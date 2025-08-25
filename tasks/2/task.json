@@ -169,7 +169,7 @@
     },
     {
       "id": "2.11",
-      "status": "-",
+      "status": "?",
       "title": "Cleanup",
       "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
       "plan": "",
@@ -181,7 +181,8 @@
       "acceptance": [],
       "dependencies": [
         "2.10"
-      ]
+      ],
+      "rejection": "Blocked: Agent loop failed: litellm.APIError: APIError: XaiException - Cloudflare encountered an error processing this request: Bad Gateway"
     },
     {
       "id": "2.12",
