@@ -20,7 +20,7 @@ Notes:
   - Task directories are numeric IDs: tasks/{id}/ (e.g., tasks/1/).
   - Tests are named per-feature: tasks/{task_id}/tests/test_{task_id}_{feature_number}.py (e.g., tasks/15/tests/test_15_3.py).
 - Python modules: snake_case.py (e.g., task_format.py, run_local_agent.py).
-- Javascript modules: camelCase.js (e.g., taskFormat.js, runLocalAgent.js).
+- Javascript/TypeScript modules: camelCase.js/ts (e.g., taskFormat.js, runLocalAgent.ts). For schema mirrors adjacent to Python specs, a matching snake_case.ts is acceptable under docs/.
 - Documentation files: UPPERCASE or Title_Case for project-wide specs (e.g., TESTING.md, FILE_ORGANISATION.md). Place task-related docs under docs/tasks/.
 - JSON examples/templates: Use .json with clear, descriptive names (e.g., task_example.json).
 
@@ -52,7 +52,8 @@ repo_root/
 │  ├─ LINTING_AND_FORMATTING.md
 │  └─ tasks/
 │     ├─ task_example.json
-│     └─ task_formay.py
+│     ├─ task_format.py           # Python source-of-truth schema
+│     └─ task_format.ts           # TypeScript mirror of the schema
 ├─ scripts/
 │  └─ setup-linting-formatting.js
 └─ tasks/
@@ -62,4 +63,4 @@ repo_root/
          └─ test_1_1.py
 ```
 
-This diagram shows how documentation, scripts, and per-task artifacts are arranged, including the Electron desktop app under src/desktop created with electron-vite.
+This diagram shows how documentation, scripts, and per-task artifacts are arranged, including the Electron desktop app under src/desktop created with electron-vite. It also highlights that the task schema exists both in Python (authoritative) and as a TypeScript mirror under docs/tasks/ for use in TypeScript tooling and apps.
