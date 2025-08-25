@@ -19,7 +19,7 @@
     },
     {
       "id": "2.2",
-      "status": "-",
+      "status": "+",
       "title": "Logical Tasks indexer and file watcher",
       "description": "Scan tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ tasks; watcher reliably updates on file changes; performance measured and documented;.",
       "plan": "",
