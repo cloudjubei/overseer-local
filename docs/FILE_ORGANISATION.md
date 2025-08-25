@@ -9,7 +9,6 @@ This document describes how files and directories are organised in this reposito
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
-- .github/workflows/: CI workflows (e.g., lint on push/PR).
 - .env, and other setup files may exist as needed.
 
 Notes:
@@ -56,9 +55,6 @@ repo_root/
 │     └─ task_formay.py
 ├─ scripts/
 │  └─ setup-linting-formatting.js
-├─ .github/
-│  └─ workflows/
-│     └─ lint.yml
 └─ tasks/
    └─ 1/
       ├─ task.json
