@@ -11,19 +11,29 @@ if (require('electron-squirrel-startup')) {
 
 let indexer = null;
 
-function upperEnvPrefix(name) {
-  return String(name || '').toUpperCase().replace(/[^A-Z0-9]/g, '_');
-}
-
 function loadRenderer(win, name, hash) {
-  const PREFIX = upperEnvPrefix(name);
-  const DEV_URL = process.env[`${PREFIX}_VITE_DEV_SERVER_URL`];
-  const VITE_NAME = process.env[`${PREFIX}_VITE_NAME`];
+  // In dev mode, all renderers are served by the same vite dev server,
+  // which is configured under the 'main_window' renderer name in forge.config.js
+  const DEV_URL = process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL;
+
+  const htmlFileMap = {
+    'main_window': 'index.html',
+    'task_create': 'task_create.html',
+    'feature_create': 'feature_create.html',
+  };
+  const htmlFile = htmlFileMap[name];
+  if (!htmlFile) {
+    throw new Error(`No HTML file mapping for renderer: ${name}`);
+  }
+
   if (DEV_URL) {
-    const url = hash ? `${DEV_URL}#${hash}` : DEV_URL;
-    win.loadURL(url);
+    const url = new URL(htmlFile, DEV_URL);
+    if (hash) {
+      url.hash = hash;
+    }
+    win.loadURL(url.toString());
   } else {
-    const filePath = path.join(__dirname, `../renderer/${VITE_NAME}/index.html`);
+    const filePath = path.join(__dirname, `../renderer/${htmlFile}`);
     if (hash) {
       win.loadFile(filePath, { hash });
     } else {
