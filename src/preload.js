@@ -21,6 +21,10 @@ contextBridge.exposeInMainWorld('tasksIndex', {
   addTask: async (task) => {
     return await ipcRenderer.invoke('tasks:add', task);
   },
+  reorderFeatures: async (taskId, payload) => {
+    // payload can be { order: string[] } or { fromId: string, toIndex: number }
+    return await ipcRenderer.invoke('tasks-features:reorder', { taskId, ...payload });
+  },
   openFeatureCreate: async (taskId) => {
     return await ipcRenderer.invoke('feature-create:open', { taskId });
   },

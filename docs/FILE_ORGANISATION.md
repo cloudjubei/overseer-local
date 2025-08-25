@@ -112,6 +112,7 @@ repo_root/
     - tasks:update (invoke) updates a task's fields (currently title and description) in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:update (invoke) updates a feature in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:add (invoke) appends a new feature to tasks/{id}/task.json and triggers an index rebuild
+    - tasks-features:reorder (invoke) reorders a task's features and renumbers their ids to `${taskId}.N`, updates dependencies across tasks, and triggers an index rebuild
     - tasks:add (invoke) creates a new task directory tasks/{id}/ and writes a minimal valid task.json, then triggers an index rebuild
     - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
     - task-create:open (invoke) opens a modal popup window for creating a new task
@@ -120,23 +121,10 @@ repo_root/
     - updateTask(taskId, data) to persist edits to a task (title/description)
     - updateFeature(taskId, featureId, data) to persist edits to a feature
     - addFeature(taskId, feature) to create a new feature under a task
+    - reorderFeatures(taskId, payload) to reorder features; payload is either { order: string[] } or { fromId: string, toIndex: number }
     - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
     - openFeatureCreate(taskId) to open the popup create window for a given task id
     - openTaskCreate() to open the popup window for creating a new task
-
-## Renderer UI
-- Location: src/renderer/
-- Purpose:
-  - App.tsx mounts the React app and renders containers for the legacy list and details views while we migrate. This ensures the app uses React for the UI entry point.
-  - TaskCreateView.tsx wraps the legacy task creation UI in a React entry.
-  - FeatureCreateView.tsx implements the popup form for creating a new feature using React.
-- Shared Utilities and Components:
-  - components/ui/: Common UI primitives (toast, modal/alert dialog, alert banners) styled with Tailwind-like utilities for easy theming (shadcn-inspired).
-  - utils/dom.js: DOM query and element creation helpers ($, createEl)
-  - utils/status.js: Status labels/options and statusBadge rendering helper
-  - utils/routing.js: parseRoute, routeName, and parseTaskIdFromLocation
-  - utils/tasks.js: Common task helpers (filtering, counting, next-id computation)
-  - components/stringListEditor.js: Reusable multi-row text input editor
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.

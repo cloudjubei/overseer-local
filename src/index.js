@@ -221,7 +221,21 @@ function slugifyIdFromTitle(title) {
   return base || 'feature';
 }
 
-function allocateFeatureId(existingIds, title) {
+function allocateFeatureId(existingIds, title, taskId) {
+  // Prefer numeric dotted scheme if existing IDs follow it
+  const dotted = existingIds.every(id => typeof id === 'string' && /^\d+\.\d+$/.test(id));
+  if (dotted && Number.isInteger(taskId)) {
+    // Determine next index
+    let maxN = 0;
+    for (const id of existingIds) {
+      const m = String(id).match(/\.(\d+)$/);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (Number.isInteger(n) && n > maxN) maxN = n;
+      }
+    }
+    return `${taskId}.${maxN + 1}`;
+  }
   const used = new Set(existingIds.filter(Boolean));
   let base = slugifyIdFromTitle(title);
   let candidate = base;
@@ -260,7 +274,7 @@ async function addFeatureToTaskFile(tasksDir, taskId, feature) {
     out.id = incomingId.trim();
   } else {
     const existingIds = json.features.map(f => f && f.id).filter(Boolean);
-    out.id = allocateFeatureId(existingIds, feature.title);
+    out.id = allocateFeatureId(existingIds, feature.title, taskId);
   }
   if (json.features.some(f => f && f.id === out.id)) throw new Error(`Feature id '${out.id}' already exists in task ${taskId}`);
   if (!STATUSES.has(feature.status)) throw new Error('feature.status must be one of +,~, -,?,=');
@@ -359,6 +373,131 @@ function openTaskCreateWindow(parentWindow) {
   return win;
 }
 
+function buildReorderedIds(taskId, features) {
+  // Assign sequential dotted IDs like `${taskId}.1`, `${taskId}.2`, ...
+  return features.map((_, idx) => `${taskId}.${idx + 1}`);
+}
+
+async function reorderFeaturesInTaskFile(tasksDir, taskId, payload) {
+  // payload: either { order: string[] } or { fromId: string, toIndex: number }
+  const dir = path.join(tasksDir, String(taskId));
+  const file = path.join(dir, 'task.json');
+
+  let json;
+  try {
+    const data = await fsp.readFile(file, 'utf8');
+    json = JSON.parse(data);
+  } catch (e) {
+    throw new Error(`Failed to read task file: ${e.message || String(e)}`);
+  }
+
+  if (!Array.isArray(json.features)) throw new Error('Task has no features array');
+
+  const currentIds = json.features.map(f => f && f.id).filter(Boolean);
+  if (currentIds.length !== json.features.length) throw new Error('All features must have ids');
+
+  let newOrderIds = null;
+  if (payload && Array.isArray(payload.order)) {
+    newOrderIds = payload.order.slice();
+  } else if (payload && typeof payload.fromId === 'string' && Number.isInteger(payload.toIndex)) {
+    // construct order by moving one id
+    const arr = currentIds.slice();
+    const fromIdx = arr.indexOf(payload.fromId);
+    if (fromIdx === -1) throw new Error('fromId not found');
+    const toIndex = Math.max(0, Math.min(arr.length - 1, payload.toIndex));
+    const [moved] = arr.splice(fromIdx, 1);
+    arr.splice(toIndex, 0, moved);
+    newOrderIds = arr;
+  } else {
+    throw new Error('Invalid reorder payload');
+  }
+
+  // Validate it's a permutation of current ids
+  if (newOrderIds.length !== currentIds.length) throw new Error('order length mismatch');
+  const setA = new Set(currentIds);
+  const setB = new Set(newOrderIds);
+  if (setA.size !== setB.size || [...setA].some(id => !setB.has(id))) {
+    throw new Error('order must be a permutation of current feature ids');
+  }
+
+  // Build the new ordered features array
+  const byId = new Map(json.features.map(f => [f.id, f]));
+  const newFeatures = newOrderIds.map(id => byId.get(id));
+
+  // Compute new IDs and mapping old->new
+  const newIds = buildReorderedIds(taskId, newFeatures);
+  const idMapping = new Map();
+  newOrderIds.forEach((oldId, idx) => {
+    idMapping.set(oldId, newIds[idx]);
+  });
+
+  // Apply new IDs to features
+  const renamedFeatures = newFeatures.map((f, idx) => ({ ...f, id: newIds[idx] }));
+
+  // Update dependencies inside this task and across all tasks
+  const updatedTaskFiles = new Set();
+
+  // First, write back the main task with renamed ids and updated intra-task dependencies
+  function remapDeps(arr) {
+    if (!Array.isArray(arr)) return arr;
+    return arr.map(d => (idMapping.has(d) ? idMapping.get(d) : d));
+  }
+
+  const rewrittenTask = { ...json, features: renamedFeatures.map(feat => ({
+    ...feat,
+    dependencies: remapDeps(feat.dependencies)
+  })) };
+
+  // Validate and write main task file
+  {
+    const [ok, errors] = validateTask(rewrittenTask);
+    if (!ok) throw new Error(`Validation failed after reorder: ${errors.join('; ')}`);
+    const pretty = JSON.stringify(rewrittenTask, null, 2) + '\n';
+    await fsp.writeFile(file, pretty, 'utf8');
+    updatedTaskFiles.add(String(taskId));
+  }
+
+  // Now scan all other tasks to update dependencies
+  const taskDirs = (await fsp.readdir(tasksDir, { withFileTypes: true }).catch(() => []))
+    .filter(e => e.isDirectory() && /^\d+$/.test(e.name))
+    .map(e => e.name);
+
+  for (const tid of taskDirs) {
+    const tfile = path.join(tasksDir, tid, 'task.json');
+    let tjson;
+    try {
+      const data = await fsp.readFile(tfile, 'utf8');
+      tjson = JSON.parse(data);
+    } catch (_) {
+      continue;
+    }
+    if (!tjson || !Array.isArray(tjson.features)) continue;
+
+    let changed = false;
+    for (let i = 0; i < tjson.features.length; i++) {
+      const f = tjson.features[i];
+      if (Array.isArray(f.dependencies) && f.dependencies.length > 0) {
+        const nextDeps = f.dependencies.map(d => (idMapping.has(d) ? idMapping.get(d) : d));
+        const same = nextDeps.length === f.dependencies.length && nextDeps.every((d, idx) => d === f.dependencies[idx]);
+        if (!same) {
+          tjson.features[i] = { ...f, dependencies: nextDeps };
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      const [ok, errors] = validateTask(tjson);
+      if (!ok) throw new Error(`Validation failed updating dependencies in task ${tid}: ${errors.join('; ')}`);
+      const pretty = JSON.stringify(tjson, null, 2) + '\n';
+      await fsp.writeFile(tfile, pretty, 'utf8');
+      updatedTaskFiles.add(String(tid));
+    }
+  }
+
+  return { ok: true, updated: Array.from(updatedTaskFiles) };
+}
+
 app.whenReady().then(async () => {
   const projectRoot = path.resolve(__dirname, '..');
   indexer = new TasksIndexer(projectRoot);
@@ -417,6 +556,19 @@ app.whenReady().then(async () => {
       const created = await addTaskFile(indexer.tasksDir, payload);
       await indexer.buildIndex();
       return { ok: true, id: created.id };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('tasks-features:reorder', async (_event, payload) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
+      const { taskId } = payload;
+      if (!Number.isInteger(taskId)) throw new Error('taskId must be integer');
+      const res = await reorderFeaturesInTaskFile(indexer.tasksDir, taskId, payload);
+      await indexer.buildIndex();
+      return { ok: true, updated: res.updated };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
