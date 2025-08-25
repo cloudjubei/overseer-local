@@ -69,9 +69,9 @@
     },
     {
       "id": "2.5",
-      "status": "+",
+      "status": "-",
       "title": "Edit mode - feature details",
-      "description": "Allow editing of a feature's parameters.",
+      "description": "Allow editing of a feature's parameters. The status dropdown defaults to the current status. The string list edits show rows of editable strings. Dependencies allow matching features by name and working out the id from it.",
       "plan": "",
       "context": [
         "src/",
@@ -85,9 +85,9 @@
     },
     {
       "id": "2.6",
-      "status": "+",
-      "title": "Edit mode - feature details",
-      "description": "Allow editing of a feature's parameters.",
+      "status": "-",
+      "title": "Edit mode - task details",
+      "description": "Allow editing of a task's title and description.",
       "plan": "",
       "context": [
         "src/",
@@ -97,6 +97,41 @@
       "acceptance": [],
       "dependencies": [
         "2.4"
+      ]
+    },
+    {
+      "id": "2.7",
+      "status": "-",
+      "title": "Edit mode - moving tasks and features around",
+      "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4"
+      ]
+    },
+    {
+      "id": "2.8",
+      "status": "-",
+      "title": "The task view is the main home view.",
+      "description": "Glow up the whole appearance so that it looks like a production ready app.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4",
+        "2.5",
+        "2.6",
+        "2.7"
       ]
     }
   ]
