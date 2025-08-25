@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const fsp = require('node:fs/promises');
+const fs = require('node:fs');
 const { TasksIndexer, validateTask, STATUSES } = require('./tasks/indexer');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -40,6 +41,42 @@ const createWindow = () => {
     });
   }
 };
+
+async function ensureTasksDir(tasksDir) {
+  try {
+    await fsp.mkdir(tasksDir, { recursive: true });
+  } catch (e) {
+    // ignore if it exists; rethrow others
+    if (e && e.code !== 'EEXIST') throw e;
+  }
+}
+
+async function readExistingTaskIds(tasksDir) {
+  try {
+    const entries = await fsp.readdir(tasksDir, { withFileTypes: true });
+    return entries
+      .filter((e) => e.isDirectory() && /^\d+$/.test(e.name))
+      .map((e) => parseInt(e.name, 10))
+      .filter((n) => Number.isInteger(n));
+  } catch (_) {
+    return [];
+  }
+}
+
+async function allocateTaskId(tasksDir, preferredId) {
+  await ensureTasksDir(tasksDir);
+  const used = new Set(await readExistingTaskIds(tasksDir));
+  if (Number.isInteger(preferredId) && preferredId > 0 && !used.has(preferredId)) {
+    return preferredId;
+  }
+  let max = 0;
+  for (const n of used) if (n > max) max = n;
+  let candidate = max + 1 || 1;
+  while (used.has(candidate) || fs.existsSync(path.join(tasksDir, String(candidate)))) {
+    candidate += 1;
+  }
+  return candidate;
+}
 
 async function updateTaskInTaskFile(tasksDir, taskId, patch) {
   const dir = path.join(tasksDir, String(taskId));
@@ -227,6 +264,34 @@ async function addFeatureToTaskFile(tasksDir, taskId, feature) {
   }
 }
 
+async function addTaskFile(tasksDir, payload) {
+  await ensureTasksDir(tasksDir);
+  const chosenId = await allocateTaskId(tasksDir, payload && payload.id);
+  const dir = path.join(tasksDir, String(chosenId));
+  const file = path.join(dir, 'task.json');
+
+  try { await fsp.mkdir(dir, { recursive: true }); } catch (e) { /* ignore */ }
+
+  const title = payload && typeof payload.title === 'string' ? payload.title : '';
+  const description = payload && typeof payload.description === 'string' ? payload.description : '';
+  const status = payload && STATUSES.has(payload.status) ? payload.status : '-';
+
+  const json = {
+    id: chosenId,
+    status,
+    title,
+    description,
+    features: [],
+  };
+
+  const [ok, errors] = validateTask(json);
+  if (!ok) throw new Error(`Validation failed: ${errors.join('; ')}`);
+
+  const pretty = JSON.stringify(json, null, 2) + '\n';
+  await fsp.writeFile(file, pretty, 'utf8');
+  return json;
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -282,6 +347,18 @@ app.whenReady().then(async () => {
       await addFeatureToTaskFile(indexer.tasksDir, taskId, feature);
       await indexer.buildIndex();
       return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // New: task add handler
+  ipcMain.handle('tasks:add', async (_event, payload) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
+      const created = await addTaskFile(indexer.tasksDir, payload);
+      await indexer.buildIndex();
+      return { ok: true, id: created.id };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

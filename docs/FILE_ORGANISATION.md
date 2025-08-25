@@ -89,16 +89,18 @@ repo_root/
     - tasks:update (invoke) updates a task's fields (currently title and description) in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:update (invoke) updates a feature in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:add (invoke) appends a new feature to tasks/{id}/task.json and triggers an index rebuild
+    - tasks:add (invoke) creates a new task directory tasks/{id}/ and writes a minimal valid task.json, then triggers an index rebuild
   - Preload exposes window.tasksIndex with:
     - getSnapshot() and onUpdate(cb) for renderer use
     - updateTask(taskId, data) to persist edits to a task (title/description)
     - updateFeature(taskId, featureId, data) to persist edits to a feature
     - addFeature(taskId, feature) to create a new feature under a task
+    - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
 
 ## Renderer UI
 - Location: src/renderer/
 - Purpose:
-  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}).
+  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}). Includes a Create Task mode with an inline form to add a new task (ID, status, title, description). On success, navigates to the new task.
   - taskDetailsView.js: Renders a task details page showing task metadata and its features.
     - Provides a Back button.
     - Includes inline edit mode for the task's title and description with Save/Cancel; saving persists via IPC and re-renders on index updates.

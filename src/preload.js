@@ -17,5 +17,8 @@ contextBridge.exposeInMainWorld('tasksIndex', {
   },
   addFeature: async (taskId, feature) => {
     return await ipcRenderer.invoke('tasks-feature:add', { taskId, feature });
+  },
+  addTask: async (task) => {
+    return await ipcRenderer.invoke('tasks:add', task);
   }
 });
