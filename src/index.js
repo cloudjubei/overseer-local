@@ -16,8 +16,8 @@ function createWindow() {
     },
   });
 
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  if (process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/main_window/index.html'));
   }
@@ -132,7 +132,7 @@ ipcMain.handle('feature-create:open', (event, taskId) => {
       height: 800,
       title: 'Create Feature',
     },
-    devServerUrl: FEATURE_CREATE_VITE_DEV_SERVER_URL,
+    devServerUrl: process.env.FEATURE_CREATE_VITE_DEV_SERVER_URL,
     filePath: path.join(__dirname, '../renderer/feature_create/index.html'),
   });
 
@@ -148,7 +148,7 @@ ipcMain.handle('task-create:open', () => {
       height: 400,
       title: 'Create Task',
     },
-    devServerUrl: TASK_CREATE_VITE_DEV_SERVER_URL,
+    devServerUrl: process.env.TASK_CREATE_VITE_DEV_SERVER_URL,
     filePath: path.join(__dirname, '../renderer/task_create/index.html'),
   });
 });
