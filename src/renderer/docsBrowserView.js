@@ -63,7 +63,7 @@
     browser.appendChild(treeContainer);
     browser.appendChild(contentContainer);
 
-    root.appendChild(createEl("h2", { text: "Documentation" }));
+    root.appendChild(createEl("h2", { id: "docs-view-heading", text: "Documentation" }));
     root.appendChild(browser);
 
     let currentIndex = null;
@@ -74,9 +74,11 @@
       const allFiles = root.querySelectorAll(".file");
       allFiles.forEach((el) => el.classList.toggle("selected", el.dataset.path === path));
       try {
-        const content = await window.docsIndex.getFile(path);
+        const html = await window.docsIndex.getRenderedMarkdown(path);
         contentContainer.innerHTML = "";
-        contentContainer.appendChild(createEl("pre", {}, [content]));
+        const mdDiv = createEl("div", { class: "markdown-body" });
+        mdDiv.innerHTML = html;
+        contentContainer.appendChild(mdDiv);
       } catch (e) {
         contentContainer.innerHTML = "";
         contentContainer.appendChild(createEl("div", { class: "error", text: `Failed to load file: ${e.message}` }));
