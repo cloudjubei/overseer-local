@@ -134,22 +134,6 @@
     {
       "id": "2.9",
       "status": "-",
-      "title": "Edit mode - moving tasks and features around",
-      "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
-      "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
-      "acceptance": [],
-      "dependencies": [
-        "2.4"
-      ]
-    },
-    {
-      "id": "2.10",
-      "status": "-",
       "title": "The task view is the main home view.",
       "description": "Glow up the whole appearance so that it looks like a production ready app.",
       "plan": "",
@@ -164,15 +148,30 @@
         "2.5",
         "2.6",
         "2.7",
-        "2.8",
+        "2.8"
+      ]
+    },
+    {
+      "id": "2.10",
+      "status": "-",
+      "title": "Refactor",
+      "description": "The code was meant to use React for UI - make sure it does.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
         "2.9"
       ]
     },
     {
       "id": "2.11",
       "status": "-",
-      "title": "Refactor",
-      "description": "The code was meant to use React for UI - make sure it does.",
+      "title": "Cleanup",
+      "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
       "plan": "",
       "context": [
         "src/",
@@ -187,8 +186,8 @@
     {
       "id": "2.12",
       "status": "-",
-      "title": "Cleanup",
-      "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
+      "title": "Common functions and libraries",
+      "description": "We need to have common components for popups, alerts, toasts etc. It would be great to introduce a library like `shadcn` and use it with tailwind as much as possible. This way we can control theming and color schemes easily.",
       "plan": "",
       "context": [
         "src/",
@@ -203,8 +202,8 @@
     {
       "id": "2.13",
       "status": "-",
-      "title": "Common functions and libraries",
-      "description": "We need to have common components for popups, alerts, toasts etc. It would be great to introduce a library like `shadcn` and use it with tailwind as much as possible. This way we can control theming and color schemes easily.",
+      "title": "Edit mode - moving features around",
+      "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced.",
       "plan": "",
       "context": [
         "src/",
@@ -213,7 +212,25 @@
       ],
       "acceptance": [],
       "dependencies": [
+        "2.4",
         "2.12"
+      ]
+    },
+    {
+      "id": "2.14",
+      "status": "-",
+      "title": "Edit mode - moving tasks around",
+      "description": "Allow editing the order of tasks - thus changing the underlying id everywhere where it's referenced.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4",
+        "2.13"
       ]
     }
   ]
