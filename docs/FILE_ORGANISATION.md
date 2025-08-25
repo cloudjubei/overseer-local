@@ -48,6 +48,8 @@ repo_root/
 │   ├─ index.html
 │   ├─ index.js
 │   ├─ preload.js
+│   ├─ docs/
+│   │  └─ indexer.js
 │   ├─ renderer/
 │   │   ├─ tasksListView.js     # Tasks list UI (search + filters, view-only)
 │   │   └─ taskDetailsView.js   # Task details UI with features list (includes edit for task title/description; includes feature edit and create modes)
@@ -96,6 +98,18 @@ repo_root/
     - updateFeature(taskId, featureId, data) to persist edits to a feature
     - addFeature(taskId, feature) to create a new feature under a task
     - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
+
+## Logical Docs Indexer
+- Location: src/docs/indexer.js
+- Purpose: Scans the docs/ directory (and subdirectories) under the projectRoot for .md files, builds an in-memory index (a tree structure with paths and metadata); watches for file changes and refreshes the index.
+- API:
+  - Class DocsIndexer(projectRoot)
+    - getIndex(): returns the current index snapshot
+    - init(): builds the index and starts watchers
+    - buildIndex(): triggers a full rescan
+    - stopWatching(): stops all watchers
+  - Index shape:
+    - { root, docsDir, updatedAt, docsTree, filesByPath, errors, metrics: { lastScanMs, lastScanCount } }
 
 ## Renderer UI
 - Location: src/renderer/
