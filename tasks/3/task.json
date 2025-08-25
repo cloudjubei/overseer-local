@@ -6,13 +6,12 @@
   "features": [
     {
       "id": "3.1",
-      "status": "?",
+      "status": "-",
       "title": "Add sidebar navigation to the application UI",
       "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
       "plan": "",
       "context": [],
-      "acceptance": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      "acceptance": []
     },
     {
       "id": "3.2",
@@ -34,12 +33,13 @@
     },
     {
       "id": "3.4",
-      "status": "+",
+      "status": "-",
       "title": "Create Docs browser view component with file listing",
       "description": "Add a docsBrowserView.js in src/renderer/ that fetches the docs index via IPC, renders a tree or collapsible list of markdown files and directories under docs/. Handle selection of a file to display its content (to be rendered in later features). Subscribe to index updates for real-time refreshes and handle empty states or errors.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "the new code uses `chokidar` in a require but package.json was never updated"
     },
     {
       "id": "3.5",
