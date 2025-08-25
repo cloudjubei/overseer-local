@@ -97,8 +97,7 @@
       "acceptance": [],
       "dependencies": [
         "2.5"
-      ],
-      "rejection": "Seeing this in the popup every time: Error: No Task ID provided. This window should be opened from a task details page."
+      ]
     },
     {
       "id": "2.7",
@@ -118,9 +117,9 @@
     },
     {
       "id": "2.8",
-      "status": "?",
+      "status": "-",
       "title": "Create mode - new task",
-      "description": "Allow adding a new task in a new popup window - make this the same pattern as edit mode.",
+      "description": "Allow adding a new task in a new popup window - make this the same pattern as task edit mode and create feature.",
       "plan": "",
       "context": [
         "src/",
@@ -130,8 +129,7 @@
       "acceptance": [],
       "dependencies": [
         "2.7"
-      ],
-      "rejection": "Blocked: Agent loop failed: litellm.InternalServerError: VertexAIException InternalServerError - {\n  \"error\": {\n    \"code\": 500,\n    \"message\": \"An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting\",\n    \"status\": \"INTERNAL\"\n  }\n}\n"
+      ]
     },
     {
       "id": "2.9",
@@ -200,6 +198,22 @@
       "acceptance": [],
       "dependencies": [
         "2.11"
+      ]
+    },
+    {
+      "id": "2.13",
+      "status": "-",
+      "title": "Common functions and libraries",
+      "description": "We need to have common components for popups, alerts, toasts etc. It would be great to introduce a library like `shadcn` and use it with tailwind as much as possible. This way we can control theming and color schemes easily.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.12"
       ]
     }
   ]
