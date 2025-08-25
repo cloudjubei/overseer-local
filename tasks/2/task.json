@@ -117,7 +117,7 @@
     },
     {
       "id": "2.8",
-      "status": "-",
+      "status": "+",
       "title": "Create mode - new task",
       "description": "Allow adding a new task in a new popup window - make this the same pattern as task edit mode and create feature.",
       "plan": "",
