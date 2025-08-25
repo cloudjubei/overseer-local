@@ -1,8 +1,8 @@
 {
   "id": 4,
   "status": "-",
-  "title": "Markdown documentation explorer and renderer",
-  "description": "Implement a docs browser that lists Markdown files under docs/ (including docs/tasks/*). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Acceptance: Sidebar shows directory tree; renderer supports anchors and code blocks; clicking internal links navigates within the app; large files render efficiently; tested with provided docs/*.md.",
+  "title": "Agentic chat interface",
+  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Allow communication with a chat agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard.",
   "features": [
   ]
 }

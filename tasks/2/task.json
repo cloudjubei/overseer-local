@@ -1,14 +1,14 @@
 {
   "id": 2,
   "status": "-",
-  "title": "Local settings storage and project root selector",
-  "description": "Implement a JSON-backed settings store in Electron userData path. Create UI to set and persist the path to the factory project root. Implement project validation against docs/FILE_ORGANISATION.md (check tasks/, docs/, scripts/, etc.). Acceptance: User can pick a folder; app validates and persists; invalid structure yields clear error; settings survive restarts; tested on macOS/Windows/Linux paths.",
+  "title": "Task handling",
+  "description": "Implement all features that allow proper handling of tasks. docs/tasks/task_format.py is the source of truth for the interfaces for a Task, Feature, ProjectSpec & ProjectRequirement. docs/tasks/task_example.json holds an example task json file.",
   "features": [
     {
       "id": "2.1",
       "status": "-",
-      "title": "Implement JSON-backed SettingsStore in Electron userData",
-      "description": "Create a SettingsStore module in the Electron main process that persists app settings to a JSON file under app.getPath('userData')/settings.json. Requirements: (1) Schema: { version: 1, projectRoot: string|null }. (2) Provide async methods: load(), save(), get(key), set(key, value), getAll(), getProjectRoot(), setProjectRoot(path). (3) Use atomic writes (write to temp file then rename) and ensure the directory exists. (4) Normalize and resolve paths before persisting (absolute path, resolve symlinks) but preserve platform-native separators. (5) Support dependency injection/override of userData base path for tests via an optional constructor parameter or environment variable (e.g., SETTINGS_USER_DATA_DIR). (6) Handle schema version migration stubs for future versions, with safe defaults on unknown keys. (7) On errors (IO/parse), surface typed errors and fall back to defaults without crashing. Place file at src/main/settingsStore.(ts|js).",
+      "title": "Task schema definition and validator",
+      "description": "Generate TypeScript interfaces from the schema. Implement a validator used before reading/writing task.json. Acceptance: Validator catches malformed examples; TS types aligned with schema; unit tests cover valid/invalid cases using sample task.json files.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -16,65 +16,52 @@
     {
       "id": "2.2",
       "status": "-",
-      "title": "Implement ProjectRootValidator based on docs/FILE_ORGANISATION.md",
-      "description": "Add a reusable validator module at src/common/projectRootValidator.(ts|js). Export validateProjectRoot(rootPath: string): Promise<{ ok: boolean; missing: string[]; warnings: string[]; details: { checkedPath: string } }>. Validation rules derived strictly from docs/FILE_ORGANISATION.md: REQUIRED: 'docs/' directory, 'tasks/' directory, file 'docs/FILE_ORGANISATION.md'. OPTIONAL (warn only): 'src/' directory; 'scripts/' directory (warn if missing but do not fail because docs do not list it as required). Verify that rootPath exists and is a directory; return missing entries (e.g., 'docs/', 'tasks/', 'docs/FILE_ORGANISATION.md') with clear names. Use path utilities to handle cross-platform checks. Do not read large trees; only shallow existence checks of these paths. Provide error codes/messages internally: E_NOT_DIR, E_NOT_EXIST, E_MISSING_DOCS_DIR, E_MISSING_TASKS_DIR, E_MISSING_DOC_FILE, W_MISSING_SRC_DIR, W_MISSING_SCRIPTS_DIR.",
+      "title": "Logical Tasks indexer and file watcher",
+      "description": "Scan tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ tasks; watcher reliably updates on file changes; performance measured and documented;.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "dependencies":["2.1"]
     },
     {
       "id": "2.3",
       "status": "-",
-      "title": "Cross-platform path normalization and realpath utility",
-      "description": "Create a small utility at src/common/pathUtils.(ts|js) exposing: normalizeInputPath(p: string): string (trims quotes/whitespace, expands ~ on POSIX), resolveToRealAbsolute(p: string): Promise<string> (fs.realpath, absolute), normalizeForPlatform(p: string): string (path.normalize), and isLikelyWindowsStyle(p: string): boolean (detects patterns like /^[A-Za-z]:\\\\/). Use these in both SettingsStore and ProjectRootValidator to ensure consistent behavior across macOS/Windows/Linux. The utility must not rely on process.platform to validate path strings; allow testing Windows-style strings on non-Windows for normalization-only functions.",
+      "title": "Tasks list UI with filtering and search - view only",
+      "description": "Build a React view listing tasks with id, title, status, and counts of features (done/total). Provide text search and filters (e.g., status). Filtering/search applied client-side; empty states handled; accessibility basics (labels, keyboard nav) covered.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "dependencies":["2.2"]
     },
     {
       "id": "2.4",
       "status": "-",
-      "title": "IPC and Preload bridge for settings, validation, and folder picking",
-      "description": "Implement IPC plumbing between renderer and main. In main (src/main/ipc/settingsIpc.(ts|js)), register ipcMain.handle handlers: 'settings:get' -> returns all settings; 'settings:setProjectRoot' -> validates path, persists on success, returns {ok, errors?, warnings?}; 'project:validate' -> returns validation result; 'project:pickRoot' -> opens dialog.showOpenDialog({ properties: ['openDirectory'] }) and returns selected path or null. In preload (src/preload/settingsBridge.(ts|js)), use contextBridge.exposeInMainWorld('api', { getSettings, setProjectRoot, validateProjectRoot, pickProjectRootFolder }) that wrap ipcRenderer.invoke calls. Enforce contextIsolation and disable remote; no direct fs access from renderer. Include input sanitization before sending to main.",
+      "title": "Task details view with feature list - view only",
+      "description": "Create a detail page showing the task metadata and its features with statuses.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "dependencies":["2.3"]
     },
     {
       "id": "2.5",
       "status": "-",
-      "title": "Renderer Settings UI to choose and save Project Root with validation feedback",
-      "description": "Add a simple settings UI in the renderer (follow existing framework: if React, create a SettingsView component; if vanilla, create a settings page). Requirements: (1) Display current project root (read-only field). (2) 'Choose Folder' button calls window.api.pickProjectRootFolder(). (3) On selection, call window.api.validateProjectRoot(path) and show immediate feedback: success or list missing requirements. (4) 'Save' persists via window.api.setProjectRoot(path); disable 'Save' if validation failed. (5) Show clear error messages like 'Invalid project root. Missing: docs/, tasks/, docs/FILE_ORGANISATION.md'. (6) Provide access via a 'Preferences' or 'Settings' menu entry wired in main menu. Place files under src/renderer/... consistent with existing structure.",
+      "title": "Edit mode - feature details",
+      "description": "Allow editing of a feature's parameters.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "dependencies":["2.4"]
     },
     {
       "id": "2.6",
       "status": "-",
-      "title": "Startup integration and invalid project root notification flow",
-      "description": "Integrate SettingsStore on app startup (main). On app 'ready': (1) initialize and load settings; (2) if settings.projectRoot is unset, open the settings UI by default or prompt the user to pick a folder; (3) if set but invalid per ProjectRootValidator, show a modal dialog with details of missing items and an action to open Settings; (4) if valid, proceed normally. Add a menu item 'Preferences' (macOS: under app menu; Windows/Linux: under 'File' or 'Edit') to open the settings UI. Use Electron's dialog for error messages; ensure messages are clear and actionable.",
+      "title": "Edit mode - feature details",
+      "description": "Allow editing of a feature's parameters.",
       "plan": "",
       "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "2.7",
-      "status": "-",
-      "title": "Deterministic tests for SettingsStore and Validator (including cross-platform paths)",
-      "description": "Create deterministic tests driven by Node scripts and Python wrappers. Add Node test scripts under tasks/2/tests/js/: (a) test_settings_store.js: sets SETTINGS_USER_DATA_DIR to a temp dir, instantiates SettingsStore, sets projectRoot, saves, reloads a new instance pointing at same dir, and prints JSON { ok: true, persisted: true, path: <stored> }. (b) test_project_root_validator.js: creates temp directories to simulate: valid repo (docs/, tasks/, docs/FILE_ORGANISATION.md), missing docs/, missing tasks/, missing file; runs validateProjectRoot() and prints JSON results for each case; also tests optional warnings for missing src/ and scripts/. (c) test_cross_platform_paths.js: exercises pathUtils.normalizeInputPath and normalizeForPlatform with Windows-style ('C:\\\\repo') and POSIX ('/home/user/repo') inputs on any OS and prints normalization results. Add Python tests: tasks/2/tests/test_2_1.py executes Node script (a) and asserts persisted = True; tasks/2/tests/test_2_2.py executes Node script (b) and asserts valid case ok=True and invalid cases list expected missing entries; tasks/2/tests/test_2_6.py executes Node script (c) and asserts normalized outputs contain expected separators for both styles. Ensure tests are deterministic and do not require Electron runtime (only Node).",
-      "plan": "",
-      "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "2.8",
-      "status": "-",
-      "title": "Documentation for settings schema, validation rules, and QA checklist",
-      "description": "Add docs/tasks/2_SETTINGS_AND_VALIDATION.md documenting: (1) settings storage location (Electron userData) and file name, (2) JSON schema with example, (3) how the project root is validated per docs/FILE_ORGANISATION.md, including which items are required vs optional warnings, (4) error messages and codes mapping, (5) manual QA steps to verify on macOS/Windows/Linux (e.g., pick folder, validate, persist across restart), and (6) security notes about IPC and preload. Add a Python test tasks/2/tests/test_2_8.py that asserts the file exists and contains the headings 'Settings Storage', 'Validation Rules', and 'QA Checklist'.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "dependencies":["2.4"]
     }
   ]
 }

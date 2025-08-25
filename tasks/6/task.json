@@ -1,0 +1,8 @@
+{
+  "id": 6,
+  "status": "-",
+  "title": "Cross-platform packaging configuration with a CI pipeline for build and release",
+  "description": "Configure electron-builder to produce distributables for macOS (dmg), Windows (nsis), and Linux (AppImage). Include app icons and code signing placeholders. Acceptance: CI-local builds produce artifacts; metadata correct (name, version, copyright); app auto-updates disabled initially.",
+  "features": [
+  ]
+}
