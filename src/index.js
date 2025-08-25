@@ -193,6 +193,27 @@ async function updateFeatureInTaskFile(tasksDir, taskId, featureId, patch) {
   }
 }
 
+function slugifyIdFromTitle(title) {
+  const base = String(title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s_-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+  return base || 'feature';
+}
+
+function allocateFeatureId(existingIds, title) {
+  const used = new Set(existingIds.filter(Boolean));
+  let base = slugifyIdFromTitle(title);
+  let candidate = base;
+  let counter = 1;
+  while (used.has(candidate)) {
+    counter += 1;
+    candidate = `${base}-${counter}`;
+  }
+  return candidate;
+}
+
 async function addFeatureToTaskFile(tasksDir, taskId, feature) {
   const dir = path.join(tasksDir, String(taskId));
   const file = path.join(dir, 'task.json');
@@ -215,9 +236,15 @@ async function addFeatureToTaskFile(tasksDir, taskId, feature) {
   // Validate and sanitize incoming feature
   if (!feature || typeof feature !== 'object') throw new Error('feature must be an object');
   const out = {};
-  // id
-  if (typeof feature.id !== 'string' || !feature.id.trim()) throw new Error('feature.id must be a non-empty string');
-  out.id = feature.id.trim();
+  // id: optional from payload; if not provided, generate from title
+  let incomingId = feature.id;
+  if (incomingId != null) {
+    if (typeof incomingId !== 'string' || !incomingId.trim()) throw new Error('feature.id must be a non-empty string if provided');
+    out.id = incomingId.trim();
+  } else {
+    const existingIds = json.features.map(f => f && f.id).filter(Boolean);
+    out.id = allocateFeatureId(existingIds, feature.title);
+  }
   if (json.features.some(f => f && f.id === out.id)) throw new Error(`Feature id '${out.id}' already exists in task ${taskId}`);
   // status
   if (!STATUSES.has(feature.status)) throw new Error('feature.status must be one of +,~, -,?,=');
@@ -303,7 +330,7 @@ function openFeatureCreateWindow(parentWindow, taskId) {
     },
   });
   const filePath = path.join(__dirname, 'feature_create.html');
-  // Pass task id via hash
+  // Pass task id via hash for the popup
   win.loadFile(filePath, { hash: `task/${taskId}` });
   return win;
 }
