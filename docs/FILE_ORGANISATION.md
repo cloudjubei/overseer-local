@@ -114,6 +114,7 @@ repo_root/
     - tasks-feature:add (invoke) appends a new feature to tasks/{id}/task.json and triggers an index rebuild
     - tasks-features:reorder (invoke) reorders a task's features and renumbers their ids to `${taskId}.N`, updates dependencies across tasks, and triggers an index rebuild
     - tasks:add (invoke) creates a new task directory tasks/{id}/ and writes a minimal valid task.json, then triggers an index rebuild
+    - tasks:reorder (invoke) reorders tasks globally, renumbers task directory ids to 1..N per the new order, updates each affected task.json id, updates dotted feature ids and dependencies across all tasks, and triggers an index rebuild
     - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
     - task-create:open (invoke) opens a modal popup window for creating a new task
   - Preload exposes window.tasksIndex with:
@@ -122,6 +123,7 @@ repo_root/
     - updateFeature(taskId, featureId, data) to persist edits to a feature
     - addFeature(taskId, feature) to create a new feature under a task
     - reorderFeatures(taskId, payload) to reorder features; payload is either { order: string[] } or { fromId: string, toIndex: number }
+    - reorderTasks(payload) to reorder tasks; payload is either { order: number[] } or { fromId: number, toIndex: number }
     - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
     - openFeatureCreate(taskId) to open the popup create window for a given task id
     - openTaskCreate() to open the popup window for creating a new task

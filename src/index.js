@@ -498,6 +498,155 @@ async function reorderFeaturesInTaskFile(tasksDir, taskId, payload) {
   return { ok: true, updated: Array.from(updatedTaskFiles) };
 }
 
+// Reorder tasks: renumber task ids to match the new ordering and update all references
+async function reorderTasksInDir(tasksDir, payload) {
+  // Gather current task ids (numeric asc)
+  const entries = await fsp.readdir(tasksDir, { withFileTypes: true }).catch(() => []);
+  const currentIds = entries
+    .filter(e => e.isDirectory() && /^\d+$/.test(e.name))
+    .map(e => parseInt(e.name, 10))
+    .filter(n => Number.isInteger(n))
+    .sort((a, b) => a - b);
+
+  if (currentIds.length === 0) return { ok: true, updated: [] };
+
+  let newOrder = null;
+  if (payload && Array.isArray(payload.order)) {
+    const coerced = payload.order.map(x => parseInt(x, 10));
+    newOrder = coerced;
+  } else if (payload && Number.isInteger(payload.fromId) && Number.isInteger(payload.toIndex)) {
+    const arr = currentIds.slice();
+    const fromIdx = arr.indexOf(payload.fromId);
+    if (fromIdx === -1) throw new Error('fromId not found');
+    const toIndex = Math.max(0, Math.min(arr.length - 1, payload.toIndex));
+    const [moved] = arr.splice(fromIdx, 1);
+    arr.splice(toIndex, 0, moved);
+    newOrder = arr;
+  } else {
+    throw new Error('Invalid reorder payload');
+  }
+
+  // Validate permutation
+  if (newOrder.length !== currentIds.length) throw new Error('order length mismatch');
+  const setA = new Set(currentIds);
+  const setB = new Set(newOrder);
+  if (setA.size !== setB.size || [...setA].some(id => !setB.has(id))) {
+    throw new Error('order must be a permutation of current task ids');
+  }
+
+  // Compute mapping oldId -> newId (sequential renumber 1..N according to new order)
+  const mapping = new Map();
+  newOrder.forEach((oldId, idx) => {
+    mapping.set(oldId, idx + 1);
+  });
+
+  // Early exit if identity mapping
+  const identity = currentIds.every(id => mapping.get(id) === id);
+  if (identity) return { ok: true, updated: [] };
+
+  // Read all task.json into memory; build global feature id mapping for tasks whose id changes
+  const tasks = [];
+  const globalFeatIdMap = new Map(); // old dotted id -> new dotted id
+
+  for (const oldId of currentIds) {
+    const dir = path.join(tasksDir, String(oldId));
+    const file = path.join(dir, 'task.json');
+    let json;
+    try {
+      const data = await fsp.readFile(file, 'utf8');
+      json = JSON.parse(data);
+    } catch (e) {
+      throw new Error(`Failed to read task ${oldId}: ${e.message || String(e)}`);
+    }
+    const newId = mapping.get(oldId);
+    tasks.push({ oldId, newId, dir, file, json });
+
+    if (newId !== oldId && Array.isArray(json.features)) {
+      for (const f of json.features) {
+        const m = f && typeof f.id === 'string' ? f.id.match(/^(\d+)\.(\d+)$/) : null;
+        if (m && parseInt(m[1], 10) === oldId) {
+          const suffix = parseInt(m[2], 10);
+          if (Number.isInteger(suffix)) {
+            globalFeatIdMap.set(f.id, `${newId}.${suffix}`);
+          }
+        }
+      }
+    }
+  }
+
+  // Rewrite task files in place with updated ids and dependencies
+  const updatedTaskFiles = new Set();
+
+  for (const t of tasks) {
+    const { oldId, newId, file, json } = t;
+    let changed = false;
+
+    // Update task.id if needed
+    if (newId !== oldId) {
+      json.id = newId;
+      changed = true;
+    }
+
+    // Update feature ids if dotted with old prefix
+    if (Array.isArray(json.features)) {
+      for (let i = 0; i < json.features.length; i++) {
+        const f = json.features[i];
+        if (!f || typeof f.id !== 'string') continue;
+        const m = f.id.match(/^(\d+)\.(\d+)$/);
+        if (m && parseInt(m[1], 10) === oldId && newId !== oldId) {
+          const suffix = parseInt(m[2], 10);
+          const newFid = `${newId}.${suffix}`;
+          if (newFid !== f.id) {
+            json.features[i] = { ...f, id: newFid };
+            changed = true;
+          }
+        }
+      }
+    }
+
+    // Update dependencies via global feature id map
+    if (Array.isArray(json.features)) {
+      for (let i = 0; i < json.features.length; i++) {
+        const f = json.features[i];
+        if (Array.isArray(f.dependencies) && f.dependencies.length > 0) {
+          const nextDeps = f.dependencies.map(d => (globalFeatIdMap.has(d) ? globalFeatIdMap.get(d) : d));
+          const same = nextDeps.length === f.dependencies.length && nextDeps.every((d, idx) => d === f.dependencies[idx]);
+          if (!same) {
+            json.features[i] = { ...json.features[i], dependencies: nextDeps };
+            changed = true;
+          }
+        }
+      }
+    }
+
+    if (changed) {
+      const [ok, errors] = validateTask(json);
+      if (!ok) throw new Error(`Validation failed updating task ${oldId}: ${errors.join('; ')}`);
+      const pretty = JSON.stringify(json, null, 2) + '\n';
+      await fsp.writeFile(file, pretty, 'utf8');
+      updatedTaskFiles.add(String(oldId));
+    }
+  }
+
+  // Perform directory renames using temp names to avoid conflicts
+  const renames = [];
+  const timestamp = Date.now();
+  for (const t of tasks) {
+    if (t.newId === t.oldId) continue;
+    const tmpName = `__tmp__${t.oldId}__${timestamp}_${Math.random().toString(36).slice(2,8)}`;
+    const tmpPath = path.join(tasksDir, tmpName);
+    await fsp.rename(t.dir, tmpPath);
+    renames.push({ tmpPath, finalPath: path.join(tasksDir, String(t.newId)) });
+  }
+  for (const r of renames) {
+    await fsp.rename(r.tmpPath, r.finalPath);
+  }
+
+  // After renames, return list of updated tasks (by old ids written) and all moved tasks (by new ids)
+  const moved = tasks.filter(t => t.newId !== t.oldId).map(t => String(t.newId));
+  return { ok: true, updated: Array.from(new Set([ ...Array.from(updatedTaskFiles), ...moved ])) };
+}
+
 app.whenReady().then(async () => {
   const projectRoot = path.resolve(__dirname, '..');
   indexer = new TasksIndexer(projectRoot);
@@ -567,6 +716,18 @@ app.whenReady().then(async () => {
       const { taskId } = payload;
       if (!Number.isInteger(taskId)) throw new Error('taskId must be integer');
       const res = await reorderFeaturesInTaskFile(indexer.tasksDir, taskId, payload);
+      await indexer.buildIndex();
+      return { ok: true, updated: res.updated };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // New: reorder tasks (renumber ids and update references)
+  ipcMain.handle('tasks:reorder', async (_event, payload) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
+      const res = await reorderTasksInDir(indexer.tasksDir, payload);
       await indexer.buildIndex();
       return { ok: true, updated: res.updated };
     } catch (e) {
