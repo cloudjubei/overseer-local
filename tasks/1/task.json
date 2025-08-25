@@ -9,27 +9,10 @@
       "status": "-",
       "title": "Initialize Project with electron-vite",
       "description": "Use the `pnpm create electron-vite` command to scaffold a new project. Select the `react-ts` template. This will generate the initial project structure, including separate directories for main, preload, and renderer code, along with default TypeScript and ESLint configurations.",
-      "plan": "Implementation Plan: Initialize Project with electron-vite (react-ts)\n\nOverview\n- Goal: Scaffold a new Electron application using electron-vite with React + TypeScript template.\n- Output: A bootstrapped project under projects/electron-react-ts-app with default TypeScript and ESLint configuration. Provide a one-shot script to scaffold/install, plus documentation on how to run.\n\nSteps\n1) Create projects/ directory structure\n   - At repository root, create a new directory to hold app projects.\n   - Command: mkdir -p projects\n\n2) Add a one-shot scaffolding script\n   - Create scripts/ directory if it does not exist.\n     - Command: mkdir -p scripts\n   - Create scripts/scaffold_electron_vite.sh with the following content:\n     ---8<---\n     #!/usr/bin/env bash\n     set -euo pipefail\n\n     ROOT_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"\n     APP_DIR=\"$ROOT_DIR/projects/electron-react-ts-app\"\n\n     echo \"[info] Verifying prerequisites...\"\n     if ! command -v pnpm >/dev/null 2>&1; then\n       echo \"[error] pnpm is required. Install from https://pnpm.io/installation\" >&2\n       exit 1\n     fi\n     if ! command -v node >/dev/null 2>&1; then\n       echo \"[error] Node.js is required. Install LTS (>=18).\" >&2\n       exit 1\n     fi\n\n     NODE_VER_RAW=$(node -v | sed 's/v//')\n     NODE_MAJOR=\"${NODE_VER_RAW%%.*}\"\n     if [ \"$NODE_MAJOR\" -lt 18 ]; then\n       echo \"[error] Node.js >= 18 is required. Current: $NODE_VER_RAW\" >&2\n       exit 1\n     fi\n\n     mkdir -p \"$ROOT_DIR/projects\"\n\n     if [ -d \"$APP_DIR\" ] && [ -n \"$(ls -A \"$APP_DIR\" 2>/dev/null || true)\" ]; then\n       echo \"[error] Target directory $APP_DIR already exists and is not empty. Aborting to avoid overwriting.\" >&2\n       exit 1\n     fi\n\n     echo \"[info] Scaffolding electron-vite (react-ts) project at $APP_DIR ...\"\n     pnpm create electron-vite \"$APP_DIR\" --template react-ts\n\n     echo \"[info] Installing dependencies...\"\n     cd \"$APP_DIR\"\n     pnpm install\n\n     echo \"[success] Scaffold complete. Next steps:\"\n     echo \"  cd projects/electron-react-ts-app\"\n     echo \"  pnpm run dev    # Start development with HMR\"\n     echo \"  pnpm run build  # Build production binaries\"\n     ---8<---\n   - Make the script executable:\n     - Command: chmod +x scripts/scaffold_electron_vite.sh\n\n3) Execute the scaffold (local developer step)\n   - Run the one-shot script to generate the project and install dependencies:\n     - Command: ./scripts/scaffold_electron_vite.sh\n   - Note: This will create the app at projects/electron-react-ts-app.\n\n4) Verify generated structure\n   - Ensure the following directories exist under projects/electron-react-ts-app:\n     - src/main/ (Electron main process)\n     - src/preload/ (Preload scripts)\n     - src/renderer/ (React UI)\n   - Verify package.json includes scripts like dev and build (template-provided):\n     - \"dev\": starts the electron-vite dev environment\n     - \"build\": builds the production app\n   - Verify TypeScript and ESLint configuration files exist (template-provided):\n     - tsconfig.json (and possibly tsconfig.* for main/preload/renderer)\n     - .eslintrc.* or equivalent ESLint config\n\n5) Add task documentation for setup and usage\n   - Create docs/tasks/1/setup_electron_vite.md with the following content:\n     ---8<---\n     # Setup: electron-vite React + TypeScript Scaffold\n\n     This document explains how to scaffold and run the Electron app using electron-vite with React + TypeScript.\n\n     ## Prerequisites\n     - Node.js >= 18\n     - pnpm installed (https://pnpm.io/installation)\n\n     ## Scaffold and Install\n     ```bash\n     ./scripts/scaffold_electron_vite.sh\n     ```\n\n     This creates the app in `projects/electron-react-ts-app` and installs dependencies.\n\n     ## Development\n     ```bash\n     cd projects/electron-react-ts-app\n     pnpm run dev\n     ```\n\n     ## Build\n     ```bash\n     cd projects/electron-react-ts-app\n     pnpm run build\n     ```\n\n     The template includes TypeScript and ESLint defaults. The React UI placeholder should render when running `pnpm run dev`.\n     ---8<---\n\n6) Update repository file organization docs\n   - Edit docs/FILE_ORGANISATION.md to document the new projects/ directory and example entry for projects/electron-react-ts-app. Add a brief note under \"Top-Level Directory Layout\" describing `projects/` as the location for application subprojects scaffolded by tasks. Update the illustrative tree to include:\n     - projects/\n       - electron-react-ts-app/\n\n7) Add a lightweight project-level README\n   - Create projects/electron-react-ts-app/README.md summarizing how to run and build the app and pointing to docs/tasks/1/setup_electron_vite.md for details.\n\n8) Version control housekeeping\n   - Stage and commit new files:\n     - scripts/scaffold_electron_vite.sh\n     - docs/tasks/1/setup_electron_vite.md\n     - docs/FILE_ORGANISATION.md (updated)\n     - projects/electron-react-ts-app/** (scaffolded content)\n   - Suggested commit message: \"feat: scaffold electron-vite React+TS app under projects/ with setup script and docs\"\n\n9) Manual smoke test (developer verification)\n   - From projects/electron-react-ts-app, run: pnpm run dev => Electron app launches with React placeholder UI.\n   - Run: pnpm run build => Build artifacts produced in dist/ (or out/ per template).\n\nNotes\n- This feature only covers scaffolding using the official react-ts template with its default TypeScript and ESLint configurations. Additional hardening (sandbox, contextIsolation checks), Prettier setup, or custom lint/format scripts are handled in subsequent features.",
+      "plan": "",
       "context": [
-        "docs/FILE_ORGANISATION.md",
-        "docs/tasks/1/setup_electron_vite.md",
-        "scripts/scaffold_electron_vite.sh",
-        "projects/electron-react-ts-app/package.json",
-        "projects/electron-react-ts-app/electron.vite.config.ts",
-        "projects/electron-react-ts-app/tsconfig.json",
-        "projects/electron-react-ts-app/src/main/index.ts",
-        "projects/electron-react-ts-app/src/preload/index.ts",
-        "projects/electron-react-ts-app/src/renderer/index.html",
-        "projects/electron-react-ts-app/src/renderer/src/main.tsx",
-        "projects/electron-react-ts-app/src/renderer/src/App.tsx",
-        "projects/electron-react-ts-app/README.md"
       ],
       "acceptance": [
-        "projects/electron-react-ts-app/package.json exists.",
-        "projects/electron-react-ts-app/package.json has scripts: dev, build, and lint.",
-        "projects/electron-react-ts-app/src/main, projects/electron-react-ts-app/src/preload, and projects/electron-react-ts-app/src/renderer directories exist.",
-        "projects/electron-react-ts-app/electron.vite.config.ts, projects/electron-react-ts-app/.eslintrc.cjs, and projects/electron-react-ts-app/tsconfig.json exist.",
-        "projects/electron-react-ts-app/package.json lists electron, electron-vite, react, and typescript in either dependencies or devDependencies."
       ]
     },
     {
@@ -95,9 +78,9 @@
     },
     {
       "id": "1.4",
-      "status": "?",
-      "title": "READ.me",
-      "description": "A READ.me file documenting information and steps to take for developers",
+      "status": "-",
+      "title": "README.md",
+      "description": "A README.md file documenting information and steps to take for developers",
       "plan": "",
       "context": [],
       "acceptance": [],

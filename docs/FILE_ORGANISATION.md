@@ -50,4 +50,4 @@ repo_root/
       └─ tests/
 ```
 
-This diagram shows how documentation, scripts, and per-task artifacts are arranged, including where tests for each feature live and where child project submodules reside under projects/.
+This diagram shows how documentation, scripts, and per-task artifacts are arranged, including where tests for each feature live and how the main code structure is organized. 
