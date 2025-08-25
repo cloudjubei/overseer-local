@@ -52,7 +52,8 @@ repo_root/
 │   │  └─ indexer.js
 │   ├─ renderer/
 │   │   ├─ tasksListView.js     # Tasks list UI (search + filters, view-only)
-│   │   └─ taskDetailsView.js   # Task details UI with features list (includes edit for task title/description; includes feature edit and create modes)
+│   │   ├─ taskDetailsView.js   # Task details UI with features list (includes edit for task title/description; includes feature edit and create modes)
+│   │   └─ docsBrowserView.js   # Docs browser UI with file tree and content display
 │   ├─ tasks/
 │   │  └─ indexer.js           # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
@@ -128,6 +129,7 @@ repo_root/
     - Includes inline edit mode for the task's title and description with Save/Cancel; saving persists via IPC and re-renders on index updates.
     - Includes inline edit mode for a feature allowing editing: status, title, description, plan, context, acceptance, dependencies, and rejection.
     - Includes a Create mode to add a new feature with all required and optional fields; saving persists via IPC and re-renders on index updates.
+  - docsBrowserView.js: Renders a documentation browser with a collapsible tree view of markdown files and directories. Handles file selection to fetch and display raw content. Subscribes to docs index updates for real-time refreshes. Handles empty states and errors. Visible on #docs hash.
 - Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders accordingly.
 
 Performance
