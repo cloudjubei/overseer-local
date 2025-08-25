@@ -69,6 +69,25 @@
     let currentIndex = null;
     let selectedPath = null;
 
+    function resolvePath(base, rel) {
+      if (rel.startsWith('/')) {
+        return rel.slice(1);
+      }
+      const baseParts = base.split('/').slice(0, -1);
+      const relParts = rel.split('/');
+      const parts = baseParts.slice();
+      for (let i = 0; i < relParts.length; i++) {
+        const part = relParts[i];
+        if (part === '' || part === '.') continue;
+        if (part === '..') {
+          if (parts.length > 0) parts.pop();
+        } else {
+          parts.push(part);
+        }
+      }
+      return parts.join('/');
+    }
+
     async function selectFile(path) {
       selectedPath = path;
       const allFiles = root.querySelectorAll(".file");
@@ -79,6 +98,32 @@
         const mdDiv = createEl("div", { class: "markdown-body" });
         mdDiv.innerHTML = html;
         contentContainer.appendChild(mdDiv);
+
+        mdDiv.addEventListener('click', (e) => {
+          const link = e.target.closest('a');
+          if (!link) return;
+          const href = link.getAttribute('href');
+          if (!href) return;
+          const [pathPart, hashPart] = href.split('#');
+          const hash = hashPart || null;
+          if (pathPart.startsWith('http:') || pathPart.startsWith('https:') || pathPart.startsWith('//')) return;
+          if (pathPart && !pathPart.endsWith('.md')) return;
+          e.preventDefault();
+          const targetPath = pathPart ? resolvePath(selectedPath, pathPart) : selectedPath;
+          if (targetPath === selectedPath) {
+            if (hash) {
+              const el = contentContainer.querySelector(`[id="${hash}"]`);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }
+          } else {
+            selectFile(targetPath).then(() => {
+              if (hash) {
+                const el = contentContainer.querySelector(`[id="${hash}"]`);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }
+            });
+          }
+        });
       } catch (e) {
         contentContainer.innerHTML = "";
         contentContainer.appendChild(createEl("div", { class: "error", text: `Failed to load file: ${e.message}` }));
