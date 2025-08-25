@@ -295,14 +295,14 @@
       STATUS_OPTIONS.map(s => createEl("option", { value: s, selected: s === "-" }, `${STATUS_LABELS[s]} (${s})`))
     );
     const titleInput = createEl("input", { id: `newfeat-title`, type: "text", value: "", "aria-label": "Title" });
-    const descInput = createEl("textarea", { id: `newfeat-desc", rows: 3, "aria-label": "Description" });
-    const planInput = createEl("textarea", { id: `newfeat-plan", rows: 3, "aria-label": "Plan" });
+    const descInput = createEl("textarea", { id: `newfeat-desc`, rows: 3, "aria-label": "Description" });
+    const planInput = createEl("textarea", { id: `newfeat-plan`, rows: 3, "aria-label": "Plan" });
 
     const contextEditor = stringListEditor({ idBase: `newfeat-context`, label: "Context (one per row)", initial: [], placeholder: "Context item" });
     const acceptanceEditor = stringListEditor({ idBase: `newfeat-acceptance`, label: "Acceptance (one per row)", initial: [], placeholder: "Acceptance criterion" });
     const depSuggestions = featureSuggestionsTitles();
     const dependenciesEditor = stringListEditor({ idBase: `newfeat-deps`, label: "Dependencies (feature id or title; one per row)", initial: [], placeholder: "Feature id or title", suggestions: depSuggestions });
-    const rejectionInput = createEl("textarea", { id: `newfeat-rejection", rows: 2, "aria-label": "Rejection (optional)" });
+    const rejectionInput = createEl("textarea", { id: `newfeat-rejection`, rows: 2, "aria-label": "Rejection (optional)" });
 
     const createBtn = createEl("button", { type: "button", class: "btn-save" }, "Create");
     const cancelBtn = createEl("button", { type: "button", class: "btn-cancel", onclick: () => { if (createState.saving) return; createState.open = false; rerender(task); } }, "Cancel");
