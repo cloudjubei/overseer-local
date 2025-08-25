@@ -133,7 +133,7 @@
     },
     {
       "id": "2.9",
-      "status": "-",
+      "status": "?",
       "title": "Edit mode - moving tasks and features around",
       "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
       "plan": "",
@@ -145,7 +145,8 @@
       "acceptance": [],
       "dependencies": [
         "2.4"
-      ]
+      ],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
     },
     {
       "id": "2.10",
