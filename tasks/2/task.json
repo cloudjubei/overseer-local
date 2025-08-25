@@ -86,6 +86,22 @@
     {
       "id": "2.6",
       "status": "-",
+      "title": "Create mode - new feature",
+      "description": "Allow adding a new feature to a task.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.5"
+      ]
+    },
+    {
+      "id": "2.7",
+      "status": "-",
       "title": "Edit mode - task details",
       "description": "Allow editing of a task's title and description.",
       "plan": "",
@@ -100,7 +116,23 @@
       ]
     },
     {
-      "id": "2.7",
+      "id": "2.8",
+      "status": "-",
+      "title": "Create mode - new task",
+      "description": "Allow adding a new task.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.7"
+      ]
+    },
+    {
+      "id": "2.9",
       "status": "-",
       "title": "Edit mode - moving tasks and features around",
       "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
@@ -116,7 +148,7 @@
       ]
     },
     {
-      "id": "2.8",
+      "id": "2.10",
       "status": "-",
       "title": "The task view is the main home view.",
       "description": "Glow up the whole appearance so that it looks like a production ready app.",
@@ -131,7 +163,9 @@
         "2.4",
         "2.5",
         "2.6",
-        "2.7"
+        "2.7",
+        "2.8",
+        "2.9"
       ]
     }
   ]
