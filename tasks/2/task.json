@@ -153,9 +153,9 @@
     },
     {
       "id": "2.10",
-      "status": "+",
+      "status": "-",
       "title": "Refactor",
-      "description": "The code was meant to use React for UI - make sure it does.",
+      "description": "The code was meant to use React for UI - make sure all components, views are coded the React way. There should be no other reference to the old (legacy) code anywhere.",
       "plan": "",
       "context": [
         "src/",
@@ -169,26 +169,10 @@
       "rejection": " Cannot launch the app - getting this error: An unhandled rejection has occurred inside Forge: Error: 'config.renderer' must be an Array at ViteConfigGenerator.getRendererConfig (/Users/cloud/Documents/Work/TheFactory/projects/overseer-local/node_modules/@electron-forge/plugin-vite/dist/ViteConfig.js:61:19)"
     },
     {
-      "id": "2.11",
-      "status": "+",
-      "title": "Cleanup",
-      "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
-      "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
-      "acceptance": [],
-      "dependencies": [
-        "2.10"
-      ]
-    },
-    {
       "id": "2.12",
-      "status": "+",
+      "status": "-",
       "title": "Common functions and libraries",
-      "description": "We need to have common components for popups, alerts, toasts etc. It would be great to introduce a library like `shadcn` and use it with tailwind as much as possible. This way we can control theming and color schemes easily.",
+      "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit task popups should stem from a common popup component.",
       "plan": "",
       "context": [
         "src/",
@@ -202,6 +186,22 @@
     },
     {
       "id": "2.13",
+      "status": "-",
+      "title": "Use shadcn and tailwind",
+      "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen where it must be possible to change themes.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.11"
+      ]
+    },
+    {
+      "id": "2.14",
       "status": "+",
       "title": "Edit mode - moving features around",
       "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced.",
@@ -218,7 +218,7 @@
       ]
     },
     {
-      "id": "2.14",
+      "id": "2.15",
       "status": "+",
       "title": "Edit mode - moving tasks around",
       "description": "Allow editing the order of tasks - thus changing the underlying id everywhere where it's referenced.",
@@ -231,14 +231,14 @@
       "acceptance": [],
       "dependencies": [
         "2.4",
-        "2.13"
+        "2.14"
       ]
     },
     {
-      "id": "2.15",
-      "status": "+",
-      "title": "Improve UI to match best task applications in the world",
-      "description": "Look at the competitor landscape (search online the latest best similar apps) and look at how their design is. Propose 3 designs in a document DESIGN_PROPOSALS.md. If you can include image references that would be ideals.",
+      "id": "2.16",
+      "status": "-",
+      "title": "Delete mode - delete feature",
+      "description": "Allow deleting a feature from a task.",
       "plan": "",
       "context": [
         "src/",
@@ -247,7 +247,25 @@
       ],
       "acceptance": [],
       "dependencies": [
-        "2.14"
+        "2.4",
+        "2.15"
+      ]
+    },
+    {
+      "id": "2.17",
+      "status": "-",
+      "title": "Delete mode - delete task",
+      "description": "Allow deleting a task.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4",
+        "2.16"
       ]
     }
   ]
