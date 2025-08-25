@@ -25,7 +25,7 @@
     const el = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
       if (k === "class") el.className = v;
-      else If (k === "dataset") {
+      else if (k === "dataset") {
         for (const [dk, dv] of Object.entries(v || {})) el.dataset[dk] = dv;
       } else if (k.startsWith("on") && typeof v === "function") {
         el.addEventListener(k.slice(2).toLowerCase(), v);
