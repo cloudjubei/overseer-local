@@ -49,7 +49,8 @@ repo_root/
 │   ├─ index.js
 │   ├─ preload.js
 │   ├─ renderer/
-│   │   └─ tasksListView.js     # Tasks list UI (search + filters, view-only)
+│   │   ├─ tasksListView.js     # Tasks list UI (search + filters, view-only)
+│   │   └─ taskDetailsView.js   # Task details UI with features list (view-only)
 │   ├─ tasks/
 │   │  └─ indexer.js           # Logical Tasks indexer and file watcher
 │   └─ types/
@@ -87,9 +88,11 @@ repo_root/
   - Preload exposes window.tasksIndex with getSnapshot() and onUpdate(cb) for renderer use.
 
 ## Renderer UI
-- Location: src/renderer/tasksListView.js
-- Purpose: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled.
-- Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders the list accordingly.
+- Location: src/renderer/
+- Purpose:
+  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}).
+  - taskDetailsView.js: Renders a task details page showing task metadata and its features with statuses (view-only). Provides a Back button to return to the list. Responds to hash-based navigation and index updates.
+- Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders accordingly.
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.

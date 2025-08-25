@@ -86,6 +86,10 @@
     }
   }
 
+  function routeName(hash) {
+    return /^#task\/\d+$/.test(hash || "") ? "details" : "list";
+  }
+
   function renderList(listEl, tasks) {
     listEl.innerHTML = "";
     if (!tasks || tasks.length === 0) {
@@ -97,15 +101,17 @@
 
     tasks.forEach((t, idx) => {
       const { done, total } = countFeatures(t);
+      const goToDetails = () => { location.hash = `#task/${t.id}`; };
       const row = createEl(
         "div",
         {
           class: "task-row",
           tabindex: 0,
-          role: "group",
+          role: "button",
           dataset: { index: idx },
-          onkeydown: (e) => onRowKeyDown(e, ul),
-          "aria-label": `Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status] || t.status}. Features ${done} of ${total} done.`,
+          onclick: goToDetails,
+          onkeydown: (e) => onRowKeyDown(e, ul, t.id),
+          "aria-label": `Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`,
         },
         [
           createEl("div", { class: "col col-id" }, String(t.id)),
@@ -121,7 +127,12 @@
     listEl.appendChild(ul);
   }
 
-  function onRowKeyDown(e, ul) {
+  function onRowKeyDown(e, ul, taskId) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      location.hash = `#task/${taskId}`;
+      return;
+    }
     if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
     e.preventDefault();
     const rows = Array.from(ul.querySelectorAll(".task-row"));
@@ -214,14 +225,21 @@
 
     let currentIndex = null;
 
+    function updateVisibility() {
+      const name = routeName(location.hash);
+      root.style.display = name === "list" ? "" : "none";
+    }
+
     // Hook up events
     searchInput.addEventListener("input", () => root.dispatchEvent(new CustomEvent("filters:change")));
     statusSelect.addEventListener("change", () => root.dispatchEvent(new CustomEvent("filters:change")));
     root.addEventListener("filters:change", onFiltersChange);
+    window.addEventListener("hashchange", updateVisibility);
 
     try {
       currentIndex = await window.tasksIndex.getSnapshot();
       applyRender(currentIndex);
+      updateVisibility();
       // Subscribe to updates
       window.tasksIndex.onUpdate((idx) => {
         currentIndex = idx;

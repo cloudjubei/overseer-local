@@ -53,7 +53,7 @@
     },
     {
       "id": "2.4",
-      "status": "-",
+      "status": "+",
       "title": "Task details view with feature list - view only",
       "description": "Create a detail page showing the task metadata and its features with statuses.",
       "plan": "",
