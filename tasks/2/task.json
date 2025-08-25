@@ -171,6 +171,22 @@
     {
       "id": "2.11",
       "status": "-",
+      "title": "Refactor",
+      "description": "The code was meant to use React for UI - make sure it does.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.10"
+      ]
+    },
+    {
+      "id": "2.12",
+      "status": "-",
       "title": "Cleanup",
       "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
       "plan": "",
@@ -181,7 +197,7 @@
       ],
       "acceptance": [],
       "dependencies": [
-        "2.10"
+        "2.11"
       ]
     }
   ]
