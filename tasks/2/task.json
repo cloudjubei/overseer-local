@@ -69,7 +69,7 @@
     },
     {
       "id": "2.5",
-      "status": "-",
+      "status": "+",
       "title": "Edit mode - feature details",
       "description": "Allow editing of a feature's parameters. The status dropdown defaults to the current status. The string list edits show rows of editable strings. Dependencies allow matching features by name and working out the id from it.",
       "plan": "",

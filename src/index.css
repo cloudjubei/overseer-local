@@ -154,18 +154,24 @@ h1 {
   border-radius: 6px;
   font-size: 0.95rem;
 }
-.btn-edit, .btn-save, .btn-cancel, .btn-back {
+.btn-edit, .btn-save, .btn-cancel, .btn-back, .btn-add-row, .btn-remove-row {
   padding: 0.45rem 0.75rem;
   border: 1px solid #bbb;
   border-radius: 6px;
   background: #fafafa;
   cursor: pointer;
 }
-.btn-edit:hover, .btn-save:hover, .btn-cancel:hover, .btn-back:hover { background: #f0f0f0; }
+.btn-edit:hover, .btn-save:hover, .btn-cancel:hover, .btn-back:hover, .btn-add-row:hover, .btn-remove-row:hover { background: #f0f0f0; }
 
 .task-meta { margin: 0.5rem 0 1rem; }
 .task-meta .task-title { display: flex; gap: 0.5rem; align-items: center; }
 .task-meta .task-desc { margin-top: 0.25rem; color: #333; }
+
+/* String list editor */
+.string-list { width: 100%; }
+.string-list-rows { list-style: none; padding: 0; margin: 0 0 0.5rem 0; }
+.string-list-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; }
+.string-list-row input[type="text"] { flex: 1 1 auto; }
 
 /* Responsive tweaks */
 @media (max-width: 720px) {
