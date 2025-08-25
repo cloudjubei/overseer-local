@@ -85,14 +85,18 @@
     }
 
     // Editing form
-    const statusSelect = createEl("select", { id: `feat-${f.id}-status`, "aria-label": "Status" }, STATUS_OPTIONS.map(s => createEl("option", { value: s, selected: f.status === s }, `${STATUS_LABELS[s]} (${s})`)));
+    const statusSelect = createEl(
+      "select",
+      { id: `feat-${f.id}-status`, "aria-label": "Status" },
+      STATUS_OPTIONS.map(s => createEl("option", { value: s, selected: f.status === s }, `${STATUS_LABELS[s]} (${s})`))
+    );
     const titleInput = createEl("input", { id: `feat-${f.id}-title`, type: "text", value: f.title || "", "aria-label": "Title" });
-    const descInput = createEl("textarea", { id: `feat-${f.id}-desc", rows: 3, "aria-label": "Description" }, f.description || "");
-    const planInput = createEl("textarea", { id: `feat-${f.id}-plan", rows: 3, "aria-label": "Plan" }, f.plan || "");
-    const contextInput = createEl("textarea", { id: `feat-${f.id}-context", rows: 3, "aria-label": "Context (one per line)" }, toLines(f.context || []));
-    const acceptanceInput = createEl("textarea", { id: `feat-${f.id}-acceptance", rows: 3, "aria-label": "Acceptance (one per line)" }, toLines(f.acceptance || []));
-    const dependenciesInput = createEl("textarea", { id: `feat-${f.id}-deps", rows: 2, "aria-label": "Dependencies (optional, one per line)" }, toLines(f.dependencies || []));
-    const rejectionInput = createEl("textarea", { id: `feat-${f.id}-rejection", rows: 2, "aria-label": "Rejection (optional)" }, f.rejection || "");
+    const descInput = createEl("textarea", { id: `feat-${f.id}-desc`, rows: 3, "aria-label": "Description" }, f.description || "");
+    const planInput = createEl("textarea", { id: `feat-${f.id}-plan`, rows: 3, "aria-label": "Plan" }, f.plan || "");
+    const contextInput = createEl("textarea", { id: `feat-${f.id}-context`, rows: 3, "aria-label": "Context (one per line)" }, toLines(f.context || []));
+    const acceptanceInput = createEl("textarea", { id: `feat-${f.id}-acceptance`, rows: 3, "aria-label": "Acceptance (one per line)" }, toLines(f.acceptance || []));
+    const dependenciesInput = createEl("textarea", { id: `feat-${f.id}-deps`, rows: 2, "aria-label": "Dependencies (optional, one per line)" }, toLines(f.dependencies || []));
+    const rejectionInput = createEl("textarea", { id: `feat-${f.id}-rejection`, rows: 2, "aria-label": "Rejection (optional)" }, f.rejection || "");
 
     const saveBtn = createEl("button", { type: "button", class: "btn-save", onclick: async () => {
       if (editState.saving) return;
