@@ -1,15 +1,58 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Add Feature</title>
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <h1>Add New Feature</h1>
-    <section id="feature-create-view" role="region" aria-labelledby="feature-create-heading">
-      <h2 id="feature-create-heading">Create Feature</h2>
-    </section>
-    <script src="renderer/featureCreateView.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Create New Feature</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Create New Feature</h1>
+    <form id="feature-form">
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="-">Pending</option>
+          <option value="~">In Progress</option>
+          <option value="+">Done</option>
+          <option value="?">Blocked</option>
+          <option value="=">Deferred</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="plan">Plan</label>
+        <textarea id="plan" name="plan" rows="5"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="context">Context (one item per line)</label>
+        <textarea id="context" name="context" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="acceptance">Acceptance Criteria (one item per line)</label>
+        <textarea id="acceptance" name="acceptance" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="dependencies">Dependencies (one item per line)</label>
+        <textarea id="dependencies" name="dependencies" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="rejection">Rejection Reason</label>
+        <textarea id="rejection" name="rejection" rows="2"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="cancel-button">Cancel</button>
+        <button type="submit">Save Feature</button>
+      </div>
+    </form>
+  </div>
+  <script type="module" src="./renderer/featureCreateView.js"></script>
+</body>
 </html>
