@@ -43,7 +43,7 @@
     },
     {
       "id": "3.5",
-      "status": "-",
+      "status": "+",
       "title": "Implement basic Markdown rendering with extensions",
       "description": "In the Docs browser view, upon file selection, fetch the file content via IPC and render it using a Markdown parser (e.g., react-markdown or marked). Support basic extensions: tables and code highlighting (integrate highlight.js or similar for syntax highlighting in code blocks). Display the rendered content in a dedicated pane or section of the view.",
       "plan": "",

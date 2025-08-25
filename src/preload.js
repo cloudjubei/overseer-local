@@ -1,4 +1,20 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const marked = require('marked');
+const hljs = require('highlight.js');
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+
+const { window } = new JSDOM('');
+const DOMPurify = createDOMPurify(window);
+
+marked.setOptions({
+  gfm: true,
+  tables: true,
+  highlight: function(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  }
+});
 
 contextBridge.exposeInMainWorld('tasksIndex', {
   getSnapshot: async () => {
@@ -34,5 +50,11 @@ contextBridge.exposeInMainWorld('docsIndex', {
   },
   getFile: async (relativePath) => {
     return await ipcRenderer.invoke('docs-file:get', relativePath);
+  },
+  getRenderedMarkdown: async (relativePath) => {
+    const content = await ipcRenderer.invoke('docs-file:get', relativePath);
+    const html = marked.parse(content);
+    const sanitized = DOMPurify.sanitize(html);
+    return sanitized;
   }
 });
