@@ -1,6 +1,6 @@
 {
   "id": 2,
-  "status": "+",
+  "status": "-",
   "title": "Task handling",
   "description": "Implement all features that allow proper handling of tasks. docs/tasks/task_format.py is the source of truth for the interfaces for a Task, Feature, ProjectSpec & ProjectRequirement. docs/tasks/task_example.json holds an example task json file.",
   "features": [
@@ -85,9 +85,9 @@
     },
     {
       "id": "2.6",
-      "status": "+",
+      "status": "-",
       "title": "Create mode - new feature",
-      "description": "Allow adding a new feature to a task.",
+      "description": "Allow adding a new feature to a task in a new popup window - make this the same pattern as edit mode.",
       "plan": "",
       "context": [
         "src/",
@@ -117,9 +117,9 @@
     },
     {
       "id": "2.8",
-      "status": "+",
+      "status": "-",
       "title": "Create mode - new task",
-      "description": "Allow adding a new task.",
+      "description": "Allow adding a new task in a new popup window - make this the same pattern as edit mode.",
       "plan": "",
       "context": [
         "src/",
@@ -166,6 +166,22 @@
         "2.7",
         "2.8",
         "2.9"
+      ]
+    },
+    {
+      "id": "2.11",
+      "status": "-",
+      "title": "Cleanup",
+      "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.10"
       ]
     }
   ]
