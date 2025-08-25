@@ -7,8 +7,8 @@
     {
       "id": "2.1",
       "status": "-",
-      "title": "Task schema definition and validator",
-      "description": "Generate TypeScript interfaces from the schema. Implement a validator used before reading/writing task.json. Acceptance: Validator catches malformed examples; TS types aligned with schema; unit tests cover valid/invalid cases using sample task.json files.",
+      "title": "Task schema definition",
+      "description": "Generate TypeScript interfaces from the schema.",
       "plan": "",
       "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": []
