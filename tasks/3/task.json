@@ -6,13 +6,13 @@
   "features": [
     {
       "id": "3.1",
-      "status": "?",
+      "status": "-",
       "title": "Add sidebar navigation to the application UI",
       "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      "rejection": "UnhandledPromiseRejectionWarning: TypeError: Cannot read properties of undefined (reading 'forEach') at DocsIndexer._flattenFiles (/src/docs/indexer.js:92:19)"
     },
     {
       "id": "3.2",
