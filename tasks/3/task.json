@@ -52,7 +52,7 @@
     },
     {
       "id": "3.6",
-      "status": "-",
+      "status": "+",
       "title": "Add HTML sanitization to Markdown rendering",
       "description": "Enhance the Markdown rendering to include safe HTML sanitization using a library like dompurify. Sanitize the generated HTML before rendering to prevent XSS vulnerabilities, ensuring only safe tags and attributes are allowed while preserving the formatting from Markdown extensions.",
       "plan": "",
