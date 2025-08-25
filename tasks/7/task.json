@@ -1,0 +1,7 @@
+{
+  "id": 7,
+  "status": "-",
+  "title": "Notifications center UI and preferences",
+  "description": "Add a notifications panel listing recent events. Provide settings to enable/disable OS notifications and categories.",
+  "features":[]
+}
