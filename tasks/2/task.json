@@ -69,7 +69,7 @@
     },
     {
       "id": "2.5",
-      "status": "-",
+      "status": "+",
       "title": "Edit mode - feature details",
       "description": "Allow editing of a feature's parameters. The status dropdown defaults to the current status. The string list edits show rows of editable strings. Dependencies allow matching features by name and working out the id from it.",
       "plan": "",
@@ -85,7 +85,7 @@
     },
     {
       "id": "2.6",
-      "status": "-",
+      "status": "+",
       "title": "Create mode - new feature",
       "description": "Allow adding a new feature to a task.",
       "plan": "",
@@ -101,7 +101,7 @@
     },
     {
       "id": "2.7",
-      "status": "-",
+      "status": "+",
       "title": "Edit mode - task details",
       "description": "Allow editing of a task's title and description.",
       "plan": "",
@@ -117,7 +117,7 @@
     },
     {
       "id": "2.8",
-      "status": "-",
+      "status": "+",
       "title": "Create mode - new task",
       "description": "Allow adding a new task.",
       "plan": "",
