@@ -1,10 +1,6 @@
 "use strict";
 
 (function () {
-  const marked = require('marked');
-  const hljs = require('highlight.js');
-  const DOMPurify = require('dompurify')(window);
-
   function $(sel, root = document) {
     return root.querySelector(sel);
   }
@@ -95,15 +91,6 @@
     const root = document.getElementById("docs-view");
     if (!root) return;
 
-    marked.setOptions({
-      gfm: true,
-      tables: true,
-      highlight: function(code, lang) {
-        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        return hljs.highlight(code, { language }).value;
-      }
-    });
-
     const heading = createEl("h2", { id: "docs-view-heading" }, "Documentation");
 
     const treeContainer = createEl("div", { class: "docs-tree-container" });
@@ -124,10 +111,9 @@
       contentContainer.innerHTML = "";
       contentContainer.appendChild(createEl("div", {}, "Loading..."));
       try {
-        const res = await window.docsIndex.getFile(path);
+        const res = await window.docsIndex.getRenderedMarkdown(path);
         if (!res.ok) throw new Error(res.error || "Unknown error");
-        const markdown = res.content;
-        const html = DOMPurify.sanitize(marked.parse(markdown));
+        const html = res.content;
         contentContainer.innerHTML = "";
         const mdDiv = createEl("div", { class: "markdown-body" });
         mdDiv.innerHTML = html;
