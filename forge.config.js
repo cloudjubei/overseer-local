@@ -19,6 +19,14 @@ module.exports = {
             name: 'main_window',
             config: 'vite.renderer.config.js',
           },
+          {
+            name: 'task_create',
+            config: 'vite.renderer.config.js',
+          },
+          {
+            name: 'feature_create',
+            config: 'vite.renderer.config.js',
+          },
         ],
       },
     },
