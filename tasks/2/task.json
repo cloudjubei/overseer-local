@@ -1,6 +1,6 @@
 {
   "id": 2,
-  "status": "+",
+  "status": "-",
   "title": "Task handling",
   "description": "Implement all features that allow proper handling of tasks. docs/tasks/task_format.py is the source of truth for the interfaces for a Task, Feature, ProjectSpec & ProjectRequirement. docs/tasks/task_example.json holds an example task json file.",
   "features": [
@@ -153,20 +153,27 @@
     },
     {
       "id": "2.10",
-      "status": "+",
+      "status": "-",
       "title": "Refactor",
       "description": "The code was meant to use React for UI - make sure all components, views are coded the React way. There should be no other reference to the old (legacy) code anywhere.",
       "plan": "",
       "context": [
         "src/",
         "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
+        "tests/tasks/test_task_schema.py",
+        "README.md",
+        "forge.config.js",
+        "tsconfig.json",
+        "tsconfig.node.json",
+        "vite.main.config.js",
+        "vite.preload.config.js",
+        "vite.renderer.config.js"
       ],
       "acceptance": [],
       "dependencies": [
         "2.9"
       ],
-      "rejection": " Cannot launch the app - getting this error: An unhandled rejection has occurred inside Forge: Error: 'config.renderer' must be an Array at ViteConfigGenerator.getRendererConfig (/Users/cloud/Documents/Work/TheFactory/projects/overseer-local/node_modules/@electron-forge/plugin-vite/dist/ViteConfig.js:61:19)"
+      "rejection": " Cannot launch the app (I'm including as context `forge.config.js`) - getting this error: An unhandled rejection has occurred inside Forge: Error: 'config.renderer' must be an Array at ViteConfigGenerator.getRendererConfig (/Users/cloud/Documents/Work/TheFactory/projects/overseer-local/node_modules/@electron-forge/plugin-vite/dist/ViteConfig.js:61:19)"
     },
     {
       "id": "2.12",
