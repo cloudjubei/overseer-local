@@ -2,7 +2,7 @@
   "id": 4,
   "status": "-",
   "title": "Agentic chat interface",
-  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Allow communication with a chat agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard.",
+  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
   ]
 }
