@@ -21,7 +21,7 @@
     },
     {
       "id": "1.2",
-      "status": "-",
+      "status": "+",
       "title": "Configure Linting and Formatting",
       "description": "Install project dependencies using `pnpm install`. Add Prettier for code formatting by installing `prettier` and `eslint-config-prettier`. Create a `.prettierrc` file with sensible defaults. Update the `.eslintrc.cjs` configuration to integrate with Prettier. Finally, add `lint` and `format` scripts to `package.json`.",
       "plan": "1.  **Install all dependencies:** Run `pnpm install` to install dependencies defined in `package.json`.\n2.  **Install formatting packages:** Run `pnpm add -D prettier eslint-config-prettier` to add Prettier and its ESLint config as development dependencies.\n3.  **Create Prettier configuration:** Create a `.prettierrc` file in the root directory with the following content:\n    ```json\n    {\n      \"semi\": false,\n      \"singleQuote\": true,\n      \"trailingComma\": \"all\",\n      \"printWidth\": 100\n    }\n    ```\n4.  **Update ESLint configuration:** Modify `.eslintrc.cjs` to include Prettier. Add `'prettier'` to the end of the `extends` array within the configuration object.\n5.  **Add package scripts:** Modify `package.json` to add `lint` and `format` scripts.\n    -   `\"lint\": \"eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0\"`\n    -   `\"format\": \"prettier --write .\"`",
