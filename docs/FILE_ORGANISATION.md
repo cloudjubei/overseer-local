@@ -50,9 +50,9 @@ repo_root/
 │   ├─ preload.js
 │   ├─ renderer/
 │   │   ├─ tasksListView.js     # Tasks list UI (search + filters, view-only)
-│   │   └─ taskDetailsView.js   # Task details UI with features list (view-only)
+│   │   └─ taskDetailsView.js   # Task details UI with features list (now includes edit mode)
 │   ├─ tasks/
-│   │  └─ indexer.js           # Logical Tasks indexer and file watcher
+│   │  └─ indexer.js           # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
 │      └─ tasks.ts             # TypeScript interfaces for task schema
 ├─ docs/
@@ -60,9 +60,7 @@ repo_root/
 │  ├─ LINTING_AND_FORMATTING.md
 │  └─ tasks/
 │     ├─ task_example.json
-│     ├─ task_format.py           # Python source-of-truth schema
-│     ├─ INDEXING_PERFORMANCE.md  # Performance notes & how to measure
-│     └─ task_format.ts           # (optional) TypeScript mirror of the schema
+│     └─ task_format.py           # Python source-of-truth schema
 └─ tasks/
    └─ 1/
       ├─ task.json
@@ -79,19 +77,25 @@ repo_root/
     - init(): builds the index and starts watchers
     - buildIndex(): triggers a full rescan
     - stopWatching(): stops all watchers
+  - Additional exports:
+    - validateTask(task): validates a parsed task.json object
+    - STATUSES: Set of allowed status codes
   - Index shape:
     - { root, tasksDir, updatedAt, tasksById, featuresByKey, errors, metrics: { lastScanMs, lastScanCount } }
 - Integration:
   - The Electron main process instantiates the indexer and exposes IPC channels:
     - tasks-index:get (invoke) returns the index snapshot
     - tasks-index:update (event) pushes updates on changes
-  - Preload exposes window.tasksIndex with getSnapshot() and onUpdate(cb) for renderer use.
+    - tasks-feature:update (invoke) updates a feature in tasks/{id}/task.json and triggers an index rebuild
+  - Preload exposes window.tasksIndex with:
+    - getSnapshot() and onUpdate(cb) for renderer use
+    - updateFeature(taskId, featureId, data) to persist edits to a feature
 
 ## Renderer UI
 - Location: src/renderer/
 - Purpose:
   - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}).
-  - taskDetailsView.js: Renders a task details page showing task metadata and its features with statuses (view-only). Provides a Back button to return to the list. Responds to hash-based navigation and index updates.
+  - taskDetailsView.js: Renders a task details page showing task metadata and its features. Provides a Back button. Includes inline edit mode for a feature allowing editing: status, title, description, plan, context, acceptance, dependencies, and rejection. Save persists via IPC and re-renders on index updates.
 - Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders accordingly.
 
 Performance
