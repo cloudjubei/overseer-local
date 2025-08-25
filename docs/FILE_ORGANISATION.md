@@ -6,6 +6,7 @@ This document describes how files and directories are organised in this reposito
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - docs/: Project documentation and specifications.
+  - DESIGN_PROPOSALS.md: UI design proposals and references for the task application
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -78,6 +79,7 @@ repo_root/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
 │  ├─ COMPONENTS_AND_THEMING.md   # How to use the common UI primitives
+│  ├─ DESIGN_PROPOSALS.md         # UI design options and competitor references
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py           # Python source-of-truth schema
