@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('tasksIndex', {
       return () => ipcRenderer.removeListener('tasks-index:update', listener);
   },
   deleteFeature: (taskId, featureId) => ipcRenderer.invoke('tasks-feature:delete', { taskId, featureId }),
+  deleteTask: (taskId) => ipcRenderer.invoke('tasks:delete', { taskId }),
 });

@@ -262,7 +262,7 @@
     },
     {
       "id": "2.17",
-      "status": "-",
+      "status": "+",
       "title": "Delete mode - delete task",
       "description": "Allow deleting a task.",
       "plan": "",

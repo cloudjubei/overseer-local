@@ -178,6 +178,61 @@ class TasksIndexer {
         await this.rebuildAndNotify(`Feature ${featureId} deleted, index rebuilt.`);
         return { ok: true };
     }
+
+    async deleteTask(taskId) {
+        console.log(`Deleting task ${taskId}`);
+        const taskDirPath = path.join(this.tasksDir, String(taskId));
+    
+        const deletedTask = this.index.tasksById[taskId];
+        const deletedFeatureIds = new Set(deletedTask ? deletedTask.features.map(f => f.id) : []);
+
+        try {
+            await fs.rm(taskDirPath, { recursive: true, force: true });
+        } catch (e) {
+            throw new Error(`Could not delete task directory for task ${taskId}: ${e.message}`);
+        }
+    
+        if (deletedFeatureIds.size > 0) {
+            const tasksToUpdate = {};
+            const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+            const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+    
+            for (const currentTaskId of taskDirNames) {
+                const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
+                let currentTaskData;
+                try {
+                    currentTaskData = JSON.parse(await fs.readFile(currentTaskPath, 'utf-8'));
+                } catch (e) {
+                    console.warn(`Skipping dependency update for unreadable task: ${currentTaskId}`);
+                    continue;
+                }
+    
+                let taskModified = false;
+                for (const feature of currentTaskData.features) {
+                    if (!feature.dependencies || feature.dependencies.length === 0) continue;
+    
+                    const originalDepsCount = feature.dependencies.length;
+                    feature.dependencies = feature.dependencies.filter(dep => !deletedFeatureIds.has(dep));
+    
+                    if (feature.dependencies.length !== originalDepsCount) {
+                        taskModified = true;
+                    }
+                }
+    
+                if (taskModified) {
+                    tasksToUpdate[currentTaskId] = currentTaskData;
+                }
+            }
+    
+            await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
+                const filePath = path.join(this.tasksDir, id, 'task.json');
+                return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+            }));
+        }
+    
+        await this.rebuildAndNotify(`Task ${taskId} deleted, dependencies updated, index rebuilt.`);
+        return { ok: true };
+    }
 }
 
 module.exports = { TasksIndexer };

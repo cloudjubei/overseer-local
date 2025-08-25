@@ -58,3 +58,16 @@ ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
     return { ok: false, error: error.message };
   }
 });
+
+ipcMain.handle('tasks:delete', async (event, { taskId }) => {
+    if (!indexer) {
+        return { ok: false, error: 'Indexer not initialized' };
+    }
+    try {
+        const result = await indexer.deleteTask(taskId);
+        return result;
+    } catch (error) {
+        console.error(`Failed to delete task ${taskId}:`, error);
+        return { ok: false, error: error.message };
+    }
+});
