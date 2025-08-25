@@ -176,7 +176,7 @@
       "dependencies": [
         "2.9"
       ],
-      "rejection": "UnhandledPromiseRejectionWarning: ReferenceError: MAIN_WINDOW_VITE_DEV_SERVER_URL is not defined"
+      "rejection": "I cannot launch the app - it fails instantly with this error: UnhandledPromiseRejectionWarning: ReferenceError: MAIN_WINDOW_VITE_DEV_SERVER_URL is not defined"
     },
     {
       "id": "2.12",
