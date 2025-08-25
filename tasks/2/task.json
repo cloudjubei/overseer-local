@@ -1,0 +1,8 @@
+{
+  "id": 2,
+  "status": "-",
+  "title": "IPC",
+  "description": "Define a minimal IPC contract with typed channels for: settings:get/set, project:select/validate, tasks:list, task:get, task:update, docs:list, docs:read, git:status, agents:list/start/stop/logs, llm:chat. Implement a preload script exposing a narrow, typed API to the renderer. Document IPC schemas in docs/ARCHITECTURE.md. Acceptance: TypeScript types for request/response payloads; runtime validation; renderer can call stubs for each channel; security validated (no Node APIs exposed directly).",
+  "features": [
+  ]
+}

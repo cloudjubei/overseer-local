@@ -1,0 +1,8 @@
+{
+  "id": 5,
+  "status": "-",
+  "title": "Markdown documentation explorer and renderer",
+  "description": "Implement a docs browser that lists Markdown files under docs/ (including docs/tasks/*). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Acceptance: Sidebar shows directory tree; renderer supports anchors and code blocks; clicking internal links navigates within the app; large files render efficiently; tested with provided docs/*.md.",
+  "features": [
+  ]
+}
