@@ -4,5 +4,32 @@
   "title": "Electron + React + TypeScript scaffold",
   "description": "Initialize the app using a modern toolchain (electron-vite with React + TypeScript). Include scripts: dev, build, lint, format. Ensure secure defaults: contextIsolation=true, sandbox where applicable, separate main, preload, and renderer packages. Acceptance: `pnpm/npm run dev` runs the app with React UI placeholder; `... build` yields a runnable app in dist; TypeScript config present; eslint/prettier configured.",
   "features": [
+    {
+      "id": "1.1",
+      "status": "-",
+      "title": "Initialize Project with electron-vite",
+      "description": "Use the `pnpm create electron-vite` command to scaffold a new project. Select the `react-ts` template. This will generate the initial project structure, including separate directories for main, preload, and renderer code, along with default TypeScript and ESLint configurations.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "1.2",
+      "status": "-",
+      "title": "Configure Linting and Formatting",
+      "description": "Install project dependencies using `pnpm install`. Add Prettier for code formatting by installing `prettier` and `eslint-config-prettier`. Create a `.prettierrc` file with sensible defaults. Update the `.eslintrc.cjs` configuration to integrate with Prettier. Finally, add `lint` and `format` scripts to `package.json`.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "1.3",
+      "status": "-",
+      "title": "Harden Security and Verify Build",
+      "description": "Review the main process code in `electron/main/index.ts`. Ensure the `BrowserWindow` is created with `contextIsolation: true` and `sandbox: true` in its `webPreferences`. Run `pnpm run dev` to confirm the application starts correctly with the default React placeholder. Run `pnpm run build` and verify that it generates a runnable application in the `dist` directory.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
   ]
 }
