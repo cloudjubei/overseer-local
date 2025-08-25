@@ -53,11 +53,18 @@ repo_root/
 │   ├─ renderer/
 │   │   ├─ App.tsx                # React entry mounting legacy list/details views
 │   │   ├─ TaskCreateView.tsx     # React entry wrapping task create view
-│   │   ├─ FeatureCreateView.tsx  # React form for creating a feature
-│   │   ├─ tasksListView.js       # Legacy Tasks list UI (DOM-based)
-│   │   ├─ taskDetailsView.js     # Legacy Task details UI (DOM-based)
-│   │   ├─ featureCreateView.js   # (legacy; superseded by React form)
-│   │   └─ taskCreateView.js      # Legacy task create UI (DOM-based)
+│   │   ├─ FeatureCreateView.tsx  # React form for creating a new feature
+│   │   ├─ components/
+│   │   │   └─ stringListEditor.js    # Reusable multi-row text input component
+│   │   ├─ utils/
+│   │   │   ├─ dom.js             # $, createEl helpers for DOM
+│   │   │   ├─ routing.js         # parseRoute, routeName, parseTaskIdFromLocation
+│   │   │   ├─ status.js          # STATUS_LABELS/OPTIONS, cssStatus, statusBadge
+│   │   │   └─ tasks.js           # toTasksArray, filterTasks, countFeatures, computeNextTaskId
+│   │   ├─ tasksListView.js       # Legacy Tasks list UI (DOM-based), now using utils
+│   │   ├─ taskDetailsView.js     # Legacy Task details UI (DOM-based), now using utils
+│   │   ├─ featureCreateView.js   # Legacy feature create (DOM-based), now using utils
+│   │   └─ taskCreateView.js      # Legacy task create (DOM-based), now using utils
 │   ├─ tasks/
 │   │  └─ indexer.js              # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
@@ -117,6 +124,12 @@ repo_root/
   - App.tsx mounts the React app and renders containers for the legacy list and details views while we migrate. This ensures the app uses React for the UI entry point.
   - TaskCreateView.tsx wraps the legacy task creation UI in a React entry.
   - FeatureCreateView.tsx implements the popup form for creating a new feature using React.
+- Shared Utilities and Components:
+  - utils/dom.js: DOM query and element creation helpers ($, createEl)
+  - utils/status.js: Status labels/options and statusBadge rendering helper
+  - utils/routing.js: parseRoute, routeName, and parseTaskIdFromLocation
+  - utils/tasks.js: Common task helpers (filtering, counting, next-id computation)
+  - components/stringListEditor.js: Reusable multi-row text input editor
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.

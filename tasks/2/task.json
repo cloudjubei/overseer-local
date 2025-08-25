@@ -170,7 +170,7 @@
     },
     {
       "id": "2.11",
-      "status": "-",
+      "status": "+",
       "title": "Cleanup",
       "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
       "plan": "",
