@@ -245,4 +245,4 @@ class TasksIndexer extends EventEmitter {
   }
 }
 
-module.exports = { TasksIndexer };
+module.exports = { TasksIndexer, validateTask, STATUSES };

@@ -8,5 +8,8 @@ contextBridge.exposeInMainWorld('tasksIndex', {
     const listener = (_event, data) => cb(data);
     ipcRenderer.on('tasks-index:update', listener);
     return () => ipcRenderer.removeListener('tasks-index:update', listener);
+  },
+  updateFeature: async (taskId, featureId, data) => {
+    return await ipcRenderer.invoke('tasks-feature:update', { taskId, featureId, data });
   }
 });
