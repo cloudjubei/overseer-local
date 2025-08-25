@@ -153,7 +153,7 @@
     },
     {
       "id": "2.10",
-      "status": "+",
+      "status": "-",
       "title": "Refactor",
       "description": "The code was meant to use React for UI - make sure all components, views are coded the React way. There should be no other reference to the old (legacy) code anywhere.",
       "plan": "",
@@ -173,7 +173,7 @@
       "dependencies": [
         "2.9"
       ],
-      "rejection": " Cannot launch the app (I'm including as context `forge.config.js`) - getting this error: An unhandled rejection has occurred inside Forge: Error: 'config.renderer' must be an Array at ViteConfigGenerator.getRendererConfig (/Users/cloud/Documents/Work/TheFactory/projects/overseer-local/node_modules/@electron-forge/plugin-vite/dist/ViteConfig.js:61:19)"
+      "rejection": "electron: Failed to load URL: file://./renderer/undefined/index.html with error: ERR_FILE_NOT_FOUND"
     },
     {
       "id": "2.12",
