@@ -27,7 +27,7 @@
     },
     {
       "id": "1.3",
-      "status": "-",
+      "status": "+",
       "title": "README.md",
       "description": "A README.md file documenting information and steps to take for developers to launch the app.",
       "plan": "",
