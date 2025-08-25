@@ -2,7 +2,7 @@
   "id": 5,
   "status": "-",
   "title": "Extra chat features",
-  "description": "The agentic cha",
+  "description": "The electron app developed in `src/` has an agentic chat which needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`.",
   "features": [
     {
       "id": "5.1",
