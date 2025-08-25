@@ -34,7 +34,7 @@ Notes:
 - Each feature must have deterministic tests; do not mark features complete until tests pass.
 
 ## Example Tree (illustrative)
-The following tree is graphical and illustrative of a typical repository layout:
+The following tree is graphical and illustrative of a typical repository layout (React-only renderer):
 
 ```
 repo_root/
@@ -47,30 +47,20 @@ repo_root/
 ├─ src/
 │   ├─ index.css
 │   ├─ index.html
-│   ├─ index.js
-│   ├─ feature_create.html        # Popup window for creating a new feature
-│   ├─ task_create.html           # Popup window for creating a new task
+│   ├─ index.js                # Electron main process
+│   ├─ feature_create.html     # Popup window for creating a new feature (React mounted)
+│   ├─ task_create.html        # Popup window for creating a new task (React mounted)
 │   ├─ preload.js
 │   ├─ renderer/
-│   │   ├─ App.tsx                # React entry mounting legacy list/details views
-│   │   ├─ TaskCreateView.tsx     # React entry wrapping task create view
-│   │   ├─ FeatureCreateView.tsx  # React form for creating a new feature
-│   │   ├─ components/
-│   │   │   ├─ stringListEditor.js    # Reusable multi-row text input component
-│   │   │   └─ ui/                   # Common UI primitives (shadcn-like)
-│   │   │      ├─ toast.tsx          # ToastProvider, useToast, Toaster
-│   │   │      ├─ modal.tsx          # Modal & AlertDialog popups
-│   │   │      ├─ alert.tsx          # Inline alert banners
-│   │   │      └─ index.ts           # Barrel exports
-│   │   ├─ utils/
-│   │   │   ├─ dom.js             # $, createEl helpers for DOM
-│   │   │   ├─ routing.js         # parseRoute, routeName, parseTaskIdFromLocation
-│   │   │   ├─ status.js          # STATUS_LABELS/OPTIONS, cssStatus, statusBadge
-│   │   │   └─ tasks.js           # toTasksArray, filterTasks, countFeatures, computeNextTaskId
-│   │   ├─ tasksListView.js       # Legacy Tasks list UI (DOM-based), now using utils
-│   │   ├─ taskDetailsView.js     # Legacy Task details UI (DOM-based), now using utils
-│   │   ├─ featureCreateView.js   # Legacy feature create (DOM-based), now using utils
-│   │   └─ taskCreateView.js      # Legacy task create (DOM-based), now using utils
+│   │   ├─ App.tsx                 # React app rendering tasks list and details
+│   │   ├─ TaskCreateView.tsx      # React popup for creating a task
+│   │   ├─ FeatureCreateView.tsx   # React popup for creating a feature
+│   │   └─ components/
+│   │       └─ ui/                 # Common UI primitives (shadcn-like)
+│   │           ├─ toast.tsx
+│   │           ├─ modal.tsx
+│   │           ├─ alert.tsx
+│   │           └─ index.ts
 │   ├─ tasks/
 │   │  └─ indexer.js              # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
@@ -78,8 +68,8 @@ repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
-│  ├─ COMPONENTS_AND_THEMING.md   # How to use the common UI primitives
-│  ├─ DESIGN_PROPOSALS.md         # UI design options and competitor references
+│  ├─ COMPONENTS_AND_THEMING.md
+│  ├─ DESIGN_PROPOSALS.md
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py           # Python source-of-truth schema
@@ -92,6 +82,8 @@ repo_root/
 ├─ vite.preload.config.js         # Vite config for preload scripts
 └─ vite.renderer.config.js        # Vite config for renderer (React)
 ```
+
+Important: The renderer is fully React-based. Legacy DOM-driven views (e.g., tasksListView.js, taskDetailsView.js, taskCreateView.js, featureCreateView.js, and dom.js/stringListEditor.js) have been retired and are no longer referenced anywhere. All view logic lives in React components under src/renderer/.
 
 ## Logical Tasks Indexer
 - Location: src/tasks/indexer.js
