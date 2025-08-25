@@ -55,7 +55,23 @@
         "docs/FILE_ORGANISATION.md",
         "tasks/1/tests/test_1_2.py"
       ],
-      "acceptance": [],
+      "acceptance": [
+        "A one-shot setup script exists at scripts/setup-linting-formatting.js.",
+        "The repository root contains the following configuration files: .editorconfig, .prettierrc.json, .prettierignore, .eslintignore, .eslintrc.cjs.",
+        ".prettierrc.json config is present with exactly these options: printWidth=100, tabWidth=2, singleQuote=true, trailingComma='all', semi=true, arrowParens='always', bracketSpacing=true, endOfLine='lf'.",
+        ".editorconfig exists and specifies: indent_style=space, indent_size=2, end_of_line=lf, charset=utf-8, trim_trailing_whitespace=true, insert_final_newline=true; and for *.md trim_trailing_whitespace=false.",
+        ".prettierignore exists and includes at least the following entries: node_modules, dist, build, out, coverage, .husky, .github, .next, .cache, .turbo, .vite (one per line).",
+        ".eslintignore exists and includes at least the following entries: node_modules, dist, build, out, coverage, .husky, .github, .next, .cache, .turbo, .vite (one per line).",
+        ".eslintrc.cjs exists and integrates Prettier by extending both 'plugin:prettier/recommended' and 'prettier', and includes recommended configs for TypeScript, React, React Hooks, JSX a11y, Node (plugin:n), and Vitest.",
+        ".eslintrc.cjs rules include: 'prettier/prettier': 'error', 'react/react-in-jsx-scope': 'off', 'unused-imports/no-unused-imports': 'error', and '@typescript-eslint/no-unused-vars' configured with argsIgnorePattern '^_' and varsIgnorePattern '^_'.",
+        "package.json exists and defines scripts: 'lint' invoking eslint and linting TypeScript and TSX files; 'lint:fix' performing a fix run; 'format' invoking prettier with '--write' against the project; 'format:check' invoking prettier with '--check' against the project; and 'prepare' invoking 'husky install'.",
+        "package.json has a top-level 'lint-staged' configuration including two patterns: '*.{js,jsx,ts,tsx,cjs,mjs}' running ['eslint --fix'] and '*.{json,css,scss,md,yml,yaml,html}' running ['prettier --write'].",
+        "package.json devDependencies include at minimum: eslint, prettier, eslint-config-prettier, eslint-plugin-prettier, @typescript-eslint/parser, @typescript-eslint/eslint-plugin, husky, lint-staged.",
+        "A Husky pre-commit hook exists at .husky/pre-commit and invokes 'npx --no-install lint-staged'.",
+        "Developer documentation exists at docs/tasks/1/linting_and_formatting.md describing the tools (ESLint, Prettier, Husky, lint-staged), how to run the setup script 'node scripts/setup-linting-formatting.js', and basic commands 'npm run lint' and 'npm run format'.",
+        "docs/FILE_ORGANISATION.md is updated to mention: scripts/ (project automation scripts), .husky/ (Git hooks), and .github/workflows/ (CI workflows introduced by this feature).",
+        "Optionally, if .github/workflows/lint.yml exists, it defines a CI that runs 'npm run lint' and 'npm run format:check' on push to main and on pull_request, and uses actions/checkout@v4 and actions/setup-node@v4."
+      ],
       "dependencies": [
         "1.1"
       ]
