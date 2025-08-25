@@ -3,8 +3,8 @@
 This document describes how files and directories are organised in this repository to keep the project navigable, consistent, and easy to evolve.
 
 ## Top-Level Directory Layout
+- src/: Source code for all tasks.
 - docs/: Project documentation and specifications.
-  - docs/tasks/: Canonical task schema and examples.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -37,7 +37,7 @@ The following tree is graphical and illustrative of a typical repository layout:
 repo_root/
 ├─ .env
 ├─ .gitignore
-├─ LICENSE
+├─ src/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 └─ tasks/
