@@ -25,7 +25,7 @@
     const el = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
       if (k === "class") el.className = v;
-      else if (k === "dataset") {
+      else If (k === "dataset") {
         for (const [dk, dv] of Object.entries(v || {})) el.dataset[dk] = dv;
       } else if (k.startsWith("on") && typeof v === "function") {
         el.addEventListener(k.slice(2).toLowerCase(), v);
@@ -455,10 +455,8 @@
 
     function updateVisibility() {
       const route = parseRoute(location.hash);
-      const listView = $("#tasks-view");
       if (route.name === "details") {
         root.style.display = "";
-        if (listView) listView.style.display = "none";
         const task = currentIndex && currentIndex.tasksById ? currentIndex.tasksById[String(route.id)] : null;
         if (!task) {
           root.innerHTML = "";
@@ -472,7 +470,6 @@
       } else {
         root.style.display = "none";
         taskEditState.editing = false;
-        if (listView) listView.style.display = "";
       }
     }
 
