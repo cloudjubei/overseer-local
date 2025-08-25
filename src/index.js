@@ -115,6 +115,77 @@ async function updateFeatureInTaskFile(tasksDir, taskId, featureId, patch) {
   }
 }
 
+async function addFeatureToTaskFile(tasksDir, taskId, feature) {
+  const dir = path.join(tasksDir, String(taskId));
+  const file = path.join(dir, 'task.json');
+  let json;
+  try {
+    const data = await fsp.readFile(file, 'utf8');
+    json = JSON.parse(data);
+  } catch (e) {
+    throw new Error(`Failed to read task file: ${e.message || String(e)}`);
+  }
+
+  if (!json || typeof json !== 'object') {
+    throw new Error('Invalid task file content');
+  }
+
+  if (!Array.isArray(json.features)) {
+    json.features = [];
+  }
+
+  // Validate and sanitize incoming feature
+  if (!feature || typeof feature !== 'object') throw new Error('feature must be an object');
+  const out = {};
+  // id
+  if (typeof feature.id !== 'string' || !feature.id.trim()) throw new Error('feature.id must be a non-empty string');
+  out.id = feature.id.trim();
+  if (json.features.some(f => f && f.id === out.id)) throw new Error(`Feature id '${out.id}' already exists in task ${taskId}`);
+  // status
+  if (!STATUSES.has(feature.status)) throw new Error('feature.status must be one of +,~, -,?,=');
+  out.status = feature.status;
+  // title/description/plan
+  for (const k of ['title', 'description', 'plan']) {
+    const v = feature[k];
+    if (typeof v !== 'string') throw new Error(`feature.${k} must be string`);
+    out[k] = v;
+  }
+  // context/acceptance (required arrays)
+  for (const k of ['context', 'acceptance']) {
+    const v = feature[k];
+    if (!Array.isArray(v) || v.some(x => typeof x !== 'string')) throw new Error(`feature.${k} must be string[]`);
+    out[k] = v.map(s => String(s).trim()).filter(s => s.length > 0);
+  }
+  // dependencies (optional)
+  if (feature.dependencies !== undefined) {
+    const v = feature.dependencies;
+    if (!Array.isArray(v) || v.some(x => typeof x !== 'string')) throw new Error('feature.dependencies must be string[] if provided');
+    const arr = v.map(s => String(s).trim()).filter(s => s.length > 0);
+    if (arr.length > 0) out.dependencies = arr;
+  }
+  // rejection (optional)
+  if (feature.rejection !== undefined) {
+    const v = feature.rejection;
+    if (v != null && typeof v !== 'string') throw new Error('feature.rejection must be string if provided');
+    const trimmed = String(v || '').trim();
+    if (trimmed) out.rejection = trimmed;
+  }
+
+  json.features.push(out);
+
+  const [ok, errors] = validateTask(json);
+  if (!ok) {
+    throw new Error(`Validation failed: ${errors.join('; ')}`);
+  }
+
+  const pretty = JSON.stringify(json, null, 2) + '\n';
+  try {
+    await fsp.writeFile(file, pretty, 'utf8');
+  } catch (e) {
+    throw new Error(`Failed to write task file: ${e.message || String(e)}`);
+  }
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -138,6 +209,21 @@ app.whenReady().then(async () => {
       if (!data || typeof data !== 'object') throw new Error('data must be object');
       await updateFeatureInTaskFile(indexer.tasksDir, taskId, featureId, data);
       // Rebuild index immediately for responsive UI
+      await indexer.buildIndex();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // New: feature add handler
+  ipcMain.handle('tasks-feature:add', async (_event, payload) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
+      const { taskId, feature } = payload;
+      if (!Number.isInteger(taskId)) throw new Error('taskId must be integer');
+      if (!feature || typeof feature !== 'object') throw new Error('feature must be object');
+      await addFeatureToTaskFile(indexer.tasksDir, taskId, feature);
       await indexer.buildIndex();
       return { ok: true };
     } catch (e) {
