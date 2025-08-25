@@ -245,7 +245,7 @@
     },
     {
       "id": "2.16",
-      "status": "-",
+      "status": "+",
       "title": "Delete mode - delete feature",
       "description": "Allow deleting a feature from a task.",
       "plan": "",
