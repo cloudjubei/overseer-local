@@ -1,0 +1,23 @@
+name: Lint and Format
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          if [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i; \
+          elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+          elif [ -f bun.lockb ]; then curl -fsSL https://bun.sh/install | bash && bun install; \
+          else npm ci; fi
+      - name: ESLint
+        run: npm run lint
+      - name: Prettier (check)
+        run: npm run format:check
