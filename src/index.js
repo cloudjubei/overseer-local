@@ -3,6 +3,23 @@ const path = require('node:path');
 const fsp = require('node:fs/promises');
 const fs = require('node:fs');
 const { TasksIndexer, validateTask, STATUSES } = require('./tasks/indexer');
+const { DocsIndexer } = require('./docs/indexer');
+const marked = require('marked');
+const hljs = require('highlight.js');
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+
+const { window } = new JSDOM('');
+const DOMPurify = createDOMPurify(window);
+
+marked.setOptions({
+  gfm: true,
+  tables: true,
+  highlight: function(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  }
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -10,6 +27,7 @@ if (require('electron-squirrel-startup')) {
 }
 
 let indexer = null;
+let docsIndexer = null;
 
 const createWindow = () => {
   // Create the browser window.
@@ -38,6 +56,20 @@ const createWindow = () => {
     indexer.on('updated', sendUpdate);
     mainWindow.on('closed', () => {
       if (indexer) indexer.removeListener('updated', sendUpdate);
+    });
+  }
+
+  // Push docs index updates to renderer
+  if (docsIndexer) {
+    const sendUpdate = () => {
+      try {
+        mainWindow.webContents.send('docs-index:update', docsIndexer.getIndex());
+      } catch (_) {}
+    };
+    sendUpdate();
+    docsIndexer.on('updated', sendUpdate);
+    mainWindow.on('closed', () => {
+      if (docsIndexer) docsIndexer.removeListener('updated', sendUpdate);
     });
   }
 };
@@ -331,9 +363,62 @@ app.whenReady().then(async () => {
   const projectRoot = path.resolve(__dirname, '..');
   indexer = new TasksIndexer(projectRoot);
   await indexer.init();
+  docsIndexer = new DocsIndexer(projectRoot);
+  await docsIndexer.init();
 
   ipcMain.handle('tasks-index:get', () => {
     return indexer ? indexer.getIndex() : null;
+  });
+
+  ipcMain.handle('docs-index:get', () => {
+    return docsIndexer ? docsIndexer.getIndex() : null;
+  });
+
+  ipcMain.handle('docs-file:get', async (_event, relativePath) => {
+    if (!relativePath || typeof relativePath !== 'string') return { ok: false, error: 'Invalid path' };
+    const fullPath = path.join(docsIndexer.docsDir, relativePath);
+    if (!fullPath.startsWith(docsIndexer.docsDir) || !fullPath.endsWith('.md')) {
+      return { ok: false, error: 'Invalid path' };
+    }
+    try {
+      const content = await fsp.readFile(fullPath, 'utf8');
+      return { ok: true, content };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('docs-file:render', async (_event, relativePath) => {
+    if (!relativePath || typeof relativePath !== 'string') return { ok: false, error: 'Invalid path' };
+    const fullPath = path.join(docsIndexer.docsDir, relativePath);
+    if (!fullPath.startsWith(docsIndexer.docsDir) || !fullPath.endsWith('.md')) {
+      return { ok: false, error: 'Invalid path' };
+    }
+    try {
+      const content = await fsp.readFile(fullPath, 'utf8');
+      const html = marked.parse(content);
+      const sanitized = DOMPurify.sanitize(html);
+      return { ok: true, content: sanitized };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('docs-file:save', async (_event, payload) => {
+    try {
+      const { relativePath, content } = payload;
+      if (!relativePath || typeof relativePath !== 'string') throw new Error('Invalid path');
+      if (typeof content !== 'string') throw new Error('Content must be string');
+      const fullPath = path.join(docsIndexer.docsDir, relativePath);
+      if (!fullPath.startsWith(docsIndexer.docsDir) || !fullPath.endsWith('.md')) {
+        throw new Error('Invalid path');
+      }
+      await fsp.writeFile(fullPath, content, 'utf8');
+      // Watcher will trigger rebuild
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
   });
 
   // New: task update handler (title, description)
@@ -442,6 +527,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   if (indexer) indexer.stopWatching();
+  if (docsIndexer) docsIndexer.stopWatching();
 });
 
 // In this file you can include the rest of your app's specific main process

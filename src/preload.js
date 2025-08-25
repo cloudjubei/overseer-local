@@ -28,3 +28,23 @@ contextBridge.exposeInMainWorld('tasksIndex', {
     return await ipcRenderer.invoke('task-create:open');
   }
 });
+
+contextBridge.exposeInMainWorld('docsIndex', {
+  getSnapshot: async () => {
+    return await ipcRenderer.invoke('docs-index:get');
+  },
+  onUpdate: (cb) => {
+    const listener = (_event, data) => cb(data);
+    ipcRenderer.on('docs-index:update', listener);
+    return () => ipcRenderer.removeListener('docs-index:update', listener);
+  },
+  getFile: async (relativePath) => {
+    return await ipcRenderer.invoke('docs-file:get', relativePath);
+  },
+  getRenderedMarkdown: async (relativePath) => {
+    return await ipcRenderer.invoke('docs-file:render', relativePath);
+  },
+  saveFile: async (relativePath, content) => {
+    return await ipcRenderer.invoke('docs-file:save', { relativePath, content });
+  }
+});
