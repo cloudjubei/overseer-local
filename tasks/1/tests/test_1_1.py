@@ -1,75 +1,70 @@
-#!/bin/bash
+import json
+import os
+from pathlib import Path
 
-# Exit immediately if a command exits with a non-zero status.
-set -e
+import pytest
 
-# --- Test Plan ---
-# 1. Check for package.json
-# 2. Check for required scripts in package.json
-# 3. Check for core directory structure
-# 4. Check for key config files
-# 5. Check for key dependencies
 
-echo "Running acceptance tests for feature 1.1: Initialize Project with electron-vite"
+def repo_root() -> Path:
+    # tests are expected at tasks/1/tests/test_1_1.py
+    return Path(__file__).resolve().parents[3]
 
-# Criterion 1: A `package.json` file is created in the root directory.
-if [ ! -f "package.json" ]; then
-  echo "FAIL: package.json not found!"
-  exit 1
-fi
-echo "PASS: package.json found."
 
-# Criterion 2: The `package.json` file contains `dev`, `build`, and `lint` scripts.
-package_json_content=$(cat package.json)
-if ! echo "$package_json_content" | grep -q '"dev"'; then
-  echo "FAIL: 'dev' script not found in package.json"
-  exit 1
-fi
-if ! echo "$package_json_content" | grep -q '"build"'; then
-  echo "FAIL: 'build' script not found in package.json"
-  exit 1
-fi
-if ! echo "$package_json_content" | grep -q '"lint"'; then
-  echo "FAIL: 'lint' script not found in package.json"
-  exit 1
-fi
-echo "PASS: Required scripts (dev, build, lint) found in package.json."
+def app_root() -> Path:
+    return repo_root() / "projects" / "electron-react-ts-app"
 
-# Criterion 3: The project directory structure contains `src/main`, `src/preload`, and `src/renderer` subdirectories.
-if [ ! -d "src/main" ] || [ ! -d "src/preload" ] || [ ! -d "src/renderer" ]; then
-  echo "FAIL: Core directory structure (src/main, src/preload, src/renderer) is missing or incomplete."
-  exit 1
-fi
-echo "PASS: Core directory structure is correct."
 
-# Criterion 4: Configuration files for the toolchain are present.
-if [ ! -f "electron.vite.config.ts" ] || [ ! -f ".eslintrc.cjs" ] || [ ! -f "tsconfig.json" ]; then
-  echo "FAIL: One or more configuration files (electron.vite.config.ts, .eslintrc.cjs, tsconfig.json) are missing."
-  exit 1
-fi
-echo "PASS: Key configuration files found."
+def load_package_json(p: Path) -> dict:
+    with p.open("r", encoding="utf-8") as f:
+        return json.load(f)
 
-# Criterion 5: The `dependencies` or `devDependencies` in `package.json` include key packages.
-# Combine dependencies and devDependencies for easier checking
-all_deps=$(cat package.json | grep -E '"(devD|d)ependencies"' -A 10 | tr -d '\n\r ')
 
-if ! echo "$all_deps" | grep -q '"electron"'; then
-  echo "FAIL: 'electron' dependency not found in package.json"
-  exit 1
-fi
-if ! echo "$all_deps" | grep -q '"electron-vite"'; then
-  echo "FAIL: 'electron-vite' dependency not found in package.json"
-  exit 1
-fi
-if ! echo "$all_deps" | grep -q '"react"'; then
-  echo "FAIL: 'react' dependency not found in package.json"
-  exit 1
-fi
-if ! echo "$all_deps" | grep -q '"typescript"'; then
-  echo "FAIL: 'typescript' dependency not found in package.json"
-  exit 1
-fi
-echo "PASS: Key dependencies (electron, electron-vite, react, typescript) found in package.json."
+def test_package_json_exists():
+    pj = app_root() / "package.json"
+    assert pj.exists(), f"Expected package.json at {pj}, but it does not exist."
 
-echo "All acceptance criteria for feature 1.1 met."
-exit 0
+
+def test_package_json_has_required_scripts():
+    pj = app_root() / "package.json"
+    assert pj.exists(), f"package.json missing at {pj}"
+    data = load_package_json(pj)
+    scripts = data.get("scripts", {})
+    missing = [s for s in ("dev", "build", "lint") if s not in scripts]
+    assert not missing, f"Missing scripts in package.json: {missing}. Found: {list(scripts.keys())}"
+
+
+def test_required_directories_exist():
+    for rel in ["src/main", "src/preload", "src/renderer"]:
+        d = app_root() / rel
+        assert d.is_dir(), f"Expected directory {d} to exist."
+
+
+def test_required_config_files_exist():
+    files = [
+        "electron.vite.config.ts",
+        ".eslintrc.cjs",
+        "tsconfig.json",
+    ]
+    for rel in files:
+        f = app_root() / rel
+        assert f.is_file(), f"Expected config file {f} to exist."
+
+
+def test_required_dependencies_present():
+    pj = app_root() / "package.json"
+    assert pj.exists(), f"package.json missing at {pj}"
+    data = load_package_json(pj)
+    deps = data.get("dependencies", {}) or {}
+    dev_deps = data.get("devDependencies", {}) or {}
+
+    required = ["electron", "electron-vite", "react", "typescript"]
+    missing = []
+    for name in required:
+        if name not in deps and name not in dev_deps:
+            missing.append(name)
+
+    assert not missing, (
+        "Missing required packages in dependencies/devDependencies: "
+        + ", ".join(missing)
+        + f". dependencies keys: {list(deps.keys())}, devDependencies keys: {list(dev_deps.keys())}"
+    )
