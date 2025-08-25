@@ -153,7 +153,7 @@
     },
     {
       "id": "2.10",
-      "status": "+",
+      "status": "-",
       "title": "Refactor",
       "description": "The code was meant to use React for UI - make sure all components, views are coded the React way. There should be no other reference to the old (legacy) code anywhere.",
       "plan": "",
@@ -167,7 +167,9 @@
         "tsconfig.node.json",
         "vite.main.config.js",
         "vite.preload.config.js",
-        "vite.renderer.config.js"
+        "vite.renderer.config.js",
+        "src/index.js",
+        "src/preload.js"
       ],
       "acceptance": [],
       "dependencies": [
