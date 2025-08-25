@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "2.1",
-      "status": "-",
+      "status": "+",
       "title": "Task schema definition",
       "description": "Generate TypeScript interfaces from the schema into `src/types/tasks.ts`",
       "plan": "",
