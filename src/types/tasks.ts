@@ -1,12 +1,10 @@
 /**
- * TypeScript interfaces mirroring docs/tasks/task_format.py
+ * Task schema TypeScript interfaces
  *
  * Source of truth: docs/tasks/task_format.py
- * This file provides a TypeScript representation of the same schema for
- * use in TypeScript codebases or documentation tooling.
+ * This file mirrors the Python TypedDict schema for use in the TypeScript app.
  */
 
-// Task/Feature status codes
 export type Status = 
   | "+" // Done
   | "~" // In Progress
@@ -49,9 +47,4 @@ export interface ProjectSpec {
   path: string;
   repo_url: string;
   requirements: ProjectRequirement[];
-}
-
-// Utility type guards (optional helpers)
-export function isStatus(val: unknown): val is Status {
-  return val === "+" || val === "~" || val === "-" || val === "?" || val === "=";
 }

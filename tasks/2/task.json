@@ -8,10 +8,11 @@
       "id": "2.1",
       "status": "+",
       "title": "Task schema definition",
-      "description": "Generate TypeScript interfaces from the schema.",
+      "description": "Generate TypeScript interfaces from the schema into `src/types/tasks.ts`",
       "plan": "",
       "context": [
         "src/",
+        "src/types/tasks.ts",
         "docs/tasks/task_format.py",
         "tests/tasks/test_task_schema.py"
       ],
@@ -19,12 +20,13 @@
     },
     {
       "id": "2.2",
-      "status": "+",
+      "status": "-",
       "title": "Logical Tasks indexer and file watcher",
       "description": "Scan tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ tasks; watcher reliably updates on file changes; performance measured and documented;.",
       "plan": "",
       "context": [
         "src/",
+        "src/types/tasks.ts",
         "docs/tasks/task_format.py",
         "tests/tasks/test_task_schema.py"
       ],
