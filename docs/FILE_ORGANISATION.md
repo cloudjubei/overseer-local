@@ -4,6 +4,7 @@ This document describes how files and directories are organised in this reposito
 
 ## Top-Level Directory Layout
 - src/: Electron + React + TypeScript app (electron-vite)
+- src/types/: Shared TypeScript types (generated from docs where applicable)
 - docs/: Project documentation and specifications.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
@@ -47,8 +48,10 @@ repo_root/
 │   ├─ index.html
 │   ├─ index.js
 │   ├─ preload.js
-│   └─ tasks/
-│      └─ indexer.js           # Logical Tasks indexer and file watcher (this feature)
+│   ├─ tasks/
+│   │  └─ indexer.js           # Logical Tasks indexer and file watcher (this feature)
+│   └─ types/
+│      └─ tasks.ts             # TypeScript interfaces for task schema
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
