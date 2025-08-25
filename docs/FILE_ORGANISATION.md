@@ -4,6 +4,7 @@ This document describes how files and directories are organised in this reposito
 
 ## Top-Level Directory Layout
 - src/: Source code for all tasks.
+  - src/desktop/: Electron + React + TypeScript app (electron-vite)
 - docs/: Project documentation and specifications.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
@@ -37,17 +38,32 @@ The following tree is graphical and illustrative of a typical repository layout:
 repo_root/
 ├─ .env
 ├─ .gitignore
+├─ scripts/
+│  ├─ bootstrap_desktop_app.mjs
+│  ├─ bootstrap_desktop_app.sh
+│  └─ bootstrap_desktop_app.ps1
 ├─ src/
+│  └─ desktop/
+│     ├─ electron.vite.config.ts
+│     ├─ tsconfig.json
+│     ├─ .eslintrc.cjs
+│     ├─ .prettierrc.json
+│     ├─ .npmrc
+│     ├─ .env.example
+│     ├─ README.md
+│     └─ src/
+│        ├─ main/index.ts
+│        ├─ preload/index.ts
+│        └─ renderer/
+│           ├─ index.html
+│           └─ src/{main.tsx, App.tsx, styles.css}
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
+│  └─ apps/desktop/README.md
 └─ tasks/
-   ├─ 1/
-   │  ├─ task.json
-   │  └─ tests/
-   │     └─ test_1_3.py
-   └─ 2/
-      ├─ task.json
+   └─ 1/
       └─ tests/
+         └─ test_1_1.py
 ```
 
-This diagram shows how documentation, scripts, and per-task artifacts are arranged, including where tests for each feature live and how the main code structure is organized. 
+This diagram shows how documentation, scripts, and per-task artifacts are arranged, including the Electron desktop app under src/desktop created with electron-vite.

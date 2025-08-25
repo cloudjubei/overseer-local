@@ -1,31 +1,11 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-env/
-venv/
-ENV/
-.env
-.venv
-
-# Node.js
+# General
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
-
-# Editor/OS files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
 .DS_Store
+.env
 
-# Temporary files
-*.tmp
-*.bak
-*.log
+# Desktop app (electron-vite)
+src/desktop/node_modules/
+src/desktop/dist/
+src/desktop/out/
+src/desktop/.vite/
+src/desktop/.turbo/
