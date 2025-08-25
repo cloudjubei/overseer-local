@@ -179,7 +179,7 @@
       "rejection": "I cannot launch the app - it fails instantly with this error: UnhandledPromiseRejectionWarning: ReferenceError: MAIN_WINDOW_VITE_DEV_SERVER_URL is not defined"
     },
     {
-      "id": "2.12",
+      "id": "2.11",
       "status": "-",
       "title": "Common functions and libraries",
       "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit task popups should stem from a common popup component.",
@@ -191,11 +191,11 @@
       ],
       "acceptance": [],
       "dependencies": [
-        "2.11"
+        "2.10"
       ]
     },
     {
-      "id": "2.13",
+      "id": "2.12",
       "status": "-",
       "title": "Use shadcn and tailwind",
       "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen where it must be possible to change themes.",
@@ -211,7 +211,7 @@
       ]
     },
     {
-      "id": "2.14",
+      "id": "2.13",
       "status": "+",
       "title": "Edit mode - moving features around",
       "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced.",
@@ -228,10 +228,27 @@
       ]
     },
     {
-      "id": "2.15",
+      "id": "2.14",
       "status": "+",
       "title": "Edit mode - moving tasks around",
       "description": "Allow editing the order of tasks - thus changing the underlying id everywhere where it's referenced.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4",
+        "2.13"
+      ]
+    },
+    {
+      "id": "2.15",
+      "status": "+",
+      "title": "Delete mode - delete feature",
+      "description": "Allow deleting a feature from a task.",
       "plan": "",
       "context": [
         "src/",
@@ -247,23 +264,6 @@
     {
       "id": "2.16",
       "status": "+",
-      "title": "Delete mode - delete feature",
-      "description": "Allow deleting a feature from a task.",
-      "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
-      "acceptance": [],
-      "dependencies": [
-        "2.4",
-        "2.15"
-      ]
-    },
-    {
-      "id": "2.17",
-      "status": "+",
       "title": "Delete mode - delete task",
       "description": "Allow deleting a task.",
       "plan": "",
@@ -275,7 +275,7 @@
       "acceptance": [],
       "dependencies": [
         "2.4",
-        "2.16"
+        "2.15"
       ]
     }
   ]
