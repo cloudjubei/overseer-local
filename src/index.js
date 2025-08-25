@@ -15,6 +15,7 @@ function loadRenderer(win, name, hash) {
   // In dev mode, all renderers are served by the same vite dev server,
   // which is configured under the 'main_window' renderer name in forge.config.js
   const DEV_URL = process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL;
+  const RENDERER_NAME = process.env.MAIN_WINDOW_VITE_NAME;
 
   const htmlFileMap = {
     'main_window': 'index.html',
@@ -33,7 +34,12 @@ function loadRenderer(win, name, hash) {
     }
     win.loadURL(url.toString());
   } else {
-    const filePath = path.join(__dirname, `../renderer/${htmlFile}`);
+    // In production, files are built into a subdirectory of the renderer output dir
+    // that matches the renderer's name.
+    if (!RENDERER_NAME) {
+      throw new Error('Fatal: MAIN_WINDOW_VITE_NAME environment variable is not set.');
+    }
+    const filePath = path.join(__dirname, `../renderer/${RENDERER_NAME}/${htmlFile}`);
     if (hash) {
       win.loadFile(filePath, { hash });
     } else {
