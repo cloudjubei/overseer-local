@@ -110,6 +110,14 @@ repo_root/
     - stopWatching(): stops all watchers
   - Index shape:
     - { root, docsDir, updatedAt, docsTree, filesByPath, errors, metrics: { lastScanMs, lastScanCount } }
+- Integration:
+  - The Electron main process instantiates the indexer and exposes IPC channels:
+    - docs-index:get (invoke) returns the index snapshot
+    - docs-index:update (event) pushes updates on changes
+    - docs-file:get (invoke) reads and returns the content of a .md file by relative path
+  - Preload exposes window.docsIndex with:
+    - getSnapshot() and onUpdate(cb) for renderer use
+    - getFile(relativePath) to fetch file content
 
 ## Renderer UI
 - Location: src/renderer/
