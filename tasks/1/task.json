@@ -20,7 +20,20 @@
         "docs/tasks/1/README.md",
         "tasks/1/tests/test_1_1.py"
       ],
-      "acceptance": []
+      "acceptance": [
+        "A bootstrap script exists at scripts/bootstrap_desktop_app.mjs that is intended to create or update an Electron + React + TypeScript app under src/desktop using electron-vite with the react-ts template.",
+        "Convenience wrappers exist at scripts/bootstrap_desktop_app.sh and scripts/bootstrap_desktop_app.ps1 that invoke the Node bootstrap script.",
+        "The Electron app directory src/desktop/ exists after setup.",
+        "src/desktop/package.json exists and defines scripts: dev, build, preview, lint, and typecheck. The dev script contains the substring \"electron-vite dev\" and the build script contains the substring \"electron-vite build\". OS-specific build scripts build:win, build:mac, and build:linux are present.",
+        "src/desktop/electron.vite.config.ts and src/desktop/tsconfig.json exist.",
+        "The source tree matches a standard electron-vite React+TS scaffold, satisfying one of the following layouts: (A) directories src/desktop/src/main, src/desktop/src/preload, and src/desktop/src/renderer exist; OR (B) files src/desktop/electron/main/index.ts, src/desktop/electron/preload/index.ts, and src/desktop/src/main.tsx exist.",
+        "src/desktop/package.json lists the following packages in dependencies or devDependencies: electron, electron-vite, react, and typescript.",
+        "ESLint and Prettier configuration files exist: src/desktop/.eslintrc.cjs and src/desktop/.prettierrc.json.",
+        "An .npmrc file exists at src/desktop/.npmrc containing save-exact=true.",
+        "Baseline files exist at src/desktop/.env.example and src/desktop/README.md.",
+        "The repository .gitignore includes ignore rules for src/desktop/node_modules and src/desktop/dist.",
+        "Documentation is updated: docs/FILE_ORGANISATION.md mentions src/desktop/ as the Electron + React + TS app; docs/apps/desktop/README.md exists with overview, prerequisites (Node >= 18), setup using scripts/bootstrap_desktop_app.mjs, and common commands; docs/tasks/1/README.md exists and links to the desktop app docs or restates these checks."
+      ]
     },
     {
       "id": "1.2",
