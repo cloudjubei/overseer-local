@@ -1,6 +1,10 @@
 "use strict";
 
 (function () {
+  const marked = require('marked');
+  const hljs = require('highlight.js');
+  const DOMPurify = require('dompurify')(window);
+
   function $(sel, root = document) {
     return root.querySelector(sel);
   }
@@ -32,7 +36,7 @@
     return hash === "#docs";
   }
 
-  function buildTreeNode(node, parentUl) {
+  function buildTreeNode(node, parentUl, selectFile) {
     const li = createEl("li");
     if (node.type === "directory") {
       li.className = "directory";
@@ -43,7 +47,7 @@
       li.appendChild(details);
       // Sort directories first, then files
       const sortedChildren = [...node.children].sort((a, b) => (a.type === "directory" ? -1 : 1));
-      sortedChildren.forEach((child) => buildTreeNode(child, subUl));
+      sortedChildren.forEach((child) => buildTreeNode(child, subUl, selectFile));
     } else if (node.type === "file") {
       li.className = "file";
       const link = createEl("a", { href: "#", onclick: (e) => { e.preventDefault(); selectFile(node.path); } }, node.name);
@@ -64,34 +68,7 @@
     return [...parts, ...hrefParts].join('/');
   }
 
-  async function selectFile(path) {
-    contentContainer.innerHTML = "";
-    contentContainer.appendChild(createEl("div", {}, "Loading..."));
-    try {
-      const res = await window.docsIndex.getRenderedMarkdown(path);
-      if (!res.ok) throw new Error(res.error || "Unknown error");
-      contentContainer.innerHTML = "";
-      const mdDiv = createEl("div", { class: "markdown-body" });
-      mdDiv.innerHTML = res.content;
-      // Handle internal links
-      mdDiv.querySelectorAll('a[href]').forEach(a => {
-        let href = a.getAttribute('href');
-        if (href.endsWith('.md') || href.endsWith('.MD')) {
-          a.addEventListener('click', e => {
-            e.preventDefault();
-            const targetPath = resolveRelativePath(path, href);
-            selectFile(targetPath);
-          });
-        }
-      });
-      contentContainer.appendChild(mdDiv);
-    } catch (e) {
-      contentContainer.innerHTML = "";
-      contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file: ${e.message || e}`));
-    }
-  }
-
-  function render(index, treeContainer, contentContainer, errorsContainer) {
+  function render(index, treeContainer, contentContainer, errorsContainer, selectFile) {
     treeContainer.innerHTML = "";
     errorsContainer.innerHTML = "";
     if (!index || !index.docsTree) {
@@ -102,7 +79,7 @@
       treeContainer.appendChild(createEl("div", { class: "empty" }, "No documentation files found."));
     } else {
       const ul = createEl("ul", { class: "docs-tree" });
-      buildTreeNode(index.docsTree, ul);
+      buildTreeNode(index.docsTree, ul, selectFile);
       treeContainer.appendChild(ul);
     }
     if (index.errors && index.errors.length > 0) {
@@ -118,13 +95,22 @@
     const root = document.getElementById("docs-view");
     if (!root) return;
 
+    marked.setOptions({
+      gfm: true,
+      tables: true,
+      highlight: function(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+      }
+    });
+
     const heading = createEl("h2", { id: "docs-view-heading" }, "Documentation");
 
     const treeContainer = createEl("div", { class: "docs-tree-container" });
-    const contentContainerLocal = createEl("div", { class: "docs-content-container" });
+    const contentContainer = createEl("div", { class: "docs-content-container" });
     const errorsContainer = createEl("div", { class: "docs-errors-container" });
 
-    const browser = createEl("div", { class: "docs-browser" }, [treeContainer, contentContainerLocal]);
+    const browser = createEl("div", { class: "docs-browser" }, [treeContainer, contentContainer]);
 
     root.appendChild(heading);
     root.appendChild(browser);
@@ -132,6 +118,43 @@
 
     let currentIndex = null;
     let selectedPath = null;
+
+    async function selectFile(path) {
+      selectedPath = path;
+      contentContainer.innerHTML = "";
+      contentContainer.appendChild(createEl("div", {}, "Loading..."));
+      try {
+        const res = await window.docsIndex.getFile(path);
+        if (!res.ok) throw new Error(res.error || "Unknown error");
+        const markdown = res.content;
+        const html = DOMPurify.sanitize(marked.parse(markdown));
+        contentContainer.innerHTML = "";
+        const mdDiv = createEl("div", { class: "markdown-body" });
+        mdDiv.innerHTML = html;
+        // Handle internal links
+        mdDiv.querySelectorAll('a[href]').forEach(a => {
+          let href = a.getAttribute('href');
+          if (href.startsWith('#')) {
+            // Handle anchor links
+            a.addEventListener('click', e => {
+              e.preventDefault();
+              const target = document.getElementById(href.slice(1));
+              if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+          } else if (href.endsWith('.md') || href.endsWith('.MD')) {
+            a.addEventListener('click', e => {
+              e.preventDefault();
+              const targetPath = resolveRelativePath(path, href);
+              selectFile(targetPath);
+            });
+          }
+        });
+        contentContainer.appendChild(mdDiv);
+      } catch (e) {
+        contentContainer.innerHTML = "";
+        contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file: ${e.message || e}`));
+      }
+    }
 
     function updateVisibility() {
       root.style.display = isDocsRoute(location.hash) ? "" : "none";
@@ -142,10 +165,10 @@
 
     try {
       currentIndex = await window.docsIndex.getSnapshot();
-      render(currentIndex, treeContainer, contentContainerLocal, errorsContainer);
+      render(currentIndex, treeContainer, contentContainer, errorsContainer, selectFile);
       window.docsIndex.onUpdate((idx) => {
         currentIndex = idx;
-        render(idx, treeContainer, contentContainerLocal, errorsContainer);
+        render(idx, treeContainer, contentContainer, errorsContainer, selectFile);
         if (selectedPath && idx.filesByPath && idx.filesByPath[selectedPath]) {
           selectFile(selectedPath);
         }
