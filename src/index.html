@@ -6,51 +6,6 @@
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <h1>Tasks Indexer</h1>
-    <p>This app scans tasks/{id}/task.json and watches for changes.</p>
-
-    <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading"></section>
-    <section id="task-details-view" role="region" aria-labelledby="task-details-heading" style="display:none"></section>
-
-    <hr />
-
-    <div id="tasks-info">
-      <strong>Index:</strong>
-      <div>Loading...</div>
-    </div>
-
-    <script>
-      (async function() {
-        const infoEl = document.getElementById('tasks-info');
-        function render(idx) {
-          if (!idx) {
-            infoEl.innerHTML = '<div>No index available.</div>';
-            return;
-          }
-          const count = Object.keys(idx.tasksById || {}).length;
-          const featCount = Object.keys(idx.featuresByKey || {}).length;
-          const errors = idx.errors || [];
-          infoEl.innerHTML = `
-            <div><strong>Tasks Dir:</strong> ${idx.tasksDir}</div>
-            <div><strong>Tasks:</strong> ${count}</div>
-            <div><strong>Features:</strong> ${featCount}</div>
-            <div><strong>Last Scan:</strong> ${new Date(idx.updatedAt).toLocaleString()}</div>
-            <div><strong>Scan Time:</strong> ${idx.metrics?.lastScanMs ?? 0} ms</div>
-            <div><strong>Errors:</strong> ${errors.length}</div>
-            <pre style="max-height:200px;overflow:auto;background:#f8f8f8;padding:8px;border:1px solid #eee;">${errors.map(e => `${e.path}: ${e.error}`).join('\n')}</pre>
-          `;
-        }
-        try {
-          const idx = await window.tasksIndex.getSnapshot();
-          render(idx);
-          window.tasksIndex.onUpdate(render);
-        } catch (e) {
-          infoEl.innerHTML = '<div>Failed to load index.</div>';
-        }
-      })();
-    </script>
-
-    <script src="renderer/tasksListView.js"></script>
-    <script src="renderer/taskDetailsView.js"></script>
+    <div id="root"></div>
   </body>
 </html>

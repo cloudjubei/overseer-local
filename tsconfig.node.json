@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.main.config.js", "vite.preload.config.js", "vite.renderer.config.js", "src/index.ts", "src/preload.ts"]
+}

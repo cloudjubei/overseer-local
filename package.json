@@ -22,7 +22,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",
@@ -32,9 +34,13 @@
     "@electron-forge/maker-zip": "^7.8.3",
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.3",
     "@electron-forge/plugin-fuses": "^7.8.3",
+    "@electron-forge/plugin-vite": "^7.4.0",
     "@electron/fuses": "^1.8.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
+    "@vitejs/plugin-react": "^4.3.1",
     "electron": "37.3.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
@@ -48,7 +54,9 @@
     "eslint-plugin-vitest": "^0.5.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs}": [
