@@ -37,7 +37,7 @@
     },
     {
       "id": "2.3",
-      "status": "-",
+      "status": "+",
       "title": "Tasks list UI with filtering and search - view only",
       "description": "Build a React view listing tasks with id, title, status, and counts of features (done/total). Provide text search and filters (e.g., status). Filtering/search applied client-side; empty states handled; accessibility basics (labels, keyboard nav) covered.",
       "plan": "",

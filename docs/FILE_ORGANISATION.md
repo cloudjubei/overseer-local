@@ -48,8 +48,10 @@ repo_root/
 │   ├─ index.html
 │   ├─ index.js
 │   ├─ preload.js
+│   ├─ renderer/
+│   │   └─ tasksListView.js     # Tasks list UI (search + filters, view-only)
 │   ├─ tasks/
-│   │  └─ indexer.js           # Logical Tasks indexer and file watcher (this feature)
+│   │  └─ indexer.js           # Logical Tasks indexer and file watcher
 │   └─ types/
 │      └─ tasks.ts             # TypeScript interfaces for task schema
 ├─ docs/
@@ -60,8 +62,6 @@ repo_root/
 │     ├─ task_format.py           # Python source-of-truth schema
 │     ├─ INDEXING_PERFORMANCE.md  # Performance notes & how to measure
 │     └─ task_format.ts           # (optional) TypeScript mirror of the schema
-├─ scripts/
-│  └─ setup-linting-formatting.js
 └─ tasks/
    └─ 1/
       ├─ task.json
@@ -85,6 +85,11 @@ repo_root/
     - tasks-index:get (invoke) returns the index snapshot
     - tasks-index:update (event) pushes updates on changes
   - Preload exposes window.tasksIndex with getSnapshot() and onUpdate(cb) for renderer use.
+
+## Renderer UI
+- Location: src/renderer/tasksListView.js
+- Purpose: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled.
+- Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders the list accordingly.
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.
