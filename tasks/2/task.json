@@ -118,7 +118,7 @@
     },
     {
       "id": "2.8",
-      "status": "-",
+      "status": "?",
       "title": "Create mode - new task",
       "description": "Allow adding a new task in a new popup window - make this the same pattern as edit mode.",
       "plan": "",
@@ -131,7 +131,7 @@
       "dependencies": [
         "2.7"
       ],
-      "rejection": "Currently the popup window displayed has no [X] button to close nor can you close by tapping outside. If you do so and there are changes that have been done - it should ask in a standard alert whether you really want to discard the changes.\nAll popups should have a similar look&feel and behave in this standard way."
+      "rejection": "Blocked: Agent loop failed: litellm.InternalServerError: VertexAIException InternalServerError - {\n  \"error\": {\n    \"code\": 500,\n    \"message\": \"An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting\",\n    \"status\": \"INTERNAL\"\n  }\n}\n"
     },
     {
       "id": "2.9",
