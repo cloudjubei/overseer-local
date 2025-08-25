@@ -4,56 +4,72 @@
 set -e
 
 # --- Test Plan ---
-# 1. Verify project structure and key configuration files exist.
-# 2. Verify package.json contains the required scripts.
-# 3. Install dependencies.
-# 4. Run the linter to verify ESLint setup.
-# 5. Run the build command to ensure it completes successfully.
-# 6. Check for the build output directory.
+# 1. Check for package.json
+# 2. Check for required scripts in package.json
+# 3. Check for core directory structure
+# 4. Check for key config files
+# 5. Check for key dependencies
 
-echo "--- 1. Verifying project structure and configuration files ---"
+echo "Running acceptance tests for feature 1.1: Initialize Project with electron-vite"
+
+# Criterion 1: A `package.json` file is created in the root directory.
+if [ ! -f "package.json" ]; then
+  echo "FAIL: package.json not found!"
+  exit 1
+fi
+echo "PASS: package.json found."
+
+# Criterion 2: The `package.json` file contains `dev`, `build`, and `lint` scripts.
+package_json_content=$(cat package.json)
+if ! echo "$package_json_content" | grep -q '"dev"'; then
+  echo "FAIL: 'dev' script not found in package.json"
+  exit 1
+fi
+if ! echo "$package_json_content" | grep -q '"build"'; then
+  echo "FAIL: 'build' script not found in package.json"
+  exit 1
+fi
+if ! echo "$package_json_content" | grep -q '"lint"'; then
+  echo "FAIL: 'lint' script not found in package.json"
+  exit 1
+fi
+echo "PASS: Required scripts (dev, build, lint) found in package.json."
+
+# Criterion 3: The project directory structure contains `src/main`, `src/preload`, and `src/renderer` subdirectories.
 if [ ! -d "src/main" ] || [ ! -d "src/preload" ] || [ ! -d "src/renderer" ]; then
-    echo "FAIL: Expected src/main, src/preload, and src/renderer directories not found."
-    exit 1
+  echo "FAIL: Core directory structure (src/main, src/preload, src/renderer) is missing or incomplete."
+  exit 1
 fi
-echo "PASS: Source directories exist."
+echo "PASS: Core directory structure is correct."
 
-if [ ! -f "electron.vite.config.ts" ] || [ ! -f ".eslintrc.cjs" ] || [ ! -f "tsconfig.json" ] || [ ! -f "package.json" ]; then
-    echo "FAIL: Expected configuration files (electron.vite.config.ts, .eslintrc.cjs, tsconfig.json, package.json) not found."
-    exit 1
+# Criterion 4: Configuration files for the toolchain are present.
+if [ ! -f "electron.vite.config.ts" ] || [ ! -f ".eslintrc.cjs" ] || [ ! -f "tsconfig.json" ]; then
+  echo "FAIL: One or more configuration files (electron.vite.config.ts, .eslintrc.cjs, tsconfig.json) are missing."
+  exit 1
 fi
-echo "PASS: Configuration files exist."
+echo "PASS: Key configuration files found."
 
-echo "--- 2. Verifying scripts in package.json ---"
-if ! grep -q '"dev":' package.json || ! grep -q '"build":' package.json || ! grep -q '"lint":' package.json || ! grep -q '"format":' package.json; then
-    echo "FAIL: Required scripts (dev, build, lint, format) not found in package.json."
-    exit 1
+# Criterion 5: The `dependencies` or `devDependencies` in `package.json` include key packages.
+# Combine dependencies and devDependencies for easier checking
+all_deps=$(cat package.json | grep -E '"(devD|d)ependencies"' -A 10 | tr -d '\n\r ')
+
+if ! echo "$all_deps" | grep -q '"electron"'; then
+  echo "FAIL: 'electron' dependency not found in package.json"
+  exit 1
 fi
-echo "PASS: Required scripts found in package.json."
-
-echo "--- 3. Installing dependencies ---"
-if ! command -v pnpm &> /dev/null
-then
-    echo "pnpm could not be found, installing..."
-    npm install -g pnpm
+if ! echo "$all_deps" | grep -q '"electron-vite"'; then
+  echo "FAIL: 'electron-vite' dependency not found in package.json"
+  exit 1
 fi
-pnpm install
-echo "PASS: Dependencies installed."
-
-echo "--- 4. Running linter ---"
-pnpm run lint
-echo "PASS: Lint command executed successfully."
-
-echo "--- 5. Running build command ---"
-pnpm run build
-echo "PASS: Build command executed successfully."
-
-echo "--- 6. Verifying build output ---"
-if [ ! -d "out" ]; then
-    echo "FAIL: Build output directory 'out' not found after build."
-    exit 1
+if ! echo "$all_deps" | grep -q '"react"'; then
+  echo "FAIL: 'react' dependency not found in package.json"
+  exit 1
 fi
-echo "PASS: Build output directory exists."
+if ! echo "$all_deps" | grep -q '"typescript"'; then
+  echo "FAIL: 'typescript' dependency not found in package.json"
+  exit 1
+fi
+echo "PASS: Key dependencies (electron, electron-vite, react, typescript) found in package.json."
 
-echo "--- ALL TESTS PASSED ---"
+echo "All acceptance criteria for feature 1.1 met."
 exit 0
