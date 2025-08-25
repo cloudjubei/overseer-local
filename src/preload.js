@@ -1,39 +1,12 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('tasksIndex', {
-  getSnapshot: async () => {
-    return await ipcRenderer.invoke('tasks-index:get');
+  getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
+  onUpdate: (callback) => {
+      const listener = (_event, value) => callback(value);
+      ipcRenderer.on('tasks-index:update', listener);
+      return () => ipcRenderer.removeListener('tasks-index:update', listener);
   },
-  onUpdate: (cb) => {
-    const listener = (_event, data) => cb(data);
-    ipcRenderer.on('tasks-index:update', listener);
-    return () => ipcRenderer.removeListener('tasks-index:update', listener);
-  },
-  updateTask: async (taskId, data) => {
-    return await ipcRenderer.invoke('tasks:update', { taskId, data });
-  },
-  updateFeature: async (taskId, featureId, data) => {
-    return await ipcRenderer.invoke('tasks-feature:update', { taskId, featureId, data });
-  },
-  addFeature: async (taskId, feature) => {
-    return await ipcRenderer.invoke('tasks-feature:add', { taskId, feature });
-  },
-  addTask: async (task) => {
-    return await ipcRenderer.invoke('tasks:add', task);
-  },
-  reorderFeatures: async (taskId, payload) => {
-    // payload can be { order: string[] } or { fromId: string, toIndex: number }
-    return await ipcRenderer.invoke('tasks-features:reorder', { taskId, ...payload });
-  },
-  // New: reorder tasks (renumber ids and update references)
-  reorderTasks: async (payload) => {
-    // payload can be { order: number[] } or { fromId: number, toIndex: number }
-    return await ipcRenderer.invoke('tasks:reorder', payload);
-  },
-  openFeatureCreate: async (taskId) => {
-    return await ipcRenderer.invoke('feature-create:open', { taskId });
-  },
-  openTaskCreate: async () => {
-    return await ipcRenderer.invoke('task-create:open');
-  }
+  deleteFeature: (taskId, featureId) => ipcRenderer.invoke('tasks-feature:delete', { taskId, featureId }),
+  deleteTask: (taskId) => ipcRenderer.invoke('tasks:delete', { taskId }),
 });

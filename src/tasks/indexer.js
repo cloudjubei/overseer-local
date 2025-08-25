@@ -1,248 +1,238 @@
-"use strict";
+const fs = require('fs').promises;
+const path = require('path');
+const chokidar = require('chokidar');
+const { validateTask } = require('./validator');
 
-const fs = require("node:fs");
-const fsp = require("node:fs/promises");
-const path = require("node:path");
-const { EventEmitter } = require("node:events");
-
-// Allowed statuses from docs/tasks/task_format.py
-const STATUSES = new Set(["+", "~", "-", "?", "="]);
-
-function isObject(v) {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
-}
-
-function validateFeature(feature, i, taskId) {
-  const errors = [];
-  if (!isObject(feature)) {
-    return [false, [`Feature at index ${i} in task ${taskId} is not an object`]];
-  }
-  const required = ["id", "status", "title", "description", "plan", "context", "acceptance"];
-  for (const k of required) {
-    if (!(k in feature)) errors.push(`Feature missing required field '${k}'`);
-  }
-  if (typeof feature.id !== "string") errors.push("Feature.id must be string");
-  if (!STATUSES.has(feature.status)) errors.push("Feature.status must be one of +,~, - ,?,=");
-  if (typeof feature.title !== "string") errors.push("Feature.title must be string");
-  if (typeof feature.description !== "string") errors.push("Feature.description must be string");
-  if (typeof feature.plan !== "string") errors.push("Feature.plan must be string");
-  if (!Array.isArray(feature.context) || feature.context.some((x) => typeof x !== "string")) errors.push("Feature.context must be string[]");
-  if (!Array.isArray(feature.acceptance) || feature.acceptance.some((x) => typeof x !== "string")) errors.push("Feature.acceptance must be string[]");
-  if (feature.dependencies && (!Array.isArray(feature.dependencies) || feature.dependencies.some((x) => typeof x !== "string"))) {
-    errors.push("Feature.dependencies must be string[] if provided");
-  }
-  if (feature.rejection && typeof feature.rejection !== "string") errors.push("Feature.rejection must be string if provided");
-  return [errors.length === 0, errors];
-}
-
-function validateTask(task) {
-  const errors = [];
-  if (!isObject(task)) return [false, ["Task must be an object"]];
-  const required = ["id", "status", "title", "description", "features"];
-  for (const k of required) {
-    if (!(k in task)) errors.push(`Task missing required field '${k}'`);
-  }
-  if (!Number.isInteger(task.id)) errors.push("Task.id must be an integer");
-  if (!STATUSES.has(task.status)) errors.push("Task.status must be one of +,~, -,?,=");
-  if (typeof task.title !== "string") errors.push("Task.title must be string");
-  if (typeof task.description !== "string") errors.push("Task.description must be string");
-  if (!Array.isArray(task.features)) errors.push("Task.features must be an array");
-  if (task.rejection && typeof task.rejection !== "string") errors.push("Task.rejection must be string if provided");
-  const featureErrors = [];
-  if (Array.isArray(task.features)) {
-    task.features.forEach((f, i) => {
-      const [ok, errs] = validateFeature(f, i, task.id);
-      if (!ok) featureErrors.push(...errs);
-    });
-  }
-  return [errors.length === 0 && featureErrors.length === 0, [...errors, ...featureErrors]];
-}
-
-function nowMs() {
-  const n = process.hrtime.bigint();
-  return Number(n / 1000000n);
-}
-
-class TasksIndexer extends EventEmitter {
-  constructor(projectRoot) {
-    super();
-    this.projectRoot = projectRoot;
-    this.tasksDir = path.join(projectRoot, "tasks");
-    this.index = {
-      root: this.projectRoot,
-      tasksDir: this.tasksDir,
-      updatedAt: Date.now(),
-      tasksById: {},
-      featuresByKey: {},
-      errors: [],
-      metrics: { lastScanMs: 0, lastScanCount: 0 },
-    };
-    this._watchers = new Map(); // key -> fs.FSWatcher
-    this._debounceTimer = null;
-  }
-
-  getIndex() {
-    return this.index;
-  }
-
-  async init() {
-    await this.buildIndex();
-    await this.startWatching();
-  }
-
-  async buildIndex() {
-    const t0 = nowMs();
-    const idx = {
-      root: this.projectRoot,
-      tasksDir: this.tasksDir,
-      updatedAt: Date.now(),
-      tasksById: {},
-      featuresByKey: {},
-      errors: [],
-      metrics: { lastScanMs: 0, lastScanCount: 0 },
-    };
-    let taskDirs = [];
-    try {
-      const entries = await fsp.readdir(this.tasksDir, { withFileTypes: true });
-      taskDirs = entries
-        .filter((e) => e.isDirectory() && /^\d+$/.test(e.name))
-        .map((e) => path.join(this.tasksDir, e.name));
-    } catch (err) {
-      // no tasks dir yet – index empty
-      idx.errors.push({ path: this.tasksDir, error: String(err) });
+class TasksIndexer {
+    constructor(projectRoot, window) {
+        this.projectRoot = projectRoot;
+        this.tasksDir = path.join(projectRoot, 'tasks');
+        this.index = {
+            root: projectRoot,
+            tasksDir: this.tasksDir,
+            updatedAt: null,
+            tasksById: {},
+            featuresByKey: {},
+            errors: [],
+            metrics: { lastScanMs: 0, lastScanCount: 0 }
+        };
+        this.watcher = null;
+        this.window = window;
     }
 
-    const loadPromises = taskDirs.map(async (dir) => {
-      const file = path.join(dir, "task.json");
-      try {
-        const data = await fsp.readFile(file, "utf8");
-        const json = JSON.parse(data);
-        const [ok, errors] = validateTask(json);
-        if (!ok) {
-          idx.errors.push({ path: file, error: errors.join("; ") });
-          return;
+    getIndex() {
+        return this.index;
+    }
+
+    async init() {
+        await this.buildIndex();
+        this.watcher = chokidar.watch(path.join(this.tasksDir, '*/task.json'), {
+            ignored: /(^|[/\\])\../,
+            persistent: true,
+            ignoreInitial: true,
+        });
+
+        this.watcher
+            .on('add', (path) => this.rebuildAndNotify(`File added: ${path}`))
+            .on('change', (path) => this.rebuildAndNotify(`File changed: ${path}`))
+            .on('unlink', (path) => this.rebuildAndNotify(`File removed: ${path}`));
+    }
+    
+    async rebuildAndNotify(logMessage) {
+        if (logMessage) console.log(logMessage);
+        await this.buildIndex();
+        if (this.window) {
+            this.window.webContents.send('tasks-index:update', this.getIndex());
         }
-        // Normalize and add
-        idx.tasksById[String(json.id)] = json;
-        if (Array.isArray(json.features)) {
-          for (const f of json.features) {
-            const key = `${json.id}:${f.id}`;
-            idx.featuresByKey[key] = { ...f, taskId: json.id };
-          }
+    }
+
+    async buildIndex() {
+        const startTime = Date.now();
+        const newIndex = {
+            ...this.index,
+            updatedAt: new Date().toISOString(),
+            tasksById: {},
+            featuresByKey: {},
+            errors: [],
+        };
+
+        try {
+            const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+            for (const dirent of taskDirs) {
+                if (dirent.isDirectory() && /^\d+$/.test(dirent.name)) {
+                    const taskId = parseInt(dirent.name, 10);
+                    const taskFilePath = path.join(this.tasksDir, dirent.name, 'task.json');
+                    try {
+                        const content = await fs.readFile(taskFilePath, 'utf-8');
+                        const task = JSON.parse(content);
+                        const { valid, errors } = validateTask(task);
+                        if (!valid) {
+                            newIndex.errors.push({ file: taskFilePath, errors });
+                            continue;
+                        }
+                        if(task.id !== taskId) {
+                            newIndex.errors.push({ file: taskFilePath, errors: [`Task ID in file (${task.id}) does not match directory name (${taskId})`] });
+                            continue;
+                        }
+                        newIndex.tasksById[task.id] = task;
+                        task.features.forEach(feature => {
+                            newIndex.featuresByKey[feature.id] = feature;
+                        });
+                    } catch (err) {
+                        newIndex.errors.push({ file: taskFilePath, errors: [err.message] });
+                    }
+                }
+            }
+        } catch (err) {
+            if (err.code !== 'ENOENT') {
+                newIndex.errors.push({ file: this.tasksDir, errors: [err.message] });
+            }
         }
-      } catch (err) {
-        idx.errors.push({ path: file, error: String(err) });
-      }
-    });
 
-    await Promise.all(loadPromises);
-    idx.metrics.lastScanCount = Object.keys(idx.tasksById).length;
-    idx.metrics.lastScanMs = Math.max(0, nowMs() - t0);
-
-    this.index = idx;
-
-    // Keep watchers in sync with current state (new/deleted task dirs)
-    try {
-      this._syncTaskDirWatchers(taskDirs);
-    } catch (_) {
-      // best-effort; watcher sync issues shouldn't prevent index update
+        this.index = newIndex;
+        this.index.metrics.lastScanMs = Date.now() - startTime;
+        this.index.metrics.lastScanCount = Object.keys(newIndex.tasksById).length;
     }
 
-    this.emit("updated", this.index);
-    return idx;
-  }
-
-  async startWatching() {
-    // Clear existing watchers
-    this.stopWatching();
-
-    // Watch the tasks root for new/deleted task directories and changes.
-    if (!fs.existsSync(this.tasksDir)) {
-      return; // nothing to watch yet
-    }
-
-    const rootWatcherKey = this.tasksDir;
-    const rootWatcher = fs.watch(this.tasksDir, { persistent: true }, (eventType, filename) => {
-      // Any rename or change under tasks root triggers a rescan with debounce
-      this._debouncedRebuild();
-
-      // If a new numeric dir appears, attach a watcher to it
-      if (filename && /^\d+$/.test(String(filename))) {
-        const candidate = path.join(this.tasksDir, String(filename));
-        fsp.stat(candidate)
-          .then((st) => {
-            if (st.isDirectory()) this._watchTaskDir(candidate);
-          })
-          .catch(() => {});
-      }
-    });
-    this._watchers.set(rootWatcherKey, rootWatcher);
-
-    // Attach watchers for each task directory present at startup
-    const entries = await fsp.readdir(this.tasksDir, { withFileTypes: true }).catch(() => []);
-    for (const e of entries) {
-      if (e.isDirectory() && /^\d+$/.test(e.name)) {
-        const dir = path.join(this.tasksDir, e.name);
-        this._watchTaskDir(dir);
-      }
-    }
-  }
-
-  _watchTaskDir(dir) {
-    const key = path.join(dir, "task.json");
-    if (this._watchers.has(key)) return;
-    try {
-      const watcher = fs.watch(dir, { persistent: true }, (eventType, filename) => {
-        if (!filename) {
-          this._debouncedRebuild();
-          return;
+    stopWatching() {
+        if (this.watcher) {
+            this.watcher.close();
+            this.watcher = null;
         }
-        if (filename === "task.json" || /^test/i.test(String(filename)) || eventType === "rename") {
-          this._debouncedRebuild();
+    }
+
+    async deleteFeature(taskId, featureId) {
+        console.log(`Deleting feature ${featureId} from task ${taskId}`);
+        const taskPath = path.join(this.tasksDir, String(taskId), 'task.json');
+        
+        let taskData;
+        try {
+            const rawData = await fs.readFile(taskPath, 'utf-8');
+            taskData = JSON.parse(rawData);
+        } catch (e) {
+            throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
         }
-      });
-      this._watchers.set(key, watcher);
-    } catch (e) {
-      // Ignore watcher errors for directories that may disappear
-    }
-  }
+        
+        const featureIndex = taskData.features.findIndex(f => f.id === featureId);
+        if (featureIndex === -1) {
+            throw new Error(`Feature ${featureId} not found in task ${taskId}`);
+        }
+        
+        taskData.features.splice(featureIndex, 1);
 
-  _syncTaskDirWatchers(taskDirs) {
-    // Ensure a watcher exists for each dir; remove watchers for dirs that no longer exist
-    const expectedKeys = new Set(taskDirs.map((d) => path.join(d, "task.json")));
+        const idUpdateMap = new Map();
+        idUpdateMap.set(featureId, null); 
 
-    // Add missing
-    for (const d of taskDirs) {
-      this._watchTaskDir(d);
+        taskData.features.forEach((feature, index) => {
+            const newFeatureId = `${taskId}.${index + 1}`;
+            if (feature.id !== newFeatureId) {
+                idUpdateMap.set(feature.id, newFeatureId);
+                feature.id = newFeatureId;
+            }
+        });
+
+        const tasksToUpdate = {};
+        
+        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+        const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+
+        for (const currentTaskId of taskDirNames) {
+            const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
+            let currentTaskData;
+
+            if (currentTaskId === String(taskId)) {
+                currentTaskData = taskData;
+            } else {
+                 try {
+                    currentTaskData = JSON.parse(await fs.readFile(currentTaskPath, 'utf-8'));
+                 } catch (e) {
+                    console.warn(`Skipping dependency update for unreadable task: ${currentTaskId}`);
+                    continue;
+                 }
+            }
+
+            let taskModified = false;
+            for (const feature of currentTaskData.features) {
+                if (!feature.dependencies || feature.dependencies.length === 0) continue;
+
+                const originalDepsJSON = JSON.stringify(feature.dependencies);
+                feature.dependencies = feature.dependencies
+                    .map(dep => idUpdateMap.has(dep) ? idUpdateMap.get(dep) : dep)
+                    .filter(dep => dep !== null);
+                
+                if (JSON.stringify(feature.dependencies) !== originalDepsJSON) {
+                    taskModified = true;
+                }
+            }
+            
+            if (taskModified || currentTaskId === String(taskId)) {
+                tasksToUpdate[currentTaskId] = currentTaskData;
+            }
+        }
+        
+        await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
+            const filePath = path.join(this.tasksDir, id, 'task.json');
+            return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+        }));
+
+        await this.rebuildAndNotify(`Feature ${featureId} deleted, index rebuilt.`);
+        return { ok: true };
     }
 
-    // Remove stale (exclude the root watcher which is keyed by tasksDir path)
-    for (const [key, watcher] of this._watchers) {
-      if (key === this.tasksDir) continue; // root watcher
-      if (!expectedKeys.has(key)) {
-        try { watcher.close(); } catch (_) {}
-        this._watchers.delete(key);
-      }
-    }
-  }
+    async deleteTask(taskId) {
+        console.log(`Deleting task ${taskId}`);
+        const taskDirPath = path.join(this.tasksDir, String(taskId));
+    
+        const deletedTask = this.index.tasksById[taskId];
+        const deletedFeatureIds = new Set(deletedTask ? deletedTask.features.map(f => f.id) : []);
 
-  _debouncedRebuild(delayMs = 100) {
-    if (this._debounceTimer) clearTimeout(this._debounceTimer);
-    this._debounceTimer = setTimeout(() => {
-      this.buildIndex().catch(() => {});
-    }, delayMs);
-  }
-
-  stopWatching() {
-    for (const [key, watcher] of this._watchers) {
-      try { watcher.close(); } catch (_) {}
-      this._watchers.delete(key);
+        try {
+            await fs.rm(taskDirPath, { recursive: true, force: true });
+        } catch (e) {
+            throw new Error(`Could not delete task directory for task ${taskId}: ${e.message}`);
+        }
+    
+        if (deletedFeatureIds.size > 0) {
+            const tasksToUpdate = {};
+            const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+            const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+    
+            for (const currentTaskId of taskDirNames) {
+                const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
+                let currentTaskData;
+                try {
+                    currentTaskData = JSON.parse(await fs.readFile(currentTaskPath, 'utf-8'));
+                } catch (e) {
+                    console.warn(`Skipping dependency update for unreadable task: ${currentTaskId}`);
+                    continue;
+                }
+    
+                let taskModified = false;
+                for (const feature of currentTaskData.features) {
+                    if (!feature.dependencies || feature.dependencies.length === 0) continue;
+    
+                    const originalDepsCount = feature.dependencies.length;
+                    feature.dependencies = feature.dependencies.filter(dep => !deletedFeatureIds.has(dep));
+    
+                    if (feature.dependencies.length !== originalDepsCount) {
+                        taskModified = true;
+                    }
+                }
+    
+                if (taskModified) {
+                    tasksToUpdate[currentTaskId] = currentTaskData;
+                }
+            }
+    
+            await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
+                const filePath = path.join(this.tasksDir, id, 'task.json');
+                return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+            }));
+        }
+    
+        await this.rebuildAndNotify(`Task ${taskId} deleted, dependencies updated, index rebuilt.`);
+        return { ok: true };
     }
-    if (this._debounceTimer) {
-      clearTimeout(this._debounceTimer);
-      this._debounceTimer = null;
-    }
-  }
 }
 
-module.exports = { TasksIndexer, validateTask, STATUSES };
+module.exports = { TasksIndexer };
