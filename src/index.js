@@ -41,6 +41,47 @@ const createWindow = () => {
   }
 };
 
+async function updateTaskInTaskFile(tasksDir, taskId, patch) {
+  const dir = path.join(tasksDir, String(taskId));
+  const file = path.join(dir, 'task.json');
+  let json;
+  try {
+    const data = await fsp.readFile(file, 'utf8');
+    json = JSON.parse(data);
+  } catch (e) {
+    throw new Error(`Failed to read task file: ${e.message || String(e)}`);
+  }
+
+  if (!json || typeof json !== 'object') {
+    throw new Error('Invalid task file content');
+  }
+
+  const allowed = ['title', 'description'];
+  let touched = false;
+  for (const k of allowed) {
+    if (!(k in patch)) continue;
+    const v = patch[k];
+    if (v != null && typeof v !== 'string') throw new Error(`${k} must be string`);
+    json[k] = v == null ? '' : String(v);
+    touched = true;
+  }
+  if (!touched) {
+    throw new Error('No valid fields to update');
+  }
+
+  const [ok, errors] = validateTask(json);
+  if (!ok) {
+    throw new Error(`Validation failed: ${errors.join('; ')}`);
+  }
+
+  const pretty = JSON.stringify(json, null, 2) + '\n';
+  try {
+    await fsp.writeFile(file, pretty, 'utf8');
+  } catch (e) {
+    throw new Error(`Failed to write task file: ${e.message || String(e)}`);
+  }
+}
+
 async function updateFeatureInTaskFile(tasksDir, taskId, featureId, patch) {
   const dir = path.join(tasksDir, String(taskId));
   const file = path.join(dir, 'task.json');
@@ -197,6 +238,21 @@ app.whenReady().then(async () => {
 
   ipcMain.handle('tasks-index:get', () => {
     return indexer ? indexer.getIndex() : null;
+  });
+
+  // New: task update handler (title, description)
+  ipcMain.handle('tasks:update', async (_event, payload) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
+      const { taskId, data } = payload;
+      if (!Number.isInteger(taskId)) throw new Error('taskId must be integer');
+      if (!data || typeof data !== 'object') throw new Error('data must be object');
+      await updateTaskInTaskFile(indexer.tasksDir, taskId, data);
+      await indexer.buildIndex();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
   });
 
   // New: feature update handler

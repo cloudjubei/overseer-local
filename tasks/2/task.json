@@ -101,7 +101,7 @@
     },
     {
       "id": "2.7",
-      "status": "-",
+      "status": "+",
       "title": "Edit mode - task details",
       "description": "Allow editing of a task's title and description.",
       "plan": "",

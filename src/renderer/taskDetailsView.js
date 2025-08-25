@@ -15,6 +15,7 @@
   let currentIndex = null;
   let editState = { featureId: null, saving: false };
   let createState = { open: false, saving: false };
+  let taskEditState = { editing: false, saving: false };
 
   function $(sel, root = document) {
     return root.querySelector(sel);
@@ -187,7 +188,7 @@
     const features = Array.isArray(task.features) ? task.features : [];
     let maxN = 0;
     for (const f of features) {
-      const m = new RegExp('^' + base.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\.([0-9]+)$').exec(String(f.id || ''));
+      const m = new RegExp('^' + base.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\.([0-9]+)$').exec(String(f.id || ''));
       if (m) {
         const n = parseInt(m[1], 10);
         if (!Number.isNaN(n) && n > maxN) maxN = n;
@@ -374,20 +375,63 @@
     return container;
   }
 
+  function renderTaskMeta(task) {
+    if (!taskEditState.editing) {
+      const titleRow = createEl("div", { class: "task-title" }, [
+        createEl("h3", {}, task.title || ""),
+        statusBadge(task.status),
+        createEl("span", { class: "spacer" }),
+        createEl("button", { type: "button", class: "btn-edit-task", onclick: () => { taskEditState.editing = true; rerender(task); } }, "Edit Task")
+      ]);
+      return createEl("div", { class: "task-meta" }, [
+        titleRow,
+        createEl("div", { class: "task-id" }, [createEl("strong", {}, "ID: "), String(task.id)]),
+        createEl("div", { class: "task-desc" }, task.description || ""),
+      ]);
+    }
+
+    const titleInput = createEl("input", { id: `task-${task.id}-title`, type: "text", value: task.title || "", "aria-label": "Task Title" });
+    const descInput = createEl("textarea", { id: `task-${task.id}-desc`, rows: 4, "aria-label": "Task Description" }, task.description || "");
+
+    const saveBtn = createEl("button", { type: "button", class: "btn-save" }, "Save");
+    const cancelBtn = createEl("button", { type: "button", class: "btn-cancel", onclick: () => {
+      if (taskEditState.saving) return;
+      taskEditState.editing = false; rerender(task);
+    } }, "Cancel");
+
+    saveBtn.addEventListener("click", async () => {
+      if (taskEditState.saving) return;
+      taskEditState.saving = true; saveBtn.disabled = true; cancelBtn.disabled = true;
+      try {
+        const payload = {
+          title: titleInput.value || "",
+          description: descInput.value || "",
+        };
+        const res = await window.tasksIndex.updateTask(task.id, payload);
+        if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Unknown error');
+        taskEditState.saving = false;
+        taskEditState.editing = false;
+        rerender(task);
+      } catch (e) {
+        alert(`Failed to update task: ${e.message || e}`);
+        taskEditState.saving = false; saveBtn.disabled = false; cancelBtn.disabled = false;
+      }
+    });
+
+    return createEl("div", { class: "task-meta editing" }, [
+      createEl("div", { class: "form-row" }, [createEl("label", { for: titleInput.id }, "Title"), titleInput]),
+      createEl("div", { class: "form-row" }, [createEl("label", { for: descInput.id }, "Description"), descInput]),
+      createEl("div", { class: "form-actions" }, [saveBtn, createEl("span", { class: "spacer" }), cancelBtn])
+    ]);
+  }
+
   function renderTaskDetails(root, task) {
     root.innerHTML = "";
     const heading = createEl("h2", { id: "task-details-heading" }, `Task ${task.id}`);
 
-    const backBtn = createEl("button", { type: "button", class: "btn-back", onclick: () => { location.hash = ""; } }, "Back to Tasks");
+    const backBtn = createEl("button", { type: "button", class: "btn-back", onclick: () => { taskEditState.editing = false; location.hash = ""; } }, "Back to Tasks");
 
-    const meta = createEl("div", { class: "task-meta" }, [
-      createEl("div", { class: "task-title" }, [
-        createEl("h3", {}, task.title || ""),
-        statusBadge(task.status),
-      ]),
-      createEl("div", { class: "task-id" }, [createEl("strong", {}, "ID: "), String(task.id)]),
-      createEl("div", { class: "task-desc" }, task.description || ""),
-    ]);
+    const meta = renderTaskMeta(task);
 
     const featuresHeading = createEl("h3", {}, "Features");
     const featuresList = renderFeatures(task);
@@ -427,6 +471,7 @@
         }
       } else {
         root.style.display = "none";
+        taskEditState.editing = false;
         if (listView) listView.style.display = "";
       }
     }
