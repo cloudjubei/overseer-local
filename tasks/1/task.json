@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "1.1",
-      "status": "-",
+      "status": "+",
       "title": "Initialize Project with electron-vite",
       "description": "Use the `pnpm create electron-vite` command to scaffold a new project. Select the `react-ts` template. This will generate the initial project structure, including separate directories for main, preload, and renderer code, along with default TypeScript and ESLint configurations.",
       "plan": "1. Run the scaffolding command `pnpm create electron-vite` in the root directory.\n2. When prompted for the project name, enter `electron-react-ts-app`.\n3. When prompted to select a framework, choose `react`.\n4. When prompted to select a variant, choose `react-ts`.\n5. Change the current directory to the newly created `electron-react-ts-app`.\n6. Run `pnpm install` to install all the necessary dependencies.\n7. List the files in the directory to confirm successful scaffolding.",
