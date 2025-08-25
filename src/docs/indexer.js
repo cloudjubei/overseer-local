@@ -1,9 +1,11 @@
 const fs = require('fs').promises;
 const path = require('path');
 const chokidar = require('chokidar');
+const EventEmitter = require('events');
 
-class DocsIndexer {
+class DocsIndexer extends EventEmitter {
   constructor(projectRoot) {
+    super();
     this.projectRoot = projectRoot;
     this.docsDir = path.join(projectRoot, 'docs');
     this._index = {
@@ -46,6 +48,7 @@ class DocsIndexer {
       errors,
       metrics: { lastScanMs: Date.now() - start, lastScanCount: count }
     };
+    this.emit('updated');
   }
 
   async _buildTree(dirPath, relPath) {

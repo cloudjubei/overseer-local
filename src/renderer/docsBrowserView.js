@@ -52,14 +52,39 @@
     parentUl.appendChild(li);
   }
 
+  function resolveRelativePath(currentPath, href) {
+    const parts = currentPath.split('/');
+    parts.pop(); // remove current file
+    const hrefParts = href.split('/');
+    while (hrefParts.length > 0 && hrefParts[0] === '..') {
+      hrefParts.shift();
+      if (parts.length > 0) parts.pop();
+    }
+    if (hrefParts[0] === '.') hrefParts.shift();
+    return [...parts, ...hrefParts].join('/');
+  }
+
   async function selectFile(path) {
     contentContainer.innerHTML = "";
     contentContainer.appendChild(createEl("div", {}, "Loading..."));
     try {
-      const res = await window.docsIndex.getFile(path);
+      const res = await window.docsIndex.getRenderedMarkdown(path);
       if (!res.ok) throw new Error(res.error || "Unknown error");
       contentContainer.innerHTML = "";
-      contentContainer.appendChild(createEl("pre", {}, res.content));
+      const mdDiv = createEl("div", { class: "markdown-body" });
+      mdDiv.innerHTML = res.content;
+      // Handle internal links
+      mdDiv.querySelectorAll('a[href]').forEach(a => {
+        let href = a.getAttribute('href');
+        if (href.endsWith('.md') || href.endsWith('.MD')) {
+          a.addEventListener('click', e => {
+            e.preventDefault();
+            const targetPath = resolveRelativePath(path, href);
+            selectFile(targetPath);
+          });
+        }
+      });
+      contentContainer.appendChild(mdDiv);
     } catch (e) {
       contentContainer.innerHTML = "";
       contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file: ${e.message || e}`));

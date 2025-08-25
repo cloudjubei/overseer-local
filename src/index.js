@@ -4,6 +4,22 @@ const fsp = require('node:fs/promises');
 const fs = require('node:fs');
 const { TasksIndexer, validateTask, STATUSES } = require('./tasks/indexer');
 const { DocsIndexer } = require('./docs/indexer');
+const marked = require('marked');
+const hljs = require('highlight.js');
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+
+const { window } = new JSDOM('');
+const DOMPurify = createDOMPurify(window);
+
+marked.setOptions({
+  gfm: true,
+  tables: true,
+  highlight: function(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  }
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -336,6 +352,22 @@ app.whenReady().then(async () => {
     try {
       const content = await fsp.readFile(fullPath, 'utf8');
       return { ok: true, content };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('docs-file:render', async (_event, relativePath) => {
+    if (!relativePath || typeof relativePath !== 'string') return { ok: false, error: 'Invalid path' };
+    const fullPath = path.join(docsIndexer.docsDir, relativePath);
+    if (!fullPath.startsWith(docsIndexer.docsDir) || !fullPath.endsWith('.md')) {
+      return { ok: false, error: 'Invalid path' };
+    }
+    try {
+      const content = await fsp.readFile(fullPath, 'utf8');
+      const html = marked.parse(content);
+      const sanitized = DOMPurify.sanitize(html);
+      return { ok: true, content: sanitized };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

@@ -1,12 +1,12 @@
 {
   "id": 3,
-  "status": "-",
+  "status": "+",
   "title": "Markdown documentation explorer and renderer",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Implement a docs browser that lists Markdown files under docs/ (including docs/). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Introduce a sidebar that will have the sections of the app - currently Home (Tasks - task 2) and Docs (this feature).",
   "features": [
     {
       "id": "3.1",
-      "status": "-",
+      "status": "+",
       "title": "Add sidebar navigation to the application UI",
       "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
       "plan": "",
