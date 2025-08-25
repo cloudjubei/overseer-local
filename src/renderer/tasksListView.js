@@ -88,8 +88,8 @@
     }
   }
 
-  function routeName(hash) {
-    return /^#task\/\d+$/.test(hash || "") ? "details" : "list";
+  function isListRoute(hash) {
+    return !hash || hash === "#";
   }
 
   function onRowKeyDown(e, ul, taskId) {
@@ -308,8 +308,7 @@
     }
 
     function updateVisibility() {
-      const name = routeName(location.hash);
-      root.style.display = name === "list" ? "" : "none";
+      root.style.display = isListRoute(location.hash) ? "" : "none";
     }
 
     // Hook up events

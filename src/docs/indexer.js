@@ -89,14 +89,18 @@ class DocsIndexer {
     if (tree.type === 'file') {
       map[tree.path] = tree;
     }
-    tree.children.forEach(child => this._flattenFiles(child, map));
+    if (tree.children) {
+      tree.children.forEach(child => this._flattenFiles(child, map));
+    }
     return map;
   }
 
   _countFiles(tree) {
     if (!tree) return 0;
     let count = tree.type === 'file' ? 1 : 0;
-    tree.children.forEach(child => { count += this._countFiles(child); });
+    if (tree.children) {
+      tree.children.forEach(child => { count += this._countFiles(child); });
+    }
     return count;
   }
 
