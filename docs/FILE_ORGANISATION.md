@@ -47,14 +47,18 @@ repo_root/
 │   ├─ index.css
 │   ├─ index.html
 │   ├─ index.js
+│   ├─ feature_create.html        # Popup window for creating a new feature
+│   ├─ task_create.html           # Popup window for creating a new task
 │   ├─ preload.js
 │   ├─ renderer/
-│   │   ├─ tasksListView.js     # Tasks list UI (search + filters, view-only)
-│   │   └─ taskDetailsView.js   # Task details UI with features list (includes edit for task title/description; includes feature edit and create modes)
+│   │   ├─ tasksListView.js       # Tasks list UI (search + filters, view-only; open popup to create task)
+│   │   ├─ taskDetailsView.js     # Task details UI with features list (includes edit for task title/description; includes feature edit)
+│   │   ├─ featureCreateView.js   # Popup create feature form (same fields as edit mode)
+│   │   └─ taskCreateView.js      # Popup create task form (ID, status, title, description)
 │   ├─ tasks/
-│   │  └─ indexer.js           # Logical Tasks indexer, validator, and file watcher
+│   │  └─ indexer.js              # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
-│      └─ tasks.ts             # TypeScript interfaces for task schema
+│      └─ tasks.ts                # TypeScript interfaces for task schema
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
@@ -90,23 +94,28 @@ repo_root/
     - tasks-feature:update (invoke) updates a feature in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:add (invoke) appends a new feature to tasks/{id}/task.json and triggers an index rebuild
     - tasks:add (invoke) creates a new task directory tasks/{id}/ and writes a minimal valid task.json, then triggers an index rebuild
+    - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
+    - task-create:open (invoke) opens a modal popup window for creating a new task
   - Preload exposes window.tasksIndex with:
     - getSnapshot() and onUpdate(cb) for renderer use
     - updateTask(taskId, data) to persist edits to a task (title/description)
     - updateFeature(taskId, featureId, data) to persist edits to a feature
     - addFeature(taskId, feature) to create a new feature under a task
     - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
+    - openFeatureCreate(taskId) to open the popup create window for a given task id
+    - openTaskCreate() to open the popup window for creating a new task
 
 ## Renderer UI
 - Location: src/renderer/
 - Purpose:
-  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}). Includes a Create Task mode with an inline form to add a new task (ID, status, title, description). On success, navigates to the new task.
+  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}). Includes a Create Task control as a popup (task_create.html) with fields: ID, status, title, description.
   - taskDetailsView.js: Renders a task details page showing task metadata and its features.
     - Provides a Back button.
     - Includes inline edit mode for the task's title and description with Save/Cancel; saving persists via IPC and re-renders on index updates.
     - Includes inline edit mode for a feature allowing editing: status, title, description, plan, context, acceptance, dependencies, and rejection.
-    - Includes a Create mode to add a new feature with all required and optional fields; saving persists via IPC and re-renders on index updates.
-- Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders accordingly.
+    - Includes a Create mode to add a new feature implemented as a popup window (feature_create.html) with the same fields as edit mode.
+  - featureCreateView.js: Implements the popup form for creating a new feature, including dependency suggestions and resolution.
+  - taskCreateView.js: Implements the popup form for creating a new task, computing a suggested next numeric ID.
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.

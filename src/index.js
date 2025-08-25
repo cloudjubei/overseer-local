@@ -292,6 +292,37 @@ async function addTaskFile(tasksDir, payload) {
   return json;
 }
 
+function openFeatureCreateWindow(parentWindow, taskId) {
+  const win = new BrowserWindow({
+    width: 800,
+    height: 700,
+    modal: !!parentWindow,
+    parent: parentWindow || null,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
+  const filePath = path.join(__dirname, 'feature_create.html');
+  // Pass task id via hash
+  win.loadFile(filePath, { hash: `task/${taskId}` });
+  return win;
+}
+
+function openTaskCreateWindow(parentWindow) {
+  const win = new BrowserWindow({
+    width: 700,
+    height: 600,
+    modal: !!parentWindow,
+    parent: parentWindow || null,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
+  const filePath = path.join(__dirname, 'task_create.html');
+  win.loadFile(filePath);
+  return win;
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -359,6 +390,31 @@ app.whenReady().then(async () => {
       const created = await addTaskFile(indexer.tasksDir, payload);
       await indexer.buildIndex();
       return { ok: true, id: created.id };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // New: open feature create popup
+  ipcMain.handle('feature-create:open', async (event, payload) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
+      const { taskId } = payload;
+      if (!Number.isInteger(taskId)) throw new Error('taskId must be integer');
+      const parent = BrowserWindow.fromWebContents(event.sender);
+      openFeatureCreateWindow(parent, taskId);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // New: open task create popup
+  ipcMain.handle('task-create:open', async (event) => {
+    try {
+      const parent = BrowserWindow.fromWebContents(event.sender);
+      openTaskCreateWindow(parent);
+      return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

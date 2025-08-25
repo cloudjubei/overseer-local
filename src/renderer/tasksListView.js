@@ -9,8 +9,6 @@
     "=": "Deferred",
   };
 
-  const STATUS_OPTIONS = ["+", "~", "-", "?", "="];
-
   function $(sel, root = document) {
     return root.querySelector(sel);
   }
@@ -110,16 +108,6 @@
     rows[nextIndex].focus();
   }
 
-  function computeNextTaskId(index) {
-    const tasksById = (index && index.tasksById) || {};
-    let max = 0;
-    for (const t of Object.values(tasksById)) {
-      const id = parseInt((t && t.id) || 0, 10);
-      if (Number.isInteger(id) && id > max) max = id;
-    }
-    return (max + 1) || 1;
-  }
-
   function buildControls(rootEl) {
     const heading = createEl("h2", { id: "tasks-view-heading" }, "Tasks");
 
@@ -189,71 +177,17 @@
     let allTasks = [];
     let state = { query: "", status: "any" };
     let currentIndex = null;
-    let createOpen = false;
-    let createSaving = false;
 
     function renderCreateUI() {
       addTaskContainer.innerHTML = "";
-      if (!createOpen) {
-        const btn = createEl("button", { type: "button", class: "btn-add-task", onclick: () => { createOpen = true; renderCreateUI(); } }, "Add Task");
-        addTaskContainer.appendChild(btn);
-        return;
-      }
-
-      const defaultId = computeNextTaskId(currentIndex);
-      const idInput = createEl("input", { id: "newtask-id", type: "number", value: String(defaultId), min: 1, step: 1, "aria-label": "Task ID" });
-      const statusSelectNew = createEl(
-        "select",
-        { id: "newtask-status", "aria-label": "Status" },
-        STATUS_OPTIONS.map(s => createEl("option", { value: s, selected: s === "-" }, `${STATUS_LABELS[s]} (${s})`))
-      );
-      const titleInput = createEl("input", { id: "newtask-title", type: "text", placeholder: "Title", "aria-label": "Task Title" });
-      const descInput = createEl("textarea", { id: "newtask-desc", rows: 3, placeholder: "Description", "aria-label": "Task Description" });
-
-      const saveBtn = createEl("button", { type: "button", class: "btn-save" }, "Create Task");
-      const cancelBtn = createEl("button", { type: "button", class: "btn-cancel", onclick: () => { if (createSaving) return; createOpen = false; renderCreateUI(); } }, "Cancel");
-
-      saveBtn.addEventListener("click", async () => {
-        if (createSaving) return;
-        const idVal = parseInt(idInput.value, 10);
-        if (!Number.isInteger(idVal) || idVal <= 0) {
-          alert("Please provide a valid positive integer ID");
-          idInput.focus();
-          return;
+      const btn = createEl("button", {
+        type: "button",
+        class: "btn-add-task",
+        onclick: async () => {
+          try { await window.tasksIndex.openTaskCreate(); } catch (_) {}
         }
-        const payload = {
-          id: idVal,
-          status: statusSelectNew.value,
-          title: titleInput.value || "",
-          description: descInput.value || "",
-        };
-        try {
-          createSaving = true; saveBtn.disabled = true; cancelBtn.disabled = true;
-          const res = await window.tasksIndex.addTask(payload);
-          if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Unknown error');
-          createSaving = false;
-          createOpen = false;
-          renderCreateUI();
-          // Navigate to new task
-          if (res.id) location.hash = `#task/${res.id}`;
-        } catch (e) {
-          alert(`Failed to create task: ${e.message || e}`);
-          createSaving = false; saveBtn.disabled = false; cancelBtn.disabled = false;
-        }
-      });
-
-      const form = createEl("div", { class: "task-create-form" }, [
-        createEl("div", { class: "form-row" }, [createEl("label", { for: idInput.id }, "ID"), idInput]),
-        createEl("div", { class: "form-row" }, [createEl("label", { for: statusSelectNew.id }, "Status"), statusSelectNew]),
-        createEl("div", { class: "form-row" }, [createEl("label", { for: titleInput.id }, "Title"), titleInput]),
-        createEl("div", { class: "form-row" }, [createEl("label", { for: descInput.id }, "Description"), descInput]),
-        createEl("div", { class: "form-actions" }, [saveBtn, createEl("span", { class: "spacer" }), cancelBtn])
-      ]);
-
-      addTaskContainer.appendChild(createEl("div", { class: "task-create" }, [
-        createEl("h4", {}, "Add New Task"),
-        form
-      ]));
+      }, "Add Task");
+      addTaskContainer.appendChild(btn);
     }
 
     function renderList(listEl, tasks) {
