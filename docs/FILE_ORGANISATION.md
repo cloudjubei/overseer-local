@@ -3,8 +3,7 @@
 This document describes how files and directories are organised in this repository to keep the project navigable, consistent, and easy to evolve.
 
 ## Top-Level Directory Layout
-- src/: Source code for all tasks.
-  - src/desktop/: Electron + React + TypeScript app (electron-vite)
+- src/: Electron + React + TypeScript app (electron-vite)
 - docs/: Project documentation and specifications.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
@@ -38,30 +37,23 @@ The following tree is graphical and illustrative of a typical repository layout:
 repo_root/
 ├─ .env
 ├─ .gitignore
-├─ scripts/
-│  ├─ bootstrap_desktop_app.mjs
-│  ├─ bootstrap_desktop_app.sh
-│  └─ bootstrap_desktop_app.ps1
+├─ forge-config.js
+├─ package.json
+├─ package-lock.json
+├─ README.md
 ├─ src/
-│  └─ desktop/
-│     ├─ electron.vite.config.ts
-│     ├─ tsconfig.json
-│     ├─ .eslintrc.cjs
-│     ├─ .prettierrc.json
-│     ├─ .npmrc
-│     ├─ .env.example
-│     ├─ README.md
-│     └─ src/
-│        ├─ main/index.ts
-│        ├─ preload/index.ts
-│        └─ renderer/
-│           ├─ index.html
-│           └─ src/{main.tsx, App.tsx, styles.css}
+│   ├─ index.css
+│   ├─ index.html
+│   ├─ index.js
+│   └─ preload.js
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
-│  └─ apps/desktop/README.md
+│  └─ tasks/
+│     ├─ task_example.json
+│     └─ task_formay.py
 └─ tasks/
    └─ 1/
+│     ├─ task.json
       └─ tests/
          └─ test_1_1.py
 ```
