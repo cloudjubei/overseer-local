@@ -10,7 +10,7 @@
       "title": "Task schema definition and validator",
       "description": "Generate TypeScript interfaces from the schema. Implement a validator used before reading/writing task.json. Acceptance: Validator catches malformed examples; TS types aligned with schema; unit tests cover valid/invalid cases using sample task.json files.",
       "plan": "",
-      "context": [],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": []
     },
     {
@@ -19,7 +19,7 @@
       "title": "Logical Tasks indexer and file watcher",
       "description": "Scan tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ tasks; watcher reliably updates on file changes; performance measured and documented;.",
       "plan": "",
-      "context": [],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
       "dependencies":["2.1"]
     },
@@ -29,7 +29,7 @@
       "title": "Tasks list UI with filtering and search - view only",
       "description": "Build a React view listing tasks with id, title, status, and counts of features (done/total). Provide text search and filters (e.g., status). Filtering/search applied client-side; empty states handled; accessibility basics (labels, keyboard nav) covered.",
       "plan": "",
-      "context": [],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
       "dependencies":["2.2"]
     },
@@ -39,7 +39,7 @@
       "title": "Task details view with feature list - view only",
       "description": "Create a detail page showing the task metadata and its features with statuses.",
       "plan": "",
-      "context": [],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
       "dependencies":["2.3"]
     },
@@ -49,7 +49,7 @@
       "title": "Edit mode - feature details",
       "description": "Allow editing of a feature's parameters.",
       "plan": "",
-      "context": [],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
       "dependencies":["2.4"]
     },
@@ -59,7 +59,7 @@
       "title": "Edit mode - feature details",
       "description": "Allow editing of a feature's parameters.",
       "plan": "",
-      "context": [],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
       "dependencies":["2.4"]
     }
