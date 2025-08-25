@@ -55,7 +55,12 @@ repo_root/
 │   │   ├─ TaskCreateView.tsx     # React entry wrapping task create view
 │   │   ├─ FeatureCreateView.tsx  # React form for creating a new feature
 │   │   ├─ components/
-│   │   │   └─ stringListEditor.js    # Reusable multi-row text input component
+│   │   │   ├─ stringListEditor.js    # Reusable multi-row text input component
+│   │   │   └─ ui/                   # Common UI primitives (shadcn-like)
+│   │   │      ├─ toast.tsx          # ToastProvider, useToast, Toaster
+│   │   │      ├─ modal.tsx          # Modal & AlertDialog popups
+│   │   │      ├─ alert.tsx          # Inline alert banners
+│   │   │      └─ index.ts           # Barrel exports
 │   │   ├─ utils/
 │   │   │   ├─ dom.js             # $, createEl helpers for DOM
 │   │   │   ├─ routing.js         # parseRoute, routeName, parseTaskIdFromLocation
@@ -72,6 +77,7 @@ repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
+│  ├─ COMPONENTS_AND_THEMING.md   # How to use the common UI primitives
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py           # Python source-of-truth schema
@@ -125,6 +131,7 @@ repo_root/
   - TaskCreateView.tsx wraps the legacy task creation UI in a React entry.
   - FeatureCreateView.tsx implements the popup form for creating a new feature using React.
 - Shared Utilities and Components:
+  - components/ui/: Common UI primitives (toast, modal/alert dialog, alert banners) styled with Tailwind-like utilities for easy theming (shadcn-inspired).
   - utils/dom.js: DOM query and element creation helpers ($, createEl)
   - utils/status.js: Status labels/options and statusBadge rendering helper
   - utils/routing.js: parseRoute, routeName, and parseTaskIdFromLocation

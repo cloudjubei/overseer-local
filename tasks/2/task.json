@@ -186,7 +186,7 @@
     },
     {
       "id": "2.12",
-      "status": "-",
+      "status": "+",
       "title": "Common functions and libraries",
       "description": "We need to have common components for popups, alerts, toasts etc. It would be great to introduce a library like `shadcn` and use it with tailwind as much as possible. This way we can control theming and color schemes easily.",
       "plan": "",
