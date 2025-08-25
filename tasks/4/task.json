@@ -4,5 +4,122 @@
   "title": "Agentic chat interface",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
+    {
+      "id": "4.1",
+      "status": "-",
+      "title": "Add Chat route and basic UI skeleton",
+      "description": "Update the renderer (e.g., main app.js or index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.2",
+      "status": "-",
+      "title": "Manage chat state and render messages",
+      "description": "In ChatView, use React state (or equivalent) for a messages array of objects {role: 'user'|'assistant', content: string}. Render the messages in the message div, with user messages on the right, assistant on the left, styled as chat bubbles. Handle empty state with a message like 'Start chatting about the project'.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.3",
+      "status": "-",
+      "title": "Implement message input and dummy response logic",
+      "description": "In ChatView, add event handler for send button click or Enter key in textarea. Get input value, append {role: 'user', content} to messages state, clear input, then append a dummy {role: 'assistant', content: 'Echo: ' + content} to simulate response. Scroll to bottom after updates.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.4",
+      "status": "-",
+      "title": "Add LLM configuration UI and local storage",
+      "description": "In ChatView, add a settings button that opens a form (modal or section) for LLM config: apiBaseUrl (default 'https://api.openai.com/v1'), apiKey, model (default 'gpt-4o'). Save values to localStorage on submit. Load and apply on component mount. Show warning if not configured.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.5",
+      "status": "-",
+      "title": "Add IPC handler for basic non-streaming LLM completion",
+      "description": "In main process, install 'openai' package if needed. Add ipcMain.handle('chat:completion', async (event, {messages, config}) => { const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey}); const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'}; const response = await openai.chat.completions.create({model: config.model, messages: [systemPrompt, ...messages], stream: false}); return response.choices[0].message; }). Handle errors gracefully.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.6",
+      "status": "-",
+      "title": "Integrate basic LLM call in ChatView",
+      "description": "Update send handler in ChatView: After adding user message, load config from localStorage. If configured, call ipcRenderer.invoke('chat:completion', {messages: state.messages, config}), then append the returned message to state. Show loading indicator while waiting. Handle errors with a message.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.7",
+      "status": "-",
+      "title": "Extend IPC for tool calling in agent loop",
+      "description": "Update 'chat:completion' handler to support tools. Define an empty tools array for now. In the handler, implement a loop: call completions.create with tools, if response has tool_calls, execute each (call function and get result), append {role: 'tool', content: result, tool_call_id} to messages, repeat until no tool_calls, then return the final content message.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.8",
+      "status": "-",
+      "title": "Add project read tools for agent",
+      "description": "In the tools array of the completion handler, add: 1. list_tasks (no params, returns JSON.stringify(tasksIndexer.getIndex().tasksById)), 2. list_docs (no params, returns JSON.stringify(docsIndexer.getIndex().docsTree)), 3. read_doc (param: path, returns fs.readFileSync(docsIndexer.getIndex().docsDir + '/' + path, 'utf8') or error). Update system prompt: 'Use tools to query project info. If user mentions @path, use read_doc.'",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.9",
+      "status": "-",
+      "title": "Add create_doc tool for agent",
+      "description": "Add to tools: create_doc (params: name, content), writes fs.writeFileSync(docsIndexer.getIndex().docsDir + '/' + name + '.md', content), calls docsIndexer.buildIndex(), returns 'Created at ' + name + '.md' or error.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.10",
+      "status": "-",
+      "title": "Add autocomplete for mentioning docs",
+      "description": "In ChatView input textarea, detect typing starting with '@', show a dropdown autocomplete list of matching paths from window.docsIndex.getSnapshot().filesByPath. On select, insert the full '@path' into the input. Subscribe to docs updates to refresh list.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.11",
+      "status": "-",
+      "title": "Add file upload UI and IPC for docs",
+      "description": "In ChatView, add an attach button next to input, with hidden file input. On file select, use FileReader to read content as text, then call ipcRenderer.invoke('docs:upload', {name: file.name, content}). In main, add ipcMain.handle('docs:upload', (event, {name, content}) => { const path = 'uploads/' + name; fs.writeFileSync(docsIndexer.getIndex().docsDir + '/' + path, content); docsIndexer.buildIndex(); return path; }).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.12",
+      "status": "-",
+      "title": "Integrate upload into chat flow",
+      "description": "After successful upload via IPC, append a user message to state: 'Uploaded document to @' + returnedPath. This allows mentioning it immediately and triggers LLM awareness via tools.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.13",
+      "status": "-",
+      "title": "Add chat history persistence",
+      "description": "In main, add ipcMain.handle('chat:load', () => { try { return JSON.parse(fs.readFileSync(projectRoot + '/chats/chat.json', 'utf8')); } catch { return []; } }), and 'chat:save', (event, messages) => fs.writeFileSync(projectRoot + '/chats/chat.json', JSON.stringify(messages)). Ensure /chats/ dir exists. In ChatView, on mount load via invoke('chat:load'), set to state, and after any message add, invoke('chat:save', state.messages).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
   ]
 }
