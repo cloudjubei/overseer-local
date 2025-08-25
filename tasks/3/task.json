@@ -1,18 +1,18 @@
 {
   "id": 3,
-  "status": "+",
+  "status": "-",
   "title": "Markdown documentation explorer and renderer",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Implement a docs browser that lists Markdown files under docs/ (including docs/). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Introduce a sidebar that will have the sections of the app - currently Home (Tasks - task 2) and Docs (this feature).",
   "features": [
     {
       "id": "3.1",
-      "status": "+",
+      "status": "-",
       "title": "Add sidebar navigation to the application UI",
       "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "rejection": "FollowingErrors: 1) UnhandledPromiseRejectionWarning: TypeError: docsIndexer.on is not a function at createWindow (/src/index.js:54:17)\n\n2) Unable to load preload script: /Users/cloud/Documents/Work/TheFactory/projects/overseer-local/src/preload.js\n\n 3) Error: module not found: marked at preloadRequire (VM4 sandbox_bundle:2:143993) at <anonymous>:3:16 at runPreloadScript (VM4 sandbox_bundle:2:144262)"
+      "rejection": "when selecting docs from the sidebar - I can still see tasks. Each sidebar item should open a different full view page"
     },
     {
       "id": "3.2",
@@ -44,12 +44,13 @@
     },
     {
       "id": "3.5",
-      "status": "+",
+      "status": "-",
       "title": "Implement basic Markdown rendering with extensions",
       "description": "In the Docs browser view, upon file selection, fetch the file content via IPC and render it using a Markdown parser (e.g., react-markdown or marked). Support basic extensions: tables and code highlighting (integrate highlight.js or similar for syntax highlighting in code blocks). Display the rendered content in a dedicated pane or section of the view.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection":"when selecting a document to render nothing happns"
     },
     {
       "id": "3.6",
