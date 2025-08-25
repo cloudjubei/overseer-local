@@ -1,19 +1,57 @@
+:root {
+  --primary-color: #0078d4;
+  --secondary-color: #f0f0f0;
+  --text-color: #333;
+  --bg-color: #fff;
+  --border-color: #ddd;
+  --shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --transition: all 0.2s ease;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   margin: auto;
   max-width: 56rem;
   padding: 2rem;
-  color: #111;
+  color: var(--text-color);
+  background: var(--bg-color);
 }
 
-h1 {
-  margin-top: 0;
+h1, h2, h3 {
+  color: var(--primary-color);
+}
+
+/* Buttons */
+button, .btn {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+button:hover, .btn:hover {
+  background: darken(var(--primary-color), 10%);
+  box-shadow: var(--shadow);
+}
+
+.btn-secondary {
+  background: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+  background: darken(var(--secondary-color), 5%);
 }
 
 /* Tasks view */
 #tasks-view {
   margin: 1rem 0 2rem 0;
+  background: var(--bg-color);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
 }
 
 .tasks-controls {
@@ -35,9 +73,16 @@ h1 {
 .tasks-controls select {
   width: 100%;
   padding: 0.5rem 0.6rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.tasks-controls input[type="search"]:focus,
+.tasks-controls select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
 }
 
 .tasks-controls .control-buttons {
@@ -82,10 +127,15 @@ h1 {
   gap: 0.5rem 1rem;
   align-items: center;
   padding: 0.6rem 0.75rem;
-  border: 1px solid #e4e4e4;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #fff;
+  background: var(--bg-color);
   outline: none;
+  transition: var(--transition);
+}
+
+.task-row:hover {
+  box-shadow: var(--shadow);
 }
 
 .task-row:focus {
@@ -123,7 +173,7 @@ h1 {
 .status-deferred { background: #fff5e6; color: #9a5a00; border-color: #ffe2b8; }
 
 /* Features (Task Details) */
-#task-details-view { margin: 1rem 0 2rem 0; }
+#task-details-view { margin: 1rem 0 2rem 0; background: var(--bg-color); padding: 1rem; border-radius: 8px; box-shadow: var(--shadow); }
 .features-list { list-style: none; padding: 0; margin: 0; }
 .feature-item + .feature-item { margin-top: 8px; }
 
@@ -133,10 +183,12 @@ h1 {
   gap: 0.5rem 1rem;
   align-items: start;
   padding: 0.6rem 0.75rem;
-  border: 1px solid #e4e4e4;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #fff;
+  background: var(--bg-color);
+  transition: var(--transition);
 }
+.feature-row:hover { box-shadow: var(--shadow); }
 .feature-row.editing {
   grid-template-columns: 80px 1fr;
 }
@@ -150,18 +202,25 @@ h1 {
 .feature-edit-form select {
   width: 100%;
   padding: 0.5rem 0.6rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.95rem;
+  transition: var(--transition);
+}
+.feature-edit-form input:focus, .feature-edit-form textarea:focus, .feature-edit-form select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
 }
 .btn-edit, .btn-save, .btn-cancel, .btn-back, .btn-add-row, .btn-remove-row {
   padding: 0.45rem 0.75rem;
-  border: 1px solid #bbb;
   border-radius: 6px;
-  background: #fafafa;
   cursor: pointer;
+  transition: var(--transition);
 }
-.btn-edit:hover, .btn-save:hover, .btn-cancel:hover, .btn-back:hover, .btn-add-row:hover, .btn-remove-row:hover { background: #f0f0f0; }
+.btn-edit, .btn-save { background: var(--primary-color); color: #fff; border: none; }
+.btn-cancel, .btn-back, .btn-add-row, .btn-remove-row { background: var(--secondary-color); border: 1px solid var(--border-color); }
+.btn-edit:hover, .btn-save:hover { background: darken(var(--primary-color), 10%); }
+.btn-cancel:hover, .btn-back:hover, .btn-add-row:hover, .btn-remove-row:hover { background: darken(var(--secondary-color), 5%); }
 
 .task-meta { margin: 0.5rem 0 1rem; }
 .task-meta .task-title { display: flex; gap: 0.5rem; align-items: center; }
@@ -172,6 +231,37 @@ h1 {
 .string-list-rows { list-style: none; padding: 0; margin: 0 0 0.5rem 0; }
 .string-list-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; }
 .string-list-row input[type="text"] { flex: 1 1 auto; }
+
+/* Popup styles */
+.container {
+  padding: 2rem;
+  max-width: 40rem;
+  margin: auto;
+}
+.form-group {
+  margin-bottom: 1rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
 
 /* Responsive tweaks */
 @media (max-width: 720px) {
