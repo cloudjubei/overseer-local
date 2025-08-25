@@ -2,7 +2,7 @@
   "id": 6,
   "status": "-",
   "title": "Agentic chat interface",
-  "description": "Allow communication with a chat agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard.",
+  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Allow communication with a chat agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard.",
   "features": [
   ]
 }

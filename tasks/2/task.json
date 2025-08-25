@@ -2,7 +2,7 @@
   "id": 2,
   "status": "-",
   "title": "Local settings storage and project root selector",
-  "description": "Implement a JSON-backed settings store in Electron userData path. Create UI to set and persist the path to the factory project root. Implement project validation against docs/FILE_ORGANISATION.md (check tasks/, docs/, scripts/, etc.). Acceptance: User can pick a folder; app validates and persists; invalid structure yields clear error; settings survive restarts; tested on macOS/Windows/Linux paths.",
+  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Implement a JSON-backed settings store in Electron userData path. Create UI to set and persist the path to the factory project root. Implement project validation against docs/FILE_ORGANISATION.md (check tasks/, docs/, scripts/, etc.). Acceptance: User can pick a folder; app validates and persists; invalid structure yields clear error; settings survive restarts; tested on macOS/Windows/Linux paths.",
   "features": [
     {
       "id": "2.1",
