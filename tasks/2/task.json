@@ -85,7 +85,7 @@
     },
     {
       "id": "2.6",
-      "status": "+",
+      "status": "-",
       "title": "Create mode - new feature",
       "description": "Allow adding a new feature to a task in a new popup window - make this the same pattern as edit mode.",
       "plan": "",
@@ -98,7 +98,7 @@
       "dependencies": [
         "2.5"
       ],
-      "rejection": "Currently the popup window displays nothing and it's not possible to close it in any way"
+      "rejection": "Seeing this in the popup every time: Error: No Task ID provided. This window should be opened from a task details page."
     },
     {
       "id": "2.7",
@@ -135,7 +135,7 @@
     },
     {
       "id": "2.9",
-      "status": "?",
+      "status": "-",
       "title": "Edit mode - moving tasks and features around",
       "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
       "plan": "",
@@ -147,8 +147,7 @@
       "acceptance": [],
       "dependencies": [
         "2.4"
-      ],
-      "rejection": "Blocked: Agent loop failed: the JSON object must be str, bytes or bytearray, not NoneType"
+      ]
     },
     {
       "id": "2.10",
