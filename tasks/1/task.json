@@ -86,7 +86,21 @@
         "README.md",
         "docs/FILE_ORGANISATION.md"
       ],
-      "acceptance": [],
+      "acceptance": [
+        "A README.md file exists at the repository root.",
+        "The README title starts with a Markdown heading and includes the words 'Electron', 'React', and 'TypeScript'.",
+        "The README mentions 'electron-vite'.",
+        "The README contains a 'Table of Contents' section as a Markdown heading.",
+        "The README contains the following sections as Markdown headings: Overview, Requirements, Quick Start, Scripts, Project Structure, Security Defaults, TypeScript Setup, Linting & Formatting, Environment Variables & CSP, Development Guidelines (IPC & Preload API), Build & Distribution, Troubleshooting, Contributing, License.",
+        "The Quick Start section documents install and run commands for at least one package manager: includes an install command ('pnpm install' or 'npm install'), a development command ('pnpm dev' or 'npm run dev'), and a build command ('pnpm build' or 'npm run build').",
+        "The Scripts section documents commands for dev, build, lint, and format (presence of references to 'dev', 'build', 'lint', and 'format' commands, with examples like 'pnpm ...' or 'npm run ...').",
+        "The Security Defaults section mentions 'contextIsolation' (true) and 'nodeIntegration' (false).",
+        "The README includes IPC and preload API examples or references containing the strings: 'contextBridge.exposeInMainWorld', 'ipcMain.handle', and 'ipcRenderer.invoke'.",
+        "The Project Structure section mentions the directories 'packages/main', 'packages/preload', and 'packages/renderer'.",
+        "The Build & Distribution section mentions that build artifacts are output to 'dist' (e.g., 'dist/').",
+        "The Requirements section mentions Node.js and an LTS version hint including '18' or '20'.",
+        "The README includes a License section that references a common license name (e.g., MIT, Apache, BSD, GPL) or explicitly states the license."
+      ],
       "dependencies": [
         "1.1",
         "1.2"

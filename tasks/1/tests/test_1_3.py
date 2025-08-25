@@ -1,100 +1,125 @@
-import json
 import os
 import re
-import sys
-from pathlib import Path
+import unittest
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+README_PATH = os.path.join(ROOT, 'README.md')
 
-errors = []
 
-def read_text(path: Path):
-    if not path.exists():
-        return None
-    try:
-        return path.read_text(encoding='utf-8')
-    except Exception as e:
-        errors.append(f"Failed to read {path}: {e}")
-        return None
+def read_readme():
+    assert os.path.exists(README_PATH), f"README.md not found at {README_PATH}"
+    with open(README_PATH, 'r', encoding='utf-8') as f:
+        return f.read()
 
-# 1. electron/main/index.ts exists
-main_ts_path = REPO_ROOT / 'electron' / 'main' / 'index.ts'
-main_ts = read_text(main_ts_path)
-if main_ts is None:
-    errors.append('electron/main/index.ts does not exist.')
 
-# 2-7. Security-related checks in main process
-if main_ts:
-    # contextIsolation: true
-    if not re.search(r"contextIsolation\s*:\s*true", main_ts):
-        errors.append('contextIsolation: true not found in BrowserWindow webPreferences in electron/main/index.ts')
-    # sandbox: true
-    if not re.search(r"sandbox\s*:\s*true", main_ts):
-        errors.append('sandbox: true not found in BrowserWindow webPreferences in electron/main/index.ts')
-    # nodeIntegration: false
-    if not re.search(r"nodeIntegration\s*:\s*false", main_ts):
-        errors.append('nodeIntegration: false not found in BrowserWindow webPreferences in electron/main/index.ts')
-    # webSecurity: true
-    if not re.search(r"webSecurity\s*:\s*true", main_ts):
-        errors.append('webSecurity: true not found in BrowserWindow webPreferences in electron/main/index.ts')
-    # setWindowOpenHandler deny
-    if not (re.search(r"setWindowOpenHandler\s*\(", main_ts) and re.search(r"action\s*:\s*['\"]deny['\"]", main_ts)):
-        errors.append('webContents.setWindowOpenHandler denying new windows not found in electron/main/index.ts')
-    # will-navigate handler that prevents external nav
-    has_will_navigate = re.search(r"will-navigate", main_ts) is not None
-    prevents_default = re.search(r"preventDefault\s*\(\s*\)", main_ts) is not None
-    if not (has_will_navigate and prevents_default):
-        errors.append('will-navigate handler preventing disallowed navigation not found in electron/main/index.ts')
+class TestReadmeElectronScaffold(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.content = read_readme()
 
-# 8. Preload exists and exposes API via contextBridge.exposeInMainWorld
-preload_ts_path = REPO_ROOT / 'electron' / 'preload' / 'index.ts'
-preload_ts = read_text(preload_ts_path)
-if preload_ts is None:
-    errors.append('electron/preload/index.ts does not exist.')
-else:
-    if not re.search(r"contextBridge", preload_ts):
-        errors.append('electron/preload/index.ts does not reference contextBridge.')
-    if not re.search(r"exposeInMainWorld\s*\(\s*['\"]\w+['\"]", preload_ts):
-        errors.append('electron/preload/index.ts does not expose an API via contextBridge.exposeInMainWorld.')
+    def test_title_and_stack(self):
+        c = self.content
+        # Title must start with a Markdown heading and include Electron, React, TypeScript
+        first_heading = re.search(r"^# +(.+)$", c, flags=re.MULTILINE)
+        self.assertIsNotNone(first_heading, "README must start with a level-1 heading")
+        title = first_heading.group(1)
+        for word in ["Electron", "React", "TypeScript"]:
+            self.assertRegex(title, re.compile(word, re.IGNORECASE), f"Title must include '{word}'")
+        self.assertRegex(c, re.compile(r"electron[- ]?vite", re.IGNORECASE), "README must mention 'electron-vite'")
 
-# 9. ipcMain.handle('ping', ...) returns 'pong'
-if main_ts:
-    has_ipc_ping = re.search(r"ipcMain\.handle\s*\(\s*['\"]ping['\"]", main_ts) is not None
-    returns_pong = re.search(r"['\"]pong['\"]", main_ts) is not None
-    if not (has_ipc_ping and returns_pong):
-        errors.append("ipcMain.handle('ping', ...) returning 'pong' not found in electron/main/index.ts")
+    def test_table_of_contents(self):
+        self.assertRegex(self.content, re.compile(r"^#{2,}\s*Table of Contents", re.IGNORECASE | re.MULTILINE), "Missing 'Table of Contents' section heading")
 
-# 10-11. package.json dev and build scripts
-package_json_path = REPO_ROOT / 'package.json'
-pkg_text = read_text(package_json_path)
-if pkg_text is None:
-    errors.append('package.json does not exist.')
-else:
-    try:
-        pkg = json.loads(pkg_text)
-        scripts = pkg.get('scripts', {}) if isinstance(pkg, dict) else {}
-        dev_script = scripts.get('dev', '')
-        build_script = scripts.get('build', '')
-        if not dev_script:
-            errors.append('package.json missing dev script.')
-        else:
-            # Accept common dev patterns (electron-vite dev or similar)
-            if not re.search(r"electron\S*\s*vite\b|electron-vite\b|vite\s+dev|electron\s+.*dev", dev_script):
-                errors.append("package.json dev script does not appear to start Electron in dev mode (expected something like 'electron-vite dev').")
-        if not build_script:
-            errors.append('package.json missing build script.')
-        else:
-            # Accept common build patterns (electron-vite build and/or electron-builder)
-            if not re.search(r"electron\S*\s*vite\b.*build|electron-vite\s+build|electron-builder|build\s+.*electron", build_script):
-                errors.append("package.json build script does not appear to build/package the Electron app (expected 'electron-vite build' and/or 'electron-builder').")
-    except json.JSONDecodeError as e:
-        errors.append(f'package.json is not valid JSON: {e}')
+    def test_required_sections(self):
+        c = self.content
+        sections = {
+            "Overview": r"^#{2,}\s*Overview",
+            "Requirements": r"^#{2,}\s*Requirements",
+            "Quick Start": r"^#{2,}\s*Quick\s*Start",
+            "Scripts": r"^#{2,}\s*Scripts",
+            "Project Structure": r"^#{2,}\s*Project\s*Structure",
+            "Security Defaults": r"^#{2,}\s*Security\s*Defaults",
+            "TypeScript Setup": r"^#{2,}\s*Type\s*Script\s*Setup|^#{2,}\s*TypeScript\s*Setup",
+            "Linting & Formatting": r"^#{2,}\s*Linting\s*&\s*Formatting",
+            "Environment Variables & CSP": r"^#{2,}\s*(Environment\s*Variables.*CSP|CSP)",
+            "Development Guidelines": r"^#{2,}\s*Development\s*Guidelines",
+            "Build & Distribution": r"^#{2,}\s*Build\s*&\s*Distribution",
+            "Troubleshooting": r"^#{2,}\s*Troubleshooting",
+            "Contributing": r"^#{2,}\s*Contributing",
+            "License": r"^#{2,}\s*License"
+        }
+        for name, pattern in sections.items():
+            self.assertRegex(c, re.compile(pattern, re.IGNORECASE | re.MULTILINE), f"Missing '{name}' section heading")
 
-if errors:
-    print('FAIL')
-    for e in errors:
-        print(f'- {e}')
-    sys.exit(1)
-else:
-    print('PASS')
-    sys.exit(0)
+    def test_quick_start_commands(self):
+        c = self.content
+        # Install command
+        self.assertTrue(
+            re.search(r"pnpm\s+install", c, re.IGNORECASE) or re.search(r"npm\s+install", c, re.IGNORECASE),
+            "Quick Start must include an install command (pnpm install or npm install)"
+        )
+        # Dev command
+        self.assertTrue(
+            re.search(r"pnpm\s+dev", c, re.IGNORECASE) or re.search(r"npm\s+run\s+dev", c, re.IGNORECASE),
+            "Quick Start must include a dev command (pnpm dev or npm run dev)"
+        )
+        # Build command
+        self.assertTrue(
+            re.search(r"pnpm\s+build", c, re.IGNORECASE) or re.search(r"npm\s+run\s+build", c, re.IGNORECASE),
+            "Quick Start must include a build command (pnpm build or npm run build)"
+        )
+
+    def test_scripts_commands(self):
+        c = self.content
+        # Must include a Scripts heading
+        self.assertRegex(c, re.compile(r"^#{2,}\s*Scripts", re.IGNORECASE | re.MULTILINE), "Missing 'Scripts' section")
+        # And references to dev, build, lint, format commands
+        self.assertTrue(
+            re.search(r"\bdev\b", c, re.IGNORECASE) and re.search(r"\bbuild\b", c, re.IGNORECASE),
+            "Scripts section must reference dev and build commands"
+        )
+        self.assertTrue(
+            (re.search(r"pnpm\s+lint", c, re.IGNORECASE) or re.search(r"npm\s+run\s+lint", c, re.IGNORECASE)),
+            "Scripts must include a lint command example"
+        )
+        self.assertTrue(
+            (re.search(r"pnpm\s+format", c, re.IGNORECASE) or re.search(r"npm\s+run\s+format", c, re.IGNORECASE)),
+            "Scripts must include a format command example"
+        )
+
+    def test_security_defaults_and_ipc_examples(self):
+        c = self.content
+        # Security defaults mentions
+        self.assertRegex(c, re.compile(r"contextIsolation", re.IGNORECASE), "Security Defaults must mention contextIsolation")
+        self.assertRegex(c, re.compile(r"nodeIntegration", re.IGNORECASE), "Security Defaults must mention nodeIntegration")
+        # IPC and preload references
+        self.assertIn("contextBridge.exposeInMainWorld", c, "README must include contextBridge.exposeInMainWorld reference")
+        self.assertIn("ipcMain.handle", c, "README must include ipcMain.handle reference")
+        self.assertIn("ipcRenderer.invoke", c, "README must include ipcRenderer.invoke reference")
+
+    def test_project_structure(self):
+        c = self.content
+        self.assertRegex(c, re.compile(r"packages/main", re.IGNORECASE), "Project Structure must mention packages/main")
+        self.assertRegex(c, re.compile(r"packages/preload", re.IGNORECASE), "Project Structure must mention packages/preload")
+        self.assertRegex(c, re.compile(r"packages/renderer", re.IGNORECASE), "Project Structure must mention packages/renderer")
+
+    def test_build_dist(self):
+        c = self.content
+        self.assertRegex(c, re.compile(r"\bdist/?\b", re.IGNORECASE), "Build & Distribution must mention dist output")
+
+    def test_requirements_node_version(self):
+        c = self.content
+        self.assertRegex(c, re.compile(r"Node(\.js)?", re.IGNORECASE), "Requirements must mention Node.js")
+        # Look for LTS versions like 18 or 20
+        self.assertTrue(re.search(r"\b1?8\b", c) or re.search(r"\b20\b", c), "Requirements should hint Node.js LTS versions (e.g., 18 or 20)")
+
+    def test_license_reference(self):
+        c = self.content
+        self.assertRegex(c, re.compile(r"^#{2,}\s*License", re.IGNORECASE | re.MULTILINE), "Missing License section heading")
+        # Expect mention of a common license name
+        has_license_name = any(re.search(pattern, c, re.IGNORECASE) for pattern in [r"\bMIT\b", r"Apache", r"BSD", r"GPL", r"MPL"])
+        self.assertTrue(has_license_name, "License section should reference a known license name (e.g., MIT)")
+
+
+if __name__ == '__main__':
+    unittest.main()
