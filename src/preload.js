@@ -37,5 +37,8 @@ contextBridge.exposeInMainWorld('docsIndex', {
   },
   getRenderedMarkdown: async (relativePath) => {
     return await ipcRenderer.invoke('docs-file:render', relativePath);
+  },
+  saveFile: async (relativePath, content) => {
+    return await ipcRenderer.invoke('docs-file:save', { relativePath, content });
   }
 });

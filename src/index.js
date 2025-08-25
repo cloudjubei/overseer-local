@@ -373,6 +373,23 @@ app.whenReady().then(async () => {
     }
   });
 
+  ipcMain.handle('docs-file:save', async (_event, payload) => {
+    try {
+      const { relativePath, content } = payload;
+      if (!relativePath || typeof relativePath !== 'string') throw new Error('Invalid path');
+      if (typeof content !== 'string') throw new Error('Content must be string');
+      const fullPath = path.join(docsIndexer.docsDir, relativePath);
+      if (!fullPath.startsWith(docsIndexer.docsDir) || !fullPath.endsWith('.md')) {
+        throw new Error('Invalid path');
+      }
+      await fsp.writeFile(fullPath, content, 'utf8');
+      // Watcher will trigger rebuild
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // New: task update handler (title, description)
   ipcMain.handle('tasks:update', async (_event, payload) => {
     try {

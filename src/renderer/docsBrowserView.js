@@ -105,16 +105,68 @@
 
     let currentIndex = null;
     let selectedPath = null;
+    let editor = null;
+    let isEditMode = false;
 
-    async function selectFile(path) {
-      selectedPath = path;
-      contentContainer.innerHTML = "";
+    async function enterEditMode(path, contentContainer) {
+      const res = await window.docsIndex.getFile(path);
+      if (!res.ok) {
+        contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file content: ${res.error}`));
+        return;
+      }
+      const markdown = res.content;
+
+      contentContainer.innerHTML = '';
+      const editorEl = createEl('div', { id: 'editor' });
+      contentContainer.appendChild(editorEl);
+
+      editor = new toastui.Editor({
+        el: editorEl,
+        initialEditType: 'wysiwyg',
+        previewStyle: 'vertical',
+        height: '500px',
+        initialValue: markdown
+      });
+
+      const actions = createEl('div', { class: 'editor-actions' });
+      const saveBtn = createEl('button', { onclick: async () => {
+        const updatedMarkdown = editor.getMarkdown();
+        const saveRes = await window.docsIndex.saveFile(path, updatedMarkdown);
+        if (saveRes.ok) {
+          exitEditMode(contentContainer);
+          await viewFile(path, contentContainer);
+        } else {
+          alert(`Failed to save: ${saveRes.error}`);
+        }
+      } }, 'Save');
+      const cancelBtn = createEl('button', { onclick: () => {
+        exitEditMode(contentContainer);
+        viewFile(path, contentContainer);
+      } }, 'Cancel');
+      actions.appendChild(saveBtn);
+      actions.appendChild(cancelBtn);
+      contentContainer.appendChild(actions);
+
+      isEditMode = true;
+    }
+
+    function exitEditMode(contentContainer) {
+      if (editor) {
+        editor.destroy();
+        editor = null;
+      }
+      contentContainer.innerHTML = '';
+      isEditMode = false;
+    }
+
+    async function viewFile(path, contentContainer) {
+      contentContainer.innerHTML = '';
       contentContainer.appendChild(createEl("div", {}, "Loading..."));
       try {
         const res = await window.docsIndex.getRenderedMarkdown(path);
         if (!res.ok) throw new Error(res.error || "Unknown error");
         const html = res.content;
-        contentContainer.innerHTML = "";
+        contentContainer.innerHTML = '';
         const mdDiv = createEl("div", { class: "markdown-body" });
         mdDiv.innerHTML = html;
         // Handle internal links
@@ -136,10 +188,19 @@
           }
         });
         contentContainer.appendChild(mdDiv);
+
+        const editBtn = createEl('button', { onclick: () => enterEditMode(path, contentContainer) }, 'Edit');
+        contentContainer.appendChild(editBtn);
       } catch (e) {
-        contentContainer.innerHTML = "";
+        contentContainer.innerHTML = '';
         contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file: ${e.message || e}`));
       }
+    }
+
+    async function selectFile(path) {
+      selectedPath = path;
+      if (isEditMode) exitEditMode(contentContainer);
+      await viewFile(path, contentContainer);
     }
 
     function updateVisibility() {

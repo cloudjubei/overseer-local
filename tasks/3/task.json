@@ -1,6 +1,6 @@
 {
   "id": 3,
-  "status": "-",
+  "status": "+",
   "title": "Markdown documentation explorer and renderer",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Implement a docs browser that lists Markdown files under docs/ (including docs/). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Introduce a sidebar that will have the sections of the app - currently Home (Tasks - task 2) and Docs (this feature).",
   "features": [
@@ -70,7 +70,7 @@
     },
     {
       "id": "3.8",
-      "status": "-",
+      "status": "+",
       "title": "Markdown editor",
       "description": "When clicking edit in a viewer, the user can go to a Markdown editor where they can change the text in a WYSIWYG style and save it.",
       "plan": "",
