@@ -1,8 +1,8 @@
 {
   "id": 5,
   "status": "-",
-  "title": "Markdown documentation explorer and renderer",
-  "description": "Implement a docs browser that lists Markdown files under docs/ (including docs/tasks/*). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Acceptance: Sidebar shows directory tree; renderer supports anchors and code blocks; clicking internal links navigates within the app; large files render efficiently; tested with provided docs/*.md.",
+  "title": "Read-only Git status panel",
+  "description": "Expose project Git by invoking the git CLI or a lightweight library. Show current branch, ahead/behind, changed files, and submodule summary. No write operations from this panel. Acceptance: Works across platforms; handles repositories with submodules; performance acceptable; unit tests stub git outputs; UI displays clear status indicators.",
   "features": [
   ]
 }
