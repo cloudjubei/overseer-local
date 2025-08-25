@@ -51,10 +51,13 @@ repo_root/
 │   ├─ task_create.html           # Popup window for creating a new task
 │   ├─ preload.js
 │   ├─ renderer/
-│   │   ├─ tasksListView.js       # Tasks list UI (search + filters, view-only; open popup to create task)
-│   │   ├─ taskDetailsView.js     # Task details UI with features list (includes edit for task title/description; includes feature edit)
-│   │   ├─ featureCreateView.js   # Popup create feature form (same fields as edit mode)
-│   │   └─ taskCreateView.js      # Popup create task form (ID, status, title, description)
+│   │   ├─ App.tsx                # React entry mounting legacy list/details views
+│   │   ├─ TaskCreateView.tsx     # React entry wrapping task create view
+│   │   ├─ FeatureCreateView.tsx  # React form for creating a feature
+│   │   ├─ tasksListView.js       # Legacy Tasks list UI (DOM-based)
+│   │   ├─ taskDetailsView.js     # Legacy Task details UI (DOM-based)
+│   │   ├─ featureCreateView.js   # (legacy; superseded by React form)
+│   │   └─ taskCreateView.js      # Legacy task create UI (DOM-based)
 │   ├─ tasks/
 │   │  └─ indexer.js              # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
@@ -65,11 +68,14 @@ repo_root/
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py           # Python source-of-truth schema
-└─ tasks/
-   └─ 1/
-      ├─ task.json
-      └─ tests/
-         └─ test_1_1.py
+├─ tasks/
+│  └─ 1/
+│     ├─ task.json
+│     └─ tests/
+│        └─ test_1_1.py
+├─ vite.main.config.js            # Vite config for main process
+├─ vite.preload.config.js         # Vite config for preload scripts
+└─ vite.renderer.config.js        # Vite config for renderer (React)
 ```
 
 ## Logical Tasks Indexer
@@ -108,14 +114,9 @@ repo_root/
 ## Renderer UI
 - Location: src/renderer/
 - Purpose:
-  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}). Includes a Create Task control as a popup (task_create.html) with fields: ID, status, title, description.
-  - taskDetailsView.js: Renders a task details page showing task metadata and its features.
-    - Provides a Back button.
-    - Includes inline edit mode for the task's title and description with Save/Cancel; saving persists via IPC and re-renders on index updates.
-    - Includes inline edit mode for a feature allowing editing: status, title, description, plan, context, acceptance, dependencies, and rejection.
-    - Includes a Create mode to add a new feature implemented as a popup window (feature_create.html) with the same fields as edit mode.
-  - featureCreateView.js: Implements the popup form for creating a new feature, including dependency suggestions and resolution.
-  - taskCreateView.js: Implements the popup form for creating a new task, computing a suggested next numeric ID.
+  - App.tsx mounts the React app and renders containers for the legacy list and details views while we migrate. This ensures the app uses React for the UI entry point.
+  - TaskCreateView.tsx wraps the legacy task creation UI in a React entry.
+  - FeatureCreateView.tsx implements the popup form for creating a new feature using React.
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.

@@ -153,7 +153,7 @@
     },
     {
       "id": "2.10",
-      "status": "-",
+      "status": "+",
       "title": "Refactor",
       "description": "The code was meant to use React for UI - make sure it does.",
       "plan": "",

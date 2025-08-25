@@ -11,8 +11,28 @@ if (require('electron-squirrel-startup')) {
 
 let indexer = null;
 
+function upperEnvPrefix(name) {
+  return String(name || '').toUpperCase().replace(/[^A-Z0-9]/g, '_');
+}
+
+function loadRenderer(win, name, hash) {
+  const PREFIX = upperEnvPrefix(name);
+  const DEV_URL = process.env[`${PREFIX}_VITE_DEV_SERVER_URL`];
+  const VITE_NAME = process.env[`${PREFIX}_VITE_NAME`];
+  if (DEV_URL) {
+    const url = hash ? `${DEV_URL}#${hash}` : DEV_URL;
+    win.loadURL(url);
+  } else {
+    const filePath = path.join(__dirname, `../renderer/${VITE_NAME}/index.html`);
+    if (hash) {
+      win.loadFile(filePath, { hash });
+    } else {
+      win.loadFile(filePath);
+    }
+  }
+}
+
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 700,
@@ -21,11 +41,12 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  loadRenderer(mainWindow, 'main_window');
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // Open the DevTools in development.
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  }
 
   // Push index updates to renderer
   if (indexer) {
@@ -46,7 +67,6 @@ async function ensureTasksDir(tasksDir) {
   try {
     await fsp.mkdir(tasksDir, { recursive: true });
   } catch (e) {
-    // ignore if it exists; rethrow others
     if (e && e.code !== 'EEXIST') throw e;
   }
 }
@@ -141,7 +161,6 @@ async function updateFeatureInTaskFile(tasksDir, taskId, featureId, patch) {
 
   const current = json.features[idx] || {};
 
-  // Sanitize patch
   const allowed = ['status', 'title', 'description', 'plan', 'context', 'acceptance', 'dependencies', 'rejection'];
   const next = { ...current };
   for (const k of allowed) {
@@ -233,10 +252,8 @@ async function addFeatureToTaskFile(tasksDir, taskId, feature) {
     json.features = [];
   }
 
-  // Validate and sanitize incoming feature
   if (!feature || typeof feature !== 'object') throw new Error('feature must be an object');
   const out = {};
-  // id: optional from payload; if not provided, generate from title
   let incomingId = feature.id;
   if (incomingId != null) {
     if (typeof incomingId !== 'string' || !incomingId.trim()) throw new Error('feature.id must be a non-empty string if provided');
@@ -246,29 +263,24 @@ async function addFeatureToTaskFile(tasksDir, taskId, feature) {
     out.id = allocateFeatureId(existingIds, feature.title);
   }
   if (json.features.some(f => f && f.id === out.id)) throw new Error(`Feature id '${out.id}' already exists in task ${taskId}`);
-  // status
   if (!STATUSES.has(feature.status)) throw new Error('feature.status must be one of +,~, -,?,=');
   out.status = feature.status;
-  // title/description/plan
   for (const k of ['title', 'description', 'plan']) {
     const v = feature[k];
     if (typeof v !== 'string') throw new Error(`feature.${k} must be string`);
     out[k] = v;
   }
-  // context/acceptance (required arrays)
   for (const k of ['context', 'acceptance']) {
     const v = feature[k];
     if (!Array.isArray(v) || v.some(x => typeof x !== 'string')) throw new Error(`feature.${k} must be string[]`);
     out[k] = v.map(s => String(s).trim()).filter(s => s.length > 0);
   }
-  // dependencies (optional)
   if (feature.dependencies !== undefined) {
     const v = feature.dependencies;
     if (!Array.isArray(v) || v.some(x => typeof x !== 'string')) throw new Error('feature.dependencies must be string[] if provided');
     const arr = v.map(s => String(s).trim()).filter(s => s.length > 0);
     if (arr.length > 0) out.dependencies = arr;
   }
-  // rejection (optional)
   if (feature.rejection !== undefined) {
     const v = feature.rejection;
     if (v != null && typeof v !== 'string') throw new Error('feature.rejection must be string if provided');
@@ -329,9 +341,7 @@ function openFeatureCreateWindow(parentWindow, taskId) {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
-  const filePath = path.join(__dirname, 'feature_create.html');
-  // Pass task id via hash for the popup
-  win.loadFile(filePath, { hash: `task/${taskId}` });
+  loadRenderer(win, 'feature_create', `task/${taskId}`);
   return win;
 }
 
@@ -345,16 +355,11 @@ function openTaskCreateWindow(parentWindow) {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
-  const filePath = path.join(__dirname, 'task_create.html');
-  win.loadFile(filePath);
+  loadRenderer(win, 'task_create');
   return win;
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  // Resolve project root: one level up from src/ in dev
   const projectRoot = path.resolve(__dirname, '..');
   indexer = new TasksIndexer(projectRoot);
   await indexer.init();
@@ -363,7 +368,6 @@ app.whenReady().then(async () => {
     return indexer ? indexer.getIndex() : null;
   });
 
-  // New: task update handler (title, description)
   ipcMain.handle('tasks:update', async (_event, payload) => {
     try {
       if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
@@ -378,7 +382,6 @@ app.whenReady().then(async () => {
     }
   });
 
-  // New: feature update handler
   ipcMain.handle('tasks-feature:update', async (_event, payload) => {
     try {
       if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
@@ -387,7 +390,6 @@ app.whenReady().then(async () => {
       if (!featureId || typeof featureId !== 'string') throw new Error('featureId must be string');
       if (!data || typeof data !== 'object') throw new Error('data must be object');
       await updateFeatureInTaskFile(indexer.tasksDir, taskId, featureId, data);
-      // Rebuild index immediately for responsive UI
       await indexer.buildIndex();
       return { ok: true };
     } catch (e) {
@@ -395,7 +397,6 @@ app.whenReady().then(async () => {
     }
   });
 
-  // New: feature add handler
   ipcMain.handle('tasks-feature:add', async (_event, payload) => {
     try {
       if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
@@ -410,7 +411,6 @@ app.whenReady().then(async () => {
     }
   });
 
-  // New: task add handler
   ipcMain.handle('tasks:add', async (_event, payload) => {
     try {
       if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
@@ -422,7 +422,6 @@ app.whenReady().then(async () => {
     }
   });
 
-  // New: open feature create popup
   ipcMain.handle('feature-create:open', async (event, payload) => {
     try {
       if (!payload || typeof payload !== 'object') throw new Error('Invalid payload');
@@ -436,7 +435,6 @@ app.whenReady().then(async () => {
     }
   });
 
-  // New: open task create popup
   ipcMain.handle('task-create:open', async (event) => {
     try {
       const parent = BrowserWindow.fromWebContents(event.sender);
@@ -449,8 +447,6 @@ app.whenReady().then(async () => {
 
   createWindow();
 
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -458,9 +454,6 @@ app.whenReady().then(async () => {
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -470,6 +463,3 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   if (indexer) indexer.stopWatching();
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
