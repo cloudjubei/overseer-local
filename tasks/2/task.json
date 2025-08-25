@@ -135,7 +135,7 @@
     },
     {
       "id": "2.9",
-      "status": "-",
+      "status": "?",
       "title": "Edit mode - moving tasks and features around",
       "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
       "plan": "",
@@ -147,7 +147,8 @@
       "acceptance": [],
       "dependencies": [
         "2.4"
-      ]
+      ],
+      "rejection": "Blocked: Agent loop failed: the JSON object must be str, bytes or bytearray, not NoneType"
     },
     {
       "id": "2.10",
