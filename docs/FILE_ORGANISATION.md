@@ -46,14 +46,17 @@ repo_root/
 │   ├─ index.css
 │   ├─ index.html
 │   ├─ index.js
-│   └─ preload.js
+│   ├─ preload.js
+│   └─ tasks/
+│      └─ indexer.js           # Logical Tasks indexer and file watcher (this feature)
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
 │  └─ tasks/
 │     ├─ task_example.json
 │     ├─ task_format.py           # Python source-of-truth schema
-│     └─ task_format.ts           # TypeScript mirror of the schema
+│     ├─ INDEXING_PERFORMANCE.md  # Performance notes & how to measure
+│     └─ task_format.ts           # (optional) TypeScript mirror of the schema
 ├─ scripts/
 │  └─ setup-linting-formatting.js
 └─ tasks/
@@ -63,4 +66,22 @@ repo_root/
          └─ test_1_1.py
 ```
 
-This diagram shows how documentation, scripts, and per-task artifacts are arranged, including the Electron desktop app under src/desktop created with electron-vite. It also highlights that the task schema exists both in Python (authoritative) and as a TypeScript mirror under docs/tasks/ for use in TypeScript tooling and apps.
+## Logical Tasks Indexer
+- Location: src/tasks/indexer.js
+- Purpose: Scans tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features; watches for file changes and refreshes the index.
+- API:
+  - Class TasksIndexer(projectRoot)
+    - getIndex(): returns the current index snapshot
+    - init(): builds the index and starts watchers
+    - buildIndex(): triggers a full rescan
+    - stopWatching(): stops all watchers
+  - Index shape:
+    - { root, tasksDir, updatedAt, tasksById, featuresByKey, errors, metrics: { lastScanMs, lastScanCount } }
+- Integration:
+  - The Electron main process instantiates the indexer and exposes IPC channels:
+    - tasks-index:get (invoke) returns the index snapshot
+    - tasks-index:update (event) pushes updates on changes
+  - Preload exposes window.tasksIndex with getSnapshot() and onUpdate(cb) for renderer use.
+
+Performance
+- See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.
