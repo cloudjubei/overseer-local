@@ -28,133 +28,88 @@
     return el;
   }
 
-  function buildTreeEl(tree, selectHandler) {
-    const ul = createEl("ul", { class: "docs-tree" });
-    tree.children.forEach((child) => {
-      const li = createEl("li");
-      if (child.type === "directory") {
-        const details = createEl("details");
-        const summary = createEl("summary", { text: child.name });
-        details.appendChild(summary);
-        const subUl = buildTreeEl(child, selectHandler);
-        details.appendChild(subUl);
-        li.appendChild(details);
-      } else {
-        li.className = "file";
-        li.dataset.path = child.path;
-        li.textContent = child.name;
-        li.onclick = () => selectHandler(child.path);
-        li.tabindex = 0;
-        li.role = "button";
-        li.setAttribute("aria-label", `Select file ${child.name}`);
-      }
-      ul.appendChild(li);
-    });
-    return ul;
+  function isDocsRoute(hash) {
+    return hash === "#docs";
+  }
+
+  function buildTreeNode(node, parentUl) {
+    const li = createEl("li");
+    if (node.type === "directory") {
+      li.className = "directory";
+      const summary = createEl("summary", {}, node.name || "docs");
+      const details = createEl("details", {}, [summary]);
+      const subUl = createEl("ul");
+      details.appendChild(subUl);
+      li.appendChild(details);
+      // Sort directories first, then files
+      const sortedChildren = [...node.children].sort((a, b) => (a.type === "directory" ? -1 : 1));
+      sortedChildren.forEach((child) => buildTreeNode(child, subUl));
+    } else if (node.type === "file") {
+      li.className = "file";
+      const link = createEl("a", { href: "#", onclick: (e) => { e.preventDefault(); selectFile(node.path); } }, node.name);
+      li.appendChild(link);
+    }
+    parentUl.appendChild(li);
+  }
+
+  async function selectFile(path) {
+    contentContainer.innerHTML = "";
+    contentContainer.appendChild(createEl("div", {}, "Loading..."));
+    try {
+      const res = await window.docsIndex.getFile(path);
+      if (!res.ok) throw new Error(res.error || "Unknown error");
+      contentContainer.innerHTML = "";
+      contentContainer.appendChild(createEl("pre", {}, res.content));
+    } catch (e) {
+      contentContainer.innerHTML = "";
+      contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file: ${e.message || e}`));
+    }
+  }
+
+  function render(index, treeContainer, contentContainer, errorsContainer) {
+    treeContainer.innerHTML = "";
+    errorsContainer.innerHTML = "";
+    if (!index || !index.docsTree) {
+      treeContainer.appendChild(createEl("div", { class: "empty" }, "Failed to load documentation index."));
+      return;
+    }
+    if (index.docsTree.children.length === 0) {
+      treeContainer.appendChild(createEl("div", { class: "empty" }, "No documentation files found."));
+    } else {
+      const ul = createEl("ul", { class: "docs-tree" });
+      buildTreeNode(index.docsTree, ul);
+      treeContainer.appendChild(ul);
+    }
+    if (index.errors && index.errors.length > 0) {
+      const errList = createEl("ul", {}, index.errors.map((err) => createEl("li", {}, err)));
+      errorsContainer.appendChild(createEl("div", { class: "errors" }, [createEl("h3", {}, "Indexing Errors"), errList]));
+    }
+    // For initial, show select message
+    contentContainer.innerHTML = "";
+    contentContainer.appendChild(createEl("div", {}, "Select a file to view its content."));
   }
 
   async function init() {
-    const root = $("#docs-view");
+    const root = document.getElementById("docs-view");
     if (!root) return;
 
-    const browser = createEl("div", { class: "docs-browser" });
-    const treeContainer = createEl("div", { class: "docs-tree-container" });
-    const contentContainer = createEl("div", { class: "docs-content-container" });
-    browser.appendChild(treeContainer);
-    browser.appendChild(contentContainer);
+    const heading = createEl("h2", { id: "docs-view-heading" }, "Documentation");
 
-    root.appendChild(createEl("h2", { id: "docs-view-heading", text: "Documentation" }));
+    const treeContainer = createEl("div", { class: "docs-tree-container" });
+    const contentContainerLocal = createEl("div", { class: "docs-content-container" });
+    const errorsContainer = createEl("div", { class: "docs-errors-container" });
+
+    const browser = createEl("div", { class: "docs-browser" }, [treeContainer, contentContainerLocal]);
+
+    root.appendChild(heading);
     root.appendChild(browser);
+    root.appendChild(errorsContainer);
 
     let currentIndex = null;
     let selectedPath = null;
 
-    function resolvePath(base, rel) {
-      if (rel.startsWith('/')) {
-        return rel.slice(1);
-      }
-      const baseParts = base.split('/').slice(0, -1);
-      const relParts = rel.split('/');
-      const parts = baseParts.slice();
-      for (let i = 0; i < relParts.length; i++) {
-        const part = relParts[i];
-        if (part === '' || part === '.') continue;
-        if (part === '..') {
-          if (parts.length > 0) parts.pop();
-        } else {
-          parts.push(part);
-        }
-      }
-      return parts.join('/');
-    }
-
-    async function selectFile(path) {
-      selectedPath = path;
-      const allFiles = root.querySelectorAll(".file");
-      allFiles.forEach((el) => el.classList.toggle("selected", el.dataset.path === path));
-      try {
-        const html = await window.docsIndex.getRenderedMarkdown(path);
-        contentContainer.innerHTML = "";
-        const mdDiv = createEl("div", { class: "markdown-body" });
-        mdDiv.innerHTML = html;
-        contentContainer.appendChild(mdDiv);
-
-        mdDiv.addEventListener('click', (e) => {
-          const link = e.target.closest('a');
-          if (!link) return;
-          const href = link.getAttribute('href');
-          if (!href) return;
-          const [pathPart, hashPart] = href.split('#');
-          const hash = hashPart || null;
-          if (pathPart.startsWith('http:') || pathPart.startsWith('https:') || pathPart.startsWith('//')) return;
-          if (pathPart && !pathPart.endsWith('.md')) return;
-          e.preventDefault();
-          const targetPath = pathPart ? resolvePath(selectedPath, pathPart) : selectedPath;
-          if (targetPath === selectedPath) {
-            if (hash) {
-              const el = contentContainer.querySelector(`[id="${hash}"]`);
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }
-          } else {
-            selectFile(targetPath).then(() => {
-              if (hash) {
-                const el = contentContainer.querySelector(`[id="${hash}"]`);
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }
-            });
-          }
-        });
-      } catch (e) {
-        contentContainer.innerHTML = "";
-        contentContainer.appendChild(createEl("div", { class: "error", text: `Failed to load file: ${e.message}` }));
-      }
-    }
-
-    function render() {
-      treeContainer.innerHTML = "";
-      contentContainer.innerHTML = "";
-      const tree = currentIndex?.docsTree;
-      if (!tree || tree.children.length === 0) {
-        treeContainer.appendChild(createEl("div", { class: "empty", text: "No documentation files found." }));
-        contentContainer.appendChild(createEl("div", { class: "empty", text: "Select a file to view its content." }));
-        return;
-      }
-      const treeEl = buildTreeEl(tree, selectFile);
-      treeContainer.appendChild(treeEl);
-      if (currentIndex.errors?.length > 0) {
-        const errDiv = createEl("div", { class: "errors" });
-        currentIndex.errors.forEach((err) => errDiv.appendChild(createEl("p", { text: err })));
-        treeContainer.appendChild(errDiv);
-      }
-      if (selectedPath && currentIndex.filesByPath?.[selectedPath]) {
-        selectFile(selectedPath);
-      } else {
-        contentContainer.appendChild(createEl("div", { class: "empty", text: "Select a file to view its content." }));
-      }
-    }
-
     function updateVisibility() {
-      root.style.display = location.hash === "#docs" ? "" : "none";
+      root.style.display = isDocsRoute(location.hash) ? "" : "none";
     }
 
     window.addEventListener("hashchange", updateVisibility);
@@ -162,13 +117,16 @@
 
     try {
       currentIndex = await window.docsIndex.getSnapshot();
-      render();
+      render(currentIndex, treeContainer, contentContainerLocal, errorsContainer);
       window.docsIndex.onUpdate((idx) => {
         currentIndex = idx;
-        render();
+        render(idx, treeContainer, contentContainerLocal, errorsContainer);
+        if (selectedPath && idx.filesByPath && idx.filesByPath[selectedPath]) {
+          selectFile(selectedPath);
+        }
       });
     } catch (e) {
-      treeContainer.appendChild(createEl("div", { class: "error", text: "Failed to load docs index." }));
+      treeContainer.appendChild(createEl("div", { class: "error" }, "Failed to load docs index."));
     }
   }
 
