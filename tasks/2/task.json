@@ -169,13 +169,14 @@
         "vite.preload.config.js",
         "vite.renderer.config.js",
         "src/index.js",
+        "src/index.html",
         "src/preload.js"
       ],
       "acceptance": [],
       "dependencies": [
         "2.9"
       ],
-      "rejection": "UnhandledPromiseRejectionWarning: Error: Fatal: MAIN_WINDOW_VITE_NAME environment variable is not set."
+      "rejection": "(node:75962) electron: Failed to load URL: file://./index.html with error: ERR_FILE_NOT_FOUND"
     },
     {
       "id": "2.12",
