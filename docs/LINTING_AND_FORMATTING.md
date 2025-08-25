@@ -1,12 +1,12 @@
-Linting and Formatting Setup
+# Linting and Formatting Setup
 
-Overview
+## Overview
 - ESLint: Static analysis for JS/TS with React and Electron contexts
 - Prettier: Consistent code formatting
 - Husky: Git hooks to enforce checks on commits
 - lint-staged: Run linters only on changed files for speed
 
-Setup
+## Setup
 - Run the one-shot script: node scripts/setup-linting-formatting.js
 - The script installs dev dependencies, writes config files, updates package.json, sets up Husky, and adds a CI workflow
 

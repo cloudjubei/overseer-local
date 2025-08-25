@@ -9,7 +9,6 @@ This document describes how files and directories are organised in this reposito
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
-- .husky/: Git hooks configured by Husky.
 - .github/workflows/: CI workflows (e.g., lint on push/PR).
 - .env, and other setup files may exist as needed.
 
@@ -51,13 +50,12 @@ repo_root/
 │   └─ preload.js
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
+│  ├─ LINTING_AND_FORMATTING.md
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_formay.py
 ├─ scripts/
 │  └─ setup-linting-formatting.js
-├─ .husky/
-│  └─ pre-commit
 ├─ .github/
 │  └─ workflows/
 │     └─ lint.yml
@@ -69,8 +67,3 @@ repo_root/
 ```
 
 This diagram shows how documentation, scripts, and per-task artifacts are arranged, including the Electron desktop app under src/desktop created with electron-vite.
-
-Notes on recent additions:
-- scripts/: Added for project automation scripts (e.g., linting/formatting setup)
-- .husky/: Added for Git hooks managed by Husky
-- .github/workflows/: Added CI pipeline for linting/formatting

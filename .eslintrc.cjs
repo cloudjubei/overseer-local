@@ -38,20 +38,11 @@ module.exports = {
     'simple-import-sort/imports': 'warn',
     'simple-import-sort/exports': 'warn',
     'react/react-in-jsx-scope': 'off'
-  ],
+  },
   overrides: [
-    {
-      files: ['src/renderer/**/*.{ts,tsx,js,jsx}'],
-      env: { browser: true }
-    },
-    {
-      files: ['src/main/**/*.{ts,js}', 'src/preload/**/*.{ts,js}', '*.config.{ts,js,mjs,cjs}'],
-      env: { node: true }
-    },
-    {
-      files: ['**/*.{test,spec}.{ts,tsx,js,jsx}'],
-      env: { 'vitest/globals': true }
-    }
+    { files: ['src/renderer/**/*.{ts,tsx,js,jsx}'], env: { browser: true } },
+    { files: ['src/main/**/*.{ts,js}', 'src/preload/**/*.{ts,js}', '*.config.{ts,js,mjs,cjs}'], env: { node: true } },
+    { files: ['**/*.{test,spec}.{ts,tsx,js,jsx}'], env: { 'vitest/globals': true } }
   ],
   ignorePatterns: ['dist', 'build', 'out', 'node_modules', '.husky']
 };
