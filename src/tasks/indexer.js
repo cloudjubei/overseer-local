@@ -104,14 +104,15 @@ class TasksIndexer extends EventEmitter {
     let taskDirs = [];
     try {
       const entries = await fsp.readdir(this.tasksDir, { withFileTypes: true });
-      taskDirs = entries.filter((e) => e.isDirectory() && /^\d+$/.test(e.name)).map((e) => path.join(this.tasksDir, e.name));
+      taskDirs = entries
+        .filter((e) => e.isDirectory() && /^\d+$/.test(e.name))
+        .map((e) => path.join(this.tasksDir, e.name));
     } catch (err) {
       // no tasks dir yet – index empty
       idx.errors.push({ path: this.tasksDir, error: String(err) });
     }
 
     const loadPromises = taskDirs.map(async (dir) => {
-      const idStr = path.basename(dir);
       const file = path.join(dir, "task.json");
       try {
         const data = await fsp.readFile(file, "utf8");
@@ -139,6 +140,14 @@ class TasksIndexer extends EventEmitter {
     idx.metrics.lastScanMs = Math.max(0, nowMs() - t0);
 
     this.index = idx;
+
+    // Keep watchers in sync with current state (new/deleted task dirs)
+    try {
+      this._syncTaskDirWatchers(taskDirs);
+    } catch (_) {
+      // best-effort; watcher sync issues shouldn't prevent index update
+    }
+
     this.emit("updated", this.index);
     return idx;
   }
@@ -156,11 +165,20 @@ class TasksIndexer extends EventEmitter {
     const rootWatcher = fs.watch(this.tasksDir, { persistent: true }, (eventType, filename) => {
       // Any rename or change under tasks root triggers a rescan with debounce
       this._debouncedRebuild();
-      // If a new numeric dir appears, attach a watcher to its task.json once it exists.
+
+      // If a new numeric dir appears, attach a watcher to it
+      if (filename && /^\d+$/.test(String(filename))) {
+        const candidate = path.join(this.tasksDir, String(filename));
+        fsp.stat(candidate)
+          .then((st) => {
+            if (st.isDirectory()) this._watchTaskDir(candidate);
+          })
+          .catch(() => {});
+      }
     });
     this._watchers.set(rootWatcherKey, rootWatcher);
 
-    // Attach watchers for each task.json present at startup
+    // Attach watchers for each task directory present at startup
     const entries = await fsp.readdir(this.tasksDir, { withFileTypes: true }).catch(() => []);
     for (const e of entries) {
       if (e.isDirectory() && /^\d+$/.test(e.name)) {
@@ -179,13 +197,32 @@ class TasksIndexer extends EventEmitter {
           this._debouncedRebuild();
           return;
         }
-        if (filename === "task.json" || /^test/i.test(filename) || eventType === "rename") {
+        if (filename === "task.json" || /^test/i.test(String(filename)) || eventType === "rename") {
           this._debouncedRebuild();
         }
       });
       this._watchers.set(key, watcher);
     } catch (e) {
       // Ignore watcher errors for directories that may disappear
+    }
+  }
+
+  _syncTaskDirWatchers(taskDirs) {
+    // Ensure a watcher exists for each dir; remove watchers for dirs that no longer exist
+    const expectedKeys = new Set(taskDirs.map((d) => path.join(d, "task.json")));
+
+    // Add missing
+    for (const d of taskDirs) {
+      this._watchTaskDir(d);
+    }
+
+    // Remove stale (exclude the root watcher which is keyed by tasksDir path)
+    for (const [key, watcher] of this._watchers) {
+      if (key === this.tasksDir) continue; // root watcher
+      if (!expectedKeys.has(key)) {
+        try { watcher.close(); } catch (_) {}
+        this._watchers.delete(key);
+      }
     }
   }
 
