@@ -232,6 +232,22 @@
         "2.4",
         "2.13"
       ]
+    },
+    {
+      "id": "2.15",
+      "status": "-",
+      "title": "Improve UI to match best competitors",
+      "description": "Look at the competitor landscape (search online the latest best similar apps) and look at how their design is. Propose 3 designs in a document DESIGN_PROPOSALS.md. If you can include image references that would be ideals.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.14"
+      ]
     }
   ]
 }
