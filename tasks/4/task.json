@@ -189,7 +189,7 @@
     },
     {
       "id": "4.19",
-      "status": "-",
+      "status": "+",
       "title": "Custom local provider - LM Studio",
       "description": "Allow using LM Studio's API server that lists models at http://localhost:1234/v1/models - there should be a check to see that it's running and then all the available models can be listed. To post messages to: http://localhost:1234/v1/chat/completions",
       "plan": "",

@@ -2,6 +2,7 @@ import { ChatMessage, LLMConfig } from '../types';
 
 export type ChatService = {
   getCompletion: (messages: ChatMessage[], config: LLMConfig) => Promise<ChatMessage>;
+  listModels: (config: LLMConfig) => Promise<string[]>;
   list: () => Promise<string[]>;
   create: () => Promise<string>;
   load: (chatId: string) => Promise<ChatMessage[]>;
@@ -11,6 +12,7 @@ export type ChatService = {
 
 export const chatService: ChatService = {
   getCompletion: (messages, config) => window.chat.getCompletion(messages, config),
+  listModels: (config) => window.chat.listModels(config),
   list: () => window.chat.list(),
   create: () => window.chat.create(),
   load: (chatId) => window.chat.load(chatId),

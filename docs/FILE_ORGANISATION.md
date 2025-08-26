@@ -51,7 +51,8 @@ repo_root/
 │  │  ├─ providers/
 │  │  │  ├─ base.js
 │  │  │  ├─ openai.js
-│  │  │  └─ litellm.js
+│  │  │  ├─ litellm.js
+│  │  │  └─ lmstudio.js
 │  │  └─ manager.js          
 │  ├─ docs/
 │  │  └─ indexer.js        
@@ -121,6 +122,7 @@ Notes on recent changes
 - Updated TasksListView to use Navigator for opening the Create Task modal and for navigating to task details, aligning with STANDARDS.md (centralized navigation).
 - Added src/chat/providers/ for LLM provider abstractions.
 - Added SettingsView.tsx for advanced settings including LLM configurations.
+- Added src/chat/providers/lmstudio.js for LM Studio support.
 
 Rationale
 - This eliminates the macOS bug where modal BrowserWindows showed the underlying app view and did not close when the modal was dismissed. Rendering modals in the same window ensures consistent behavior, proper focus management, and simpler state handling.
