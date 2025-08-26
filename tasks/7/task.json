@@ -211,7 +211,7 @@
     },
     {
       "id": "7.16",
-      "status": "-",
+      "status": "+",
       "title": "SettingsView according to latest design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
