@@ -33,7 +33,7 @@
     },
     {
       "id": "3.4",
-      "status": "-",
+      "status": "+",
       "title": "Create Docs browser view component with file listing",
       "description": "Reference the legacy `src/rendereer/docsBrowserView.js`. Create a React component that fetches the docs index via IPC, renders a tree or collapsible list of markdown files and directories under docs/. Handle selection of a file to display its content (to be rendered in later features). Subscribe to index updates for real-time refreshes and handle empty states or errors.",
       "plan": "",
