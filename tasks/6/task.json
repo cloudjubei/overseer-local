@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "6.1",
-      "status": "-",
+      "status": "+",
       "title": "Install electron-builder dependency",
       "description": "Add electron-builder as a devDependency in package.json and install it using npm. This enables packaging capabilities for the Electron app.",
       "plan": "",
@@ -15,16 +15,17 @@
     },
     {
       "id": "6.2",
-      "status": "-",
+      "status": "?",
       "title": "Configure basic electron-builder settings",
       "description": "Add a 'build' section in package.json with basic configurations such as appId, productName, directories (output, buildResources), and files to include in the build.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: Extra data: line 14 column 1 (char 583)"
     },
     {
       "id": "6.3",
-      "status": "-",
+      "status": "+",
       "title": "Configure macOS DMG packaging",
       "description": "In the build configuration, add mac-specific settings including target 'dmg', icon path (icns), and any necessary entitlements or artifacts.",
       "plan": "",
@@ -33,7 +34,7 @@
     },
     {
       "id": "6.4",
-      "status": "-",
+      "status": "+",
       "title": "Configure Windows NSIS packaging",
       "description": "In the build configuration, add win-specific settings including target 'nsis', icon path (ico), and installer options like one-click installation.",
       "plan": "",
@@ -42,7 +43,7 @@
     },
     {
       "id": "6.5",
-      "status": "-",
+      "status": "+",
       "title": "Configure Linux AppImage packaging",
       "description": "In the build configuration, add linux-specific settings including target 'appimage', icon path (png), and desktop entry details.",
       "plan": "",
@@ -51,7 +52,7 @@
     },
     {
       "id": "6.6",
-      "status": "-",
+      "status": "+",
       "title": "Add app icons for all platforms",
       "description": "Create or add placeholder icon files (icon.icns for macOS, icon.ico for Windows, icon.png for Linux) in a build resources directory (e.g., build/), and reference them in the build configuration.",
       "plan": "",
@@ -60,7 +61,7 @@
     },
     {
       "id": "6.7",
-      "status": "-",
+      "status": "+",
       "title": "Add code signing placeholders",
       "description": "In the build configuration, add placeholders for code signing, such as CSC_LINK and CSC_KEY_PASSWORD environment variables for macOS and Windows, with documentation on how to set them for production builds.",
       "plan": "",
