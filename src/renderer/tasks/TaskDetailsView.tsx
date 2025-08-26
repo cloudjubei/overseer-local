@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import EditableTaskMeta from './EditableTaskMeta'
 import type { Feature, Status, Task } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
-import type { TasksIndexSnapshot } from '../types/external'
+import type { TasksIndexSnapshot } from '../../types/external'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',

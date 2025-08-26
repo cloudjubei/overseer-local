@@ -47,6 +47,16 @@ repo_root/
 │  ├─ STANDARDS.md
 │  └─ BUILD_SIGNING.md
 ├─ src/
+│  ├─ chat/
+│  │  └─ manager.js          
+│  ├─ docs/
+│  │  └─ indexer.js        
+│  ├─ tasks/
+│  │  ├─ indexer.js                 
+│  │  └─ validator.js                
+│  ├─ types/
+│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
+│  │  └─ tasks.ts                      # Shared Task/Feature/Status types
 │  ├─ renderer/
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
@@ -56,38 +66,45 @@ repo_root/
 │  │  │     ├─ Alert.tsx               # Reusable AlertDialog
 │  │  │     ├─ Button.tsx              # Reusable Button
 │  │  │     ├─ Modal.tsx               # Reusable Modal
-│  │  │     └─ Toast.tsx               # ToastProvider + useToast (lightweight)
+│  │  │     └─ Toast.tsx               # ToastProvider + useToast
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts             # Wraps window.chat API
 │  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
-│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API (strongly typed)
+│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts                # Chat state + send flow
 │  │  │  ├─ useDocsIndex.ts            # Subscribe to docs index, expose docsList
 │  │  │  ├─ useDocsAutocomplete.ts     # @mention detection and suggestion UI logic
 │  │  │  ├─ useLLMConfig.ts            # LLM config management
-│  │  │  └─ useNextTaskId.ts           # Next task ID calculation (via tasksService)
+│  │  │  └─ useNextTaskId.ts           # Next task ID calculation 
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  └─ ChatView.tsx               # UI consumes hooks/services
 │  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         # Uses tasksService; closes via onRequestClose
-│  │  │  ├─ TaskEditView.tsx           # Always in Modal; shows loading inside modal
-│  │  │  ├─ FeatureCreateView.tsx      # Uses tasksService; closes via onRequestClose
-│  │  │  ├─ FeatureEditView.tsx        # Always in Modal; shows loading inside modal
-│  │  │  ├─ TaskDetailsView.tsx        # Details + features, now strongly typed
-│  │  │  └─ TasksListView.tsx          # List, filters, reorder; strongly typed
-│  │  ├─ types/
-│  │  │  └─ external.d.ts              # Ambient types for window.tasksIndex and service payloads
+│  │  │  ├─ TaskCreateView.tsx         
+│  │  │  ├─ TaskEditView.tsx           # Always in Modal
+│  │  │  ├─ FeatureCreateView.tsx      
+│  │  │  ├─ FeatureEditView.tsx        # Always in Modal
+│  │  │  ├─ TaskDetailsView.tsx        # Details + features
+│  │  │  └─ TasksListView.tsx          # List, filters, reorder
 │  │  ├─ App.tsx
-│  │  └─ types.ts                      # +ChatMessage/LLMConfig
+│  │  └─ types.ts                      # UI types
 │  ├─ index.css
 │  ├─ main.js
 │  └─ preload.js
-├─ src/types/
-│  └─ tasks.ts                         # Shared Task/Feature/Status types
+├─ .env
+├─ forge.config.js
+├─ index.html
+├─ package.json
+├─ postcss.config.js
+├─ README.md
+├─ tailwind.config.js
+├─ tsconfig.json
+├─ vite.main.config.mjs
+├─ vite.preload.config.mjs
+├─ vite.renderer.config.mjs
 └─ …
 ```
 

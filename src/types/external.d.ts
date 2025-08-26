@@ -1,4 +1,4 @@
-import type { Task, Feature } from '../../types/tasks'
+import type { Task, Feature } from './tasks'
 
 export type ServiceResult = { ok: boolean; error?: string }
 

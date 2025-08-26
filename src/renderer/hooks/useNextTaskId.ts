@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { tasksService } from '../services/tasksService'
 import type { Task } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../types/external'
+import type { TasksIndexSnapshot } from '../../types/external'
 
 export function useNextTaskId(): number {
   const [nextId, setNextId] = useState<number>(1)

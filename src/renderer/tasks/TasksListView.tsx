@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Button } from '../components/ui/button'
 import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
-import type { TasksIndexSnapshot } from '../types/external'
+import type { TasksIndexSnapshot } from '../../types/external'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
