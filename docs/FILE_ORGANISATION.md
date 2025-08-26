@@ -91,6 +91,71 @@ repo_root/
 │  │  └─ README.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
+│  ├─ chat/
+│  │  ├─ providers/
+│  │  │  ├─ base.js
+│  │  │  ├─ openai.js
+│  │  │  ├─ litellm.js
+│  │  │  └─ lmstudio.js
+│  │  └─ manager.js          
+│  ├─ docs/
+│  │  └─ indexer.js        
+│  ├─ tasks/
+│  │  ├─ indexer.js                 
+│  │  └─ validator.js                
+│  ├─ types/
+│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
+│  │  └─ tasks.ts                      # Shared Task/Feature/Status types
+│  ├─ renderer/
+│  │  ├─ navigation/
+│  │  │  ├─ Navigator.tsx             
+│  │  │  └─ ModalHost.tsx              
+│  │  ├─ components/
+│  │  │  ├─ ui/
+│  │  │  │  ├─ Alert.tsx
+│  │  │  │  ├─ Button.tsx
+│  │  │  │  ├─ Input.tsx
+│  │  │  │  ├─ Modal.tsx
+│  │  │  │  ├─ Select.tsx
+│  │  │  │  ├─ Toast.tsx
+│  │  │  │  ├─ Tooltip.tsx
+│  │  │  │  ├─ Spinner.tsx
+│  │  │  │  ├─ Skeleton.tsx
+│  │  │  │  ├─ CommandMenu.tsx
+│  │  │  │  └─ ShortcutsHelp.tsx
+│  │  │  ├─ tasks/
+│  │  │  │  ├─ StatusBadge.tsx
+│  │  │  │  ├─ PriorityTag.tsx
+│  │  │  │  └─ TaskCard.tsx
+│  │  │  ├─ FeatureForm.tsx        
+│  │  │  └─ TaskForm.tsx           
+│  │  ├─ services/
+│  │  │  ├─ chatService.ts
+│  │  │  ├─ docsService.ts
+│  │  │  └─ tasksService.ts
+│  │  ├─ hooks/
+│  │  │  ├─ useChats.ts
+│  │  │  ├─ useDocsIndex.ts
+│  │  │  ├─ useDocsAutocomplete.ts
+│  │  │  ├─ useLLMConfig.ts
+│  │  │  ├─ useNextTaskId.ts
+│  │  │  ├─ useShortcuts.tsx
+│  │  │  └─ useTheme.ts           
+│  │  ├─ screens/
+│  │  │  ├─ SidebarView.tsx
+│  │  │  ├─ TasksView.tsx
+│  │  │  ├─ DocumentsView.tsx
+│  │  │  ├─ ChatView.tsx               
+│  │  │  └─ SettingsView.tsx           
+│  │  ├─ tasks/
+│  │  │  ├─ TaskCreateView.tsx         
+│  │  │  ├─ TaskEditView.tsx
+│  │  │  ├─ FeatureCreateView.tsx      
+│  │  │  ├─ FeatureEditView.tsx
+│  │  │  ├─ TaskDetailsView.tsx
+│  │  │  └─ TasksListView.tsx
+│  │  ├─ App.tsx                   
+│  │  └─ types.ts
 │  ├─ styles/
 │  │  ├─ design-tokens.css
 │  │  ├─ foundations/
@@ -113,14 +178,19 @@ repo_root/
 │  │     ├─ settings.css
 │  │     ├─ task-details.css
 │  │     └─ tasks.css
-│  ├─ index.css   # Aggregates tokens + Tailwind layers + modular styles; minimal base rules
-│  └─ …
+│  ├─ index.css   
+│  ├─ main.js
+│  └─ preload.js
+├─ .env
+├─ forge.config.js
+├─ index.html
+├─ package.json
+├─ postcss.config.js
+├─ README.md
+├─ tailwind.config.js
+├─ tsconfig.json
+├─ vite.main.config.mjs
+├─ vite.preload.config.mjs
+├─ vite.renderer.config.mjs
+└─ …
 ```
-
-## Styling Approach Update
-- index.css is now a thin aggregator that imports:
-  - design-tokens.css first
-  - Tailwind layers (base/components/utilities)
-  - foundations, primitives, components, layout, then screen-level CSS
-- Component and screen files should use the reusable primitives/utilities (e.g., .u-focus-ring, .u-hover-raise, .u-reveal-on-hover) and semantic tokens only.
-- New component styles should live under src/styles/components; view-specific styles should live under src/styles/screens.

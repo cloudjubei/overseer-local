@@ -168,12 +168,11 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "currently these look ugly. Especially the button style for the close. Additionally, when opening a modal - it never opens over the current screen, but over Home - this shouldn't be the case."
+      "acceptance": []
     },
     {
       "id": "7.14",
-      "status": "+",
+      "status": "-",
       "title": "ChatView according to design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
@@ -188,7 +187,7 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "Currently the whole screen is scrollable - but only the messages list should be. The chat history should be a pane, similar to the sidebar, that is collapsible."
+      "rejection": "Currently the whole screen is scrollable - but only the messages list should be"
     },
     {
       "id": "7.15",
@@ -206,9 +205,8 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "Currently the list of files and directories is a weird blue. The last update time is squished to the side - this should just be a very small label below the file name. The documents list pane should be collapsible and merged with the top bar to allow as much screen real estate for the document as possible."
-    },
+      "acceptance": []
+     },
     {
       "id": "7.16",
       "status": "+",
@@ -225,8 +223,7 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "The different Settings categories - Visual, LLMs - should be in a pane right next to the sidebar that is collapsible. Then clicking one of the categories shows the view for just that section. The Add new config button (and the edit button) should show a popup similar to create task - the editable view is hidden at the bottom right now"
+      "acceptance": []
     },
     {
       "id": "7.17",
@@ -248,9 +245,9 @@
     },
     {
       "id": "7.18",
-      "status": "?",
+      "status": "-",
       "title": "Both in the Tasks list and the Features list the ID takes too much space",
-      "description": "It should be made to look like a little bubble - similar to how the Dependencies bubbles are shown",
+      "description": "It should be made to look like a little bubble - similar to how the Dependencies bubbles are shown. Action in the Features list also takes too much space (the column heading 'Action' is unnecessary)",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
@@ -262,8 +259,7 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
+      "acceptance": []
     },
     {
       "id": "7.19",
@@ -291,6 +287,28 @@
       "plan": "",
       "context": [
         "src/index.css",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.21",
+      "status": "-",
+      "title": "Create a unified screen with side panel style",
+      "description": "Settings, Docs and Chat all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). This kind of component needs to be unified, reusable and made slick and pretty.",
+      "plan": "",
+      "context": [
+        "src/index.css",
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/screens/DocumentsView.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/SidebarView.tsx",
         "docs/design/COMPONENTS.md",
         "docs/design/DESIGN_SYSTEM.md",
         "docs/design/DESIGN_TOKENS.md",
