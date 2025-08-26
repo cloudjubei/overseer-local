@@ -112,7 +112,7 @@ export default function ChatView() {
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
   return (
-    <div className="flex min-h-0 w-full">
+    <div className="flex flex-1 min-h-0 w-full overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col min-h-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
@@ -161,7 +161,7 @@ export default function ChatView() {
       </aside>
 
       {/* Main content */}
-      <section className="flex-1 min-w-0 min-h-0 flex flex-col bg-[var(--surface-base)]">
+      <section className="flex-1 min-w-0 min-h-0 flex flex-col bg-[var(--surface-base)] overflow-hidden">
         {/* Hidden mirror for caret positioning (docs autocomplete) */}
         <div
           ref={mirrorRef}
