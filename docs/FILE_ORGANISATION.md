@@ -45,45 +45,45 @@ repo_root/
 │     ├─ task_example.json
 │     └─ task_format.py            # Python source-of-truth schema
 ├─ src/
-│   ├─ docs/
-│   │  └─ indexer.js               # Logical Docs indexer and file watcher
-│   ├─ renderer/
-│   │   ├─ components/
-│   │   │  ├─ ui/
-│   │   │  │  ├─ alert.tsx         
-│   │   │  │  ├─ button.tsx         
-│   │   │  │  ├─ index.tsx         
-│   │   │  │  ├─ modal.tsx         
-│   │   │  │  └─ toast.tsx         
-│   │   │  ├─ FeatureForm.tsx             
-│   │   │  ├─ MarkdownRenderer.tsx             
-│   │   │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
-│   │   │  └─ TaskForm.tsx          
-│   │   ├─ docs/
-│   │   │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
-│   │   ├─ screens/
-│   │   │  ├─ DocumentsView.tsx           # Documents screen using DocumentsBrowserView
-│   │   │  ├─ SettingsView.tsx            # Settings screen for configuring theme
-│   │   │  └─ TasksView.tsx               # Home view component (tasks)   
-│   │   ├─ tasks/
-│   │   │  ├─ EditableTaskMeta.tsx        
-│   │   │  ├─ FeatureCreateView.tsx      
-│   │   │  ├─ FeatureEditView.tsx       
-│   │   │  ├─ TaskCreateView.tsx         
-│   │   │  ├─ TaskDetailsView.tsx         
-│   │   │  ├─ TaskEditView.tsx        
-│   │   │  └─ TasksListView.tsx  
-│   │   ├─ App.tsx                 # Main Entry for the React app 
-│   │   └─ types.ts                # Renderer-local types (View)
-│   ├─ tasks/
-│   │  ├─ validator.js             # Logical Tasks validator
-│   │  └─ indexer.js               # Logical Tasks indexer and file watcher
-│   ├─ types/
-│   │  ├─ global.d.ts              
-│   │  └─ tasks.ts                 # TypeScript interfaces for task schema
-│   ├─ index.css
-│   ├─ main.js
-│   └─ preload.js
+│  ├─ docs/
+│  │  └─ indexer.js               # Logical Docs indexer and file watcher
+│  ├─ renderer/
+│  │  ├─ components/
+│  │  │  ├─ ui/
+│  │  │  │  ├─ alert.tsx         
+│  │  │  │  ├─ button.tsx         
+│  │  │  │  ├─ index.tsx         
+│  │  │  │  ├─ modal.tsx         
+│  │  │  │  └─ toast.tsx         
+│  │  │  ├─ FeatureForm.tsx             
+│  │  │  ├─ MarkdownRenderer.tsx        # Placeholder Markdown renderer (full rendering added later)
+│  │  │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
+│  │  │  └─ TaskForm.tsx          
+│  │  ├─ docs/
+│  │  │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
+│  │  ├─ screens/
+│  │  │  ├─ DocumentsView.tsx         # Documents screen using DocumentsBrowserView
+│  │  │  ├─ SettingsView.tsx          # Settings screen for configuring theme
+│  │  │  └─ TasksView.tsx             # Home view component (tasks)   
+│  │  ├─ tasks/
+│  │  │  ├─ EditableTaskMeta.tsx        
+│  │  │  ├─ FeatureCreateView.tsx      
+│  │  │  ├─ FeatureEditView.tsx       
+│  │  │  ├─ TaskCreateView.tsx         
+│  │  │  ├─ TaskDetailsView.tsx         
+│  │  │  ├─ TaskEditView.tsx        
+│  │  │  └─ TasksListView.tsx  
+│  │  ├─ App.tsx                 # Main Entry for the React app 
+│  │  └─ types.ts                # Renderer-local types (View)
+│  ├─ tasks/
+│  │  ├─ validator.js             # Logical Tasks validator
+│  │  └─ indexer.js               # Logical Tasks indexer and file watcher
+│  ├─ types/
+│  │  ├─ global.d.ts              
+│  │  └─ tasks.ts                 # TypeScript interfaces for task schema
+│  ├─ index.css
+│  ├─ main.js
+│  └─ preload.js
 ├─ tasks/
 │  └─ 1/
 │     ├─ task.json
@@ -175,8 +175,8 @@ repo_root/
 ## Notes on Renderer Layers
 - The repository currently contains both a React renderer (src/renderer/App.tsx) and a legacy DOM-based renderer used by src/index.html.
 - The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing. It is kept for reference only.
-- The React documentation browser lives at src/renderer/docs/DocsBrowserView.tsx and is used by the Documents screen (src/renderer/components/Docs.tsx) to list Markdown files and directories under docs/.
+- The React documentation browser lives at src/renderer/docs/DocumentsBrowserView.tsx and is used by the Documents screen (src/renderer/screens/DocumentsView.tsx) to list Markdown files and directories under docs/.
 
 ## Updates
-- 2025-08-26: Added a Tailwind-styled Sidebar component (src/renderer/components/Sidebar.tsx) and updated App.tsx to use it with persistent layout; removed dependency on App.css in favor of Tailwind/shadcn classes. Added src/renderer/types.ts to centralize renderer-local types (View).
-- 2025-08-26: Introduced React Docs browser (src/renderer/docs/DocsBrowserView.tsx) and wired it into the Docs screen.
+- 2025-08-26: Added a Tailwind-styled Sidebar component (src/renderer/components/SidebarView.tsx) and updated App.tsx to use it with persistent layout; removed dependency on App.css in favor of Tailwind/shadcn classes. Added src/renderer/types.ts to centralize renderer-local types (View).
+- 2025-08-26: Introduced React Docs browser (src/renderer/docs/DocumentsBrowserView.tsx) and wired it into the Docs screen.
