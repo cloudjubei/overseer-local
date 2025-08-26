@@ -1,125 +1,76 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import EditableTaskMeta from './EditableTaskMeta'; // <-- Import the new component
+import React, { useEffect, useState } from 'react'
+import EditableTaskMeta from './EditableTaskMeta'
+import type { Feature, Status, Task } from 'src/types/tasks'
+import { tasksService } from '../services/tasksService'
+import type { TasksIndexSnapshot } from '../types/external'
 
-// --- UTILITY FUNCTIONS AND CONSTANTS (UNCHANGED) ---
-
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
   '~': 'In Progress',
   '-': 'Pending',
   '?': 'Blocked',
   '=': 'Deferred',
-} as const;
+}
 
-type Status = keyof typeof STATUS_LABELS;
+const STATUS_OPTIONS: Status[] = ['+', '~', '-', '?', '=']
 
-const STATUS_OPTIONS: Status[] = ['+', '~', '-', '?', '='];
-
-function cssStatus(status: string) {
+function cssStatus(status: Status | string) {
   switch (status) {
-    case '+': return 'done';
-    case '~': return 'inprogress';
-    case '-': return 'pending';
-    case '?': return 'blocked';
-    case '=': return 'deferred';
-    default: return 'unknown';
+    case '+': return 'done'
+    case '~': return 'inprogress'
+    case '-': return 'pending'
+    case '?': return 'blocked'
+    case '=': return 'deferred'
+    default: return 'unknown'
   }
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const label = STATUS_LABELS[status as Status] || String(status || '');
-  return <span className={`status-badge status-${cssStatus(status)}`} role="img" aria-label={label}>{label}</span>;
+function StatusBadge({ status }: { status: Status | string }) {
+  const label = STATUS_LABELS[status as Status] || String(status || '')
+  return <span className={`status-badge status-${cssStatus(status)}`} role="img" aria-label={label}>{label}</span>
 }
 
-function parseRoute(hash: string) {
-  const m = /^#task\/(\d+)$/.exec(hash || '');
-  if (m) return { name: 'details', id: parseInt(m[1], 10) };
-  return { name: 'list' };
+function featureSuggestionsTitles(_index: TasksIndexSnapshot): string[] {
+  return []
 }
 
-// NOTE: StringListEditor component would ideally be in its own file too.
-// For now, it's kept here as it was in the original file.
-function StringListEditor({ idBase, label, initial = [], placeholder = '', suggestions = [], onChange }: any) {
-  const [rows, setRows] = useState(initial.length === 0 ? [''] : initial);
-
-  useEffect(() => {
-    onChange(rows.filter((v: string) => v.trim() !== ''));
-  }, [rows, onChange]);
-
-  const addRow = () => setRows((prev: string[]) => [...prev, '']);
-  const removeRow = (index: number) => setRows((prev: string[]) => prev.filter((_, i) => i !== index));
-  const updateRow = (index: number, value: string) => setRows((prev: string[]) => prev.map((v, i) => i === index ? value : v));
-
-  const datalistId = suggestions.length ? `${idBase}-datalist` : undefined;
-
-  return (
-    <div className="string-list">
-      <label>{label}</label>
-      <ul className="string-list-rows">
-        {rows.map((value: string, index: number) => (
-          <li key={index} className="string-list-row">
-            <input
-              type="text"
-              value={value}
-              placeholder={placeholder}
-              list={datalistId}
-              onChange={(e) => updateRow(index, e.target.value)}
-            />
-            <button type="button" className="btn-remove-row" onClick={() => removeRow(index)}>Remove</button>
-          </li>
-        ))}
-      </ul>
-      <button type="button" className="btn-add-row" onClick={addRow}>Add row</button>
-      {datalistId && (
-        <datalist id={datalistId}>
-          {suggestions.map((s: string) => <option key={s} value={s} />)}
-        </datalist>
-      )}
-    </div>
-  );
+function resolveDependencies(deps: string[], _task: Task, _index: TasksIndexSnapshot): string[] {
+  return deps
 }
 
-function featureSuggestionsTitles(index: any) {
-  // ... (This function is correct, no changes needed)
-  return []; // Placeholder
-}
+function EditableFeatureRow({ feature, task, index, onSave, onCancel, isSaving }: {
+  feature: Feature
+  task: Task
+  index: number
+  onSave: (featureId: string, payload: Partial<Feature>) => void
+  onCancel: () => void
+  isSaving: boolean
+}) {
+  const [status, setStatus] = useState<Status>(feature.status)
+  const [title, setTitle] = useState<string>(feature.title || '')
+  const [description, setDescription] = useState<string>(feature.description || '')
+  const [plan, setPlan] = useState<string>(feature.plan || '')
+  const [context, setContext] = useState<string[]>(feature.context || [])
+  const [acceptance, setAcceptance] = useState<string[]>(feature.acceptance || [])
+  const [dependencies, setDependencies] = useState<string[]>(feature.dependencies || [])
+  const [rejection, setRejection] = useState<string>(feature.rejection || '')
 
-function resolveDependencies(deps: string[], task: any, index: any) {
-  // ... (This function is correct, no changes needed)
-  return []; // Placeholder
-}
-
-
-// --- NEW COMPONENT FOR THE FEATURE EDITING FORM ---
-
-function EditableFeatureRow({ feature, task, index, onSave, onCancel, isSaving }: any) {
-  // All hooks are now correctly at the top level of this component
-  const [status, setStatus] = useState(feature.status);
-  const [title, setTitle] = useState(feature.title || '');
-  const [description, setDescription] = useState(feature.description || '');
-  const [plan, setPlan] = useState(feature.plan || '');
-  const [context, setContext] = useState<string[]>(feature.context || []);
-  const [acceptance, setAcceptance] = useState<string[]>(feature.acceptance || []);
-  const [dependencies, setDependencies] = useState<string[]>(feature.dependencies || []);
-  const [rejection, setRejection] = useState(feature.rejection || '');
-
-  const depSuggestions = featureSuggestionsTitles(index);
+  const depSuggestions = featureSuggestionsTitles(index as unknown as TasksIndexSnapshot)
 
   const handleSave = () => {
-    const payload = {
+    const payload: Partial<Feature> = {
       status,
       title,
       description,
       plan,
       context,
       acceptance,
-      dependencies: resolveDependencies(dependencies, task, index),
+      dependencies: resolveDependencies(dependencies, task, index as unknown as TasksIndexSnapshot),
       rejection: rejection.trim() || undefined,
-    };
-    onSave(feature.id, payload);
-  };
+    }
+    onSave(feature.id, payload)
+  }
 
-  // The JSX for the form is moved here from the old render function
   return (
     <div className="feature-row editing" role="group" aria-label={`Editing Feature ${feature.id}`}>
       <div className="col col-id">{feature.id || ''}</div>
@@ -164,96 +115,146 @@ function EditableFeatureRow({ feature, task, index, onSave, onCancel, isSaving }
         </div>
       </div>
     </div>
-  );
+  )
 }
 
+function StringListEditor({ idBase, label, initial = [], placeholder = '', suggestions = [], onChange }: {
+  idBase: string
+  label: string
+  initial?: string[]
+  placeholder?: string
+  suggestions?: string[]
+  onChange: (values: string[]) => void
+}) {
+  const [rows, setRows] = useState<string[]>(initial.length === 0 ? [''] : initial)
 
-// --- MAIN VIEW COMPONENT (REFACTORED) ---
+  useEffect(() => {
+    onChange(rows.filter((v: string) => v.trim() !== ''))
+  }, [rows, onChange])
+
+  const addRow = () => setRows((prev) => [...prev, ''])
+  const removeRow = (index: number) => setRows((prev) => prev.filter((_, i) => i !== index))
+  const updateRow = (index: number, value: string) => setRows((prev) => prev.map((v, i) => (i === index ? value : v)))
+
+  const datalistId = suggestions.length ? `${idBase}-datalist` : undefined
+
+  return (
+    <div className="string-list">
+      <label>{label}</label>
+      <ul className="string-list-rows">
+        {rows.map((value: string, index: number) => (
+          <li key={index} className="string-list-row">
+            <input
+              type="text"
+              value={value}
+              placeholder={placeholder}
+              list={datalistId}
+              onChange={(e) => updateRow(index, e.target.value)}
+            />
+            <button type="button" className="btn-remove-row" onClick={() => removeRow(index)}>Remove</button>
+          </li>
+        ))}
+      </ul>
+      <button type="button" className="btn-add-row" onClick={addRow}>Add row</button>
+      {datalistId && (
+        <datalist id={datalistId}>
+          {suggestions.map((s: string) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
+      )}
+    </div>
+  )
+}
 
 export default function TaskDetailsView({ taskId }: { taskId: number }) {
-  const [index, setIndex] = useState<any>(null);
-  const [task, setTask] = useState<any>(null);
-  const [editFeatureId, setEditFeatureId] = useState<string | null>(null);
-  const [taskEditing, setTaskEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
+  const [task, setTask] = useState<Task | null>(null)
+  const [editFeatureId, setEditFeatureId] = useState<string | null>(null)
+  const [taskEditing, setTaskEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const fetchIndex = async () => {
       try {
-        const idx = await (window as any).tasksIndex.getSnapshot();
-        setIndex(idx);
-        (window as any).tasksIndex.onUpdate(setIndex);
+        const idx = await tasksService.getSnapshot()
+        setIndex(idx)
+        tasksService.onUpdate(setIndex)
       } catch (e) {
-        console.error(e);
+        console.error(e)
       }
-    };
-    fetchIndex();
-  }, []);
+    }
+    fetchIndex()
+  }, [])
 
   useEffect(() => {
     if (taskId && index && index.tasksById) {
-      const t = index.tasksById?.[taskId];
-      setTask(t);
+      const t = index.tasksById?.[taskId]
+      setTask(t || null)
     }
-  }, [taskId, index]);
+  }, [taskId, index])
 
-  const handleSaveFeature = async (featureId: string, payload: any) => {
-    setSaving(true);
+  const handleSaveFeature = async (featureId: string, payload: Partial<Feature>) => {
+    if (!task) return
+    setSaving(true)
     try {
-      const res = await (window as any).tasksIndex.updateFeature(task.id, featureId, payload);
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
-      setEditFeatureId(null);
+      const res = await tasksService.updateFeature(task.id, featureId, payload)
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      setEditFeatureId(null)
     } catch (e: any) {
-      alert(`Failed to save feature: ${e.message || e}`);
+      alert(`Failed to save feature: ${e.message || e}`)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
-  const handleSaveTask = async (payload: { title: string; description: string }) => {
-    setSaving(true);
+  const handleSaveTask = async (payload: Pick<Task, 'title' | 'description'>) => {
+    if (!task) return
+    setSaving(true)
     try {
-      const res = await (window as any).tasksIndex.updateTask(task.id, payload);
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
-      setTaskEditing(false);
+      const res = await tasksService.updateTask(task.id, payload)
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      setTaskEditing(false)
     } catch (e: any) {
-      alert(`Failed to update task: ${e.message || e}`);
+      alert(`Failed to update task: ${e.message || e}`)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const handleAddFeature = async () => {
+    if (!task) return
     try {
-      await (window as any).tasksIndex.openFeatureCreate(task.id);
+      await window.tasksIndex.openFeatureCreate(task.id)
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   const handleMoveFeature = async (fromId: string, toIndex: number) => {
-    setSaving(true);
+    if (!task) return
+    setSaving(true)
     try {
-      const res = await (window as any).tasksIndex.reorderFeatures(task.id, { fromId, toIndex });
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
+      const res = await window.tasksIndex.reorderFeatures(task.id, { fromId, toIndex })
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
-      alert(`Failed to reorder feature: ${e.message || e}`);
+      alert(`Failed to reorder feature: ${e.message || e}`)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
-  if (!task) return <div className="empty">Task {taskId} not found. <button onClick={() => location.hash = ''}>Back to Tasks</button></div>;
+  if (!task) return <div className="empty">Task {taskId} not found. <button onClick={() => (location.hash = '')}>Back to Tasks</button></div>
 
-  const features = task.features || [];
+  const features = task.features || []
 
   return (
     <section id="task-details-view" role="region" aria-labelledby="task-details-heading">
       <h2 id="task-details-heading">Task {task.id}</h2>
       <div className="task-details-controls">
-        <button type="button" className="btn-back" onClick={() => { setTaskEditing(false); location.hash = ''; }}>Back to Tasks</button>
+        <button type="button" className="btn-back" onClick={() => { setTaskEditing(false); location.hash = '' }}>Back to Tasks</button>
       </div>
-      
+
       {taskEditing ? (
         <EditableTaskMeta
           task={task}
@@ -283,7 +284,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <div className="empty">No features defined for this task.</div>
         ) : (
           <ul className="features-list" role="list" aria-label="Features">
-            {features.map((f: any, index: number) => (
+            {features.map((f: Feature, index: number) => (
               <li key={f.id} className="feature-item" role="listitem">
                 {editFeatureId === f.id ? (
                   <EditableFeatureRow
@@ -312,5 +313,5 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
         )}
       </div>
     </section>
-  );
+  )
 }

@@ -1,53 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import type { Feature, Status } from 'src/types/tasks'
 
-type Status = '+' | '~' | '-' | '?' | '=';
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done', '~': 'In Progress', '-': 'Pending', '?': 'Blocked', '=': 'Deferred'
-};
+}
 
-export type FeatureFormValues = {
-  status: Status;
-  title: string;
-  description: string;
-  plan: string;
-  context: string[];
-  acceptance: string[];
-  dependencies: string[];
-  rejection?: string;
-};
+export type FeatureFormValues = Omit<Feature, 'id'>
 
 type FeatureFormProps = {
-  initialValues?: FeatureFormValues;
-  onSubmit: (values: FeatureFormValues) => void;
-  onCancel: () => void;
-  submitting: boolean;
-  isCreate: boolean;
-};
+  initialValues?: Partial<FeatureFormValues>
+  onSubmit: (values: FeatureFormValues) => void
+  onCancel: () => void
+  submitting: boolean
+  isCreate: boolean
+}
 
 export function FeatureForm({ initialValues = {}, onSubmit, onCancel, submitting, isCreate }: FeatureFormProps) {
-  const [status, setStatus] = useState<Status>(initialValues.status ?? '-');
-  const [title, setTitle] = useState(initialValues.title ?? '');
-  const [description, setDescription] = useState(initialValues.description ?? '');
-  const [plan, setPlan] = useState(initialValues.plan ?? '');
-  const [context, setContext] = useState(initialValues.context?.join('\n') ?? '');
-  const [acceptance, setAcceptance] = useState(initialValues.acceptance?.join('\n') ?? '');
-  const [dependencies, setDependencies] = useState(initialValues.dependencies?.join('\n') ?? '');
-  const [rejection, setRejection] = useState(initialValues.rejection ?? '');
+  const [status, setStatus] = useState<Status>((initialValues.status as Status) ?? '-')
+  const [title, setTitle] = useState(initialValues.title ?? '')
+  const [description, setDescription] = useState(initialValues.description ?? '')
+  const [plan, setPlan] = useState(initialValues.plan ?? '')
+  const [context, setContext] = useState((initialValues.context?.join('\n')) ?? '')
+  const [acceptance, setAcceptance] = useState((initialValues.acceptance?.join('\n')) ?? '')
+  const [dependencies, setDependencies] = useState((initialValues.dependencies?.join('\n')) ?? '')
+  const [rejection, setRejection] = useState(initialValues.rejection ?? '')
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
+    e.preventDefault()
+    if (!String(title).trim()) return
     onSubmit({
       status,
-      title: title.trim(),
-      description: description.trim(),
-      plan: plan.trim(),
-      context: context.split('\n').map(s => s.trim()).filter(Boolean),
-      acceptance: acceptance.split('\n').map(s => s.trim()).filter(Boolean),
-      dependencies: dependencies.split('\n').map(s => s.trim()).filter(Boolean),
-      rejection: rejection.trim() || undefined,
-    });
-  };
+      title: String(title).trim(),
+      description: String(description).trim(),
+      plan: String(plan).trim(),
+      context: String(context).split('\n').map(s => s.trim()).filter(Boolean),
+      acceptance: String(acceptance).split('\n').map(s => s.trim()).filter(Boolean),
+      dependencies: String(dependencies).split('\n').map(s => s.trim()).filter(Boolean),
+      rejection: String(rejection).trim() || undefined,
+    })
+  }
 
   return (
     <form onSubmit={handleSubmit} className="feature-form">
@@ -92,5 +83,5 @@ export function FeatureForm({ initialValues = {}, onSubmit, onCancel, submitting
         <button type="submit" className="btn" disabled={submitting}>{isCreate ? 'Create' : 'Save'}</button>
       </div>
     </form>
-  );
+  )
 }

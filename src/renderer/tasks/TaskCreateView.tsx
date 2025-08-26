@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { TaskForm } from '../components/TaskForm'
+import { TaskForm, TaskFormValues } from '../components/TaskForm'
 import { useNextTaskId } from '../hooks/useNextTaskId'
 import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
@@ -17,15 +17,15 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
   }
 
   const onSubmit = useCallback(
-    async (values: any) => {
-      if (!Number.isInteger(values.id) || values.id <= 0) {
+    async (values: TaskFormValues) => {
+      if (!Number.isInteger(values.id) || (values.id as number) <= 0) {
         setAlertMessage('Please provide a valid positive integer ID')
         setShowAlert(true)
         return
       }
       setSubmitting(true)
       try {
-        const res = await tasksService.addTask(values)
+        const res = await tasksService.addTask({ ...values })
         if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
         toast({ title: 'Success', description: 'Task created successfully', variant: 'success' })
         doClose()

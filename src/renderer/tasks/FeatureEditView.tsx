@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { FeatureForm } from '../components/FeatureForm'
+import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { tasksService } from '../services/tasksService'
-import { AlertDialog, Modal } from '../components/ui/Modal';
-import { useToast } from '../components/ui/toast';
+import { AlertDialog, Modal } from '../components/ui/Modal'
+import { useToast } from '../components/ui/toast'
+import type { Feature, Task } from 'src/types/tasks'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
-  const [initialValues, setInitialValues] = useState<any>(null)
+  const [initialValues, setInitialValues] = useState<Feature | null>(null)
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -20,9 +21,9 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     ;(async () => {
       try {
         const idx = await tasksService.getSnapshot()
-        const task = idx.tasksById[taskId]
+        const task: Task | undefined = idx.tasksById[taskId]
         if (!task) throw new Error('Task not found')
-        const feature = task.features.find((f: any) => f.id === featureId)
+        const feature = task.features.find((f: Feature) => f.id === featureId)
         if (!feature) throw new Error('Feature not found')
         if (!cancelled) setInitialValues(feature)
       } catch (e: any) {
@@ -35,7 +36,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     return () => { cancelled = true }
   }, [taskId, featureId])
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: FeatureFormValues) => {
     setSubmitting(true)
     try {
       const res = await tasksService.updateFeature(taskId, featureId, values)
@@ -62,7 +63,9 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             isCreate={false}
           />
         ) : (
-          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature…</div>
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature
+
+</div>
         )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />

@@ -1,36 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import type { Status, Task } from 'src/types/tasks'
 
-type Status = '+' | '~' | '-' | '?' | '=';
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done', '~': 'In Progress', '-': 'Pending', '?': 'Blocked', '=': 'Deferred'
-};
+}
 
-export type TaskFormValues = {
-  id?: number;
-  status: Status;
-  title: string;
-  description: string;
-};
+export type TaskFormValues = Pick<Task, 'id' | 'status' | 'title' | 'description'>
 
 type TaskFormProps = {
-  initialValues?: Partial<TaskFormValues>;
-  onSubmit: (values: TaskFormValues) => void;
-  onCancel: () => void;
-  submitting: boolean;
-  isCreate: boolean;
-};
+  initialValues?: Partial<TaskFormValues>
+  onSubmit: (values: TaskFormValues) => void
+  onCancel: () => void
+  submitting: boolean
+  isCreate: boolean
+}
 
 export function TaskForm({ initialValues = {}, onSubmit, onCancel, submitting, isCreate }: TaskFormProps) {
-  const [id, setId] = useState<number | ''>(initialValues.id ?? (isCreate ? '' : ''));
-  const [status, setStatus] = useState<Status>(initialValues.status ?? '-');
-  const [title, setTitle] = useState(initialValues.title ?? '');
-  const [description, setDescription] = useState(initialValues.description ?? '');
+  const [id, setId] = useState<number | ''>(initialValues.id ?? (isCreate ? '' : ''))
+  const [status, setStatus] = useState<Status>(initialValues.status ?? '-')
+  const [title, setTitle] = useState(initialValues.title ?? '')
+  const [description, setDescription] = useState(initialValues.description ?? '')
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const idVal = typeof id === 'number' ? id : parseInt(String(id || ''), 10);
-    onSubmit({ id: isCreate ? idVal : initialValues.id!, status, title, description });
-  };
+    e.preventDefault()
+    const idVal = typeof id === 'number' ? id : parseInt(String(id || ''), 10)
+    onSubmit({ id: isCreate ? idVal : (initialValues.id as number), status, title, description })
+  }
 
   return (
     <form onSubmit={handleSubmit} className="task-form">
@@ -62,5 +57,5 @@ export function TaskForm({ initialValues = {}, onSubmit, onCancel, submitting, i
         <button type="submit" className="btn" disabled={submitting}>{isCreate ? 'Create' : 'Save'}</button>
       </div>
     </form>
-  );
+  )
 }

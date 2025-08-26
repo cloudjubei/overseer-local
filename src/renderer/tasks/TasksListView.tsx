@@ -1,142 +1,142 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Button } from '../components/ui/button';
-import { Task } from 'src/types/tasks';
+import React, { useEffect, useState, useRef } from 'react'
+import { Button } from '../components/ui/button'
+import { Task, Status } from 'src/types/tasks'
+import { tasksService } from '../services/tasksService'
+import type { TasksIndexSnapshot } from '../types/external'
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
   '~': 'In Progress',
   '-': 'Pending',
   '?': 'Blocked',
   '=': 'Deferred',
-} as const;
+}
 
-type Status = keyof typeof STATUS_LABELS;
+const STATUSES: Status[] = Object.keys(STATUS_LABELS) as Status[]
 
-const STATUSES: Status[] = Object.keys(STATUS_LABELS) as Status[];
-
-function toTasksArray(index: any) {
-  const tasksById = index?.tasksById || {};
-  const arr = Object.values(tasksById) as any[];
-  arr.sort((a, b) => (a.id || 0) - (b.id || 0));
-  return arr;
+function toTasksArray(index: TasksIndexSnapshot): Task[] {
+  const tasksById = index?.tasksById || {}
+  const arr = Object.values(tasksById) as Task[]
+  arr.sort((a, b) => (a.id || 0) - (b.id || 0))
+  return arr
 }
 
 function countFeatures(task: Task) {
-  const features = Array.isArray(task.features) ? task.features : [];
-  const total = features.length;
-  const done = features.filter((f) => f.status === '+').length;
-  return { done, total };
+  const features = Array.isArray(task.features) ? task.features : []
+  const total = features.length
+  const done = features.filter((f) => f.status === '+').length
+  return { done, total }
 }
 
 function matchesQuery(task: Task, q: string) {
-  if (!q) return true;
-  const s = q.trim().toLowerCase();
-  if (!s) return true;
-  const idStr = String(task.id || '');
-  return idStr.includes(s) || task.title?.toLowerCase().includes(s) || task.description?.toLowerCase().includes(s);
+  if (!q) return true
+  const s = q.trim().toLowerCase()
+  if (!s) return true
+  const idStr = String(task.id || '')
+  return idStr.includes(s) || task.title?.toLowerCase().includes(s) || task.description?.toLowerCase().includes(s)
 }
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
-    const byStatus = !status || status === 'any' ? true : t.status === status;
-    return byStatus && matchesQuery(t, query);
-  });
+    const byStatus = !status || status === 'any' ? true : t.status === (status as Status)
+    return byStatus && matchesQuery(t, query)
+  })
 }
 
-function cssStatus(status: string) {
+function cssStatus(status: Status | string) {
   switch (status) {
-    case '+': return 'done';
-    case '~': return 'inprogress';
-    case '-': return 'pending';
-    case '?': return 'blocked';
-    case '=': return 'deferred';
-    default: return 'unknown';
+    case '+': return 'done'
+    case '~': return 'inprogress'
+    case '-': return 'pending'
+    case '?': return 'blocked'
+    case '=': return 'deferred'
+    default: return 'unknown'
   }
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const label = STATUS_LABELS[status as Status] || String(status || '');
+function StatusBadge({ status }: { status: Status | string }) {
+  const label = STATUS_LABELS[status as Status] || String(status || '')
   return (
     <span className={`status-badge status-${cssStatus(status)}`} role="img" aria-label={label}>
       {label}
     </span>
-  );
+  )
 }
 
 function onRowKeyDown(e: React.KeyboardEvent<HTMLDivElement>, taskId: number, ulRef: React.RefObject<HTMLUListElement>) {
   if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    location.hash = `#task/${taskId}`;
-    return;
+    e.preventDefault()
+    location.hash = `#task/${taskId}`
+    return
   }
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-  e.preventDefault();
-  const ul = ulRef.current;
-  if (!ul) return;
-  const rows = Array.from(ul.querySelectorAll('.task-row'));
-  const current = e.currentTarget;
-  const i = rows.indexOf(current);
-  if (i === -1) return;
-  let nextIndex = i + (e.key === 'ArrowDown' ? 1 : -1);
-  if (nextIndex < 0) nextIndex = 0;
-  if (nextIndex >= rows.length) nextIndex = rows.length - 1;
-  (rows[nextIndex] as HTMLElement).focus();
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+  e.preventDefault()
+  const ul = ulRef.current
+  if (!ul) return
+  const rows = Array.from(ul.querySelectorAll('.task-row'))
+  const current = e.currentTarget
+  const i = rows.indexOf(current)
+  if (i === -1) return
+  let nextIndex = i + (e.key === 'ArrowDown' ? 1 : -1)
+  if (nextIndex < 0) nextIndex = 0
+  if (nextIndex >= rows.length) nextIndex = rows.length - 1
+  ;(rows[nextIndex] as HTMLElement).focus()
 }
 
 export default function TasksListView() {
-  const [allTasks, setAllTasks] = useState<any[]>([]);
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('any');
-  const [index, setIndex] = useState<any>(null);
-  const [saving, setSaving] = useState(false);
-  const ulRef = useRef<HTMLUListElement>(null);
+  const [allTasks, setAllTasks] = useState<Task[]>([])
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('any')
+  const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
+  const [saving, setSaving] = useState(false)
+  const ulRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     const fetchIndex = async () => {
       try {
-        const idx = await window.tasksIndex.getSnapshot();
-        setIndex(idx);
-        window.tasksIndex.onUpdate(setIndex);
+        const idx = await tasksService.getSnapshot()
+        setIndex(idx)
+        tasksService.onUpdate(setIndex)
       } catch (e) {
-        console.error('Failed to load tasks index.', e);
+        console.error('Failed to load tasks index.', e)
       }
-    };
-    fetchIndex();
-  }, []);
+    }
+    fetchIndex()
+  }, [])
 
   useEffect(() => {
     if (index) {
-      setAllTasks(toTasksArray(index));
+      setAllTasks(toTasksArray(index))
     }
-  }, [index]);
+  }, [index])
 
-  const filtered = filterTasks(allTasks, { query, status: statusFilter });
-  const isFiltered = query !== '' || statusFilter !== 'any';
+  const filtered = filterTasks(allTasks, { query, status: statusFilter })
+  const isFiltered = query !== '' || statusFilter !== 'any'
 
   const handleClear = () => {
-    setQuery('');
-    setStatusFilter('any');
-  };
+    setQuery('')
+    setStatusFilter('any')
+  }
 
   const handleAddTask = async () => {
     try {
-      await window.tasksIndex.openTaskCreate();
+      await window.tasksIndex.openTaskCreate()
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   const handleMoveTask = async (fromId: number, toIndex: number) => {
-    setSaving(true);
+    setSaving(true)
     try {
-      const res = await window.tasksIndex.reorderTasks({ fromId, toIndex });
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
+      const res = await window.tasksIndex.reorderTasks({ fromId, toIndex })
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
-      alert(`Failed to reorder task: ${e.message || e}`);
+      alert(`Failed to reorder task: ${e.message || e}`)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   return (
     <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
@@ -176,7 +176,7 @@ export default function TasksListView() {
         ) : (
           <ul className="tasks-list" role="list" aria-label="Tasks" ref={ulRef}>
             {filtered.map((t, idx) => {
-              const { done, total } = countFeatures(t);
+              const { done, total } = countFeatures(t)
               return (
                 <li key={t.id} className="task-item" role="listitem">
                   <div
@@ -196,17 +196,17 @@ export default function TasksListView() {
                     <div className="col col-features">{done}/{total}</div>
                     {!isFiltered && (
                       <div className="col col-actions">
-                        <Button className="btn-move-up" disabled={saving || idx === 0} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx - 1); }}>Up</Button>
-                        <Button className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx + 1); }}>Down</Button>
+                        <Button className="btn-move-up" disabled={saving || idx === 0} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx - 1) }}>Up</Button>
+                        <Button className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx + 1) }}>Down</Button>
                       </div>
                     )}
                   </div>
                 </li>
-              );
+              )
             })}
           </ul>
         )}
       </div>
     </section>
-  );
+  )
 }

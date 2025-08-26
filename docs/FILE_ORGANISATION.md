@@ -60,7 +60,7 @@ repo_root/
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts             # Wraps window.chat API
 │  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
-│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API
+│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API (strongly typed)
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts                # Chat state + send flow
 │  │  │  ├─ useDocsIndex.ts            # Subscribe to docs index, expose docsList
@@ -76,11 +76,21 @@ repo_root/
 │  │  │  ├─ TaskCreateView.tsx         # Uses tasksService; closes via onRequestClose
 │  │  │  ├─ TaskEditView.tsx           # Always in Modal; shows loading inside modal
 │  │  │  ├─ FeatureCreateView.tsx      # Uses tasksService; closes via onRequestClose
-│  │  │  └─ FeatureEditView.tsx        # Always in Modal; shows loading inside modal
+│  │  │  ├─ FeatureEditView.tsx        # Always in Modal; shows loading inside modal
+│  │  │  ├─ TaskDetailsView.tsx        # Details + features, now strongly typed
+│  │  │  └─ TasksListView.tsx          # List, filters, reorder; strongly typed
+│  │  ├─ types/
+│  │  │  └─ external.d.ts              # Ambient types for window.tasksIndex and service payloads
 │  │  ├─ App.tsx
 │  │  └─ types.ts                      # +ChatMessage/LLMConfig
 │  ├─ index.css
 │  ├─ main.js
 │  └─ preload.js
+├─ src/types/
+│  └─ tasks.ts                         # Shared Task/Feature/Status types
 └─ …
 ```
+
+Notes on recent changes
+- Introduced src/renderer/types/external.d.ts to provide ambient typings for the window.tasksIndex API and related payload/response types.
+- Refactored tasks-related views, forms, hooks, and services to use shared types from src/types/tasks.ts for strong typing and consistency.
