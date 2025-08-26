@@ -1,53 +1,36 @@
-import fs from 'fs/promises'
+import fs from 'fs/promises';
 import path from 'path';
 import chokidar from 'chokidar';
-import EventEmitter from 'events';
 
 export class DocsIndexer {
-  constructor(projectRoot, options = {}) {
-    this.root = projectRoot;
-    this.docsDir = path.join(projectRoot, "docs");
+  constructor(projectRoot, window, options = {}) {
+    this.projectRoot = projectRoot;
+    this.docsDir = path.join(projectRoot, 'docs');
+    this.window = window;
     this.options = {
-      pollingIntervalMs: options.pollingIntervalMs || 1000,
-      maxTitleBytes: options.maxTitleBytes || 64 * 1024, // limit when reading first heading
+      maxTitleBytes: options.maxTitleBytes || 64 * 1024,
     };
 
-    this._index = this._emptyIndex();
-    this._pollTimer = null;
-    this._lastSignature = null;
-    this._emitter = new EventEmitter();
-    this._building = false;
-  }
-
-  _emptyIndex() {
-    return {
-      root: this.root,
+    this.index = {
+      root: projectRoot,
       docsDir: this.docsDir,
       updatedAt: null,
-      tree: this._makeDirNode("docs", "", this.docsDir),
+      tree: this._makeDirNode('docs', '', this.docsDir),
       files: [],
       errors: [],
-      metrics: {
-        lastScanMs: 0,
-        lastScanCount: 0,
-      },
+      metrics: { lastScanMs: 0, lastScanCount: 0 },
     };
+
+    this.watcher = null;
   }
 
   _makeDirNode(name, relPath, absPath) {
-    return {
-      type: "dir",
-      name,
-      relPath, // relative to docsDir
-      absPath,
-      dirs: [],
-      files: [],
-    };
+    return { type: 'dir', name, relPath, absPath, dirs: [], files: [] };
   }
 
   _makeFileNode(relPath, absPath, stats, title, headings) {
     return {
-      type: "file",
+      type: 'file',
       name: path.basename(relPath),
       relPath,
       absPath,
@@ -59,172 +42,139 @@ export class DocsIndexer {
   }
 
   getIndex() {
-    // Return a shallow copy snapshot to discourage external mutation
-    return { ...this._index };
-  }
-
-  onUpdate(cb) {
-    this._emitter.on("update", cb);
-    return () => this._emitter.off("update", cb);
+    return this.index;
   }
 
   async init() {
     await this.buildIndex();
-    this._startPolling();
-    return this.getIndex();
+    this.watcher = chokidar.watch(path.join(this.docsDir, '**/*.md'), {
+      ignored: /(^|[\/\\])\../,
+      persistent: true,
+      ignoreInitial: true,
+    });
+
+    this.watcher
+      .on('add', (p) => this.rebuildAndNotify(`Doc added: ${p}`))
+      .on('change', (p) => this.rebuildAndNotify(`Doc changed: ${p}`))
+      .on('unlink', (p) => this.rebuildAndNotify(`Doc removed: ${p}`))
+      .on('addDir', (p) => this.rebuildAndNotify(`Dir added: ${p}`))
+      .on('unlinkDir', (p) => this.rebuildAndNotify(`Dir removed: ${p}`));
   }
 
-  stopWatching() {
-    if (this._pollTimer) {
-      clearInterval(this._pollTimer);
-      this._pollTimer = null;
-    }
-  }
-
-  _startPolling() {
-    this.stopWatching();
-    this._pollTimer = setInterval(async () => {
-      try {
-        const sig = this._computeSignature();
-        if (sig !== this._lastSignature) {
-          await this.buildIndex();
-        }
-      } catch (err) {
-        // Swallow polling errors; detailed errors will appear during buildIndex
-      }
-    }, this.options.pollingIntervalMs);
-    if (this._pollTimer && this._pollTimer.unref) {
-      // Allow process to exit if nothing else is pending
-      this._pollTimer.unref();
+  async rebuildAndNotify(logMessage) {
+    if (logMessage) console.log(logMessage);
+    await this.buildIndex();
+    if (this.window) {
+      this.window.webContents.send('docs-index:update', this.getIndex());
     }
   }
 
   async buildIndex() {
-    if (this._building) return; // avoid concurrent builds
-    this._building = true;
-    const start = Date.now();
+    const startTime = Date.now();
+    const newIndex = {
+      ...this.index,
+      updatedAt: new Date().toISOString(),
+      tree: this._makeDirNode('docs', '', this.docsDir),
+      files: [],
+      errors: [],
+    };
 
-    const nextIndex = this._emptyIndex();
-    const errors = [];
+    // Verify docsDir exists
+    let docsDirExists = true;
+    try {
+      const s = await fs.stat(this.docsDir);
+      docsDirExists = s.isDirectory();
+    } catch (e) {
+      docsDirExists = false;
+      if (e && e.code !== 'ENOENT') {
+        newIndex.errors.push({ file: this.docsDir, errors: [e.message || String(e)] });
+      }
+    }
 
-    if (!fs.existsSync(this.docsDir)) {
-      // docs directory missing; keep empty index and signature
-      this._lastSignature = this._computeSignature();
-      nextIndex.updatedAt = new Date().toISOString();
-      nextIndex.errors = errors;
-      nextIndex.metrics.lastScanMs = Date.now() - start;
-      nextIndex.metrics.lastScanCount = 0;
-      this._index = nextIndex;
-      this._emitter.emit("update", this.getIndex());
-      this._building = false;
+    if (docsDirExists) {
+      try {
+        await this._walkAndIndex('', newIndex.tree, newIndex.files, newIndex.errors);
+      } catch (e) {
+        newIndex.errors.push({ file: this.docsDir, errors: [e.message || String(e)] });
+      }
+
+      // Sort directories and files for stable ordering
+      const sortTree = (dirNode) => {
+        dirNode.dirs.sort((a, b) => a.name.localeCompare(b.name));
+        dirNode.files.sort((a, b) => a.name.localeCompare(b.name));
+        for (const d of dirNode.dirs) sortTree(d);
+      };
+      sortTree(newIndex.tree);
+
+      newIndex.files.sort((a, b) => a.relPath.localeCompare(b.relPath));
+    }
+
+    this.index = newIndex;
+    this.index.metrics.lastScanMs = Date.now() - startTime;
+    this.index.metrics.lastScanCount = this.index.files.length;
+  }
+
+  async _walkAndIndex(relDir, dirNode, filesAcc, errorsAcc) {
+    const absDir = path.join(this.docsDir, relDir);
+    let entries;
+    try {
+      entries = await fs.readdir(absDir, { withFileTypes: true });
+    } catch (e) {
+      errorsAcc.push({ type: 'readdir', dir: absDir, message: e.message || String(e) });
       return;
     }
 
-    const dirMap = new Map();
-    dirMap.set("", nextIndex.tree);
-
-    const ensureDirNode = (relDir) => {
-      if (dirMap.has(relDir)) return dirMap.get(relDir);
-      const abs = path.join(this.docsDir, relDir);
-      const name = relDir === "" ? "docs" : path.basename(relDir);
-      const node = this._makeDirNode(name, relDir, abs);
-      // attach to parent
-      const parentRel = path.dirname(relDir);
-      const parent = ensureDirNode(parentRel === "." ? "" : parentRel);
-      parent.dirs.push(node);
-      dirMap.set(relDir, node);
-      return node;
-    };
-
-    const files = [];
-
-    const walk = (relDir) => {
-      const absDir = path.join(this.docsDir, relDir);
-      let entries;
-      try {
-        entries = fs.readdirSync(absDir, { withFileTypes: true });
-      } catch (err) {
-        errors.push({ type: "readdir", dir: absDir, message: String(err && err.message || err) });
-        return;
-      }
-
-      for (const entry of entries) {
-        const entryRel = relDir ? path.join(relDir, entry.name) : entry.name;
-        const entryAbs = path.join(this.docsDir, entryRel);
-        if (entry.isDirectory()) {
-          ensureDirNode(entryRel);
-          walk(entryRel);
-        } else if (entry.isFile()) {
-          if (!/\.md$/i.test(entry.name)) continue; // only markdown
-          let stats;
-          try {
-            stats = fs.statSync(entryAbs);
-          } catch (err) {
-            errors.push({ type: "stat", file: entryAbs, message: String(err && err.message || err) });
-            continue;
-          }
-          let title = null;
-          let headings = [];
-          try {
-            const { title: t, headings: h } = this._extractHeadings(entryAbs);
-            title = t;
-            headings = h;
-          } catch (err) {
-            // Non-fatal: still index the file
-            errors.push({ type: "parse", file: entryAbs, message: String(err && err.message || err) });
-          }
-          const fileNode = this._makeFileNode(entryRel, entryAbs, stats, title, headings);
-          files.push(fileNode);
-          const parentRel = relDir;
-          const parent = ensureDirNode(parentRel);
-          parent.files.push(fileNode);
+    for (const entry of entries) {
+      const entryRel = relDir ? path.join(relDir, entry.name) : entry.name;
+      const entryAbs = path.join(this.docsDir, entryRel);
+      if (entry.isDirectory()) {
+        const childDir = this._makeDirNode(entry.name, entryRel, entryAbs);
+        dirNode.dirs.push(childDir);
+        await this._walkAndIndex(entryRel, childDir, filesAcc, errorsAcc);
+      } else if (entry.isFile()) {
+        if (!/\.md$/i.test(entry.name)) continue;
+        let stats;
+        try {
+          stats = await fs.stat(entryAbs);
+        } catch (e) {
+          errorsAcc.push({ type: 'stat', file: entryAbs, message: e.message || String(e) });
+          continue;
         }
+
+        let title = null;
+        let headings = [];
+        try {
+          const extracted = await this._extractHeadings(entryAbs, stats.size);
+          title = extracted.title;
+          headings = extracted.headings;
+        } catch (e) {
+          errorsAcc.push({ type: 'parse', file: entryAbs, message: e.message || String(e) });
+        }
+
+        const fileNode = this._makeFileNode(entryRel, entryAbs, stats, title, headings);
+        dirNode.files.push(fileNode);
+        filesAcc.push(fileNode);
       }
-    };
-
-    // Start walking from root of docs
-    walk("");
-
-    // Sort directories and files for stable ordering
-    for (const [, dir] of dirMap) {
-      dir.dirs.sort((a, b) => a.name.localeCompare(b.name));
-      dir.files.sort((a, b) => a.name.localeCompare(b.name));
     }
-
-    nextIndex.files = files.sort((a, b) => a.relPath.localeCompare(b.relPath));
-    nextIndex.errors = errors;
-    nextIndex.updatedAt = new Date().toISOString();
-    nextIndex.metrics.lastScanMs = Date.now() - start;
-    nextIndex.metrics.lastScanCount = nextIndex.files.length;
-
-    // Update signature
-    this._lastSignature = this._computeSignature();
-
-    // Publish
-    this._index = nextIndex;
-    this._emitter.emit("update", this.getIndex());
-    this._building = false;
   }
 
-  _extractHeadings(absPath) {
-    // Read up to maxTitleBytes for efficiency; for headings we will read the whole file only if small
-    const stat = fs.statSync(absPath);
-    const maxRead = Math.min(stat.size, this.options.maxTitleBytes);
-    const fd = fs.openSync(absPath, "r");
+  async _extractHeadings(absPath, size) {
+    const maxRead = Math.min(size || this.options.maxTitleBytes, this.options.maxTitleBytes);
+    let fh;
     try {
+      fh = await fs.open(absPath, 'r');
       const buffer = Buffer.allocUnsafe(maxRead);
-      fs.readSync(fd, buffer, 0, maxRead, 0);
-      let text = buffer.toString("utf8");
+      const { bytesRead } = await fh.read({ buffer, offset: 0, length: maxRead, position: 0 });
+      const text = buffer.slice(0, bytesRead).toString('utf8');
 
-      // If file is bigger than maxRead, we might miss later headings; acceptable for title extraction
-      // Extract headings that look like Markdown ATX headings (#..######)
       const lines = text.split(/\r?\n/);
       let title = null;
       const headings = [];
       let inCodeFence = false;
+
       for (const line of lines) {
-        const fenceMatch = line.match(/^\s*```/);
-        if (fenceMatch) {
+        const fence = line.match(/^\s*```/);
+        if (fence) {
           inCodeFence = !inCodeFence;
           continue;
         }
@@ -232,56 +182,26 @@ export class DocsIndexer {
         const m = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
         if (m) {
           const level = m[1].length;
-          const text = m[2].trim();
-          headings.push({ level, text });
-          if (!title && level === 1) title = text;
-        }
-        if (!title && !/^\s*$/.test(line)) {
-          // As a fallback, the first non-empty line can be a title if no H1 found later
+          const hText = m[2].trim();
+          headings.push({ level, text: hText });
+          if (!title && level === 1) title = hText;
         }
       }
+
       if (!title) {
-        // Fallback to file name without extension
-        title = path.basename(absPath).replace(/\.[^/.]+$/, "");
+        title = path.basename(absPath).replace(/\.[^/.]+$/, '');
       }
+
       return { title, headings };
     } finally {
-      fs.closeSync(fd);
+      if (fh) await fh.close();
     }
   }
 
-  _computeSignature() {
-    // Signature based on list of markdown files and their sizes + mtimes
-    if (!fs.existsSync(this.docsDir)) return "<no-docs-dir>";
-    const entries = [];
-
-    const walk = (absDir, relDir) => {
-      let dirents;
-      try {
-        dirents = fs.readdirSync(absDir, { withFileTypes: true });
-      } catch (e) {
-        entries.push(`ERR:${relDir}`);
-        return;
-      }
-      for (const d of dirents) {
-        const abs = path.join(absDir, d.name);
-        const rel = relDir ? path.join(relDir, d.name) : d.name;
-        if (d.isDirectory()) {
-          walk(abs, rel);
-        } else if (d.isFile()) {
-          if (!/\.md$/i.test(d.name)) continue;
-          try {
-            const s = fs.statSync(abs);
-            entries.push(`${rel}|${s.size}|${Math.floor(s.mtimeMs)}`);
-          } catch (e) {
-            entries.push(`${rel}|ERR`);
-          }
-        }
-      }
-    };
-
-    walk(this.docsDir, "");
-    entries.sort();
-    return entries.join("\n");
+  stopWatching() {
+    if (this.watcher) {
+      this.watcher.close();
+      this.watcher = null;
+    }
   }
 }
