@@ -327,4 +327,84 @@ export class TasksIndexer {
         await this.rebuildAndNotify(`Features reordered for task ${taskId}, index rebuilt.`);
         return { ok: true };
     }
+
+    async reorderTasks(payload) {
+        console.log('Reordering tasks');
+        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+        let currentOrder = taskDirs
+            .filter(d => d.isDirectory() && /^\d+$/.test(d.name))
+            .map(d => parseInt(d.name, 10))
+            .sort((a, b) => a - b);
+
+        let newOrder;
+        if (payload.order) {
+            newOrder = payload.order;
+            const orderSet = new Set(newOrder);
+            if (orderSet.size !== currentOrder.length || !newOrder.every(id => currentOrder.includes(id))) {
+                throw new Error('Invalid order: must include all existing task IDs without duplicates');
+            }
+        } else if (payload.fromId && payload.toIndex !== undefined) {
+            const fromIndex = currentOrder.indexOf(payload.fromId);
+            if (fromIndex === -1) throw new Error(`Task ${payload.fromId} not found`);
+            if (payload.toIndex < 0 || payload.toIndex >= currentOrder.length) throw new Error('Invalid target index');
+            newOrder = [...currentOrder];
+            const [moved] = newOrder.splice(fromIndex, 1);
+            newOrder.splice(payload.toIndex, 0, moved);
+        } else {
+            throw new Error('Invalid payload for reorder');
+        }
+
+        const newIdForOld = new Map();
+        newOrder.forEach((oldId, index) => {
+            newIdForOld.set(oldId, index + 1);
+        });
+
+        const featureIdUpdateMap = new Map();
+        const tasksData = {};
+        for (const oldId of currentOrder) {
+            const taskPath = path.join(this.tasksDir, String(oldId), 'task.json');
+            const raw = await fs.readFile(taskPath, 'utf-8');
+            tasksData[oldId] = JSON.parse(raw);
+        }
+
+        Object.entries(tasksData).forEach(([oldTaskIdStr, task]) => {
+            const oldTaskId = parseInt(oldTaskIdStr);
+            const newTaskId = newIdForOld.get(oldTaskId);
+            task.id = newTaskId;
+            task.features.forEach((feature, index) => {
+                const oldFeatureId = feature.id;
+                const newFeatureId = `${newTaskId}.${index + 1}`;
+                featureIdUpdateMap.set(oldFeatureId, newFeatureId);
+                feature.id = newFeatureId;
+            });
+        });
+
+        Object.values(tasksData).forEach(task => {
+            task.features.forEach(feature => {
+                if (feature.dependencies) {
+                    feature.dependencies = feature.dependencies.map(dep => featureIdUpdateMap.get(dep) || dep);
+                }
+            });
+        });
+
+        const tempMap = new Map();
+        for (const oldId of currentOrder) {
+            const oldDir = path.join(this.tasksDir, String(oldId));
+            const tempDir = path.join(this.tasksDir, `temp_${oldId}`);
+            await fs.rename(oldDir, tempDir);
+            tempMap.set(oldId, tempDir);
+        }
+
+        for (const [newIndex, oldId] of newOrder.entries()) {
+            const newId = newIndex + 1;
+            const tempDir = tempMap.get(oldId);
+            const newDir = path.join(this.tasksDir, String(newId));
+            await fs.rename(tempDir, newDir);
+            const newTaskPath = path.join(newDir, 'task.json');
+            await fs.writeFile(newTaskPath, JSON.stringify(tasksData[oldId], null, 2), 'utf-8');
+        }
+
+        await this.rebuildAndNotify('Tasks reordered, index rebuilt.');
+        return { ok: true };
+    }
 }
