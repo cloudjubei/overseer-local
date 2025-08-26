@@ -24,6 +24,8 @@ export default function ChatView() {
   const { navigateView } = useNavigator()
 
   const [input, setInput] = useState<string>('')
+  const [isHistoryOpen, setHistoryOpen] = useState<boolean>(true)
+
   const messageListRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
@@ -111,9 +113,20 @@ export default function ChatView() {
 
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
+  // Jump to a message from the History pane
+  const scrollToMessage = (index: number) => {
+    const scroller = messageListRef.current
+    if (!scroller) return
+    const target = scroller.querySelector(`#msg-${index}`) as HTMLElement | null
+    if (target) {
+      target.scrollIntoView({ block: 'nearest' })
+      target.focus({ preventScroll: true })
+    }
+  }
+
   return (
-    <div className="flex min-h-0 w-full">
-      {/* Sidebar */}
+    <div className="flex min-h-0 w-full h-full">
+      {/* Sidebar: Chats list */}
       <aside className="w-64 shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col min-h-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
           <h2 className="m-0 text-[13px] font-semibold text-[var(--text-secondary)] tracking-wide">Chats</h2>
@@ -181,6 +194,15 @@ export default function ChatView() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setHistoryOpen((v) => !v)}
+              className="btn-secondary"
+              aria-pressed={isHistoryOpen}
+              aria-label="Toggle chat history pane"
+              title="Toggle chat history"
+            >
+              {isHistoryOpen ? 'Hide History' : 'Show History'}
+            </button>
             <Select value={activeConfigId || ''} onValueChange={setActive}>
               <SelectTrigger className="ui-select w-[220px]">
                 <SelectValue placeholder="Select Model" />
@@ -217,8 +239,8 @@ export default function ChatView() {
           </div>
         )}
 
-        {/* Messages */}
-        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
+        {/* Messages: the ONLY scrollable region in the main content */}
+        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4" aria-label="Messages list" role="log">
           {enhancedMessages.length === 0 ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
@@ -235,7 +257,7 @@ export default function ChatView() {
 
                 if (isSystem) {
                   return (
-                    <div key={index} className="flex justify-center">
+                    <div key={index} id={`msg-${index}`} tabIndex={-1} className="flex justify-center">
                       <div className="text-[12px] text-[var(--text-muted)] italic bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-full px-3 py-1">
                         {msg.content}
                       </div>
@@ -246,6 +268,8 @@ export default function ChatView() {
                 return (
                   <div
                     key={index}
+                    id={`msg-${index}`}
+                    tabIndex={-1}
                     className={[
                       'flex items-start gap-2',
                       isUser ? 'flex-row-reverse' : 'flex-row',
@@ -276,7 +300,7 @@ export default function ChatView() {
                       {/* Message bubble */}
                       <div
                         className={[
-                          'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                          'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow outline-none',
                           isUser
                             ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                             : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
@@ -361,6 +385,53 @@ export default function ChatView() {
           </div>
         </div>
       </section>
+
+      {/* Right-side collapsible History pane */}
+      {isHistoryOpen && (
+        <aside className="w-80 shrink-0 border-l border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col min-h-0">
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
+            <h2 className="m-0 text-[13px] font-semibold text-[var(--text-secondary)] tracking-wide">History</h2>
+            <button
+              className="btn-secondary"
+              onClick={() => setHistoryOpen(false)}
+              aria-label="Close history pane"
+            >
+              Close
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-2" role="list" aria-label="Chat history">
+            {enhancedMessages.length === 0 && (
+              <div className="text-[12px] text-[var(--text-muted)] px-2 py-1.5">No messages yet</div>
+            )}
+            {enhancedMessages.map((m, i) => (
+              <button
+                key={i}
+                onClick={() => scrollToMessage(i)}
+                role="listitem"
+                className="w-full text-left px-2 py-1.5 rounded-md hover:bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
+                title={m.content}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={[
+                      'inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold',
+                      m.role === 'user'
+                        ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                        : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                    ].join(' ')}
+                    aria-hidden="true"
+                  >
+                    {m.role === 'user' ? 'U' : m.role === 'assistant' ? 'A' : 'S'}
+                  </span>
+                  <span className="truncate text-[12px] text-[var(--text-primary)]">
+                    {m.content.length > 60 ? m.content.slice(0, 60) + '…' : m.content}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+      )}
     </div>
   )
 }
