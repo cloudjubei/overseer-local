@@ -87,6 +87,7 @@ export default function TasksListView() {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('any');
   const [index, setIndex] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
   const ulRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
@@ -109,6 +110,7 @@ export default function TasksListView() {
   }, [index]);
 
   const filtered = filterTasks(allTasks, { query, status: statusFilter });
+  const isFiltered = query !== '' || statusFilter !== 'any';
 
   const handleClear = () => {
     setQuery('');
@@ -120,6 +122,18 @@ export default function TasksListView() {
       await window.tasksIndex.openTaskCreate();
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleMoveTask = async (fromId: number, toIndex: number) => {
+    setSaving(true);
+    try {
+      const res = await window.tasksIndex.reorderTasks({ fromId, toIndex });
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
+    } catch (e: any) {
+      alert(`Failed to reorder task: ${e.message || e}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -183,6 +197,12 @@ export default function TasksListView() {
                       <StatusBadge status={t.status} />
                     </div>
                     <div className="col col-features">{done}/{total}</div>
+                    {!isFiltered && (
+                      <div className="col col-actions">
+                        <button type="button" className="btn-move-up" disabled={saving || idx === 0} onClick={() => handleMoveTask(t.id, idx - 1)}>Up</button>
+                        <button type="button" className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={() => handleMoveTask(t.id, idx + 1)}>Down</button>
+                      </div>
+                    )}
                   </div>
                 </li>
               );
