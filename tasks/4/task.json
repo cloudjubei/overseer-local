@@ -161,12 +161,13 @@
     },
     {
       "id": "4.16",
-      "status": "+",
+      "status": "-",
       "title": "Settings screen is more advanced",
-      "description": "The user should be able to configure various LLMs using various providers - this requires a more complex screen that should be accessible via Chat.",
+      "description": "The user should be able to configure various LLMs using various providers - this requires a more complex screen that should be accessible via Chat. The user needs to select a model from some common models (OpenAI, Anthropic, xai/grok, google/gemini) and based on the interface (LiteLLM) it works out API URL + provides a dropdown to available models (the user can also go custom and type it in themselves).",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "the current UI/UX isn't user friendly"
     },
     {
       "id": "4.17",
@@ -179,9 +180,9 @@
     },
     {
       "id": "4.18",
-      "status": "+",
+      "status": "-",
       "title": "Cannot send a message",
-      "description": "Currently if I send a message to a configured LLM - the whole app crashes horribly",
+      "description": "Currently if I send a message to a configured LLM - nothing happens - the message just dissappears",
       "plan": "",
       "context": [],
       "acceptance": []
