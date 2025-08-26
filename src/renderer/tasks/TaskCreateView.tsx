@@ -3,7 +3,7 @@ import { TaskForm, TaskFormValues } from '../components/TaskForm'
 import { useNextTaskId } from '../hooks/useNextTaskId'
 import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useToast } from '../components/ui/toast'
+import { useToast } from '../components/ui/Toast'
 
 export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()

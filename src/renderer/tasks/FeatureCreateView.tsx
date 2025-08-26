@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { tasksService } from '../services/tasksService'
-import { useToast } from '../components/ui/toast'
+import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 
 export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {

@@ -90,3 +90,7 @@ typings/
 
 # Electron-Forge
 out/
+
+# APP SPECIFIC
+chats/
+chats/*

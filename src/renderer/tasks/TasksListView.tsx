@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Button } from '../components/ui/button'
+import { Button } from '../components/ui/Button'
 import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
@@ -121,11 +121,7 @@ export default function TasksListView() {
   }
 
   const handleAddTask = async () => {
-    try {
       openModal({ type: 'task-create' })
-    } catch (e) {
-      console.error(e)
-    }
   }
 
   const handleMoveTask = async (fromId: number, toIndex: number) => {

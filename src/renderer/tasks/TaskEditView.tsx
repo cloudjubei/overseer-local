@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
 import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useToast } from '../components/ui/toast'
+import { useToast } from '../components/ui/Toast'
 import type { Task } from 'src/types/tasks'
 
 export default function TaskEditView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {

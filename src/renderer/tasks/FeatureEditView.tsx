@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useToast } from '../components/ui/toast'
+import { useToast } from '../components/ui/Toast'
 import type { Feature, Task } from 'src/types/tasks'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
