@@ -7,7 +7,7 @@ import { useDocsIndex } from '../hooks/useDocsIndex';
 import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNavigator } from '../navigation/Navigator';
-import type { LLMConfig } from '../types';
+import type { LLMConfig, ChatMessage } from '../types';
 
 const ChatView = () => {
   const { chatHistories, currentChatId, setCurrentChatId, messages, createChat, deleteChat, sendMessage, uploadDocument } = useChats();
@@ -49,6 +49,19 @@ const ChatView = () => {
     };
     reader.readAsText(file);
   };
+
+  interface EnhancedMessage extends ChatMessage {
+    showModel?: boolean;
+  }
+
+  const enhancedMessages: EnhancedMessage[] = messages.map((msg, index) => {
+    let showModel = false;
+    if (msg.role === 'assistant' && msg.model) {
+      const prevAssistant = [...messages.slice(0, index)].reverse().find(m => m.role === 'assistant');
+      showModel = !prevAssistant || prevAssistant.model !== msg.model;
+    }
+    return { ...msg, showModel };
+  });
 
   return (
     <div className="flex h-full">
@@ -96,15 +109,15 @@ const ChatView = () => {
           ref={messageListRef}
           className="flex-1 overflow-y-auto mb-4 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 rounded-md mx-4"
         >
-          {messages.length === 0 ? (
+          {enhancedMessages.length === 0 ? (
             <div className="text-center text-neutral-500 dark:text-neutral-400 mt-10">
               Start chatting about the project
             </div>
           ) : (
-            messages.map((msg, index) => (
+            enhancedMessages.map((msg, index) => (
               <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : msg.role === 'system' ? 'justify-center' : 'justify-start'} mb-2`}>
                 <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 dark:bg-blue-600 text-white' : msg.role === 'system' ? 'bg-gray-300 dark:bg-gray-700 text-neutral-900 dark:text-neutral-100' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'}`}>
-                  {msg.role === 'assistant' && msg.model && <div className="text-xs text-gray-500">{msg.model}</div>}
+                  {msg.role === 'assistant' && msg.showModel && msg.model && <div className="text-xs text-gray-500">{msg.model}</div>}
                   {msg.content}
                 </div>
               </div>

@@ -170,7 +170,7 @@
     },
     {
       "id": "4.17",
-      "status": "-",
+      "status": "+",
       "title": "Switching models",
       "description": "User can switch between different models that were configured directly in the chat. There's a dropdown with all the options that were previously configured and the user can choose which chat to use. If there was a switch in a conversation it is shown which LLM replied.",
       "plan": "",
