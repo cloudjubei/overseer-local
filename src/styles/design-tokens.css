@@ -169,6 +169,81 @@
   --status-queued-soft-bg: color-mix(in srgb, var(--status-queued-bg) 30%, transparent);
   --status-queued-soft-fg: var(--status-queued-fg);
   --status-queued-soft-border: #D4D4D4;
+
+  /* Typography tokens */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --fs-xxs: 10px;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 30px;
+  --lh-tight: 1.1;
+  --lh-snug: 1.25;
+  --lh-normal: 1.45;
+  --lh-relaxed: 1.6;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Spacing scale (4-based, with half-steps) */
+  --space-0: 0;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 14px;
+  --space-8: 16px;
+  --space-10: 20px;
+  --space-12: 24px;
+  --space-16: 32px;
+  --space-20: 40px;
+  --space-24: 48px;
+  --space-32: 64px;
+
+  /* Radii */
+  --radius-1: 4px;
+  --radius-2: 6px;
+  --radius-3: 8px;
+  --radius-4: 10px;
+  --radius-5: 12px;
+  --radius-round: 999px;
+
+  /* Elevation (shadows) */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-2: 0 1px 3px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.06);
+  --shadow-3: 0 6px 16px rgba(0,0,0,0.10), 0 10px 30px rgba(0,0,0,0.08);
+  --shadow-4: 0 10px 30px rgba(0,0,0,0.14), 0 16px 40px rgba(0,0,0,0.10);
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-normal: 180ms;
+  --motion-slow: 240ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  /* Z-index scale */
+  --z-base: 1;
+  --z-sticky: 10;
+  --z-dropdown: 1000;
+  --z-tooltip: 1200;
+  --z-modal: 1100;
+  --z-toast: 1300;
+
+  /* Component sizing tokens (guidance) */
+  --control-h-sm: 28px;
+  --control-h-md: 34px;
+  --control-h-lg: 40px;
+  --control-pad-x: 12px;
+  --focus-ring-width: 3px;
 }
 
 .dark, [data-theme="dark"] {
@@ -229,6 +304,12 @@
   --status-queued-soft-bg: color-mix(in srgb, var(--status-queued-bg) 40%, transparent);
   --status-queued-soft-fg: var(--status-queued-fg);
   --status-queued-soft-border: #505963;
+
+  /* Dark: slightly stronger shadow alphas for legibility against dark surfaces */
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.28);
+  --shadow-2: 0 1px 3px rgba(0,0,0,0.32), 0 6px 20px rgba(0,0,0,0.28);
+  --shadow-3: 0 6px 16px rgba(0,0,0,0.34), 0 10px 30px rgba(0,0,0,0.30);
+  --shadow-4: 0 10px 30px rgba(0,0,0,0.38), 0 16px 40px rgba(0,0,0,0.32);
 }
 
 /* Utility classes for badges */

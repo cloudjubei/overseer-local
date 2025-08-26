@@ -6,15 +6,20 @@ This document describes how files and directories are organised in this reposito
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - src/styles/: Shared CSS assets and design tokens.
-  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"].
+  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"]. Includes typography, spacing, radii, elevation, motion, and z-index tokens.
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
   - design/: Design system references and tokens.
     - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
+    - design/DESIGN_SYSTEM.md: Comprehensive design system documentation (principles, tokens, typography, spacing, elevation, motion, radii, theming, accessibility, extension guidance).
+    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltips, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
     - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
   - ux/: UX research and guidelines.
     - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
+  - styleguide/: Living style guide that demonstrates tokens and components using actual CSS.
+    - styleguide/index.html: Static style guide (light/dark + density toggle) importing src/styles/design-tokens.css and src/index.css.
+    - styleguide/README.md: How to view and use the style guide.
   - tailwind.config.tokens.example.js: Example Tailwind extension mapping to CSS variable tokens.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
@@ -56,9 +61,14 @@ repo_root/
 │  ├─ BUILD_SIGNING.md
 │  ├─ design/
 │  │  ├─ DESIGN_TOKENS.md
+│  │  ├─ DESIGN_SYSTEM.md
+│  │  ├─ COMPONENTS.md
 │  │  └─ MONDAY_PALETTE_REFERENCE.md
 │  ├─ ux/
 │  │  └─ LINEAR_UX_GUIDELINES.md
+│  ├─ styleguide/
+│  │  ├─ index.html
+│  │  └─ README.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
 │  ├─ chat/
@@ -83,32 +93,32 @@ repo_root/
 │  │  │  │  ├─ Modal.tsx
 │  │  │  │  ├─ Select.tsx
 │  │  │  │  ├─ Toast.tsx
-│  │  │  │  ├─ Tooltip.tsx          ← new: contextual tooltips with portal + placement
-│  │  │  │  ├─ Spinner.tsx          ← new: loading spinner component (tokens + animations)
-│  │  │  │  ├─ Skeleton.tsx         ← new: skeleton shimmer for perceived performance
-│  │  │  │  ├─ CommandMenu.tsx      ← new: Linear-style command palette (Cmd/Ctrl+K, /)
-│  │  │  │  └─ ShortcutsHelp.tsx    ← new: shortcuts overlay (triggered by ?)
+│  │  │  │  ├─ Tooltip.tsx
+│  │  │  │  ├─ Spinner.tsx
+│  │  │  │  ├─ Skeleton.tsx
+│  │  │  │  ├─ CommandMenu.tsx
+│  │  │  │  └─ ShortcutsHelp.tsx
 │  │  │  └─ tasks/
 │  │  │     ├─ StatusBadge.tsx
 │  │  │     ├─ PriorityTag.tsx
-│  │  │     └─ TaskCard.tsx         ← updated: hover quick actions + tooltips
+│  │  │     └─ TaskCard.tsx
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts
 │  │  │  ├─ useDocsIndex.ts
 │  │  │  ├─ useDocsAutocomplete.ts
 │  │  │  ├─ useLLMConfig.ts
 │  │  │  ├─ useNextTaskId.ts
-│  │  │  └─ useShortcuts.tsx        ← new: global shortcuts registry with helpers
+│  │  │  └─ useShortcuts.tsx
 │  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx         ← updated: tooltips when collapsed + view transition
+│  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  └─ ChatView.tsx
-│  │  ├─ App.tsx                    ← updated: providers + CommandMenu + ShortcutsHelp
+│  │  ├─ App.tsx
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
-│  ├─ index.css                     ← updated: micro-animations, tooltip, spinner, skeleton, command/help styles
+│  ├─ index.css
 │  ├─ main.js
 │  └─ preload.js
 ├─ .env
@@ -126,9 +136,7 @@ repo_root/
 ```
 
 Notes on recent changes
-- Added advanced interaction primitives (Tooltip, Spinner, Skeleton) to support hover states, loading animations, and skeletons for perceived performance.
-- Implemented a global keyboard shortcuts infrastructure (useShortcuts) aligned to Linear-like mappings with discoverability.
-- Introduced a Command Menu (Cmd/Ctrl+K, also '/' to focus) and a Shortcuts Help overlay (?), rendered as lightweight modals.
-- Enhanced SidebarView with contextual tooltips when collapsed and smooth view transitions.
-- Updated Button to support a loading state with a spinner overlay.
-- Refreshed index.css with micro-animations (fade, view transition), tooltip styling, spinner keyframes, and skeleton shimmer.
+- Added foundational tokens for typography, spacing, radii, elevation, motion, and z-index to src/styles/design-tokens.css.
+- Created a comprehensive design system guide (DESIGN_SYSTEM.md) and component guidelines (COMPONENTS.md).
+- Introduced a living style guide at docs/styleguide/index.html showcasing tokens and components with light/dark and density toggles.
+- These changes support Monday-inspired visuals and Linear-grade interactions with improved accessibility and maintainability.
