@@ -52,7 +52,7 @@
     },
     {
       "id": "6.6",
-      "status": "-",
+      "status": "+",
       "title": "Add app icons for all platforms",
       "description": "Create or add placeholder icon files (icon.icns for macOS, icon.ico for Windows, icon.png for Linux) in a build resources directory (e.g., build/), and reference them in the build configuration.",
       "plan": "",
