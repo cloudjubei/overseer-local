@@ -192,6 +192,10 @@ export class DocsIndexer {
     }
 
     nextIndex.files = files.sort((a, b) => a.relPath.localeCompare(b.relPath));
+    nextIndex.filesByPath = {};
+    nextIndex.files.forEach((file) => {
+      nextIndex.filesByPath[file.relPath] = file;
+    });
     nextIndex.errors = errors;
     nextIndex.updatedAt = new Date().toISOString();
     nextIndex.metrics.lastScanMs = Date.now() - start;

@@ -49,6 +49,11 @@ app.whenReady().then(() => {
   docsIndexer = new DocsIndexer(projectRoot);
   docsIndexer.init();
 
+  const chatsDir = path.join(projectRoot, 'chats');
+  if (!fs.existsSync(chatsDir)) {
+    fs.mkdirSync(chatsDir);
+  }
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -204,6 +209,17 @@ ipcMain.handle('docs-file:save', async (event, { relPath, content }) => {
   return await docsIndexer.saveFile(relPath, content);
 });
 
+ipcMain.handle('docs:upload', (event, {name, content}) => {
+  const uploadsDir = path.join(docsIndexer.getIndex().docsDir, 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  const filePath = path.join(uploadsDir, name);
+  fs.writeFileSync(filePath, content);
+  docsIndexer.buildIndex();
+  return 'uploads/' + name;
+});
+
 ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   try {
     const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
@@ -320,4 +336,18 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
     console.error('Error in chat completion:', error);
     return { role: 'assistant', content: `An error occurred: ${error.message}` };
   }
+});
+
+ipcMain.handle('chat:load', () => {
+  const filePath = path.join(app.getAppPath(), 'chats/chat.json');
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return [];
+  }
+});
+
+ipcMain.handle('chat:save', (event, messages) => {
+  const filePath = path.join(app.getAppPath(), 'chats/chat.json');
+  fs.writeFileSync(filePath, JSON.stringify(messages));
 });

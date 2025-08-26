@@ -1,6 +1,6 @@
 {
   "id": 4,
-  "status": "-",
+  "status": "+",
   "title": "Agentic chat interface",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
@@ -110,7 +110,7 @@
     },
     {
       "id": "4.10",
-      "status": "-",
+      "status": "+",
       "title": "Add autocomplete for mentioning docs",
       "description": "In ChatView input textarea, detect typing starting with '@', show a dropdown autocomplete list of matching paths from window.docsIndex.getSnapshot().filesByPath. On select, insert the full '@path' into the input. Subscribe to docs updates to refresh list.",
       "plan": "",
@@ -119,7 +119,7 @@
     },
     {
       "id": "4.11",
-      "status": "-",
+      "status": "+",
       "title": "Add file upload UI and IPC for docs",
       "description": "In ChatView, add an attach button next to input, with hidden file input. On file select, use FileReader to read content as text, then call ipcRenderer.invoke('docs:upload', {name: file.name, content}). In main, add ipcMain.handle('docs:upload', (event, {name, content}) => { const path = 'uploads/' + name; fs.writeFileSync(docsIndexer.getIndex().docsDir + '/' + path, content); docsIndexer.buildIndex(); return path; }).",
       "plan": "",
@@ -128,7 +128,7 @@
     },
     {
       "id": "4.12",
-      "status": "-",
+      "status": "+",
       "title": "Integrate upload into chat flow",
       "description": "After successful upload via IPC, append a user message to state: 'Uploaded document to @' + returnedPath. This allows mentioning it immediately and triggers LLM awareness via tools.",
       "plan": "",
@@ -137,7 +137,7 @@
     },
     {
       "id": "4.13",
-      "status": "-",
+      "status": "+",
       "title": "Add chat history persistence",
       "description": "In main, add ipcMain.handle('chat:load', () => { try { return JSON.parse(fs.readFileSync(projectRoot + '/chats/chat.json', 'utf8')); } catch { return []; } }), and 'chat:save', (event, messages) => fs.writeFileSync(projectRoot + '/chats/chat.json', JSON.stringify(messages)). Ensure /chats/ dir exists. In ChatView, on mount load via invoke('chat:load'), set to state, and after any message add, invoke('chat:save', state.messages).",
       "plan": "",
