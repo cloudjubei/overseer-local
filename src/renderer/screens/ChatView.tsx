@@ -3,7 +3,7 @@ import { LLMConfigManager } from '../utils/LLMConfigManager';
 import {Modal} from '../components/ui/modal';
 
 const ChatView = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string }[]>([]);
   const [input, setInput] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [config, setConfig] = useState({ apiBaseUrl: '', apiKey: '', model: '' });
@@ -12,6 +12,7 @@ const ChatView = () => {
   const messageListRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [docsList, setDocsList] = useState<string[]>([]);
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
   const [matchingDocs, setMatchingDocs] = useState<string[]>([]);
@@ -218,6 +219,25 @@ const ChatView = () => {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const content = event.target?.result as string;
+      const relPath = file.name;
+      try {
+        await window.docsIndex.saveFile(relPath, content);
+        setMessages(prev => [...prev, { role: 'system', content: `Uploaded document: @${relPath}` }]);
+      } catch (err) {
+        console.error('Upload failed:', err);
+        setMessages(prev => [...prev, { role: 'system', content: `Upload failed: ${err.message}` }]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div ref={mirrorRef} aria-hidden="true" className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none" />
@@ -245,15 +265,15 @@ const ChatView = () => {
           </div>
         ) : (
           messages.map((msg, index) => (
-            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
-              <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 dark:bg-blue-600 text-white' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'}`}>
+            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : msg.role === 'system' ? 'justify-center' : 'justify-start'} mb-2`}>
+              <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 dark:bg-blue-600 text-white' : msg.role === 'system' ? 'bg-gray-300 dark:bg-gray-700 text-neutral-900 dark:text-neutral-100' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'}`}>
                 {msg.content}
               </div>
             </div>
           ))
         )}
       </div>
-      <div className="flex relative">
+      <div className="flex relative items-start">
         <textarea
           ref={textareaRef}
           value={input}
@@ -262,6 +282,19 @@ const ChatView = () => {
           placeholder="Type your message..."
           rows={3}
         ></textarea>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="ml-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+        >
+          Attach
+        </button>
+        <input
+          type="file"
+          accept=".md,.txt"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileUpload}
+        />
         <button
           onClick={handleSend}
           className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"

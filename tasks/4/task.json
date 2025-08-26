@@ -117,7 +117,7 @@
     },
     {
       "id": "4.11",
-      "status": "-",
+      "status": "+",
       "title": "Add file upload UI and IPC for docs",
       "description": "In ChatView, add an attach button next to input, with hidden file input.",
       "plan": "",
