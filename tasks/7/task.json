@@ -33,7 +33,7 @@
     },
     {
       "id": "7.4",
-      "status": "-",
+      "status": "+",
       "title": "Redesign core UI components with Linear.app-inspired UX patterns",
       "description": "Refactor existing UI components (buttons, modals, forms, inputs, dropdowns) to follow Linear.app's clean and efficient interaction patterns. Implement consistent spacing, typography hierarchy, subtle animations, and intuitive keyboard navigation. Focus on reducing visual clutter while maintaining functionality and improving user efficiency.",
       "plan": "",

@@ -1,16 +1,35 @@
 import React from "react";
 
-export const Input = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->(({ className = "", ...props }, ref) => {
-  return (
-    <input
-      className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+function cn(...xs: Array<string | false | undefined | null>) { return xs.filter(Boolean).join(" "); }
+
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  size?: "sm" | "md" | "lg";
+  invalid?: boolean;
+};
+
+const sizeClass = {
+  sm: "h-8 text-sm px-2.5",
+  md: "h-9 text-sm px-3",
+  lg: "h-10 text-base px-3.5",
+};
+
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className = "", size = "md", invalid = false, ...props }, ref) => {
+    return (
+      <input
+        ref={ref}
+        className={cn(
+          "w-full rounded-md border bg-surface-raised text-text-primary placeholder:text-text-muted",
+          "focus:outline-none focus:ring-2",
+          invalid ? "border-red-400 focus:ring-red-400" : "border border-border focus:ring",
+          sizeClass[size],
+          className
+        )}
+        aria-invalid={invalid || undefined}
+        {...props}
+      />
+    );
+  }
+);
 
 Input.displayName = "Input";
