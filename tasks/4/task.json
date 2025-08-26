@@ -68,7 +68,7 @@
     },
     {
       "id": "4.6",
-      "status": "-",
+      "status": "+",
       "title": "Integrate basic LLM call in ChatView",
       "description": "Update send handler in ChatView: Allow a user to send a message. Show loading indicator while waiting. Handle errors with a message.",
       "plan": "",
