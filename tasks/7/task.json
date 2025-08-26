@@ -1,6 +1,6 @@
 {
   "id": 7,
-  "status": "+",
+  "status": "-",
   "title": "UI design and patterns matching best in class - follow `docs/DESIGN_PROPOSAL.md`",
   "description": "We want to follow Linear.app and Monday.com as they are one of the best task management apps in the world. We want to mimic Monday's colorful style and palette, but we also want to improve on it. We want to match and improve on Linear's UX and controls.",
   "features": [
@@ -97,9 +97,9 @@
     },
     {
       "id": "7.10",
-      "status": "+",
+      "status": "-",
       "title": "Feature details view",
-      "description": "The view is old design - it should be adapted to the new design",
+      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where dependencies lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TaskDetailsView.tsx",
@@ -152,9 +152,9 @@
     },
     {
       "id": "7.13",
-      "status": "+",
-      "title": "Create feature and create task look bad",
-      "description": "they should be adapted to the new design guidelines",
+      "status": "-",
+      "title": "Create feature and create task don't open",
+      "description": "they should be adapted to the new design guidelines. Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/tasks/FeatureCreateView.tsx",
@@ -173,9 +173,9 @@
     },
     {
       "id": "7.14",
-      "status": "+",
-      "title": "The whole chat view needs a revamp",
-      "description": "It looks ugly - it should look like the guidelines stipulate",
+      "status": "-",
+      "title": "ChatView according to design",
+      "description": "It needs to adhere to the set guidelines and be similar in style to the rest. Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/ChatView.tsx",
@@ -191,9 +191,9 @@
     },
     {
       "id": "7.15",
-      "status": "+",
-      "title": "The whole documents screen needs a revamp",
-      "description": "It looks ugly - it should look like the guidelines stipulate",
+      "status": "-",
+      "title": "DocumentsView according to latest design",
+      "description": "The whole screen seems to be flowing vertically. Before the latest changes it was all nice - the sidebar collapsible on the left, and the main content in the middle, scrollable when needed. Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/DocumentsView.tsx",
@@ -210,8 +210,8 @@
     {
       "id": "7.16",
       "status": "+",
-      "title": "The whole settings screen needs a revamp",
-      "description": "It looks ugly - it should look like the guidelines stipulate",
+      "title": "SettingsView according to latest design",
+      "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/SettingsView.tsx",
