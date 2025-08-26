@@ -78,7 +78,7 @@
     },
     {
       "id": "7.9",
-      "status": "-",
+      "status": "+",
       "title": "The dropdown in Home (list view) looks ugly",
       "description": "It looks completely out of place - as if its some old design. It looks bad in the styleguide already",
       "plan": "",

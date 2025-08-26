@@ -136,9 +136,13 @@
       <h3>Inputs</h3>
       <div class="comp-row">
         <input type="text" placeholder="Text input" style="height:var(--control-h-md); padding: 0 var(--control-pad-x); background:var(--surface-raised); border:1px solid var(--border-default); border-radius:var(--radius-2); color:var(--text-primary)" />
-        <select style="height:var(--control-h-md); padding: 0 var(--control-pad-x); background:var(--surface-raised); border:1px solid var(--border-default); border-radius:var(--radius-2); color:var(--text-primary)">
+        <select class="ui-select">
           <option>Option A</option>
           <option>Option B</option>
+        </select>
+        <select class="ui-select ui-select--sm">
+          <option>Small</option>
+          <option>Compact</option>
         </select>
       </div>
 
@@ -223,6 +227,7 @@
         <li>Unified soft/bold status tokens across light/dark themes.</li>
         <li>Density toggle for compact boards without sacrificing readability.</li>
         <li>Motion tokens standardize micro-interaction timings and easing.</li>
+        <li>Consistent select styling (.ui-select) across app and docs.</li>
       </ul>
     </div>
   </div>

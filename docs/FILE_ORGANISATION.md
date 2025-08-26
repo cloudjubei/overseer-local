@@ -107,9 +107,9 @@ repo_root/
 │  │  │     ├─ PriorityTag.tsx
 │  │  │     └─ TaskCard.tsx
 │  │  ├─ services/
-│  │  │  ├─ chatService.ts             # Wraps window.chat API
-│  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
-│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API
+│  │  │  ├─ chatService.ts
+│  │  │  ├─ docsService.ts
+│  │  │  └─ tasksService.ts
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts
 │  │  │  ├─ useDocsIndex.ts
@@ -121,20 +121,20 @@ repo_root/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
-│  │  │  └─ SettingsView.tsx           # Settings screen with theme and LLM configurations
+│  │  │  ├─ ChatView.tsx
+│  │  │  └─ SettingsView.tsx
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskEditView.tsx           # Always in Modal
+│  │  │  ├─ TaskEditView.tsx
 │  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx        # Always in Modal
-│  │  │  ├─ TaskDetailsView.tsx        # Details + features
-│  │  │  └─ TasksListView.tsx          # List, filters, reorder
+│  │  │  ├─ FeatureEditView.tsx
+│  │  │  ├─ TaskDetailsView.tsx
+│  │  │  └─ TasksListView.tsx
 │  │  ├─ App.tsx
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
-│  ├─ index.css
+│  ├─ index.css   # Contains shared component styles (including .ui-select)
 │  ├─ main.js
 │  └─ preload.js
 ├─ .env
@@ -147,12 +147,11 @@ repo_root/
 ├─ tsconfig.json
 ├─ vite.main.config.mjs
 ├─ vite.preload.config.mjs
-├─ vite.renderer.config.mjs
-└─ …
+└─ vite.renderer.config.mjs
 ```
 
 Notes on recent changes
-- Added foundational tokens for typography, spacing, radii, elevation, motion, and z-index to src/styles/design-tokens.css.
-- Created a comprehensive design system guide (DESIGN_SYSTEM.md) and component guidelines (COMPONENTS.md).
-- Introduced a living style guide at docs/styleguide/index.html showcasing tokens and components with light/dark and density toggles.
-- These changes support Monday-inspired visuals and Linear-grade interactions with improved accessibility and maintainability.
+- Introduced a unified .ui-select dropdown style in src/index.css using design tokens (appearance reset, custom chevron, focus ring). Variants: .ui-select--sm and .ui-select--lg.
+- Updated TasksListView to apply .ui-select for the toolbar filter and a compact .ui-select--sm for inline status changes.
+- Updated docs/styleguide/index.html to showcase the .ui-select styles instead of inline-styled select elements.
+- These changes align dropdown visuals with Monday-inspired palette and Linear-grade UX while improving accessibility and consistency across the app and style guide.

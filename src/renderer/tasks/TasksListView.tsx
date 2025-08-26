@@ -165,7 +165,7 @@ export default function TasksListView() {
             <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
           <div className="control">
-            <select id="tasks-status-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select id="tasks-status-select" className="ui-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="any">All statuses</option>
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -230,7 +230,7 @@ export default function TasksListView() {
                       <div className="col col-status">
                         <div className="status-inline">
                           <StatusBadge status={t.status} />
-                          <select className="status-select" aria-label="Change status"
+                          <select className="status-select ui-select ui-select--sm" aria-label="Change status"
                             value={t.status}
                             onClick={(e) => e.stopPropagation()}
                             onChange={(e) => handleStatusChange(t.id, e.target.value as Status)}
