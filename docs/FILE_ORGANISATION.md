@@ -134,7 +134,7 @@ repo_root/
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
-│  ├─ index.css   # Contains shared component styles (including .ui-select)
+│  ├─ index.css   # Contains shared component styles (including .ui-select and task details layout)
 │  ├─ main.js
 │  └─ preload.js
 ├─ .env
@@ -154,4 +154,5 @@ Notes on recent changes
 - Introduced a unified .ui-select dropdown style in src/index.css using design tokens (appearance reset, custom chevron, focus ring). Variants: .ui-select--sm and .ui-select--lg.
 - Updated TasksListView to apply .ui-select for the toolbar filter and a compact .ui-select--sm for inline status changes.
 - Updated docs/styleguide/index.html to showcase the .ui-select styles instead of inline-styled select elements.
+- Updated TaskDetailsView to align with the design system: uses shared StatusBadge (soft/bold), standardized .btn/.btn-secondary buttons, a header + scrollable content layout, and token-driven feature list styling. Reordering now goes through tasksService.
 - These changes align dropdown visuals with Monday-inspired palette and Linear-grade UX while improving accessibility and consistency across the app and style guide.

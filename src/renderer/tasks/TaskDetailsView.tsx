@@ -3,6 +3,7 @@ import type { Feature, Status, Task } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
+import StatusBadge from '../components/tasks/StatusBadge'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -12,25 +13,6 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 }
 
-const STATUS_OPTIONS: Status[] = ['+', '~', '-', '?', '=']
-
-function cssStatus(status: Status | string) {
-  switch (status) {
-    case '+': return 'done'
-    case '~': return 'inprogress'
-    case '-': return 'pending'
-    case '?': return 'blocked'
-    case '=': return 'deferred'
-    default: return 'unknown'
-  }
-}
-
-function StatusBadge({ status }: { status: Status | string }) {
-  const label = STATUS_LABELS[status as Status] || String(status || '')
-  return <span className={`status-badge status-${cssStatus(status)}`} role="img" aria-label={label}>{label}</span>
-}
-
-
 export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [task, setTask] = useState<Task | null>(null)
@@ -38,16 +20,18 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const { openModal, navigateView } = useNavigator()
 
   useEffect(() => {
+    let unsubscribe: (() => void) | null = null
     const fetchIndex = async () => {
       try {
         const idx = await tasksService.getSnapshot()
         setIndex(idx)
-        tasksService.onUpdate(setIndex)
+        unsubscribe = tasksService.onUpdate(setIndex)
       } catch (e) {
         console.error(e)
       }
     }
     fetchIndex()
+    return () => { if (unsubscribe) unsubscribe() }
   }, [])
 
   useEffect(() => {
@@ -57,24 +41,15 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     }
   }, [taskId, index])
 
-  const handleEditTask = () => {
-    if (!task) return
-    openModal({ type: 'task-edit', taskId: task.id })
-  }
-  const handleAddFeature = () => {
-    if (!task) return
-    openModal({ type: 'feature-create', taskId: task.id })
-  }
-  const handleEditFeature = (featureId: string) => {
-    if (!task) return
-    openModal({ type: 'feature-edit', taskId: task.id, featureId })
-  }
+  const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
+  const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
+  const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
 
   const handleMoveFeature = async (fromId: string, toIndex: number) => {
     if (!task) return
     setSaving(true)
     try {
-      const res = await window.tasksIndex.reorderFeatures(task.id, { fromId, toIndex })
+      const res = await tasksService.reorderFeatures(task.id, { fromId, toIndex })
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)
@@ -83,54 +58,85 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     }
   }
 
-  if (!task) return <div className="empty">Task {taskId} not found. <button onClick={() => { navigateView('Home') }}>Back to Tasks</button></div>
+  if (!task) {
+    return (
+      <div className="task-details flex flex-col min-h-0 w-full">
+        <header className="details-header shrink-0">
+          <div className="details-header__bar">
+            <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>Back to Tasks</button>
+            <h1 className="details-title">Task {taskId}</h1>
+          </div>
+        </header>
+        <main className="details-content flex-1 min-h-0 overflow-auto p-4">
+          <div className="empty">Task {taskId} not found.</div>
+        </main>
+      </div>
+    )
+  }
 
   const features = task.features || []
 
   return (
-    <section id="task-details-view" role="region" aria-labelledby="task-details-heading">
-      <h2 id="task-details-heading">Task {task.id}</h2>
-      <div className="task-details-controls">
-        <button type="button" className="btn-back" onClick={() => { navigateView('Home') }}>Back to Tasks</button>
-      </div>
-
-      <div className="task-meta">
-        <div className="task-title">
-          <h3>{task.title || ''}</h3>
-          <StatusBadge status={task.status} />
-          <span className="spacer" />
-          <button type="button" className="btn-edit-task" onClick={handleEditTask}>Edit Task</button>
+    <div className="task-details flex flex-col min-h-0 w-full" role="region" aria-labelledby="task-details-heading">
+      <header className="details-header shrink-0">
+        <div className="details-header__bar">
+          <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>Back</button>
+          <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
+          <StatusBadge status={task.status} variant="bold" className="ml-2" />
+          <div className="spacer" />
+          <button type="button" className="btn-secondary" onClick={handleEditTask}>Edit Task</button>
+          <button type="button" className="btn" onClick={handleAddFeature}>Add Feature</button>
         </div>
-        <div className="task-id"><strong>ID: </strong>{String(task.id)}</div>
-        <div className="task-desc">{task.description || ''}</div>
-      </div>
-
-      <h3>Features</h3>
-      <div className="features-container">
-        <div className="feature-create-controls">
-          <button type="button" className="btn-add-feature" onClick={handleAddFeature}>Add Feature</button>
+        <div className="details-header__meta">
+          <span className="meta-item"><span className="meta-label">ID</span><span className="meta-value">{String(task.id)}</span></span>
+          <span className="meta-item"><span className="meta-label">Status</span><span className="meta-value">{STATUS_LABELS[task.status as Status] || String(task.status)}</span></span>
         </div>
-        {features.length === 0 ? (
-          <div className="empty">No features defined for this task.</div>
-        ) : (
-          <ul className="features-list" role="list" aria-label="Features">
-            {features.map((f: Feature, index: number) => (
-              <li key={f.id} className="feature-item" role="listitem">
-                <div className="feature-row" role="group" aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}`}>
-                  <div className="col col-id">{f.id || ''}</div>
-                  <div className="col col-title">{f.title || ''}</div>
-                  <div className="col col-status"><StatusBadge status={f.status} /></div>
-                  <div className="col col-actions">
-                    <button type="button" className="btn-edit" onClick={() => handleEditFeature(f.id)}>Edit</button>
-                    <button type="button" className="btn-move-up" disabled={index === 0 || saving} onClick={() => handleMoveFeature(f.id, index - 1)}>Up</button>
-                    <button type="button" className="btn-move-down" disabled={index === features.length - 1 || saving} onClick={() => handleMoveFeature(f.id, index + 1)}>Down</button>
-                  </div>
-                </div>
+      </header>
+
+      <main className="details-content flex-1 min-h-0 overflow-auto">
+        <section className="panel">
+          <h2 className="section-title">Overview</h2>
+          <p className="task-desc">{task.description || 'No description provided.'}</p>
+        </section>
+
+        <section className="panel">
+          <div className="section-header">
+            <h2 className="section-title">Features</h2>
+            <div className="section-actions">
+              <button type="button" className="btn" onClick={handleAddFeature}>Add Feature</button>
+            </div>
+          </div>
+
+          {features.length === 0 ? (
+            <div className="empty">No features defined for this task.</div>
+          ) : (
+            <ul className="features-list" role="list" aria-label="Features">
+              <li className="features-head" aria-hidden="true">
+                <div className="col col-id">ID</div>
+                <div className="col col-title">Title</div>
+                <div className="col col-status">Status</div>
+                <div className="col col-actions">Actions</div>
               </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </section>
+              {features.map((f: Feature, idx: number) => (
+                <li key={f.id} className="feature-item" role="listitem">
+                  <div className="feature-row" role="group" aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}`}>
+                    <div className="col col-id">{f.id || ''}</div>
+                    <div className="col col-title">{f.title || ''}</div>
+                    <div className="col col-status"><StatusBadge status={f.status} variant="soft" /></div>
+                    <div className="col col-actions">
+                      <button type="button" className="btn-secondary" onClick={() => handleEditFeature(f.id)}>Edit</button>
+                      <div className="row-actions">
+                        <button type="button" className="btn-secondary" disabled={idx === 0 || saving} onClick={() => handleMoveFeature(f.id, idx - 1)}>Up</button>
+                        <button type="button" className="btn-secondary" disabled={idx === features.length - 1 || saving} onClick={() => handleMoveFeature(f.id, idx + 1)}>Down</button>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </main>
+    </div>
   )
 }
