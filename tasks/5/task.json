@@ -5,7 +5,7 @@
   "description": "The electron app developed in `src/` has an agentic chat which needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`.",
   "features": [
     {
-      "id": "5.2",
+      "id": "5.1",
       "status": "-",
       "title": "Context retrieval for chat - using graphiti",
       "description": "There's a library `https://github.com/getzep/graphiti` that provides an upgraded RAG database. Create agentic tools for this and allow local-only retrieval.",

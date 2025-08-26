@@ -7,7 +7,7 @@ function mapStatusToSemantic(status: Status | string): { key: string; label: str
     case '+': return { key: 'done', label: 'Done' }
     case '~': return { key: 'working', label: 'In Progress' }
     case '-': return { key: 'queued', label: 'Pending' }
-    case '?': return { key: 'blocked', label: 'Blocked' }
+    case '?': return { key: 'stuck', label: 'Blocked' }
     case '=': return { key: 'onhold', label: 'Deferred' }
     default: return { key: 'queued', label: String(status || '') }
   }

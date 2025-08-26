@@ -75,6 +75,155 @@
       "plan": "",
       "context": [],
       "acceptance": []
+    },
+    {
+      "id": "7.9",
+      "status": "-",
+      "title": "The dropdown in Home (list view) looks ugly",
+      "description": "It looks completely out of place - as if its some old design. It looks bad in the styleguide already",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.10",
+      "status": "-",
+      "title": "Feature details view",
+      "description": "The view is old design - it should be adapted to the new design",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.11",
+      "status": "-",
+      "title": "Dragging tasks in the board view doesn't work - in list view it does",
+      "description": "Error occurred in handler for 'tasks:update': TypeError: indexer.updateTask is not a function; Additionally, when dragging there should be helpful animations showing which column/area the dragged item is being put into.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.12",
+      "status": "-",
+      "title": "Theming is broken",
+      "description": "it's impossible to change themes now",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.13",
+      "status": "-",
+      "title": "Create feature and create task look bad",
+      "description": "they should be adapted to the new design guidelines",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/FeatureCreateView.tsx",
+        "src/renderer/tasks/FeatureEditView.tsx",
+        "src/renderer/tasks/TaskCreateView.tsx",
+        "src/renderer/tasks/TaskEditView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.14",
+      "status": "-",
+      "title": "The whole chat view needs a revamp",
+      "description": "It looks ugly - it should look like the guidelines stipulate",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/ChatView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.15",
+      "status": "-",
+      "title": "The whole documents screen needs a revamp",
+      "description": "It looks ugly - it should look like the guidelines stipulate",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/DocumentsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.16",
+      "status": "-",
+      "title": "The whole settings screen needs a revamp",
+      "description": "It looks ugly - it should look like the guidelines stipulate",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
     }
   ]
 }

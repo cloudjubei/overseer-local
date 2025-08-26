@@ -157,7 +157,7 @@ export default function SidebarView({}: SidebarProps) {
 
       <nav className="nav" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
-          {NAV_ITEMS.map((item, i) => {
+          {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view;
             const ref = i === 0 ? firstItemRef : undefined;
             const Btn = (
