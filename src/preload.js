@@ -34,12 +34,16 @@ const DOCS_API = {
   },
   getFile: (relPath) => ipcRenderer.invoke('docs-file:get', { relPath }),
   saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
+  upload: (name, content) => ipcRenderer.invoke('docs:upload', { name, content }),
 };
 
 const CHAT_API = {
   getCompletion: (messages, config) => ipcRenderer.invoke('chat:completion', {messages, config}),
-  load: () => ipcRenderer.invoke('chat:load'),
-  save: (messages) => ipcRenderer.invoke('chat:save', messages),
+  list: () => ipcRenderer.invoke('chat:list'),
+  create: () => ipcRenderer.invoke('chat:create'),
+  load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
+  save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
+  delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
