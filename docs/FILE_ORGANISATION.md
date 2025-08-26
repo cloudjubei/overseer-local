@@ -5,9 +5,22 @@ This document describes how files and directories are organised in this reposito
 ## Top-Level Directory Layout
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
+- src/styles/: Shared CSS assets and design tokens.
+  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"]. Includes typography, spacing, radii, elevation, motion, and z-index tokens.
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
+  - design/: Design system references and tokens.
+    - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
+    - design/DESIGN_SYSTEM.md: Comprehensive design system documentation (principles, tokens, typography, spacing, elevation, motion, radii, theming, accessibility, extension guidance).
+    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltips, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
+    - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
+  - ux/: UX research and guidelines.
+    - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
+  - styleguide/: Living style guide that demonstrates tokens and components using actual CSS.
+    - styleguide/index.html: Static style guide (light/dark + density toggle) importing src/styles/design-tokens.css and src/index.css.
+    - styleguide/README.md: How to view and use the style guide.
+  - tailwind.config.tokens.example.js: Example Tailwind extension mapping to CSS variable tokens.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -45,7 +58,18 @@ repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ STANDARDS.md
-│  └─ BUILD_SIGNING.md
+│  ├─ BUILD_SIGNING.md
+│  ├─ design/
+│  │  ├─ DESIGN_TOKENS.md
+│  │  ├─ DESIGN_SYSTEM.md
+│  │  ├─ COMPONENTS.md
+│  │  └─ MONDAY_PALETTE_REFERENCE.md
+│  ├─ ux/
+│  │  └─ LINEAR_UX_GUIDELINES.md
+│  ├─ styleguide/
+│  │  ├─ index.html
+│  │  └─ README.md
+│  └─ tailwind.config.tokens.example.js
 ├─ src/
 │  ├─ chat/
 │  │  ├─ providers/
@@ -67,23 +91,36 @@ repo_root/
 │  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
 │  │  │  └─ ModalHost.tsx              # Renders modals globally above screens via portal
 │  │  ├─ components/
-│  │  │  └─ ui/
-│  │  │     ├─ Alert.tsx               # Reusable AlertDialog
-│  │  │     ├─ Button.tsx              # Reusable Button
-│  │  │     ├─ Input.tsx               # Reusable Input
-│  │  │     ├─ Modal.tsx               # Reusable Modal
-│  │  │     ├─ Select.tsx              # Reusable Select
-│  │  │     └─ Toast.tsx               # ToastProvider + useToast
+│  │  │  ├─ ui/
+│  │  │  │  ├─ Alert.tsx
+│  │  │  │  ├─ Button.tsx
+│  │  │  │  ├─ Input.tsx
+│  │  │  │  ├─ Modal.tsx
+│  │  │  │  ├─ Select.tsx
+│  │  │  │  ├─ Toast.tsx
+│  │  │  │  ├─ Tooltip.tsx
+│  │  │  │  ├─ Spinner.tsx
+│  │  │  │  ├─ Skeleton.tsx
+│  │  │  │  ├─ CommandMenu.tsx
+│  │  │  │  └─ ShortcutsHelp.tsx
+│  │  │  ├─ tasks/
+│  │  │  │  ├─ StatusBadge.tsx
+│  │  │  │  ├─ PriorityTag.tsx
+│  │  │  │  └─ TaskCard.tsx
+│  │  │  ├─ FeatureForm.tsx        <-- NEW: feature create/edit form (Monday/Linear-guided)
+│  │  │  └─ TaskForm.tsx           <-- NEW: task create/edit form (Monday/Linear-guided)
 │  │  ├─ services/
-│  │  │  ├─ chatService.ts             # Wraps window.chat API
-│  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
-│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API
+│  │  │  ├─ chatService.ts
+│  │  │  ├─ docsService.ts
+│  │  │  └─ tasksService.ts
 │  │  ├─ hooks/
-│  │  │  ├─ useChats.ts                # Chat state + send flow
-│  │  │  ├─ useDocsIndex.ts            # Subscribe to docs index, expose docsList
-│  │  │  ├─ useDocsAutocomplete.ts     # @mention detection and suggestion UI logic
-│  │  │  ├─ useLLMConfig.ts            # LLM config management
-│  │  │  └─ useNextTaskId.ts           # Next task ID calculation 
+│  │  │  ├─ useChats.ts
+│  │  │  ├─ useDocsIndex.ts
+│  │  │  ├─ useDocsAutocomplete.ts
+│  │  │  ├─ useLLMConfig.ts
+│  │  │  ├─ useNextTaskId.ts
+│  │  │  ├─ useShortcuts.tsx
+│  │  │  └─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
@@ -92,16 +129,18 @@ repo_root/
 │  │  │  └─ SettingsView.tsx           # Settings screen with theme and LLM configurations
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskEditView.tsx           # Always in Modal
+│  │  │  ├─ TaskEditView.tsx
 │  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx        # Always in Modal
-│  │  │  ├─ TaskDetailsView.tsx        # Details + features
-│  │  │  └─ TasksListView.tsx          # List, filters, reorder
-│  │  ├─ App.tsx
-│  │  └─ types.ts                      # UI types
-│  ├─ index.css
-│  ├─ main.js                          # Electron main process (updated: removed modal BrowserWindow logic)
-│  └─ preload.js                       # Exposes window.tasksIndex/docsIndex/chat APIs (updated: removed modal-opening functions)
+│  │  │  ├─ FeatureEditView.tsx
+│  │  │  ├─ TaskDetailsView.tsx
+│  │  │  └─ TasksListView.tsx
+│  │  ├─ App.tsx                   (initializes theme on app boot)
+│  │  └─ types.ts
+│  ├─ styles/
+│  │  └─ design-tokens.css
+│  ├─ index.css   # Contains shared component styles (including .ui-select and task details layout)
+│  ├─ main.js
+│  └─ preload.js
 ├─ .env
 ├─ forge.config.js
 ├─ index.html

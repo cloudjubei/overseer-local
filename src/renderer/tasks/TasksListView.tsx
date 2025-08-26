@@ -60,6 +60,9 @@ export default function TasksListView() {
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
   const [dragTaskId, setDragTaskId] = useState<number | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
   const { openModal, navigateTaskDetails } = useNavigator()
 
@@ -128,6 +131,21 @@ export default function TasksListView() {
 
   const dndEnabled = !isFiltered && view === 'list'
 
+  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const pos: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after'
+    setDropIndex(idx)
+    setDropPosition(pos)
+  }
+
+  const clearDndState = () => {
+    setDragTaskId(null)
+    setDragging(false)
+    setDropIndex(null)
+    setDropPosition(null)
+  }
+
   const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, taskId: number) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -157,6 +175,16 @@ export default function TasksListView() {
     ;(rows[nextIndex] as HTMLElement).focus()
   }
 
+  const onListDrop = (e: React.DragEvent<HTMLUListElement>) => {
+    if (!dndEnabled || !dragging) return
+    e.preventDefault()
+    if (dragTaskId != null && dropIndex != null) {
+      const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
+      handleMoveTask(dragTaskId, toIndex)
+    }
+    clearDndState()
+  }
+
   return (
     <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
       <div className="tasks-toolbar">
@@ -165,7 +193,7 @@ export default function TasksListView() {
             <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
           <div className="control">
-            <select id="tasks-status-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select id="tasks-status-select" className="ui-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="any">All statuses</option>
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -198,23 +226,60 @@ export default function TasksListView() {
           {filtered.length === 0 ? (
             <div className="empty">No tasks found.</div>
           ) : (
-            <ul className="tasks-list" role="list" aria-label="Tasks" ref={ulRef}
-              onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
+            <ul
+              className={`tasks-list ${dragging ? 'dnd-active' : ''}`}
+              role="list"
+              aria-label="Tasks"
+              ref={ulRef}
+              onDragOver={(e) => {
+                if (dndEnabled) {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                }
+              }}
+              onDrop={onListDrop}
+              onDragEnd={() => clearDndState()}
             >
               {filtered.map((t, idx) => {
                 const { done, total } = countFeatures(t)
                 const priority = parsePriorityFromTitle(t.title)
+                const isDragSource = dragTaskId === t.id
+                const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
+                const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 return (
                   <li key={t.id} className="task-item" role="listitem">
+                    {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
                     <div
-                      className={`task-row ${dndEnabled ? 'draggable' : ''}`}
+                      className={`task-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''}`}
                       tabIndex={0}
                       role="button"
                       data-index={idx}
                       draggable={dndEnabled}
-                      onDragStart={(e) => { if (!dndEnabled) return; setDragTaskId(t.id); e.dataTransfer.setData('text/plain', String(t.id)); e.dataTransfer.effectAllowed = 'move' }}
-                      onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault() }}
-                      onDrop={(e) => { if (!dndEnabled) return; e.preventDefault(); const overIdx = idx; if (dragTaskId != null) { handleMoveTask(dragTaskId, overIdx) } setDragTaskId(null) }}
+                      aria-grabbed={isDragSource}
+                      onDragStart={(e) => {
+                        if (!dndEnabled) return;
+                        setDragTaskId(t.id);
+                        setDragging(true);
+                        e.dataTransfer.setData('text/plain', String(t.id));
+                        e.dataTransfer.effectAllowed = 'move'
+                      }}
+                      onDragOver={(e) => {
+                        if (!dndEnabled) return; 
+                        e.preventDefault();
+                        computeDropForRow(e, idx);
+                      }}
+                      onDrop={(e) => {
+                        if (!dndEnabled) return; 
+                        e.preventDefault();
+                        // List-level onDrop handles the actual reorder using current dropIndex/position
+                        // We just ensure the current target is set correctly
+                        computeDropForRow(e, idx);
+                        if (dragTaskId != null && dropIndex != null) {
+                          const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
+                          handleMoveTask(dragTaskId, to)
+                        }
+                        clearDndState()
+                      }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
                       aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
@@ -230,7 +295,7 @@ export default function TasksListView() {
                       <div className="col col-status">
                         <div className="status-inline">
                           <StatusBadge status={t.status} />
-                          <select className="status-select" aria-label="Change status"
+                          <select className="status-select ui-select ui-select--sm" aria-label="Change status"
                             value={t.status}
                             onClick={(e) => e.stopPropagation()}
                             onChange={(e) => handleStatusChange(t.id, e.target.value as Status)}
@@ -243,6 +308,7 @@ export default function TasksListView() {
                       </div>
                       <div className="col col-features">{done}/{total}</div>
                     </div>
+                    {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )
               })}
@@ -250,6 +316,8 @@ export default function TasksListView() {
           )}
         </div>
       )}
+
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </section>
   )
 }

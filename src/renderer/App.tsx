@@ -2,16 +2,16 @@ import { useEffect } from 'react';
 import SidebarView from './screens/SidebarView';
 import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
-import { ToastProvider, useToast } from './components/ui/Toast';
+import { ToastProvider } from './components/ui/Toast';
 import { NavigatorProvider, useNavigator } from './navigation/Navigator';
 import { ShortcutsProvider, useShortcuts, match } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
+import { initTheme } from './hooks/useTheme';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
   const nav = useNavigator();
-  const { toast } = useToast();
 
   useEffect(() => {
     // Cmd/Ctrl+N: New Task
@@ -31,15 +31,9 @@ function GlobalShortcutsBootstrap() {
   return null;
 }
 
-function App() {
-  useEffect(() => {
-    let theme = localStorage.getItem('theme');
-    if (!theme) {
-      theme = 'blue';
-      localStorage.setItem('theme', theme);
-    }
-    document.documentElement.className = `theme-${theme}`;
-  }, []);
+function App()
+{
+  useEffect(() => { initTheme() }, [])
 
   return (
     <ToastProvider>

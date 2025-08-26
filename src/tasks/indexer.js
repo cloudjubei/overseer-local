@@ -414,4 +414,32 @@ export class TasksIndexer {
         await this.rebuildAndNotify('Tasks reordered, index rebuilt.');
         return { ok: true };
     }
+
+    // NEW: updateTask to support status/title/description/rejection updates from renderer (e.g., board drag)
+    async updateTask(taskId, data) {
+        console.log(`Updating task ${taskId}`);
+        const taskDir = path.join(this.tasksDir, String(taskId));
+        const taskPath = path.join(taskDir, 'task.json');
+        let taskData;
+        try {
+            const raw = await fs.readFile(taskPath, 'utf-8');
+            taskData = JSON.parse(raw);
+        } catch (e) {
+            throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
+        }
+
+        // Do not allow changing ID via updateTask; everything else is merged
+        const { id, features, ...patchable } = data || {};
+        const next = { ...taskData, ...patchable };
+
+        // Validate before writing
+        const { valid, errors } = validateTask(next);
+        if (!valid) {
+            throw new Error(`Invalid task update for ${taskId}: ${errors && errors.join ? errors.join(', ') : JSON.stringify(errors)}`);
+        }
+
+        await fs.writeFile(taskPath, JSON.stringify(next, null, 2), 'utf-8');
+        await this.rebuildAndNotify(`Task ${taskId} updated`);
+        return { ok: true };
+    }
 }

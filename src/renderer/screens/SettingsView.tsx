@@ -4,17 +4,14 @@ import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { chatService } from '../services/chatService';
-import type { LLMConfig } from '../types';
+import type { LLMConfig, LLMProviderType } from '../types';
+import { useTheme, type Theme } from '../hooks/useTheme';
 import { useToast } from '../components/ui/Toast';
 
 export default function SettingsView() {
-  const themes = ['light', 'dark', 'blue'];
+  const themes: Theme[] = ['light', 'dark'];
+  const { theme, setTheme } = useTheme();
 
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme') || 'light';
-    document.documentElement.className = `theme-${saved}`;
-    return saved;
-  });
   const { configs, activeConfigId, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
   const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
@@ -50,7 +47,7 @@ export default function SettingsView() {
     }
   };
 
-  const handleProviderChange = (value: string) => {
+  const handleProviderChange = (value: LLMProviderType) => {
     setEditingConfig((prev) => {
       if (!prev) return null;
       const newBase = defaultUrls[value] || '';
@@ -80,9 +77,6 @@ export default function SettingsView() {
     setModelsError(null);
     try {
       const models = await chatService.listModels(editingConfig);
-      if (models.error) {
-        throw new Error(models.error);
-      }
       setAvailableModels(models);
       setModelsError(null);
     } catch (err) {
@@ -90,8 +84,8 @@ export default function SettingsView() {
       setAvailableModels([]);
       toast({
         title: 'Error',
-        description: err.message,
-        variant: 'destructive'
+        description: String(err),
+        variant: 'error'
       });
     } finally {
       setModelsLoading(false);
@@ -125,7 +119,7 @@ export default function SettingsView() {
   };
 
   const handleAddNewConfig = () => {
-    setEditingConfig({ id: '', name: '', provider: '', apiBaseUrl: '', apiKey: '', model: '' });
+    setEditingConfig({ id: '', name: '', provider: 'openai', apiBaseUrl: '', apiKey: '', model: '' });
     setIsAddingNew(true);
     setModelMode('preset');
     setAvailableModels([]);
@@ -147,7 +141,7 @@ export default function SettingsView() {
         <select 
           value={theme} 
           onChange={(e) => {
-            setTheme(e.target.value);
+            setTheme(e.target.value as Theme);
             document.documentElement.className = `theme-${e.target.value}`;
             localStorage.setItem('theme', e.target.value);
           }} 
@@ -168,7 +162,7 @@ export default function SettingsView() {
             <span>{cfg.name} ({cfg.model}) {activeConfigId === cfg.id ? '(Active)' : ''}</span>
             <div>
               <Button onClick={() => handleEditConfig(cfg)} variant="outline" className="mr-2">Edit</Button>
-              <Button onClick={() => handleDeleteConfig(cfg.id)} variant="destructive" className="mr-2">Delete</Button>
+              <Button onClick={() => handleDeleteConfig(cfg.id)} variant="danger" className="mr-2">Delete</Button>
               {activeConfigId !== cfg.id && <Button onClick={() => setActive(cfg.id)}>Set Active</Button>}
             </div>
           </div>

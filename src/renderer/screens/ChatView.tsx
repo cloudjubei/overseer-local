@@ -1,178 +1,366 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
-import { useChats } from '../hooks/useChats';
-import { useDocsIndex } from '../hooks/useDocsIndex';
-import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
-import { useLLMConfig } from '../hooks/useLLMConfig';
-import { useNavigator } from '../navigation/Navigator';
-import type { ChatMessage } from '../types';
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
+import { useChats } from '../hooks/useChats'
+import { useDocsIndex } from '../hooks/useDocsIndex'
+import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete'
+import { useLLMConfig } from '../hooks/useLLMConfig'
+import { useNavigator } from '../navigation/Navigator'
+import type { ChatMessage } from '../types'
 
-const ChatView = () => {
-  const { chatHistories, currentChatId, setCurrentChatId, messages, createChat, deleteChat, sendMessage, uploadDocument } = useChats();
-  const { docsList } = useDocsIndex();
-  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig();
-  const { navigateView } = useNavigator();
+export default function ChatView() {
+  const {
+    chatHistories,
+    currentChatId,
+    setCurrentChatId,
+    messages,
+    createChat,
+    deleteChat,
+    sendMessage,
+    uploadDocument,
+  } = useChats()
 
-  const [input, setInput] = useState<string>('');
-  const messageListRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const mirrorRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isOpen: isAutocompleteOpen, matches: matchingDocs, position: autocompletePosition, onSelect: onAutocompleteSelect } = useDocsAutocomplete({
-    docsList,
-    input,
-    setInput,
-    textareaRef,
-    mirrorRef,
-  });
+  const { docsList } = useDocsIndex()
+  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
+  const { navigateView } = useNavigator()
 
+  const [input, setInput] = useState<string>('')
+  const messageListRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const mirrorRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const {
+    isOpen: isAutocompleteOpen,
+    matches: matchingDocs,
+    position: autocompletePosition,
+    onSelect: onAutocompleteSelect,
+  } = useDocsAutocomplete({ docsList, input, setInput, textareaRef, mirrorRef })
+
+  // Always scroll to bottom on new messages
   useEffect(() => {
-    messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
-  }, [messages]);
+    const el = messageListRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight })
+  }, [messages])
+
+  // Textarea autosize for better composing UX
+  const autoSizeTextarea = () => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const max = 200 // px
+    const next = Math.min(el.scrollHeight, max)
+    el.style.height = next + 'px'
+  }
+  useEffect(() => {
+    autoSizeTextarea()
+  }, [input])
 
   const handleSend = async () => {
-    if (!input.trim() || !activeConfig) return;
+    if (!input.trim() || !activeConfig) return
     if (!currentChatId) {
-      await createChat();
+      await createChat()
     }
-    sendMessage(input, activeConfig);
-    setInput('');
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      uploadDocument(file.name, content);
-    };
-    reader.readAsText(file);
-  };
-
-  interface EnhancedMessage extends ChatMessage {
-    showModel?: boolean;
+    sendMessage(input, activeConfig)
+    setInput('')
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+        textareaRef.current.focus()
+      }
+    })
   }
 
-  const enhancedMessages: EnhancedMessage[] = messages.map((msg, index) => {
-    let showModel = false;
-    if (msg.role === 'assistant' && msg.model) {
-      const prevAssistant = [...messages.slice(0, index)].reverse().find(m => m.role === 'assistant');
-      showModel = !prevAssistant || prevAssistant.model !== msg.model;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result as string
+      uploadDocument(file.name, content)
     }
-    return { ...msg, showModel };
-  });
+    reader.readAsText(file)
+  }
+
+  const handleTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  interface EnhancedMessage extends ChatMessage {
+    showModel?: boolean
+    isFirstInGroup?: boolean
+  }
+
+  // Enhance messages: show model chip when it changes; group consecutive by role
+  const enhancedMessages: EnhancedMessage[] = useMemo(() => {
+    return messages.map((msg, index) => {
+      let showModel = false
+      if (msg.role === 'assistant' && msg.model) {
+        const prevAssistant = [...messages.slice(0, index)].reverse().find((m) => m.role === 'assistant')
+        showModel = !prevAssistant || prevAssistant.model !== msg.model
+      }
+      const prev = messages[index - 1]
+      const isFirstInGroup = !prev || prev.role !== msg.role || msg.role === 'system'
+      return { ...msg, showModel, isFirstInGroup }
+    })
+  }, [messages])
+
+  const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
   return (
-    <div className="flex h-full">
-      <div className="w-1/4 border-r border-neutral-200 dark:border-neutral-800 p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Chats</h2>
-          <button onClick={createChat} className="px-2 py-1 bg-blue-500 text-white rounded">New Chat</button>
+    <div className="flex min-h-0 w-full">
+      {/* Sidebar */}
+      <aside className="w-64 shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col min-h-0">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
+          <h2 className="m-0 text-[13px] font-semibold text-[var(--text-secondary)] tracking-wide">Chats</h2>
+          <button className="btn" onClick={createChat} aria-label="Create new chat">
+            New
+          </button>
         </div>
-        {chatHistories.map((id) => (
-          <div key={id} className={`flex justify-between items-center p-2 cursor-pointer ${currentChatId === id ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`} onClick={() => setCurrentChatId(id)}>
-            <span>Chat {id}</span>
-            <button onClick={() => deleteChat(id)} className="text-red-500">Delete</button>
+        <div className="flex-1 min-h-0 overflow-y-auto p-2" role="list" aria-label="Chat list">
+          {chatHistories.length === 0 && (
+            <div className="text-[12px] text-[var(--text-muted)] px-2 py-1.5">No chats yet</div>
+          )}
+          {chatHistories.map((id) => {
+            const isActive = currentChatId === id
+            return (
+              <div
+                key={id}
+                role="listitem"
+                className={[
+                  'group flex items-center justify-between gap-2 cursor-pointer select-none px-2 py-1.5 rounded-md',
+                  'text-[var(--text-primary)] transition-colors',
+                  isActive
+                    ? 'border border-[var(--border-default)] bg-[var(--surface-overlay)]'
+                    : 'hover:bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]',
+                ].join(' ')}
+                onClick={() => setCurrentChatId(id)}
+                aria-current={isActive ? 'true' : undefined}
+                title={`Open Chat ${id}`}
+              >
+                <span className="truncate">Chat {id}</span>
+                <button
+                  className="opacity-60 group-hover:opacity-100 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteChat(id)
+                  }}
+                  aria-label={`Delete Chat ${id}`}
+                  title="Delete chat"
+                >
+                  Delete
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <section className="flex-1 min-w-0 min-h-0 flex flex-col bg-[var(--surface-base)]">
+        {/* Hidden mirror for caret positioning (docs autocomplete) */}
+        <div
+          ref={mirrorRef}
+          aria-hidden="true"
+          className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none"
+        />
+
+        <header className="shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
+              Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}
+            </h1>
+            {activeConfig && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[12px] text-[var(--text-secondary)] border border-[var(--border-subtle)] bg-[var(--surface-overlay)] px-2 py-0.5 rounded-full">
+                Model: <strong className="font-medium text-[var(--text-primary)]">{activeConfig.name}</strong>
+              </span>
+            )}
           </div>
-        ))}
-      </div>
-      <div className="flex flex-col w-3/4 h-full">
-        <div ref={mirrorRef} aria-hidden="true" className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none" />
-        <div className="flex justify-between items-center p-4">
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}</h1>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <Select value={activeConfigId || ''} onValueChange={setActive}>
-              <SelectTrigger className="w-[180px] mr-2">
+              <SelectTrigger className="ui-select w-[220px]">
                 <SelectValue placeholder="Select Model" />
               </SelectTrigger>
               <SelectContent>
                 {configs.map((cfg) => (
-                  <SelectItem key={cfg.id} value={cfg.id}>{cfg.name} ({cfg.model})</SelectItem>
+                  <SelectItem key={cfg.id} value={cfg.id}>
+                    {cfg.name} ({cfg.model})
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <button
               onClick={() => navigateView('Settings')}
-              className="px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+              className="btn-secondary"
+              aria-label="Open Settings"
             >
               Settings
             </button>
           </div>
-        </div>
+        </header>
+
         {!isConfigured && (
-          <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 p-2 rounded-md mb-4 mx-4">
-            Warning: LLM not configured. Please set your API key in settings.
+          <div
+            className="mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
+            style={{
+              background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
+              color: 'var(--text-primary)',
+            }}
+            role="status"
+          >
+            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+            <button className="btn" onClick={() => navigateView('Settings')}>Configure</button>
           </div>
         )}
-        <div
-          ref={messageListRef}
-          className="flex-1 overflow-y-auto mb-4 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 rounded-md mx-4"
-        >
+
+        {/* Messages */}
+        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
           {enhancedMessages.length === 0 ? (
-            <div className="text-center text-neutral-500 dark:text-neutral-400 mt-10">
-              Start chatting about the project
+            <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
+              <div className="text-[18px] font-medium">Start chatting about the project</div>
+              <div className="text-[13px] mt-2">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
+              <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
+                Attach markdown or text files to give context. Mention docs with / to quickly link files.
+              </div>
             </div>
           ) : (
-            enhancedMessages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : msg.role === 'system' ? 'justify-center' : 'justify-start'} mb-2`}>
-                <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 dark:bg-blue-600 text-white' : msg.role === 'system' ? 'bg-gray-300 dark:bg-gray-700 text-neutral-900 dark:text-neutral-100' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'}`}>
-                  {msg.role === 'assistant' && msg.showModel && msg.model && <div className="text-xs text-gray-500">{msg.model}</div>}
-                  {msg.content}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-        <div className="flex relative items-start p-4">
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 rounded-md text-neutral-900 dark:text-neutral-100"
-            placeholder="Type your message..."
-            rows={3}
-          ></textarea>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="ml-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-          >
-            Attach
-          </button>
-          <input
-            type="file"
-            accept=".md,.txt"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileUpload}
-          />
-          <button
-            onClick={handleSend}
-            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          >
-            Send
-          </button>
-          {isAutocompleteOpen && autocompletePosition && (
-            <div
-              className="absolute bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-10"
-              style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px` }}
-            >
-              {matchingDocs.map((path, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 cursor-pointer"
-                  onClick={() => onAutocompleteSelect(path)}
-                >
-                  {path}
-                </div>
-              ))}
+            <div className="mx-auto max-w-[960px] space-y-3">
+              {enhancedMessages.map((msg, index) => {
+                const isUser = msg.role === 'user'
+                const isSystem = msg.role === 'system'
+
+                if (isSystem) {
+                  return (
+                    <div key={index} className="flex justify-center">
+                      <div className="text-[12px] text-[var(--text-muted)] italic bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-full px-3 py-1">
+                        {msg.content}
+                      </div>
+                    </div>
+                  )
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className={[
+                      'flex items-start gap-2',
+                      isUser ? 'flex-row-reverse' : 'flex-row',
+                    ].join(' ')}
+                  >
+                    {/* Avatar */}
+                    <div
+                      className={[
+                        'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                        isUser
+                          ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                          : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                      ].join(' ')}
+                      aria-hidden="true"
+                    >
+                      {isUser ? 'You' : 'AI'}
+                    </div>
+
+                    <div className={['max-w-[72%] min-w-[80px] flex flex-col', isUser ? 'items-end' : 'items-start'].join(' ')}>
+                      {/* Model chip on assistant model change */}
+                      {!isUser && msg.showModel && msg.model && (
+                        <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                          {msg.model}
+                        </div>
+                      )}
+
+                      {/* Message bubble */}
+                      <div
+                        className={[
+                          'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                          isUser
+                            ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
+                            : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                          msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                        ].join(' ')}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-};
 
-export default ChatView;
+        {/* Composer */}
+        <div className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
+          <div className="p-3">
+            <div className="relative flex items-end gap-2">
+              <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onInput={autoSizeTextarea}
+                  onKeyDown={handleTextareaKeyDown}
+                  className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
+                  placeholder={isConfigured ? 'Type your message…' : 'Configure your LLM in Settings to start chatting'}
+                  rows={1}
+                  aria-label="Message input"
+                  disabled={!isConfigured}
+                  style={{ maxHeight: 200, overflowY: 'auto' }}
+                />
+                <div className="px-3 py-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[12px] text-[var(--text-muted)]">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="btn-secondary"
+                      aria-label="Attach a document"
+                      type="button"
+                    >
+                      Attach
+                    </button>
+                    <input
+                      type="file"
+                      accept=".md,.txt"
+                      ref={fileInputRef}
+                      style={{ display: 'none' }}
+                      onChange={handleFileUpload}
+                    />
+                    <span className="hidden sm:inline">Tip: Use / to reference docs</span>
+                  </div>
+                  <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
+                </div>
+              </div>
+
+              <button onClick={handleSend} className="btn" disabled={!canSend} aria-label="Send message">
+                Send
+              </button>
+
+              {isAutocompleteOpen && autocompletePosition && (
+                <div
+                  className="absolute z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+                  style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px` }}
+                  role="listbox"
+                  aria-label="Docs suggestions"
+                >
+                  {matchingDocs.map((path, idx) => (
+                    <div
+                      key={idx}
+                      className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]"
+                      role="option"
+                      onClick={() => onAutocompleteSelect(path)}
+                    >
+                      {path}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}

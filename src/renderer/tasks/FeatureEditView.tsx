@@ -33,7 +33,9 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         }
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [taskId, featureId])
 
   const onSubmit = async (values: FeatureFormValues) => {
@@ -63,9 +65,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             isCreate={false}
           />
         ) : (
-          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature
-
-</div>
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature…</div>
         )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
