@@ -82,7 +82,8 @@ const ChatView = () => {
       const content = event.target?.result as string;
       try {
         const path = await ipcRenderer.invoke('docs:upload', { name: file.name, content });
-        window.alert(`File uploaded to ${path}`);
+        const uploadMessage = `Uploaded document to @${path}`;
+        setMessages(prevMessages => [...prevMessages, { role: 'user', content: uploadMessage }]);
       } catch (err) {
         window.alert(`Error uploading file: ${err.message}`);
       }
