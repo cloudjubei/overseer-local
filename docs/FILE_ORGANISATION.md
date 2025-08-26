@@ -6,7 +6,7 @@ This document describes how files and directories are organised in this reposito
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - src/styles/: Shared CSS assets and design tokens.
-  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics).
+  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"].
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
@@ -128,12 +128,15 @@ repo_root/
 
 Notes on recent changes
 - Added docs/design/ with DESIGN_TOKENS.md and MONDAY_PALETTE_REFERENCE.md to define and reference Monday-inspired color tokens.
-- Added src/styles/design-tokens.css with CSS variables for light/dark themes and status colors.
+- Added src/styles/design-tokens.css with CSS variables for light/dark themes and status colors. Now supports toggling via .dark class or [data-theme="dark"].
+- Updated tailwind.config.js to map Tailwind colors to CSS variable tokens (brand, gray, green, orange, red, purple, blue, teal, pink, surface, text, border, accent, status). This enables dynamic theming.
+- Updated src/index.css to import design-tokens.css and refactor base/component styles to use semantic tokens for colors and focus rings.
 - Added docs/tailwind.config.tokens.example.js showing how to map tokens into Tailwind.
 - Added docs/ux/LINEAR_UX_GUIDELINES.md documenting Linear-inspired UX patterns and how to apply them in our app.
 
 Rationale
 - Centralizing the color system in tokens enables consistent styling, theming, and accessibility improvements across the app without coupling components to raw hex values.
+- Mapping Tailwind to CSS variables allows runtime theme switching without rebuilds and supports AA/AAA contrast targets.
 - Documenting UX patterns provides a single source of truth for interaction design and ensures keyboard-first, accessible, and efficient workflows.
 
 Notes on recent changes (from prior):
