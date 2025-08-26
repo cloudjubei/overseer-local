@@ -76,17 +76,17 @@ repo_root/
 │  │  │  ├─ Navigator.tsx
 │  │  │  └─ ModalHost.tsx
 │  │  ├─ components/
-│  │  │  └─ ui/
-│  │  │     ├─ Alert.tsx
-│  │  │     ├─ Button.tsx
-│  │  │     ├─ Input.tsx
-│  │  │     ├─ Modal.tsx
-│  │  │     ├─ Select.tsx
-│  │  │     └─ Toast.tsx
-│  │  ├─ services/
-│  │  │  ├─ chatService.ts
-│  │  │  ├─ docsService.ts
-│  │  │  └─ tasksService.ts
+│  │  │  ├─ ui/
+│  │  │  │  ├─ Alert.tsx
+│  │  │  │  ├─ Button.tsx
+│  │  │  │  ├─ Input.tsx
+│  │  │  │  ├─ Modal.tsx
+│  │  │  │  ├─ Select.tsx
+│  │  │  │  └─ Toast.tsx
+│  │  │  └─ tasks/
+│  │  │     ├─ StatusBadge.tsx           ← new: tokenized Monday-style status badge
+│  │  │     ├─ PriorityTag.tsx           ← new: priority chip (parsed from title, P0..P3)
+│  │  │     └─ TaskCard.tsx              ← new: board/list card with status + priority
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts
 │  │  │  ├─ useDocsIndex.ts
@@ -98,18 +98,23 @@ repo_root/
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  └─ ChatView.tsx
+│  │  ├─ services/
+│  │  │  ├─ chatService.ts
+│  │  │  ├─ docsService.ts
+│  │  │  └─ tasksService.ts
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx
 │  │  │  ├─ TaskEditView.tsx
+│  │  │  ├─ TaskDetailsView.tsx
 │  │  │  ├─ FeatureCreateView.tsx
 │  │  │  ├─ FeatureEditView.tsx
-│  │  │  ├─ TaskDetailsView.tsx
-│  │  │  └─ TasksListView.tsx
+│  │  │  ├─ TasksListView.tsx            ← updated: List/Board, DnD reorder, inline status
+│  │  │  └─ BoardView.tsx                ← new: kanban board view with DnD status change
 │  │  ├─ App.tsx
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
-│  ├─ index.css
+│  ├─ index.css                           ← updated: board styles, priority tags, refined toolbar
 │  ├─ main.js
 │  └─ preload.js
 ├─ .env
@@ -127,19 +132,11 @@ repo_root/
 ```
 
 Notes on recent changes
-- Added docs/design/ with DESIGN_TOKENS.md and MONDAY_PALETTE_REFERENCE.md to define and reference Monday-inspired color tokens.
-- Added src/styles/design-tokens.css with CSS variables for light/dark themes and status colors. Now supports toggling via .dark class or [data-theme="dark"].
-- Updated tailwind.config.js to map Tailwind colors to CSS variable tokens (brand, gray, green, orange, red, purple, blue, teal, pink, surface, text, border, accent, status). This enables dynamic theming.
-- Updated src/index.css to import design-tokens.css and refactor base/component styles to use semantic tokens for colors and focus rings.
-- Added docs/tailwind.config.tokens.example.js showing how to map tokens into Tailwind.
-- Added docs/ux/LINEAR_UX_GUIDELINES.md documenting Linear-inspired UX patterns and how to apply them in our app.
+- Added new token-aligned components under src/renderer/components/tasks: StatusBadge, PriorityTag, TaskCard.
+- Enhanced src/renderer/tasks/TasksListView.tsx to include Monday-like colorful status indicators, priority chips, drag-and-drop reordering (list), inline status change, and a Linear-inspired toolbar with List/Board toggle.
+- Added src/renderer/tasks/BoardView.tsx for a kanban board layout with drag-and-drop to change task status across columns.
+- Updated src/index.css with board styles, refined toolbar, and priority chip styles using semantic design tokens.
 
 Rationale
-- Centralizing the color system in tokens enables consistent styling, theming, and accessibility improvements across the app without coupling components to raw hex values.
-- Mapping Tailwind to CSS variables allows runtime theme switching without rebuilds and supports AA/AAA contrast targets.
-- Documenting UX patterns provides a single source of truth for interaction design and ensures keyboard-first, accessible, and efficient workflows.
-
-Notes on recent changes (from prior):
-- Removed main-process modal window creation: src/main.js no longer defines createModalWindow nor the IPC handlers feature-create:open, task-create:open, task-edit:open, feature-edit:open. Modals are handled within the renderer via Navigator + ModalHost and are rendered into document.body using createPortal.
-- Simplified preload tasks API: src/preload.js no longer exposes openFeatureCreate/openTaskCreate/openTaskEdit/openFeatureEdit. Renderer code should use Navigator.openModal/closeModal for UI navigation.
-- Updated TasksListView to use Navigator for opening the Create Task modal and for navigating to task details, aligning with STANDARDS.md (centralized navigation).
+- Components encapsulate visual tokens and patterns for reuse across list and board views, aligning with docs/design/DESIGN_TOKENS.md and LINEAR_UX_GUIDELINES.md.
+- Board view and DnD interactions improve efficiency while maintaining accessibility and keyboard support.

@@ -42,7 +42,7 @@
     },
     {
       "id": "7.5",
-      "status": "-",
+      "status": "+",
       "title": "Implement task management interface inspired by both platforms",
       "description": "Redesign the main task management interface combining Monday's colorful status indicators and visual hierarchy with Linear's clean layout and efficient workflows. Implement color-coded task statuses, priority indicators, drag-and-drop functionality, and streamlined task creation/editing flows. Ensure the interface feels both visually engaging and highly functional.",
       "plan": "",
