@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
 import { URL } from 'node:url';
@@ -206,10 +207,62 @@ ipcMain.handle('docs-file:save', async (event, { relPath, content }) => {
 ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   try {
     const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
-    const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'};
+    const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc.'};
     let chatMessages = [systemPrompt, ...messages];
-    const tools = []; // empty for now
-    const availableTools = {}; // empty map for tool functions
+    const tools = [
+      {
+        type: 'function',
+        function: {
+          name: 'list_tasks',
+          description: 'List all tasks in the project. Returns an object mapping task IDs to task details.',
+          parameters: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'list_docs',
+          description: 'List the document tree in the project. Returns a tree structure of directories and files.',
+          parameters: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'read_doc',
+          description: 'Read the content of a specific document. The path is relative to the docs directory.',
+          parameters: {
+            type: 'object',
+            properties: {
+              path: { type: 'string', description: 'Relative path to the document' }
+            },
+            required: ['path'],
+            additionalProperties: false
+          }
+        }
+      }
+    ];
+    const availableTools = {
+      list_tasks: () => indexer.getIndex().tasksById,
+      list_docs: () => docsIndexer.getIndex().tree,
+      read_doc: (args) => {
+        try {
+          const fullPath = path.join(docsIndexer.getIndex().docsDir, args.path);
+          const content = fs.readFileSync(fullPath, 'utf8');
+          return { content };
+        } catch (e) {
+          return { error: e.message };
+        }
+      }
+    };
     while (true) {
       const response = await openai.chat.completions.create({
         model: config.model,
