@@ -5,15 +5,6 @@
   "description": "The electron app developed in `src/` has an agentic chat which needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`.",
   "features": [
     {
-      "id": "5.1",
-      "status": "-",
-      "title": "LLM connector abstraction and providers (LiteLLM, OpenAI-compatible)",
-      "description": "Design an abstraction for chat providers. Implement connectors for: (1) LiteLLM-compatible HTTP endpoint, (2) OpenAI-compatible custom base URL to support LM Studio / Ollama. Configurable API key, base URL, model name, timeouts.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
-    },
-    {
       "id": "5.2",
       "status": "-",
       "title": "Context retrieval for chat - using graphiti",
