@@ -1,6 +1,6 @@
 {
   "id": 2,
-  "status": "-",
+  "status": "+",
   "title": "Task handling",
   "description": "Implement all features that allow proper handling of tasks. docs/tasks/task_format.py is the source of truth for the interfaces for a Task, Feature, ProjectSpec & ProjectRequirement. docs/tasks/task_example.json holds an example task json file.",
   "features": [
@@ -133,7 +133,7 @@
     },
     {
       "id": "2.9",
-      "status": "-",
+      "status": "+",
       "title": "Common functions and libraries",
       "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit task popups should stem from a common popup component.",
       "plan": "",
@@ -145,14 +145,13 @@
       "acceptance": [],
       "dependencies": [
         "2.8"
-      ],
-      "rejection": "the create feature popup doesn't scroll properly. All popups should have a bit of padding everywhere, be rounded with a shadow, have a close button in top right, and be scrollable if their content is too long."
+      ]
     },
     {
       "id": "2.10",
-      "status": "-",
+      "status": "+",
       "title": "Use shadcn and tailwind",
-      "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen where it must be possible to change themes.",
+      "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen (an item in the sidebar) where it must be possible to change themes.",
       "plan": "",
       "context": [
         "src/",
@@ -163,11 +162,11 @@
       "dependencies": [
         "2.9"
       ],
-      "rejection": "when clicking on any of the themes - nothing changes - there needs to be 3 themes defined so that the change can be visible"
+      "rejection": "the first theme needs to have very bland and readable colors. Right now I can't see any buttons. When clicking on any of the themes - nothing changes - there needs to be 3 themes defined so that the change can be visible"
     },
     {
       "id": "2.11",
-      "status": "-",
+      "status": "+",
       "title": "Edit mode - moving features around",
       "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced. Pay attention to dependencies.",
       "plan": "",
@@ -181,7 +180,7 @@
         "2.4",
         "2.10"
       ],
-      "rejection": "when moving a feature it doesn't update dependencies"
+      "rejection": "when moving a feature it doesn't update dependencies -> it should always do that."
     },
     {
       "id": "2.12",

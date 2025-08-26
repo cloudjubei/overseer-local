@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './components/ui/button';
 
 export default function SettingsView() {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.className = `theme-${saved}`;
+    return saved;
+  });
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.className = `theme-${theme}`;
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -24,6 +24,9 @@ export default function SettingsView() {
           </Button>
           <Button onClick={() => setTheme('dark')} variant={theme === 'dark' ? 'default' : 'outline'}>
             Dark
+          </Button>
+          <Button onClick={() => setTheme('blue')} variant={theme === 'blue' ? 'default' : 'outline'}>
+            Blue
           </Button>
         </div>
       </div>

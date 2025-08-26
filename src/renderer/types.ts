@@ -1,1 +1,1 @@
-export type View = 'Home' | 'Docs';
+export type View = 'Home' | 'Docs' | 'Settings';

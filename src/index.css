@@ -2,12 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary-color: #0078d4;
-  --secondary-color: #f0f0f0;
+.theme-light {
+  --primary: #808080;
+  --primary-hover: #696969;
+  --secondary: #f0f0f0;
+  --secondary-hover: #e6e6e6;
   --text-color: #333;
-  --bg-color: #fff;
+  --bg-color: #f5f5f5;
   --border-color: #ddd;
+  --shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --transition: all 0.2s ease;
+}
+
+.theme-dark {
+  --primary: #4da6ff;
+  --primary-hover: #3399ff;
+  --secondary: #333;
+  --secondary-hover: #444;
+  --text-color: #eee;
+  --bg-color: #1a1a1a;
+  --border-color: #444;
+  --shadow: 0 2px 4px rgba(255,255,255,0.1);
+  --transition: all 0.2s ease;
+}
+
+.theme-blue {
+  --primary: #003366;
+  --primary-hover: #002244;
+  --secondary: #e6f2ff;
+  --secondary-hover: #cce5ff;
+  --text-color: #001a33;
+  --bg-color: #f0f8ff;
+  --border-color: #99ccff;
   --shadow: 0 2px 4px rgba(0,0,0,0.1);
   --transition: all 0.2s ease;
 }
@@ -22,12 +48,12 @@ body {
 }
 
 h1, h2, h3 {
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 /* Buttons */
 button, .btn {
-  background: var(--primary-color);
+  background: var(--primary);
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
@@ -36,17 +62,17 @@ button, .btn {
   transition: var(--transition);
 }
 button:hover, .btn:hover {
-  background: darken(var(--primary-color), 10%);
+  background: var(--primary-hover);
   box-shadow: var(--shadow);
 }
 
 .btn-secondary {
-  background: var(--secondary-color);
+  background: var(--secondary);
   color: var(--text-color);
   border: 1px solid var(--border-color);
 }
 .btn-secondary:hover {
-  background: darken(var(--secondary-color), 5%);
+  background: var(--secondary-hover);
 }
 
 /* Tasks view */
@@ -85,7 +111,7 @@ button:hover, .btn:hover {
 
 .tasks-controls input[type="search"]:focus,
 .tasks-controls select:focus {
-  border-color: var(--primary-color);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
 }
 
@@ -212,7 +238,7 @@ button:hover, .btn:hover {
   transition: var(--transition);
 }
 .feature-edit-form input:focus, .feature-edit-form textarea:focus, .feature-edit-form select:focus {
-  border-color: var(--primary-color);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
 }
 .btn-edit, .btn-save, .btn-cancel, .btn-back, .btn-add-row, .btn-remove-row {
@@ -221,10 +247,10 @@ button:hover, .btn:hover {
   cursor: pointer;
   transition: var(--transition);
 }
-.btn-edit, .btn-save { background: var(--primary-color); color: #fff; border: none; }
-.btn-cancel, .btn-back, .btn-add-row, .btn-remove-row { background: var(--secondary-color); border: 1px solid var(--border-color); }
-.btn-edit:hover, .btn-save:hover { background: darken(var(--primary-color), 10%); }
-.btn-cancel:hover, .btn-back:hover, .btn-add-row:hover, .btn-remove-row:hover { background: darken(var(--secondary-color), 5%); }
+.btn-edit, .btn-save { background: var(--primary); color: #fff; border: none; }
+.btn-cancel, .btn-back, .btn-add-row, .btn-remove-row { background: var(--secondary); border: 1px solid var(--border-color); }
+.btn-edit:hover, .btn-save:hover { background: var(--primary-hover); }
+.btn-cancel:hover, .btn-back:hover, .btn-add-row:hover, .btn-remove-row:hover { background: var(--secondary-hover); }
 
 .task-meta { margin: 0.5rem 0 1rem; }
 .task-meta .task-title { display: flex; gap: 0.5rem; align-items: center; }
@@ -258,7 +284,7 @@ button:hover, .btn:hover {
   transition: var(--transition);
 }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-  border-color: var(--primary-color);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
 }
 .form-actions {

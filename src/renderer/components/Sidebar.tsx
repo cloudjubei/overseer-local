@@ -26,6 +26,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView }) => {
             Docs
           </button>
         </li>
+        <li>
+          <button 
+            onClick={() => setCurrentView('Settings')}
+            className={currentView === 'Settings' ? 'active' : ''}
+          >
+            Settings
+          </button>
+        </li>
       </ul>
     </nav>
   );
