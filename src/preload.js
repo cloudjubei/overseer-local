@@ -32,8 +32,8 @@ const DOCS_API = {
     ipcRenderer.on('docs-index:update', listener);
     return () => ipcRenderer.removeListener('docs-index:update', listener);
   },
-  getFile: (relPath) => ipcRenderer.invoke('docs-file:get', relPath),
-  saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', relPath, content),
+  getFile: (relPath) => ipcRenderer.invoke('docs-file:get', { relPath }),
+  saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
 };
 
 

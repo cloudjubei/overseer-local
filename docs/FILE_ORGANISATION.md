@@ -45,45 +45,46 @@ repo_root/
 │     ├─ task_example.json
 │     └─ task_format.py            # Python source-of-truth schema
 ├─ src/
-│   ├─ docs/
-│   │  └─ indexer.js               # Logical Docs indexer and file watcher
-│   ├─ renderer/
-│   │   ├─ components/
-│   │   │  ├─ ui/
-│   │   │  │  ├─ alert.tsx         
-│   │   │  │  ├─ button.tsx         
-│   │   │  │  ├─ index.tsx         
-│   │   │  │  ├─ modal.tsx         
-│   │   │  │  └─ toast.tsx         
-│   │   │  ├─ FeatureForm.tsx             
-│   │   │  ├─ MarkdownRenderer.tsx             
-│   │   │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
-│   │   │  └─ TaskForm.tsx          
-│   │   ├─ docs/
-│   │   │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
-│   │   ├─ screens/
-│   │   │  ├─ DocumentsView.tsx           # Documents screen using DocumentsBrowserView
-│   │   │  ├─ SettingsView.tsx            # Settings screen for configuring theme
-│   │   │  └─ TasksView.tsx               # Home view component (tasks)   
-│   │   ├─ tasks/
-│   │   │  ├─ EditableTaskMeta.tsx        
-│   │   │  ├─ FeatureCreateView.tsx      
-│   │   │  ├─ FeatureEditView.tsx       
-│   │   │  ├─ TaskCreateView.tsx         
-│   │   │  ├─ TaskDetailsView.tsx         
-│   │   │  ├─ TaskEditView.tsx        
-│   │   │  └─ TasksListView.tsx  
-│   │   ├─ App.tsx                 # Main Entry for the React app 
-│   │   └─ types.ts                # Renderer-local types (View)
-│   ├─ tasks/
-│   │  ├─ validator.js             # Logical Tasks validator
-│   │  └─ indexer.js               # Logical Tasks indexer and file watcher
-│   ├─ types/
-│   │  ├─ global.d.ts              
-│   │  └─ tasks.ts                 # TypeScript interfaces for task schema
-│   ├─ index.css
-│   ├─ main.js
-│   └─ preload.js
+│  ├─ docs/
+│  │  └─ indexer.js               # Logical Docs indexer and file watcher
+│  ├─ renderer/
+│  │  ├─ components/
+│  │  │  ├─ ui/
+│  │  │  │  ├─ alert.tsx         
+│  │  │  │  ├─ button.tsx         
+│  │  │  │  ├─ index.tsx         
+│  │  │  │  ├─ modal.tsx         
+│  │  │  │  └─ toast.tsx         
+│  │  │  ├─ FeatureForm.tsx             
+│  │  │  ├─ MarkdownRenderer.tsx        # Markdown renderer (GFM, highlight, sanitize, internal links)
+│  │  │  ├─ MarkdownEditor.tsx          # Split-view WYSIWYG-style Markdown editor with live preview
+│  │  │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
+│  │  │  └─ TaskForm.tsx          
+│  │  ├─ docs/
+│  │  │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories) with edit capabilities
+│  │  ├─ screens/
+│  │  │  ├─ DocumentsView.tsx         # Documents screen using DocumentsBrowserView
+│  │  │  ├─ SettingsView.tsx          # Settings screen for configuring theme
+│  │  │  └─ TasksView.tsx             # Home view component (tasks)   
+│  │  ├─ tasks/
+│  │  │  ├─ EditableTaskMeta.tsx        
+│  │  │  ├─ FeatureCreateView.tsx      
+│  │  │  ├─ FeatureEditView.tsx       
+│  │  │  ├─ TaskCreateView.tsx         
+│  │  │  ├─ TaskDetailsView.tsx         
+│  │  │  ├─ TaskEditView.tsx        
+│  │  │  └─ TasksListView.tsx  
+│  │  ├─ App.tsx                 # Main Entry for the React app 
+│  │  └─ types.ts                # Renderer-local types (View)
+│  ├─ tasks/
+│  │  ├─ validator.js             # Logical Tasks validator
+│  │  └─ indexer.js               # Logical Tasks indexer and file watcher
+│  ├─ types/
+│  │  ├─ global.d.ts              
+│  │  └─ tasks.ts                 # TypeScript interfaces for task schema
+│  ├─ index.css
+│  ├─ main.js
+│  └─ preload.js
 ├─ tasks/
 │  └─ 1/
 │     ├─ task.json
@@ -161,7 +162,7 @@ repo_root/
   - Only files with a .md extension are indexed (case-insensitive). Non-Markdown files are ignored.
   - Basic metadata is extracted without rendering Markdown; rendering and sanitization are handled in the renderer layer.
 - Integration (IPC):
-  - The Electron main process instantiates a singleton DocsIndexer and exposes channels via src/main/ipc/docs.js:
+  - The Electron main process instantiates a singleton DocsIndexer and exposes channels:
     - docs-index:get (invoke) returns the current index snapshot
     - docs-index:update (event) broadcasts updates when the index changes
     - docs-file:get (invoke) reads and returns the UTF-8 content of a .md file by relative path under docs/
@@ -171,12 +172,3 @@ repo_root/
     - subscribe(cb): subscribe to updates; returns unsubscribe function
     - getFile(relPath): Promise resolving to the file content
     - saveFile(relPath, content): Promise resolving when save completes
-
-## Notes on Renderer Layers
-- The repository currently contains both a React renderer (src/renderer/App.tsx) and a legacy DOM-based renderer used by src/index.html.
-- The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing. It is kept for reference only.
-- The React documentation browser lives at src/renderer/docs/DocsBrowserView.tsx and is used by the Documents screen (src/renderer/components/Docs.tsx) to list Markdown files and directories under docs/.
-
-## Updates
-- 2025-08-26: Added a Tailwind-styled Sidebar component (src/renderer/components/Sidebar.tsx) and updated App.tsx to use it with persistent layout; removed dependency on App.css in favor of Tailwind/shadcn classes. Added src/renderer/types.ts to centralize renderer-local types (View).
-- 2025-08-26: Introduced React Docs browser (src/renderer/docs/DocsBrowserView.tsx) and wired it into the Docs screen.
