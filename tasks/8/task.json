@@ -15,7 +15,7 @@
     },
     {
       "id": "8.2",
-      "status": "-",
+      "status": "+",
       "title": "Build notifications panel UI component",
       "description": "Create a NotificationsView component in src/renderer/screens/ that displays a list of recent notifications. Include notification items with timestamps, icons, titles, descriptions, and read/unread states. Add mark as read functionality, clear all notifications, and basic styling consistent with the app's design system.",
       "plan": "",
