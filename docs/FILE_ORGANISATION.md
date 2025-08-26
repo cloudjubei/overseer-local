@@ -94,7 +94,7 @@ repo_root/
 │  │  │  ├─ useLLMConfig.ts
 │  │  │  └─ useNextTaskId.ts
 │  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx
+│  │  │  ├─ SidebarView.tsx              ← updated: Linear-like collapsible sidebar with keyboard + mobile drawer
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  └─ ChatView.tsx
@@ -114,7 +114,7 @@ repo_root/
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
-│  ├─ index.css                           ← updated: board styles, priority tags, refined toolbar
+│  ├─ index.css                          ← updated: navigation styles (sidebar, nav items), board styles, priority tags, refined toolbar
 │  ├─ main.js
 │  └─ preload.js
 ├─ .env
@@ -132,11 +132,15 @@ repo_root/
 ```
 
 Notes on recent changes
-- Added new token-aligned components under src/renderer/components/tasks: StatusBadge, PriorityTag, TaskCard.
-- Enhanced src/renderer/tasks/TasksListView.tsx to include Monday-like colorful status indicators, priority chips, drag-and-drop reordering (list), inline status change, and a Linear-inspired toolbar with List/Board toggle.
-- Added src/renderer/tasks/BoardView.tsx for a kanban board layout with drag-and-drop to change task status across columns.
-- Updated src/index.css with board styles, refined toolbar, and priority chip styles using semantic design tokens.
+- Updated src/renderer/screens/SidebarView.tsx to implement a Linear-inspired collapsible sidebar with:
+  - Smooth expand/collapse width animation
+  - Roving tabindex keyboard navigation (Arrow Up/Down, Home/End, Enter/Space)
+  - Cmd/Ctrl+B to toggle sidebar (desktop) or open/close drawer (mobile)
+  - Responsive mobile drawer with backdrop, Esc/Click to close, and focus management
+  - Monday-style colorful active accents per item (brand/purple/teal/gray)
+- Extended src/index.css with navigation styles (sidebar, nav items, active accents, mobile drawer, triggers).
 
 Rationale
-- Components encapsulate visual tokens and patterns for reuse across list and board views, aligning with docs/design/DESIGN_TOKENS.md and LINEAR_UX_GUIDELINES.md.
-- Board view and DnD interactions improve efficiency while maintaining accessibility and keyboard support.
+- Aligns with docs/ux/LINEAR_UX_GUIDELINES.md for clean, efficient navigation and keyboard-first control.
+- Preserves Monday’s colorful touches via accent-specific active backgrounds and indicators.
+- Improves accessibility with aria labels, aria-current, and focus rings.

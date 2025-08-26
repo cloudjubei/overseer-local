@@ -51,7 +51,7 @@
     },
     {
       "id": "7.6",
-      "status": "-",
+      "status": "+",
       "title": "Create responsive navigation and sidebar inspired by Linear's layout",
       "description": "Redesign the application navigation and sidebar to match Linear's clean, collapsible sidebar design with clear hierarchy and efficient space usage. Implement smooth animations for expand/collapse states, keyboard navigation, and proper responsive behavior. Maintain Monday's colorful accent touches while achieving Linear's organizational clarity.",
       "plan": "",
