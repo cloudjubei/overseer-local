@@ -180,9 +180,18 @@
     },
     {
       "id": "4.18",
-      "status": "+",
-      "title": "Cannot send a message",
-      "description": "Currently if I send a message to a configured LLM - nothing happens - the message just dissappears",
+      "status": "-",
+      "title": "Some providers don't work",
+      "description": "Trying to send a message to xai/grok-4 or claude-sonnet-4-20250514 with litellm doesn't work. Directly via openai and providing the url also doesn't work.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.19",
+      "status": "-",
+      "title": "Custom local provider - LM Studio",
+      "description": "Allow using LM Studio's API server that lists models at http://localhost:1234/v1/models - there should be a check to see that it's running and then all the available models can be listed. To post messages to: http://localhost:1234/v1/chat/completions",
       "plan": "",
       "context": [],
       "acceptance": []

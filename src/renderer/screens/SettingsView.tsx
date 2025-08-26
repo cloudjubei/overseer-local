@@ -27,10 +27,8 @@ export default function SettingsView() {
   };
 
   const commonModels: Record<string, string[]> = {
-    openai: ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-    anthropic: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'],
-    grok: ['grok-beta'],
-    gemini: ['gemini-pro', 'gemini-1.5-pro-latest'],
+    openai: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
+    litellm: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
     custom: []
   };
 
@@ -78,8 +76,7 @@ export default function SettingsView() {
   };
 
   const handleAddNewConfig = () => {
-    const defaultProvider = 'openai';
-    setEditingConfig({ id: '', name: '', provider: defaultProvider, apiBaseUrl: defaultUrls[defaultProvider], apiKey: '', model: '' });
+    setEditingConfig({ id: '', name: '', provider: '', apiBaseUrl: '', apiKey: '', model: '' });
     setIsAddingNew(true);
     setModelMode('preset');
   };
@@ -135,13 +132,11 @@ export default function SettingsView() {
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="litellm">LiteLLM</SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="anthropic">Anthropic</SelectItem>
-                <SelectItem value="grok">Grok (xAI)</SelectItem>
-                <SelectItem value="gemini">Gemini (Google)</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
+
             <label htmlFor="apiBaseUrl" className="block text-sm font-medium mb-1">API Base URL</label>
             <Input id="apiBaseUrl" placeholder="API Base URL" name="apiBaseUrl" value={editingConfig.apiBaseUrl || ''} onChange={handleConfigChange} className="mb-2" />
             <label htmlFor="apiKey" className="block text-sm font-medium mb-1">API Key</label>

@@ -93,7 +93,7 @@ export class ChatManager {
         }
       };
 
-      const provider = config.provider || 'openai';
+      const provider = config.provider || 'litellm';
       const providerClasses = {
         openai: OpenAIProvider,
         litellm: LiteLLMProvider
@@ -108,6 +108,7 @@ export class ChatManager {
         const response = await llmProvider.createCompletion({
           model: config.model,
           messages: currentMessages,
+          apiKey: config.apiKey,
           tools: tools.length > 0 ? tools : undefined,
           tool_choice: tools.length > 0 ? 'auto' : undefined,
           stream: false

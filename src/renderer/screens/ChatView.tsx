@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useChats } from '../hooks/useChats';
 import { useDocsIndex } from '../hooks/useDocsIndex';
 import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNavigator } from '../navigation/Navigator';
-import type { LLMConfig, ChatMessage } from '../types';
+import type { ChatMessage } from '../types';
 
 const ChatView = () => {
   const { chatHistories, currentChatId, setCurrentChatId, messages, createChat, deleteChat, sendMessage, uploadDocument } = useChats();
