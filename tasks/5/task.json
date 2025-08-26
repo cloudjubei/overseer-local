@@ -1,6 +1,6 @@
 {
   "id": 5,
-  "status": "+",
+  "status": "-",
   "title": "Cleanup, refactor and fixes",
   "description": "The electron app developed in `src/` needs to be cleaned up so that it's nice and modular. References `README.md`, `docs/FILE_ORGANISATION.md`. Every single file change must be reflected in `docs/FILE_ORGANISATION.md`.",
   "features": [
@@ -36,6 +36,28 @@
       "status": "+",
       "title": "Create standards",
       "description": "There's a big discrepancy in how certain views are created or styled - there needs to be a standard for this. Create a standard and document it in `docs/STANDARDS.md`.",
+      "plan": "",
+      "context": [
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "5.5",
+      "status": "-",
+      "title": "Adhere to standards",
+      "description": "The doc (`docs/STANDARDS.md`) describing the standards needs to be adhered to - for all code.",
+      "plan": "",
+      "context": [
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "5.6",
+      "status": "-",
+      "title": "Opening up a modal results in a weird error",
+      "description": "When any modal is open it shows it but with other views underneath - then when closing it, the modal still stays with that background view still there.",
       "plan": "",
       "context": [
         "docs/STANDARDS.md"
