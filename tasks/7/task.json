@@ -115,7 +115,7 @@
     },
     {
       "id": "7.11",
-      "status": "-",
+      "status": "+",
       "title": "Dragging tasks in the board view doesn't work - in list view it does",
       "description": "Error occurred in handler for 'tasks:update': TypeError: indexer.updateTask is not a function; Additionally, when dragging there should be helpful animations showing which column/area the dragged item is being put into.",
       "plan": "",

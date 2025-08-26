@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { Task, Status } from 'src/types/tasks'
 import TaskCard from '../components/tasks/TaskCard'
 import { tasksService } from '../services/tasksService'
@@ -13,15 +13,20 @@ function Column({ status, tasks, onDropTask, onCardClick }: {
   onDropTask: (taskId: number, targetStatus: Status) => void
   onCardClick: (taskId: number) => void
 }) {
-  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
+  const [isOver, setIsOver] = useState(false)
+
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (!isOver) setIsOver(true) }
+  const handleDragEnter = (e: React.DragEvent) => { e.preventDefault(); if (!isOver) setIsOver(true) }
+  const handleDragLeave = () => { setIsOver(false) }
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+    setIsOver(false)
     const idStr = e.dataTransfer.getData('text/task-id') || e.dataTransfer.getData('text/plain')
     const taskId = parseInt(idStr, 10)
     if (!Number.isNaN(taskId)) onDropTask(taskId, status)
   }
   return (
-    <div className="board-col" onDragOver={handleDragOver} onDrop={handleDrop} aria-label={`${STATUS_TITLES[status]} column`}>
+    <div className={`board-col ${isOver ? 'drag-over' : ''} board-col--status-${status}`} onDragOver={handleDragOver} onDragEnter={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop} aria-label={`${STATUS_TITLES[status]} column`}>
       <div className={`board-col__header header-${status}`}>
         <span className="board-col__title">{STATUS_TITLES[status]}</span>
         <span className="board-col__count">{tasks.length}</span>
