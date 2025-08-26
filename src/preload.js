@@ -33,11 +33,13 @@ const DOCS_INDEX_API = {
     return () => ipcRenderer.removeListener('docs-index:update', listener);
   },
   getFile: (relPath) => ipcRenderer.invoke('docs-file:get', relPath),
+  saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', relPath, content),
 };
 
 // Backward-compat minimal API; route to new channel
 const DOCS_API = {
   docsGetContent: (filePath) => ipcRenderer.invoke('docs-file:get', filePath),
+  docsSaveContent: (filePath, content) => ipcRenderer.invoke('docs-file:save', filePath, content),
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);

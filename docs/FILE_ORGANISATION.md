@@ -52,28 +52,27 @@ repo_root/
 │   │  └─ indexer.js
 │   ├─ main/
 │   │  └─ ipc/
-│   │     └─ docs.js               # IPC handlers for Docs index and file content
+│   │     └─ docs.js               # IPC handlers for Docs index and file content (and saving)
 │   ├─ renderer/
 │   │   ├─ App.tsx                 # React app rendering tasks list and details
-│   │   ├─ TaskCreateView.tsx      # React popup for creating a task
-│   │   ├─ FeatureCreateView.tsx   # React popup for creating a feature
-│   │   └─ components/
-│   │       └─ ui/                 # Common UI primitives (shadcn-like)
-│   │           ├─ toast.tsx
-│   │           ├─ modal.tsx
-│   │           ├─ alert.tsx
-│   │           └─ index.ts
+│   │   ├─ components/
+│   │   │  └─ ui/                  # Common UI primitives (shadcn-like)
+│   │   │     ├─ toast.tsx
+│   │   │     ├─ modal.tsx
+│   │   │     ├─ alert.tsx
+│   │   │     └─ index.ts
+│   │   └─ docsBrowserView.js      # Legacy docs browser and WYSIWYG editor (ToastUI) wired to preload APIs
 │   ├─ tasks/
-│   │  └─ indexer.js              # Logical Tasks indexer, validator, and file watcher
+│   │  └─ indexer.js               # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
-│      └─ tasks.ts                # TypeScript interfaces for task schema
+│      └─ tasks.ts                 # TypeScript interfaces for task schema
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
 │  ├─ COMPONENTS_AND_THEMING.md
 │  └─ tasks/
 │     ├─ task_example.json
-│     └─ task_format.py           # Python source-of-truth schema
+│     └─ task_format.py            # Python source-of-truth schema
 ├─ tasks/
 │  └─ 1/
 │     ├─ task.json
@@ -143,7 +142,14 @@ Performance
     - docs-index:get (invoke) returns the current index snapshot
     - docs-index:update (event) broadcasts updates when the index changes
     - docs-file:get (invoke) reads and returns the UTF-8 content of a .md file by relative path under docs/
+    - docs-file:save (invoke) writes UTF-8 content to a .md file by relative path under docs/
   - Preload exposes a safe renderer bridge as window.docsIndex with methods:
     - get(): Promise resolving to the index snapshot
     - subscribe(cb): subscribe to updates; returns unsubscribe function
     - getFile(relPath): Promise resolving to the file content
+    - saveFile(relPath, content): Promise resolving when save completes
+
+## Notes on Renderer Layers
+- The repository currently contains both a React renderer (src/renderer/App.tsx) and a legacy DOM-based renderer used by src/index.html.
+- The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing.
+- Future work may consolidate the renderer into a single React app; until then, keep both layers working without conflict.

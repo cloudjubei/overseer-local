@@ -1,364 +1,218 @@
-"use strict";
-
 (function () {
-  function $(sel, root = document) {
-    return root.querySelector(sel);
+  // Simple state for docs browser and editor
+  const state = {
+    index: null,
+    currentFile: null, // relPath
+    currentContent: '',
+    mode: 'view', // 'view' | 'edit'
+    editor: null,
+  };
+
+  const docsView = document.getElementById('docs-view');
+  if (!docsView) return;
+
+  // Build layout: sidebar with files, content area with viewer/editor and toolbar
+  docsView.innerHTML = `
+    <div id="docs-layout" style="display:flex; height: 100%; gap: 12px;">
+      <aside id="docs-sidebar" style="width: 280px; overflow:auto; border-right: 1px solid #e5e5e5; padding-right: 8px;"></aside>
+      <section id="docs-content" style="flex: 1; display:flex; flex-direction: column; min-width:0;">
+        <div id="docs-toolbar" style="display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid #e5e5e5;">
+          <button id="docs-edit-btn" disabled>Edit</button>
+          <button id="docs-save-btn" style="display:none;">Save</button>
+          <button id="docs-cancel-btn" style="display:none;">Cancel</button>
+          <span id="docs-path" style="margin-left:auto; font-size: 12px; color: #666;"></span>
+        </div>
+        <div id="docs-viewer" style="flex:1; overflow:auto; padding: 8px;"></div>
+        <div id="docs-editor" style="flex:1; overflow:auto; display:none;"></div>
+      </section>
+    </div>
+  `;
+
+  const sidebarEl = document.getElementById('docs-sidebar');
+  const viewerEl = document.getElementById('docs-viewer');
+  const editorEl = document.getElementById('docs-editor');
+  const editBtn = document.getElementById('docs-edit-btn');
+  const saveBtn = document.getElementById('docs-save-btn');
+  const cancelBtn = document.getElementById('docs-cancel-btn');
+  const pathEl = document.getElementById('docs-path');
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  function createEl(tag, attrs = {}, children = []) {
-    const el = document.createElement(tag);
-    for (const [k, v] of Object.entries(attrs)) {
-      if (k === "class") el.className = v;
-      else if (k === "dataset") {
-        for (const [dk, dv] of Object.entries(v || {})) el.dataset[dk] = dv;
-      } else if (k.startsWith("on") && typeof v === "function") {
-        el.addEventListener(k.slice(2).toLowerCase(), v);
-      } else if (k === "text") {
-        el.textContent = v;
-      } else if (v !== undefined && v !== null) {
-        el.setAttribute(k, String(v));
-      }
-    }
-    if (!Array.isArray(children)) children = [children];
-    for (const c of children) {
-      if (c == null) continue;
-      if (typeof c === "string") el.appendChild(document.createTextNode(c));
-      else el.appendChild(c);
-    }
-    return el;
-  }
-
-  function isDocsRoute(hash) {
-    return hash === "#docs";
-  }
-
-  // Resolve path like ./a/b.md, ../b.md relative to currentPath (docs-relative)
-  function resolveRelativePath(currentPath, hrefPath) {
-    const currentParts = currentPath.split('/');
-    currentParts.pop(); // remove current file name
-    const hrefParts = hrefPath.split('/');
-    while (hrefParts.length > 0 && hrefParts[0] === '..') {
-      hrefParts.shift();
-      if (currentParts.length > 0) currentParts.pop();
-    }
-    if (hrefParts[0] === '.') hrefParts.shift();
-    return [...currentParts, ...hrefParts].join('/');
-  }
-
-  function buildTreeFromNewIndex(node, parentUl, selectFile) {
-    if (!node) return;
+  function renderSidebarTree(node) {
+    if (!node) return '';
     if (node.type === 'dir') {
-      const li = createEl('li');
-      li.className = 'directory';
-      const details = createEl('details');
-      const summary = createEl('summary', {}, node.relPath ? node.name : 'docs');
-      details.appendChild(summary);
-
-      const subUl = createEl('ul');
-      // Sort directories then files by name
-      const dirs = Array.isArray(node.dirs) ? [...node.dirs].sort((a, b) => a.name.localeCompare(b.name)) : [];
-      const files = Array.isArray(node.files) ? [...node.files].sort((a, b) => a.name.localeCompare(b.name)) : [];
-
-      for (const d of dirs) buildTreeFromNewIndex(d, subUl, selectFile);
-      for (const f of files) {
-        const fLi = createEl('li');
-        fLi.className = 'file';
-        const link = createEl('a', { href: '#', onclick: (e) => { e.preventDefault(); selectFile(f.relPath); } }, f.name);
-        fLi.appendChild(link);
-        subUl.appendChild(fLi);
-      }
-
-      details.appendChild(subUl);
-      li.appendChild(details);
-      parentUl.appendChild(li);
+      const children = [
+        ...node.dirs.map(renderSidebarTree),
+        ...node.files.map((f) => `
+          <li class="docs-file" data-rel="${escapeHtml(f.relPath)}">
+            <a href="#docs:${encodeURIComponent(f.relPath)}">${escapeHtml(f.title || f.name)}</a>
+          </li>
+        `),
+      ].join('');
+      const label = node.relPath === '' ? 'docs' : node.name;
+      return `
+        <details open>
+          <summary>${escapeHtml(label)}</summary>
+          <ul style="margin-left: 12px; list-style: none; padding-left: 8px;">${children}</ul>
+        </details>
+      `;
     }
+    return '';
   }
 
-  function buildTreeNodeLegacy(node, parentUl, selectFile) {
-    const li = createEl("li");
-    if (node.type === "directory") {
-      li.className = "directory";
-      const summary = createEl("summary", {}, node.name || "docs");
-      const details = createEl("details", {}, [summary]);
-      const subUl = createEl("ul");
-      details.appendChild(subUl);
-      li.appendChild(details);
-      const sortedChildren = [...(node.children || [])].sort((a, b) => (a.type === "directory" ? -1 : 1));
-      sortedChildren.forEach((child) => buildTreeNodeLegacy(child, subUl, selectFile));
-    } else if (node.type === "file") {
-      li.className = "file";
-      const link = createEl("a", { href: "#", onclick: (e) => { e.preventDefault(); selectFile(node.path); } }, node.name);
-      li.appendChild(link);
-    }
-    parentUl.appendChild(li);
-  }
-
-  function render(index, treeContainer, contentContainer, errorsContainer, selectFile) {
-    treeContainer.innerHTML = "";
-    errorsContainer.innerHTML = "";
-
-    if (!index) {
-      treeContainer.appendChild(createEl("div", { class: "empty" }, "Failed to load documentation index."));
-      return;
-    }
-
-    // Build tree based on either legacy shape (docsTree) or new shape (tree)
-    const hasLegacyTree = !!index.docsTree;
-    const hasNewTree = !!index.tree;
-
-    if (!hasLegacyTree && !hasNewTree) {
-      treeContainer.appendChild(createEl("div", { class: "empty" }, "No documentation files found."));
-    } else {
-      const ul = createEl("ul", { class: "docs-tree" });
-      if (hasLegacyTree) {
-        buildTreeNodeLegacy(index.docsTree, ul, selectFile);
-      } else {
-        buildTreeFromNewIndex(index.tree, ul, selectFile);
-      }
-      treeContainer.appendChild(ul);
-    }
-
-    if (index.errors && index.errors.length > 0) {
-      const errList = createEl("ul", {}, index.errors.map((err) => createEl("li", {}, typeof err === 'string' ? err : (err.message || JSON.stringify(err)))));
-      errorsContainer.appendChild(createEl("div", { class: "errors" }, [createEl("h3", {}, "Indexing Errors"), errList]));
-    }
-
-    // Initial message
-    contentContainer.innerHTML = "";
-    contentContainer.appendChild(createEl("div", {}, "Select a file to view its content."));
-  }
-
-  function toSlug(s) {
-    const text = (s || '').trim().toLowerCase();
-    return text
-      .replace(/[\u2000-\u206F\u2E00-\u2E7F'"!#$%&()*+,./:;<=>?@\[\]^`{|}~]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-  }
-
-  function scrollToFragment(container, fragment) {
-    if (!fragment) return;
-    const raw = decodeURIComponent(fragment);
+  async function loadIndex() {
     try {
-      const idSel = `#${CSS && CSS.escape ? CSS.escape(raw) : raw.replace(/"/g, '\\"')}`;
-      let target = container.querySelector(idSel);
-      if (!target) target = container.querySelector(`[name="${raw}"]`);
-      if (!target) {
-        // Try GitHub-style slug from the fragment
-        const slug = toSlug(raw);
-        if (slug) {
-          target = container.querySelector(`#${slug}`) || container.querySelector(`[id="${slug}"]`);
+      const snapshot = await window.docsIndex.get();
+      state.index = snapshot;
+      sidebarEl.innerHTML = renderSidebarTree(snapshot.tree);
+      // Add click handler (delegated) for sidebar
+      sidebarEl.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target && target.tagName === 'A' && target.getAttribute('href')?.startsWith('#docs:')) {
+          e.preventDefault();
+          const rel = decodeURIComponent(target.getAttribute('href').slice('#docs:'.length));
+          openFile(rel);
         }
-      }
-      if (!target) {
-        // Fallback: match heading text
-        const slug = toSlug(raw);
-        const headings = container.querySelectorAll('h1,h2,h3,h4,h5,h6');
-        for (const h of headings) {
-          const ht = h.textContent ? toSlug(h.textContent) : '';
-          if (ht === slug || (h.id && h.id === raw)) { target = h; break; }
-        }
-      }
-      if (target && typeof target.scrollIntoView === 'function') {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    } catch (_) {
-      // ignore scrolling errors
-    }
-  }
-
-  async function init() {
-    const root = document.getElementById("docs-view");
-    if (!root) return;
-
-    const heading = createEl("h2", { id: "docs-view-heading" }, "Documentation");
-
-    const treeContainer = createEl("div", { class: "docs-tree-container" });
-    const contentContainer = createEl("div", { class: "docs-content-container" });
-    const errorsContainer = createEl("div", { class: "docs-errors-container" });
-
-    const browser = createEl("div", { class: "docs-browser" }, [treeContainer, contentContainer]);
-
-    root.appendChild(heading);
-    root.appendChild(browser);
-    root.appendChild(errorsContainer);
-
-    let currentIndex = null;
-    let selectedPath = null;
-    let editor = null;
-    let isEditMode = false;
-
-    // Intercept all clicks on links inside the content container for internal navigation
-    contentContainer.addEventListener('click', (e) => {
-      const a = e.target && (e.target.closest ? e.target.closest('a[href]') : null);
-      if (!a) return;
-      const href = a.getAttribute('href') || '';
-      // External or absolute http(s) links: allow default
-      if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^tel:/i.test(href)) return;
-      if (href.startsWith('#')) {
-        e.preventDefault();
-        const fragment = href.slice(1);
-        const mdDiv = contentContainer.querySelector('.markdown-body') || contentContainer;
-        scrollToFragment(mdDiv, fragment);
-        return;
-      }
-      // Internal .md links (with optional fragment)
-      // Ignore protocol-like strings
-      if (/^[a-zA-Z]+:/.test(href)) return;
-
-      const [hrefPath, fragment = ''] = href.split('#');
-      if (/\.md$/i.test(hrefPath)) {
-        e.preventDefault();
-        const targetPath = resolveRelativePath(selectedPath || '', hrefPath);
-        selectFile(targetPath, fragment);
-      }
-    });
-
-    async function enterEditMode(path, contentContainer) {
-      // Optional editing support kept; not part of this feature
-      const getFile = window.docsIndex && typeof window.docsIndex.getFile === 'function'
-        ? window.docsIndex.getFile
-        : null;
-      if (!getFile) return;
-      let markdown = '';
-      try {
-        const res = await getFile(path);
-        if (typeof res === 'string') markdown = res;
-        else if (res && res.ok && typeof res.content === 'string') markdown = res.content;
-        else if (res && typeof res.content === 'string') markdown = res.content;
-      } catch (err) {
-        contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file content: ${err && err.message || err}`));
-        return;
-      }
-
-      contentContainer.innerHTML = '';
-      const editorEl = createEl('div', { id: 'editor' });
-      contentContainer.appendChild(editorEl);
-
-      if (window.toastui && window.toastui.Editor) {
-        editor = new window.toastui.Editor({
-          el: editorEl,
-          initialEditType: 'wysiwyg',
-          previewStyle: 'vertical',
-          height: '500px',
-          initialValue: markdown
-        });
-      } else {
-        editorEl.textContent = markdown;
-      }
-
-      const actions = createEl('div', { class: 'editor-actions' });
-      const cancelBtn = createEl('button', { onclick: () => {
-        exitEditMode(contentContainer);
-        viewFile(path, contentContainer);
-      } }, 'Cancel');
-      actions.appendChild(cancelBtn);
-      contentContainer.appendChild(actions);
-
-      isEditMode = true;
-    }
-
-    function exitEditMode(contentContainer) {
-      if (editor && editor.destroy) {
-        editor.destroy();
-        editor = null;
-      }
-      contentContainer.innerHTML = '';
-      isEditMode = false;
-    }
-
-    async function viewFile(path, contentContainer, fragment) {
-      contentContainer.innerHTML = '';
-      contentContainer.appendChild(createEl("div", {}, "Loading..."));
-      try {
-        let html = null;
-        let markdown = null;
-
-        const hasRendered = window.docsIndex && typeof window.docsIndex.getRenderedMarkdown === 'function';
-        if (hasRendered) {
-          const res = await window.docsIndex.getRenderedMarkdown(path);
-          if (res && res.ok) html = res.content;
-          else if (res && typeof res === 'string') html = res;
-        }
-        if (html == null) {
-          // Fallback: get raw markdown; very basic rendering (pre) so anchors may not work without IDs
-          const res = await (window.docsIndex && window.docsIndex.getFile ? window.docsIndex.getFile(path) : Promise.resolve(''));
-          if (typeof res === 'string') markdown = res;
-          else if (res && res.ok && typeof res.content === 'string') markdown = res.content;
-          else if (res && typeof res.content === 'string') markdown = res.content;
-        }
-
-        contentContainer.innerHTML = '';
-        const mdDiv = createEl("div", { class: "markdown-body" });
-        if (html != null) {
-          mdDiv.innerHTML = html;
-        } else if (markdown != null) {
-          // Minimal fallback rendering: wrap in <pre>; internal anchors won't be present
-          const pre = createEl('pre');
-          pre.textContent = markdown;
-          mdDiv.appendChild(pre);
-        } else {
-          mdDiv.textContent = 'Failed to load content.';
-        }
-
-        contentContainer.appendChild(mdDiv);
-
-        // After rendering, if a fragment was requested, scroll to it
-        if (fragment) scrollToFragment(mdDiv, fragment);
-
-        // Optional edit button (no-op if toastui not present)
-        const editBtn = createEl('button', { onclick: () => enterEditMode(path, contentContainer) }, 'Edit');
-        contentContainer.appendChild(editBtn);
-      } catch (e) {
-        contentContainer.innerHTML = '';
-        contentContainer.appendChild(createEl("div", { class: "error" }, `Failed to load file: ${e.message || e}`));
-      }
-    }
-
-    async function selectFile(path, fragment) {
-      selectedPath = path;
-      if (isEditMode) exitEditMode(contentContainer);
-      await viewFile(path, contentContainer, fragment);
-    }
-
-    function updateVisibility() {
-      root.style.display = isDocsRoute(location.hash) ? "" : "none";
-    }
-
-    window.addEventListener("hashchange", updateVisibility);
-    updateVisibility();
-
-    try {
-      // Support both legacy and new preload APIs
-      const getIndex = window.docsIndex && typeof window.docsIndex.get === 'function'
-        ? window.docsIndex.get
-        : (window.docsIndex && window.docsIndex.getSnapshot) ? window.docsIndex.getSnapshot : null;
-
-      const subscribe = window.docsIndex && typeof window.docsIndex.subscribe === 'function'
-        ? window.docsIndex.subscribe
-        : (window.docsIndex && window.docsIndex.onUpdate) ? window.docsIndex.onUpdate : null;
-
-      currentIndex = getIndex ? await getIndex() : null;
-      render(currentIndex, treeContainer, contentContainer, errorsContainer, selectFile);
-
-      if (subscribe) {
-        subscribe((idx) => {
-          currentIndex = idx;
-          render(idx, treeContainer, contentContainer, errorsContainer, selectFile);
-          if (selectedPath) {
-            // try to keep selection
-            selectFile(selectedPath);
-          }
-        });
-      }
+      });
     } catch (e) {
-      treeContainer.appendChild(createEl("div", { class: "error" }, "Failed to load docs index."));
+      sidebarEl.innerHTML = `<div style="color:red;">Failed to load docs index: ${escapeHtml(String(e?.message || e))}</div>`;
     }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
+  async function openFile(relPath) {
+    try {
+      const content = await window.docsIndex.getFile(relPath);
+      state.currentFile = relPath;
+      state.currentContent = content;
+      pathEl.textContent = relPath;
+      editBtn.disabled = false;
+      setMode('view');
+      renderViewer(content);
+      // update hash for deep linking
+      try { window.location.hash = `docs:${encodeURIComponent(relPath)}`; } catch {}
+    } catch (e) {
+      viewerEl.innerHTML = `<div style="color:red;">Failed to load file: ${escapeHtml(String(e?.message || e))}</div>`;
+    }
   }
+
+  function setMode(mode) {
+    state.mode = mode;
+    if (mode === 'view') {
+      viewerEl.style.display = '';
+      editorEl.style.display = 'none';
+      saveBtn.style.display = 'none';
+      cancelBtn.style.display = 'none';
+      editBtn.style.display = '';
+    } else {
+      viewerEl.style.display = 'none';
+      editorEl.style.display = '';
+      saveBtn.style.display = '';
+      cancelBtn.style.display = '';
+      editBtn.style.display = 'none';
+    }
+  }
+
+  function renderViewer(md) {
+    // Use Toast UI Viewer if available; otherwise fallback to basic rendering
+    if (window.toastui && window.toastui.Editor) {
+      // Destroy previous viewer content
+      viewerEl.innerHTML = '';
+      const Viewer = window.toastui.Editor.factory;
+      // Toast UI Editor factory with viewer config
+      new Viewer({
+        el: viewerEl,
+        viewer: true,
+        initialValue: md,
+        usageStatistics: false,
+        // sanitize is enabled by default in viewer
+      });
+    } else {
+      // naive fallback - preformatted safe output
+      viewerEl.innerHTML = `<pre>${escapeHtml(md)}</pre>`;
+    }
+  }
+
+  function openEditor(md) {
+    // Lazy initialize ToastUI Editor in edit mode
+    editorEl.innerHTML = '';
+    if (window.toastui && window.toastui.Editor) {
+      state.editor = new window.toastui.Editor({
+        el: editorEl,
+        height: '100%',
+        initialEditType: 'markdown',
+        previewStyle: 'vertical',
+        initialValue: md,
+        usageStatistics: false,
+      });
+    } else {
+      // Simple textarea fallback
+      const ta = document.createElement('textarea');
+      ta.style.width = '100%';
+      ta.style.height = '100%';
+      ta.value = md;
+      editorEl.appendChild(ta);
+      state.editor = {
+        getMarkdown: () => ta.value,
+        setMarkdown: (v) => (ta.value = v),
+      };
+    }
+  }
+
+  editBtn.addEventListener('click', () => {
+    if (!state.currentFile) return;
+    setMode('edit');
+    openEditor(state.currentContent);
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    setMode('view');
+    // No change; re-render viewer to reflect latest saved content
+    renderViewer(state.currentContent);
+  });
+
+  saveBtn.addEventListener('click', async () => {
+    if (!state.currentFile || !state.editor) return;
+    const next = state.editor.getMarkdown();
+    try {
+      await window.docsIndex.saveFile(state.currentFile, next);
+      state.currentContent = next;
+      setMode('view');
+      renderViewer(next);
+      // Optional: basic toast via alert
+      // In real app, integrate with a toast component.
+    } catch (e) {
+      alert('Failed to save: ' + String(e?.message || e));
+    }
+  });
+
+  // Handle hash navigation for deep linking
+  function handleHash() {
+    const h = window.location.hash;
+    if (h && h.startsWith('#docs:')) {
+      const rel = decodeURIComponent(h.slice('#docs:'.length));
+      openFile(rel);
+    }
+  }
+  window.addEventListener('hashchange', handleHash);
+
+  // Subscribe to index updates; refresh sidebar and if current file changed, reload it
+  const unsubscribe = window.docsIndex.subscribe((snapshot) => {
+    state.index = snapshot;
+    sidebarEl.innerHTML = renderSidebarTree(snapshot.tree);
+    if (state.currentFile) {
+      // reload content to reflect external changes
+      window.docsIndex.getFile(state.currentFile).then((content) => {
+        state.currentContent = content;
+        if (state.mode === 'view') renderViewer(content);
+      }).catch(() => {});
+    }
+  });
+
+  // Initialize
+  loadIndex().then(handleHash);
+
+  // Expose for debugging
+  window.__docsView = { state };
 })();
