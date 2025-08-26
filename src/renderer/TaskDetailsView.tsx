@@ -79,7 +79,6 @@ function StringListEditor({ idBase, label, initial = [], placeholder = '', sugge
   );
 }
 
-
 function featureSuggestionsTitles(index: any) {
   // ... (This function is correct, no changes needed)
   return []; // Placeholder
@@ -232,6 +231,18 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     }
   };
 
+  const handleMoveFeature = async (fromId: string, toIndex: number) => {
+    setSaving(true);
+    try {
+      const res = await (window as any).tasksIndex.reorderFeatures(task.id, { fromId, toIndex });
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
+    } catch (e: any) {
+      alert(`Failed to reorder feature: ${e.message || e}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!task) return <div className="empty">Task {taskId} not found. <button onClick={() => location.hash = ''}>Back to Tasks</button></div>;
 
   const features = task.features || [];
@@ -272,7 +283,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <div className="empty">No features defined for this task.</div>
         ) : (
           <ul className="features-list" role="list" aria-label="Features">
-            {features.map((f: any) => (
+            {features.map((f: any, index: number) => (
               <li key={f.id} className="feature-item" role="listitem">
                 {editFeatureId === f.id ? (
                   <EditableFeatureRow
@@ -290,6 +301,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                     <div className="col col-status"><StatusBadge status={f.status} /></div>
                     <div className="col col-actions">
                       <button type="button" className="btn-edit" onClick={() => setEditFeatureId(f.id)}>Edit</button>
+                      <button type="button" className="btn-move-up" disabled={index === 0 || saving || editFeatureId !== null} onClick={() => handleMoveFeature(f.id, index - 1)}>Up</button>
+                      <button type="button" className="btn-move-down" disabled={index === features.length - 1 || saving || editFeatureId !== null} onClick={() => handleMoveFeature(f.id, index + 1)}>Down</button>
                     </div>
                   </div>
                 )}
