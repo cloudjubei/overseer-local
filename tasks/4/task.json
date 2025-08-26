@@ -135,7 +135,7 @@
     },
     {
       "id": "4.13",
-      "status": "-",
+      "status": "+",
       "title": "Add chat history persistence",
       "description": "",
       "plan": "",
