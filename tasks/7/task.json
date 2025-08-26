@@ -78,28 +78,9 @@
     },
     {
       "id": "7.9",
-      "status": "+",
-      "title": "The dropdown in Home (list view) looks ugly",
-      "description": "It looks completely out of place - as if its some old design. It looks bad in the styleguide already",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "src/renderer/tasks/TasksListView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "7.10",
-      "status": "+",
-      "title": "Feature details view",
-      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where dependencies lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
+      "status": "-",
+      "title": "Sidebar on the left, collapsible, main screen in the middle",
+      "description": "The main screen should be responsive (adapt well to size changes) and allow for vertical scrolling (horizontal scrolling shouldn't really be allowed for the whole screen - only inside for some components).",
       "plan": "",
       "context": [
         "src/renderer/tasks/TaskDetailsView.tsx",
@@ -114,10 +95,29 @@
       "acceptance": []
     },
     {
+      "id": "7.10",
+      "status": "-",
+      "title": "Feature details view",
+      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where dependencies lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": [],
+      "rejection": "doesn't open right now - app throws lots of errors and cannot see anything"
+    },
+    {
       "id": "7.11",
-      "status": "+",
-      "title": "Dragging tasks in the board view doesn't work - in list view it does",
-      "description": "Error occurred in handler for 'tasks:update': TypeError: indexer.updateTask is not a function; Additionally, when dragging there should be helpful animations showing which column/area the dragged item is being put into.",
+      "status": "-",
+      "title": "Dragging tasks in list view requires visible target areas and animations",
+      "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
@@ -152,9 +152,9 @@
     },
     {
       "id": "7.13",
-      "status": "+",
+      "status": "-",
       "title": "Create feature and create task don't open",
-      "description": "they should be adapted to the new design guidelines. Remember - these are react components, using tailwind.",
+      "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/tasks/FeatureCreateView.tsx",
@@ -169,13 +169,14 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "None of the modals open - the app throws lots of errors"
     },
     {
       "id": "7.14",
-      "status": "+",
+      "status": "-",
       "title": "ChatView according to design",
-      "description": "It needs to adhere to the set guidelines and be similar in style to the rest. Remember - these are react components, using tailwind.",
+      "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/ChatView.tsx",
@@ -187,13 +188,14 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "The screen looks worse than before - the history is all over the place and the chat area looks old - FIX!!!! "
     },
     {
       "id": "7.15",
-      "status": "+",
+      "status": "-",
       "title": "DocumentsView according to latest design",
-      "description": "The whole screen seems to be flowing vertically. Before the latest changes it was all nice - the sidebar collapsible on the left, and the main content in the middle, scrollable when needed. Remember - these are react components, using tailwind.",
+      "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/DocumentsView.tsx",
@@ -205,7 +207,8 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "The screen looks worse than before - the documents list looks terrible, the view and renderer also look worse - FIX!!!! "
     },
     {
       "id": "7.16",
