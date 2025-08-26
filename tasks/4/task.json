@@ -48,8 +48,7 @@
         "src/tasks/indexer.js",
         "src/renderer/screens/ChatView.tsx"
       ],
-      "acceptance": [],
-      "rejection": "clicking settings inside ChatView does nothing - it must be possible to configure the LLM settings"
+      "acceptance": []
     },
     {
       "id": "4.5",
@@ -154,6 +153,15 @@
     {
       "id": "4.15",
       "status": "-",
+      "title": "User can open settings and configure API keys",
+      "description": "currently clicking the settings button does nothing - it must be possible to configure the LLM settings",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.16",
+      "status": "-",
       "title": "LLM connector abstraction and providers (LiteLLM, OpenAI-compatible)",
       "description": "Design an abstraction for chat providers. Implement connectors for: (1) LiteLLM-compatible HTTP endpoint, (2) OpenAI-compatible custom base URL to support LM Studio / Ollama. Configurable API key, base URL, model name, timeouts.",
       "plan": "",
@@ -161,7 +169,7 @@
       "acceptance": []
     },
     {
-      "id": "4.16",
+      "id": "4.17",
       "status": "-",
       "title": "Switching models",
       "description": "User can switch between different models that were configured. There's a dropdown with all the options that were previously configured and the user can choose which chat to use. If there was a switch in a conversation it is shown which LLM replied.",
