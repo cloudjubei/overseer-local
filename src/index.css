@@ -1,11 +1,26 @@
 /* Global base and utilities (existing content may be here) */
 @import './styles/design-tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Root layout: make the app fill the window and avoid unexpected margins */
+html, body, #root { height: 100%; }
+html, body { margin: 0; padding: 0; }
+
+/* Base body colors using semantic tokens */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-base);
+}
+
+h1, h2, h3 { color: var(--accent-primary); }
 /* Buttons (assume existing styles) */
-.btn { background: var(--accent-primary); color: var(--text-inverted); border: none; height: var(--control-h-md); padding: 0 var(--control-pad-x, 12px); border-radius: var(--radius-2); cursor: pointer; box-shadow: var(--shadow-0); transition: background var(--motion-fast, 120ms) var(--easing-standard, ease); }
-.btn:hover { background: var(--accent-primary-hover); }
-.btn:active { background: var(--accent-primary-active); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+button, .btn { background: var(--accent-primary); color: var(--text-inverted); border: none; height: var(--control-h-md); padding: 0 var(--control-pad-x, 12px); border-radius: var(--radius-2); cursor: pointer; box-shadow: var(--shadow-0); transition: background var(--motion-fast, 120ms) var(--easing-standard, ease); }
+button:hover, .btn:hover { background: var(--accent-primary-hover); }
+button:active, .btn:active { background: var(--accent-primary-active); }
+button:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-secondary { background: var(--surface-raised); color: var(--text-primary); border: 1px solid var(--border-default); height: var(--control-h-md); padding: 0 var(--control-pad-x, 12px); border-radius: var(--radius-2); cursor: pointer; transition: background var(--motion-fast, 120ms) var(--easing-standard, ease), border-color var(--motion-fast, 120ms) var(--easing-standard, ease); }
 .btn-secondary:hover { background: color-mix(in srgb, var(--surface-raised) 90%, var(--text-primary) 10%); }
@@ -319,6 +334,15 @@
 .nav-accent-purple { --nav-accent: var(--color-purple-650); }
 .nav-accent-teal { --nav-accent: var(--color-teal-600); }
 .nav-accent-gray { --nav-accent: var(--color-gray-400); }
+.nav-accent-brand.nav-item--active { background: color-mix(in srgb, var(--color-brand-600) 12%, transparent); }
+.nav-accent-brand.nav-item--active::before { background: var(--color-brand-600); }
+.nav-accent-purple.nav-item--active { background: color-mix(in srgb, var(--color-purple-650) 12%, transparent); }
+.nav-accent-purple.nav-item--active::before { background: var(--color-purple-650); }
+.nav-accent-teal.nav-item--active { background: color-mix(in srgb, var(--color-teal-600) 12%, transparent); }
+.nav-accent-teal.nav-item--active::before { background: var(--color-teal-600); }
+.nav-accent-gray.nav-item--active { background: color-mix(in srgb, var(--color-gray-500) 10%, transparent); }
+.nav-accent-gray.nav-item--active::before { background: var(--color-gray-600); }
+
 
 .nav-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border-radius: var(--radius-2); background: transparent; border: 1px solid transparent; color: var(--text-primary); cursor: pointer; box-shadow: inset 3px 0 0 0 transparent; transition: background var(--motion-fast, 120ms) var(--easing-standard, ease), border-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease); }
 .nav-item:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
