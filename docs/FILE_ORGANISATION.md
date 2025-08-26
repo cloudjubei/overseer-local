@@ -103,7 +103,8 @@ repo_root/
 │  │  │  │  ├─ Spinner.tsx
 │  │  │  │  ├─ Skeleton.tsx
 │  │  │  │  ├─ CommandMenu.tsx
-│  │  │  │  └─ ShortcutsHelp.tsx
+│  │  │  │  ├─ ShortcutsHelp.tsx
+│  │  │  │  └─ Switch.tsx
 │  │  │  ├─ tasks/
 │  │  │  │  ├─ StatusBadge.tsx
 │  │  │  │  ├─ PriorityTag.tsx
@@ -123,7 +124,8 @@ repo_root/
 │  │  │  ├─ useNextTaskId.ts
 │  │  │  ├─ useShortcuts.tsx
 │  │  │  ├─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
-│  │  │  └─ useNotifications.ts
+│  │  │  ├─ useNotifications.ts
+│  │  │  └─ useNotificationPreferences.ts
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx

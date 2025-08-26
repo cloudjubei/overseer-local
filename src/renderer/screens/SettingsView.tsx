@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
+import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
+import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { chatService } from '../services/chatService';
 import type { LLMConfig, LLMProviderType } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
@@ -11,6 +13,7 @@ import { useToast } from '../components/ui/Toast';
 export default function SettingsView() {
   const themes: Theme[] = ['light', 'dark'];
   const { theme, setTheme } = useTheme();
+  const { preferences, updatePreferences } = useNotificationPreferences();
 
   const { configs, activeConfigId, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
   const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
@@ -153,6 +156,51 @@ export default function SettingsView() {
             </option>
           ))}
         </select>
+      </section>
+      <section className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">Notification Preferences</h2>
+        <div className="space-y-4">
+          <Switch
+            checked={preferences.osNotificationsEnabled}
+            onCheckedChange={(checked) => updatePreferences({ osNotificationsEnabled: checked })}
+            label="Enable OS Notifications"
+          />
+          <div>
+            <h3 className="font-medium mb-2">Notification Categories</h3>
+            <div className="space-y-2">
+              {Object.entries(preferences.categoriesEnabled).map(([category, enabled]) => (
+                <Switch
+                  key={category}
+                  checked={enabled ?? true}
+                  onCheckedChange={(checked) => updatePreferences({ categoriesEnabled: { [category]: checked } })}
+                  label={category.charAt(0).toUpperCase() + category.slice(1)}
+                />
+              ))}
+            </div>
+          </div>
+          <Switch
+            checked={preferences.soundsEnabled}
+            onCheckedChange={(checked) => updatePreferences({ soundsEnabled: checked })}
+            label="Enable Notification Sounds"
+          />
+          <div>
+            <label className="block text-sm font-medium mb-1">Notification Display Duration</label>
+            <Select
+              value={preferences.displayDuration.toString()}
+              onValueChange={(value) => updatePreferences({ displayDuration: parseInt(value) })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select duration" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3">3 seconds</SelectItem>
+                <SelectItem value="5">5 seconds</SelectItem>
+                <SelectItem value="10">10 seconds</SelectItem>
+                <SelectItem value="0">Persistent</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </section>
       <section>
         <h2 className="text-xl font-semibold mb-2">LLM Configurations</h2>
