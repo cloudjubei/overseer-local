@@ -96,7 +96,7 @@
     },
     {
       "id": "7.10",
-      "status": "-",
+      "status": "+",
       "title": "Feature details view",
       "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where dependencies lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
       "plan": "",
