@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "8.1",
-      "status": "-",
+      "status": "+",
       "title": "Create notifications data model and service",
       "description": "Define TypeScript types for notifications in src/types/, create a notifications service in src/renderer/services/ that handles storing, retrieving, and managing notification data. Include notification structure with id, timestamp, type/category, title, message, read status, and metadata. Implement basic CRUD operations and persistence.",
       "plan": "",
