@@ -82,39 +82,33 @@ repo_root/
 │  │  │  │  ├─ Input.tsx
 │  │  │  │  ├─ Modal.tsx
 │  │  │  │  ├─ Select.tsx
-│  │  │  │  └─ Toast.tsx
+│  │  │  │  ├─ Toast.tsx
+│  │  │  │  ├─ Tooltip.tsx          ← new: contextual tooltips with portal + placement
+│  │  │  │  ├─ Spinner.tsx          ← new: loading spinner component (tokens + animations)
+│  │  │  │  ├─ Skeleton.tsx         ← new: skeleton shimmer for perceived performance
+│  │  │  │  ├─ CommandMenu.tsx      ← new: Linear-style command palette (Cmd/Ctrl+K, /)
+│  │  │  │  └─ ShortcutsHelp.tsx    ← new: shortcuts overlay (triggered by ?)
 │  │  │  └─ tasks/
-│  │  │     ├─ StatusBadge.tsx           ← new: tokenized Monday-style status badge
-│  │  │     ├─ PriorityTag.tsx           ← new: priority chip (parsed from title, P0..P3)
-│  │  │     └─ TaskCard.tsx              ← new: board/list card with status + priority
+│  │  │     ├─ StatusBadge.tsx
+│  │  │     ├─ PriorityTag.tsx
+│  │  │     └─ TaskCard.tsx         ← updated: hover quick actions + tooltips
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts
 │  │  │  ├─ useDocsIndex.ts
 │  │  │  ├─ useDocsAutocomplete.ts
 │  │  │  ├─ useLLMConfig.ts
-│  │  │  └─ useNextTaskId.ts
+│  │  │  ├─ useNextTaskId.ts
+│  │  │  └─ useShortcuts.tsx        ← new: global shortcuts registry with helpers
 │  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx              ← updated: Linear-like collapsible sidebar with keyboard + mobile drawer
+│  │  │  ├─ SidebarView.tsx         ← updated: tooltips when collapsed + view transition
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  └─ ChatView.tsx
-│  │  ├─ services/
-│  │  │  ├─ chatService.ts
-│  │  │  ├─ docsService.ts
-│  │  │  └─ tasksService.ts
-│  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx
-│  │  │  ├─ TaskEditView.tsx
-│  │  │  ├─ TaskDetailsView.tsx
-│  │  │  ├─ FeatureCreateView.tsx
-│  │  │  ├─ FeatureEditView.tsx
-│  │  │  ├─ TasksListView.tsx            ← updated: List/Board, DnD reorder, inline status
-│  │  │  └─ BoardView.tsx                ← new: kanban board view with DnD status change
-│  │  ├─ App.tsx
+│  │  ├─ App.tsx                    ← updated: providers + CommandMenu + ShortcutsHelp
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
-│  ├─ index.css                          ← updated: navigation styles (sidebar, nav items), board styles, priority tags, refined toolbar
+│  ├─ index.css                     ← updated: micro-animations, tooltip, spinner, skeleton, command/help styles
 │  ├─ main.js
 │  └─ preload.js
 ├─ .env
@@ -132,15 +126,9 @@ repo_root/
 ```
 
 Notes on recent changes
-- Updated src/renderer/screens/SidebarView.tsx to implement a Linear-inspired collapsible sidebar with:
-  - Smooth expand/collapse width animation
-  - Roving tabindex keyboard navigation (Arrow Up/Down, Home/End, Enter/Space)
-  - Cmd/Ctrl+B to toggle sidebar (desktop) or open/close drawer (mobile)
-  - Responsive mobile drawer with backdrop, Esc/Click to close, and focus management
-  - Monday-style colorful active accents per item (brand/purple/teal/gray)
-- Extended src/index.css with navigation styles (sidebar, nav items, active accents, mobile drawer, triggers).
-
-Rationale
-- Aligns with docs/ux/LINEAR_UX_GUIDELINES.md for clean, efficient navigation and keyboard-first control.
-- Preserves Monday’s colorful touches via accent-specific active backgrounds and indicators.
-- Improves accessibility with aria labels, aria-current, and focus rings.
+- Added advanced interaction primitives (Tooltip, Spinner, Skeleton) to support hover states, loading animations, and skeletons for perceived performance.
+- Implemented a global keyboard shortcuts infrastructure (useShortcuts) aligned to Linear-like mappings with discoverability.
+- Introduced a Command Menu (Cmd/Ctrl+K, also '/' to focus) and a Shortcuts Help overlay (?), rendered as lightweight modals.
+- Enhanced SidebarView with contextual tooltips when collapsed and smooth view transitions.
+- Updated Button to support a loading state with a spinner overlay.
+- Refreshed index.css with micro-animations (fade, view transition), tooltip styling, spinner keyframes, and skeleton shimmer.

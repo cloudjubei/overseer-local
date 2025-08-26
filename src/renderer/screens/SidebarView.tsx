@@ -4,6 +4,7 @@ import DocumentsView from './DocumentsView';
 import SettingsView from './SettingsView';
 import ChatView from './ChatView';
 import { useNavigator } from '../navigation/Navigator';
+import Tooltip from '../components/ui/Tooltip';
 
 export type SidebarProps = {};
 
@@ -119,10 +120,10 @@ export default function SidebarView({}: SidebarProps) {
   }, [navigateView, isMobile]);
 
   const renderedView = useMemo(() => {
-    if (currentView === 'Documents') return <DocumentsView />;
-    if (currentView === 'Settings') return <SettingsView />;
-    if (currentView === 'Chat') return <ChatView />;
-    return <TasksView />;
+    if (currentView === 'Documents') return <div key="Documents" className="view-transition"><DocumentsView /></div>;
+    if (currentView === 'Settings') return <div key="Settings" className="view-transition"><SettingsView /></div>;
+    if (currentView === 'Chat') return <div key="Chat" className="view-transition"><ChatView /></div>;
+    return <div key="Home" className="view-transition"><TasksView /></div>;
   }, [currentView]);
 
   // Sidebar element (shared for desktop and mobile drawer)
@@ -133,9 +134,6 @@ export default function SidebarView({}: SidebarProps) {
       data-collapsed={collapsed ? 'true' : 'false'}
       style={{
         // Smooth width animation via CSS var (see index.css)
-        // When in mobile drawer mode we always show expanded width visually
-        // but keep the collapsed state persisted for desktop
-        // width controlled by CSS .sidebar class
       }}
     >
       <div className={`mb-2 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}>
@@ -162,27 +160,32 @@ export default function SidebarView({}: SidebarProps) {
           {NAV_ITEMS.map((item, i) => {
             const isActive = currentView === item.view;
             const ref = i === 0 ? firstItemRef : undefined;
+            const Btn = (
+              <button
+                ref={ref as any}
+                type="button"
+                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'brand'}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => onActivate(item.view)}
+                title={item.label}
+                tabIndex={focusIndex === i ? 0 : -1}
+                onFocus={() => setFocusIndex(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onActivate(item.view);
+                  }
+                }}
+              >
+                <span className="nav-item__icon">{item.icon}</span>
+                {!collapsed && <span className="nav-item__label">{item.label}</span>}
+              </button>
+            );
             return (
               <li key={item.id} className="nav-li">
-                <button
-                  ref={ref as any}
-                  type="button"
-                  className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'brand'}`}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => onActivate(item.view)}
-                  title={item.label}
-                  tabIndex={focusIndex === i ? 0 : -1}
-                  onFocus={() => setFocusIndex(i)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onActivate(item.view);
-                    }
-                  }}
-                >
-                  <span className="nav-item__icon">{item.icon}</span>
-                  {!collapsed && <span className="nav-item__label">{item.label}</span>}
-                </button>
+                {collapsed ? (
+                  <Tooltip content={item.label} placement="right">{Btn}</Tooltip>
+                ) : Btn}
               </li>
             );
           })}
@@ -195,26 +198,31 @@ export default function SidebarView({}: SidebarProps) {
           {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item, i) => {
             const idx = NAV_ITEMS.findIndex((n) => n.view === 'Settings');
             const isActive = currentView === item.view;
+            const Btn = (
+              <button
+                type="button"
+                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => onActivate(item.view)}
+                title={item.label}
+                tabIndex={focusIndex === idx ? 0 : -1}
+                onFocus={() => setFocusIndex(idx)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onActivate(item.view);
+                  }
+                }}
+              >
+                <span className="nav-item__icon">{item.icon}</span>
+                {!collapsed && <span className="nav-item__label">{item.label}</span>}
+              </button>
+            );
             return (
               <li key={item.id} className="nav-li">
-                <button
-                  type="button"
-                  className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => onActivate(item.view)}
-                  title={item.label}
-                  tabIndex={focusIndex === idx ? 0 : -1}
-                  onFocus={() => setFocusIndex(idx)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onActivate(item.view);
-                    }
-                  }}
-                >
-                  <span className="nav-item__icon">{item.icon}</span>
-                  {!collapsed && <span className="nav-item__label">{item.label}</span>}
-                </button>
+                {collapsed ? (
+                  <Tooltip content={item.label} placement="right">{Btn}</Tooltip>
+                ) : Btn}
               </li>
             );
           })}
@@ -237,7 +245,7 @@ export default function SidebarView({}: SidebarProps) {
               />
               <div className="fixed inset-y-0 left-0 z-30" style={{ width: 260 }}>
                 {/* Force expanded UI for drawer, but keep collapsed state persisted */}
-                {React.cloneElement(Aside, { className: `${Aside.props.className} drawer-open`, 'data-collapsed': 'false' })}
+                {React.cloneElement(Aside, { className: `${(Aside as any).props.className} drawer-open`, 'data-collapsed': 'false' })}
               </div>
             </>
           )}
