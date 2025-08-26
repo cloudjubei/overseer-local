@@ -116,6 +116,27 @@
       "createDesktopShortcut": true,
       "shortcutName": "${productName}",
       "artifactName": "${productName}-Setup-${version}-${arch}.exe"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icons/icon.png",
+      "category": "Utility",
+      "maintainer": "Kamil Chmurzynski <cloudjubei@gmail.com>",
+      "synopsis": "Cross-platform Electron app",
+      "desktop": {
+        "Name": "${productName}",
+        "GenericName": "Productivity",
+        "Comment": "Electron application",
+        "Type": "Application",
+        "Terminal": "false",
+        "Categories": "Utility;Development;",
+        "StartupWMClass": "electron"
+      }
+    },
+    "appImage": {
+      "artifactName": "${productName}-${version}-${arch}.AppImage"
     }
   }
 }

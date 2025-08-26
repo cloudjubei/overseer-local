@@ -13,6 +13,7 @@ This document describes how files and directories are organised in this reposito
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns: Placeholder macOS app icon to be replaced with a real ICNS file.
   - build/icons/icon.ico: Placeholder Windows app icon to be replaced with a real ICO file.
+  - build/icons/icon.png: Placeholder Linux app icon to be replaced with a real 512x512 PNG file.
   - build/entitlements.mac.plist: macOS entitlements for main app (hardened runtime/JIT allowances).
   - build/entitlements.mac.inherit.plist: macOS entitlements inherited by helper processes.
 - .env, and other setup files may exist as needed.
@@ -77,7 +78,6 @@ repo_root/
 │  │  │  ├─ FeatureEditView.tsx       
 │  │  │  ├─ TaskCreateView.tsx         
 │  │  │  ├─ TaskDetailsView.tsx         
-│  │  │  ├─ TaskEditView.tsx        
 │  │  │  └─ TasksListView.tsx  
 │  │  ├─ App.tsx                 # Main Entry for the React app 
 │  │  └─ types.ts                # Renderer-local types (View)
@@ -98,7 +98,8 @@ repo_root/
 ├─ build/
 │  ├─ icons/
 │  │  ├─ icon.icns               # Placeholder macOS icon (replace with real ICNS)
-│  │  └─ icon.ico                # Placeholder Windows icon (replace with real ICO)
+│  │  ├─ icon.ico                # Placeholder Windows icon (replace with real ICO)
+│  │  └─ icon.png                # Placeholder Linux icon (replace with real 512x512 PNG)
 │  ├─ entitlements.mac.plist     # macOS entitlements for main app
 │  └─ entitlements.mac.inherit.plist # macOS entitlements for helpers
 ├─ .editorconfig

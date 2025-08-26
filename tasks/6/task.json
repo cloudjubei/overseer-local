@@ -43,7 +43,7 @@
     },
     {
       "id": "6.5",
-      "status": "-",
+      "status": "+",
       "title": "Configure Linux AppImage packaging",
       "description": "In the build configuration, add linux-specific settings including target 'appimage', icon path (png), and desktop entry details.",
       "plan": "",
