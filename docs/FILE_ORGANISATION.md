@@ -116,13 +116,14 @@ repo_root/
 │  │  │  ├─ useDocsAutocomplete.ts
 │  │  │  ├─ useLLMConfig.ts
 │  │  │  ├─ useNextTaskId.ts
-│  │  │  └─ useShortcuts.tsx
+│  │  │  ├─ useShortcuts.tsx
+│  │  │  └─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  ├─ ChatView.tsx
-│  │  │  └─ SettingsView.tsx
+│  │  │  └─ SettingsView.tsx      (updated to use useTheme and data-theme)
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx         
 │  │  │  ├─ TaskEditView.tsx
@@ -130,7 +131,7 @@ repo_root/
 │  │  │  ├─ FeatureEditView.tsx
 │  │  │  ├─ TaskDetailsView.tsx
 │  │  │  └─ TasksListView.tsx
-│  │  ├─ App.tsx
+│  │  ├─ App.tsx                   (initializes theme on app boot)
 │  │  └─ types.ts
 │  ├─ styles/
 │  │  └─ design-tokens.css
@@ -151,8 +152,10 @@ repo_root/
 ```
 
 Notes on recent changes
-- Introduced a unified .ui-select dropdown style in src/index.css using design tokens (appearance reset, custom chevron, focus ring). Variants: .ui-select--sm and .ui-select--lg.
-- Updated TasksListView to apply .ui-select for the toolbar filter and a compact .ui-select--sm for inline status changes.
-- Updated docs/styleguide/index.html to showcase the .ui-select styles instead of inline-styled select elements.
-- Updated TaskDetailsView to align with the design system: uses shared StatusBadge (soft/bold), standardized .btn/.btn-secondary buttons, a header + scrollable content layout, and token-driven feature list styling. Reordering now goes through tasksService.
-- These changes align dropdown visuals with Monday-inspired palette and Linear-grade UX while improving accessibility and consistency across the app and style guide.
+- Introduced a centralized theming helper (src/renderer/hooks/useTheme.ts) that:
+  - Applies theme via [data-theme="<light|dark>"] and toggles a .dark class for compatibility.
+  - Persists the theme in localStorage and exposes initTheme() to apply it on app boot.
+  - Provides a React hook useTheme() for components to read/update the theme.
+- Updated App.tsx to call initTheme() on mount so the persisted theme is applied globally, not only when opening Settings.
+- Updated SettingsView to use useTheme() and a single, correct theme list [light, dark]. Removed the unused "blue" option and the incorrect className assignment on <html> which broke theming.
+- This aligns with docs/design/DESIGN_SYSTEM.md which specifies theming via data-theme, ensuring Monday-inspired palettes and Linear-grade UX behave correctly across light/dark.

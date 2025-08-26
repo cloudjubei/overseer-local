@@ -134,7 +134,7 @@
     },
     {
       "id": "7.12",
-      "status": "-",
+      "status": "+",
       "title": "Theming is broken",
       "description": "it's impossible to change themes now",
       "plan": "",

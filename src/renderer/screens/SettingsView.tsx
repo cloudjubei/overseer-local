@@ -4,15 +4,12 @@ import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import type { LLMConfig } from '../types';
+import { useTheme, type Theme } from '../hooks/useTheme';
 
 export default function SettingsView() {
-  const themes = ['light', 'dark', 'blue'];
+  const themes: Theme[] = ['light', 'dark'];
+  const { theme, setTheme } = useTheme();
 
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme') || 'light';
-    document.documentElement.className = `theme-${saved}`;
-    return saved;
-  });
   const { configs, activeConfigId, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
   const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
@@ -93,14 +90,11 @@ export default function SettingsView() {
       <h1 className="text-2xl font-bold mb-4">Settings</h1>
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Theme</h2>
-        <select 
-          value={theme} 
-          onChange={(e) => {
-            setTheme(e.target.value);
-            document.documentElement.className = `theme-${e.target.value}`;
-            localStorage.setItem('theme', e.target.value);
-          }} 
-          className="w-full p-2 border border-gray-300 rounded-md focus:border-primary focus:ring-primary"
+        <select
+          value={theme}
+          onChange={(e) => setTheme(e.target.value as Theme)}
+          className="ui-select"
+          aria-label="Theme selection"
         >
           {themes.map((t) => (
             <option key={t} value={t}>
