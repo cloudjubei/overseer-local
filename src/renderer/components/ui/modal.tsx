@@ -42,12 +42,12 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div
         className={
-          `relative z-10 w-full ${sizeClass(size)} rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900`
+          `relative z-10 w-full ${sizeClass(size)} rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900 flex flex-col max-h-[90vh]`
         }
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-start justify-between gap-4 border-b p-4 dark:border-neutral-800">
+        <div className="flex items-start justify-between gap-4 border-b p-4 dark:border-neutral-800 shrink-0">
           <div className="text-base font-semibold">{title}</div>
           {!hideCloseButton && (
             <button
@@ -60,8 +60,8 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
             </button>
           )}
         </div>
-        <div className="p-4">{children}</div>
-        {footer ? <div className="border-t p-3 dark:border-neutral-800">{footer}</div> : null}
+        <div className="flex-grow overflow-y-auto p-4">{children}</div>
+        {footer ? <div className="shrink-0 border-t p-3 dark:border-neutral-800">{footer}</div> : null}
       </div>
     </div>
   );
