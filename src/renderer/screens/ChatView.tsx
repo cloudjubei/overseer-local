@@ -1,49 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LLMConfigManager, LLMConfig } from '../utils/LLMConfigManager';
-import { Modal } from '../components/ui/modal';
+import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { useChats } from '../hooks/useChats';
+import { useDocsIndex } from '../hooks/useDocsIndex';
+import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
+import { useLLMConfig } from '../hooks/useLLMConfig';
+import { docsService } from '../services/docsService';
+
 
 const ChatView = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string; model?: string }[]>([]);
+    const { chatHistories, currentChatId, setCurrentChatId, messages, setMessages, createChat, deleteChat, sendMessage } = useChats();
+  const { snapshot: docsSnapshot, docsList } = useDocsIndex();
+  const { config, setConfig, isConfigured, save } = useLLMConfig();
+
   const [input, setInput] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [configs, setConfigs] = useState<LLMConfig[]>([]);
-  const [activeConfigId, setActiveConfigId] = useState<string | null>(null);
-  const [editingConfig, setEditingConfig] = useState<Partial<LLMConfig> | null>(null);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
-  const [isConfigured, setIsConfigured] = useState<boolean>(false);
-  const managerRef = useRef<LLMConfigManager | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [docsList, setDocsList] = useState<string[]>([]);
-  const [isAutocompleteOpen, setIsAutocompleteOpen] = useState<boolean>(false);
-  const [matchingDocs, setMatchingDocs] = useState<string[]>([]);
-  const [mentionStart, setMentionStart] = useState<number | null>(null);
-  const [autocompletePosition, setAutocompletePosition] = useState<{left: number, top: number} | null>(null);
-  const [chatHistories, setChatHistories] = useState<string[]>([]);
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const { isOpen: isAutocompleteOpen, matches: matchingDocs, position: autocompletePosition, onSelect: handleSelect } = useDocsAutocomplete({
+    docsList,
+    input,
+    setInput,
+    textareaRef,
+    mirrorRef,
+  });
 
-  useEffect(() => {
-    managerRef.current = new LLMConfigManager();
-    const loadedConfigs = managerRef.current.getConfigs();
-    setConfigs(loadedConfigs);
-    const activeId = managerRef.current.getActiveId();
-    setActiveConfigId(activeId);
-    setIsConfigured(managerRef.current.isConfigured());
 
-    const loadChats = async () => {
-      const chats = await window.chat.list();
-      setChatHistories(chats);
-      if (chats.length > 0) {
-        setCurrentChatId(chats[0]);
-      }
-    };
-    loadChats();
-  }, []);
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -220,20 +208,8 @@ const ChatView = () => {
   };
 
   const handleSaveConfig = () => {
-    if (!editingConfig) return;
-    if (isAddingNew) {
-      const newConfig = managerRef.current?.addConfig(editingConfig as LLMConfig);
-      if (newConfig) {
-        setConfigs(managerRef.current?.getConfigs() || []);
-        setActiveConfigId(newConfig.id);
-      }
-      setIsAddingNew(false);
-    } else if (editingConfig.id) {
-      managerRef.current?.updateConfig(editingConfig.id, editingConfig);
-      setConfigs(managerRef.current?.getConfigs() || []);
-    }
-    setEditingConfig(null);
-    setIsConfigured(managerRef.current?.isConfigured() || false);
+        // e.preventDefault();
+        save(config);
   };
 
   const handleEditConfig = (config: LLMConfig) => {
@@ -309,21 +285,6 @@ const ChatView = () => {
     reader.readAsText(file);
   };
 
-  const handleCreateChat = async () => {
-    const newChatId = await window.chat.create();
-    setChatHistories([...chatHistories, newChatId]);
-    setCurrentChatId(newChatId);
-    setMessages([]);
-  };
-
-  const handleDeleteChat = async (chatId: string) => {
-    await window.chat.delete(chatId);
-    setChatHistories(chatHistories.filter(id => id !== chatId));
-    if (currentChatId === chatId) {
-      setCurrentChatId(chatHistories[0] || null);
-      setMessages([]);
-    }
-  };
 
   return (
     <div className="flex h-full">

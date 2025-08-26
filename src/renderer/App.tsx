@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import SidebarView from './screens/SidebarView';
-import { ToastProvider } from './components/ui';
 import { createRoot } from 'react-dom/client';
+import ModalHost from './navigation/ModalHost';
+import { ToastProvider } from './components/ui/Toast';
+import { NavigatorProvider } from './navigation/Navigator';
 
 function App() {
   useEffect(() => {
@@ -13,12 +15,14 @@ function App() {
     document.documentElement.className = `theme-${theme}`;
   }, []);
 
-
   return (
     <ToastProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-        <SidebarView />
-      </div>
+      <NavigatorProvider>
+        <div className="flex h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+          <SidebarView />
+          <ModalHost />
+        </div>
+      </NavigatorProvider>
     </ToastProvider>
   );
 }

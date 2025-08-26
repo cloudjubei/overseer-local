@@ -185,18 +185,31 @@
       "id": "4.18",
       "status": "-",
       "title": "Errors",
+      "description": "There are lots of errors in ChatView.tsx. There was a new document `docs/STANDARDS.md` established and a lot of functionality has been moved around. Fix it.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/ChatView.tsx", 
+      "src/renderer/hooks/useChats.ts", 
+      "src/renderer/hooks/useDocsAutocomplete.ts", 
+      "src/renderer/hooks/useDocsIndex.ts", 
+      "src/renderer/hooks/useLLMConfig.ts", 
+      "src/renderer/navigation/ModalHost.tsx",
+      "src/renderer/navigation/Navigator.tsx", 
+      "src/renderer/services/chatService.ts", 
+      "src/renderer/services/docsService.ts", 
+      "docs/STANDARDS.md"],
+      "acceptance": [ ]
+    },
+    {
+      "id": "4.19",
+      "status": "+",
+      "title": "Errors2",
       "description": "All the errors will be described in the acceptance criteria as a list so it's easy to go over them one by one.",
       "plan": "",
       "context": ["src/renderer/screens/ChatView.tsx"],
       "acceptance": [
         "line: 4 - Cannot find module '../components/ui/input' or its corresponding type declarations.",
-        "line: 6 - Cannot find module '../components/ui/select' or its corresponding type declarations.",
-        "line: 39 - Property 'chat' does not exist on type 'Window & typeof globalThis'",
-        "line: 126 - Argument of type 'HTMLTextAreaElement | null' is not assignable to parameter of type 'HTMLTextAreaElement'. Type 'null' is not assignable to type 'HTMLTextAreaElement'.",
-        "line: 166 - Element implicitly has an 'any' type because index expression is not of type 'number'.",
-        "line: 270 -  Types of property 'role' are incompatible. Type 'string' is not assignable to type '\"user\" | \"assistant\" | \"system\"'.",
-        "line: 296 - Property 'upload' does not exist on type '{ get: () => Promise<DocsIndexSnapshot>; subscribe: (cb: (snapshot: DocsIndexSnapshot) => void) => () => void; getFile?: ((relPath: string) => Promise<...>) | undefined; saveFile?: ((relPath: string, content: string) => Promise<...>) | undefined; }'",
-        "line: 303 - 'err' is of type 'unknown'."
+        "line: 6 - Cannot find module '../components/ui/select' or its corresponding type declarations."
       ]
     }
     
