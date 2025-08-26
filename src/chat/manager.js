@@ -16,7 +16,7 @@ export class ChatManager {
   async getCompletion({messages, config}) {
     try {
       const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
-      const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc.'};
+      const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc. You can create new documents using create_doc.'};
       let currentMessages = [systemPrompt, ...messages];
       const tools = [
         {
@@ -48,6 +48,21 @@ export class ChatManager {
               required: ['path']
             }
           }
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'create_doc',
+            description: 'Create a new document with the given name and content',
+            parameters: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', description: 'Name of the document (relative path, including .md extension)' },
+                content: { type: 'string', description: 'Content of the document' }
+              },
+              required: ['name', 'content']
+            }
+          }
         }
       ];
       const toolsMap = {
@@ -58,6 +73,21 @@ export class ChatManager {
             return await this.docsIndexer.getFile(path);
           } catch (error) {
             return `Error: ${error.message}`;
+          }
+        },
+        create_doc: async ({ name, content }) => {
+          try {
+            const relPath = name;
+            const absPath = path.join(this.docsIndexer.docsDir, relPath);
+            const dir = path.dirname(absPath);
+            if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir, { recursive: true });
+            }
+            fs.writeFileSync(absPath, content, 'utf8');
+            this.docsIndexer.buildIndex();
+            return `Document ${name} created successfully.`;
+          } catch (error) {
+            return `Error creating document: ${error.message}`;
           }
         }
       };

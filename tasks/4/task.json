@@ -99,7 +99,7 @@
     },
     {
       "id": "4.9",
-      "status": "-",
+      "status": "+",
       "title": "Add create_doc tool for agent",
       "description": "Add to tools: create_doc (params: name, content)",
       "plan": "",
