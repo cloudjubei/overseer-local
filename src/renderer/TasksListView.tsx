@@ -199,8 +199,8 @@ export default function TasksListView() {
                     <div className="col col-features">{done}/{total}</div>
                     {!isFiltered && (
                       <div className="col col-actions">
-                        <button type="button" className="btn-move-up" disabled={saving || idx === 0} onClick={() => handleMoveTask(t.id, idx - 1)}>Up</button>
-                        <button type="button" className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={() => handleMoveTask(t.id, idx + 1)}>Down</button>
+                        <button type="button" className="btn-move-up" disabled={saving || idx === 0} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx - 1); }}>Up</button>
+                        <button type="button" className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx + 1); }}>Down</button>
                       </div>
                     )}
                   </div>
