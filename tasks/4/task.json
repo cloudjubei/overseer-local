@@ -6,20 +6,25 @@
   "features": [
     {
       "id": "4.1",
-      "status": "+",
+      "status": "-",
       "title": "Add Chat route and basic UI skeleton",
       "description": "Update the renderer (e.g., main app.js or index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "rejection": "new file changes are not documented in `docs/FILE_ORGANISATION.md`"
     },
     {
       "id": "4.2",
-      "status": "+",
+      "status": "-",
       "title": "Manage chat state and render messages",
       "description": "In ChatView, use React state (or equivalent) for a messages array of objects {role: 'user'|'assistant', content: string}. Render the messages in the message div, with user messages on the right, assistant on the left, styled as chat bubbles. Handle empty state with a message like 'Start chatting about the project'.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
       "acceptance": []
     },
     {
@@ -33,29 +38,47 @@
     },
     {
       "id": "4.4",
-      "status": "+",
-      "title": "Add LLM configuration UI and local storage",
+      "status": "-",
+      "title": "Add LLM configuration UI and local storage - separate class to manage this",
       "description": "In ChatView, add a settings button that opens a form (modal or section) for LLM config: apiBaseUrl (default 'https://api.openai.com/v1'), apiKey, model (default 'gpt-4o'). Save values to localStorage on submit. Load and apply on component mount. Show warning if not configured.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/main.js",
+        "src/preload.js",
+        "src/docs/indexer.js",
+        "src/tasks/indexer.js",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "rejection": "new file changes are not documented in `docs/FILE_ORGANISATION.md`. "
     },
     {
       "id": "4.5",
-      "status": "+",
+      "status": "-",
       "title": "Add IPC handler for basic non-streaming LLM completion",
       "description": "In main process, install 'openai' package if needed. Add ipcMain.handle('chat:completion', async (event, {messages, config}) => { const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey}); const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'}; const response = await openai.chat.completions.create({model: config.model, messages: [systemPrompt, ...messages], stream: false}); return response.choices[0].message; }). Handle errors gracefully.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/main.js",
+        "src/preload.js",
+        "src/docs/indexer.js",
+        "src/tasks/indexer.js",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "rejection": "new file changes are not documented in `docs/FILE_ORGANISATION.md`. The IPC contract needs to exist in `src/main.js` but there should be a separate class managing all of this similar to TasksIndexer and DocsIndexer"
     },
     {
       "id": "4.6",
-      "status": "+",
+      "status": "-",
       "title": "Integrate basic LLM call in ChatView",
-      "description": "Update send handler in ChatView: After adding user message, load config from localStorage. If configured, call ipcRenderer.invoke('chat:completion', {messages: state.messages, config}), then append the returned message to state. Show loading indicator while waiting. Handle errors with a message.",
+      "description": "Update send handler in ChatView: Allow a user to send a message. Show loading indicator while waiting. Handle errors with a message.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/main.js",
+        "src/preload.js",
+        "src/renderer/screens/ChatView.tsx"
+      ],
       "acceptance": []
     },
     {

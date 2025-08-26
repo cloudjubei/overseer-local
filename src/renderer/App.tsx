@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SidebarView from './components/SidebarView';
 import TasksView from './screens/TasksView';
 import DocumentsView from './screens/DocumentsView';
@@ -17,33 +17,6 @@ function App() {
       localStorage.setItem('theme', theme);
     }
     document.documentElement.className = `theme-${theme}`;
-  }, []);
-
-  useEffect(() => {
-    const viewToHash: { [key in NavigationView]: string } = {
-      'Home': '#home',
-      'Documents': '#docs',
-      'Settings': '#settings',
-      'Chat': '#chat'
-    };
-    window.location.hash = viewToHash[currentView];
-  }, [currentView]);
-
-  useEffect(() => {
-    const hashToView = {
-      '#home': 'Home',
-      '#docs': 'Documents',
-      '#settings': 'Settings',
-      '#chat': 'Chat'
-    };
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      const view = (hash === '' ? 'Home' : hashToView[hash as keyof typeof hashToView]) || 'Home';
-      setCurrentView(view);
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // initial
-    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const renderView = () => {
