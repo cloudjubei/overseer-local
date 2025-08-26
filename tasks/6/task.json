@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "6.1",
-      "status": "-",
+      "status": "+",
       "title": "Install electron-builder dependency",
       "description": "Add electron-builder as a devDependency in package.json and install it using npm. This enables packaging capabilities for the Electron app.",
       "plan": "",
