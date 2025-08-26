@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "3.1",
-      "status": "-",
+      "status": "+",
       "title": "Add sidebar navigation to the application UI",
       "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
       "plan": "",
@@ -33,20 +33,23 @@
     },
     {
       "id": "3.4",
-      "status": "-",
+      "status": "+",
       "title": "Create Docs browser view component with file listing",
-      "description": "Add a docsBrowserView.js in src/renderer/ that fetches the docs index via IPC, renders a tree or collapsible list of markdown files and directories under docs/. Handle selection of a file to display its content (to be rendered in later features). Subscribe to index updates for real-time refreshes and handle empty states or errors.",
+      "description": "Create a React component that fetches the docs index via IPC, renders a tree or collapsible list of markdown files and directories under docs/. Handle selection of a file to display its content (to be rendered in later features). Subscribe to index updates for real-time refreshes and handle empty states or errors.",
       "plan": "",
-      "context": [],
+      "context": [
+      ],
       "acceptance": []
     },
     {
       "id": "3.5",
-      "status": "-",
+      "status": "+",
       "title": "Implement basic Markdown rendering with extensions",
       "description": "In the Docs browser view, upon file selection, fetch the file content via IPC and render it using a Markdown parser (e.g., react-markdown or marked). Support basic extensions: tables and code highlighting (integrate highlight.js or similar for syntax highlighting in code blocks). Display the rendered content in a dedicated pane or section of the view.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/rendereer/docsBrowserView.js"
+      ],
       "acceptance": []
     },
     {
@@ -55,16 +58,31 @@
       "title": "Add HTML sanitization to Markdown rendering",
       "description": "Enhance the Markdown rendering to include safe HTML sanitization using a library like dompurify. Sanitize the generated HTML before rendering to prevent XSS vulnerabilities, ensuring only safe tags and attributes are allowed while preserving the formatting from Markdown extensions.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/rendereer/docsBrowserView.js"
+      ],
       "acceptance": []
     },
     {
       "id": "3.7",
       "status": "-",
       "title": "Implement internal link navigation in rendered Markdown",
-      "description": "In the rendered Markdown content, intercept clicks on internal links (relative paths to other .md files or anchors within the same file). For relative .md links, navigate to the corresponding file in the Docs browser view by updating the selection. Handle anchor links (#fragment) by scrolling to the section within the current rendered content.",
+      "description": "Reference the legacy `src/rendereer/docsBrowserView.js`. In the rendered Markdown content, intercept clicks on internal links (relative paths to other .md files or anchors within the same file). For relative .md links, navigate to the corresponding file in the Docs browser view by updating the selection. Handle anchor links (#fragment) by scrolling to the section within the current rendered content.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/rendereer/docsBrowserView.js"
+      ],
+      "acceptance": []
+     },
+    {
+      "id": "3.8",
+      "status": "-",
+      "title": "Markdown editor",
+      "description": "Reference the legacy `src/rendereer/docsBrowserView.js`. When clicking edit in a viewer, the user can go to a Markdown editor where they can change the text in a WYSIWYG style and save it.",
+      "plan": "",
+      "context": [
+        "src/rendereer/docsBrowserView.js"
+      ],
       "acceptance": []
     }
   ]

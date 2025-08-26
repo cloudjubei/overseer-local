@@ -1,7 +1,7 @@
 {
   "id": 7,
   "status": "-",
-  "title": "UI design and patterns matching best in class - follow `docs/DESIGN_PROPOSAL.md`",
-  "description": "We want to follow Linear.app and Monday.com as they are one of the best task management apps in the world. We want to mimic Monday's colorful style and palette, but we also want to improve on it. We want to match and improve on Linear's UX and controls.",
-  "features": []
+  "title": "Notifications center UI and preferences (selecting themes)",
+  "description": "Add a notifications panel listing recent events. Provide settings to enable/disable OS notifications and categories.",
+  "features":[]
 }

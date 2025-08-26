@@ -6,7 +6,6 @@ This document describes how files and directories are organised in this reposito
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - docs/: Project documentation and specifications.
-  - DESIGN_PROPOSALS.md: UI design proposals and references for the task application
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -34,7 +33,7 @@ Notes:
 - Each feature must have deterministic tests; do not mark features complete until tests pass.
 
 ## Example Tree (illustrative)
-The following tree is graphical and illustrative of a typical repository layout (React-only renderer):
+The following tree is graphical and illustrative of a typical repository layout:
 
 ```
 repo_root/
@@ -47,10 +46,10 @@ repo_root/
 ├─ src/
 │   ├─ index.css
 │   ├─ index.html
-│   ├─ index.js                # Electron main process
-│   ├─ feature_create.html     # Popup window for creating a new feature (React mounted)
-│   ├─ task_create.html        # Popup window for creating a new task (React mounted)
+│   ├─ index.js
 │   ├─ preload.js
+│   ├─ docs/
+│   │  └─ indexer.js
 │   ├─ renderer/
 │   │   ├─ App.tsx                 # React app rendering tasks list and details
 │   │   ├─ TaskCreateView.tsx      # React popup for creating a task
@@ -69,7 +68,6 @@ repo_root/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
 │  ├─ COMPONENTS_AND_THEMING.md
-│  ├─ DESIGN_PROPOSALS.md
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py           # Python source-of-truth schema
@@ -82,8 +80,6 @@ repo_root/
 ├─ vite.preload.config.js         # Vite config for preload scripts
 └─ vite.renderer.config.js        # Vite config for renderer (React)
 ```
-
-Important: The renderer is fully React-based. Legacy DOM-driven views (e.g., tasksListView.js, taskDetailsView.js, taskCreateView.js, featureCreateView.js, and dom.js/stringListEditor.js) have been retired and are no longer referenced anywhere. All view logic lives in React components under src/renderer/.
 
 ## Logical Tasks Indexer
 - Location: src/tasks/indexer.js
