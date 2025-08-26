@@ -4,17 +4,29 @@ import Modal from '../components/ui/modal';
 
 const ChatView = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [input, setInput] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [config, setConfig] = useState({ apiBaseUrl: '', apiKey: '', model: '' });
   const [isConfigured, setIsConfigured] = useState(false);
   const managerRef = useRef<LLMConfigManager | null>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     managerRef.current = new LLMConfigManager();
     const loadedConfig = managerRef.current.getConfig();
     setConfig(loadedConfig);
     setIsConfigured(managerRef.current.isConfigured());
+
+    const loadMessages = async () => {
+      const saved = await window.chat.load();
+      setMessages(saved || []);
+    };
+    loadMessages();
   }, []);
+
+  useEffect(() => {
+    messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
+  }, [messages]);
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +37,27 @@ const ChatView = () => {
 
   const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConfig({ ...config, [e.target.name]: e.target.value });
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || !isConfigured) return;
+
+    const newMessages = [...messages, { role: 'user', content: input }];
+    setMessages(newMessages);
+    setInput('');
+
+    const loadingMsg = { role: 'assistant', content: 'Thinking...' };
+    setMessages([...newMessages, loadingMsg]);
+
+    try {
+      const response = await window.chat.getCompletion(newMessages, config);
+      const assistantMsg = { role: 'assistant', content: response };
+      setMessages([...newMessages, assistantMsg]);
+      await window.chat.save([...newMessages, assistantMsg]);
+    } catch (error) {
+      const errorMsg = { role: 'assistant', content: `Error: ${error.message}` };
+      setMessages([...newMessages, errorMsg]);
+    }
   };
 
   return (
@@ -43,7 +76,10 @@ const ChatView = () => {
           Warning: LLM not configured. Please set your API key in settings.
         </div>
       )}
-      <div className="flex-1 overflow-y-auto mb-4 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 rounded-md" id="message-list">
+      <div
+        ref={messageListRef}
+        className="flex-1 overflow-y-auto mb-4 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 rounded-md"
+      >
         {messages.length === 0 ? (
           <div className="text-center text-neutral-500 dark:text-neutral-400 mt-10">
             Start chatting about the project
@@ -60,11 +96,14 @@ const ChatView = () => {
       </div>
       <div className="flex">
         <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           className="flex-1 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 rounded-md text-neutral-900 dark:text-neutral-100"
           placeholder="Type your message..."
           rows={3}
         ></textarea>
         <button
+          onClick={handleSend}
           className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
           Send
