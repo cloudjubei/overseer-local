@@ -1,9 +1,9 @@
-const fs = require('fs').promises;
-const path = require('path');
-const chokidar = require('chokidar');
-const { validateTask } = require('./validator');
+import fs from 'fs/promises'
+import path from 'path';
+import chokidar from 'chokidar';
+import { validateTask } from './validator';
 
-class TasksIndexer {
+export class TasksIndexer {
     constructor(projectRoot, window) {
         this.projectRoot = projectRoot;
         this.tasksDir = path.join(projectRoot, 'tasks');
@@ -234,5 +234,3 @@ class TasksIndexer {
         return { ok: true };
     }
 }
-
-module.exports = { TasksIndexer };

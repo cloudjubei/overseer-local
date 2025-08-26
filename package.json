@@ -3,7 +3,7 @@
   "productName": "electron",
   "version": "1.0.0",
   "description": "My Electron application description",
-  "main": "src/index.js",
+  "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -57,7 +57,7 @@
     "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
     "typescript": "^5.5.4",
-    "vite": "^5.4.1"
+    "vite": "^5.4.19"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs}": [

@@ -1,6 +1,6 @@
-const STATUSES = new Set(['+', '~', '-', '?', '=']);
+export const STATUSES = new Set(['+', '~', '-', '?', '=']);
 
-function validateTask(task) {
+export function validateTask(task) {
   const errors = [];
   if (!task || typeof task !== 'object') return { valid: false, errors: ['Task must be an object'] };
   if (typeof task.id !== 'number') errors.push('Task must have a numeric id');
@@ -16,5 +16,3 @@ function validateTask(task) {
   }
   return { valid: errors.length === 0, errors };
 }
-
-module.exports = { validateTask, STATUSES };

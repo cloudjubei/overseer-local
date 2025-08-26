@@ -1,32 +1,43 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const { TasksIndexer } = require('./tasks/indexer');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'node:path';
+import started from 'electron-squirrel-startup';
+import { TasksIndexer }  from './tasks/indexer';
 
+
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (started) {
+  app.quit();
+}
 let mainWindow;
 let indexer;
 
-function createWindow() {
+
+const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
+      // contextIsolation: true,
+      // nodeIntegration: false,
     },
   });
 
-  if (process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  // and load the index.html of the app.
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/main_window/index.html'));
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
-}
+
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools();
+};
 
 app.whenReady().then(() => {
   createWindow();
 
-  const projectRoot = path.join(app.getAppPath(), '..');
+  const projectRoot = app.getAppPath();
   indexer = new TasksIndexer(projectRoot, mainWindow);
   indexer.init();
 
@@ -119,7 +130,7 @@ const createModalWindow = (options) => {
   if (options.devServerUrl) {
     window.loadURL(options.devServerUrl);
   } else {
-    window.loadFile(options.filePath);
+    window.loadFile(path.join(__dirname, `../renderer/${options.viteName}/index.html`));
   }
 
   return window;
@@ -132,8 +143,11 @@ ipcMain.handle('feature-create:open', (event, taskId) => {
       height: 800,
       title: 'Create Feature',
     },
-    devServerUrl: process.env.FEATURE_CREATE_VITE_DEV_SERVER_URL,
-    filePath: path.join(__dirname, '../renderer/feature_create/index.html'),
+    // Use the globals injected by Vite
+    // eslint-disable-next-line no-undef
+    devServerUrl: FEATURE_CREATE_VITE_DEV_SERVER_URL,
+    // eslint-disable-next-line no-undef
+    viteName: FEATURE_CREATE_VITE_NAME,
   });
 
   featureCreateWindow.webContents.on('did-finish-load', () => {
@@ -148,7 +162,7 @@ ipcMain.handle('task-create:open', () => {
       height: 400,
       title: 'Create Task',
     },
-    devServerUrl: process.env.TASK_CREATE_VITE_DEV_SERVER_URL,
-    filePath: path.join(__dirname, '../renderer/task_create/index.html'),
+    devServerUrl: TASK_CREATE_VITE_DEV_SERVER_URL,
+    viteName: TASK_CREATE_VITE_NAME,
   });
 });
