@@ -1,0 +1,2 @@
+/* Components: Tooltip */
+.ui-tooltip { position: absolute; z-index: var(--z-tooltip, 1000); background: var(--surface-overlay); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-2); box-shadow: var(--shadow-2); padding: 6px 8px; }

@@ -7,6 +7,26 @@ This document describes how files and directories are organised in this reposito
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - src/styles/: Shared CSS assets and design tokens.
   - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"]. Includes typography, spacing, radii, elevation, motion, and z-index tokens.
+  - src/styles/foundations/: Foundational CSS not specific to components (metrics, global control sizes).
+    - foundations/metrics.css: Root control sizes, paddings, focus ring width, and sidebar metrics.
+  - src/styles/primitives/: Low-level reusable effects/utilities.
+    - primitives/effects.css: Focus ring utility, pressable, elevation helpers, hover-raise, reveal-on-hover, DnD helpers, view transition keyframes.
+  - src/styles/components/: Reusable component styles.
+    - components/buttons.css: .btn variants and states.
+    - components/forms.css: .ui-input, .ui-textarea, .ui-select and generic form layouts.
+    - components/feedback.css: Spinner and Skeleton styles.
+    - components/badges.css: Status badges and priority tags.
+    - components/tooltip.css: Tooltip.
+    - components/overlays.css: Command menu, help overlay.
+    - components/cards.css: Task card.
+  - src/styles/layout/: Layout building blocks like sidebar/nav.
+    - layout/nav.css: Sidebar and navigation styles.
+  - src/styles/screens/: Screen-scoped styles that compose primitives/components.
+    - screens/tasks.css: Tasks list and toolbar styles + DnD transitions.
+    - screens/task-details.css: Task details panel and features list.
+    - screens/board.css: Board (kanban) columns and interactions.
+    - screens/docs.css: Documents view.
+    - screens/settings.css: Settings view.
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
@@ -71,86 +91,36 @@ repo_root/
 │  │  └─ README.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
-│  ├─ chat/
-│  │  ├─ providers/
-│  │  │  ├─ base.js
-│  │  │  ├─ openai.js
-│  │  │  ├─ litellm.js
-│  │  │  └─ lmstudio.js
-│  │  └─ manager.js          
-│  ├─ docs/
-│  │  └─ indexer.js        
-│  ├─ tasks/
-│  │  ├─ indexer.js                 
-│  │  └─ validator.js                
-│  ├─ types/
-│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
-│  │  └─ tasks.ts                      # Shared Task/Feature/Status types
-│  ├─ renderer/
-│  │  ├─ navigation/
-│  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
-│  │  │  └─ ModalHost.tsx              # Renders modals globally above screens via portal
-│  │  ├─ components/
-│  │  │  ├─ ui/
-│  │  │  │  ├─ Alert.tsx
-│  │  │  │  ├─ Button.tsx
-│  │  │  │  ├─ Input.tsx
-│  │  │  │  ├─ Modal.tsx
-│  │  │  │  ├─ Select.tsx
-│  │  │  │  ├─ Toast.tsx
-│  │  │  │  ├─ Tooltip.tsx
-│  │  │  │  ├─ Spinner.tsx
-│  │  │  │  ├─ Skeleton.tsx
-│  │  │  │  ├─ CommandMenu.tsx
-│  │  │  │  └─ ShortcutsHelp.tsx
-│  │  │  ├─ tasks/
-│  │  │  │  ├─ StatusBadge.tsx
-│  │  │  │  ├─ PriorityTag.tsx
-│  │  │  │  └─ TaskCard.tsx
-│  │  │  ├─ FeatureForm.tsx        <-- NEW: feature create/edit form (Monday/Linear-guided)
-│  │  │  └─ TaskForm.tsx           <-- NEW: task create/edit form (Monday/Linear-guided)
-│  │  ├─ services/
-│  │  │  ├─ chatService.ts
-│  │  │  ├─ docsService.ts
-│  │  │  └─ tasksService.ts
-│  │  ├─ hooks/
-│  │  │  ├─ useChats.ts
-│  │  │  ├─ useDocsIndex.ts
-│  │  │  ├─ useDocsAutocomplete.ts
-│  │  │  ├─ useLLMConfig.ts
-│  │  │  ├─ useNextTaskId.ts
-│  │  │  ├─ useShortcuts.tsx
-│  │  │  └─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
-│  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx
-│  │  │  ├─ TasksView.tsx
-│  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
-│  │  │  └─ SettingsView.tsx           # Settings screen with theme and LLM configurations
-│  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskEditView.tsx
-│  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx
-│  │  │  ├─ TaskDetailsView.tsx
-│  │  │  └─ TasksListView.tsx
-│  │  ├─ App.tsx                   (initializes theme on app boot)
-│  │  └─ types.ts
 │  ├─ styles/
-│  │  └─ design-tokens.css
-│  ├─ index.css   # Contains shared component styles (including .ui-select and task details layout)
-│  ├─ main.js
-│  └─ preload.js
-├─ .env
-├─ forge.config.js
-├─ index.html
-├─ package.json
-├─ postcss.config.js
-├─ README.md
-├─ tailwind.config.js
-├─ tsconfig.json
-├─ vite.main.config.mjs
-├─ vite.preload.config.mjs
-├─ vite.renderer.config.mjs
-└─ …
+│  │  ├─ design-tokens.css
+│  │  ├─ foundations/
+│  │  │  └─ metrics.css
+│  │  ├─ primitives/
+│  │  │  └─ effects.css
+│  │  ├─ components/
+│  │  │  ├─ badges.css
+│  │  │  ├─ buttons.css
+│  │  │  ├─ cards.css
+│  │  │  ├─ feedback.css
+│  │  │  ├─ forms.css
+│  │  │  ├─ overlays.css
+│  │  │  └─ tooltip.css
+│  │  ├─ layout/
+│  │  │  └─ nav.css
+│  │  └─ screens/
+│  │     ├─ board.css
+│  │     ├─ docs.css
+│  │     ├─ settings.css
+│  │     ├─ task-details.css
+│  │     └─ tasks.css
+│  ├─ index.css   # Aggregates tokens + Tailwind layers + modular styles; minimal base rules
+│  └─ …
 ```
+
+## Styling Approach Update
+- index.css is now a thin aggregator that imports:
+  - design-tokens.css first
+  - Tailwind layers (base/components/utilities)
+  - foundations, primitives, components, layout, then screen-level CSS
+- Component and screen files should use the reusable primitives/utilities (e.g., .u-focus-ring, .u-hover-raise, .u-reveal-on-hover) and semantic tokens only.
+- New component styles should live under src/styles/components; view-specific styles should live under src/styles/screens.

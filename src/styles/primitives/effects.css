@@ -1,0 +1,44 @@
+/* Primitives: reusable effects and utilities that components can compose */
+
+/* Focus ring utility: apply on elements that should render a visible ring */
+.u-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
+}
+
+/* Pressable micro-interaction (subtle press) */
+.u-pressable {
+  transition: transform var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+.u-pressable:active { transform: translateY(0.5px); }
+
+/* Elevation helpers */
+.u-elevate-0 { box-shadow: var(--shadow-0); }
+.u-elevate-1 { box-shadow: var(--shadow-1); }
+.u-elevate-2 { box-shadow: var(--shadow-2); }
+.u-elevate-3 { box-shadow: var(--shadow-3); }
+.u-elevate-4 { box-shadow: var(--shadow-4); }
+
+/* Hover raise pattern */
+.u-hover-raise {
+  transition: box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease),
+              transform var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+.u-hover-raise:hover { box-shadow: var(--shadow-2); transform: translateY(-1px); }
+
+/* Subtle hover background on surfaces */
+.u-bg-hover:hover { background: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
+
+/* Reveal children with class .reveal-on-hover when parent is hovered/focused */
+.u-reveal-on-hover .reveal-on-hover { opacity: 0; pointer-events: none; transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease); }
+.u-reveal-on-hover:hover .reveal-on-hover,
+.u-reveal-on-hover:focus-within .reveal-on-hover { opacity: 1; pointer-events: auto; }
+
+/* Drag and drop helpers */
+.u-draggable { cursor: grab; }
+.u-dragging  { cursor: grabbing; opacity: 0.6; transform: scale(0.98); }
+.u-drop-target { background: color-mix(in srgb, var(--accent-primary) 8%, transparent); }
+
+/* Generic view enter transition */
+.view-transition { animation: viewFade var(--motion-normal, 180ms) var(--easing-decelerate, ease-out) 1; }
+@keyframes viewFade { from { opacity: 0.96; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }

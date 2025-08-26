@@ -285,7 +285,7 @@
     },
     {
       "id": "7.20",
-      "status": "-",
+      "status": "+",
       "title": "index.css has grown to be massive",
       "description": "The file should really contain reusable effects that can be applied to many different components - then those components will have correct classnames set to use them. We need to shrink index.css and make reusable styles - this way everything is cleaner and in general the views and codebase will be more standardized.",
       "plan": "",
