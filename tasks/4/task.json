@@ -1,6 +1,6 @@
 {
   "id": 4,
-  "status": "-",
+  "status": "+",
   "title": "Agentic chat interface",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
@@ -179,7 +179,7 @@
     },
     {
       "id": "4.18",
-      "status": "-",
+      "status": "+",
       "title": "Cannot send a message",
       "description": "Currently if I send a message to a configured LLM - the whole app crashes horribly",
       "plan": "",

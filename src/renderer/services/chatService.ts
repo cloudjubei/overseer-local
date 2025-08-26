@@ -1,7 +1,7 @@
 import { ChatMessage, LLMConfig } from '../types';
 
 export type ChatService = {
-  getCompletion: (messages: ChatMessage[], config: LLMConfig) => Promise<string>;
+  getCompletion: (messages: ChatMessage[], config: LLMConfig) => Promise<ChatMessage>;
   list: () => Promise<string[]>;
   create: () => Promise<string>;
   load: (chatId: string) => Promise<ChatMessage[]>;
