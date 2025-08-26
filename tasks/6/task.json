@@ -1,6 +1,6 @@
 {
   "id": 6,
-  "status": "-",
+  "status": "?",
   "title": "Cross-platform packaging configuration with a CI pipeline for build and release",
   "description": "Configure electron-builder to produce distributables for macOS (dmg), Windows (nsis), and Linux (AppImage). Include app icons and code signing placeholders",
   "features": [
@@ -72,7 +72,7 @@
     },
     {
       "id": "6.8",
-      "status": "/",
+      "status": "?",
       "title": "Set up CI pipeline for building distributables",
       "description": "Create a GitHub Actions workflow file (.github/workflows/build.yml) that runs on push to main, installs dependencies, builds the app for all platforms using electron-builder, and archives the artifacts.",
       "plan": "",
@@ -81,7 +81,7 @@
     },
     {
       "id": "6.9",
-      "status": "/",
+      "status": "?",
       "title": "Configure CI for release on tags",
       "description": "Extend the CI workflow to run on tags (e.g., v*), build the distributables, and automatically create a GitHub release with the built files attached.",
       "plan": "",
