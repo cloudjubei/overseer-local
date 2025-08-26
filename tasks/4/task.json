@@ -15,7 +15,7 @@
     },
     {
       "id": "4.2",
-      "status": "-",
+      "status": "+",
       "title": "Manage chat state and render messages",
       "description": "In ChatView, use React state (or equivalent) for a messages array of objects {role: 'user'|'assistant', content: string}. Render the messages in the message div, with user messages on the right, assistant on the left, styled as chat bubbles. Handle empty state with a message like 'Start chatting about the project'.",
       "plan": "",
