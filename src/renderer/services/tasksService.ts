@@ -1,16 +1,21 @@
-export type TasksIndexSnapshot = any
+import type { Task, Feature } from 'src/types/tasks'
+import type { TasksIndexSnapshot, ReorderFeaturesPayload, ReorderTasksPayload, ServiceResult } from '../types/external'
+
+export type { TasksIndexSnapshot } from '../types/external'
+
+export type TaskCreateInput = Pick<Task, 'id' | 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection'>>
 
 export type TasksService = {
   getSnapshot: () => Promise<TasksIndexSnapshot>
   onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
-  addTask: (task: any) => Promise<any>
-  updateTask: (taskId: number, data: any) => Promise<any>
-  deleteTask: (taskId: number) => Promise<any>
-  addFeature: (taskId: number, feature: any) => Promise<any>
-  updateFeature: (taskId: number, featureId: string, data: any) => Promise<any>
-  deleteFeature: (taskId: number, featureId: string) => Promise<any>
-  reorderFeatures: (taskId: number, payload: any) => Promise<any>
-  reorderTasks: (payload: any) => Promise<any>
+  addTask: (task: TaskCreateInput | Partial<Task>) => Promise<ServiceResult>
+  updateTask: (taskId: number, data: Partial<Task>) => Promise<ServiceResult>
+  deleteTask: (taskId: number) => Promise<ServiceResult>
+  addFeature: (taskId: number, feature: Omit<Feature, 'id'> | Partial<Feature>) => Promise<ServiceResult>
+  updateFeature: (taskId: number, featureId: string, data: Partial<Feature>) => Promise<ServiceResult>
+  deleteFeature: (taskId: number, featureId: string) => Promise<ServiceResult>
+  reorderFeatures: (taskId: number, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
+  reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
 }
 
 export const tasksService: TasksService = {

@@ -67,7 +67,7 @@
     },
     {
       "id": "5.7",
-      "status": "-",
+      "status": "+",
       "title": "Everything should be strongly typed as we are using TypeScript",
       "description": "For instance, `src/renderer/tasks/TasksListView` has its own Task interface. This is unacceptable. `src/types/tasks.ts` exists and it should be used whenever possible",
       "plan": "",
