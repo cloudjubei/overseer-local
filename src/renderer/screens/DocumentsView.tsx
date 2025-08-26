@@ -153,6 +153,23 @@ export default function DocumentsView() {
   const [selected, setSelected] = useState<string | null>(null);
   const [openSet, setOpenSet] = useState<Set<string>>(() => new Set(['<root>']));
 
+  // Collapsible sidebar state (persisted)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      const v = localStorage.getItem('docs.sidebarCollapsed');
+      return v === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem('docs.sidebarCollapsed', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  }, []);
+
   const searchRef = useRef<HTMLInputElement | null>(null);
   useKeyShortcut('/', () => searchRef.current?.focus());
 
@@ -254,9 +271,14 @@ export default function DocumentsView() {
     <div className="flex h-full min-h-0 w-full flex-col">
       <header className="shrink-0 border-b border-border-subtle bg-surface-base">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <h1 className="m-0 truncate text-lg font-semibold text-text-primary">Documents</h1>
-            <div className="text-xs text-text-muted">{filteredFilesCount || totalFiles} files{query ? ' • filtered' : ''}</div>
+          <div className="min-w-0 flex items-center gap-2">
+            <Button variant="secondary" size="md" onClick={toggleSidebar} aria-label={sidebarCollapsed ? 'Show documents list' : 'Hide documents list'}>
+              {sidebarCollapsed ? '📂' : '🗂️'}
+            </Button>
+            <div className="min-w-0">
+              <h1 className="m-0 truncate text-lg font-semibold text-text-primary">Documents</h1>
+              <div className="text-xs text-text-muted">{filteredFilesCount || totalFiles} files{query ? ' • filtered' : ''}</div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-72">
@@ -288,7 +310,7 @@ export default function DocumentsView() {
               </Tooltip>
               <Tooltip content="Refresh index">
                 <Button variant="secondary" size="md" onClick={() => window.location.reload()} aria-label="Refresh documents">
-                  ↻
+                  ⟳
                 </Button>
               </Tooltip>
             </div>
@@ -298,33 +320,31 @@ export default function DocumentsView() {
 
       <main className="flex-1 min-h-0 min-w-0">
         <div className="flex h-full min-h-0 w-full">
-          <aside className="w-80 shrink-0 border-r border-border-subtle bg-surface-base/60 overflow-y-auto" aria-label="Documents folders">
-            <div className="px-2 py-2">
-              <div className="flex items-center justify-between px-2 py-1">
-                <div className="text-xs font-medium uppercase tracking-wide text-text-muted">All Documents</div>
-                <div className="text-[11px] text-text-muted">{filteredFilesCount}</div>
-              </div>
-              {!root ? (
-                <div className="p-3 text-sm text-text-muted">
-                  <Skeleton className="h-4 w-40" />
-                  <div className="mt-2">
-                    <SkeletonText lines={3} />
+          {!sidebarCollapsed && (
+            <aside className="w-80 shrink-0 border-r border-border-subtle bg-surface-base/60 overflow-y-auto" aria-label="Documents folders">
+              <div className="px-2 py-2">
+                {!root ? (
+                  <div className="p-3 text-sm text-text-muted">
+                    <Skeleton className="h-4 w-40" />
+                    <div className="mt-2">
+                      <SkeletonText lines={3} />
+                    </div>
                   </div>
-                </div>
-              ) : filteredTree ? (
-                <DirTree
-                  node={filteredTree}
-                  level={0}
-                  openSet={openSet}
-                  toggleOpen={handleToggleOpen}
-                  selected={selected}
-                  onSelect={(p) => setSelected(p)}
-                />
-              ) : (
-                <EmptyState query={query} />
-              )}
-            </div>
-          </aside>
+                ) : filteredTree ? (
+                  <DirTree
+                    node={filteredTree}
+                    level={0}
+                    openSet={openSet}
+                    toggleOpen={handleToggleOpen}
+                    selected={selected}
+                    onSelect={(p) => setSelected(p)}
+                  />
+                ) : (
+                  <EmptyState query={query} />
+                )}
+              </div>
+            </aside>
+          )}
           <section className="flex-1 min-w-0 min-h-0 overflow-hidden">
             {!selected ? (
               <div className="h-full w-full grid place-items-center">
@@ -393,7 +413,7 @@ function DirTree({ node, level, openSet, toggleOpen, selected, onSelect }: {
           title={isRoot ? 'docs' : node.name}
         >
           <span className="text-sm" aria-hidden>{isRoot ? '📚' : isOpen ? '📂' : '📁'}</span>
-          <span className="truncate font-medium">{isRoot ? 'docs' : node.name}</span>
+          <span className="truncate font-medium text-text-primary">{isRoot ? 'docs' : node.name}</span>
           <span className="ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]">{node.files.length}</span>
         </button>
       </div>
@@ -415,15 +435,17 @@ function DirTree({ node, level, openSet, toggleOpen, selected, onSelect }: {
             return (
               <button
                 key={`file:${f.relPath}`}
-                className={`group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none ${isSel ? 'bg-[color:var(--surface-raised)] border border-[color:var(--border-focus)] shadow-[var(--shadow-1)]' : 'hover:bg-[color:var(--border-subtle)] focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'}`}
+                className={`group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none ${isSel ? 'bg-[color:var(--surface-raised)] border border-[color:var(--border-default)] shadow-[var(--shadow-1)]' : 'hover:bg-[color:var(--border-subtle)] focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'}`}
                 onClick={() => onSelect(f.relPath)}
                 style={{ paddingLeft: (level * 14) + 28 }}
                 title={f.relPath}
                 aria-current={isSel ? 'true' : undefined}
               >
-                <span className="text-xs opacity-80" aria-hidden>📄</span>
-                <span className="truncate text-text-primary">{f.title || f.name}</span>
-                <span className="ml-auto text-[10px] text-text-muted pr-1">{relTime(f.mtimeMs)}</span>
+                <span className="text-xs opacity-80 mt-[2px]" aria-hidden>📄</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-text-primary">{f.title || f.name}</div>
+                  <div className="text-[10px] text-text-muted">{f.mtimeMs ? `Updated ${relTime(f.mtimeMs)}` : ''}</div>
+                </div>
               </button>
             );
           })}

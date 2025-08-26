@@ -1,0 +1,10 @@
+/* Foundations: control sizes, spacing, and layout metrics */
+:root {
+  --control-h-sm: 30px;
+  --control-h-md: 34px;
+  --control-h-lg: 40px;
+  --control-pad-x: 12px;
+  --focus-ring-width: 2px;
+  --sidebar-w: 260px;
+  --sidebar-w-collapsed: 64px;
+}

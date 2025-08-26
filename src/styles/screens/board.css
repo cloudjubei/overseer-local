@@ -1,0 +1,27 @@
+/* Screens: Board (Kanban) */
+.board { display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: var(--space-4, 12px); padding: var(--space-4, 12px); align-items: start; }
+.board-col { background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: var(--radius-3); box-shadow: var(--shadow-0); display: flex; flex-direction: column; min-height: 220px; transition: box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease), transform var(--motion-fast, 120ms) var(--easing-standard, ease), border-color var(--motion-fast, 120ms) var(--easing-standard, ease); }
+.board-col__header { display:flex; align-items:center; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); font-weight: var(--fw-semibold, 600); font-size: var(--fs-sm, 14px); }
+.board-col__title { color: var(--text-primary); }
+.board-col__count { color: var(--text-secondary); font-size: var(--fs-xs, 12px); }
+.board-col__body { padding: 10px; display: flex; flex-direction: column; gap: 8px; position: relative; min-height: 160px; }
+
+/* Colorful headers by status (soft tints inspired by Monday) */
+.header-done { background: var(--status-done-soft-bg); color: var(--status-done-soft-fg); border-bottom-color: var(--status-done-soft-border); }
+.header-inprogress { background: var(--status-working-soft-bg); color: var(--status-working-soft-fg); border-bottom-color: var(--status-working-soft-border); }
+.header-pending  { background: var(--status-queued-soft-bg); color: var(--status-queued-soft-fg); border-bottom-color: var(--status-queued-soft-border); }
+.header-blocked { background: color-mix(in srgb, var(--status-blocked-bg) 14%, transparent); color: var(--status-blocked-fg); border-bottom-color: color-mix(in srgb, var(--status-blocked-bg) 55%, transparent); }
+.header-deferred { background: var(--status-on_hold-soft-bg); color: var(--status-on_hold-soft-fg); border-bottom-color: var(--status-on_hold-soft-border); }
+
+/* Drag-over animations */
+.board-col.drag-over { border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 35%, transparent); transform: translateY(-2px); }
+.board-col.drag-over .board-col__header { filter: saturate(1.05) brightness(1.02); }
+.board-col.drag-over .board-col__body::after { content: "Drop here"; position: absolute; inset: 6px; border: 2px dashed var(--border-focus); border-radius: var(--radius-3); pointer-events: none; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs, 12px); background: color-mix(in srgb, var(--surface-raised) 86%, var(--focus-ring) 14%); animation: boardPulse var(--motion-normal, 180ms) var(--easing-decelerate, ease-out) 1; }
+@keyframes boardPulse { from { transform: scale(0.98); opacity: 0.8; } to { transform: scale(1); opacity: 1 } }
+
+/* Status-colored subtle side accents */
+.board-col--status-done { box-shadow: inset 3px 0 0 0 var(--status-done-soft-border); }
+.board-col--status-inprogress { box-shadow: inset 3px 0 0 0 var(--status-working-soft-border); }
+.board-col--status-pending { box-shadow: inset 3px 0 0 0 var(--status-queued-soft-border); }
+.board-col--status-blocked { box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--status-blocked-bg) 55%, transparent); }
+.board-col--status-deferred { box-shadow: inset 3px 0 0 0 var(--status-on_hold-soft-border); }

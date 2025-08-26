@@ -13,6 +13,32 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 }
 
+function IconBack({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  )
+}
+
+function IconEdit({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  )
+}
+
+function IconPlus({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  )
+}
+
 export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [task, setTask] = useState<Task | null>(null)
@@ -58,7 +84,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     return { featuresById: byId, dependentsMap: deps }
   }, [task])
 
-
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
   const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
@@ -101,7 +126,10 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
       <div className="task-details flex flex-col min-h-0 w-full">
         <header className="details-header shrink-0">
           <div className="details-header__bar">
-            <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>Back to Tasks</button>
+            <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>
+              <IconBack />
+              <span className="sr-only">Back to Tasks</span>
+            </button>
             <h1 className="details-title">Task {taskId}</h1>
           </div>
         </header>
@@ -120,11 +148,13 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     <div className="task-details flex flex-col min-h-0 w-full" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
         <div className="details-header__bar">
-          <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>Back</button>
+          <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }} aria-label="Back to Tasks">
+            <IconBack />
+          </button>
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
           <StatusBadge status={task.status} variant="bold" className="ml-2" />
           <div className="spacer" />
-          <button type="button" className="btn-secondary" onClick={handleEditTask}>Edit Task</button>
+          {/* Removed text Edit Task from header; moved to Overview section as icon button */}
         </div>
         <div className="details-header__meta">
           <span className="meta-item"><span className="meta-label">ID</span><span className="meta-value">{String(task.id)}</span></span>
@@ -135,7 +165,14 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
       <main className="details-content flex-1 min-h-0 overflow-auto">
         <section className="panel">
-          <h2 className="section-title">Overview</h2>
+          <div className="section-header">
+            <h2 className="section-title">Overview</h2>
+            <div className="section-actions">
+              <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={handleEditTask}>
+                <IconEdit />
+              </button>
+            </div>
+          </div>
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
@@ -143,7 +180,9 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <div className="section-header">
             <h2 className="section-title">Features</h2>
             <div className="section-actions">
-              <button type="button" className="btn" onClick={handleAddFeature}>Add Feature</button>
+              <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
+                <IconPlus />
+              </button>
             </div>
           </div>
 
@@ -205,7 +244,11 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         )}
                       </div>
                       <div className="col col-actions">
-                        <button type="button" className="btn-secondary" onClick={() => handleEditFeature(f.id)}>Edit</button>
+                        <div className="row-actions">
+                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={() => handleEditFeature(f.id)}>
+                            <IconEdit />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </li>

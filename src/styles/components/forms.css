@@ -1,0 +1,66 @@
+/* Components: Inputs, Textareas, Selects, and Form Layout */
+
+/* Unified Select */
+.ui-select { 
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+  appearance: none;
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  height: var(--control-h-md);
+  padding: 0 calc(var(--control-pad-x) + 18px) 0 var(--control-pad-x);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  line-height: 1.2;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2396A1AE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px 16px;
+}
+.ui-select:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
+.ui-select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.ui-select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Unified Input */
+.ui-input {
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  height: var(--control-h-md);
+  padding: 0 var(--control-pad-x);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  line-height: 1.2;
+  font: inherit;
+  transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+.ui-input:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
+.ui-input:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.ui-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Unified Textarea */
+.ui-textarea {
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  min-height: 84px;
+  padding: 8px var(--control-pad-x);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  line-height: 1.35;
+  font: inherit;
+  resize: vertical;
+  transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+.ui-textarea:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
+.ui-textarea:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.ui-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Generic form layouts */
+.task-form, .feature-form { display: grid; gap: 12px; }
+.task-form .form-row, .feature-form .form-group { display: grid; gap: 6px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border-subtle); margin-top: 4px; }
+.task-form label, .feature-form label { font-size: var(--fs-xs, 12px); color: var(--text-secondary); }
+.task-form input[type='number']::-webkit-inner-spin-button, .task-form input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.task-form input[type='number'] { -moz-appearance: textfield; }

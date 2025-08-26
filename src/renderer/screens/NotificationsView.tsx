@@ -21,7 +21,7 @@ function getIconForType(type: Notification['type']): string {
   }
 }
 
-export function NotificationsView() {
+export default function NotificationsView() {
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
 
   return (
@@ -30,7 +30,7 @@ export function NotificationsView() {
         <h1 className="text-2xl font-bold">Notifications ({unreadCount} unread)</h1>
         <div className="space-x-2">
           <Button onClick={markAllAsRead} variant="secondary">Mark all as read</Button>
-          <Button onClick={clearAll} variant="destructive">Clear all</Button>
+          <Button onClick={clearAll} variant="danger">Clear all</Button>
         </div>
       </div>
       <div className="overflow-auto flex-1">
