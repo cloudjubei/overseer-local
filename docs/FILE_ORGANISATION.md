@@ -75,6 +75,8 @@ repo_root/
 │  │  │  ├─ TaskDetailsView.tsx         
 │  │  │  ├─ TaskEditView.tsx        
 │  │  │  └─ TasksListView.tsx  
+│  │  ├─ utils/
+│  │  │  └─ LLMConfigManager.ts        # Manager for LLM configuration and local storage
 │  │  ├─ App.tsx                 # Main Entry for the React app 
 │  │  └─ types.ts                # Renderer-local types (View)
 │  ├─ tasks/
