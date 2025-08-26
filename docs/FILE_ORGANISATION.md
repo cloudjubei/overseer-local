@@ -7,6 +7,7 @@ This document describes how files and directories are organised in this reposito
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
+  - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -72,11 +73,15 @@ Logic/UI split: services and hooks for renderer logic
 - Added: src/renderer/hooks/useLLMConfig.ts — centralizes LLM configuration loading/saving via LLMConfigManager and exposes isConfigured flag.
 - Updated: src/renderer/types.ts — now defines shared ChatMessage and LLMConfig types alongside NavigationView.
 
+Documentation:
+- Added: docs/STANDARDS.md — UI standards for creating and styling views, modals, and using hooks/services/navigation consistently.
+
 Example Tree (illustrative):
 ```
 repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
+│  ├─ STANDARDS.md
 │  └─ BUILD_SIGNING.md
 ├─ src/
 │  ├─ renderer/
