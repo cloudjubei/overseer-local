@@ -54,14 +54,16 @@ repo_root/
 │   │  └─ ipc/
 │   │     └─ docs.js               # IPC handlers for Docs index and file content (and saving)
 │   ├─ renderer/
-│   │   ├─ App.tsx                 # React app rendering tasks list and details
+│   │   ├─ App.tsx                 # React app with sidebar navigation (Home, Docs)
+│   │   ├─ types.ts                # Renderer-local types (e.g., View)
 │   │   ├─ components/
-│   │   │  └─ ui/                  # Common UI primitives (shadcn-like)
+│   │   │  ├─ Sidebar.tsx          # Sidebar component (Tailwind/shadcn-styled)
+│   │   │  └─ ui/
 │   │   │     ├─ toast.tsx
 │   │   │     ├─ modal.tsx
 │   │   │     ├─ alert.tsx
 │   │   │     └─ index.ts
-│   │   └─ docsBrowserView.js      # Legacy docs browser and WYSIWYG editor (ToastUI) wired to preload APIs
+│   │   └─ docsBrowserView.js      # Legacy docs browser and WYSIWYG editor (ToastUI)
 │   ├─ tasks/
 │   │  └─ indexer.js               # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
@@ -110,9 +112,6 @@ repo_root/
     - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
     - task-create:open (invoke) opens a modal popup window for creating a new task
 
-Performance
-- See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.
-
 ## Logical Docs Indexer
 - Location: src/docs/indexer.js
 - Purpose: Scans the project's docs/ directory (and all subdirectories) for Markdown (.md) files to build an in-memory documentation index; watches for file changes and refreshes the index.
@@ -153,3 +152,6 @@ Performance
 - The repository currently contains both a React renderer (src/renderer/App.tsx) and a legacy DOM-based renderer used by src/index.html.
 - The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing.
 - Future work may consolidate the renderer into a single React app; until then, keep both layers working without conflict.
+
+## Updates
+- 2025-08-26: Added a Tailwind-styled Sidebar component (src/renderer/components/Sidebar.tsx) and updated App.tsx to use it with persistent layout; removed dependency on App.css in favor of Tailwind/shadcn classes. Added src/renderer/types.ts to centralize renderer-local types (View).

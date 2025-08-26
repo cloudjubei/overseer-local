@@ -1,42 +1,54 @@
 import React from 'react';
-import { View } from '../types';
 
-interface SidebarProps {
-  currentView: View;
-  setCurrentView: (view: View) => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView }) => {
-  return (
-    <nav className="sidebar">
-      <ul>
-        <li>
-          <button 
-            onClick={() => setCurrentView('Home')}
-            className={currentView === 'Home' ? 'active' : ''}
-          >
-            Home
-          </button>
-        </li>
-        <li>
-          <button 
-            onClick={() => setCurrentView('Docs')}
-            className={currentView === 'Docs' ? 'active' : ''}
-          >
-            Docs
-          </button>
-        </li>
-        <li>
-          <button 
-            onClick={() => setCurrentView('Settings')}
-            className={currentView === 'Settings' ? 'active' : ''}
-          >
-            Settings
-          </button>
-        </li>
-      </ul>
-    </nav>
-  );
+export type SidebarProps = {
+  currentView: 'Home' | 'Docs' | 'Settings';
+  setCurrentView: (v: 'Home' | 'Docs' | 'Settings') => void;
 };
 
-export default Sidebar;
+const NavItem = ({ label, isActive, onClick, icon }: { label: string; isActive?: boolean; onClick: () => void; icon?: React.ReactNode }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
+      isActive
+        ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
+        : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800'
+    }`}
+  >
+    {icon ? <span className="text-base">{icon}</span> : null}
+    <span>{label}</span>
+  </button>
+);
+
+export default function Sidebar({ currentView, setCurrentView }: SidebarProps) {
+  return (
+    <aside className="sticky top-0 h-screen w-56 shrink-0 border-r border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="mb-3 px-2">
+        <div className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Project</div>
+        <div className="text-xs text-neutral-500 dark:text-neutral-400">Navigation</div>
+      </div>
+      <nav className="flex flex-col gap-1">
+        <NavItem
+          label="Home"
+          isActive={currentView === 'Home'}
+          onClick={() => setCurrentView('Home')}
+          icon={<span>🏠</span>}
+        />
+        <NavItem
+          label="Docs"
+          isActive={currentView === 'Docs'}
+          onClick={() => setCurrentView('Docs')}
+          icon={<span>📚</span>}
+        />
+      </nav>
+      <div className="mt-4 border-t border-neutral-200 pt-3 dark:border-neutral-800">
+        <NavItem
+          label="Settings"
+          isActive={currentView === 'Settings'}
+          onClick={() => setCurrentView('Settings')}
+          icon={<span>⚙️</span>}
+        />
+      </div>
+    </aside>
+  );
+}
