@@ -13,6 +13,8 @@ This document describes how files and directories are organised in this reposito
   - design/: Design system references and tokens.
     - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
     - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
+  - ux/: UX research and guidelines.
+    - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
   - tailwind.config.tokens.example.js: Example Tailwind extension mapping to CSS variable tokens.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
@@ -55,6 +57,8 @@ repo_root/
 │  ├─ design/
 │  │  ├─ DESIGN_TOKENS.md
 │  │  └─ MONDAY_PALETTE_REFERENCE.md
+│  ├─ ux/
+│  │  └─ LINEAR_UX_GUIDELINES.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
 │  ├─ chat/
@@ -126,9 +130,11 @@ Notes on recent changes
 - Added docs/design/ with DESIGN_TOKENS.md and MONDAY_PALETTE_REFERENCE.md to define and reference Monday-inspired color tokens.
 - Added src/styles/design-tokens.css with CSS variables for light/dark themes and status colors.
 - Added docs/tailwind.config.tokens.example.js showing how to map tokens into Tailwind.
+- Added docs/ux/LINEAR_UX_GUIDELINES.md documenting Linear-inspired UX patterns and how to apply them in our app.
 
 Rationale
 - Centralizing the color system in tokens enables consistent styling, theming, and accessibility improvements across the app without coupling components to raw hex values.
+- Documenting UX patterns provides a single source of truth for interaction design and ensures keyboard-first, accessible, and efficient workflows.
 
 Notes on recent changes (from prior):
 - Removed main-process modal window creation: src/main.js no longer defines createModalWindow nor the IPC handlers feature-create:open, task-create:open, task-edit:open, feature-edit:open. Modals are handled within the renderer via Navigator + ModalHost and are rendered into document.body using createPortal.
