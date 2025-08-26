@@ -183,7 +183,7 @@
     },
     {
       "id": "4.18",
-      "status": "-",
+      "status": "+",
       "title": "Errors",
       "description": "Chat view has these 2 import errors - we are clearly missing these reusable components. Make them in the shadcn + tailwind style like the rest",
       "plan": "",
