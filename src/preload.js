@@ -34,6 +34,7 @@ const DOCS_API = {
   },
   getFile: (relPath) => ipcRenderer.invoke('docs-file:get', { relPath }),
   saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
+  upload: (name, content) => ipcRenderer.invoke('docs:upload', { name, content }),
 };
 
 const CHAT_API = {

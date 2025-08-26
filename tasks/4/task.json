@@ -126,7 +126,7 @@
     },
     {
       "id": "4.12",
-      "status": "-",
+      "status": "+",
       "title": "Integrate upload into chat flow",
       "description": "After successful upload via IPC, append a user message to state: 'Uploaded document to @' + returnedPath. This allows mentioning it immediately and triggers LLM awareness via tools.",
       "plan": "",

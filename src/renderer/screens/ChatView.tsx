@@ -226,13 +226,19 @@ const ChatView = () => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const content = event.target?.result as string;
-      const relPath = file.name;
+      const name = file.name;
       try {
-        await window.docsIndex.saveFile(relPath, content);
-        setMessages(prev => [...prev, { role: 'system', content: `Uploaded document: @${relPath}` }]);
+        const returnedPath = await window.docsIndex.upload(name, content);
+        const uploadMsg = { role: 'user', content: `Uploaded document to @${returnedPath}` };
+        const newMessages = [...messages, uploadMsg];
+        setMessages(newMessages);
+        await window.chat.save(newMessages);
       } catch (err) {
         console.error('Upload failed:', err);
-        setMessages(prev => [...prev, { role: 'system', content: `Upload failed: ${err.message}` }]);
+        const errorMsg = { role: 'system', content: `Upload failed: ${err.message}` };
+        const newMessages = [...messages, errorMsg];
+        setMessages(newMessages);
+        await window.chat.save(newMessages);
       }
     };
     reader.readAsText(file);
