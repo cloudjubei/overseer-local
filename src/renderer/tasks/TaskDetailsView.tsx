@@ -125,7 +125,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <StatusBadge status={task.status} variant="bold" className="ml-2" />
           <div className="spacer" />
           <button type="button" className="btn-secondary" onClick={handleEditTask}>Edit Task</button>
-          <button type="button" className="btn" onClick={handleAddFeature}>Add Feature</button>
         </div>
         <div className="details-header__meta">
           <span className="meta-item"><span className="meta-label">ID</span><span className="meta-value">{String(task.id)}</span></span>

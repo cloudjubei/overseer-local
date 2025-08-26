@@ -1,6 +1,6 @@
 {
   "id": 7,
-  "status": "+",
+  "status": "-",
   "title": "UI design and patterns matching best in class - follow `docs/DESIGN_PROPOSAL.md`",
   "description": "We want to follow Linear.app and Monday.com as they are one of the best task management apps in the world. We want to mimic Monday's colorful style and palette, but we also want to improve on it. We want to match and improve on Linear's UX and controls.",
   "features": [
@@ -110,8 +110,7 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "doesn't open right now - app throws lots of errors and cannot see anything"
+      "acceptance": []
     },
     {
       "id": "7.11",
@@ -152,8 +151,8 @@
     },
     {
       "id": "7.13",
-      "status": "+",
-      "title": "Create feature and create task don't open",
+      "status": "-",
+      "title": "Create feature and create task modal adhere to latest designs",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
@@ -170,11 +169,11 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "None of the modals open - the app throws lots of errors"
+      "rejection": "currently these look ugly. Especially the button style for the close. Additionally, when opening a modal - it never opens over the current screen, but over Home - this shouldn't be the case."
     },
     {
       "id": "7.14",
-      "status": "+",
+      "status": "-",
       "title": "ChatView according to design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
@@ -189,11 +188,11 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "The screen looks worse than before - the history is all over the place and the chat area looks old - FIX!!!! "
+      "rejection": "Currently the whole screen is scrollable - but only the messages list should be. The chat history should be a pane, similar to the sidebar, that is collapsible."
     },
     {
       "id": "7.15",
-      "status": "+",
+      "status": "-",
       "title": "DocumentsView according to latest design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
@@ -208,16 +207,89 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "The screen looks worse than before - the documents list looks terrible, the view and renderer also look worse - FIX!!!! "
+      "rejection": "Currently the list of files and directories is a weird blue. The last update time is squished to the side - this should just be a very small label below the file name. The documents list pane should be collapsible and merged with the top bar to allow as much screen real estate for the document as possible."
     },
     {
       "id": "7.16",
-      "status": "+",
+      "status": "-",
       "title": "SettingsView according to latest design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/screens/SettingsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": [],
+      "rejection": "The different Settings categories - Visual, LLMs - should be in a pane right next to the sidebar that is collapsible. Then clicking one of the categories shows the view for just that section. The Add new config button (and the edit button) should show a popup similar to create task - the editable view is hidden at the bottom right now"
+    },
+    {
+      "id": "7.17",
+      "status": "-",
+      "title": "The button style in the tasks list needs rework",
+      "description": "Currently I can see a rectangular blue button - this should be made according to design. It should look slick. Remember - these are react components, using tailwind. The Clear button is almost invisible (it has not border). Rethink the whole button design and make it consistent and readable.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.18",
+      "status": "-",
+      "title": "Both in the Tasks list and the Features list the ID takes too much space",
+      "description": "It should be made to look like a little bubble - similar to how the Dependencies bubbles are shown",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.19",
+      "status": "-",
+      "title": "In the features list the Actions should only show on hover",
+      "description": "Make the Edit button an icon button not the words. The Edit Task button can show as the same button icon, but in the Task Overview Area. The Add Feature can also be changed into a nice '+' button. We should also have a standard Back button with an icon.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.20",
+      "status": "-",
+      "title": "index.css has grown to be massive",
+      "description": "The file should really contain reusable effects that can be applied to many different components - then those components will have correct classnames set to use them. We need to shrink index.css and make reusable styles - this way everything is cleaner and in general the views and codebase will be more standardized.",
+      "plan": "",
+      "context": [
+        "src/index.css",
         "docs/design/COMPONENTS.md",
         "docs/design/DESIGN_SYSTEM.md",
         "docs/design/DESIGN_TOKENS.md",
