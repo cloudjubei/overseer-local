@@ -172,7 +172,7 @@
     },
     {
       "id": "7.14",
-      "status": "+",
+      "status": "-",
       "title": "ChatView according to design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
@@ -187,7 +187,7 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "Currently the whole screen is scrollable - but only the messages list should be"
+      "rejection": "Currently the whole screen is scrollable - but only the messages list should be. The controls and especially the bottom message sending panel should stay put."
     },
     {
       "id": "7.15",
