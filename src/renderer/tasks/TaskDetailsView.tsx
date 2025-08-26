@@ -22,18 +22,16 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
 
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null
     const fetchIndex = async () => {
       try {
         const idx = await tasksService.getSnapshot()
         setIndex(idx)
-        unsubscribe = tasksService.onUpdate(setIndex)
+        tasksService.onUpdate(setIndex)
       } catch (e) {
-        console.error(e)
+        console.error('Failed to load tasks index.', e)
       }
     }
     fetchIndex()
-    return () => { if (unsubscribe) unsubscribe() }
   }, [])
 
   useEffect(() => {
@@ -42,6 +40,24 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
       setTask(t || null)
     }
   }, [taskId, index])
+
+  const { featuresById, dependentsMap } = useMemo(() => {
+    const features = task?.features || []
+    const byId: Record<string, Feature> = {}
+    const deps: Record<string, string[]> = {}
+    for (const f of features) {
+      byId[f.id] = f
+    }
+    for (const f of features) {
+      const depsOfF = Array.isArray(f.dependencies) ? f.dependencies : []
+      for (const dep of depsOfF) {
+        if (!deps[dep]) deps[dep] = []
+        deps[dep].push(f.id)
+      }
+    }
+    return { featuresById: byId, dependentsMap: deps }
+  }, [task])
+
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
@@ -98,23 +114,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
   const features = Array.isArray(task.features) ? task.features : []
 
-  // Build dependency maps for quick lookups
-  const { featuresById, dependentsMap } = useMemo(() => {
-    const byId: Record<string, Feature> = {}
-    const deps: Record<string, string[]> = {}
-    for (const f of features) {
-      byId[f.id] = f
-    }
-    for (const f of features) {
-      const depsOfF = Array.isArray(f.dependencies) ? f.dependencies : []
-      for (const dep of depsOfF) {
-        if (!deps[dep]) deps[dep] = []
-        deps[dep].push(f.id)
-      }
-    }
-    return { featuresById: byId, dependentsMap: deps }
-  }, [features])
-
   const dndEnabled = !saving
 
   return (
@@ -164,7 +163,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               </li>
               {features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
-                const dependents = dependentsMap[f.id] || []
+                const dependents : string[] = dependentsMap[f.id] || []
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
                     <div
