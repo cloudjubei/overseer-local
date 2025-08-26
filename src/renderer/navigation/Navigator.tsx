@@ -14,10 +14,12 @@ export type ModalRoute =
 export type NavigatorState = {
   currentView: NavigationView;
   tasksRoute: TasksRoute;
+};
+export type ModalState = {
   modal: ModalRoute | null;
 };
 
-export type NavigatorApi = NavigatorState & {
+export type NavigatorApi = NavigatorState & ModalState & {
   openModal: (m: ModalRoute) => void;
   closeModal: () => void;
   navigateView: (v: NavigationView) => void;
@@ -38,47 +40,14 @@ function viewPrefixToView(prefix: string): NavigationView {
   }
 }
 
-function viewToPrefix(v: NavigationView): string {
-  switch (v) {
-    case 'Documents':
-      return 'documents';
-    case 'Chat':
-      return 'chat';
-    case 'Settings':
-      return 'settings';
-    case 'Home':
-    default:
-      return 'home';
-  }
-}
-
-function parseModal(fragment: string): ModalRoute | null {
-  let m: RegExpExecArray | null;
-  if (fragment === 'task-create') return { type: 'task-create' };
-  if ((m = /^task-edit\/(\d+)$/.exec(fragment))) return { type: 'task-edit', taskId: parseInt(m[1], 10) };
-  if ((m = /^feature-create\/(\d+)$/.exec(fragment))) return { type: 'feature-create', taskId: parseInt(m[1], 10) };
-  if ((m = /^feature-edit\/(\d+)\/(.+)$/.exec(fragment))) return { type: 'feature-edit', taskId: parseInt(m[1], 10), featureId: m[2] };
-  return null;
-}
-
 function parseHash(hashRaw: string): NavigatorState {
   const raw = (hashRaw || '').replace(/^#/, '');
 
-  const [prefixRaw, ...restParts] = raw.split('/');
+  const [prefixRaw] = raw.split('/');
   const prefix = prefixRaw || 'home';
-  const rest = restParts.join('/');
 
   // Determine current view from the first segment
   const currentView: NavigationView = viewPrefixToView(prefix);
-
-  // Modal: prefer parsing from the secondary segment if present; otherwise allow legacy top-level
-  let modal: ModalRoute | null = null;
-  if (rest) {
-    modal = parseModal(rest);
-  }
-  if (!modal) {
-    modal = parseModal(raw);
-  }
 
   // Tasks route (details) recognized on legacy top-level form
   let tasksRoute: TasksRoute = { name: 'list' };
@@ -87,22 +56,19 @@ function parseHash(hashRaw: string): NavigatorState {
     tasksRoute = { name: 'details', taskId: parseInt(m[1], 10) };
   }
 
-  return { currentView, tasksRoute, modal };
+  return { currentView, tasksRoute };
 }
 
 const NavigatorContext = createContext<NavigatorApi | null>(null);
 
 export function NavigatorProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<NavigatorState>(() => parseHash(window.location.hash));
+  const [modal, setModal] = useState<ModalState>({ modal: null });
   const lastNonModalHashRef = useRef<string>('');
 
   useEffect(() => {
     const onHash = () => {
       const next = parseHash(window.location.hash);
-      // Track last non-modal hash to restore on close
-      if (!next.modal) {
-        lastNonModalHashRef.current = window.location.hash || '#home';
-      }
       setState(next);
     };
     window.addEventListener('hashchange', onHash);
@@ -112,34 +78,11 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openModal = useCallback((m: ModalRoute) => {
-    // Remember the current non-modal hash so we can return
-    const currentParsed = parseHash(window.location.hash);
-    if (!currentParsed.modal) {
-      lastNonModalHashRef.current = window.location.hash || '#home';
-    }
-    // Build a composite hash so the modal opens over the current view instead of resetting to Home
-    const basePrefix = viewToPrefix(currentParsed.currentView);
-    const base = `#${basePrefix}`;
-    switch (m.type) {
-      case 'task-create':
-        window.location.hash = `${base}/task-create`;
-        break;
-      case 'task-edit':
-        window.location.hash = `${base}/task-edit/${m.taskId}`;
-        break;
-      case 'feature-create':
-        window.location.hash = `${base}/feature-create/${m.taskId}`;
-        break;
-      case 'feature-edit':
-        window.location.hash = `${base}/feature-edit/${m.taskId}/${m.featureId}`;
-        break;
-    }
+    setModal({ modal: m })
   }, []);
 
   const closeModal = useCallback(() => {
-    const fallback = '#home';
-    const prev = lastNonModalHashRef.current || fallback;
-    window.location.hash = prev;
+    setModal({ modal: null })
   }, []);
 
   const navigateView = useCallback((v: NavigationView) => {
@@ -165,11 +108,12 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<NavigatorApi>(() => ({
     ...state,
+    ...modal,
     openModal,
     closeModal,
     navigateView,
     navigateTaskDetails,
-  }), [state, openModal, closeModal, navigateView, navigateTaskDetails]);
+  }), [state, modal, openModal, closeModal, navigateView, navigateTaskDetails]);
 
   return <NavigatorContext.Provider value={value}>{children}</NavigatorContext.Provider>;
 }

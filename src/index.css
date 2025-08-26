@@ -1,8 +1,5 @@
 /* Global base and utilities */
 @import './styles/design-tokens.css';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* Foundations and primitives */
 @import './styles/foundations/metrics.css';
@@ -26,6 +23,10 @@
 @import './styles/screens/board.css';
 @import './styles/screens/docs.css';
 @import './styles/screens/settings.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Root layout: make the app fill the window and avoid unexpected margins */
 html, body, #root { height: 100%; }
