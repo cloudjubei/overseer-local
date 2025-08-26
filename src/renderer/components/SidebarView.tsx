@@ -32,19 +32,19 @@ export default function SidebarView({ currentView, setCurrentView }: SidebarProp
         <NavItem
           label="Home"
           isActive={currentView === 'Home'}
-          onClick={() => setCurrentView('Home')}
+          onClick={() => { setCurrentView('Home'); window.location.hash = '#home'; }}
           icon={<span>🏠</span>}
         />
         <NavItem
           label="Docs"
           isActive={currentView === 'Documents'}
-          onClick={() => setCurrentView('Documents')}
+          onClick={() => { setCurrentView('Documents'); window.location.hash = '#documents'; }}
           icon={<span>📚</span>}
         />
         <NavItem
           label="Chat"
           isActive={currentView === 'Chat'}
-          onClick={() => setCurrentView('Chat')}
+          onClick={() => { setCurrentView('Chat'); window.location.hash = '#chat'; }}
           icon={<span>💬</span>}
         />
       </nav>
@@ -52,7 +52,7 @@ export default function SidebarView({ currentView, setCurrentView }: SidebarProp
         <NavItem
           label="Settings"
           isActive={currentView === 'Settings'}
-          onClick={() => setCurrentView('Settings')}
+          onClick={() => { setCurrentView('Settings'); window.location.hash = '#settings'; }}
           icon={<span>⚙️</span>}
         />
       </div>

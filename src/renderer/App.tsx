@@ -19,6 +19,34 @@ function App() {
     document.documentElement.className = `theme-${theme}`;
   }, []);
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1).toLowerCase();
+      switch (hash) {
+        case 'home':
+          setCurrentView('Home');
+          break;
+        case 'documents':
+          setCurrentView('Documents');
+          break;
+        case 'chat':
+          setCurrentView('Chat');
+          break;
+        case 'settings':
+          setCurrentView('Settings');
+          break;
+        default:
+          setCurrentView('Home');
+          break;
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange();
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
   const renderView = () => {
     switch (currentView) {
       case 'Home':

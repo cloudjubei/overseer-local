@@ -64,6 +64,7 @@ repo_root/
 │  │  │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories) with edit capabilities
 │  │  ├─ screens/
 │  │  │  ├─ DocumentsView.tsx         # Documents screen using DocumentsBrowserView
+│  │  │  ├─ ChatView.tsx             # Chat screen for project chat interface
 │  │  │  ├─ SettingsView.tsx          # Settings screen for configuring theme
 │  │  │  └─ TasksView.tsx             # Home view component (tasks)   
 │  │  ├─ tasks/

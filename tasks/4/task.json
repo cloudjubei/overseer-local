@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "4.1",
-      "status": "-",
+      "status": "+",
       "title": "Add Chat route and basic UI skeleton",
       "description": "Update the renderer (e.g., main app.js or index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
       "plan": "",
