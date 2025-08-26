@@ -151,19 +151,6 @@
       "acceptance": []
     },
     {
-      "id": "4.15",
-      "status": "-",
-      "title": "User can open settings and configure API keys",
-      "description": "currently clicking the settings button does nothing - it must be possible to configure the LLM settings. ChatView.tsx also needs strict typing as this is TypeScript.",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/ChatView.tsx",
-        "src/renderer/components/ui/modal.tsx",
-        "src/renderer/utils/LLMConfigManager.ts"
-      ],
-      "acceptance": []
-    },
-    {
       "id": "4.16",
       "status": "-",
       "title": "LLM connector abstraction and providers (LiteLLM, OpenAI-compatible)",
@@ -177,6 +164,15 @@
       "status": "-",
       "title": "Switching models",
       "description": "User can switch between different models that were configured. There's a dropdown with all the options that were previously configured and the user can choose which chat to use. If there was a switch in a conversation it is shown which LLM replied.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.18",
+      "status": "-",
+      "title": "Cannot send a message",
+      "description": "Currently if I send a message to a configured LLM - the whole app crashes horribly",
       "plan": "",
       "context": [],
       "acceptance": []

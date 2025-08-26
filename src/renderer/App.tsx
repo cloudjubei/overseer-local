@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import SidebarView from './screens/SidebarView';
 import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
-import { ToastProvider } from './components/ui/toast';
+import { ToastProvider } from './components/ui/Toast';
 import { NavigatorProvider } from './navigation/Navigator';
 
 function App() {
