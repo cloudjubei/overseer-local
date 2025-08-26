@@ -31,7 +31,9 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
         }
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [taskId])
 
   const onSubmit = async (values: TaskFormValues) => {
@@ -61,9 +63,7 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
             isCreate={false}
           />
         ) : (
-          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading task
-
-</div>
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading task…</div>
         )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
