@@ -3,6 +3,5 @@
   "status": "-",
   "title": "Manage child projects",
   "description": "List child projects under projects/ (the .json configs) and based on the data there, allow task and similar inspection to everything just like for this project.",
-  "features": [
-  ]
+  "features": []
 }

@@ -1,10 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal } from './components/ui';
-
-type Status = '+' | '~' | '-' | '?' | '=';
-const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done', '~': 'In Progress', '-': 'Pending', '?': 'Blocked', '=': 'Deferred'
-};
+import React, { useCallback, useEffect, useState } from 'react';
+import { Modal, AlertDialog, useToast } from './components/ui';
+import { TaskForm } from './components/TaskForm';
 
 function useNextTaskId() {
   const [nextId, setNextId] = useState<number>(1);
@@ -31,66 +27,38 @@ function useNextTaskId() {
 }
 
 export default function TaskCreateView() {
+  const { toast } = useToast();
   const defaultId = useNextTaskId();
-  const [id, setId] = useState<number | ''>('');
-  const [status, setStatus] = useState<Status>('-');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    // initialize id if empty when default computed
-    if (id === '' && defaultId) setId(defaultId);
-  }, [defaultId]);
-
-  const onCancel = useCallback(() => window.close(), []);
-
-  const onCreate = useCallback(async () => {
-    const idVal = typeof id === 'number' ? id : parseInt(String(id || ''), 10);
-    if (!Number.isInteger(idVal) || idVal <= 0) {
-      alert('Please provide a valid positive integer ID');
+  const onSubmit = useCallback(async (values) => {
+    if (!Number.isInteger(values.id) || values.id <= 0) {
+      setAlertMessage('Please provide a valid positive integer ID');
+      setShowAlert(true);
       return;
     }
     setSubmitting(true);
     try {
-      const res = await window.tasksIndex.addTask({ id: idVal, status, title: title || '', description: description || '' });
+      const res = await window.tasksIndex.addTask(values);
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
+      toast({ title: 'Success', description: 'Task created successfully', variant: 'success' });
       window.close();
     } catch (e: any) {
-      alert(`Failed to create task: ${e?.message || String(e)}`);
+      setAlertMessage(`Failed to create task: ${e?.message || String(e)}`);
+      setShowAlert(true);
     } finally {
       setSubmitting(false);
     }
-  }, [id, status, title, description]);
+  }, [toast]);
 
   return (
-    <Modal title="Create New Task" onClose={() => window.close()} isOpen={true}>
-      <div className="task-create-form">
-        <div className="form-row">
-          <label htmlFor="newtask-id">ID</label>
-          <input id="newtask-id" type="number" min={1} step={1} value={id} onChange={(e) => setId(e.target.value === '' ? '' : parseInt(e.target.value, 10))} />
-        </div>
-        <div className="form-row">
-          <label htmlFor="newtask-status">Status</label>
-          <select id="newtask-status" value={status} onChange={(e) => setStatus(e.target.value as Status)}>
-            {(['+', '~', '-', '?', '='] as Status[]).map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS[s]} ({s})</option>
-            ))}
-          </select>
-        </div>
-        <div className="form-row">
-          <label htmlFor="newtask-title">Title</label>
-          <input id="newtask-title" type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
-        <div className="form-row">
-          <label htmlFor="newtask-desc">Description</label>
-          <textarea id="newtask-desc" rows={4} placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-        </div>
-        <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={submitting}>Cancel</button>
-          <button type="button" className="btn" onClick={onCreate} disabled={submitting}>Create</button>
-        </div>
-      </div>
-    </Modal>
+    <>
+      <Modal title="Create New Task" onClose={() => window.close()} isOpen={true}>
+        <TaskForm initialValues={{ id: defaultId }} onSubmit={onSubmit} onCancel={() => window.close()} submitting={submitting} isCreate={true} />
+      </Modal>
+      <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
+    </>
   );
 }

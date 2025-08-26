@@ -4,6 +4,8 @@ import TasksView from './components/TasksView';
 import Docs from './components/Docs';
 import './App.css';
 import { View } from './types';
+import { ToastProvider } from './components/ui';
+import { createRoot } from 'react-dom/client';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('Home');
@@ -20,13 +22,19 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
-      <main className="main-content">
-        {renderView()}
-      </main>
-    </div>
+    <ToastProvider>
+      <div className="app-container">
+        <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+        <main className="main-content">
+          {renderView()}
+        </main>
+      </div>
+    </ToastProvider>
   );
-}
+};
 
-export default App;
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}
