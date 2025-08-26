@@ -233,4 +233,98 @@ export class TasksIndexer {
         await this.rebuildAndNotify(`Task ${taskId} deleted, dependencies updated, index rebuilt.`);
         return { ok: true };
     }
+
+    async reorderFeatures(taskId, payload) {
+        console.log(`Reordering features for task ${taskId}`);
+        const taskPath = path.join(this.tasksDir, String(taskId), 'task.json');
+
+        let taskData;
+        try {
+            const rawData = await fs.readFile(taskPath, 'utf-8');
+            taskData = JSON.parse(rawData);
+        } catch (e) {
+            throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
+        }
+
+        let features = taskData.features;
+        const currentOrder = features.map(f => f.id);
+        let newOrder;
+
+        if (payload.order) {
+            newOrder = payload.order;
+            const orderSet = new Set(newOrder);
+            if (orderSet.size !== currentOrder.length || !newOrder.every(id => currentOrder.includes(id))) {
+                throw new Error('Invalid order: must include all existing feature IDs without duplicates');
+            }
+        } else if (payload.fromId && payload.toIndex !== undefined) {
+            const fromIndex = features.findIndex(f => f.id === payload.fromId);
+            if (fromIndex === -1) throw new Error(`Feature ${payload.fromId} not found`);
+            if (payload.toIndex < 0 || payload.toIndex >= features.length) throw new Error('Invalid target index');
+            newOrder = [...currentOrder];
+            const [moved] = newOrder.splice(fromIndex, 1);
+            newOrder.splice(payload.toIndex, 0, moved);
+        } else {
+            throw new Error('Invalid payload for reorder');
+        }
+
+        // Reorder features
+        const reorderedFeatures = newOrder.map(id => features.find(f => f.id === id));
+
+        // Renumber IDs
+        const idUpdateMap = new Map();
+        reorderedFeatures.forEach((feature, index) => {
+            const newId = `${taskId}.${index + 1}`;
+            if (feature.id !== newId) {
+                idUpdateMap.set(feature.id, newId);
+                feature.id = newId;
+            }
+        });
+
+        taskData.features = reorderedFeatures;
+
+        // Update dependencies across all tasks
+        const tasksToUpdate = {};
+        tasksToUpdate[String(taskId)] = taskData;
+
+        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+        const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+
+        for (const currentTaskId of taskDirNames) {
+            if (currentTaskId === String(taskId)) continue;
+
+            const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
+            let currentTaskData;
+            try {
+                currentTaskData = JSON.parse(await fs.readFile(currentTaskPath, 'utf-8'));
+            } catch (e) {
+                console.warn(`Skipping dependency update for unreadable task: ${currentTaskId}`);
+                continue;
+            }
+
+            let taskModified = false;
+            for (const feature of currentTaskData.features) {
+                if (!feature.dependencies || feature.dependencies.length === 0) continue;
+
+                const updatedDeps = feature.dependencies.map(dep => idUpdateMap.has(dep) ? idUpdateMap.get(dep) : dep);
+
+                if (JSON.stringify(updatedDeps) !== JSON.stringify(feature.dependencies)) {
+                    feature.dependencies = updatedDeps;
+                    taskModified = true;
+                }
+            }
+
+            if (taskModified) {
+                tasksToUpdate[currentTaskId] = currentTaskData;
+            }
+        }
+
+        // Write updated tasks
+        await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
+            const filePath = path.join(this.tasksDir, id, 'task.json');
+            return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+        }));
+
+        await this.rebuildAndNotify(`Features reordered for task ${taskId}, index rebuilt.`);
+        return { ok: true };
+    }
 }
