@@ -81,7 +81,7 @@
     },
     {
       "id": "4.7",
-      "status": "-",
+      "status": "+",
       "title": "Extend IPC for tool calling in agent loop",
       "description": "Update 'chat:completion' handler to support tools. Define an empty tools array for now. In the handler, implement a loop: call completions.create with tools, if response has tool_calls, execute each (call function and get result), append {role: 'tool', content: result, tool_call_id} to messages, repeat until no tool_calls, then return the final content message.",
       "plan": "",
