@@ -154,7 +154,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
           <StatusBadge status={task.status} variant="bold" className="ml-2" />
           <div className="spacer" />
-          {/* Removed text Edit Task from header; moved to Overview section as icon button */}
         </div>
         <div className="details-header__meta">
           <span className="meta-item"><span className="meta-label">ID</span><span className="meta-value">{String(task.id)}</span></span>
@@ -193,11 +192,11 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
             >
               <li className="features-head" aria-hidden="true">
-                <div className="col col-id">ID</div>
+                <div className="col col-id">#</div>
                 <div className="col col-title">Title</div>
                 <div className="col col-status">Status</div>
                 <div className="col col-deps">Dependencies</div>
-                <div className="col col-actions">Actions</div>
+                <div className="col col-actions"></div>
               </li>
               {features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
@@ -216,7 +215,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >
-                      <div className="col col-id">{f.id || ''}</div>
+                      <div className="col col-id"><span className="id-chip">{f.id || ''}</span></div>
                       <div className="col col-title">
                         <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
                         <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>

@@ -284,7 +284,7 @@ export default function TasksListView() {
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
                       aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
                     >
-                      <div className="col col-id">{String(t.id)}</div>
+                      <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
                       <div className="col col-title">
                         <div className="title-line">
                           <span className="title-text">{t.title || ''}</span>

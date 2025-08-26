@@ -245,7 +245,7 @@
     },
     {
       "id": "7.18",
-      "status": "-",
+      "status": "+",
       "title": "Both in the Tasks list and the Features list the ID takes too much space",
       "description": "It should be made to look like a little bubble - similar to how the Dependencies bubbles are shown. Action in the Features list also takes too much space (the column heading 'Action' is unnecessary)",
       "plan": "",

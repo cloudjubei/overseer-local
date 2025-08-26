@@ -23,3 +23,6 @@
 .priority--p1 { background: color-mix(in srgb, var(--color-orange-650) 12%, transparent); color: var(--color-orange-800); border-color: var(--color-orange-400); }
 .priority--p2 { background: color-mix(in srgb, var(--color-blue-650) 10%, transparent); color: var(--color-blue-800); border-color: var(--color-blue-400); }
 .priority--p3 { background: color-mix(in srgb, var(--color-gray-400) 14%, transparent); color: var(--color-gray-800); border-color: var(--color-gray-400); }
+
+/* ID chip: compact bubble for IDs (tasks/features), similar to dependency chips */
+.id-chip { display:inline-flex; align-items:center; justify-content:center; height: 18px; padding: 0 6px; border-radius: var(--radius-round); border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-secondary); font-size: var(--fs-xxs, 10px); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
