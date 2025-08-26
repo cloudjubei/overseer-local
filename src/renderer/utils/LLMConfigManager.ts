@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 export interface LLMConfig {
   id: string;
   name: string;
-  provider: 'openai' | 'litellm';
+  provider: 'openai' | 'litellm' | 'lmstudio';
   apiBaseUrl: string;
   apiKey: string;
   model: string;

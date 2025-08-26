@@ -151,6 +151,14 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   return await chatManager.getCompletion({messages, config});
 });
 
+ipcMain.handle('chat:list-models', async (event, config) => {
+  try {
+    return await chatManager.listModels(config);
+  } catch (error) {
+    return { error: error.message };
+  }
+});
+
 ipcMain.handle('chat:list', () => {
   return chatManager.listChats();
 });

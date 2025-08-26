@@ -180,9 +180,9 @@
     },
     {
       "id": "4.18",
-      "status": "-",
-      "title": "Some providers don't work",
-      "description": "Trying to send a message to xai/grok-4 or claude-sonnet-4-20250514 with litellm doesn't work. Directly via openai and providing the url also doesn't work.",
+      "status": "+",
+      "title": "Custom local provider - LM Studio",
+      "description": "Allow using LM Studio's API server that lists models at http://localhost:1234/v1/models - there should be a check to see that it's running and then all the available models can be listed. To post messages to: http://localhost:1234/v1/chat/completions",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -190,8 +190,17 @@
     {
       "id": "4.19",
       "status": "-",
-      "title": "Custom local provider - LM Studio",
-      "description": "Allow using LM Studio's API server that lists models at http://localhost:1234/v1/models - there should be a check to see that it's running and then all the available models can be listed. To post messages to: http://localhost:1234/v1/chat/completions",
+      "title": "Litellm doesn't always work",
+      "description": "Trying to send a message to xai/grok-4 or claude-sonnet-4-20250514 with litellm doesn't work. Using gpt-5 does",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.20",
+      "status": "-",
+      "title": "Openai provider doesn't work",
+      "description": "When sending a message to openai's gpt-4o with the default apiurl it works. but using any other model provider doesn't.",
       "plan": "",
       "context": [],
       "acceptance": []

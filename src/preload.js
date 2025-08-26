@@ -34,6 +34,7 @@ const DOCS_API = {
 
 const CHAT_API = {
   getCompletion: (messages, config) => ipcRenderer.invoke('chat:completion', {messages, config}),
+  listModels: (config) => ipcRenderer.invoke('chat:list-models', config),
   list: () => ipcRenderer.invoke('chat:list'),
   create: () => ipcRenderer.invoke('chat:create'),
   load: (chatId) => ipcRenderer.invoke('chat:load', chatId),

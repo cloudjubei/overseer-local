@@ -3,6 +3,7 @@ import path from 'node:path';
 import { BaseProvider } from './providers/base';
 import { OpenAIProvider } from './providers/openai';
 import { LiteLLMProvider } from './providers/litellm';
+import { LMStudioProvider } from './providers/lmstudio';
 
 export class ChatManager {
   constructor(projectRoot, tasksIndexer, docsIndexer) {
@@ -13,6 +14,20 @@ export class ChatManager {
     if (!fs.existsSync(this.chatsDir)) {
       fs.mkdirSync(this.chatsDir);
     }
+  }
+
+  getProvider(config) {
+    const provider = config.provider || 'litellm';
+    const providerClasses = {
+      openai: OpenAIProvider,
+      litellm: LiteLLMProvider,
+      lmstudio: LMStudioProvider
+    };
+    const ProviderClass = providerClasses[provider];
+    if (!ProviderClass) {
+      throw new Error(`Unknown provider: ${provider}`);
+    }
+    return new ProviderClass(config);
   }
 
   async getCompletion({messages, config}) {
@@ -93,16 +108,7 @@ export class ChatManager {
         }
       };
 
-      const provider = config.provider || 'litellm';
-      const providerClasses = {
-        openai: OpenAIProvider,
-        litellm: LiteLLMProvider
-      };
-      const ProviderClass = providerClasses[provider];
-      if (!ProviderClass) {
-        throw new Error(`Unknown provider: ${provider}`);
-      }
-      const llmProvider = new ProviderClass(config);
+      const llmProvider = this.getProvider(config);
 
       while (true) {
         const response = await llmProvider.createCompletion({
@@ -115,7 +121,7 @@ export class ChatManager {
         });
         const message = response.choices[0].message;
 
-        if (!message.tool_calls) {
+        if (!message.tool_calls || message.tool_calls.length == 0) {
           return message;
         }
 
@@ -139,6 +145,15 @@ export class ChatManager {
     } catch (error) {
       console.error('Error in chat completion:', error);
       return { role: 'assistant', content: `An error occurred: ${error.message}` };
+    }
+  }
+
+  async listModels(config) {
+    try {
+      const provider = this.getProvider(config);
+      return await provider.listModels();
+    } catch (error) {
+      throw error;
     }
   }
 

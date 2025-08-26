@@ -3,7 +3,9 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useLLMConfig } from '../hooks/useLLMConfig';
+import { chatService } from '../services/chatService';
 import type { LLMConfig } from '../types';
+import { useToast } from '../components/ui/Toast';
 
 export default function SettingsView() {
   const themes = ['light', 'dark', 'blue'];
@@ -17,9 +19,15 @@ export default function SettingsView() {
   const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
   const [modelMode, setModelMode] = useState<'preset' | 'custom'>('preset');
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const defaultUrls: Record<string, string> = {
     openai: 'https://api.openai.com/v1',
+    litellm: '',
+    lmstudio: 'http://localhost:1234/v1',
     anthropic: 'https://api.anthropic.com',
     grok: 'https://api.x.ai/v1',
     gemini: 'https://generativelanguage.googleapis.com/v1beta',
@@ -29,21 +37,31 @@ export default function SettingsView() {
   const commonModels: Record<string, string[]> = {
     openai: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
     litellm: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
+    lmstudio: [],
     custom: []
   };
 
   const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEditingConfig((prev) => prev ? { ...prev, [name]: value } : null);
+    if (name === 'apiBaseUrl' && editingConfig?.provider === 'lmstudio') {
+      setAvailableModels([]);
+      setModelsError(null);
+    }
   };
 
   const handleProviderChange = (value: string) => {
     setEditingConfig((prev) => {
       if (!prev) return null;
-      const newBase = prev.apiBaseUrl || defaultUrls[value] || '';
+      const newBase = defaultUrls[value] || '';
       return { ...prev, provider: value, apiBaseUrl: newBase };
     });
     setModelMode('preset');
+    setAvailableModels([]);
+    setModelsError(null);
+    if (value !== 'lmstudio') {
+      setAvailableModels(commonModels[value] || []);
+    }
   };
 
   const handleModelChange = (value: string) => {
@@ -53,6 +71,30 @@ export default function SettingsView() {
     } else {
       setModelMode('preset');
       setEditingConfig((prev) => prev ? { ...prev, model: value } : null);
+    }
+  };
+
+  const loadModels = async () => {
+    if (!editingConfig) return;
+    setModelsLoading(true);
+    setModelsError(null);
+    try {
+      const models = await chatService.listModels(editingConfig);
+      if (models.error) {
+        throw new Error(models.error);
+      }
+      setAvailableModels(models);
+      setModelsError(null);
+    } catch (err) {
+      setModelsError('Failed to load models. Is LM Studio running?');
+      setAvailableModels([]);
+      toast({
+        title: 'Error',
+        description: err.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setModelsLoading(false);
     }
   };
 
@@ -66,6 +108,8 @@ export default function SettingsView() {
     setEditingConfig(null);
     setIsAddingNew(false);
     setModelMode('preset');
+    setAvailableModels([]);
+    setModelsError(null);
   };
 
   const handleEditConfig = (config: LLMConfig) => {
@@ -73,12 +117,19 @@ export default function SettingsView() {
     const providerModels = commonModels[config.provider] || [];
     setModelMode(providerModels.includes(config.model) ? 'preset' : 'custom');
     setIsAddingNew(false);
+    setAvailableModels(providerModels);
+    setModelsError(null);
+    if (config.provider === 'lmstudio') {
+      loadModels();
+    }
   };
 
   const handleAddNewConfig = () => {
     setEditingConfig({ id: '', name: '', provider: '', apiBaseUrl: '', apiKey: '', model: '' });
     setIsAddingNew(true);
     setModelMode('preset');
+    setAvailableModels([]);
+    setModelsError(null);
   };
 
   const handleDeleteConfig = (id: string) => {
@@ -134,6 +185,7 @@ export default function SettingsView() {
               <SelectContent>
                 <SelectItem value="litellm">LiteLLM</SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
+                <SelectItem value="lmstudio">LM Studio</SelectItem>
               </SelectContent>
             </Select>
 
@@ -142,13 +194,21 @@ export default function SettingsView() {
             <label htmlFor="apiKey" className="block text-sm font-medium mb-1">API Key</label>
             <Input id="apiKey" placeholder="API Key" name="apiKey" value={editingConfig.apiKey || ''} onChange={handleConfigChange} className="mb-2" />
             <label htmlFor="model" className="block text-sm font-medium mb-1">Model</label>
-            {editingConfig.provider !== 'custom' && commonModels[editingConfig.provider]?.length > 0 ? (
+            {editingConfig.provider === 'lmstudio' && (
+              <>
+                <Button onClick={loadModels} disabled={modelsLoading} className="mb-2">
+                  {modelsLoading ? 'Loading...' : 'Load Available Models'}
+                </Button>
+                {modelsError && <p className="text-red-500 mb-2">{modelsError}</p>}
+              </>
+            )}
+            {(editingConfig.provider !== 'custom' && (availableModels.length > 0 || commonModels[editingConfig.provider]?.length > 0)) ? (
               <Select value={modelMode === 'preset' ? editingConfig.model : 'custom'} onValueChange={handleModelChange}>
                 <SelectTrigger id="model" className="mb-2">
                   <SelectValue placeholder="Select Model" />
                 </SelectTrigger>
                 <SelectContent>
-                  {commonModels[editingConfig.provider].map((m) => (
+                  {(editingConfig.provider === 'lmstudio' ? availableModels : commonModels[editingConfig.provider]).map((m) => (
                     <SelectItem key={m} value={m}>{m}</SelectItem>
                   ))}
                   <SelectItem value="custom">Custom</SelectItem>

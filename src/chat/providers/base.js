@@ -6,4 +6,8 @@ export class BaseProvider {
   async createCompletion(params) {
     throw new Error('Not implemented');
   }
+
+  async listModels() {
+    throw new Error('Not implemented');
+  }
 }
