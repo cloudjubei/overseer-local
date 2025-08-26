@@ -5,6 +5,8 @@ import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
 
+import { notificationsService } from '../services/notificationsService';
+
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
   '~': 'In Progress',
@@ -99,6 +101,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     } finally {
       setSaving(false)
     }
+    // notificationsService.create({ 
+    //   type: 'success',
+    //   category: 'system',
+    //   title: 'hooray',
+    //   message: "it's showing"
+    // })
   }
 
   const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, featureId: string) => {

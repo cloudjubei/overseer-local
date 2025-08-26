@@ -76,9 +76,9 @@ class NotificationsService {
   private getPreferences(): NotificationPreferences {
     try {
       const stored = localStorage.getItem(this.PREFS_KEY);
-      return stored ? JSON.parse(stored) : {};
+      return stored ? JSON.parse(stored) : { osNotificationsEnabled: false, categoriesEnabled: {}, soundsEnabled: false, displayDuration: 0 };
     } catch {
-      return {};
+      return { osNotificationsEnabled: false, categoriesEnabled: {}, soundsEnabled: false, displayDuration: 0 };
     }
   }
 
