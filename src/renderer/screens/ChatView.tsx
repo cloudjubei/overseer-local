@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
-import Modal from '../components/ui/modal';
+import {Modal} from '../components/ui/modal';
 
 const ChatView = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
