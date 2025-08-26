@@ -81,5 +81,26 @@
     "*.{json,css,scss,md,yml,yaml,html}": [
       "prettier --write"
     ]
+  },
+  "build": {
+    "appId": "com.example.overseer-local",
+    "productName": "electron",
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg"
+      ],
+      "icon": "build/icons/icon.icns",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.dmg"
+    }
   }
 }

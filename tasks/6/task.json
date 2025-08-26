@@ -25,7 +25,7 @@
     },
     {
       "id": "6.3",
-      "status": "-",
+      "status": "+",
       "title": "Configure macOS DMG packaging",
       "description": "In the build configuration, add mac-specific settings including target 'dmg', icon path (icns), and any necessary entitlements or artifacts.",
       "plan": "",
