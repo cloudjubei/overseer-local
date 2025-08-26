@@ -433,7 +433,6 @@ function DirTree({ node, level, openSet, toggleOpen, selected, onSelect }: {
   );
 }
 
-// Expose an imperative handle to trigger edit via keyboard
 type DocumentPaneHandle = { startEdit: () => void };
 
 const DocumentPane = React.forwardRef<DocumentPaneHandle, { relPath: string; file: DocFileNode | null }>(function DocumentPane({ relPath, file }, ref) {
@@ -444,14 +443,16 @@ const DocumentPane = React.forwardRef<DocumentPaneHandle, { relPath: string; fil
   const [draft, setDraft] = useState('');
 
   const load = useCallback(async () => {
-    setLoading(true); setError(null);
-    try {
-      const text = await docsService.getFile(relPath);
-      setContent(text || '');
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
+    if (relPath){
+      setLoading(true); setError(null);
+      try {
+        const text = await docsService.getFile(relPath);
+        setContent(text || '');
+      } catch (e: any) {
+        setError(e?.message || String(e));
+      } finally {
+        setLoading(false);
+      }
     }
   }, [relPath]);
 
@@ -472,7 +473,7 @@ const DocumentPane = React.forwardRef<DocumentPaneHandle, { relPath: string; fil
 
   React.useImperativeHandle(ref, () => ({ startEdit: onStartEdit }), [onStartEdit]);
 
-  const displayTitle = file?.title || file?.name || relPath.split('/').pop() || relPath;
+  const displayTitle = file?.title || file?.name || relPath?.split('/')?.pop() || relPath;
   const updated = file?.mtimeMs ? relTime(file.mtimeMs) : '';
 
   return (
@@ -495,22 +496,20 @@ const DocumentPane = React.forwardRef<DocumentPaneHandle, { relPath: string; fil
       </div>
       <div className="flex-1 min-h-0 overflow-auto p-4">
         {loading && (
-          <div className="flex items-center gap-2 text-text-muted"><Spinner size={20} /> Loading   </div>
+          <div className="flex items-center gap-2 text-text-muted"><Spinner size={20} />Loading</div>
         )}
         {error && (
           <div className="text-[color:var(--color-red-600)]">{error}</div>
         )}
-        {!loading && !error && !isEditing && (
+        {!loading && !error && !isEditing && relPath && (
           <div className="prose max-w-[840px] prose-invert:prose-dark">
             <MarkdownRenderer content={content} currentRelPath={relPath} onNavigateDoc={(p, fragment) => { /* navigation hook point */ }} />
           </div>
         )}
-        {!loading && !error && isEditing && (
+        {!loading && !error && isEditing && relPath && (
           <MarkdownEditor value={draft} onChange={setDraft} onSave={onSave} onCancel={onCancel} fileRelPath={relPath} />
         )}
       </div>
     </div>
   );
 });
-
-export default DocumentPane;
