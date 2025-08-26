@@ -15,12 +15,13 @@
     },
     {
       "id": "6.2",
-      "status": "-",
+      "status": "?",
       "title": "Configure basic electron-builder settings",
       "description": "Add a 'build' section in package.json with basic configurations such as appId, productName, directories (output, buildResources), and files to include in the build.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: Extra data: line 14 column 1 (char 583)"
     },
     {
       "id": "6.3",
