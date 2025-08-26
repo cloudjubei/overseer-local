@@ -87,7 +87,8 @@ repo_root/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
-│  │  │  └─ ChatView.tsx               # UI consumes hooks/services
+│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
+│  │  │  └─ SettingsView.tsx           # Settings screen with theme and LLM configurations
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx         
 │  │  │  ├─ TaskEditView.tsx           # Always in Modal
@@ -119,6 +120,7 @@ Notes on recent changes
 - Simplified preload tasks API: src/preload.js no longer exposes openFeatureCreate/openTaskCreate/openTaskEdit/openFeatureEdit. Renderer code should use Navigator.openModal/closeModal for UI navigation.
 - Updated TasksListView to use Navigator for opening the Create Task modal and for navigating to task details, aligning with STANDARDS.md (centralized navigation).
 - Added src/chat/providers/ for LLM provider abstractions.
+- Added SettingsView.tsx for advanced settings including LLM configurations.
 
 Rationale
 - This eliminates the macOS bug where modal BrowserWindows showed the underlying app view and did not close when the modal was dismissed. Rendering modals in the same window ensures consistent behavior, proper focus management, and simpler state handling.

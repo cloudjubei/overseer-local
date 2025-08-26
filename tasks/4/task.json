@@ -161,7 +161,7 @@
     },
     {
       "id": "4.16",
-      "status": "-",
+      "status": "+",
       "title": "Settings screen is more advanced",
       "description": "The user should be able to configure various LLMs using various providers - this requires a more complex screen that should be accessible via Chat.",
       "plan": "",
