@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import SidebarView from './components/SidebarView';
-import TasksView from './components/TasksView';
-import DocumentsView from './components/DocumentsView';
-import Settings from './Settings';
+import TasksView from './screens/TasksView';
+import DocumentsView from './screens/DocumentsView';
+import SettingsView from './screens/SettingsView';
 import { NavigationView } from './types';
 import { ToastProvider } from './components/ui';
 import { createRoot } from 'react-dom/client';
@@ -25,7 +25,7 @@ function App() {
       case 'Documents':
         return <DocumentsView />;
       case 'Settings':
-        return <Settings />;
+        return <SettingsView />;
       default:
         return <TasksView />;
     }

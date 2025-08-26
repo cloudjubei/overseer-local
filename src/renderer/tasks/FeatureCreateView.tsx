@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { Modal, AlertDialog, useToast } from './components/ui';
-import { FeatureForm } from './components/FeatureForm';
+import { Modal, AlertDialog, useToast } from '../components/ui';
+import { FeatureForm } from '../components/FeatureForm';
 
 export default function FeatureCreateView({ taskId }: { taskId: number }) {
   const { toast } = useToast();

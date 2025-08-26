@@ -20,11 +20,11 @@
       "description": "Create a DocsIndexer class in src/docs/indexer.js, similar to TasksIndexer. It should scan the docs/ directory (and subdirectories) under the projectRoot for .md files, build an in-memory index (e.g., a tree structure with paths and metadata). Include methods to get the index snapshot, initialize scanning, and watch for file changes to refresh the index.",
       "plan": "",
       "context": [
-        "docs/indexer.js",
-        "tasks/indexer.js"
+        "src/docs/indexer.js",
+        "src/tasks/indexer.js"
       ],
       "acceptance": [],
-      "rejection": "the `docs/indexer.js` isn't working correctly - it's not picking up any files. Use `tasks/indexer.js` as reference on how to do this"
+      "rejection": "the `src/docs/indexer.js` isn't working correctly - it's not picking up any files. The new DocsIndexer should follow the same exact pattern as TasksIndexer in `src/tasks/indexer.js`. Remember this is an Electron app using React & Vite."
     },
     {
       "id": "3.3",
@@ -43,12 +43,12 @@
       "plan": "",
       "context": [
         "src/main/ipc/docs.js",
-        "src/renderer/components/DocumentsView.js",
-        "src/renderer/components/docs/DocsBrowserView.tsx",
+        "src/renderer/screens/DocumentsView.js",
+        "src/renderer/docs/DocumentsBrowserView.tsx",
         "src/renderer/components/MarkdownRenderer.tsx"
       ],
       "acceptance": [],
-      "rejection": "1) there's a leftover `src/main/ipc/docs.js` - not sure if it's needed at all? 2) `src/renderer/components/docs/DocsBrowserView.tsx` should show directories and folders nicely so that I can expand them. 3) `src/renderer/components/DocumentsView.js` isn't passing parameters correctly. 4) `src/renderer/components/MarkdownRenderer.tsx` which is meant to be used in the docs browser, has lots of unknown imports... and isn't used"
+      "rejection": "1) `src/renderer/docs/DocumentsBrowserView.tsx` should show directories and folders nicely so that I can expand them. 2) `src/renderer/screens/DocumentsView.js` isn't passing parameters correctly. 3) `src/renderer/components/MarkdownRenderer.tsx` which is meant to be used in the docs browser, has lots of unknown imports... and isn't used"
     },
     {
       "id": "3.5",

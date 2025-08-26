@@ -42,7 +42,7 @@ declare global {
   }
 }
 
-export type DocsBrowserViewProps = {
+export type DocumentsBrowserViewProps = {
   className?: string;
   onSelectFile?: (relPath: string) => void; // notify selection (content rendering handled later)
 };
@@ -135,7 +135,7 @@ function DirItem({ node, level, openSet, toggleOpen, onSelectFile }: {
   );
 }
 
-export default function DocsBrowserView({ className, onSelectFile }: DocsBrowserViewProps) {
+export default function DocumentsBrowserView({ className, onSelectFile }: DocumentsBrowserViewProps) {
   const { snapshot, loading, error, reload } = useDocsIndex();
   const [selected, setSelected] = useState<string | null>(null);
   const [openSet, setOpenSet] = useState<Set<string>>(() => new Set(['<root>']));

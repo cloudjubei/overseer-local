@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, AlertDialog, useToast } from './components/ui';
-import { TaskForm } from './components/TaskForm';
+import { Modal, AlertDialog, useToast } from '../components/ui';
+import { TaskForm } from '../components/TaskForm';
 
 function useNextTaskId() {
   const [nextId, setNextId] = useState<number>(1);

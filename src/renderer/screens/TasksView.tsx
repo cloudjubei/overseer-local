@@ -1,10 +1,10 @@
 import React from 'react';
-import TaskCreateView from '../TaskCreateView';
-import FeatureCreateView from '../FeatureCreateView';
-import TaskEditView from '../TaskEditView';
-import FeatureEditView from '../FeatureEditView';
-import TaskDetailsView from '../TaskDetailsView';
-import TasksListView from '../TasksListView';
+import TaskCreateView from '../tasks/TaskCreateView';
+import FeatureCreateView from '../tasks/FeatureCreateView';
+import TaskEditView from '../tasks/TaskEditView';
+import FeatureEditView from '../tasks/FeatureEditView';
+import TaskDetailsView from '../tasks/TaskDetailsView';
+import TasksListView from '../tasks/TasksListView';
 function useTaskRouter() {
   const [hash, setHash] = React.useState(location.hash);
 

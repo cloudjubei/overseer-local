@@ -37,51 +37,76 @@ The following tree is graphical and illustrative of a typical repository layout:
 
 ```
 repo_root/
-├─ .env
-├─ .gitignore
-├─ forge-config.js
-├─ package.json
-├─ package-lock.json
-├─ README.md
-├─ src/
-│   ├─ index.css
-│   ├─ index.html
-│   ├─ index.js
-│   ├─ preload.js
-│   ├─ docs/
-│   │  └─ indexer.js
-│   ├─ main/
-│   │  └─ ipc/
-│   │     └─ docs.js               # IPC handlers for Docs index and file content (and saving)
-│   ├─ renderer/
-│   │   ├─ App.tsx                 # React app with sidebar navigation (Home, Docs)
-│   │   ├─ types.ts                # Renderer-local types (View)
-│   │   ├─ components/
-│   │   │  ├─ Sidebar.tsx          # Sidebar component (Tailwind/shadcn-styled)
-│   │   │  ├─ TasksView.tsx        # Home view component (tasks)
-│   │   │  └─ Docs.tsx             # Documents screen using DocsBrowserView
-│   │   ├─ docs/
-│   │   │  └─ DocsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
-│   │   └─ docsBrowserView.js      # Legacy DOM-based docs browser (reference only; not used)
-│   ├─ tasks/
-│   │  └─ indexer.js               # Logical Tasks indexer, validator, and file watcher
-│   └─ types/
-│      └─ tasks.ts                 # TypeScript interfaces for task schema
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
-│  ├─ COMPONENTS_AND_THEMING.md
+│  ├─ DESIGN_PROPOSAL.md
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py            # Python source-of-truth schema
+├─ src/
+│   ├─ docs/
+│   │  └─ indexer.js               # Logical Docs indexer and file watcher
+│   ├─ renderer/
+│   │   ├─ components/
+│   │   │  ├─ ui/
+│   │   │  │  ├─ alert.tsx         
+│   │   │  │  ├─ button.tsx         
+│   │   │  │  ├─ index.tsx         
+│   │   │  │  ├─ modal.tsx         
+│   │   │  │  └─ toast.tsx         
+│   │   │  ├─ FeatureForm.tsx             
+│   │   │  ├─ MarkdownRenderer.tsx             
+│   │   │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
+│   │   │  └─ TaskForm.tsx          
+│   │   ├─ docs/
+│   │   │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
+│   │   ├─ screens/
+│   │   │  ├─ DocumentsView.tsx           # Documents screen using DocumentsBrowserView
+│   │   │  ├─ SettingsView.tsx            # Settings screen for configuring theme
+│   │   │  └─ TasksView.tsx               # Home view component (tasks)   
+│   │   ├─ tasks/
+│   │   │  ├─ EditableTaskMeta.tsx        
+│   │   │  ├─ FeatureCreateView.tsx      
+│   │   │  ├─ FeatureEditView.tsx       
+│   │   │  ├─ TaskCreateView.tsx         
+│   │   │  ├─ TaskDetailsView.tsx         
+│   │   │  ├─ TaskEditView.tsx        
+│   │   │  └─ TasksListView.tsx  
+│   │   ├─ App.tsx                 # Main Entry for the React app 
+│   │   └─ types.ts                # Renderer-local types (View)
+│   ├─ tasks/
+│   │  ├─ validator.js             # Logical Tasks validator
+│   │  └─ indexer.js               # Logical Tasks indexer and file watcher
+│   ├─ types/
+│   │  ├─ global.d.ts              
+│   │  └─ tasks.ts                 # TypeScript interfaces for task schema
+│   ├─ index.css
+│   ├─ main.js
+│   └─ preload.js
 ├─ tasks/
 │  └─ 1/
 │     ├─ task.json
 │     └─ tests/
 │        └─ test_1_1.py
-├─ vite.main.config.js            # Vite config for main process
-├─ vite.preload.config.js         # Vite config for preload scripts
-└─ vite.renderer.config.js        # Vite config for renderer (React)
+├─ .editorconfig
+├─ .env
+├─ .eslintignore
+├─ .eslintrc.cjs
+├─ .gitignore
+├─ .prettierignore
+├─ .prettierrc.json
+├─ forge-config.js
+├─ index.html
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.js
+├─ README.md
+├─ tailwind.config.js
+├─ tsconfig.json
+├─ vite.main.config.mjs            # Vite config for main process
+├─ vite.preload.config.mjs         # Vite config for preload scripts
+└─ vite.renderer.config.mjs        # Vite config for renderer (React)
 ```
 
 ## Logical Tasks Indexer
