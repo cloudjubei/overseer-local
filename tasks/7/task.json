@@ -248,7 +248,7 @@
     },
     {
       "id": "7.18",
-      "status": "-",
+      "status": "?",
       "title": "Both in the Tasks list and the Features list the ID takes too much space",
       "description": "It should be made to look like a little bubble - similar to how the Dependencies bubbles are shown",
       "plan": "",
@@ -262,7 +262,8 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
     },
     {
       "id": "7.19",
