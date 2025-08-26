@@ -133,7 +133,7 @@
     },
     {
       "id": "2.9",
-      "status": "-",
+      "status": "+",
       "title": "Common functions and libraries",
       "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit task popups should stem from a common popup component.",
       "plan": "",

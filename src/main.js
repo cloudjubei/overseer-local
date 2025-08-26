@@ -146,23 +146,38 @@ const createModalWindow = (options) => {
   return window;
 };
 
-// REPLACE your old 'feature-create:open' handler.
 ipcMain.handle('feature-create:open', (event, taskId) => {
   createModalWindow({
     width: 600,
     height: 800,
     browserWindow: { title: 'Create Feature' },
-    // We pass the route information via the hash
     hash: `feature-create/${taskId}`,
   });
 });
 
-// REPLACE your old 'task-create:open' handler.
 ipcMain.handle('task-create:open', () => {
   createModalWindow({
     width: 600,
     height: 500,
     browserWindow: { title: 'Create Task' },
-    hash: 'task-create', // The hash for creating a task
+    hash: 'task-create',
+  });
+});
+
+ipcMain.handle('task-edit:open', (event, taskId) => {
+  createModalWindow({
+    width: 600,
+    height: 500,
+    browserWindow: { title: 'Edit Task' },
+    hash: `task-edit/${taskId}`,
+  });
+});
+
+ipcMain.handle('feature-edit:open', (event, taskId, featureId) => {
+  createModalWindow({
+    width: 600,
+    height: 800,
+    browserWindow: { title: 'Edit Feature' },
+    hash: `feature-edit/${taskId}/${featureId}`,
   });
 });

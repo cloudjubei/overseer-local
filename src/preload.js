@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('tasksIndex', {
   
   openFeatureCreate: (taskId) => ipcRenderer.invoke('feature-create:open', taskId),
   openTaskCreate: () => ipcRenderer.invoke('task-create:open'),
+  openTaskEdit: (taskId) => ipcRenderer.invoke('task-edit:open', taskId),
+  openFeatureEdit: (taskId, featureId) => ipcRenderer.invoke('feature-edit:open', taskId, featureId),
 
   // For modal windows to receive data
   onSetTaskId: (callback) => {

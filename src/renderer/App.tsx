@@ -2,8 +2,11 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import TasksListView from './TasksListView';
 import TaskDetailsView from './TaskDetailsView';
-import TaskCreateView from './TaskCreateView'; 
-import FeatureCreateView from './FeatureCreateView'; 
+import TaskCreateView from './TaskCreateView';
+import FeatureCreateView from './FeatureCreateView';
+import TaskEditView from './TaskEditView';
+import FeatureEditView from './FeatureEditView';
+import { ToastProvider } from './components/ui/toast';
 
 function useAppRouter() {
   const [hash, setHash] = React.useState(location.hash);
@@ -14,49 +17,61 @@ function useAppRouter() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const taskMatch = /^#task\/(\d+)$/.exec(hash);
-  if (taskMatch) {
-    return { name: 'details', hash };
+  let match;
+  if ((match = /^#task\/(\d+)$/.exec(hash))) {
+    return { name: 'details', taskId: parseInt(match[1], 10) };
   }
-
-  const featureCreateMatch = /^#feature-create\/(\d+)$/.exec(hash);
-  if (featureCreateMatch) {
-    return { name: 'feature-create', taskId: parseInt(featureCreateMatch[1], 10) };
+  if ((match = /^#feature-create\/(\d+)$/.exec(hash))) {
+    return { name: 'feature-create', taskId: parseInt(match[1], 10) };
   }
-
-  if (hash === '#task-create') {
+  if ((match = /^#task-create$/.exec(hash))) {
     return { name: 'task-create' };
   }
-
-  return { name: 'list', hash };
+  if ((match = /^#task-edit\/(\d+)$/.exec(hash))) {
+    return { name: 'task-edit', taskId: parseInt(match[1], 10) };
+  }
+  if ((match = /^#feature-edit\/(\d+)\/(.+)$/.exec(hash))) {
+    return { name: 'feature-edit', taskId: parseInt(match[1], 10), featureId: match[2] };
+  }
+  return { name: 'list' };
 }
 
 const App = () => {
   const route = useAppRouter();
 
-  if (route.name === 'task-create') {
-    return <TaskCreateView />;
-  }
-  if (route.name === 'feature-create') {
-    return <FeatureCreateView  taskId={route.taskId!}/>;
+  let content;
+  switch (route.name) {
+    case 'task-create':
+      content = <TaskCreateView />;
+      break;
+    case 'feature-create':
+      content = <FeatureCreateView taskId={route.taskId} />;
+      break;
+    case 'task-edit':
+      content = <TaskEditView taskId={route.taskId} />;
+      break;
+    case 'feature-edit':
+      content = <FeatureEditView taskId={route.taskId} featureId={route.featureId} />;
+      break;
+    case 'details':
+      content = <TaskDetailsView taskId={route.taskId} />;
+      break;
+    default:
+      content = <TasksListView />;
+      break;
   }
 
-  // Otherwise, render the main application layout.
   return (
-    <div style={{ fontFamily: 'sans-serif' }}>
-      <h1>Project Tasks</h1>
-      {route.name === 'details' ? (
-        <TaskDetailsView hash={route.hash!} />
-      ) : (
-        <TasksListView />
-      )}
-    </div>
+    <ToastProvider>
+      <div style={{ fontFamily: 'sans-serif' }}>
+        {content}
+      </div>
+    </ToastProvider>
   );
 };
 
-
-const container = document.getElementById("root");
+const container = document.getElementById('root');
 if (container) {
-    const root = createRoot(container);
-    root.render(<App />);
+  const root = createRoot(container);
+  root.render(<App />);
 }
