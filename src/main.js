@@ -48,7 +48,7 @@ app.whenReady().then(() => {
   docsIndexer = new DocsIndexer(projectRoot);
   docsIndexer.init();
 
-  chatManager = new ChatManager(projectRoot);
+  chatManager = new ChatManager(projectRoot, indexer, docsIndexer);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

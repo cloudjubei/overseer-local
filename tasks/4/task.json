@@ -90,7 +90,7 @@
     },
     {
       "id": "4.8",
-      "status": "-",
+      "status": "+",
       "title": "Add project read tools for agent",
       "description": "In the tools array of the completion handler, add: 1. list_tasks (no params, returns JSON.stringify(tasksIndexer.getIndex().tasksById)), 2. list_docs (no params, returns JSON.stringify(docsIndexer.getIndex().docsTree)), 3. read_doc (param: path, returns fs.readFileSync(docsIndexer.getIndex().docsDir + '/' + path, 'utf8') or error). Update system prompt: 'Use tools to query project info. If user mentions @path, use read_doc.'",
       "plan": "",

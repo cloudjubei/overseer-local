@@ -3,8 +3,10 @@ import path from 'node:path';
 import { OpenAI } from 'openai';
 
 export class ChatManager {
-  constructor(projectRoot) {
+  constructor(projectRoot, tasksIndexer, docsIndexer) {
     this.projectRoot = projectRoot;
+    this.tasksIndexer = tasksIndexer;
+    this.docsIndexer = docsIndexer;
     this.chatsDir = path.join(projectRoot, 'chats');
     if (!fs.existsSync(this.chatsDir)) {
       fs.mkdirSync(this.chatsDir);
@@ -14,10 +16,51 @@ export class ChatManager {
   async getCompletion({messages, config}) {
     try {
       const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
-      const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'};
+      const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc.'};
       let currentMessages = [systemPrompt, ...messages];
-      const tools = []; // empty for now
-      const toolsMap = {}; // map of tool names to functions, empty for now
+      const tools = [
+        {
+          type: 'function',
+          function: {
+            name: 'list_tasks',
+            description: 'List all tasks in the project',
+            parameters: { type: 'object', properties: {} }
+          }
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'list_docs',
+            description: 'List all documents in the project',
+            parameters: { type: 'object', properties: {} }
+          }
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'read_doc',
+            description: 'Read the content of a document by its relative path',
+            parameters: {
+              type: 'object',
+              properties: {
+                path: { type: 'string', description: 'Relative path to the doc' }
+              },
+              required: ['path']
+            }
+          }
+        }
+      ];
+      const toolsMap = {
+        list_tasks: async () => JSON.stringify(this.tasksIndexer.getIndex().tasksById),
+        list_docs: async () => JSON.stringify(this.docsIndexer.getIndex().tree),
+        read_doc: async ({ path }) => {
+          try {
+            return await this.docsIndexer.getFile(path);
+          } catch (error) {
+            return `Error: ${error.message}`;
+          }
+        }
+      };
 
       while (true) {
         const response = await openai.chat.completions.create({
