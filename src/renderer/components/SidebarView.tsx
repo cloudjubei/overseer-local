@@ -41,6 +41,12 @@ export default function SidebarView({ currentView, setCurrentView }: SidebarProp
           onClick={() => setCurrentView('Documents')}
           icon={<span>📚</span>}
         />
+        <NavItem
+          label="Chat"
+          isActive={currentView === 'Chat'}
+          onClick={() => setCurrentView('Chat')}
+          icon={<span>💬</span>}
+        />
       </nav>
       <div className="mt-4 border-t border-neutral-200 pt-3 dark:border-neutral-800">
         <NavItem
