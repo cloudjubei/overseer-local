@@ -34,7 +34,7 @@
     },
     {
       "id": "6.4",
-      "status": "-",
+      "status": "+",
       "title": "Configure Windows NSIS packaging",
       "description": "In the build configuration, add win-specific settings including target 'nsis', icon path (ico), and installer options like one-click installation.",
       "plan": "",

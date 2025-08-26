@@ -12,6 +12,7 @@ This document describes how files and directories are organised in this reposito
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns: Placeholder macOS app icon to be replaced with a real ICNS file.
+  - build/icons/icon.ico: Placeholder Windows app icon to be replaced with a real ICO file.
   - build/entitlements.mac.plist: macOS entitlements for main app (hardened runtime/JIT allowances).
   - build/entitlements.mac.inherit.plist: macOS entitlements inherited by helper processes.
 - .env, and other setup files may exist as needed.
@@ -96,7 +97,8 @@ repo_root/
 │        └─ test_1_1.py
 ├─ build/
 │  ├─ icons/
-│  │  └─ icon.icns               # Placeholder macOS icon (replace with real ICNS)
+│  │  ├─ icon.icns               # Placeholder macOS icon (replace with real ICNS)
+│  │  └─ icon.ico                # Placeholder Windows icon (replace with real ICO)
 │  ├─ entitlements.mac.plist     # macOS entitlements for main app
 │  └─ entitlements.mac.inherit.plist # macOS entitlements for helpers
 ├─ .editorconfig
