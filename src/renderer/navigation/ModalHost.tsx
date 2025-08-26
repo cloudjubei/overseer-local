@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigator } from './Navigator';
 import TaskCreateView from '../tasks/TaskCreateView';
 import TaskEditView from '../tasks/TaskEditView';
@@ -8,16 +9,29 @@ import FeatureEditView from '../tasks/FeatureEditView';
 export default function ModalHost() {
   const { modal, closeModal } = useNavigator();
   if (!modal) return null;
+
+  let content: React.ReactNode = null;
   switch (modal.type) {
     case 'task-create':
-      return <TaskCreateView onRequestClose={closeModal} />;
+      content = <TaskCreateView onRequestClose={closeModal} />;
+      break;
     case 'task-edit':
-      return <TaskEditView taskId={modal.taskId} onRequestClose={closeModal} />;
+      content = <TaskEditView taskId={modal.taskId} onRequestClose={closeModal} />;
+      break;
     case 'feature-create':
-      return <FeatureCreateView taskId={modal.taskId} onRequestClose={closeModal} />;
+      content = <FeatureCreateView taskId={modal.taskId} onRequestClose={closeModal} />;
+      break;
     case 'feature-edit':
-      return <FeatureEditView taskId={modal.taskId} featureId={modal.featureId} onRequestClose={closeModal} />;
+      content = (
+        <FeatureEditView taskId={modal.taskId} featureId={modal.featureId} onRequestClose={closeModal} />
+      );
+      break;
     default:
-      return null;
+      content = null;
   }
+
+  if (!content) return null;
+
+  // Render modals above all app content to avoid stacking context issues
+  return createPortal(<>{content}</>, document.body);
 }

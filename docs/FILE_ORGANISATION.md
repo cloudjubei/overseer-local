@@ -17,7 +17,6 @@ This document describes how files and directories are organised in this reposito
   - build/icons/icon.ico: Placeholder Windows app icon to be replaced with a real ICO file.
   - build/icons/icon.png: Placeholder Linux app icon to be replaced with a real 512x512 PNG file.
   - build/entitlements.mac.plist: macOS entitlements for main app (hardened runtime/JIT allowances).
-  - build/entitlements.mac.inherit.plist: macOS entitlements inherited by helper processes.
 - .env, and other setup files may exist as needed.
 
 Notes:
@@ -51,7 +50,7 @@ Key changes for responsive layout and sidebar:
 
 New navigation layer:
 - Added: src/renderer/navigation/Navigator.tsx — app-wide navigation context that parses location.hash into currentView, tasksRoute, and modal state. Exposes openModal/closeModal and navigation helpers.
-- Added: src/renderer/navigation/ModalHost.tsx — central modal renderer that overlays the active screen and mounts task-related modals.
+- Updated: src/renderer/navigation/ModalHost.tsx — now renders active modals via a React portal into document.body, guaranteeing the overlay sits above all screens and avoids stacking-context issues. It mounts task-related modals and wires onRequestClose to Navigator.closeModal.
 - Added: src/renderer/navigation/index.ts — re-exports Navigator hooks/components.
 
 UI utilities for consistency:
@@ -62,9 +61,9 @@ UI utilities for consistency:
 
 Task modal components and hooks:
 - Updated: src/renderer/tasks/TaskCreateView.tsx — now calls tasksService instead of window.tasksIndex and no longer calls window.close(); adheres to standards for closing via onRequestClose.
-- Updated: src/renderer/tasks/TaskEditView.tsx — now uses tasksService for data access and removes window.close() fallback.
+- Updated: src/renderer/tasks/TaskEditView.tsx — always renders within a Modal, even during initial loading, ensuring a consistent overlay and avoiding stray non-modal content. Uses tasksService for data access and removes window.close() fallback.
 - Updated: src/renderer/tasks/FeatureCreateView.tsx — now uses tasksService and removes window.close() fallback.
-- Updated: src/renderer/tasks/FeatureEditView.tsx — now uses tasksService and removes window.close() fallback.
+- Updated: src/renderer/tasks/FeatureEditView.tsx — always renders within a Modal, even during initial loading, ensuring a consistent overlay and avoiding stray non-modal content. Uses tasksService and removes window.close() fallback.
 - Added: src/renderer/hooks/useNextTaskId.ts — refactored to use tasksService for index access/subscribe.
 
 Logic/UI split: services and hooks for renderer logic
@@ -91,7 +90,7 @@ repo_root/
 │  ├─ renderer/
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
-│  │  │  ├─ ModalHost.tsx              # Renders modals globally above screens
+│  │  │  ├─ ModalHost.tsx              # Renders modals globally above screens via portal
 │  │  │  └─ index.ts                   # Re-exports
 │  │  ├─ components/
 │  │  │  └─ ui/
@@ -115,10 +114,10 @@ repo_root/
 │  │  │  ├─ DocumentsView.tsx
 │  │  │  └─ ChatView.tsx               # UI consumes hooks/services
 │  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         # Uses tasksService; no window.close
-│  │  │  ├─ TaskEditView.tsx           # Uses tasksService; no window.close
-│  │  │  ├─ FeatureCreateView.tsx      # Uses tasksService; no window.close
-│  │  │  └─ FeatureEditView.tsx        # Uses tasksService; no window.close
+│  │  │  ├─ TaskCreateView.tsx         # Uses tasksService; closes via onRequestClose
+│  │  │  ├─ TaskEditView.tsx           # Always in Modal; shows loading inside modal
+│  │  │  ├─ FeatureCreateView.tsx      # Uses tasksService; closes via onRequestClose
+│  │  │  └─ FeatureEditView.tsx        # Always in Modal; shows loading inside modal
 │  │  ├─ App.tsx
 │  │  └─ types.ts                      # +ChatMessage/LLMConfig
 │  ├─ index.css
@@ -130,4 +129,5 @@ repo_root/
 Notes on the refactor
 - Introduced tasksService to adhere to standards: screens/components and hooks no longer call window.tasksIndex directly.
 - Removed window.close() fallbacks from all modals. Modals now fully adhere to the contract of accepting onRequestClose and delegating closing to parent via Navigator/ModalHost.
-- Added compatibility wrapper components/ui/modal.ts to fix runtime import errors and ease migration; this adheres to the previously documented plan in this file.
+- Updated ModalHost to portal into document.body, fixing overlay z-index/stacking issues so modals reliably appear above all screens and unmount cleanly on close.
+- Ensured edit modals render a loading state within the Modal shell instead of returning plain elements; this prevents orphan background elements when data is loading.

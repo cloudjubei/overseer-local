@@ -15,6 +15,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   }
 
   useEffect(() => {
+    let cancelled = false
     ;(async () => {
       try {
         const idx = await tasksService.getSnapshot()
@@ -22,12 +23,15 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         if (!task) throw new Error('Task not found')
         const feature = task.features.find((f: any) => f.id === featureId)
         if (!feature) throw new Error('Feature not found')
-        setInitialValues(feature)
+        if (!cancelled) setInitialValues(feature)
       } catch (e: any) {
-        setAlertMessage(`Failed to load feature: ${e.message || String(e)}`)
-        setShowAlert(true)
+        if (!cancelled) {
+          setAlertMessage(`Failed to load feature: ${e.message || String(e)}`)
+          setShowAlert(true)
+        }
       }
     })()
+    return () => { cancelled = true }
   }, [taskId, featureId])
 
   const onSubmit = async (values: any) => {
@@ -45,12 +49,20 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     }
   }
 
-  if (!initialValues) return <div>Loading...</div>
-
   return (
     <>
       <Modal title="Edit Feature" onClose={doClose} isOpen={true}>
-        <FeatureForm initialValues={initialValues} onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={false} />
+        {initialValues ? (
+          <FeatureForm
+            initialValues={initialValues}
+            onSubmit={onSubmit}
+            onCancel={doClose}
+            submitting={submitting}
+            isCreate={false}
+          />
+        ) : (
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature…</div>
+        )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>

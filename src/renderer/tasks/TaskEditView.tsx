@@ -15,17 +15,21 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
   }
 
   useEffect(() => {
+    let cancelled = false
     ;(async () => {
       try {
         const idx = await tasksService.getSnapshot()
         const task = idx.tasksById[taskId]
         if (!task) throw new Error('Task not found')
-        setInitialValues(task)
+        if (!cancelled) setInitialValues(task)
       } catch (e: any) {
-        setAlertMessage(`Failed to load task: ${e.message || String(e)}`)
-        setShowAlert(true)
+        if (!cancelled) {
+          setAlertMessage(`Failed to load task: ${e.message || String(e)}`)
+          setShowAlert(true)
+        }
       }
     })()
+    return () => { cancelled = true }
   }, [taskId])
 
   const onSubmit = async (values: any) => {
@@ -43,12 +47,20 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
     }
   }
 
-  if (!initialValues) return <div>Loading...</div>
-
   return (
     <>
       <Modal title="Edit Task" onClose={doClose} isOpen={true}>
-        <TaskForm initialValues={initialValues} onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={false} />
+        {initialValues ? (
+          <TaskForm
+            initialValues={initialValues}
+            onSubmit={onSubmit}
+            onCancel={doClose}
+            submitting={submitting}
+            isCreate={false}
+          />
+        ) : (
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading task…</div>
+        )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>
