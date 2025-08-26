@@ -245,7 +245,7 @@
     },
     {
       "id": "7.18",
-      "status": "-",
+      "status": "+",
       "title": "In the Features list Status has a lot of right padding.",
       "description": "Status width can be shrunk to be just a bit wider than the 'Status' title so there's enough space for it not to feel crowded. Dependencies can also be pushed a bit more to the right so it can fit 6 blockers.",
       "plan": "",

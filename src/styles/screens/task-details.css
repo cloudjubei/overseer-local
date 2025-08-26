@@ -18,15 +18,16 @@
 .task-desc { color: var(--text-primary); }
 
 .features-list { list-style: none; padding: 0; margin: 0; }
-/* Compact ID and Actions columns using max-content */
-.features-head { display:grid; grid-template-columns: max-content 1fr 160px 1fr max-content; gap: 8px; padding: 8px; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); }
+/* Compact ID and Actions columns using max-content; shrink Status and bias more width to Dependencies */
+.features-head { display:grid; grid-template-columns: max-content 0.8fr max-content 1.2fr max-content; gap: 8px; padding: 8px; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); }
 .feature-item + .feature-item { border-top: 1px solid var(--border-subtle); }
-.feature-row { display:grid; grid-template-columns: max-content 1fr 160px 1fr max-content; gap: 8px; align-items:center; padding: 8px; }
+.feature-row { display:grid; grid-template-columns: max-content 0.8fr max-content 1.2fr max-content; gap: 8px; align-items:center; padding: 8px; }
 .feature-row:hover { background: color-mix(in srgb, var(--surface-raised) 95%, var(--text-primary) 5%); }
 .feature-row.draggable { cursor: grab; }
 .feature-row:focus { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent) inset; }
 .col { min-width: 0; }
 .col-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-status { white-space: nowrap; }
 .col-actions { display:flex; align-items:center; gap: 8px; justify-content: flex-end; }
 .row-actions { display:inline-flex; gap: 6px; opacity: 0; pointer-events: none; transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease); }
 .feature-row:hover .row-actions, .feature-row:focus .row-actions { opacity: 1; pointer-events: auto; }
@@ -44,5 +45,6 @@
 .empty { padding: 12px; color: var(--text-secondary); }
 
 @media (max-width: 900px) {
-  .features-head, .feature-row { grid-template-columns: max-content 1fr 140px 1fr max-content; }
+  /* Keep Status compact and still bias more room to Dependencies on smaller screens */
+  .features-head, .feature-row { grid-template-columns: max-content 0.9fr max-content 1.1fr max-content; }
 }
