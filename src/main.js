@@ -184,26 +184,22 @@ ipcMain.handle('notifications:send-os', async (event, data) => {
     return { success: false, error: 'Notifications not supported' };
   }
 
-  // Request permission if needed (on macOS)
-  if (process.platform === 'darwin') {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      return { success: false, error: 'Permission denied' };
-    }
+  try {
+    const notification = new Notification({
+      title: data.title,
+      body: data.message,
+      silent: !data.soundsEnabled,
+      timeoutType: data.displayDuration > 0 ? 'default' : 'never',
+    });
+
+    notification.on('click', () => {
+      mainWindow.focus();
+      mainWindow.webContents.send('notifications:clicked', data.metadata);
+    });
+
+    notification.show();
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
-
-  const notification = new Notification({
-    title: data.title,
-    body: data.message,
-    silent: !data.soundsEnabled,
-    timeoutType: data.displayDuration > 0 ? 'default' : 'never',
-  });
-
-  notification.on('click', () => {
-    mainWindow.focus();
-    mainWindow.webContents.send('notifications:clicked', data.metadata);
-  });
-
-  notification.show();
-  return { success: true };
 });
