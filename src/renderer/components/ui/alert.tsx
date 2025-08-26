@@ -5,15 +5,16 @@ export type AlertVariant = "default" | "info" | "success" | "warning" | "destruc
 function variantClasses(variant: AlertVariant) {
   switch (variant) {
     case "info":
-      return "bg-sky-50 text-sky-900 border-sky-200 dark:bg-sky-950/50 dark:text-sky-100 dark:border-sky-900";
+      // Use blue soft tokens
+      return "bg-[color:var(--status-review-soft-bg)] text-[color:var(--status-review-soft-fg)] border-[color:var(--status-review-soft-border)]";
     case "success":
-      return "bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-100 dark:border-emerald-900";
+      return "bg-[color:var(--status-done-soft-bg)] text-[color:var(--status-done-soft-fg)] border-[color:var(--status-done-soft-border)]";
     case "warning":
-      return "bg-amber-50 text-amber-900 border-amber-200 dark:bg-amber-950/50 dark:text-amber-100 dark:border-amber-900";
+      return "bg-[color:var(--status-working-soft-bg)] text-[color:var(--status-working-soft-fg)] border-[color:var(--status-working-soft-border)]";
     case "destructive":
-      return "bg-red-50 text-red-900 border-red-200 dark:bg-red-950/50 dark:text-red-100 dark:border-red-900";
+      return "bg-[color:var(--status-stuck-soft-bg)] text-[color:var(--status-stuck-soft-fg)] border-[color:var(--status-stuck-soft-border)]";
     default:
-      return "bg-neutral-50 text-neutral-900 border-neutral-200 dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-800";
+      return "bg-surface-raised text-text-primary border-border";
   }
 }
 

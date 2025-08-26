@@ -5,9 +5,22 @@ This document describes how files and directories are organised in this reposito
 ## Top-Level Directory Layout
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
+- src/styles/: Shared CSS assets and design tokens.
+  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"]. Includes typography, spacing, radii, elevation, motion, and z-index tokens.
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
+  - design/: Design system references and tokens.
+    - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
+    - design/DESIGN_SYSTEM.md: Comprehensive design system documentation (principles, tokens, typography, spacing, elevation, motion, radii, theming, accessibility, extension guidance).
+    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltips, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
+    - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
+  - ux/: UX research and guidelines.
+    - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
+  - styleguide/: Living style guide that demonstrates tokens and components using actual CSS.
+    - styleguide/index.html: Static style guide (light/dark + density toggle) importing src/styles/design-tokens.css and src/index.css.
+    - styleguide/README.md: How to view and use the style guide.
+  - tailwind.config.tokens.example.js: Example Tailwind extension mapping to CSS variable tokens.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -45,7 +58,18 @@ repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ STANDARDS.md
-│  └─ BUILD_SIGNING.md
+│  ├─ BUILD_SIGNING.md
+│  ├─ design/
+│  │  ├─ DESIGN_TOKENS.md
+│  │  ├─ DESIGN_SYSTEM.md
+│  │  ├─ COMPONENTS.md
+│  │  └─ MONDAY_PALETTE_REFERENCE.md
+│  ├─ ux/
+│  │  └─ LINEAR_UX_GUIDELINES.md
+│  ├─ styleguide/
+│  │  ├─ index.html
+│  │  └─ README.md
+│  └─ tailwind.config.tokens.example.js
 ├─ src/
 │  ├─ chat/
 │  │  ├─ providers/
@@ -54,35 +78,45 @@ repo_root/
 │  │  │  └─ litellm.js
 │  │  └─ manager.js          
 │  ├─ docs/
-│  │  └─ indexer.js        
+│  │  └─ indexer.js
 │  ├─ tasks/
-│  │  ├─ indexer.js                 
-│  │  └─ validator.js                
+│  │  ├─ indexer.js
+│  │  └─ validator.js
 │  ├─ types/
-│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
-│  │  └─ tasks.ts                      # Shared Task/Feature/Status types
+│  │  ├─ external.d.ts
+│  │  └─ tasks.ts
 │  ├─ renderer/
 │  │  ├─ navigation/
-│  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
-│  │  │  └─ ModalHost.tsx              # Renders modals globally above screens via portal
+│  │  │  ├─ Navigator.tsx
+│  │  │  └─ ModalHost.tsx
 │  │  ├─ components/
-│  │  │  └─ ui/
-│  │  │     ├─ Alert.tsx               # Reusable AlertDialog
-│  │  │     ├─ Button.tsx              # Reusable Button
-│  │  │     ├─ Input.tsx               # Reusable Input
-│  │  │     ├─ Modal.tsx               # Reusable Modal
-│  │  │     ├─ Select.tsx              # Reusable Select
-│  │  │     └─ Toast.tsx               # ToastProvider + useToast
+│  │  │  ├─ ui/
+│  │  │  │  ├─ Alert.tsx
+│  │  │  │  ├─ Button.tsx
+│  │  │  │  ├─ Input.tsx
+│  │  │  │  ├─ Modal.tsx
+│  │  │  │  ├─ Select.tsx
+│  │  │  │  ├─ Toast.tsx
+│  │  │  │  ├─ Tooltip.tsx
+│  │  │  │  ├─ Spinner.tsx
+│  │  │  │  ├─ Skeleton.tsx
+│  │  │  │  ├─ CommandMenu.tsx
+│  │  │  │  └─ ShortcutsHelp.tsx
+│  │  │  └─ tasks/
+│  │  │     ├─ StatusBadge.tsx
+│  │  │     ├─ PriorityTag.tsx
+│  │  │     └─ TaskCard.tsx
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts             # Wraps window.chat API
 │  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
 │  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API
 │  │  ├─ hooks/
-│  │  │  ├─ useChats.ts                # Chat state + send flow
-│  │  │  ├─ useDocsIndex.ts            # Subscribe to docs index, expose docsList
-│  │  │  ├─ useDocsAutocomplete.ts     # @mention detection and suggestion UI logic
-│  │  │  ├─ useLLMConfig.ts            # LLM config management
-│  │  │  └─ useNextTaskId.ts           # Next task ID calculation 
+│  │  │  ├─ useChats.ts
+│  │  │  ├─ useDocsIndex.ts
+│  │  │  ├─ useDocsAutocomplete.ts
+│  │  │  ├─ useLLMConfig.ts
+│  │  │  ├─ useNextTaskId.ts
+│  │  │  └─ useShortcuts.tsx
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
@@ -97,10 +131,12 @@ repo_root/
 │  │  │  ├─ TaskDetailsView.tsx        # Details + features
 │  │  │  └─ TasksListView.tsx          # List, filters, reorder
 │  │  ├─ App.tsx
-│  │  └─ types.ts                      # UI types
+│  │  └─ types.ts
+│  ├─ styles/
+│  │  └─ design-tokens.css
 │  ├─ index.css
-│  ├─ main.js                          # Electron main process (updated: removed modal BrowserWindow logic)
-│  └─ preload.js                       # Exposes window.tasksIndex/docsIndex/chat APIs (updated: removed modal-opening functions)
+│  ├─ main.js
+│  └─ preload.js
 ├─ .env
 ├─ forge.config.js
 ├─ index.html
@@ -116,11 +152,7 @@ repo_root/
 ```
 
 Notes on recent changes
-- Removed main-process modal window creation: src/main.js no longer defines createModalWindow nor the IPC handlers feature-create:open, task-create:open, task-edit:open, feature-edit:open. Modals are handled within the renderer via Navigator + ModalHost and are rendered into document.body using createPortal.
-- Simplified preload tasks API: src/preload.js no longer exposes openFeatureCreate/openTaskCreate/openTaskEdit/openFeatureEdit. Renderer code should use Navigator.openModal/closeModal for UI navigation.
-- Updated TasksListView to use Navigator for opening the Create Task modal and for navigating to task details, aligning with STANDARDS.md (centralized navigation).
-- Added src/chat/providers/ for LLM provider abstractions.
-- Added SettingsView.tsx for advanced settings including LLM configurations.
-
-Rationale
-- This eliminates the macOS bug where modal BrowserWindows showed the underlying app view and did not close when the modal was dismissed. Rendering modals in the same window ensures consistent behavior, proper focus management, and simpler state handling.
+- Added foundational tokens for typography, spacing, radii, elevation, motion, and z-index to src/styles/design-tokens.css.
+- Created a comprehensive design system guide (DESIGN_SYSTEM.md) and component guidelines (COMPONENTS.md).
+- Introduced a living style guide at docs/styleguide/index.html showcasing tokens and components with light/dark and density toggles.
+- These changes support Monday-inspired visuals and Linear-grade interactions with improved accessibility and maintainability.

@@ -1,9 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../components/ui/Button'
 import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
+import StatusBadge from '../components/tasks/StatusBadge'
+import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/PriorityTag'
+import BoardView from './BoardView'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -13,11 +16,16 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 }
 
-const STATUSES: Status[] = Object.keys(STATUS_LABELS) as Status[]
+const STATUSES: Status[] = ['+', '~', '-', '?', '=']
 
 function toTasksArray(index: TasksIndexSnapshot): Task[] {
   const tasksById = index?.tasksById || {}
   const arr = Object.values(tasksById) as Task[]
+  // Keep stable by orderedIds if provided; otherwise by id asc
+  if (index?.orderedIds && Array.isArray(index.orderedIds)) {
+    const byId: Record<number, Task> = tasksById as any
+    return index.orderedIds.map((id) => byId[id]).filter(Boolean)
+  }
   arr.sort((a, b) => (a.id || 0) - (b.id || 0))
   return arr
 }
@@ -44,52 +52,14 @@ function filterTasks(tasks: Task[], { query, status }: { query: string; status: 
   })
 }
 
-function cssStatus(status: Status | string) {
-  switch (status) {
-    case '+': return 'done'
-    case '~': return 'inprogress'
-    case '-': return 'pending'
-    case '?': return 'blocked'
-    case '=': return 'deferred'
-    default: return 'unknown'
-  }
-}
-
-function StatusBadge({ status }: { status: Status | string }) {
-  const label = STATUS_LABELS[status as Status] || String(status || '')
-  return (
-    <span className={`status-badge status-${cssStatus(status)}`} role="img" aria-label={label}>
-      {label}
-    </span>
-  )
-}
-
-function onRowKeyDown(e: React.KeyboardEvent<HTMLDivElement>, taskId: number, ulRef: React.RefObject<HTMLUListElement>, navigateTaskDetails: (id: number) => void) {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault()
-    navigateTaskDetails(taskId)
-    return
-  }
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-  e.preventDefault()
-  const ul = ulRef.current
-  if (!ul) return
-  const rows = Array.from(ul.querySelectorAll('.task-row'))
-  const current = e.currentTarget
-  const i = rows.indexOf(current)
-  if (i === -1) return
-  let nextIndex = i + (e.key === 'ArrowDown' ? 1 : -1)
-  if (nextIndex < 0) nextIndex = 0
-  if (nextIndex >= rows.length) nextIndex = rows.length - 1
-  ;(rows[nextIndex] as HTMLElement).focus()
-}
-
 export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('any')
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [saving, setSaving] = useState(false)
+  const [view, setView] = useState<'list' | 'board'>('list')
+  const [dragTaskId, setDragTaskId] = useState<number | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
   const { openModal, navigateTaskDetails } = useNavigator()
 
@@ -112,7 +82,19 @@ export default function TasksListView() {
     }
   }, [index])
 
-  const filtered = filterTasks(allTasks, { query, status: statusFilter })
+  // Keyboard shortcut: Cmd/Ctrl+N for new task
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault()
+        openModal({ type: 'task-create' })
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [openModal])
+
+  const filtered = useMemo(() => filterTasks(allTasks, { query, status: statusFilter }), [allTasks, query, statusFilter])
   const isFiltered = query !== '' || statusFilter !== 'any'
 
   const handleClear = () => {
@@ -121,13 +103,13 @@ export default function TasksListView() {
   }
 
   const handleAddTask = async () => {
-      openModal({ type: 'task-create' })
+    openModal({ type: 'task-create' })
   }
 
   const handleMoveTask = async (fromId: number, toIndex: number) => {
     setSaving(true)
     try {
-      const res = await window.tasksIndex.reorderTasks({ fromId, toIndex })
+      const res = await tasksService.reorderTasks({ fromId, toIndex })
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder task: ${e.message || e}`)
@@ -136,75 +118,138 @@ export default function TasksListView() {
     }
   }
 
+  const handleStatusChange = async (taskId: number, status: Status) => {
+    try {
+      await tasksService.updateTask(taskId, { status })
+    } catch (e) {
+      console.error('Failed to update status', e)
+    }
+  }
+
+  const dndEnabled = !isFiltered && view === 'list'
+
+  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, taskId: number) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigateTaskDetails(taskId)
+      return
+    }
+    if (e.key.toLowerCase() === 's') {
+      e.preventDefault()
+      // cycle status quickly
+      const current = allTasks.find(t => t.id === taskId)?.status
+      const order: Status[] = ['-', '~', '+', '=', '?']
+      const next = order[(Math.max(0, order.indexOf(current as Status)) + 1) % order.length]
+      handleStatusChange(taskId, next)
+      return
+    }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+    e.preventDefault()
+    const ul = ulRef.current
+    if (!ul) return
+    const rows = Array.from(ul.querySelectorAll('.task-row'))
+    const current = e.currentTarget
+    const i = rows.indexOf(current)
+    if (i === -1) return
+    let nextIndex = i + (e.key === 'ArrowDown' ? 1 : -1)
+    if (nextIndex < 0) nextIndex = 0
+    if (nextIndex >= rows.length) nextIndex = rows.length - 1
+    ;(rows[nextIndex] as HTMLElement).focus()
+  }
+
   return (
     <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
-      <div className="tasks-controls" role="search">
-        <div className="control">
-          <label htmlFor="tasks-search-input">Search</label>
-          <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <div className="tasks-toolbar">
+        <div className="left">
+          <div className="control">
+            <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
+          </div>
+          <div className="control">
+            <select id="tasks-status-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="any">All statuses</option>
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_LABELS[s]} ({s})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="control">
+            <Button className="btn-clear" variant="secondary" onClick={handleClear}>Clear</Button>
+          </div>
         </div>
-        <div className="control">
-          <label htmlFor="tasks-status-select">Status</label>
-          <select id="tasks-status-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="any">All statuses</option>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]} ({s})
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="control control-Buttons">
-          <Button className="btn-clear" onClick={handleClear}>
-            Clear
-          </Button>
-        </div>
-        <div className="control control-add-task">
-          <Button className="btn-add-task" onClick={handleAddTask}>
-            Add Task
-          </Button>
+        <div className="right">
+          <div className="view-toggle" role="tablist" aria-label="View toggle">
+            <button className={`toggle ${view === 'list' ? 'active' : ''}`} role="tab" aria-selected={view === 'list'} onClick={() => setView('list')}>List</button>
+            <button className={`toggle ${view === 'board' ? 'active' : ''}`} role="tab" aria-selected={view === 'board'} onClick={() => setView('board')}>Board</button>
+          </div>
+          <Button onClick={handleAddTask}>New Task</Button>
         </div>
       </div>
+
       <div id="tasks-count" className="tasks-count" aria-live="polite">
         Showing {filtered.length} of {allTasks.length} tasks
       </div>
-      <div id="tasks-results" className="tasks-results" tabIndex={-1}>
-        {filtered.length === 0 ? (
-          <div className="empty">No tasks found.</div>
-        ) : (
-          <ul className="tasks-list" role="list" aria-label="Tasks" ref={ulRef}>
-            {filtered.map((t, idx) => {
-              const { done, total } = countFeatures(t)
-              return (
-                <li key={t.id} className="task-item" role="listitem">
-                  <div
-                    className="task-row"
-                    tabIndex={0}
-                    role="Button"
-                    data-index={idx}
-                    onClick={() => navigateTaskDetails(t.id)}
-                    onKeyDown={(e) => onRowKeyDown(e, t.id, ulRef, navigateTaskDetails)}
-                    aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
-                  >
-                    <div className="col col-id">{String(t.id)}</div>
-                    <div className="col col-title">{t.title || ''}</div>
-                    <div className="col col-status">
-                      <StatusBadge status={t.status} />
-                    </div>
-                    <div className="col col-features">{done}/{total}</div>
-                    {!isFiltered && (
-                      <div className="col col-actions">
-                        <Button className="btn-move-up" disabled={saving || idx === 0} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx - 1) }}>Up</Button>
-                        <Button className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx + 1) }}>Down</Button>
+
+      {view === 'board' ? (
+        <BoardView tasks={filtered} />
+      ) : (
+        <div id="tasks-results" className="tasks-results" tabIndex={-1}>
+          {filtered.length === 0 ? (
+            <div className="empty">No tasks found.</div>
+          ) : (
+            <ul className="tasks-list" role="list" aria-label="Tasks" ref={ulRef}
+              onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
+            >
+              {filtered.map((t, idx) => {
+                const { done, total } = countFeatures(t)
+                const priority = parsePriorityFromTitle(t.title)
+                return (
+                  <li key={t.id} className="task-item" role="listitem">
+                    <div
+                      className={`task-row ${dndEnabled ? 'draggable' : ''}`}
+                      tabIndex={0}
+                      role="button"
+                      data-index={idx}
+                      draggable={dndEnabled}
+                      onDragStart={(e) => { if (!dndEnabled) return; setDragTaskId(t.id); e.dataTransfer.setData('text/plain', String(t.id)); e.dataTransfer.effectAllowed = 'move' }}
+                      onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault() }}
+                      onDrop={(e) => { if (!dndEnabled) return; e.preventDefault(); const overIdx = idx; if (dragTaskId != null) { handleMoveTask(dragTaskId, overIdx) } setDragTaskId(null) }}
+                      onClick={() => navigateTaskDetails(t.id)}
+                      onKeyDown={(e) => onRowKeyDown(e, t.id)}
+                      aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
+                    >
+                      <div className="col col-id">{String(t.id)}</div>
+                      <div className="col col-title">
+                        <div className="title-line">
+                          <span className="title-text">{t.title || ''}</span>
+                          <PriorityTag priority={priority} />
+                        </div>
+                        <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
                       </div>
-                    )}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </div>
+                      <div className="col col-status">
+                        <div className="status-inline">
+                          <StatusBadge status={t.status} />
+                          <select className="status-select" aria-label="Change status"
+                            value={t.status}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => handleStatusChange(t.id, e.target.value as Status)}
+                          >
+                            {STATUSES.map(s => (
+                              <option key={s} value={s}>{STATUS_LABELS[s]} ({s})</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="col col-features">{done}/{total}</div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      )}
     </section>
   )
 }

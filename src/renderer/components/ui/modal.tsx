@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 
 export type ModalProps = {
   isOpen: boolean;
@@ -8,6 +8,7 @@ export type ModalProps = {
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
   hideCloseButton?: boolean;
+  initialFocusRef?: React.RefObject<HTMLElement>;
 };
 
 function sizeClass(size?: ModalProps["size"]) {
@@ -25,7 +26,21 @@ function sizeClass(size?: ModalProps["size"]) {
   }
 }
 
-export function Modal({ isOpen, onClose, title, children, footer, size, hideCloseButton }: ModalProps) {
+function getFocusable(container: HTMLElement | null): HTMLElement[] {
+  if (!container) return [];
+  const selectors = [
+    'a[href]','button:not([disabled])','textarea:not([disabled])','input:not([disabled])','select:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])'
+  ];
+  const nodes = Array.from(container.querySelectorAll<HTMLElement>(selectors.join(',')));
+  return nodes.filter(n => !n.hasAttribute('disabled') && !n.getAttribute('aria-hidden'));
+}
+
+export function Modal({ isOpen, onClose, title, children, footer, size, hideCloseButton, initialFocusRef }: ModalProps) {
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedEl = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -35,25 +50,67 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    previouslyFocusedEl.current = document.activeElement as HTMLElement | null;
+
+    const toFocus = initialFocusRef?.current || getFocusable(panelRef.current!)[0];
+    toFocus?.focus();
+
+    return () => {
+      previouslyFocusedEl.current?.focus?.();
+    };
+  }, [isOpen, initialFocusRef]);
+
   if (!isOpen) return null;
 
+  const onOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) onClose();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab') return;
+    const focusables = getFocusable(panelRef.current!);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center" aria-hidden={false}>
       <div
+        ref={overlayRef}
+        className="absolute inset-0 bg-black/40 opacity-100 animate-in fade-in"
+        onMouseDown={onOverlayClick}
+      />
+      <div
+        ref={panelRef}
         className={
-          `relative z-10 w-full ${sizeClass(size)} rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900 flex flex-col max-h-[90vh]`
+          `relative z-10 w-full ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh]` +
+          " border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95"
         }
         role="dialog"
         aria-modal="true"
+        onKeyDown={onKeyDown}
       >
-        <div className="flex items-start justify-between gap-4 border-b p-4 dark:border-neutral-800 shrink-0">
+        <div className="flex items-start justify-between gap-4 border-b p-4 shrink-0 border-border">
           <div className="text-base font-semibold">{title}</div>
           {!hideCloseButton && (
             <button
               type="button"
               onClick={onClose}
-              className="rounded p-1 text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded p-1 text-text-muted hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2"
               aria-label="Close"
             >
               ×
@@ -61,7 +118,7 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
           )}
         </div>
         <div className="flex-grow overflow-y-auto p-4">{children}</div>
-        {footer ? <div className="shrink-0 border-t p-3 dark:border-neutral-800">{footer}</div> : null}
+        {footer ? <div className="shrink-0 border-t p-3 border-border">{footer}</div> : null}
       </div>
     </div>
   );
@@ -75,6 +132,7 @@ export function AlertDialog({
   confirmText = "Confirm",
   cancelText = "Cancel",
   onConfirm,
+  initialFocusRef,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -83,33 +141,37 @@ export function AlertDialog({
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
+  initialFocusRef?: React.RefObject<HTMLElement>;
 }) {
+  const confirmRef = initialFocusRef || React.useRef<HTMLButtonElement>(null);
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      initialFocusRef={confirmRef as React.RefObject<HTMLElement>}
       footer={
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="inline-flex items-center rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-800 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm bg-surface-raised text-text-primary hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2"
           >
             {cancelText}
           </button>
           <button
+            ref={confirmRef}
             onClick={() => {
               onConfirm?.();
               onClose();
             }}
-            className="inline-flex items-center rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+            className="inline-flex items-center rounded-md bg-brand-600 px-3 py-1.5 text-sm text-text-inverted hover:bg-brand-700 focus-visible:ring-2"
           >
             {confirmText}
           </button>
         </div>
       }
     >
-      {description ? <p className="text-sm text-neutral-600 dark:text-neutral-300">{description}</p> : null}
+      {description ? <p className="text-sm text-text-secondary">{description}</p> : null}
     </Modal>
   );
 }
