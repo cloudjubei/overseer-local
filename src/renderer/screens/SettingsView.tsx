@@ -222,7 +222,27 @@ export default function SettingsView() {
       <div className="space-y-4">
         <Switch
           checked={preferences.osNotificationsEnabled}
-          onCheckedChange={(checked) => updatePreferences({ osNotificationsEnabled: checked })}
+          onCheckedChange={async (checked) => {
+            updatePreferences({ osNotificationsEnabled: checked });
+            if (checked) {
+              try {
+                const result = await window.notifications.sendOs({
+                  title: 'Notifications Enabled',
+                  message: 'You will now receive desktop notifications for important events.',
+                  soundsEnabled: false,
+                  displayDuration: 5,
+                  metadata: {}
+                });
+                if (!result.success) {
+                  updatePreferences({ osNotificationsEnabled: false });
+                  toast({ title: 'Error Enabling Notifications', description: result.error || 'Unable to enable notifications. Please check your system settings.', variant: 'error' });
+                }
+              } catch (err) {
+                updatePreferences({ osNotificationsEnabled: false });
+                toast({ title: 'Error', description: String(err), variant: 'error' });
+              }
+            }
+          }}
           label="Enable OS Notifications"
         />
         <div>
