@@ -67,7 +67,7 @@
     },
     {
       "id": "3.7",
-      "status": "-",
+      "status": "+",
       "title": "Implement internal link navigation in rendered Markdown",
       "description": "In the rendered Markdown content, intercept clicks on internal links (relative paths to other .md files or anchors within the same file). For relative .md links, navigate to the corresponding file in the Docs browser view by updating the selection. Handle anchor links (#fragment) by scrolling to the section within the current rendered content.",
       "plan": "",

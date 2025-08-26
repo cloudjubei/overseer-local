@@ -183,6 +183,7 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
   const [content, setContent] = useState<string>('');
   const [contentLoading, setContentLoading] = useState<boolean>(false);
   const [contentError, setContentError] = useState<string | null>(null);
+  const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
 
   // Keep selection if file still exists; otherwise clear
   useEffect(() => {
@@ -192,6 +193,7 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
       setSelected(null);
       setContent('');
       setContentError(null);
+      setPendingAnchor(null);
     }
   }, [snapshot, selected]);
 
@@ -224,8 +226,17 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
   const handleSelect = useCallback((relPath: string) => {
     setSelected(relPath);
     if (onSelectFile) onSelectFile(relPath);
+    setPendingAnchor(null);
     loadContent(relPath);
   }, [onSelectFile, loadContent]);
+
+  // Internal navigation handler from MarkdownRenderer
+  const handleNavigateDoc = useCallback((relPath: string, fragment?: string | null) => {
+    setSelected(relPath);
+    if (onSelectFile) onSelectFile(relPath);
+    setPendingAnchor(fragment || null);
+    loadContent(relPath);
+  }, [loadContent, onSelectFile]);
 
   const isEmpty = useMemo(() => {
     if (!snapshot) return false;
@@ -284,7 +295,12 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
               <div className="text-sm text-red-600 dark:text-red-400">{contentError}</div>
             )}
             {!contentLoading && !contentError && (
-              <MarkdownRenderer content={content} />
+              <MarkdownRenderer
+                content={content}
+                currentRelPath={selected}
+                onNavigateDoc={handleNavigateDoc}
+                scrollToId={pendingAnchor}
+              />
             )}
           </div>
         )}
