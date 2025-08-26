@@ -1,6 +1,6 @@
 {
   "id": 8,
-  "status": "-",
+  "status": "+",
   "title": "Notifications center UI and preferences",
   "description": "Add a notifications panel listing recent events. Provide settings to enable/disable OS notifications and categories.",
   "features": [
@@ -33,7 +33,7 @@
     },
     {
       "id": "8.4",
-      "status": "-",
+      "status": "+",
       "title": "Create notification preferences UI",
       "description": "Build a notification preferences/settings modal or screen that allows users to enable/disable OS notifications globally and configure notification categories. Include toggles for different types of notifications (tasks, features, system events, etc.), sound preferences, and notification display duration settings. Persist settings using Electron store or local storage.",
       "plan": "",
