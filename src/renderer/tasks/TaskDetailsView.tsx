@@ -192,7 +192,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
             >
               <li className="features-head" aria-hidden="true">
-                <div className="col col-id">#</div>
+                <div className="col col-id"></div>
                 <div className="col col-title">Title</div>
                 <div className="col col-status">Status</div>
                 <div className="col col-deps">Dependencies</div>

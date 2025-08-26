@@ -244,24 +244,6 @@
       "acceptance": []
     },
     {
-      "id": "7.18",
-      "status": "+",
-      "title": "In the Features list Status has a lot of right padding.",
-      "description": "Status width can be shrunk to be just a bit wider than the 'Status' title so there's enough space for it not to feel crowded. Dependencies can also be pushed a bit more to the right so it can fit 6 blockers.",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": []
-    },
-    {
       "id": "7.19",
       "status": "+",
       "title": "In the features list the Actions should only show on hover",
