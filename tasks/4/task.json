@@ -78,7 +78,7 @@
     },
     {
       "id": "4.9",
-      "status": "-",
+      "status": "+",
       "title": "Add create_doc tool for agent",
       "description": "Add to tools: create_doc (params: name, content), writes fs.writeFileSync(docsIndexer.getIndex().docsDir + '/' + name + '.md', content), calls docsIndexer.buildIndex(), returns 'Created at ' + name + '.md' or error.",
       "plan": "",

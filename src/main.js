@@ -248,6 +248,22 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
             additionalProperties: false
           }
         }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'create_doc',
+          description: 'Create a new document in the project docs directory.',
+          parameters: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'The name of the document (without .md extension)' },
+              content: { type: 'string', description: 'The Markdown content of the document' }
+            },
+            required: ['name', 'content'],
+            additionalProperties: false
+          }
+        }
       }
     ];
     const availableTools = {
@@ -258,6 +274,17 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
           const fullPath = path.join(docsIndexer.getIndex().docsDir, args.path);
           const content = fs.readFileSync(fullPath, 'utf8');
           return { content };
+        } catch (e) {
+          return { error: e.message };
+        }
+      },
+      create_doc: async (args) => {
+        try {
+          const filename = `${args.name}.md`;
+          const fullPath = path.join(docsIndexer.getIndex().docsDir, filename);
+          fs.writeFileSync(fullPath, args.content, 'utf8');
+          await docsIndexer.buildIndex();
+          return { message: `Created at ${filename}` };
         } catch (e) {
           return { error: e.message };
         }
