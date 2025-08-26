@@ -23,6 +23,18 @@ const ChatView = () => {
   const ipcRenderer = (window as any).electron.ipcRenderer;
 
   useEffect(() => {
+    const loadMessages = async () => {
+      const loaded = await ipcRenderer.invoke('chat:load');
+      setMessages(loaded);
+    };
+    loadMessages();
+  }, []);
+
+  useEffect(() => {
+    ipcRenderer.invoke('chat:save', messages);
+  }, [messages]);
+
+  useEffect(() => {
     setApiBaseUrl(localStorage.getItem('llm_apiBaseUrl') || 'https://api.openai.com/v1');
     setApiKey(localStorage.getItem('llm_apiKey') || '');
     setModel(localStorage.getItem('llm_model') || 'gpt-4o');

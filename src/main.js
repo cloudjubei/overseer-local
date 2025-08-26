@@ -49,6 +49,11 @@ app.whenReady().then(() => {
   docsIndexer = new DocsIndexer(projectRoot);
   docsIndexer.init();
 
+  const chatsDir = path.join(projectRoot, 'chats');
+  if (!fs.existsSync(chatsDir)) {
+    fs.mkdirSync(chatsDir);
+  }
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -331,4 +336,18 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
     console.error('Error in chat completion:', error);
     return { role: 'assistant', content: `An error occurred: ${error.message}` };
   }
+});
+
+ipcMain.handle('chat:load', () => {
+  const filePath = path.join(app.getAppPath(), 'chats/chat.json');
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return [];
+  }
+});
+
+ipcMain.handle('chat:save', (event, messages) => {
+  const filePath = path.join(app.getAppPath(), 'chats/chat.json');
+  fs.writeFileSync(filePath, JSON.stringify(messages));
 });
