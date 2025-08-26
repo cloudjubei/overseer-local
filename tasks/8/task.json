@@ -24,12 +24,13 @@
     },
     {
       "id": "8.3",
-      "status": "-",
+      "status": "?",
       "title": "Add OS notification integration",
       "description": "Implement native OS notifications using Electron's Notification API in the main process. Add IPC communication between renderer and main process to trigger OS notifications. Include notification click handling to focus the app and navigate to relevant content. Add permission checks and fallback handling.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
     },
     {
       "id": "8.4",
