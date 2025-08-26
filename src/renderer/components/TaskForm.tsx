@@ -1,97 +1,185 @@
-import React, { useState } from 'react'
-import type { Status, Task } from 'src/types/tasks'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done', '~': 'In Progress', '-': 'Pending', '?': 'Blocked', '=': 'Deferred'
+export type TaskFormValues = {
+  id: number
+  title: string
+  status?: 'queued' | 'working' | 'review' | 'done' | 'stuck' | 'on_hold'
+  description?: string
 }
 
-export type TaskFormValues = Pick<Task, 'id' | 'status' | 'title' | 'description'>
-
-type TaskFormProps = {
+type Props = {
   initialValues?: Partial<TaskFormValues>
-  onSubmit: (values: TaskFormValues) => void
+  onSubmit: (values: TaskFormValues) => void | Promise<void>
   onCancel: () => void
-  submitting: boolean
-  isCreate: boolean
+  submitting?: boolean
+  isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
 }
 
-export function TaskForm({ initialValues = {}, onSubmit, onCancel, submitting, isCreate, titleRef }: TaskFormProps) {
-  const [id, setId] = useState<number | ''>(initialValues.id ?? (isCreate ? '' : ''))
-  const [status, setStatus] = useState<Status>(initialValues.status ?? '-')
-  const [title, setTitle] = useState(initialValues.title ?? '')
-  const [description, setDescription] = useState(initialValues.description ?? '')
+const STATUS_OPTIONS: Array<{ value: TaskFormValues['status']; label: string }> = [
+  { value: 'queued', label: 'Queued' },
+  { value: 'working', label: 'Working' },
+  { value: 'review', label: 'In Review' },
+  { value: 'done', label: 'Done' },
+  { value: 'stuck', label: 'Stuck' },
+  { value: 'on_hold', label: 'On Hold' },
+]
 
-  const doSubmit = () => {
-    const idVal = typeof id === 'number' ? id : parseInt(String(id || ''), 10)
-    onSubmit({ id: isCreate ? idVal : (initialValues.id as number), status, title, description })
+export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef }: Props) {
+  const [id, setId] = useState<number>(initialValues?.id ?? 0)
+  const [title, setTitle] = useState<string>(initialValues?.title ?? '')
+  const [status, setStatus] = useState<TaskFormValues['status']>(initialValues?.status ?? 'queued')
+  const [description, setDescription] = useState<string>(initialValues?.description ?? '')
+  const [errors, setErrors] = useState<{ id?: string; title?: string }>({})
+
+  const localTitleRef = useRef<HTMLInputElement>(null)
+  const combinedTitleRef = titleRef ?? localTitleRef
+
+  useEffect(() => {
+    if (combinedTitleRef?.current) {
+      combinedTitleRef.current.focus()
+      combinedTitleRef.current.select?.()
+    }
+  }, [combinedTitleRef])
+
+  const canSubmit = useMemo(() => {
+    const hasId = Number.isInteger(id) && id > 0
+    const hasTitle = title.trim().length > 0
+    return hasId && hasTitle && !submitting
+  }, [id, title, submitting])
+
+  function validate(): boolean {
+    const next: { id?: string; title?: string } = {}
+    if (!Number.isInteger(id) || id <= 0) next.id = 'ID must be a positive integer'
+    if (!title.trim()) next.title = 'Title is required'
+    setErrors(next)
+    return Object.keys(next).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    doSubmit()
+  async function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault()
+    if (!validate()) return
+    const payload: TaskFormValues = {
+      id,
+      title: title.trim(),
+      status: status ?? 'queued',
+      description: description?.trim() || '',
+    }
+    await onSubmit(payload)
   }
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
+  function onKeyDown(e: React.KeyboardEvent) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'enter') {
       e.preventDefault()
-      doSubmit()
+      if (canSubmit) handleSubmit()
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="task-form">
-      {isCreate && (
-        <div className="form-row">
-          <label htmlFor="task-id">ID</label>
+    <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Task' : 'Edit Task'}>
+      <div className="grid grid-cols-1 gap-3">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="task-id" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Task ID</label>
           <input
             id="task-id"
-            className="ui-input"
             type="number"
+            inputMode="numeric"
             min={1}
-            step={1}
-            value={id}
-            onChange={(e) => setId(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+            value={isCreate ? id : (initialValues?.id ?? id)}
+            onChange={(e) => setId(parseInt(e.target.value, 10))}
+            disabled={!isCreate || submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+            aria-invalid={!!errors.id}
+            aria-describedby={errors.id ? 'task-id-error' : undefined}
+          />
+          {errors.id ? (
+            <div id="task-id-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{errors.id}</div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="task-title" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Title</label>
+          <input
+            id="task-title"
+            ref={combinedTitleRef}
+            type="text"
+            placeholder="Give your task a clear title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: errors.title ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+            aria-invalid={!!errors.title}
+            aria-describedby={errors.title ? 'task-title-error' : undefined}
+          />
+          {errors.title ? (
+            <div id="task-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{errors.title}</div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="task-status" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Status</label>
+          <select
+            id="task-status"
+            value={status ?? 'queued'}
+            onChange={(e) => setStatus(e.target.value as TaskFormValues['status'])}
+            disabled={submitting}
+            className="ui-select w-full"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value ?? ''}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="task-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+          <textarea
+            id="task-description"
+            rows={4}
+            placeholder="Optional description or details"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
           />
         </div>
-      )}
-      {!isCreate && <div className="form-row"><label>ID</label><p>{initialValues.id}</p></div>}
-      <div className="form-row">
-        <label htmlFor="task-status">Status</label>
-        <select id="task-status" className="ui-select" value={status} onChange={(e) => setStatus(e.target.value as Status)}>
-          {(['+', '~', '-', '?', '='] as Status[]).map((s) => (
-            <option key={s} value={s}>{STATUS_LABELS[s]} ({s})</option>
-          ))}
-        </select>
       </div>
-      <div className="form-row">
-        <label htmlFor="task-title">Title</label>
-        <input
-          id="task-title"
-          ref={titleRef}
-          className="ui-input"
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      <div className="form-row">
-        <label htmlFor="task-desc">Description</label>
-        <textarea
-          id="task-desc"
-          className="ui-textarea"
-          rows={4}
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-      <div className="form-actions">
-        <button type="button" className="btn-secondary" onClick={onCancel} disabled={submitting}>Cancel</button>
-        <button type="submit" className="btn" disabled={submitting}>{isCreate ? 'Create' : 'Save'}</button>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => onCancel()}
+          disabled={submitting}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="btn"
+          disabled={!canSubmit}
+          aria-keyshortcuts="Control+Enter Meta+Enter"
+          title="Cmd/Ctrl+Enter to submit"
+        >
+          {isCreate ? 'Create Task' : 'Save Changes'}
+        </button>
       </div>
     </form>
   )
 }
+export default TaskForm

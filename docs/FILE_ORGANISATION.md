@@ -102,10 +102,12 @@ repo_root/
 │  │  │  │  ├─ Skeleton.tsx
 │  │  │  │  ├─ CommandMenu.tsx
 │  │  │  │  └─ ShortcutsHelp.tsx
-│  │  │  └─ tasks/
-│  │  │     ├─ StatusBadge.tsx
-│  │  │     ├─ PriorityTag.tsx
-│  │  │     └─ TaskCard.tsx
+│  │  │  ├─ tasks/
+│  │  │  │  ├─ StatusBadge.tsx
+│  │  │  │  ├─ PriorityTag.tsx
+│  │  │  │  └─ TaskCard.tsx
+│  │  │  ├─ FeatureForm.tsx        <-- NEW: feature create/edit form (Monday/Linear-guided)
+│  │  │  └─ TaskForm.tsx           <-- NEW: task create/edit form (Monday/Linear-guided)
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts
 │  │  │  ├─ docsService.ts
@@ -158,4 +160,9 @@ Notes on recent changes
   - Provides a React hook useTheme() for components to read/update the theme.
 - Updated App.tsx to call initTheme() on mount so the persisted theme is applied globally, not only when opening Settings.
 - Updated SettingsView to use useTheme() and a single, correct theme list [light, dark]. Removed the unused "blue" option and the incorrect className assignment on <html> which broke theming.
-- This aligns with docs/design/DESIGN_SYSTEM.md which specifies theming via data-theme, ensuring Monday-inspired palettes and Linear-grade UX behave correctly across light/dark.
+- Added FeatureForm.tsx and TaskForm.tsx under src/renderer/components/ implementing Monday-inspired styles and Linear-grade UX patterns:
+  - Minimal fields, visible focus, soft borders using design tokens
+  - Keyboard shortcut Cmd/Ctrl+Enter to submit; Esc handled by Modal
+  - Initial focus on Title, with support for external titleRef
+  - Inline validation for required fields (ID, Title)
+- This aligns with docs/design/DESIGN_SYSTEM.md and docs/ux/LINEAR_UX_GUIDELINES.md (quick create, keyboard-first).

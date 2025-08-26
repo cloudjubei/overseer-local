@@ -152,7 +152,7 @@
     },
     {
       "id": "7.13",
-      "status": "-",
+      "status": "+",
       "title": "Create feature and create task don't open",
       "description": "they should be adapted to the new design guidelines. Remember - these are react components, using tailwind.",
       "plan": "",

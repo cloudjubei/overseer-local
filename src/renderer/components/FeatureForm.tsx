@@ -1,99 +1,129 @@
-import React, { useState } from 'react'
-import type { Feature, Status } from 'src/types/tasks'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done', '~': 'In Progress', '-': 'Pending', '?': 'Blocked', '=': 'Deferred'
+export type FeatureFormValues = {
+  title: string
+  description?: string
 }
 
-export type FeatureFormValues = Omit<Feature, 'id'>
-
-type FeatureFormProps = {
+type Props = {
   initialValues?: Partial<FeatureFormValues>
-  onSubmit: (values: FeatureFormValues) => void
+  onSubmit: (values: FeatureFormValues) => void | Promise<void>
   onCancel: () => void
-  submitting: boolean
-  isCreate: boolean
+  submitting?: boolean
+  isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
 }
 
-export function FeatureForm({ initialValues = {}, onSubmit, onCancel, submitting, isCreate, titleRef }: FeatureFormProps) {
-  const [status, setStatus] = useState<Status>((initialValues.status as Status) ?? '-')
-  const [title, setTitle] = useState(initialValues.title ?? '')
-  const [description, setDescription] = useState(initialValues.description ?? '')
-  const [plan, setPlan] = useState(initialValues.plan ?? '')
-  const [context, setContext] = useState((initialValues.context?.join('\n')) ?? '')
-  const [acceptance, setAcceptance] = useState((initialValues.acceptance?.join('\n')) ?? '')
-  const [dependencies, setDependencies] = useState((initialValues.dependencies?.join('\n')) ?? '')
-  const [rejection, setRejection] = useState(initialValues.rejection ?? '')
+export function FeatureForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef }: Props) {
+  const [title, setTitle] = useState<string>(initialValues?.title ?? '')
+  const [description, setDescription] = useState<string>(initialValues?.description ?? '')
+  const [error, setError] = useState<string | null>(null)
 
-  const doSubmit = () => {
-    if (!String(title).trim()) return
-    onSubmit({
-      status,
-      title: String(title).trim(),
-      description: String(description).trim(),
-      plan: String(plan).trim(),
-      context: String(context).split('\n').map(s => s.trim()).filter(Boolean),
-      acceptance: String(acceptance).split('\n').map(s => s.trim()).filter(Boolean),
-      dependencies: String(dependencies).split('\n').map(s => s.trim()).filter(Boolean),
-      rejection: String(rejection).trim() || undefined,
-    })
+  const localTitleRef = useRef<HTMLInputElement>(null)
+  const combinedTitleRef = titleRef ?? localTitleRef
+
+  useEffect(() => {
+    if (combinedTitleRef?.current) {
+      combinedTitleRef.current.focus()
+      combinedTitleRef.current.select?.()
+    }
+  }, [combinedTitleRef])
+
+  const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
+
+  function validate(): boolean {
+    if (!title.trim()) {
+      setError('Title is required')
+      return false
+    }
+    setError(null)
+    return true
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    doSubmit()
+  async function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault()
+    if (!validate()) return
+    const payload: FeatureFormValues = {
+      title: title.trim(),
+      description: description?.trim() || ''
+    }
+    await onSubmit(payload)
   }
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLFormElement> = (e) => {
+  function onKeyDown(e: React.KeyboardEvent) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'enter') {
       e.preventDefault()
-      doSubmit()
+      if (canSubmit) handleSubmit()
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="feature-form">
-      <div className="form-group">
-        <label htmlFor="status">Status</label>
-        <select id="status" className="ui-select" value={status} onChange={(e) => setStatus(e.target.value as Status)}>
-          {(['+', '~', '-', '?', '='] as Status[]).map(s => (
-            <option key={s} value={s}>{STATUS_LABELS[s]} ({s})</option>
-          ))}
-        </select>
+    <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}>
+      <div className="grid grid-cols-1 gap-3">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="feature-title" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Title</label>
+          <input
+            id="feature-title"
+            ref={combinedTitleRef}
+            type="text"
+            placeholder="What is this feature?"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+            aria-invalid={!!error}
+            aria-describedby={error ? 'feature-title-error' : undefined}
+          />
+          {error ? (
+            <div id="feature-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{error}</div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+          <textarea
+            id="feature-description"
+            rows={4}
+            placeholder="Optional details or acceptance criteria"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+          />
+        </div>
       </div>
-      <div className="form-group">
-        <label htmlFor="title">Title</label>
-        <input id="title" ref={titleRef} className="ui-input" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label htmlFor="description">Description</label>
-        <textarea id="description" className="ui-textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="plan">Plan</label>
-        <textarea id="plan" className="ui-textarea" rows={3} value={plan} onChange={(e) => setPlan(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="context">Context (one per line)</label>
-        <textarea id="context" className="ui-textarea" rows={4} value={context} onChange={(e) => setContext(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="acceptance">Acceptance (one per line)</label>
-        <textarea id="acceptance" className="ui-textarea" rows={4} value={acceptance} onChange={(e) => setAcceptance(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="dependencies">Dependencies (feature id or title; one per line)</label>
-        <textarea id="dependencies" className="ui-textarea" rows={3} value={dependencies} onChange={(e) => setDependencies(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="rejection">Rejection (optional)</label>
-        <textarea id="rejection" className="ui-textarea" rows={2} value={rejection} onChange={(e) => setRejection(e.target.value)} />
-      </div>
-      <div className="form-actions">
-        <button type="button" className="btn-secondary" onClick={onCancel} disabled={submitting}>Cancel</button>
-        <button type="submit" className="btn" disabled={submitting}>{isCreate ? 'Create' : 'Save'}</button>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => onCancel()}
+          disabled={submitting}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="btn"
+          disabled={!canSubmit}
+          aria-keyshortcuts="Control+Enter Meta+Enter"
+          title="Cmd/Ctrl+Enter to submit"
+        >
+          {isCreate ? 'Create Feature' : 'Save Changes'}
+        </button>
       </div>
     </form>
   )
 }
+
+export default FeatureForm
