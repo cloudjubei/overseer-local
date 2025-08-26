@@ -318,7 +318,9 @@ h1, h2, h3 { color: var(--accent-primary); }
 .col { min-width: 0; }
 .col-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .col-actions { display:flex; align-items:center; gap: 8px; }
-.row-actions { display:inline-flex; gap: 6px; }
+.row-actions { display:inline-flex; gap: 6px; opacity: 0; pointer-events: none; transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease); }
+/* Actions appear on hover or keyboard focus for accessibility */
+.feature-row:hover .row-actions, .feature-row:focus .row-actions { opacity: 1; pointer-events: auto; }
 
 /* Dependencies visualization */
 .deps-list { display:flex; align-items:center; gap: 6px; flex-wrap: wrap; }

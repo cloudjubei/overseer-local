@@ -267,7 +267,7 @@
     },
     {
       "id": "7.19",
-      "status": "-",
+      "status": "+",
       "title": "In the features list the Actions should only show on hover",
       "description": "Make the Edit button an icon button not the words. The Edit Task button can show as the same button icon, but in the Task Overview Area. The Add Feature can also be changed into a nice '+' button. We should also have a standard Back button with an icon.",
       "plan": "",
