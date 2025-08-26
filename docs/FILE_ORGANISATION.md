@@ -51,24 +51,34 @@ repo_root/
 │   ├─ docs/
 │   │  └─ indexer.js
 │   ├─ renderer/
-│   │   ├─ tasksListView.js     # Tasks list UI (search + filters, view-only)
-│   │   ├─ taskDetailsView.js   # Task details UI with features list (includes edit for task title/description; includes feature edit and create modes)
-│   │   └─ docsBrowserView.js   # Docs browser UI with file tree and content display
+│   │   ├─ App.tsx                 # React app rendering tasks list and details
+│   │   ├─ TaskCreateView.tsx      # React popup for creating a task
+│   │   ├─ FeatureCreateView.tsx   # React popup for creating a feature
+│   │   └─ components/
+│   │       └─ ui/                 # Common UI primitives (shadcn-like)
+│   │           ├─ toast.tsx
+│   │           ├─ modal.tsx
+│   │           ├─ alert.tsx
+│   │           └─ index.ts
 │   ├─ tasks/
-│   │  └─ indexer.js           # Logical Tasks indexer, validator, and file watcher
+│   │  └─ indexer.js              # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
-│      └─ tasks.ts             # TypeScript interfaces for task schema
+│      └─ tasks.ts                # TypeScript interfaces for task schema
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ LINTING_AND_FORMATTING.md
+│  ├─ COMPONENTS_AND_THEMING.md
 │  └─ tasks/
 │     ├─ task_example.json
 │     └─ task_format.py           # Python source-of-truth schema
-└─ tasks/
-   └─ 1/
-      ├─ task.json
-      └─ tests/
-         └─ test_1_1.py
+├─ tasks/
+│  └─ 1/
+│     ├─ task.json
+│     └─ tests/
+│        └─ test_1_1.py
+├─ vite.main.config.js            # Vite config for main process
+├─ vite.preload.config.js         # Vite config for preload scripts
+└─ vite.renderer.config.js        # Vite config for renderer (React)
 ```
 
 ## Logical Tasks Indexer
@@ -92,45 +102,21 @@ repo_root/
     - tasks:update (invoke) updates a task's fields (currently title and description) in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:update (invoke) updates a feature in tasks/{id}/task.json and triggers an index rebuild
     - tasks-feature:add (invoke) appends a new feature to tasks/{id}/task.json and triggers an index rebuild
+    - tasks-features:reorder (invoke) reorders a task's features and renumbers their ids to `${taskId}.N`, updates dependencies across tasks, and triggers an index rebuild
     - tasks:add (invoke) creates a new task directory tasks/{id}/ and writes a minimal valid task.json, then triggers an index rebuild
+    - tasks:reorder (invoke) reorders tasks globally, renumbers task directory ids to 1..N per the new order, updates each affected task.json id, updates dotted feature ids and dependencies across all tasks, and triggers an index rebuild
+    - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
+    - task-create:open (invoke) opens a modal popup window for creating a new task
   - Preload exposes window.tasksIndex with:
     - getSnapshot() and onUpdate(cb) for renderer use
     - updateTask(taskId, data) to persist edits to a task (title/description)
     - updateFeature(taskId, featureId, data) to persist edits to a feature
     - addFeature(taskId, feature) to create a new feature under a task
+    - reorderFeatures(taskId, payload) to reorder features; payload is either { order: string[] } or { fromId: string, toIndex: number }
+    - reorderTasks(payload) to reorder tasks; payload is either { order: number[] } or { fromId: number, toIndex: number }
     - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
-
-## Logical Docs Indexer
-- Location: src/docs/indexer.js
-- Purpose: Scans the docs/ directory (and subdirectories) under the projectRoot for .md files, builds an in-memory index (a tree structure with paths and metadata); watches for file changes and refreshes the index.
-- API:
-  - Class DocsIndexer(projectRoot)
-    - getIndex(): returns the current index snapshot
-    - init(): builds the index and starts watchers
-    - buildIndex(): triggers a full rescan
-    - stopWatching(): stops all watchers
-  - Index shape:
-    - { root, docsDir, updatedAt, docsTree, filesByPath, errors, metrics: { lastScanMs, lastScanCount } }
-- Integration:
-  - The Electron main process instantiates the indexer and exposes IPC channels:
-    - docs-index:get (invoke) returns the index snapshot
-    - docs-index:update (event) pushes updates on changes
-    - docs-file:get (invoke) reads and returns the content of a .md file by relative path
-  - Preload exposes window.docsIndex with:
-    - getSnapshot() and onUpdate(cb) for renderer use
-    - getFile(relativePath) to fetch file content
-
-## Renderer UI
-- Location: src/renderer/
-- Purpose:
-  - tasksListView.js: Renders a client-side tasks list with text search and status filtering. Accessible labels and keyboard navigation (arrow keys between rows) are provided. Empty states are handled. Clicking a task navigates to its details via URL hash (#task/{id}). Includes a Create Task mode with an inline form to add a new task (ID, status, title, description). On success, navigates to the new task.
-  - taskDetailsView.js: Renders a task details page showing task metadata and its features.
-    - Provides a Back button.
-    - Includes inline edit mode for the task's title and description with Save/Cancel; saving persists via IPC and re-renders on index updates.
-    - Includes inline edit mode for a feature allowing editing: status, title, description, plan, context, acceptance, dependencies, and rejection.
-    - Includes a Create mode to add a new feature with all required and optional fields; saving persists via IPC and re-renders on index updates.
-  - docsBrowserView.js: Renders a documentation browser with a collapsible tree view of markdown files and directories. Handles file selection to fetch and display raw content. Subscribes to docs index updates for real-time refreshes. Handles empty states and errors. Visible on #docs hash.
-- Integration: Loaded from src/index.html, subscribes to window.tasksIndex to receive index snapshots/updates and re-renders accordingly.
+    - openFeatureCreate(taskId) to open the popup create window for a given task id
+    - openTaskCreate() to open the popup window for creating a new task
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.

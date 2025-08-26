@@ -85,7 +85,7 @@
     },
     {
       "id": "2.6",
-      "status": "-",
+      "status": "+",
       "title": "Create mode - new feature",
       "description": "Allow adding a new feature to a task in a new popup window - make this the same pattern as edit mode.",
       "plan": "",
@@ -97,8 +97,7 @@
       "acceptance": [],
       "dependencies": [
         "2.5"
-      ],
-      "rejection": "Currently the popup window displays nothing and isn't possible to close it"
+      ]
     },
     {
       "id": "2.7",
@@ -118,9 +117,9 @@
     },
     {
       "id": "2.8",
-      "status": "-",
+      "status": "+",
       "title": "Create mode - new task",
-      "description": "Allow adding a new task in a new popup window - make this the same pattern as edit mode.",
+      "description": "Allow adding a new task in a new popup window - make this the same pattern as task edit mode and create feature.",
       "plan": "",
       "context": [
         "src/",
@@ -130,14 +129,13 @@
       "acceptance": [],
       "dependencies": [
         "2.7"
-      ],
-      "rejection": "Currently the popup window displayed has no [X] button to close nor can you close by tapping outside. If you do so and there are changes that have been done - it should ask in a standard alert whether you really want to discard the changes.\nAll popups should have a similar look&feel and behave in this standard way."
+      ]
     },
     {
       "id": "2.9",
       "status": "-",
-      "title": "Edit mode - moving tasks and features around",
-      "description": "Allow editing the order of tasks and features in their lists - thus changing the underlying id.",
+      "title": "Common functions and libraries",
+      "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit task popups should stem from a common popup component.",
       "plan": "",
       "context": [
         "src/",
@@ -146,14 +144,30 @@
       ],
       "acceptance": [],
       "dependencies": [
-        "2.4"
+        "2.8"
       ]
     },
     {
       "id": "2.10",
       "status": "-",
-      "title": "The task view is the main home view.",
-      "description": "Glow up the whole appearance so that it looks like a production ready app.",
+      "title": "Use shadcn and tailwind",
+      "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen where it must be possible to change themes.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.9"
+      ]
+    },
+    {
+      "id": "2.11",
+      "status": "-",
+      "title": "Edit mode - moving features around",
+      "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced.",
       "plan": "",
       "context": [
         "src/",
@@ -163,34 +177,14 @@
       "acceptance": [],
       "dependencies": [
         "2.4",
-        "2.5",
-        "2.6",
-        "2.7",
-        "2.8",
-        "2.9"
-      ]
-    },
-    {
-      "id": "2.11",
-      "status": "-",
-      "title": "Refactor",
-      "description": "The code was meant to use React for UI - make sure it does.",
-      "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
-      "acceptance": [],
-      "dependencies": [
         "2.10"
       ]
     },
     {
       "id": "2.12",
       "status": "-",
-      "title": "Cleanup",
-      "description": "Cleanup the repository so there's reusable utils for tasks/features and ui code is structured well.",
+      "title": "Edit mode - moving tasks around",
+      "description": "Allow editing the order of tasks - thus changing the underlying id everywhere where it's referenced.",
       "plan": "",
       "context": [
         "src/",
@@ -199,7 +193,42 @@
       ],
       "acceptance": [],
       "dependencies": [
+        "2.4",
         "2.11"
+      ]
+    },
+    {
+      "id": "2.13",
+      "status": "+",
+      "title": "Delete mode - delete feature",
+      "description": "Allow deleting a feature from a task.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4",
+        "2.12"
+      ]
+    },
+    {
+      "id": "2.14",
+      "status": "+",
+      "title": "Delete mode - delete task",
+      "description": "Allow deleting a task.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/tasks/task_format.py",
+        "tests/tasks/test_task_schema.py"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "2.4",
+        "2.13"
       ]
     }
   ]

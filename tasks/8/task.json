@@ -1,8 +1,7 @@
 {
   "id": 8,
   "status": "-",
-  "title": "Manage child projects",
-  "description": "List child projects under projects/ (the .json configs) and based on the data there, allow task and similar inspection to everything just like for this project.",
-  "features": [
-  ]
+  "title": "Notifications center UI and preferences",
+  "description": "Add a notifications panel listing recent events. Provide settings to enable/disable OS notifications and categories.",
+  "features":[]
 }
