@@ -193,7 +193,7 @@
     },
     {
       "id": "7.15",
-      "status": "-",
+      "status": "+",
       "title": "DocumentsView according to latest design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
