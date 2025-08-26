@@ -180,7 +180,7 @@
     },
     {
       "id": "4.18",
-      "status": "-",
+      "status": "+",
       "title": "Cannot send a message",
       "description": "Currently if I send a message to a configured LLM - nothing happens - the message just dissappears",
       "plan": "",

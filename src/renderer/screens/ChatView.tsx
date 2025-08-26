@@ -32,8 +32,11 @@ const ChatView = () => {
     messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || !activeConfig) return;
+    if (!currentChatId) {
+      await createChat();
+    }
     sendMessage(input, activeConfig);
     setInput('');
   };
