@@ -10,6 +10,7 @@ const ChatView = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [apiBaseUrl, setApiBaseUrl] = useState('https://api.openai.com/v1');
   const [apiKey, setApiKey] = useState('');
@@ -73,6 +74,22 @@ const ChatView = () => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const content = event.target?.result as string;
+      try {
+        const path = await ipcRenderer.invoke('docs:upload', { name: file.name, content });
+        window.alert(`File uploaded to ${path}`);
+      } catch (err) {
+        window.alert(`Error uploading file: ${err.message}`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   useEffect(() => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
@@ -115,7 +132,7 @@ const ChatView = () => {
           </div>
         )}
       </div>
-      <div className="flex">
+      <div className="flex items-end">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -124,6 +141,13 @@ const ChatView = () => {
           placeholder="Type your message..."
           rows={3}
         ></textarea>
+        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="ml-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+        >
+          Attach
+        </button>
         <button
           onClick={handleSend}
           className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"

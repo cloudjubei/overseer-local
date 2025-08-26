@@ -204,6 +204,17 @@ ipcMain.handle('docs-file:save', async (event, { relPath, content }) => {
   return await docsIndexer.saveFile(relPath, content);
 });
 
+ipcMain.handle('docs:upload', (event, {name, content}) => {
+  const uploadsDir = path.join(docsIndexer.getIndex().docsDir, 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  const filePath = path.join(uploadsDir, name);
+  fs.writeFileSync(filePath, content);
+  docsIndexer.buildIndex();
+  return 'uploads/' + name;
+});
+
 ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   try {
     const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
