@@ -245,9 +245,9 @@
     },
     {
       "id": "7.18",
-      "status": "+",
-      "title": "Both in the Tasks list and the Features list the ID takes too much space",
-      "description": "It should be made to look like a little bubble - similar to how the Dependencies bubbles are shown. Action in the Features list also takes too much space (the column heading 'Action' is unnecessary)",
+      "status": "-",
+      "title": "In the Features list Status has a lot of right padding.",
+      "description": "Status width can be shrunk to be just a bit wider than the 'Status' title so there's enough space for it not to feel crowded. Dependencies can also be pushed a bit more to the right so it can fit 6 blockers.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
@@ -309,6 +309,99 @@
         "src/renderer/screens/DocumentsView.tsx",
         "src/renderer/screens/SettingsView.tsx",
         "src/renderer/screens/SidebarView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.22",
+      "status": "-",
+      "title": "Feature dragging should follow the same pattern as Task dragging.",
+      "description": "The same visual cues need to be used in both places with nice animations.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.23",
+      "status": "-",
+      "title": "Tasks list dragging  error",
+      "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": [],
+      "rejection": "Error occurred in handler for 'tasks:reorder': Error: ENOENT: no such file or directory, rename './tasks/1' -> './tasks/temp_1'"
+    },
+    {
+      "id": "7.24",
+      "status": "-",
+      "title": "Home - List <-> Board switch",
+      "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.25",
+      "status": "-",
+      "title": "Home the status dropdown looks horrible",
+      "description": "The dropdown should somehow incorporate the bullet design that is currently used to display the status. In fact, the best way would be for the dropdown not to be there, and when the user hovers over an item, the status bullet can become bigger and show an edit symbol. If the user clicks on the bullet - it opens a bullet selector that can change the status.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.26",
+      "status": "-",
+      "title": "Home - Board view - horizontal problems",
+      "description": "If the screen isn't wide enough, not all sections can show - look at how Linear and Monday resolve this and introduce the same fix",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
         "docs/design/COMPONENTS.md",
         "docs/design/DESIGN_SYSTEM.md",
         "docs/design/DESIGN_TOKENS.md",
