@@ -24,32 +24,66 @@ export type NavigatorApi = NavigatorState & {
   navigateTaskDetails: (taskId: number) => void;
 };
 
-function parseHash(hashRaw: string): NavigatorState {
-  const hash = (hashRaw || '').replace(/^#/, '');
+function viewPrefixToView(prefix: string): NavigationView {
+  switch (prefix) {
+    case 'documents':
+      return 'Documents';
+    case 'chat':
+      return 'Chat';
+    case 'settings':
+      return 'Settings';
+    case 'home':
+    default:
+      return 'Home';
+  }
+}
 
-  // Screen-level views
-  let currentView: NavigationView = 'Home';
-  if (hash.startsWith('documents')) currentView = 'Documents';
-  else if (hash.startsWith('chat')) currentView = 'Chat';
-  else if (hash.startsWith('settings')) currentView = 'Settings';
-  else currentView = 'Home';
+function viewToPrefix(v: NavigationView): string {
+  switch (v) {
+    case 'Documents':
+      return 'documents';
+    case 'Chat':
+      return 'chat';
+    case 'Settings':
+      return 'settings';
+    case 'Home':
+    default:
+      return 'home';
+  }
+}
 
-  // Modal routes
-  let modal: ModalRoute | null = null;
+function parseModal(fragment: string): ModalRoute | null {
   let m: RegExpExecArray | null;
-  if (hash === 'task-create') {
-    modal = { type: 'task-create' };
-  } else if ((m = /^task-edit\/(\d+)$/.exec(hash))) {
-    modal = { type: 'task-edit', taskId: parseInt(m[1], 10) };
-  } else if ((m = /^feature-create\/(\d+)$/.exec(hash))) {
-    modal = { type: 'feature-create', taskId: parseInt(m[1], 10) };
-  } else if ((m = /^feature-edit\/(\d+)\/(.+)$/.exec(hash))) {
-    modal = { type: 'feature-edit', taskId: parseInt(m[1], 10), featureId: m[2] };
+  if (fragment === 'task-create') return { type: 'task-create' };
+  if ((m = /^task-edit\/(\d+)$/.exec(fragment))) return { type: 'task-edit', taskId: parseInt(m[1], 10) };
+  if ((m = /^feature-create\/(\d+)$/.exec(fragment))) return { type: 'feature-create', taskId: parseInt(m[1], 10) };
+  if ((m = /^feature-edit\/(\d+)\/(.+)$/.exec(fragment))) return { type: 'feature-edit', taskId: parseInt(m[1], 10), featureId: m[2] };
+  return null;
+}
+
+function parseHash(hashRaw: string): NavigatorState {
+  const raw = (hashRaw || '').replace(/^#/, '');
+
+  const [prefixRaw, ...restParts] = raw.split('/');
+  const prefix = prefixRaw || 'home';
+  const rest = restParts.join('/');
+
+  // Determine current view from the first segment
+  const currentView: NavigationView = viewPrefixToView(prefix);
+
+  // Modal: prefer parsing from the secondary segment if present; otherwise allow legacy top-level
+  let modal: ModalRoute | null = null;
+  if (rest) {
+    modal = parseModal(rest);
+  }
+  if (!modal) {
+    modal = parseModal(raw);
   }
 
-  // Tasks route (for Home screen)
+  // Tasks route (details) recognized on legacy top-level form
   let tasksRoute: TasksRoute = { name: 'list' };
-  if ((m = /^task\/(\d+)$/.exec(hash))) {
+  let m: RegExpExecArray | null;
+  if ((m = /^task\/(\d+)$/.exec(raw))) {
     tasksRoute = { name: 'details', taskId: parseInt(m[1], 10) };
   }
 
@@ -83,18 +117,21 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     if (!currentParsed.modal) {
       lastNonModalHashRef.current = window.location.hash || '#home';
     }
+    // Build a composite hash so the modal opens over the current view instead of resetting to Home
+    const basePrefix = viewToPrefix(currentParsed.currentView);
+    const base = `#${basePrefix}`;
     switch (m.type) {
       case 'task-create':
-        window.location.hash = '#task-create';
+        window.location.hash = `${base}/task-create`;
         break;
       case 'task-edit':
-        window.location.hash = `#task-edit/${m.taskId}`;
+        window.location.hash = `${base}/task-edit/${m.taskId}`;
         break;
       case 'feature-create':
-        window.location.hash = `#feature-create/${m.taskId}`;
+        window.location.hash = `${base}/feature-create/${m.taskId}`;
         break;
       case 'feature-edit':
-        window.location.hash = `#feature-edit/${m.taskId}/${m.featureId}`;
+        window.location.hash = `${base}/feature-edit/${m.taskId}/${m.featureId}`;
         break;
     }
   }, []);

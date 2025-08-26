@@ -91,7 +91,7 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
     <div className="fixed inset-0 z-[1000] flex items-center justify-center" aria-hidden={false}>
       <div
         ref={overlayRef}
-        className="absolute inset-0 bg-black/40 opacity-100 animate-in fade-in"
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 animate-in fade-in"
         onMouseDown={onOverlayClick}
       />
       <div
@@ -110,10 +110,14 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
             <button
               type="button"
               onClick={onClose}
-              className="rounded p-1 text-text-muted hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               aria-label="Close"
+              title="Close"
             >
-              ×
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
           )}
         </div>
