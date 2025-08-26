@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TasksView from './components/TasksView';
 import Docs from './components/Docs';
@@ -10,6 +10,14 @@ import { createRoot } from 'react-dom/client';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('Home');
+  useEffect(() => {
+    let theme = localStorage.getItem('theme')
+    if (!theme){
+      theme = 'blue'
+      localStorage.setItem('theme', theme);
+    }
+    document.documentElement.className = `theme-${theme}`;
+  }, []);
 
   const renderView = () => {
     switch (currentView) {
