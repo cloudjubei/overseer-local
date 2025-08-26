@@ -8,6 +8,7 @@ type Message = {
 const ChatView = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
 
   const [apiBaseUrl, setApiBaseUrl] = useState('https://api.openai.com/v1');
@@ -17,6 +18,8 @@ const ChatView = () => {
   const [tempApiBaseUrl, setTempApiBaseUrl] = useState('');
   const [tempApiKey, setTempApiKey] = useState('');
   const [tempModel, setTempModel] = useState('');
+
+  const ipcRenderer = (window as any).electron.ipcRenderer;
 
   useEffect(() => {
     setApiBaseUrl(localStorage.getItem('llm_apiBaseUrl') || 'https://api.openai.com/v1');
@@ -42,15 +45,25 @@ const ChatView = () => {
     setIsSettingsOpen(false);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const content = input.trim();
     if (!content) return;
-    setMessages([
-      ...messages,
-      { role: 'user', content },
-      { role: 'assistant', content: 'Echo: ' + content }
-    ]);
+    const newMessages = [...messages, { role: 'user', content }];
+    setMessages(newMessages);
     setInput('');
+    if (!apiKey) {
+      setMessages([...newMessages, { role: 'assistant', content: 'LLM not configured. Please set your API key in settings.' }]);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await ipcRenderer.invoke('chat:completion', { messages: newMessages, config: { apiBaseUrl, apiKey, model } });
+      setMessages([...newMessages, response]);
+    } catch (err) {
+      setMessages([...newMessages, { role: 'assistant', content: `Error: ${err.message}` }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -64,7 +77,7 @@ const ChatView = () => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isLoading]);
 
   return (
     <div className="flex flex-col h-full">
@@ -94,6 +107,13 @@ const ChatView = () => {
             </span>
           </div>
         ))}
+        {isLoading && (
+          <div className="mb-2 text-left">
+            <span className="inline-block p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-neutral-900 dark:text-neutral-100">
+              Loading...
+            </span>
+          </div>
+        )}
       </div>
       <div className="flex">
         <textarea

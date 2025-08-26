@@ -51,7 +51,7 @@
     },
     {
       "id": "4.6",
-      "status": "-",
+      "status": "+",
       "title": "Integrate basic LLM call in ChatView",
       "description": "Update send handler in ChatView: After adding user message, load config from localStorage. If configured, call ipcRenderer.invoke('chat:completion', {messages: state.messages, config}), then append the returned message to state. Show loading indicator while waiting. Handle errors with a message.",
       "plan": "",
