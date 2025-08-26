@@ -1,41 +1,36 @@
+export interface LLMConfig {
+  apiBaseUrl: string;
+  apiKey: string;
+  model: string;
+}
+
 export class LLMConfigManager {
-  static STORAGE_KEY = 'llmConfig';
+  private storageKey = 'llmConfig';
 
-  static defaults = {
-    apiBaseUrl: 'https://api.openai.com/v1',
-    apiKey: '',
-    model: 'gpt-4o'
-  };
+  getConfig(): LLMConfig {
+    const defaults: LLMConfig = {
+      apiBaseUrl: 'https://api.openai.com/v1',
+      apiKey: '',
+      model: 'gpt-4o'
+    };
 
-  config: { apiBaseUrl: string; apiKey: string; model: string };
-
-  constructor() {
-    this.config = { ...LLMConfigManager.defaults };
-    this.load();
-  }
-
-  load() {
-    const stored = localStorage.getItem(LLMConfigManager.STORAGE_KEY);
+    const stored = localStorage.getItem(this.storageKey);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored);
-        this.config = { ...this.config, ...parsed };
+        const parsed = JSON.parse(stored) as Partial<LLMConfig>;
+        return { ...defaults, ...parsed };
       } catch (e) {
-        console.error('Failed to parse stored LLM config:', e);
+        console.error('Failed to parse stored config', e);
       }
     }
+    return defaults;
   }
 
-  save(newConfig: Partial<{ apiBaseUrl: string; apiKey: string; model: string }>) {
-    this.config = { ...this.config, ...newConfig };
-    localStorage.setItem(LLMConfigManager.STORAGE_KEY, JSON.stringify(this.config));
+  save(config: LLMConfig): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(config));
   }
 
-  getConfig() {
-    return this.config;
-  }
-
-  isConfigured() {
-    return !!this.config.apiKey;
+  isConfigured(): boolean {
+    return !!this.getConfig().apiKey;
   }
 }

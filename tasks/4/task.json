@@ -37,7 +37,7 @@
     },
     {
       "id": "4.4",
-      "status": "-",
+      "status": "+",
       "title": "Add LLM configuration UI and local storage - separate class to manage this",
       "description": "In ChatView, add a settings button that opens a form (modal or section) for LLM config: apiBaseUrl (default 'https://api.openai.com/v1'), apiKey, model (default 'gpt-4o'). Save values to localStorage on submit. Load and apply on component mount. Show warning if not configured.",
       "plan": "",
@@ -65,7 +65,7 @@
         "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": []
-   },
+    },
     {
       "id": "4.6",
       "status": "-",
