@@ -152,7 +152,7 @@
     },
     {
       "id": "4.15",
-      "status": "-",
+      "status": "+",
       "title": "User can open settings and configure API keys",
       "description": "currently clicking the settings button does nothing - it must be possible to configure the LLM settings. ChatView.tsx also needs strict typing as this is TypeScript.",
       "plan": "",
@@ -160,7 +160,6 @@
         "src/renderer/screens/ChatView.tsx",
         "src/renderer/components/ui/modal.tsx",
         "src/renderer/utils/LLMConfigManager.ts"
-
       ],
       "acceptance": []
     },

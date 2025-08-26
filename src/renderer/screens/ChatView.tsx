@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LLMConfigManager } from '../utils/LLMConfigManager';
-import {Modal} from '../components/ui/modal';
+import { LLMConfigManager, LLMConfig } from '../utils/LLMConfigManager';
+import { Modal } from '../components/ui/modal';
 
 const ChatView = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string }[]>([]);
-  const [input, setInput] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [config, setConfig] = useState({ apiBaseUrl: '', apiKey: '', model: '' });
-  const [isConfigured, setIsConfigured] = useState(false);
+  const [input, setInput] = useState<string>('');
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [config, setConfig] = useState<LLMConfig>({ apiBaseUrl: '', apiKey: '', model: '' });
+  const [isConfigured, setIsConfigured] = useState<boolean>(false);
   const managerRef = useRef<LLMConfigManager | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [docsList, setDocsList] = useState<string[]>([]);
-  const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
+  const [isAutocompleteOpen, setIsAutocompleteOpen] = useState<boolean>(false);
   const [matchingDocs, setMatchingDocs] = useState<string[]>([]);
   const [mentionStart, setMentionStart] = useState<number | null>(null);
   const [autocompletePosition, setAutocompletePosition] = useState<{left: number, top: number} | null>(null);
@@ -61,14 +61,14 @@ const ChatView = () => {
     return unsubscribe;
   }, []);
 
-  const updateDocsList = (index) => {
+  const updateDocsList = (index: any) => {
     const paths = extractPaths(index.tree);
     setDocsList(paths);
   };
 
-  const extractPaths = (tree) => {
-    const paths = [];
-    const recurse = (node) => {
+  const extractPaths = (tree: any): string[] => {
+    const paths: string[] = [];
+    const recurse = (node: any) => {
       if (node.type === 'file') {
         paths.push(node.relPath);
       }
@@ -129,7 +129,7 @@ const ChatView = () => {
     setIsAutocompleteOpen(false);
   };
 
-  const getCursorCoordinates = (textarea: HTMLTextAreaElement, pos: number) => {
+  const getCursorCoordinates = (textarea: HTMLTextAreaElement, pos: number): { x: number; y: number } => {
     const mirror = mirrorRef.current;
     if (!mirror) return { x: 0, y: 0 };
 
@@ -202,7 +202,7 @@ const ChatView = () => {
     setMentionStart(null);
   };
 
-  const handleSaveConfig = (e: React.FormEvent) => {
+  const handleSaveConfig = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     managerRef.current?.save(config);
     setIsConfigured(!!config.apiKey);
@@ -210,7 +210,8 @@ const ChatView = () => {
   };
 
   const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfig({ ...config, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setConfig(prev => ({ ...prev, [name as keyof LLMConfig]: value }));
   };
 
   const handleSend = async () => {
@@ -368,46 +369,47 @@ const ChatView = () => {
             </div>
           )}
         </div>
-        {showSettings && (
-          <Modal onClose={() => setShowSettings(false)}>
-            <h2 className="text-xl font-bold mb-4">LLM Configuration</h2>
-            <form onSubmit={handleSaveConfig}>
-              <div className="mb-4">
-                <label className="block mb-1">API Base URL</label>
-                <input
-                  type="text"
-                  name="apiBaseUrl"
-                  value={config.apiBaseUrl}
-                  onChange={handleConfigChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">API Key</label>
-                <input
-                  type="text"
-                  name="apiKey"
-                  value={config.apiKey}
-                  onChange={handleConfigChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Model</label>
-                <input
-                  type="text"
-                  name="model"
-                  value={config.model}
-                  onChange={handleConfigChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-              <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-                Save
-              </button>
-            </form>
-          </Modal>
-        )}
+        <Modal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          title="LLM Configuration"
+        >
+          <form onSubmit={handleSaveConfig}>
+            <div className="mb-4">
+              <label className="block mb-1">API Base URL</label>
+              <input
+                type="text"
+                name="apiBaseUrl"
+                value={config.apiBaseUrl}
+                onChange={handleConfigChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1">API Key</label>
+              <input
+                type="text"
+                name="apiKey"
+                value={config.apiKey}
+                onChange={handleConfigChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1">Model</label>
+              <input
+                type="text"
+                name="model"
+                value={config.model}
+                onChange={handleConfigChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+              Save
+            </button>
+          </form>
+        </Modal>
       </div>
     </div>
   );
