@@ -1,16 +1,45 @@
 {
   "id": 5,
   "status": "-",
-  "title": "Extra chat features",
-  "description": "The electron app developed in `src/` has an agentic chat which needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`.",
+  "title": "Cleanup, refactor and fixes",
+  "description": "The electron app developed in `src/` needs to be cleaned up so that it's nice and modular. References `README.md`, `docs/FILE_ORGANISATION.md`. Every single file change must be reflected in `docs/FILE_ORGANISATION.md`.",
   "features": [
+    {
+      "id": "5.1",
+      "status": "-",
+      "title": "The app needs to be responsive to resizing",
+      "description": "Currently most of the views don't resize properly when the window is resized. Especially with the sidebar to the sidebar on the left side, it doesn't stay there and if something big gets opened, like the Document viewer - then the screen becomes too big. We need to have a common strategy for this. The sidebar should also be collapsible.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
     {
       "id": "5.2",
       "status": "-",
-      "title": "Context retrieval for chat - using graphiti",
-      "description": "There's a library `https://github.com/getzep/graphiti` that provides an upgraded RAG database. Create agentic tools for this and allow local-only retrieval.",
+      "title": "App wide navigator",
+      "description": "Right now in `src/renderer/screens/TasksView` you can open modals but they open in a weird way (with the TasksView underneath them). Modals need to be standardized and for this, there needs to be a Navigator somewhere which allows to be used to work out if a given modal or screen should be showing.",
       "plan": "",
       "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "5.3",
+      "status": "-",
+      "title": "Organise files",
+      "description": "A lot of the logical code is in the renderer but there should be a clear logic/ui split. Propose changes that will be documented in `docs/FILE_ORGANISATION.md` and carry out the clean up.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "5.4",
+      "status": "-",
+      "title": "Create standards",
+      "description": "There's a big discrepancy in how certain views are created or styled - there needs to be a standard for this. Create a standard and document it in `docs/STANDARDS.md`.",
+      "plan": "",
+      "context": [
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     }
   ]
