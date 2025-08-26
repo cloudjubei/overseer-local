@@ -26,12 +26,14 @@ function useNextTaskId() {
   return nextId;
 }
 
-export default function TaskCreateView() {
+export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast();
   const defaultId = useNextTaskId();
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const doClose = () => { if (onRequestClose) onRequestClose(); else window.close(); };
 
   const onSubmit = useCallback(async (values) => {
     if (!Number.isInteger(values.id) || values.id <= 0) {
@@ -44,7 +46,7 @@ export default function TaskCreateView() {
       const res = await window.tasksIndex.addTask(values);
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
       toast({ title: 'Success', description: 'Task created successfully', variant: 'success' });
-      window.close();
+      doClose();
     } catch (e: any) {
       setAlertMessage(`Failed to create task: ${e?.message || String(e)}`);
       setShowAlert(true);
@@ -55,8 +57,8 @@ export default function TaskCreateView() {
 
   return (
     <>
-      <Modal title="Create New Task" onClose={() => window.close()} isOpen={true}>
-        <TaskForm initialValues={{ id: defaultId }} onSubmit={onSubmit} onCancel={() => window.close()} submitting={submitting} isCreate={true} />
+      <Modal title="Create New Task" onClose={doClose} isOpen={true}>
+        <TaskForm initialValues={{ id: defaultId }} onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={true} />
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>

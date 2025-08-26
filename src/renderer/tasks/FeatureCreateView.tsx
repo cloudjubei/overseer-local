@@ -2,11 +2,13 @@ import React, { useCallback, useState } from 'react';
 import { Modal, AlertDialog, useToast } from '../components/ui';
 import { FeatureForm } from '../components/FeatureForm';
 
-export default function FeatureCreateView({ taskId }: { taskId: number }) {
+export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
   const { toast } = useToast();
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const doClose = () => { if (onRequestClose) onRequestClose(); else window.close(); };
 
   const onSubmit = useCallback(async (values) => {
     if (!taskId || !Number.isInteger(taskId)) {
@@ -19,7 +21,7 @@ export default function FeatureCreateView({ taskId }: { taskId: number }) {
       const res = await window.tasksIndex.addFeature(taskId, values);
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
       toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' });
-      window.close();
+      doClose();
     } catch (e: any) {
       setAlertMessage(`Failed to create feature: ${e?.message || String(e)}`);
       setShowAlert(true);
@@ -34,8 +36,8 @@ export default function FeatureCreateView({ taskId }: { taskId: number }) {
 
   return (
     <>
-      <Modal title="Create New Feature" onClose={() => window.close()} isOpen={true}>
-        <FeatureForm onSubmit={onSubmit} onCancel={() => window.close()} submitting={submitting} isCreate={true} />
+      <Modal title="Create New Feature" onClose={doClose} isOpen={true}>
+        <FeatureForm onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={true} />
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>

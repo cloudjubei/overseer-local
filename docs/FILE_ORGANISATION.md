@@ -42,10 +42,27 @@ Notes:
 ## Repository Tree (updated)
 Key changes for responsive layout and sidebar:
 - Updated: src/index.css — removed fixed body max-width/padding, added full-height layout for html/body/#root; retained component styles.
-- Updated: src/renderer/App.tsx — simplified ToastProvider usage and ensured root container uses full height/width.
+- Updated: src/renderer/App.tsx — now wraps the app with ToastProvider and a new NavigatorProvider; adds a global ModalHost to render modals above screens.
 - Updated: src/renderer/screens/SidebarView.tsx — refactored into a flexible layout with a collapsible left sidebar and a scrollable content area; sidebar width transitions between 56 and 14 tailwind units, collapsed state persisted in localStorage.
 - Updated: src/renderer/screens/DocumentsView.tsx — wrapped in a flex column with min-h-0 and proper overflow to prevent oversized content.
 - Updated: src/renderer/screens/ChatView.tsx — adjusted layout to use fixed-width left chat list and flexible right pane with min-w-0/min-h-0 for correct resizing.
+- Updated: src/renderer/screens/TasksView.tsx — simplified to render only list/details; modals removed from here and moved to global ModalHost via Navigator.
+
+New navigation layer:
+- Added: src/renderer/navigation/Navigator.tsx — app-wide navigation context that parses location.hash into currentView, tasksRoute, and modal state. Exposes openModal/closeModal and navigation helpers.
+- Added: src/renderer/navigation/ModalHost.tsx — central modal renderer that overlays the active screen and mounts task-related modals.
+- Added: src/renderer/navigation/index.ts — re-exports Navigator hooks/components.
+
+UI utilities for consistency:
+- Added: src/renderer/components/ui/index.ts — barrel exports for Modal/AlertDialog and Toast utilities.
+- Added: src/renderer/components/ui/toast.tsx — lightweight ToastProvider and useToast hook used by task modals.
+- Added: src/renderer/components/ui/modal.ts — compatibility re-export to satisfy existing lower-case import paths (e.g., ChatView).
+
+Task modal components updated to support global navigator:
+- Updated: src/renderer/tasks/TaskCreateView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
+- Updated: src/renderer/tasks/FeatureCreateView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
+- Updated: src/renderer/tasks/TaskEditView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
+- Updated: src/renderer/tasks/FeatureEditView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
 
 ## Example Tree (illustrative)
 The following tree is graphical and illustrative of a typical repository layout:
@@ -57,37 +74,37 @@ repo_root/
 │  ├─ BUILD_SIGNING.md
 │  └─ …
 ├─ src/
-│  ├─ docs/
-│  │  └─ indexer.js
 │  ├─ renderer/
+│  │  ├─ navigation/
+│  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
+│  │  │  ├─ ModalHost.tsx              # Renders modals globally above screens
+│  │  │  └─ index.ts                   # Re-exports
 │  │  ├─ components/
-│  │  │  ├─ MarkdownEditor.tsx
-│  │  │  ├─ MarkdownRenderer.tsx
-│  │  │  └─ ui/ …
-│  │  ├─ docs/
-│  │  │  └─ DocumentsBrowserView.tsx
+│  │  │  └─ ui/
+│  │  │     ├─ Modal.tsx               # Reusable Modal + AlertDialog
+│  │  │     ├─ modal.ts                # Compatibility re-export
+│  │  │     ├─ toast.tsx               # ToastProvider + useToast (lightweight)
+│  │  │     └─ index.ts                # Barrel exports
 │  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx        # Collapsible, responsive sidebar + content layout
-│  │  │  ├─ DocumentsView.tsx      # Uses min-h-0/overflow for resizing
-│  │  │  ├─ ChatView.tsx           # Resizable split layout
-│  │  │  └─ SettingsView.tsx
+│  │  │  ├─ SidebarView.tsx
+│  │  │  ├─ TasksView.tsx              # Uses Navigator to render list/details only
+│  │  │  ├─ DocumentsView.tsx
+│  │  │  └─ ChatView.tsx
 │  │  ├─ tasks/
-│  │  │  ├─ TasksListView.tsx
-│  │  │  └─ TaskDetailsView.tsx
-│  │  ├─ App.tsx                   # App root with full-size container
+│  │  │  ├─ TaskCreateView.tsx         # Updated to use onRequestClose
+│  │  │  ├─ TaskEditView.tsx           # Updated to use onRequestClose
+│  │  │  ├─ FeatureCreateView.tsx      # Updated to use onRequestClose
+│  │  │  └─ FeatureEditView.tsx        # Updated to use onRequestClose
+│  │  ├─ App.tsx                       # Wrapped with Toast + Navigator; includes ModalHost
 │  │  └─ types.ts
-│  ├─ tasks/
-│  │  ├─ validator.js
-│  │  └─ indexer.js
-│  ├─ chat/
-│  │  └─ manager.js
-│  ├─ index.css                    # Full-height layout + styles (updated)
+│  ├─ index.css                         # Full-height layout + styles (updated)
 │  ├─ main.js
 │  └─ preload.js
 └─ …
 ```
 
-## Notes on Responsiveness
-- The app uses a common flex layout: a collapsible left sidebar and a main content area.
-- min-h-0 and min-w-0 are applied to containers that must allow children with overflow-auto to scroll correctly in nested flex layouts, ensuring large viewers (e.g., docs) do not force the window to grow.
-- Sidebar collapse state is saved as localStorage key "sidebar-collapsed".
+## Notes on Modals and Navigation
+- Modals are now rendered by a global ModalHost mounted in App, ensuring they overlay the current screen properly (no underlying TasksView rendering issues).
+- NavigatorProvider centralizes route parsing from location.hash into three concerns: currentView, tasksRoute, and modal.
+- TasksView no longer owns modal routing; it focuses only on list/details rendering. Opening a modal uses Navigator (or existing hash changes) and closing a modal restores the last non-modal route.
+- A compatibility re-export (components/ui/modal.ts) keeps existing lowercase imports working without refactors.

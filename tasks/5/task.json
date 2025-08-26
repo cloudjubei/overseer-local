@@ -15,7 +15,7 @@
     },
     {
       "id": "5.2",
-      "status": "-",
+      "status": "+",
       "title": "App wide navigator",
       "description": "Right now in `src/renderer/screens/TasksView` you can open modals but they open in a weird way (with the TasksView underneath them). Modals need to be standardized and for this, there needs to be a Navigator somewhere which allows to be used to work out if a given modal or screen should be showing.",
       "plan": "",

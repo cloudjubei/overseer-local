@@ -1,3 +1,2 @@
-export * from "./toast";
-export * from "./modal";
-export * from "./alert";
+export { Modal, AlertDialog } from './Modal';
+export { ToastProvider, useToast } from './toast';
