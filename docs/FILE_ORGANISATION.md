@@ -107,16 +107,31 @@ repo_root/
     - tasks:reorder (invoke) reorders tasks globally, renumbers task directory ids to 1..N per the new order, updates each affected task.json id, updates dotted feature ids and dependencies across all tasks, and triggers an index rebuild
     - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
     - task-create:open (invoke) opens a modal popup window for creating a new task
-  - Preload exposes window.tasksIndex with:
-    - getSnapshot() and onUpdate(cb) for renderer use
-    - updateTask(taskId, data) to persist edits to a task (title/description)
-    - updateFeature(taskId, featureId, data) to persist edits to a feature
-    - addFeature(taskId, feature) to create a new feature under a task
-    - reorderFeatures(taskId, payload) to reorder features; payload is either { order: string[] } or { fromId: string, toIndex: number }
-    - reorderTasks(payload) to reorder tasks; payload is either { order: number[] } or { fromId: number, toIndex: number }
-    - addTask(task) to create a new task; accepts { id?, status?, title, description } and returns { ok, id? }
-    - openFeatureCreate(taskId) to open the popup create window for a given task id
-    - openTaskCreate() to open the popup window for creating a new task
 
 Performance
 - See docs/tasks/INDEXING_PERFORMANCE.md for measurement methodology and indicative results.
+
+## Logical Docs Indexer
+- Location: src/docs/indexer.js
+- Purpose: Scans the project's docs/ directory (and all subdirectories) for Markdown (.md) files to build an in-memory documentation index; watches for file changes and refreshes the index.
+- API:
+  - Class DocsIndexer(projectRoot, options?)
+    - getIndex(): returns the current index snapshot
+    - init(): builds the index and starts a cross-platform watcher (polling)
+    - buildIndex(): triggers a full rescan and rebuilds the index tree
+    - stopWatching(): stops the watcher
+    - onUpdate(cb): subscribes to index updates; returns an unsubscribe function
+  - Options:
+    - pollingIntervalMs (number, default 1000): how frequently to poll for file changes
+    - maxTitleBytes (number, default 64KB): maximum bytes to read from each file to extract a title and headings
+  - Index shape:
+    - { root, docsDir, updatedAt, tree, files, errors, metrics: { lastScanMs, lastScanCount } }
+    - tree: a directory tree beginning at docs/, where each node has:
+      - type: 'dir' | 'file'
+      - name, relPath, absPath
+      - For 'dir': dirs[] and files[] arrays with child nodes
+      - For 'file': size, mtimeMs, title (first H1 or filename), headings[] (array of { level, text })
+- Notes:
+  - The watcher uses a portable polling strategy to detect changes across platforms, avoiding native watcher limitations.
+  - Only files with a .md extension are indexed (case-insensitive). Non-Markdown files are ignored.
+  - Basic metadata is extracted without rendering Markdown; rendering and sanitization are handled in the renderer layer.
