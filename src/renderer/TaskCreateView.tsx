@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { createRoot } from 'react-dom/client';
+import { Modal } from './components/ui';
 
 type Status = '+' | '~' | '-' | '?' | '=';
 const STATUS_LABELS: Record<Status, string> = {
@@ -30,7 +30,7 @@ function useNextTaskId() {
   return nextId;
 }
 
-function TaskCreateView() {
+export default function TaskCreateView() {
   const defaultId = useNextTaskId();
   const [id, setId] = useState<number | ''>('');
   const [status, setStatus] = useState<Status>('-');
@@ -64,7 +64,7 @@ function TaskCreateView() {
   }, [id, status, title, description]);
 
   return (
-    <div id="task-create-view" className="container">
+    <Modal title="Create New Task" onClose={() => window.close()} isOpen={true}>
       <div className="task-create-form">
         <div className="form-row">
           <label htmlFor="newtask-id">ID</label>
@@ -91,10 +91,6 @@ function TaskCreateView() {
           <button type="button" className="btn" onClick={onCreate} disabled={submitting}>Create</button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
-
-const container = document.getElementById('root')!;
-const root = createRoot(container);
-root.render(<TaskCreateView />);

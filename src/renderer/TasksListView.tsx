@@ -81,7 +81,7 @@ function onRowKeyDown(e: React.KeyboardEvent<HTMLDivElement>, taskId: number, ul
   (rows[nextIndex] as HTMLElement).focus();
 }
 
-function TasksListView() {
+export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('any');
@@ -189,5 +189,3 @@ function TasksListView() {
     </section>
   );
 }
-
-export default TasksListView;

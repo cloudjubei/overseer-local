@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { createRoot } from 'react-dom/client';
+import { Modal } from './components/ui';
 
 type Status = '+' | '~' | '-' | '?' | '=';
 
@@ -11,19 +11,7 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 };
 
-function useTaskId(): number | null {
-  return useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const fromQuery = params.get('taskId');
-    if (fromQuery && /^\d+$/.test(fromQuery)) return parseInt(fromQuery, 10);
-    const m = /^#?task\/(\d+)$/.exec(window.location.hash || '');
-    if (m) return parseInt(m[1], 10);
-    return null;
-  }, []);
-}
-
-function FeatureCreateView() {
-  const taskId = useTaskId();
+export default function FeatureCreateView({ taskId } : { taskId: number}) {
   const [status, setStatus] = useState<Status>('-');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -72,8 +60,7 @@ function FeatureCreateView() {
   }
 
   return (
-    <div className="container">
-      <h2>Create New Feature</h2>
+    <Modal title="Create New Feature" onClose={() => window.close()} isOpen={true}>
       <form onSubmit={onSubmit} id="feature-form">
         <div className="form-group">
           <label htmlFor="status">Status</label>
@@ -116,10 +103,6 @@ function FeatureCreateView() {
           <button type="submit" className="btn" disabled={submitting}>Create Feature</button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 }
-
-const container = document.getElementById('root')!;
-const root = createRoot(container);
-root.render(<FeatureCreateView />);

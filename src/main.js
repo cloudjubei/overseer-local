@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
+import { URL } from 'node:url';
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -111,58 +112,57 @@ ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
-
 const createModalWindow = (options) => {
   const window = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: options.width || 800,
+    height: options.height || 600,
     modal: true,
     parent: mainWindow,
-    ...options.browserWindow,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      ...options.webPreferences,
     },
+    ...options.browserWindow,
   });
 
-  if (options.devServerUrl) {
-    window.loadURL(options.devServerUrl);
+  // This is the magic: Load the MAIN app's URL, but add the
+  // special hash that our App.tsx router will understand.
+  // eslint-disable-next-line no-undef
+  const devServerURL = MAIN_WINDOW_VITE_DEV_SERVER_URL;
+  if (devServerURL) {
+    const url = new URL(devServerURL);
+    url.hash = options.hash;
+    window.loadURL(url.href);
   } else {
-    window.loadFile(path.join(__dirname, `../renderer/${options.viteName}/index.html`));
+    // eslint-disable-next-line no-undef
+    const filePath = path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`);
+    const url = new URL(`file://${filePath}`);
+    url.hash = options.hash;
+    window.loadFile(url.pathname, { hash: url.hash.substring(1) });
   }
+
+  // Optional: Open dev tools for the modal for debugging
+  // window.webContents.openDevTools();
 
   return window;
 };
 
+// REPLACE your old 'feature-create:open' handler.
 ipcMain.handle('feature-create:open', (event, taskId) => {
-  const featureCreateWindow = createModalWindow({
-    browserWindow: {
-      width: 600,
-      height: 800,
-      title: 'Create Feature',
-    },
-    // Use the globals injected by Vite
-    // eslint-disable-next-line no-undef
-    devServerUrl: FEATURE_CREATE_VITE_DEV_SERVER_URL,
-    // eslint-disable-next-line no-undef
-    viteName: FEATURE_CREATE_VITE_NAME,
-  });
-
-  featureCreateWindow.webContents.on('did-finish-load', () => {
-    featureCreateWindow.webContents.send('set-task-id', taskId);
+  createModalWindow({
+    width: 600,
+    height: 800,
+    browserWindow: { title: 'Create Feature' },
+    // We pass the route information via the hash
+    hash: `feature-create/${taskId}`,
   });
 });
 
+// REPLACE your old 'task-create:open' handler.
 ipcMain.handle('task-create:open', () => {
   createModalWindow({
-    browserWindow: {
-      width: 600,
-      height: 400,
-      title: 'Create Task',
-    },
-    devServerUrl: TASK_CREATE_VITE_DEV_SERVER_URL,
-    viteName: TASK_CREATE_VITE_NAME,
+    width: 600,
+    height: 500,
+    browserWindow: { title: 'Create Task' },
+    hash: 'task-create', // The hash for creating a task
   });
 });
