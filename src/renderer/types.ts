@@ -1,4 +1,4 @@
-export type NavigationView = 'Home' | 'Documents' | 'Settings' | 'Chat';
+export type NavigationView = 'Home' | 'Documents' | 'Settings' | 'Chat' | 'Notifications';
 
 export type ChatRole = 'user' | 'assistant' | 'system';
 export type ChatMessage = { role: ChatRole, content: string, model?: string };

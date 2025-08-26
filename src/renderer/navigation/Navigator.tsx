@@ -32,6 +32,7 @@ function parseHash(hashRaw: string): NavigatorState {
   if (hash.startsWith('documents')) currentView = 'Documents';
   else if (hash.startsWith('chat')) currentView = 'Chat';
   else if (hash.startsWith('settings')) currentView = 'Settings';
+  else if (hash.startsWith('notifications')) currentView = 'Notifications';
   else currentView = 'Home';
 
   // Modal routes
@@ -118,6 +119,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break;
       case 'Settings':
         window.location.hash = '#settings';
+        break;
+      case 'Notifications':
+        window.location.hash = '#notifications';
         break;
     }
   }, []);

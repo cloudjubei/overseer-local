@@ -43,7 +43,7 @@
     },
     {
       "id": "8.5",
-      "status": "-",
+      "status": "+",
       "title": "Integrate notifications center with navigation",
       "description": "Add notifications panel access to the sidebar or main navigation. Include a notifications icon/button with unread count badge. Integrate with the existing Navigator system for modal/screen navigation. Add keyboard shortcuts and ensure the notifications center follows the app's navigation patterns defined in STANDARDS.md.",
       "plan": "",
