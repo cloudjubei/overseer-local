@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
 import { useNextTaskId } from '../hooks/useNextTaskId'
 import { tasksService } from '../services/tasksService'
@@ -11,6 +11,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const titleRef = useRef<HTMLInputElement>(null)
 
   const doClose = () => {
     onRequestClose?.()
@@ -41,8 +42,15 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
 
   return (
     <>
-      <Modal title="Create New Task" onClose={doClose} isOpen={true}>
-        <TaskForm initialValues={{ id: defaultId }} onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={true} />
+      <Modal title="Create New Task" onClose={doClose} isOpen={true} size="md" initialFocusRef={titleRef as React.RefObject<HTMLElement>}>
+        <TaskForm
+          initialValues={{ id: defaultId }}
+          onSubmit={onSubmit}
+          onCancel={doClose}
+          submitting={submitting}
+          isCreate={true}
+          titleRef={titleRef}
+        />
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>
