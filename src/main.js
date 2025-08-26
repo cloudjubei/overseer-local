@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Notification } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
@@ -177,4 +177,33 @@ ipcMain.handle('chat:save', (event, {chatId, messages}) => {
 
 ipcMain.handle('chat:delete', (event, chatId) => {
   chatManager.deleteChat(chatId);
+});
+
+ipcMain.handle('notifications:send-os', async (event, data) => {
+  if (!Notification.isSupported()) {
+    return { success: false, error: 'Notifications not supported' };
+  }
+
+  // Request permission if needed (on macOS)
+  if (process.platform === 'darwin') {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      return { success: false, error: 'Permission denied' };
+    }
+  }
+
+  const notification = new Notification({
+    title: data.title,
+    body: data.message,
+    silent: !data.soundsEnabled,
+    timeoutType: data.displayDuration > 0 ? 'default' : 'never',
+  });
+
+  notification.on('click', () => {
+    mainWindow.focus();
+    mainWindow.webContents.send('notifications:clicked', data.metadata);
+  });
+
+  notification.show();
+  return { success: true };
 });

@@ -11,11 +11,13 @@ import {
   NotificationQuery,
   NotificationStats,
   NotificationType,
-  NotificationCategory
+  NotificationCategory,
+  NotificationPreferences
 } from '../../types/notifications';
 
 class NotificationsService {
   private readonly STORAGE_KEY = 'app_notifications';
+  private readonly PREFS_KEY = 'notification_preferences';
   private notifications: Map<string, Notification> = new Map();
   private listeners: Set<() => void> = new Set();
 
@@ -69,6 +71,41 @@ class NotificationsService {
   }
 
   /**
+   * Get preferences from storage
+   */
+  private getPreferences(): NotificationPreferences {
+    try {
+      const stored = localStorage.getItem(this.PREFS_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Show OS notification if enabled
+   */
+  private async showOsNotification(notification: Notification) {
+    const prefs = this.getPreferences();
+    if (!prefs.osNotificationsEnabled) return;
+    if (prefs.categoriesEnabled && !prefs.categoriesEnabled[notification.category]) return;
+
+    const data = {
+      title: notification.title,
+      message: notification.message,
+      metadata: notification.metadata,
+      soundsEnabled: prefs.soundsEnabled,
+      displayDuration: prefs.displayDuration
+    };
+
+    try {
+      await window.notifications.sendOs(data);
+    } catch (error) {
+      console.error('Failed to send OS notification:', error);
+    }
+  }
+
+  /**
    * Create a new notification
    */
   create(input: NotificationCreateInput): Notification {
@@ -86,6 +123,7 @@ class NotificationsService {
     this.notifications.set(notification.id, notification);
     this.saveToStorage();
     this.notifyListeners();
+    this.showOsNotification(notification);
 
     return notification;
   }
