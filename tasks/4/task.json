@@ -183,36 +183,19 @@
     },
     {
       "id": "4.18",
-      "status": "+",
+      "status": "-",
       "title": "Errors",
-      "description": "There are lots of errors in ChatView.tsx. There was a new document `docs/STANDARDS.md` established and a lot of functionality has been moved around. Fix it.",
+      "description": "Chat view has these 2 import errors - we are clearly missing these reusable components. Make them in the shadcn + tailwind style like the rest",
       "plan": "",
       "context": [
-        "src/renderer/screens/ChatView.tsx",
-        "src/renderer/hooks/useChats.ts",
-        "src/renderer/hooks/useDocsAutocomplete.ts",
-        "src/renderer/hooks/useDocsIndex.ts",
-        "src/renderer/hooks/useLLMConfig.ts",
-        "src/renderer/navigation/ModalHost.tsx",
-        "src/renderer/navigation/Navigator.tsx",
-        "src/renderer/services/chatService.ts",
-        "src/renderer/services/docsService.ts",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "4.19",
-      "status": "+",
-      "title": "Errors2",
-      "description": "All the errors will be described in the acceptance criteria as a list so it's easy to go over them one by one.",
-      "plan": "",
-      "context": [
+        "docs/STANDARDS.md",
+        "src/renderer/components/ui/Modal.tsx",
+        "src/renderer/components/ui/Button.tsx",
         "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [
-        "line: 4 - Cannot find module '../components/ui/input' or its corresponding type declarations.",
-        "line: 6 - Cannot find module '../components/ui/select' or its corresponding type declarations."
+        "line: 3 - Cannot find module '../components/ui/input' or its corresponding type declarations.",
+        "line: 5 - Cannot find module '../components/ui/select' or its corresponding type declarations."
       ]
     }
   ]
