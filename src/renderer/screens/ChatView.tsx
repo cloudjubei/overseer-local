@@ -1,23 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal } from '../components/ui/Modal';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useChats } from '../hooks/useChats';
 import { useDocsIndex } from '../hooks/useDocsIndex';
 import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
 import { useLLMConfig } from '../hooks/useLLMConfig';
-import type { LLMConfig } from '../types';
+import { useNavigator } from '../navigation/Navigator';
+import type { ChatMessage } from '../types';
 
 const ChatView = () => {
   const { chatHistories, currentChatId, setCurrentChatId, messages, createChat, deleteChat, sendMessage, uploadDocument } = useChats();
   const { docsList } = useDocsIndex();
-  const { configs, activeConfigId, activeConfig, isConfigured, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
+  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig();
+  const { navigateView } = useNavigator();
 
   const [input, setInput] = useState<string>('');
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
-  const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
@@ -34,8 +30,11 @@ const ChatView = () => {
     messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || !activeConfig) return;
+    if (!currentChatId) {
+      await createChat();
+    }
     sendMessage(input, activeConfig);
     setInput('');
   };
@@ -52,42 +51,18 @@ const ChatView = () => {
     reader.readAsText(file);
   };
 
-  const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditingConfig((prev) => prev ? { ...prev, [name]: value } : null);
-  };
+  interface EnhancedMessage extends ChatMessage {
+    showModel?: boolean;
+  }
 
-  const handleProviderChange = (value: string) => {
-    setEditingConfig((prev) => prev ? { ...prev, provider: value as 'openai' | 'litellm' } : null);
-  };
-
-  const handleSaveConfig = () => {
-    if (!editingConfig) return;
-    if (isAddingNew) {
-      addConfig(editingConfig);
-    } else {
-      updateConfig(editingConfig.id, editingConfig);
+  const enhancedMessages: EnhancedMessage[] = messages.map((msg, index) => {
+    let showModel = false;
+    if (msg.role === 'assistant' && msg.model) {
+      const prevAssistant = [...messages.slice(0, index)].reverse().find(m => m.role === 'assistant');
+      showModel = !prevAssistant || prevAssistant.model !== msg.model;
     }
-    setEditingConfig(null);
-    setIsAddingNew(false);
-  };
-
-  const handleEditConfig = (config: LLMConfig) => {
-    setEditingConfig({ ...config });
-    setIsAddingNew(false);
-  };
-
-  const handleAddNewConfig = () => {
-    setEditingConfig({ id: '', name: '', provider: 'openai', apiBaseUrl: '', apiKey: '', model: '' });
-    setIsAddingNew(true);
-  };
-
-  const handleDeleteConfig = (id: string) => {
-    removeConfig(id);
-    if (editingConfig?.id === id) {
-      setEditingConfig(null);
-    }
-  };
+    return { ...msg, showModel };
+  });
 
   return (
     <div className="flex h-full">
@@ -119,7 +94,7 @@ const ChatView = () => {
               </SelectContent>
             </Select>
             <button
-              onClick={() => setShowSettings(true)}
+              onClick={() => navigateView('Settings')}
               className="px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
             >
               Settings
@@ -135,15 +110,15 @@ const ChatView = () => {
           ref={messageListRef}
           className="flex-1 overflow-y-auto mb-4 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 rounded-md mx-4"
         >
-          {messages.length === 0 ? (
+          {enhancedMessages.length === 0 ? (
             <div className="text-center text-neutral-500 dark:text-neutral-400 mt-10">
               Start chatting about the project
             </div>
           ) : (
-            messages.map((msg, index) => (
+            enhancedMessages.map((msg, index) => (
               <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : msg.role === 'system' ? 'justify-center' : 'justify-start'} mb-2`}>
                 <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 dark:bg-blue-600 text-white' : msg.role === 'system' ? 'bg-gray-300 dark:bg-gray-700 text-neutral-900 dark:text-neutral-100' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'}`}>
-                  {msg.role === 'assistant' && msg.model && <div className="text-xs text-gray-500">{msg.model}</div>}
+                  {msg.role === 'assistant' && msg.showModel && msg.model && <div className="text-xs text-gray-500">{msg.model}</div>}
                   {msg.content}
                 </div>
               </div>
@@ -195,67 +170,6 @@ const ChatView = () => {
             </div>
           )}
         </div>
-        <Modal
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-          title="LLM Configurations"
-        >
-          <div className="mb-4">
-            <Button onClick={handleAddNewConfig}>Add New Config</Button>
-          </div>
-          {configs.map((cfg) => (
-            <div key={cfg.id} className="mb-2 flex justify-between">
-              <span>{cfg.name} ({cfg.model}) {activeConfigId === cfg.id ? '(Active)' : ''}</span>
-              <div>
-                <Button onClick={() => handleEditConfig(cfg)} variant="outline">Edit</Button>
-                <Button onClick={() => handleDeleteConfig(cfg.id)} variant="destructive">Delete</Button>
-                {activeConfigId !== cfg.id && <Button onClick={() => setActive(cfg.id)}>Set Active</Button>}
-              </div>
-            </div>
-          ))}
-          {editingConfig && (
-            <div className="mt-4">
-              <Input
-                placeholder="Name"
-                name="name"
-                value={editingConfig.name || ''}
-                onChange={handleConfigChange}
-                className="mb-2"
-              />
-              <Select value={editingConfig.provider || 'openai'} onValueChange={handleProviderChange}>
-                <SelectTrigger className="mb-2">
-                  <SelectValue placeholder="Provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="openai">OpenAI</SelectItem>
-                  <SelectItem value="litellm">LiteLLM</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                placeholder="API Base URL"
-                name="apiBaseUrl"
-                value={editingConfig.apiBaseUrl || ''}
-                onChange={handleConfigChange}
-                className="mb-2"
-              />
-              <Input
-                placeholder="API Key"
-                name="apiKey"
-                value={editingConfig.apiKey || ''}
-                onChange={handleConfigChange}
-                className="mb-2"
-              />
-              <Input
-                placeholder="Model"
-                name="model"
-                value={editingConfig.model || ''}
-                onChange={handleConfigChange}
-                className="mb-2"
-              />
-              <Button onClick={handleSaveConfig}>Save</Button>
-            </div>
-          )}
-        </Modal>
       </div>
     </div>
   );

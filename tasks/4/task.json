@@ -1,6 +1,6 @@
 {
   "id": 4,
-  "status": "-",
+  "status": "+",
   "title": "Agentic chat interface",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
@@ -152,7 +152,7 @@
     },
     {
       "id": "4.15",
-      "status": "-",
+      "status": "+",
       "title": "LLM connector abstraction and providers (LiteLLM, OpenAI-compatible)",
       "description": "Design an abstraction for chat providers. Implement connectors for: (1) LiteLLM-compatible HTTP endpoint, (2) OpenAI-compatible custom base URL to support LM Studio / Ollama. Configurable API key, base URL, model name, timeouts.",
       "plan": "",
@@ -161,16 +161,17 @@
     },
     {
       "id": "4.16",
-      "status": "-",
+      "status": "+",
       "title": "Settings screen is more advanced",
-      "description": "The user should be able to configure various LLMs using various providers - this requires a more complex screen that should be accessible via Chat.",
+      "description": "The user should be able to configure various LLMs using various providers - this requires a more complex screen that should be accessible via Chat. The user needs to select a model from some common models (OpenAI, Anthropic, xai/grok, google/gemini) and based on the interface (LiteLLM) it works out API URL + provides a dropdown to available models (the user can also go custom and type it in themselves).",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "the current UI/UX isn't user friendly"
     },
     {
       "id": "4.17",
-      "status": "-",
+      "status": "+",
       "title": "Switching models",
       "description": "User can switch between different models that were configured directly in the chat. There's a dropdown with all the options that were previously configured and the user can choose which chat to use. If there was a switch in a conversation it is shown which LLM replied.",
       "plan": "",
@@ -180,8 +181,17 @@
     {
       "id": "4.18",
       "status": "-",
-      "title": "Cannot send a message",
-      "description": "Currently if I send a message to a configured LLM - the whole app crashes horribly",
+      "title": "Some providers don't work",
+      "description": "Trying to send a message to xai/grok-4 or claude-sonnet-4-20250514 with litellm doesn't work. Directly via openai and providing the url also doesn't work.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4.19",
+      "status": "-",
+      "title": "Custom local provider - LM Studio",
+      "description": "Allow using LM Studio's API server that lists models at http://localhost:1234/v1/models - there should be a check to see that it's running and then all the available models can be listed. To post messages to: http://localhost:1234/v1/chat/completions",
       "plan": "",
       "context": [],
       "acceptance": []

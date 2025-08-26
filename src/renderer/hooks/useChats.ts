@@ -55,7 +55,7 @@ export function useChats() {
 
     try {
       const response = await chatService.getCompletion(newMessages, config);
-      const assistantMsg: ChatMessage = { role: 'assistant', content: response, model: config.model };
+      const assistantMsg: ChatMessage = { role: 'assistant', content: response.content, model: config.model };
       const final = [...newMessages, assistantMsg];
       setMessages(final);
       await chatService.save(currentChatId, final);
