@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TasksView from './components/TasksView';
 import Docs from './components/Docs';
+import Settings from './Settings';
 import './App.css';
 import { View } from './types';
 import { ToastProvider } from './components/ui';
@@ -16,6 +17,8 @@ function App() {
         return <TasksView />;
       case 'Docs':
         return <Docs />;
+      case 'Settings':
+        return <Settings />;
       default:
         return <TasksView />;
     }

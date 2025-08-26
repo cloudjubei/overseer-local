@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 .theme-light {
-  --primary: #0078d4;
-  --primary-hover: #0063b1;
+  --primary: #808080;
+  --primary-hover: #696969;
   --secondary: #f0f0f0;
   --secondary-hover: #e6e6e6;
   --text-color: #333;
-  --bg-color: #fff;
+  --bg-color: #f5f5f5;
   --border-color: #ddd;
   --shadow: 0 2px 4px rgba(0,0,0,0.1);
   --transition: all 0.2s ease;

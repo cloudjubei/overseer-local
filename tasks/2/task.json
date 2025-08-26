@@ -149,7 +149,7 @@
     },
     {
       "id": "2.10",
-      "status": "-",
+      "status": "+",
       "title": "Use shadcn and tailwind",
       "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen (an item in the sidebar) where it must be possible to change themes.",
       "plan": "",
