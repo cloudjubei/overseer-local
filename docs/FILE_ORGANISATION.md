@@ -39,6 +39,14 @@ Notes:
 - Deprecate gradually: create new files/specs alongside old ones, migrate, then remove deprecated artifacts when tests prove stability.
 - Each feature must have deterministic tests; do not mark features complete until tests pass.
 
+## Repository Tree (updated)
+Key changes for responsive layout and sidebar:
+- Updated: src/index.css — removed fixed body max-width/padding, added full-height layout for html/body/#root; retained component styles.
+- Updated: src/renderer/App.tsx — simplified ToastProvider usage and ensured root container uses full height/width.
+- Updated: src/renderer/screens/SidebarView.tsx — refactored into a flexible layout with a collapsible left sidebar and a scrollable content area; sidebar width transitions between 56 and 14 tailwind units, collapsed state persisted in localStorage.
+- Updated: src/renderer/screens/DocumentsView.tsx — wrapped in a flex column with min-h-0 and proper overflow to prevent oversized content.
+- Updated: src/renderer/screens/ChatView.tsx — adjusted layout to use fixed-width left chat list and flexible right pane with min-w-0/min-h-0 for correct resizing.
+
 ## Example Tree (illustrative)
 The following tree is graphical and illustrative of a typical repository layout:
 
@@ -47,173 +55,39 @@ repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ BUILD_SIGNING.md
-│  ├─ LINTING_AND_FORMATTING.md
-│  ├─ DESIGN_PROPOSAL.md
-│  └─ tasks/
-│     ├─ task_example.json
-│     └─ task_format.py            # Python source-of-truth schema
+│  └─ …
 ├─ src/
 │  ├─ docs/
-│  │  └─ indexer.js               # Logical Docs indexer and file watcher
+│  │  └─ indexer.js
 │  ├─ renderer/
 │  │  ├─ components/
-│  │  │  ├─ ui/
-│  │  │  │  ├─ alert.tsx         
-│  │  │  │  ├─ button.tsx         
-│  │  │  │  ├─ index.tsx         
-│  │  │  │  ├─ modal.tsx         
-│  │  │  │  └─ toast.tsx         
-│  │  │  ├─ FeatureForm.tsx             
-│  │  │  ├─ MarkdownRenderer.tsx        # Markdown renderer (GFM, highlight, sanitize, internal links)
-│  │  │  ├─ MarkdownEditor.tsx          # Split-view WYSIWYG-style Markdown editor with live preview
-│  │  │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
-│  │  │  └─ TaskForm.tsx          
+│  │  │  ├─ MarkdownEditor.tsx
+│  │  │  ├─ MarkdownRenderer.tsx
+│  │  │  └─ ui/ …
 │  │  ├─ docs/
-│  │  │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories) with edit capabilities
+│  │  │  └─ DocumentsBrowserView.tsx
 │  │  ├─ screens/
-│  │  │  ├─ DocumentsView.tsx         # Documents screen using DocumentsBrowserView
-│  │  │  ├─ ChatView.tsx             # Chat screen for project chat interface
-│  │  │  ├─ SettingsView.tsx          # Settings screen for configuring theme
-│  │  │  └─ TasksView.tsx             # Home view component (tasks)   
+│  │  │  ├─ SidebarView.tsx        # Collapsible, responsive sidebar + content layout
+│  │  │  ├─ DocumentsView.tsx      # Uses min-h-0/overflow for resizing
+│  │  │  ├─ ChatView.tsx           # Resizable split layout
+│  │  │  └─ SettingsView.tsx
 │  │  ├─ tasks/
-│  │  │  ├─ EditableTaskMeta.tsx        
-│  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx       
-│  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskDetailsView.tsx         
-│  │  │  └─ TasksListView.tsx  
-│  │  ├─ utils/
-│  │  │  └─ LLMConfigManager.ts        # Manager for LLM configuration and local storage
-│  │  ├─ App.tsx                 # Main Entry for the React app 
-│  │  └─ types.ts                # Renderer-local types (View)
+│  │  │  ├─ TasksListView.tsx
+│  │  │  └─ TaskDetailsView.tsx
+│  │  ├─ App.tsx                   # App root with full-size container
+│  │  └─ types.ts
 │  ├─ tasks/
-│  │  ├─ validator.js             # Logical Tasks validator
-│  │  └─ indexer.js               # Logical Tasks indexer and file watcher
-│  ├─ types/
-│  │  ├─ global.d.ts              
-│  │  └─ tasks.ts                 # TypeScript interfaces for task schema
-│  ├─ index.css
+│  │  ├─ validator.js
+│  │  └─ indexer.js
+│  ├─ chat/
+│  │  └─ manager.js
+│  ├─ index.css                    # Full-height layout + styles (updated)
 │  ├─ main.js
-│  ├─ preload.js
-│  └─ chat/
-│     └─ manager.js               # Logical Chat manager for LLM interactions
-├─ tasks/
-│  └─ 1/
-│     ├─ task.json
-│     └─ tests/
-│        └─ test_1_1.py
-├─ build/
-│  ├─ icons/
-│  │  ├─ icon.icns               # Placeholder macOS icon (replace with real ICNS)
-│  │  ├─ icon.ico                # Placeholder Windows icon (replace with real ICO)
-│  │  └─ icon.png                # Placeholder Linux icon (replace with real 512x512 PNG)
-│  ├─ entitlements.mac.plist     # macOS entitlements for main app
-│  └─ entitlements.mac.inherit.plist # macOS entitlements for helpers
-├─ .editorconfig
-├─ .env
-├─ .eslintignore
-├─ .eslintrc.cjs
-├─ .gitignore
-├─ .prettierignore
-├─ .prettierrc.json
-├─ forge-config.js
-├─ index.html
-├─ package-lock.json
-├─ package.json
-├─ postcss.config.js
-├─ README.md
-├─ tailwind.config.js
-├─ tsconfig.json
-├─ vite.main.config.mjs            # Vite config for main process
-├─ vite.preload.config.mjs         # Vite config for preload scripts
-└─ vite.renderer.config.mjs        # Vite config for renderer (React)
+│  └─ preload.js
+└─ …
 ```
 
-## Logical Tasks Indexer
-- Location: src/tasks/indexer.js
-- Purpose: Scans tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features; watches for file changes and refreshes the index.
-- API:
-  - Class TasksIndexer(projectRoot)
-    - getIndex(): returns the current index snapshot
-    - init(): builds the index and starts watchers
-    - buildIndex(): triggers a full rescan
-    - stopWatching(): stops all watchers
-  - Additional exports:
-    - validateTask(task): validates a parsed task.json object
-    - STATUSES: Set of allowed status codes
-  - Index shape:
-    - { root, tasksDir, updatedAt, tasksById, featuresByKey, errors, metrics: { lastScanMs, lastScanCount } }
-- Integration:
-  - The Electron main process instantiates the indexer and exposes IPC channels:
-    - tasks-index:get (invoke) returns the index snapshot
-    - tasks-index:update (event) pushes updates on changes
-    - tasks:update (invoke) updates a task's fields (currently title and description) in tasks/{id}/task.json and triggers an index rebuild
-    - tasks-feature:update (invoke) updates a feature in tasks/{id}/task.json and triggers an index rebuild
-    - tasks-feature:add (invoke) appends a new feature to tasks/{id}/task.json and triggers an index rebuild
-    - tasks-features:reorder (invoke) reorders a task's features and renumbers their ids to `${taskId}.N`, updates dependencies across tasks, and triggers an index rebuild
-    - tasks:add (invoke) creates a new task directory tasks/{id}/ and writes a minimal valid task.json, then triggers an index rebuild
-    - tasks:reorder (invoke) reorders tasks globally, renumbers task directory ids to 1..N per the new order, updates each affected task.json id, updates dotted feature ids and dependencies across all tasks, and triggers an index rebuild
-    - feature-create:open (invoke) opens a modal popup window for adding a new feature to a task
-    - task-create:open (invoke) opens a modal popup window for creating a new task
-
-## Logical Docs Indexer
-- Location: src/docs/indexer.js
-- Purpose: Scans the project's docs/ directory (and all subdirectories) for Markdown (.md) files to build an in-memory documentation index; watches for file changes and refreshes the index.
-- API:
-  - Class DocsIndexer(projectRoot, options?)
-    - getIndex(): returns the current index snapshot
-    - init(): builds the index and starts a cross-platform watcher (polling)
-    - buildIndex(): triggers a full rescan and rebuilds the index tree
-    - stopWatching(): stops the watcher
-    - onUpdate(cb): subscribes to index updates; returns an unsubscribe function
-  - Options:
-    - pollingIntervalMs (number, default 1000): how frequently to poll for file changes
-    - maxTitleBytes (number, default 64KB): maximum bytes to read from each file to extract a title and headings
-  - Index shape:
-    - { root, docsDir, updatedAt, tree, files, errors, metrics: { lastScanMs, lastScanCount } }
-    - tree: a directory tree beginning at docs/, where each node has:
-      - type: 'dir' | 'file'
-      - name, relPath, absPath
-      - For 'dir': dirs[] and files[] arrays with child nodes
-      - For 'file': size, mtimeMs, title (first H1 or filename), headings[] (array of { level, text })
-- Notes:
-  - The watcher uses a portable polling strategy to detect changes across platforms, avoiding native watcher limitations.
-  - Only files with a .md extension are indexed (case-insensitive). Non-Markdown files are ignored.
-  - Basic metadata is extracted without rendering Markdown; rendering and sanitization are handled in the renderer layer.
-- Integration (IPC):
-  - The Electron main process instantiates a singleton DocsIndexer and exposes channels:
-    - docs-index:get (invoke) returns the current index snapshot
-    - docs-index:update (event) broadcasts updates when the index changes
-    - docs-file:get (invoke) reads and returns the UTF-8 content of a .md file by relative path under docs/
-    - docs-file:save (invoke) writes UTF-8 content to a .md file by relative path under docs/
-  - Preload exposes a safe renderer bridge as window.docsIndex with methods:
-    - get(): Promise resolving to the index snapshot
-    - subscribe(cb): subscribe to updates; returns unsubscribe function
-    - getFile(relPath): Promise resolving to the file content
-    - saveFile(relPath, content): Promise resolving when save completes
-## Logical Chat Manager
-- Location: src/chat/manager.js
-- Purpose: Manages the chat interface's backend, including LLM completions and chat history persistence.
-- API:
-  - Class ChatManager(projectRoot)
-    - async getCompletion({messages, config}): Performs a non-streaming LLM chat completion and returns the response message.
-    - listChats(): Returns a list of chat IDs.
-    - createChat(): Creates a new chat and returns its ID.
-    - loadChat(chatId): Loads saved chat messages from file for the given chatId.
-    - saveChat(chatId, messages): Saves chat messages to file for the given chatId.
-    - deleteChat(chatId): Deletes the chat file for the given chatId.
-- Integration:
-  - The Electron main process instantiates the manager and exposes IPC channels:
-    - chat:completion (invoke) returns the LLM response
-    - chat:list (invoke) returns the list of chat IDs
-    - chat:create (invoke) creates a new chat and returns ID
-    - chat:load (invoke) returns the loaded messages for chatId
-    - chat:save (invoke) saves the messages for chatId
-    - chat:delete (invoke) deletes the chat by chatId
-  - Preload exposes a safe renderer bridge as window.chat with methods:
-    - getCompletion(messages, config): Promise resolving to the response
-    - list(): Promise resolving to list of chat IDs
-    - create(): Promise resolving to new chat ID
-    - load(chatId): Promise resolving to loaded messages
-    - save(chatId, messages): Promise resolving when saved
-    - delete(chatId): Promise resolving when deleted
+## Notes on Responsiveness
+- The app uses a common flex layout: a collapsible left sidebar and a main content area.
+- min-h-0 and min-w-0 are applied to containers that must allow children with overflow-auto to scroll correctly in nested flex layouts, ensuring large viewers (e.g., docs) do not force the window to grow.
+- Sidebar collapse state is saved as localStorage key "sidebar-collapsed".

@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "5.1",
-      "status": "-",
+      "status": "+",
       "title": "The app needs to be responsive to resizing",
       "description": "Currently most of the views don't resize properly when the window is resized. Especially with the sidebar to the sidebar on the left side, it doesn't stay there and if something big gets opened, like the Document viewer - then the screen becomes too big. We need to have a common strategy for this. The sidebar should also be collapsible.",
       "plan": "",
