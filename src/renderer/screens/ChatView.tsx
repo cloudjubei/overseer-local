@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LLMConfigManager, LLMConfig } from '../utils/LLMConfigManager';
 import { Modal } from '../components/ui/modal';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 const ChatView = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string }[]>([]);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string; model?: string }[]>([]);
   const [input, setInput] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [config, setConfig] = useState<LLMConfig>({ apiBaseUrl: '', apiKey: '', model: '' });
+  const [configs, setConfigs] = useState<LLMConfig[]>([]);
+  const [activeConfigId, setActiveConfigId] = useState<string | null>(null);
+  const [editingConfig, setEditingConfig] = useState<Partial<LLMConfig> | null>(null);
+  const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
   const [isConfigured, setIsConfigured] = useState<boolean>(false);
   const managerRef = useRef<LLMConfigManager | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -23,8 +29,10 @@ const ChatView = () => {
 
   useEffect(() => {
     managerRef.current = new LLMConfigManager();
-    const loadedConfig = managerRef.current.getConfig();
-    setConfig(loadedConfig);
+    const loadedConfigs = managerRef.current.getConfigs();
+    setConfigs(loadedConfigs);
+    const activeId = managerRef.current.getActiveId();
+    setActiveConfigId(activeId);
     setIsConfigured(managerRef.current.isConfigured());
 
     const loadChats = async () => {
@@ -202,20 +210,61 @@ const ChatView = () => {
     setMentionStart(null);
   };
 
-  const handleSaveConfig = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    managerRef.current?.save(config);
-    setIsConfigured(!!config.apiKey);
-    setShowSettings(false);
-  };
-
   const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setConfig(prev => ({ ...prev, [name as keyof LLMConfig]: value }));
+    setEditingConfig(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProviderChange = (value: string) => {
+    setEditingConfig(prev => ({ ...prev, provider: value as 'openai' | 'litellm' }));
+  };
+
+  const handleSaveConfig = () => {
+    if (!editingConfig) return;
+    if (isAddingNew) {
+      const newConfig = managerRef.current?.addConfig(editingConfig as LLMConfig);
+      if (newConfig) {
+        setConfigs(managerRef.current?.getConfigs() || []);
+        setActiveConfigId(newConfig.id);
+      }
+      setIsAddingNew(false);
+    } else if (editingConfig.id) {
+      managerRef.current?.updateConfig(editingConfig.id, editingConfig);
+      setConfigs(managerRef.current?.getConfigs() || []);
+    }
+    setEditingConfig(null);
+    setIsConfigured(managerRef.current?.isConfigured() || false);
+  };
+
+  const handleEditConfig = (config: LLMConfig) => {
+    setEditingConfig(config);
+    setIsAddingNew(false);
+  };
+
+  const handleAddNewConfig = () => {
+    setEditingConfig({ name: '', provider: 'openai', apiBaseUrl: '', apiKey: '', model: '' });
+    setIsAddingNew(true);
+  };
+
+  const handleDeleteConfig = (id: string) => {
+    managerRef.current?.removeConfig(id);
+    setConfigs(managerRef.current?.getConfigs() || []);
+    setActiveConfigId(managerRef.current?.getActiveId() || null);
+    if (editingConfig?.id === id) {
+      setEditingConfig(null);
+    }
+  };
+
+  const handleSetActive = (id: string) => {
+    managerRef.current?.setActiveId(id);
+    setActiveConfigId(id);
   };
 
   const handleSend = async () => {
     if (!input.trim() || !isConfigured || !currentChatId) return;
+
+    const activeConfig = managerRef.current?.getActiveConfig();
+    if (!activeConfig) return;
 
     const newMessages = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);
@@ -225,8 +274,8 @@ const ChatView = () => {
     setMessages([...newMessages, loadingMsg]);
 
     try {
-      const response = await window.chat.getCompletion(newMessages, config);
-      const assistantMsg = { role: 'assistant', content: response };
+      const response = await window.chat.getCompletion(newMessages, activeConfig);
+      const assistantMsg = { role: 'assistant', content: response.content, model: activeConfig.model };
       setMessages([...newMessages, assistantMsg]);
       await window.chat.save(currentChatId, [...newMessages, assistantMsg]);
     } catch (error) {
@@ -294,12 +343,24 @@ const ChatView = () => {
         <div ref={mirrorRef} aria-hidden="true" className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none" />
         <div className="flex justify-between items-center p-4">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}</h1>
-          <button
-            onClick={() => setShowSettings(true)}
-            className="px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
-          >
-            Settings
-          </button>
+          <div className="flex items-center">
+            <Select value={activeConfigId || ''} onValueChange={handleSetActive}>
+              <SelectTrigger className="w-[180px] mr-2">
+                <SelectValue placeholder="Select Model" />
+              </SelectTrigger>
+              <SelectContent>
+                {configs.map((cfg) => (
+                  <SelectItem key={cfg.id} value={cfg.id}>{cfg.name} ({cfg.model})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+            >
+              Settings
+            </button>
+          </div>
         </div>
         {!isConfigured && (
           <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 p-2 rounded-md mb-4 mx-4">
@@ -318,6 +379,7 @@ const ChatView = () => {
             messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : msg.role === 'system' ? 'justify-center' : 'justify-start'} mb-2`}>
                 <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 dark:bg-blue-600 text-white' : msg.role === 'system' ? 'bg-gray-300 dark:bg-gray-700 text-neutral-900 dark:text-neutral-100' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'}`}>
+                  {msg.role === 'assistant' && msg.model && <div className="text-xs text-gray-500">{msg.model}</div>}
                   {msg.content}
                 </div>
               </div>
@@ -372,43 +434,63 @@ const ChatView = () => {
         <Modal
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
-          title="LLM Configuration"
+          title="LLM Configurations"
         >
-          <form onSubmit={handleSaveConfig}>
-            <div className="mb-4">
-              <label className="block mb-1">API Base URL</label>
-              <input
-                type="text"
+          <div className="mb-4">
+            <Button onClick={handleAddNewConfig}>Add New Config</Button>
+          </div>
+          {configs.map((cfg) => (
+            <div key={cfg.id} className="mb-2 flex justify-between">
+              <span>{cfg.name} ({cfg.model}) {activeConfigId === cfg.id ? '(Active)' : ''}</span>
+              <div>
+                <Button onClick={() => handleEditConfig(cfg)} variant="outline">Edit</Button>
+                <Button onClick={() => handleDeleteConfig(cfg.id)} variant="destructive">Delete</Button>
+                {activeConfigId !== cfg.id && <Button onClick={() => handleSetActive(cfg.id)}>Set Active</Button>}
+              </div>
+            </div>
+          ))}
+          {editingConfig && (
+            <div className="mt-4">
+              <Input
+                placeholder="Name"
+                name="name"
+                value={editingConfig.name || ''}
+                onChange={handleConfigChange}
+                className="mb-2"
+              />
+              <Select value={editingConfig.provider || 'openai'} onValueChange={handleProviderChange}>
+                <SelectTrigger className="mb-2">
+                  <SelectValue placeholder="Provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="litellm">LiteLLM</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="API Base URL"
                 name="apiBaseUrl"
-                value={config.apiBaseUrl}
+                value={editingConfig.apiBaseUrl || ''}
                 onChange={handleConfigChange}
-                className="w-full border p-2 rounded"
+                className="mb-2"
               />
-            </div>
-            <div className="mb-4">
-              <label className="block mb-1">API Key</label>
-              <input
-                type="text"
+              <Input
+                placeholder="API Key"
                 name="apiKey"
-                value={config.apiKey}
+                value={editingConfig.apiKey || ''}
                 onChange={handleConfigChange}
-                className="w-full border p-2 rounded"
+                className="mb-2"
               />
-            </div>
-            <div className="mb-4">
-              <label className="block mb-1">Model</label>
-              <input
-                type="text"
+              <Input
+                placeholder="Model"
                 name="model"
-                value={config.model}
+                value={editingConfig.model || ''}
                 onChange={handleConfigChange}
-                className="w-full border p-2 rounded"
+                className="mb-2"
               />
+              <Button onClick={handleSaveConfig}>Save</Button>
             </div>
-            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-              Save
-            </button>
-          </form>
+          )}
         </Modal>
       </div>
     </div>
