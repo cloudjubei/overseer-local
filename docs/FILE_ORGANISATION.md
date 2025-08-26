@@ -65,7 +65,9 @@ repo_root/
 │  │  │  └─ ui/
 │  │  │     ├─ Alert.tsx               # Reusable AlertDialog
 │  │  │     ├─ Button.tsx              # Reusable Button
+│  │  │     ├─ Input.tsx               # Reusable Input
 │  │  │     ├─ Modal.tsx               # Reusable Modal
+│  │  │     ├─ Select.tsx              # Reusable Select
 │  │  │     └─ Toast.tsx               # ToastProvider + useToast
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts             # Wraps window.chat API

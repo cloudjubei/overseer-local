@@ -1,24 +1,44 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
 import type { LLMConfig } from '../types';
 
 export function useLLMConfig() {
-  const managerRef = useRef<LLMConfigManager | null>(null);
-  const [config, setConfig] = useState<LLMConfig>({ apiBaseUrl: '', apiKey: '', model: '' });
-  const [isConfigured, setIsConfigured] = useState(false);
+  const managerRef = useRef<LLMConfigManager>(new LLMConfigManager());
+  const [configs, setConfigs] = useState<LLMConfig[]>([]);
+  const [activeConfigId, setActiveConfigId] = useState<string | null>(null);
 
   useEffect(() => {
-    managerRef.current = new LLMConfigManager();
-    const loaded = managerRef.current.getConfig();
-    setConfig(loaded);
-    setIsConfigured(managerRef.current.isConfigured());
+    setConfigs(managerRef.current.getConfigs());
+    setActiveConfigId(managerRef.current.getActiveId());
   }, []);
 
-  const save = (next: LLMConfig) => {
-    managerRef.current?.save(next);
-    setConfig(next);
-    setIsConfigured(!!next.apiKey);
-  };
+  const activeConfig = useMemo(() => 
+    configs.find(c => c.id === activeConfigId) || null,
+  [configs, activeConfigId]);
 
-  return { config, setConfig, isConfigured, save };
+  const isConfigured = useMemo(() => !!activeConfig?.apiKey, [activeConfig]);
+
+  const addConfig = useCallback((config: Omit<LLMConfig, 'id'>) => {
+    managerRef.current.addConfig(config);
+    setConfigs(managerRef.current.getConfigs());
+    setActiveConfigId(managerRef.current.getActiveId());
+  }, []);
+
+  const updateConfig = useCallback((id: string, updates: Partial<LLMConfig>) => {
+    managerRef.current.updateConfig(id, updates);
+    setConfigs(managerRef.current.getConfigs());
+  }, []);
+
+  const removeConfig = useCallback((id: string) => {
+    managerRef.current.removeConfig(id);
+    setConfigs(managerRef.current.getConfigs());
+    setActiveConfigId(managerRef.current.getActiveId());
+  }, []);
+
+  const setActive = useCallback((id: string) => {
+    managerRef.current.setActiveId(id);
+    setActiveConfigId(id);
+  }, []);
+
+  return { configs, activeConfigId, activeConfig, isConfigured, addConfig, updateConfig, removeConfig, setActive };
 }
