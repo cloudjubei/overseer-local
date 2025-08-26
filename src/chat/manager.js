@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { OpenAI } from 'openai';
-import { completion } from 'litellm';
+import { BaseProvider } from './providers/base';
+import { OpenAIProvider } from './providers/openai';
+import { LiteLLMProvider } from './providers/litellm';
 
 export class ChatManager {
   constructor(projectRoot, tasksIndexer, docsIndexer) {
@@ -93,27 +94,18 @@ export class ChatManager {
       };
 
       const provider = config.provider || 'openai';
-      let createCompletion;
-      if (provider === 'openai') {
-        const openai = new OpenAI({
-          baseURL: config.apiBaseUrl,
-          apiKey: config.apiKey,
-          timeout: config.timeout
-        });
-        createCompletion = async (params) => openai.chat.completions.create(params);
-      } else if (provider === 'litellm') {
-        createCompletion = async (params) => completion({
-          ...params,
-          api_key: config.apiKey,
-          api_base: config.apiBaseUrl,
-          timeout: config.timeout ? Math.ceil(config.timeout / 1000) : undefined
-        });
-      } else {
+      const providerClasses = {
+        openai: OpenAIProvider,
+        litellm: LiteLLMProvider
+      };
+      const ProviderClass = providerClasses[provider];
+      if (!ProviderClass) {
         throw new Error(`Unknown provider: ${provider}`);
       }
+      const llmProvider = new ProviderClass(config);
 
       while (true) {
-        const response = await createCompletion({
+        const response = await llmProvider.createCompletion({
           model: config.model,
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,

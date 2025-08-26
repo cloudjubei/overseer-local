@@ -48,6 +48,10 @@ repo_root/
 │  └─ BUILD_SIGNING.md
 ├─ src/
 │  ├─ chat/
+│  │  ├─ providers/
+│  │  │  ├─ base.js
+│  │  │  ├─ openai.js
+│  │  │  └─ litellm.js
 │  │  └─ manager.js          
 │  ├─ docs/
 │  │  └─ indexer.js        
@@ -114,6 +118,7 @@ Notes on recent changes
 - Removed main-process modal window creation: src/main.js no longer defines createModalWindow nor the IPC handlers feature-create:open, task-create:open, task-edit:open, feature-edit:open. Modals are handled within the renderer via Navigator + ModalHost and are rendered into document.body using createPortal.
 - Simplified preload tasks API: src/preload.js no longer exposes openFeatureCreate/openTaskCreate/openTaskEdit/openFeatureEdit. Renderer code should use Navigator.openModal/closeModal for UI navigation.
 - Updated TasksListView to use Navigator for opening the Create Task modal and for navigating to task details, aligning with STANDARDS.md (centralized navigation).
+- Added src/chat/providers/ for LLM provider abstractions.
 
 Rationale
 - This eliminates the macOS bug where modal BrowserWindows showed the underlying app view and did not close when the modal was dismissed. Rendering modals in the same window ensures consistent behavior, proper focus management, and simpler state handling.
