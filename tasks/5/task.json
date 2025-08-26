@@ -24,7 +24,7 @@
     },
     {
       "id": "5.3",
-      "status": "-",
+      "status": "+",
       "title": "Organise files",
       "description": "A lot of the logical code is in the renderer but there should be a clear logic/ui split. Propose changes that will be documented in `docs/FILE_ORGANISATION.md` and carry out the clean up.",
       "plan": "",

@@ -1,30 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Modal, AlertDialog, useToast } from '../components/ui';
 import { TaskForm } from '../components/TaskForm';
-
-function useNextTaskId() {
-  const [nextId, setNextId] = useState<number>(1);
-  useEffect(() => {
-    let unsub: null | (() => void) = null;
-    (async () => {
-      try {
-        const idx = await window.tasksIndex.getSnapshot();
-        const ids = Object.values(idx?.tasksById || {}).map(t => t.id).filter((n) => Number.isInteger(n));
-        const max = ids.length > 0 ? Math.max(...ids) : 0;
-        setNextId((max + 1) || 1);
-      } catch (_) {}
-      try {
-        unsub = window.tasksIndex.onUpdate((i) => {
-          const ids = Object.values(i?.tasksById || {}).map((t: any) => t.id).filter((n: any) => Number.isInteger(n));
-          const max = ids.length > 0 ? Math.max(...ids) : 0;
-          setNextId((max + 1) || 1);
-        });
-      } catch (_) {}
-    })();
-    return () => { try { unsub && unsub(); } catch (_) {} };
-  }, []);
-  return nextId;
-}
+import { useNextTaskId } from '../hooks/useNextTaskId';
 
 export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast();
@@ -35,7 +12,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
 
   const doClose = () => { if (onRequestClose) onRequestClose(); else window.close(); };
 
-  const onSubmit = useCallback(async (values) => {
+  const onSubmit = useCallback(async (values: any) => {
     if (!Number.isInteger(values.id) || values.id <= 0) {
       setAlertMessage('Please provide a valid positive integer ID');
       setShowAlert(true);
