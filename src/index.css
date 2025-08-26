@@ -82,6 +82,8 @@
   --control-h-lg: 40px;
   --control-pad-x: 12px;
   --focus-ring-width: 2px;
+  --sidebar-w: 260px;
+  --sidebar-w-collapsed: 64px;
 }
 
 .ui-select { 
@@ -133,7 +135,7 @@
   line-height: 1.35;
   font: inherit;
   resize: vertical;
-  transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease);
+  transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease);
 }
 .ui-textarea:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
 .ui-textarea:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
@@ -298,3 +300,40 @@
   .settings__content { padding: 8px; }
   .settings-form--2col { grid-template-columns: 1fr; }
 }
+
+/* ================= Sidebar & Navigation ================= */
+.sidebar { width: var(--sidebar-w); transition: width var(--motion-fast, 120ms) var(--easing-standard, ease); overflow-y: auto; overflow-x: hidden; }
+.sidebar.collapsed, .sidebar[data-collapsed="true"] { width: var(--sidebar-w-collapsed); }
+
+/* Top toggle + mobile trigger */
+.nav-toggle, .nav-trigger { height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-2); border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-primary); cursor: pointer; }
+.nav-toggle:hover, .nav-trigger:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+.nav-toggle:focus, .nav-trigger:focus { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+
+.nav { padding: 6px 0 10px; display: flex; flex-direction: column; gap: 8px; }
+.nav-list { list-style: none; margin: 0; padding: 0 6px; display: flex; flex-direction: column; gap: 4px; }
+.nav-li { display: block; }
+
+/* Accent variables per item */
+.nav-accent-brand { --nav-accent: var(--color-brand-600); }
+.nav-accent-purple { --nav-accent: var(--color-purple-650); }
+.nav-accent-teal { --nav-accent: var(--color-teal-600); }
+.nav-accent-gray { --nav-accent: var(--color-gray-400); }
+
+.nav-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border-radius: var(--radius-2); background: transparent; border: 1px solid transparent; color: var(--text-primary); cursor: pointer; box-shadow: inset 3px 0 0 0 transparent; transition: background var(--motion-fast, 120ms) var(--easing-standard, ease), border-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease); }
+.nav-item:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+.nav-item:focus { outline: none; box-shadow: inset 3px 0 0 0 var(--nav-accent, var(--border-focus)), 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.nav-item--active { background: color-mix(in srgb, var(--nav-accent, var(--accent-primary)) 14%, transparent); border-color: color-mix(in srgb, var(--nav-accent, var(--accent-primary)) 45%, transparent); box-shadow: inset 3px 0 0 0 var(--nav-accent, var(--accent-primary)); }
+.nav-item--compact { justify-content: center; padding: 0; height: 40px; }
+
+.nav-item__icon { width: 22px; display: inline-flex; align-items: center; justify-content: center; }
+.nav-item__label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.nav-sep { height: 1px; margin: 8px 8px; background: var(--border-subtle); border-radius: 1px; }
+
+/* Mobile drawer tweaks */
+.drawer-open { box-shadow: var(--shadow-3); }
+
+/* Subtle view fade-in */
+.view-transition { animation: viewFade var(--motion-normal, 180ms) var(--easing-decelerate, ease-out) 1; }
+@keyframes viewFade { from { opacity: 0.96; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }

@@ -78,7 +78,7 @@
     },
     {
       "id": "7.9",
-      "status": "-",
+      "status": "+",
       "title": "Sidebar on the left, collapsible, main screen in the middle",
       "description": "The main screen should be responsive (adapt well to size changes) and allow for vertical scrolling (horizontal scrolling shouldn't really be allowed for the whole screen - only inside for some components).",
       "plan": "",

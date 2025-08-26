@@ -132,9 +132,7 @@ export default function SidebarView({}: SidebarProps) {
       className={`sidebar relative z-30 flex h-full shrink-0 flex-col border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${collapsed ? 'collapsed' : ''}`}
       aria-label="Primary navigation"
       data-collapsed={collapsed ? 'true' : 'false'}
-      style={{
-        // Smooth width animation via CSS var (see index.css)
-      }}
+      style={{}}
     >
       <div className={`mb-2 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}>
         {!collapsed && (
@@ -195,7 +193,7 @@ export default function SidebarView({}: SidebarProps) {
 
         <ul className="nav-list" role="list">
           {/* Keep Settings at bottom */}
-          {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item, i) => {
+          {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item) => {
             const idx = NAV_ITEMS.findIndex((n) => n.view === 'Settings');
             const isActive = currentView === item.view;
             const Btn = (
@@ -269,7 +267,7 @@ export default function SidebarView({}: SidebarProps) {
           <div className="text-sm font-semibold">{currentView}</div>
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
           {renderedView}
         </div>
       </main>
