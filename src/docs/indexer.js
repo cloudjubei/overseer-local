@@ -198,6 +198,37 @@ export class DocsIndexer {
     }
   }
 
+  _validateRelPath(relPath) {
+    if (typeof relPath !== 'string' || relPath.length === 0) {
+      throw new Error('relPath must be a non-empty string');
+    }
+    if (!/\.md$/i.test(relPath)) {
+      throw new Error('Only Markdown files (.md) are allowed');
+    }
+    const joined = path.join(this.docsDir, relPath);
+    const normalizedDocs = path.resolve(this.docsDir);
+    const normalizedJoined = path.resolve(joined);
+    if (!normalizedJoined.startsWith(normalizedDocs + path.sep) && normalizedJoined !== normalizedDocs) {
+      // Not inside docs dir
+      throw new Error('Access outside of docs directory is not allowed');
+    }
+    return normalizedJoined;
+  }
+
+  async getFile(relPath) {
+    const absPath = this._validateRelPath(relPath);
+    const buf = await fs.readFile(absPath);
+    return buf.toString('utf8');
+  }
+
+  async saveFile(relPath, content) {
+    const absPath = this._validateRelPath(relPath);
+    await fs.mkdir(path.dirname(absPath), { recursive: true });
+    await fs.writeFile(absPath, content, 'utf8');
+    await this.rebuildAndNotify(`Doc saved: ${absPath}`);
+    return { ok: true };
+  }
+
   stopWatching() {
     if (this.watcher) {
       this.watcher.close();

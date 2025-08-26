@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 
 // Types for the Docs Indexer snapshot
 export type DocHeading = { level: number; text: string };
@@ -139,7 +140,7 @@ function DirItem({ node, level, openSet, toggleOpen, onSelectFile, selected }: {
           title={isRoot ? 'docs' : node.name}
         >
           <span className="text-sm" aria-hidden>
-            {isRoot ? '📚' : isOpen ? '📂' : '📁'}
+            {isRoot ? '\ud83d\udcda' : isOpen ? '\ud83d\udcc2' : '\ud83d\udcc1'}
           </span>
           <span className="text-neutral-800 dark:text-neutral-100">{isRoot ? 'docs' : node.name}</span>
         </button>
@@ -164,7 +165,7 @@ function DirItem({ node, level, openSet, toggleOpen, onSelectFile, selected }: {
                 title={f.relPath}
                 style={{ paddingLeft: indentPx + 22 }}
               >
-                <span className="text-xs opacity-70" aria-hidden>📄</span>
+                <span className="text-xs opacity-70" aria-hidden>\ud83d\udcc4</span>
                 <span className="truncate">{f.title || f.name}</span>
               </button>
             );
@@ -179,12 +180,19 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
   const { snapshot, loading, error, reload } = useDocsIndex();
   const [selected, setSelected] = useState<string | null>(null);
   const [openSet, setOpenSet] = useState<Set<string>>(() => new Set(['<root>']));
+  const [content, setContent] = useState<string>('');
+  const [contentLoading, setContentLoading] = useState<boolean>(false);
+  const [contentError, setContentError] = useState<string | null>(null);
 
   // Keep selection if file still exists; otherwise clear
   useEffect(() => {
     if (!snapshot || !selected) return;
     const exists = snapshot.files?.some((f) => f.relPath === selected);
-    if (!exists) setSelected(null);
+    if (!exists) {
+      setSelected(null);
+      setContent('');
+      setContentError(null);
+    }
   }, [snapshot, selected]);
 
   const toggleOpen = useCallback((relPath: string) => {
@@ -195,10 +203,29 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
     });
   }, []);
 
+  const loadContent = useCallback(async (relPath: string) => {
+    setContentLoading(true);
+    setContentError(null);
+    try {
+      const api = (window as any).docsIndex;
+      if (!api || typeof api.getFile !== 'function') {
+        throw new Error('Docs IPC bridge is not available (getFile)');
+      }
+      const text = await api.getFile(relPath);
+      setContent(text || '');
+    } catch (e: any) {
+      setContent('');
+      setContentError(e?.message || String(e));
+    } finally {
+      setContentLoading(false);
+    }
+  }, []);
+
   const handleSelect = useCallback((relPath: string) => {
     setSelected(relPath);
     if (onSelectFile) onSelectFile(relPath);
-  }, [onSelectFile]);
+    loadContent(relPath);
+  }, [onSelectFile, loadContent]);
 
   const isEmpty = useMemo(() => {
     if (!snapshot) return false;
@@ -248,11 +275,17 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
           <div className="text-sm text-neutral-500 dark:text-neutral-400">Select a document from the list to view it.</div>
         )}
         {selected && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="text-xs text-neutral-500 dark:text-neutral-400">{selected}</div>
-            <div className="text-sm text-neutral-600 dark:text-neutral-300">
-              Preview will appear here in a later feature. For now, you have selected this Markdown file.
-            </div>
+            {contentLoading && (
+              <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</div>
+            )}
+            {contentError && (
+              <div className="text-sm text-red-600 dark:text-red-400">{contentError}</div>
+            )}
+            {!contentLoading && !contentError && (
+              <MarkdownRenderer content={content} />
+            )}
           </div>
         )}
       </section>

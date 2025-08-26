@@ -29,7 +29,12 @@
     "electron-squirrel-startup": "^1.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.0.0"
+    "tailwind-merge": "^2.0.0",
+    "highlight.js": "^11.10.0",
+    "react-markdown": "^9.0.1",
+    "rehype-highlight": "^7.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",
