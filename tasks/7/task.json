@@ -115,7 +115,7 @@
     },
     {
       "id": "7.11",
-      "status": "-",
+      "status": "+",
       "title": "Dragging tasks in list view requires visible target areas and animations",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
