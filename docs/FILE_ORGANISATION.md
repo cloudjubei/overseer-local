@@ -50,6 +50,9 @@ repo_root/
 │   ├─ preload.js
 │   ├─ docs/
 │   │  └─ indexer.js
+│   ├─ main/
+│   │  └─ ipc/
+│   │     └─ docs.js               # IPC handlers for Docs index and file content
 │   ├─ renderer/
 │   │   ├─ App.tsx                 # React app rendering tasks list and details
 │   │   ├─ TaskCreateView.tsx      # React popup for creating a task
@@ -135,3 +138,12 @@ Performance
   - The watcher uses a portable polling strategy to detect changes across platforms, avoiding native watcher limitations.
   - Only files with a .md extension are indexed (case-insensitive). Non-Markdown files are ignored.
   - Basic metadata is extracted without rendering Markdown; rendering and sanitization are handled in the renderer layer.
+- Integration (IPC):
+  - The Electron main process instantiates a singleton DocsIndexer and exposes channels via src/main/ipc/docs.js:
+    - docs-index:get (invoke) returns the current index snapshot
+    - docs-index:update (event) broadcasts updates when the index changes
+    - docs-file:get (invoke) reads and returns the UTF-8 content of a .md file by relative path under docs/
+  - Preload exposes a safe renderer bridge as window.docsIndex with methods:
+    - get(): Promise resolving to the index snapshot
+    - subscribe(cb): subscribe to updates; returns unsubscribe function
+    - getFile(relPath): Promise resolving to the file content

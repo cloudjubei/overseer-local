@@ -24,11 +24,24 @@ const TASKS_API = {
   }
 };
 
+// New Docs Index API exposed to renderer as window.docsIndex
+const DOCS_INDEX_API = {
+  get: () => ipcRenderer.invoke('docs-index:get'),
+  subscribe: (callback) => {
+    const listener = (_event, snapshot) => callback(snapshot);
+    ipcRenderer.on('docs-index:update', listener);
+    return () => ipcRenderer.removeListener('docs-index:update', listener);
+  },
+  getFile: (relPath) => ipcRenderer.invoke('docs-file:get', relPath),
+};
+
+// Backward-compat minimal API; route to new channel
 const DOCS_API = {
-  docsGetContent: (filePath) => ipcRenderer.invoke('docs:getContent', filePath),
+  docsGetContent: (filePath) => ipcRenderer.invoke('docs-file:get', filePath),
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
+contextBridge.exposeInMainWorld('docsIndex', DOCS_INDEX_API);
 
 contextBridge.exposeInMainWorld('api', {
   ...DOCS_API,

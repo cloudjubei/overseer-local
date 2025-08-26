@@ -24,7 +24,7 @@
     },
     {
       "id": "3.3",
-      "status": "-",
+      "status": "+",
       "title": "Add IPC channels for Docs index and file content",
       "description": "In the Electron main process, instantiate DocsIndexer and expose IPC channels: 'docs-index:get' to retrieve the index snapshot, 'docs-index:update' for event-based updates on changes, and 'docs-file:get' to read and return the content of a specific .md file by relative path. In preload.js, expose corresponding methods on window.docsIndex for renderer access.",
       "plan": "",
