@@ -139,10 +139,6 @@ export default function TasksListView() {
 
   return (
     <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
-      <div className="flex justify-between items-center mb-4">
-        <h2 id="tasks-view-heading">Tasks</h2>
-        <Button onClick={() => location.hash = '#settings'}>Settings</Button>
-      </div>
       <div className="tasks-controls" role="search">
         <div className="control">
           <label htmlFor="tasks-search-input">Search</label>
