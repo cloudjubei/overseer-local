@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { NavigationView } from '../types';
 import TasksView from './TasksView';
 import DocumentsView from './DocumentsView';
 import SettingsView from './SettingsView';
 import ChatView from './ChatView';
+import { useNavigator } from '../navigation';
 
 export type SidebarProps = {};
 
@@ -24,26 +25,10 @@ const NavItem = ({ label, isActive, onClick, icon, collapsed }: { label: string;
 );
 
 export default function SidebarView({}: SidebarProps) {
-  const [currentView, setCurrentView] = useState<NavigationView>('Home');
+  const { currentView, navigateView } = useNavigator();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; }
   });
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1).toLowerCase();
-      switch (hash) {
-        case 'home': setCurrentView('Home'); break;
-        case 'documents': setCurrentView('Documents'); break;
-        case 'chat': setCurrentView('Chat'); break;
-        case 'settings': setCurrentView('Settings'); break;
-        default: setCurrentView('Home'); break;
-      }
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
 
   useEffect(() => {
     try { localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
@@ -55,8 +40,6 @@ export default function SidebarView({}: SidebarProps) {
     if (currentView === 'Chat') return <ChatView />;
     return <TasksView />;
   }, [currentView]);
-
-  const navigate = (hash: string) => () => { window.location.hash = hash; };
 
   return (
     <div className="flex h-full w-full">
@@ -77,15 +60,15 @@ export default function SidebarView({}: SidebarProps) {
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? '»' : '«'}
+            {collapsed ? '\u00bb' : '\u00ab'}
           </button>
         </div>
         <nav className="flex flex-1 flex-col gap-1 overflow-auto">
-          <NavItem label="Home" isActive={currentView === 'Home'} onClick={navigate('#home')} icon={<span>🏠</span>} collapsed={collapsed} />
-          <NavItem label="Docs" isActive={currentView === 'Documents'} onClick={navigate('#documents')} icon={<span>📚</span>} collapsed={collapsed} />
-          <NavItem label="Chat" isActive={currentView === 'Chat'} onClick={navigate('#chat')} icon={<span>💬</span>} collapsed={collapsed} />
+          <NavItem label="Home" isActive={currentView === 'Home'} onClick={() => navigateView('Home')} icon={<span>\ud83c\udfe0</span>} collapsed={collapsed} />
+          <NavItem label="Docs" isActive={currentView === 'Documents'} onClick={() => navigateView('Documents')} icon={<span>\ud83d\udcda</span>} collapsed={collapsed} />
+          <NavItem label="Chat" isActive={currentView === 'Chat'} onClick={() => navigateView('Chat')} icon={<span>\ud83d\udcac</span>} collapsed={collapsed} />
           <div className="mt-auto border-t border-neutral-200 pt-2 dark:border-neutral-800" />
-          <NavItem label="Settings" isActive={currentView === 'Settings'} onClick={navigate('#settings')} icon={<span>⚙️</span>} collapsed={collapsed} />
+          <NavItem label="Settings" isActive={currentView === 'Settings'} onClick={() => navigateView('Settings')} icon={<span>\u2699\ufe0f</span>} collapsed={collapsed} />
         </nav>
       </aside>
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">

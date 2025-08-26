@@ -1,6 +1,6 @@
 {
   "id": 5,
-  "status": "-",
+  "status": "+",
   "title": "Cleanup, refactor and fixes",
   "description": "The electron app developed in `src/` needs to be cleaned up so that it's nice and modular. References `README.md`, `docs/FILE_ORGANISATION.md`. Every single file change must be reflected in `docs/FILE_ORGANISATION.md`.",
   "features": [
@@ -24,7 +24,7 @@
     },
     {
       "id": "5.3",
-      "status": "-",
+      "status": "+",
       "title": "Organise files",
       "description": "A lot of the logical code is in the renderer but there should be a clear logic/ui split. Propose changes that will be documented in `docs/FILE_ORGANISATION.md` and carry out the clean up.",
       "plan": "",
@@ -33,7 +33,7 @@
     },
     {
       "id": "5.4",
-      "status": "-",
+      "status": "+",
       "title": "Create standards",
       "description": "There's a big discrepancy in how certain views are created or styled - there needs to be a standard for this. Create a standard and document it in `docs/STANDARDS.md`.",
       "plan": "",

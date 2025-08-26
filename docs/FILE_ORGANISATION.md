@@ -7,6 +7,7 @@ This document describes how files and directories are organised in this reposito
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
+  - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -43,10 +44,10 @@ Notes:
 Key changes for responsive layout and sidebar:
 - Updated: src/index.css — removed fixed body max-width/padding, added full-height layout for html/body/#root; retained component styles.
 - Updated: src/renderer/App.tsx — now wraps the app with ToastProvider and a new NavigatorProvider; adds a global ModalHost to render modals above screens.
-- Updated: src/renderer/screens/SidebarView.tsx — refactored into a flexible layout with a collapsible left sidebar and a scrollable content area; sidebar width transitions between 56 and 14 tailwind units, collapsed state persisted in localStorage.
+- Updated: src/renderer/screens/SidebarView.tsx — refactored to use Navigator for view state and navigation instead of manual hash parsing; retains collapsible sidebar with persisted state.
 - Updated: src/renderer/screens/DocumentsView.tsx — wrapped in a flex column with min-h-0 and proper overflow to prevent oversized content.
-- Updated: src/renderer/screens/ChatView.tsx — adjusted layout to use fixed-width left chat list and flexible right pane with min-w-0/min-h-0 for correct resizing.
-- Updated: src/renderer/screens/TasksView.tsx — simplified to render only list/details; modals removed from here and moved to global ModalHost via Navigator.
+- Updated: src/renderer/screens/ChatView.tsx — refactored to separate logic from UI using new hooks/services; layout uses fixed-width left chat list and flexible right pane with min-w-0/min-h-0 for correct resizing.
+- Updated: src/renderer/screens/TasksView.tsx — renders only list/details; modals handled by global ModalHost via Navigator.
 
 New navigation layer:
 - Added: src/renderer/navigation/Navigator.tsx — app-wide navigation context that parses location.hash into currentView, tasksRoute, and modal state. Exposes openModal/closeModal and navigation helpers.
@@ -58,21 +59,30 @@ UI utilities for consistency:
 - Added: src/renderer/components/ui/toast.tsx — lightweight ToastProvider and useToast hook used by task modals.
 - Added: src/renderer/components/ui/modal.ts — compatibility re-export to satisfy existing lower-case import paths (e.g., ChatView).
 
-Task modal components updated to support global navigator:
-- Updated: src/renderer/tasks/TaskCreateView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
-- Updated: src/renderer/tasks/FeatureCreateView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
-- Updated: src/renderer/tasks/TaskEditView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
-- Updated: src/renderer/tasks/FeatureEditView.tsx — accepts onRequestClose and uses it instead of window.close() when provided.
+Task modal components and hooks:
+- Updated: src/renderer/tasks/TaskCreateView.tsx — now uses extracted hook useNextTaskId for ID calculation and subscription.
+- Unchanged interface but compatible: src/renderer/tasks/TaskEditView.tsx, src/renderer/tasks/FeatureCreateView.tsx, src/renderer/tasks/FeatureEditView.tsx — continue to accept onRequestClose and use it instead of window.close() when provided.
+- Added: src/renderer/hooks/useNextTaskId.ts — encapsulates next-ID calculation and subscription to the tasks index.
 
-## Example Tree (illustrative)
-The following tree is graphical and illustrative of a typical repository layout:
+Logic/UI split: services and hooks for renderer logic
+- Added: src/renderer/services/chatService.ts — wraps window.chat API with typed methods (getCompletion/list/create/load/save/delete).
+- Added: src/renderer/services/docsService.ts — wraps window.docsIndex API and provides extractPathsFromIndexTree helper.
+- Added: src/renderer/hooks/useChats.ts — manages chats list, current chat, messages and sending flow (including completion + persistence) for ChatView.
+- Added: src/renderer/hooks/useDocsIndex.ts — subscribes to the docs index and provides a derived flat docsList for UI consumption.
+- Added: src/renderer/hooks/useDocsAutocomplete.ts — encapsulates @-mention detection, matching against docsList, cursor position calculation, and selection behavior for ChatView.
+- Added: src/renderer/hooks/useLLMConfig.ts — centralizes LLM configuration loading/saving via LLMConfigManager and exposes isConfigured flag.
+- Updated: src/renderer/types.ts — now defines shared ChatMessage and LLMConfig types alongside NavigationView.
 
+Documentation:
+- Added: docs/STANDARDS.md — UI standards for creating and styling views, modals, and using hooks/services/navigation consistently.
+
+Example Tree (illustrative):
 ```
 repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
-│  ├─ BUILD_SIGNING.md
-│  └─ …
+│  ├─ STANDARDS.md
+│  └─ BUILD_SIGNING.md
 ├─ src/
 │  ├─ renderer/
 │  │  ├─ navigation/
@@ -85,26 +95,35 @@ repo_root/
 │  │  │     ├─ modal.ts                # Compatibility re-export
 │  │  │     ├─ toast.tsx               # ToastProvider + useToast (lightweight)
 │  │  │     └─ index.ts                # Barrel exports
+│  │  ├─ services/
+│  │  │  ├─ chatService.ts             # Wraps window.chat API
+│  │  │  └─ docsService.ts             # Wraps window.docsIndex API + helpers
+│  │  ├─ hooks/
+│  │  │  ├─ useChats.ts                # Chat state + send flow
+│  │  │  ├─ useDocsIndex.ts            # Subscribe to docs index, expose docsList
+│  │  │  ├─ useDocsAutocomplete.ts     # @mention detection and suggestion UI logic
+│  │  │  ├─ useLLMConfig.ts            # LLM config management
+│  │  │  └─ useNextTaskId.ts           # Next task ID calculation
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
-│  │  │  ├─ TasksView.tsx              # Uses Navigator to render list/details only
+│  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
-│  │  │  └─ ChatView.tsx
+│  │  │  └─ ChatView.tsx               # Now focused on UI; logic via hooks/services
 │  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         # Updated to use onRequestClose
-│  │  │  ├─ TaskEditView.tsx           # Updated to use onRequestClose
-│  │  │  ├─ FeatureCreateView.tsx      # Updated to use onRequestClose
-│  │  │  └─ FeatureEditView.tsx        # Updated to use onRequestClose
-│  │  ├─ App.tsx                       # Wrapped with Toast + Navigator; includes ModalHost
-│  │  └─ types.ts
-│  ├─ index.css                         # Full-height layout + styles (updated)
+│  │  │  ├─ TaskCreateView.tsx         # Uses useNextTaskId
+│  │  │  ├─ TaskEditView.tsx
+│  │  │  ├─ FeatureCreateView.tsx
+│  │  │  └─ FeatureEditView.tsx
+│  │  ├─ App.tsx
+│  │  └─ types.ts                      # +ChatMessage/LLMConfig
+│  ├─ index.css
 │  ├─ main.js
 │  └─ preload.js
 └─ …
 ```
 
-## Notes on Modals and Navigation
-- Modals are now rendered by a global ModalHost mounted in App, ensuring they overlay the current screen properly (no underlying TasksView rendering issues).
-- NavigatorProvider centralizes route parsing from location.hash into three concerns: currentView, tasksRoute, and modal.
-- TasksView no longer owns modal routing; it focuses only on list/details rendering. Opening a modal uses Navigator (or existing hash changes) and closing a modal restores the last non-modal route.
-- A compatibility re-export (components/ui/modal.ts) keeps existing lowercase imports working without refactors.
+Notes on the refactor
+- ChatView is now UI-only: data fetching, completion flow, and mention logic live in hooks/services. This makes the chat UI easier to maintain and test and clarifies responsibilities.
+- SidebarView uses the centralized Navigator state and helpers for consistency and to avoid duplicate hash parsing logic.
+- A new services layer wraps window APIs to simplify mocking and future evolution of IPC boundaries.
+- All new files are documented above; no file was deleted. Existing imports that referenced Modal via lowercase path still work thanks to the compatibility re-export under components/ui/modal.ts.

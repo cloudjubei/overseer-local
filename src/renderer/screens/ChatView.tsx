@@ -1,192 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { LLMConfigManager } from '../utils/LLMConfigManager';
-import {Modal} from '../components/ui/modal';
+import React, { useRef, useState } from 'react';
+import { Modal } from '../components/ui/modal';
+import { useChats } from '../hooks/useChats';
+import { useDocsIndex } from '../hooks/useDocsIndex';
+import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
+import { useLLMConfig } from '../hooks/useLLMConfig';
+import { docsService } from '../services/docsService';
 
 const ChatView = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant' | 'system'; content: string }[]>([]);
+  const { chatHistories, currentChatId, setCurrentChatId, messages, setMessages, createChat, deleteChat, sendMessage } = useChats();
+  const { snapshot: docsSnapshot, docsList } = useDocsIndex();
   const [input, setInput] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  const [config, setConfig] = useState({ apiBaseUrl: '', apiKey: '', model: '' });
-  const [isConfigured, setIsConfigured] = useState(false);
-  const managerRef = useRef<LLMConfigManager | null>(null);
+  const { config, setConfig, isConfigured, save } = useLLMConfig();
+
   const messageListRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [docsList, setDocsList] = useState<string[]>([]);
-  const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
-  const [matchingDocs, setMatchingDocs] = useState<string[]>([]);
-  const [mentionStart, setMentionStart] = useState<number | null>(null);
-  const [autocompletePosition, setAutocompletePosition] = useState<{left: number, top: number} | null>(null);
-  const [chatHistories, setChatHistories] = useState<string[]>([]);
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
 
-  useEffect(() => {
-    managerRef.current = new LLMConfigManager();
-    const loadedConfig = managerRef.current.getConfig();
-    setConfig(loadedConfig);
-    setIsConfigured(managerRef.current.isConfigured());
-
-    const loadChats = async () => {
-      const chats = await window.chat.list();
-      setChatHistories(chats);
-      if (chats.length > 0) {
-        setCurrentChatId(chats[0]);
-      }
-    };
-    loadChats();
-  }, []);
-
-  useEffect(() => {
-    const loadMessages = async () => {
-      if (currentChatId) {
-        const saved = await window.chat.load(currentChatId);
-        setMessages(saved || []);
-      }
-    };
-    loadMessages();
-  }, [currentChatId]);
-
-  useEffect(() => {
-    messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
-  }, [messages]);
-
-  useEffect(() => {
-    const fetchDocs = async () => {
-      const index = await window.docsIndex.get();
-      updateDocsList(index);
-    };
-    fetchDocs();
-    const unsubscribe = window.docsIndex.subscribe(updateDocsList);
-    return unsubscribe;
-  }, []);
-
-  const updateDocsList = (index) => {
-    const paths = extractPaths(index.tree);
-    setDocsList(paths);
-  };
-
-  const extractPaths = (tree) => {
-    const paths = [];
-    const recurse = (node) => {
-      if (node.type === 'file') {
-        paths.push(node.relPath);
-      }
-      if (node.dirs) node.dirs.forEach(recurse);
-      if (node.files) node.files.forEach(recurse);
-    };
-    recurse(tree);
-    return paths;
-  };
-
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const handleInputEvent = () => {
-      const pos = textarea.selectionStart;
-      const text = textarea.value;
-      checkForMention(text, pos);
-    };
-
-    textarea.addEventListener('input', handleInputEvent);
-    textarea.addEventListener('keyup', handleInputEvent);
-    textarea.addEventListener('keydown', handleInputEvent);
-    textarea.addEventListener('click', handleInputEvent);
-
-    return () => {
-      textarea.removeEventListener('input', handleInputEvent);
-      textarea.removeEventListener('keyup', handleInputEvent);
-      textarea.removeEventListener('keydown', handleInputEvent);
-      textarea.removeEventListener('click', handleInputEvent);
-    };
-  }, [docsList]);
-
-  const checkForMention = (text: string, pos: number) => {
-    let start = pos;
-    while (start > 0 && text[start - 1] !== ' ' && text[start - 1] !== '\n') {
-      start--;
-    }
-    const word = text.slice(start, pos);
-    if (word.startsWith('@')) {
-      const query = word.slice(1);
-      const matches = docsList.filter((p) => p.toLowerCase().includes(query.toLowerCase()));
-      setMatchingDocs(matches);
-      setMentionStart(start);
-      if (matches.length > 0) {
-        const textarea = textareaRef.current;
-        const coords = getCursorCoordinates(textarea, pos);
-        const textareaRect = textarea.getBoundingClientRect();
-        const style = window.getComputedStyle(textarea);
-        const lineHeight = parseFloat(style.lineHeight) || 20;
-        const cursorLeft = textareaRect.left + coords.x;
-        const cursorTop = textareaRect.top + coords.y + lineHeight;
-        setAutocompletePosition({ left: cursorLeft, top: cursorTop });
-        setIsAutocompleteOpen(true);
-        return;
-      }
-    }
-    setIsAutocompleteOpen(false);
-  };
-
-  const getCursorCoordinates = (textarea: HTMLTextAreaElement, pos: number) => {
-    const mirror = mirrorRef.current;
-    if (!mirror) return { x: 0, y: 0 };
-
-    const style = window.getComputedStyle(textarea);
-    const stylesToCopy = [
-      'boxSizing', 'borderBottomWidth', 'borderLeftWidth', 'borderRightWidth', 'borderTopWidth', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'textDecoration', 'textTransform', 'width'
-    ];
-    stylesToCopy.forEach((key) => { (mirror.style as any)[key] = (style as any)[key]; });
-    mirror.style.overflowWrap = 'break-word';
-    mirror.style.whiteSpace = 'pre-wrap';
-    mirror.style.wordBreak = 'break-word';
-    mirror.style.height = 'auto';
-
-    mirror.textContent = input.slice(0, pos);
-
-    const marker = document.createElement('span');
-    marker.style.display = 'inline-block';
-    marker.style.width = '0';
-    marker.textContent = '';
-    mirror.appendChild(marker);
-
-    const mirrorRect = mirror.getBoundingClientRect();
-    const markerRect = marker.getBoundingClientRect();
-
-    const x = markerRect.left - mirrorRect.left;
-    const y = markerRect.top - mirrorRect.top;
-
-    mirror.textContent = '';
-
-    return { x, y };
-  };
-
-  const handleSelect = (path: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea || mentionStart === null) return;
-
-    const currentText = textarea.value;
-    const currentPos = textarea.selectionStart;
-    const before = currentText.slice(0, mentionStart);
-    const after = currentText.slice(currentPos);
-    const newText = `${before}@${path}${after}`;
-    setInput(newText);
-
-    const newPos = before.length + 1 + path.length;
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(newPos, newPos);
-    }, 0);
-
-    setIsAutocompleteOpen(false);
-    setMentionStart(null);
-  };
+  const { isOpen: isAutocompleteOpen, matches: matchingDocs, position: autocompletePosition, onSelect: handleSelect } = useDocsAutocomplete({
+    docsList,
+    input,
+    setInput,
+    textareaRef,
+    mirrorRef,
+  });
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
-    managerRef.current?.save(config);
-    setIsConfigured(!!config.apiKey);
+    save(config);
     setShowSettings(false);
   };
 
@@ -195,66 +37,31 @@ const ChatView = () => {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || !isConfigured || !currentChatId) return;
-
-    const newMessages = [...messages, { role: 'user', content: input }];
-    setMessages(newMessages);
+    if (!input.trim() || !isConfigured) return;
+    await sendMessage(input, config);
     setInput('');
-
-    const loadingMsg = { role: 'assistant', content: 'Thinking...' } as const;
-    setMessages([...newMessages, loadingMsg]);
-
-    try {
-      const response = await window.chat.getCompletion(newMessages, config);
-      const assistantMsg = { role: 'assistant', content: response } as const;
-      setMessages([...newMessages, assistantMsg]);
-      await window.chat.save(currentChatId, [...newMessages, assistantMsg]);
-    } catch (error: any) {
-      const errorMsg = { role: 'assistant', content: `Error: ${error.message}` } as const;
-      setMessages([...newMessages, errorMsg]);
-    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !currentChatId) return;
-
     const reader = new FileReader();
     reader.onload = async (event) => {
       const content = event.target?.result as string;
       const name = file.name;
       try {
-        const returnedPath = await window.docsIndex.upload(name, content);
-        const uploadMsg = { role: 'user', content: `Uploaded document to @${returnedPath}` } as const;
+        const returnedPath = await docsService.upload(name, content);
+        const uploadMsg = { role: 'user' as const, content: `Uploaded document to @${returnedPath}` };
         const newMessages = [...messages, uploadMsg];
         setMessages(newMessages);
-        await window.chat.save(currentChatId, newMessages);
       } catch (err: any) {
         console.error('Upload failed:', err);
-        const errorMsg = { role: 'system', content: `Upload failed: ${err.message}` } as const;
+        const errorMsg = { role: 'system' as const, content: `Upload failed: ${err.message}` };
         const newMessages = [...messages, errorMsg];
         setMessages(newMessages);
-        await window.chat.save(currentChatId, newMessages);
       }
     };
     reader.readAsText(file);
-  };
-
-  const handleCreateChat = async () => {
-    const newChatId = await window.chat.create();
-    setChatHistories([...chatHistories, newChatId]);
-    setCurrentChatId(newChatId);
-    setMessages([]);
-  };
-
-  const handleDeleteChat = async (chatId: string) => {
-    await window.chat.delete(chatId);
-    const next = chatHistories.filter(id => id !== chatId);
-    setChatHistories(next);
-    if (currentChatId === chatId) {
-      setCurrentChatId(next[0] || null);
-      setMessages([]);
-    }
   };
 
   return (
@@ -262,13 +69,13 @@ const ChatView = () => {
       <div className="flex h-full w-64 shrink-0 flex-col border-r border-neutral-200 p-4 dark:border-neutral-800">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Chats</h2>
-          <button onClick={handleCreateChat} className="rounded bg-blue-500 px-2 py-1 text-white">New Chat</button>
+          <button onClick={createChat} className="rounded bg-blue-500 px-2 py-1 text-white">New Chat</button>
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           {chatHistories.map((id) => (
             <div key={id} className={`flex items-center justify-between p-2 ${currentChatId === id ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`} onClick={() => setCurrentChatId(id)}>
               <span className="truncate">Chat {id}</span>
-              <button onClick={(e) => { e.stopPropagation(); handleDeleteChat(id); }} className="text-red-500">Delete</button>
+              <button onClick={(e) => { e.stopPropagation(); deleteChat(id); }} className="text-red-500">Delete</button>
             </div>
           ))}
         </div>
