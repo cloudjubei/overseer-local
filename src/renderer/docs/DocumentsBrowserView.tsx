@@ -140,7 +140,7 @@ function DirItem({ node, level, openSet, toggleOpen, onSelectFile, selected }: {
           title={isRoot ? 'docs' : node.name}
         >
           <span className="text-sm" aria-hidden>
-            {isRoot ? '\ud83d\udcda' : isOpen ? '\ud83d\udcc2' : '\ud83d\udcc1'}
+            {isRoot ? '📚' : isOpen ? '📂' : '📁'}
           </span>
           <span className="text-neutral-800 dark:text-neutral-100">{isRoot ? 'docs' : node.name}</span>
         </button>
@@ -165,7 +165,7 @@ function DirItem({ node, level, openSet, toggleOpen, onSelectFile, selected }: {
                 title={f.relPath}
                 style={{ paddingLeft: indentPx + 22 }}
               >
-                <span className="text-xs opacity-70" aria-hidden>\ud83d\udcc4</span>
+                <span className="text-xs opacity-70" aria-hidden>📄</span>
                 <span className="truncate">{f.title || f.name}</span>
               </button>
             );
