@@ -54,7 +54,7 @@
     },
     {
       "id": "4.5",
-      "status": "-",
+      "status": "+",
       "title": "Add IPC handler for basic non-streaming LLM completion",
       "description": "In main process, install 'openai' package if needed. Add ipcMain.handle('chat:completion', async (event, {messages, config}) => { const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey}); const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'}; const response = await openai.chat.completions.create({model: config.model, messages: [systemPrompt, ...messages], stream: false}); return response.choices[0].message; }). Handle errors gracefully.",
       "plan": "",
