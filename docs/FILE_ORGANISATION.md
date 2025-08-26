@@ -55,15 +55,14 @@ repo_root/
 │   │     └─ docs.js               # IPC handlers for Docs index and file content (and saving)
 │   ├─ renderer/
 │   │   ├─ App.tsx                 # React app with sidebar navigation (Home, Docs)
-│   │   ├─ types.ts                # Renderer-local types (e.g., View)
+│   │   ├─ types.ts                # Renderer-local types (View)
 │   │   ├─ components/
 │   │   │  ├─ Sidebar.tsx          # Sidebar component (Tailwind/shadcn-styled)
-│   │   │  └─ ui/
-│   │   │     ├─ toast.tsx
-│   │   │     ├─ modal.tsx
-│   │   │     ├─ alert.tsx
-│   │   │     └─ index.ts
-│   │   └─ docsBrowserView.js      # Legacy docs browser and WYSIWYG editor (ToastUI)
+│   │   │  ├─ TasksView.tsx        # Home view component (tasks)
+│   │   │  └─ Docs.tsx             # Documents screen using DocsBrowserView
+│   │   ├─ docs/
+│   │   │  └─ DocsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
+│   │   └─ docsBrowserView.js      # Legacy DOM-based docs browser (reference only; not used)
 │   ├─ tasks/
 │   │  └─ indexer.js               # Logical Tasks indexer, validator, and file watcher
 │   └─ types/
@@ -150,8 +149,9 @@ repo_root/
 
 ## Notes on Renderer Layers
 - The repository currently contains both a React renderer (src/renderer/App.tsx) and a legacy DOM-based renderer used by src/index.html.
-- The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing.
-- Future work may consolidate the renderer into a single React app; until then, keep both layers working without conflict.
+- The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing. It is kept for reference only.
+- The React documentation browser lives at src/renderer/docs/DocsBrowserView.tsx and is used by the Documents screen (src/renderer/components/Docs.tsx) to list Markdown files and directories under docs/.
 
 ## Updates
 - 2025-08-26: Added a Tailwind-styled Sidebar component (src/renderer/components/Sidebar.tsx) and updated App.tsx to use it with persistent layout; removed dependency on App.css in favor of Tailwind/shadcn classes. Added src/renderer/types.ts to centralize renderer-local types (View).
+- 2025-08-26: Introduced React Docs browser (src/renderer/docs/DocsBrowserView.tsx) and wired it into the Docs screen.

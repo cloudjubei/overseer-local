@@ -1,10 +1,14 @@
 import React from 'react';
+import DocsBrowserView from '../docs/DocsBrowserView';
 
 const Docs: React.FC = () => {
   return (
-    <div>
-      <h1>Documentation</h1>
-      <p>This is where the Markdown documentation explorer and renderer will go.</p>
+    <div className="flex h-full flex-col gap-3">
+      <header className="px-1">
+        <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Documentation</h1>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Browse Markdown files under the docs/ directory.</p>
+      </header>
+      <DocsBrowserView />
     </div>
   );
 };
