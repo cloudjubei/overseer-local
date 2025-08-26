@@ -10,6 +10,38 @@ const ChatView = () => {
   const [input, setInput] = useState('');
   const messageListRef = useRef<HTMLDivElement>(null);
 
+  const [apiBaseUrl, setApiBaseUrl] = useState('https://api.openai.com/v1');
+  const [apiKey, setApiKey] = useState('');
+  const [model, setModel] = useState('gpt-4o');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [tempApiBaseUrl, setTempApiBaseUrl] = useState('');
+  const [tempApiKey, setTempApiKey] = useState('');
+  const [tempModel, setTempModel] = useState('');
+
+  useEffect(() => {
+    setApiBaseUrl(localStorage.getItem('llm_apiBaseUrl') || 'https://api.openai.com/v1');
+    setApiKey(localStorage.getItem('llm_apiKey') || '');
+    setModel(localStorage.getItem('llm_model') || 'gpt-4o');
+  }, []);
+
+  useEffect(() => {
+    if (isSettingsOpen) {
+      setTempApiBaseUrl(apiBaseUrl);
+      setTempApiKey(apiKey);
+      setTempModel(model);
+    }
+  }, [isSettingsOpen, apiBaseUrl, apiKey, model]);
+
+  const handleSave = () => {
+    setApiBaseUrl(tempApiBaseUrl);
+    setApiKey(tempApiKey);
+    setModel(tempModel);
+    localStorage.setItem('llm_apiBaseUrl', tempApiBaseUrl);
+    localStorage.setItem('llm_apiKey', tempApiKey);
+    localStorage.setItem('llm_model', tempModel);
+    setIsSettingsOpen(false);
+  };
+
   const handleSend = () => {
     const content = input.trim();
     if (!content) return;
@@ -36,7 +68,20 @@ const ChatView = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <h1 className="text-2xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">Project Chat</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Project Chat</h1>
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className="px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+        >
+          Settings
+        </button>
+      </div>
+      {!apiKey && (
+        <div className="text-red-500 mb-4">
+          Warning: LLM not configured. Please set your API key in settings.
+        </div>
+      )}
       <div
         ref={messageListRef}
         className="flex-1 overflow-y-auto mb-4 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 rounded-md"
@@ -66,6 +111,54 @@ const ChatView = () => {
           Send
         </button>
       </div>
+      {isSettingsOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">LLM Configuration</h2>
+            <div className="mb-4">
+              <label className="block mb-1 text-neutral-900 dark:text-neutral-100">API Base URL</label>
+              <input
+                type="text"
+                value={tempApiBaseUrl}
+                onChange={(e) => setTempApiBaseUrl(e.target.value)}
+                className="w-full p-2 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 text-neutral-900 dark:text-neutral-100">API Key</label>
+              <input
+                type="password"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                className="w-full p-2 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 text-neutral-900 dark:text-neutral-100">Model</label>
+              <input
+                type="text"
+                value={tempModel}
+                onChange={(e) => setTempModel(e.target.value)}
+                className="w-full p-2 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 rounded-md"
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="mr-2 px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
