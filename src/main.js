@@ -4,6 +4,7 @@ import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
 import { URL } from 'node:url';
 import { DocsIndexer } from './docs/indexer';
+import { OpenAI } from 'openai';
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -200,4 +201,16 @@ ipcMain.handle('docs-file:get', async (event, { relPath }) => {
 });
 ipcMain.handle('docs-file:save', async (event, { relPath, content }) => {
   return await docsIndexer.saveFile(relPath, content);
+});
+
+ipcMain.handle('chat:completion', async (event, {messages, config}) => {
+  try {
+    const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
+    const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'};
+    const response = await openai.chat.completions.create({model: config.model, messages: [systemPrompt, ...messages], stream: false});
+    return response.choices[0].message;
+  } catch (error) {
+    console.error('Error in chat completion:', error);
+    return { role: 'assistant', content: `An error occurred: ${error.message}` };
+  }
 });
