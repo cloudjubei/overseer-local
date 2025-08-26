@@ -1,64 +1,50 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, AlertDialog, useToast } from '../components/ui';
-import { TaskForm } from '../components/TaskForm';
+import React, { useCallback, useState } from 'react'
+import { TaskForm, TaskFormValues } from '../components/TaskForm'
+import { useNextTaskId } from '../hooks/useNextTaskId'
+import { tasksService } from '../services/tasksService'
+import { AlertDialog, Modal } from '../components/ui/Modal'
+import { useToast } from '../components/ui/Toast'
 
-function useNextTaskId() {
-  const [nextId, setNextId] = useState<number>(1);
-  useEffect(() => {
-    let unsub: null | (() => void) = null;
-    (async () => {
+export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
+  const { toast } = useToast()
+  const defaultId = useNextTaskId()
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertMessage, setAlertMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const doClose = () => {
+    onRequestClose?.()
+  }
+
+  const onSubmit = useCallback(
+    async (values: TaskFormValues) => {
+      if (!Number.isInteger(values.id) || (values.id as number) <= 0) {
+        setAlertMessage('Please provide a valid positive integer ID')
+        setShowAlert(true)
+        return
+      }
+      setSubmitting(true)
       try {
-        const idx = await window.tasksIndex.getSnapshot();
-        const ids = Object.values(idx?.tasksById || {}).map(t => t.id).filter((n) => Number.isInteger(n));
-        const max = ids.length > 0 ? Math.max(...ids) : 0;
-        setNextId((max + 1) || 1);
-      } catch (_) {}
-      try {
-        unsub = window.tasksIndex.onUpdate((i) => {
-          const ids = Object.values(i?.tasksById || {}).map((t: any) => t.id).filter((n: any) => Number.isInteger(n));
-          const max = ids.length > 0 ? Math.max(...ids) : 0;
-          setNextId((max + 1) || 1);
-        });
-      } catch (_) {}
-    })();
-    return () => { try { unsub && unsub(); } catch (_) {} };
-  }, []);
-  return nextId;
-}
-
-export default function TaskCreateView() {
-  const { toast } = useToast();
-  const defaultId = useNextTaskId();
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const onSubmit = useCallback(async (values) => {
-    if (!Number.isInteger(values.id) || values.id <= 0) {
-      setAlertMessage('Please provide a valid positive integer ID');
-      setShowAlert(true);
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await window.tasksIndex.addTask(values);
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error');
-      toast({ title: 'Success', description: 'Task created successfully', variant: 'success' });
-      window.close();
-    } catch (e: any) {
-      setAlertMessage(`Failed to create task: ${e?.message || String(e)}`);
-      setShowAlert(true);
-    } finally {
-      setSubmitting(false);
-    }
-  }, [toast]);
+        const res = await tasksService.addTask({ ...values })
+        if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+        toast({ title: 'Success', description: 'Task created successfully', variant: 'success' })
+        doClose()
+      } catch (e: any) {
+        setAlertMessage(`Failed to create task: ${e?.message || String(e)}`)
+        setShowAlert(true)
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [toast]
+  )
 
   return (
     <>
-      <Modal title="Create New Task" onClose={() => window.close()} isOpen={true}>
-        <TaskForm initialValues={{ id: defaultId }} onSubmit={onSubmit} onCancel={() => window.close()} submitting={submitting} isCreate={true} />
+      <Modal title="Create New Task" onClose={doClose} isOpen={true}>
+        <TaskForm initialValues={{ id: defaultId }} onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={true} />
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>
-  );
+  )
 }

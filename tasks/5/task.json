@@ -1,12 +1,12 @@
 {
   "id": 5,
-  "status": "-",
+  "status": "+",
   "title": "Cleanup, refactor and fixes",
   "description": "The electron app developed in `src/` needs to be cleaned up so that it's nice and modular. References `README.md`, `docs/FILE_ORGANISATION.md`. Every single file change must be reflected in `docs/FILE_ORGANISATION.md`.",
   "features": [
     {
       "id": "5.1",
-      "status": "-",
+      "status": "+",
       "title": "The app needs to be responsive to resizing",
       "description": "Currently most of the views don't resize properly when the window is resized. Especially with the sidebar to the sidebar on the left side, it doesn't stay there and if something big gets opened, like the Document viewer - then the screen becomes too big. We need to have a common strategy for this. The sidebar should also be collapsible.",
       "plan": "",
@@ -15,7 +15,7 @@
     },
     {
       "id": "5.2",
-      "status": "-",
+      "status": "+",
       "title": "App wide navigator",
       "description": "Right now in `src/renderer/screens/TasksView` you can open modals but they open in a weird way (with the TasksView underneath them). Modals need to be standardized and for this, there needs to be a Navigator somewhere which allows to be used to work out if a given modal or screen should be showing.",
       "plan": "",
@@ -24,7 +24,7 @@
     },
     {
       "id": "5.3",
-      "status": "-",
+      "status": "+",
       "title": "Organise files",
       "description": "A lot of the logical code is in the renderer but there should be a clear logic/ui split. Propose changes that will be documented in `docs/FILE_ORGANISATION.md` and carry out the clean up.",
       "plan": "",
@@ -33,12 +33,55 @@
     },
     {
       "id": "5.4",
-      "status": "-",
+      "status": "+",
       "title": "Create standards",
       "description": "There's a big discrepancy in how certain views are created or styled - there needs to be a standard for this. Create a standard and document it in `docs/STANDARDS.md`.",
       "plan": "",
       "context": [
         "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "5.5",
+      "status": "+",
+      "title": "Adhere to standards",
+      "description": "The doc (`docs/STANDARDS.md`) describing the standards needs to be adhered to - for all code.",
+      "plan": "",
+      "context": [
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "5.6",
+      "status": "+",
+      "title": "Opening up a modal results in a weird error",
+      "description": "When any modal is open it shows in a new window, but it opens TasksView underneat. When closing it, the modal window still stays with that background view.  This seems like an Electron specific bug when dealing with modals. This is being tested on a Mac.",
+      "plan": "",
+      "context": [
+        "docs/STANDARDS.md",
+        "src/main.js",
+        "src/preload.js",
+        "src/renderer/App.tsx",
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/components/ui/Modal.tsx",
+        "src/renderer/navigation/ModalHost.tsx",
+        "src/renderer/navigation/Navigator.tsx"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "5.7",
+      "status": "+",
+      "title": "Everything should be strongly typed as we are using TypeScript",
+      "description": "For instance, `src/renderer/tasks/TasksListView` has its own Task interface. This is unacceptable. `src/types/tasks.ts` exists and it should be used whenever possible",
+      "plan": "",
+      "context": [
+        "docs/STANDARDS.md",
+        "src/types/tasks.ts",
+        "src/renderer/tasks/TasksListView"
       ],
       "acceptance": []
     }
