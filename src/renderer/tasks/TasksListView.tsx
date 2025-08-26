@@ -203,7 +203,7 @@ export default function TasksListView() {
             </select>
           </div>
           <div className="control">
-            <Button className="btn-clear" variant="secondary" onClick={handleClear}>Clear</Button>
+            <Button variant="secondary" onClick={handleClear}>Clear</Button>
           </div>
         </div>
         <div className="right">

@@ -16,17 +16,125 @@ body {
 }
 
 h1, h2, h3 { color: var(--accent-primary); }
-/* Buttons (assume existing styles) */
-button, .btn { background: var(--accent-primary); color: var(--text-inverted); border: none; height: var(--control-h-md); padding: 0 var(--control-pad-x, 12px); border-radius: var(--radius-2); cursor: pointer; box-shadow: var(--shadow-0); transition: background var(--motion-fast, 120ms) var(--easing-standard, ease); }
-button:hover, .btn:hover { background: var(--accent-primary-hover); }
-button:active, .btn:active { background: var(--accent-primary-active); }
-button:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-secondary { background: var(--surface-raised); color: var(--text-primary); border: 1px solid var(--border-default); height: var(--control-h-md); padding: 0 var(--control-pad-x, 12px); border-radius: var(--radius-2); cursor: pointer; transition: background var(--motion-fast, 120ms) var(--easing-standard, ease), border-color var(--motion-fast, 120ms) var(--easing-standard, ease); }
-.btn-secondary:hover { background: color-mix(in srgb, var(--surface-raised) 90%, var(--text-primary) 10%); }
-.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ================= Buttons: unified, token-based ================= */
+/* Base variables */
+:root {
+  --control-h-sm: 30px;
+  --control-h-md: 34px;
+  --control-h-lg: 40px;
+  --control-pad-x: 12px;
+  --focus-ring-width: 2px;
+  --sidebar-w: 260px;
+  --sidebar-w-collapsed: 64px;
+}
 
-/* Spinner (for button demo) */
+/* Apply consistent base to our button variants only (not all <button>) */
+.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-outline, .btn-danger, .btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--control-h-md);
+  padding: 0 var(--control-pad-x);
+  border-radius: var(--radius-2);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: var(--fw-medium, 500);
+  text-decoration: none;
+  box-shadow: var(--shadow-0);
+  transition:
+    background var(--motion-fast, 120ms) var(--easing-standard, ease),
+    color var(--motion-fast, 120ms) var(--easing-standard, ease),
+    border-color var(--motion-fast, 120ms) var(--easing-standard, ease),
+    transform var(--motion-fast, 120ms) var(--easing-standard, ease),
+    box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+
+/* Focus ring (visible) */
+.btn:focus-visible, .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-ghost:focus-visible, .btn-outline:focus-visible, .btn-danger:focus-visible, .btn-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
+}
+
+/* Press micro-interaction */
+.btn:active, .btn-primary:active, .btn-secondary:active, .btn-ghost:active, .btn-outline:active, .btn-danger:active, .btn-link:active {
+  transform: translateY(0.5px);
+}
+
+/* Disabled */
+.btn[disabled], .btn-primary[disabled], .btn-secondary[disabled], .btn-ghost[disabled], .btn-outline[disabled], .btn-danger[disabled], .btn-link[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Primary (default) */
+/* Keep .btn mapping to primary for backward compatibility (styleguide) */
+.btn, .btn-primary {
+  background: var(--accent-primary);
+  color: var(--text-inverted);
+}
+.btn:hover, .btn-primary:hover { background: var(--accent-primary-hover); }
+.btn:active, .btn-primary:active { background: var(--accent-primary-active); }
+
+/* Secondary: surface with border */
+.btn-secondary {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.btn-secondary:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+
+/* Outline: transparent with explicit border */
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.btn-outline:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+
+/* Ghost: no border, subtle hover */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn-ghost:hover { background: color-mix(in srgb, var(--surface-raised) 90%, var(--text-primary) 10%); }
+
+/* Danger */
+.btn-danger {
+  background: var(--color-red-600);
+  color: #fff;
+}
+.btn-danger:hover { background: var(--color-red-700); }
+.btn-danger:active { background: var(--color-red-800); }
+
+/* Link */
+.btn-link {
+  background: transparent;
+  color: var(--accent-primary);
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-link:hover { filter: brightness(1.05); }
+
+/* Sizes */
+.btn-sm, .btn-primary.btn-sm, .btn-secondary.btn-sm, .btn-outline.btn-sm, .btn-ghost.btn-sm, .btn-danger.btn-sm, .btn-link.btn-sm {
+  height: var(--control-h-sm);
+  padding: 0 10px;
+  font-size: var(--fs-sm, 14px);
+}
+.btn-lg, .btn-primary.btn-lg, .btn-secondary.btn-lg, .btn-outline.btn-lg, .btn-ghost.btn-lg, .btn-danger.btn-lg, .btn-link.btn-lg {
+  height: var(--control-h-lg);
+  padding: 0 14px;
+  font-size: var(--fs-md, 16px);
+}
+.btn-icon, .btn-primary.btn-icon, .btn-secondary.btn-icon, .btn-outline.btn-icon, .btn-ghost.btn-icon, .btn-danger.btn-icon, .btn-link.btn-icon {
+  width: var(--control-h-md);
+  padding: 0;
+}
+
+/* Spinner (for button demo and UI component) */
 .ui-spinner__track { stroke: var(--border-default); opacity: 0.5; }
 .ui-spinner__indicator { stroke: var(--accent-primary); stroke-linecap: round; stroke-dasharray: 60; stroke-dashoffset: 40; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -90,17 +198,6 @@ button:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .task-card__meta { display:flex; gap: 6px; }
 
 /* NEW: Unified Select (dropdown) styles to match design system */
-:root {
-  /* Provide defaults if not present */
-  --control-h-sm: 30px;
-  --control-h-md: 34px;
-  --control-h-lg: 40px;
-  --control-pad-x: 12px;
-  --focus-ring-width: 2px;
-  --sidebar-w: 260px;
-  --sidebar-w-collapsed: 64px;
-}
-
 .ui-select { 
   -webkit-appearance: none; 
   -moz-appearance: none; 

@@ -230,7 +230,7 @@
     },
     {
       "id": "7.17",
-      "status": "-",
+      "status": "+",
       "title": "The button style in the tasks list needs rework",
       "description": "Currently I can see a rectangular blue button - this should be made according to design. It should look slick. Remember - these are react components, using tailwind. The Clear button is almost invisible (it has not border). Rethink the whole button design and make it consistent and readable.",
       "plan": "",
