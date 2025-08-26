@@ -44,7 +44,7 @@
     },
     {
       "id": "5.5",
-      "status": "-",
+      "status": "+",
       "title": "Adhere to standards",
       "description": "The doc (`docs/STANDARDS.md`) describing the standards needs to be adhered to - for all code.",
       "plan": "",

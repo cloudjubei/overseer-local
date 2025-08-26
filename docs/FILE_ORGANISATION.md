@@ -55,18 +55,22 @@ New navigation layer:
 - Added: src/renderer/navigation/index.ts — re-exports Navigator hooks/components.
 
 UI utilities for consistency:
-- Added: src/renderer/components/ui/index.ts — barrel exports for Modal/AlertDialog and Toast utilities.
+- Added: src/renderer/components/ui/Modal.tsx — Reusable Modal + AlertDialog with focus/escape handling.
+- Added: src/renderer/components/ui/modal.ts — Compatibility wrapper to satisfy existing lower-case import paths (e.g., ChatView). Defaults isOpen to true for legacy usage.
 - Added: src/renderer/components/ui/toast.tsx — lightweight ToastProvider and useToast hook used by task modals.
-- Added: src/renderer/components/ui/modal.ts — compatibility re-export to satisfy existing lower-case import paths (e.g., ChatView).
+- Added: src/renderer/components/ui/index.ts — barrel exports for Modal/AlertDialog and Toast utilities.
 
 Task modal components and hooks:
-- Updated: src/renderer/tasks/TaskCreateView.tsx — now uses extracted hook useNextTaskId for ID calculation and subscription.
-- Unchanged interface but compatible: src/renderer/tasks/TaskEditView.tsx, src/renderer/tasks/FeatureCreateView.tsx, src/renderer/tasks/FeatureEditView.tsx — continue to accept onRequestClose and use it instead of window.close() when provided.
-- Added: src/renderer/hooks/useNextTaskId.ts — encapsulates next-ID calculation and subscription to the tasks index.
+- Updated: src/renderer/tasks/TaskCreateView.tsx — now calls tasksService instead of window.tasksIndex and no longer calls window.close(); adheres to standards for closing via onRequestClose.
+- Updated: src/renderer/tasks/TaskEditView.tsx — now uses tasksService for data access and removes window.close() fallback.
+- Updated: src/renderer/tasks/FeatureCreateView.tsx — now uses tasksService and removes window.close() fallback.
+- Updated: src/renderer/tasks/FeatureEditView.tsx — now uses tasksService and removes window.close() fallback.
+- Added: src/renderer/hooks/useNextTaskId.ts — refactored to use tasksService for index access/subscribe.
 
 Logic/UI split: services and hooks for renderer logic
 - Added: src/renderer/services/chatService.ts — wraps window.chat API with typed methods (getCompletion/list/create/load/save/delete).
 - Added: src/renderer/services/docsService.ts — wraps window.docsIndex API and provides extractPathsFromIndexTree helper.
+- Added: src/renderer/services/tasksService.ts — wraps window.tasksIndex API; used by task modals and hooks instead of direct window calls.
 - Added: src/renderer/hooks/useChats.ts — manages chats list, current chat, messages and sending flow (including completion + persistence) for ChatView.
 - Added: src/renderer/hooks/useDocsIndex.ts — subscribes to the docs index and provides a derived flat docsList for UI consumption.
 - Added: src/renderer/hooks/useDocsAutocomplete.ts — encapsulates @-mention detection, matching against docsList, cursor position calculation, and selection behavior for ChatView.
@@ -92,28 +96,29 @@ repo_root/
 │  │  ├─ components/
 │  │  │  └─ ui/
 │  │  │     ├─ Modal.tsx               # Reusable Modal + AlertDialog
-│  │  │     ├─ modal.ts                # Compatibility re-export
+│  │  │     ├─ modal.ts                # Compatibility wrapper (lower-case import)
 │  │  │     ├─ toast.tsx               # ToastProvider + useToast (lightweight)
 │  │  │     └─ index.ts                # Barrel exports
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts             # Wraps window.chat API
-│  │  │  └─ docsService.ts             # Wraps window.docsIndex API + helpers
+│  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
+│  │  │  └─ tasksService.ts            # Wraps window.tasksIndex API
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts                # Chat state + send flow
 │  │  │  ├─ useDocsIndex.ts            # Subscribe to docs index, expose docsList
 │  │  │  ├─ useDocsAutocomplete.ts     # @mention detection and suggestion UI logic
 │  │  │  ├─ useLLMConfig.ts            # LLM config management
-│  │  │  └─ useNextTaskId.ts           # Next task ID calculation
+│  │  │  └─ useNextTaskId.ts           # Next task ID calculation (via tasksService)
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
-│  │  │  └─ ChatView.tsx               # Now focused on UI; logic via hooks/services
+│  │  │  └─ ChatView.tsx               # UI consumes hooks/services
 │  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         # Uses useNextTaskId
-│  │  │  ├─ TaskEditView.tsx
-│  │  │  ├─ FeatureCreateView.tsx
-│  │  │  └─ FeatureEditView.tsx
+│  │  │  ├─ TaskCreateView.tsx         # Uses tasksService; no window.close
+│  │  │  ├─ TaskEditView.tsx           # Uses tasksService; no window.close
+│  │  │  ├─ FeatureCreateView.tsx      # Uses tasksService; no window.close
+│  │  │  └─ FeatureEditView.tsx        # Uses tasksService; no window.close
 │  │  ├─ App.tsx
 │  │  └─ types.ts                      # +ChatMessage/LLMConfig
 │  ├─ index.css
@@ -123,7 +128,6 @@ repo_root/
 ```
 
 Notes on the refactor
-- ChatView is now UI-only: data fetching, completion flow, and mention logic live in hooks/services. This makes the chat UI easier to maintain and test and clarifies responsibilities.
-- SidebarView uses the centralized Navigator state and helpers for consistency and to avoid duplicate hash parsing logic.
-- A new services layer wraps window APIs to simplify mocking and future evolution of IPC boundaries.
-- All new files are documented above; no file was deleted. Existing imports that referenced Modal via lowercase path still work thanks to the compatibility re-export under components/ui/modal.ts.
+- Introduced tasksService to adhere to standards: screens/components and hooks no longer call window.tasksIndex directly.
+- Removed window.close() fallbacks from all modals. Modals now fully adhere to the contract of accepting onRequestClose and delegating closing to parent via Navigator/ModalHost.
+- Added compatibility wrapper components/ui/modal.ts to fix runtime import errors and ease migration; this adheres to the previously documented plan in this file.
