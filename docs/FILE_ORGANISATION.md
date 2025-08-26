@@ -87,7 +87,9 @@ repo_root/
 │  │  └─ tasks.ts                 # TypeScript interfaces for task schema
 │  ├─ index.css
 │  ├─ main.js
-│  └─ preload.js
+│  ├─ preload.js
+│  └─ chat/
+│     └─ manager.js               # Logical Chat manager for LLM interactions
 ├─ tasks/
 │  └─ 1/
 │     ├─ task.json
@@ -175,3 +177,20 @@ repo_root/
     - subscribe(cb): subscribe to updates; returns unsubscribe function
     - getFile(relPath): Promise resolving to the file content
     - saveFile(relPath, content): Promise resolving when save completes
+## Logical Chat Manager
+- Location: src/chat/manager.js
+- Purpose: Manages the chat interface's backend, including LLM completions and chat history persistence.
+- API:
+  - Class ChatManager(projectRoot)
+    - async getCompletion({messages, config}): Performs a non-streaming LLM chat completion and returns the response message.
+    - loadChat(): Loads saved chat messages from file.
+    - saveChat(messages): Saves chat messages to file.
+- Integration:
+  - The Electron main process instantiates the manager and exposes IPC channels:
+    - chat:completion (invoke) returns the LLM response
+    - chat:load (invoke) returns the loaded messages
+    - chat:save (invoke) saves the messages
+  - Preload exposes a safe renderer bridge as window.chat with methods:
+    - getCompletion(messages, config): Promise resolving to the response
+    - load(): Promise resolving to loaded messages
+    - save(messages): Promise resolving when saved

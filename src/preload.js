@@ -36,6 +36,12 @@ const DOCS_API = {
   saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
 };
 
+const CHAT_API = {
+  getCompletion: (messages, config) => ipcRenderer.invoke('chat:completion', {messages, config}),
+  load: () => ipcRenderer.invoke('chat:load'),
+  save: (messages) => ipcRenderer.invoke('chat:save', messages),
+};
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
 contextBridge.exposeInMainWorld('docsIndex', DOCS_API);
+contextBridge.exposeInMainWorld('chat', CHAT_API);
