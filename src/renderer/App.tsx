@@ -6,6 +6,7 @@ import TaskCreateView from './TaskCreateView';
 import FeatureCreateView from './FeatureCreateView';
 import TaskEditView from './TaskEditView';
 import FeatureEditView from './FeatureEditView';
+import SettingsView from './SettingsView';
 import { ToastProvider } from './components/ui/toast';
 
 function useAppRouter() {
@@ -33,6 +34,9 @@ function useAppRouter() {
   if ((match = /^#feature-edit\/(\d+)\/(.+)$/.exec(hash))) {
     return { name: 'feature-edit', taskId: parseInt(match[1], 10), featureId: match[2] };
   }
+  if (hash === '#settings') {
+    return { name: 'settings' };
+  }
   return { name: 'list' };
 }
 
@@ -55,6 +59,9 @@ const App = () => {
       break;
     case 'details':
       content = <TaskDetailsView taskId={route.taskId} />;
+      break;
+    case 'settings':
+      content = <SettingsView />;
       break;
     default:
       content = <TasksListView />;

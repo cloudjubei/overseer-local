@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Button } from './components/ui/button';
 
 const STATUS_LABELS = {
   '+': 'Done',
@@ -124,7 +125,10 @@ export default function TasksListView() {
 
   return (
     <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
-      <h2 id="tasks-view-heading">Tasks</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 id="tasks-view-heading">Tasks</h2>
+        <Button onClick={() => location.hash = '#settings'}>Settings</Button>
+      </div>
       <div className="tasks-controls" role="search">
         <div className="control">
           <label htmlFor="tasks-search-input">Search</label>
