@@ -15,11 +15,11 @@
     },
     {
       "id": "6.2",
-      "status": "?",
-      "title": "Configure basic electron-builder settings",
-      "description": "Add a 'build' section in package.json with basic configurations such as appId, productName, directories (output, buildResources), and files to include in the build.",
+      "status": "-",
+      "title": "Create a document explaining exactly step by step how to create a release version of the application for each platform",
+      "description": "`docs/APP_RELEASE.md` should contain all the information. Explain from the ground up about getting any required credentials or certificates needed for each platform. Provide instructions on how to configure these within the project's build scripts or environment variables. Then finally which scripts to run to get a build out.",
       "plan": "",
-      "context": [],
+      "context": ["docs/APP_RELEASE.md"],
       "acceptance": [],
       "rejection": "Blocked: Agent loop failed: Extra data: line 14 column 1 (char 583)"
     },
@@ -70,7 +70,7 @@
     },
     {
       "id": "6.8",
-      "status": "-",
+      "status": "/",
       "title": "Set up CI pipeline for building distributables",
       "description": "Create a GitHub Actions workflow file (.github/workflows/build.yml) that runs on push to main, installs dependencies, builds the app for all platforms using electron-builder, and archives the artifacts.",
       "plan": "",
@@ -79,7 +79,7 @@
     },
     {
       "id": "6.9",
-      "status": "-",
+      "status": "/",
       "title": "Configure CI for release on tags",
       "description": "Extend the CI workflow to run on tags (e.g., v*), build the distributables, and automatically create a GitHub release with the built files attached.",
       "plan": "",
