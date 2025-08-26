@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '../components/ui/button';
+import { Task } from 'src/types/tasks';
 
 const STATUS_LABELS = {
   '+': 'Done',
@@ -20,14 +21,14 @@ function toTasksArray(index: any) {
   return arr;
 }
 
-function countFeatures(task: any) {
+function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : [];
   const total = features.length;
   const done = features.filter((f) => f.status === '+').length;
   return { done, total };
 }
 
-function matchesQuery(task: any, q: string) {
+function matchesQuery(task: Task, q: string) {
   if (!q) return true;
   const s = q.trim().toLowerCase();
   if (!s) return true;
@@ -35,7 +36,7 @@ function matchesQuery(task: any, q: string) {
   return idStr.includes(s) || task.title?.toLowerCase().includes(s) || task.description?.toLowerCase().includes(s);
 }
 
-function filterTasks(tasks: any[], { query, status }: { query: string; status: string }) {
+function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
     const byStatus = !status || status === 'any' ? true : t.status === status;
     return byStatus && matchesQuery(t, query);
@@ -155,15 +156,15 @@ export default function TasksListView() {
             ))}
           </select>
         </div>
-        <div className="control control-buttons">
-          <button type="button" className="btn-clear" onClick={handleClear}>
+        <div className="control control-Buttons">
+          <Button className="btn-clear" onClick={handleClear}>
             Clear
-          </button>
+          </Button>
         </div>
         <div className="control control-add-task">
-          <button type="button" className="btn-add-task" onClick={handleAddTask}>
+          <Button className="btn-add-task" onClick={handleAddTask}>
             Add Task
-          </button>
+          </Button>
         </div>
       </div>
       <div id="tasks-count" className="tasks-count" aria-live="polite">
@@ -181,7 +182,7 @@ export default function TasksListView() {
                   <div
                     className="task-row"
                     tabIndex={0}
-                    role="button"
+                    role="Button"
                     data-index={idx}
                     onClick={() => (location.hash = `#task/${t.id}`)}
                     onKeyDown={(e) => onRowKeyDown(e, t.id, ulRef)}
@@ -195,8 +196,8 @@ export default function TasksListView() {
                     <div className="col col-features">{done}/{total}</div>
                     {!isFiltered && (
                       <div className="col col-actions">
-                        <button type="button" className="btn-move-up" disabled={saving || idx === 0} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx - 1); }}>Up</button>
-                        <button type="button" className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx + 1); }}>Down</button>
+                        <Button className="btn-move-up" disabled={saving || idx === 0} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx - 1); }}>Up</Button>
+                        <Button className="btn-move-down" disabled={saving || idx === filtered.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveTask(t.id, idx + 1); }}>Down</Button>
                       </div>
                     )}
                   </div>

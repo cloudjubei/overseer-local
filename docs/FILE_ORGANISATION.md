@@ -39,47 +39,7 @@ Notes:
 - Deprecate gradually: create new files/specs alongside old ones, migrate, then remove deprecated artifacts when tests prove stability.
 - Each feature must have deterministic tests; do not mark features complete until tests pass.
 
-## Repository Tree (updated)
-Key changes for responsive layout and sidebar:
-- Updated: src/index.css — removed fixed body max-width/padding, added full-height layout for html/body/#root; retained component styles.
-- Updated: src/renderer/App.tsx — now wraps the app with ToastProvider and a new NavigatorProvider; adds a global ModalHost to render modals above screens.
-- Updated: src/renderer/screens/SidebarView.tsx — refactored to use Navigator for view state and navigation instead of manual hash parsing; retains collapsible sidebar with persisted state.
-- Updated: src/renderer/screens/DocumentsView.tsx — wrapped in a flex column with min-h-0 and proper overflow to prevent oversized content.
-- Updated: src/renderer/screens/ChatView.tsx — refactored to separate logic from UI using new hooks/services; layout uses fixed-width left chat list and flexible right pane with min-w-0/min-h-0 for correct resizing.
-- Updated: src/renderer/screens/TasksView.tsx — renders only list/details; modals handled by global ModalHost via Navigator.
-
-New navigation layer:
-- Added: src/renderer/navigation/Navigator.tsx — app-wide navigation context that parses location.hash into currentView, tasksRoute, and modal state. Exposes openModal/closeModal and navigation helpers.
-- Updated: src/renderer/navigation/ModalHost.tsx — now renders active modals via a React portal into document.body, guaranteeing the overlay sits above all screens and avoids stacking-context issues. It mounts task-related modals and wires onRequestClose to Navigator.closeModal.
-- Added: src/renderer/navigation/index.ts — re-exports Navigator hooks/components.
-
-UI utilities for consistency:
-- Added: src/renderer/components/ui/Modal.tsx — Reusable Modal + AlertDialog with focus/escape handling.
-- Added: src/renderer/components/ui/modal.ts — Compatibility wrapper to satisfy existing lower-case import paths (e.g., ChatView). Defaults isOpen to true for legacy usage.
-- Added: src/renderer/components/ui/toast.tsx — lightweight ToastProvider and useToast hook used by task modals.
-- Added: src/renderer/components/ui/index.ts — barrel exports for Modal/AlertDialog and Toast utilities.
-
-Task modal components and hooks:
-- Updated: src/renderer/tasks/TaskCreateView.tsx — now calls tasksService instead of window.tasksIndex and no longer calls window.close(); adheres to standards for closing via onRequestClose.
-- Updated: src/renderer/tasks/TaskEditView.tsx — always renders within a Modal, even during initial loading, ensuring a consistent overlay and avoiding stray non-modal content. Uses tasksService for data access and removes window.close() fallback.
-- Updated: src/renderer/tasks/FeatureCreateView.tsx — now uses tasksService and removes window.close() fallback.
-- Updated: src/renderer/tasks/FeatureEditView.tsx — always renders within a Modal, even during initial loading, ensuring a consistent overlay and avoiding stray non-modal content. Uses tasksService and removes window.close() fallback.
-- Added: src/renderer/hooks/useNextTaskId.ts — refactored to use tasksService for index access/subscribe.
-
-Logic/UI split: services and hooks for renderer logic
-- Added: src/renderer/services/chatService.ts — wraps window.chat API with typed methods (getCompletion/list/create/load/save/delete).
-- Added: src/renderer/services/docsService.ts — wraps window.docsIndex API and provides extractPathsFromIndexTree helper.
-- Added: src/renderer/services/tasksService.ts — wraps window.tasksIndex API; used by task modals and hooks instead of direct window calls.
-- Added: src/renderer/hooks/useChats.ts — manages chats list, current chat, messages and sending flow (including completion + persistence) for ChatView.
-- Added: src/renderer/hooks/useDocsIndex.ts — subscribes to the docs index and provides a derived flat docsList for UI consumption.
-- Added: src/renderer/hooks/useDocsAutocomplete.ts — encapsulates @-mention detection, matching against docsList, cursor position calculation, and selection behavior for ChatView.
-- Added: src/renderer/hooks/useLLMConfig.ts — centralizes LLM configuration loading/saving via LLMConfigManager and exposes isConfigured flag.
-- Updated: src/renderer/types.ts — now defines shared ChatMessage and LLMConfig types alongside NavigationView.
-
-Documentation:
-- Added: docs/STANDARDS.md — UI standards for creating and styling views, modals, and using hooks/services/navigation consistently.
-
-Example Tree (illustrative):
+## Repository Tree
 ```
 repo_root/
 ├─ docs/
@@ -90,14 +50,13 @@ repo_root/
 │  ├─ renderer/
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx              # Global navigation state (screen + modal)
-│  │  │  ├─ ModalHost.tsx              # Renders modals globally above screens via portal
-│  │  │  └─ index.ts                   # Re-exports
+│  │  │  └─ ModalHost.tsx              # Renders modals globally above screens via portal
 │  │  ├─ components/
 │  │  │  └─ ui/
-│  │  │     ├─ Modal.tsx               # Reusable Modal + AlertDialog
-│  │  │     ├─ modal.ts                # Compatibility wrapper (lower-case import)
-│  │  │     ├─ toast.tsx               # ToastProvider + useToast (lightweight)
-│  │  │     └─ index.ts                # Barrel exports
+│  │  │     ├─ Alert.tsx               # Reusable AlertDialog
+│  │  │     ├─ Button.tsx              # Reusable Button
+│  │  │     ├─ Modal.tsx               # Reusable Modal
+│  │  │     └─ Toast.tsx               # ToastProvider + useToast (lightweight)
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts             # Wraps window.chat API
 │  │  │  ├─ docsService.ts             # Wraps window.docsIndex API + helpers
@@ -125,9 +84,3 @@ repo_root/
 │  └─ preload.js
 └─ …
 ```
-
-Notes on the refactor
-- Introduced tasksService to adhere to standards: screens/components and hooks no longer call window.tasksIndex directly.
-- Removed window.close() fallbacks from all modals. Modals now fully adhere to the contract of accepting onRequestClose and delegating closing to parent via Navigator/ModalHost.
-- Updated ModalHost to portal into document.body, fixing overlay z-index/stacking issues so modals reliably appear above all screens and unmount cleanly on close.
-- Ensured edit modals render a loading state within the Modal shell instead of returning plain elements; this prevents orphan background elements when data is loading.

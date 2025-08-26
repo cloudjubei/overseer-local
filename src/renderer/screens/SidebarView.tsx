@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { NavigationView } from '../types';
 import TasksView from './TasksView';
 import DocumentsView from './DocumentsView';
 import SettingsView from './SettingsView';
 import ChatView from './ChatView';
-import { useNavigator } from '../navigation';
+import { useNavigator } from '../navigation/Navigator';
 
 export type SidebarProps = {};
 

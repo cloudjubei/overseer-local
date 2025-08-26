@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import SidebarView from './screens/SidebarView';
 import { createRoot } from 'react-dom/client';
-import { ToastProvider } from './components/ui';
-import { NavigatorProvider } from './navigation';
 import ModalHost from './navigation/ModalHost';
+import { ToastProvider } from './components/ui/toast';
+import { NavigatorProvider } from './navigation/Navigator';
 
 function App() {
   useEffect(() => {
@@ -20,7 +20,6 @@ function App() {
       <NavigatorProvider>
         <div className="flex h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
           <SidebarView />
-          {/* Global modal layer */}
           <ModalHost />
         </div>
       </NavigatorProvider>

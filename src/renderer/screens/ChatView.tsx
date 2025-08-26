@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Modal } from '../components/ui/modal';
+import { Modal } from '../components/ui/Modal';
 import { useChats } from '../hooks/useChats';
 import { useDocsIndex } from '../hooks/useDocsIndex';
 import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete';
@@ -119,27 +119,25 @@ const ChatView = () => {
             </div>
           )}
         </div>
-        {showSettings && (
-          <Modal onClose={() => setShowSettings(false)}>
-            <h2 className="mb-4 text-xl font-bold">LLM Configuration</h2>
-            <form onSubmit={handleSaveConfig}>
-              <div className="mb-4">
-                <label className="mb-1 block">API Base URL</label>
-                <input type="text" name="apiBaseUrl" value={config.apiBaseUrl} onChange={handleConfigChange} className="w-full rounded border p-2" />
-              </div>
-              <div className="mb-4">
-                <label className="mb-1 block">API Key</label>
-                <input type="text" name="apiKey" value={config.apiKey} onChange={handleConfigChange} className="w-full rounded border p-2" />
-              </div>
-              <div className="mb-4">
-                <label className="mb-1 block">Model</label>
-                <input type="text" name="model" value={config.model} onChange={handleConfigChange} className="w-full rounded border p-2" />
-              </div>
-              <button type="submit" className="rounded bg-blue-500 px-4 py-2 text-white">Save</button>
-            </form>
-          </Modal>
-        )}
       </div>
+      <Modal onClose={() => setShowSettings(false)} isOpen={showSettings}>
+        <h2 className="mb-4 text-xl font-bold">LLM Configuration</h2>
+        <form onSubmit={handleSaveConfig}>
+          <div className="mb-4">
+            <label className="mb-1 block">API Base URL</label>
+            <input type="text" name="apiBaseUrl" value={config.apiBaseUrl} onChange={handleConfigChange} className="w-full rounded border p-2" />
+          </div>
+          <div className="mb-4">
+            <label className="mb-1 block">API Key</label>
+            <input type="text" name="apiKey" value={config.apiKey} onChange={handleConfigChange} className="w-full rounded border p-2" />
+          </div>
+          <div className="mb-4">
+            <label className="mb-1 block">Model</label>
+            <input type="text" name="model" value={config.model} onChange={handleConfigChange} className="w-full rounded border p-2" />
+          </div>
+          <button type="submit" className="rounded bg-blue-500 px-4 py-2 text-white">Save</button>
+        </form>
+      </Modal>
     </div>
   );
 };

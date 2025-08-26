@@ -1,7 +1,7 @@
 import React from 'react';
 import TaskDetailsView from '../tasks/TaskDetailsView';
 import TasksListView from '../tasks/TasksListView';
-import { useNavigator } from '../navigation';
+import { useNavigator } from '../navigation/Navigator';
 
 const TasksView: React.FC = () => {
   const { tasksRoute } = useNavigator();

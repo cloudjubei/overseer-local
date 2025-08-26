@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Modal, AlertDialog, useToast } from '../components/ui'
 import { TaskForm } from '../components/TaskForm'
 import { tasksService } from '../services/tasksService'
+import { AlertDialog, Modal } from '../components/ui/Modal';
+import { useToast } from '../components/ui/toast';
 
 export default function TaskEditView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
   const { toast } = useToast()
