@@ -207,8 +207,35 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   try {
     const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
     const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics.'};
-    const response = await openai.chat.completions.create({model: config.model, messages: [systemPrompt, ...messages], stream: false});
-    return response.choices[0].message;
+    let chatMessages = [systemPrompt, ...messages];
+    const tools = []; // empty for now
+    const availableTools = {}; // empty map for tool functions
+    while (true) {
+      const response = await openai.chat.completions.create({
+        model: config.model,
+        messages: chatMessages,
+        tools: tools.length > 0 ? tools : undefined,
+        stream: false,
+      });
+      const message = response.choices[0].message;
+      if (!message.tool_calls) {
+        return message;
+      }
+      chatMessages.push(message);
+      for (const toolCall of message.tool_calls) {
+        const toolName = toolCall.function.name;
+        const args = JSON.parse(toolCall.function.arguments);
+        if (!availableTools[toolName]) {
+          throw new Error(`Unknown tool: ${toolName}`);
+        }
+        const result = await availableTools[toolName](args);
+        chatMessages.push({
+          role: 'tool',
+          content: JSON.stringify(result),
+          tool_call_id: toolCall.id,
+        });
+      }
+    }
   } catch (error) {
     console.error('Error in chat completion:', error);
     return { role: 'assistant', content: `An error occurred: ${error.message}` };
