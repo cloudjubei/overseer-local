@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
 import { useChats } from '../hooks/useChats'
 import { useDocsIndex } from '../hooks/useDocsIndex'
@@ -36,9 +36,25 @@ export default function ChatView() {
     onSelect: onAutocompleteSelect,
   } = useDocsAutocomplete({ docsList, input, setInput, textareaRef, mirrorRef })
 
+  // Always scroll to bottom on new messages
   useEffect(() => {
-    messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight)
+    const el = messageListRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight })
   }, [messages])
+
+  // Textarea autosize for better composing UX
+  const autoSizeTextarea = () => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const max = 200 // px
+    const next = Math.min(el.scrollHeight, max)
+    el.style.height = next + 'px'
+  }
+  useEffect(() => {
+    autoSizeTextarea()
+  }, [input])
 
   const handleSend = async () => {
     if (!input.trim() || !activeConfig) return
@@ -47,7 +63,12 @@ export default function ChatView() {
     }
     sendMessage(input, activeConfig)
     setInput('')
-    textareaRef.current?.focus()
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+        textareaRef.current.focus()
+      }
+    })
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,16 +92,22 @@ export default function ChatView() {
 
   interface EnhancedMessage extends ChatMessage {
     showModel?: boolean
+    isFirstInGroup?: boolean
   }
 
-  const enhancedMessages: EnhancedMessage[] = messages.map((msg, index) => {
-    let showModel = false
-    if (msg.role === 'assistant' && msg.model) {
-      const prevAssistant = [...messages.slice(0, index)].reverse().find((m) => m.role === 'assistant')
-      showModel = !prevAssistant || prevAssistant.model !== msg.model
-    }
-    return { ...msg, showModel }
-  })
+  // Enhance messages: show model chip when it changes; group consecutive by role
+  const enhancedMessages: EnhancedMessage[] = useMemo(() => {
+    return messages.map((msg, index) => {
+      let showModel = false
+      if (msg.role === 'assistant' && msg.model) {
+        const prevAssistant = [...messages.slice(0, index)].reverse().find((m) => m.role === 'assistant')
+        showModel = !prevAssistant || prevAssistant.model !== msg.model
+      }
+      const prev = messages[index - 1]
+      const isFirstInGroup = !prev || prev.role !== msg.role || msg.role === 'system'
+      return { ...msg, showModel, isFirstInGroup }
+    })
+  }, [messages])
 
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
@@ -95,6 +122,9 @@ export default function ChatView() {
           </button>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto p-2" role="list" aria-label="Chat list">
+          {chatHistories.length === 0 && (
+            <div className="text-[12px] text-[var(--text-muted)] px-2 py-1.5">No chats yet</div>
+          )}
           {chatHistories.map((id) => {
             const isActive = currentChatId === id
             return (
@@ -103,13 +133,14 @@ export default function ChatView() {
                 role="listitem"
                 className={[
                   'group flex items-center justify-between gap-2 cursor-pointer select-none px-2 py-1.5 rounded-md',
-                  'text-[var(--text-primary)]',
+                  'text-[var(--text-primary)] transition-colors',
                   isActive
                     ? 'border border-[var(--border-default)] bg-[var(--surface-overlay)]'
                     : 'hover:bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]',
                 ].join(' ')}
                 onClick={() => setCurrentChatId(id)}
                 aria-current={isActive ? 'true' : undefined}
+                title={`Open Chat ${id}`}
               >
                 <span className="truncate">Chat {id}</span>
                 <button
@@ -139,9 +170,16 @@ export default function ChatView() {
         />
 
         <header className="shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
-          <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold">
-            Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}
-          </h1>
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
+              Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}
+            </h1>
+            {activeConfig && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[12px] text-[var(--text-secondary)] border border-[var(--border-subtle)] bg-[var(--surface-overlay)] px-2 py-0.5 rounded-full">
+                Model: <strong className="font-medium text-[var(--text-primary)]">{activeConfig.name}</strong>
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <Select value={activeConfigId || ''} onValueChange={setActive}>
               <SelectTrigger className="ui-select w-[220px]">
@@ -167,47 +205,82 @@ export default function ChatView() {
 
         {!isConfigured && (
           <div
-            className="mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px]"
+            className="mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
             style={{
               background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
               color: 'var(--text-primary)',
             }}
             role="status"
           >
-            LLM not configured. Set your API key in Settings to enable sending messages.
+            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+            <button className="btn" onClick={() => navigateView('Settings')}>Configure</button>
           </div>
         )}
 
         {/* Messages */}
-        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4" aria-live="polite">
+        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
           {enhancedMessages.length === 0 ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
-              <div className="text-[13px] mt-1">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
+              <div className="text-[13px] mt-2">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
+              <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
+                Attach markdown or text files to give context. Mention docs with / to quickly link files.
+              </div>
             </div>
           ) : (
-            <div className="mx-auto max-w-[920px] space-y-2">
+            <div className="mx-auto max-w-[960px] space-y-3">
               {enhancedMessages.map((msg, index) => {
                 const isUser = msg.role === 'user'
                 const isSystem = msg.role === 'system'
 
+                if (isSystem) {
+                  return (
+                    <div key={index} className="flex justify-center">
+                      <div className="text-[12px] text-[var(--text-muted)] italic bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-full px-3 py-1">
+                        {msg.content}
+                      </div>
+                    </div>
+                  )
+                }
+
                 return (
                   <div
                     key={index}
-                    className={['flex', isUser ? 'justify-end' : 'justify-start'].join(' ')}
+                    className={[
+                      'flex items-start gap-2',
+                      isUser ? 'flex-row-reverse' : 'flex-row',
+                    ].join(' ')}
                   >
-                    <div className="max-w-[72%]">
+                    {/* Avatar */}
+                    <div
+                      className={[
+                        'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                        isUser
+                          ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                          : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                      ].join(' ')}
+                      aria-hidden="true"
+                    >
+                      {isUser ? 'You' : 'AI'}
+                    </div>
+
+                    <div className={['max-w-[72%] min-w-[80px] flex flex-col', isUser ? 'items-end' : 'items-start'].join(' ')}>
+                      {/* Model chip on assistant model change */}
                       {!isUser && msg.showModel && msg.model && (
-                        <div className="text-[11px] text-[var(--text-muted)] mb-1">{msg.model}</div>
+                        <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                          {msg.model}
+                        </div>
                       )}
+
+                      {/* Message bubble */}
                       <div
                         className={[
-                          'px-3 py-2 rounded-2xl shadow',
-                          isSystem
-                            ? 'bg-transparent text-[var(--text-muted)] italic px-0 py-1 shadow-none'
-                            : isUser
+                          'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                          isUser
                             ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                             : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                          msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
                         ].join(' ')}
                       >
                         {msg.content}
@@ -224,33 +297,42 @@ export default function ChatView() {
         <div className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
           <div className="p-3">
             <div className="relative flex items-end gap-2">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleTextareaKeyDown}
-                className="flex-1 resize-none rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] px-3 py-2 text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
-                placeholder={isConfigured ? 'Type your message…' : 'Configure your LLM in Settings to start chatting'}
-                rows={3}
-                aria-label="Message input"
-                disabled={!isConfigured}
-              />
-
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="btn-secondary"
-                aria-label="Attach a document"
-                type="button"
-              >
-                Attach
-              </button>
-              <input
-                type="file"
-                accept=".md,.txt"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleFileUpload}
-              />
+              <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onInput={autoSizeTextarea}
+                  onKeyDown={handleTextareaKeyDown}
+                  className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
+                  placeholder={isConfigured ? 'Type your message…' : 'Configure your LLM in Settings to start chatting'}
+                  rows={1}
+                  aria-label="Message input"
+                  disabled={!isConfigured}
+                  style={{ maxHeight: 200, overflowY: 'auto' }}
+                />
+                <div className="px-3 py-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[12px] text-[var(--text-muted)]">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="btn-secondary"
+                      aria-label="Attach a document"
+                      type="button"
+                    >
+                      Attach
+                    </button>
+                    <input
+                      type="file"
+                      accept=".md,.txt"
+                      ref={fileInputRef}
+                      style={{ display: 'none' }}
+                      onChange={handleFileUpload}
+                    />
+                    <span className="hidden sm:inline">Tip: Use / to reference docs</span>
+                  </div>
+                  <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
+                </div>
+              </div>
 
               <button onClick={handleSend} className="btn" disabled={!canSend} aria-label="Send message">
                 Send
@@ -258,7 +340,7 @@ export default function ChatView() {
 
               {isAutocompleteOpen && autocompletePosition && (
                 <div
-                  className="absolute z-50 min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+                  className="absolute z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
                   style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px` }}
                   role="listbox"
                   aria-label="Docs suggestions"
@@ -276,7 +358,6 @@ export default function ChatView() {
                 </div>
               )}
             </div>
-            <div className="text-[12px] text-[var(--text-muted)] mt-2">Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
           </div>
         </div>
       </section>
