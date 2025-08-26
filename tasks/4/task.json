@@ -24,7 +24,7 @@
     },
     {
       "id": "4.3",
-      "status": "-",
+      "status": "+",
       "title": "Implement message input and dummy response logic",
       "description": "In ChatView, add event handler for send button click or Enter key in textarea. Get input value, append {role: 'user', content} to messages state, clear input, then append a dummy {role: 'assistant', content: 'Echo: ' + content} to simulate response. Scroll to bottom after updates.",
       "plan": "",
