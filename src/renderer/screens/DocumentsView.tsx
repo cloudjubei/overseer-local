@@ -136,13 +136,13 @@ export default function DocumentsView() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
-      <header className="docs-toolbar shrink-0 border-b border-border-subtle bg-surface-base">
-        <div className="docs-toolbar__inner">
-          <div className="left">
-            <h1 className="text-base font-semibold text-text-primary m-0">Documents</h1>
+      <header className="shrink-0 border-b border-border-subtle bg-surface-base">
+        <div className="flex items-center justify-between gap-3 px-3 py-2">
+          <div className="min-w-0">
+            <h1 className="m-0 truncate text-base font-semibold text-text-primary">Documents</h1>
             <div className="text-xs text-text-muted">{snapshot?.files?.length ?? 0} files</div>
           </div>
-          <div className="right">
+          <div className="flex items-center gap-2">
             <div className="w-64">
               <Input
                 ref={searchRef}
@@ -165,17 +165,17 @@ export default function DocumentsView() {
             </Select>
             <Tooltip content="Refresh index">
               <Button variant="secondary" size="md" onClick={() => window.location.reload()} aria-label="Refresh documents">
-                
+                ↻
               </Button>
             </Tooltip>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 min-h-0 min-w-0 overflow-hidden">
+      <main className="flex-1 min-h-0 min-w-0">
         <div className="flex h-full min-h-0 w-full">
-          <aside className="docs-sidebar">
-            <div className="docs-tree">
+          <aside className="w-72 shrink-0 border-r border-border-subtle bg-surface-base/50 overflow-y-auto" aria-label="Documents folders">
+            <div className="p-2">
               {!root ? (
                 <div className="p-3 text-sm text-text-muted">
                   <Skeleton className="h-4 w-40" />
@@ -195,7 +195,7 @@ export default function DocumentsView() {
               )}
             </div>
           </aside>
-          <section className="docs-content">
+          <section className="flex-1 min-w-0 min-h-0 overflow-hidden">
             {!selected ? (
               <div className="p-4 text-sm text-text-secondary">Select a document from the list to view it.</div>
             ) : (
@@ -338,7 +338,7 @@ function DocumentPane({ relPath }: { relPath: string }) {
           <div className="text-[color:var(--color-red-600)]">{error}</div>
         )}
         {!loading && !error && !isEditing && (
-          <MarkdownRenderer content={content} currentRelPath={relPath} onNavigateDoc={(p, fragment) => { /* simple navigation by setting hash or could integrate */ }} />
+          <MarkdownRenderer content={content} currentRelPath={relPath} onNavigateDoc={(p, fragment) => { /* navigation hook point */ }} />
         )}
         {!loading && !error && isEditing && (
           <MarkdownEditor value={draft} onChange={setDraft} onSave={onSave} onCancel={onCancel} fileRelPath={relPath} />
