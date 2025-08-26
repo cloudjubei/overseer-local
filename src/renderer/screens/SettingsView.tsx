@@ -16,6 +16,23 @@ export default function SettingsView() {
   const { configs, activeConfigId, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
   const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
+  const [modelMode, setModelMode] = useState<'preset' | 'custom'>('preset');
+
+  const defaultUrls: Record<string, string> = {
+    openai: 'https://api.openai.com/v1',
+    anthropic: 'https://api.anthropic.com',
+    grok: 'https://api.x.ai/v1',
+    gemini: 'https://generativelanguage.googleapis.com/v1beta',
+    custom: ''
+  };
+
+  const commonModels: Record<string, string[]> = {
+    openai: ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+    anthropic: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'],
+    grok: ['grok-beta'],
+    gemini: ['gemini-pro', 'gemini-1.5-pro-latest'],
+    custom: []
+  };
 
   const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,7 +40,22 @@ export default function SettingsView() {
   };
 
   const handleProviderChange = (value: string) => {
-    setEditingConfig((prev) => prev ? { ...prev, provider: value as 'openai' | 'litellm' } : null);
+    setEditingConfig((prev) => {
+      if (!prev) return null;
+      const newBase = prev.apiBaseUrl || defaultUrls[value] || '';
+      return { ...prev, provider: value, apiBaseUrl: newBase };
+    });
+    setModelMode('preset');
+  };
+
+  const handleModelChange = (value: string) => {
+    if (value === 'custom') {
+      setModelMode('custom');
+      setEditingConfig((prev) => prev ? { ...prev, model: '' } : null);
+    } else {
+      setModelMode('preset');
+      setEditingConfig((prev) => prev ? { ...prev, model: value } : null);
+    }
   };
 
   const handleSaveConfig = () => {
@@ -35,16 +67,21 @@ export default function SettingsView() {
     }
     setEditingConfig(null);
     setIsAddingNew(false);
+    setModelMode('preset');
   };
 
   const handleEditConfig = (config: LLMConfig) => {
     setEditingConfig({ ...config });
+    const providerModels = commonModels[config.provider] || [];
+    setModelMode(providerModels.includes(config.model) ? 'preset' : 'custom');
     setIsAddingNew(false);
   };
 
   const handleAddNewConfig = () => {
-    setEditingConfig({ id: '', name: '', provider: 'openai', apiBaseUrl: '', apiKey: '', model: '' });
+    const defaultProvider = 'openai';
+    setEditingConfig({ id: '', name: '', provider: defaultProvider, apiBaseUrl: defaultUrls[defaultProvider], apiKey: '', model: '' });
     setIsAddingNew(true);
+    setModelMode('preset');
   };
 
   const handleDeleteConfig = (id: string) => {
@@ -90,43 +127,42 @@ export default function SettingsView() {
         ))}
         {editingConfig && (
           <div className="mt-4 p-4 border rounded-md">
-            <Input
-              placeholder="Name"
-              name="name"
-              value={editingConfig.name || ''}
-              onChange={handleConfigChange}
-              className="mb-2"
-            />
+            <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
+            <Input id="name" placeholder="Name" name="name" value={editingConfig.name || ''} onChange={handleConfigChange} className="mb-2" />
+            <label htmlFor="provider" className="block text-sm font-medium mb-1">Provider</label>
             <Select value={editingConfig.provider || 'openai'} onValueChange={handleProviderChange}>
-              <SelectTrigger className="mb-2">
+              <SelectTrigger id="provider" className="mb-2">
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="litellm">LiteLLM</SelectItem>
+                <SelectItem value="anthropic">Anthropic</SelectItem>
+                <SelectItem value="grok">Grok (xAI)</SelectItem>
+                <SelectItem value="gemini">Gemini (Google)</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              placeholder="API Base URL"
-              name="apiBaseUrl"
-              value={editingConfig.apiBaseUrl || ''}
-              onChange={handleConfigChange}
-              className="mb-2"
-            />
-            <Input
-              placeholder="API Key"
-              name="apiKey"
-              value={editingConfig.apiKey || ''}
-              onChange={handleConfigChange}
-              className="mb-2"
-            />
-            <Input
-              placeholder="Model"
-              name="model"
-              value={editingConfig.model || ''}
-              onChange={handleConfigChange}
-              className="mb-2"
-            />
+            <label htmlFor="apiBaseUrl" className="block text-sm font-medium mb-1">API Base URL</label>
+            <Input id="apiBaseUrl" placeholder="API Base URL" name="apiBaseUrl" value={editingConfig.apiBaseUrl || ''} onChange={handleConfigChange} className="mb-2" />
+            <label htmlFor="apiKey" className="block text-sm font-medium mb-1">API Key</label>
+            <Input id="apiKey" placeholder="API Key" name="apiKey" value={editingConfig.apiKey || ''} onChange={handleConfigChange} className="mb-2" />
+            <label htmlFor="model" className="block text-sm font-medium mb-1">Model</label>
+            {editingConfig.provider !== 'custom' && commonModels[editingConfig.provider]?.length > 0 ? (
+              <Select value={modelMode === 'preset' ? editingConfig.model : 'custom'} onValueChange={handleModelChange}>
+                <SelectTrigger id="model" className="mb-2">
+                  <SelectValue placeholder="Select Model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {commonModels[editingConfig.provider].map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : null}
+            {modelMode === 'custom' || editingConfig.provider === 'custom' ? (
+              <Input placeholder="Custom Model" name="model" value={editingConfig.model || ''} onChange={handleConfigChange} className="mb-2" />
+            ) : null}
             <Button onClick={handleSaveConfig}>Save</Button>
           </div>
         )}
