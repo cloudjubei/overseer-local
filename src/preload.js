@@ -25,7 +25,7 @@ const TASKS_API = {
 };
 
 // New Docs Index API exposed to renderer as window.docsIndex
-const DOCS_INDEX_API = {
+const DOCS_API = {
   get: () => ipcRenderer.invoke('docs-index:get'),
   subscribe: (callback) => {
     const listener = (_event, snapshot) => callback(snapshot);
@@ -36,15 +36,6 @@ const DOCS_INDEX_API = {
   saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', relPath, content),
 };
 
-// Backward-compat minimal API; route to new channel
-const DOCS_API = {
-  docsGetContent: (filePath) => ipcRenderer.invoke('docs-file:get', filePath),
-  docsSaveContent: (filePath, content) => ipcRenderer.invoke('docs-file:save', filePath, content),
-};
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
-contextBridge.exposeInMainWorld('docsIndex', DOCS_INDEX_API);
-
-contextBridge.exposeInMainWorld('api', {
-  ...DOCS_API,
-});
+contextBridge.exposeInMainWorld('docsIndex', DOCS_API);

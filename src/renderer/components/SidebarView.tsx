@@ -1,8 +1,9 @@
 import React from 'react';
+import { NavigationView } from '../types';
 
 export type SidebarProps = {
-  currentView: 'Home' | 'Docs' | 'Settings';
-  setCurrentView: (v: 'Home' | 'Docs' | 'Settings') => void;
+  currentView: NavigationView;
+  setCurrentView: (v: NavigationView) => void;
 };
 
 const NavItem = ({ label, isActive, onClick, icon }: { label: string; isActive?: boolean; onClick: () => void; icon?: React.ReactNode }) => (
@@ -20,7 +21,7 @@ const NavItem = ({ label, isActive, onClick, icon }: { label: string; isActive?:
   </button>
 );
 
-export default function Sidebar({ currentView, setCurrentView }: SidebarProps) {
+export default function SidebarView({ currentView, setCurrentView }: SidebarProps) {
   return (
     <aside className="sticky top-0 h-screen w-56 shrink-0 border-r border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
       <div className="mb-3 px-2">
@@ -36,8 +37,8 @@ export default function Sidebar({ currentView, setCurrentView }: SidebarProps) {
         />
         <NavItem
           label="Docs"
-          isActive={currentView === 'Docs'}
-          onClick={() => setCurrentView('Docs')}
+          isActive={currentView === 'Documents'}
+          onClick={() => setCurrentView('Documents')}
           icon={<span>📚</span>}
         />
       </nav>

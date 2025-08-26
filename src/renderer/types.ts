@@ -1,1 +1,1 @@
-export type View = 'Home' | 'Docs' | 'Settings';
+export type NavigationView = 'Home' | 'Documents' | 'Settings';

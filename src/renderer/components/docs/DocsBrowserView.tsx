@@ -1,38 +1,14 @@
 import React, { useState, useEffect } from 'react';
-
-// These types would ideally be in a shared types file.
-export interface DocFile {
-  name: string;
-  path: string;
-  type: 'file';
-}
-
-export interface DocDir {
-  name: string;
-  path: string;
-  type: 'directory';
-  children: DocEntry[];
-}
-
-export type DocEntry = DocFile | DocDir;
+import { DocDirNode, DocFileNode, DocsIndexSnapshot } from 'src/renderer/docs/DocsBrowserView';
 
 interface DocsBrowserViewProps {
   onFileSelect: (path: string) => void;
   selectedFile: string | null;
 }
 
-// This is a placeholder for the actual API exposed via preload script
-declare global {
-  interface Window {
-    docsIndex: {
-      getSnapshot: () => Promise<DocDir>;
-      onUpdate: (callback: (index: DocDir) => void) => () => void;
-    }
-  }
-}
 
 const DocsBrowserView: React.FC<DocsBrowserViewProps> = ({ onFileSelect, selectedFile }) => {
-  const [root, setRoot] = useState<DocDir | null>(null);
+  const [root, setRoot] = useState<DocsIndexSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +17,7 @@ const DocsBrowserView: React.FC<DocsBrowserViewProps> = ({ onFileSelect, selecte
       try {
         setLoading(true);
         if (window.docsIndex) {
-            const docsIndex = await window.docsIndex.getSnapshot();
+            const docsIndex = await window.docsIndex.get();
             setRoot(docsIndex);
         } else {
             setError("Docs API not available on window object.");
@@ -56,7 +32,7 @@ const DocsBrowserView: React.FC<DocsBrowserViewProps> = ({ onFileSelect, selecte
     fetchDocsIndex();
 
     if (window.docsIndex) {
-        const unsubscribe = window.docsIndex.onUpdate((newIndex: DocDir) => {
+        const unsubscribe = window.docsIndex.subscribe((newIndex: DocsIndexSnapshot) => {
             setRoot(newIndex);
         });
 
@@ -74,19 +50,19 @@ const DocsBrowserView: React.FC<DocsBrowserViewProps> = ({ onFileSelect, selecte
     return <div style={{ color: 'red' }}>Error: {error}</div>;
   }
 
-  if (!root || root.children.length === 0) {
+  if (!root || root.files.length === 0) {
     return <div>No documentation files found.</div>;
   }
 
   return (
     <div className="docs-browser-view">
-      <FileTree root={root} onFileSelect={onFileSelect} selectedFile={selectedFile} />
+      <FileTree root={root.tree} onFileSelect={onFileSelect} selectedFile={selectedFile} />
     </div>
   );
 };
 
 interface FileTreeProps {
-    root: DocDir;
+    root: DocDirNode;
     onFileSelect: (path: string) => void;
     selectedFile: string | null;
 }
@@ -94,45 +70,30 @@ interface FileTreeProps {
 const FileTree: React.FC<FileTreeProps> = ({ root, onFileSelect, selectedFile }) => {
     return (
         <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-            {root.children.map(entry => (
-                <TreeNode key={entry.path} entry={entry} onFileSelect={onFileSelect} selectedFile={selectedFile} />
+
+            {root.dirs.map(entry => (
+                <FileTree key={entry.name} root={entry} onFileSelect={onFileSelect} selectedFile={selectedFile} />
+            ))}
+            {root.files.map(entry => (
+                <TreeNode key={entry.name} entry={entry} onFileSelect={onFileSelect} selectedFile={selectedFile} />
             ))}
         </ul>
     );
 };
 
 interface TreeNodeProps {
-    entry: DocEntry;
+    entry: DocFileNode;
     onFileSelect: (path: string) => void;
     selectedFile: string | null;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({ entry, onFileSelect, selectedFile }) => {
-    const [isOpen, setIsOpen] = useState(true); // Default to open for simplicity
-
-    if (entry.type === 'directory') {
-        return (
-            <li style={{ paddingLeft: '1em' }}>
-                <div onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
-                    {isOpen ? '▾' : '▸'} 📂 {entry.name}
-                </div>
-                {isOpen && (
-                    <ul style={{ listStyle: 'none', paddingLeft: '1em' }}>
-                        {entry.children.map(child => (
-                            <TreeNode key={child.path} entry={child} onFileSelect={onFileSelect} selectedFile={selectedFile} />
-                        ))}
-                    </ul>
-                )}
-            </li>
-        );
-    }
-
-    const isSelected = selectedFile === entry.path;
+    const isSelected = selectedFile === entry.absPath;
 
     return (
         <li style={{ paddingLeft: '1em' }}>
             <div 
-              onClick={() => onFileSelect(entry.path)} 
+              onClick={() => onFileSelect(entry.absPath)} 
               style={{ 
                 cursor: 'pointer',
                 fontWeight: isSelected ? 'bold' : 'normal',

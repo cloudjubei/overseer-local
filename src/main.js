@@ -3,6 +3,7 @@ import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
 import { URL } from 'node:url';
+import { DocsIndexer } from './docs/indexer';
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -11,6 +12,7 @@ if (started) {
 }
 let mainWindow;
 let indexer;
+let docsIndexer;
 
 
 const createWindow = () => {
@@ -42,6 +44,9 @@ app.whenReady().then(() => {
   indexer = new TasksIndexer(projectRoot, mainWindow);
   indexer.init();
 
+  docsIndexer = new DocsIndexer(projectRoot);
+  docsIndexer.init();
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -55,6 +60,9 @@ app.on('window-all-closed', () => {
   }
   if (indexer) {
     indexer.stopWatching();
+  }
+  if (docsIndexer) {
+    docsIndexer.stopWatching();
   }
 });
 
@@ -180,4 +188,16 @@ ipcMain.handle('feature-edit:open', (event, taskId, featureId) => {
     browserWindow: { title: 'Edit Feature' },
     hash: `feature-edit/${taskId}/${featureId}`,
   });
+});
+
+
+ipcMain.handle('docs-index:get', async () => {
+  return docsIndexer.getIndex();
+});
+
+ipcMain.handle('docs-file:get', async (event, { relPath }) => {
+  return await docsIndexer.getFile(relPath);
+});
+ipcMain.handle('docs-file:save', async (event, { relPath, content }) => {
+  return await docsIndexer.saveFile(relPath, content);
 });

@@ -1,24 +1,9 @@
-"use strict";
+import fs from 'fs/promises'
+import path from 'path';
+import chokidar from 'chokidar';
+import EventEmitter from 'events';
 
-const fs = require("fs");
-const path = require("path");
-const EventEmitter = require("events");
-
-/**
- * DocsIndexer
- * - Scans projectRoot/docs/ and subdirectories for Markdown (.md) files
- * - Builds an in-memory index (tree + flat list) with basic metadata
- * - Watches for file changes via a portable polling mechanism and refreshes the index
- *
- * API:
- *   const di = new DocsIndexer(projectRoot, { pollingIntervalMs?: number });
- *   await di.init();
- *   di.getIndex(); // returns snapshot
- *   di.onUpdate(cb); // subscribe to updates
- *   await di.buildIndex(); // manual rebuild
- *   di.stopWatching(); // stop watchers
- */
-class DocsIndexer {
+export class DocsIndexer {
   constructor(projectRoot, options = {}) {
     this.root = projectRoot;
     this.docsDir = path.join(projectRoot, "docs");
@@ -300,6 +285,3 @@ class DocsIndexer {
     return entries.join("\n");
   }
 }
-
-module.exports = { DocsIndexer };
-module.exports.default = DocsIndexer;

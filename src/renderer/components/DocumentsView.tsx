@@ -1,7 +1,8 @@
 import React from 'react';
 import DocsBrowserView from '../docs/DocsBrowserView';
 
-const Docs: React.FC = () => {
+export default function DocumentsView()
+{
   return (
     <div className="flex h-full flex-col gap-3">
       <header className="px-1">
@@ -12,5 +13,3 @@ const Docs: React.FC = () => {
     </div>
   );
 };
-
-export default Docs;
