@@ -15,11 +15,13 @@
     },
     {
       "id": "6.2",
-      "status": "-",
+      "status": "+",
       "title": "Create a document explaining exactly step by step how to create a release version of the application for each platform",
       "description": "`docs/APP_RELEASE.md` should contain all the information. Explain from the ground up about getting any required credentials or certificates needed for each platform. Provide instructions on how to configure these within the project's build scripts or environment variables. Then finally which scripts to run to get a build out.",
       "plan": "",
-      "context": ["docs/APP_RELEASE.md"],
+      "context": [
+        "docs/APP_RELEASE.md"
+      ],
       "acceptance": [],
       "rejection": "Blocked: Agent loop failed: Extra data: line 14 column 1 (char 583)"
     },
