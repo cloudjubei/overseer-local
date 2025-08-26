@@ -129,8 +129,19 @@ export class ChatManager {
     }
   }
 
-  loadChat() {
-    const filePath = path.join(this.chatsDir, 'chat.json');
+  listChats() {
+    return fs.readdirSync(this.chatsDir).filter(file => file.endsWith('.json')).map(file => file.replace('.json', ''));
+  }
+
+  createChat() {
+    const chatId = Date.now().toString();
+    const filePath = path.join(this.chatsDir, `${chatId}.json`);
+    fs.writeFileSync(filePath, JSON.stringify([]));
+    return chatId;
+  }
+
+  loadChat(chatId) {
+    const filePath = path.join(this.chatsDir, `${chatId}.json`);
     try {
       return JSON.parse(fs.readFileSync(filePath, 'utf8'));
     } catch {
@@ -138,8 +149,15 @@ export class ChatManager {
     }
   }
 
-  saveChat(messages) {
-    const filePath = path.join(this.chatsDir, 'chat.json');
+  saveChat(chatId, messages) {
+    const filePath = path.join(this.chatsDir, `${chatId}.json`);
     fs.writeFileSync(filePath, JSON.stringify(messages));
+  }
+
+  deleteChat(chatId) {
+    const filePath = path.join(this.chatsDir, `${chatId}.json`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 }

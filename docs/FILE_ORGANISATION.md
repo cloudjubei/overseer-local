@@ -183,14 +183,23 @@ repo_root/
 - API:
   - Class ChatManager(projectRoot)
     - async getCompletion({messages, config}): Performs a non-streaming LLM chat completion and returns the response message.
-    - loadChat(): Loads saved chat messages from file.
-    - saveChat(messages): Saves chat messages to file.
+    - listChats(): Returns a list of chat IDs.
+    - createChat(): Creates a new chat and returns its ID.
+    - loadChat(chatId): Loads saved chat messages from file for the given chatId.
+    - saveChat(chatId, messages): Saves chat messages to file for the given chatId.
+    - deleteChat(chatId): Deletes the chat file for the given chatId.
 - Integration:
   - The Electron main process instantiates the manager and exposes IPC channels:
     - chat:completion (invoke) returns the LLM response
-    - chat:load (invoke) returns the loaded messages
-    - chat:save (invoke) saves the messages
+    - chat:list (invoke) returns the list of chat IDs
+    - chat:create (invoke) creates a new chat and returns ID
+    - chat:load (invoke) returns the loaded messages for chatId
+    - chat:save (invoke) saves the messages for chatId
+    - chat:delete (invoke) deletes the chat by chatId
   - Preload exposes a safe renderer bridge as window.chat with methods:
     - getCompletion(messages, config): Promise resolving to the response
-    - load(): Promise resolving to loaded messages
-    - save(messages): Promise resolving when saved
+    - list(): Promise resolving to list of chat IDs
+    - create(): Promise resolving to new chat ID
+    - load(chatId): Promise resolving to loaded messages
+    - save(chatId, messages): Promise resolving when saved
+    - delete(chatId): Promise resolving when deleted

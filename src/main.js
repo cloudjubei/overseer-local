@@ -220,10 +220,22 @@ ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   return await chatManager.getCompletion({messages, config});
 });
 
-ipcMain.handle('chat:load', () => {
-  return chatManager.loadChat();
+ipcMain.handle('chat:list', () => {
+  return chatManager.listChats();
 });
 
-ipcMain.handle('chat:save', (event, messages) => {
-  chatManager.saveChat(messages);
+ipcMain.handle('chat:create', () => {
+  return chatManager.createChat();
+});
+
+ipcMain.handle('chat:load', (event, chatId) => {
+  return chatManager.loadChat(chatId);
+});
+
+ipcMain.handle('chat:save', (event, {chatId, messages}) => {
+  chatManager.saveChat(chatId, messages);
+});
+
+ipcMain.handle('chat:delete', (event, chatId) => {
+  chatManager.deleteChat(chatId);
 });

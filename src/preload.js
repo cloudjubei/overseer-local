@@ -39,8 +39,11 @@ const DOCS_API = {
 
 const CHAT_API = {
   getCompletion: (messages, config) => ipcRenderer.invoke('chat:completion', {messages, config}),
-  load: () => ipcRenderer.invoke('chat:load'),
-  save: (messages) => ipcRenderer.invoke('chat:save', messages),
+  list: () => ipcRenderer.invoke('chat:list'),
+  create: () => ipcRenderer.invoke('chat:create'),
+  load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
+  save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
+  delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
