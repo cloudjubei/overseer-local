@@ -92,8 +92,8 @@ repo_root/
 │  │  ├─ App.tsx
 │  │  └─ types.ts                      # UI types
 │  ├─ index.css
-│  ├─ main.js
-│  └─ preload.js
+│  ├─ main.js                          # Electron main process (updated: removed modal BrowserWindow logic)
+│  └─ preload.js                       # Exposes window.tasksIndex/docsIndex/chat APIs (updated: removed modal-opening functions)
 ├─ .env
 ├─ forge.config.js
 ├─ index.html
@@ -109,5 +109,9 @@ repo_root/
 ```
 
 Notes on recent changes
-- Introduced src/renderer/types/external.d.ts to provide ambient typings for the window.tasksIndex API and related payload/response types.
-- Refactored tasks-related views, forms, hooks, and services to use shared types from src/types/tasks.ts for strong typing and consistency.
+- Removed main-process modal window creation: src/main.js no longer defines createModalWindow nor the IPC handlers feature-create:open, task-create:open, task-edit:open, feature-edit:open. Modals are handled within the renderer via Navigator + ModalHost and are rendered into document.body using createPortal.
+- Simplified preload tasks API: src/preload.js no longer exposes openFeatureCreate/openTaskCreate/openTaskEdit/openFeatureEdit. Renderer code should use Navigator.openModal/closeModal for UI navigation.
+- Updated TasksListView to use Navigator for opening the Create Task modal and for navigating to task details, aligning with STANDARDS.md (centralized navigation).
+
+Rationale
+- This eliminates the macOS bug where modal BrowserWindows showed the underlying app view and did not close when the modal was dismissed. Rendering modals in the same window ensures consistent behavior, proper focus management, and simpler state handling.

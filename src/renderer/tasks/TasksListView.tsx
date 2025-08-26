@@ -3,6 +3,7 @@ import { Button } from '../components/ui/button'
 import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
+import { useNavigator } from '../navigation/Navigator'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -63,10 +64,10 @@ function StatusBadge({ status }: { status: Status | string }) {
   )
 }
 
-function onRowKeyDown(e: React.KeyboardEvent<HTMLDivElement>, taskId: number, ulRef: React.RefObject<HTMLUListElement>) {
+function onRowKeyDown(e: React.KeyboardEvent<HTMLDivElement>, taskId: number, ulRef: React.RefObject<HTMLUListElement>, navigateTaskDetails: (id: number) => void) {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
-    location.hash = `#task/${taskId}`
+    navigateTaskDetails(taskId)
     return
   }
   if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
@@ -90,6 +91,7 @@ export default function TasksListView() {
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [saving, setSaving] = useState(false)
   const ulRef = useRef<HTMLUListElement>(null)
+  const { openModal, navigateTaskDetails } = useNavigator()
 
   useEffect(() => {
     const fetchIndex = async () => {
@@ -120,7 +122,7 @@ export default function TasksListView() {
 
   const handleAddTask = async () => {
     try {
-      await window.tasksIndex.openTaskCreate()
+      openModal({ type: 'task-create' })
     } catch (e) {
       console.error(e)
     }
@@ -184,8 +186,8 @@ export default function TasksListView() {
                     tabIndex={0}
                     role="Button"
                     data-index={idx}
-                    onClick={() => (location.hash = `#task/${t.id}`)}
-                    onKeyDown={(e) => onRowKeyDown(e, t.id, ulRef)}
+                    onClick={() => navigateTaskDetails(t.id)}
+                    onKeyDown={(e) => onRowKeyDown(e, t.id, ulRef, navigateTaskDetails)}
                     aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
                   >
                     <div className="col col-id">{String(t.id)}</div>

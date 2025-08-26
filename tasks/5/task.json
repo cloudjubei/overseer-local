@@ -1,6 +1,6 @@
 {
   "id": 5,
-  "status": "-",
+  "status": "+",
   "title": "Cleanup, refactor and fixes",
   "description": "The electron app developed in `src/` needs to be cleaned up so that it's nice and modular. References `README.md`, `docs/FILE_ORGANISATION.md`. Every single file change must be reflected in `docs/FILE_ORGANISATION.md`.",
   "features": [
@@ -55,22 +55,21 @@
     },
     {
       "id": "5.6",
-      "status": "-",
+      "status": "+",
       "title": "Opening up a modal results in a weird error",
       "description": "When any modal is open it shows in a new window, but it opens TasksView underneat. When closing it, the modal window still stays with that background view.  This seems like an Electron specific bug when dealing with modals. This is being tested on a Mac.",
       "plan": "",
       "context": [
-        "docs/STANDARDS.md", 
-        "src/main.js", 
-        "src/preload.js", 
-        "src/renderer/App.tsx", 
-        "src/renderer/screens/SidebarView.tsx", 
+        "docs/STANDARDS.md",
+        "src/main.js",
+        "src/preload.js",
+        "src/renderer/App.tsx",
+        "src/renderer/screens/SidebarView.tsx",
         "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/components/ui/Modal.tsx",
         "src/renderer/navigation/ModalHost.tsx",
         "src/renderer/navigation/Navigator.tsx"
       ],
-      
       "acceptance": []
     },
     {

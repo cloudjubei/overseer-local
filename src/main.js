@@ -3,7 +3,6 @@ import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
-import { URL } from 'node:url';
 import { DocsIndexer } from './docs/indexer';
 import { ChatManager } from './chat/manager';
 
@@ -123,76 +122,8 @@ ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
-const createModalWindow = (options) => {
-  const window = new BrowserWindow({
-    width: options.width || 800,
-    height: options.height || 600,
-    modal: true,
-    parent: mainWindow,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-    },
-    ...options.browserWindow,
-  });
-
-  // This is the magic: Load the MAIN app's URL, but add the
-  // special hash that our App.tsx router will understand.
-  // eslint-disable-next-line no-undef
-  const devServerURL = MAIN_WINDOW_VITE_DEV_SERVER_URL;
-  if (devServerURL) {
-    const url = new URL(devServerURL);
-    url.hash = options.hash;
-    window.loadURL(url.href);
-  } else {
-    // eslint-disable-next-line no-undef
-    const filePath = path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`);
-    const url = new URL(`file://${filePath}`);
-    url.hash = options.hash;
-    window.loadFile(url.pathname, { hash: url.hash.substring(1) });
-  }
-
-  // Optional: Open dev tools for the modal for debugging
-  // window.webContents.openDevTools();
-
-  return window;
-};
-
-ipcMain.handle('feature-create:open', (event, taskId) => {
-  createModalWindow({
-    width: 600,
-    height: 800,
-    browserWindow: { title: 'Create Feature' },
-    hash: `feature-create/${taskId}`,
-  });
-});
-
-ipcMain.handle('task-create:open', () => {
-  createModalWindow({
-    width: 600,
-    height: 500,
-    browserWindow: { title: 'Create Task' },
-    hash: 'task-create',
-  });
-});
-
-ipcMain.handle('task-edit:open', (event, taskId) => {
-  createModalWindow({
-    width: 600,
-    height: 500,
-    browserWindow: { title: 'Edit Task' },
-    hash: `task-edit/${taskId}`,
-  });
-});
-
-ipcMain.handle('feature-edit:open', (event, taskId, featureId) => {
-  createModalWindow({
-    width: 600,
-    height: 800,
-    browserWindow: { title: 'Edit Feature' },
-    hash: `feature-edit/${taskId}/${featureId}`,
-  });
-});
-
+// Removed modal BrowserWindow creation for task/feature modals.
+// Modals are now handled entirely in the renderer via Navigator + ModalHost.
 
 ipcMain.handle('docs-index:get', async () => {
   return docsIndexer.getIndex();

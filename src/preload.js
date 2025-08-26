@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-// Based on FILE_ORGANISATION.md, there should be a tasks API.
-// To avoid overwriting and breaking it, I'm including a plausible implementation.
+// Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
 const TASKS_API = {
   getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
   onUpdate: (callback) => ipcRenderer.on('tasks-index:update', (_event, ...args) => callback(...args)),
@@ -13,10 +12,6 @@ const TASKS_API = {
   reorderTasks: (payload) => ipcRenderer.invoke('tasks:reorder', payload),
   addTask: (task) => ipcRenderer.invoke('tasks:add', task),
   deleteTask: (taskId) => ipcRenderer.invoke('tasks:delete', { taskId }),
-  openFeatureCreate: (taskId) => ipcRenderer.invoke('feature-create:open', taskId),
-  openTaskCreate: () => ipcRenderer.invoke('task-create:open'),
-  openTaskEdit: (taskId) => ipcRenderer.invoke('task-edit:open', taskId),
-  openFeatureEdit: (taskId, featureId) => ipcRenderer.invoke('feature-edit:open', taskId, featureId),
   onSetTaskId: (callback) => {
     const listener = (_event, value) => callback(value);
     ipcRenderer.on('set-task-id', listener);
@@ -24,7 +19,7 @@ const TASKS_API = {
   }
 };
 
-// New Docs Index API exposed to renderer as window.docsIndex
+// Docs Index API exposed to renderer as window.docsIndex
 const DOCS_API = {
   get: () => ipcRenderer.invoke('docs-index:get'),
   subscribe: (callback) => {
