@@ -90,22 +90,24 @@
     },
     "mac": {
       "category": "public.app-category.productivity",
-      "target": [
-        "dmg"
-      ],
+      "target": ["dmg"],
       "icon": "build/icons/icon.icns",
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "notarize": {
+        "tool": "notarytool",
+        "appleId": "${env.APPLE_ID}",
+        "appleIdPassword": "${env.APPLE_APP_SPECIFIC_PASSWORD}",
+        "teamId": "${env.APPLE_TEAM_ID}"
+      }
     },
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.dmg"
     },
     "win": {
-      "target": [
-        "nsis"
-      ],
+      "target": ["nsis"],
       "icon": "build/icons/icon.ico",
       "publisherName": "Example Publisher"
     },
@@ -118,9 +120,7 @@
       "artifactName": "${productName}-Setup-${version}-${arch}.exe"
     },
     "linux": {
-      "target": [
-        "AppImage"
-      ],
+      "target": ["AppImage"],
       "icon": "build/icons/icon.png",
       "category": "Utility",
       "maintainer": "Kamil Chmurzynski <cloudjubei@gmail.com>",

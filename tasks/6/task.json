@@ -61,7 +61,7 @@
     },
     {
       "id": "6.7",
-      "status": "-",
+      "status": "+",
       "title": "Add code signing placeholders",
       "description": "In the build configuration, add placeholders for code signing, such as CSC_LINK and CSC_KEY_PASSWORD environment variables for macOS and Windows, with documentation on how to set them for production builds.",
       "plan": "",

@@ -6,6 +6,7 @@ This document describes how files and directories are organised in this reposito
 - src/: Electron + React + TypeScript app (electron-vite)
 - src/types/: Shared TypeScript types (generated from docs where applicable)
 - docs/: Project documentation and specifications.
+  - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
 - tasks/: Per-task workspaces containing task metadata and tests.
   - tasks/{id}/task.json: Canonical task definition for a single task.
   - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
@@ -45,6 +46,7 @@ The following tree is graphical and illustrative of a typical repository layout:
 repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
+│  ├─ BUILD_SIGNING.md
 │  ├─ LINTING_AND_FORMATTING.md
 │  ├─ DESIGN_PROPOSAL.md
 │  └─ tasks/
