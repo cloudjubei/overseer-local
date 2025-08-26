@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { OpenAI } from 'openai';
+import { completion } from 'litellm';
 
 export class ChatManager {
   constructor(projectRoot, tasksIndexer, docsIndexer) {
@@ -15,7 +16,6 @@ export class ChatManager {
 
   async getCompletion({messages, config}) {
     try {
-      const openai = new OpenAI({baseURL: config.apiBaseUrl, apiKey: config.apiKey});
       const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc. You can create new documents using create_doc.'};
       let currentMessages = [systemPrompt, ...messages];
       const tools = [
@@ -92,8 +92,28 @@ export class ChatManager {
         }
       };
 
+      const provider = config.provider || 'openai';
+      let createCompletion;
+      if (provider === 'openai') {
+        const openai = new OpenAI({
+          baseURL: config.apiBaseUrl,
+          apiKey: config.apiKey,
+          timeout: config.timeout
+        });
+        createCompletion = async (params) => openai.chat.completions.create(params);
+      } else if (provider === 'litellm') {
+        createCompletion = async (params) => completion({
+          ...params,
+          api_key: config.apiKey,
+          api_base: config.apiBaseUrl,
+          timeout: config.timeout ? Math.ceil(config.timeout / 1000) : undefined
+        });
+      } else {
+        throw new Error(`Unknown provider: ${provider}`);
+      }
+
       while (true) {
-        const response = await openai.chat.completions.create({
+        const response = await createCompletion({
           model: config.model,
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,

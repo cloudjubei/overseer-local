@@ -165,7 +165,7 @@
     },
     {
       "id": "4.16",
-      "status": "-",
+      "status": "+",
       "title": "LLM connector abstraction and providers (LiteLLM, OpenAI-compatible)",
       "description": "Design an abstraction for chat providers. Implement connectors for: (1) LiteLLM-compatible HTTP endpoint, (2) OpenAI-compatible custom base URL to support LM Studio / Ollama. Configurable API key, base URL, model name, timeouts.",
       "plan": "",
