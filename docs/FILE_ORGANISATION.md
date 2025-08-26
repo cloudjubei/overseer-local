@@ -56,11 +56,12 @@ repo_root/
 │  │  │  │  ├─ modal.tsx         
 │  │  │  │  └─ toast.tsx         
 │  │  │  ├─ FeatureForm.tsx             
-│  │  │  ├─ MarkdownRenderer.tsx        # Placeholder Markdown renderer (full rendering added later)
+│  │  │  ├─ MarkdownRenderer.tsx        # Markdown renderer (GFM, highlight, sanitize, internal links)
+│  │  │  ├─ MarkdownEditor.tsx          # Split-view WYSIWYG-style Markdown editor with live preview
 │  │  │  ├─ SidebarView.tsx             # Sidebar component (Tailwind/shadcn-styled)
 │  │  │  └─ TaskForm.tsx          
 │  │  ├─ docs/
-│  │  │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories)
+│  │  │  └─ DocumentsBrowserView.tsx  # React docs browser (lists Markdown files/directories) with edit capabilities
 │  │  ├─ screens/
 │  │  │  ├─ DocumentsView.tsx         # Documents screen using DocumentsBrowserView
 │  │  │  ├─ SettingsView.tsx          # Settings screen for configuring theme
@@ -161,7 +162,7 @@ repo_root/
   - Only files with a .md extension are indexed (case-insensitive). Non-Markdown files are ignored.
   - Basic metadata is extracted without rendering Markdown; rendering and sanitization are handled in the renderer layer.
 - Integration (IPC):
-  - The Electron main process instantiates a singleton DocsIndexer and exposes channels via src/main/ipc/docs.js:
+  - The Electron main process instantiates a singleton DocsIndexer and exposes channels:
     - docs-index:get (invoke) returns the current index snapshot
     - docs-index:update (event) broadcasts updates when the index changes
     - docs-file:get (invoke) reads and returns the UTF-8 content of a .md file by relative path under docs/
@@ -173,10 +174,11 @@ repo_root/
     - saveFile(relPath, content): Promise resolving when save completes
 
 ## Notes on Renderer Layers
-- The repository currently contains both a React renderer (src/renderer/App.tsx) and a legacy DOM-based renderer used by src/index.html.
-- The legacy docs browser implementation lives at src/renderer/docsBrowserView.js and integrates with Toast UI Editor for WYSIWYG Markdown editing. It is kept for reference only.
+- The repository currently contains a React renderer (src/renderer/App.tsx).
 - The React documentation browser lives at src/renderer/docs/DocumentsBrowserView.tsx and is used by the Documents screen (src/renderer/screens/DocumentsView.tsx) to list Markdown files and directories under docs/.
+- A live-preview Markdown editor is provided at src/renderer/components/MarkdownEditor.tsx and is integrated into DocumentsBrowserView with an Edit action and Save/Cancel flow.
 
 ## Updates
 - 2025-08-26: Added a Tailwind-styled Sidebar component (src/renderer/components/SidebarView.tsx) and updated App.tsx to use it with persistent layout; removed dependency on App.css in favor of Tailwind/shadcn classes. Added src/renderer/types.ts to centralize renderer-local types (View).
 - 2025-08-26: Introduced React Docs browser (src/renderer/docs/DocumentsBrowserView.tsx) and wired it into the Docs screen.
+- 2025-08-26: Added a split-view WYSIWYG-style Markdown editor (src/renderer/components/MarkdownEditor.tsx) with save via IPC, and integrated Edit/Save/Cancel in the Docs browser viewer.

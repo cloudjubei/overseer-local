@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
+import MarkdownEditor from '../components/MarkdownEditor';
 
 // Types for the Docs Indexer snapshot
 export type DocHeading = { level: number; text: string };
@@ -184,6 +185,8 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
   const [contentLoading, setContentLoading] = useState<boolean>(false);
   const [contentError, setContentError] = useState<string | null>(null);
   const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [draft, setDraft] = useState<string>('');
 
   // Keep selection if file still exists; otherwise clear
   useEffect(() => {
@@ -194,6 +197,8 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
       setContent('');
       setContentError(null);
       setPendingAnchor(null);
+      setIsEditing(false);
+      setDraft('');
     }
   }, [snapshot, selected]);
 
@@ -224,19 +229,30 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
   }, []);
 
   const handleSelect = useCallback((relPath: string) => {
+    // Guard unsaved changes when switching files in editing mode
+    if (isEditing && draft !== content) {
+      const ok = window.confirm('You have unsaved changes. Discard and switch files?');
+      if (!ok) return;
+      setIsEditing(false);
+    }
     setSelected(relPath);
     if (onSelectFile) onSelectFile(relPath);
     setPendingAnchor(null);
     loadContent(relPath);
-  }, [onSelectFile, loadContent]);
+  }, [onSelectFile, loadContent, isEditing, draft, content]);
 
   // Internal navigation handler from MarkdownRenderer
   const handleNavigateDoc = useCallback((relPath: string, fragment?: string | null) => {
+    if (isEditing && draft !== content) {
+      const ok = window.confirm('You have unsaved changes. Discard and navigate?');
+      if (!ok) return;
+      setIsEditing(false);
+    }
     setSelected(relPath);
     if (onSelectFile) onSelectFile(relPath);
     setPendingAnchor(fragment || null);
     loadContent(relPath);
-  }, [loadContent, onSelectFile]);
+  }, [loadContent, onSelectFile, isEditing, draft, content]);
 
   const isEmpty = useMemo(() => {
     if (!snapshot) return false;
@@ -247,6 +263,33 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
     };
     return !hasFiles(root);
   }, [snapshot]);
+
+  const startEditing = useCallback(() => {
+    if (!selected) return;
+    setDraft(content);
+    setIsEditing(true);
+  }, [selected, content]);
+
+  const cancelEditing = useCallback(() => {
+    setIsEditing(false);
+    setDraft('');
+  }, []);
+
+  const saveEditing = useCallback(async (nextText: string) => {
+    if (!selected) return;
+    try {
+      const api = (window as any).docsIndex;
+      if (!api || typeof api.saveFile !== 'function') {
+        throw new Error('Docs IPC bridge is not available (saveFile)');
+      }
+      await api.saveFile(selected, nextText);
+      setIsEditing(false);
+      setDraft('');
+      setContent(nextText);
+    } catch (e: any) {
+      alert('Failed to save: ' + (e?.message || String(e)));
+    }
+  }, [selected]);
 
   return (
     <div className={`flex h-full min-h-[60vh] gap-4 ${className || ''}`}>
@@ -263,7 +306,7 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
           </button>
         </div>
         {loading && (
-          <div className="px-2 py-2 text-sm text-neutral-500 dark:text-neutral-400">Loading docs…</div>
+          <div className="px-2 py-2 text-sm text-neutral-500 dark:text-neutral-400">Loading docs5</div>
         )}
         {error && (
           <div className="px-2 py-2 text-sm text-red-600 dark:text-red-400">
@@ -287,19 +330,39 @@ export default function DocumentsBrowserView({ className, onSelectFile }: Docume
         )}
         {selected && (
           <div className="space-y-3">
-            <div className="text-xs text-neutral-500 dark:text-neutral-400">{selected}</div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="truncate text-xs text-neutral-500 dark:text-neutral-400" title={selected}>{selected}</div>
+              {!isEditing && !contentLoading && !contentError && (
+                <button
+                  type="button"
+                  onClick={startEditing}
+                  className="rounded bg-neutral-900 px-3 py-1 text-sm text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                >
+                  Edit
+                </button>
+              )}
+            </div>
             {contentLoading && (
-              <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</div>
+              <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading</div>
             )}
             {contentError && (
               <div className="text-sm text-red-600 dark:text-red-400">{contentError}</div>
             )}
-            {!contentLoading && !contentError && (
+            {!contentLoading && !contentError && !isEditing && (
               <MarkdownRenderer
                 content={content}
                 currentRelPath={selected}
                 onNavigateDoc={handleNavigateDoc}
                 scrollToId={pendingAnchor}
+              />
+            )}
+            {!contentLoading && !contentError && isEditing && (
+              <MarkdownEditor
+                value={draft}
+                onChange={setDraft}
+                onSave={saveEditing}
+                onCancel={cancelEditing}
+                fileRelPath={selected}
               />
             )}
           </div>
