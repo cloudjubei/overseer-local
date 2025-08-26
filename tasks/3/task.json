@@ -76,7 +76,7 @@
     },
     {
       "id": "3.8",
-      "status": "-",
+      "status": "+",
       "title": "Markdown editor",
       "description": "When clicking edit in a viewer, the user can go to a Markdown editor where they can change the text in a WYSIWYG style and save it.",
       "plan": "",
