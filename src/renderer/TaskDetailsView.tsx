@@ -171,8 +171,7 @@ function EditableFeatureRow({ feature, task, index, onSave, onCancel, isSaving }
 
 // --- MAIN VIEW COMPONENT (REFACTORED) ---
 
-export default function TaskDetailsView({ hash }: { hash: string }) {
-  const route = parseRoute(hash);
+export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [index, setIndex] = useState<any>(null);
   const [task, setTask] = useState<any>(null);
   const [editFeatureId, setEditFeatureId] = useState<string | null>(null);
@@ -193,11 +192,11 @@ export default function TaskDetailsView({ hash }: { hash: string }) {
   }, []);
 
   useEffect(() => {
-    if (index && route.name === 'details') {
-      const t = index.tasksById?.[String(route.id)];
+    if (taskId && index && index.tasksById) {
+      const t = index.tasksById?.[taskId];
       setTask(t);
     }
-  }, [index, route]);
+  }, [taskId, index]);
 
   const handleSaveFeature = async (featureId: string, payload: any) => {
     setSaving(true);
@@ -233,8 +232,7 @@ export default function TaskDetailsView({ hash }: { hash: string }) {
     }
   };
 
-  if (route.name !== 'details') return null;
-  if (!task) return <div className="empty">Task {route.id} not found. <button onClick={() => location.hash = ''}>Back to Tasks</button></div>;
+  if (!task) return <div className="empty">Task {taskId} not found. <button onClick={() => location.hash = ''}>Back to Tasks</button></div>;
 
   const features = task.features || [];
 

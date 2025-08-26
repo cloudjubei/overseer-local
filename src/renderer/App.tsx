@@ -49,16 +49,16 @@ const App = () => {
       content = <TaskCreateView />;
       break;
     case 'feature-create':
-      content = <FeatureCreateView taskId={route.taskId} />;
+      content = <FeatureCreateView taskId={route.taskId!} />;
       break;
     case 'task-edit':
-      content = <TaskEditView taskId={route.taskId} />;
+      content = <TaskEditView taskId={route.taskId!} />;
       break;
     case 'feature-edit':
-      content = <FeatureEditView taskId={route.taskId} featureId={route.featureId} />;
+      content = <FeatureEditView taskId={route.taskId!} featureId={route.featureId!} />;
       break;
     case 'details':
-      content = <TaskDetailsView taskId={route.taskId} />;
+      content = <TaskDetailsView taskId={route.taskId!} />;
       break;
     case 'settings':
       content = <SettingsView />;
