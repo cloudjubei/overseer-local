@@ -108,7 +108,7 @@
     },
     {
       "id": "4.10",
-      "status": "-",
+      "status": "+",
       "title": "Add autocomplete for mentioning docs",
       "description": "In ChatView input textarea, detect typing starting with '@', show a dropdown autocomplete list of matching paths from docsIndex. On select, insert the full '@path' into the input. Subscribe to docs updates to refresh list.",
       "plan": "",
