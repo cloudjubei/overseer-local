@@ -1,6 +1,6 @@
 {
   "id": 2,
-  "status": "-",
+  "status": "+",
   "title": "Task handling",
   "description": "Implement all features that allow proper handling of tasks. docs/tasks/task_format.py is the source of truth for the interfaces for a Task, Feature, ProjectSpec & ProjectRequirement. docs/tasks/task_example.json holds an example task json file.",
   "features": [
@@ -167,7 +167,7 @@
     },
     {
       "id": "2.11",
-      "status": "-",
+      "status": "+",
       "title": "Edit mode - moving features around",
       "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced. Pay attention to dependencies.",
       "plan": "",

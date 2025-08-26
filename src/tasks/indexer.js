@@ -280,6 +280,13 @@ export class TasksIndexer {
             }
         });
 
+        // Update dependencies within this task
+        reorderedFeatures.forEach(feature => {
+            if (feature.dependencies) {
+                feature.dependencies = feature.dependencies.map(dep => idUpdateMap.has(dep) ? idUpdateMap.get(dep) : dep);
+            }
+        });
+
         taskData.features = reorderedFeatures;
 
         // Update dependencies across all tasks
