@@ -3,5 +3,51 @@
   "status": "-",
   "title": "Notifications center UI and preferences",
   "description": "Add a notifications panel listing recent events. Provide settings to enable/disable OS notifications and categories.",
-  "features": []
+  "features": [
+    {
+      "id": "8.1",
+      "status": "-",
+      "title": "Create notifications data model and service",
+      "description": "Define TypeScript types for notifications in src/types/, create a notifications service in src/renderer/services/ that handles storing, retrieving, and managing notification data. Include notification structure with id, timestamp, type/category, title, message, read status, and metadata. Implement basic CRUD operations and persistence.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8.2",
+      "status": "-",
+      "title": "Build notifications panel UI component",
+      "description": "Create a NotificationsView component in src/renderer/screens/ that displays a list of recent notifications. Include notification items with timestamps, icons, titles, descriptions, and read/unread states. Add mark as read functionality, clear all notifications, and basic styling consistent with the app's design system.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8.3",
+      "status": "-",
+      "title": "Add OS notification integration",
+      "description": "Implement native OS notifications using Electron's Notification API in the main process. Add IPC communication between renderer and main process to trigger OS notifications. Include notification click handling to focus the app and navigate to relevant content. Add permission checks and fallback handling.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8.4",
+      "status": "-",
+      "title": "Create notification preferences UI",
+      "description": "Build a notification preferences/settings modal or screen that allows users to enable/disable OS notifications globally and configure notification categories. Include toggles for different types of notifications (tasks, features, system events, etc.), sound preferences, and notification display duration settings. Persist settings using Electron store or local storage.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8.5",
+      "status": "-",
+      "title": "Integrate notifications center with navigation",
+      "description": "Add notifications panel access to the sidebar or main navigation. Include a notifications icon/button with unread count badge. Integrate with the existing Navigator system for modal/screen navigation. Add keyboard shortcuts and ensure the notifications center follows the app's navigation patterns defined in STANDARDS.md.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ]
 }
