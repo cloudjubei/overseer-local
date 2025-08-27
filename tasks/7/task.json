@@ -172,7 +172,7 @@
     },
     {
       "id": "7.14",
-      "status": "-",
+      "status": "+",
       "title": "ChatView according to design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
