@@ -60,11 +60,11 @@
     },
     {
       "id": "10.7",
-      "status": "-",
+      "status": "+",
       "title": "Write mocks for common ui components",
       "description": "Write the mocks for all components in `src/renderer/components/ui` and give a few examples in the doc on how to use the preview tool.",
       "plan": "",
-      "context": [ 
+      "context": [
         "src/renderer/components/ui",
         "/docs/PREVIEW_ANALYZER.md",
         "/docs/PREVIEW_TOOL.md",

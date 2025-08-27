@@ -35,6 +35,7 @@ This document describes how files and directories are organised in this reposito
     - Select.tsx, Input.tsx, Tooltip.tsx, etc.
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
     - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
+    - previews.tsx: Preview mocks and wrapper components for common UI elements (this file aggregates small preview exports with sensible defaults for use with preview.html and the preview_screenshot tool).
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
@@ -181,13 +182,11 @@ repo_root/
 │  │  │  ├─ withPreview.tsx
 │  │  │  └─ mocks/
 │  │  │     └─ coreMocks.tsx
-│  │  └─ ...
-│  ├─ tools/
-│  │  ├─ standardTools.js   ← includes preview_screenshot tool (with interactions)
-│  │  └─ preview/
-│  │     └─ analyzer.js
-│  └─ capture/
-│     └─ screenshotService.js
+│  │  └─ components/
+│  │     └─ ui/
+│  │        ├─ previews.tsx   ← new: UI component preview mocks and wrappers
+│  │        └─ ...
+│  └─ ...
 ├─ scripts/
 │  └─ preview-scan.js
 ├─ preview.html
