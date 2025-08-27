@@ -322,7 +322,7 @@
     },
     {
       "id": "7.22",
-      "status": "-",
+      "status": "+",
       "title": "Feature dragging should follow the same pattern as Task dragging.",
       "description": "The same visual cues need to be used in both places with nice animations.",
       "plan": "",

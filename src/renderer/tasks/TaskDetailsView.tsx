@@ -45,7 +45,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [saving, setSaving] = useState(false)
   const { openModal, navigateView } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
+
+  // DnD state (match Tasks list patterns)
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
 
   useEffect(() => {
     const fetchIndex = async () => {
@@ -101,6 +106,21 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     }
   }
 
+  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const pos: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after'
+    setDropIndex(idx)
+    setDropPosition(pos)
+  }
+
+  const clearDndState = () => {
+    setDragFeatureId(null)
+    setDragging(false)
+    setDropIndex(null)
+    setDropPosition(null)
+  }
+
   const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, featureId: string) => {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -143,6 +163,16 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const features = Array.isArray(task.features) ? task.features : []
 
   const dndEnabled = !saving
+
+  const onListDrop = (e: React.DragEvent<HTMLUListElement>) => {
+    if (!dndEnabled || !dragging) return
+    e.preventDefault()
+    if (dragFeatureId != null && dropIndex != null) {
+      const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
+      handleMoveFeature(dragFeatureId, toIndex)
+    }
+    clearDndState()
+  }
 
   return (
     <div className="task-details flex flex-col min-h-0 w-full" role="region" aria-labelledby="task-details-heading">
@@ -188,8 +218,14 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           {features.length === 0 ? (
             <div className="empty">No features defined for this task.</div>
           ) : (
-            <ul className="features-list" role="list" aria-label="Features" ref={ulRef}
+            <ul
+              className={`features-list ${dragging ? 'dnd-active' : ''}`}
+              role="list"
+              aria-label="Features"
+              ref={ulRef}
               onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
+              onDrop={onListDrop}
+              onDragEnd={() => clearDndState()}
             >
               <li className="features-head" aria-hidden="true">
                 <div className="col col-id">#</div>
@@ -201,17 +237,37 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               {features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
                 const dependents : string[] = dependentsMap[f.id] || []
+                const isDragSource = dragFeatureId === f.id
+                const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
+                const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
+                    {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
                     <div
-                      className={`feature-row ${dndEnabled ? 'draggable' : ''}`}
+                      className={`feature-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''}`}
                       role="button"
                       tabIndex={0}
                       data-index={idx}
                       draggable={dndEnabled}
-                      onDragStart={(e) => { if (!dndEnabled) return; setDragFeatureId(f.id); e.dataTransfer.setData('text/plain', String(f.id)); e.dataTransfer.effectAllowed = 'move' }}
-                      onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault() }}
-                      onDrop={(e) => { if (!dndEnabled) return; e.preventDefault(); const overIdx = idx; if (dragFeatureId != null) { handleMoveFeature(dragFeatureId, overIdx) } setDragFeatureId(null) }}
+                      aria-grabbed={isDragSource}
+                      onDragStart={(e) => {
+                        if (!dndEnabled) return
+                        setDragFeatureId(f.id)
+                        setDragging(true)
+                        e.dataTransfer.setData('text/plain', String(f.id))
+                        e.dataTransfer.effectAllowed = 'move'
+                      }}
+                      onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
+                      onDrop={(e) => {
+                        if (!dndEnabled) return
+                        e.preventDefault()
+                        computeDropForRow(e, idx)
+                        if (dragFeatureId != null && dropIndex != null) {
+                          const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
+                          handleMoveFeature(dragFeatureId, to)
+                        }
+                        clearDndState()
+                      }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >
@@ -250,6 +306,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         </div>
                       </div>
                     </div>
+                    {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )
               })}
@@ -257,6 +314,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           )}
         </section>
       </main>
+
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </div>
   )
 }
