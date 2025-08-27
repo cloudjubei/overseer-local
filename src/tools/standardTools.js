@@ -73,7 +73,7 @@ const standardToolSchemas = [
   },
   {
     name: 'preview_screenshot',
-    description: 'Render a component via the built-in preview.html (or any app URL) and return a screenshot as a data URL. Requires a running Vite dev server. Set PREVIEW_BASE_URL or pass base_url.',
+    description: 'Render a component via the built-in preview.html (or any app URL) and return a screenshot as a data URL. Supports scripted interactions and before/after capture. Requires a running Vite dev server. Set PREVIEW_BASE_URL or pass base_url.',
     parameters: {
       type: 'object',
       properties: {
@@ -87,17 +87,21 @@ const standardToolSchemas = [
         variant: { type: 'string', description: 'Variant name to select (hash portion), e.g., "loading"' },
         // URL mode parameter
         url: { type: 'string', description: 'Absolute or relative URL (relative resolved against base_url)' },
+        // Interactions
+        interactions: { type: 'array', description: 'Array of interaction steps to perform before the final capture', items: { type: 'object' } },
+        capture_before: { type: 'boolean', description: 'If true (default when interactions provided), capture a before screenshot prior to interactions.' },
         // Shared capture options
         width: { type: 'number', description: 'Viewport width (CSS px). Default 1024' },
         height: { type: 'number', description: 'Viewport height (CSS px). Default 768' },
         device_scale_factor: { type: 'number', description: 'Device scale factor (pixel ratio). Default 1' },
         delay_ms: { type: 'number', description: 'Additional delay before capture (ms)' },
-        wait_selector: { type: 'string', description: 'CSS selector to wait for before capture' },
+        wait_selector: { type: 'string', description: 'CSS selector to wait for before capture; defaults to #preview-stage in component mode' },
         clip_selector: { type: 'string', description: 'CSS selector of element to clip around for the screenshot' },
         base_url: { type: 'string', description: 'Base URL of the dev server, e.g., http://localhost:5173. Defaults to PREVIEW_BASE_URL or auto-detect.' },
         format: { type: 'string', enum: ['png', 'jpeg'], description: 'Screenshot format. Default png' },
         quality: { type: 'number', description: 'JPEG quality 0-100 (only for jpeg). Default 80' },
-        out_file: { type: 'string', description: 'Optional file path to save the screenshot. If not provided, only dataUrl is returned.' },
+        out_file: { type: 'string', description: 'Optional file path to save the final (after) screenshot. If not provided, only dataUrl is returned.' },
+        before_out_file: { type: 'string', description: 'Optional file path to save the before screenshot (when capture_before is true).' },
         auto_detect: { type: 'boolean', description: 'If true, try common localhost ports for base_url if not provided. Default true' }
       },
       required: []
@@ -163,6 +167,132 @@ async function probeBaseUrl(hint) {
     }
   }
   return null;
+}
+
+async function saveDataUrlToFile(dataUrl, outPath, format) {
+  if (!outPath) return null;
+  const ext = format === 'jpeg' ? '.jpg' : '.png';
+  const filePath = path.isAbsolute(outPath) ? outPath : path.join(process.cwd(), outPath);
+  const finalPath = filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') ? filePath : (filePath + ext);
+  const b64 = dataUrl.split(',')[1];
+  await ensureDirForFile(finalPath);
+  await fs.writeFile(finalPath, Buffer.from(b64, 'base64'));
+  return finalPath;
+}
+
+async function capturePage(page, { wait_selector, delay_ms, clip_selector, format, quality }) {
+  if (wait_selector) {
+    await page.waitForSelector(wait_selector, { timeout: 20000 });
+  }
+  if (delay_ms && delay_ms > 0) {
+    await new Promise((r) => setTimeout(r, delay_ms));
+  }
+  let clip;
+  if (clip_selector) {
+    const rect = await page.$eval(clip_selector, (el) => {
+      const r = el.getBoundingClientRect();
+      return { x: Math.max(0, r.x), y: Math.max(0, r.y), width: Math.max(0, r.width), height: Math.max(0, r.height) };
+    });
+    if (rect && rect.width > 0 && rect.height > 0) {
+      clip = { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) };
+    }
+  }
+  const opts = { type: format === 'jpeg' ? 'jpeg' : 'png', encoding: 'base64' };
+  if (clip) opts.clip = clip;
+  if (opts.type === 'jpeg') opts.quality = typeof quality === 'number' ? Math.max(0, Math.min(100, Math.floor(quality))) : 80;
+  const base64 = await page.screenshot(opts);
+  const mime = opts.type === 'jpeg' ? 'image/jpeg' : 'image/png';
+  const dataUrl = `data:${mime};base64,${base64}`;
+  return { dataUrl, format: opts.type };
+}
+
+async function performInteractions(page, steps = []) {
+  for (const step of steps) {
+    const { type } = step || {};
+    try {
+      switch (type) {
+        case 'wait': {
+          const { ms, selector, timeout = 20000 } = step;
+          if (selector) await page.waitForSelector(selector, { timeout });
+          else if (typeof ms === 'number') await page.waitForTimeout(ms);
+          break;
+        }
+        case 'click': {
+          const { selector, button = 'left', clickCount = 1, delay } = step;
+          await page.click(selector, { button, clickCount, delay });
+          break;
+        }
+        case 'hover': {
+          const { selector } = step;
+          await page.hover(selector);
+          break;
+        }
+        case 'focus': {
+          const { selector } = step;
+          await page.focus(selector);
+          break;
+        }
+        case 'blur': {
+          const { selector } = step;
+          await page.$eval(selector, (el) => (el instanceof HTMLElement ? el.blur() : undefined));
+          break;
+        }
+        case 'type': {
+          const { selector, text = '', delay = 0 } = step;
+          await page.type(selector, text, { delay });
+          break;
+        }
+        case 'set_value': {
+          const { selector, value } = step;
+          await page.$eval(
+            selector,
+            (el, v) => {
+              const anyEl = el;
+              if ('value' in anyEl) {
+                anyEl.value = v;
+                anyEl.dispatchEvent(new Event('input', { bubbles: true }));
+                anyEl.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            },
+            value
+          );
+          break;
+        }
+        case 'keypress': {
+          const { key } = step;
+          await page.keyboard.press(key);
+          break;
+        }
+        case 'dispatch': {
+          const { selector, event = 'click' } = step;
+          await page.$eval(
+            selector,
+            (el, evt) => {
+              el.dispatchEvent(new Event(evt, { bubbles: true }));
+            },
+            event
+          );
+          break;
+        }
+        case 'scroll': {
+          const { selector, x = 0, y = 0 } = step;
+          if (selector) {
+            await page.$eval(selector, (el, dx, dy) => el.scrollBy(dx, dy), x, y);
+          } else {
+            await page.evaluate((dx, dy) => window.scrollBy(dx, dy), x, y);
+          }
+          break;
+        }
+        default:
+          // unknown step: ignore
+          break;
+      }
+    } catch (e) {
+      // Continue on interaction errors to avoid blocking overall capture
+      // eslint-disable-next-line no-console
+      console.warn('Interaction step failed:', step, e);
+    }
+  }
 }
 
 async function captureWithPuppeteer({ url, width = 1024, height = 768, device_scale_factor = 1, wait_selector, delay_ms, clip_selector, format = 'png', quality = 80 }) {
@@ -281,13 +411,16 @@ const standardToolFunctions = {
       height = 768,
       device_scale_factor = 1,
       delay_ms = 0,
-      wait_selector,
+      wait_selector: waitSelectorParam,
       clip_selector,
       base_url,
       format = 'png',
       quality = 80,
       out_file,
+      before_out_file,
       auto_detect = true,
+      interactions = [],
+      capture_before,
     } = params || {};
 
     // Resolve base URL
@@ -296,45 +429,105 @@ const standardToolFunctions = {
       baseUrl = await probeBaseUrl();
     }
 
+    // If interactions are provided, we run an interactive session in Puppeteer to allow before/after.
+    const hasInteractions = Array.isArray(interactions) && interactions.length > 0;
+    const shouldCaptureBefore = typeof capture_before === 'boolean' ? capture_before : hasInteractions;
+
+    // Build final URL
+    let finalUrl = '';
     if (mode === 'component') {
       if (!baseUrl) {
         const hint = 'No base_url found. Set PREVIEW_BASE_URL or pass base_url. Example: http://localhost:5173';
         return { ok: false, error: hint, reason: 'no_base_url', id };
       }
-      const fullUrl = buildComponentPreviewUrl({ baseUrl, id, props, props_b64, needs, theme, variant });
-      const result = await captureWithPuppeteer({ url: fullUrl, width, height, device_scale_factor, wait_selector, delay_ms, clip_selector, format, quality });
-      if (result.ok && out_file) {
-        const ext = format === 'jpeg' ? '.jpg' : '.png';
-        const filePath = path.isAbsolute(out_file) ? out_file : path.join(process.cwd(), out_file);
-        const finalPath = filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') ? filePath : (filePath + ext);
-        const b64 = result.dataUrl.split(',')[1];
-        await ensureDirForFile(finalPath);
-        await fs.writeFile(finalPath, Buffer.from(b64, 'base64'));
-        return { ...result, file: finalPath };
+      finalUrl = buildComponentPreviewUrl({ baseUrl, id, props, props_b64, needs, theme, variant });
+    } else {
+      finalUrl = urlParam || '';
+      const isAbsolute = /^https?:\/\//i.test(finalUrl);
+      if (!isAbsolute) {
+        if (!baseUrl) {
+          const hint = 'Relative url used but no base_url found. Set PREVIEW_BASE_URL or pass base_url.';
+          return { ok: false, error: hint, reason: 'no_base_url' };
+        }
+        finalUrl = `${baseUrl.replace(/\/$/, '')}/${finalUrl.replace(/^\//, '')}`;
       }
-      return result;
     }
 
-    // mode === 'url'
-    let finalUrl = urlParam || '';
-    if (!finalUrl) return { ok: false, error: 'url parameter is required when mode="url"', reason: 'missing_param' };
-    const isAbsolute = /^https?:\/\//i.test(finalUrl);
-    if (!isAbsolute) {
-      if (!baseUrl) {
-        const hint = 'Relative url used but no base_url found. Set PREVIEW_BASE_URL or pass base_url.';
-        return { ok: false, error: hint, reason: 'no_base_url' };
+    // Default wait selector for component previews is the stage container
+    const wait_selector = waitSelectorParam || (mode === 'component' ? '#preview-stage' : undefined);
+
+    if (hasInteractions || shouldCaptureBefore) {
+      if (!puppeteer) {
+        return {
+          ok: false,
+          error: 'Puppeteer is not installed. Install "puppeteer" or "puppeteer-core" to use interactions/before-after capture.',
+          reason: 'missing_dependency',
+          url: finalUrl,
+        };
       }
-      finalUrl = `${baseUrl.replace(/\/$/, '')}/${finalUrl.replace(/^\//, '')}`;
+
+      const launchOptions = {
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      };
+      if (puppeteer && (!puppeteer.executablePath || typeof puppeteer.executablePath !== 'function')) {
+        const exe = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH || process.env.CHROMIUM_PATH;
+        if (exe) launchOptions.executablePath = exe;
+      }
+
+      let browser;
+      try {
+        browser = await puppeteer.launch(launchOptions);
+        const page = await browser.newPage();
+        await page.setViewport({ width, height, deviceScaleFactor: device_scale_factor || 1 });
+
+        await page.goto(finalUrl, { waitUntil: wait_selector ? 'domcontentloaded' : 'networkidle0', timeout: 30000 });
+        if (wait_selector) {
+          await page.waitForSelector(wait_selector, { timeout: 20000 });
+        }
+        // Also wait for preview readiness event/flag if present
+        try {
+          await page.waitForFunction(() => !!window.__PREVIEW_READY, { timeout: 5000 });
+        } catch (_) { /* ignore */ }
+
+        const before = shouldCaptureBefore ? await capturePage(page, { wait_selector, delay_ms, clip_selector, format, quality }) : null;
+
+        if (hasInteractions) {
+          await performInteractions(page, interactions);
+        }
+
+        const after = await capturePage(page, { wait_selector, delay_ms, clip_selector, format, quality });
+
+        await page.close();
+        await browser.close();
+
+        // Save files if requested
+        let beforeFile = null;
+        let afterFile = null;
+        if (before && before_out_file) beforeFile = await saveDataUrlToFile(before.dataUrl, before_out_file, before.format);
+        if (after && out_file) afterFile = await saveDataUrlToFile(after.dataUrl, out_file, after.format);
+
+        return {
+          ok: true,
+          url: finalUrl,
+          width,
+          height,
+          format: after.format,
+          dataUrl: after.dataUrl, // final capture (after interactions)
+          before: before ? { dataUrl: before.dataUrl, file: beforeFile } : undefined,
+          after: { dataUrl: after.dataUrl, file: afterFile },
+        };
+      } catch (error) {
+        try { if (browser) await browser.close(); } catch (_) {}
+        return { ok: false, error: String(error?.message || error), url: finalUrl };
+      }
     }
+
+    // No interactions and no before/after requested: do a simple one-shot capture
     const result = await captureWithPuppeteer({ url: finalUrl, width, height, device_scale_factor, wait_selector, delay_ms, clip_selector, format, quality });
     if (result.ok && out_file) {
-      const ext = format === 'jpeg' ? '.jpg' : '.png';
-      const filePath = path.isAbsolute(out_file) ? out_file : path.join(process.cwd(), out_file);
-      const finalPath = filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') ? filePath : (filePath + ext);
-      const b64 = result.dataUrl.split(',')[1];
-      await ensureDirForFile(finalPath);
-      await fs.writeFile(finalPath, Buffer.from(b64, 'base64'));
-      return { ...result, file: finalPath };
+      const saved = await saveDataUrlToFile(result.dataUrl, out_file, format);
+      return { ...result, file: saved };
     }
     return result;
   }

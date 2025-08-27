@@ -40,7 +40,7 @@ This document describes how files and directories are organised in this reposito
     - PriorityTag.tsx: Priority tags P0–P3.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
   - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
-    - previewHost.tsx: Dedicated preview renderer that dynamically loads a component module and mounts it with provided props and providers.
+    - previewHost.tsx: React PreviewHost component that dynamically loads a component module and mounts it with provided props and providers. Wraps content in a stable `#preview-stage` container and signals readiness via `window.__PREVIEW_READY` + `preview:ready` event.
     - main.tsx: Entry point that boots the preview host.
     - previewTypes.ts: Types for declaring preview metadata and provider registry.
     - previewRegistry.tsx: Lightweight registry for provider factories and composition helpers.
@@ -97,7 +97,7 @@ This document describes how files and directories are organised in this reposito
   - preview/: Preview analyzer tooling
     - analyzer.js: Library to analyze TSX components for preview capability.
   - Agent-facing tools:
-    - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. See docs/PREVIEW_TOOL.md.
+    - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
@@ -132,9 +132,9 @@ Notes:
 - In dev, open http://localhost:<vite-port>/preview.html with query params:
   - id: module path under src (e.g., renderer/components/ui/Button.tsx#default)
   - props: URL-encoded JSON of props (or base64 if props_b64=1)
-  - needs: Comma-separated provider keys (theme, router auto-applied). Additional available: frame, tasksMock, notificationsMock, llmMock.
+  - needs: Comma-separated provider keys to include (in addition to defaults)
   - theme: light | dark (applies data-theme on <html>)
-- Components can export a `preview` metadata object in their module to declare needs and variants. See docs/COMPONENT_PREVIEWS.md.
+- The preview stage element is available as `#preview-stage` and a `preview:ready` event fires after mount.
 
 ## Preview Analyzer
 - Location: src/tools/preview/analyzer.js (library), scripts/preview-scan.js (CLI).
@@ -147,7 +147,8 @@ Notes:
 - Integrated into src/tools/standardTools.js as preview_screenshot.
 - Allows agents to request a screenshot of a component (via preview.html) or any URL.
 - Accepts parameters for component path (id), props override, provider needs, theme, screenshot dimensions, variant selection (hash), wait/clip options, and output path.
-- Requires a running dev server; provide base_url or set PREVIEW_BASE_URL. See docs/PREVIEW_TOOL.md for details.
+- Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md for details.
+- Requires a running dev server; provide base_url or set PREVIEW_BASE_URL.
 
 ## Repository Tree
 ```
@@ -182,7 +183,7 @@ repo_root/
 │  │  │     └─ coreMocks.tsx
 │  │  └─ ...
 │  ├─ tools/
-│  │  ├─ standardTools.js   ← includes preview_screenshot tool
+│  │  ├─ standardTools.js   ← includes preview_screenshot tool (with interactions)
 │  │  └─ preview/
 │  │     └─ analyzer.js
 │  └─ capture/

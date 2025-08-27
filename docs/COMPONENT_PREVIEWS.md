@@ -6,6 +6,7 @@ Overview
 - A dedicated preview runtime (preview.html) renders components in isolation.
 - Components can export a `preview` metadata object (or `getPreview()` function) to declare required dependencies (providers, mocks) and provide example variants with props.
 - A registry provides default providers for common needs (theme, router) and optional mocks (tasks, notifications, LLM config).
+- New: The preview runtime exposes a stable container (#preview-stage) for interaction/capture and dispatches a 'preview:ready' event when mounted.
 
 Quick Start
 1. Open http://localhost:<vite-port>/preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&provider=app&theme=light
@@ -52,6 +53,11 @@ Variants
 
 Advanced: Dynamic preview metadata
 - For cases where you need data fetching or async work to prepare preview props, export a `getPreview()` function that returns a `PreviewMeta` object.
+
+Interactions and Automation
+- The preview host renders content inside a stable container with id `#preview-stage` to assist automation and clipping.
+- When the preview is mounted, the window flag `__PREVIEW_READY` is set and a `preview:ready` event is dispatched.
+- Use the `preview_screenshot` tool (see docs/PREVIEW_TOOL.md) to script interactions (click, type, etc.) and capture before/after screenshots.
 
 Examples
 

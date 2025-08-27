@@ -38,44 +38,90 @@ async function loadTargetModule(idParam: string): Promise<{ Comp: any; exportNam
 
 function getVariant(meta: PreviewMeta | undefined, hash: string | null) {
   if (!meta?.variants?.length) return { variant: undefined, name: undefined };
-  // hash like #default; but location.hash is '#default', we pass query id includes '#Export', so here use location.hash for variant name
   const targetName = hash?.startsWith('#') ? hash.substring(1) : hash ?? undefined;
   const v = meta.variants.find((x) => x.name === targetName) || meta.variants[0];
   return { variant: v, name: v?.name };
 }
 
-async function main() {
-  const params = parseQuery();
-  const id = params.get('id');
-  if (!id) {
-    document.body.textContent = 'Missing ?id parameter';
-    return;
-  }
+export function PreviewHost() {
+  const [error, setError] = React.useState<string | null>(null);
+  const [content, setContent] = React.useState<React.ReactNode>(null);
 
-  const { Comp, meta } = await loadTargetModule(id);
+  React.useEffect(() => {
+    const run = async () => {
+      const params = parseQuery();
+      const id = params.get('id');
+      if (!id) {
+        setError('Missing ?id parameter');
+        return;
+      }
 
-  const urlProps = decodeProps(params) ?? {};
-  const { variant } = getVariant(meta, window.location.hash);
-  const variantProps = variant?.props ?? {};
-  const defaultProps = meta?.defaultProps ?? {};
-  const props = { ...defaultProps, ...variantProps, ...urlProps } as any;
+      try {
+        const { Comp, exportName, meta } = await loadTargetModule(id);
+        document.title = meta?.title || exportName || 'Preview';
 
-  const themeParam = (params.get('theme') as any) || meta?.theme || 'light';
-  const { composed } = resolvePreviewProviders(meta, { theme: themeParam, params, needs: [], registry: undefined });
+        const urlProps = decodeProps(params) ?? {};
+        const { variant } = getVariant(meta, window.location.hash);
+        const variantProps = variant?.props ?? {};
+        const defaultProps = meta?.defaultProps ?? {};
+        const props = { ...defaultProps, ...variantProps, ...urlProps } as any;
 
-  const rootEl = document.getElementById('root')!;
-  const root = ReactDOM.createRoot(rootEl);
+        const themeParam = (params.get('theme') as any) || meta?.theme || 'light';
+        const { composed } = resolvePreviewProviders(meta, { theme: themeParam, params, needs: [], registry: undefined });
 
-  // Apply optional wrappers: composed providers, meta.wrapper, variant.wrapper, in that order
-  let tree: React.ReactNode = <Comp {...props} />;
-  tree = composed.wrap(tree);
-  tree = applyWrapper(meta?.wrapper, tree);
-  tree = applyWrapper(variant?.wrapper, tree);
+        // Build tree with a stable stage container for interactions and clipping
+        let tree: React.ReactNode = (
+          <div id="preview-stage" data-preview-stage>
+            <Comp {...props} />
+          </div>
+        );
+        tree = composed.wrap(tree);
+        tree = applyWrapper(meta?.wrapper, tree);
+        tree = applyWrapper(variant?.wrapper, tree);
 
-  root.render(<React.StrictMode>{tree}</React.StrictMode>);
+        setContent(tree);
+      } catch (e: any) {
+        console.error(e);
+        setError(e?.message || String(e));
+      }
+    };
+
+    run();
+  }, []);
+
+  React.useEffect(() => {
+    // Signal readiness once content is set to help external automation
+    if (content && typeof window !== 'undefined') {
+      (window as any).__PREVIEW_READY = true;
+      window.dispatchEvent(new CustomEvent('preview:ready'));
+    }
+  }, [content]);
+
+  if (error) return <div style={{ padding: 16, color: 'red' }}>Error loading preview: {error}</div>;
+  if (!content) return <div style={{ padding: 16 }}>Loading preview…</div>;
+  return <>{content}</>;
 }
 
-main().catch((err) => {
-  console.error(err);
-  document.body.textContent = 'Error loading preview. See console.';
-});
+// For direct mounting without main.tsx (backward compatibility) if needed
+export function mountPreviewHost() {
+  const rootEl = document.getElementById('root');
+  if (!rootEl) return;
+  const root = ReactDOM.createRoot(rootEl);
+  root.render(
+    <React.StrictMode>
+      <PreviewHost />
+    </React.StrictMode>
+  );
+}
+
+// Auto-mount if this module is loaded directly (not via main.tsx)
+if (typeof window !== 'undefined' && (import.meta as any).env?.MODE) {
+  // Heuristic: if there is no global flag set by main.tsx, mount ourselves.
+  if (!(window as any).__PREVIEW_MAIN_MOUNTED) {
+    try {
+      mountPreviewHost();
+    } catch (_) {
+      // ignore
+    }
+  }
+}
