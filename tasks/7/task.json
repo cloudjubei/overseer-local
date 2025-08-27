@@ -133,7 +133,7 @@
     },
     {
       "id": "7.12",
-      "status": "-",
+      "status": "+",
       "title": "Tasks list and features list should allow their lists to scroll",
       "description": "The whole screen doesn't scroll - just the list of items inside",
       "plan": "",
@@ -143,8 +143,7 @@
         "src/renderer/tasks/TaskDetailsView.tsx",
         "src/renderer/tasks/TasksListView.tsx"
       ],
-      "acceptance": [],
-      "rejection": "still cannot scroll in either of these screens. These and Docs and chats also don't allow for scrolling - maybe the issue is in the sidebar or somewhere else?! This is extremely frustrating."
+      "acceptance": []
     },
     {
       "id": "7.13",
@@ -157,8 +156,7 @@
         "src/renderer/screens/DocumentsView.tsx",
         "src/renderer/docs/DocumentsBrowserView.tsx"
       ],
-      "acceptance": [],
-      "rejection": "still cannot scroll in this screen. This is very frustrating."
+      "acceptance": []
     },
     {
       "id": "7.14",
@@ -170,8 +168,7 @@
         "src/renderer/screens/SidebarView.tsx",
         "src/renderer/screens/ChatView.tsx"
       ],
-      "acceptance": [],
-      "rejection": "still cannot scroll in this screen. This is very frustrating."
+      "acceptance": []
     },
     {
       "id": "7.15",
@@ -300,7 +297,7 @@
     },
     {
       "id": "7.22",
-      "status": "+",
+      "status": "-",
       "title": "Tasks list dragging error",
       "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
       "plan": "",
