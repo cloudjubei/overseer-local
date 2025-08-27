@@ -500,4 +500,32 @@ export class TasksIndexer {
         await this.rebuildAndNotify(`Task ${taskId} updated`);
         return { ok: true };
     }
+
+    async updateFeature(taskId, featureId, data) {
+        console.log(`Updating feature ${featureId}`);
+        const taskDir = path.join(this.tasksDir, String(taskId));
+        const taskPath = path.join(taskDir, 'task.json');
+        let taskData;
+        try {
+            const raw = await fs.readFile(taskPath, 'utf-8');
+            taskData = JSON.parse(raw);
+        } catch (e) {
+            throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
+        }
+
+        // Do not allow changing ID via updateFeature; everything else is merged
+        const { id, ...patchable } = data || {};
+
+        const features = taskData.features.map(f => f.id == featureId ? { ...f, ...patchable } : f);
+        const next = { ...taskData, features };
+
+        const { valid, errors } = validateTask(next);
+        if (!valid) {
+            throw new Error(`Invalid task update for ${taskId}: ${errors && errors.join ? errors.join(', ') : JSON.stringify(errors)}`);
+        }
+
+        await fs.writeFile(taskPath, JSON.stringify(next, null, 2), 'utf-8');
+        await this.rebuildAndNotify(`Task ${taskId} updated`);
+        return { ok: true };
+    }
 }

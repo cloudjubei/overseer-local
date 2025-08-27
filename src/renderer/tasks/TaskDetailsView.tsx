@@ -4,6 +4,7 @@ import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
+import StatusBullet from '../components/tasks/StatusBullet'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -92,6 +93,21 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
   const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
+
+  const handleTaskStatusChange = async (taskId: number, status: Status) => {
+    try {
+      await tasksService.updateTask(taskId, { status })
+    } catch (e) {
+      console.error('Failed to update status', e)
+    }
+  }
+  const handleFeatureStatusChange = async (taskId: number, featureId: string, status: Status) => {
+    try {
+      await tasksService.updateFeature(taskId, featureId, { status })
+    } catch (e) {
+      console.error('Failed to update status', e)
+    }
+  }
 
   const handleMoveFeature = async (fromId: string, toIndex: number) => {
     if (!task) return
@@ -182,7 +198,15 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
             <IconBack />
           </button>
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
-          <StatusBadge status={task.status} variant="bold" className="ml-2" />
+          <div className="status-inline">
+            <StatusBadge status={task.status} variant="bold" className="ml-2" />
+            <StatusBullet
+              status={task.status}
+              onChange={(next) => handleTaskStatusChange(task.id, next)}
+              className="reveal-on-hover"
+            />
+          </div>
+          {/* <StatusBadge status={task.status} variant="bold" className="ml-2" /> */}
           <div className="spacer" />
         </div>
         <div className="details-header__meta">
@@ -276,7 +300,16 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
                         <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>
                       </div>
-                      <div className="col col-status"><StatusBadge status={f.status} variant="soft" /></div>
+                      <div className="col col-status">
+                        <div className="status-inline">
+                          <StatusBadge status={f.status} />
+                          <StatusBullet
+                            status={f.status}
+                            onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
+                            className="reveal-on-hover"
+                          />
+                        </div>
+                      </div>
                       <div className="col col-deps">
                         <div className="deps-list" aria-label={`Dependencies for ${f.id}`}>
                           {deps.length === 0 ? (
