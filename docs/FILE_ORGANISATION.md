@@ -34,6 +34,7 @@ This document describes how files and directories are organised in this reposito
     - Spinner.tsx: Inline spinner.
     - Select.tsx, Input.tsx, Tooltip.tsx, etc.
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
+    - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
@@ -145,7 +146,8 @@ repo_root/
 │  │  │  │  ├─ Skeleton.tsx
 │  │  │  │  ├─ CommandMenu.tsx
 │  │  │  │  ├─ ShortcutsHelp.tsx
-│  │  │  │  └─ Switch.tsx
+│  │  │  │  ├─ Switch.tsx
+│  │  │  │  └─ CollapsibleSidebar.tsx  <-- NEW: Reusable collapsible sidebar
 │  │  │  ├─ tasks/
 │  │  │  │  ├─ StatusBadge.tsx
 │  │  │  │  ├─ PriorityTag.tsx

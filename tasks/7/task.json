@@ -262,7 +262,7 @@
     },
     {
       "id": "7.20",
-      "status": "-",
+      "status": "+",
       "title": "Create a unified screen with side panel style - Settings screen",
       "description": "Settings should have a panel that behaves similarly to the Sidebar (it's collapsible). It holds the different sections. This kind of component, a screen with a sidepanel needs to be unified, reusable and made slick and pretty.",
       "plan": "",

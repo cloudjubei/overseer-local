@@ -11,12 +11,13 @@ import type { LLMConfig, LLMProviderType } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import { useToast } from '../components/ui/Toast';
 import { Modal } from '../components/ui/Modal';
+import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
 
 // Settings Categories
 const CATEGORIES = [
-  { id: 'visual', label: 'Visual' },
-  { id: 'llms', label: 'LLMs' },
-  { id: 'notifications', label: 'Notifications' }
+  { id: 'visual', label: 'Visual', icon: <span aria-hidden>🎨</span>, accent: 'purple' },
+  { id: 'llms', label: 'LLMs', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
+  { id: 'notifications', label: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'brand' }
 ] as const;
 
 type CategoryId = typeof CATEGORIES[number]['id'];
@@ -36,7 +37,6 @@ export default function SettingsView() {
   const { toast } = useToast();
 
   // Layout state
-  const [categoryCollapsed, setCategoryCollapsed] = useState(false);
   const [activeCategory, setActiveCategory] = useState<CategoryId>('visual');
 
   // Defaults and common models
@@ -365,39 +365,21 @@ export default function SettingsView() {
   };
 
   return (
-    <div className="flex flex-col min-h-0 w-full">
-      <header className="shrink-0 px-4 py-3 border-b flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Settings</h1>
-        <Button variant="secondary" onClick={() => setCategoryCollapsed((c) => !c)}>
-          {categoryCollapsed ? 'Show Categories' : 'Hide Categories'}
-        </Button>
-      </header>
+    <div className="flex min-h-0 w-full">
+      <CollapsibleSidebar
+        items={CATEGORIES}
+        activeId={activeCategory}
+        onSelect={setActiveCategory}
+        storageKey="settings-panel-collapsed"
+        headerTitle="Settings"
+        headerSubtitle="Preferences"
+      />
 
-      <div className="flex min-h-0 w-full">
-        {/* Categories Pane (collapsible) */}
-        <aside className={`${categoryCollapsed ? 'hidden' : 'block'} w-64 shrink-0 border-r overflow-y-auto`}>
-          <nav className="p-2">
-            {CATEGORIES.map((cat) => {
-              const active = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors ${active ? 'bg-[var(--surface-raised)] border border-[var(--border-default)]' : 'hover:bg-[var(--surface-raised)]'}`}
-                  onClick={() => setActiveCategory(cat.id)}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
-
-        <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
-          {activeCategory === 'visual' && renderVisualSection()}
-          {activeCategory === 'llms' && renderLLMsSection()}
-          {activeCategory === 'notifications' && renderNotificationsSection()}
-        </main>
-      </div>
+      <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
+        {activeCategory === 'visual' && renderVisualSection()}
+        {activeCategory === 'llms' && renderLLMsSection()}
+        {activeCategory === 'notifications' && renderNotificationsSection()}
+      </main>
 
       {renderConfigModal()}
     </div>
