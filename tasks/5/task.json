@@ -25,7 +25,7 @@
     },
     {
       "id": "5.3",
-      "status": "-",
+      "status": "+",
       "title": "Research terminal/code running",
       "description": "There are multiple problems we are facing: 1st the agent makes changes to files, but cannot verify the outcome of its work. We need to provide tools for it so that it would be able to check each new file it makes to see if it compiles. If possible, we should also think of allowing the agent of running the code in some isolated environment. All the options for such a behaviour need to be researched and written into a doc so a decision can be made.",
       "context": [],
