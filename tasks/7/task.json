@@ -379,7 +379,7 @@
     },
     {
       "id": "7.25",
-      "status": "-",
+      "status": "+",
       "title": "Home the status dropdown looks horrible",
       "description": "The dropdown should somehow incorporate the bullet design that is currently used to display the status. In fact, the best way would be for the dropdown not to be there, and when the user hovers over an item, the status bullet can become bigger and show an edit symbol. If the user clicks on the bullet - it opens a bullet selector that can change the status.",
       "plan": "",

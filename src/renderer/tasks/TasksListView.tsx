@@ -8,6 +8,7 @@ import StatusBadge from '../components/tasks/StatusBadge'
 import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/PriorityTag'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
+import StatusBullet from '../components/tasks/StatusBullet'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -325,15 +326,11 @@ export default function TasksListView() {
                       <div className="col col-status">
                         <div className="status-inline">
                           <StatusBadge status={t.status} />
-                          <select className="status-select ui-select ui-select--sm" aria-label="Change status"
-                            value={t.status}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => handleStatusChange(t.id, e.target.value as Status)}
-                          >
-                            {STATUSES.map(s => (
-                              <option key={s} value={s}>{STATUS_LABELS[s]} ({s})</option>
-                            ))}
-                          </select>
+                          <StatusBullet
+                            status={t.status}
+                            onChange={(next) => handleStatusChange(t.id, next)}
+                            className="reveal-on-hover"
+                          />
                         </div>
                       </div>
                       <div className="col col-features">{done}/{total}</div>

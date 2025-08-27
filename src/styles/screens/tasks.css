@@ -17,6 +17,28 @@
 .status-inline { display:flex; align-items:center; gap: 8px; }
 .status-inline .status-select { min-width: 140px; }
 
+/* Status bullet interactive control */
+.status-bullet-btn { position: relative; display:inline-flex; align-items:center; justify-content:center; width: 18px; height: 18px; border: 0; background: transparent; padding: 0; border-radius: 999px; cursor: pointer; }
+.status-bullet { display:inline-block; width: 10px; height: 10px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--border-strong) 60%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 8%, transparent); transition: transform var(--motion-fast, 120ms) ease, box-shadow var(--motion-fast, 120ms) ease; }
+.status-bullet-btn .status-bullet__edit { position:absolute; inset: 0; display:flex; align-items:center; justify-content:center; font-size: 10px; color: var(--text-inverted); opacity: 0; transition: opacity var(--motion-fast, 120ms) ease; pointer-events: none; }
+.task-row:hover .status-bullet { transform: scale(1.35); box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus-ring) 50%, transparent), inset 0 0 0 1px color-mix(in srgb, #000 10%, transparent); }
+.task-row:hover .status-bullet-btn .status-bullet__edit { opacity: 0.9; }
+.status-bullet-btn:focus-visible .status-bullet { transform: scale(1.35); box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus-ring) 55%, transparent), inset 0 0 0 1px color-mix(in srgb, #000 10%, transparent); }
+
+/* Map bullet colors to semantic status tokens (bold fills) */
+.status-bullet--done { background: var(--status-done-bg); }
+.status-bullet--working { background: var(--status-working-bg); }
+.status-bullet--queued { background: var(--status-queued-bg); }
+.status-bullet--stuck { background: var(--status-stuck-bg); }
+.status-bullet--onhold { background: var(--status-on_hold-bg); }
+
+/* Picker popover */
+.status-picker { position: absolute; z-index: var(--z-dropdown, 1000); background: var(--surface-overlay); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: var(--radius-3); box-shadow: var(--shadow-2); padding: 6px; }
+.status-picker__item { display:flex; align-items:center; gap: 8px; width: 100%; padding: 6px 8px; background: transparent; border: 0; border-radius: var(--radius-2); cursor: pointer; color: inherit; text-align: left; }
+.status-picker__item:hover, .status-picker__item.is-active { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+.status-picker__label { font-size: 13px; }
+.status-picker__check { margin-left: auto; color: var(--text-secondary); }
+
 @media (max-width: 800px) {
   .task-row { grid-template-columns: max-content 1fr 160px 60px; }
   .status-inline .status-select { min-width: 120px; }
