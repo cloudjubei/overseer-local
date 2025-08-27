@@ -33,7 +33,7 @@
     },
     {
       "id": "10.4",
-      "status": "-",
+      "status": "+",
       "title": "Preview capability detection",
       "description": "Implement a system that can analyze components and determine if they can be previewed. This should scan component files to detect dependencies, required props, and external requirements. Create metadata that indicates preview compatibility and any special requirements. Provide clear feedback when components cannot be previewed and why.",
       "plan": "",

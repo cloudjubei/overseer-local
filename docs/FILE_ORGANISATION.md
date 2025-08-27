@@ -94,26 +94,12 @@ This document describes how files and directories are organised in this reposito
 - src/chat/ (providers and manager) – may be supplied by preload/main glue.
 - src/tools/
   - standardTools.js
+  - preview/: Preview analyzer tooling
+    - analyzer.js: Library to analyze TSX components for preview capability.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
-- docs/: Project documentation and specifications.
-  - BUILD_SIGNING.md
-  - STANDARDS.md
-  - design/
-    - DESIGN_TOKENS.md
-    - DESIGN_SYSTEM.md
-    - COMPONENTS.md
-    - MONDAY_PALETTE_REFERENCE.md
-  - ux/
-    - LINEAR_UX_GUIDELINES.md
-  - styleguide/
-    - index.html
-    - README.md
-  - tailwind.config.tokens.example.js
-- tasks/: Per-task workspaces containing task metadata and tests.
-  - tasks/{id}/task.json
-  - tasks/{id}/tests/
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
+  - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns, icon.ico, icon.png
   - build/entitlements.mac.plist
@@ -148,12 +134,20 @@ Notes:
   - theme: light | dark (applies data-theme on <html>)
 - Components can export a `preview` metadata object in their module to declare needs and variants. See docs/COMPONENT_PREVIEWS.md.
 
+## Preview Analyzer
+- Location: src/tools/preview/analyzer.js (library), scripts/preview-scan.js (CLI).
+- Purpose: Analyze components to determine preview compatibility, required providers/mocks, props requirements, and blockers.
+- Usage:
+  - node scripts/preview-scan.js --dir src/renderer/components --out preview-metadata.json
+- Output: JSON report with a summary and per-file analyses. See docs/PREVIEW_ANALYZER.md.
+
 ## Repository Tree
 ```
 repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ COMPONENT_PREVIEWS.md
+│  ├─ PREVIEW_ANALYZER.md
 │  ├─ STANDARDS.md
 │  ├─ BUILD_SIGNING.md
 │  ├─ design/
@@ -178,7 +172,13 @@ repo_root/
 │  │  │  └─ mocks/
 │  │  │     └─ coreMocks.tsx
 │  │  └─ ...
+│  ├─ tools/
+│  │  ├─ standardTools.js
+│  │  └─ preview/
+│  │     └─ analyzer.js
 │  └─ ...
+├─ scripts/
+│  └─ preview-scan.js
 ├─ preview.html
 ├─ index.html
 ├─ package.json
