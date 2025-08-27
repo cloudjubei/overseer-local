@@ -2,6 +2,44 @@
   "id": 9,
   "status": "-",
   "title": "Terminal/code running tool",
-  "description": "There are multiple problems we are facing: 1st the agent makes changes to files, but cannot verify the outcome of its work. We need to provide tools for it so that it would be able to check each new file it makes to see if it compiles. If possible, we should also think of allowing the agent of running the code in some isolated environment. All the options for such a behaviour need to be researched and written into a doc so a decision can be made.",
-  "features": []
+  "description": "There are multiple problems we are facing: 1st the agent makes changes to files, but cannot verify the outcome of its work. We need to provide tools for it so that it would be able to check each new file it makes to see if it compiles. If possible, we should also think of allowing the agent of running the code in some isolated environment.",
+  "features": [
+    {
+      "id": "9.1",
+      "status": "-",
+      "title": "Tool for compilation checks for typescript",
+      "description": "Node.js VM Module has the possibility to run isolated code. When an agent writes to a file we would want to check if that file compiles. So the tool needs to accept a list of filenames, try to compile each one, and return a list of statuses.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.2",
+      "status": "-",
+      "title": "Tool for running code formatter on a file",
+      "description": "When an agent writes to a file we would want to apply common formatting rules. So the tool needs to accept a list of filenames, apply formatting to them, and return a list of statuses.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.3",
+      "status": "-",
+      "title": "Tool for running a view",
+      "description": "WebContainers allows running code in an isolated environment - we want to extract this into a tool so that an agent could use this to check if the code they wrote results in the required outcome.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.4",
+      "status": "-",
+      "title": "Tool for running anything",
+      "description": "Similarly to feature 9.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": ["9.3"]
+    }
+  ]
 }
