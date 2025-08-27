@@ -359,7 +359,7 @@
     },
     {
       "id": "7.26",
-      "status": "-",
+      "status": "+",
       "title": "Edit and create feature views should show the Status Bullet",
       "description": "Both views need to allow editing of the feature's status",
       "plan": "",
