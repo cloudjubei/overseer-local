@@ -362,7 +362,7 @@
     },
     {
       "id": "7.24",
-      "status": "-",
+      "status": "+",
       "title": "Creating a feature doesn't work",
       "description": "The required connector/IPC isn't implemented - i.e. tasksService.addFeature doesn't work",
       "plan": "",

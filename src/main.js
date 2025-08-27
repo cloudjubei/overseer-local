@@ -81,7 +81,16 @@ ipcMain.handle('tasks-feature:update', async (event, { taskId, featureId, data }
 });
 
 ipcMain.handle('tasks-feature:add', async (event, { taskId, feature }) => {
-  return await indexer.addFeature(taskId, feature);
+  if (!indexer) {
+    return { ok: false, error: 'Indexer not initialized' };
+  }
+  try {
+    const result = await indexer.addFeature(taskId, feature);
+    return result;
+  } catch (error) {
+    console.error(`Failed to add feature to task ${taskId}:`, error);
+    return { ok: false, error: error.message };
+  }
 });
 
 ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
@@ -102,7 +111,16 @@ ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
 });
 
 ipcMain.handle('tasks:add', async (event, task) => {
-  return await indexer.addTask(task);
+  if (!indexer) {
+    return { ok: false, error: 'Indexer not initialized' };
+  }
+  try {
+    const result = await indexer.addTask(task);
+    return result;
+  } catch (error) {
+    console.error(`Failed to add task:`, error);
+    return { ok: false, error: error.message };
+  }
 });
 
 ipcMain.handle('tasks:delete', async (event, { taskId }) => {
