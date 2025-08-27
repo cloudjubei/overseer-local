@@ -138,11 +138,11 @@ export default function SidebarView({}: SidebarProps) {
   }, [navigateView, isMobile]);
 
   const renderedView = useMemo(() => {
-    if (currentView === 'Documents') return <div key="Documents" className="view-transition"><DocumentsView /></div>;
-    if (currentView === 'Settings') return <div key="Settings" className="view-transition"><SettingsView /></div>;
-    if (currentView === 'Chat') return <div key="Chat" className="view-transition"><ChatView /></div>;
-    if (currentView === 'Notifications') return <div key="Notifications" className="view-transition"><NotificationsView /></div>;
-    return <div key="Home" className="view-transition"><TasksView /></div>;
+    if (currentView === 'Documents') return <div key="Documents" className="flex flex-col flex-1 min-h-0 view-transition"><DocumentsView /></div>;
+    if (currentView === 'Settings') return <div key="Settings" className="flex flex-col flex-1 min-h-0 view-transition"><SettingsView /></div>;
+    if (currentView === 'Chat') return <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition"><ChatView /></div>;
+    if (currentView === 'Notifications') return <div key="Notifications" className="flex flex-col flex-1 min-h-0 view-transition"><NotificationsView /></div>;
+    return <div key="Home" className="flex flex-col flex-1 min-h-0 view-transition"><TasksView /></div>;
   }, [currentView]);
 
   // Sidebar element (shared for desktop and mobile drawer)
@@ -292,7 +292,7 @@ export default function SidebarView({}: SidebarProps) {
           <div className="text-sm font-semibold">{currentView}</div>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {renderedView}
         </div>
       </main>
