@@ -77,12 +77,25 @@ Notes:
 - All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.
 - Documentation in docs/ is the single source of truth for specs and formats.
 
+## New: Projects subsystem
+- src/projects/: Main-process indexer for child projects under projects/
+  - src/projects/indexer.js: Scans the projects/ directory for .json files, validates them against ProjectSpec, builds an index, and watches for changes. Emits 'projects-index:update' via IPC.
+  - src/projects/validator.js: Runtime validation of ProjectSpec objects.
+- src/renderer/services/projectsService.ts: Renderer-side service that accesses window.projectsIndex to list and load child projects.
+- IPC exposure:
+  - Preload: window.projectsIndex with get() and subscribe(callback) methods.
+  - Main: ipcMain.handle('projects-index:get') returns the latest projects index snapshot.
+
+Projects directory expectations
+- Location: <project-root>/projects/
+- Files: One or more .json config files matching the ProjectSpec interface (see src/types/tasks.ts).
+- Security: ProjectSpec.path is normalized and must resolve under projects/; configs escaping this directory are ignored and reported as errors.
+
 ## File Naming Conventions
 - Tasks and features:
   - Task directories are numeric IDs: tasks/{id}/ (e.g., tasks/1/).
   - Tests are named per-feature: tasks/{task_id}/tests/test_{task_id}_{feature_number}.py (e.g., tasks/15/tests/test_15_3.py).
-- Python modules: snake_case.py (e.g., task_format.py, run_local_agent.py).
-- Javascript/TypeScript modules: camelCase.js/ts (e.g., taskFormat.js, runLocalAgent.ts). For schema mirrors adjacent to Python specs, a matching snake_case.ts is acceptable under docs/.
+- Javascript/TypeScript modules: camelCase.js/ts. For schema mirrors adjacent to Python specs, a matching snake_case.ts is acceptable under docs/.
 - Documentation files: UPPERCASE or Title_Case for project-wide specs (e.g., TESTING.md, FILE_ORGANISATION.md). Place task-related docs under docs/tasks/.
 - JSON examples/templates: Use .json with clear, descriptive names (e.g., task_example.json).
 
@@ -101,125 +114,28 @@ repo_root/
 │  ├─ STANDARDS.md
 │  ├─ BUILD_SIGNING.md
 │  ├─ design/
-│  │  ├─ DESIGN_TOKENS.md
-│  │  ├─ DESIGN_SYSTEM.md
-│  │  ├─ COMPONENTS.md
-│  │  └─ MONDAY_PALETTE_REFERENCE.md
 │  ├─ ux/
-│  │  └─ LINEAR_UX_GUIDELINES.md
 │  ├─ styleguide/
-│  │  ├─ index.html
-│  │  └─ README.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
 │  ├─ chat/
-│  │  ├─ providers/
-│  │  │  ├─ base.js
-│  │  │  ├─ openai.js
-│  │  │  ├─ litellm.js
-│  │  │  └─ lmstudio.js
-│  │  └─ manager.js          
 │  ├─ docs/
-│  │  └─ indexer.js        
 │  ├─ tasks/
-│  │  ├─ indexer.js                 
-│  │  └─ validator.js                
+│  ├─ projects/               ← NEW: child projects indexer + validator
+│  │  ├─ indexer.js
+│  │  └─ validator.js
 │  ├─ types/
-│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
-│  │  ├─ tasks.ts                      # Shared Task/Feature/Status types
-│  │  └─ notifications.ts              # Notification types
 │  ├─ renderer/
-│  │  ├─ navigation/
-│  │  │  ├─ Navigator.tsx             
-│  │  │  └─ ModalHost.tsx              
-│  │  ├─ components/
-│  │  │  ├─ ui/
-│  │  │  │  ├─ Alert.tsx
-│  │  │  │  ├─ Button.tsx
-│  │  │  │  ├─ Input.tsx
-│  │  │  │  ├─ Modal.tsx
-│  │  │  │  ├─ Select.tsx
-│  │  │  │  ├─ Toast.tsx
-│  │  │  │  ├─ Tooltip.tsx
-│  │  │  │  ├─ Spinner.tsx
-│  │  │  │  ├─ Skeleton.tsx
-│  │  │  │  ├─ CommandMenu.tsx
-│  │  │  │  ├─ ShortcutsHelp.tsx
-│  │  │  │  └─ Switch.tsx
-│  │  │  ├─ tasks/
-│  │  │  │  ├─ StatusBadge.tsx
-│  │  │  │  ├─ PriorityTag.tsx
-│  │  │  │  └─ TaskCard.tsx
-│  │  │  ├─ FeatureForm.tsx        
-│  │  │  └─ TaskForm.tsx           
 │  │  ├─ services/
-│  │  │  ├─ chatService.ts
-│  │  │  ├─ docsService.ts
-│  │  │  ├─ tasksService.ts
-│  │  │  └─ notificationsService.ts
-│  │  ├─ hooks/
-│  │  │  ├─ useChats.ts
-│  │  │  ├─ useDocsIndex.ts
-│  │  │  ├─ useDocsAutocomplete.ts
-│  │  │  ├─ useLLMConfig.ts
-│  │  │  ├─ useNextTaskId.ts
-│  │  │  ├─ useShortcuts.tsx
-│  │  │  ├─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
-│  │  │  ├─ useNotifications.ts
-│  │  │  └─ useNotificationPreferences.ts
-│  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx
-│  │  │  ├─ TasksView.tsx
-│  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
-│  │  │  ├─ SettingsView.tsx           # Settings screen with theme and LLM configurations
-│  │  │  └─ NotificationsView.tsx
-│  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskEditView.tsx
-│  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx
-│  │  │  ├─ TaskDetailsView.tsx
-│  │  │  └─ TasksListView.tsx
-│  │  ├─ App.tsx                   
-│  │  └─ types.ts
+│  │  │  └─ projectsService.ts
+│  │  └─ ...
 │  ├─ styles/
-│  │  ├─ design-tokens.css
-│  │  ├─ foundations/
-│  │  │  └─ metrics.css
-│  │  ├─ primitives/
-│  │  │  └─ effects.css
-│  │  ├─ components/
-│  │  │  ├─ badges.css
-│  │  │  ├─ buttons.css
-│  │  │  ├─ cards.css
-│  │  │  ├─ feedback.css
-│  │  │  ├─ forms.css
-│  │  │  ├─ overlays.css
-│  │  │  └─ tooltip.css
-│  │  ├─ layout/
-│  │  │  └─ nav.css
-│  │  └─ screens/
-│  │     ├─ board.css
-│  │     ├─ docs.css
-│  │     ├─ settings.css
-│  │     ├─ task-details.css
-│  │     └─ tasks.css
 │  ├─ tools/
-│  │  └─ standardTools.js
-│  ├─ index.css   
-│  ├─ main.js
-│  └─ preload.js
-├─ .env
-├─ forge.config.js
-├─ index.html
+│  ├─ index.css
+│  ├─ main.js                 ← wired IPC for projects-index
+│  └─ preload.js              ← exposes window.projectsIndex API
+├─ tasks/
+├─ projects/                  ← Scanned JSON configs for child projects
 ├─ package.json
-├─ postcss.config.js
-├─ README.md
-├─ tailwind.config.js
-├─ tsconfig.json
-├─ vite.main.config.mjs
-├─ vite.preload.config.mjs
-├─ vite.renderer.config.mjs
-└─ …
+└─ ...
 ```

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
 import { DocsIndexer } from './docs/indexer';
+import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -13,6 +14,7 @@ if (started) {
 let mainWindow;
 let indexer;
 let docsIndexer;
+let projectsIndexer;
 let chatManager;
 
 const createWindow = () => {
@@ -44,8 +46,11 @@ app.whenReady().then(() => {
   indexer = new TasksIndexer(projectRoot, mainWindow);
   indexer.init();
 
-  docsIndexer = new DocsIndexer(projectRoot);
+  docsIndexer = new DocsIndexer(projectRoot, mainWindow);
   docsIndexer.init();
+
+  projectsIndexer = new ProjectsIndexer(projectRoot, mainWindow);
+  projectsIndexer.init();
 
   chatManager = new ChatManager(projectRoot, indexer, docsIndexer);
 
@@ -60,12 +65,9 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-  if (indexer) {
-    indexer.stopWatching();
-  }
-  if (docsIndexer) {
-    docsIndexer.stopWatching();
-  }
+  if (indexer) { indexer.stopWatching(); }
+  if (docsIndexer) { docsIndexer.stopWatching(); }
+  if (projectsIndexer) { projectsIndexer.stopWatching(); }
 });
 
 ipcMain.handle('tasks-index:get', async () => {
@@ -122,9 +124,7 @@ ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
-// Removed modal BrowserWindow creation for task/feature modals.
-// Modals are now handled entirely in the renderer via Navigator + ModalHost.
-
+// Docs
 ipcMain.handle('docs-index:get', async () => {
   return docsIndexer.getIndex();
 });
@@ -147,6 +147,12 @@ ipcMain.handle('docs:upload', (event, {name, content}) => {
   return 'uploads/' + name;
 });
 
+// Projects
+ipcMain.handle('projects-index:get', async () => {
+  return projectsIndexer.getIndex();
+});
+
+// Chat
 ipcMain.handle('chat:completion', async (event, {messages, config}) => {
   return await chatManager.getCompletion({messages, config});
 });
@@ -179,6 +185,7 @@ ipcMain.handle('chat:delete', (event, chatId) => {
   chatManager.deleteChat(chatId);
 });
 
+// Notifications
 ipcMain.handle('notifications:send-os', async (event, data) => {
   
   if (!Notification.isSupported()) {

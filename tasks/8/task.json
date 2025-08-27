@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "8.1",
-      "status": "-",
+      "status": "+",
       "title": "Create project scanning and loading service",
       "description": "Implement a projectsService that can scan the projects/ directory for .json config files, validate them against the ProjectSpec interface, and provide methods to load, list, and manage child projects. This service should handle reading project metadata and configurations.",
       "plan": "",

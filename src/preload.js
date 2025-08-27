@@ -50,7 +50,18 @@ const NOTIFICATIONS_API = {
   }
 };
 
+// Projects Index API
+const PROJECTS_API = {
+  get: () => ipcRenderer.invoke('projects-index:get'),
+  subscribe: (callback) => {
+    const listener = (_event, snapshot) => callback(snapshot);
+    ipcRenderer.on('projects-index:update', listener);
+    return () => ipcRenderer.removeListener('projects-index:update', listener);
+  },
+};
+
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
 contextBridge.exposeInMainWorld('docsIndex', DOCS_API);
 contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
+contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);

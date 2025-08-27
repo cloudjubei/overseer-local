@@ -1,4 +1,4 @@
-import type { Task, Feature } from './tasks'
+import type { Task, Feature, ProjectSpec } from './tasks'
 
 export type ServiceResult = { ok: boolean; error?: string }
 
@@ -25,9 +25,34 @@ export interface TasksIndexAPI {
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
 }
 
+export type ProjectsIndexSnapshot = {
+  root: string
+  projectsDir: string
+  updatedAt: string | null
+  projectsById: Record<string, ProjectSpec>
+  orderedIds: string[]
+  errors: any[]
+  metrics: { lastScanMs: number; lastScanCount: number }
+}
+
+export interface ProjectsIndexAPI {
+  get: () => Promise<ProjectsIndexSnapshot>
+  subscribe: (callback: (snapshot: ProjectsIndexSnapshot) => void) => () => void
+}
+
 declare global {
   interface Window {
     tasksIndex: TasksIndexAPI
+    docsIndex: {
+      get: () => Promise<any>
+      subscribe: (callback: (snapshot: any) => void) => () => void
+      getFile: (relPath: string) => Promise<string>
+      saveFile: (relPath: string, content: string) => Promise<any>
+      upload: (name: string, content: Buffer | Uint8Array) => Promise<string>
+    }
+    chat: any
+    notifications: any
+    projectsIndex: ProjectsIndexAPI
   }
 }
 
