@@ -3,15 +3,18 @@ import TasksView from './TasksView';
 import DocumentsView from './DocumentsView';
 import SettingsView from './SettingsView';
 import ChatView from './ChatView';
+import NotificationsView from './NotificationsView';
 import { useNavigator } from '../navigation/Navigator';
 import Tooltip from '../components/ui/Tooltip';
+import { useNotifications } from '../hooks/useNotifications';
+import { useShortcuts } from '../hooks/useShortcuts';
 
 export type SidebarProps = {};
 
 type NavDef = {
   id: string;
   label: string;
-  view: 'Home' | 'Documents' | 'Chat' | 'Settings';
+  view: 'Home' | 'Documents' | 'Chat' | 'Settings' | 'Notifications';
   icon: React.ReactNode;
   accent?: 'brand' | 'purple' | 'teal' | 'gray';
 };
@@ -20,6 +23,7 @@ const NAV_ITEMS: NavDef[] = [
   { id: 'home', label: 'Home', view: 'Home', icon: <span aria-hidden>🏠</span>, accent: 'brand' },
   { id: 'docs', label: 'Docs', view: 'Documents', icon: <span aria-hidden>📚</span>, accent: 'purple' },
   { id: 'chat', label: 'Chat', view: 'Chat', icon: <span aria-hidden>💬</span>, accent: 'teal' },
+  { id: 'notifications', label: 'Notifications', view: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'teal' },
   { id: 'settings', label: 'Settings', view: 'Settings', icon: <span aria-hidden>⚙️</span>, accent: 'gray' },
 ];
 
@@ -41,6 +45,8 @@ function useMediaQuery(query: string) {
 
 export default function SidebarView({}: SidebarProps) {
   const { currentView, navigateView } = useNavigator();
+  const { unreadCount } = useNotifications();
+  const { register } = useShortcuts();
 
   // Persistent collapsed state (desktop)
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -75,7 +81,7 @@ export default function SidebarView({}: SidebarProps) {
         e.preventDefault();
         if (isMobile) setMobileOpen((v) => !v);
         else setCollapsed((v) => !v);
-      }
+      }ectified
       if (isMobile && e.key === 'Escape' && mobileOpen) {
         setMobileOpen(false);
         // restore focus to trigger
@@ -85,6 +91,18 @@ export default function SidebarView({}: SidebarProps) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isMobile, mobileOpen]);
+
+  // Register shortcut for notifications (Cmd/Ctrl + Shift + N)
+  useEffect(() => {
+    const unregister = register({
+      id: 'open-notifications',
+      keys: (e) => (e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'n' || e.key === 'N'),
+      handler: () => { navigateView('Notifications'); },
+      description: 'Open Notifications',
+      scope: 'global',
+    });
+    return unregister;
+  }, [register, navigateView]);
 
   // Roving tabindex for nav items
   const activeIndex = useMemo(() => {
@@ -123,6 +141,7 @@ export default function SidebarView({}: SidebarProps) {
     if (currentView === 'Documents') return <div key="Documents" className="view-transition"><DocumentsView /></div>;
     if (currentView === 'Settings') return <div key="Settings" className="view-transition"><SettingsView /></div>;
     if (currentView === 'Chat') return <div key="Chat" className="view-transition"><ChatView /></div>;
+    if (currentView === 'Notifications') return <div key="Notifications" className="view-transition"><NotificationsView /></div>;
     return <div key="Home" className="view-transition"><TasksView /></div>;
   }, [currentView]);
 
@@ -158,6 +177,7 @@ export default function SidebarView({}: SidebarProps) {
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view;
             const ref = i === 0 ? firstItemRef : undefined;
+            const showBadge = item.view === 'Notifications' && unreadCount > 0;
             const Btn = (
               <button
                 ref={ref as any}
@@ -177,6 +197,11 @@ export default function SidebarView({}: SidebarProps) {
               >
                 <span className="nav-item__icon">{item.icon}</span>
                 {!collapsed && <span className="nav-item__label">{item.label}</span>}
+                {showBadge && (
+                  <span className="nav-item__badge">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
             );
             return (

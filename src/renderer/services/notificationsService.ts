@@ -11,11 +11,14 @@ import {
   NotificationQuery,
   NotificationStats,
   NotificationType,
-  NotificationCategory
+  NotificationCategory,
+  NotificationPreferences
 } from '../../types/notifications';
+import { BrowserWindow, Notification as SystemNotification } from 'electron';
 
 class NotificationsService {
   private readonly STORAGE_KEY = 'app_notifications';
+  private readonly PREFS_KEY = 'notification_preferences';
   private notifications: Map<string, Notification> = new Map();
   private listeners: Set<() => void> = new Set();
 
@@ -69,6 +72,41 @@ class NotificationsService {
   }
 
   /**
+   * Get preferences from storage
+   */
+  private getPreferences(): NotificationPreferences {
+    try {
+      const stored = localStorage.getItem(this.PREFS_KEY);
+      return stored ? JSON.parse(stored) : { osNotificationsEnabled: false, categoriesEnabled: {}, soundsEnabled: false, displayDuration: 0 };
+    } catch {
+      return { osNotificationsEnabled: false, categoriesEnabled: {}, soundsEnabled: false, displayDuration: 0 };
+    }
+  }
+
+  /**
+   * Show OS notification if enabled
+   */
+  private async showOsNotification(notification: Notification) {
+    const prefs = this.getPreferences();
+    if (!prefs.osNotificationsEnabled) return;
+    if (prefs.categoriesEnabled && !prefs.categoriesEnabled[notification.category]) return;
+
+    const data = {
+      title: notification.title,
+      message: notification.message,
+      metadata: notification.metadata,
+      soundsEnabled: prefs.soundsEnabled,
+      displayDuration: prefs.displayDuration
+    };
+
+    try {
+      await window.notifications.sendOs(data);
+    } catch (error) {
+      console.error('Failed to send OS notification:', error);
+    }
+  }
+
+  /**
    * Create a new notification
    */
   create(input: NotificationCreateInput): Notification {
@@ -86,6 +124,7 @@ class NotificationsService {
     this.notifications.set(notification.id, notification);
     this.saveToStorage();
     this.notifyListeners();
+    this.showOsNotification(notification);
 
     return notification;
   }
@@ -173,6 +212,28 @@ class NotificationsService {
       this.saveToStorage();
       this.notifyListeners();
     }
+  }
+
+  async changeNotifications(enabled: boolean) : Promise<boolean>
+  {
+    if (enabled) {
+      try {
+        const result = await window.notifications.sendOs({
+          title: 'Notifications Enabled',
+          message: 'You will now receive desktop notifications for important events.',
+          soundsEnabled: false,
+          displayDuration: 5,
+          metadata: {}
+        });
+        if (result.error){
+          // toast({ title: 'Error Enabling Notifications', description: result.error || 'Unable to enable notifications. Please check your system settings.', variant: 'error' });
+        }
+        return result.success
+      } catch (err) {
+          // toast({ title: 'Error Enabling Notifications', description: err || 'Unable to enable notifications. Please check your system settings.', variant: 'error' });
+      }
+    }
+    return false
   }
 
   /**
@@ -381,6 +442,31 @@ class NotificationsService {
     }
 
     return deletedCount;
+  }
+
+  handleNotificationSend(mainWindow: BrowserWindow, data: { title: string, message: string, soundsEnabled: boolean, displayDuration: number, metadata: any }) : { success: boolean, error?: string}
+  {
+    if (!SystemNotification.isSupported()) {
+      return { success: false, error: 'Notifications not supported' };
+    }
+
+    try {
+      const notification = new SystemNotification({
+        title: data.title,
+        body: data.message,
+        silent: !data.soundsEnabled,
+        timeoutType: data.displayDuration > 0 ? 'default' : 'never',
+      });
+      notification.on('click', () => {
+        mainWindow.focus();
+        mainWindow.webContents.send('notifications:clicked', data.metadata);
+      });
+
+      notification.show();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
   }
 }
 

@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
+import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
+import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
+import { notificationsService } from '../services/notificationsService';
 import { chatService } from '../services/chatService';
 import type { LLMConfig, LLMProviderType } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
@@ -12,17 +15,17 @@ import { Modal } from '../components/ui/Modal';
 // Settings Categories
 const CATEGORIES = [
   { id: 'visual', label: 'Visual' },
-  { id: 'llms', label: 'LLMs' }
+  { id: 'llms', label: 'LLMs' },
+  { id: 'notifications', label: 'Notifications' }
 ] as const;
 
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 export default function SettingsView() {
-  // Visual settings
   const themes: Theme[] = ['light', 'dark'];
   const { theme, setTheme } = useTheme();
+  const { preferences, updatePreferences } = useNotificationPreferences();
 
-  // LLM settings state
   const { configs, activeConfigId, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
   const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
@@ -40,13 +43,18 @@ export default function SettingsView() {
   const defaultUrls: Record<string, string> = {
     openai: 'https://api.openai.com/v1',
     litellm: '',
-    lmstudio: 'http://localhost:1234/v1'
+    lmstudio: 'http://localhost:1234/v1',
+    anthropic: 'https://api.anthropic.com',
+    grok: 'https://api.x.ai/v1',
+    gemini: 'https://generativelanguage.googleapis.com/v1beta',
+    custom: ''
   };
 
   const commonModels: Record<string, string[]> = {
     openai: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
     litellm: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
-    lmstudio: []
+    lmstudio: [],
+    custom: []
   };
 
   // Derive provider models for current editing
@@ -209,6 +217,60 @@ export default function SettingsView() {
       </div>
     </div>
   );
+  const renderNotificationsSection = () => (
+    <div className="max-w-3xl">
+      <h2 className="text-xl font-semibold mb-3">Notification Preferences</h2>
+      <div className="space-y-4">
+        <Switch
+          checked={preferences.osNotificationsEnabled}
+          onCheckedChange={async (checked) => {
+            const success = await notificationsService.changeNotifications(checked)
+            if (success){
+              updatePreferences({ osNotificationsEnabled: true });
+            }else{
+              updatePreferences({ osNotificationsEnabled: false });
+            }
+          }}
+          label="Enable OS Notifications"
+        />
+        <div>
+          <h3 className="font-medium mb-2">Notification Categories</h3>
+          <div className="space-y-2">
+            {Object.entries(preferences.categoriesEnabled).map(([category, enabled]) => (
+              <Switch
+                key={category}
+                checked={enabled ?? true}
+                onCheckedChange={(checked) => updatePreferences({ categoriesEnabled: { [category]: checked } })}
+                label={category.charAt(0).toUpperCase() + category.slice(1)}
+              />
+            ))}
+          </div>
+        </div>
+        <Switch
+          checked={preferences.soundsEnabled}
+          onCheckedChange={(checked) => updatePreferences({ soundsEnabled: checked })}
+          label="Enable Notification Sounds"
+        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Notification Display Duration</label>
+          <Select
+            value={preferences.displayDuration.toString()}
+            onValueChange={(value) => updatePreferences({ displayDuration: parseInt(value) })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select duration" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">3 seconds</SelectItem>
+              <SelectItem value="5">5 seconds</SelectItem>
+              <SelectItem value="10">10 seconds</SelectItem>
+              <SelectItem value="0">Persistent</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
 
   // LLM Config Modal content
   const renderConfigModal = () => {
@@ -330,14 +392,13 @@ export default function SettingsView() {
           </nav>
         </aside>
 
-        {/* Main content area */}
         <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
           {activeCategory === 'visual' && renderVisualSection()}
           {activeCategory === 'llms' && renderLLMsSection()}
+          {activeCategory === 'notifications' && renderNotificationsSection()}
         </main>
       </div>
 
-      {/* Modal for Add/Edit LLM Config */}
       {renderConfigModal()}
     </div>
   );

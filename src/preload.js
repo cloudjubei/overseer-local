@@ -42,6 +42,15 @@ const CHAT_API = {
   delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
 };
 
+const NOTIFICATIONS_API = {
+  sendOs: (data) => ipcRenderer.invoke('notifications:send-os', data),
+  onClicked: (callback) => {
+    ipcRenderer.on('notifications:clicked', (_event, metadata) => callback(metadata));
+    return () => ipcRenderer.removeListener('notifications:clicked', callback);
+  }
+};
+
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
 contextBridge.exposeInMainWorld('docsIndex', DOCS_API);
 contextBridge.exposeInMainWorld('chat', CHAT_API);
+contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);

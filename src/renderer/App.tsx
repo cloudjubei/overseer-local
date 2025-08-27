@@ -8,6 +8,7 @@ import { ShortcutsProvider, useShortcuts, match } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { initTheme } from './hooks/useTheme';
+import { NotificationMetadata } from '../types/notifications';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
@@ -31,6 +32,31 @@ function GlobalShortcutsBootstrap() {
   return null;
 }
 
+function NotificationClickHandler() {
+  const nav = useNavigator();
+
+  useEffect(() => {
+    const unsubscribe = window.notifications.onClicked((metadata: NotificationMetadata) => {
+      if (metadata.taskId) {
+        nav.navigateTaskDetails(parseInt(metadata.taskId, 10));
+      } else if (metadata.chatId) {
+        nav.navigateView('Chat');
+        // TODO: handle specific chat
+      } else if (metadata.documentPath) {
+        nav.navigateView('Documents');
+        // TODO: open specific doc
+      } else if (metadata.actionUrl) {
+        // Handle custom URL if needed
+      }
+      // Mark as read? Handled separately
+    });
+
+    return unsubscribe;
+  }, [nav]);
+
+  return null;
+}
+
 function App()
 {
   useEffect(() => { initTheme() }, [])
@@ -40,6 +66,7 @@ function App()
       <NavigatorProvider>
         <ShortcutsProvider>
           <GlobalShortcutsBootstrap />
+          <NotificationClickHandler />
           <CommandMenu />
           <ShortcutsHelp />
           <div className="flex h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">

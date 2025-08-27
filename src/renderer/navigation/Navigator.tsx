@@ -34,6 +34,8 @@ function viewPrefixToView(prefix: string): NavigationView {
       return 'Chat';
     case 'settings':
       return 'Settings';
+    case 'notifications':
+      return 'Notifications';
     case 'home':
     default:
       return 'Home';
@@ -64,7 +66,6 @@ const NavigatorContext = createContext<NavigatorApi | null>(null);
 export function NavigatorProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<NavigatorState>(() => parseHash(window.location.hash));
   const [modal, setModal] = useState<ModalState>({ modal: null });
-  const lastNonModalHashRef = useRef<string>('');
 
   useEffect(() => {
     const onHash = () => {
@@ -98,6 +99,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break;
       case 'Settings':
         window.location.hash = '#settings';
+        break;
+      case 'Notifications':
+        window.location.hash = '#notifications';
         break;
     }
   }, []);

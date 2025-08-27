@@ -5,6 +5,7 @@ import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
 import { DocsIndexer } from './docs/indexer';
 import { ChatManager } from './chat/manager';
+import { notificationsService } from './renderer/services/notificationsService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -177,4 +178,8 @@ ipcMain.handle('chat:save', (event, {chatId, messages}) => {
 
 ipcMain.handle('chat:delete', (event, chatId) => {
   chatManager.deleteChat(chatId);
+});
+
+ipcMain.handle('notifications:send-os', async (event, data) => {
+  return notificationsService.handleNotificationSend(mainWindow, data)
 });

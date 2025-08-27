@@ -105,7 +105,8 @@ repo_root/
 │  │  └─ validator.js                
 │  ├─ types/
 │  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
-│  │  └─ tasks.ts                      # Shared Task/Feature/Status types
+│  │  ├─ tasks.ts                      # Shared Task/Feature/Status types
+│  │  └─ notifications.ts              # Notification types
 │  ├─ renderer/
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx             
@@ -122,7 +123,8 @@ repo_root/
 │  │  │  │  ├─ Spinner.tsx
 │  │  │  │  ├─ Skeleton.tsx
 │  │  │  │  ├─ CommandMenu.tsx
-│  │  │  │  └─ ShortcutsHelp.tsx
+│  │  │  │  ├─ ShortcutsHelp.tsx
+│  │  │  │  └─ Switch.tsx
 │  │  │  ├─ tasks/
 │  │  │  │  ├─ StatusBadge.tsx
 │  │  │  │  ├─ PriorityTag.tsx
@@ -132,7 +134,8 @@ repo_root/
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts
 │  │  │  ├─ docsService.ts
-│  │  │  └─ tasksService.ts
+│  │  │  ├─ tasksService.ts
+│  │  │  └─ notificationsService.ts
 │  │  ├─ hooks/
 │  │  │  ├─ useChats.ts
 │  │  │  ├─ useDocsIndex.ts
@@ -140,13 +143,16 @@ repo_root/
 │  │  │  ├─ useLLMConfig.ts
 │  │  │  ├─ useNextTaskId.ts
 │  │  │  ├─ useShortcuts.tsx
-│  │  │  └─ useTheme.ts           
+│  │  │  ├─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
+│  │  │  ├─ useNotifications.ts
+│  │  │  └─ useNotificationPreferences.ts
 │  │  ├─ screens/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx               
-│  │  │  └─ SettingsView.tsx           
+│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
+│  │  │  ├─ SettingsView.tsx           # Settings screen with theme and LLM configurations
+│  │  │  └─ NotificationsView.tsx
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx         
 │  │  │  ├─ TaskEditView.tsx
