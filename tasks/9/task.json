@@ -3,5 +3,87 @@
   "status": "-",
   "title": "Manage projects",
   "description": "List child projects under projects/ (the .json configs according to the interface `ProjectSpec` defined in `/src/types/tasks.ts`). For each project, based on the data in the config json, allow task and similar inspection to everything just like for this project. Each child project has its own tasks list. All functionality that is already present here, should be available for any child project.",
-  "features": []
+  "features": [
+    {
+      "id": "9.1",
+      "status": "-",
+      "title": "Define ProjectSpec type and project directory structure",
+      "description": "Create or update the ProjectSpec interface in /src/types/tasks.ts to define the structure of child project configuration files. Establish the projects/ directory structure and define the JSON schema that child projects must follow.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.2",
+      "status": "-",
+      "title": "Create project scanning and loading service",
+      "description": "Implement a projectsService that can scan the projects/ directory for .json config files, validate them against the ProjectSpec interface, and provide methods to load, list, and manage child projects. This service should handle reading project metadata and configurations.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.3",
+      "status": "-",
+      "title": "Add project context management",
+      "description": "Create a project context system that tracks the currently selected project (main project vs child projects). This should include hooks and state management to allow switching between projects and maintaining the active project context throughout the application.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.4",
+      "status": "-",
+      "title": "Update navigation to show child projects",
+      "description": "Modify the sidebar navigation (SidebarView.tsx) to display a list of available child projects. Add project selection UI that allows users to switch between the main project and any child projects. Include visual indicators for the currently active project.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.5",
+      "status": "-",
+      "title": "Make tasks service project-aware",
+      "description": "Update the tasksService to work with project context. Modify task loading, saving, and indexing to use the correct project directory (either root tasks/ or projects/{project-id}/tasks/). Ensure task operations respect the currently selected project context.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.6",
+      "status": "-",
+      "title": "Make docs service project-aware",
+      "description": "Update the docsService to work with project context. Modify document indexing and search to use the correct project directory (either root docs/ or projects/{project-id}/docs/). Ensure document operations respect the currently selected project context.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.7",
+      "status": "-",
+      "title": "Update all task views to work with project context",
+      "description": "Modify TasksListView, TaskDetailsView, TaskCreateView, TaskEditView, and related components to work within the selected project context. Ensure all task-related operations (create, edit, delete, status changes) work correctly for both main project and child projects.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.8",
+      "status": "-",
+      "title": "Add project management UI",
+      "description": "Create interfaces for managing child projects: create new child projects, edit existing project configurations, and delete child projects. This should include forms for project metadata (name, description, etc.) and validation of project configurations.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9.9",
+      "status": "-",
+      "title": "Ensure feature and chat services work with project context",
+      "description": "Update any remaining services (chat service, notification service) to work correctly within project context. Ensure that features, chat sessions, and notifications are properly scoped to the selected project when applicable.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ]
 }
