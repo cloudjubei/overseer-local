@@ -133,7 +133,7 @@
     },
     {
       "id": "7.12",
-      "status": "+",
+      "status": "-",
       "title": "Tasks list and features list should allow their lists to scroll",
       "description": "The whole screen doesn't scroll - just the list of items inside",
       "plan": "",
@@ -143,11 +143,12 @@
         "src/renderer/tasks/TaskDetailsView.tsx",
         "src/renderer/tasks/TasksListView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "still cannot scroll in either of these screens. This is very frustrating."
     },
     {
       "id": "7.13",
-      "status": "+",
+      "status": "-",
       "title": "Documents screen - each section allows scrolling",
       "description": "The whole screen doesn't scroll - just the list of items inside the documents list and the document itself - both separately.",
       "plan": "",
@@ -156,11 +157,12 @@
         "src/renderer/screens/DocumentsView.tsx",
         "src/renderer/docs/DocumentsBrowserView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "still cannot scroll in this screen. This is very frustrating."
     },
     {
       "id": "7.14",
-      "status": "+",
+      "status": "-",
       "title": "Chats screen - each section allows scrolling",
       "description": "The whole screen doesn't scroll - just the list of items inside the chats list and the chat messages itself (ONLY THE MESSAGES, the top settings and bottom message composer are stuck)",
       "plan": "",
@@ -168,7 +170,8 @@
         "src/renderer/screens/SidebarView.tsx",
         "src/renderer/screens/ChatView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "still cannot scroll in this screen. This is very frustrating."
     },
     {
       "id": "7.15",
@@ -373,9 +376,10 @@
       "id": "7.27",
       "status": "-",
       "title": "Reuse the sidepanel for Docs, Chat and Notifications",
-      "description": "Docs, Chat and Notifications all should have the sidepanel Settings has. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages.",
+      "description": "Docs, Chat and Notifications all should have the sidepanel Settings has. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
       "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
         "src/renderer/screens/SettingsView.tsx",
         "src/renderer/screens/ChatView.tsx",
         "src/renderer/screens/DocumentsView.tsx",
