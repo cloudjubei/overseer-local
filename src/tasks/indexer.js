@@ -539,4 +539,78 @@ export class TasksIndexer {
         await this.rebuildAndNotify(`Task ${taskId} updated`);
         return { ok: true };
     }
+
+    async addFeature(taskId, feature) {
+        console.log(`Adding feature to task ${taskId}`);
+        const taskPath = path.join(this.tasksDir, String(taskId), 'task.json');
+        let taskData;
+        try {
+            const rawData = await fs.readFile(taskPath, 'utf-8');
+            taskData = JSON.parse(rawData);
+        } catch (e) {
+            throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
+        }
+
+        const newIndex = taskData.features.length + 1;
+        const newId = `${taskId}.${newIndex}`;
+        const newFeature = {
+            id: newId,
+            status: feature.status || '-',
+            title: feature.title || '',
+            description: feature.description || '',
+            plan: feature.plan || '',
+            context: feature.context || [],
+            acceptance: feature.acceptance || [],
+            dependencies: feature.dependencies || [],
+            rejection: feature.rejection
+        };
+        taskData.features.push(newFeature);
+
+        const { valid, errors } = validateTask(taskData);
+        if (!valid) {
+            throw new Error(`Invalid task after adding feature: ${errors.join(', ')}`);
+        }
+
+        await fs.writeFile(taskPath, JSON.stringify(taskData, null, 2), 'utf-8');
+        await this.rebuildAndNotify(`Feature added to task ${taskId}, index rebuilt.`);
+        return { ok: true };
+    }
+
+    async addTask(task) {
+        console.log('Adding new task');
+        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+        const existingIds = taskDirs
+            .filter(d => d.isDirectory() && isNumericDir(d.name))
+            .map(d => parseInt(d.name, 10));
+        const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+
+        const newTaskDir = path.join(this.tasksDir, String(nextId));
+        await fs.mkdir(newTaskDir, { recursive: true });
+
+        const newTask = {
+            id: nextId,
+            status: task.status || '-',
+            title: task.title || '',
+            description: task.description || '',
+            features: task.features || [],
+            rejection: task.rejection
+        };
+
+        newTask.features = newTask.features.map((f, index) => ({
+            ...f,
+            id: `${nextId}.${index + 1}`,
+            status: f.status || '-'
+        }));
+
+        const { valid, errors } = validateTask(newTask);
+        if (!valid) {
+            await fs.rm(newTaskDir, { recursive: true, force: true });
+            throw new Error(`Invalid new task: ${errors.join(', ')}`);
+        }
+
+        const taskPath = path.join(newTaskDir, 'task.json');
+        await fs.writeFile(taskPath, JSON.stringify(newTask, null, 2), 'utf-8');
+        await this.rebuildAndNotify(`New task ${nextId} added, index rebuilt.`);
+        return { ok: true };
+    }
 }

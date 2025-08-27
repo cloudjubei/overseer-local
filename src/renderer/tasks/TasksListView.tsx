@@ -221,7 +221,7 @@ export default function TasksListView() {
   }
 
   return (
-    <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
+    <section className="overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
       <div className="tasks-toolbar">
         <div className="left">
           <div className="control">
