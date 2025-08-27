@@ -362,25 +362,13 @@
     {
       "id": "7.24",
       "status": "-",
-      "title": "Home - Board view - horizontal problems",
-      "description": "If the screen isn't wide enough, not all sections can show - following Linear and Monday to resolve this.",
+      "title": "Creating a feature doesn't work",
+      "description": "The required connector/IPC isn't implemented - i.e. tasksService.addFeature doesn't work",
       "plan": "",
       "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": [
-        "Board columns overflow horizontally with a scrollable viewport when not all fit.",
-        "Edge gradient hints appear when content is scrollable left/right.",
-        "Sticky left/right nav buttons allow scrolling by approximately one column.",
-        "Keyboard Left/Right scroll the board; Shift+mouse wheel scrolls horizontally.",
-        "Column headers remain visible (sticky) while scrolling within columns."
+        "src/renderer/screens/TasksDetailView.tsx",
+        "src/renderer/screens/FeatureCreateView.tsx",
+        "src/renderer/screens/FeatureEditView.tsx"
       ]
     }
   ]

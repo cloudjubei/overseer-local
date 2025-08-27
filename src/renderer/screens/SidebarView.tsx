@@ -81,7 +81,7 @@ export default function SidebarView({}: SidebarProps) {
         e.preventDefault();
         if (isMobile) setMobileOpen((v) => !v);
         else setCollapsed((v) => !v);
-      }ectified
+      }
       if (isMobile && e.key === 'Escape' && mobileOpen) {
         setMobileOpen(false);
         // restore focus to trigger

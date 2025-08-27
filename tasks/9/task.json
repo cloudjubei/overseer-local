@@ -34,12 +34,14 @@
     {
       "id": "9.4",
       "status": "-",
-      "title": "Tool for running anything",
+      "title": "Tool for running any code",
       "description": "Similarly to feature 9.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": ["9.3"]
+      "dependencies": [
+        "9.3"
+      ]
     }
   ]
 }
