@@ -6,6 +6,8 @@ export const docsService = {
   getFile: (relPath: string) => window.docsIndex.getFile(relPath),
   saveFile: (relPath: string, content: string) => window.docsIndex.saveFile(relPath, content),
   upload: (name: string, content: string) => window.docsIndex.upload(name, content),
+  // NEW: set project context for docs ("main" or child project id)
+  setContext: (projectId: 'main' | string) => window.docsIndex.setContext(projectId),
 };
 
 export function extractPathsFromIndexTree(tree: any): string[] {

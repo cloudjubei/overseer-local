@@ -78,7 +78,7 @@
     },
     {
       "id": "8.5",
-      "status": "-",
+      "status": "+",
       "title": "Make docs service project-aware",
       "description": "Update the docsService to work with project context. Modify document indexing and search to use the correct project directory (either root docs/ or projects/{project-id}/docs/). Ensure document operations respect the currently selected project context.",
       "plan": "",

@@ -32,6 +32,8 @@ const DOCS_API = {
   getFile: (relPath) => ipcRenderer.invoke('docs-file:get', { relPath }),
   saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
   upload: (name, content) => ipcRenderer.invoke('docs:upload', { name, content }),
+  // NEW: set active docs context (project-aware)
+  setContext: (projectId) => ipcRenderer.invoke('docs:set-context', { projectId }),
 };
 
 const CHAT_API = {

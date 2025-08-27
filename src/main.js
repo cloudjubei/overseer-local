@@ -155,6 +155,30 @@ ipcMain.handle('docs-index:get', async () => {
   return docsIndexer.getIndex();
 });
 
+ipcMain.handle('docs:set-context', async (event, { projectId }) => {
+  try {
+    let targetDir;
+    if (!projectId || projectId === 'main') {
+      targetDir = docsIndexer.getDefaultDocsDir();
+    } else {
+      const snap = projectsIndexer.getIndex();
+      const spec = snap.projectsById?.[projectId];
+      const projectsDirAbs = path.resolve(snap.projectsDir);
+      if (spec) {
+        const projectAbs = path.resolve(projectsDirAbs, spec.path);
+        targetDir = path.join(projectAbs, 'docs');
+      } else {
+        targetDir = docsIndexer.getDefaultDocsDir();
+      }
+    }
+    const res = await docsIndexer.setDocsDir(targetDir);
+    return res;
+  } catch (e) {
+    console.error('Failed to set docs context:', e);
+    return docsIndexer.getIndex();
+  }
+});
+
 ipcMain.handle('docs-file:get', async (event, { relPath }) => {
   return await docsIndexer.getFile(relPath);
 });

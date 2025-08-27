@@ -49,8 +49,9 @@ This document describes how files and directories are organised in this reposito
     - SidebarView.tsx ← NEW: Sidebar component rendering primary nav and Projects list (main + child projects)
   - src/renderer/services/: Renderer-side service modules (IPC access)
     - projectsService.ts: Lists and gets child projects via preload window.projectsIndex.
+    - docsService.ts: Project-aware docs service; subscribes to docs index updates; can switch context via window.docsIndex.setContext.
   - src/renderer/projects/: Renderer-side project context
-    - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app.
+    - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app. Propagates context to tasks and docs indexers via preload APIs.
 - src/tools/: Library of standard tools for agents.
   - src/tools/standardTools.js: Defines tool schemas and implementations for standard agent tools.
 - docs/: Project documentation and specifications.
@@ -87,7 +88,7 @@ Notes:
   - src/projects/indexer.js: Scans the projects/ directory for .json files, validates them against ProjectSpec, builds an index, and watches for changes. Emits 'projects-index:update' via IPC.
   - src/projects/validator.js: Runtime validation of ProjectSpec objects.
 - src/renderer/services/projectsService.ts: Renderer-side service that accesses window.projectsIndex to list and load child projects.
-- src/renderer/projects/ProjectContext.tsx: Renderer-side provider and hooks to manage the active project context (main vs child projects) across the app. Persists selection and stays in sync with the projects index.
+- src/renderer/projects/ProjectContext.tsx: Renderer-side provider and hooks to manage the active project context (main vs child projects) across the app. Persists selection and stays in sync with the projects index. Propagates context to tasks and docs indexers.
 - IPC exposure:
   - Preload: window.projectsIndex with get() and subscribe(callback) methods.
   - Main: ipcMain.handle('projects-index:get') returns the latest projects index snapshot.
@@ -96,6 +97,22 @@ Projects directory expectations
 - Location: <project-root>/projects/
 - Files: One or more .json config files matching the ProjectSpec interface (see src/types/tasks.ts).
 - Security: ProjectSpec.path is normalized and must resolve under projects/; configs escaping this directory are ignored and reported as errors.
+
+## Docs subsystem (project-aware)
+- src/docs/indexer.js: Indexes Markdown documents under the active docs directory. Now project-aware:
+  - getDefaultDocsDir(): <project-root>/docs
+  - setDocsDir(absPath): switch the active docs directory to a new path (e.g., <project-root>/projects/{id}/docs), rebuilds the index, restarts watchers, and notifies renderer via 'docs-index:update'.
+- Preload API: window.docsIndex
+  - get(), subscribe(cb)
+  - getFile(relPath), saveFile(relPath, content), upload(name, content)
+  - setContext(projectId): Tell main process to switch docs directory to root or a child project's docs.
+- Main IPC:
+  - 'docs-index:get' → returns current docs index snapshot
+  - 'docs:set-context' → computes target docs dir based on projectId and calls DocsIndexer.setDocsDir()
+  - 'docs-file:get' / 'docs-file:save' / 'docs:upload' → operate within the active docs directory
+- Renderer services:
+  - src/renderer/services/docsService.ts exposes setContext(projectId) in addition to get/subscribe/getFile/saveFile/upload.
+  - ProjectContext.tsx calls window.docsIndex.setContext(activeProjectId) whenever the active project changes.
 
 ## File Naming Conventions
 - Tasks and features:
@@ -126,24 +143,26 @@ repo_root/
 ├─ src/
 │  ├─ chat/
 │  ├─ docs/
+│  │  └─ indexer.js                ← Docs indexer (project-aware)
 │  ├─ tasks/
-│  ├─ projects/               ← NEW: child projects indexer + validator
+│  ├─ projects/               ← child projects indexer + validator
 │  │  ├─ indexer.js
 │  │  └─ validator.js
 │  ├─ types/
 │  ├─ renderer/
 │  │  ├─ services/
-│  │  │  └─ projectsService.ts
+│  │  │  ├─ projectsService.ts
+│  │  │  └─ docsService.ts        ← now exposes setContext(projectId)
 │  │  ├─ projects/
-│  │  │  └─ ProjectContext.tsx  ← NEW: active project provider + hooks
+│  │  │  └─ ProjectContext.tsx  ← active project provider + hooks (syncs tasks/docs contexts)
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx
-│  │  │  └─ SidebarView.tsx      ← NEW: sidebar with projects list and selection UI
+│  │  │  └─ SidebarView.tsx
 │  │  └─ ...
 │  ├─ styles/
 │  ├─ index.css
-│  ├─ main.js                 ← wired IPC for projects-index
-│  └─ preload.js              ← exposes window.projectsIndex API
+│  ├─ main.js                 ← wired IPC for projects-index, tasks, and docs set-context
+│  └─ preload.js              ← exposes window.projectsIndex, window.tasksIndex, and window.docsIndex.setContext
 ├─ tasks/
 ├─ projects/                  ← Scanned JSON configs for child projects
 ├─ package.json

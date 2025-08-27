@@ -112,11 +112,16 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return snapshot.projectsById[activeProjectId] || null
   }, [snapshot, activeProjectId])
 
-  // Sync active project with tasks indexer context in main via preload API
+  // Sync active project with tasks and docs indexer context in main via preload API
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined' && window.tasksIndex && typeof window.tasksIndex.setContext === 'function') {
-        window.tasksIndex.setContext(activeProjectId)
+      if (typeof window !== 'undefined') {
+        if (window.tasksIndex && typeof window.tasksIndex.setContext === 'function') {
+          window.tasksIndex.setContext(activeProjectId)
+        }
+        if (window.docsIndex && typeof window.docsIndex.setContext === 'function') {
+          window.docsIndex.setContext(activeProjectId)
+        }
       }
     } catch { /* ignore */ }
   }, [activeProjectId])

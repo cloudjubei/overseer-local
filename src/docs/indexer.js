@@ -45,8 +45,22 @@ export class DocsIndexer {
     return this.index;
   }
 
+  getDefaultDocsDir() {
+    return path.join(this.projectRoot, 'docs');
+  }
+
   async init() {
     await this.buildIndex();
+    await this._startWatcher();
+  }
+
+  async _startWatcher() {
+    // Close existing watcher if present
+    if (this.watcher) {
+      try { await this.watcher.close(); } catch {}
+      this.watcher = null;
+    }
+
     this.watcher = chokidar.watch(path.join(this.docsDir, '**/*.md'), {
       ignored: /(^|[\/\\])\../,
       persistent: true,
@@ -61,6 +75,27 @@ export class DocsIndexer {
       .on('unlinkDir', (p) => this.rebuildAndNotify(`Dir removed: ${p}`));
   }
 
+  async setDocsDir(nextDir) {
+    const normalizedNext = path.resolve(nextDir);
+    const normalizedCurrent = path.resolve(this.docsDir);
+    if (normalizedNext === normalizedCurrent) {
+      // No change
+      return this.getIndex();
+    }
+
+    // Switch directory: stop watcher, set dir, rebuild, restart watcher, notify
+    this.stopWatching();
+    this.docsDir = normalizedNext;
+    // Reflect in current index object immediately to avoid stale uploadsDir lookups
+    this.index.docsDir = this.docsDir;
+    await this.buildIndex();
+    await this._startWatcher();
+    if (this.window) {
+      this.window.webContents.send('docs-index:update', this.getIndex());
+    }
+    return this.getIndex();
+  }
+
   async rebuildAndNotify(logMessage) {
     if (logMessage) console.log(logMessage);
     await this.buildIndex();
@@ -73,6 +108,7 @@ export class DocsIndexer {
     const startTime = Date.now();
     const newIndex = {
       ...this.index,
+      docsDir: this.docsDir,
       updatedAt: new Date().toISOString(),
       tree: this._makeDirNode('docs', '', this.docsDir),
       files: [],
@@ -120,6 +156,8 @@ export class DocsIndexer {
     try {
       entries = await fs.readdir(absDir, { withFileTypes: true });
     } catch (e) {
+      // It's OK if the dir doesn't exist yet; treat as empty
+      if (e && e.code === 'ENOENT') return;
       errorsAcc.push({ type: 'readdir', dir: absDir, message: e.message || String(e) });
       return;
     }
