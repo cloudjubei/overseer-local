@@ -36,14 +36,15 @@
     },
     {
       "id": "5.4",
-      "status": "-",
+      "status": "?",
       "title": "Hot preview",
       "description": "It would be ideal for an agent to immediately see the effect of their work (preview work tool). So after they change some files, they could request screenshots of how the code/app that they just created renders. This can be based on this project. A methodology needs to be established.",
       "context": [],
       "acceptance": [],
       "dependencies": [
         "5.1"
-      ]
+      ],
+      "rejection": "Blocked: Unclear implementation path for screenshot capture in the agent tool context. The tools are in Node.js, lacking direct access to Electron's BrowserWindow for capturePage. Adding to chat tools requires vision support not present in current setup. No clear way to handle hot reloading and preview without additional environment details or dependencies."
     },
     {
       "id": "5.5",
