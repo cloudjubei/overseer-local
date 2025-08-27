@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "5.1",
-      "status": "-",
+      "status": "+",
       "title": "Standard tools",
       "description": "Create a set of standard agent tools that live in a library like code that have documentation that always gets updated whenever there's a new tool added. This document is meant to be passed to an agent so that it knows precisely how to use the tools. The doc needs to be concise and not contain too many descriptions.",
       "context": [],
