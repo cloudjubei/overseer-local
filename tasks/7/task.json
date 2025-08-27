@@ -133,7 +133,7 @@
     },
     {
       "id": "7.12",
-      "status": "+",
+      "status": "-",
       "title": "Tasks list and features list should allow their lists to scroll",
       "description": "The whole screen doesn't scroll - just the list of items inside",
       "plan": "",
@@ -144,7 +144,7 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "rejection": "still cannot scroll in either of these screens. This is very frustrating."
+      "rejection": "still cannot scroll in either of these screens. These and Docs and chats also don't allow for scrolling - maybe the issue is in the sidebar or somewhere else?! This is extremely frustrating."
     },
     {
       "id": "7.13",
