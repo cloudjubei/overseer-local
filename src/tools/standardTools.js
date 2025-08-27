@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
+const fetch = require('node-fetch');
 
 const standardToolSchemas = [
   {
@@ -53,6 +54,28 @@ const standardToolSchemas = [
       properties: {},
       required: []
     }
+  },
+  {
+    name: 'web_search_duckduckgo',
+    description: 'Search the web using DuckDuckGo.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'web_search_serpapi',
+    description: 'Search the web using Google via SerpAPI. Requires SERPAPI_KEY in environment.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string' }
+      },
+      required: ['query']
+    }
   }
 ];
 
@@ -82,6 +105,25 @@ const standardToolFunctions = {
   },
   run_test() {
     return 'Test results.';
+  },
+  async web_search_duckduckgo({ query }) {
+    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
+    const response = await fetch(url);
+    const data = await response.json();
+    let results = data.Abstract ? [data.Abstract] : [];
+    if (data.RelatedTopics) {
+      results = results.concat(data.RelatedTopics.map(t => t.Text));
+    }
+    return results.join('\n') || 'No results found.';
+  },
+  async web_search_serpapi({ query }) {
+    const apiKey = process.env.SERPAPI_KEY;
+    if (!apiKey) return 'SerpAPI key not set.';
+    const url = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${apiKey}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const results = data.organic_results ? data.organic_results.map(r => `${r.title}: ${r.snippet}`) : [];
+    return results.join('\n') || 'No results found.';
   }
 };
 

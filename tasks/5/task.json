@@ -14,7 +14,7 @@
     },
     {
       "id": "5.2",
-      "status": "-",
+      "status": "+",
       "title": "Web search tool",
       "description": "Create at least two versions of web search tools for the agent (for 2 different standard providers).",
       "context": [],
