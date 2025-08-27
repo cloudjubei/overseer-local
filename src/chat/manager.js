@@ -1,9 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { BaseProvider } from './providers/base';
-import { OpenAIProvider } from './providers/openai';
-import { LiteLLMProvider } from './providers/litellm';
-import { LMStudioProvider } from './providers/lmstudio';
+import { LLMProvider } from './LLMProvider';
 
 export class ChatManager {
   constructor(projectRoot, tasksIndexer, docsIndexer) {
@@ -16,23 +13,9 @@ export class ChatManager {
     }
   }
 
-  getProvider(config) {
-    const provider = config.provider || 'litellm';
-    const providerClasses = {
-      openai: OpenAIProvider,
-      litellm: LiteLLMProvider,
-      lmstudio: LMStudioProvider
-    };
-    const ProviderClass = providerClasses[provider];
-    if (!ProviderClass) {
-      throw new Error(`Unknown provider: ${provider}`);
-    }
-    return new ProviderClass(config);
-  }
-
-  async getCompletion({messages, config}) {
+  async getCompletion({ messages, config }) {
     try {
-      const systemPrompt = {role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc. You can create new documents using create_doc.'};
+      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc. You can create new documents using create_doc.' };
       let currentMessages = [systemPrompt, ...messages];
       const tools = [
         {
@@ -40,16 +23,16 @@ export class ChatManager {
           function: {
             name: 'list_tasks',
             description: 'List all tasks in the project',
-            parameters: { type: 'object', properties: {} }
-          }
+            parameters: { type: 'object', properties: {} },
+          },
         },
         {
           type: 'function',
           function: {
             name: 'list_docs',
             description: 'List all documents in the project',
-            parameters: { type: 'object', properties: {} }
-          }
+            parameters: { type: 'object', properties: {} },
+          },
         },
         {
           type: 'function',
@@ -59,11 +42,11 @@ export class ChatManager {
             parameters: {
               type: 'object',
               properties: {
-                path: { type: 'string', description: 'Relative path to the doc' }
+                path: { type: 'string', description: 'Relative path to the doc' },
               },
-              required: ['path']
-            }
-          }
+              required: ['path'],
+            },
+          },
         },
         {
           type: 'function',
@@ -74,12 +57,12 @@ export class ChatManager {
               type: 'object',
               properties: {
                 name: { type: 'string', description: 'Name of the document (relative path, including .md extension)' },
-                content: { type: 'string', description: 'Content of the document' }
+                content: { type: 'string', description: 'Content of the document' },
               },
-              required: ['name', 'content']
-            }
-          }
-        }
+              required: ['name', 'content'],
+            },
+          },
+        },
       ];
       const toolsMap = {
         list_tasks: async () => JSON.stringify(this.tasksIndexer.getIndex().tasksById),
@@ -105,22 +88,26 @@ export class ChatManager {
           } catch (error) {
             return `Error creating document: ${error.message}`;
           }
-        }
+        },
       };
 
-      const llmProvider = this.getProvider(config);
+      const provider = new LLMProvider(config);
 
       while (true) {
-        const response = await llmProvider.createCompletion({
+        const response = await provider.createCompletion({
           model: config.model,
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,
           tool_choice: tools.length > 0 ? 'auto' : undefined,
-          stream: false
+          stream: false,
         });
-        const message = response.choices[0].message;
 
-        if (!message.tool_calls || message.tool_calls.length == 0) {
+        const message = response?.choices?.[0]?.message;
+        if (!message) {
+          throw new Error('LLM returned an unexpected response format.');
+        }
+
+        if (!message.tool_calls || message.tool_calls.length === 0) {
           return message;
         }
 
@@ -128,7 +115,7 @@ export class ChatManager {
 
         for (const toolCall of message.tool_calls) {
           const functionName = toolCall.function.name;
-          const functionArgs = JSON.parse(toolCall.function.arguments);
+          const functionArgs = JSON.parse(toolCall.function.arguments || '{}');
           const functionToCall = toolsMap[functionName];
           if (!functionToCall) {
             throw new Error(`Unknown tool: ${functionName}`);
@@ -137,27 +124,41 @@ export class ChatManager {
           currentMessages.push({
             role: 'tool',
             tool_call_id: toolCall.id,
-            content: JSON.stringify(functionResponse)
+            content: JSON.stringify(functionResponse),
           });
         }
       }
     } catch (error) {
-      console.error('Error in chat completion:', error);
-      return { role: 'assistant', content: `An error occurred: ${error.message}` };
+      // Provide richer diagnostics to the UI
+      const details = [
+        error?.message,
+        error?.response?.data ? JSON.stringify(error.response.data) : null,
+        error?.cause?.message || null,
+      ]
+        .filter(Boolean)
+        .join('\n');
+      console.error('Error in chat completion:', details);
+      return { role: 'assistant', content: `An error occurred: ${details}` };
     }
   }
 
   async listModels(config) {
     try {
-      const provider = this.getProvider(config);
-      return await provider.listModels();
+      const provider = new LLMProvider(config);
+      if (typeof provider.listModels === 'function') {
+        return await provider.listModels();
+      }
+      return [];
     } catch (error) {
       throw error;
     }
   }
 
   listChats() {
-    return fs.readdirSync(this.chatsDir).filter(file => file.endsWith('.json')).map(file => file.replace('.json', ''));
+    return fs
+      .readdirSync(this.chatsDir)
+      .filter((file) => file.endsWith('.json'))
+      .map((file) => file.replace('.json', ''));
   }
 
   createChat() {

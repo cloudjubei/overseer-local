@@ -47,32 +47,63 @@ This document describes how files and directories are organised in this reposito
     - BoardView.tsx: Kanban-style board with columns by status.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
-- src/tools/: Library of standard tools for agents.
-  - src/tools/standardTools.js: Defines tool schemas and implementations for standard agent tools.
+    - ModalHost.tsx
+  - src/renderer/settings/
+    - SettingsLLMConfigModal.tsx: Modal used for adding/editing LLM provider configurations. Opened via Navigator + ModalHost.
+  - src/renderer/services/
+    - chatService.ts
+    - docsService.ts
+    - tasksService.ts
+    - notificationsService.ts
+  - src/renderer/hooks/
+    - useChats.ts
+    - useDocsIndex.ts
+    - useDocsAutocomplete.ts
+    - useLLMConfig.ts
+    - useNextTaskId.ts
+    - useShortcuts.tsx
+    - useTheme.ts
+    - useNotifications.ts
+    - useNotificationPreferences.ts
+  - src/renderer/screens/
+    - SidebarView.tsx
+    - TasksView.tsx
+    - DocumentsView.tsx
+    - ChatView.tsx
+    - SettingsView.tsx
+    - NotificationsView.tsx
+  - src/renderer/tasks/
+    - TaskCreateView.tsx
+    - TaskEditView.tsx
+    - FeatureCreateView.tsx
+    - FeatureEditView.tsx
+  - src/renderer/App.tsx
+  - src/renderer/types.ts
+- src/chat/ (providers and manager) – may be supplied by preload/main glue.
+- src/tools/
+  - standardTools.js
 - docs/: Project documentation and specifications.
-  - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
-  - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
-  - design/: Design system references and tokens.
-    - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
-    - design/DESIGN_SYSTEM.md: Comprehensive design system documentation (principles, tokens, typography, spacing, elevation, motion, radii, theming, accessibility, extension guidance).
-    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltips, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
-    - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
-  - ux/: UX research and guidelines.
-    - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
-  - styleguide/: Living style guide that demonstrates tokens and components using actual CSS.
-    - styleguide/index.html: Static style guide (light/dark + density toggle) importing src/styles/design-tokens.css and src/index.css.
-    - styleguide/README.md: How to view and use the style guide.
-  - tailwind.config.tokens.example.js: Example Tailwind extension mapping to CSS variable tokens.
+  - BUILD_SIGNING.md
+  - STANDARDS.md
+  - design/
+    - DESIGN_TOKENS.md
+    - DESIGN_SYSTEM.md
+    - COMPONENTS.md
+    - MONDAY_PALETTE_REFERENCE.md
+  - ux/
+    - LINEAR_UX_GUIDELINES.md
+  - styleguide/
+    - index.html
+    - README.md
+  - tailwind.config.tokens.example.js
 - tasks/: Per-task workspaces containing task metadata and tests.
-  - tasks/{id}/task.json: Canonical task definition for a single task.
-  - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
+  - tasks/{id}/task.json
+  - tasks/{id}/tests/
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
-  - build/icons/icon.icns: Placeholder macOS app icon to be replaced with a real ICNS file.
-  - build/icons/icon.ico: Placeholder Windows app icon to be replaced with a real ICO file.
-  - build/icons/icon.png: Placeholder Linux app icon to be replaced with a real 512x512 PNG file.
-  - build/entitlements.mac.plist: macOS entitlements for main app (hardened runtime/JIT allowances).
-- .env, and other setup files may exist as needed.
+  - build/icons/icon.icns, icon.ico, icon.png
+  - build/entitlements.mac.plist
+- .env, forge.config.js, index.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
 
 Notes:
 - All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.
@@ -132,7 +163,9 @@ repo_root/
 │  ├─ renderer/
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx             
-│  │  │  └─ ModalHost.tsx              
+│  │  │  └─ ModalHost.tsx 
+│  │  ├─ settings/
+│  │  │  └─ SettingsLLMConfigModal.tsx             
 │  │  ├─ components/
 │  │  │  ├─ ui/
 │  │  │  │  ├─ Alert.tsx
@@ -176,6 +209,8 @@ repo_root/
 │  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
 │  │  │  ├─ SettingsView.tsx           # Settings screen with theme and LLM configurations
 │  │  │  └─ NotificationsView.tsx
+│  │  ├─ utils/
+│  │  │  └─ LLMConfigManager.ts
 │  │  ├─ tasks/
 │  │  │  ├─ TaskCreateView.tsx         
 │  │  │  ├─ TaskEditView.tsx
