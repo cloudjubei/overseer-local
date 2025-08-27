@@ -148,7 +148,7 @@
     },
     {
       "id": "7.13",
-      "status": "-",
+      "status": "+",
       "title": "Documents screen - each section allows scrolling",
       "description": "The whole screen doesn't scroll - just the list of items inside the documents list and the document itself - both separately.",
       "plan": "",
