@@ -216,8 +216,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
         </div>
       </header>
 
-      <main className="details-content flex-1">
-        <section className="panel">
+      <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
+        <section className="panel shrink-0">
           <div className="section-header">
             <h2 className="section-title">Overview</h2>
             <div className="section-actions">
@@ -229,8 +229,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
-        <section className="panel overflow-hidden">
-          <div className="section-header">
+        <section className="panel flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
             <div className="section-actions">
               <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
@@ -240,10 +240,10 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           </div>
 
           {features.length === 0 ? (
-            <div className="empty">No features defined for this task.</div>
+            <div className="flex-1 min-h-0 overflow-y-auto empty">No features defined for this task.</div>
           ) : (
             <ul
-              className={`features-list ${dragging ? 'dnd-active' : ''}`}
+              className={`flex-1 min-h-0 overflow-y-auto features-list ${dragging ? 'dnd-active' : ''}`}
               role="list"
               aria-label="Features"
               ref={ulRef}

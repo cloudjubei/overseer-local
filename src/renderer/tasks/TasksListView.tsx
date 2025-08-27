@@ -221,8 +221,8 @@ export default function TasksListView() {
   }
 
   return (
-    <section className="overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
-      <div className="tasks-toolbar">
+    <section className="flex flex-col h-full overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
+      <div className="tasks-toolbar shrink-0">
         <div className="left">
           <div className="control">
             <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -256,105 +256,107 @@ export default function TasksListView() {
         </div>
       </div>
 
-      <div id="tasks-count" className="tasks-count" aria-live="polite">
+      <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
         Showing {filtered.length} of {allTasks.length} tasks
       </div>
 
-      {view === 'board' ? (
-        <BoardView tasks={filtered} />
-      ) : (
-        <div id="tasks-results" className="tasks-results" tabIndex={-1}>
-          {filtered.length === 0 ? (
-            <div className="empty">No tasks found.</div>
-          ) : (
-            <ul
-              className={`tasks-list ${dragging ? 'dnd-active' : ''}`}
-              role="list"
-              aria-label="Tasks"
-              ref={ulRef}
-              onDragOver={(e) => {
-                if (dndEnabled) {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = 'move';
-                }
-              }}
-              onDrop={onListDrop}
-              onDragEnd={() => clearDndState()}
-            >
-              {filtered.map((t, idx) => {
-                const { done, total } = countFeatures(t)
-                const priority = parsePriorityFromTitle(t.title)
-                const isDragSource = dragTaskId === t.id
-                const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
-                const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
-                return (
-                  <li key={t.id} className="task-item" role="listitem">
-                    {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
-                    <div
-                      className={`task-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''}`}
-                      tabIndex={0}
-                      role="button"
-                      data-index={idx}
-                      draggable={dndEnabled}
-                      aria-grabbed={isDragSource}
-                      onDragStart={(e) => {
-                        if (!dndEnabled) return;
-                        setDragTaskId(t.id);
-                        setDragging(true);
-                        e.dataTransfer.setData('text/plain', String(t.id));
-                        e.dataTransfer.effectAllowed = 'move'
-                      }}
-                      onDragOver={(e) => {
-                        if (!dndEnabled) return; 
-                        e.preventDefault();
-                        computeDropForRow(e, idx, t.id);
-                      }}
-                      onDrop={(e) => {
-                        if (!dndEnabled) return; 
-                        e.preventDefault();
-                        // Ensure the current target is set correctly and not the same row
-                        computeDropForRow(e, idx, t.id);
-                        if (dragTaskId != null && dropIndex != null) {
-                          const fromIndex = allTasks.findIndex(tt => tt.id === dragTaskId)
-                          const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
-                          if (fromIndex !== -1 && to !== fromIndex) {
-                            handleMoveTask(dragTaskId, to)
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {view === 'board' ? (
+          <BoardView tasks={filtered} />
+        ) : (
+          <div id="tasks-results" className="h-full overflow-y-auto tasks-results" tabIndex={-1}>
+            {filtered.length === 0 ? (
+              <div className="empty">No tasks found.</div>
+            ) : (
+              <ul
+                className={`tasks-list ${dragging ? 'dnd-active' : ''}`}
+                role="list"
+                aria-label="Tasks"
+                ref={ulRef}
+                onDragOver={(e) => {
+                  if (dndEnabled) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                  }
+                }}
+                onDrop={onListDrop}
+                onDragEnd={() => clearDndState()}
+              >
+                {filtered.map((t, idx) => {
+                  const { done, total } = countFeatures(t)
+                  const priority = parsePriorityFromTitle(t.title)
+                  const isDragSource = dragTaskId === t.id
+                  const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
+                  const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
+                  return (
+                    <li key={t.id} className="task-item" role="listitem">
+                      {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
+                      <div
+                        className={`task-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''}`}
+                        tabIndex={0}
+                        role="button"
+                        data-index={idx}
+                        draggable={dndEnabled}
+                        aria-grabbed={isDragSource}
+                        onDragStart={(e) => {
+                          if (!dndEnabled) return;
+                          setDragTaskId(t.id);
+                          setDragging(true);
+                          e.dataTransfer.setData('text/plain', String(t.id));
+                          e.dataTransfer.effectAllowed = 'move'
+                        }}
+                        onDragOver={(e) => {
+                          if (!dndEnabled) return; 
+                          e.preventDefault();
+                          computeDropForRow(e, idx, t.id);
+                        }}
+                        onDrop={(e) => {
+                          if (!dndEnabled) return; 
+                          e.preventDefault();
+                          // Ensure the current target is set correctly and not the same row
+                          computeDropForRow(e, idx, t.id);
+                          if (dragTaskId != null && dropIndex != null) {
+                            const fromIndex = allTasks.findIndex(tt => tt.id === dragTaskId)
+                            const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
+                            if (fromIndex !== -1 && to !== fromIndex) {
+                              handleMoveTask(dragTaskId, to)
+                            }
                           }
-                        }
-                        clearDndState()
-                      }}
-                      onClick={() => navigateTaskDetails(t.id)}
-                      onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                      aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
-                    >
-                      <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
-                      <div className="col col-title">
-                        <div className="title-line">
-                          <span className="title-text">{t.title || ''}</span>
-                          <PriorityTag priority={priority} />
+                          clearDndState()
+                        }}
+                        onClick={() => navigateTaskDetails(t.id)}
+                        onKeyDown={(e) => onRowKeyDown(e, t.id)}
+                        aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
+                      >
+                        <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
+                        <div className="col col-title">
+                          <div className="title-line">
+                            <span className="title-text">{t.title || ''}</span>
+                            <PriorityTag priority={priority} />
+                          </div>
+                          <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
                         </div>
-                        <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
-                      </div>
-                      <div className="col col-status">
-                        <div className="status-inline">
-                          <StatusBadge status={t.status} />
-                          <StatusBullet
-                            status={t.status}
-                            onChange={(next) => handleStatusChange(t.id, next)}
-                            className="reveal-on-hover"
-                          />
+                        <div className="col col-status">
+                          <div className="status-inline">
+                            <StatusBadge status={t.status} />
+                            <StatusBullet
+                              status={t.status}
+                              onChange={(next) => handleStatusChange(t.id, next)}
+                              className="reveal-on-hover"
+                            />
+                          </div>
                         </div>
+                        <div className="col col-features">{done}/{total}</div>
                       </div>
-                      <div className="col col-features">{done}/{total}</div>
-                    </div>
-                    {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </div>
-      )}
+                      {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </section>

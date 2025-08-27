@@ -133,7 +133,7 @@
     },
     {
       "id": "7.12",
-      "status": "-",
+      "status": "+",
       "title": "Tasks list and features list should allow their lists to scroll",
       "description": "The whole screen doesn't scroll - just the list of items inside",
       "plan": "",
@@ -383,7 +383,9 @@
         "src/renderer/screens/SidebarView.tsx"
       ],
       "acceptance": [],
-      "dependencies": ["7.20"]
+      "dependencies": [
+        "7.20"
+      ]
     }
   ]
 }
