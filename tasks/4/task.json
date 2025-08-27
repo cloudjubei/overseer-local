@@ -1,6 +1,6 @@
 {
   "id": 4,
-  "status": "-",
+  "status": "+",
   "title": "Agentic chat interface",
   "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
@@ -189,7 +189,7 @@
     },
     {
       "id": "4.19",
-      "status": "-",
+      "status": "+",
       "title": "Litellm and Openai providers don't always work",
       "description": "Trying to send a message to xai/grok-4 or claude-sonnet-4-20250514 with litellm or openai (with correct apiurls) doesn't work. Using gpt-5 does for both. Using local LM studio works fine for all models.",
       "plan": "",

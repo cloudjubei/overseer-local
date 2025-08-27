@@ -42,7 +42,7 @@ export default function SettingsView() {
   // Defaults and common models
   const defaultUrls: Record<string, string> = {
     openai: 'https://api.openai.com/v1',
-    litellm: '',
+    litellm: 'http://localhost:4000', // encourage proxy usage for non-OpenAI models
     lmstudio: 'http://localhost:1234/v1',
     anthropic: 'https://api.anthropic.com',
     grok: 'https://api.x.ai/v1',
@@ -115,7 +115,7 @@ export default function SettingsView() {
       setAvailableModels(models);
       setModelsError(null);
     } catch (err) {
-      setModelsError('Failed to load models. Is LM Studio running?');
+      setModelsError('Failed to load models. Is your provider endpoint running?');
       setAvailableModels([]);
       toast({ title: 'Error', description: String(err), variant: 'error' });
     } finally {
@@ -171,7 +171,6 @@ export default function SettingsView() {
           onChange={(e) => {
             const t = e.target.value as Theme;
             setTheme(t);
-            // Persist for next time; defer to useTheme internal application
             try { localStorage.setItem('theme', t); } catch {}
           }}
           className="w-64 p-2 border border-gray-300 rounded-md focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
@@ -214,6 +213,9 @@ export default function SettingsView() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="text-[12px] text-[var(--text-secondary)] mt-2">
+        Tip: For LiteLLM provider, set API Base URL to your LiteLLM proxy (e.g., http://localhost:4000). This enables non-OpenAI models like claude or grok using a single OpenAI-compatible interface.
       </div>
     </div>
   );
@@ -320,7 +322,7 @@ export default function SettingsView() {
           </div>
 
           <div>
-            <label htmlFor="apiKey" className="block text-sm font-medium mb-1">API Key</label>
+            <label htmlFor="apiKey" className="block textsm font-medium mb-1">API Key</label>
             <Input id="apiKey" placeholder="sk-..." name="apiKey" value={editingConfig.apiKey || ''} onChange={handleConfigFieldChange} />
           </div>
 
