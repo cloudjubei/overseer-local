@@ -112,7 +112,7 @@ export default function ChatView() {
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
   return (
-    <div className="flex flex-1 min-h-0 w-full overflow-hidden">
+    <div className="flex w-full min-h-0 h-screen overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col min-h-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
@@ -161,7 +161,7 @@ export default function ChatView() {
       </aside>
 
       {/* Main content */}
-      <section className="flex-1 min-w-0 min-h-0 flex flex-col bg-[var(--surface-base)] overflow-hidden">
+      <section className="flex-1 min-w-0 min-h-0 grid grid-rows-[auto,auto,1fr,auto] bg-[var(--surface-base)] overflow-hidden">
         {/* Hidden mirror for caret positioning (docs autocomplete) */}
         <div
           ref={mirrorRef}
@@ -169,7 +169,8 @@ export default function ChatView() {
           className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none"
         />
 
-        <header className="shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
+        {/* Row 1: Header */}
+        <header className="row-start-1 row-end-2 shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
               Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}
@@ -203,9 +204,10 @@ export default function ChatView() {
           </div>
         </header>
 
+        {/* Row 2: Callout (non-scroll) */}
         {!isConfigured && (
           <div
-            className="mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
+            className="row-start-2 row-end-3 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
             style={{
               background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
               color: 'var(--text-primary)',
@@ -217,8 +219,8 @@ export default function ChatView() {
           </div>
         )}
 
-        {/* Messages */}
-        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
+        {/* Row 3: Messages (only scrollable region) */}
+        <div ref={messageListRef} className="row-start-3 row-end-4 flex-1 min-h-0 overflow-auto p-4">
           {enhancedMessages.length === 0 ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
@@ -293,8 +295,8 @@ export default function ChatView() {
           )}
         </div>
 
-        {/* Composer */}
-        <div className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
+        {/* Row 4: Composer (fixed at bottom) */}
+        <div className="row-start-4 row-end-5 shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
           <div className="p-3">
             <div className="relative flex items-end gap-2">
               <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">

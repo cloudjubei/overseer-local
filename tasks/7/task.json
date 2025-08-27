@@ -172,7 +172,7 @@
     },
     {
       "id": "7.14",
-      "status": "-",
+      "status": "+",
       "title": "ChatView according to design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
@@ -281,7 +281,7 @@
     },
     {
       "id": "7.20",
-      "status": "-",
+      "status": "?",
       "title": "Create a unified screen with side panel style",
       "description": "Settings, Docs, Chat and Notifications all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. This kind of component needs to be unified, reusable and made slick and pretty.",
       "plan": "",
@@ -323,7 +323,7 @@
     },
     {
       "id": "7.22",
-      "status": "-",
+      "status": "+",
       "title": "Tasks list dragging error",
       "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
       "plan": "",
