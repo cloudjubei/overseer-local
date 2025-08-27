@@ -281,7 +281,7 @@
     },
     {
       "id": "7.20",
-      "status": "-",
+      "status": "?",
       "title": "Create a unified screen with side panel style",
       "description": "Settings, Docs, Chat and Notifications all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. This kind of component needs to be unified, reusable and made slick and pretty.",
       "plan": "",
@@ -299,7 +299,8 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
     },
     {
       "id": "7.21",
@@ -361,7 +362,7 @@
     },
     {
       "id": "7.24",
-      "status": "-",
+      "status": "+",
       "title": "Creating a feature doesn't work",
       "description": "The required connector/IPC isn't implemented - i.e. tasksService.addFeature doesn't work",
       "plan": "",
