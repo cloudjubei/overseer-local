@@ -172,7 +172,7 @@
     },
     {
       "id": "7.14",
-      "status": "+",
+      "status": "-",
       "title": "ChatView according to design",
       "description": "Remember - these are react components, using tailwind.",
       "plan": "",
@@ -187,7 +187,7 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "Currently the whole screen is scrollable - but only the messages list should be. The controls and especially the bottom message sending panel should stay put."
+      "rejection": "Currently the whole ChatView is slightly bigger than the screen which makes the whole window ALWAYS scroll - even when I resize. Only the inner chat messages should scroll (like they do now) - the whole view shouldn't."
     },
     {
       "id": "7.15",
@@ -281,7 +281,7 @@
     },
     {
       "id": "7.20",
-      "status": "?",
+      "status": "-",
       "title": "Create a unified screen with side panel style",
       "description": "Settings, Docs, Chat and Notifications all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. This kind of component needs to be unified, reusable and made slick and pretty.",
       "plan": "",
@@ -299,8 +299,7 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
+      "acceptance": []
     },
     {
       "id": "7.21",
@@ -364,7 +363,7 @@
       "id": "7.24",
       "status": "-",
       "title": "Home - Board view - horizontal problems",
-      "description": "If the screen isn't wide enough, not all sections can show - look at how Linear and Monday resolve this and introduce the same fix",
+      "description": "If the screen isn't wide enough, not all sections can show - following Linear and Monday to resolve this.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
@@ -376,7 +375,13 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [
+        "Board columns overflow horizontally with a scrollable viewport when not all fit.",
+        "Edge gradient hints appear when content is scrollable left/right.",
+        "Sticky left/right nav buttons allow scrolling by approximately one column.",
+        "Keyboard Left/Right scroll the board; Shift+mouse wheel scrolls horizontally.",
+        "Column headers remain visible (sticky) while scrolling within columns."
+      ]
     }
   ]
 }
