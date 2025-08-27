@@ -9,6 +9,7 @@ import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
+import { ProjectsProvider } from './projects/ProjectContext';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
@@ -63,18 +64,20 @@ function App()
 
   return (
     <ToastProvider>
-      <NavigatorProvider>
-        <ShortcutsProvider>
-          <GlobalShortcutsBootstrap />
-          <NotificationClickHandler />
-          <CommandMenu />
-          <ShortcutsHelp />
-          <div className="flex h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-            <SidebarView />
-            <ModalHost />
-          </div>
-        </ShortcutsProvider>
-      </NavigatorProvider>
+      <ProjectsProvider>
+        <NavigatorProvider>
+          <ShortcutsProvider>
+            <GlobalShortcutsBootstrap />
+            <NotificationClickHandler />
+            <CommandMenu />
+            <ShortcutsHelp />
+            <div className="flex h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+              <SidebarView />
+              <ModalHost />
+            </div>
+          </ShortcutsProvider>
+        </NavigatorProvider>
+      </ProjectsProvider>
     </ToastProvider>
   );
 }
