@@ -189,7 +189,7 @@
     },
     {
       "id": "4.19",
-      "status": "-",
+      "status": "+",
       "title": "Settings needs adapting",
       "description": "We only accept the user specifying an LLM provider by passing in the api url, the api key and the model name. We want to have some presets available - the user can select a common provider (openai, gemini, anthropic, xai, local) and then the api url should get populated for the user. The list of models for local can be retrieved via the standard provider but for the rest we can include the latest models for that provider.",
       "plan": "",

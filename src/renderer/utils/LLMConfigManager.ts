@@ -1,12 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-
-export interface LLMConfig {
-  id: string;
-  name: string;
-  apiBaseUrl: string;
-  apiKey: string;
-  model: string;
-}
+import type { LLMConfig } from '../types';
 
 export class LLMConfigManager {
   private storageKey = 'llmConfigs';
@@ -36,7 +29,7 @@ export class LLMConfigManager {
   }
 
   addConfig(config: Omit<LLMConfig, 'id'>): LLMConfig {
-    const newConfig = { ...config, id: uuidv4() };
+    const newConfig: LLMConfig = { ...config, id: uuidv4() } as LLMConfig;
     const configs = this.getConfigs();
     configs.push(newConfig);
     this.saveConfigs(configs);

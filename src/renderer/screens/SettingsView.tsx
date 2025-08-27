@@ -1,16 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Input } from '../components/ui/Input';
+import React, { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { notificationsService } from '../services/notificationsService';
-import { chatService } from '../services/chatService';
-import type { LLMConfig } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
-import { useToast } from '../components/ui/Toast';
-import { Modal } from '../components/ui/Modal';
+import { useNavigator } from '../navigation/Navigator';
 
 // Settings Categories
 const CATEGORIES = [
@@ -26,124 +22,12 @@ export default function SettingsView() {
   const { theme, setTheme } = useTheme();
   const { preferences, updatePreferences } = useNotificationPreferences();
 
-  const { configs, activeConfigId, addConfig, updateConfig, removeConfig, setActive } = useLLMConfig();
-  const [editingConfig, setEditingConfig] = useState<LLMConfig | null>(null);
-  const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
-  const [modelMode, setModelMode] = useState<'preset' | 'custom'>('preset');
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [modelsLoading, setModelsLoading] = useState(false);
-  const [modelsError, setModelsError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { configs, activeConfigId, removeConfig, setActive } = useLLMConfig();
+  const { openModal } = useNavigator();
 
   // Layout state
   const [categoryCollapsed, setCategoryCollapsed] = useState(false);
   const [activeCategory, setActiveCategory] = useState<CategoryId>('visual');
-
-  // Defaults and common models
-  const defaultUrls: Record<string, string> = {
-    openai: 'https://api.openai.com/v1',
-    anthropic: 'https://api.anthropic.com',
-    grok: 'https://api.x.ai/v1',
-    gemini: 'https://generativelanguage.googleapis.com/v1beta',
-    local: 'http://localhost:1234/v1',
-    custom: ''
-  };
-
-  const commonModels: Record<string, string[]> = {
-    openai: ['gpt-4o', 'gpt-5', 'gpt-5-nano'],
-    anthropic: ['claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku'],
-    grok: ['xai/grok-4'],
-    gemini: ['gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash'],
-    custom: []
-  };
-
-  const providerModels = useMemo(() => {
-    if (!editingConfig) return [] as string[];
-    if (modelMode === 'custom') return availableModels;
-    return []
-    // return commonModels[editingConfig.provider] || [];
-  }, [editingConfig, availableModels]);
-
-  function resetEditingState() {
-    setEditingConfig(null);
-    setIsAddingNew(false);
-    setModelMode('preset');
-    setAvailableModels([]);
-    setModelsError(null);
-  }
-
-  // Handlers: LLM Config editing
-  const handleConfigFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditingConfig((prev) => (prev ? { ...prev, [name]: value } : null));
-    if (name === 'apiBaseUrl' && modelMode === 'custom') {
-      setAvailableModels([]);
-      setModelsError(null);
-    }
-  };
-
-  const handleModelChange = (value: string) => {
-    if (value === 'custom') {
-      setModelMode('custom');
-      setEditingConfig((prev) => (prev ? { ...prev, model: '' } : null));
-    } else {
-      setModelMode('preset');
-      setEditingConfig((prev) => (prev ? { ...prev, model: value } : null));
-    }
-  };
-
-  const loadModels = async () => {
-    if (!editingConfig) return;
-    setModelsLoading(true);
-    setModelsError(null);
-    try {
-      const models = await chatService.listModels(editingConfig);
-      setAvailableModels(models);
-      setModelsError(null);
-    } catch (err) {
-      setModelsError('Failed to load models. Is your provider endpoint running?');
-      setAvailableModels([]);
-      toast({ title: 'Error', description: String(err), variant: 'error' });
-    } finally {
-      setModelsLoading(false);
-    }
-  };
-
-  const openEditModal = (config: LLMConfig) => {
-    setEditingConfig({ ...config });
-    const pModels = commonModels[config.provider] || [];
-    setModelMode(pModels.includes(config.model) ? 'preset' : 'custom');
-    setIsAddingNew(false);
-    setAvailableModels(pModels);
-    setModelsError(null);
-  };
-
-  const openAddModal = () => {
-    setEditingConfig({ id: '', name: '', apiBaseUrl: '', apiKey: '', model: '' });
-    setIsAddingNew(true);
-    setModelMode('custom');
-    setAvailableModels(commonModels['openai'] || []);
-    setModelsError(null);
-  };
-
-  const handleSaveConfig = () => {
-    if (!editingConfig) return;
-    if (!editingConfig.name || !editingConfig.provider || !editingConfig.model) {
-      toast({ title: 'Missing fields', description: 'Please provide name, provider, and model.', variant: 'error' });
-      return;
-    }
-    if (isAddingNew) {
-      addConfig(editingConfig);
-    } else {
-      updateConfig(editingConfig.id, editingConfig);
-    }
-    resetEditingState();
-  };
-
-  const handleDeleteConfig = (id: string) => {
-    removeConfig(id);
-    if (editingConfig?.id === id) resetEditingState();
-  };
 
   // Visual Settings content
   const renderVisualSection = () => (
@@ -176,7 +60,7 @@ export default function SettingsView() {
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold">LLM Configurations</h2>
-        <Button onClick={openAddModal}>Add New Config</Button>
+        <Button onClick={() => openModal({ type: 'llm-config-add' })}>Add New Config</Button>
       </div>
       <div className="border rounded-md divide-y">
         {configs.length === 0 && (
@@ -191,8 +75,8 @@ export default function SettingsView() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Button onClick={() => openEditModal(cfg)} variant="outline">Edit</Button>
-              <Button onClick={() => handleDeleteConfig(cfg.id)} variant="danger">Delete</Button>
+              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id })} variant="outline">Edit</Button>
+              <Button onClick={() => removeConfig(cfg.id)} variant="danger">Delete</Button>
               {activeConfigId !== cfg.id && (
                 <Button onClick={() => setActive(cfg.id)}>Set Active</Button>
               )}
@@ -201,10 +85,11 @@ export default function SettingsView() {
         ))}
       </div>
       <div className="text-[12px] text-[var(--text-secondary)] mt-2">
-        Tip: For LiteLLM provider, set API Base URL to your LiteLLM proxy (e.g., http://localhost:4000). This enables non-OpenAI models like claude or grok using a single OpenAI-compatible interface.
+        Tip: Local providers must expose an OpenAI-compatible API. Use the Local preset to fill the default URL (http://localhost:1234/v1) and click "Load Available Models" to discover models.
       </div>
     </div>
   );
+
   const renderNotificationsSection = () => (
     <div className="max-w-3xl">
       <h2 className="text-xl font-semibold mb-3">Notification Preferences</h2>
@@ -260,98 +145,6 @@ export default function SettingsView() {
     </div>
   );
 
-  // LLM Config Modal content
-  const renderConfigModal = () => {
-    if (!editingConfig) return null;
-
-    const modalTitle = isAddingNew ? 'Add LLM Configuration' : 'Edit LLM Configuration';
-
-    const onClose = () => {
-      resetEditingState();
-    };
-
-    const onSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      handleSaveConfig();
-    };
-
-    return (
-      <Modal title={modalTitle} onClose={onClose} isOpen={true}>
-        <form className="space-y-3" onSubmit={onSubmit} onKeyDown={(e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-            e.preventDefault();
-            handleSaveConfig();
-          }
-        }}>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-            <Input id="name" placeholder="Name" name="name" value={editingConfig.name || ''} onChange={handleConfigFieldChange} />
-          </div>
-
-          <div>
-            <label htmlFor="provider" className="block text-sm font-medium mb-1">Provider</label>
-            <Select value={editingConfig.provider || 'openai'} onValueChange={handleProviderChange}>
-              <SelectTrigger id="provider">
-                <SelectValue placeholder="Provider" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="litellm">LiteLLM</SelectItem>
-                <SelectItem value="lmstudio">LM Studio</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label htmlFor="apiBaseUrl" className="block text-sm font-medium mb-1">API Base URL</label>
-            <Input id="apiBaseUrl" placeholder="https://..." name="apiBaseUrl" value={editingConfig.apiBaseUrl || ''} onChange={handleConfigFieldChange} />
-          </div>
-
-          <div>
-            <label htmlFor="apiKey" className="block textsm font-medium mb-1">API Key</label>
-            <Input id="apiKey" placeholder="sk-..." name="apiKey" value={editingConfig.apiKey || ''} onChange={handleConfigFieldChange} />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="model" className="block text-sm font-medium mb-1">Model</label>
-              {editingConfig.provider === 'lmstudio' && (
-                <Button type="button" onClick={loadModels} disabled={modelsLoading} variant="outline" className="ml-2">
-                  {modelsLoading ? 'Loading…' : 'Load Available Models'}
-                </Button>
-              )}
-            </div>
-
-            {(editingConfig.provider !== 'custom' && providerModels.length > 0) ? (
-              <Select value={modelMode === 'preset' ? editingConfig.model : 'custom'} onValueChange={handleModelChange}>
-                <SelectTrigger id="model">
-                  <SelectValue placeholder="Select Model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {providerModels.map((m) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                  ))}
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
-            ) : null}
-
-            {(modelMode === 'custom' || providerModels.length === 0) && (
-              <Input placeholder="Custom model id" name="model" value={editingConfig.model || ''} onChange={handleConfigFieldChange} className="mt-2" />
-            )}
-
-            {modelsError && <p className="text-red-500 text-sm mt-1">{modelsError}</p>}
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Save</Button>
-          </div>
-        </form>
-      </Modal>
-    );
-  };
-
   return (
     <div className="flex flex-col min-h-0 w-full">
       <header className="shrink-0 px-4 py-3 border-b flex items-center justify-between">
@@ -386,8 +179,6 @@ export default function SettingsView() {
           {activeCategory === 'notifications' && renderNotificationsSection()}
         </main>
       </div>
-
-      {renderConfigModal()}
     </div>
   );
 }
