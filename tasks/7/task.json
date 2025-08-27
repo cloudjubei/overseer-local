@@ -363,24 +363,6 @@
     {
       "id": "7.24",
       "status": "-",
-      "title": "Home the status dropdown looks horrible",
-      "description": "The dropdown should somehow incorporate the bullet design that is currently used to display the status. In fact, the best way would be for the dropdown not to be there, and when the user hovers over an item, the status bullet can become bigger and show an edit symbol. If the user clicks on the bullet - it opens a bullet selector that can change the status.",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "7.25",
-      "status": "-",
       "title": "Home - Board view - horizontal problems",
       "description": "If the screen isn't wide enough, not all sections can show - look at how Linear and Monday resolve this and introduce the same fix",
       "plan": "",
