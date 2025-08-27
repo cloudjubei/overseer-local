@@ -371,16 +371,14 @@
     {
       "id": "7.27",
       "status": "-",
-      "title": "Reuse the sidepanel for Docs, Chat and Notifications",
-      "description": "Docs, Chat and Notifications all should have the sidepanel Settings has. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
+      "title": "Reuse the sidepanel for Documents",
+      "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
       "context": [
         "src/renderer/components/ui/CollapsibleSidebar.tsx",
         "src/renderer/screens/SettingsView.tsx",
-        "src/renderer/screens/ChatView.tsx",
         "src/renderer/screens/DocumentsView.tsx",
-        "src/renderer/screens/NotificationsView.tsx",
-        "src/renderer/screens/SidebarView.tsx"
+        "src/styles/layout/nav.css"
       ],
       "acceptance": [],
       "dependencies": [
@@ -396,6 +394,40 @@
       "context": [],
       "acceptance": [],
       "dependencies": []
+    },
+    {
+      "id": "7.29",
+      "status": "-",
+      "title": "Reuse the sidepanel for Chat",
+      "description": "The Chat screen should have the same kind of sidepanel that the Settings screen has. For Chat it holds the list of all chats (i.e. chat history). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/NotificationsView.tsx",
+        "src/styles/layout/nav.css"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "7.20"
+      ]
+    },
+    {
+      "id": "7.30",
+      "status": "-",
+      "title": "Reuse the sidepanel for Notifications",
+      "description": "The Notifications screen should have the same kind of sidepanel that the Settings screen has. For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/ChatView.tsx",
+        "src/styles/layout/nav.css"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "7.20"
+      ]
     }
   ]
 }
