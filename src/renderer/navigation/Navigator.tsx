@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { NavigationView } from '../types';
 
 export type TasksRoute =
@@ -9,7 +9,10 @@ export type ModalRoute =
   | { type: 'task-create' }
   | { type: 'task-edit'; taskId: number }
   | { type: 'feature-create'; taskId: number }
-  | { type: 'feature-edit'; taskId: number; featureId: string };
+  | { type: 'feature-edit'; taskId: number; featureId: string }
+  | { type: 'llm-config-add' }
+  | { type: 'llm-config-edit'; id: string }
+  | { type: 'projects-manage' };
 
 export type NavigatorState = {
   currentView: NavigationView;
@@ -79,11 +82,11 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openModal = useCallback((m: ModalRoute) => {
-    setModal({ modal: m })
+    setModal({ modal: m });
   }, []);
 
   const closeModal = useCallback(() => {
-    setModal({ modal: null })
+    setModal({ modal: null });
   }, []);
 
   const navigateView = useCallback((v: NavigationView) => {

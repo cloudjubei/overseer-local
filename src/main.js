@@ -8,7 +8,6 @@ import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
@@ -29,14 +28,12 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  // Open the DevTools.
   mainWindow.webContents.openDevTools();
 };
 
@@ -114,16 +111,7 @@ ipcMain.handle('tasks-feature:add', async (event, { taskId, feature }) => {
 });
 
 ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
-  if (!indexer) {
-    return { ok: false, error: 'Indexer not initialized' };
-  }
-  try {
-    const result = await indexer.deleteFeature(taskId, featureId);
-    return result;
-  } catch (error) {
-    console.error(`Failed to delete feature ${featureId} from task ${taskId}:`, error);
-    return { ok: false, error: error.message };
-  }
+  return await indexer.deleteFeature(taskId, featureId);
 });
 
 ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
@@ -131,27 +119,17 @@ ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
 });
 
 ipcMain.handle('tasks:add', async (event, task) => {
-  return await indexer.addTask(task);
+    return await indexer.addTask(task);
 });
 
 ipcMain.handle('tasks:delete', async (event, { taskId }) => {
-  if (!indexer) {
-    return { ok: false, error: 'Indexer not initialized' };
-  }
-  try {
-    const result = await indexer.deleteTask(taskId);
-    return result;
-  } catch (error) {
-    console.error(`Failed to delete task ${taskId}:`, error);
-    return { ok: false, error: error.message };
-  }
+  return await indexer.deleteTask(taskId);
 });
 
 ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
-// Docs
 ipcMain.handle('docs-index:get', async () => {
   return docsIndexer.getIndex();
 });

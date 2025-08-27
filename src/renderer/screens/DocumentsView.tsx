@@ -321,7 +321,7 @@ export default function DocumentsView() {
       <main className="flex-1 min-h-0 min-w-0">
         <div className="flex h-full min-h-0 w-full">
           {!sidebarCollapsed && (
-            <aside className="w-80 shrink-0 border-r border-border-subtle bg-surface-base/60 overflow-y-auto" aria-label="Documents folders">
+            <aside className="h-full w-80 shrink-0 border-r border-border-subtle bg-surface-base/60 overflow-y-auto" aria-label="Documents folders">
               <div className="px-2 py-2">
                 {!root ? (
                   <div className="p-3 text-sm text-text-muted">
@@ -345,7 +345,7 @@ export default function DocumentsView() {
               </div>
             </aside>
           )}
-          <section className="flex-1 min-w-0 min-h-0 overflow-hidden">
+          <section className="flex-1 min-w-0 min-h-0 overflow-auto">
             {!selected ? (
               <div className="h-full w-full grid place-items-center">
                 <div className="text-center px-6 py-8">
@@ -435,7 +435,7 @@ function DirTree({ node, level, openSet, toggleOpen, selected, onSelect }: {
             return (
               <button
                 key={`file:${f.relPath}`}
-                className={`group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none ${isSel ? 'bg-[color:var(--surface-raised)] border border-[color:var(--border-default)] shadow-[var(--shadow-1)]' : 'hover:bg-[color:var(--border-subtle)] focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'}`}
+                className={`group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm ${isSel ? 'bg-[color:var(--surface-raised)] border border-[color:var(--border-default)] shadow-[var(--shadow-1)]' : 'hover:bg-[color:var(--border-subtle)] focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'}`}
                 onClick={() => onSelect(f.relPath)}
                 style={{ paddingLeft: (level * 14) + 28 }}
                 title={f.relPath}
@@ -500,7 +500,7 @@ const DocumentPane = React.forwardRef<DocumentPaneHandle, { relPath: string; fil
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-border-subtle bg-surface-base px-4 py-2.5">
+      <div className="shrink-0 flex items-center justify-between gap-2 border-b border-border-subtle bg-surface-base px-4 py-2.5">
         <div className="min-w-0">
           <div className="truncate text-sm font-medium text-text-primary" title={relPath}>{displayTitle}</div>
           <div className="text-[11px] text-text-muted">{relPath}{updated ? ` • updated ${updated}` : ''}</div>

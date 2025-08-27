@@ -232,8 +232,8 @@ export default function TasksListView() {
   }
 
   return (
-    <section id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
-      <div className="tasks-toolbar">
+    <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
+      <div className="tasks-toolbar shrink-0">
         <div className="left">
           <div className="control">
             <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -267,14 +267,16 @@ export default function TasksListView() {
         </div>
       </div>
 
-      <div id="tasks-count" className="tasks-count" aria-live="polite">
+      <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
         Showing {filtered.length} of {allTasks.length} tasks
       </div>
 
       {view === 'board' ? (
-        <BoardView tasks={filtered} />
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <BoardView tasks={filtered} />
+        </div>
       ) : (
-        <div id="tasks-results" className="tasks-results" tabIndex={-1}>
+        <div id="tasks-results" className="flex-1 min-h-0 overflow-y-auto tasks-results" tabIndex={-1}>
           {filtered.length === 0 ? (
             <div className="empty">No tasks found.</div>
           ) : (
@@ -323,7 +325,6 @@ export default function TasksListView() {
                       onDrop={(e) => {
                         if (!dndEnabled) return; 
                         e.preventDefault();
-                        // Ensure the current target is set correctly and not the same row
                         computeDropForRow(e, idx, t.id);
                         if (dragTaskId != null && dropIndex != null) {
                           const fromIndex = allTasks.findIndex(tt => tt.id === dragTaskId)

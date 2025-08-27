@@ -5,6 +5,8 @@ import TaskCreateView from '../tasks/TaskCreateView';
 import TaskEditView from '../tasks/TaskEditView';
 import FeatureCreateView from '../tasks/FeatureCreateView';
 import FeatureEditView from '../tasks/FeatureEditView';
+import SettingsLLMConfigModal from '../settings/SettingsLLMConfigModal';
+import ProjectManagerModal from '../projects/ProjectManagerModal';
 
 export default function ModalHost() {
   const { modal, closeModal } = useNavigator();
@@ -24,6 +26,17 @@ export default function ModalHost() {
     case 'feature-edit':
       content = (
         <FeatureEditView taskId={modal.taskId} featureId={modal.featureId} onRequestClose={closeModal} />
+      );
+      break;
+    case 'llm-config-add':
+      content = <SettingsLLMConfigModal mode="add" onRequestClose={closeModal} />;
+      break;
+    case 'llm-config-edit':
+      content = <SettingsLLMConfigModal mode="edit" id={modal.id} onRequestClose={closeModal} />;
+      break;
+    case 'projects-manage':
+      content = (
+        <ProjectManagerModal onRequestClose={closeModal} />
       );
       break;
     default:

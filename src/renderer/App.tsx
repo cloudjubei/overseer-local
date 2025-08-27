@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import SidebarView from './screens/SidebarView';
+import SidebarView from './navigation/SidebarView';
 import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
 import { ToastProvider } from './components/ui/Toast';

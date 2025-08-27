@@ -41,6 +41,16 @@ function IconPlus({ className }: { className?: string }) {
   )
 }
 
+function IconExclamation({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  )
+}
+
 export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [task, setTask] = useState<Task | null>(null)
@@ -167,7 +177,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
   if (!task) {
     return (
-      <div className="task-details flex flex-col min-h-0 w-full">
+      <div className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
         <header className="details-header shrink-0">
           <div className="details-header__bar">
             <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>
@@ -199,7 +209,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   }
 
   return (
-    <div className="task-details flex flex-col min-h-0 w-full" role="region" aria-labelledby="task-details-heading">
+    <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
         <div className="details-header__bar">
           <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }} aria-label="Back to Tasks">
@@ -223,8 +233,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
         </div>
       </header>
 
-      <main className="details-content flex-1 min-h-0 overflow-auto">
-        <section className="panel">
+      <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
+        <section className="panel shrink-0">
           <div className="section-header">
             <h2 className="section-title">Overview</h2>
             <div className="section-actions">
@@ -236,8 +246,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
-        <section className="panel">
-          <div className="section-header">
+        <section className="panel flex flex-col flex-1 min-h-0">
+          <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
             <div className="section-actions">
               <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
@@ -247,10 +257,10 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           </div>
 
           {features.length === 0 ? (
-            <div className="empty">No features defined for this task.</div>
+            <div className="flex-1 min-h-0 overflow-y-auto empty">No features defined for this task.</div>
           ) : (
             <ul
-              className={`features-list ${dragging ? 'dnd-active' : ''}`}
+              className={`flex-1 min-h-0 overflow-y-auto features-list ${dragging ? 'dnd-active' : ''}`}
               role="list"
               aria-label="Features"
               ref={ulRef}
@@ -302,7 +312,14 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >
-                      <div className="col col-id"><span className="id-chip">{f.id || ''}</span></div>
+                      <div className="col col-id flex flex-col items-center gap-1">
+                          {f.rejection && (
+                            <span className="rejection-badge" aria-label="Has rejection reason" title={f.rejection}>
+                              <IconExclamation className="w-4 h-4" />
+                            </span>
+                          )}
+                        <span className="id-chip">{f.id || ''}</span>
+                      </div>
                       <div className="col col-title">
                         <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
                         <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>

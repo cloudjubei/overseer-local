@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Modal } from '../components/ui/Modal'
 import { projectsService } from '../services/projectsService'
 import { validateProjectClient } from './validateProject'
@@ -23,7 +23,7 @@ function TextArea({ label, value, onChange, placeholder }: any) {
   )
 }
 
-export function ProjectManagerModal({ onClose }: { onClose?: () => void }) {
+export default function ProjectManagerModal({ onRequestClose }: { onRequestClose?: () => void}) {
   const [snapshot, setSnapshot] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -34,6 +34,11 @@ export function ProjectManagerModal({ onClose }: { onClose?: () => void }) {
   const [form, setForm] = useState<any>({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [] })
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const titleRef = useRef<HTMLInputElement>(null)
+
+  const doClose = () => {
+    onRequestClose?.()
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -112,7 +117,7 @@ export function ProjectManagerModal({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <Modal title="Manage Projects" onClose={onClose}>
+    <Modal title="Manage Projects" onClose={doClose} isOpen={true} size="lg" initialFocusRef={titleRef as React.RefObject<HTMLElement>}>
       {loading && <div>Loading…</div>}
       {error && <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>Error: {error}</div>}
 

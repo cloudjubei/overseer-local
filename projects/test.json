@@ -1,8 +1,8 @@
 {
   "id": "test",
-  "title": "dfd",
-  "description": "test",
-  "path": "../",
-  "repo_url": "https://github.com/cloudjubei/overseer-local",
+  "title": "Test Project",
+  "description": "this is a test",
+  "path": "test",
+  "repo_url": "",
   "requirements": []
 }

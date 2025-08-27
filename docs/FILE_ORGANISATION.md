@@ -19,7 +19,7 @@ This document describes how files and directories are organised in this reposito
     - components/tooltip.css: Tooltip.
     - components/overlays.css: Command menu, help overlay.
     - components/cards.css: Task card.
-    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board toggle.
+    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle.
   - src/styles/layout/: Layout building blocks like sidebar/nav.
     - layout/nav.css: Sidebar and navigation styles.
   - src/styles/screens/: Screen-scoped styles that compose primitives/components.
@@ -34,7 +34,7 @@ This document describes how files and directories are organised in this reposito
     - Spinner.tsx: Inline spinner.
     - Select.tsx, Input.tsx, Tooltip.tsx, etc.
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
-    - Modal.tsx ← NEW: Lightweight modal wrapper reusing overlays styles for dialogs.
+    - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
@@ -42,54 +42,221 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/screens/
     - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
   - src/renderer/tasks/: Screens and views for tasks.
-    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor. Project-aware (reacts to active project context).
-    - TaskDetailsView.tsx: Right-side details panel. Project-aware and resubscribes on project change.
-    - BoardView.tsx: Kanban-style board with columns by status. Project-aware.
+    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor.
+    - TaskDetailsView.tsx: Right-side details panel.
+    - BoardView.tsx: Kanban-style board with columns by status.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
-    - SidebarView.tsx ← UPDATED: Now includes a Manage button to open Project Manager modal and uses ProjectSpec.title.
-  - src/renderer/services/: Renderer-side service modules (IPC access)
-    - projectsService.ts: Lists and gets child projects via preload window.projectsIndex; now also supports create/update/delete.
-    - docsService.ts: Project-aware docs service; subscribes to docs index updates; can switch context via window.docsIndex.setContext.
-    - tasksService.ts: Tasks service using project-aware tasks index; subscriptions return an unsubscribe function.
-    - chatService.ts ← UPDATED: Now includes setContext(projectId) to scope chats directory per project via IPC.
-    - notificationsService.ts ← UPDATED: Renderer-local notifications are now scoped per project (storage keys include projectId) and expose setContext(projectId).
-  - src/renderer/projects/: Renderer-side project context and management UI
-    - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app. Propagates context to tasks, docs, chat, and notifications via preload APIs/services.
-    - ProjectManagerModal.tsx ← NEW: Modal UI to create, edit, and delete child projects with validation.
-    - validateProject.ts ← NEW: Client-side validation mirroring ProjectSpec rules.
-- src/projects/: Main-process indexer for child projects under projects/
-  - src/projects/indexer.js: Scans the projects/ directory for .json files, validates them against ProjectSpec, builds an index, and watches for changes. Emits 'projects-index:update' via IPC. UPDATED to expose configPathsById mapping for maintenance.
-  - src/projects/validator.js: Runtime validation of ProjectSpec objects.
-- src/docs/: Project-aware docs indexer and IPC.
-- src/tasks/: Project-aware tasks indexer and IPC.
-- src/chat/: Chat manager and providers
-  - src/chat/manager.js ← UPDATED: Supports getDefaultChatsDir() and setChatsDir(dir) to switch chats storage based on active project.
-  - src/chat/providers/*: LLM provider integrations (OpenAI, LiteLLM, LM Studio).
-- src/index.css: Imports styles.
-- src/main.js: Electron main process and IPC wiring, including projects CRUD handlers. ← UPDATED: Adds 'chat:set-context' to switch chats directory per project.
-- src/preload.js: Exposes window.projectsIndex with get/subscribe and CRUD methods; exposes tasksIndex/docsIndex setContext; exposes chat.setContext for project-aware chat. ← UPDATED
-
-## New: Projects management UI and IPC
-- Renderer adds a Projects Manager modal accessible from the sidebar Projects section. Users can create, edit, and delete child projects.
-- Validation occurs client-side and server-side (main process uses src/projects/validator.js).
-- Main process adds IPC handlers:
-  - 'projects:create' → writes a new JSON under projects/<id>.json
-  - 'projects:update' → updates existing project JSON (renames file if id changed)
-  - 'projects:delete' → removes the project JSON
-- Projects indexer now includes configPathsById to track each project's config file path relative to projects/ for safe updates/deletes. Renderer ignores this field.
-
-## Project-aware Chat and Notifications ← NEW
-- Chat
-  - Preload exposes chat.setContext(projectId) that calls 'chat:set-context' IPC.
-  - Main handles 'chat:set-context' and switches ChatManager's chatsDir to either <appRoot>/chats (main) or <projects>/<project.path>/chats (child), creating the directory if needed.
-  - ChatManager (src/chat/manager.js) now has getDefaultChatsDir() and setChatsDir(dir), used by IPC.
-- Notifications
-  - Renderer-only persistence is scoped per project by namespacing storage keys (app_notifications__<projectId>, notification_preferences__<projectId>).
-  - notificationsService exposes setContext(projectId); ProjectContext calls this when active project changes.
-  - OS notifications include metadata.projectId to allow routing when clicked.
+    - ModalHost.tsx
+  - src/renderer/settings/
+    - SettingsLLMConfigModal.tsx: Modal used for adding/editing LLM provider configurations. Opened via Navigator + ModalHost.
+  - src/renderer/services/
+    - chatService.ts
+    - docsService.ts
+    - tasksService.ts
+    - notificationsService.ts
+  - src/renderer/hooks/
+    - useChats.ts
+    - useDocsIndex.ts
+    - useDocsAutocomplete.ts
+    - useLLMConfig.ts
+    - useNextTaskId.ts
+    - useShortcuts.tsx
+    - useTheme.ts
+    - useNotifications.ts
+    - useNotificationPreferences.ts
+  - src/renderer/screens/
+    - SidebarView.tsx
+    - TasksView.tsx
+    - DocumentsView.tsx
+    - ChatView.tsx
+    - SettingsView.tsx
+    - NotificationsView.tsx
+  - src/renderer/tasks/
+    - TaskCreateView.tsx
+    - TaskEditView.tsx
+    - FeatureCreateView.tsx
+    - FeatureEditView.tsx
+  - src/renderer/App.tsx
+  - src/renderer/types.ts
+- src/chat/ (providers and manager) – may be supplied by preload/main glue.
+- src/tools/
+  - standardTools.js
+- docs/: Project documentation and specifications.
+  - BUILD_SIGNING.md
+  - STANDARDS.md
+  - design/
+    - DESIGN_TOKENS.md
+    - DESIGN_SYSTEM.md
+    - COMPONENTS.md
+    - MONDAY_PALETTE_REFERENCE.md
+  - ux/
+    - LINEAR_UX_GUIDELINES.md
+  - styleguide/
+    - index.html
+    - README.md
+  - tailwind.config.tokens.example.js
+- tasks/: Per-task workspaces containing task metadata and tests.
+  - tasks/{id}/task.json
+  - tasks/{id}/tests/
+- scripts/: Project automation scripts (e.g., setup-linting-formatting).
+- build/: Packaging resources for electron-builder (icons, entitlements, etc.).
+  - build/icons/icon.icns, icon.ico, icon.png
+  - build/entitlements.mac.plist
+- .env, forge.config.js, index.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
 
 Notes:
-- Projects are stored as JSON files under <project-root>/projects/. Each JSON follows ProjectSpec (id, title, description, path, repo_url, requirements[]).
-- The UI surfaces basic metadata: ID, Title, Description, Path (under projects/), and Repository URL.
-- Requirements can be left empty; the validator requires an array, defaults to [].
+- All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.
+- Documentation in docs/ is the single source of truth for specs and formats.
+
+## File Naming Conventions
+- Tasks and features:
+  - Task directories are numeric IDs: tasks/{id}/ (e.g., tasks/1/).
+  - Tests are named per-feature: tasks/{task_id}/tests/test_{task_id}_{feature_number}.py (e.g., tasks/15/tests/test_15_3.py).
+- Python modules: snake_case.py (e.g., task_format.py, run_local_agent.py).
+- Javascript/TypeScript modules: camelCase.js/ts (e.g., taskFormat.js, runLocalAgent.ts). For schema mirrors adjacent to Python specs, a matching snake_case.ts is acceptable under docs/.
+- Documentation files: UPPERCASE or Title_Case for project-wide specs (e.g., TESTING.md, FILE_ORGANISATION.md). Place task-related docs under docs/tasks/.
+- JSON examples/templates: Use .json with clear, descriptive names (e.g., task_example.json).
+
+## Evolution Guidance
+- Make minimal, incremental changes that are easy to review and test.
+- Keep documentation authoritative: update docs first when changing schemas or protocols.
+- Introduce shared utilities only when multiple tasks need them; otherwise keep helpers local to a task.
+- Deprecate gradually: create new files/specs alongside old ones, migrate, then remove deprecated artifacts when tests prove stability.
+- Each feature must have deterministic tests; do not mark features complete until tests pass.
+
+## Repository Tree
+```
+repo_root/
+├─ docs/
+│  ├─ FILE_ORGANISATION.md
+│  ├─ STANDARDS.md
+│  ├─ BUILD_SIGNING.md
+│  ├─ design/
+│  │  ├─ DESIGN_TOKENS.md
+│  │  ├─ DESIGN_SYSTEM.md
+│  │  ├─ COMPONENTS.md
+│  │  └─ MONDAY_PALETTE_REFERENCE.md
+│  ├─ ux/
+│  │  └─ LINEAR_UX_GUIDELINES.md
+│  ├─ styleguide/
+│  │  ├─ index.html
+│  │  └─ README.md
+│  └─ tailwind.config.tokens.example.js
+├─ src/
+│  ├─ chat/
+│  │  ├─ providers/
+│  │  │  ├─ base.js
+│  │  │  ├─ openai.js
+│  │  │  ├─ litellm.js
+│  │  │  └─ lmstudio.js
+│  │  └─ manager.js          
+│  ├─ docs/
+│  │  └─ indexer.js        
+│  ├─ tasks/
+│  │  ├─ indexer.js                 
+│  │  └─ validator.js                
+│  ├─ types/
+│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
+│  │  ├─ tasks.ts                      # Shared Task/Feature/Status types
+│  │  └─ notifications.ts              # Notification types
+│  ├─ renderer/
+│  │  ├─ navigation/
+│  │  │  ├─ Navigator.tsx             
+│  │  │  └─ ModalHost.tsx 
+│  │  ├─ settings/
+│  │  │  └─ SettingsLLMConfigModal.tsx             
+│  │  ├─ components/
+│  │  │  ├─ ui/
+│  │  │  │  ├─ Alert.tsx
+│  │  │  │  ├─ Button.tsx
+│  │  │  │  ├─ Input.tsx
+│  │  │  │  ├─ Modal.tsx
+│  │  │  │  ├─ Select.tsx
+│  │  │  │  ├─ Toast.tsx
+│  │  │  │  ├─ Tooltip.tsx
+│  │  │  │  ├─ Spinner.tsx
+│  │  │  │  ├─ Skeleton.tsx
+│  │  │  │  ├─ CommandMenu.tsx
+│  │  │  │  ├─ ShortcutsHelp.tsx
+│  │  │  │  ├─ Switch.tsx
+│  │  │  │  └─ CollapsibleSidebar.tsx  <-- NEW: Reusable collapsible sidebar
+│  │  │  ├─ tasks/
+│  │  │  │  ├─ StatusBadge.tsx
+│  │  │  │  ├─ PriorityTag.tsx
+│  │  │  │  └─ TaskCard.tsx
+│  │  │  ├─ FeatureForm.tsx        
+│  │  │  └─ TaskForm.tsx           
+│  │  ├─ services/
+│  │  │  ├─ chatService.ts
+│  │  │  ├─ docsService.ts
+│  │  │  ├─ tasksService.ts
+│  │  │  └─ notificationsService.ts
+│  │  ├─ hooks/
+│  │  │  ├─ useChats.ts
+│  │  │  ├─ useDocsIndex.ts
+│  │  │  ├─ useDocsAutocomplete.ts
+│  │  │  ├─ useLLMConfig.ts
+│  │  │  ├─ useNextTaskId.ts
+│  │  │  ├─ useShortcuts.tsx
+│  │  │  ├─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
+│  │  │  ├─ useNotifications.ts
+│  │  │  └─ useNotificationPreferences.ts
+│  │  ├─ screens/
+│  │  │  ├─ SidebarView.tsx
+│  │  │  ├─ TasksView.tsx
+│  │  │  ├─ DocumentsView.tsx
+│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
+│  │  │  ├─ SettingsView.tsx           # Settings screen with theme and LLM configurations
+│  │  │  └─ NotificationsView.tsx
+│  │  ├─ utils/
+│  │  │  └─ LLMConfigManager.ts
+│  │  ├─ tasks/
+│  │  │  ├─ TaskCreateView.tsx         
+│  │  │  ├─ TaskEditView.tsx
+│  │  │  ├─ FeatureCreateView.tsx      
+│  │  │  ├─ FeatureEditView.tsx
+│  │  │  ├─ TaskDetailsView.tsx
+│  │  │  └─ TasksListView.tsx
+│  │  ├─ App.tsx                   
+│  │  └─ types.ts
+│  ├─ styles/
+│  │  ├─ design-tokens.css
+│  │  ├─ foundations/
+│  │  │  └─ metrics.css
+│  │  ├─ primitives/
+│  │  │  └─ effects.css
+│  │  ├─ components/
+│  │  │  ├─ badges.css
+│  │  │  ├─ buttons.css
+│  │  │  ├─ cards.css
+│  │  │  ├─ feedback.css
+│  │  │  ├─ forms.css
+│  │  │  ├─ overlays.css
+│  │  │  └─ tooltip.css
+│  │  ├─ layout/
+│  │  │  └─ nav.css
+│  │  └─ screens/
+│  │     ├─ board.css
+│  │     ├─ docs.css
+│  │     ├─ settings.css
+│  │     ├─ task-details.css
+│  │     └─ tasks.css
+│  ├─ tools/
+│  │  └─ standardTools.js
+│  ├─ index.css   
+│  ├─ main.js
+│  └─ preload.js
+├─ .env
+├─ forge.config.js
+├─ index.html
+├─ package.json
+├─ postcss.config.js
+├─ README.md
+├─ tailwind.config.js
+├─ tsconfig.json
+├─ vite.main.config.mjs
+├─ vite.preload.config.mjs
+├─ vite.renderer.config.mjs
+└─ …
+```
