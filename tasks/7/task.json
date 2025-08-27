@@ -133,61 +133,42 @@
     },
     {
       "id": "7.12",
-      "status": "+",
-      "title": "Theming is broken",
-      "description": "it's impossible to change themes now",
+      "status": "-",
+      "title": "Tasks list and features list should allow their lists to scroll",
+      "description": "The whole screen doesn't scroll - just the list of items inside",
       "plan": "",
       "context": [
-        "src/renderer/screens/SettingsView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": []
     },
     {
       "id": "7.13",
-      "status": "+",
-      "title": "Create feature and create task modal adhere to latest designs",
-      "description": "Remember - these are react components, using tailwind.",
+      "status": "-",
+      "title": "Documents screen - each section allows scrolling",
+      "description": "The whole screen doesn't scroll - just the list of items inside the documents list and the document itself - both separately.",
       "plan": "",
       "context": [
-        "src/renderer/tasks/FeatureCreateView.tsx",
-        "src/renderer/tasks/FeatureEditView.tsx",
-        "src/renderer/tasks/TaskCreateView.tsx",
-        "src/renderer/tasks/TaskEditView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/DocumentsView.tsx",
+        "src/renderer/docs/DocumentsBrowserView.tsx"
       ],
       "acceptance": []
     },
     {
       "id": "7.14",
-      "status": "+",
-      "title": "ChatView according to design",
-      "description": "Remember - these are react components, using tailwind.",
+      "status": "-",
+      "title": "Chats screen - each section allows scrolling",
+      "description": "The whole screen doesn't scroll - just the list of items inside the chats list and the chat messages itself (ONLY THE MESSAGES, the top settings and bottom message composer are stuck)",
       "plan": "",
       "context": [
-        "src/renderer/screens/ChatView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/ChatView.tsx"
       ],
-      "acceptance": [],
-      "rejection": "Currently the whole ChatView is slightly bigger than the screen which makes the whole window ALWAYS scroll - even when I resize. Only the inner chat messages should scroll (like they do now) - the whole view shouldn't."
+      "acceptance": []
     },
     {
       "id": "7.15",
@@ -281,26 +262,19 @@
     },
     {
       "id": "7.20",
-      "status": "?",
-      "title": "Create a unified screen with side panel style",
-      "description": "Settings, Docs, Chat and Notifications all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. This kind of component needs to be unified, reusable and made slick and pretty.",
+      "status": "-",
+      "title": "Create a unified screen with side panel style - Settings screen",
+      "description": "Settings should have a panel that behaves similarly to the Sidebar (it's collapsible). It holds the different sections. This kind of component, a screen with a sidepanel needs to be unified, reusable and made slick and pretty.",
       "plan": "",
       "context": [
         "src/index.css",
-        "src/renderer/screens/ChatView.tsx",
-        "src/renderer/screens/DocumentsView.tsx",
         "src/renderer/screens/SettingsView.tsx",
         "src/renderer/screens/SidebarView.tsx",
-        "docs/design/COMPONENTS.md",
         "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      "acceptance": []
     },
     {
       "id": "7.21",
@@ -371,6 +345,45 @@
         "src/renderer/screens/FeatureCreateView.tsx",
         "src/renderer/screens/FeatureEditView.tsx"
       ]
+    },
+    {
+      "id": "7.25",
+      "status": "-",
+      "title": "Edit feature should allow editing the rejection field",
+      "description": "When nothing is input, the key is removed from the feature - otherwise it should be saved. If a feature has a rejection, it should display an exclamation badge next to the status in the Feature list.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksDetailView.tsx",
+        "src/renderer/screens/FeatureEditView.tsx"
+      ]
+    },
+    {
+      "id": "7.26",
+      "status": "-",
+      "title": "Edit and create feature views should show the Status Bullet",
+      "description": "Both views need to allow editing of the feature's status",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksDetailView.tsx",
+        "src/renderer/screens/FeatureCreateView.tsx",
+        "src/renderer/screens/FeatureEditView.tsx"
+      ]
+    },
+    {
+      "id": "7.27",
+      "status": "-",
+      "title": "Reuse the sidepanel for Docs, Chat and Notifications",
+      "description": "Docs, Chat and Notifications all should have the sidepanel Settings has. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/screens/DocumentsView.tsx",
+        "src/renderer/screens/NotificationsView.tsx",
+        "src/renderer/screens/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": ["7.20"]
     }
   ]
 }
