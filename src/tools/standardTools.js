@@ -16,27 +16,7 @@ const standardToolSchemas = [
     }
   },
   {
-    name: 'finish_feature',
-    description: 'Mark the feature as complete.',
-    parameters: {
-      type: 'object',
-      properties: {},
-      required: []
-    }
-  },
-  {
-    name: 'block_feature',
-    description: 'Block the feature with a reason.',
-    parameters: {
-      type: 'object',
-      properties: {
-        reason: { type: 'string' }
-      },
-      required: ['reason']
-    }
-  },
-  {
-    name: 'get_context',
+    name: 'read_files',
     description: 'Get content of files.',
     parameters: {
       type: 'object',
@@ -85,13 +65,7 @@ const standardToolFunctions = {
     await fs.writeFile(fullPath, content, 'utf8');
     return 'File written.';
   },
-  finish_feature() {
-    return 'Feature completed.';
-  },
-  block_feature({ reason }) {
-    return `Blocked: ${reason}`;
-  },
-  async get_context({ files }) {
+  async read_files({ files }) {
     const contents = [];
     for (const file of files) {
       try {
