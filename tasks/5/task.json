@@ -19,7 +19,9 @@
       "description": "Create at least two versions of web search tools for the agent (for 2 different standard providers).",
       "context": [],
       "acceptance": [],
-      "dependencies": ["5.1"]
+      "dependencies": [
+        "5.1"
+      ]
     },
     {
       "id": "5.3",
@@ -28,7 +30,9 @@
       "description": "There are multiple problems we are facing: 1st the agent makes changes to files, but cannot verify the outcome of its work. We need to provide tools for it so that it would be able to check each new file it makes to see if it compiles. If possible, we should also think of allowing the agent of running the code in some isolated environment. All the options for such a behaviour need to be researched and written into a doc so a decision can be made.",
       "context": [],
       "acceptance": [],
-      "dependencies": ["5.1"]
+      "dependencies": [
+        "5.1"
+      ]
     },
     {
       "id": "5.4",
@@ -37,7 +41,9 @@
       "description": "It would be ideal for an agent to immediately see the effect of their work (preview work tool). So after they change some files, they could request screenshots of how the code/app that they just created renders. This can be based on this project. A methodology needs to be established.",
       "context": [],
       "acceptance": [],
-      "dependencies": ["5.1"]
+      "dependencies": [
+        "5.1"
+      ]
     },
     {
       "id": "5.5",
@@ -56,7 +62,9 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": ["5.5"]
+      "dependencies": [
+        "5.5"
+      ]
     }
   ]
 }

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
+import { notificationsService } from '../services/notificationsService';
 import { chatService } from '../services/chatService';
 import type { LLMConfig, LLMProviderType } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
@@ -223,24 +224,11 @@ export default function SettingsView() {
         <Switch
           checked={preferences.osNotificationsEnabled}
           onCheckedChange={async (checked) => {
-            updatePreferences({ osNotificationsEnabled: checked });
-            if (checked) {
-              try {
-                const result = await window.notifications.sendOs({
-                  title: 'Notifications Enabled',
-                  message: 'You will now receive desktop notifications for important events.',
-                  soundsEnabled: false,
-                  displayDuration: 5,
-                  metadata: {}
-                });
-                if (!result.success) {
-                  updatePreferences({ osNotificationsEnabled: false });
-                  toast({ title: 'Error Enabling Notifications', description: result.error || 'Unable to enable notifications. Please check your system settings.', variant: 'error' });
-                }
-              } catch (err) {
-                updatePreferences({ osNotificationsEnabled: false });
-                toast({ title: 'Error', description: String(err), variant: 'error' });
-              }
+            const success = await notificationsService.changeNotifications(checked)
+            if (success){
+              updatePreferences({ osNotificationsEnabled: true });
+            }else{
+              updatePreferences({ osNotificationsEnabled: false });
             }
           }}
           label="Enable OS Notifications"
