@@ -341,7 +341,7 @@
     },
     {
       "id": "7.23",
-      "status": "-",
+      "status": "+",
       "title": "Tasks list dragging  error",
       "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file.",
       "plan": "",
