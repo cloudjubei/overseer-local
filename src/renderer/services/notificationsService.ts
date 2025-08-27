@@ -14,7 +14,6 @@ import {
   NotificationCategory,
   NotificationPreferences
 } from '../../types/notifications';
-import { BrowserWindow, Notification as SystemNotification } from 'electron';
 
 class NotificationsService {
   private readonly STORAGE_KEY = 'app_notifications';
@@ -442,31 +441,6 @@ class NotificationsService {
     }
 
     return deletedCount;
-  }
-
-  handleNotificationSend(mainWindow: BrowserWindow, data: { title: string, message: string, soundsEnabled: boolean, displayDuration: number, metadata: any }) : { success: boolean, error?: string}
-  {
-    if (!SystemNotification.isSupported()) {
-      return { success: false, error: 'Notifications not supported' };
-    }
-
-    try {
-      const notification = new SystemNotification({
-        title: data.title,
-        body: data.message,
-        silent: !data.soundsEnabled,
-        timeoutType: data.displayDuration > 0 ? 'default' : 'never',
-      });
-      notification.on('click', () => {
-        mainWindow.focus();
-        mainWindow.webContents.send('notifications:clicked', data.metadata);
-      });
-
-      notification.show();
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: String(error) };
-    }
   }
 }
 

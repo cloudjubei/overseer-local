@@ -288,7 +288,7 @@ export default function SettingsView() {
     };
 
     return (
-      <Modal title={modalTitle} onClose={onClose}>
+      <Modal title={modalTitle} onClose={onClose} isOpen={true}>
         <form className="space-y-3" onSubmit={onSubmit} onKeyDown={(e) => {
           if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
             e.preventDefault();
