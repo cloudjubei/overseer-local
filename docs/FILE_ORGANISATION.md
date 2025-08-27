@@ -39,6 +39,14 @@ This document describes how files and directories are organised in this reposito
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
+  - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
+    - previewHost.tsx: Dedicated preview renderer that dynamically loads a component module and mounts it with provided props and providers.
+    - main.tsx: Entry point that boots the preview host.
+    - Usage: visit /preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&provider=app&theme=light
+      - id: path (relative to src/) plus optional #ExportName (default: default)
+      - props: URL-encoded JSON of props (or base64 if props_b64=1)
+      - provider: one of [app, none]
+      - theme: light | dark (applies data-theme attr)
   - src/renderer/screens/
     - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
   - src/renderer/tasks/: Screens and views for tasks.
@@ -105,7 +113,7 @@ This document describes how files and directories are organised in this reposito
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns, icon.ico, icon.png
   - build/entitlements.mac.plist
-- .env, forge.config.js, index.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
+- .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
 
 Notes:
 - All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.
@@ -127,6 +135,15 @@ Notes:
 - Deprecate gradually: create new files/specs alongside old ones, migrate, then remove deprecated artifacts when tests prove stability.
 - Each feature must have deterministic tests; do not mark features complete until tests pass.
 
+## Preview System
+- Dedicated component preview is provided via preview.html and the src/renderer/preview/ runtime.
+- In dev, open http://localhost:<vite-port>/preview.html with query params:
+  - id: module path under src (e.g., renderer/components/ui/Button.tsx#default)
+  - props: URL-encoded JSON of props (or base64 if props_b64=1)
+  - provider: app | none (wrap with MemoryRouter and minimal theme init)
+  - theme: light | dark (applies data-theme on <html>)
+- For production builds, ensure vite.renderer.config.mjs includes preview.html in rollupOptions.input if you need a separate HTML entry baked into the app bundle.
+
 ## Repository Tree
 ```
 repo_root/
@@ -146,117 +163,14 @@ repo_root/
 │  │  └─ README.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
-│  ├─ chat/
-│  │  ├─ providers/
-│  │  │  ├─ base.js
-│  │  │  ├─ openai.js
-│  │  │  ├─ litellm.js
-│  │  │  └─ lmstudio.js
-│  │  └─ manager.js         
-│  ├─ docs/
-│  │  └─ indexer.js       
-│  ├─ tasks/
-│  │  ├─ indexer.js                
-│  │  └─ validator.js               
-│  ├─ types/
-│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
-│  │  ├─ tasks.ts                      # Shared Task/Feature/Status types
-│  │  └─ notifications.ts              # Notification types
 │  ├─ renderer/
-│  │  ├─ navigation/
-│  │  │  ├─ Navigator.tsx             
-│  │  │  └─ ModalHost.tsx 
-│  │  ├─ settings/
-│  │  │  └─ SettingsLLMConfigModal.tsx             
-│  │  ├─ components/
-│  │  │  ├─ ui/
-│  │  │  │  ├─ Alert.tsx
-│  │  │  │  ├─ Button.tsx
-│  │  │  │  ├─ Input.tsx
-│  │  │  │  ├─ Modal.tsx
-│  │  │  │  ├─ Select.tsx
-│  │  │  │  ├─ Toast.tsx
-│  │  │  │  ├─ Tooltip.tsx
-│  │  │  │  ├─ Spinner.tsx
-│  │  │  │  ├─ Skeleton.tsx
-│  │  │  │  ├─ CommandMenu.tsx
-│  │  │  │  ├─ ShortcutsHelp.tsx
-│  │  │  │  ├─ Switch.tsx
-│  │  │  │  └─ CollapsibleSidebar.tsx  <-- NEW: Reusable collapsible sidebar
-│  │  │  ├─ tasks/
-│  │  │  │  ├─ StatusBadge.tsx
-│  │  │  │  ├─ PriorityTag.tsx
-│  │  │  │  └─ TaskCard.tsx
-│  │  ├─ services/
-│  │  │  ├─ chatService.ts
-│  │  │  ├─ docsService.ts
-│  │  │  ├─ tasksService.ts
-│  │  │  └─ notificationsService.ts
-│  │  ├─ hooks/
-│  │  │  ├─ useChats.ts
-│  │  │  ├─ useDocsIndex.ts
-│  │  │  ├─ useDocsAutocomplete.ts
-│  │  │  ├─ useLLMConfig.ts
-│  │  │  ├─ useNextTaskId.ts
-│  │  │  ├─ useShortcuts.tsx
-│  │  │  ├─ useTheme.ts           <-- NEW: centralized theming helpers (apply/init/use)
-│  │  │  ├─ useNotifications.ts
-│  │  │  └─ useNotificationPreferences.ts
-│  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx
-│  │  │  ├─ TasksView.tsx
-│  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx
-│  │  │  ├─ SettingsView.tsx
-│  │  │  └─ NotificationsView.tsx
-│  │  ├─ utils/
-│  │  │  └─ LLMConfigManager.ts
-│  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskEditView.tsx
-│  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx
-│  │  │  ├─ TaskDetailsView.tsx
-│  │  │  └─ TasksListView.tsx
-│  │  ├─ App.tsx                   
-│  │  └─ types.ts
-│  ├─ styles/
-│  │  ├─ design-tokens.css
-│  │  ├─ foundations/
-│  │  │  └─ metrics.css
-│  │  ├─ primitives/
-│  │  │  └─ effects.css
-│  │  ├─ components/
-│  │  │  ├─ badges.css
-│  │  │  ├─ buttons.css
-│  │  │  ├─ cards.css
-│  │  │  ├─ feedback.css
-│  │  │  ├─ forms.css
-│  │  │  ├─ overlays.css
-│  │  │  └─ tooltip.css
-│  │  ├─ layout/
-│  │  │  └─ nav.css
-│  │  └─ screens/
-│  │     ├─ board.css
-│  │     ├─ docs.css
-│  │     ├─ settings.css
-│  │     ├─ task-details.css
-│  │     └─ tasks.css
-│  ├─ tools/
-│  │  └─ standardTools.js
-│  ├─ index.css   
-│  ├─ main.js
-│  └─ preload.js
-├─ .env
-├─ forge.config.js
+│  │  ├─ preview/
+│  │  │  ├─ main.tsx
+│  │  │  └─ previewHost.tsx
+│  │  └─ ...
+│  └─ ...
+├─ preview.html
 ├─ index.html
 ├─ package.json
-├─ postcss.config.js
-├─ README.md
-├─ tailwind.config.js
-├─ tsconfig.json
-├─ vite.main.config.mjs
-├─ vite.preload.config.mjs
-├─ vite.renderer.config.mjs
-└─ …
+└─ ...
 ```
