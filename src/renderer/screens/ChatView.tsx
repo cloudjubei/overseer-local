@@ -114,8 +114,8 @@ export default function ChatView() {
   return (
     <div className="flex w-full h-full overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col min-h-0">
-        <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
+      <aside className="w-64 h-full shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col">
+        <div className="flex-shrink-0 flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
           <h2 className="m-0 text-[13px] font-semibold text-[var(--text-secondary)] tracking-wide">Chats</h2>
           <button className="btn" onClick={createChat} aria-label="Create new chat">
             New
@@ -206,7 +206,7 @@ export default function ChatView() {
         {/* Row 2: Callout (non-scroll) */}
         {!isConfigured && (
           <div
-            className="mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
+            className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
             style={{
               background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
               color: 'var(--text-primary)',
