@@ -165,8 +165,6 @@ export default function SettingsView() {
         {activeCategory === 'llms' && renderLLMsSection()}
         {activeCategory === 'notifications' && renderNotificationsSection()}
       </main>
-
-      {renderConfigModal()}
     </div>
   );
 }

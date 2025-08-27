@@ -39,7 +39,7 @@ export const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "z-50 min-w-[10rem] overflow-hidden rounded-md border bg-surface-raised text-text-primary shadow-md",
+        "z-[2000] min-w-[10rem] overflow-hidden rounded-md border bg-surface-raised text-text-primary shadow-md",
         "border-border",
         className
       )}
