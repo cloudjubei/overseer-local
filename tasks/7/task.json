@@ -397,7 +397,7 @@
     },
     {
       "id": "7.26",
-      "status": "-",
+      "status": "+",
       "title": "Home - Board view - horizontal problems",
       "description": "If the screen isn't wide enough, not all sections can show - look at how Linear and Monday resolve this and introduce the same fix",
       "plan": "",
