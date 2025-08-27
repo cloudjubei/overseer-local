@@ -12,8 +12,20 @@ export class ChatManager {
     this.docsIndexer = docsIndexer;
     this.chatsDir = path.join(projectRoot, 'chats');
     if (!fs.existsSync(this.chatsDir)) {
-      fs.mkdirSync(this.chatsDir);
+      fs.mkdirSync(this.chatsDir, { recursive: true });
     }
+  }
+
+  getDefaultChatsDir() {
+    return path.join(this.projectRoot, 'chats');
+  }
+
+  setChatsDir(dir) {
+    this.chatsDir = dir;
+    if (!fs.existsSync(this.chatsDir)) {
+      fs.mkdirSync(this.chatsDir, { recursive: true });
+    }
+    return this.chatsDir;
   }
 
   getProvider(config) {

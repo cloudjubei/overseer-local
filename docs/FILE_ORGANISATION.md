@@ -52,8 +52,10 @@ This document describes how files and directories are organised in this reposito
     - projectsService.ts: Lists and gets child projects via preload window.projectsIndex; now also supports create/update/delete.
     - docsService.ts: Project-aware docs service; subscribes to docs index updates; can switch context via window.docsIndex.setContext.
     - tasksService.ts: Tasks service using project-aware tasks index; subscriptions return an unsubscribe function.
+    - chatService.ts ← UPDATED: Now includes setContext(projectId) to scope chats directory per project via IPC.
+    - notificationsService.ts ← UPDATED: Renderer-local notifications are now scoped per project (storage keys include projectId) and expose setContext(projectId).
   - src/renderer/projects/: Renderer-side project context and management UI
-    - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app. Propagates context to tasks and docs indexers via preload APIs.
+    - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app. Propagates context to tasks, docs, chat, and notifications via preload APIs/services.
     - ProjectManagerModal.tsx ← NEW: Modal UI to create, edit, and delete child projects with validation.
     - validateProject.ts ← NEW: Client-side validation mirroring ProjectSpec rules.
 - src/projects/: Main-process indexer for child projects under projects/
@@ -61,9 +63,12 @@ This document describes how files and directories are organised in this reposito
   - src/projects/validator.js: Runtime validation of ProjectSpec objects.
 - src/docs/: Project-aware docs indexer and IPC.
 - src/tasks/: Project-aware tasks indexer and IPC.
+- src/chat/: Chat manager and providers
+  - src/chat/manager.js ← UPDATED: Supports getDefaultChatsDir() and setChatsDir(dir) to switch chats storage based on active project.
+  - src/chat/providers/*: LLM provider integrations (OpenAI, LiteLLM, LM Studio).
 - src/index.css: Imports styles.
-- src/main.js: Electron main process and IPC wiring, including projects CRUD handlers. ← UPDATED
-- src/preload.js: Exposes window.projectsIndex with get/subscribe and CRUD methods. ← UPDATED
+- src/main.js: Electron main process and IPC wiring, including projects CRUD handlers. ← UPDATED: Adds 'chat:set-context' to switch chats directory per project.
+- src/preload.js: Exposes window.projectsIndex with get/subscribe and CRUD methods; exposes tasksIndex/docsIndex setContext; exposes chat.setContext for project-aware chat. ← UPDATED
 
 ## New: Projects management UI and IPC
 - Renderer adds a Projects Manager modal accessible from the sidebar Projects section. Users can create, edit, and delete child projects.
@@ -73,6 +78,16 @@ This document describes how files and directories are organised in this reposito
   - 'projects:update' → updates existing project JSON (renames file if id changed)
   - 'projects:delete' → removes the project JSON
 - Projects indexer now includes configPathsById to track each project's config file path relative to projects/ for safe updates/deletes. Renderer ignores this field.
+
+## Project-aware Chat and Notifications ← NEW
+- Chat
+  - Preload exposes chat.setContext(projectId) that calls 'chat:set-context' IPC.
+  - Main handles 'chat:set-context' and switches ChatManager's chatsDir to either <appRoot>/chats (main) or <projects>/<project.path>/chats (child), creating the directory if needed.
+  - ChatManager (src/chat/manager.js) now has getDefaultChatsDir() and setChatsDir(dir), used by IPC.
+- Notifications
+  - Renderer-only persistence is scoped per project by namespacing storage keys (app_notifications__<projectId>, notification_preferences__<projectId>).
+  - notificationsService exposes setContext(projectId); ProjectContext calls this when active project changes.
+  - OS notifications include metadata.projectId to allow routing when clicked.
 
 Notes:
 - Projects are stored as JSON files under <project-root>/projects/. Each JSON follows ProjectSpec (id, title, description, path, repo_url, requirements[]).

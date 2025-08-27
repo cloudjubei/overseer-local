@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ProjectSpec } from 'src/types/tasks'
 import { projectsService, type ProjectsIndexSnapshot } from '../services/projectsService'
+import notificationsService from '../services/notificationsService'
 
 export type ProjectId = 'main' | string
 
@@ -112,7 +113,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return snapshot.projectsById[activeProjectId] || null
   }, [snapshot, activeProjectId])
 
-  // Sync active project with tasks and docs indexer context in main via preload API
+  // Sync active project with tasks, docs, chat, and notifications context in main via preload API
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
@@ -122,6 +123,11 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
         if (window.docsIndex && typeof window.docsIndex.setContext === 'function') {
           window.docsIndex.setContext(activeProjectId)
         }
+        if (window.chat && typeof window.chat.setContext === 'function') {
+          window.chat.setContext(activeProjectId)
+        }
+        // Renderer-local notifications: switch storage namespace
+        notificationsService.setContext(activeProjectId)
       }
     } catch { /* ignore */ }
   }, [activeProjectId])

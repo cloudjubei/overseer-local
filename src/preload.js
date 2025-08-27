@@ -48,6 +48,8 @@ const CHAT_API = {
   load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
   save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
   delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
+  // NEW: set active chat context (project-aware)
+  setContext: (projectId) => ipcRenderer.invoke('chat:set-context', { projectId }),
 };
 
 const NOTIFICATIONS_API = {

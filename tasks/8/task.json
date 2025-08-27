@@ -1,6 +1,6 @@
 {
   "id": 8,
-  "status": "-",
+  "status": "+",
   "title": "Manage projects",
   "description": "List child projects under projects/ (the .json configs according to the interface `ProjectSpec` defined in `/src/types/tasks.ts`). For each project, based on the data in the config json, allow task and similar inspection to everything just like for this project. Each child project has its own tasks list. All functionality that is already present here, should be available for any child project. For this whole task - refer to Linear or Monday as to how they solve this problem.",
   "features": [
@@ -132,7 +132,7 @@
     },
     {
       "id": "8.8",
-      "status": "-",
+      "status": "+",
       "title": "Ensure feature and chat services work with project context",
       "description": "Update any remaining services (chat service, notification service) to work correctly within project context. Ensure that features, chat sessions, and notifications are properly scoped to the selected project when applicable.",
       "plan": "",

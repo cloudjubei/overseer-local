@@ -313,6 +313,30 @@ ipcMain.handle('chat:delete', (event, chatId) => {
   chatManager.deleteChat(chatId);
 });
 
+ipcMain.handle('chat:set-context', async (event, { projectId }) => {
+  try {
+    let targetDir;
+    if (!projectId || projectId === 'main') {
+      targetDir = chatManager.getDefaultChatsDir();
+    } else {
+      const snap = projectsIndexer.getIndex();
+      const spec = snap.projectsById?.[projectId];
+      const projectsDirAbs = path.resolve(snap.projectsDir);
+      if (spec) {
+        const projectAbs = path.resolve(projectsDirAbs, spec.path);
+        targetDir = path.join(projectAbs, 'chats');
+      } else {
+        targetDir = chatManager.getDefaultChatsDir();
+      }
+    }
+    chatManager.setChatsDir(targetDir);
+    return chatManager.listChats();
+  } catch (e) {
+    console.error('Failed to set chat context:', e);
+    return chatManager.listChats();
+  }
+});
+
 // Notifications
 ipcMain.handle('notifications:send-os', async (event, data) => {
   

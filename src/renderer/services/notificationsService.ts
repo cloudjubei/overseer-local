@@ -15,9 +15,11 @@ import {
   NotificationPreferences
 } from '../../types/notifications';
 
+// Local type to avoid importing from React context
+export type ProjectId = 'main' | string;
+
 class NotificationsService {
-  private readonly STORAGE_KEY = 'app_notifications';
-  private readonly PREFS_KEY = 'notification_preferences';
+  private currentProjectId: ProjectId = 'main';
   private notifications: Map<string, Notification> = new Map();
   private listeners: Set<() => void> = new Set();
 
@@ -25,18 +27,40 @@ class NotificationsService {
     this.loadFromStorage();
   }
 
+  /** Compute storage keys scoped by project */
+  private storageKey(): string {
+    return `app_notifications__${this.currentProjectId}`;
+  }
+  private prefsKey(): string {
+    return `notification_preferences__${this.currentProjectId}`;
+  }
+
+  /**
+   * Change active project context for notifications
+   */
+  setContext(projectId: ProjectId) {
+    const prev = this.currentProjectId;
+    this.currentProjectId = projectId || 'main';
+    if (prev !== this.currentProjectId) {
+      this.loadFromStorage();
+      this.notifyListeners();
+    }
+  }
+
   /**
    * Load notifications from localStorage
    */
   private loadFromStorage(): void {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
+      const stored = localStorage.getItem(this.storageKey());
       if (stored) {
         const data = JSON.parse(stored) as Notification[];
         this.notifications.clear();
         data.forEach(notification => {
           this.notifications.set(notification.id, notification);
         });
+      } else {
+        this.notifications.clear();
       }
     } catch (error) {
       console.error('Failed to load notifications from storage:', error);
@@ -50,7 +74,7 @@ class NotificationsService {
   private saveToStorage(): void {
     try {
       const data = Array.from(this.notifications.values());
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(this.storageKey(), JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save notifications to storage:', error);
     }
@@ -75,7 +99,7 @@ class NotificationsService {
    */
   private getPreferences(): NotificationPreferences {
     try {
-      const stored = localStorage.getItem(this.PREFS_KEY);
+      const stored = localStorage.getItem(this.prefsKey());
       return stored ? JSON.parse(stored) : { osNotificationsEnabled: false, categoriesEnabled: {}, soundsEnabled: false, displayDuration: 0 };
     } catch {
       return { osNotificationsEnabled: false, categoriesEnabled: {}, soundsEnabled: false, displayDuration: 0 };
@@ -93,7 +117,10 @@ class NotificationsService {
     const data = {
       title: notification.title,
       message: notification.message,
-      metadata: notification.metadata,
+      metadata: {
+        ...(notification.metadata || {}),
+        projectId: this.currentProjectId,
+      },
       soundsEnabled: prefs.soundsEnabled,
       displayDuration: prefs.displayDuration
     };
@@ -117,7 +144,7 @@ class NotificationsService {
       title: input.title,
       message: input.message,
       read: false,
-      metadata: input.metadata
+      metadata: { ...(input.metadata || {}), projectId: this.currentProjectId }
     };
 
     this.notifications.set(notification.id, notification);
@@ -222,14 +249,14 @@ class NotificationsService {
           message: 'You will now receive desktop notifications for important events.',
           soundsEnabled: false,
           displayDuration: 5,
-          metadata: {}
+          metadata: { projectId: this.currentProjectId }
         });
         if (result.error){
-          // toast({ title: 'Error Enabling Notifications', description: result.error || 'Unable to enable notifications. Please check your system settings.', variant: 'error' });
+          // handle error UI if needed
         }
         return result.success
       } catch (err) {
-          // toast({ title: 'Error Enabling Notifications', description: err || 'Unable to enable notifications. Please check your system settings.', variant: 'error' });
+        // handle error UI if needed
       }
     }
     return false

@@ -8,6 +8,7 @@ export type ChatService = {
   load: (chatId: string) => Promise<ChatMessage[]>;
   save: (chatId: string, messages: ChatMessage[]) => Promise<void>;
   delete: (chatId: string) => Promise<void>;
+  setContext: (projectId: 'main' | string) => Promise<string[]>;
 };
 
 export const chatService: ChatService = {
@@ -18,4 +19,5 @@ export const chatService: ChatService = {
   load: (chatId) => window.chat.load(chatId),
   save: (chatId, messages) => window.chat.save(chatId, messages),
   delete: (chatId) => window.chat.delete(chatId),
+  setContext: (projectId) => window.chat.setContext(projectId),
 };
