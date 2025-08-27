@@ -156,7 +156,13 @@ export default function TasksListView() {
 
   const dndEnabled = !isFiltered && view === 'list'
 
-  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
+  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number, rowTaskId: number) => {
+    // Do not show drop indicators when hovering the dragged row itself
+    if (dragTaskId != null && rowTaskId === dragTaskId) {
+      setDropIndex(null)
+      setDropPosition(null)
+      return
+    }
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const offsetY = e.clientY - rect.top
     const pos: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after'
@@ -204,8 +210,12 @@ export default function TasksListView() {
     if (!dndEnabled || !dragging) return
     e.preventDefault()
     if (dragTaskId != null && dropIndex != null) {
+      const fromIndex = allTasks.findIndex(t => t.id === dragTaskId)
       const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
-      handleMoveTask(dragTaskId, toIndex)
+      // Guard against no-op moves
+      if (fromIndex !== -1 && toIndex !== fromIndex) {
+        handleMoveTask(dragTaskId, toIndex)
+      }
     }
     clearDndState()
   }
@@ -297,17 +307,19 @@ export default function TasksListView() {
                       onDragOver={(e) => {
                         if (!dndEnabled) return; 
                         e.preventDefault();
-                        computeDropForRow(e, idx);
+                        computeDropForRow(e, idx, t.id);
                       }}
                       onDrop={(e) => {
                         if (!dndEnabled) return; 
                         e.preventDefault();
-                        // List-level onDrop handles the actual reorder using current dropIndex/position
-                        // We just ensure the current target is set correctly
-                        computeDropForRow(e, idx);
+                        // Ensure the current target is set correctly and not the same row
+                        computeDropForRow(e, idx, t.id);
                         if (dragTaskId != null && dropIndex != null) {
+                          const fromIndex = allTasks.findIndex(tt => tt.id === dragTaskId)
                           const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
-                          handleMoveTask(dragTaskId, to)
+                          if (fromIndex !== -1 && to !== fromIndex) {
+                            handleMoveTask(dragTaskId, to)
+                          }
                         }
                         clearDndState()
                       }}

@@ -312,6 +312,11 @@ export class TasksIndexer {
             throw new Error('Invalid payload for reorder');
         }
 
+        // Early exit if order did not change
+        if (JSON.stringify(newOrder) === JSON.stringify(currentOrder)) {
+            return { ok: true };
+        }
+
         // Reorder features
         const reorderedFeatures = newOrder.map(id => features.find(f => f.id === id));
 
@@ -382,7 +387,8 @@ export class TasksIndexer {
 
     async reorderTasks(payload) {
         console.log('Reordering tasks');
-        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+        const tasksDirAbs = path.resolve(this.tasksDir);
+        const taskDirs = await fs.readdir(tasksDirAbs, { withFileTypes: true });
         let currentOrder = taskDirs
             .filter(d => d.isDirectory() && isNumericDir(d.name))
             .map(d => parseInt(d.name, 10))
@@ -408,6 +414,11 @@ export class TasksIndexer {
             throw new Error('Invalid payload for reorder');
         }
 
+        // Early exit if order did not change (prevents unnecessary renames and ENOENT issues)
+        if (JSON.stringify(newOrder) === JSON.stringify(currentOrder)) {
+            return { ok: true };
+        }
+
         const newIdForOld = new Map();
         newOrder.forEach((oldId, index) => {
             newIdForOld.set(oldId, index + 1);
@@ -416,7 +427,7 @@ export class TasksIndexer {
         const featureIdUpdateMap = new Map();
         const tasksData = {};
         for (const oldId of currentOrder) {
-            const taskPath = path.join(this.tasksDir, String(oldId), 'task.json');
+            const taskPath = path.join(tasksDirAbs, String(oldId), 'task.json');
             const raw = await fs.readFile(taskPath, 'utf-8');
             tasksData[oldId] = JSON.parse(raw);
         }
@@ -442,12 +453,12 @@ export class TasksIndexer {
         });
 
         // Use a staging directory to avoid rename conflicts and ENOENT due to path resolution
-        const stagingDir = path.join(this.tasksDir, `.reorder_tmp_${Date.now()}`)
+        const stagingDir = path.join(tasksDirAbs, `.reorder_tmp_${Date.now()}`)
         await fs.mkdir(stagingDir, { recursive: true })
 
         // Move all current numeric task dirs into staging (by oldId)
         for (const oldId of currentOrder) {
-            const oldDir = path.join(this.tasksDir, String(oldId));
+            const oldDir = path.join(tasksDirAbs, String(oldId));
             const stagedDir = path.join(stagingDir, String(oldId));
             // Verify exists before rename to avoid ENOENT confusing errors
             if (!(await pathExists(oldDir))) {
@@ -460,7 +471,7 @@ export class TasksIndexer {
         for (const [newIndex, oldId] of newOrder.entries()) {
             const newId = newIndex + 1;
             const stagedDir = path.join(stagingDir, String(oldId));
-            const newDir = path.join(this.tasksDir, String(newId));
+            const newDir = path.join(tasksDirAbs, String(newId));
             await fs.rename(stagedDir, newDir);
             const newTaskPath = path.join(newDir, 'task.json');
             await fs.writeFile(newTaskPath, JSON.stringify(tasksData[oldId], null, 2), 'utf-8');
