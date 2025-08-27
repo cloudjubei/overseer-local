@@ -348,7 +348,7 @@
     },
     {
       "id": "7.25",
-      "status": "-",
+      "status": "+",
       "title": "Edit feature should allow editing the rejection field",
       "description": "When nothing is input, the key is removed from the feature - otherwise it should be saved. If a feature has a rejection, it should display an exclamation badge next to the status in the Feature list.",
       "plan": "",

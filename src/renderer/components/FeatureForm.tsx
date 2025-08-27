@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 export type FeatureFormValues = {
   title: string
   description?: string
+  rejection?: string
 }
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 export function FeatureForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
+  const [rejection, setRejection] = useState<string>(initialValues?.rejection ?? '')
   const [error, setError] = useState<string | null>(null)
 
   const localTitleRef = useRef<HTMLInputElement>(null)
@@ -45,7 +47,8 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, submitting = fa
     if (!validate()) return
     const payload: FeatureFormValues = {
       title: title.trim(),
-      description: description?.trim() || ''
+      description: description?.trim() || '',
+      rejection: rejection?.trim() || undefined
     }
     await onSubmit(payload)
   }
@@ -92,6 +95,24 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, submitting = fa
             placeholder="Optional details or acceptance criteria"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="feature-rejection" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Reason</label>
+          <textarea
+            id="feature-rejection"
+            rows={3}
+            placeholder="Optional reason for rejection (leave blank to remove)"
+            value={rejection}
+            onChange={(e) => setRejection(e.target.value)}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
             style={{
