@@ -196,6 +196,6 @@
       "context": [],
       "acceptance": [],
       "rejection": "for Litellm the error when using 'gemini/gemini-2.5-pro' is: An error occurred: Model: gemini/gemini-2.5-pro not supported. Cannot find a handler.    I use Litellm in a different project, there once the apiKey is given and the model (no need for urls) it all works. When using claude-4-sonnet-20250514 with litellm I got this error: claude-4-sonnet-20250514 is not supported on this API. Please use the Messages API instead.'"
-     }
+    }
   ]
 }

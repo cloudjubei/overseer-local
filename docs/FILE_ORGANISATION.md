@@ -46,7 +46,8 @@ This document describes how files and directories are organised in this reposito
     - BoardView.tsx: Kanban-style board with columns by status.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
-
+- src/tools/: Library of standard tools for agents.
+  - src/tools/standardTools.js: Defines tool schemas and implementations for standard agent tools.
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
@@ -204,6 +205,8 @@ repo_root/
 │  │     ├─ settings.css
 │  │     ├─ task-details.css
 │  │     └─ tasks.css
+│  ├─ tools/
+│  │  └─ standardTools.js
 │  ├─ index.css   
 │  ├─ main.js
 │  └─ preload.js
