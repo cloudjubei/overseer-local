@@ -6,6 +6,7 @@ import { TasksIndexer }  from './tasks/indexer';
 import { DocsIndexer } from './docs/indexer';
 import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
+import { validateProjectSpec } from './projects/validator';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -200,6 +201,83 @@ ipcMain.handle('docs:upload', (event, {name, content}) => {
 // Projects
 ipcMain.handle('projects-index:get', async () => {
   return projectsIndexer.getIndex();
+});
+
+function ensureProjectsDirExists() {
+  const dir = projectsIndexer.getIndex().projectsDir;
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function getProjectConfigPathForId(id) {
+  const snap = projectsIndexer.getIndex();
+  const rel = snap.configPathsById?.[id];
+  if (rel) return path.join(snap.projectsDir, rel);
+  // default convention: projects/<id>.json
+  return path.join(snap.projectsDir, `${id}.json`);
+}
+
+ipcMain.handle('projects:create', async (event, { spec }) => {
+  try {
+    const sanitized = { ...spec };
+    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
+    const { valid, errors } = validateProjectSpec(sanitized);
+    if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
+
+    const dir = ensureProjectsDirExists();
+    const snap = projectsIndexer.getIndex();
+    if (snap.projectsById[sanitized.id]) {
+      return { ok: false, error: `Project with id ${sanitized.id} already exists` };
+    }
+
+    const target = path.join(dir, `${sanitized.id}.json`);
+    fs.writeFileSync(target, JSON.stringify(sanitized, null, 2), 'utf8');
+    // watcher will pick up; but proactively rebuild to notify immediately
+    await projectsIndexer.rebuildAndNotify('Project created');
+    return { ok: true };
+  } catch (e) {
+    console.error('projects:create failed', e);
+    return { ok: false, error: String(e?.message || e) };
+  }
+});
+
+ipcMain.handle('projects:update', async (event, { id, spec }) => {
+  try {
+    const sanitized = { ...spec };
+    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
+    if (!sanitized.id) sanitized.id = id;
+    const { valid, errors } = validateProjectSpec(sanitized);
+    if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
+
+    ensureProjectsDirExists();
+    const snap = projectsIndexer.getIndex();
+    const existingPath = getProjectConfigPathForId(id);
+    // If id changed, we will write to new file and delete old file if different
+    const writePath = getProjectConfigPathForId(sanitized.id);
+
+    fs.writeFileSync(writePath, JSON.stringify(sanitized, null, 2), 'utf8');
+    if (fs.existsSync(existingPath) && path.resolve(existingPath) !== path.resolve(writePath)) {
+      try { fs.unlinkSync(existingPath); } catch {}
+    }
+
+    await projectsIndexer.rebuildAndNotify('Project updated');
+    return { ok: true };
+  } catch (e) {
+    console.error('projects:update failed', e);
+    return { ok: false, error: String(e?.message || e) };
+  }
+});
+
+ipcMain.handle('projects:delete', async (event, { id }) => {
+  try {
+    const p = getProjectConfigPathForId(id);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
+    await projectsIndexer.rebuildAndNotify('Project deleted');
+    return { ok: true };
+  } catch (e) {
+    console.error('projects:delete failed', e);
+    return { ok: false, error: String(e?.message || e) };
+  }
 });
 
 // Chat

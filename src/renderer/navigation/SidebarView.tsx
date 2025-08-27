@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigator } from './Navigator'
 import { useProjectContext } from '../projects/ProjectContext'
+import { ProjectManagerModal } from '../projects/ProjectManagerModal'
 
 export type SidebarViewProps = {
   collapsed?: boolean
@@ -36,6 +37,7 @@ export default function SidebarView({ collapsed }: SidebarViewProps) {
     setActiveProjectId,
     switchToMainProject,
   } = useProjectContext()
+  const [showManager, setShowManager] = useState(false)
 
   return (
     <aside className="sidebar" data-collapsed={collapsed ? 'true' : 'false'} aria-label="Primary Navigation">
@@ -88,9 +90,12 @@ export default function SidebarView({ collapsed }: SidebarViewProps) {
         {/* Projects section */}
         {!collapsed && (
           <div className="px-3" aria-hidden>
-            <div style={{ color: 'var(--text-secondary)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <span>Projects</span>
-              <span>{projects.length}</span>
+              <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                <span>{projects.length}</span>
+                <button className="btn-secondary" style={{ padding: '0 8px', height: 24, fontSize: 12 }} onClick={() => setShowManager(true)}>Manage</button>
+              </div>
             </div>
           </div>
         )}
@@ -134,16 +139,17 @@ export default function SidebarView({ collapsed }: SidebarViewProps) {
                   className={classNames('nav-item', accent, active && 'nav-item--active', collapsed && 'nav-item--compact')}
                   aria-current={active ? 'true' : undefined}
                   onClick={() => setActiveProjectId(p.id)}
-                  title={p.name}
+                  title={p.title}
                 >
                   <span className="nav-item__icon" aria-hidden>📁</span>
-                  {!collapsed && <span className="nav-item__label">{p.name}</span>}
+                  {!collapsed && <span className="nav-item__label">{p.title}</span>}
                 </button>
               </li>
             )
           })}
         </ul>
       </nav>
+      {showManager && <ProjectManagerModal onClose={() => setShowManager(false)} />}
     </aside>
   )
 }

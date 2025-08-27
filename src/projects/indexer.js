@@ -18,6 +18,8 @@ export class ProjectsIndexer {
       orderedIds: [],
       errors: [],
       metrics: { lastScanMs: 0, lastScanCount: 0 },
+      // map project id -> config file path relative to projectsDir (for maintenance)
+      configPathsById: {},
     };
     this.watcher = null;
   }
@@ -59,6 +61,7 @@ export class ProjectsIndexer {
       projectsById: {},
       orderedIds: [],
       errors: [],
+      configPathsById: {},
     };
 
     const projectsDirAbs = path.resolve(this.projectsDir);
@@ -73,8 +76,6 @@ export class ProjectsIndexer {
       for (const entry of entries) {
         const abs = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-          // Recurse only one level deep to avoid scanning unrelated repos
-          // but still catch nested project configs inside subfolders
           await scan(abs);
         } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
           await this._tryLoadProjectConfig(abs, projectsDirAbs, rootAbs, next);
@@ -84,8 +85,6 @@ export class ProjectsIndexer {
 
     if (await pathExists(projectsDirAbs)) {
       await scan(projectsDirAbs);
-    } else {
-      // Not an error; just no projects dir present
     }
 
     // Stable ordering by title then id
@@ -135,5 +134,7 @@ export class ProjectsIndexer {
 
     const id = json.id;
     next.projectsById[id] = { ...json, path: path.relative(projectsDirAbs, resolved) };
+    // store config file relative to projectsDir for maintenance (update/delete)
+    next.configPathsById[id] = path.relative(projectsDirAbs, configAbsPath);
   }
 }

@@ -19,7 +19,7 @@ This document describes how files and directories are organised in this reposito
     - components/tooltip.css: Tooltip.
     - components/overlays.css: Command menu, help overlay.
     - components/cards.css: Task card.
-    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle.
+    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board toggle.
   - src/styles/layout/: Layout building blocks like sidebar/nav.
     - layout/nav.css: Sidebar and navigation styles.
   - src/styles/screens/: Screen-scoped styles that compose primitives/components.
@@ -34,6 +34,7 @@ This document describes how files and directories are organised in this reposito
     - Spinner.tsx: Inline spinner.
     - Select.tsx, Input.tsx, Tooltip.tsx, etc.
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
+    - Modal.tsx ← NEW: Lightweight modal wrapper reusing overlays styles for dialogs.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
@@ -46,136 +47,34 @@ This document describes how files and directories are organised in this reposito
     - BoardView.tsx: Kanban-style board with columns by status. Project-aware.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
-    - SidebarView.tsx ← NEW: Sidebar component rendering primary nav and Projects list (main + child projects)
+    - SidebarView.tsx ← UPDATED: Now includes a Manage button to open Project Manager modal and uses ProjectSpec.title.
   - src/renderer/services/: Renderer-side service modules (IPC access)
-    - projectsService.ts: Lists and gets child projects via preload window.projectsIndex.
+    - projectsService.ts: Lists and gets child projects via preload window.projectsIndex; now also supports create/update/delete.
     - docsService.ts: Project-aware docs service; subscribes to docs index updates; can switch context via window.docsIndex.setContext.
     - tasksService.ts: Tasks service using project-aware tasks index; subscriptions return an unsubscribe function.
-  - src/renderer/projects/: Renderer-side project context
+  - src/renderer/projects/: Renderer-side project context and management UI
     - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app. Propagates context to tasks and docs indexers via preload APIs.
-- src/tools/: Library of standard tools for agents.
-  - src/tools/standardTools.js: Defines tool schemas and implementations for standard agent tools.
-- docs/: Project documentation and specifications.
-  - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
-  - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
-  - design/: Design system references and tokens.
-    - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
-    - design/DESIGN_SYSTEM.md: Comprehensive design system documentation (principles, tokens, typography, spacing, elevation, motion, radii, theming, accessibility, extension guidance).
-    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltip, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
-    - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
-  - ux/: UX research and guidelines.
-    - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
-  - styleguide/: Living style guide that demonstrates tokens and components using actual CSS.
-    - styleguide/index.html: Static style guide (light/dark + density toggle) importing src/styles/design-tokens.css and src/index.css.
-    - styleguide/README.md: How to view and use the style guide.
-  - tailwind.config.tokens.example.js: Example Tailwind extension mapping to CSS variable tokens.
-- tasks/: Per-task workspaces containing task metadata and tests.
-  - tasks/{id}/task.json: Canonical task definition for a single task.
-  - tasks/{id}/tests/: Deterministic tests validating each feature in the task.
-- scripts/: Project automation scripts (e.g., setup-linting-formatting).
-- build/: Packaging resources for electron-builder (icons, entitlements, etc.).
-  - build/icons/icon.icns: Placeholder macOS app icon to be replaced with a real ICNS file.
-  - build/icons/icon.ico: Placeholder Windows app icon to be replaced with a real ICO file.
-  - build/icons/icon.png: Placeholder Linux app icon to be replaced with a real 512x512 PNG file.
-  - build/entitlements.mac.plist: macOS entitlements for main app (hardened runtime/JIT allowances).
-- .env, and other setup files may exist as needed.
+    - ProjectManagerModal.tsx ← NEW: Modal UI to create, edit, and delete child projects with validation.
+    - validateProject.ts ← NEW: Client-side validation mirroring ProjectSpec rules.
+- src/projects/: Main-process indexer for child projects under projects/
+  - src/projects/indexer.js: Scans the projects/ directory for .json files, validates them against ProjectSpec, builds an index, and watches for changes. Emits 'projects-index:update' via IPC. UPDATED to expose configPathsById mapping for maintenance.
+  - src/projects/validator.js: Runtime validation of ProjectSpec objects.
+- src/docs/: Project-aware docs indexer and IPC.
+- src/tasks/: Project-aware tasks indexer and IPC.
+- src/index.css: Imports styles.
+- src/main.js: Electron main process and IPC wiring, including projects CRUD handlers. ← UPDATED
+- src/preload.js: Exposes window.projectsIndex with get/subscribe and CRUD methods. ← UPDATED
+
+## New: Projects management UI and IPC
+- Renderer adds a Projects Manager modal accessible from the sidebar Projects section. Users can create, edit, and delete child projects.
+- Validation occurs client-side and server-side (main process uses src/projects/validator.js).
+- Main process adds IPC handlers:
+  - 'projects:create' → writes a new JSON under projects/<id>.json
+  - 'projects:update' → updates existing project JSON (renames file if id changed)
+  - 'projects:delete' → removes the project JSON
+- Projects indexer now includes configPathsById to track each project's config file path relative to projects/ for safe updates/deletes. Renderer ignores this field.
 
 Notes:
-- All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.
-- Documentation in docs/ is the single source of truth for specs and formats.
-
-## New: Projects subsystem
-- src/projects/: Main-process indexer for child projects under projects/
-  - src/projects/indexer.js: Scans the projects/ directory for .json files, validates them against ProjectSpec, builds an index, and watches for changes. Emits 'projects-index:update' via IPC.
-  - src/projects/validator.js: Runtime validation of ProjectSpec objects.
-- src/renderer/services/projectsService.ts: Renderer-side service that accesses window.projectsIndex to list and load child projects.
-- src/renderer/projects/ProjectContext.tsx: Renderer-side provider and hooks to manage the active project context (main vs child projects) across the app. Persists selection and stays in sync with the projects index. Propagates context to tasks and docs indexers.
-- IPC exposure:
-  - Preload: window.projectsIndex with get() and subscribe(callback) methods.
-  - Main: ipcMain.handle('projects-index:get') returns the latest projects index snapshot.
-
-Projects directory expectations
-- Location: <project-root>/projects/
-- Files: One or more .json config files matching the ProjectSpec interface (see src/types/tasks.ts).
-- Security: ProjectSpec.path is normalized and must resolve under projects/; configs escaping this directory are ignored and reported as errors.
-
-## Docs subsystem (project-aware)
-- src/docs/indexer.js: Indexes Markdown documents under the active docs directory. Now project-aware:
-  - getDefaultDocsDir(): <project-root>/docs
-  - setDocsDir(absPath): switch the active docs directory to a new path (e.g., <project-root>/projects/{id}/docs), rebuilds the index, restarts watchers, and notifies renderer via 'docs-index:update'.
-- Preload API: window.docsIndex
-  - get(), subscribe(cb)
-  - getFile(relPath), saveFile(relPath, content), upload(name, content)
-  - setContext(projectId): Tell main process to switch docs directory to root or a child project's docs.
-- Main IPC:
-  - 'docs-index:get' → returns current docs index snapshot
-  - 'docs:set-context' → computes target docs dir based on projectId and calls DocsIndexer.setDocsDir()
-  - 'docs-file:get' / 'docs-file:save' / 'docs:upload' → operate within the active docs directory
-- Renderer services:
-  - src/renderer/services/docsService.ts exposes setContext(projectId) in addition to get/subscribe/getFile/saveFile/upload.
-  - ProjectContext.tsx calls window.docsIndex.setContext(activeProjectId) whenever the active project changes.
-
-## Tasks subsystem (project-aware)
-- Tasks views and services are project-aware via ProjectContext.
-  - ProjectContext calls window.tasksIndex.setContext(activeProjectId) whenever the active project changes.
-  - src/renderer/services/tasksService.ts subscribes to tasks index updates and now returns an unsubscribe function from onUpdate.
-  - src/renderer/tasks/TasksListView.tsx, TaskDetailsView.tsx, and BoardView.tsx resubscribe and refresh their snapshots when the active project changes to reflect the correct project's tasks. All create/edit/delete/status/reorder operations apply within the active project's tasks directory.
-
-## File Naming Conventions
-- Tasks and features:
-  - Task directories are numeric IDs: tasks/{id}/ (e.g., tasks/1/).
-  - Tests are named per-feature: tasks/{task_id}/tests/test_{task_id}_{feature_number}.py (e.g., tasks/15/tests/test_15_3.py).
-- Javascript/TypeScript modules: camelCase.js/ts. For schema mirrors adjacent to Python specs, a matching snake_case.ts is acceptable under docs/.
-- Documentation files: UPPERCASE or Title_Case for project-wide specs (e.g., TESTING.md, FILE_ORGANISATION.md). Place task-related docs under docs/tasks/.
-- JSON examples/templates: Use .json with clear, descriptive names (e.g., task_example.json).
-
-## Evolution Guidance
-- Make minimal, incremental changes that are easy to review and test.
-- Keep documentation authoritative: update docs first when changing schemas or protocols.
-- Introduce shared utilities only when multiple tasks need them; otherwise keep helpers local to a task.
-- Deprecate gradually: create new files/specs alongside old ones, migrate, then remove deprecated artifacts when tests prove stability.
-- Each feature must have deterministic tests; do not mark features complete until tests pass.
-
-## Repository Tree
-```
-repo_root/
-├─ docs/
-│  ├─ FILE_ORGANISATION.md
-│  ├─ STANDARDS.md
-│  ├─ BUILD_SIGNING.md
-│  ├─ design/
-│  ├─ ux/
-│  ├─ styleguide/
-│  └─ tailwind.config.tokens.example.js
-├─ src/
-│  ├─ chat/
-│  ├─ docs/
-│  │  └─ indexer.js                ← Docs indexer (project-aware)
-│  ├─ tasks/
-│  ├─ projects/               ← child projects indexer + validator
-│  │  ├─ indexer.js
-│  │  └─ validator.js
-│  ├─ types/
-│  ├─ renderer/
-│  │  ├─ services/
-│  │  │  ├─ projectsService.ts
-│  │  │  ├─ docsService.ts        ← now exposes setContext(projectId)
-│  │  │  └─ tasksService.ts       ← project-aware updates with unsubscribe
-│  │  ├─ projects/
-│  │  │  └─ ProjectContext.tsx  ← active project provider + hooks (syncs tasks/docs contexts)
-│  │  ├─ navigation/
-│  │  │  ├─ Navigator.tsx
-│  │  │  └─ SidebarView.tsx
-│  │  └─ tasks/
-│  │     ├─ TasksListView.tsx    ← project-aware
-│  │     ├─ TaskDetailsView.tsx  ← project-aware
-│  │     └─ BoardView.tsx        ← project-aware
-│  ├─ styles/
-│  ├─ index.css
-│  ├─ main.js                 ← wired IPC for projects-index, tasks, and docs set-context
-│  └─ preload.js              ← exposes window.projectsIndex, window.tasksIndex (with unsubscribe), and window.docsIndex.setContext
-├─ tasks/
-├─ projects/                  ← Scanned JSON configs for child projects
-├─ package.json
-└─ ...
-```
+- Projects are stored as JSON files under <project-root>/projects/. Each JSON follows ProjectSpec (id, title, description, path, repo_url, requirements[]).
+- The UI surfaces basic metadata: ID, Title, Description, Path (under projects/), and Repository URL.
+- Requirements can be left empty; the validator requires an array, defaults to [].

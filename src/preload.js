@@ -59,7 +59,7 @@ const NOTIFICATIONS_API = {
   }
 };
 
-// Projects Index API
+// Projects Index + CRUD API
 const PROJECTS_API = {
   get: () => ipcRenderer.invoke('projects-index:get'),
   subscribe: (callback) => {
@@ -67,6 +67,9 @@ const PROJECTS_API = {
     ipcRenderer.on('projects-index:update', listener);
     return () => ipcRenderer.removeListener('projects-index:update', listener);
   },
+  create: (spec) => ipcRenderer.invoke('projects:create', { spec }),
+  update: (id, spec) => ipcRenderer.invoke('projects:update', { id, spec }),
+  delete: (id) => ipcRenderer.invoke('projects:delete', { id }),
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
