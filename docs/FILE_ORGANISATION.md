@@ -42,10 +42,14 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
     - previewHost.tsx: Dedicated preview renderer that dynamically loads a component module and mounts it with provided props and providers.
     - main.tsx: Entry point that boots the preview host.
-    - Usage: visit /preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&provider=app&theme=light
+    - previewTypes.ts: Types for declaring preview metadata and provider registry.
+    - previewRegistry.tsx: Lightweight registry for provider factories and composition helpers.
+    - withPreview.tsx: Helpers to resolve providers and apply wrappers based on meta + URL.
+    - mocks/coreMocks.tsx: Default providers (theme, router, frame) and in-memory mocks (tasks, notifications, llm).
+    - Usage: visit /preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&theme=light
       - id: path (relative to src/) plus optional #ExportName (default: default)
       - props: URL-encoded JSON of props (or base64 if props_b64=1)
-      - provider: one of [app, none]
+      - needs: comma-separated dependency keys to include (in addition to defaults)
       - theme: light | dark (applies data-theme attr)
   - src/renderer/screens/
     - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
@@ -140,15 +144,16 @@ Notes:
 - In dev, open http://localhost:<vite-port>/preview.html with query params:
   - id: module path under src (e.g., renderer/components/ui/Button.tsx#default)
   - props: URL-encoded JSON of props (or base64 if props_b64=1)
-  - provider: app | none (wrap with MemoryRouter and minimal theme init)
+  - needs: Comma-separated provider keys (theme, router auto-applied). Additional available: frame, tasksMock, notificationsMock, llmMock.
   - theme: light | dark (applies data-theme on <html>)
-- For production builds, ensure vite.renderer.config.mjs includes preview.html in rollupOptions.input if you need a separate HTML entry baked into the app bundle.
+- Components can export a `preview` metadata object in their module to declare needs and variants. See docs/COMPONENT_PREVIEWS.md.
 
 ## Repository Tree
 ```
 repo_root/
 ├─ docs/
 │  ├─ FILE_ORGANISATION.md
+│  ├─ COMPONENT_PREVIEWS.md
 │  ├─ STANDARDS.md
 │  ├─ BUILD_SIGNING.md
 │  ├─ design/
@@ -166,7 +171,12 @@ repo_root/
 │  ├─ renderer/
 │  │  ├─ preview/
 │  │  │  ├─ main.tsx
-│  │  │  └─ previewHost.tsx
+│  │  │  ├─ previewHost.tsx
+│  │  │  ├─ previewTypes.ts
+│  │  │  ├─ previewRegistry.tsx
+│  │  │  ├─ withPreview.tsx
+│  │  │  └─ mocks/
+│  │  │     └─ coreMocks.tsx
 │  │  └─ ...
 │  └─ ...
 ├─ preview.html
