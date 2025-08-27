@@ -46,6 +46,7 @@ This document describes how files and directories are organised in this reposito
     - BoardView.tsx: Kanban-style board with columns by status.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
+    - SidebarView.tsx ← NEW: Sidebar component rendering primary nav and Projects list (main + child projects)
   - src/renderer/services/: Renderer-side service modules (IPC access)
     - projectsService.ts: Lists and gets child projects via preload window.projectsIndex.
   - src/renderer/projects/: Renderer-side project context
@@ -135,9 +136,11 @@ repo_root/
 │  │  │  └─ projectsService.ts
 │  │  ├─ projects/
 │  │  │  └─ ProjectContext.tsx  ← NEW: active project provider + hooks
+│  │  ├─ navigation/
+│  │  │  ├─ Navigator.tsx
+│  │  │  └─ SidebarView.tsx      ← NEW: sidebar with projects list and selection UI
 │  │  └─ ...
 │  ├─ styles/
-│  ├─ tools/
 │  ├─ index.css
 │  ├─ main.js                 ← wired IPC for projects-index
 │  └─ preload.js              ← exposes window.projectsIndex API

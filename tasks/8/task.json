@@ -42,7 +42,7 @@
     },
     {
       "id": "8.3",
-      "status": "-",
+      "status": "+",
       "title": "Update navigation to show child projects",
       "description": "Modify the sidebar navigation (SidebarView.tsx) to display a list of available child projects. Add project selection UI that allows users to switch between the main project and any child projects. Include visual indicators for the currently active project.",
       "plan": "",
