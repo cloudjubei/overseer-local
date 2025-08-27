@@ -48,3 +48,20 @@
   /* Keep Status compact and still bias more room to Dependencies on smaller screens */
   .features-head, .feature-row { grid-template-columns: max-content 0.9fr max-content 1.1fr max-content; }
 }
+
+/* DnD: Match tasks list cues and animations for features */
+.task-details .features-list { position: relative; }
+.task-details .features-list.dnd-active { user-select: none; }
+.task-details .feature-row {
+  transition:
+    transform var(--motion-fast, 120ms) var(--easing-decelerate, ease-out),
+    background-color var(--motion-fast, 120ms) ease,
+    box-shadow var(--motion-fast, 120ms) ease;
+  background: transparent;
+}
+.task-details .feature-row.draggable { cursor: grab; }
+.task-details .feature-row.is-dragging { cursor: grabbing; opacity: 0.6; transform: scale(0.98); box-shadow: var(--shadow-1); }
+.task-details .feature-row.is-drop-target { background: color-mix(in srgb, var(--accent-primary) 8%, transparent); }
+.task-details .drop-indicator { height: 6px; margin: 6px 8px; border-radius: 6px; background: linear-gradient(90deg, var(--accent-primary), color-mix(in srgb, var(--accent-primary) 70%, var(--color-blue-650, var(--accent-primary)))); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 28%, transparent), 0 4px 10px -2px color-mix(in srgb, var(--accent-primary) 40%, transparent); transform-origin: center; transform: scaleX(0.85); animation: dropPulse var(--motion-normal, 160ms) var(--easing-decelerate, ease-out) forwards; }
+@keyframes dropPulse { from { transform: scaleX(0.6); opacity: 0.5; } to { transform: scaleX(1); opacity: 1; } }
+.task-details .features-list::after { content: ''; display:block; height: 16px; }

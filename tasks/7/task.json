@@ -281,7 +281,7 @@
     },
     {
       "id": "7.21",
-      "status": "-",
+      "status": "?",
       "title": "Create a unified screen with side panel style",
       "description": "Settings, Docs and Chat all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). This kind of component needs to be unified, reusable and made slick and pretty.",
       "plan": "",
@@ -299,11 +299,12 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
     },
     {
       "id": "7.22",
-      "status": "-",
+      "status": "+",
       "title": "Feature dragging should follow the same pattern as Task dragging.",
       "description": "The same visual cues need to be used in both places with nice animations.",
       "plan": "",
@@ -322,7 +323,7 @@
     },
     {
       "id": "7.23",
-      "status": "-",
+      "status": "+",
       "title": "Tasks list dragging  error",
       "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file.",
       "plan": "",
@@ -342,7 +343,7 @@
     },
     {
       "id": "7.24",
-      "status": "-",
+      "status": "+",
       "title": "Home - List <-> Board switch",
       "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
       "plan": "",

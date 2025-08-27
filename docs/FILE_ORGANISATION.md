@@ -19,6 +19,7 @@ This document describes how files and directories are organised in this reposito
     - components/tooltip.css: Tooltip.
     - components/overlays.css: Command menu, help overlay.
     - components/cards.css: Task card.
+    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle and other segmented pickers.
   - src/styles/layout/: Layout building blocks like sidebar/nav.
     - layout/nav.css: Sidebar and navigation styles.
   - src/styles/screens/: Screen-scoped styles that compose primitives/components.
@@ -27,6 +28,13 @@ This document describes how files and directories are organised in this reposito
     - screens/board.css: Board (kanban) columns and interactions.
     - screens/docs.css: Documents view.
     - screens/settings.css: Settings view.
+- src/renderer/: React renderer (screens, components, hooks, services, navigation).
+  - src/renderer/components/ui/: Shared UI primitives.
+    - Button.tsx: Button component with variants and loading state.
+    - Spinner.tsx: Inline spinner.
+    - Select.tsx, Input.tsx, Tooltip.tsx, etc.
+    - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
+
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.
@@ -91,106 +99,27 @@ repo_root/
 │  │  └─ README.md
 │  └─ tailwind.config.tokens.example.js
 ├─ src/
-│  ├─ chat/
-│  │  ├─ providers/
-│  │  │  ├─ base.js
-│  │  │  ├─ openai.js
-│  │  │  ├─ litellm.js
-│  │  │  └─ lmstudio.js
-│  │  └─ manager.js          
-│  ├─ docs/
-│  │  └─ indexer.js        
-│  ├─ tasks/
-│  │  ├─ indexer.js                 
-│  │  └─ validator.js                
-│  ├─ types/
-│  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
-│  │  └─ tasks.ts                      # Shared Task/Feature/Status types
 │  ├─ renderer/
-│  │  ├─ navigation/
-│  │  │  ├─ Navigator.tsx             
-│  │  │  └─ ModalHost.tsx              
 │  │  ├─ components/
-│  │  │  ├─ ui/
-│  │  │  │  ├─ Alert.tsx
-│  │  │  │  ├─ Button.tsx
-│  │  │  │  ├─ Input.tsx
-│  │  │  │  ├─ Modal.tsx
-│  │  │  │  ├─ Select.tsx
-│  │  │  │  ├─ Toast.tsx
-│  │  │  │  ├─ Tooltip.tsx
-│  │  │  │  ├─ Spinner.tsx
-│  │  │  │  ├─ Skeleton.tsx
-│  │  │  │  ├─ CommandMenu.tsx
-│  │  │  │  └─ ShortcutsHelp.tsx
-│  │  │  ├─ tasks/
-│  │  │  │  ├─ StatusBadge.tsx
-│  │  │  │  ├─ PriorityTag.tsx
-│  │  │  │  └─ TaskCard.tsx
-│  │  │  ├─ FeatureForm.tsx        
-│  │  │  └─ TaskForm.tsx           
-│  │  ├─ services/
-│  │  │  ├─ chatService.ts
-│  │  │  ├─ docsService.ts
-│  │  │  └─ tasksService.ts
-│  │  ├─ hooks/
-│  │  │  ├─ useChats.ts
-│  │  │  ├─ useDocsIndex.ts
-│  │  │  ├─ useDocsAutocomplete.ts
-│  │  │  ├─ useLLMConfig.ts
-│  │  │  ├─ useNextTaskId.ts
-│  │  │  ├─ useShortcuts.tsx
-│  │  │  └─ useTheme.ts           
+│  │  │  └─ ui/
+│  │  │     ├─ Button.tsx
+│  │  │     ├─ Spinner.tsx
+│  │  │     └─ SegmentedControl.tsx   ← new
 │  │  ├─ screens/
-│  │  │  ├─ SidebarView.tsx
-│  │  │  ├─ TasksView.tsx
-│  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx               
-│  │  │  └─ SettingsView.tsx           
-│  │  ├─ tasks/
-│  │  │  ├─ TaskCreateView.tsx         
-│  │  │  ├─ TaskEditView.tsx
-│  │  │  ├─ FeatureCreateView.tsx      
-│  │  │  ├─ FeatureEditView.tsx
-│  │  │  ├─ TaskDetailsView.tsx
-│  │  │  └─ TasksListView.tsx
-│  │  ├─ App.tsx                   
-│  │  └─ types.ts
+│  │  └─ tasks/
 │  ├─ styles/
-│  │  ├─ design-tokens.css
-│  │  ├─ foundations/
-│  │  │  └─ metrics.css
-│  │  ├─ primitives/
-│  │  │  └─ effects.css
 │  │  ├─ components/
-│  │  │  ├─ badges.css
 │  │  │  ├─ buttons.css
-│  │  │  ├─ cards.css
-│  │  │  ├─ feedback.css
 │  │  │  ├─ forms.css
+│  │  │  ├─ feedback.css
+│  │  │  ├─ badges.css
+│  │  │  ├─ tooltip.css
 │  │  │  ├─ overlays.css
-│  │  │  └─ tooltip.css
-│  │  ├─ layout/
-│  │  │  └─ nav.css
+│  │  │  ├─ cards.css
+│  │  │  └─ segmented.css            ← new
 │  │  └─ screens/
-│  │     ├─ board.css
-│  │     ├─ docs.css
-│  │     ├─ settings.css
-│  │     ├─ task-details.css
-│  │     └─ tasks.css
-│  ├─ index.css   
-│  ├─ main.js
-│  └─ preload.js
-├─ .env
-├─ forge.config.js
-├─ index.html
-├─ package.json
-├─ postcss.config.js
-├─ README.md
-├─ tailwind.config.js
-├─ tsconfig.json
-├─ vite.main.config.mjs
-├─ vite.preload.config.mjs
-├─ vite.renderer.config.mjs
-└─ …
+│  │     ├─ tasks.css
+│  │     └─ board.css
+│  ├─ index.css (imports new segmented.css)
+└─ ...
 ```
