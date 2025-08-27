@@ -1,9 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { LLMConfig } from '../types';
 
+export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed';
+
 export class LLMConfigManager {
   private storageKey = 'llmConfigs';
   private activeKey = 'activeLlmConfigId';
+
+  private notify() {
+    try {
+      window.dispatchEvent(new CustomEvent(LLM_CONFIGS_CHANGED_EVENT));
+    } catch {}
+  }
 
   getConfigs(): LLMConfig[] {
     const stored = localStorage.getItem(this.storageKey);
@@ -12,6 +20,7 @@ export class LLMConfigManager {
 
   saveConfigs(configs: LLMConfig[]): void {
     localStorage.setItem(this.storageKey, JSON.stringify(configs));
+    this.notify();
   }
 
   getActiveId(): string | null {
@@ -20,6 +29,7 @@ export class LLMConfigManager {
 
   setActiveId(id: string): void {
     localStorage.setItem(this.activeKey, id);
+    this.notify();
   }
 
   getActiveConfig(): LLMConfig | null {
@@ -35,6 +45,8 @@ export class LLMConfigManager {
     this.saveConfigs(configs);
     if (configs.length === 1) {
       this.setActiveId(newConfig.id);
+    } else {
+      this.notify();
     }
     return newConfig;
   }
@@ -45,6 +57,8 @@ export class LLMConfigManager {
     if (index !== -1) {
       configs[index] = { ...configs[index], ...updates };
       this.saveConfigs(configs);
+    } else {
+      this.notify();
     }
   }
 
@@ -54,6 +68,8 @@ export class LLMConfigManager {
     this.saveConfigs(configs);
     if (this.getActiveId() === id) {
       this.setActiveId(configs[0]?.id || '');
+    } else {
+      this.notify();
     }
   }
 

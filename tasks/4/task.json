@@ -203,7 +203,7 @@
     },
     {
       "id": "4.20",
-      "status": "-",
+      "status": "+",
       "title": "Settings for LLMs fixes",
       "description": "When a LLM config is saved it doesn't update the list of configs in settings. The dropdown inside the LLMConfig popup doesn't show when clicked.",
       "plan": "",
