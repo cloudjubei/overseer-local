@@ -297,27 +297,6 @@
     },
     {
       "id": "7.22",
-      "status": "-",
-      "title": "Tasks list dragging error",
-      "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": [],
-      "rejection": "Error occurred in handler for 'tasks:reorder': Error: ENOENT: no such file or directory, rename './tasks/1' -> './tasks/.reorder_tmp_1756254151133/1'"
-    },
-    {
-      "id": "7.23",
       "status": "+",
       "title": "Home - List <-> Board switch",
       "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
@@ -335,7 +314,7 @@
       "acceptance": []
     },
     {
-      "id": "7.24",
+      "id": "7.23",
       "status": "+",
       "title": "Creating a feature doesn't work",
       "description": "The required connector/IPC isn't implemented - i.e. tasksService.addFeature doesn't work",
@@ -347,7 +326,7 @@
       ]
     },
     {
-      "id": "7.25",
+      "id": "7.24",
       "status": "+",
       "title": "Edit feature should allow editing the rejection field",
       "description": "When nothing is input, the key is removed from the feature - otherwise it should be saved. If a feature has a rejection, it should display an exclamation badge next to the status in the Feature list.",
@@ -358,7 +337,7 @@
       ]
     },
     {
-      "id": "7.26",
+      "id": "7.25",
       "status": "+",
       "title": "Edit and create feature views should show the Status Bullet",
       "description": "Both views need to allow editing of the feature's status",
@@ -368,6 +347,26 @@
         "src/renderer/screens/FeatureCreateView.tsx",
         "src/renderer/screens/FeatureEditView.tsx"
       ]
+    },
+    {
+      "id": "7.26",
+      "status": "+",
+      "title": "Tasks list dragging error",
+      "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
     },
     {
       "id": "7.27",
@@ -387,6 +386,16 @@
       "dependencies": [
         "7.20"
       ]
+    },
+    {
+      "id": "7.28",
+      "status": "-",
+      "title": "StatusBadge + StatusBullet edit improvement",
+      "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
     }
   ]
 }

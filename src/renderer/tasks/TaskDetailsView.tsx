@@ -62,6 +62,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   // DnD state (match Tasks list patterns)
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
 
@@ -143,7 +144,10 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const offsetY = e.clientY - rect.top
-    const pos: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after'
+    let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
+    if (draggingIndex != null && (idx == draggingIndex || (idx == draggingIndex-1 && pos == 'after') || (idx == draggingIndex+1 && pos == 'before'))){
+      pos = null
+    }
     setDropIndex(idx)
     setDropPosition(pos)
   }
@@ -151,6 +155,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const clearDndState = () => {
     setDragFeatureId(null)
     setDragging(false)
+    setDraggingIndex(null)
     setDropIndex(null)
     setDropPosition(null)
   }
@@ -198,10 +203,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
   const dndEnabled = !saving
 
-  const onListDrop = (e: React.DragEvent<HTMLUListElement>) => {
-    if (!dndEnabled || !dragging) return
-    e.preventDefault()
-    if (dragFeatureId != null && dropIndex != null) {
+  const onListDrop = () => {
+    if (dragFeatureId != null && dropIndex != null && dropPosition != null) {
       const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
       handleMoveFeature(dragFeatureId, toIndex)
     }
@@ -265,7 +268,11 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               aria-label="Features"
               ref={ulRef}
               onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
-              onDrop={onListDrop}
+              onDrop={(e) =>{
+                if (!dndEnabled || !dragging) return
+                e.preventDefault()
+                onListDrop()
+              }}
               onDragEnd={() => clearDndState()}
             >
               <li className="features-head" aria-hidden="true">
@@ -295,20 +302,11 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         if (!dndEnabled) return
                         setDragFeatureId(f.id)
                         setDragging(true)
+                        setDraggingIndex(idx)
                         e.dataTransfer.setData('text/plain', String(f.id))
                         e.dataTransfer.effectAllowed = 'move'
                       }}
                       onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
-                      onDrop={(e) => {
-                        if (!dndEnabled) return
-                        e.preventDefault()
-                        computeDropForRow(e, idx)
-                        if (dragFeatureId != null && dropIndex != null) {
-                          const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
-                          handleMoveFeature(dragFeatureId, to)
-                        }
-                        clearDndState()
-                      }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >

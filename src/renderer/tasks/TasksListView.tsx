@@ -82,6 +82,7 @@ export default function TasksListView() {
   const [view, setView] = useState<'list' | 'board'>('list')
   const [dragTaskId, setDragTaskId] = useState<number | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
@@ -146,6 +147,8 @@ export default function TasksListView() {
   }
 
   const handleMoveTask = async (fromId: number, toIndex: number) => {
+    console.log("handleMoveTask fromId: ", fromId, " toIndex: ", toIndex, " saving: ", saving)
+    if (saving) return
     setSaving(true)
     try {
       const res = await tasksService.reorderTasks({ fromId, toIndex })
@@ -167,16 +170,14 @@ export default function TasksListView() {
 
   const dndEnabled = !isFiltered && view === 'list'
 
-  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number, rowTaskId: number) => {
+  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     // Do not show drop indicators when hovering the dragged row itself
-    if (dragTaskId != null && rowTaskId === dragTaskId) {
-      setDropIndex(null)
-      setDropPosition(null)
-      return
-    }
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const offsetY = e.clientY - rect.top
-    const pos: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after'
+    let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
+    if (draggingIndex != null && (idx == draggingIndex || (idx == draggingIndex-1 && pos == 'after') || (idx == draggingIndex+1 && pos == 'before'))){
+      pos = null
+    }
     setDropIndex(idx)
     setDropPosition(pos)
   }
@@ -184,6 +185,7 @@ export default function TasksListView() {
   const clearDndState = () => {
     setDragTaskId(null)
     setDragging(false)
+    setDraggingIndex(null)
     setDropIndex(null)
     setDropPosition(null)
   }
@@ -217,13 +219,11 @@ export default function TasksListView() {
     ;(rows[nextIndex] as HTMLElement).focus()
   }
 
-  const onListDrop = (e: React.DragEvent<HTMLUListElement>) => {
-    if (!dndEnabled || !dragging) return
-    e.preventDefault()
-    if (dragTaskId != null && dropIndex != null) {
+  const onListDrop = () => {
+    if (dragTaskId != null && dropIndex != null && dropPosition != null) {
       const fromIndex = allTasks.findIndex(t => t.id === dragTaskId)
-      const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
-      // Guard against no-op moves
+      const toIndex = dropIndex //+ (dropPosition === 'after' ? 1 : 0)
+      
       if (fromIndex !== -1 && toIndex !== fromIndex) {
         handleMoveTask(dragTaskId, toIndex)
       }
@@ -291,7 +291,11 @@ export default function TasksListView() {
                   e.dataTransfer.dropEffect = 'move';
                 }
               }}
-              onDrop={onListDrop}
+              onDrop={(e) =>{
+                if (!dndEnabled || !dragging) return
+                e.preventDefault()
+                onListDrop()
+              }}
               onDragEnd={() => clearDndState()}
             >
               {filtered.map((t, idx) => {
@@ -314,26 +318,14 @@ export default function TasksListView() {
                         if (!dndEnabled) return;
                         setDragTaskId(t.id);
                         setDragging(true);
+                        setDraggingIndex(idx);
                         e.dataTransfer.setData('text/plain', String(t.id));
                         e.dataTransfer.effectAllowed = 'move'
                       }}
                       onDragOver={(e) => {
                         if (!dndEnabled) return; 
                         e.preventDefault();
-                        computeDropForRow(e, idx, t.id);
-                      }}
-                      onDrop={(e) => {
-                        if (!dndEnabled) return; 
-                        e.preventDefault();
-                        computeDropForRow(e, idx, t.id);
-                        if (dragTaskId != null && dropIndex != null) {
-                          const fromIndex = allTasks.findIndex(tt => tt.id === dragTaskId)
-                          const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
-                          if (fromIndex !== -1 && to !== fromIndex) {
-                            handleMoveTask(dragTaskId, to)
-                          }
-                        }
-                        clearDndState()
+                        computeDropForRow(e, idx);
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}

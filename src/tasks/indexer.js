@@ -429,7 +429,6 @@ export class TasksIndexer {
     }
 
     async reorderTasks(payload) {
-        console.log('Reordering tasks');
         const tasksDirAbs = path.resolve(this.tasksDir);
         const taskDirs = await fs.readdir(tasksDirAbs, { withFileTypes: true });
         let currentOrder = taskDirs
@@ -457,7 +456,6 @@ export class TasksIndexer {
             throw new Error('Invalid payload for reorder');
         }
 
-        // Early exit if order did not change (prevents unnecessary renames and ENOENT issues)
         if (JSON.stringify(newOrder) === JSON.stringify(currentOrder)) {
             return { ok: true };
         }
@@ -495,15 +493,12 @@ export class TasksIndexer {
             });
         });
 
-        // Use a staging directory to avoid rename conflicts and ENOENT due to path resolution
         const stagingDir = path.join(tasksDirAbs, `.reorder_tmp_${Date.now()}`)
         await fs.mkdir(stagingDir, { recursive: true })
 
-        // Move all current numeric task dirs into staging (by oldId)
         for (const oldId of currentOrder) {
             const oldDir = path.join(tasksDirAbs, String(oldId));
             const stagedDir = path.join(stagingDir, String(oldId));
-            // Verify exists before rename to avoid ENOENT confusing errors
             if (!(await pathExists(oldDir))) {
                 throw new Error(`Source task directory not found: ${oldDir}`)
             }
