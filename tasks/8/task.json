@@ -1,61 +1,151 @@
 {
   "id": 8,
   "status": "-",
-  "title": "Preview work",
-  "description": "This is an Electron+React+Vite app. It would be ideal for an agent to immediately see the effect of their work by seeing a screenshot of how it renders in a given project. So after an agent changes some files via tools, they could request this new tool for screenshots of how the code/app that they just created renders. This can be based on this project. A methodology needs to be established - so components can be previewed this way. Perhaps each component requires special stubs and it's possible to tell ahead of time if such functionality is possible for that tool. When developing in XCode with SwiftUI it's possible to see previews such as these for even tiny components, and when using Android Studio - this is possible too. In XCode interaction is even possible within the component which would be the ideal example to emulate.",
+  "title": "Manage projects",
+  "description": "List child projects under projects/ (the .json configs according to the interface `ProjectSpec` defined in `/src/types/tasks.ts`). For each project, based on the data in the config json, allow task and similar inspection to everything just like for this project. Each child project has its own tasks list. All functionality that is already present here, should be available for any child project. For this whole task - refer to Linear or Monday as to how they solve this problem.",
   "features": [
     {
       "id": "8.1",
       "status": "-",
-      "title": "Core screenshot capture service",
-      "description": "Implement the foundational screenshot capture functionality using Electron's native capabilities. Create a service in the main process that can capture screenshots of the current renderer window or specific regions. This should handle different screenshot formats (PNG, JPEG) and quality settings. The service should expose IPC methods that can be called from the renderer process.",
+      "title": "Create project scanning and loading service",
+      "description": "Implement a projectsService that can scan the projects/ directory for .json config files, validate them against the ProjectSpec interface, and provide methods to load, list, and manage child projects. This service should handle reading project metadata and configurations.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     },
     {
       "id": "8.2",
       "status": "-",
-      "title": "Component preview infrastructure",
-      "description": "Create a preview system that can render React components in isolation, similar to Storybook. This should include a dedicated preview renderer that can mount individual components with mock props and context providers. Implement a preview window or iframe that can be used to render components separately from the main application for clean screenshot capture.",
+      "title": "Add project context management",
+      "description": "Create a project context system that tracks the currently selected project (main project vs child projects). This should include hooks and state management to allow switching between projects and maintaining the active project context throughout the application.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     },
     {
       "id": "8.3",
       "status": "-",
-      "title": "Component stub and mock system",
-      "description": "Develop a system for providing stubs and mock data for component previews. Create a methodology for components to declare their preview requirements (props, context, dependencies). Build a registry system that can automatically provide sensible defaults and mocks for common component dependencies like services, hooks, and external data.",
+      "title": "Update navigation to show child projects",
+      "description": "Modify the sidebar navigation (SidebarView.tsx) to display a list of available child projects. Add project selection UI that allows users to switch between the main project and any child projects. Include visual indicators for the currently active project.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     },
     {
       "id": "8.4",
       "status": "-",
-      "title": "Preview capability detection",
-      "description": "Implement a system that can analyze components and determine if they can be previewed. This should scan component files to detect dependencies, required props, and external requirements. Create metadata that indicates preview compatibility and any special requirements. Provide clear feedback when components cannot be previewed and why.",
+      "title": "Make tasks service project-aware",
+      "description": "Update the tasksService to work with project context. Modify task loading, saving, and indexing to use the correct project directory (either root tasks/ or projects/{project-id}/tasks/). Ensure task operations respect the currently selected project context.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     },
     {
       "id": "8.5",
       "status": "-",
-      "title": "Preview tool for agents",
-      "description": "Create the agent-facing tool that allows requesting screenshots of components or the full application. This tool should accept parameters like component path, props override, screenshot dimensions, and preview mode. Integrate this into the existing standardTools.js system so agents can easily call it after making changes to see visual feedback.",
+      "title": "Make docs service project-aware",
+      "description": "Update the docsService to work with project context. Modify document indexing and search to use the correct project directory (either root docs/ or projects/{project-id}/docs/). Ensure document operations respect the currently selected project context.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     },
     {
       "id": "8.6",
       "status": "-",
-      "title": "Interactive preview capabilities",
-      "description": "Implement basic interaction support within component previews, similar to XCode SwiftUI previews. This should allow simple interactions like clicking buttons, typing in inputs, and state changes to be captured in screenshots. Provide a way to capture before/after states of interactions to show component behavior.",
+      "title": "Update all task views to work with project context",
+      "description": "Modify TasksListView, TaskDetailsView, TaskCreateView, TaskEditView, and related components to work within the selected project context. Ensure all task-related operations (create, edit, delete, status changes) work correctly for both main project and child projects.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "8.7",
+      "status": "-",
+      "title": "Add project management UI",
+      "description": "Create interfaces for managing child projects: create new child projects, edit existing project configurations, and delete child projects. This should include forms for project metadata (name, description, etc.) and validation of project configurations.",
+      "plan": "",
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "8.8",
+      "status": "-",
+      "title": "Ensure feature and chat services work with project context",
+      "description": "Update any remaining services (chat service, notification service) to work correctly within project context. Ensure that features, chat sessions, and notifications are properly scoped to the selected project when applicable.",
+      "plan": "",
+      "context": [
+        "/src/types/tasks.ts",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
       "acceptance": []
     }
   ]
