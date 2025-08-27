@@ -206,7 +206,7 @@ export default function ChatView() {
         {/* Row 2: Callout (non-scroll) */}
         {!isConfigured && (
           <div
-            className="row-start-2 row-end-3 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
+            className="mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
             style={{
               background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
               color: 'var(--text-primary)',

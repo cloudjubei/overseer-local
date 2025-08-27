@@ -160,7 +160,7 @@
     },
     {
       "id": "7.14",
-      "status": "-",
+      "status": "+",
       "title": "Chats screen - each section allows scrolling",
       "description": "The whole screen doesn't scroll - just the list of items inside the chats list and the chat messages itself (ONLY THE MESSAGES, the top settings and bottom message composer are stuck)",
       "plan": "",
