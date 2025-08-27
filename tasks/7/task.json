@@ -361,7 +361,7 @@
     },
     {
       "id": "7.24",
-      "status": "-",
+      "status": "+",
       "title": "Home - List <-> Board switch",
       "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
       "plan": "",
