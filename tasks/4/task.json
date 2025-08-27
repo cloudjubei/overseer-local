@@ -199,8 +199,21 @@
         "src/renderer/screens/TasksView.tsx",
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
-      "acceptance": [],
-      "rejection": "The modal doesn't allow any editing - modal opening should follow the same methodology as other models i.e. via ModalHost+Navigator."
+      "acceptance": []
+    },
+    {
+      "id": "4.20",
+      "status": "-",
+      "title": "Settings for LLMs fixes",
+      "description": "When a LLM config is saved it doesn't update the list of configs in settings. The dropdown inside the LLMConfig popup doesn't show when clicked.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/settings/SettingsLLMConfigModal.tsx",
+        "src/renderer/navigation/ModalHost.tsx",
+        "src/renderer/navigation/Navigator.tsx"
+      ],
+      "acceptance": []
     }
   ]
 }

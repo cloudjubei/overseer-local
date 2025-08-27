@@ -2,7 +2,6 @@ import { OpenAI } from 'openai';
 
 export class LLMProvider {
   constructor(config) {
-    super(config);
     this.client = new OpenAI({
       baseURL: config.apiBaseUrl,
       apiKey: config.apiKey,

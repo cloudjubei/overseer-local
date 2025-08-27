@@ -5,10 +5,10 @@ import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { chatService } from '../services/chatService';
-import type { LLMConfig, LLMProvider } from '../types';
+import type { LLMConfig, LLMProviderType } from '../types';
 import { useToast } from '../components/ui/Toast';
 
-const PROVIDER_DEFAULT_URL: Record<LLMProvider, string> = {
+const PROVIDER_DEFAULT_URL: Record<LLMProviderType, string> = {
   openai: 'https://api.openai.com/v1',
   anthropic: 'https://api.anthropic.com',
   gemini: 'https://generativelanguage.googleapis.com/v1beta',
@@ -17,7 +17,7 @@ const PROVIDER_DEFAULT_URL: Record<LLMProvider, string> = {
   custom: '',
 };
 
-const PROVIDER_MODELS: Record<Exclude<LLMProvider, 'local' | 'custom'>, string[]> = {
+const PROVIDER_MODELS: Record<Exclude<LLMProviderType, 'local' | 'custom'>, string[]> = {
   openai: [
     'gpt-4o',
     'gpt-4o-mini',
@@ -72,7 +72,7 @@ export default function SettingsLLMConfigModal({ mode, id, onRequestClose }: { m
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const onProviderChange = (value: LLMProvider) => {
+  const onProviderChange = (value: LLMProviderType) => {
     setForm(prev => ({
       ...prev,
       provider: value,
@@ -151,7 +151,7 @@ export default function SettingsLLMConfigModal({ mode, id, onRequestClose }: { m
 
         <div>
           <label htmlFor="provider" className="block text-sm font-medium mb-1">Provider</label>
-          <Select value={form.provider} onValueChange={(v) => onProviderChange(v as LLMProvider)}>
+          <Select value={form.provider} onValueChange={(v) => onProviderChange(v as LLMProviderType)}>
             <SelectTrigger id="provider">
               <SelectValue placeholder="Select provider" />
             </SelectTrigger>
