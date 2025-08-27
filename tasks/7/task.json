@@ -370,7 +370,7 @@
     },
     {
       "id": "7.27",
-      "status": "-",
+      "status": "?",
       "title": "Reuse the sidepanel for Documents",
       "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
@@ -383,7 +383,8 @@
       "acceptance": [],
       "dependencies": [
         "7.20"
-      ]
+      ],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
     },
     {
       "id": "7.28",

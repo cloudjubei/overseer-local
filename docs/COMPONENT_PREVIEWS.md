@@ -1,100 +1,102 @@
-# Component Previews and Mocks
+# Component Previews: Stubs and Mocks System
 
-This project ships with a lightweight, Storybook-like preview system so agents can see UI components in isolation and capture screenshots.
+This documentation describes how to declare preview requirements for React components and how the preview runtime provides sensible default providers and mock data.
 
-Quick start
-- Ensure the dev server is running (vite/electron-vite). The base URL is typically http://localhost:PORT.
-- Open preview.html with query params specifying a component id and optional props.
-- Or use the preview_screenshot tool (preferred in automations) to capture images programmatically.
+Overview
+- A dedicated preview runtime (preview.html) renders components in isolation.
+- Components can export a `preview` metadata object (or `getPreview()` function) to declare required dependencies (providers, mocks) and provide example variants with props.
+- A registry provides default providers for common needs (theme, router) and optional mocks (tasks, notifications, LLM config).
+- New: The preview runtime exposes a stable container (#preview-stage) for interaction/capture and dispatches a 'preview:ready' event when mounted.
 
-UI component mocks
-- We provide ready-to-use previews for common UI components under:
-  - src/renderer/components/ui/previews.tsx
-- Each exported preview is a small wrapper component that renders the underlying UI with sensible default props, so you can see a result immediately without crafting props.
-- You can still override props using the props query param.
+Quick Start
+1. Open http://localhost:<vite-port>/preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&provider=app&theme=light
+2. Add a `preview` export to your component module to tailor its preview:
 
-Examples in the browser
-- Button (default):
-  /preview.html?id=renderer/components/ui/previews.tsx#Button_Default&theme=light
+```ts
+import type { PreviewMeta } from '../../preview/previewTypes';
 
-- Button variants:
-  /preview.html?id=renderer/components/ui/previews.tsx#Button_Variants&theme=dark
+export const preview: PreviewMeta = {
+  title: 'UI/Button',
+  theme: 'light',
+  needs: ['frame'], // theme + router are auto-applied
+  defaultProps: { variant: 'primary' },
+  variants: [
+    { name: 'default', props: { children: 'Click me' } },
+    { name: 'loading', props: { children: 'Saving…', loading: true } },
+  ],
+};
+```
 
-- Input defaults:
-  /preview.html?id=renderer/components/ui/previews.tsx#Input_Default
+URL Parameters
+- id: Module path under src/ with optional `#ExportName` (default: `default`). Example: `renderer/components/ui/Button.tsx#default`.
+- theme: `light` | `dark`. Applies `data-theme` on `<html>`.
+- props: URL-encoded JSON props for the target export.
+- props_b64: If `1`, decode props as base64.
+- needs: Comma-separated provider keys to include in addition to those declared by the component.
 
-- Tooltip on a button:
-  /preview.html?id=renderer/components/ui/previews.tsx#Tooltip_Default
+Declaring Dependencies (needs)
+The preview runtime composes provider wrappers based on dependency keys. The following are available by default:
+- theme: Sets `<html data-theme>` to the requested theme. Applied by default.
+- router: Wraps with a MemoryRouter. Applied by default.
+- frame: Adds a padded frame around the component for visual clarity.
+- tasksMock: In-memory tasks context providing sample tasks. Available for components that rely on tasks data.
+- notificationsMock: In-memory notifications context.
+- llmMock: In-memory LLM providers configuration.
 
-- Modal (open):
-  /preview.html?id=renderer/components/ui/previews.tsx#Modal_Default
+Notes:
+- Static imports cannot be overridden at runtime; these mocks are made available via React Context for components that consume context-driven dependencies or for purpose-built preview-only wrappers.
+- If your component directly imports service modules and calls them during render, add a thin prop or context to inject data for previewing, or create a small wrapper component that adapts to preview contexts.
 
-Passing props
-- Props are JSON-encoded via the props query param. Example: set Button label and variant
-  /preview.html?id=renderer/components/ui/previews.tsx#Button_Default&props=%7B%22children%22%3A%22Save%22%2C%22variant%22%3A%22primary%22%7D
-- For large props use props_b64=1 and pass base64-encoded JSON.
+Variants
+- Variants allow you to define multiple named prop sets for a component preview.
+- Navigate variants via URL hash, e.g., `#loading` selects the `loading` variant.
 
-Theming and providers
-- Use theme=light or theme=dark to toggle theme: /preview.html?...&theme=dark
-- Core providers (theme, router, frame) are included by default via preview mocks (src/renderer/preview/mocks/coreMocks.tsx). If a component needs additional providers, pass needs=key1,key2 and register them in the preview registry.
+Advanced: Dynamic preview metadata
+- For cases where you need data fetching or async work to prepare preview props, export a `getPreview()` function that returns a `PreviewMeta` object.
 
-Using the preview_screenshot tool
-- The tool lives in src/tools/standardTools.js and can render any preview or arbitrary URL. It supports scripted interactions and before/after captures. You can call it from the agent integration.
+Interactions and Automation
+- The preview host renders content inside a stable container with id `#preview-stage` to assist automation and clipping.
+- When the preview is mounted, the window flag `__PREVIEW_READY` is set and a `preview:ready` event is dispatched.
+- Use the `preview_screenshot` tool (see docs/PREVIEW_TOOL.md) to script interactions (click, type, etc.) and capture before/after screenshots.
 
-Basic capture of Button default (JPEG 2x):
-{
-  "tool_name": "preview_screenshot",
-  "arguments": {
-    "id": "renderer/components/ui/previews.tsx#Button_Default",
-    "theme": "light",
-    "viewport": { "width": 600, "height": 260, "device_scale_factor": 2 },
-    "wait_for_ready": true,
-    "output": "artifacts/button_default.jpg",
-    "format": "jpeg",
-    "quality": 90
-  }
-}
+Examples
 
-Override props (primary and loading):
-{
-  "tool_name": "preview_screenshot",
-  "arguments": {
-    "id": "renderer/components/ui/previews.tsx#Button_Default",
-    "props": { "children": "Saving...", "variant": "primary", "loading": true },
-    "theme": "dark",
-    "viewport": { "width": 600, "height": 260 },
-    "output": "artifacts/button_saving.png"
-  }
-}
+Button.tsx
+```ts
+// src/renderer/components/ui/Button.tsx
+export default function Button(props: { variant?: 'primary'|'secondary'; loading?: boolean; children?: React.ReactNode }) { /* ... */ }
 
-Scripted interaction example (hover to reveal a tooltip and capture after delay):
-{
-  "tool_name": "preview_screenshot",
-  "arguments": {
-    "id": "renderer/components/ui/previews.tsx#Tooltip_Default",
-    "theme": "light",
-    "viewport": { "width": 700, "height": 360 },
-    "before": [
-      { "action": "hover", "selector": "button" },
-      { "action": "wait", "ms": 300 }
-    ],
-    "output": "artifacts/tooltip_hover.png"
-  }
-}
+export const preview: PreviewMeta = {
+  title: 'UI/Button',
+  needs: ['frame'],
+  defaultProps: { variant: 'primary' },
+  variants: [
+    { name: 'default', props: { children: 'Click me' } },
+    { name: 'secondary', props: { children: 'Click', variant: 'secondary' } },
+  ],
+};
+```
 
-Other useful previews
-- Select: id=renderer/components/ui/previews.tsx#Select_Default
-- Switch: id=renderer/components/ui/previews.tsx#Switch_Default
-- Skeleton: id=renderer/components/ui/previews.tsx#Skeleton_Default
-- SegmentedControl: id=renderer/components/ui/previews.tsx#SegmentedControl_Default
-- CollapsibleSidebar: id=renderer/components/ui/previews.tsx#CollapsibleSidebar_Default
-- Toast: id=renderer/components/ui/previews.tsx#Toast_Default
-- CommandMenu: id=renderer/components/ui/previews.tsx#CommandMenu_Default
-- ShortcutsHelp: id=renderer/components/ui/previews.tsx#ShortcutsHelp_Default
-- Alert: id=renderer/components/ui/previews.tsx#Alert_Default
-- Modal: id=renderer/components/ui/previews.tsx#Modal_Default
+TasksListView.tsx
+```ts
+// A screen that needs router + tasks data
+export const preview: PreviewMeta = {
+  title: 'Screens/TasksList',
+  needs: ['tasksMock', 'frame'],
+  variants: [{ name: 'default' }],
+};
+```
+
+Extending the Registry
+- Register additional providers/mocks in `src/renderer/preview/mocks/` and wire them up in `createDefaultMocksRegistry()`.
+- Use keys that reflect the dependency (e.g., `authMock`, `docsMock`).
+
+Limitations and Guidance
+- Prefer components that accept data via props or context to keep them preview-friendly.
+- Avoid hard side effects during initial render.
+- Keep preview mocks small, deterministic, and in-memory.
 
 Troubleshooting
-- If a preview does not render and the console shows missing provider/context errors, add a dedicated wrapper export that supplies the provider locally, or register the provider and pass it via the needs query param.
-- Ensure your id path is relative to src (omit leading src/). Example: renderer/components/ui/previews.tsx#Button_Default.
-- Use preview:ready event or wait_for_ready in preview_screenshot to avoid racing before mount.
+- If your component does not render, check console for import path or export name errors.
+- Validate `props` parameter formatting; use `props_b64=1` for complicated JSON.
+- Use `needs` query param to experiment with providers: `&needs=frame,tasksMock`.
