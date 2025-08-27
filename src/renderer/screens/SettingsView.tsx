@@ -7,7 +7,7 @@ import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { notificationsService } from '../services/notificationsService';
 import { chatService } from '../services/chatService';
-import type { LLMConfig, LLMProviderType } from '../types';
+import type { LLMConfig } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import { useToast } from '../components/ui/Toast';
 import { Modal } from '../components/ui/Modal';
@@ -42,26 +42,26 @@ export default function SettingsView() {
   // Defaults and common models
   const defaultUrls: Record<string, string> = {
     openai: 'https://api.openai.com/v1',
-    litellm: 'http://localhost:4000', // encourage proxy usage for non-OpenAI models
-    lmstudio: 'http://localhost:1234/v1',
     anthropic: 'https://api.anthropic.com',
     grok: 'https://api.x.ai/v1',
     gemini: 'https://generativelanguage.googleapis.com/v1beta',
+    local: 'http://localhost:1234/v1',
     custom: ''
   };
 
   const commonModels: Record<string, string[]> = {
-    openai: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
-    litellm: ['gpt-4o', 'gpt-5', 'gpt-5-nano', 'claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku', 'gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash', 'xai/grok-4'],
-    lmstudio: [],
+    openai: ['gpt-4o', 'gpt-5', 'gpt-5-nano'],
+    anthropic: ['claude-4-opus-20250514', 'claude-4-sonnet-20250514', 'claude-4-haiku'],
+    grok: ['xai/grok-4'],
+    gemini: ['gemini/gemini-2.5-pro', 'gemini/gemini-2.5-flash'],
     custom: []
   };
 
-  // Derive provider models for current editing
   const providerModels = useMemo(() => {
     if (!editingConfig) return [] as string[];
-    if (editingConfig.provider === 'lmstudio') return availableModels;
-    return commonModels[editingConfig.provider] || [];
+    if (modelMode === 'custom') return availableModels;
+    return []
+    // return commonModels[editingConfig.provider] || [];
   }, [editingConfig, availableModels]);
 
   function resetEditingState() {
@@ -76,23 +76,9 @@ export default function SettingsView() {
   const handleConfigFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEditingConfig((prev) => (prev ? { ...prev, [name]: value } : null));
-    if (name === 'apiBaseUrl' && editingConfig?.provider === 'lmstudio') {
+    if (name === 'apiBaseUrl' && modelMode === 'custom') {
       setAvailableModels([]);
       setModelsError(null);
-    }
-  };
-
-  const handleProviderChange = (value: LLMProviderType) => {
-    setEditingConfig((prev) => {
-      if (!prev) return null;
-      const newBase = defaultUrls[value] ?? '';
-      return { ...prev, provider: value, apiBaseUrl: newBase };
-    });
-    setModelMode('preset');
-    setAvailableModels([]);
-    setModelsError(null);
-    if (value !== 'lmstudio') {
-      setAvailableModels(commonModels[value] || []);
     }
   };
 
@@ -133,9 +119,9 @@ export default function SettingsView() {
   };
 
   const openAddModal = () => {
-    setEditingConfig({ id: '', name: '', provider: 'openai', apiBaseUrl: defaultUrls['openai'] || '', apiKey: '', model: '' });
+    setEditingConfig({ id: '', name: '', apiBaseUrl: '', apiKey: '', model: '' });
     setIsAddingNew(true);
-    setModelMode('preset');
+    setModelMode('custom');
     setAvailableModels(commonModels['openai'] || []);
     setModelsError(null);
   };

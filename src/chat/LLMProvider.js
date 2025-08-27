@@ -1,7 +1,6 @@
 import { OpenAI } from 'openai';
-import { BaseProvider } from './base';
 
-export class OpenAIProvider extends BaseProvider {
+export class LLMProvider {
   constructor(config) {
     super(config);
     this.client = new OpenAI({

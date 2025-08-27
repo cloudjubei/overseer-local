@@ -189,13 +189,18 @@
     },
     {
       "id": "4.19",
-      "status": "+",
-      "title": "Litellm and Openai providers don't always work",
-      "description": "Trying to send a message to xai/grok-4 or claude-sonnet-4-20250514 with litellm or openai (with correct apiurls) doesn't work. Using gpt-5 does for both. Using local LM studio works fine for all models.",
+      "status": "-",
+      "title": "Settings needs adapting",
+      "description": "We only accept the user specifying an LLM provider by passing in the api url, the api key and the model name. We want to have some presets available - the user can select a common provider (openai, gemini, anthropic, xai, local) and then the api url should get populated for the user. The list of models for local can be retrieved via the standard provider but for the rest we can include the latest models for that provider.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/navigation/ModalHost.tsx",
+        "src/renderer/navigation/Navigator.tsx",
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
       "acceptance": [],
-      "rejection": "for Litellm the error when using 'gemini/gemini-2.5-pro' is: An error occurred: Model: gemini/gemini-2.5-pro not supported. Cannot find a handler.    I use Litellm in a different project, there once the apiKey is given and the model (no need for urls) it all works. When using claude-4-sonnet-20250514 with litellm I got this error: claude-4-sonnet-20250514 is not supported on this API. Please use the Messages API instead.'"
+      "rejection": "The modal doesn't allow any editing - modal opening should follow the same methodology as other models i.e. via ModalHost+Navigator."
     }
   ]
 }

@@ -1,9 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { BaseProvider } from './providers/base';
-import { OpenAIProvider } from './providers/openai';
-import { LiteLLMProvider } from './providers/litellm';
-import { LMStudioProvider } from './providers/lmstudio';
+import { LLMProvider } from './LLMProvider';
 
 export class ChatManager {
   constructor(projectRoot, tasksIndexer, docsIndexer) {
@@ -14,20 +11,6 @@ export class ChatManager {
     if (!fs.existsSync(this.chatsDir)) {
       fs.mkdirSync(this.chatsDir);
     }
-  }
-
-  getProvider(config) {
-    const provider = config.provider || 'litellm';
-    const providerClasses = {
-      openai: OpenAIProvider,
-      litellm: LiteLLMProvider,
-      lmstudio: LMStudioProvider,
-    };
-    const ProviderClass = providerClasses[provider];
-    if (!ProviderClass) {
-      throw new Error(`Unknown provider: ${provider}`);
-    }
-    return new ProviderClass(config);
   }
 
   async getCompletion({ messages, config }) {
@@ -108,10 +91,10 @@ export class ChatManager {
         },
       };
 
-      const llmProvider = this.getProvider(config);
+      const provider = new LLMProvider(config);
 
       while (true) {
-        const response = await llmProvider.createCompletion({
+        const response = await provider.createCompletion({
           model: config.model,
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,
@@ -161,7 +144,7 @@ export class ChatManager {
 
   async listModels(config) {
     try {
-      const provider = this.getProvider(config);
+      const provider = new LLMProvider(config);
       if (typeof provider.listModels === 'function') {
         return await provider.listModels();
       }
