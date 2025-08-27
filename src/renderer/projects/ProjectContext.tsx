@@ -112,6 +112,15 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return snapshot.projectsById[activeProjectId] || null
   }, [snapshot, activeProjectId])
 
+  // Sync active project with tasks indexer context in main via preload API
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.tasksIndex && typeof window.tasksIndex.setContext === 'function') {
+        window.tasksIndex.setContext(activeProjectId)
+      }
+    } catch { /* ignore */ }
+  }, [activeProjectId])
+
   const value = useMemo<ProjectContextValue>(() => ({
     activeProjectId,
     isMain: activeProjectId === 'main',

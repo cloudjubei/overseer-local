@@ -74,6 +74,32 @@ ipcMain.handle('tasks-index:get', async () => {
   return indexer.getIndex();
 });
 
+ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
+  try {
+    // Compute tasks directory based on projectId
+    let targetDir;
+    if (!projectId || projectId === 'main') {
+      targetDir = indexer.getDefaultTasksDir();
+    } else {
+      const snap = projectsIndexer.getIndex();
+      const spec = snap.projectsById?.[projectId];
+      const projectsDirAbs = path.resolve(snap.projectsDir);
+      if (spec) {
+        const projectAbs = path.resolve(projectsDirAbs, spec.path);
+        targetDir = path.join(projectAbs, 'tasks');
+      } else {
+        // Fallback to main if project not found
+        targetDir = indexer.getDefaultTasksDir();
+      }
+    }
+    const res = await indexer.setTasksDir(targetDir);
+    return res;
+  } catch (e) {
+    console.error('Failed to set tasks context:', e);
+    return indexer.getIndex();
+  }
+});
+
 ipcMain.handle('tasks:update', async (event, { taskId, data }) => {
   return await indexer.updateTask(taskId, data);
 });

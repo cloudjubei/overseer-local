@@ -16,7 +16,9 @@ const TASKS_API = {
     const listener = (_event, value) => callback(value);
     ipcRenderer.on('set-task-id', listener);
     return () => ipcRenderer.removeListener('set-task-id', listener);
-  }
+  },
+  // NEW: set active tasks context (project-aware)
+  setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
 };
 
 // Docs Index API exposed to renderer as window.docsIndex

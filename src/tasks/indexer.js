@@ -31,6 +31,7 @@ export class TasksIndexer {
     constructor(projectRoot, window) {
         this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot);
         this.tasksDir = resolveTasksDir(this.projectRoot);
+        this.initialTasksDir = this.tasksDir; // Will be corrected in init
         this.index = {
             root: this.projectRoot,
             tasksDir: this.tasksDir,
@@ -60,12 +61,23 @@ export class TasksIndexer {
             if (await pathExists(c)) {
                 this.tasksDir = c
                 this.index.tasksDir = c
+                this.initialTasksDir = c
                 break
             }
         }
         await this.buildIndex();
+        await this._startWatcher();
+    }
+
+    async _startWatcher() {
+        if (!(await pathExists(this.tasksDir))) {
+            // No watcher if missing; still allow operations to rebuild later
+            this.stopWatching();
+            return;
+        }
+        this.stopWatching();
         this.watcher = chokidar.watch(path.join(this.tasksDir, '*/task.json'), {
-            ignored: /(^|[/\\])\../,
+            ignored: /(^|[\/\\])\../,
             persistent: true,
             ignoreInitial: true,
         });
@@ -75,7 +87,38 @@ export class TasksIndexer {
             .on('change', (path) => this.rebuildAndNotify(`File changed: ${path}`))
             .on('unlink', (path) => this.rebuildAndNotify(`File removed: ${path}`));
     }
-    
+
+    async setTasksDir(absDir) {
+        try {
+            const next = path.isAbsolute(absDir) ? path.resolve(absDir) : path.resolve(absDir);
+            const current = path.resolve(this.tasksDir || '');
+            if (current === next) {
+                // No change
+                return this.getIndex();
+            }
+            this.stopWatching();
+            this.tasksDir = next;
+            this.index.tasksDir = next;
+            await this.buildIndex();
+            await this._startWatcher();
+            if (this.window) {
+                this.window.webContents.send('tasks-index:update', this.getIndex());
+            }
+            return this.getIndex();
+        } catch (e) {
+            // Record error and propagate index anyway
+            this.index.errors.push({ file: absDir, errors: [e.message || String(e)] });
+            if (this.window) {
+                this.window.webContents.send('tasks-index:update', this.getIndex());
+            }
+            return this.getIndex();
+        }
+    }
+
+    getDefaultTasksDir() {
+        return this.initialTasksDir || this.tasksDir;
+    }
+
     async rebuildAndNotify(logMessage) {
         if (logMessage) console.log(logMessage);
         await this.buildIndex();

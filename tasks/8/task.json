@@ -60,7 +60,7 @@
     },
     {
       "id": "8.4",
-      "status": "-",
+      "status": "+",
       "title": "Make tasks service project-aware",
       "description": "Update the tasksService to work with project context. Modify task loading, saving, and indexing to use the correct project directory (either root tasks/ or projects/{project-id}/tasks/). Ensure task operations respect the currently selected project context.",
       "plan": "",
