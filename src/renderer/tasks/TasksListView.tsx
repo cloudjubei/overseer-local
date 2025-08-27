@@ -9,6 +9,7 @@ import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/Priorit
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import StatusBullet from '../components/tasks/StatusBullet'
+import { useActiveProject } from '../projects/ProjectContext'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -85,23 +86,33 @@ export default function TasksListView() {
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
   const { openModal, navigateTaskDetails } = useNavigator()
+  const { projectId } = useActiveProject()
 
+  // Subscribe to tasks index updates and refresh when project context changes
   useEffect(() => {
-    const fetchIndex = async () => {
+    let cancelled = false
+    ;(async () => {
       try {
         const idx = await tasksService.getSnapshot()
-        setIndex(idx)
-        tasksService.onUpdate(setIndex)
+        if (!cancelled) setIndex(idx)
       } catch (e) {
         console.error('Failed to load tasks index.', e)
       }
+    })()
+    const unsubscribe = tasksService.onUpdate((idx) => {
+      setIndex(idx)
+    })
+    return () => {
+      cancelled = true
+      if (typeof unsubscribe === 'function') unsubscribe()
     }
-    fetchIndex()
-  }, [])
+  }, [projectId])
 
   useEffect(() => {
     if (index) {
       setAllTasks(toTasksArray(index))
+    } else {
+      setAllTasks([])
     }
   }, [index])
 
@@ -112,7 +123,7 @@ export default function TasksListView() {
         e.preventDefault()
         openModal({ type: 'task-create' })
       }
-      // Quick toggle between list/board: Ctrl/Cmd+Shift+L or B (optional enhancement)
+      // Quick toggle between list/board: Ctrl/Cmd+Shift+L or B
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'b')) {
         e.preventDefault()
         setView((v) => (v === 'list' ? 'board' : 'list'))

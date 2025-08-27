@@ -3,6 +3,7 @@ import type { Task, Status } from 'src/types/tasks'
 import StatusBadge from '../components/tasks/StatusBadge'
 import TaskCard from '../components/tasks/TaskCard'
 import { tasksService } from '../services/tasksService'
+import { useActiveProject } from '../projects/ProjectContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 const STATUS_LABELS: Record<Status, string> = {
@@ -25,6 +26,7 @@ export default function BoardView({ tasks }: Props) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const { projectId } = useActiveProject()
 
   const grouped = useMemo(() => {
     const map: Record<Status, Task[]> = { '+': [], '~': [], '-': [], '?': [], '=': [] }
@@ -93,8 +95,8 @@ export default function BoardView({ tasks }: Props) {
       el.removeEventListener('scroll', onScroll as any)
       ro.disconnect()
     }
-    // Re-evaluate when tasks change (column counts/widths may shift)
-  }, [tasks])
+    // Re-evaluate when tasks or project changes (column counts/widths may shift)
+  }, [tasks, projectId])
 
   const scrollByCols = (dir: -1 | 1) => {
     const el = viewportRef.current

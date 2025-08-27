@@ -41,15 +41,16 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/screens/
     - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
   - src/renderer/tasks/: Screens and views for tasks.
-    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor.
-    - TaskDetailsView.tsx: Right-side details panel.
-    - BoardView.tsx: Kanban-style board with columns by status.
+    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor. Project-aware (reacts to active project context).
+    - TaskDetailsView.tsx: Right-side details panel. Project-aware and resubscribes on project change.
+    - BoardView.tsx: Kanban-style board with columns by status. Project-aware.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
     - SidebarView.tsx ← NEW: Sidebar component rendering primary nav and Projects list (main + child projects)
   - src/renderer/services/: Renderer-side service modules (IPC access)
     - projectsService.ts: Lists and gets child projects via preload window.projectsIndex.
     - docsService.ts: Project-aware docs service; subscribes to docs index updates; can switch context via window.docsIndex.setContext.
+    - tasksService.ts: Tasks service using project-aware tasks index; subscriptions return an unsubscribe function.
   - src/renderer/projects/: Renderer-side project context
     - ProjectContext.tsx: Tracks active project (main vs child), exposes hooks to switch and consume active project across the app. Propagates context to tasks and docs indexers via preload APIs.
 - src/tools/: Library of standard tools for agents.
@@ -60,7 +61,7 @@ This document describes how files and directories are organised in this reposito
   - design/: Design system references and tokens.
     - design/DESIGN_TOKENS.md: Design tokens spec (colors, semantics, accessibility) for CSS/Tailwind.
     - design/DESIGN_SYSTEM.md: Comprehensive design system documentation (principles, tokens, typography, spacing, elevation, motion, radii, theming, accessibility, extension guidance).
-    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltips, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
+    - design/COMPONENTS.md: Component usage guidelines (states, variants, tokens) for Buttons, Inputs, Selects, Modals, Toasts, Tooltip, Spinner, Skeleton, Command Menu, Shortcuts Help, and task primitives.
     - design/MONDAY_PALETTE_REFERENCE.md: Approximate Monday.com palette anchors and notes.
   - ux/: UX research and guidelines.
     - ux/LINEAR_UX_GUIDELINES.md: Linear.app-inspired UX patterns and interaction controls with implementation guidance.
@@ -114,6 +115,12 @@ Projects directory expectations
   - src/renderer/services/docsService.ts exposes setContext(projectId) in addition to get/subscribe/getFile/saveFile/upload.
   - ProjectContext.tsx calls window.docsIndex.setContext(activeProjectId) whenever the active project changes.
 
+## Tasks subsystem (project-aware)
+- Tasks views and services are project-aware via ProjectContext.
+  - ProjectContext calls window.tasksIndex.setContext(activeProjectId) whenever the active project changes.
+  - src/renderer/services/tasksService.ts subscribes to tasks index updates and now returns an unsubscribe function from onUpdate.
+  - src/renderer/tasks/TasksListView.tsx, TaskDetailsView.tsx, and BoardView.tsx resubscribe and refresh their snapshots when the active project changes to reflect the correct project's tasks. All create/edit/delete/status/reorder operations apply within the active project's tasks directory.
+
 ## File Naming Conventions
 - Tasks and features:
   - Task directories are numeric IDs: tasks/{id}/ (e.g., tasks/1/).
@@ -152,17 +159,21 @@ repo_root/
 │  ├─ renderer/
 │  │  ├─ services/
 │  │  │  ├─ projectsService.ts
-│  │  │  └─ docsService.ts        ← now exposes setContext(projectId)
+│  │  │  ├─ docsService.ts        ← now exposes setContext(projectId)
+│  │  │  └─ tasksService.ts       ← project-aware updates with unsubscribe
 │  │  ├─ projects/
 │  │  │  └─ ProjectContext.tsx  ← active project provider + hooks (syncs tasks/docs contexts)
 │  │  ├─ navigation/
 │  │  │  ├─ Navigator.tsx
 │  │  │  └─ SidebarView.tsx
-│  │  └─ ...
+│  │  └─ tasks/
+│  │     ├─ TasksListView.tsx    ← project-aware
+│  │     ├─ TaskDetailsView.tsx  ← project-aware
+│  │     └─ BoardView.tsx        ← project-aware
 │  ├─ styles/
 │  ├─ index.css
 │  ├─ main.js                 ← wired IPC for projects-index, tasks, and docs set-context
-│  └─ preload.js              ← exposes window.projectsIndex, window.tasksIndex, and window.docsIndex.setContext
+│  └─ preload.js              ← exposes window.projectsIndex, window.tasksIndex (with unsubscribe), and window.docsIndex.setContext
 ├─ tasks/
 ├─ projects/                  ← Scanned JSON configs for child projects
 ├─ package.json

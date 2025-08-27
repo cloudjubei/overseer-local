@@ -5,6 +5,7 @@ import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
 import StatusBullet from '../components/tasks/StatusBullet'
+import { useActiveProject } from '../projects/ProjectContext'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -46,6 +47,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [saving, setSaving] = useState(false)
   const { openModal, navigateView } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
+  const { projectId } = useActiveProject()
 
   // DnD state (match Tasks list patterns)
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
@@ -54,22 +56,28 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
 
   useEffect(() => {
-    const fetchIndex = async () => {
+    let cancelled = false
+    ;(async () => {
       try {
         const idx = await tasksService.getSnapshot()
-        setIndex(idx)
-        tasksService.onUpdate(setIndex)
+        if (!cancelled) setIndex(idx)
       } catch (e) {
         console.error('Failed to load tasks index.', e)
       }
+    })()
+    const unsubscribe = tasksService.onUpdate((idx) => setIndex(idx))
+    return () => {
+      cancelled = true
+      if (typeof unsubscribe === 'function') unsubscribe()
     }
-    fetchIndex()
-  }, [])
+  }, [projectId])
 
   useEffect(() => {
-    if (taskId && index && index.tasksById) {
-      const t = index.tasksById?.[taskId]
+    if (taskId && index && (index as any).tasksById) {
+      const t = (index as any).tasksById?.[taskId]
       setTask(t || null)
+    } else {
+      setTask(null)
     }
   }, [taskId, index])
 
@@ -206,7 +214,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               className="reveal-on-hover"
             />
           </div>
-          {/* <StatusBadge status={task.status} variant="bold" className="ml-2" /> */}
           <div className="spacer" />
         </div>
         <div className="details-header__meta">

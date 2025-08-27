@@ -3,7 +3,11 @@ import { contextBridge, ipcRenderer } from 'electron';
 // Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
 const TASKS_API = {
   getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
-  onUpdate: (callback) => ipcRenderer.on('tasks-index:update', (_event, ...args) => callback(...args)),
+  onUpdate: (callback) => {
+    const listener = (_event, ...args) => callback(...args);
+    ipcRenderer.on('tasks-index:update', listener);
+    return () => ipcRenderer.removeListener('tasks-index:update', listener);
+  },
   updateTask: (taskId, data) => ipcRenderer.invoke('tasks:update', { taskId, data }),
   updateFeature: (taskId, featureId, data) => ipcRenderer.invoke('tasks-feature:update', { taskId, featureId, data }),
   addFeature: (taskId, feature) => ipcRenderer.invoke('tasks-feature:add', { taskId, feature }),
@@ -49,8 +53,9 @@ const CHAT_API = {
 const NOTIFICATIONS_API = {
   sendOs: (data) => ipcRenderer.invoke('notifications:send-os', data),
   onClicked: (callback) => {
-    ipcRenderer.on('notifications:clicked', (_event, metadata) => callback(metadata));
-    return () => ipcRenderer.removeListener('notifications:clicked', callback);
+    const listener = (_event, metadata) => callback(metadata);
+    ipcRenderer.on('notifications:clicked', listener);
+    return () => ipcRenderer.removeListener('notifications:clicked', listener);
   }
 };
 

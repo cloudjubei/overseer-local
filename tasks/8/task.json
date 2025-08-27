@@ -96,7 +96,7 @@
     },
     {
       "id": "8.6",
-      "status": "-",
+      "status": "+",
       "title": "Update all task views to work with project context",
       "description": "Modify TasksListView, TaskDetailsView, TaskCreateView, TaskEditView, and related components to work within the selected project context. Ensure all task-related operations (create, edit, delete, status changes) work correctly for both main project and child projects.",
       "plan": "",
