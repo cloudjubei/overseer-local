@@ -96,6 +96,8 @@ This document describes how files and directories are organised in this reposito
   - standardTools.js
   - preview/: Preview analyzer tooling
     - analyzer.js: Library to analyze TSX components for preview capability.
+  - Agent-facing tools:
+    - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. See docs/PREVIEW_TOOL.md.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
@@ -141,6 +143,12 @@ Notes:
   - node scripts/preview-scan.js --dir src/renderer/components --out preview-metadata.json
 - Output: JSON report with a summary and per-file analyses. See docs/PREVIEW_ANALYZER.md.
 
+## Agent Preview Screenshot Tool
+- Integrated into src/tools/standardTools.js as preview_screenshot.
+- Allows agents to request a screenshot of a component (via preview.html) or any URL.
+- Accepts parameters for component path (id), props override, provider needs, theme, screenshot dimensions, variant selection (hash), wait/clip options, and output path.
+- Requires a running dev server; provide base_url or set PREVIEW_BASE_URL. See docs/PREVIEW_TOOL.md for details.
+
 ## Repository Tree
 ```
 repo_root/
@@ -148,6 +156,7 @@ repo_root/
 │  ├─ FILE_ORGANISATION.md
 │  ├─ COMPONENT_PREVIEWS.md
 │  ├─ PREVIEW_ANALYZER.md
+│  ├─ PREVIEW_TOOL.md
 │  ├─ STANDARDS.md
 │  ├─ BUILD_SIGNING.md
 │  ├─ design/
@@ -173,10 +182,11 @@ repo_root/
 │  │  │     └─ coreMocks.tsx
 │  │  └─ ...
 │  ├─ tools/
-│  │  ├─ standardTools.js
+│  │  ├─ standardTools.js   ← includes preview_screenshot tool
 │  │  └─ preview/
 │  │     └─ analyzer.js
-│  └─ ...
+│  └─ capture/
+│     └─ screenshotService.js
 ├─ scripts/
 │  └─ preview-scan.js
 ├─ preview.html
