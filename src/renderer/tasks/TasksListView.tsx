@@ -7,6 +7,8 @@ import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
 import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/PriorityTag'
 import BoardView from './BoardView'
+import SegmentedControl from '../components/ui/SegmentedControl'
+import StatusBullet from '../components/tasks/StatusBullet'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -52,6 +54,24 @@ function filterTasks(tasks: Task[], { query, status }: { query: string; status: 
   })
 }
 
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/>
+      <circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/>
+    </svg>
+  )
+}
+
+function BoardIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="10" rx="1.5"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="15" width="7" height="6" rx="1.5"/>
+    </svg>
+  )
+}
+
 export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
@@ -91,6 +111,11 @@ export default function TasksListView() {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault()
         openModal({ type: 'task-create' })
+      }
+      // Quick toggle between list/board: Ctrl/Cmd+Shift+L or B (optional enhancement)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'b')) {
+        e.preventDefault()
+        setView((v) => (v === 'list' ? 'board' : 'list'))
       }
     }
     window.addEventListener('keydown', onKey)
@@ -207,10 +232,16 @@ export default function TasksListView() {
           </div>
         </div>
         <div className="right">
-          <div className="view-toggle" role="tablist" aria-label="View toggle">
-            <button className={`toggle ${view === 'list' ? 'active' : ''}`} role="tab" aria-selected={view === 'list'} onClick={() => setView('list')}>List</button>
-            <button className={`toggle ${view === 'board' ? 'active' : ''}`} role="tab" aria-selected={view === 'board'} onClick={() => setView('board')}>Board</button>
-          </div>
+          <SegmentedControl
+            ariaLabel="Toggle between list and board views"
+            options={[
+              { value: 'list', label: 'List', icon: <ListIcon /> },
+              { value: 'board', label: 'Board', icon: <BoardIcon /> },
+            ]}
+            value={view}
+            onChange={(v) => setView(v as 'list' | 'board')}
+            size="sm"
+          />
           <Button onClick={handleAddTask}>New Task</Button>
         </div>
       </div>
@@ -295,15 +326,11 @@ export default function TasksListView() {
                       <div className="col col-status">
                         <div className="status-inline">
                           <StatusBadge status={t.status} />
-                          <select className="status-select ui-select ui-select--sm" aria-label="Change status"
-                            value={t.status}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => handleStatusChange(t.id, e.target.value as Status)}
-                          >
-                            {STATUSES.map(s => (
-                              <option key={s} value={s}>{STATUS_LABELS[s]} ({s})</option>
-                            ))}
-                          </select>
+                          <StatusBullet
+                            status={t.status}
+                            onChange={(next) => handleStatusChange(t.id, next)}
+                            className="reveal-on-hover"
+                          />
                         </div>
                       </div>
                       <div className="col col-features">{done}/{total}</div>

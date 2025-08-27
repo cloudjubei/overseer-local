@@ -19,14 +19,34 @@ This document describes how files and directories are organised in this reposito
     - components/tooltip.css: Tooltip.
     - components/overlays.css: Command menu, help overlay.
     - components/cards.css: Task card.
+    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle.
   - src/styles/layout/: Layout building blocks like sidebar/nav.
     - layout/nav.css: Sidebar and navigation styles.
   - src/styles/screens/: Screen-scoped styles that compose primitives/components.
-    - screens/tasks.css: Tasks list and toolbar styles + DnD transitions.
+    - screens/tasks.css: Tasks list and toolbar styles + DnD transitions. Includes interactive status bullet and status picker patterns used in the list view.
     - screens/task-details.css: Task details panel and features list.
     - screens/board.css: Board (kanban) columns and interactions.
     - screens/docs.css: Documents view.
     - screens/settings.css: Settings view.
+- src/renderer/: React renderer (screens, components, hooks, services, navigation).
+  - src/renderer/components/ui/: Shared UI primitives.
+    - Button.tsx: Button component with variants and loading state.
+    - Spinner.tsx: Inline spinner.
+    - Select.tsx, Input.tsx, Tooltip.tsx, etc.
+    - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
+  - src/renderer/components/tasks/: Task-specific UI pieces.
+    - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
+    - PriorityTag.tsx: Priority tags P0–P3.
+    - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
+  - src/renderer/screens/
+    - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
+  - src/renderer/tasks/: Screens and views for tasks.
+    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor.
+    - TaskDetailsView.tsx: Right-side details panel.
+    - BoardView.tsx: Kanban-style board with columns by status.
+  - src/renderer/navigation/: Navigation state + modal host.
+    - Navigator.tsx
+
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md: How to configure code signing for macOS and Windows using electron-builder (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, etc.) and CI examples.
   - STANDARDS.md: UI standards and conventions for screens, modals, styling, hooks/services, and navigation.

@@ -4,6 +4,7 @@ import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
+import StatusBullet from '../components/tasks/StatusBullet'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -45,7 +46,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [saving, setSaving] = useState(false)
   const { openModal, navigateView } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
+
+  // DnD state (match Tasks list patterns)
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
 
   useEffect(() => {
     const fetchIndex = async () => {
@@ -88,6 +94,21 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
   const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
 
+  const handleTaskStatusChange = async (taskId: number, status: Status) => {
+    try {
+      await tasksService.updateTask(taskId, { status })
+    } catch (e) {
+      console.error('Failed to update status', e)
+    }
+  }
+  const handleFeatureStatusChange = async (taskId: number, featureId: string, status: Status) => {
+    try {
+      await tasksService.updateFeature(taskId, featureId, { status })
+    } catch (e) {
+      console.error('Failed to update status', e)
+    }
+  }
+
   const handleMoveFeature = async (fromId: string, toIndex: number) => {
     if (!task) return
     setSaving(true)
@@ -99,6 +120,21 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     } finally {
       setSaving(false)
     }
+  }
+
+  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    const pos: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after'
+    setDropIndex(idx)
+    setDropPosition(pos)
+  }
+
+  const clearDndState = () => {
+    setDragFeatureId(null)
+    setDragging(false)
+    setDropIndex(null)
+    setDropPosition(null)
   }
 
   const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, featureId: string) => {
@@ -144,6 +180,16 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
   const dndEnabled = !saving
 
+  const onListDrop = (e: React.DragEvent<HTMLUListElement>) => {
+    if (!dndEnabled || !dragging) return
+    e.preventDefault()
+    if (dragFeatureId != null && dropIndex != null) {
+      const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
+      handleMoveFeature(dragFeatureId, toIndex)
+    }
+    clearDndState()
+  }
+
   return (
     <div className="task-details flex flex-col min-h-0 w-full" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
@@ -152,7 +198,15 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
             <IconBack />
           </button>
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
-          <StatusBadge status={task.status} variant="bold" className="ml-2" />
+          <div className="status-inline">
+            <StatusBadge status={task.status} variant="bold" className="ml-2" />
+            <StatusBullet
+              status={task.status}
+              onChange={(next) => handleTaskStatusChange(task.id, next)}
+              className="reveal-on-hover"
+            />
+          </div>
+          {/* <StatusBadge status={task.status} variant="bold" className="ml-2" /> */}
           <div className="spacer" />
         </div>
         <div className="details-header__meta">
@@ -188,11 +242,17 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           {features.length === 0 ? (
             <div className="empty">No features defined for this task.</div>
           ) : (
-            <ul className="features-list" role="list" aria-label="Features" ref={ulRef}
+            <ul
+              className={`features-list ${dragging ? 'dnd-active' : ''}`}
+              role="list"
+              aria-label="Features"
+              ref={ulRef}
               onDragOver={(e) => { if (dndEnabled) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
+              onDrop={onListDrop}
+              onDragEnd={() => clearDndState()}
             >
               <li className="features-head" aria-hidden="true">
-                <div className="col col-id">#</div>
+                <div className="col col-id"></div>
                 <div className="col col-title">Title</div>
                 <div className="col col-status">Status</div>
                 <div className="col col-deps">Dependencies</div>
@@ -201,17 +261,37 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               {features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
                 const dependents : string[] = dependentsMap[f.id] || []
+                const isDragSource = dragFeatureId === f.id
+                const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
+                const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
+                    {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
                     <div
-                      className={`feature-row ${dndEnabled ? 'draggable' : ''}`}
+                      className={`feature-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''}`}
                       role="button"
                       tabIndex={0}
                       data-index={idx}
                       draggable={dndEnabled}
-                      onDragStart={(e) => { if (!dndEnabled) return; setDragFeatureId(f.id); e.dataTransfer.setData('text/plain', String(f.id)); e.dataTransfer.effectAllowed = 'move' }}
-                      onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault() }}
-                      onDrop={(e) => { if (!dndEnabled) return; e.preventDefault(); const overIdx = idx; if (dragFeatureId != null) { handleMoveFeature(dragFeatureId, overIdx) } setDragFeatureId(null) }}
+                      aria-grabbed={isDragSource}
+                      onDragStart={(e) => {
+                        if (!dndEnabled) return
+                        setDragFeatureId(f.id)
+                        setDragging(true)
+                        e.dataTransfer.setData('text/plain', String(f.id))
+                        e.dataTransfer.effectAllowed = 'move'
+                      }}
+                      onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
+                      onDrop={(e) => {
+                        if (!dndEnabled) return
+                        e.preventDefault()
+                        computeDropForRow(e, idx)
+                        if (dragFeatureId != null && dropIndex != null) {
+                          const to = dropIndex + (dropPosition === 'after' ? 1 : 0)
+                          handleMoveFeature(dragFeatureId, to)
+                        }
+                        clearDndState()
+                      }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >
@@ -220,7 +300,16 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
                         <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>
                       </div>
-                      <div className="col col-status"><StatusBadge status={f.status} variant="soft" /></div>
+                      <div className="col col-status">
+                        <div className="status-inline">
+                          <StatusBadge status={f.status} />
+                          <StatusBullet
+                            status={f.status}
+                            onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
+                            className="reveal-on-hover"
+                          />
+                        </div>
+                      </div>
                       <div className="col col-deps">
                         <div className="deps-list" aria-label={`Dependencies for ${f.id}`}>
                           {deps.length === 0 ? (
@@ -250,6 +339,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         </div>
                       </div>
                     </div>
+                    {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )
               })}
@@ -257,6 +347,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           )}
         </section>
       </main>
+
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </div>
   )
 }

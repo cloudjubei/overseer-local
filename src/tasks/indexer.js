@@ -3,12 +3,36 @@ import path from 'path';
 import chokidar from 'chokidar';
 import { validateTask } from './validator';
 
+function isNumericDir(name) {
+    return /^\d+$/.test(name)
+}
+
+async function pathExists(p) {
+    try { await fs.stat(p); return true } catch { return false }
+}
+
+function resolveTasksDir(projectRoot) {
+    // Ensure absolute and robust resolution to the real tasks directory in dev/packaged runs
+    const candidates = []
+    const root = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot)
+    candidates.push(path.join(root, 'tasks'))
+    candidates.push(path.resolve(root, '..', 'tasks'))
+    candidates.push(path.resolve(root, '..', '..', 'tasks'))
+    candidates.push(path.resolve(process.cwd(), 'tasks'))
+    for (const c of candidates) {
+        // Note: do not await here, we use sync-ish check pattern via fs.stat in init
+        // but we can return the first candidate; existence validated in init/buildIndex
+        // We still prefer the first that exists.
+    }
+    return candidates[0] // initial default; we will correct in init if needed
+}
+
 export class TasksIndexer {
     constructor(projectRoot, window) {
-        this.projectRoot = projectRoot;
-        this.tasksDir = path.join(projectRoot, 'tasks');
+        this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot);
+        this.tasksDir = resolveTasksDir(this.projectRoot);
         this.index = {
-            root: projectRoot,
+            root: this.projectRoot,
             tasksDir: this.tasksDir,
             updatedAt: null,
             tasksById: {},
@@ -25,6 +49,20 @@ export class TasksIndexer {
     }
 
     async init() {
+        // Ensure tasksDir resolves to an existing path; try common fallbacks
+        const candidates = [
+            path.join(this.projectRoot, 'tasks'),
+            path.resolve(this.projectRoot, '..', 'tasks'),
+            path.resolve(this.projectRoot, '..', '..', 'tasks'),
+            path.resolve(process.cwd(), 'tasks'),
+        ]
+        for (const c of candidates) {
+            if (await pathExists(c)) {
+                this.tasksDir = c
+                this.index.tasksDir = c
+                break
+            }
+        }
         await this.buildIndex();
         this.watcher = chokidar.watch(path.join(this.tasksDir, '*/task.json'), {
             ignored: /(^|[/\\])\../,
@@ -57,29 +95,34 @@ export class TasksIndexer {
         };
 
         try {
-            const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-            for (const dirent of taskDirs) {
-                if (dirent.isDirectory() && /^\d+$/.test(dirent.name)) {
-                    const taskId = parseInt(dirent.name, 10);
-                    const taskFilePath = path.join(this.tasksDir, dirent.name, 'task.json');
-                    try {
-                        const content = await fs.readFile(taskFilePath, 'utf-8');
-                        const task = JSON.parse(content);
-                        const { valid, errors } = validateTask(task);
-                        if (!valid) {
-                            newIndex.errors.push({ file: taskFilePath, errors });
-                            continue;
+            const exists = await pathExists(this.tasksDir)
+            if (!exists) {
+                newIndex.errors.push({ file: this.tasksDir, errors: ['Tasks directory not found'] })
+            } else {
+                const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
+                for (const dirent of taskDirs) {
+                    if (dirent.isDirectory() && isNumericDir(dirent.name)) {
+                        const taskId = parseInt(dirent.name, 10);
+                        const taskFilePath = path.join(this.tasksDir, dirent.name, 'task.json');
+                        try {
+                            const content = await fs.readFile(taskFilePath, 'utf-8');
+                            const task = JSON.parse(content);
+                            const { valid, errors } = validateTask(task);
+                            if (!valid) {
+                                newIndex.errors.push({ file: taskFilePath, errors });
+                                continue;
+                            }
+                            if(task.id !== taskId) {
+                                newIndex.errors.push({ file: taskFilePath, errors: [`Task ID in file (${task.id}) does not match directory name (${taskId})`] });
+                                continue;
+                            }
+                            newIndex.tasksById[task.id] = task;
+                            task.features.forEach(feature => {
+                                newIndex.featuresByKey[feature.id] = feature;
+                            });
+                        } catch (err) {
+                            newIndex.errors.push({ file: taskFilePath, errors: [err.message] });
                         }
-                        if(task.id !== taskId) {
-                            newIndex.errors.push({ file: taskFilePath, errors: [`Task ID in file (${task.id}) does not match directory name (${taskId})`] });
-                            continue;
-                        }
-                        newIndex.tasksById[task.id] = task;
-                        task.features.forEach(feature => {
-                            newIndex.featuresByKey[feature.id] = feature;
-                        });
-                    } catch (err) {
-                        newIndex.errors.push({ file: taskFilePath, errors: [err.message] });
                     }
                 }
             }
@@ -134,7 +177,7 @@ export class TasksIndexer {
         const tasksToUpdate = {};
         
         const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-        const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+        const taskDirNames = taskDirs.filter(d => d.isDirectory() && isNumericDir(d.name)).map(d => d.name);
 
         for (const currentTaskId of taskDirNames) {
             const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
@@ -195,7 +238,7 @@ export class TasksIndexer {
         if (deletedFeatureIds.size > 0) {
             const tasksToUpdate = {};
             const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-            const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+            const taskDirNames = taskDirs.filter(d => d.isDirectory() && isNumericDir(d.name)).map(d => d.name);
     
             for (const currentTaskId of taskDirNames) {
                 const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
@@ -259,10 +302,12 @@ export class TasksIndexer {
         } else if (payload.fromId && payload.toIndex !== undefined) {
             const fromIndex = features.findIndex(f => f.id === payload.fromId);
             if (fromIndex === -1) throw new Error(`Feature ${payload.fromId} not found`);
-            if (payload.toIndex < 0 || payload.toIndex >= features.length) throw new Error('Invalid target index');
+            if (payload.toIndex < 0 || payload.toIndex > features.length) throw new Error('Invalid target index');
             newOrder = [...currentOrder];
             const [moved] = newOrder.splice(fromIndex, 1);
-            newOrder.splice(payload.toIndex, 0, moved);
+            // Allow moving to end (toIndex === length)
+            if (payload.toIndex >= newOrder.length) newOrder.push(moved)
+            else newOrder.splice(payload.toIndex, 0, moved);
         } else {
             throw new Error('Invalid payload for reorder');
         }
@@ -294,7 +339,7 @@ export class TasksIndexer {
         tasksToUpdate[String(taskId)] = taskData;
 
         const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-        const taskDirNames = taskDirs.filter(d => d.isDirectory() && /^\d+$/.test(d.name)).map(d => d.name);
+        const taskDirNames = taskDirs.filter(d => d.isDirectory() && isNumericDir(d.name)).map(d => d.name);
 
         for (const currentTaskId of taskDirNames) {
             if (currentTaskId === String(taskId)) continue;
@@ -339,7 +384,7 @@ export class TasksIndexer {
         console.log('Reordering tasks');
         const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
         let currentOrder = taskDirs
-            .filter(d => d.isDirectory() && /^\d+$/.test(d.name))
+            .filter(d => d.isDirectory() && isNumericDir(d.name))
             .map(d => parseInt(d.name, 10))
             .sort((a, b) => a - b);
 
@@ -353,10 +398,12 @@ export class TasksIndexer {
         } else if (payload.fromId && payload.toIndex !== undefined) {
             const fromIndex = currentOrder.indexOf(payload.fromId);
             if (fromIndex === -1) throw new Error(`Task ${payload.fromId} not found`);
-            if (payload.toIndex < 0 || payload.toIndex >= currentOrder.length) throw new Error('Invalid target index');
+            if (payload.toIndex < 0 || payload.toIndex > currentOrder.length) throw new Error('Invalid target index');
             newOrder = [...currentOrder];
             const [moved] = newOrder.splice(fromIndex, 1);
-            newOrder.splice(payload.toIndex, 0, moved);
+            // Allow moving to end (toIndex === length)
+            if (payload.toIndex >= newOrder.length) newOrder.push(moved)
+            else newOrder.splice(payload.toIndex, 0, moved);
         } else {
             throw new Error('Invalid payload for reorder');
         }
@@ -394,22 +441,33 @@ export class TasksIndexer {
             });
         });
 
-        const tempMap = new Map();
+        // Use a staging directory to avoid rename conflicts and ENOENT due to path resolution
+        const stagingDir = path.join(this.tasksDir, `.reorder_tmp_${Date.now()}`)
+        await fs.mkdir(stagingDir, { recursive: true })
+
+        // Move all current numeric task dirs into staging (by oldId)
         for (const oldId of currentOrder) {
             const oldDir = path.join(this.tasksDir, String(oldId));
-            const tempDir = path.join(this.tasksDir, `temp_${oldId}`);
-            await fs.rename(oldDir, tempDir);
-            tempMap.set(oldId, tempDir);
+            const stagedDir = path.join(stagingDir, String(oldId));
+            // Verify exists before rename to avoid ENOENT confusing errors
+            if (!(await pathExists(oldDir))) {
+                throw new Error(`Source task directory not found: ${oldDir}`)
+            }
+            await fs.rename(oldDir, stagedDir);
         }
 
+        // Move from staging to new locations (by newId) and write updated task.json
         for (const [newIndex, oldId] of newOrder.entries()) {
             const newId = newIndex + 1;
-            const tempDir = tempMap.get(oldId);
+            const stagedDir = path.join(stagingDir, String(oldId));
             const newDir = path.join(this.tasksDir, String(newId));
-            await fs.rename(tempDir, newDir);
+            await fs.rename(stagedDir, newDir);
             const newTaskPath = path.join(newDir, 'task.json');
             await fs.writeFile(newTaskPath, JSON.stringify(tasksData[oldId], null, 2), 'utf-8');
         }
+
+        // Attempt to remove the staging folder (should be empty)
+        try { await fs.rmdir(stagingDir) } catch { /* ignore */ }
 
         await this.rebuildAndNotify('Tasks reordered, index rebuilt.');
         return { ok: true };
@@ -433,6 +491,34 @@ export class TasksIndexer {
         const next = { ...taskData, ...patchable };
 
         // Validate before writing
+        const { valid, errors } = validateTask(next);
+        if (!valid) {
+            throw new Error(`Invalid task update for ${taskId}: ${errors && errors.join ? errors.join(', ') : JSON.stringify(errors)}`);
+        }
+
+        await fs.writeFile(taskPath, JSON.stringify(next, null, 2), 'utf-8');
+        await this.rebuildAndNotify(`Task ${taskId} updated`);
+        return { ok: true };
+    }
+
+    async updateFeature(taskId, featureId, data) {
+        console.log(`Updating feature ${featureId}`);
+        const taskDir = path.join(this.tasksDir, String(taskId));
+        const taskPath = path.join(taskDir, 'task.json');
+        let taskData;
+        try {
+            const raw = await fs.readFile(taskPath, 'utf-8');
+            taskData = JSON.parse(raw);
+        } catch (e) {
+            throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
+        }
+
+        // Do not allow changing ID via updateFeature; everything else is merged
+        const { id, ...patchable } = data || {};
+
+        const features = taskData.features.map(f => f.id == featureId ? { ...f, ...patchable } : f);
+        const next = { ...taskData, features };
+
         const { valid, errors } = validateTask(next);
         if (!valid) {
             throw new Error(`Invalid task update for ${taskId}: ${errors && errors.join ? errors.join(', ') : JSON.stringify(errors)}`);

@@ -245,24 +245,6 @@
     },
     {
       "id": "7.18",
-      "status": "-",
-      "title": "In the Features list Status has a lot of right padding.",
-      "description": "Status width can be shrunk to be just a bit wider than the 'Status' title so there's enough space for it not to feel crowded. Dependencies can also be pushed a bit more to the right so it can fit 6 blockers.",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "docs/design/COMPONENTS.md",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/design/DESIGN_TOKENS.md",
-        "docs/design/MONDAY_PALETTE_REFERENCE.md",
-        "docs/styleguide/index.html",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "7.19",
       "status": "+",
       "title": "In the features list the Actions should only show on hover",
       "description": "Make the Edit button an icon button not the words. The Edit Task button can show as the same button icon, but in the Task Overview Area. The Add Feature can also be changed into a nice '+' button. We should also have a standard Back button with an icon.",
@@ -280,7 +262,7 @@
       "acceptance": []
     },
     {
-      "id": "7.20",
+      "id": "7.19",
       "status": "+",
       "title": "index.css has grown to be massive",
       "description": "The file should really contain reusable effects that can be applied to many different components - then those components will have correct classnames set to use them. We need to shrink index.css and make reusable styles - this way everything is cleaner and in general the views and codebase will be more standardized.",
@@ -298,7 +280,7 @@
       "acceptance": []
     },
     {
-      "id": "7.21",
+      "id": "7.20",
       "status": "-",
       "title": "Create a unified screen with side panel style",
       "description": "Settings, Docs, Chat and Notifications all should have a panel that behaves similarly to the Sidebar (it's collapsible). For Settings it holds the different sections. For Chat it holds the list of all chats (i.e. chat history). For Docs it holds the list of documents and the topbar (search and sorting). For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. This kind of component needs to be unified, reusable and made slick and pretty.",
@@ -317,11 +299,12 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
     },
     {
-      "id": "7.22",
-      "status": "-",
+      "id": "7.21",
+      "status": "+",
       "title": "Feature dragging should follow the same pattern as Task dragging.",
       "description": "The same visual cues need to be used in both places with nice animations.",
       "plan": "",
@@ -339,14 +322,15 @@
       "acceptance": []
     },
     {
-      "id": "7.23",
+      "id": "7.22",
       "status": "-",
-      "title": "Tasks list dragging  error",
-      "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file.",
+      "title": "Tasks list dragging error",
+      "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
         "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
         "docs/design/COMPONENTS.md",
         "docs/design/DESIGN_SYSTEM.md",
         "docs/design/DESIGN_TOKENS.md",
@@ -356,11 +340,11 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "Error occurred in handler for 'tasks:reorder': Error: ENOENT: no such file or directory, rename './tasks/1' -> './tasks/temp_1'"
+      "rejection": "Error occurred in handler for 'tasks:reorder': Error: ENOENT: no such file or directory, rename './tasks/1' -> './tasks/.reorder_tmp_1756254151133/1'"
     },
     {
-      "id": "7.24",
-      "status": "-",
+      "id": "7.23",
+      "status": "+",
       "title": "Home - List <-> Board switch",
       "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
       "plan": "",
@@ -377,7 +361,7 @@
       "acceptance": []
     },
     {
-      "id": "7.25",
+      "id": "7.24",
       "status": "-",
       "title": "Home the status dropdown looks horrible",
       "description": "The dropdown should somehow incorporate the bullet design that is currently used to display the status. In fact, the best way would be for the dropdown not to be there, and when the user hovers over an item, the status bullet can become bigger and show an edit symbol. If the user clicks on the bullet - it opens a bullet selector that can change the status.",
@@ -395,7 +379,7 @@
       "acceptance": []
     },
     {
-      "id": "7.26",
+      "id": "7.25",
       "status": "-",
       "title": "Home - Board view - horizontal problems",
       "description": "If the screen isn't wide enough, not all sections can show - look at how Linear and Monday resolve this and introduce the same fix",
