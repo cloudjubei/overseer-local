@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "10.1",
-      "status": "-",
+      "status": "+",
       "title": "Core screenshot capture service",
       "description": "Implement the foundational screenshot capture functionality using Electron's native capabilities. Create a service in the main process that can capture screenshots of the current renderer window or specific regions. This should handle different screenshot formats (PNG, JPEG) and quality settings. The service should expose IPC methods that can be called from the renderer process.",
       "plan": "",

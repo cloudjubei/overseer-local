@@ -82,6 +82,8 @@ This document describes how files and directories are organised in this reposito
 - src/chat/ (providers and manager) – may be supplied by preload/main glue.
 - src/tools/
   - standardTools.js
+- src/capture/: Main-process screenshot capture service and related utilities.
+  - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - docs/: Project documentation and specifications.
   - BUILD_SIGNING.md
   - STANDARDS.md
@@ -150,12 +152,12 @@ repo_root/
 │  │  │  ├─ openai.js
 │  │  │  ├─ litellm.js
 │  │  │  └─ lmstudio.js
-│  │  └─ manager.js          
+│  │  └─ manager.js         
 │  ├─ docs/
-│  │  └─ indexer.js        
+│  │  └─ indexer.js       
 │  ├─ tasks/
-│  │  ├─ indexer.js                 
-│  │  └─ validator.js                
+│  │  ├─ indexer.js                
+│  │  └─ validator.js               
 │  ├─ types/
 │  │  ├─ external.d.ts                 # Ambient types for window.tasksIndex and service payloads
 │  │  ├─ tasks.ts                      # Shared Task/Feature/Status types
@@ -185,8 +187,6 @@ repo_root/
 │  │  │  │  ├─ StatusBadge.tsx
 │  │  │  │  ├─ PriorityTag.tsx
 │  │  │  │  └─ TaskCard.tsx
-│  │  │  ├─ FeatureForm.tsx        
-│  │  │  └─ TaskForm.tsx           
 │  │  ├─ services/
 │  │  │  ├─ chatService.ts
 │  │  │  ├─ docsService.ts
@@ -206,8 +206,8 @@ repo_root/
 │  │  │  ├─ SidebarView.tsx
 │  │  │  ├─ TasksView.tsx
 │  │  │  ├─ DocumentsView.tsx
-│  │  │  ├─ ChatView.tsx               # UI consumes hooks/services
-│  │  │  ├─ SettingsView.tsx           # Settings screen with theme and LLM configurations
+│  │  │  ├─ ChatView.tsx
+│  │  │  ├─ SettingsView.tsx
 │  │  │  └─ NotificationsView.tsx
 │  │  ├─ utils/
 │  │  │  └─ LLMConfigManager.ts

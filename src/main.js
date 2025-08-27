@@ -7,6 +7,7 @@ import { DocsIndexer } from './docs/indexer';
 import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
+import { registerScreenshotService } from './capture/screenshotService';
 
 if (started) {
   app.quit();
@@ -39,6 +40,9 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
   createWindow();
+
+  // Register screenshot service with access to the current main window
+  registerScreenshotService(() => mainWindow);
 
   const projectRoot = app.getAppPath();
   indexer = new TasksIndexer(projectRoot, mainWindow);

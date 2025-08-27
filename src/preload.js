@@ -61,6 +61,20 @@ const NOTIFICATIONS_API = {
   }
 };
 
+// Screenshot capture API
+const SCREENSHOT_API = {
+  /**
+   * Capture a screenshot.
+   * @param {Object} options
+   * @param {number} [options.windowId]
+   * @param {{x:number,y:number,width:number,height:number}} [options.rect]
+   * @param {'png'|'jpeg'} [options.format]
+   * @param {number} [options.quality] // 0-100 (jpeg only)
+   * @returns {{ok: boolean, dataUrl?: string, width?: number, height?: number, format?: string, error?: string}}
+   */
+  capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
+};
+
 // Projects Index + CRUD API
 const PROJECTS_API = {
   get: () => ipcRenderer.invoke('projects-index:get'),
@@ -79,3 +93,4 @@ contextBridge.exposeInMainWorld('docsIndex', DOCS_API);
 contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);
+contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
