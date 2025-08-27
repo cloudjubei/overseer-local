@@ -169,7 +169,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
   if (!task) {
     return (
-      <div className="task-details flex flex-col min-h-0 w-full">
+      <div className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
         <header className="details-header shrink-0">
           <div className="details-header__bar">
             <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }}>
@@ -201,7 +201,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   }
 
   return (
-    <div  className="task-details flex flex-col min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
+    <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
         <div className="details-header__bar">
           <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }} aria-label="Back to Tasks">
@@ -239,7 +239,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
-        <section className="panel flex flex-col flex-1 min-h-0 overflow-hidden">
+        <section className="panel flex flex-col flex-1 min-h-0">
           <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
             <div className="section-actions">
