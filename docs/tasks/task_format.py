@@ -13,6 +13,14 @@ Status = Literal[
     "=" # Deferred
 ]
 
+DependencyType = Literal['task', 'feature']
+
+class Dependency(TypedDict):
+    type: DependencyType
+    project_id: str
+    task_id: int
+    feature_id: NotRequired[str]
+
 class Feature(TypedDict):
     id: str
     status: Status
@@ -21,7 +29,7 @@ class Feature(TypedDict):
     plan: str
     context: List[str]
     acceptance: List[str]
-    dependencies: NotRequired[List[str]]
+    dependencies: NotRequired[List[Dependency]]
     rejection: NotRequired[str]
 
 
@@ -31,6 +39,7 @@ class Task(TypedDict):
     title: str
     description: str
     features: List[Feature]
+    dependencies: NotRequired[List[Dependency]]
     rejection: NotRequired[str]
 
 class ProjectRequirement(TypedDict):

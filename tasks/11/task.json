@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "11.1",
-      "status": "-",
+      "status": "+",
       "title": "Add dependency types and data structures",
       "description": "Extend the TypeScript types to support dependencies between features and tasks. Add dependency arrays to Feature and Task types, and create supporting types for dependency references that can point to features or tasks across the entire project scope. Update the data structures to store and validate these cross-references.",
       "plan": "",
