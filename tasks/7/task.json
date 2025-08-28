@@ -354,7 +354,7 @@
     },
     {
       "id": "7.26",
-      "status": "-",
+      "status": "+",
       "title": "Creating a task is broken",
       "description": "The status fields don't match the Task specification",
       "plan": "",
