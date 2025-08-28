@@ -399,7 +399,7 @@
     },
     {
       "id": "7.29",
-      "status": "-",
+      "status": "+",
       "title": "Reuse the sidepanel for Chat",
       "description": "The Chat screen should have the same kind of sidepanel that the Settings screen has. For Chat it holds the list of all chats (i.e. chat history). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",

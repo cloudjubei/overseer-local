@@ -7,6 +7,7 @@ export type CollapsibleSidebarItem = {
   icon?: React.ReactNode;
   accent?: string;
   badge?: number;
+  action?: React.ReactNode;
 };
 
 type Props = {
@@ -16,6 +17,8 @@ type Props = {
   storageKey?: string;
   headerTitle?: string;
   headerSubtitle?: string;
+  headerAction?: React.ReactNode;
+  emptyMessage?: string;
 };
 
 export default function CollapsibleSidebar({
@@ -25,6 +28,8 @@ export default function CollapsibleSidebar({
   storageKey,
   headerTitle,
   headerSubtitle,
+  headerAction,
+  emptyMessage,
 }: Props) {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (!storageKey) return false;
@@ -81,20 +86,28 @@ export default function CollapsibleSidebar({
             <div className="text-[11px] text-neutral-500 dark:text-neutral-400">{headerSubtitle ?? ''}</div>
           </div>
         )}
-        <button
-          type="button"
-          onClick={() => setCollapsed((v) => !v)}
-          className="nav-toggle"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          aria-expanded={!collapsed}
-          title={collapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
-        >
-          <span aria-hidden>{collapsed ? '»' : '«'}</span>
-        </button>
+        <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
+          {!collapsed && headerAction}
+          <button
+            type="button"
+            onClick={() => setCollapsed((v) => !v)}
+            className="nav-toggle"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!collapsed}
+            title={collapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
+          >
+            <span aria-hidden>{collapsed ? '»' : '«'}</span>
+          </button>
+        </div>
       </div>
 
-      <nav className="nav" onKeyDown={onKeyDownList}>
+      <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
+          {items.length === 0 && emptyMessage && (
+            <li key="empty" className="nav-li">
+              <div className="text-[11px] text-neutral-500 dark:text-neutral-400 px-2 py-1.5">{emptyMessage}</div>
+            </li>
+          )}
           {items.map((item, i) => {
             const isActive = activeId === item.id;
             const Btn = (
@@ -118,6 +131,7 @@ export default function CollapsibleSidebar({
                 {item.badge && item.badge > 0 && (
                   <span className="nav-item__badge">{item.badge}</span>
                 )}
+                {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
               </button>
             );
             return (
