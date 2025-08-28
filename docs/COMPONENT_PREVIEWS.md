@@ -15,19 +15,19 @@ UI component mocks
 
 Examples in the browser
 - Button (default):
-  /preview.html?id=renderer/components/ui/previews.tsx#Button_Default&theme=light
+  /preview.html?id=renderer/components/ui/previews.tsx%23Button_Default&theme=light
 
 - Button variants:
-  /preview.html?id=renderer/components/ui/previews.tsx#Button_Variants&theme=dark
+  /preview.html?id=renderer/components/ui/previews.tsx%23Button_Variants&theme=dark
 
 - Input defaults:
-  /preview.html?id=renderer/components/ui/previews.tsx#Input_Default
+  /preview.html?id=renderer/components/ui/previews.tsx%23Input_Default
 
 - Tooltip on a button:
-  /preview.html?id=renderer/components/ui/previews.tsx#Tooltip_Default
+  /preview.html?id=renderer/components/ui/previews.tsx%23Tooltip_Default
 
 - Modal (open):
-  /preview.html?id=renderer/components/ui/previews.tsx#Modal_Default
+  /preview.html?id=renderer/components/ui/previews.tsx%23Modal_Default
 
 Passing props
 - Props are JSON-encoded via the props query param. Example: set Button label and variant

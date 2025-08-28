@@ -37,7 +37,7 @@ function useToastsState() {
   return { items, add, remove };
 }
 
-function ToastView({ item, onClose }: { item: Required<ToastMessage>; onClose: (id: string) => void }) {
+export function ToastView({ item, onClose }: { item: Required<ToastMessage>; onClose: (id: string) => void }) {
   const color = (() => {
     switch (item.variant) {
       case 'success':
