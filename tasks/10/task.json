@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "10.1",
-      "status": "-",
+      "status": "+",
       "title": "Tool for compilation checks for typescript",
       "description": "Node.js VM Module has the possibility to run isolated code. When an agent writes to a file we would want to check if that file compiles. So the tool needs to accept a list of filenames, try to compile each one, and return a list of statuses.",
       "plan": "",
@@ -15,7 +15,7 @@
     },
     {
       "id": "10.2",
-      "status": "-",
+      "status": "+",
       "title": "Tool for running code formatter on a file",
       "description": "When an agent writes to a file we would want to apply common formatting rules. So the tool needs to accept a list of filenames, apply formatting to them, and return a list of statuses.",
       "plan": "",
@@ -24,7 +24,7 @@
     },
     {
       "id": "10.3",
-      "status": "-",
+      "status": "+",
       "title": "Tool for running a view",
       "description": "WebContainers allows running code in an isolated environment - we want to extract this into a tool so that an agent could use this to check if the code they wrote results in the required outcome.",
       "plan": "",
@@ -35,7 +35,7 @@
       "id": "10.4",
       "status": "-",
       "title": "Tool for running any code",
-      "description": "Similarly to feature 9.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
+      "description": "Similarly to feature 10.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
       "plan": "",
       "context": [],
       "acceptance": [],

@@ -106,6 +106,61 @@ const standardToolSchemas = [
       },
       required: []
     }
+  },
+  {
+    name: 'ts_compile_check',
+    description: 'Type-check and compile-validate a list of TypeScript/TSX files using the project\'s tsconfig.json. Returns per-file status and diagnostics without emitting output.',
+    parameters: {
+      type: 'object',
+      properties: {
+        files: { type: 'array', items: { type: 'string' }, description: 'List of file paths (relative to repo root) to check.' },
+        tsconfig_path: { type: 'string', description: 'Optional path to tsconfig.json relative to repo root. Default tsconfig.json' }
+      },
+      required: ['files']
+    }
+  },
+  {
+    name: 'format_files',
+    description: 'Format a list of files using Prettier and return per-file statuses (changed/unchanged/skipped/errors). Writes changes by default.',
+    parameters: {
+      type: 'object',
+      properties: {
+        files: { type: 'array', items: { type: 'string' }, description: 'List of file paths (relative to repo root) to format.' },
+        write: { type: 'boolean', description: 'If true (default), write formatted content back to files. If false, only check and report if changes would be made.' },
+        ignore_path: { type: 'string', description: 'Optional custom .prettierignore path (relative to repo root).' }
+      },
+      required: ['files']
+    }
+  },
+  {
+    name: 'preview_run',
+    description: 'Load a component via preview.html (or any app URL) in an isolated headless browser, perform scripted interactions, and evaluate assertions or custom script to verify outcomes.',
+    parameters: {
+      type: 'object',
+      properties: {
+        mode: { type: 'string', enum: ['component', 'url'], description: 'component: build preview.html URL; url: use provided absolute/relative URL' },
+        id: { type: 'string', description: 'Module path under src/ with optional #ExportName, e.g., renderer/components/ui/Button.tsx#default' },
+        props: { type: 'object', description: 'Props override object for the target export' },
+        props_b64: { type: 'boolean', description: 'If true, encode props as base64 and set props_b64=1' },
+        needs: { type: 'array', items: { type: 'string' }, description: 'Additional preview provider keys' },
+        theme: { type: 'string', enum: ['light', 'dark', 'system'], description: 'Preview theme' },
+        variant: { type: 'string', description: 'Variant name to select (hash portion)' },
+        url: { type: 'string', description: 'Absolute or relative URL (relative resolved against base_url) when mode=url' },
+        base_url: { type: 'string', description: 'Dev server base URL (e.g., http://localhost:5173). Defaults to PREVIEW_BASE_URL or auto-detect.' },
+        auto_detect: { type: 'boolean', description: 'If true, try common localhost ports for base_url if not provided. Default true' },
+        width: { type: 'number', description: 'Viewport width (CSS px). Default 1024' },
+        height: { type: 'number', description: 'Viewport height (CSS px). Default 768' },
+        device_scale_factor: { type: 'number', description: 'Device scale factor (pixel ratio). Default 1' },
+        wait_selector: { type: 'string', description: 'CSS selector to wait for initial readiness; defaults to #preview-stage in component mode' },
+        delay_ms: { type: 'number', description: 'Additional delay before running assertions (ms)' },
+        interactions: { type: 'array', description: 'Array of interaction steps to perform before assertions (see preview_screenshot docs)', items: { type: 'object' } },
+        asserts: { type: 'array', description: 'List of assertion objects to evaluate in the page. Supported types: dom_text, exists, count, has_class, attr, eval', items: { type: 'object' } },
+        script: { type: 'string', description: 'Optional custom JS code to evaluate in the page context; should return a JSON-serializable value.' },
+        html_selector: { type: 'string', description: 'Optional selector to return outerHTML for inspection (default none). Common: #preview-stage' },
+        timeout_ms: { type: 'number', description: 'Overall timeout for navigation + waits (ms). Default 30000' }
+      },
+      required: []
+    }
   }
 ];
 
@@ -514,7 +569,7 @@ const standardToolFunctions = {
           height,
           format: after.format,
           dataUrl: after.dataUrl, // final capture (after interactions)
-          before: before ? { dataUrl: before.dataUrl, file: beforeFile } : undefined,
+          before: { dataUrl: before ? before.dataUrl : undefined, file: before ? beforeFile : undefined },
           after: { dataUrl: after.dataUrl, file: afterFile },
         };
       } catch (error) {
@@ -530,6 +585,467 @@ const standardToolFunctions = {
       return { ...result, file: saved };
     }
     return result;
+  },
+  async ts_compile_check({ files, tsconfig_path = 'tsconfig.json' }) {
+    if (!Array.isArray(files) || files.length === 0) {
+      return { ok: false, error: 'files array is required and must be non-empty.' };
+    }
+
+    let ts;
+    try {
+      // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+      ts = require('typescript');
+    } catch (e) {
+      return { ok: false, error: 'TypeScript is not installed. Please add devDependency "typescript".' };
+    }
+
+    const cwd = process.cwd();
+    const resolveRel = (p) => path.isAbsolute(p) ? p : path.join(cwd, p);
+
+    // Load tsconfig
+    const tsconfigFull = resolveRel(tsconfig_path);
+    let compilerOptions = {};
+    let basePath = cwd;
+    try {
+      const cfg = ts.readConfigFile(tsconfigFull, ts.sys.readFile);
+      if (cfg.error) {
+        // Continue with defaults but report config error at top-level
+        const msg = ts.flattenDiagnosticMessageText(cfg.error.messageText, '\n');
+        return { ok: false, error: `Failed to read tsconfig: ${msg}` };
+      }
+      basePath = path.dirname(tsconfigFull);
+      const parsed = ts.parseJsonConfigFileContent(cfg.config || {}, ts.sys, basePath);
+      if (parsed.errors && parsed.errors.length) {
+        const msgs = parsed.errors.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('\n');
+        return { ok: false, error: `Failed to parse tsconfig: ${msgs}` };
+      }
+      compilerOptions = parsed.options || {};
+      // Ensure noEmit true for checking only
+      compilerOptions.noEmit = true;
+    } catch (e) {
+      // Fallback to sane defaults if cannot read config
+      compilerOptions = { noEmit: true, jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020, moduleResolution: ts.ModuleResolutionKind.Bundler };
+      basePath = cwd;
+    }
+
+    // Helper to format diagnostics into plain objects
+    const formatDiag = (diag) => {
+      const categoryMap = { 0: 'Warning', 1: 'Error', 2: 'Suggestion', 3: 'Message' };
+      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+      const code = diag.code;
+      const category = categoryMap[diag.category] || String(diag.category);
+      let file = undefined;
+      let line = undefined;
+      let character = undefined;
+      let endLine = undefined;
+      let endCharacter = undefined;
+      if (diag.file && typeof diag.start === 'number') {
+        const sf = diag.file;
+        const { line: l, character: c } = sf.getLineAndCharacterOfPosition(diag.start);
+        file = path.relative(cwd, sf.fileName);
+        line = l + 1;
+        character = c + 1;
+        if (typeof diag.length === 'number') {
+          const endPos = diag.start + diag.length;
+          const ec = sf.getLineAndCharacterOfPosition(endPos);
+          endLine = ec.line + 1;
+          endCharacter = ec.character + 1;
+        }
+      }
+      return { category, code, message, file, line, character, endLine, endCharacter };
+    };
+
+    const results = [];
+    let errorsTotal = 0;
+    let warningsTotal = 0;
+
+    // Check existence first
+    const existMap = new Map();
+    for (const rel of files) {
+      const full = resolveRel(rel);
+      try {
+        const stat = await fs.stat(full);
+        if (!stat.isFile()) throw new Error('Not a file');
+        existMap.set(rel, { full, exists: true });
+      } catch (_) {
+        existMap.set(rel, { full, exists: false });
+      }
+    }
+
+    for (const rel of files) {
+      const info = existMap.get(rel);
+      if (!info || !info.exists) {
+        results.push({ file: rel, ok: false, reason: 'not_found', errors_count: 1, warnings_count: 0, diagnostics: [{ category: 'Error', code: 0, message: 'File not found', file: rel }] });
+        errorsTotal += 1;
+        continue;
+      }
+
+      const start = Date.now();
+      try {
+        const rootNames = [info.full];
+        const program = ts.createProgram({ rootNames, options: compilerOptions });
+        const sourceFile = program.getSourceFile(info.full);
+
+        // Collect diagnostics scoped to this file
+        const syntactic = sourceFile ? program.getSyntacticDiagnostics(sourceFile) : program.getSyntacticDiagnostics();
+        const semantic = sourceFile ? program.getSemanticDiagnostics(sourceFile) : program.getSemanticDiagnostics();
+        const optionsDiags = program.getOptionsDiagnostics();
+
+        // Merge and filter to this file when possible
+        const all = [...syntactic, ...semantic, ...optionsDiags];
+        const formatted = all.map(formatDiag);
+
+        const errors = formatted.filter(d => d.category === 'Error');
+        const warnings = formatted.filter(d => d.category === 'Warning');
+        errorsTotal += errors.length;
+        warningsTotal += warnings.length;
+
+        const ok = errors.length === 0;
+        const time_ms = Date.now() - start;
+        results.push({ file: rel, ok, errors_count: errors.length, warnings_count: warnings.length, diagnostics: formatted, time_ms });
+      } catch (e) {
+        const time_ms = Date.now() - start;
+        results.push({ file: rel, ok: false, errors_count: 1, warnings_count: 0, diagnostics: [{ category: 'Error', code: 0, message: String(e?.message || e), file: rel }], time_ms });
+        errorsTotal += 1;
+      }
+    }
+
+    const okAll = results.every(r => r.ok);
+    return { ok: okAll, results, errors_total: errorsTotal, warnings_total: warningsTotal };
+  },
+  async format_files({ files, write = true, ignore_path }) {
+    if (!Array.isArray(files) || files.length === 0) {
+      return { ok: false, error: 'files array is required and must be non-empty.' };
+    }
+
+    // Prettier is ESM in v3+, import dynamically
+    let prettier;
+    try {
+      // eslint-disable-next-line global-require
+      const mod = await import('prettier');
+      prettier = mod;
+    } catch (e) {
+      return { ok: false, error: 'Prettier is not installed. Please add devDependency "prettier".' };
+    }
+
+    const cwd = process.cwd();
+    const resolveRel = (p) => (path.isAbsolute(p) ? p : path.join(cwd, p));
+
+    const results = [];
+    let changedCount = 0;
+    let skippedCount = 0;
+    let errorCount = 0;
+
+    for (const rel of files) {
+      const full = resolveRel(rel);
+      const start = Date.now();
+      try {
+        // Ensure file exists
+        const st = await fs.stat(full).catch(() => null);
+        if (!st || !st.isFile()) {
+          errorCount += 1;
+          results.push({ file: rel, ok: false, reason: 'not_found', message: 'File not found', changed: false, skipped: false, time_ms: Date.now() - start });
+          continue;
+        }
+
+        // Check ignore rules and infer parser
+        const info = await prettier.getFileInfo(full, {
+          ignorePath: ignore_path ? resolveRel(ignore_path) : undefined,
+          // Let prettier search for plugins relative to project root
+          pluginSearchDirs: [cwd]
+        });
+        if (info.ignored) {
+          skippedCount += 1;
+          results.push({ file: rel, ok: true, skipped: true, reason: 'ignored', changed: false, time_ms: Date.now() - start });
+          continue;
+        }
+
+        const source = await fs.readFile(full, 'utf8');
+        const config = await prettier.resolveConfig(full).catch(() => null);
+        const options = { ...(config || {}), filepath: full };
+
+        let formatted;
+        try {
+          formatted = await prettier.format(source, options);
+        } catch (formatErr) {
+          errorCount += 1;
+          results.push({ file: rel, ok: false, skipped: false, changed: false, reason: 'format_error', message: String(formatErr?.message || formatErr), time_ms: Date.now() - start });
+          continue;
+        }
+
+        const changed = formatted !== source;
+        if (changed && write) {
+          await fs.writeFile(full, formatted, 'utf8');
+        }
+        if (changed) changedCount += 1;
+
+        results.push({ file: rel, ok: true, skipped: false, changed, written: Boolean(write && changed), time_ms: Date.now() - start });
+      } catch (e) {
+        errorCount += 1;
+        results.push({ file: rel, ok: false, skipped: false, changed: false, reason: 'error', message: String(e?.message || e), time_ms: Date.now() - start });
+      }
+    }
+
+    const okAll = results.every(r => r.ok);
+    return { ok: okAll, results, changed_count: changedCount, skipped_count: skippedCount, error_count: errorCount };
+  },
+  async preview_run(params = {}) {
+    const {
+      mode = 'component',
+      id,
+      props,
+      props_b64 = false,
+      needs = [],
+      theme,
+      variant,
+      url: urlParam,
+      base_url,
+      auto_detect = true,
+      width = 1024,
+      height = 768,
+      device_scale_factor = 1,
+      wait_selector: waitSelectorParam,
+      delay_ms = 0,
+      interactions = [],
+      asserts = [],
+      script,
+      html_selector,
+      timeout_ms = 30000,
+    } = params || {};
+
+    if (!puppeteer) {
+      return { ok: false, error: 'Puppeteer is not installed. Install "puppeteer" or "puppeteer-core" to use preview_run.', reason: 'missing_dependency' };
+    }
+
+    // Resolve base URL
+    let baseUrl = base_url || process.env.PREVIEW_BASE_URL || null;
+    if ((!baseUrl || baseUrl.trim() === '') && auto_detect) {
+      baseUrl = await probeBaseUrl();
+    }
+
+    // Build final URL
+    let finalUrl = '';
+    if (mode === 'component') {
+      if (!baseUrl) {
+        const hint = 'No base_url found. Set PREVIEW_BASE_URL or pass base_url. Example: http://localhost:5173';
+        return { ok: false, error: hint, reason: 'no_base_url', id };
+      }
+      finalUrl = buildComponentPreviewUrl({ baseUrl, id, props, props_b64, needs, theme, variant });
+    } else {
+      finalUrl = urlParam || '';
+      const isAbsolute = /^https?:\/\//i.test(finalUrl);
+      if (!isAbsolute) {
+        if (!baseUrl) {
+          const hint = 'Relative url used but no base_url found. Set PREVIEW_BASE_URL or pass base_url.';
+          return { ok: false, error: hint, reason: 'no_base_url' };
+        }
+        finalUrl = `${baseUrl.replace(/\/$/, '')}/${finalUrl.replace(/^\//, '')}`;
+      }
+    }
+
+    // Default wait selector for component previews is the stage container
+    const wait_selector = waitSelectorParam || (mode === 'component' ? '#preview-stage' : undefined);
+
+    // Launch browser
+    const launchOptions = {
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    };
+    if (puppeteer && (!puppeteer.executablePath || typeof puppeteer.executablePath !== 'function')) {
+      const exe = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH || process.env.CHROMIUM_PATH;
+      if (exe) launchOptions.executablePath = exe;
+    }
+
+    let browser;
+    let page;
+    const consoleLogs = [];
+    const pageErrors = [];
+
+    try {
+      browser = await puppeteer.launch(launchOptions);
+      page = await browser.newPage();
+      await page.setViewport({ width, height, deviceScaleFactor: device_scale_factor || 1 });
+
+      page.on('console', (msg) => {
+        try {
+          const args = msg.args ? msg.args().map(() => null) : [];
+          consoleLogs.push({ type: msg.type?.(), text: msg.text?.(), location: msg.location?.() || null, args_count: args.length });
+        } catch (_) {
+          consoleLogs.push({ type: 'log', text: msg.text?.() });
+        }
+      });
+      page.on('pageerror', (err) => {
+        pageErrors.push(String(err?.message || err));
+      });
+
+      await page.goto(finalUrl, { waitUntil: wait_selector ? 'domcontentloaded' : 'networkidle0', timeout: timeout_ms });
+      if (wait_selector) {
+        await page.waitForSelector(wait_selector, { timeout: Math.max(5000, Math.min(20000, timeout_ms)) });
+      }
+      try {
+        await page.waitForFunction(() => !!window.__PREVIEW_READY, { timeout: 5000 });
+      } catch (_) { /* ignore */ }
+
+      if (delay_ms && delay_ms > 0) {
+        await page.waitForTimeout(delay_ms);
+      }
+
+      if (Array.isArray(interactions) && interactions.length > 0) {
+        await performInteractions(page, interactions);
+      }
+
+      const results = [];
+
+      // Assertion runners executed in page context
+      async function runOne(a) {
+        try {
+          const res = await page.evaluate((assert) => {
+            function toRegex(rx, flags) {
+              try { return new RegExp(rx, flags || undefined); } catch (_) { return null; }
+            }
+            function cmpText(actual, assert) {
+              if (typeof assert.equals === 'string') return { pass: actual === assert.equals, expected: assert.equals, actual };
+              if (typeof assert.contains === 'string') return { pass: actual.includes(assert.contains), expected: `contains:${assert.contains}`, actual };
+              if (typeof assert.regex === 'string') {
+                const re = toRegex(assert.regex, assert.regex_flags);
+                if (!re) return { pass: false, expected: `regex:${assert.regex}`, actual, message: 'Invalid regex' };
+                return { pass: re.test(actual), expected: `regex:${assert.regex}` , actual };
+              }
+              return { pass: true, actual };
+            }
+            function countCompare(count, op, value) {
+              switch (op) {
+                case 'eq': return { pass: count === value };
+                case 'gte': return { pass: count >= value };
+                case 'lte': return { pass: count <= value };
+                case 'gt': return { pass: count > value };
+                case 'lt': return { pass: count < value };
+                default: return { pass: false, message: `Unknown op ${op}` };
+              }
+            }
+
+            const type = assert.type || 'eval';
+            if (type === 'dom_text') {
+              const el = document.querySelector(assert.selector);
+              if (!el) return { type, pass: false, message: `Element not found: ${assert.selector}` };
+              const text = (el.textContent || '').trim();
+              const c = cmpText(text, assert);
+              return { type, pass: c.pass, expected: c.expected, actual: c.actual, message: c.message };
+            }
+            if (type === 'exists') {
+              const count = document.querySelectorAll(assert.selector).length;
+              const present = count > 0;
+              const expected = assert.present !== false; // default true
+              const pass = expected ? present : !present;
+              return { type, pass, expected, actual: present, count };
+            }
+            if (type === 'count') {
+              const count = document.querySelectorAll(assert.selector).length;
+              const op = assert.op || 'eq';
+              const value = Number(assert.value || 0);
+              const r = countCompare(count, op, value);
+              return { type, pass: r.pass, op, value, actual: count, message: r.message };
+            }
+            if (type === 'has_class') {
+              const el = document.querySelector(assert.selector);
+              if (!el) return { type, pass: assert.present === false ? true : false, message: `Element not found: ${assert.selector}` };
+              const present = el.classList.contains(assert.class);
+              const expected = assert.present !== false; // default true
+              const pass = expected ? present : !present;
+              return { type, pass, expected, class: assert.class, actual: present };
+            }
+            if (type === 'attr') {
+              const el = document.querySelector(assert.selector);
+              if (!el) return { type, pass: false, message: `Element not found: ${assert.selector}` };
+              const val = el.getAttribute(assert.name);
+              if (typeof assert.equals === 'string' || typeof assert.contains === 'string' || typeof assert.regex === 'string') {
+                const c = cmpText(val ?? '', assert);
+                return { type, pass: c.pass, expected: c.expected, actual: c.actual, message: c.message, name: assert.name };
+              }
+              const present = val != null;
+              const expected = assert.present !== false; // default true
+              const pass = expected ? present : !present;
+              return { type, pass, expected, name: assert.name, actual: val };
+            }
+            if (type === 'eval') {
+              let value;
+              try {
+                // Treat expr as a JS expression; avoid Function constructor for safety if possible
+                if (typeof assert.expr === 'string' && assert.expr.trim()) {
+                  // eslint-disable-next-line no-new-func
+                  const fn = new Function(`return (${assert.expr})`);
+                  value = fn();
+                } else if (typeof assert.fn === 'function') {
+                  value = assert.fn();
+                } else {
+                  value = null;
+                }
+              } catch (e) {
+                return { type, pass: false, error: String(e?.message || e) };
+              }
+              if (Object.prototype.hasOwnProperty.call(assert, 'expect')) {
+                const pass = JSON.stringify(value) === JSON.stringify(assert.expect);
+                return { type, pass, expected: assert.expect, actual: value };
+              }
+              return { type, pass: true, actual: value };
+            }
+
+            return { type, pass: false, message: `Unknown assertion type: ${type}` };
+          }, a);
+          return { ok: true, ...res };
+        } catch (e) {
+          return { ok: false, type: a?.type, error: String(e?.message || e) };
+        }
+      }
+
+      for (const a of Array.isArray(asserts) ? asserts : []) {
+        // eslint-disable-next-line no-await-in-loop
+        const r = await runOne(a);
+        results.push(r);
+      }
+
+      let scriptResult = undefined;
+      if (typeof script === 'string' && script.trim()) {
+        try {
+          // eslint-disable-next-line no-new-func
+          const code = `(function(){ ${script}\n})();`;
+          scriptResult = await page.evaluate(new Function(`return ${JSON.stringify(code)}`));
+        } catch (e) {
+          scriptResult = { error: String(e?.message || e) };
+        }
+      }
+
+      let html = undefined;
+      if (typeof html_selector === 'string' && html_selector.trim()) {
+        try {
+          html = await page.$eval(html_selector, (el) => el.outerHTML);
+        } catch (e) {
+          html = undefined;
+        }
+      }
+
+      const failed = results.filter((r) => !(r && r.ok !== false && r.pass !== false)).length;
+
+      await page.close();
+      await browser.close();
+
+      return {
+        ok: failed === 0,
+        url: finalUrl,
+        results,
+        failures_count: failed,
+        console_logs: consoleLogs,
+        page_errors: pageErrors,
+        script_result: scriptResult,
+        html,
+        width,
+        height
+      };
+    } catch (error) {
+      try { if (page) await page.close(); } catch (_) {}
+      try { if (browser) await browser.close(); } catch (_) {}
+      return { ok: false, error: String(error?.message || error), url: finalUrl };
+    }
   }
 };
 
