@@ -3,3 +3,17 @@
 .task-card__header { display:flex; justify-content: space-between; margin-bottom: 6px; color: var(--text-secondary); font-size: var(--fs-xs, 12px); }
 .task-card__title { font-size: var(--fs-sm, 14px); color: var(--text-primary); margin-bottom: 8px; }
 .task-card__meta { display:flex; gap: 6px; }
+
+/* Summary Callout Cards */
+.summary-card__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1); }
+.summary-card__title { font-size: var(--fs-sm); font-weight: 500; margin: 0; }
+.summary-card__description { font-size: var(--fs-xs); color: var(--text-secondary); margin: 0; }
+.feature-summary-card,
+.task-summary-card {
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2);
+  padding: var(--space-2);
+  width: 240px;
+  box-shadow: var(--shadow-2);
+}

@@ -24,7 +24,7 @@
     },
     {
       "id": "11.3",
-      "status": "-",
+      "status": "+",
       "title": "Create dependency summary callout cards",
       "description": "Implement summary callout card components that appear on hover over dependency bullets. Create FeatureSummaryCard and TaskSummaryCard that show key information about the referenced feature/task (title, status, brief description). These should be styled as tooltips/popovers and positioned appropriately relative to the trigger element.",
       "plan": "",
