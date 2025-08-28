@@ -98,6 +98,7 @@ This document describes how files and directories are organised in this reposito
     - analyzer.js: Library to analyze TSX components for preview capability.
   - Agent-facing tools:
     - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
+    - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
@@ -150,6 +151,13 @@ Notes:
 - Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md for details.
 - Requires a running dev server; provide base_url or set PREVIEW_BASE_URL.
 
+## TypeScript Compile Check Tool (Agent)
+- Integrated into src/tools/standardTools.js as ts_compile_check.
+- Purpose: Quickly verify whether specific TS/TSX files compile (type-check) successfully against the project tsconfig.json.
+- Input: { files: string[], tsconfig_path?: string }
+- Output: { ok: boolean, results: { file, ok, errors_count, warnings_count, diagnostics[], time_ms }[], errors_total, warnings_total }
+- Notes: Uses TypeScript compiler API with noEmit to avoid generating output. Diagnostics include file, line/column, and message.
+
 ## Repository Tree
 ```
 repo_root/
@@ -183,7 +191,7 @@ repo_root/
 │  │  │     └─ coreMocks.tsx
 │  │  └─ ...
 │  ├─ tools/
-│  │  ├─ standardTools.js   ← includes preview_screenshot tool (with interactions)
+│  │  ├─ standardTools.js   ← includes preview_screenshot + ts_compile_check tools
 │  │  └─ preview/
 │  │     └─ analyzer.js
 │  └─ capture/

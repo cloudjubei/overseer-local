@@ -106,6 +106,18 @@ const standardToolSchemas = [
       },
       required: []
     }
+  },
+  {
+    name: 'ts_compile_check',
+    description: 'Type-check and compile-validate a list of TypeScript/TSX files using the project\'s tsconfig.json. Returns per-file status and diagnostics without emitting output.',
+    parameters: {
+      type: 'object',
+      properties: {
+        files: { type: 'array', items: { type: 'string' }, description: 'List of file paths (relative to repo root) to check.' },
+        tsconfig_path: { type: 'string', description: 'Optional path to tsconfig.json relative to repo root. Default tsconfig.json' }
+      },
+      required: ['files']
+    }
   }
 ];
 
@@ -530,6 +542,133 @@ const standardToolFunctions = {
       return { ...result, file: saved };
     }
     return result;
+  },
+  async ts_compile_check({ files, tsconfig_path = 'tsconfig.json' }) {
+    if (!Array.isArray(files) || files.length === 0) {
+      return { ok: false, error: 'files array is required and must be non-empty.' };
+    }
+
+    let ts;
+    try {
+      // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+      ts = require('typescript');
+    } catch (e) {
+      return { ok: false, error: 'TypeScript is not installed. Please add devDependency "typescript".' };
+    }
+
+    const cwd = process.cwd();
+    const resolveRel = (p) => path.isAbsolute(p) ? p : path.join(cwd, p);
+
+    // Load tsconfig
+    const tsconfigFull = resolveRel(tsconfig_path);
+    let compilerOptions = {};
+    let basePath = cwd;
+    try {
+      const cfg = ts.readConfigFile(tsconfigFull, ts.sys.readFile);
+      if (cfg.error) {
+        // Continue with defaults but report config error at top-level
+        const msg = ts.flattenDiagnosticMessageText(cfg.error.messageText, '\n');
+        return { ok: false, error: `Failed to read tsconfig: ${msg}` };
+      }
+      basePath = path.dirname(tsconfigFull);
+      const parsed = ts.parseJsonConfigFileContent(cfg.config || {}, ts.sys, basePath);
+      if (parsed.errors && parsed.errors.length) {
+        const msgs = parsed.errors.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('\n');
+        return { ok: false, error: `Failed to parse tsconfig: ${msgs}` };
+      }
+      compilerOptions = parsed.options || {};
+      // Ensure noEmit true for checking only
+      compilerOptions.noEmit = true;
+    } catch (e) {
+      // Fallback to sane defaults if cannot read config
+      compilerOptions = { noEmit: true, jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020, moduleResolution: ts.ModuleResolutionKind.Bundler };
+      basePath = cwd;
+    }
+
+    // Helper to format diagnostics into plain objects
+    const formatDiag = (diag) => {
+      const categoryMap = { 0: 'Warning', 1: 'Error', 2: 'Suggestion', 3: 'Message' };
+      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+      const code = diag.code;
+      const category = categoryMap[diag.category] || String(diag.category);
+      let file = undefined;
+      let line = undefined;
+      let character = undefined;
+      let endLine = undefined;
+      let endCharacter = undefined;
+      if (diag.file && typeof diag.start === 'number') {
+        const sf = diag.file;
+        const { line: l, character: c } = sf.getLineAndCharacterOfPosition(diag.start);
+        file = path.relative(cwd, sf.fileName);
+        line = l + 1;
+        character = c + 1;
+        if (typeof diag.length === 'number') {
+          const endPos = diag.start + diag.length;
+          const ec = sf.getLineAndCharacterOfPosition(endPos);
+          endLine = ec.line + 1;
+          endCharacter = ec.character + 1;
+        }
+      }
+      return { category, code, message, file, line, character, endLine, endCharacter };
+    };
+
+    const results = [];
+    let errorsTotal = 0;
+    let warningsTotal = 0;
+
+    // Check existence first
+    const existMap = new Map();
+    for (const rel of files) {
+      const full = resolveRel(rel);
+      try {
+        const stat = await fs.stat(full);
+        if (!stat.isFile()) throw new Error('Not a file');
+        existMap.set(rel, { full, exists: true });
+      } catch (_) {
+        existMap.set(rel, { full, exists: false });
+      }
+    }
+
+    for (const rel of files) {
+      const info = existMap.get(rel);
+      if (!info || !info.exists) {
+        results.push({ file: rel, ok: false, reason: 'not_found', errors_count: 1, warnings_count: 0, diagnostics: [{ category: 'Error', code: 0, message: 'File not found', file: rel }] });
+        errorsTotal += 1;
+        continue;
+      }
+
+      const start = Date.now();
+      try {
+        const rootNames = [info.full];
+        const program = ts.createProgram({ rootNames, options: compilerOptions });
+        const sourceFile = program.getSourceFile(info.full);
+
+        // Collect diagnostics scoped to this file
+        const syntactic = sourceFile ? program.getSyntacticDiagnostics(sourceFile) : program.getSyntacticDiagnostics();
+        const semantic = sourceFile ? program.getSemanticDiagnostics(sourceFile) : program.getSemanticDiagnostics();
+        const optionsDiags = program.getOptionsDiagnostics();
+
+        // Merge and filter to this file when possible
+        const all = [...syntactic, ...semantic, ...optionsDiags];
+        const formatted = all.map(formatDiag);
+
+        const errors = formatted.filter(d => d.category === 'Error');
+        const warnings = formatted.filter(d => d.category === 'Warning');
+        errorsTotal += errors.length;
+        warningsTotal += warnings.length;
+
+        const ok = errors.length === 0;
+        const time_ms = Date.now() - start;
+        results.push({ file: rel, ok, errors_count: errors.length, warnings_count: warnings.length, diagnostics: formatted, time_ms });
+      } catch (e) {
+        const time_ms = Date.now() - start;
+        results.push({ file: rel, ok: false, errors_count: 1, warnings_count: 0, diagnostics: [{ category: 'Error', code: 0, message: String(e?.message || e), file: rel }], time_ms });
+        errorsTotal += 1;
+      }
+    }
+
+    const okAll = results.every(r => r.ok);
+    return { ok: okAll, results, errors_total: errorsTotal, warnings_total: warningsTotal };
   }
 };
 

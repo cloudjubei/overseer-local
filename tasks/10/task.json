@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "10.1",
-      "status": "-",
+      "status": "+",
       "title": "Tool for compilation checks for typescript",
       "description": "Node.js VM Module has the possibility to run isolated code. When an agent writes to a file we would want to check if that file compiles. So the tool needs to accept a list of filenames, try to compile each one, and return a list of statuses.",
       "plan": "",
