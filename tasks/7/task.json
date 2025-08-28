@@ -483,7 +483,7 @@
     },
     {
       "id": "7.35",
-      "status": "-",
+      "status": "?",
       "title": "StatusBadge + StatusBullet edit improvement",
       "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen. All the places where these are used have been referenced in the context.",
       "plan": "",
@@ -495,7 +495,8 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "dependencies": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
     }
   ]
 }
