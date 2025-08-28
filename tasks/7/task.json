@@ -396,7 +396,7 @@
     },
     {
       "id": "7.29",
-      "status": "-",
+      "status": "+",
       "title": "Feature removal",
       "description": "It should be possible to remove a feature from the edit form (after extra alert confirmation) - all existing dependencies to this feature should be removed as well.",
       "plan": "",
