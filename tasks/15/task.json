@@ -1,0 +1,7 @@
+{
+  "id": 15,
+  "status": "-",
+  "title": "Agent process manager",
+  "description": "Allow launching, controlling, scheduling configured agents on tasks and child projects, while seeing current status, time taken (record various timing statistics) and all costs per model.",
+  "features": []
+}

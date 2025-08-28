@@ -111,6 +111,7 @@ export class ChatManager {
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,
           tool_choice: tools.length > 0 ? 'auto' : undefined,
+          timeout: 1000,
           stream: false,
         });
 

@@ -10,5 +10,5 @@ export type LLMConfig = {
   provider: LLMProviderType,
   apiBaseUrl: string,
   apiKey: string,
-  model: string,
+  model: string
 };
