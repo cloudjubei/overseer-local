@@ -3,9 +3,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useChats } from '../hooks/useChats'
 import { useDocsIndex } from '../hooks/useDocsIndex'
 import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete'
+import { useReferencesAutocomplete } from '../hooks/useReferencesAutocomplete'
 import { useLLMConfig } from '../hooks/useLLMConfig'
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
+import DependencyBullet from '../components/tasks/DependencyBullet'
 import type { ChatMessage } from '../types'
 
 export default function ChatView() {
@@ -36,6 +38,13 @@ export default function ChatView() {
     position: autocompletePosition,
     onSelect: onAutocompleteSelect,
   } = useDocsAutocomplete({ docsList, input, setInput, textareaRef, mirrorRef })
+
+  const {
+    isOpen: isRefsOpen,
+    matches: matchingRefs,
+    position: refsPosition,
+    onSelect: onRefsSelect,
+  } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef })
 
   // Always scroll to bottom on new messages
   useEffect(() => {
@@ -129,6 +138,23 @@ export default function ChatView() {
     ),
   })), [chatHistories, deleteChat])
 
+  const renderMessageContent = (content: string) => {
+    const regex = /(#\d+(?:\.\d+)?)/g;
+    const parts: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const textBefore = content.slice(lastIndex, match.index);
+      if (textBefore) parts.push(textBefore);
+      const dep = match[0].slice(1);
+      parts.push(<DependencyBullet key={match.index} dependency={dep} />);
+      lastIndex = regex.lastIndex;
+    }
+    const textAfter = content.slice(lastIndex);
+    if (textAfter) parts.push(textAfter);
+    return parts;
+  };
+
   return (
     <CollapsibleSidebar
       items={chatItems}
@@ -218,7 +244,7 @@ export default function ChatView() {
                   return (
                     <div key={index} className="flex justify-center">
                       <div className="text-[12px] text-[var(--text-muted)] italic bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-full px-3 py-1">
-                        {msg.content}
+                        {renderMessageContent(msg.content)}
                       </div>
                     </div>
                   )
@@ -264,7 +290,7 @@ export default function ChatView() {
                           msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
                         ].join(' ')}
                       >
-                        {msg.content}
+                        {renderMessageContent(msg.content)}
                       </div>
                     </div>
                   </div>
@@ -334,6 +360,26 @@ export default function ChatView() {
                       onClick={() => onAutocompleteSelect(path)}
                     >
                       {path}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {isRefsOpen && refsPosition && (
+                <div
+                  className="absolute z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+                  style={{ left: `${refsPosition.left}px`, top: `${refsPosition.top}px` }}
+                  role="listbox"
+                  aria-label="References suggestions"
+                >
+                  {matchingRefs.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]"
+                      role="option"
+                      onClick={() => onRefsSelect(item.ref)}
+                    >
+                      #{item.ref} - {item.title} ({item.type})
                     </div>
                   ))}
                 </div>

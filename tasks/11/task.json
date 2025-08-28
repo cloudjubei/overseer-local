@@ -137,7 +137,7 @@
     },
     {
       "id": "11.10",
-      "status": "-",
+      "status": "+",
       "title": "Implement chat '#' reference selector for tasks and features",
       "description": "Add functionality to the chat interface that shows a Task&Feature dependency selector when users type '#'. This should provide autocomplete/search functionality across all tasks and features in the project scope, allowing users to easily reference and link to specific items. The selected references should be rendered using the standard dependency bullet components.",
       "plan": "",

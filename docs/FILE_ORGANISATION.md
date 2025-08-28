@@ -74,6 +74,7 @@ This document describes how files and directories are organised in this reposito
     - useChats.ts
     - useDocsIndex.ts
     - useDocsAutocomplete.ts
+    - useReferencesAutocomplete.ts
     - useLLMConfig.ts
     - useNextTaskId.ts
     - useShortcuts.tsx
