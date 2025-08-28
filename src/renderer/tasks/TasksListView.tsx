@@ -4,13 +4,12 @@ import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
-import StatusBadge from '../components/tasks/StatusBadge'
 import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/PriorityTag'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
-import StatusBullet from '../components/tasks/StatusBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
+import StatusControl from '../components/tasks/StatusControl'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -363,14 +362,10 @@ export default function TasksListView() {
                         <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
                       </div>
                       <div className="col col-status">
-                        <div className="status-inline">
-                          <StatusBadge status={t.status} />
-                          <StatusBullet
-                            status={t.status}
-                            onChange={(next) => handleStatusChange(t.id, next)}
-                            className="reveal-on-hover"
-                          />
-                        </div>
+                        <StatusControl
+                          status={t.status}
+                          onChange={(next) => handleStatusChange(t.id, next)}
+                        />
                       </div>
                       <div className="col col-deps">
                         <div className="chips-list" aria-label={`Dependencies for Task ${t.id}`}>

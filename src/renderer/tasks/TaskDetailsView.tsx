@@ -3,10 +3,9 @@ import type { Feature, Status, Task } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
-import StatusBadge from '../components/tasks/StatusBadge'
-import StatusBullet from '../components/tasks/StatusBullet'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import { useActiveProject } from '../projects/ProjectContext'
+import StatusControl from '../components/tasks/StatusControl'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -257,14 +256,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
             <IconBack />
           </button>
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
-          <div className="status-inline">
-            <StatusBadge status={task.status} variant="bold" className="ml-2" />
-            <StatusBullet
-              status={task.status}
-              onChange={(next) => handleTaskStatusChange(task.id, next)}
-              className="reveal-on-hover"
-            />
-          </div>
+          <StatusControl
+            status={task.status}
+            variant="bold"
+            className="ml-2"
+            onChange={(next) => handleTaskStatusChange(task.id, next)}
+          />
           {/* Task-level dependencies shown next to status */}
           <div className="chips-group ml-3" aria-label={`Dependencies for Task ${task.id}`}>
             <div className="chips-list">
@@ -395,14 +392,10 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>
                       </div>
                       <div className="col col-status">
-                        <div className="status-inline">
-                          <StatusBadge status={f.status} />
-                          <StatusBullet
-                            status={f.status}
-                            onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
-                            className="reveal-on-hover"
-                          />
-                        </div>
+                        <StatusControl
+                          status={f.status}
+                          onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
+                        />
                       </div>
                       <div className="col col-deps">
                         <div className="chips-list" aria-label={`Dependencies for ${f.id}`}>

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Task, Feature, Status } from 'src/types/tasks'
-import StatusBullet from './tasks/StatusBullet'
-import StatusBadge from './tasks/StatusBadge'
+import StatusControl from './tasks/StatusControl'
 import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
 import type { TasksIndexSnapshot } from '../services/tasksService'
@@ -212,14 +211,10 @@ export function FeatureForm({
   return (
     <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}>
       <div className="grid grid-cols-1 gap-3">
-        <div className="status-inline">
-          <StatusBadge status={status} />
-          <StatusBullet
-            status={status}
-            onChange={setStatus}
-            className="reveal-on-hover"
-          />
-        </div>
+        <StatusControl
+          status={status}
+          onChange={setStatus}
+        />
         <div className="flex items-center gap-3">
           <label htmlFor="feature-title" className="text-xs flex-1" style={{ color: 'var(--text-secondary)' }}>Title</label>
         </div>

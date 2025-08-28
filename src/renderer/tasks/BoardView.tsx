@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Task, Status } from 'src/types/tasks'
-import StatusBadge from '../components/tasks/StatusBadge'
 import TaskCard from '../components/tasks/TaskCard'
 import { tasksService } from '../services/tasksService'
 import { useActiveProject } from '../projects/ProjectContext'
+import StatusControl from '../components/tasks/StatusControl'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 const STATUS_LABELS: Record<Status, string> = {
@@ -153,7 +153,7 @@ export default function BoardView({ tasks }: Props) {
               s === '+' ? 'header-done' : s === '~' ? 'header-inprogress' : s === '-' ? 'header-pending' : s === '?' ? 'header-blocked' : 'header-deferred'
             }`}>
               <div className="board-col__title">
-                <StatusBadge status={s} /> {STATUS_LABELS[s]}
+                <StatusControl status={s} /> {STATUS_LABELS[s]}
               </div>
               <div className="board-col__count">{totals[s]}</div>
             </div>

@@ -497,7 +497,7 @@
     },
     {
       "id": "7.36",
-      "status": "-",
+      "status": "+",
       "title": "StatusBadge + StatusBullet edit improvement",
       "description": "StatusBadge and StatusBullet should be merged into one reusable component (FeatureForm shows an example of this). In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above the badge+bullet if it's close to the bottom of the screen.",
       "plan": "",
