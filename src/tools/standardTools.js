@@ -1,6 +1,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 const fetch = require('node-fetch');
+const os = require('os');
+const { Writable } = require('stream');
 
 // Try to load puppeteer, fall back to puppeteer-core, otherwise null
 let puppeteer = null;
@@ -160,6 +162,30 @@ const standardToolSchemas = [
         timeout_ms: { type: 'number', description: 'Overall timeout for navigation + waits (ms). Default 30000' }
       },
       required: []
+    }
+  },
+  {
+    name: 'docker_run',
+    description: 'Run a command in an isolated, ephemeral Docker container using dockerode. Optionally mount provided files, capture stdout/stderr, enforce timeouts, and collect output files from the mounted workspace.',
+    parameters: {
+      type: 'object',
+      properties: {
+        image: { type: 'string', description: 'Docker image to run (e.g., node:20, python:3.11, ubuntu:latest).' },
+        cmd: { anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }], description: 'Command to run. If a string, executed via /bin/sh -lc.' },
+        workdir: { type: 'string', description: 'Working directory inside the container. Defaults to mount_path.' },
+        files: { type: 'object', description: 'Map of relative file paths to string content to be written into the mounted workspace before running.', additionalProperties: { type: 'string' } },
+        mount_path: { type: 'string', description: 'Path in container where files are mounted. Default /workspace' },
+        env: { type: 'array', items: { type: 'string' }, description: 'Environment variables as KEY=VALUE strings.' },
+        stdin: { type: 'string', description: 'Optional stdin to pipe to the process.' },
+        timeout_ms: { type: 'number', description: 'Max execution time in milliseconds before the container is stopped. Default 60000' },
+        network: { type: 'boolean', description: 'If false, run with network disabled (NetworkMode=none). Default false' },
+        mem_limit_mb: { type: 'number', description: 'Optional memory limit in megabytes.' },
+        cpu_shares: { type: 'number', description: 'Optional relative CPU shares.' },
+        pull: { type: 'boolean', description: 'If true, pull image before running even if present. Default true' },
+        collect: { type: 'array', items: { type: 'string' }, description: 'Relative file paths under the workspace to read and return after run.' },
+        max_collect_bytes: { type: 'number', description: 'Max bytes per collected file. Default 1048576 (1MB)' }
+      },
+      required: ['image']
     }
   }
 ];
@@ -410,6 +436,55 @@ async function captureWithPuppeteer({ url, width = 1024, height = 768, device_sc
     try { if (browser) await browser.close(); } catch (_) {}
     return { ok: false, error: String(error?.message || error), url };
   }
+}
+
+async function makeTempDir(prefix = 'agent-run-') {
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
+  return base;
+}
+
+async function writeFilesToDir(root, filesMap) {
+  if (!filesMap || typeof filesMap !== 'object') return [];
+  const written = [];
+  for (const [rel, content] of Object.entries(filesMap)) {
+    const full = path.join(root, rel);
+    await fs.mkdir(path.dirname(full), { recursive: true });
+    await fs.writeFile(full, content, 'utf8');
+    written.push(rel);
+  }
+  return written;
+}
+
+async function collectFilesFromDir(root, pathsList = [], maxBytes = 1048576) {
+  const results = [];
+  for (const rel of pathsList) {
+    try {
+      const full = path.join(root, rel);
+      const stat = await fs.stat(full);
+      if (!stat.isFile()) {
+        results.push({ path: rel, ok: false, reason: 'not_file' });
+        continue;
+      }
+      const size = stat.size;
+      let truncated = false;
+      let data;
+      if (size > maxBytes) {
+        const fh = await fs.open(full, 'r');
+        const buf = Buffer.allocUnsafe(maxBytes);
+        await fh.read(buf, 0, maxBytes, 0);
+        await fh.close();
+        data = buf;
+        truncated = true;
+      } else {
+        data = await fs.readFile(full);
+      }
+      const base64 = data.toString('base64');
+      results.push({ path: rel, ok: true, size, base64, truncated });
+    } catch (e) {
+      results.push({ path: rel, ok: false, reason: 'error', message: String(e?.message || e) });
+    }
+  }
+  return results;
 }
 
 const standardToolFunctions = {
@@ -1045,6 +1120,148 @@ const standardToolFunctions = {
       try { if (page) await page.close(); } catch (_) {}
       try { if (browser) await browser.close(); } catch (_) {}
       return { ok: false, error: String(error?.message || error), url: finalUrl };
+    }
+  },
+  async docker_run(params = {}) {
+    const {
+      image,
+      cmd,
+      workdir,
+      files,
+      mount_path = '/workspace',
+      env = [],
+      stdin,
+      timeout_ms = 60000,
+      network = false,
+      mem_limit_mb,
+      cpu_shares,
+      pull = true,
+      collect = [],
+      max_collect_bytes = 1048576,
+    } = params || {};
+
+    if (!image || typeof image !== 'string') {
+      return { ok: false, error: 'image is required' };
+    }
+
+    let Docker;
+    try {
+      // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+      Docker = require('dockerode');
+    } catch (e) {
+      return { ok: false, error: 'dockerode is not installed. Please add dependency "dockerode".' };
+    }
+
+    let docker;
+    try {
+      docker = new Docker();
+      await docker.ping();
+    } catch (e) {
+      return { ok: false, error: 'Docker daemon not available. Ensure Docker is installed and running.' };
+    }
+
+    async function ensureImage(img, doPull) {
+      try {
+        await docker.getImage(img).inspect();
+        if (!doPull) return;
+      } catch (_) {
+        // not present, will pull regardless of doPull
+      }
+      if (doPull) {
+        const stream = await docker.pull(img);
+        await new Promise((resolve, reject) => {
+          docker.modem.followProgress(stream, (err) => (err ? reject(err) : resolve()));
+        });
+      }
+    }
+
+    const startTime = Date.now();
+    let tempDir;
+    let container;
+    let attachStream;
+    let timedOut = false;
+    const stdoutChunks = [];
+    const stderrChunks = [];
+
+    try {
+      await ensureImage(image, !!pull);
+
+      tempDir = await makeTempDir('agent-docker-');
+      const written = await writeFilesToDir(tempDir, files);
+
+      const finalCmd = Array.isArray(cmd) ? cmd : ['/bin/sh', '-lc', typeof cmd === 'string' && cmd.trim() ? cmd : ''];
+
+      const createOpts = {
+        Image: image,
+        Cmd: finalCmd,
+        WorkingDir: workdir || mount_path,
+        Tty: false,
+        OpenStdin: typeof stdin === 'string',
+        StdinOnce: typeof stdin === 'string',
+        Env: Array.isArray(env) && env.length ? env : undefined,
+        HostConfig: {
+          Binds: [`${tempDir}:${mount_path}:rw`],
+          AutoRemove: true,
+          NetworkMode: network ? undefined : 'none',
+          Memory: mem_limit_mb ? Math.max(0, Math.floor(mem_limit_mb)) * 1024 * 1024 : undefined,
+          CpuShares: cpu_shares ? Number(cpu_shares) : undefined,
+        },
+      };
+
+      container = await docker.createContainer(createOpts);
+
+      // Attach before start to catch all output
+      attachStream = await container.attach({ stream: true, stdout: true, stderr: true, stdin: typeof stdin === 'string' });
+
+      // Demux stdout/stderr
+      const outWritable = new Writable({
+        write(chunk, enc, cb) { stdoutChunks.push(chunk); cb(); }
+      });
+      const errWritable = new Writable({
+        write(chunk, enc, cb) { stderrChunks.push(chunk); cb(); }
+      });
+      docker.modem.demuxStream(attachStream, outWritable, errWritable);
+
+      await container.start();
+
+      if (typeof stdin === 'string') {
+        attachStream.write(stdin);
+        try { attachStream.end(); } catch (_) { /* ignore */ }
+      }
+
+      let timeoutHandle = null;
+      if (timeout_ms && timeout_ms > 0) {
+        timeoutHandle = setTimeout(() => {
+          timedOut = true;
+          // Force stop immediately
+          container.stop({ t: 0 }).catch(() => {});
+        }, timeout_ms);
+      }
+
+      const waitRes = await container.wait();
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+
+      const exitCode = waitRes?.StatusCode ?? null;
+
+      const stdout = Buffer.concat(stdoutChunks).toString('utf8');
+      const stderr = Buffer.concat(stderrChunks).toString('utf8');
+
+      // Collect requested files from mounted workspace
+      const collected = Array.isArray(collect) && collect.length
+        ? await collectFilesFromDir(tempDir, collect, typeof max_collect_bytes === 'number' ? max_collect_bytes : 1048576)
+        : [];
+
+      const duration_ms = Date.now() - startTime;
+
+      return { ok: !timedOut && (exitCode === 0), image, cmd: finalCmd, exit_code: exitCode, timed_out: timedOut, duration_ms, stdout, stderr, written_files: Array.isArray(files) ? files : undefined, collected, mount_path, workdir: workdir || mount_path };
+    } catch (e) {
+      const stdout = Buffer.concat(stdoutChunks).toString('utf8');
+      const stderr = Buffer.concat(stderrChunks).toString('utf8');
+      return { ok: false, error: String(e?.message || e), image, timed_out: timedOut, stdout, stderr };
+    } finally {
+      try { if (attachStream) attachStream.destroy(); } catch (_) {}
+      // temp dirs are auto-removed if possible
+      try { if (tempDir) await fs.rm(tempDir, { recursive: true, force: true }); } catch (_) {}
     }
   }
 };
