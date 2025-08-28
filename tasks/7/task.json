@@ -483,7 +483,7 @@
     },
     {
       "id": "7.35",
-      "status": "-",
+      "status": "+",
       "title": "Modal contents can grow bigger than the popup",
       "description": "For instance, Create New Feature using the FeatureForm has textboxes that can be expanded, and Dependencies that can grow forever.\nThese stretch the whole content beyond the screen.\n\nThe simplest solution is to have the header and footer sticky, and the middle section scrollable - thus allowing stretching (but textboxes should be limited to half the popup size or something sensible).",
       "plan": "",

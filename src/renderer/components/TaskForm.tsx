@@ -140,7 +140,7 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
