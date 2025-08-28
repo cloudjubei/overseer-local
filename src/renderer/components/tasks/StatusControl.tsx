@@ -135,13 +135,14 @@ function StatusPicker({ anchorEl, value, onSelect, onClose }: PickerProps) {
 
 export type StatusControlProps = {
   status: Status | string
+  mode?: 'normal' | 'full'
   variant?: 'soft' | 'bold'
   className?: string
   title?: string
   onChange?: (next: Status) => void
 }
 
-export default function StatusControl({ status, variant = 'soft', className = '', title, onChange }: StatusControlProps) {
+export default function StatusControl({ status, mode = 'normal', variant = 'soft', className = '', title, onChange }: StatusControlProps) {
   const { key, label } = mapStatusToSemantic(status)
   const badgeCls = `badge badge--${variant} badge--${key}`
   const [open, setOpen] = useState(false)
@@ -183,7 +184,7 @@ export default function StatusControl({ status, variant = 'soft', className = ''
         >
           {label}
         </span>
-        {isEditable && (
+        {mode == "full" && (
           <button
             ref={bulletRef}
             type="button"

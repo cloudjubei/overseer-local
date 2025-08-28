@@ -29,7 +29,7 @@ export default function TaskCard({ task, onClick, draggable = false, onDragStart
       </div>
       <div className="task-card__title" title={task.title}>{task.title}</div>
       <div className="task-card__meta flex items-center justify-between gap-2">
-        <StatusControl status={task.status} variant="soft" />
+        <StatusControl status={task.status} />
         <div className="task-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
           <Tooltip content="Open details (Enter)" placement="top">
             <button className="btn-secondary !px-2 !py-1 text-sm" onClick={(e) => { e.stopPropagation(); onClick?.(); }} aria-label="Open details">

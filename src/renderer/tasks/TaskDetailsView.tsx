@@ -258,36 +258,32 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
           <StatusControl
             status={task.status}
-            variant="bold"
             className="ml-2"
             onChange={(next) => handleTaskStatusChange(task.id, next)}
           />
-          {/* Task-level dependencies shown next to status */}
-          <div className="chips-group ml-3" aria-label={`Dependencies for Task ${task.id}`}>
+          <div className="flex gap-4 ml-2" aria-label={`Dependencies for Task ${task.id}`}>
             <div className="chips-list">
+              <span className="chips-sub__label">References</span>
               {taskDeps.length === 0 ? (
-                <span className="chip chip--none" title="No dependencies">None</span>
+                <span className="chips-sub__label" title="No dependencies">None</span>
               ) : (
                 taskDeps.map((d) => (
                   <DependencyBullet key={d} dependency={d} />
                 ))
               )}
             </div>
-            {taskDependents.length > 0 && (
-              <div className="chips-sub">
-                <span className="chips-sub__label">Blocks</span>
-                {taskDependents.map((d) => (
-                  <DependencyBullet key={d} dependency={d} isInbound />
-                ))}
-              </div>
-            )}
+            <div className="chips-list">
+              <span className="chips-sub__label">Blocks</span>
+              {taskDependents.length === 0 ? (
+                <span className="chips-sub__label" title="No dependents">None</span>
+              ) : (
+                taskDependents.map((d) => (
+                    <DependencyBullet key={d} dependency={d} isInbound />
+                ))
+              )}
+            </div>
           </div>
           <div className="spacer" />
-        </div>
-        <div className="details-header__meta">
-          <span className="meta-item"><span className="meta-label">ID</span><span className="meta-value">{String(task.id)}</span></span>
-          <span className="meta-item"><span className="meta-label">Status</span><span className="meta-value">{STATUS_LABELS[task.status as Status] || String(task.status)}</span></span>
-          <span className="meta-item"><span className="meta-label">Features</span><span className="meta-value">{task.features.length}</span></span>
         </div>
       </header>
 
@@ -341,13 +337,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               }}
               onDragEnd={() => clearDndState()}
             >
-              <li className="features-head" aria-hidden="true">
-                <div className="col col-id"></div>
-                <div className="col col-title">Title</div>
-                <div className="col col-status">Status</div>
-                <div className="col col-deps">Dependencies</div>
-                <div className="col col-actions"></div>
-              </li>
               {task.features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
                 const fullId = `${f.id}`
@@ -379,52 +368,52 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >
-                      <div className="col col-id flex flex-col items-center gap-1">
+                        <div className="col col-id flex flex-col items-center gap-1">
                           {f.rejection && (
                             <span className="rejection-badge" aria-label="Has rejection reason" title={f.rejection}>
                               <IconExclamation className="w-4 h-4" />
                             </span>
                           )}
-                        <span className="id-chip">{f.id || ''}</span>
+                          <span className="id-chip">{f.id || ''}</span>
+                          <StatusControl
+                            status={f.status}
+                            onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
+                          />
+                        </div>
+                        <div className="col col-title">
+                          <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
+                          <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>
+                        </div>
+                        <div className="col col-actions">
+                          <div className="row-actions">
+                            <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={() => handleEditFeature(f.id)}>
+                              <IconEdit />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="col col-title">
-                        <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
-                        <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>
-                      </div>
-                      <div className="col col-status">
-                        <StatusControl
-                          status={f.status}
-                          onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
-                        />
-                      </div>
-                      <div className="col col-deps">
-                        <div className="chips-list" aria-label={`Dependencies for ${f.id}`}>
+                      <div className="flex gap-8 ml-16" aria-label={`Dependencies for Feature ${f.id}`}>
+                        <div className="chips-list">
+                          <span className="chips-sub__label">References</span>
                           {deps.length === 0 ? (
-                            <span className="chip chip--none" title="No dependencies">None</span>
+                            <span className="chips-sub__label" title="No dependencies">None</span>
                           ) : (
                             deps.map((d) => (
-                              <DependencyBullet key={d} dependency={d}/>
+                              <DependencyBullet key={d} dependency={d} />
                             ))
                           )}
                         </div>
-                        
-                        {dependents.length > 0 && (
-                          <div className="chips-sub" aria-label={`Dependents of ${f.id}`}>
-                            <span className="chips-sub__label">Blocks</span>
-                            {dependents.map((d) => (
-                              <DependencyBullet key={d} dependency={d} isInbound/>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="col col-actions">
-                        <div className="row-actions">
-                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={() => handleEditFeature(f.id)}>
-                            <IconEdit />
-                          </button>
+                        <div className="chips-list">
+                          <span className="chips-sub__label">Blocks</span>
+                          {dependents.length === 0 ? (
+                            <span className="chips-sub__label" title="No dependents">None</span>
+                          ) : (
+                            dependents.map((d) => (
+                                <DependencyBullet key={d} dependency={d} isInbound />
+                            ))
+                          )}
                         </div>
                       </div>
-                    </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )

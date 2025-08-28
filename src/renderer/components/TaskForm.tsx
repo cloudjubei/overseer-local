@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Status } from 'src/types/tasks'
-import StatusBullet from './tasks/StatusBullet'
-import StatusBadge from './tasks/StatusBadge'
+import StatusControl from './tasks/StatusControl'
 
 export type TaskFormValues = {
   title: string
@@ -85,14 +84,10 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
             }}
           />
         </div>}
-        <div className="status-inline">
-          <StatusBadge status={status} />
-          <StatusBullet
-            status={status}
-            onChange={setStatus}
-            className="reveal-on-hover"
-          />
-        </div>
+        <StatusControl
+          status={status}
+          onChange={setStatus}
+        />
         <div className="flex flex-col gap-1">
           <label htmlFor="task-title" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Title</label>
           <input
