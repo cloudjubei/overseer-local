@@ -59,34 +59,60 @@ export default function CollapsibleSidebar(props: Props) {
       } catch {}
     }, [collapsed]);
 
-    let onKeyDownList: ((e: React.KeyboardEvent) => void) | undefined;
-    if (!navContent) {
-      const activeIndex = useMemo(() => {
-        const idx = items.findIndex((n) => n.id === activeId);
-        return idx >= 0 ? idx : 0;
-      }, [items, activeId]);
+    const activeIndex = useMemo(() => {
+      const idx = items.findIndex((n) => n.id === activeId);
+      return idx >= 0 ? idx : 0;
+    }, [items, activeId]);
 
-      const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
+    const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
 
-      useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
+    useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
 
-      onKeyDownList = useCallback((e: React.KeyboardEvent) => {
-        const max = items.length - 1;
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          setFocusIndex((i) => (i >= max ? 0 : i + 1));
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          setFocusIndex((i) => (i <= 0 ? max : i - 1));
-        } else if (e.key === 'Home') {
-          e.preventDefault();
-          setFocusIndex(0);
-        } else if (e.key === 'End') {
-          e.preventDefault();
-          setFocusIndex(max);
-        }
-      }, [items.length]);
-    }
+    const onKeyDownList = useCallback((e: React.KeyboardEvent) => {
+      const max = items.length - 1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusIndex((i) => (i >= max ? 0 : i + 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusIndex((i) => (i <= 0 ? max : i - 1));
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        setFocusIndex(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        setFocusIndex(max);
+      }
+    }, [items.length]);
+
+    // let onKeyDownList: ((e: React.KeyboardEvent) => void) | undefined;
+    // if (!navContent) {
+    //   const activeIndex = useMemo(() => {
+    //     const idx = items.findIndex((n) => n.id === activeId);
+    //     return idx >= 0 ? idx : 0;
+    //   }, [items, activeId]);
+
+    //   const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
+
+    //   useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
+
+    //   onKeyDownList = useCallback((e: React.KeyboardEvent) => {
+    //     const max = items.length - 1;
+    //     if (e.key === 'ArrowDown') {
+    //       e.preventDefault();
+    //       setFocusIndex((i) => (i >= max ? 0 : i + 1));
+    //     } else if (e.key === 'ArrowUp') {
+    //       e.preventDefault();
+    //       setFocusIndex((i) => (i <= 0 ? max : i - 1));
+    //     } else if (e.key === 'Home') {
+    //       e.preventDefault();
+    //       setFocusIndex(0);
+    //     } else if (e.key === 'End') {
+    //       e.preventDefault();
+    //       setFocusIndex(max);
+    //     }
+    //   }, [items.length]);
+    // }
 
     return (
       <aside
@@ -126,33 +152,30 @@ export default function CollapsibleSidebar(props: Props) {
               )}
               {items.map((item, i) => {
                 const isActive = activeId === item.id;
-                const Btn = (
-                  <button
-                    type="button"
-                    className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
-                    aria-current={isActive ? 'page' : undefined}
-                    onClick={() => onSelect(item.id)}
-                    title={item.label}
-                    tabIndex={focusIndex === i ? 0 : -1}
-                    onFocus={() => setFocusIndex(i)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSelect(item.id);
-                      }
-                    }}
-                  >
-                    {item.icon && <span className="nav-item__icon">{item.icon}</span>}
-                    {!collapsed && <span className="nav-item__label">{item.label}</span>}
-                    {item.badge && item.badge > 0 && (
-                      <span className="nav-item__badge">{item.badge}</span>
-                    )}
-                    {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
-                  </button>
-                );
                 return (
                   <li key={item.id} className="nav-li">
-                    {collapsed ? <Tooltip content={item.label} placement="right">{Btn}</Tooltip> : Btn}
+                    <button
+                      type="button"
+                      className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                      aria-current={isActive ? 'page' : undefined}
+                      onClick={() => onSelect(item.id)}
+                      title={item.label}
+                      tabIndex={focusIndex === i ? 0 : -1}
+                      onFocus={() => setFocusIndex(i)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelect(item.id);
+                        }
+                      }}
+                    >
+                      {item.icon && <span className="nav-item__icon">{item.icon}</span>}
+                      {!collapsed && <span className="nav-item__label">{item.label}</span>}
+                      {item.badge && item.badge > 0 && (
+                        <span className="nav-item__badge">{item.badge}</span>
+                      )}
+                      {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
+                    </button>
                   </li>
                 );
               })}
