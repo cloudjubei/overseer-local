@@ -384,6 +384,32 @@
     {
       "id": "7.28",
       "status": "-",
+      "title": "Task fixes",
+      "description": "When creating a task - the user shouldn't be able to select the ID - this should just be auto assigned as the next available one in order.\n\nIt should be possible to delete a task from the edit screen (after extra alert confirmation).",
+      "plan": "",
+      "context": [
+        "src/renderer/components/TaskForm.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "7.29",
+      "status": "-",
+      "title": "Feature removal",
+      "description": "It should be possible to remove a feature from the edit form (after extra alert confirmation) - all existing dependencies to this feature should be removed as well.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "7.30",
+      "status": "-",
       "title": "Reuse the sidepanel for Documents",
       "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
@@ -398,7 +424,7 @@
       ]
     },
     {
-      "id": "7.29",
+      "id": "7.31",
       "status": "+",
       "title": "Reuse the sidepanel for Chat",
       "description": "The Chat screen should have the same kind of sidepanel that the Settings screen has. For Chat it holds the list of all chats (i.e. chat history). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
@@ -414,7 +440,7 @@
       ]
     },
     {
-      "id": "7.30",
+      "id": "7.32",
       "status": "+",
       "title": "Reuse the sidepanel for Notifications",
       "description": "The Notifications screen should have the same kind of sidepanel that the Settings screen has. For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
@@ -430,7 +456,7 @@
       ]
     },
     {
-      "id": "7.31",
+      "id": "7.33",
       "status": "+",
       "title": "Sidepanel issues when in mobile mode",
       "description": "When in mobile mode (i.e. small screen) the main sidebar gets pushed to the top. On a screen that has the CollapsibleSidebar - when then main sidebar is closed everything is ok, but when it's open - it gets pushed underneath the CollapsibleSidebar.\nOn mobile the CollapsibleSidebar should behave the same way as the main Sidebar.",
@@ -443,7 +469,7 @@
       "dependencies": []
     },
     {
-      "id": "7.32",
+      "id": "7.34",
       "status": "+",
       "title": "Sidepanel issues when in mobile mode",
       "description": "When in mobile mode (i.e. small screen) the CollapsibleSidebar cannot be closed by clicking the open/close button (it closes when tapping outside but needs to close on button click). The main Sidebar also has an issue - when the screen switches to mobiles mode and it's collapsed - then when trying to open it, it stays collapsed. In mobile mode both sidebars should always open non-collapsed.",
@@ -456,7 +482,7 @@
       "dependencies": []
     },
     {
-      "id": "7.33",
+      "id": "7.35",
       "status": "-",
       "title": "StatusBadge + StatusBullet edit improvement",
       "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen. All the places where these are used have been referenced in the context.",

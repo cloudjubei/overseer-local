@@ -37,7 +37,7 @@
       "title": "Tool for running any code",
       "description": "Similarly to feature 10.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
       "plan": "",
-      "context": [],
+      "context": ["src/tools/standardTools.js", "package.json", "docs/FILE_ORGANISATION.md"],
       "acceptance": [],
       "dependencies": [
         "10.3"

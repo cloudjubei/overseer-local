@@ -49,7 +49,7 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
   }, [id, title, submitting])
 
   function validate(): boolean {
-    const next: { id?: string; title?: فی string } = {}
+    const next: { id?: string; title?: string } = {}
     if (!Number.isInteger(id) || id <= 0) next.id = 'ID must be a positive integer'
     if (!title.trim()) next.title = 'Title is required'
     setErrors(next)
