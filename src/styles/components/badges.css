@@ -1,5 +1,5 @@
 /* Components: Badges and Priority Tags */
-.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: var(--radius-round); font-size: var(--fs-xs, 12px); line-height: 1; border: 1px solid transparent; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-round); font-size: var(--fs-xs, 12px); line-height: 1; border: 1px solid transparent; }
 .badge--soft.badge--done { background: var(--status-done-soft-bg); color: var(--status-done-soft-fg); border-color: var(--status-done-soft-border); }
 .badge--soft.badge--working { background: var(--status-working-soft-bg); color: var(--status-working-soft-fg); border-color: var(--status-working-soft-border); }
 .badge--soft.badge--stuck { background: var(--status-stuck-soft-bg); color: var(--status-stuck-soft-fg); border-color: var(--status-stuck-soft-border); }
@@ -25,13 +25,13 @@
 .priority--p3 { background: color-mix(in srgb, var(--color-gray-400) 14%, transparent); color: var(--color-gray-800); border-color: var(--color-gray-400); }
 
 /* ID chip: compact bubble for IDs (tasks/features), similar to dependency chips */
-.id-chip { display:inline-flex; align-items:center; justify-content:center; height: 18px; padding: 0 6px; border-radius: var(--radius-round); border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-secondary); font-size: var(--fs-xxs, 10px); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.id-chip { display:inline-flex; align-items:center; justify-content:center; padding: 4px 6px; border-radius: var(--radius-round); border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-secondary); font-size: var(--fs-xxs, 10px); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* Dependency bullets (clickable chips for task/feature refs) */
 
 .chips-list { display:flex; align-items:center; gap: 6px; flex-wrap: wrap; }
 .chips-sub { display:flex; align-items:center; gap: 6px; margin-top: 4px; }
-.chips-sub__label { font-size: var(--fs-xxs, 10px); color: var(--text-muted); padding: 2px 6px; border-radius: var(--radius-round); border: 1px solid var(--border-subtle); }
+.chips-sub__label { font-size: var(--fs-xxs, 10px); color: var(--text-muted); padding: 2px 8px; border-radius: var(--radius-round); border: 1px solid var(--border-subtle); }
 .chip { display:inline-flex; align-items:center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-round); font-size: var(--fs-xxs, 10px); border: 1px solid var(--border-default); background: var(--surface-base); color: var(--text-secondary); white-space: nowrap; cursor: pointer; transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease; }
 .chip--ok { background: color-mix(in srgb, var(--status-review-soft-bg) 42%, transparent); border-color: var(--status-review-soft-border); color: var(--text-primary); }
 .chip--missing { background: color-mix(in srgb, var(--status-stuck-soft-bg) 42%, transparent); border-color: var(--status-stuck-soft-border); color: var(--text-primary); }

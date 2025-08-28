@@ -4,13 +4,12 @@ import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
-import StatusBadge from '../components/tasks/StatusBadge'
 import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/PriorityTag'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
-import StatusBullet from '../components/tasks/StatusBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
+import StatusControl from '../components/tasks/StatusControl'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -352,46 +351,55 @@ export default function TasksListView() {
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                      aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to view details.`}
+                      aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${deps.length} dependencies this task is blocked by, ${dependents.length} dependencies this task is blocking. Press Enter to view details.`}
                     >
-                      <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
-                      <div className="col col-title">
-                        <div className="title-line">
-                          <span className="title-text">{t.title || ''}</span>
-                          <PriorityTag priority={priority} />
+                      <div className="task-grid">
+
+                        {/* <div className="col col-id"><span className="chips-sub__label">{String(t.id)}</span></div> */}
+
+                        <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
+                        <div className="col col-title">
+                          <div className="title-line">
+                            <span className="title-text">{t.title || ''}</span>
+                            <PriorityTag priority={priority} />
+                          </div>
                         </div>
-                        <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
-                      </div>
-                      <div className="col col-status">
-                        <div className="status-inline">
-                          <StatusBadge status={t.status} />
-                          <StatusBullet
+
+                        <div className="col col-features flex justify-center">
+                            <span className="chips-sub__label" title="No dependencies">{done}/{total}</span>
+                        </div>
+                        <div className="col col-desc">
+                          <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
+                        </div>
+                        <div className="col col-status">
+                          <StatusControl
                             status={t.status}
                             onChange={(next) => handleStatusChange(t.id, next)}
-                            className="reveal-on-hover"
                           />
                         </div>
                       </div>
-                      <div className="col col-deps">
-                        <div className="chips-list" aria-label={`Dependencies for Task ${t.id}`}>
+                      <div className="flex gap-8 ml-8" aria-label={`Dependencies for Task ${t.id}`}>
+                        <div className="chips-list">
+                          <span className="chips-sub__label">References</span>
                           {deps.length === 0 ? (
-                            <span className="chip chip--none" title="No dependencies">None</span>
+                            <span className="chips-sub__label" title="No dependencies">None</span>
                           ) : (
                             deps.map((d) => (
                               <DependencyBullet key={d} dependency={d} />
                             ))
                           )}
                         </div>
-                        {dependents.length > 0 && (
-                          <div className="chips-sub" aria-label={`Dependents of Task ${t.id}`}>
-                            <span className="chips-sub__label">Blocks</span>
-                            {dependents.map((d) => (
-                              <DependencyBullet key={d} dependency={d} isInbound />
-                            ))}
-                          </div>
-                        )}
+                        <div className="chips-list">
+                          <span className="chips-sub__label">Blocks</span>
+                          {dependents.length === 0 ? (
+                            <span className="chips-sub__label" title="No dependents">None</span>
+                          ) : (
+                            dependents.map((d) => (
+                                <DependencyBullet key={d} dependency={d} isInbound />
+                            ))
+                          )}
+                        </div>
                       </div>
-                      <div className="col col-features">{done}/{total}</div>
                     </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
@@ -402,7 +410,7 @@ export default function TasksListView() {
         </div>
       )}
 
-      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering 3 a6</div>}
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </section>
   )
 }
