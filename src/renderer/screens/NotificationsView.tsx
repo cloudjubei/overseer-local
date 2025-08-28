@@ -31,16 +31,14 @@ export default function NotificationsView() {
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
 
   return (
-    <div className="flex min-h-0 w-full h-full">
-      <CollapsibleSidebar
-        items={SECTIONS}
-        activeId={activeSection}
-        onSelect={setActiveSection}
-        storageKey="notifications-panel-collapsed"
-        headerTitle="Notifications"
-        headerSubtitle="Alerts & Messages"
-      />
-      <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
+    <CollapsibleSidebar
+      items={SECTIONS}
+      activeId={activeSection}
+      onSelect={setActiveSection}
+      storageKey="notifications-panel-collapsed"
+      headerTitle="Categories"
+      headerSubtitle=""
+    >
         {activeSection === 'general' && (
           <div>
             <h2 className="text-xl font-semibold mb-3">General Notifications</h2>
@@ -90,7 +88,7 @@ export default function NotificationsView() {
             <p>Placeholder for message notifications.</p>
           </div>
         )}
-      </main>
-    </div>
+    </CollapsibleSidebar>
+
   );
 }

@@ -68,7 +68,7 @@ export default function SettingsView() {
       </div>
       <div className="border rounded-md divide-y">
         {configs.length === 0 && (
-          <div className="p-4 text-sm text-gray-600">No configurations yet. Click "Add New Config" to create one.</div>
+          <div className="p-4 text-sm text-gray-600">No configurations yet. Click \"Add New Config\" to create one.</div>
         )}
         {configs.map((cfg) => (
           <div key={cfg.id} className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between">
@@ -89,7 +89,7 @@ export default function SettingsView() {
         ))}
       </div>
       <div className="text-[12px] text-[var(--text-secondary)] mt-2">
-        Tip: Local providers must expose an OpenAI-compatible API. Use the Local preset to fill the default URL (http://localhost:1234/v1) and click "Load Available Models" to discover models.
+        Tip: Local providers must expose an OpenAI-compatible API. Use the Local preset to fill the default URL (http://localhost:1234/v1) and click \"Load Available Models\" to discover models.
       </div>
     </div>
   );
@@ -150,21 +150,17 @@ export default function SettingsView() {
   );
 
   return (
-    <div className="flex min-h-0 w-full h-full">
-      <CollapsibleSidebar
-        items={CATEGORIES}
-        activeId={activeCategory}
-        onSelect={setActiveCategory}
-        storageKey="settings-panel-collapsed"
-        headerTitle="Settings"
-        headerSubtitle="Preferences"
-      />
-
-      <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
-        {activeCategory === 'visual' && renderVisualSection()}
-        {activeCategory === 'llms' && renderLLMsSection()}
-        {activeCategory === 'notifications' && renderNotificationsSection()}
-      </main>
-    </div>
+    <CollapsibleSidebar
+      items={CATEGORIES}
+      activeId={activeCategory}
+      onSelect={(c) => { setActiveCategory(c as CategoryId)}}
+      storageKey="settings-panel-collapsed"
+      headerTitle="Categories"
+      headerSubtitle=""
+    >
+      {activeCategory === 'visual' && renderVisualSection()}
+      {activeCategory === 'llms' && renderLLMsSection()}
+      {activeCategory === 'notifications' && renderNotificationsSection()}
+    </CollapsibleSidebar>
   );
 }
