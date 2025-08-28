@@ -24,7 +24,8 @@
       "plan": "",
       "context": [
         "/docs/tasks/task_format.py",
-        "/src/types/tasks.ts"
+        "/src/types/tasks.ts",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
       "acceptance": []
     },
@@ -36,19 +37,25 @@
       "plan": "",
       "context": [
         "/docs/tasks/task_format.py",
-        "/src/types/tasks.ts"
+        "/src/types/tasks.ts",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
       "acceptance": []
     },
     {
       "id": "11.4",
-      "status": "?",
+      "status": "-",
       "title": "Implement dependency browsing and selection interface",
-      "description": "Create a dependency selector component that allows users to browse and select features and tasks from across the entire project scope when creating or editing features. This should include search/filter capabilities, project organization, and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, tasks, and features.",
+      "description": "Create a dependency selector component that allows users to browse and select features and tasks from across the current project when creating or editing features. This should include search/filter capabilities and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, tasks, and features.",
       "plan": "",
-      "context": [],
-      "acceptance": [],
-      "rejection": "Blocked: Cannot access or modify main process and preload scripts to implement cross-project data loading for the dependency selector. Files like src/preload/index.ts and src/main.ts are not found, preventing addition of required IPC handlers for reading /projects directory and config.json files."
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/components/tasks/DependencySelector.tsx",
+        "src/renderer/tasks/FeatureCreateView.tsx",
+        "src/renderer/tasks/FeatureEditView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
+      ],
+      "acceptance": []
     },
     {
       "id": "11.5",
@@ -56,7 +63,13 @@
       "title": "Add dependency editing to feature creation and editing forms",
       "description": "Integrate the dependency selection interface into the FeatureCreateView and FeatureEditView components. Add form fields and UI for managing dependencies, including the ability to add, remove, and reorder dependencies. Ensure proper validation and user feedback for dependency cycles or invalid references.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/components/tasks/DependencySelector.tsx",
+        "src/renderer/tasks/FeatureCreateView.tsx",
+        "src/renderer/tasks/FeatureEditView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
+      ],
       "acceptance": []
     },
     {
@@ -65,7 +78,11 @@
       "title": "Display feature dependencies in TaskDetails",
       "description": "Update the TaskDetailsView to show dependency bullets for each feature that has dependencies. Display both inbound dependencies (features that depend on this one) and outbound dependencies (features this one depends on). Include proper grouping and labeling to make the dependency relationships clear.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/tasks/TasksDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
+      ],
       "acceptance": []
     },
     {
@@ -74,8 +91,13 @@
       "title": "Display task dependencies in TaskDetails and Tasks list",
       "description": "When a feature has dependencies from different tasks, show these task-level dependencies in the TaskDetails view and in the main Tasks list. Create appropriate visual indicators and grouping to distinguish between feature-level and task-level dependencies. Ensure the display is clean and not overwhelming.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/tasks/TasksDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
     },
     {
       "id": "11.8",
@@ -83,7 +105,11 @@
       "title": "Implement click navigation and highlighting for dependency bullets",
       "description": "Add click handlers to dependency bullets that navigate to the target feature or task and highlight it. For feature dependencies, navigate to the TaskDetails containing that feature and highlight the specific feature row. For task dependencies, navigate to the task and provide appropriate highlighting. Ensure smooth transitions and clear visual feedback.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/tasks/TasksDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
+      ],
       "acceptance": []
     },
     {
@@ -100,15 +126,6 @@
       "status": "-",
       "title": "Implement chat '#' reference selector for tasks and features",
       "description": "Add functionality to the chat interface that shows a Task&Feature dependency selector when users type '#'. This should provide autocomplete/search functionality across all tasks and features in the project scope, allowing users to easily reference and link to specific items. The selected references should be rendered using the standard dependency bullet components.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "11.11",
-      "status": "-",
-      "title": "Add dependency data persistence and loading",
-      "description": "Implement the backend/storage layer changes needed to persist dependency relationships and load them when the application starts. Ensure dependencies are maintained correctly when tasks or features are moved, renamed, or deleted. Include data migration if needed for existing projects.",
       "plan": "",
       "context": [],
       "acceptance": []
