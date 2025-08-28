@@ -1,6 +1,6 @@
 {
   "id": 7,
-  "status": "-",
+  "status": "+",
   "title": "UI design and patterns matching best in class",
   "description": "We want to follow Linear.app and Monday.com as they are one of the best task management apps in the world. We want to mimic Monday's colorful style and palette, but we also want to improve on it. We want to match and improve on Linear's UX and controls.",
   "features": [
@@ -547,7 +547,7 @@
     },
     {
       "id": "7.40",
-      "status": "-",
+      "status": "+",
       "title": "The feature view (feature row) inside TaskDetailsView needs to change - it should follow TasksListView",
       "description": "the way it should be laid out in the following grid (id+status should be in the middle between the three rows):\n| ID | Title | |\n| Status | Description | Edit Action |\n| | Dependencies blocking\nDependencies blocked by | |",
       "plan": "",
@@ -557,7 +557,9 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "dependencies": ["7.39"]
+      "dependencies": [
+        "7.39"
+      ]
     }
   ]
 }
