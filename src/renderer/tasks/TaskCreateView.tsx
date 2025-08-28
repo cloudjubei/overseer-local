@@ -1,13 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
-import { useNextTaskId } from '../hooks/useNextTaskId'
 import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 
 export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
-  const defaultId = useNextTaskId()
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -39,7 +37,8 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
     <>
       <Modal title="Create New Task" onClose={doClose} isOpen={true} size="md" initialFocusRef={titleRef as React.RefObject<HTMLElement>}>
         <TaskForm
-          initialValues={{ id: defaultId }}
+          id="-1"
+          initialValues={{ }}
           onSubmit={onSubmit}
           onCancel={doClose}
           submitting={submitting}

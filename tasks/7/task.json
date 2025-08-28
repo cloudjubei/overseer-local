@@ -383,9 +383,9 @@
     },
     {
       "id": "7.28",
-      "status": "+",
-      "title": "Task fixes",
-      "description": "When creating a task - the user shouldn't be able to select the ID - this should just be auto assigned as the next available one in order.\n\nIt should be possible to delete a task from the edit screen (after extra alert confirmation).",
+      "status": "-",
+      "title": "Task deletion",
+      "description": "It should be possible to delete a task from the edit screen (after extra alert confirmation).\nThe user should be then taken to the TasksList screen.",
       "plan": "",
       "context": [
         "src/renderer/components/TaskForm.tsx",
@@ -409,7 +409,7 @@
     },
     {
       "id": "7.30",
-      "status": "?",
+      "status": "-",
       "title": "Reuse the sidepanel for Documents",
       "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
@@ -421,8 +421,7 @@
       "acceptance": [],
       "dependencies": [
         "7.27"
-      ],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      ]
     },
     {
       "id": "7.31",

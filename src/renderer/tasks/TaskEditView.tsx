@@ -62,7 +62,8 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
       <Modal title="Edit Task" onClose={doClose} isOpen={true}>
         {initialValues ? (
           <TaskForm
-            initialValues={{ id: initialValues.id, status: initialValues.status, title: initialValues.title, description: initialValues.description }}
+            id={`${initialValues.id}`}
+            initialValues={{ status: initialValues.status, title: initialValues.title, description: initialValues.description }}
             onSubmit={onSubmit}
             onCancel={doClose}
             submitting={submitting || deleting}

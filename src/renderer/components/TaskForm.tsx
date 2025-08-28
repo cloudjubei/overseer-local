@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Status } from 'src/types/tasks'
 
 export type TaskFormValues = {
-  id: number
   title: string
   status: Status
   description?: string
 }
 
 type Props = {
+  id: string
   initialValues?: Partial<TaskFormValues>
   onSubmit: (values: TaskFormValues) => void | Promise<void>
   onCancel: () => void
@@ -26,8 +26,7 @@ const STATUS_OPTIONS: Array<{ value: Status; label: string }> = [
   { value: '=', label: 'Deferred' },
 ]
 
-export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
-  const [id, setId] = useState<number>(initialValues?.id ?? 0)
+export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -44,14 +43,12 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
   }, [combinedTitleRef])
 
   const canSubmit = useMemo(() => {
-    const hasId = Number.isInteger(id) && id > 0
     const hasTitle = title.trim().length > 0
-    return hasId && hasTitle && !submitting
-  }, [id, title, submitting])
+    return hasTitle && !submitting
+  }, [title, submitting])
 
   function validate(): boolean {
     const next: { id?: string; title?: string } = {}
-    if (!Number.isInteger(id) || id <= 0) next.id = 'ID must be a positive integer'
     if (!title.trim()) next.title = 'Title is required'
     setErrors(next)
     return Object.keys(next).length === 0
@@ -61,7 +58,6 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
     e?.preventDefault()
     if (!validate()) return
     const payload: TaskFormValues = {
-      id,
       title: title.trim(),
       status,
       description: description?.trim() || '',
@@ -79,14 +75,13 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
   return (
     <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Task' : 'Edit Task'}>
       <div className="grid grid-cols-1 gap-3">
-        <div className="flex flex-col gap-1">
+        {!isCreate && <div className="flex flex-col gap-1">
           <label htmlFor="task-id" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Task ID</label>
           <input
             id="task-id"
             type="number"
             inputMode="numeric"
-            min={1}
-            value={isCreate ? id : (initialValues?.id ?? id)}
+            value={id}
             disabled={true}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
             style={{
@@ -94,13 +89,8 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
               borderColor: 'var(--border-default)',
               color: 'var(--text-primary)'
             }}
-            aria-invalid={!!errors.id}
-            aria-describedby={errors.id ? 'task-id-error' : undefined}
           />
-          {errors.id ? (
-            <div id="task-id-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{errors.id}</div>
-          ) : null}
-        </div>
+        </div>}
 
         <div className="flex flex-col gap-1">
           <label htmlFor="task-title" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Title</label>

@@ -615,7 +615,6 @@ export class TasksIndexer {
     }
 
     async addTask(task) {
-        console.log('Adding new task');
         const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
         const existingIds = taskDirs
             .filter(d => d.isDirectory() && isNumericDir(d.name))

@@ -2,12 +2,12 @@ import type { Task, Feature } from 'src/types/tasks'
 import type { TasksIndexSnapshot, ReorderFeaturesPayload, ReorderTasksPayload, ServiceResult } from '../../types/external'
 export type { TasksIndexSnapshot } from '../../types/external'
 
-export type TaskCreateInput = Pick<Task, 'id' | 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection'>>
+export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection'>>
 
 export type TasksService = {
   getSnapshot: () => Promise<TasksIndexSnapshot>
   onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
-  addTask: (task: TaskCreateInput | Partial<Task>) => Promise<ServiceResult>
+  addTask: (task: TaskCreateInput) => Promise<ServiceResult>
   updateTask: (taskId: number, data: Partial<Task>) => Promise<ServiceResult>
   deleteTask: (taskId: number) => Promise<ServiceResult>
   addFeature: (taskId: number, feature: Omit<Feature, 'id'> | Partial<Feature>) => Promise<ServiceResult>
