@@ -19,11 +19,6 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
 
   const onSubmit = useCallback(
     async (values: TaskFormValues) => {
-      if (!Number.isInteger(values.id) || (values.id as number) <= 0) {
-        setAlertMessage('Please provide a valid positive integer ID')
-        setShowAlert(true)
-        return
-      }
       setSubmitting(true)
       try {
         const res = await tasksService.addTask({ ...values })

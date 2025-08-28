@@ -7,10 +7,12 @@ import type { Feature, Task } from 'src/types/tasks'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
+  const [task, setTask] = useState<Task | null>(null)
   const [initialValues, setInitialValues] = useState<Feature | null>(null)
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -21,11 +23,14 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     ;(async () => {
       try {
         const idx = await tasksService.getSnapshot()
-        const task: Task | undefined = idx.tasksById[taskId]
-        if (!task) throw new Error('Task not found')
-        const feature = task.features.find((f: Feature) => f.id === featureId)
+        const loadedTask: Task | undefined = idx.tasksById[taskId]
+        if (!loadedTask) throw new Error('Task not found')
+        const feature = loadedTask.features.find((f: Feature) => f.id === featureId)
         if (!feature) throw new Error('Feature not found')
-        if (!cancelled) setInitialValues(feature)
+        if (!cancelled) {
+          setTask(loadedTask)
+          setInitialValues(feature)
+        }
       } catch (e: any) {
         if (!cancelled) {
           setAlertMessage(`Failed to load feature: ${e.message || String(e)}`)
@@ -53,6 +58,27 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     }
   }
 
+  const handleDelete = async () => {
+    setSubmitting(true)
+    try {
+      if (!task) throw new Error('Task not found')
+      const dependents = task.features.filter(f => f.dependencies?.includes(featureId) ?? false)
+      for (const dep of dependents) {
+        const newDeps = dep.dependencies.filter(d => d !== featureId)
+        await tasksService.updateFeature(taskId, dep.id, { dependencies: newDeps })
+      }
+      const res = await tasksService.deleteFeature(taskId, featureId)
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
+      doClose()
+    } catch (e: any) {
+      setAlertMessage(`Failed to delete feature: ${e.message || String(e)}`)
+      setShowAlert(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <>
       <Modal title="Edit Feature" onClose={doClose} isOpen={true}>
@@ -61,6 +87,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             initialValues={initialValues}
             onSubmit={onSubmit}
             onCancel={doClose}
+            onDelete={() => setShowConfirm(true)}
             submitting={submitting}
             isCreate={false}
           />
@@ -69,6 +96,14 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
+      <AlertDialog
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        title="Delete Feature"
+        description="Are you sure you want to delete this feature? This will also remove any dependencies referencing it. This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+      />
     </>
   )
 }

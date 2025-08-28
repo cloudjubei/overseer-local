@@ -14,12 +14,13 @@ type Props = {
   initialValues?: Partial<FeatureFormValues>
   onSubmit: (values: FeatureFormValues) => void | Promise<void>
   onCancel: () => void
+  onDelete?: () => void
   submitting?: boolean
   isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
 }
 
-export function FeatureForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef }: Props) {
+export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submitting = false, isCreate = false, titleRef }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
   const [rejection, setRejection] = useState<string>(initialValues?.rejection ?? '')
@@ -138,24 +139,40 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, submitting = fa
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2">
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => onCancel()}
-          disabled={submitting}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="btn"
-          disabled={!canSubmit}
-          aria-keyshortcuts="Control+Enter Meta+Enter"
-          title="Cmd/Ctrl+Enter to submit"
-        >
-          {isCreate ? 'Create Feature' : 'Save Changes'}
-        </button>
+      <div className="flex justify-between gap-2 pt-2">
+        {onDelete && !isCreate ? (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={submitting}
+            className="btn"
+            style={{
+              background: 'var(--status-stuck-bg)',
+              color: 'var(--status-stuck-fg)'
+            }}
+          >
+            Delete
+          </button>
+        ) : null}
+        <div className="flex justify-end gap-2 flex-1">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => onCancel()}
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn"
+            disabled={!canSubmit}
+            aria-keyshortcuts="Control+Enter Meta+Enter"
+            title="Cmd/Ctrl+Enter to submit"
+          >
+            {isCreate ? 'Create Feature' : 'Save Changes'}
+          </button>
+        </div>
       </div>
     </form>
   )
