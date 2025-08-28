@@ -15,7 +15,7 @@
     },
     {
       "id": "11.2",
-      "status": "-",
+      "status": "+",
       "title": "Create reusable dependency bullet components",
       "description": "Create reusable React components for displaying dependency bullets: FeatureDependencyBullet and TaskDependencyBullet. These should be small, clickable elements that show the dependency type and provide hover states. Include proper styling to match the existing design system and ensure they work in both light and dark themes.",
       "plan": "",

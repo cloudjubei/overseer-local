@@ -26,3 +26,35 @@
 
 /* ID chip: compact bubble for IDs (tasks/features), similar to dependency chips */
 .id-chip { display:inline-flex; align-items:center; justify-content:center; height: 18px; padding: 0 6px; border-radius: var(--radius-round); border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-secondary); font-size: var(--fs-xxs, 10px); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Dependency bullets (clickable chips for task/feature refs) */
+.dependency-bullet {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-round);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs, 12px);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+.dependency-bullet:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-1);
+}
+.dependency-bullet:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring);
+}
+.task-dependency {
+  color: var(--color-blue-800);
+}
+.feature-dependency {
+  color: var(--color-green-800);
+}
