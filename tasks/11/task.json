@@ -61,7 +61,7 @@
     },
     {
       "id": "11.6",
-      "status": "-",
+      "status": "+",
       "title": "Display feature dependencies in TaskDetails",
       "description": "Update the TaskDetailsView to show dependency bullets for each feature that has dependencies. Display both inbound dependencies (features that depend on this one) and outbound dependencies (features this one depends on). Include proper grouping and labeling to make the dependency relationships clear.",
       "plan": "",

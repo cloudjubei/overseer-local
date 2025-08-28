@@ -5,6 +5,8 @@ import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
 import StatusBullet from '../components/tasks/StatusBullet'
+import FeatureDependencyBullet from '../components/tasks/FeatureDependencyBullet'
+import TaskDependencyBullet from '../components/tasks/TaskDependencyBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 
 const STATUS_LABELS: Record<Status, string> = {
@@ -55,7 +57,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [task, setTask] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
-  const { openModal, navigateView } = useNavigator()
+  const { openModal, navigateView, tasksRoute } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const { projectId } = useActiveProject()
 
@@ -92,21 +94,31 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     }
   }, [taskId, index])
 
-  const { featuresById, dependentsMap } = useMemo(() => {
-    const features = task?.features || []
+  const globalDependents = useMemo(() => {
+    const map: Record<string, string[]> = {}
+    if (!index?.tasksById) return map
+    Object.entries(index.tasksById).forEach(([tId, tsk]) => {
+      const tskId = parseInt(tId, 10)
+      (tsk.dependencies || []).forEach(dep => {
+        if (!map[dep]) map[dep] = []
+        map[dep].push(`${tskId}`)
+      })
+      tsk.features.forEach(f => {
+        (f.dependencies || []).forEach(dep => {
+          if (!map[dep]) map[dep] = []
+          map[dep].push(`${tskId}.${f.id}`)
+        })
+      })
+    })
+    return map
+  }, [index])
+
+  const featuresById = useMemo(() => {
     const byId: Record<string, Feature> = {}
-    const deps: Record<string, string[]> = {}
-    for (const f of features) {
-      byId[f.id] = f
+    if (task?.features) {
+      task.features.forEach(f => { byId[f.id] = f })
     }
-    for (const f of features) {
-      const depsOfF = Array.isArray(f.dependencies) ? f.dependencies : []
-      for (const dep of depsOfF) {
-        if (!deps[dep]) deps[dep] = []
-        deps[dep].push(f.id)
-      }
-    }
-    return { featuresById: byId, dependentsMap: deps }
+    return byId
   }, [task])
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
@@ -180,6 +192,19 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     ;(rows[nextIndex] as HTMLElement).focus()
   }
 
+  const highlightFeatureId = tasksRoute.name === 'details' && tasksRoute.taskId === taskId ? tasksRoute.highlightFeatureId : undefined
+
+  useEffect(() => {
+    if (highlightFeatureId) {
+      const row = document.querySelector(`.feature-row[data-feature-id="${highlightFeatureId}"]`)
+      if (row) {
+        row.scrollIntoView({ block: 'center' });
+        row.classList.add('highlighted')
+        setTimeout(() => row.classList.remove('highlighted'), 2000)
+      }
+    }
+  }, [highlightFeatureId])
+
   if (!task) {
     return (
       <div className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
@@ -200,6 +225,9 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   }
 
   const features = Array.isArray(task.features) ? task.features : []
+  const taskDeps = Array.isArray(task.dependencies) ? task.dependencies : []
+  const taskFullId = `${task.id}`
+  const taskDependents = globalDependents[taskFullId] || []
 
   const dndEnabled = !saving
 
@@ -249,6 +277,30 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
+        <section className="panel shrink-0">
+          <div className="section-header">
+            <h2 className="section-title">Dependencies</h2>
+          </div>
+          <div className="deps-groups">
+            <div className="deps-group">
+              <span className="deps-label">Depends on:</span>
+              <div className="deps-bullets flex flex-wrap gap-1">
+                {taskDeps.length === 0 ? <span>None</span> : taskDeps.map(d => (
+                  d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} />
+                ))}
+              </div>
+            </div>
+            <div className="deps-group">
+              <span className="deps-label">Required by:</span>
+              <div className="deps-bullets flex flex-wrap gap-1">
+                {taskDependents.length === 0 ? <span>None</span> : taskDependents.map(d => (
+                  d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} isInbound /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} isInbound />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="panel flex flex-col flex-1 min-h-0">
           <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
@@ -284,7 +336,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               </li>
               {features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
-                const dependents : string[] = dependentsMap[f.id] || []
+                const fullId = `${task.id}.${f.id}`
+                const dependents = globalDependents[fullId] || []
                 const isDragSource = dragFeatureId === f.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
@@ -292,10 +345,11 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                   <li key={f.id} className="feature-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
                     <div
-                      className={`feature-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''}`}
+                      className={`feature-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''} ${f.id === highlightFeatureId ? 'highlighted' : ''}`}
                       role="button"
                       tabIndex={0}
                       data-index={idx}
+                      data-feature-id={f.id}
                       draggable={dndEnabled}
                       aria-grabbed={isDragSource}
                       onDragStart={(e) => {
@@ -333,25 +387,24 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         </div>
                       </div>
                       <div className="col col-deps">
-                        <div className="deps-list" aria-label={`Dependencies for ${f.id}`}>
-                          {deps.length === 0 ? (
-                            <span className="dep-chip dep-chip--none" title="No dependencies">None</span>
-                          ) : (
-                            deps.map((d) => (
-                              <span key={d} className={`dep-chip ${featuresById[d] ? 'dep-chip--ok' : 'dep-chip--missing'}`} title={featuresById[d] ? `Depends on ${d}` : `Missing dependency ${d}`}>
-                                {d}
-                              </span>
-                            ))
-                          )}
-                        </div>
-                        {dependents.length > 0 && (
-                          <div className="deps-sub" aria-label={`Dependents of ${f.id}`}>
-                            <span className="deps-sub__label">Blocks</span>
-                            {dependents.map((d) => (
-                              <span key={d} className="dep-chip dep-chip--blocks" title={`Blocks ${d}`}>{d}</span>
-                            ))}
+                        <div className="deps-groups">
+                          <div className="deps-group">
+                            <span className="deps-label">Depends on:</span>
+                            <div className="deps-bullets flex flex-wrap gap-1">
+                              {deps.length === 0 ? <span className="text-gray-500">None</span> : deps.map(d => (
+                                d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} />
+                              ))}
+                            </div>
                           </div>
-                        )}
+                          <div className="deps-group">
+                            <span className="deps-label">Required by:</span>
+                            <div className="deps-bullets flex flex-wrap gap-1">
+                              {dependents.length === 0 ? <span className="text-gray-500">None</span> : dependents.map(d => (
+                                d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} isInbound /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} isInbound />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <div className="col col-actions">
                         <div className="row-actions">
