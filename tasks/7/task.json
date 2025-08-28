@@ -526,7 +526,7 @@
     },
     {
       "id": "7.38",
-      "status": "-",
+      "status": "+",
       "title": "The TaskForm should use the StatusBullet and StatusBadge",
       "description": "Follow the implementation in FeatureForm",
       "plan": "",
