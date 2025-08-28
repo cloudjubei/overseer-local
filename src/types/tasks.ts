@@ -12,15 +12,6 @@ export type Status =
   | "?" // Blocked
   | "="; // Deferred
 
-export type DependencyType = 'task' | 'feature';
-
-export interface Dependency {
-  type: DependencyType;
-  project_id: string;
-  task_id: number;
-  feature_id?: string;
-}
-
 export interface Feature {
   id: string;
   status: Status;
@@ -29,7 +20,7 @@ export interface Feature {
   plan: string;
   context: string[];
   acceptance: string[];
-  dependencies?: Dependency[];
+  dependencies?: string[]; // ["{task_id}.{feature_id}","{task_id}"]
   rejection?: string;
 }
 
@@ -39,7 +30,7 @@ export interface Task {
   title: string;
   description: string;
   features: Feature[];
-  dependencies?: Dependency[];
+  dependencies?: string[];// ["{task_id}.{feature_id}","{task_id}"]
   rejection?: string;
 }
 

@@ -10,7 +10,10 @@
       "title": "Add dependency types and data structures",
       "description": "Extend the TypeScript types to support dependencies between features and tasks. Add dependency arrays to Feature and Task types, and create supporting types for dependency references that can point to features or tasks across the entire project scope. Update the data structures to store and validate these cross-references.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/docs/tasks/task_format.py",
+        "/src/types/tasks.ts"
+      ],
       "acceptance": []
     },
     {
@@ -19,7 +22,10 @@
       "title": "Create reusable dependency bullet components",
       "description": "Create reusable React components for displaying dependency bullets: FeatureDependencyBullet and TaskDependencyBullet. These should be small, clickable elements that show the dependency type and provide hover states. Include proper styling to match the existing design system and ensure they work in both light and dark themes.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/docs/tasks/task_format.py",
+        "/src/types/tasks.ts"
+      ],
       "acceptance": []
     },
     {
@@ -28,7 +34,10 @@
       "title": "Create dependency summary callout cards",
       "description": "Implement summary callout card components that appear on hover over dependency bullets. Create FeatureSummaryCard and TaskSummaryCard that show key information about the referenced feature/task (title, status, brief description). These should be styled as tooltips/popovers and positioned appropriately relative to the trigger element.",
       "plan": "",
-      "context": [],
+      "context": [
+        "/docs/tasks/task_format.py",
+        "/src/types/tasks.ts"
+      ],
       "acceptance": []
     },
     {

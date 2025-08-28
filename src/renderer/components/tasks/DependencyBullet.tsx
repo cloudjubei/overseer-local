@@ -1,33 +1,21 @@
 import React from 'react';
 
-import '../styles/components/badges.css'; // Assuming styles are imported if needed, but typically global
-
 interface DependencyBulletProps {
+  dependency : string;
   className?: string;
   onClick?: () => void;
-  title?: string;
 }
 
-export function TaskDependencyBullet({ taskId, className = '', onClick, title }: DependencyBulletProps & { taskId: string }) {
+export function DependencyBullet({ dependency, className = '', onClick }: DependencyBulletProps) {
+  const parts = dependency.split(".")
+  const isFeatureDependency = parts.length > 0
+  const taskId = parts[0]
   return (
     <button
-      className={`dependency-bullet task-dependency ${className}`}
+      className={`dependency-bullet ${isFeatureDependency ? "feature-dependency" : "task-dependency"} ${className}`}
       onClick={onClick}
-      title={title || `Task #${taskId}`}
     >
-      T#{taskId}
-    </button>
-  );
-}
-
-export function FeatureDependencyBullet({ taskId, featureId, className = '', onClick, title }: DependencyBulletProps & { taskId: string; featureId: string }) {
-  return (
-    <button
-      className={`dependency-bullet feature-dependency ${className}`}
-      onClick={onClick}
-      title={title || `Feature #${taskId}.${featureId}`}
-    >
-      F#{taskId}.{featureId}
+      {dependency}
     </button>
   );
 }
