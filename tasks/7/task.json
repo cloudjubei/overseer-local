@@ -1,6 +1,6 @@
 {
   "id": 7,
-  "status": "-",
+  "status": "+",
   "title": "UI design and patterns matching best in class",
   "description": "We want to follow Linear.app and Monday.com as they are one of the best task management apps in the world. We want to mimic Monday's colorful style and palette, but we also want to improve on it. We want to match and improve on Linear's UX and controls.",
   "features": [
@@ -537,7 +537,7 @@
     },
     {
       "id": "7.39",
-      "status": "-",
+      "status": "+",
       "title": "The task view (task row) inside TasksListView needs to change",
       "description": "the way it should be laid out in the following grid (id should be in the middle between the two rows):\n| ID | Title | {features_done}/{all_features} |\n| | Description | Status |\nDependencies this task is blocking\nDependencies this task is blocked by",
       "plan": "",

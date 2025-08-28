@@ -351,42 +351,53 @@ export default function TasksListView() {
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                      aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to view details.`}
+                      aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${deps.length} dependencies this task is blocked by, ${dependents.length} dependencies this task is blocking. Press Enter to view details.`}
                     >
-                      <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
-                      <div className="col col-title">
-                        <div className="title-line">
-                          <span className="title-text">{t.title || ''}</span>
-                          <PriorityTag priority={priority} />
-                        </div>
-                        <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
-                      </div>
-                      <div className="col col-status">
-                        <StatusControl
-                          status={t.status}
-                          onChange={(next) => handleStatusChange(t.id, next)}
-                        />
-                      </div>
-                      <div className="col col-deps">
-                        <div className="chips-list" aria-label={`Dependencies for Task ${t.id}`}>
-                          {deps.length === 0 ? (
-                            <span className="chip chip--none" title="No dependencies">None</span>
-                          ) : (
-                            deps.map((d) => (
-                              <DependencyBullet key={d} dependency={d} />
-                            ))
-                          )}
-                        </div>
-                        {dependents.length > 0 && (
-                          <div className="chips-sub" aria-label={`Dependents of Task ${t.id}`}>
-                            <span className="chips-sub__label">Blocks</span>
-                            {dependents.map((d) => (
-                              <DependencyBullet key={d} dependency={d} isInbound />
-                            ))}
+                      <div className="task-grid">
+                        <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
+                        <div className="col col-title">
+                          <div className="title-line">
+                            <span className="title-text">{t.title || ''}</span>
+                            <PriorityTag priority={priority} />
                           </div>
-                        )}
+                        </div>
+                        <div className="col col-features">{done}/{total}</div>
+                        <div className="col col-desc">
+                          <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
+                        </div>
+                        <div className="col col-status">
+                          <StatusControl
+                            status={t.status}
+                            onChange={(next) => handleStatusChange(t.id, next)}
+                          />
+                        </div>
                       </div>
-                      <div className="col col-features">{done}/{total}</div>
+                      <div className="task-deps">
+                        <div className="deps-blocking">
+                          <span className="deps-label">Dependencies this task is blocking</span>
+                          <div className="chips-list" aria-label={`Dependents of Task ${t.id}`}>
+                            {dependents.length === 0 ? (
+                              <span className="chip chip--none" title="None">None</span>
+                            ) : (
+                              dependents.map((d) => (
+                                <DependencyBullet key={d} dependency={d} isInbound />
+                              ))
+                            )}
+                          </div>
+                        </div>
+                        <div className="deps-blocked">
+                          <span className="deps-label">Dependencies this task is blocked by</span>
+                          <div className="chips-list" aria-label={`Dependencies for Task ${t.id}`}>
+                            {deps.length === 0 ? (
+                              <span className="chip chip--none" title="None">None</span>
+                            ) : (
+                              deps.map((d) => (
+                                <DependencyBullet key={d} dependency={d} />
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
@@ -397,7 +408,7 @@ export default function TasksListView() {
         </div>
       )}
 
-      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering 3 a6</div>}
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </section>
   )
 }
