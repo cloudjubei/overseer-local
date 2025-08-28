@@ -2,12 +2,16 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status } from 'src/types/tasks'
 import StatusBullet from './tasks/StatusBullet'
 import StatusBadge from './tasks/StatusBadge'
+import { DependencySelector } from './tasks/DependencySelector'
+import { Modal } from './ui/Modal'
+import type { Task, TasksIndexSnapshot } from '../../types/external'
 
 export type FeatureFormValues = {
   title: string
   description?: string
   rejection?: string
   status: Status
+  dependencies?: string[]
 }
 
 type Props = {
@@ -18,14 +22,131 @@ type Props = {
   submitting?: boolean
   isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
+  allTasksSnapshot?: TasksIndexSnapshot
+  taskId: number
+  featureId?: string
 }
 
-export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submitting = false, isCreate = false, titleRef }: Props) {
+function toTasksArray(index: TasksIndexSnapshot): Task[] {
+  const tasksById = index?.tasksById || {}
+  const arr = Object.values(tasksById) as Task[]
+  if (index?.orderedIds && Array.isArray(index.orderedIds)) {
+    const byId: Record<number, Task> = tasksById as any
+    return index.orderedIds.map((id) => byId[id]).filter(Boolean)
+  }
+  arr.sort((a, b) => (a.id || 0) - (b.id || 0))
+  return arr
+}
+
+function getNodeId(dep: string): string {
+  const parts = dep.split('.')
+  return parts.length > 1 ? `f${parts[0]}_${parts[1]}` : `t${parts[0]}`
+}
+
+function validateDependencies(
+  proposed: string[],
+  snapshot: TasksIndexSnapshot,
+  taskId: number,
+  featureId?: string,
+  isCreate = false
+): { ok: boolean; message?: string } {
+  const invalid: string[] = []
+  const nodes = new Set<string>()
+  const graph = new Map<string, string[]>()
+  const tasksById = snapshot.tasksById || {}
+
+  Object.values(tasksById).forEach((task: Task) => {
+    const tid = `t${task.id}`
+    nodes.add(tid)
+    graph.set(tid, (task.dependencies || []).map(getNodeId))
+    task.features.forEach((f) => {
+      const fid = `f${task.id}_${f.id}`
+      nodes.add(fid)
+      graph.set(fid, (f.dependencies || []).map(getNodeId))
+    })
+  })
+
+  const selfFeature = featureId ? `${taskId}.${featureId}` : null
+  const unique = new Set(proposed)
+  if (unique.size !== proposed.length) {
+    return { ok: false, message: 'Duplicate dependencies' }
+  }
+
+  const proposedNodes: string[] = []
+  for (const dep of proposed) {
+    if (selfFeature && dep === selfFeature) {
+      invalid.push(dep)
+      continue
+    }
+    const targetNode = getNodeId(dep)
+    if (!nodes.has(targetNode)) {
+      invalid.push(dep)
+      continue
+    }
+    proposedNodes.push(targetNode)
+  }
+  if (invalid.length) {
+    return { ok: false, message: `Invalid or self dependencies: ${invalid.join(', ')}` }
+  }
+
+  const thisNode = isCreate ? `f${taskId}_new` : `f${taskId}_${featureId}`
+  if (!isCreate) {
+    graph.set(thisNode, proposedNodes)
+  } else {
+    nodes.add(thisNode)
+    graph.set(thisNode, proposedNodes)
+  }
+
+  const visited = new Set<string>()
+  const recStack = new Set<string>()
+  function dfs(node: string): boolean {
+    visited.add(node)
+    recStack.add(node)
+    const neighbors = graph.get(node) || []
+    for (const nei of neighbors) {
+      if (!visited.has(nei)) {
+        if (dfs(nei)) return true
+      } else if (recStack.has(nei)) {
+        return true
+      }
+    }
+    recStack.delete(node)
+    return false
+  }
+
+  for (const node of graph.keys()) {
+    if (!visited.has(node)) {
+      if (dfs(node)) {
+        return { ok: false, message: 'Dependency cycle detected' }
+      }
+    }
+  }
+  return { ok: true }
+}
+
+export function FeatureForm({
+  initialValues,
+  onSubmit,
+  onCancel,
+  onDelete,
+  submitting = false,
+  isCreate = false,
+  titleRef,
+  allTasksSnapshot,
+  taskId,
+  featureId,
+}: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
   const [rejection, setRejection] = useState<string>(initialValues?.rejection ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
+  const [dependencies, setDependencies] = useState<string[]>(initialValues?.dependencies ?? [])
   const [error, setError] = useState<string | null>(null)
+  const [depError, setDepError] = useState<string | null>(null)
+  const [showSelector, setShowSelector] = useState(false)
+  const [dragDepIndex, setDragDepIndex] = useState<number | null>(null)
+  const [dropDepIndex, setDropDepIndex] = useState<number | null>(null)
+  const [dropDepPos, setDropDepPos] = useState<'before' | 'after' | null>(null)
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
@@ -37,15 +158,28 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submi
     }
   }, [combinedTitleRef])
 
+  const allTasks = useMemo(() => allTasksSnapshot ? toTasksArray(allTasksSnapshot) : [], [allTasksSnapshot])
+
   const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
 
   function validate(): boolean {
+    let valid = true
     if (!title.trim()) {
       setError('Title is required')
-      return false
+      valid = false
+    } else {
+      setError(null)
     }
-    setError(null)
-    return true
+    if (allTasksSnapshot) {
+      const depVal = validateDependencies(dependencies, allTasksSnapshot, taskId, featureId, isCreate)
+      if (!depVal.ok) {
+        setDepError(depVal.message ?? 'Invalid dependencies')
+        valid = false
+      } else {
+        setDepError(null)
+      }
+    }
+    return valid
   }
 
   async function handleSubmit(e?: React.FormEvent) {
@@ -55,7 +189,8 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submi
       title: title.trim(),
       description: description?.trim() || '',
       rejection: rejection?.trim() || undefined,
-      status
+      status,
+      dependencies,
     }
     await onSubmit(payload)
   }
@@ -65,6 +200,33 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submi
       e.preventDefault()
       if (canSubmit) handleSubmit()
     }
+  }
+
+  function clearDepDnd() {
+    setDragDepIndex(null)
+    setDropDepIndex(null)
+    setDropDepPos(null)
+  }
+
+  function computeDropForDep(e: React.DragEvent<HTMLElement>, idx: number) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const offsetY = e.clientY - rect.top
+    let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
+    if (dragDepIndex != null && (idx === dragDepIndex || (idx === dragDepIndex - 1 && pos === 'after') || (idx === dragDepIndex + 1 && pos === 'before'))) {
+      pos = null
+    }
+    setDropDepIndex(idx)
+    setDropDepPos(pos)
+  }
+
+  function handleDepDrop() {
+    if (dragDepIndex == null || dropDepIndex == null || dropDepPos == null) return
+    const newDeps = [...dependencies]
+    const [moved] = newDeps.splice(dragDepIndex, 1)
+    const insertAt = dropDepPos === 'before' ? dropDepIndex : dropDepIndex + 1
+    newDeps.splice(insertAt, 0, moved)
+    setDependencies(newDeps)
+    clearDepDnd()
   }
 
   return (
@@ -137,6 +299,55 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submi
             }}
           />
         </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
+          <ul
+            className="dependencies-list border rounded-md min-h-[4rem] p-2 space-y-1"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDepDrop}
+            onDragEnd={clearDepDnd}
+          >
+            {dependencies.map((dep, idx) => {
+              const isDrag = idx === dragDepIndex
+              const isDropBefore = dropDepIndex === idx && dropDepPos === 'before'
+              const isDropAfter = dropDepIndex === idx && dropDepPos === 'after'
+              return (
+                <React.Fragment key={idx}>
+                  {isDropBefore && <div className="drop-indicator" />}
+                  <div
+                    className={`dep-row flex items-center justify-between p-2 rounded bg-neutral-100 dark:bg-neutral-700 ${isDrag ? 'is-dragging opacity-50' : ''}`}
+                    draggable
+                    onDragStart={() => setDragDepIndex(idx)}
+                    onDragOver={(e) => computeDropForDep(e, idx)}
+                  >
+                    <span>{dep}</span>
+                    <button
+                      type="button"
+                      onClick={() => setDependencies(dependencies.filter((_, i) => i !== idx))}
+                      className="text-sm text-red-500"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {isDropAfter && <div className="drop-indicator" />}
+                </React.Fragment>
+              )
+            })}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setShowSelector(true)}
+            className="btn-secondary mt-2 self-start"
+          >
+            Add Dependency
+          </button>
+          {depError && (
+            <div className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>
+              {depError}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-between gap-2 pt-2">
@@ -174,6 +385,22 @@ export function FeatureForm({ initialValues, onSubmit, onCancel, onDelete, submi
           </button>
         </div>
       </div>
+
+      {showSelector && (
+        <Modal title="Select Dependency" onClose={() => setShowSelector(false)} isOpen={true} size="md">
+          <DependencySelector
+            allTasks={allTasks}
+            onSelect={(dep) => {
+              if (dependencies.includes(dep)) return
+              setDependencies([...dependencies, dep])
+              setShowSelector(false)
+            }}
+            currentTaskId={taskId}
+            currentFeatureId={featureId}
+            existingDeps={dependencies}
+          />
+        </Modal>
+      )}
     </form>
   )
 }

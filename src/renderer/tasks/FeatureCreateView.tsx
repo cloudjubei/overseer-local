@@ -1,15 +1,21 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { tasksService } from '../services/tasksService'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
+import type { TasksIndexSnapshot } from '../../types/external'
 
 export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
   const { toast } = useToast()
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    tasksService.getSnapshot().then(setSnapshot)
+  }, [])
 
   const doClose = () => {
     onRequestClose?.()
@@ -45,7 +51,15 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
   return (
     <>
       <Modal title="Create New Feature" onClose={doClose} isOpen={true} size="lg" initialFocusRef={titleRef as React.RefObject<HTMLElement>}>
-        <FeatureForm onSubmit={onSubmit} onCancel={doClose} submitting={submitting} isCreate={true} titleRef={titleRef} />
+        <FeatureForm
+          onSubmit={onSubmit}
+          onCancel={doClose}
+          submitting={submitting}
+          isCreate={true}
+          titleRef={titleRef}
+          allTasksSnapshot={snapshot}
+          taskId={taskId}
+        />
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
     </>

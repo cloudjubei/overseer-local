@@ -4,6 +4,7 @@ import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import type { Feature, Task } from 'src/types/tasks'
+import type { TasksIndexSnapshot } from '../../types/external'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -13,6 +14,11 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
+
+  useEffect(() => {
+    tasksService.getSnapshot().then(setSnapshot)
+  }, [])
 
   const doClose = () => {
     onRequestClose?.()
@@ -91,6 +97,9 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             onDelete={() => setShowDeleteConfirm(true)}
             submitting={submitting}
             isCreate={false}
+            allTasksSnapshot={snapshot}
+            taskId={taskId}
+            featureId={featureId}
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature…</div>

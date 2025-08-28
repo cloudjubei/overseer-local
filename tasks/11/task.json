@@ -52,7 +52,7 @@
     },
     {
       "id": "11.5",
-      "status": "-",
+      "status": "+",
       "title": "Add dependency editing to feature creation and editing forms",
       "description": "Integrate the dependency selection interface into the FeatureCreateView and FeatureEditView components. Add form fields and UI for managing dependencies, including the ability to add, remove, and reorder dependencies. Ensure proper validation and user feedback for dependency cycles or invalid references.",
       "plan": "",
