@@ -16,13 +16,15 @@ export function useReferencesAutocomplete(params: {
   const { input, setInput, textareaRef, mirrorRef } = params;
   const index = useTasksIndex();
 
+  // Build searchable refs across all tasks and features (taskId and taskId.featureId)
   const references = useMemo<RefItem[]>(() => {
     if (!index?.tasksById) return [];
     const refs: RefItem[] = [];
     Object.values(index.tasksById).forEach((task) => {
-      refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
+      refs.push({ ref: `${task.id}` , title: task.title, type: 'task' });
       (task.features || []).forEach((f) => {
-        refs.push({ ref: `${f.id}`, title: f.title, type: 'feature' });
+        // IMPORTANT: include task id prefix so refs are taskId.featureId
+        refs.push({ ref: `${task.id}.${f.id}`, title: f.title, type: 'feature' });
       });
     });
     return refs.sort((a, b) => a.ref.localeCompare(b.ref));
@@ -86,7 +88,7 @@ export function useReferencesAutocomplete(params: {
   }
 
   const isBoundaryChar = (ch: string) => {
-    // Consider whitespace and common punctuation as word boundaries
+    // Consider whitespace and common punctuation as word boundaries (exclude '#')
     return /[\s\n\t\(\)\[\]\{\}<>,.!?:;"'`]/.test(ch);
   };
 
@@ -99,24 +101,25 @@ export function useReferencesAutocomplete(params: {
     if (word.startsWith('#')) {
       const query = word.slice(1).toLowerCase();
       const filtered = references.filter(
-        (item) => item.ref.startsWith(query) || item.title.toLowerCase().includes(query)
+        (item) => item.ref.toLowerCase().startsWith(query) || item.title.toLowerCase().includes(query)
       );
       setMatches(filtered);
       setMentionStart(start);
-      if (filtered.length > 0) {
-        const textarea = textareaRef.current!;
-        const coords = getCursorCoordinates(textarea, pos);
-        const textareaRect = textarea.getBoundingClientRect();
-        const style = window.getComputedStyle(textarea);
-        const lineHeight = parseFloat(style.lineHeight) || 20;
-        const cursorLeft = textareaRect.left + window.scrollX + coords.x;
-        const cursorTop = textareaRect.top + window.scrollY + coords.y + lineHeight;
-        setPosition({ left: cursorLeft, top: cursorTop });
-        setIsOpen(true);
-        return;
-      }
+
+      // Position the suggestion list near the caret
+      const textarea = textareaRef.current!;
+      const coords = getCursorCoordinates(textarea, pos);
+      const textareaRect = textarea.getBoundingClientRect();
+      const style = window.getComputedStyle(textarea);
+      const lineHeight = parseFloat(style.lineHeight) || 20;
+      const cursorLeft = textareaRect.left + window.scrollX + coords.x;
+      const cursorTop = textareaRect.top + window.scrollY + coords.y + lineHeight;
+      setPosition({ left: cursorLeft, top: cursorTop });
+      setIsOpen(true);
+      return;
     }
     setIsOpen(false);
+    setMentionStart(null);
   };
 
   const onSelect = (selectedRef: string) => {
@@ -137,6 +140,7 @@ export function useReferencesAutocomplete(params: {
     setMentionStart(null);
   };
 
+  // React to text/caret changes to trigger detection; avoid 'keydown' to not interfere with typing
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -149,16 +153,22 @@ export function useReferencesAutocomplete(params: {
 
     textarea.addEventListener('input', handleInputEvent);
     textarea.addEventListener('keyup', handleInputEvent);
-    textarea.addEventListener('keydown', handleInputEvent);
     textarea.addEventListener('click', handleInputEvent);
 
     return () => {
       textarea.removeEventListener('input', handleInputEvent);
       textarea.removeEventListener('keyup', handleInputEvent);
-      textarea.removeEventListener('keydown', handleInputEvent);
       textarea.removeEventListener('click', handleInputEvent);
     };
   }, [references, textareaRef]);
+
+  // Also run whenever controlled input state changes (e.g., programmatic updates)
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    checkForMention(input, textarea.selectionStart);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, references]);
 
   return { isOpen, matches, position, onSelect };
 }
