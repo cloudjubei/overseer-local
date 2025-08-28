@@ -5,8 +5,7 @@ import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import StatusBadge from '../components/tasks/StatusBadge'
 import StatusBullet from '../components/tasks/StatusBullet'
-import FeatureDependencyBullet from '../components/tasks/FeatureDependencyBullet'
-import TaskDependencyBullet from '../components/tasks/TaskDependencyBullet'
+import DependencyBullet from '../components/tasks/DependencyBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 
 const STATUS_LABELS: Record<Status, string> = {
@@ -98,17 +97,17 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     const map: Record<string, string[]> = {}
     if (!index?.tasksById) return map
     Object.entries(index.tasksById).forEach(([tId, tsk]) => {
-      const tskId = parseInt(tId, 10)
+      const taskId = parseInt(tId, 10);
       (tsk.dependencies || []).forEach(dep => {
         if (!map[dep]) map[dep] = []
-        map[dep].push(`${tskId}`)
-      })
+        map[dep].push(`${taskId}`)
+      });
       tsk.features.forEach(f => {
         (f.dependencies || []).forEach(dep => {
           if (!map[dep]) map[dep] = []
-          map[dep].push(`${tskId}.${f.id}`)
+          map[dep].push(`${taskId}.${f.id}`)
         })
-      })
+      });
     })
     return map
   }, [index])
@@ -277,7 +276,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
-        <section className="panel shrink-0">
+        {/* <section className="panel shrink-0">
           <div className="section-header">
             <h2 className="section-title">Dependencies</h2>
           </div>
@@ -286,7 +285,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               <span className="deps-label">Depends on:</span>
               <div className="deps-bullets flex flex-wrap gap-1">
                 {taskDeps.length === 0 ? <span>None</span> : taskDeps.map(d => (
-                  d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} />
+                  <DependencyBullet key={d} dependency={d} />
                 ))}
               </div>
             </div>
@@ -294,12 +293,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               <span className="deps-label">Required by:</span>
               <div className="deps-bullets flex flex-wrap gap-1">
                 {taskDependents.length === 0 ? <span>None</span> : taskDependents.map(d => (
-                  d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} isInbound /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} isInbound />
+                  <DependencyBullet key={d} dependency={d} isInbound/>
                 ))}
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         <section className="panel flex flex-col flex-1 min-h-0">
           <div className="section-header shrink-0">
@@ -338,6 +337,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
                 const fullId = `${task.id}.${f.id}`
                 const dependents = globalDependents[fullId] || []
+
                 const isDragSource = dragFeatureId === f.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
@@ -387,24 +387,24 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         </div>
                       </div>
                       <div className="col col-deps">
-                        <div className="deps-groups">
-                          <div className="deps-group">
-                            <span className="deps-label">Depends on:</span>
-                            <div className="deps-bullets flex flex-wrap gap-1">
-                              {deps.length === 0 ? <span className="text-gray-500">None</span> : deps.map(d => (
-                                d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} />
-                              ))}
-                            </div>
-                          </div>
-                          <div className="deps-group">
-                            <span className="deps-label">Required by:</span>
-                            <div className="deps-bullets flex flex-wrap gap-1">
-                              {dependents.length === 0 ? <span className="text-gray-500">None</span> : dependents.map(d => (
-                                d.includes('.') ? <FeatureDependencyBullet key={d} fullId={d} isInbound /> : <TaskDependencyBullet key={d} taskId={parseInt(d, 10)} isInbound />
-                              ))}
-                            </div>
-                          </div>
+                        <div className="deps-list" aria-label={`Dependencies for ${f.id}`}>
+                          {deps.length === 0 ? (
+                            <span className="dep-chip dep-chip--none" title="No dependencies">None</span>
+                          ) : (
+                            deps.map((d) => (
+                              <DependencyBullet key={d} dependency={d}/>
+                            ))
+                          )}
                         </div>
+                        
+                        {dependents.length > 0 && (
+                          <div className="deps-sub" aria-label={`Dependents of ${f.id}`}>
+                            <span className="deps-sub__label">Blocks</span>
+                            {dependents.map((d) => (
+                              <DependencyBullet key={d} dependency={d} isInbound/>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="col col-actions">
                         <div className="row-actions">
