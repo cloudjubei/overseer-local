@@ -99,6 +99,7 @@ This document describes how files and directories are organised in this reposito
   - Agent-facing tools:
     - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
     - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
+    - format_files (in standardTools.js): Formats specified files using Prettier and returns per-file statuses (changed/unchanged/skipped/errors). Writes changes by default and respects .prettierignore/config.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
@@ -158,6 +159,13 @@ Notes:
 - Output: { ok: boolean, results: { file, ok, errors_count, warnings_count, diagnostics[], time_ms }[], errors_total, warnings_total }
 - Notes: Uses TypeScript compiler API with noEmit to avoid generating output. Diagnostics include file, line/column, and message.
 
+## Code Formatting Tool (Agent)
+- Integrated into src/tools/standardTools.js as format_files.
+- Purpose: Apply Prettier formatting to specific files after writes so agents can keep code consistent.
+- Input: { files: string[], write?: boolean = true, ignore_path?: string }
+- Behavior: Respects project Prettier config and .prettierignore. Returns per-file statuses (changed/unchanged/skipped/errors) and writes changes when write is true.
+- Output: { ok: boolean, results: { file, ok, skipped, reason?, changed, written?, time_ms, message? }[], changed_count, skipped_count, error_count }
+
 ## Repository Tree
 ```
 repo_root/
@@ -191,7 +199,7 @@ repo_root/
 │  │  │     └─ coreMocks.tsx
 │  │  └─ ...
 │  ├─ tools/
-│  │  ├─ standardTools.js   ← includes preview_screenshot + ts_compile_check tools
+│  │  ├─ standardTools.js   ← includes preview_screenshot, ts_compile_check, format_files tools
 │  │  └─ preview/
 │  │     └─ analyzer.js
 │  └─ capture/

@@ -118,6 +118,19 @@ const standardToolSchemas = [
       },
       required: ['files']
     }
+  },
+  {
+    name: 'format_files',
+    description: 'Format a list of files using Prettier and return per-file statuses (changed/unchanged/skipped/errors). Writes changes by default.',
+    parameters: {
+      type: 'object',
+      properties: {
+        files: { type: 'array', items: { type: 'string' }, description: 'List of file paths (relative to repo root) to format.' },
+        write: { type: 'boolean', description: 'If true (default), write formatted content back to files. If false, only check and report if changes would be made.' },
+        ignore_path: { type: 'string', description: 'Optional custom .prettierignore path (relative to repo root).' }
+      },
+      required: ['files']
+    }
   }
 ];
 
@@ -526,7 +539,7 @@ const standardToolFunctions = {
           height,
           format: after.format,
           dataUrl: after.dataUrl, // final capture (after interactions)
-          before: before ? { dataUrl: before.dataUrl, file: beforeFile } : undefined,
+          before: { dataUrl: before ? before.dataUrl : undefined, file: before ? beforeFile : undefined },
           after: { dataUrl: after.dataUrl, file: afterFile },
         };
       } catch (error) {
@@ -669,6 +682,82 @@ const standardToolFunctions = {
 
     const okAll = results.every(r => r.ok);
     return { ok: okAll, results, errors_total: errorsTotal, warnings_total: warningsTotal };
+  },
+  async format_files({ files, write = true, ignore_path }) {
+    if (!Array.isArray(files) || files.length === 0) {
+      return { ok: false, error: 'files array is required and must be non-empty.' };
+    }
+
+    // Prettier is ESM in v3+, import dynamically
+    let prettier;
+    try {
+      // eslint-disable-next-line global-require
+      const mod = await import('prettier');
+      prettier = mod;
+    } catch (e) {
+      return { ok: false, error: 'Prettier is not installed. Please add devDependency "prettier".' };
+    }
+
+    const cwd = process.cwd();
+    const resolveRel = (p) => (path.isAbsolute(p) ? p : path.join(cwd, p));
+
+    const results = [];
+    let changedCount = 0;
+    let skippedCount = 0;
+    let errorCount = 0;
+
+    for (const rel of files) {
+      const full = resolveRel(rel);
+      const start = Date.now();
+      try {
+        // Ensure file exists
+        const st = await fs.stat(full).catch(() => null);
+        if (!st || !st.isFile()) {
+          errorCount += 1;
+          results.push({ file: rel, ok: false, reason: 'not_found', message: 'File not found', changed: false, skipped: false, time_ms: Date.now() - start });
+          continue;
+        }
+
+        // Check ignore rules and infer parser
+        const info = await prettier.getFileInfo(full, {
+          ignorePath: ignore_path ? resolveRel(ignore_path) : undefined,
+          // Let prettier search for plugins relative to project root
+          pluginSearchDirs: [cwd]
+        });
+        if (info.ignored) {
+          skippedCount += 1;
+          results.push({ file: rel, ok: true, skipped: true, reason: 'ignored', changed: false, time_ms: Date.now() - start });
+          continue;
+        }
+
+        const source = await fs.readFile(full, 'utf8');
+        const config = await prettier.resolveConfig(full).catch(() => null);
+        const options = { ...(config || {}), filepath: full };
+
+        let formatted;
+        try {
+          formatted = await prettier.format(source, options);
+        } catch (formatErr) {
+          errorCount += 1;
+          results.push({ file: rel, ok: false, skipped: false, changed: false, reason: 'format_error', message: String(formatErr?.message || formatErr), time_ms: Date.now() - start });
+          continue;
+        }
+
+        const changed = formatted !== source;
+        if (changed && write) {
+          await fs.writeFile(full, formatted, 'utf8');
+        }
+        if (changed) changedCount += 1;
+
+        results.push({ file: rel, ok: true, skipped: false, changed, written: Boolean(write && changed), time_ms: Date.now() - start });
+      } catch (e) {
+        errorCount += 1;
+        results.push({ file: rel, ok: false, skipped: false, changed: false, reason: 'error', message: String(e?.message || e), time_ms: Date.now() - start });
+      }
+    }
+
+    const okAll = results.every(r => r.ok);
+    return { ok: okAll, results, changed_count: changedCount, skipped_count: skippedCount, error_count: errorCount };
   }
 };
 

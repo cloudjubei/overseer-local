@@ -15,7 +15,7 @@
     },
     {
       "id": "10.2",
-      "status": "-",
+      "status": "+",
       "title": "Tool for running code formatter on a file",
       "description": "When an agent writes to a file we would want to apply common formatting rules. So the tool needs to accept a list of filenames, apply formatting to them, and return a list of statuses.",
       "plan": "",
