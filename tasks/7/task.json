@@ -263,22 +263,6 @@
     {
       "id": "7.20",
       "status": "+",
-      "title": "Create a unified screen with side panel style - Settings screen",
-      "description": "Settings should have a panel that behaves similarly to the Sidebar (it's collapsible). It holds the different sections. This kind of component, a screen with a sidepanel needs to be unified, reusable and made slick and pretty.",
-      "plan": "",
-      "context": [
-        "src/index.css",
-        "src/renderer/screens/SettingsView.tsx",
-        "src/renderer/screens/SidebarView.tsx",
-        "docs/design/DESIGN_SYSTEM.md",
-        "docs/ux/LINEAR_UX_GUIDELINES.md",
-        "docs/STANDARDS.md"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "7.21",
-      "status": "+",
       "title": "Feature dragging should follow the same pattern as Task dragging.",
       "description": "The same visual cues need to be used in both places with nice animations.",
       "plan": "",
@@ -296,7 +280,7 @@
       "acceptance": []
     },
     {
-      "id": "7.22",
+      "id": "7.21",
       "status": "+",
       "title": "Home - List <-> Board switch",
       "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
@@ -314,7 +298,7 @@
       "acceptance": []
     },
     {
-      "id": "7.23",
+      "id": "7.22",
       "status": "+",
       "title": "Creating a feature doesn't work",
       "description": "The required connector/IPC isn't implemented - i.e. tasksService.addFeature doesn't work",
@@ -326,7 +310,7 @@
       ]
     },
     {
-      "id": "7.24",
+      "id": "7.23",
       "status": "+",
       "title": "Edit feature should allow editing the rejection field",
       "description": "When nothing is input, the key is removed from the feature - otherwise it should be saved. If a feature has a rejection, it should display an exclamation badge next to the status in the Feature list.",
@@ -337,7 +321,7 @@
       ]
     },
     {
-      "id": "7.25",
+      "id": "7.24",
       "status": "+",
       "title": "Edit and create feature views should show the Status Bullet",
       "description": "Both views need to allow editing of the feature's status",
@@ -349,7 +333,7 @@
       ]
     },
     {
-      "id": "7.26",
+      "id": "7.25",
       "status": "+",
       "title": "Tasks list dragging error",
       "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
@@ -369,33 +353,46 @@
       "acceptance": []
     },
     {
+      "id": "7.26",
+      "status": "-",
+      "title": "StatusBadge + StatusBullet edit improvement",
+      "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
       "id": "7.27",
-      "status": "?",
+      "status": "+",
+      "title": "Create a unified screen with side panel style - Settings screen",
+      "description": "Settings should have a panel that behaves similarly to the Sidebar (it's collapsible). It holds the different sections. This kind of component, a screen with a sidepanel needs to be unified, reusable and made slick and pretty.",
+      "plan": "",
+      "context": [
+        "src/index.css",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/SidebarView.tsx",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "7.28",
+      "status": "-",
       "title": "Reuse the sidepanel for Documents",
       "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
       "context": [
         "src/renderer/components/ui/CollapsibleSidebar.tsx",
         "src/renderer/screens/SettingsView.tsx",
-        "src/renderer/screens/DocumentsView.tsx",
-        "src/styles/layout/nav.css"
+        "src/renderer/screens/DocumentsView.tsx"
       ],
       "acceptance": [],
       "dependencies": [
-        "7.20"
-      ],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
-    },
-    {
-      "id": "7.28",
-      "status": "?",
-      "title": "StatusBadge + StatusBullet edit improvement",
-      "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen.",
-      "plan": "",
-      "context": [],
-      "acceptance": [],
-      "dependencies": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+        "7.27"
+      ]
     },
     {
       "id": "7.29",
@@ -406,12 +403,11 @@
       "context": [
         "src/renderer/components/ui/CollapsibleSidebar.tsx",
         "src/renderer/screens/SettingsView.tsx",
-        "src/renderer/screens/NotificationsView.tsx",
-        "src/styles/layout/nav.css"
+        "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
       "dependencies": [
-        "7.20"
+        "7.27"
       ]
     },
     {
@@ -423,13 +419,25 @@
       "context": [
         "src/renderer/components/ui/CollapsibleSidebar.tsx",
         "src/renderer/screens/SettingsView.tsx",
-        "src/renderer/screens/ChatView.tsx",
-        "src/styles/layout/nav.css"
+        "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [],
       "dependencies": [
-        "7.20"
+        "7.27"
       ]
+    },
+    {
+      "id": "7.31",
+      "status": "-",
+      "title": "Sidepanel issues when in mobile mode",
+      "description": "When in mobile mode (i.e. small screen) the main sidebar gets pushed to the top. On a screen that has the CollapsibleSidebar - when then main sidebar is closed everything is ok, but when it's open - it gets pushed underneath the CollapsibleSidebar.\nOn mobile the CollapsibleSidebar should behave the same way as the main Sidebar.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
     }
   ]
 }

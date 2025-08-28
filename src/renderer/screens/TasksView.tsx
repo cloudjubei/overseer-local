@@ -17,7 +17,7 @@ const TasksView: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ fontFamily: 'sans-serif' }}>
+    <div className="flex flex-col w-full h-full" style={{ fontFamily: 'sans-serif' }}>
       {content}
     </div>
   );

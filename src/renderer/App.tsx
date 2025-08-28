@@ -71,7 +71,7 @@ function App()
             <NotificationClickHandler />
             <CommandMenu />
             <ShortcutsHelp />
-            <div className="flex h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+            <div className="flex h-full w-full overflow-hidden">
               <SidebarView />
               <ModalHost />
             </div>

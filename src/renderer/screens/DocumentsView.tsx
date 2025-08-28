@@ -268,7 +268,7 @@ export default function DocumentsView() {
   }, [filteredTree]);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col">
+    <div className="flex min-h-0 w-full h-full flex-col">
       <header className="shrink-0 border-b border-border-subtle bg-surface-base">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0 flex items-center gap-2">
