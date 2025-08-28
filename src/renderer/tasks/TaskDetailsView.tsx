@@ -105,20 +105,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
       tsk.features.forEach(f => {
         (f.dependencies || []).forEach(dep => {
           if (!map[dep]) map[dep] = []
-          map[dep].push(`${taskId}.${f.id}`)
+          map[dep].push(`${f.id}`)
         })
       });
     })
     return map
   }, [index])
-
-  const featuresById = useMemo(() => {
-    const byId: Record<string, Feature> = {}
-    if (task?.features) {
-      task.features.forEach(f => { byId[f.id] = f })
-    }
-    return byId
-  }, [task])
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
@@ -235,11 +227,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     )
   }
 
-  const features = Array.isArray(task.features) ? task.features : []
-  const taskDeps = Array.isArray(task.dependencies) ? task.dependencies : []
-  const taskFullId = `${task.id}`
-  const taskDependents = globalDependents[taskFullId] || []
-
   const dndEnabled = !saving
 
   const onListDrop = () => {
@@ -271,7 +258,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
         <div className="details-header__meta">
           <span className="meta-item"><span className="meta-label">ID</span><span className="meta-value">{String(task.id)}</span></span>
           <span className="meta-item"><span className="meta-label">Status</span><span className="meta-value">{STATUS_LABELS[task.status as Status] || String(task.status)}</span></span>
-          <span className="meta-item"><span className="meta-label">Features</span><span className="meta-value">{features.length}</span></span>
+          <span className="meta-item"><span className="meta-label">Features</span><span className="meta-value">{task.features.length}</span></span>
         </div>
       </header>
 
@@ -288,30 +275,6 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
           <p className="task-desc">{task.description || 'No description provided.'}</p>
         </section>
 
-        {/* <section className="panel shrink-0">
-          <div className="section-header">
-            <h2 className="section-title">Dependencies</h2>
-          </div>
-          <div className="deps-groups">
-            <div className="deps-group">
-              <span className="deps-label">Depends on:</span>
-              <div className="deps-bullets flex flex-wrap gap-1">
-                {taskDeps.length === 0 ? <span>None</span> : taskDeps.map(d => (
-                  <DependencyBullet key={d} dependency={d} />
-                ))}
-              </div>
-            </div>
-            <div className="deps-group">
-              <span className="deps-label">Required by:</span>
-              <div className="deps-bullets flex flex-wrap gap-1">
-                {taskDependents.length === 0 ? <span>None</span> : taskDependents.map(d => (
-                  <DependencyBullet key={d} dependency={d} isInbound/>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section> */}
-
         <section className="panel flex flex-col flex-1 min-h-0">
           <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
@@ -322,7 +285,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
             </div>
           </div>
 
-          {features.length === 0 ? (
+          {task.features.length === 0 ? (
             <div className="flex-1 min-h-0 overflow-y-auto empty">No features defined for this task.</div>
           ) : (
             <ul
@@ -345,9 +308,9 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                 <div className="col col-deps">Dependencies</div>
                 <div className="col col-actions"></div>
               </li>
-              {features.map((f: Feature, idx: number) => {
+              {task.features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
-                const fullId = `${task.id}.${f.id}`
+                const fullId = `${f.id}`
                 const dependents = globalDependents[fullId] || []
 
                 const isDragSource = dragFeatureId === f.id
@@ -399,9 +362,9 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         </div>
                       </div>
                       <div className="col col-deps">
-                        <div className="deps-list" aria-label={`Dependencies for ${f.id}`}>
+                        <div className="chips-list" aria-label={`Dependencies for ${f.id}`}>
                           {deps.length === 0 ? (
-                            <span className="dep-chip dep-chip--none" title="No dependencies">None</span>
+                            <span className="chip chip--none" title="No dependencies">None</span>
                           ) : (
                             deps.map((d) => (
                               <DependencyBullet key={d} dependency={d}/>
@@ -410,8 +373,8 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                         </div>
                         
                         {dependents.length > 0 && (
-                          <div className="deps-sub" aria-label={`Dependents of ${f.id}`}>
-                            <span className="deps-sub__label">Blocks</span>
+                          <div className="chips-sub" aria-label={`Dependents of ${f.id}`}>
+                            <span className="chips-sub__label">Blocks</span>
                             {dependents.map((d) => (
                               <DependencyBullet key={d} dependency={d} isInbound/>
                             ))}

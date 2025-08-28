@@ -31,17 +31,6 @@
 .col-actions { display:flex; align-items:center; gap: 8px; justify-content: flex-end; }
 .row-actions { display:inline-flex; gap: 6px; opacity: 0; pointer-events: none; transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease); }
 .feature-row:hover .row-actions, .feature-row:focus .row-actions { opacity: 1; pointer-events: auto; }
-
-/* Dependencies visualization */
-.deps-list { display:flex; align-items:center; gap: 6px; flex-wrap: wrap; }
-.deps-sub { display:flex; align-items:center; gap: 6px; margin-top: 4px; }
-.deps-sub__label { font-size: var(--fs-xxs, 10px); color: var(--text-muted); padding: 2px 6px; border-radius: var(--radius-round); border: 1px solid var(--border-subtle); }
-.dep-chip { display:inline-flex; align-items:center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-round); font-size: var(--fs-xxs, 10px); border: 1px solid var(--border-default); background: var(--surface-base); color: var(--text-secondary); }
-.dep-chip--ok { background: color-mix(in srgb, var(--status-review-soft-bg) 42%, transparent); border-color: var(--status-review-soft-border); color: var(--text-primary); }
-.dep-chip--missing { background: color-mix(in srgb, var(--status-stuck-soft-bg) 42%, transparent); border-color: var(--status-stuck-soft-border); color: var(--text-primary); }
-.dep-chip--blocks { background: color-mix(in srgb, var(--status-working-soft-bg) 36%, transparent); border-color: var(--status-working-soft-border); color: var(--text-primary); }
-.dep-chip--none { opacity: 0.7; }
-
 .empty { padding: 12px; color: var(--text-secondary); }
 
 @media (max-width: 900px) {

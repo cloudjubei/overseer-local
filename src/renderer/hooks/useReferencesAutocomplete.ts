@@ -22,7 +22,7 @@ export function useReferencesAutocomplete(params: {
     Object.values(index.tasksById).forEach(task => {
       refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
       task.features.forEach(f => {
-        refs.push({ ref: `${task.id}.${f.id}`, title: f.title, type: 'feature' });
+        refs.push({ ref: `${f.id}`, title: f.title, type: 'feature' });
       });
     });
     return refs.sort((a, b) => a.ref.localeCompare(b.ref));

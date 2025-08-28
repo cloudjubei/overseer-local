@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Status } from 'src/types/tasks'
+import type { Task, Feature, Status } from 'src/types/tasks'
 import StatusBullet from './tasks/StatusBullet'
 import StatusBadge from './tasks/StatusBadge'
 import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
-import type { Task, TasksIndexSnapshot } from '../services/tasksService'
+import type { TasksIndexSnapshot } from '../services/tasksService'
 import type { ProjectsIndexSnapshot } from '../services/projectsService'
 
 export type FeatureFormValues = {
@@ -21,7 +21,6 @@ type Props = {
   onCancel: () => void
   onDelete?: () => void
   submitting?: boolean
-  isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
   allTasksSnapshot?: TasksIndexSnapshot
   allProjectsSnapshot?: ProjectsIndexSnapshot
@@ -29,28 +28,10 @@ type Props = {
   featureId?: string
 }
 
-function toTasksArray(index: TasksIndexSnapshot): Task[] {
-  const tasksById = index?.tasksById || {}
-  const arr = Object.values(tasksById) as Task[]
-  if (index?.orderedIds && Array.isArray(index.orderedIds)) {
-    const byId: Record<number, Task> = tasksById as any
-    return index.orderedIds.map((id) => byId[id]).filter(Boolean)
-  }
-  arr.sort((a, b) => (a.id || 0) - (b.id || 0))
-  return arr
-}
-
-function getNodeId(dep: string): string {
-  const parts = dep.split('.')
-  return parts.length > 1 ? `f${parts[0]}_${parts[1]}` : `t${parts[0]}`
-}
-
 function validateDependencies(
   proposed: string[],
   snapshot: TasksIndexSnapshot,
-  taskId: number,
-  featureId?: string,
-  isCreate = false
+  featureId?: string
 ): { ok: boolean; message?: string } {
   const invalid: string[] = []
   const nodes = new Set<string>()
@@ -58,17 +39,16 @@ function validateDependencies(
   const tasksById = snapshot.tasksById || {}
 
   Object.values(tasksById).forEach((task: Task) => {
-    const tid = `t${task.id}`
+    const tid = `${task.id}`
     nodes.add(tid)
-    graph.set(tid, (task.dependencies || []).map(getNodeId))
-    task.features.forEach((f) => {
-      const fid = `f${task.id}_${f.id}`
+    graph.set(tid, (task.dependencies || []))
+    task.features.forEach((f: Feature) => {
+      const fid = `${f.id}`
       nodes.add(fid)
-      graph.set(fid, (f.dependencies || []).map(getNodeId))
+      graph.set(fid, (f.dependencies || []))
     })
   })
 
-  const selfFeature = featureId ? `${taskId}.${featureId}` : null
   const unique = new Set(proposed)
   if (unique.size !== proposed.length) {
     return { ok: false, message: 'Duplicate dependencies' }
@@ -76,23 +56,22 @@ function validateDependencies(
 
   const proposedNodes: string[] = []
   for (const dep of proposed) {
-    if (selfFeature && dep === selfFeature) {
+    if (featureId && dep === featureId) {
       invalid.push(dep)
       continue
     }
-    const targetNode = getNodeId(dep)
-    if (!nodes.has(targetNode)) {
+    if (!nodes.has(dep)) {
       invalid.push(dep)
       continue
     }
-    proposedNodes.push(targetNode)
+    proposedNodes.push(dep)
   }
   if (invalid.length) {
     return { ok: false, message: `Invalid or self dependencies: ${invalid.join(', ')}` }
   }
 
-  const thisNode = isCreate ? `f${taskId}_new` : `f${taskId}_${featureId}`
-  if (!isCreate) {
+  const thisNode = featureId ? `${featureId}` : "new"
+  if (featureId) {
     graph.set(thisNode, proposedNodes)
   } else {
     nodes.add(thisNode)
@@ -132,12 +111,11 @@ export function FeatureForm({
   onCancel,
   onDelete,
   submitting = false,
-  isCreate = false,
   titleRef,
   allTasksSnapshot,
   allProjectsSnapshot,
   taskId,
-  featureId,
+  featureId = undefined,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -153,6 +131,7 @@ export function FeatureForm({
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
+  const isCreate = !(featureId !== null && featureId !== undefined)
 
   useEffect(() => {
     if (combinedTitleRef?.current) {
@@ -172,7 +151,7 @@ export function FeatureForm({
       setError(null)
     }
     if (allTasksSnapshot) {
-      const depVal = validateDependencies(dependencies, allTasksSnapshot, taskId, featureId, isCreate)
+      const depVal = validateDependencies(dependencies, allTasksSnapshot, featureId)
       if (!depVal.ok) {
         setDepError(depVal.message ?? 'Invalid dependencies')
         valid = false

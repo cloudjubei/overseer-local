@@ -20,6 +20,7 @@ function getTaskIdsForProject(spec: ProjectSpec): number[] {
 
 function doesTaskMatch(task: any, q: string): boolean {
   return (
+    `${task.id}`.toLowerCase().includes(q) ||
     task.title.toLowerCase().includes(q) ||
     (task.description || '').toLowerCase().includes(q)
   )
@@ -27,6 +28,7 @@ function doesTaskMatch(task: any, q: string): boolean {
 
 function doesFeatureMatch(f: any, q: string): boolean {
   return (
+    `${f.id}`.toLowerCase().includes(q) ||
     f.title.toLowerCase().includes(q) ||
     (f.description || '').toLowerCase().includes(q)
   )
@@ -116,7 +118,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
         </div>
         <ul className="ml-4 space-y-1">
           {matchingFeatures.map((f) => {
-            const fdep = `${tid}.${f.id}`
+            const fdep = `${f.id}`
             const isSelf = currentTaskId === tid && currentFeatureId === f.id
             const isFDisabled = isSelf || existingDeps.includes(fdep)
             return (

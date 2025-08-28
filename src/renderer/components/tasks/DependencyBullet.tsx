@@ -75,13 +75,12 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
 
   return (
     <Tooltip content={content}>
-      <span
-        className="dependency-bullet"
+       <span
+        className={`chip  ${isFeatureDependency ? "feature" : "task"} ${isInbound ? "chip--blocks" : "dep-chip--ok"}`} title={`${dependency}${isInbound ? ' (requires this)' : ''}`}
         onClick={handleClick}
-        aria-label={`${dependency}${isInbound ? ' (requires this)' : ''}`}
-      >
-        #{dependency}
-      </span>
+        >
+          #{dependency}
+       </span>
     </Tooltip>
   );
 };

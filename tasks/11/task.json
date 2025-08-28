@@ -87,9 +87,9 @@
     },
     {
       "id": "11.7",
-      "status": "?",
-      "title": "Display task dependencies in TaskDetails and Tasks list",
-      "description": "When a feature has dependencies from different tasks, show these task-level dependencies in the TaskDetails view and in the main Tasks list. Create appropriate visual indicators and grouping to distinguish between feature-level and task-level dependencies. Ensure the display is clean and not overwhelming.",
+      "status": "-",
+      "title": "Display task dependencies in TaskDetailsView and TasksListView",
+      "description": "When a task has dependencies show these in:\n1) TaskDetails view next to the Status.\n2) TasksListView as a the one but last column.\nBoth should have it presented in the same way as a Feature does in the TaskDetailsView",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
@@ -101,8 +101,7 @@
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      "dependencies": []
     },
     {
       "id": "11.8",
@@ -122,9 +121,9 @@
     },
     {
       "id": "11.9",
-      "status": "?",
+      "status": "-",
       "title": "Create project-wide dependency resolution service",
-      "description": "Implement a service that can resolve dependency references across the entire project scope as defined in config.json. This service should handle loading and indexing all projects, tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
+      "description": "Implement a service that can resolve dependency references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
@@ -133,7 +132,7 @@
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
-      "rejection": "Blocked: Unable to locate projects/config.json or understand the multi-project loading mechanism, as relevant files like main.ts and preload.ts are missing. This prevents implementing the dependency resolution service across multiple projects."
+      "dependencies": []
     },
     {
       "id": "11.10",
