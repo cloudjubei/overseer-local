@@ -87,7 +87,7 @@
     },
     {
       "id": "11.7",
-      "status": "-",
+      "status": "?",
       "title": "Display task dependencies in TaskDetails and Tasks list",
       "description": "When a feature has dependencies from different tasks, show these task-level dependencies in the TaskDetails view and in the main Tasks list. Create appropriate visual indicators and grouping to distinguish between feature-level and task-level dependencies. Ensure the display is clean and not overwhelming.",
       "plan": "",
@@ -101,7 +101,8 @@
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "dependencies": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
     },
     {
       "id": "11.8",
