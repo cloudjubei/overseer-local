@@ -65,3 +65,13 @@
   background: var(--status-stuck-bg);
   color: var(--status-stuck-fg);
 }
+
+/* Collapsible Overview */
+.collapse-toggle { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-muted); }
+.collapse-toggle:hover { color: var(--text-primary); }
+.icon-chevron { transition: transform var(--motion-fast); display: block; width: 16px; height: 16px; }
+.icon-chevron.expanded { transform: rotate(90deg); }
+.overview-content { transition: max-height var(--motion-normal) var(--easing-decelerate); overflow: hidden; }
+.overview-content.collapsed { max-height: 0; }
+.overview-content.expanded { max-height: 6em; overflow-y: auto; }
+.task-desc { margin: 0; line-height: 1.5; }

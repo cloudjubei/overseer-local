@@ -514,7 +514,7 @@
     },
     {
       "id": "7.37",
-      "status": "-",
+      "status": "+",
       "title": "TaskDetailsView",
       "description": "Overview needs to be collapsible. When expanded, it can be scrolled and should be fitting at most 4 lines of text.",
       "plan": "",
