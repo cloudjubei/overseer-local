@@ -383,7 +383,7 @@
     },
     {
       "id": "7.28",
-      "status": "-",
+      "status": "+",
       "title": "Task deletion",
       "description": "It should be possible to delete a task from the edit screen (after extra alert confirmation).\nThe user should be then taken to the TasksList screen.",
       "plan": "",

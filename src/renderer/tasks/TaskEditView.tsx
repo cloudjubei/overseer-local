@@ -3,10 +3,12 @@ import { TaskForm, TaskFormValues } from '../components/TaskForm'
 import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
+import { useNavigator } from '../navigation/Navigator'
 import type { Task } from 'src/types/tasks'
 
 export default function TaskEditView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
   const { toast } = useToast()
+  const navigator = useNavigator()
   const [initialValues, setInitialValues] = useState<Task | null>(null)
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
@@ -60,6 +62,7 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
       const res = await tasksService.deleteTask(taskId)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Task deleted successfully', variant: 'success' })
+      navigator.navigateView('Home')
       doClose()
     } catch (e: any) {
       setAlertMessage(`Failed to delete task: ${e.message || String(e)}`)
