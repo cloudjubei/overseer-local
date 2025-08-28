@@ -202,7 +202,7 @@ export default function CollapsibleSidebar(props: Props) {
               aria-hidden
             />
             <div className="fixed inset-y-0 left-0 z-30" style={{ width: 260 }}>
-              <SidebarContent collapsed={false} setCollapsed={() => {}} />
+              <SidebarContent collapsed={false} setCollapsed={() => setMobileOpen(false)} />
             </div>
           </>
         )}
