@@ -3,7 +3,7 @@ import { NavigationView } from '../types';
 
 export type TasksRoute =
   | { name: 'list' }
-  | { name: 'details'; taskId: number };
+  | { name: 'details'; taskId: number; highlightFeatureId?: string };
 
 export type ModalRoute =
   | { type: 'task-create' }
@@ -26,7 +26,7 @@ export type NavigatorApi = NavigatorState & ModalState & {
   openModal: (m: ModalRoute) => void;
   closeModal: () => void;
   navigateView: (v: NavigationView) => void;
-  navigateTaskDetails: (taskId: number) => void;
+  navigateTaskDetails: (taskId: number, highlightFeatureId?: string) => void;
 };
 
 function viewPrefixToView(prefix: string): NavigationView {
@@ -51,14 +51,14 @@ function parseHash(hashRaw: string): NavigatorState {
   const [prefixRaw] = raw.split('/');
   const prefix = prefixRaw || 'home';
 
-  // Determine current view from the first segment
   const currentView: NavigationView = viewPrefixToView(prefix);
 
-  // Tasks route (details) recognized on legacy top-level form
   let tasksRoute: TasksRoute = { name: 'list' };
   let m: RegExpExecArray | null;
-  if ((m = /^task\/(\d+)$/.exec(raw))) {
-    tasksRoute = { name: 'details', taskId: parseInt(m[1], 10) };
+  if ((m = /^task\/(\d+)(?:\/highlight\/(\w+))?/.exec(raw))) {
+    const taskId = parseInt(m[1], 10);
+    const highlightFeatureId = m[2] || undefined;
+    tasksRoute = { name: 'details', taskId, highlightFeatureId };
   }
 
   return { currentView, tasksRoute };
@@ -76,7 +76,6 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
       setState(next);
     };
     window.addEventListener('hashchange', onHash);
-    // Initialize
     onHash();
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -109,8 +108,12 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const navigateTaskDetails = useCallback((taskId: number) => {
-    window.location.hash = `#task/${taskId}`;
+  const navigateTaskDetails = useCallback((taskId: number, highlightFeatureId?: string) => {
+    let hash = `#task/${taskId}`;
+    if (highlightFeatureId) {
+      hash += `/highlight/${highlightFeatureId}`;
+    }
+    window.location.hash = hash;
   }, []);
 
   const value = useMemo<NavigatorApi>(() => ({

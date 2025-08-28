@@ -39,6 +39,10 @@ This document describes how files and directories are organised in this reposito
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
+    - FeatureDependencyBullet.tsx: Reusable bullet for feature dependencies with hover summary and click navigation.
+    - TaskDependencyBullet.tsx: Reusable bullet for task dependencies with hover summary and click navigation.
+    - FeatureSummaryCallout.tsx: Summary card for feature on hover.
+    - TaskSummaryCallout.tsx: Summary card for task on hover.
   - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
     - previewHost.tsx: React PreviewHost component that dynamically loads a component module and mounts it with provided props and providers. Wraps content in a stable `#preview-stage` container and signals readiness via `window.__PREVIEW_READY` + `preview:ready` event.
     - main.tsx: Entry point that boots the preview host.
@@ -77,6 +81,7 @@ This document describes how files and directories are organised in this reposito
     - useTheme.ts
     - useNotifications.ts
     - useNotificationPreferences.ts
+    - useTasksIndex.ts: Hook to access the tasks index snapshot.
   - src/renderer/screens/
     - SidebarView.tsx
     - TasksView.tsx
