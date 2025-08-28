@@ -13,12 +13,12 @@ export interface DependencyBulletProps {
 
 const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbound = false }) => {
   const index = useTasksIndex();
-  const { navigateTaskDetails } = useNavigator();
+  const { navigateTaskDetails, tasksRoute } = useNavigator();
 
   const parts = dependency.split('.');
-  const isFeatureDependency = parts.length > 0
+  const isFeatureDependency = parts.length > 1;
   const taskId = parseInt(parts[0], 10);
-  const featureId = isFeatureDependency ? parts[1] : undefined
+  const featureId = isFeatureDependency ? parts[1] : undefined;
 
   const task = index?.tasksById?.[taskId];
   const feature = task?.features?.find(f => f.id === dependency);
@@ -46,7 +46,30 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   )
 
   const handleClick = () => {
-    navigateTaskDetails(taskId, featureId);
+    const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === taskId;
+    if (isSameTask) {
+      if (featureId) {
+        const row = document.querySelector(`.feature-row[data-feature-id="${featureId}"]`);
+        if (row) {
+          row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          row.classList.add('highlighted');
+          setTimeout(() => row.classList.remove('highlighted'), 2000);
+        }
+      } else {
+        const element = document.querySelector('.details-header');
+        if (element) {
+          element.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          element.classList.add('highlighted');
+          setTimeout(() => element.classList.remove('highlighted'), 2000);
+        }
+      }
+    } else {
+      if (featureId) {
+        navigateTaskDetails(taskId, featureId);
+      } else {
+        navigateTaskDetails(taskId, undefined, true);
+      }
+    }
   };
   const content = isFeatureDependency ? <FeatureSummaryCallout {...summary} /> : <TaskSummaryCallout {...summary} />
 

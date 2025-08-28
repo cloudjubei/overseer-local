@@ -3,7 +3,7 @@ import { NavigationView } from '../types';
 
 export type TasksRoute =
   | { name: 'list' }
-  | { name: 'details'; taskId: number; highlightFeatureId?: string };
+  | { name: 'details'; taskId: number; highlightFeatureId?: string; highlightTask?: boolean };
 
 export type ModalRoute =
   | { type: 'task-create' }
@@ -26,7 +26,7 @@ export type NavigatorApi = NavigatorState & ModalState & {
   openModal: (m: ModalRoute) => void;
   closeModal: () => void;
   navigateView: (v: NavigationView) => void;
-  navigateTaskDetails: (taskId: number, highlightFeatureId?: string) => void;
+  navigateTaskDetails: (taskId: number, highlightFeatureId?: string, highlightTask?: boolean) => void;
 };
 
 function viewPrefixToView(prefix: string): NavigationView {
@@ -55,10 +55,11 @@ function parseHash(hashRaw: string): NavigatorState {
 
   let tasksRoute: TasksRoute = { name: 'list' };
   let m: RegExpExecArray | null;
-  if ((m = /^task\/(\d+)(?:\/highlight\/(\w+))?/.exec(raw))) {
+  if ((m = /^task\/(\d+)(?:\/highlight-task)?(?:\/highlight-feature\/(\w+))?/.exec(raw))) {
     const taskId = parseInt(m[1], 10);
     const highlightFeatureId = m[2] || undefined;
-    tasksRoute = { name: 'details', taskId, highlightFeatureId };
+    const highlightTask = raw.includes('/highlight-task') ? true : undefined;
+    tasksRoute = { name: 'details', taskId, highlightFeatureId, highlightTask };
   }
 
   return { currentView, tasksRoute };
@@ -108,10 +109,12 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const navigateTaskDetails = useCallback((taskId: number, highlightFeatureId?: string) => {
+  const navigateTaskDetails = useCallback((taskId: number, highlightFeatureId?: string, highlightTask: boolean = false) => {
     let hash = `#task/${taskId}`;
     if (highlightFeatureId) {
-      hash += `/highlight/${highlightFeatureId}`;
+      hash += `/highlight-feature/${highlightFeatureId}`;
+    } else if (highlightTask) {
+      hash += `/highlight-task`;
     }
     window.location.hash = hash;
   }, []);

@@ -192,17 +192,29 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   }
 
   const highlightFeatureId = tasksRoute.name === 'details' && tasksRoute.taskId === taskId ? tasksRoute.highlightFeatureId : undefined
+  const highlightTaskFlag = tasksRoute.name === 'details' && tasksRoute.taskId === taskId ? tasksRoute.highlightTask : undefined
 
   useEffect(() => {
     if (highlightFeatureId) {
       const row = document.querySelector(`.feature-row[data-feature-id="${highlightFeatureId}"]`)
       if (row) {
-        row.scrollIntoView({ block: 'center' });
+        row.scrollIntoView({ block: 'center', behavior: 'smooth' });
         row.classList.add('highlighted')
         setTimeout(() => row.classList.remove('highlighted'), 2000)
       }
     }
   }, [highlightFeatureId])
+
+  useEffect(() => {
+    if (highlightTaskFlag) {
+      const element = document.querySelector('.details-header')
+      if (element) {
+        element.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        element.classList.add('highlighted')
+        setTimeout(() => element.classList.remove('highlighted'), 2000)
+      }
+    }
+  }, [highlightTaskFlag])
 
   if (!task) {
     return (
