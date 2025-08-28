@@ -75,7 +75,7 @@ export function FeatureForm({
       setError(null)
     }
 
-    const contextRef = featureId ? `${taskId}.${featureId}` : null
+    const contextRef = featureId ? `${featureId}` : null
     const depVal = dependencyResolver.validateDependencyList(contextRef, dependencies)
     if (!depVal.ok) {
       setDepError(depVal.message ?? 'Invalid dependencies')

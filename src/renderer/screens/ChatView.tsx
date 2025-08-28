@@ -46,7 +46,6 @@ export default function ChatView() {
     onSelect: onRefsSelect,
   } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef })
 
-  // Always scroll to bottom on new messages
   useEffect(() => {
     const el = messageListRef.current
     if (!el) return
@@ -347,7 +346,7 @@ export default function ChatView() {
 
               {isAutocompleteOpen && autocompletePosition && (
                 <div
-                  className="absolute z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+                  className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
                   style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px` }}
                   role="listbox"
                   aria-label="Docs suggestions"
@@ -367,7 +366,7 @@ export default function ChatView() {
 
               {isRefsOpen && refsPosition && (
                 <div
-                  className="absolute z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+                  className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
                   style={{ left: `${refsPosition.left}px`, top: `${refsPosition.top}px` }}
                   role="listbox"
                   aria-label="References suggestions"

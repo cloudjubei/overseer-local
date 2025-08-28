@@ -116,7 +116,7 @@ export class DependencyResolver {
       const task = tasksById[taskId];
       if (!task) continue;
       for (const feat of task.features || []) {
-        featuresById[`${taskId}.${feat.id}`] = { ...feat };
+        featuresById[`${feat.id}`] = { ...feat };
       }
     }
 
@@ -137,7 +137,7 @@ export class DependencyResolver {
       }
 
       for (const feat of task.features || []) {
-        const fromFeatRef = `${taskId}.${feat.id}`;
+        const fromFeatRef = `${feat.id}`;
         for (const dep of feat.dependencies || []) {
           const validation = this.validateRef(dep);
           if (!validation.ok) {
@@ -166,7 +166,7 @@ export class DependencyResolver {
       return { input: ref, code: 'BAD_TASK_ID', message: 'Task id must be an integer' };
     }
     if (parts.length === 1) return { kind: 'task', taskId } as const;
-    return { kind: 'feature', taskId, featureId: parts[1] } as const;
+    return { kind: 'feature', taskId, featureId: ref } as const;
   }
 
   resolveRef(ref: string): ResolvedRef | InvalidRefError {
@@ -185,7 +185,7 @@ export class DependencyResolver {
     if (!task) {
       return { input: ref, code: 'TASK_NOT_FOUND', message: `Task ${parsed.taskId} not found` };
     }
-    const key = `${parsed.taskId}.${parsed.featureId}`;
+    const key = `${parsed.featureId}`;
     const feature = this.index.featuresById[key];
     if (!feature) {
       return { input: ref, code: 'FEATURE_NOT_FOUND', message: `Feature ${key} not found` };
@@ -261,7 +261,7 @@ export class DependencyResolver {
       }
 
       for (const feat of task.features || []) {
-        const featRef = `${taskId}.${feat.id}`;
+        const featRef = `${feat.id}`;
         graph.set(featRef, []);
         for (const dep of feat.dependencies || []) {
           if (this.validateRef(dep).ok) addEdge(featRef, dep);
@@ -323,7 +323,7 @@ export class DependencyResolver {
         results.push({ ref: `${taskId}`, kind: 'task', title: task.title, subtitle: `Task #${taskId}` });
       }
       for (const feat of task.features || []) {
-        const ref = `${taskId}.${feat.id}`;
+        const ref = `${feat.id}`;
         if (feat.title.toLowerCase().includes(q)) {
           results.push({ ref, kind: 'feature', title: feat.title, subtitle: `Feature #${ref}` });
         }

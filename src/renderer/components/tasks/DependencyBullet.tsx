@@ -7,7 +7,7 @@ import FeatureSummaryCallout from './FeatureSummaryCallout';
 import { dependencyResolver } from '../../services/dependencyResolver';
 
 export interface DependencyBulletProps {
-  dependency: string; // format: "taskId" or "taskId.featureId"
+  dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
   isInbound?: boolean;
 }
 
@@ -52,11 +52,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
         }
       }
     } else {
-      if (featureId) {
-        navigateTaskDetails(targetTaskId, featureId);
-      } else {
-        navigateTaskDetails(targetTaskId, undefined, true);
-      }
+      navigateTaskDetails(targetTaskId, featureId, !featureId);
     }
   };
 

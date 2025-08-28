@@ -16,15 +16,13 @@ export function useReferencesAutocomplete(params: {
   const { input, setInput, textareaRef, mirrorRef } = params;
   const index = useTasksIndex();
 
-  // Build searchable refs across all tasks and features (taskId and taskId.featureId)
   const references = useMemo<RefItem[]>(() => {
     if (!index?.tasksById) return [];
     const refs: RefItem[] = [];
     Object.values(index.tasksById).forEach((task) => {
-      refs.push({ ref: `${task.id}` , title: task.title, type: 'task' });
+      refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
       (task.features || []).forEach((f) => {
-        // IMPORTANT: include task id prefix so refs are taskId.featureId
-        refs.push({ ref: `${task.id}.${f.id}`, title: f.title, type: 'feature' });
+        refs.push({ ref: `${f.id}`, title: f.title, type: 'feature' });
       });
     });
     return refs.sort((a, b) => a.ref.localeCompare(b.ref));
