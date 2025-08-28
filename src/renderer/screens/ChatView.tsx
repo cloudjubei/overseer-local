@@ -130,18 +130,16 @@ export default function ChatView() {
   })), [chatHistories, deleteChat])
 
   return (
-    <div className="flex w-full h-full overflow-hidden">
-      <CollapsibleSidebar
-        items={chatItems}
-        activeId={currentChatId || ''}
-        onSelect={setCurrentChatId}
-        storageKey="chat-sidebar-collapsed"
-        headerTitle="Chats"
-        headerSubtitle=""
-        headerAction={<button className="btn" onClick={createChat} aria-label="Create new chat">New</button>}
-        emptyMessage="No chats yet"
-      />
-
+    <CollapsibleSidebar
+      items={chatItems}
+      activeId={currentChatId || ''}
+      onSelect={setCurrentChatId}
+      storageKey="chat-sidebar-collapsed"
+      headerTitle="History"
+      headerSubtitle=""
+      headerAction={<button className="btn" onClick={createChat} aria-label="Create new chat">New</button>}
+      emptyMessage="No chats yet"
+    >
       <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
         {/* Hidden mirror for caret positioning (docs autocomplete) */}
         <div
@@ -344,6 +342,6 @@ export default function ChatView() {
           </div>
         </div>
       </section>
-    </div>
+    </CollapsibleSidebar>
   )
 }

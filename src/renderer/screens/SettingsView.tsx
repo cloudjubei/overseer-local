@@ -153,10 +153,10 @@ export default function SettingsView() {
     <CollapsibleSidebar
       items={CATEGORIES}
       activeId={activeCategory}
-      onSelect={setActiveCategory}
+      onSelect={(c) => { setActiveCategory(c as CategoryId)}}
       storageKey="settings-panel-collapsed"
-      headerTitle="Settings"
-      headerSubtitle="Preferences"
+      headerTitle="Categories"
+      headerSubtitle=""
     >
       {activeCategory === 'visual' && renderVisualSection()}
       {activeCategory === 'llms' && renderLLMsSection()}

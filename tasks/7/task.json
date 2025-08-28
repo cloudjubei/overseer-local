@@ -354,14 +354,19 @@
     },
     {
       "id": "7.26",
-      "status": "?",
+      "status": "-",
       "title": "StatusBadge + StatusBullet edit improvement",
-      "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen.",
+      "description": "StatusBadge and StatusBullet should be merged into one component. In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above if it would be cut off by the bottom off the screen. All the places where these are used have been referenced in the context.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/components/tasks/StatusBadge.tsx",
+        "src/renderer/components/tasks/StatusBullet.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      "dependencies": []
     },
     {
       "id": "7.27",
@@ -381,7 +386,7 @@
     },
     {
       "id": "7.28",
-      "status": "?",
+      "status": "-",
       "title": "Reuse the sidepanel for Documents",
       "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
@@ -393,8 +398,7 @@
       "acceptance": [],
       "dependencies": [
         "7.27"
-      ],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
+      ]
     },
     {
       "id": "7.29",
@@ -433,6 +437,19 @@
       "status": "+",
       "title": "Sidepanel issues when in mobile mode",
       "description": "When in mobile mode (i.e. small screen) the main sidebar gets pushed to the top. On a screen that has the CollapsibleSidebar - when then main sidebar is closed everything is ok, but when it's open - it gets pushed underneath the CollapsibleSidebar.\nOn mobile the CollapsibleSidebar should behave the same way as the main Sidebar.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "7.32",
+      "status": "-",
+      "title": "Sidepanel issues when in mobile mode",
+      "description": "When in mobile mode (i.e. small screen) the CollapsibleSidebar cannot be closed by clicking the open/close button (it closes when tapping outside but needs to close on button click). The main Sidebar also has an issue - when the screen switches to mobiles mode and it's collapsed - then when trying to open it, it stays collapsed. In mobile mode both sidebars should always open non-collapsed.",
       "plan": "",
       "context": [
         "src/renderer/components/ui/CollapsibleSidebar.tsx",
