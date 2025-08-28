@@ -53,8 +53,20 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
     }
   }
 
-  const handleDelete = () => {
-    setShowDeleteConfirm(true)
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false)
+    setDeleting(true)
+    try {
+      const res = await tasksService.deleteTask(taskId)
+      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      toast({ title: 'Success', description: 'Task deleted successfully', variant: 'success' })
+      doClose()
+    } catch (e: any) {
+      setAlertMessage(`Failed to delete task: ${e.message || String(e)}`)
+      setShowAlert(true)
+    } finally {
+      setDeleting(false)
+    }
   }
 
   return (
@@ -68,52 +80,21 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
             onCancel={doClose}
             submitting={submitting || deleting}
             isCreate={false}
-            onDelete={handleDelete}
+            onDelete={() => setShowDeleteConfirm(true)}
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading task…</div>
         )}
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
-      {showDeleteConfirm && (
-        <Modal title="Delete Task" onClose={() => setShowDeleteConfirm(false)} isOpen={true} size="sm">
-          <p className="py-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Are you sure you want to delete this task? This action cannot be undone.
-          </p>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={deleting}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="btn-destructive"
-              disabled={deleting}
-              onClick={async () => {
-                setShowDeleteConfirm(false)
-                setDeleting(true)
-                try {
-                  const res = await tasksService.deleteTask(taskId)
-                  if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
-                  toast({ title: 'Success', description: 'Task deleted successfully', variant: 'success' })
-                  doClose()
-                } catch (e: any) {
-                  setAlertMessage(`Failed to delete task: ${e.message || String(e)}`)
-                  setShowAlert(true)
-                } finally {
-                  setDeleting(false)
-                }
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </Modal>
-      )}
+      <AlertDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Feature"
+        description="Are you sure you want to delete this feature? This will also remove any dependencies referencing it. This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+      />
     </>
   )
 }

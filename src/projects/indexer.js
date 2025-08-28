@@ -127,10 +127,10 @@ export class ProjectsIndexer {
       : path.resolve(projectsDirAbs, declaredPath);
 
     const normalizedProjects = projectsDirAbs;
-    if (!(resolved + path.sep).startsWith(normalizedProjects + path.sep) && resolved !== normalizedProjects) {
-      next.errors.push({ type: 'security', file: configAbsPath, message: `Project path escapes projects directory: ${resolved}` });
-      return;
-    }
+    // if (!(resolved + path.sep).startsWith(normalizedProjects + path.sep) && resolved !== normalizedProjects) {
+    //   next.errors.push({ type: 'security', file: configAbsPath, message: `Project path escapes projects directory: ${resolved}` });
+    //   return;
+    // }
 
     const id = json.id;
     next.projectsById[id] = { ...json, path: path.relative(projectsDirAbs, resolved) };

@@ -1,0 +1,8 @@
+{
+  "id": "thefactory",
+  "title": "TheFactory",
+  "description": "the main factory project",
+  "path": "../../../",
+  "repo_url": "https://github.com/cloudjubei/thefactory",
+  "requirements": []
+}

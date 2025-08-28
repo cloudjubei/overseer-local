@@ -12,7 +12,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -59,6 +59,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   }
 
   const handleDelete = async () => {
+    setShowDeleteConfirm(false)
     setSubmitting(true)
     try {
       if (!task) throw new Error('Task not found')
@@ -87,7 +88,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             initialValues={initialValues}
             onSubmit={onSubmit}
             onCancel={doClose}
-            onDelete={() => setShowConfirm(true)}
+            onDelete={() => setShowDeleteConfirm(true)}
             submitting={submitting}
             isCreate={false}
           />
@@ -97,8 +98,8 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
       </Modal>
       <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
       <AlertDialog
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
         title="Delete Feature"
         description="Are you sure you want to delete this feature? This will also remove any dependencies referencing it. This action cannot be undone."
         confirmText="Delete"

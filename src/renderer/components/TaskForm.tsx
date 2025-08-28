@@ -154,9 +154,13 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
         {onDelete && (
           <button
             type="button"
-            className="btn-destructive mr-auto"
             onClick={onDelete}
             disabled={submitting}
+            className="btn"
+            style={{
+              background: 'var(--status-stuck-bg)',
+              color: 'var(--status-stuck-fg)'
+            }}
           >
             Delete
           </button>
