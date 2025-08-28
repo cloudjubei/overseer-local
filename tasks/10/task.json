@@ -1,6 +1,6 @@
 {
   "id": 10,
-  "status": "-",
+  "status": "+",
   "title": "Terminal/code running tool",
   "description": "There are multiple problems we are facing: 1st the agent makes changes to files, but cannot verify the outcome of its work. We need to provide tools for it so that it would be able to check each new file it makes to see if it compiles. If possible, we should also think of allowing the agent of running the code in some isolated environment.",
   "features": [
@@ -33,7 +33,7 @@
     },
     {
       "id": "10.4",
-      "status": "-",
+      "status": "+",
       "title": "Tool for running any code",
       "description": "Similarly to feature 10.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
       "plan": "",
