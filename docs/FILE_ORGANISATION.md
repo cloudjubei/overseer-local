@@ -70,6 +70,7 @@ This document describes how files and directories are organised in this reposito
     - docsService.ts
     - tasksService.ts
     - notificationsService.ts
+    - dependencyResolver.ts ← NEW: Project-wide dependency resolution and validation service. Indexes all tasks and features, resolves refs like "#12" / "#12.4", builds reverse dependency graph, and exposes search helpers. Listens to tasks index updates.
   - src/renderer/hooks/
     - useChats.ts
     - useDocsIndex.ts
@@ -82,6 +83,7 @@ This document describes how files and directories are organised in this reposito
     - useNotifications.ts
     - useNotificationPreferences.ts
     - useTasksIndex.ts: Hook to access the tasks index snapshot.
+    - useDependencyResolver.ts ← NEW: Hook to access and subscribe to the dependency resolver index. Accepts optional ProjectSpec.
   - src/renderer/screens/
     - SidebarView.tsx
     - TasksView.tsx
@@ -161,7 +163,7 @@ Notes:
 
 ## Agent Preview Run Tool
 - Integrated into src/tools/standardTools.js as preview_run.
-- Purpose: Execute and validate a component or URL in headless Chromium, performing interactions and DOM/script assertions.
+- Purpose: Execute and validate a component or URL in a headless Chromium, performing interactions and DOM/script assertions.
 - Input: { mode, id/url, props?, needs?, theme?, variant?, base_url?, auto_detect?, width?, height?, device_scale_factor?, wait_selector?, delay_ms?, interactions?, asserts?, script?, html_selector?, timeout_ms? }
 - Output: { ok, url, results[], failures_count, console_logs[], page_errors[], script_result?, html?, width, height }
 - See docs/PREVIEW_RUN_TOOL.md for details and examples.
