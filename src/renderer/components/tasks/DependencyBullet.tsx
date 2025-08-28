@@ -7,7 +7,7 @@ import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
 
 export interface DependencyBulletProps {
-  dependency: string; // format: "taskId" or "taskId.featureId"
+  dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
   isInbound?: boolean;
 }
 

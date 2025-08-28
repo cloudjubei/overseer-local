@@ -167,7 +167,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "rejection": "the current UI/UX isn't user friendly"
+      "dependencies": []
     },
     {
       "id": "4.17",
