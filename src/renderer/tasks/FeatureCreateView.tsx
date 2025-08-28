@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { tasksService } from '../services/tasksService'
+import { projectsService } from '../services/projectsService'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import type { TasksIndexSnapshot } from '../../types/external'
+import type { TasksIndexSnapshot } from '../services/tasksService'
+import type { ProjectsIndexSnapshot } from '../services/projectsService'
 
 export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -11,10 +13,19 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
+  const [projectsSnapshot, setProjectsSnapshot] = useState<ProjectsIndexSnapshot | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    tasksService.getSnapshot().then(setSnapshot)
+    const fetchSnapshots = async () => {
+      const [tasksSnap, projectsSnap] = await Promise.all([
+        tasksService.getSnapshot(),
+        projectsService.getSnapshot()
+      ])
+      setSnapshot(tasksSnap)
+      setProjectsSnapshot(projectsSnap)
+    }
+    fetchSnapshots()
   }, [])
 
   const doClose = () => {
@@ -58,6 +69,7 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
           isCreate={true}
           titleRef={titleRef}
           allTasksSnapshot={snapshot}
+          allProjectsSnapshot={projectsSnapshot}
           taskId={taskId}
         />
       </Modal>

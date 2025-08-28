@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { tasksService } from '../services/tasksService'
+import { projectsService } from '../services/projectsService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import type { Feature, Task } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../../types/external'
+import type { TasksIndexSnapshot } from '../services/tasksService'
+import type { ProjectsIndexSnapshot } from '../services/projectsService'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -15,9 +17,10 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
+  const [projectsSnapshot, setProjectsSnapshot] = useState<ProjectsIndexSnapshot | null>(null)
 
   useEffect(() => {
-    tasksService.getSnapshot().then(setSnapshot)
+    projectsService.getSnapshot().then(setProjectsSnapshot)
   }, [])
 
   const doClose = () => {
@@ -36,6 +39,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         if (!cancelled) {
           setTask(loadedTask)
           setInitialValues(feature)
+          setSnapshot(idx)
         }
       } catch (e: any) {
         if (!cancelled) {
@@ -98,6 +102,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             submitting={submitting}
             isCreate={false}
             allTasksSnapshot={snapshot}
+            allProjectsSnapshot={projectsSnapshot}
             taskId={taskId}
             featureId={featureId}
           />

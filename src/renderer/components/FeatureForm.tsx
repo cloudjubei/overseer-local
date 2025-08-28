@@ -4,7 +4,8 @@ import StatusBullet from './tasks/StatusBullet'
 import StatusBadge from './tasks/StatusBadge'
 import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
-import type { Task, TasksIndexSnapshot } from '../../types/external'
+import type { Task, TasksIndexSnapshot } from '../services/tasksService'
+import type { ProjectsIndexSnapshot } from '../services/projectsService'
 
 export type FeatureFormValues = {
   title: string
@@ -23,6 +24,7 @@ type Props = {
   isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
   allTasksSnapshot?: TasksIndexSnapshot
+  allProjectsSnapshot?: ProjectsIndexSnapshot
   taskId: number
   featureId?: string
 }
@@ -133,6 +135,7 @@ export function FeatureForm({
   isCreate = false,
   titleRef,
   allTasksSnapshot,
+  allProjectsSnapshot,
   taskId,
   featureId,
 }: Props) {
@@ -157,8 +160,6 @@ export function FeatureForm({
       combinedTitleRef.current.select?.()
     }
   }, [combinedTitleRef])
-
-  const allTasks = useMemo(() => allTasksSnapshot ? toTasksArray(allTasksSnapshot) : [], [allTasksSnapshot])
 
   const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
 
@@ -389,10 +390,11 @@ export function FeatureForm({
       {showSelector && (
         <Modal title="Select Dependency" onClose={() => setShowSelector(false)} isOpen={true} size="md">
           <DependencySelector
-            allTasks={allTasks}
-            onSelect={(dep) => {
-              if (dependencies.includes(dep)) return
-              setDependencies([...dependencies, dep])
+            allTasksSnapshot={allTasksSnapshot}
+            allProjectsSnapshot={allProjectsSnapshot}
+            onConfirm={(deps) => {
+              const newDeps = deps.filter((d) => !dependencies.includes(d))
+              setDependencies([...dependencies, ...newDeps])
               setShowSelector(false)
             }}
             currentTaskId={taskId}

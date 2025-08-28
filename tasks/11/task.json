@@ -44,7 +44,7 @@
     },
     {
       "id": "11.4",
-      "status": "-",
+      "status": "+",
       "title": "Implement dependency browsing and selection interface",
       "description": "Create a dependency selector component that allows users to browse and select features and tasks from across the current project when creating or editing features. This should include search/filter capabilities and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, tasks, and features.",
       "plan": "",
