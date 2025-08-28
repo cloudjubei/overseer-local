@@ -92,9 +92,13 @@
       "description": "When a feature has dependencies from different tasks, show these task-level dependencies in the TaskDetails view and in the main Tasks list. Create appropriate visual indicators and grouping to distinguish between feature-level and task-level dependencies. Ensure the display is clean and not overwhelming.",
       "plan": "",
       "context": [
+        "src/types/tasks.ts",
         "src/renderer/tasks/TasksDetailsView.tsx",
         "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/components/tasks/DependencyBullet.tsx"
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/types.ts",
+        "src/renderer/services/tasksService.ts",
+        "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
       "dependencies": []
@@ -106,9 +110,12 @@
       "description": "Add click handlers to dependency bullets that navigate to the target feature or task and highlight it. For feature dependencies, navigate to the TaskDetails containing that feature and highlight the specific feature row. For task dependencies, navigate to the task and provide appropriate highlighting. Ensure smooth transitions and clear visual feedback.",
       "plan": "",
       "context": [
+        "src/types/tasks.ts",
         "src/renderer/tasks/TasksDetailsView.tsx",
         "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/components/tasks/DependencyBullet.tsx"
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/services/tasksService.ts",
+        "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": []
     },
@@ -118,7 +125,12 @@
       "title": "Create project-wide dependency resolution service",
       "description": "Implement a service that can resolve dependency references across the entire project scope as defined in config.json. This service should handle loading and indexing all projects, tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/types/tasks.ts",
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/services/tasksService.ts",
+        "src/renderer/hooks/useTasksIndex.ts"
+      ],
       "acceptance": []
     },
     {
@@ -127,7 +139,11 @@
       "title": "Implement chat '#' reference selector for tasks and features",
       "description": "Add functionality to the chat interface that shows a Task&Feature dependency selector when users type '#'. This should provide autocomplete/search functionality across all tasks and features in the project scope, allowing users to easily reference and link to specific items. The selected references should be rendered using the standard dependency bullet components.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/types/tasks.ts",
+        "src/renderer/services/tasksService.ts",
+        "src/renderer/hooks/useTasksIndex.ts"
+      ],
       "acceptance": []
     }
   ]
