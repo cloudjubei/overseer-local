@@ -5,6 +5,7 @@ import { useDocsIndex } from '../hooks/useDocsIndex'
 import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete'
 import { useLLMConfig } from '../hooks/useLLMConfig'
 import { useNavigator } from '../navigation/Navigator'
+import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import type { ChatMessage } from '../types'
 
 export default function ChatView() {
@@ -111,54 +112,35 @@ export default function ChatView() {
 
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
+  const chatItems = useMemo(() => chatHistories.map((id) => ({
+    id,
+    label: `Chat ${id}`,
+    icon: <span aria-hidden>💬</span>,
+    accent: 'gray',
+    action: (
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          deleteChat(id)
+        }}
+      >
+        Delete
+      </button>
+    ),
+  })), [chatHistories, deleteChat])
+
   return (
     <div className="flex w-full h-full overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 h-full shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-raised)] flex flex-col">
-        <div className="flex-shrink-0 flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
-          <h2 className="m-0 text-[13px] font-semibold text-[var(--text-secondary)] tracking-wide">Chats</h2>
-          <button className="btn" onClick={createChat} aria-label="Create new chat">
-            New
-          </button>
-        </div>
-        <div className="flex-1 min-h-0 overflow-y-auto p-2" role="list" aria-label="Chat list">
-          {chatHistories.length === 0 && (
-            <div className="text-[12px] text-[var(--text-muted)] px-2 py-1.5">No chats yet</div>
-          )}
-          {chatHistories.map((id) => {
-            const isActive = currentChatId === id
-            return (
-              <div
-                key={id}
-                role="listitem"
-                className={[
-                  'group flex items-center justify-between gap-2 cursor-pointer select-none px-2 py-1.5 rounded-md',
-                  'text-[var(--text-primary)] transition-colors',
-                  isActive
-                    ? 'border border-[var(--border-default)] bg-[var(--surface-overlay)]'
-                    : 'hover:bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]',
-                ].join(' ')}
-                onClick={() => setCurrentChatId(id)}
-                aria-current={isActive ? 'true' : undefined}
-                title={`Open Chat ${id}`}
-              >
-                <span className="truncate">Chat {id}</span>
-                <button
-                  className="opacity-60 group-hover:opacity-100 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    deleteChat(id)
-                  }}
-                  aria-label={`Delete Chat ${id}`}
-                  title="Delete chat"
-                >
-                  Delete
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      </aside>
+      <CollapsibleSidebar
+        items={chatItems}
+        activeId={currentChatId || ''}
+        onSelect={setCurrentChatId}
+        storageKey="chat-sidebar-collapsed"
+        headerTitle="Chats"
+        headerSubtitle=""
+        headerAction={<button className="btn" onClick={createChat} aria-label="Create new chat">New</button>}
+        emptyMessage="No chats yet"
+      />
 
       <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
         {/* Hidden mirror for caret positioning (docs autocomplete) */}

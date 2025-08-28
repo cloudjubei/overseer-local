@@ -150,7 +150,7 @@ export default function SettingsView() {
   );
 
   return (
-    <div className="flex min-h-0 w-full">
+    <div className="flex min-h-0 w-full h-full">
       <CollapsibleSidebar
         items={CATEGORIES}
         activeId={activeCategory}
