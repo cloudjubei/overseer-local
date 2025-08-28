@@ -87,7 +87,7 @@
     },
     {
       "id": "11.7",
-      "status": "-",
+      "status": "+",
       "title": "Display task dependencies in TaskDetailsView and TasksListView",
       "description": "When a task has dependencies show these in:\n1) TaskDetails view next to the Status.\n2) TasksListView as a the one but last column.\nBoth should have it presented in the same way as a Feature does in the TaskDetailsView",
       "plan": "",

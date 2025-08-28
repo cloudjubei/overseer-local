@@ -98,12 +98,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     if (!index?.tasksById) return map
     Object.entries(index.tasksById).forEach(([tId, tsk]) => {
       const taskId = parseInt(tId, 10);
-      (tsk.dependencies || []).forEach(dep => {
+      ;(tsk.dependencies || []).forEach(dep => {
         if (!map[dep]) map[dep] = []
         map[dep].push(`${taskId}`)
       });
       tsk.features.forEach(f => {
-        (f.dependencies || []).forEach(dep => {
+        ;(f.dependencies || []).forEach(dep => {
           if (!map[dep]) map[dep] = []
           map[dep].push(`${f.id}`)
         })
@@ -237,6 +237,9 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     clearDndState()
   }
 
+  const taskDeps = Array.isArray(task.dependencies) ? task.dependencies : []
+  const taskDependents = globalDependents[String(task.id)] || []
+
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
@@ -252,6 +255,26 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               onChange={(next) => handleTaskStatusChange(task.id, next)}
               className="reveal-on-hover"
             />
+          </div>
+          {/* Task-level dependencies shown next to status */}
+          <div className="chips-group ml-3" aria-label={`Dependencies for Task ${task.id}`}>
+            <div className="chips-list">
+              {taskDeps.length === 0 ? (
+                <span className="chip chip--none" title="No dependencies">None</span>
+              ) : (
+                taskDeps.map((d) => (
+                  <DependencyBullet key={d} dependency={d} />
+                ))
+              )}
+            </div>
+            {taskDependents.length > 0 && (
+              <div className="chips-sub">
+                <span className="chips-sub__label">Blocks</span>
+                {taskDependents.map((d) => (
+                  <DependencyBullet key={d} dependency={d} isInbound />
+                ))}
+              </div>
+            )}
           </div>
           <div className="spacer" />
         </div>
@@ -398,7 +421,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
         </section>
       </main>
 
-      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering a6</div>}
     </div>
   )
 }

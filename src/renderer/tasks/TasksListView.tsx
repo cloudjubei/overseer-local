@@ -10,6 +10,7 @@ import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import StatusBullet from '../components/tasks/StatusBullet'
 import { useActiveProject } from '../projects/ProjectContext'
+import DependencyBullet from '../components/tasks/DependencyBullet'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -115,6 +116,26 @@ export default function TasksListView() {
     } else {
       setAllTasks([])
     }
+  }, [index])
+
+  // Build a dependents map: key is dependency id (taskId or taskId.featureId), value is array of dependents (taskId or featureId strings)
+  const globalDependents = useMemo(() => {
+    const map: Record<string, string[]> = {}
+    if (!index?.tasksById) return map
+    Object.entries(index.tasksById).forEach(([tId, tsk]) => {
+      const tid = parseInt(tId, 10)
+      ;(tsk.dependencies || []).forEach((dep) => {
+        if (!map[dep]) map[dep] = []
+        map[dep].push(`${tid}`)
+      })
+      ;(tsk.features || []).forEach((f) => {
+        ;(f.dependencies || []).forEach((dep) => {
+          if (!map[dep]) map[dep] = []
+          map[dep].push(`${f.id}`)
+        })
+      })
+    })
+    return map
   }, [index])
 
   // Keyboard shortcut: Cmd/Ctrl+N for new task
@@ -304,6 +325,8 @@ export default function TasksListView() {
                 const isDragSource = dragTaskId === t.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
+                const deps = Array.isArray(t.dependencies) ? t.dependencies : []
+                const dependents = globalDependents[String(t.id)] || []
                 return (
                   <li key={t.id} className="task-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -329,7 +352,7 @@ export default function TasksListView() {
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                      aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. Press Enter to view details.`}
+                      aria-label={`Task ${t.id}: ${t.title}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to view details.`}
                     >
                       <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
                       <div className="col col-title">
@@ -349,6 +372,25 @@ export default function TasksListView() {
                           />
                         </div>
                       </div>
+                      <div className="col col-deps">
+                        <div className="chips-list" aria-label={`Dependencies for Task ${t.id}`}>
+                          {deps.length === 0 ? (
+                            <span className="chip chip--none" title="No dependencies">None</span>
+                          ) : (
+                            deps.map((d) => (
+                              <DependencyBullet key={d} dependency={d} />
+                            ))
+                          )}
+                        </div>
+                        {dependents.length > 0 && (
+                          <div className="chips-sub" aria-label={`Dependents of Task ${t.id}`}>
+                            <span className="chips-sub__label">Blocks</span>
+                            {dependents.map((d) => (
+                              <DependencyBullet key={d} dependency={d} isInbound />
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <div className="col col-features">{done}/{total}</div>
                     </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -360,7 +402,7 @@ export default function TasksListView() {
         </div>
       )}
 
-      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering 3 a6</div>}
     </section>
   )
 }

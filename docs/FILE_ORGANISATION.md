@@ -57,8 +57,8 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/screens/
     - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
   - src/renderer/tasks/: Screens and views for tasks.
-    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor.
-    - TaskDetailsView.tsx: Right-side details panel.
+    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor. Now also displays task dependencies in a dedicated column before Features.
+    - TaskDetailsView.tsx: Right-side details panel. Now displays task-level dependencies next to the status, using the same chips and hover callouts as feature dependencies. Also computes inbound dependents (Blocks).
     - BoardView.tsx: Kanban-style board with columns by status.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
@@ -106,7 +106,7 @@ This document describes how files and directories are organised in this reposito
     - preview_run (in standardTools.js): Loads a component or URL in a headless browser, performs interactions, and runs assertions or custom script to verify behavior. See docs/PREVIEW_RUN_TOOL.md.
     - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
     - format_files (in standardTools.js): Formats specified files using Prettier and returns per-file statuses (changed/unchanged/skipped/errors). Writes changes by default and respects .prettierignore/config.
-    - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode. Supports mounting a temporary workspace directory populated with provided files, capturing stdout/stderr, enforcing a timeout, optional network isolation, resource limits (memory/CPU), and collecting specified output files from the workspace. Returns { ok, image, cmd, exit_code, timed_out, duration_ms, stdout, stderr, collected[] }.
+    - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode. Supports mounting a temporary workspace directory populated with provided files.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
@@ -141,7 +141,7 @@ Notes:
 - In dev, open http://localhost:<vite-port>/preview.html with query params:
   - id: module path under src (e.g., renderer/components/ui/Button.tsx#default)
   - props: URL-encoded JSON of props (or base64 if props_b64=1)
-  - needs: Comma-separated provider keys to include (in addition to defaults)
+  - needs: Comma-separated dependency keys to include (in addition to defaults)
   - theme: light | dark (applies data-theme on <html>)
 - The preview stage element is available as `#preview-stage` and a `preview:ready` event fires after mount.
 
@@ -177,7 +177,7 @@ Notes:
 - Integrated into src/tools/standardTools.js as format_files.
 - Purpose: Apply Prettier formatting to specific files after writes so agents can keep code consistent.
 - Input: { files: string[], write?: boolean = true, ignore_path?: string }
-- Behavior: Respects project Prettier config and .prettierignore. Returns per-file statuses (changed/unchanged/skipped/errors) and writes changes when write is true.
+- Behavior: Respects project Prettier config and .prettierignore. Returns per-file statuses (changed/unchanged/skipped/errors). Writes changes when write is true.
 - Output: { ok: boolean, results: { file, ok, skipped, reason?, changed, written?, time_ms, message? }[], changed_count, skipped_count, error_count }
 
 ## Docker Run Tool (Agent)
