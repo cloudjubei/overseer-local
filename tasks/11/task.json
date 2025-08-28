@@ -122,7 +122,7 @@
     },
     {
       "id": "11.9",
-      "status": "-",
+      "status": "?",
       "title": "Create project-wide dependency resolution service",
       "description": "Implement a service that can resolve dependency references across the entire project scope as defined in config.json. This service should handle loading and indexing all projects, tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
       "plan": "",
@@ -132,7 +132,8 @@
         "src/renderer/services/tasksService.ts",
         "src/renderer/hooks/useTasksIndex.ts"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Unable to locate projects/config.json or understand the multi-project loading mechanism, as relevant files like main.ts and preload.ts are missing. This prevents implementing the dependency resolution service across multiple projects."
     },
     {
       "id": "11.10",
