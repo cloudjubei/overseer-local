@@ -139,21 +139,21 @@ export default function ChatView() {
   })), [chatHistories, deleteChat])
 
   const renderMessageContent = (content: string) => {
-    const regex = /(#\d+(?:\.\d+)?)/g;
-    const parts: (string | JSX.Element)[] = [];
-    let lastIndex = 0;
-    let match;
+    const regex = /(#[0-9]+(?:\.[0-9A-Za-z_-]+)?)/g
+    const parts: (string | JSX.Element)[] = []
+    let lastIndex = 0
+    let match: RegExpExecArray | null
     while ((match = regex.exec(content)) !== null) {
-      const textBefore = content.slice(lastIndex, match.index);
-      if (textBefore) parts.push(textBefore);
-      const dep = match[0].slice(1);
-      parts.push(<DependencyBullet key={match.index} dependency={dep} />);
-      lastIndex = regex.lastIndex;
+      const textBefore = content.slice(lastIndex, match.index)
+      if (textBefore) parts.push(textBefore)
+      const dep = match[0].slice(1)
+      parts.push(<DependencyBullet key={`${match.index}-${dep}`} dependency={dep} />)
+      lastIndex = regex.lastIndex
     }
-    const textAfter = content.slice(lastIndex);
-    if (textAfter) parts.push(textAfter);
-    return parts;
-  };
+    const textAfter = content.slice(lastIndex)
+    if (textAfter) parts.push(textAfter)
+    return parts
+  }
 
   return (
     <CollapsibleSidebar
@@ -167,7 +167,7 @@ export default function ChatView() {
       emptyMessage="No chats yet"
     >
       <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
-        {/* Hidden mirror for caret positioning (docs autocomplete) */}
+        {/* Hidden mirror for caret positioning (docs & refs autocomplete) */}
         <div
           ref={mirrorRef}
           aria-hidden="true"
@@ -231,7 +231,7 @@ export default function ChatView() {
               <div className="text-[18px] font-medium">Start chatting about the project</div>
               <div className="text-[13px] mt-2">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
               <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
-                Attach markdown or text files to give context. Mention docs with / to quickly link files.
+                Attach markdown or text files to give context. Mention docs with /, and reference tasks/features with #.
               </div>
             </div>
           ) : (
@@ -312,10 +312,10 @@ export default function ChatView() {
                   onInput={autoSizeTextarea}
                   onKeyDown={handleTextareaKeyDown}
                   className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
-                  placeholder={isConfigured ? 'Type your message…' : 'Configure your LLM in Settings to start chatting'}
+                  placeholder={isConfigured ? 'Type your message…' : 'You can compose a message and reference docs (#) even before configuring. Configure LLM to send.'}
                   rows={1}
                   aria-label="Message input"
-                  disabled={!isConfigured}
+                  // Allow composing and referencing even if LLM isn't configured; only sending is gated
                   style={{ maxHeight: 200, overflowY: 'auto' }}
                 />
                 <div className="px-3 py-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[12px] text-[var(--text-muted)]">
@@ -335,7 +335,7 @@ export default function ChatView() {
                       style={{ display: 'none' }}
                       onChange={handleFileUpload}
                     />
-                    <span className="hidden sm:inline">Tip: Use / to reference docs</span>
+                    <span className="hidden sm:inline">Tip: Use / for docs • Use # for tasks and features</span>
                   </div>
                   <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
                 </div>

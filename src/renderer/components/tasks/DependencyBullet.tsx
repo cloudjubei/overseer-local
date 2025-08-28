@@ -7,7 +7,7 @@ import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
 
 export interface DependencyBulletProps {
-  dependency: string;
+  dependency: string; // format: "taskId" or "taskId.featureId"
   isInbound?: boolean;
 }
 
@@ -21,29 +21,19 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   const featureId = isFeatureDependency ? parts[1] : undefined;
 
   const task = index?.tasksById?.[taskId];
-  const feature = task?.features?.find(f => f.id === dependency);
+  const feature = isFeatureDependency ? task?.features?.find((f) => f.id === featureId) : undefined;
 
-  const summary = isFeatureDependency ? (
-    feature ? {
-      title: feature.title,
-      description: feature.description,
-      status: feature.status as Status,
-    } : {
-      title: 'Not found',
-      description: '',
-      status: '-' as Status,
-    }
-  ) : (
-    task ? {
-      title: task.title,
-      description: task.description,
-      status: task.status as Status,
-    } : {
-      title: 'Not found',
-      description: '',
-      status: '-' as Status,
-    }
-  )
+  const summary = isFeatureDependency
+    ? feature
+      ? {
+          title: feature.title,
+          description: feature.description,
+          status: feature.status as Status,
+        }
+      : { title: 'Not found', description: '', status: '-' as Status }
+    : task
+    ? { title: task.title, description: task.description, status: task.status as Status }
+    : { title: 'Not found', description: '', status: '-' as Status };
 
   const handleClick = () => {
     const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === taskId;
@@ -71,16 +61,25 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
       }
     }
   };
-  const content = isFeatureDependency ? <FeatureSummaryCallout {...summary} /> : <TaskSummaryCallout {...summary} />
+  const content = isFeatureDependency ? <FeatureSummaryCallout {...summary} /> : <TaskSummaryCallout {...summary} />;
 
   return (
     <Tooltip content={content}>
-       <span
-        className={`chip  ${isFeatureDependency ? "feature" : "task"} ${isInbound ? "chip--blocks" : "dep-chip--ok"}`} title={`${dependency}${isInbound ? ' (requires this)' : ''}`}
+      <span
+        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isInbound ? 'chip--blocks' : 'dep-chip--ok'}`}
+        title={`${dependency}${isInbound ? ' (requires this)' : ''}`}
         onClick={handleClick}
-        >
-          #{dependency}
-       </span>
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+      >
+        #{dependency}
+      </span>
     </Tooltip>
   );
 };

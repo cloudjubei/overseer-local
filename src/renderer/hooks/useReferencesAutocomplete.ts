@@ -19,10 +19,11 @@ export function useReferencesAutocomplete(params: {
   const references = useMemo<RefItem[]>(() => {
     if (!index?.tasksById) return [];
     const refs: RefItem[] = [];
-    Object.values(index.tasksById).forEach(task => {
+    Object.values(index.tasksById).forEach((task) => {
       refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
-      task.features.forEach(f => {
-        refs.push({ ref: `${f.id}`, title: f.title, type: 'feature' });
+      (task.features || []).forEach((f) => {
+        // IMPORTANT: feature references must be taskId.featureId
+        refs.push({ ref: `${task.id}.${f.id}`, title: f.title, type: 'feature' });
       });
     });
     return refs.sort((a, b) => a.ref.localeCompare(b.ref));
@@ -39,9 +40,28 @@ export function useReferencesAutocomplete(params: {
 
     const style = window.getComputedStyle(textarea);
     const stylesToCopy = [
-      'boxSizing','borderBottomWidth','borderLeftWidth','borderRightWidth','borderTopWidth','fontFamily','fontSize','fontStyle','fontWeight','letterSpacing','lineHeight','paddingBottom','paddingLeft','paddingRight','paddingTop','textDecoration','textTransform','width'
+      'boxSizing',
+      'borderBottomWidth',
+      'borderLeftWidth',
+      'borderRightWidth',
+      'borderTopWidth',
+      'fontFamily',
+      'fontSize',
+      'fontStyle',
+      'fontWeight',
+      'letterSpacing',
+      'lineHeight',
+      'paddingBottom',
+      'paddingLeft',
+      'paddingRight',
+      'paddingTop',
+      'textDecoration',
+      'textTransform',
+      'width',
     ] as const;
-    stylesToCopy.forEach((key) => { (mirror.style as any)[key] = (style as any)[key]; });
+    stylesToCopy.forEach((key) => {
+      (mirror.style as any)[key] = (style as any)[key];
+    });
     mirror.style.overflowWrap = 'break-word';
     mirror.style.whiteSpace = 'pre-wrap';
     mirror.style.wordBreak = 'break-word';
@@ -66,16 +86,21 @@ export function useReferencesAutocomplete(params: {
     return { x, y };
   }
 
+  const isBoundaryChar = (ch: string) => {
+    // Consider whitespace and common punctuation as word boundaries
+    return /[\s\n\t\(\)\[\]\{\}<>,.!?:;"'`]/.test(ch);
+  };
+
   const checkForMention = (text: string, pos: number) => {
     let start = pos;
-    while (start > 0 && text[start - 1] !== ' ' && text[start - 1] !== '\n') {
+    while (start > 0 && !isBoundaryChar(text[start - 1])) {
       start--;
     }
     const word = text.slice(start, pos);
     if (word.startsWith('#')) {
       const query = word.slice(1).toLowerCase();
-      const filtered = references.filter(item => 
-        item.ref.startsWith(query) || item.title.toLowerCase().includes(query)
+      const filtered = references.filter(
+        (item) => item.ref.startsWith(query) || item.title.toLowerCase().includes(query)
       );
       setMatches(filtered);
       setMentionStart(start);
@@ -85,8 +110,8 @@ export function useReferencesAutocomplete(params: {
         const textareaRect = textarea.getBoundingClientRect();
         const style = window.getComputedStyle(textarea);
         const lineHeight = parseFloat(style.lineHeight) || 20;
-        const cursorLeft = textareaRect.left + coords.x;
-        const cursorTop = textareaRect.top + coords.y + lineHeight;
+        const cursorLeft = textareaRect.left + window.scrollX + coords.x;
+        const cursorTop = textareaRect.top + window.scrollY + coords.y + lineHeight;
         setPosition({ left: cursorLeft, top: cursorTop });
         setIsOpen(true);
         return;
@@ -134,7 +159,7 @@ export function useReferencesAutocomplete(params: {
       textarea.removeEventListener('keydown', handleInputEvent);
       textarea.removeEventListener('click', handleInputEvent);
     };
-  }, [references, textareaRef.current]);
+  }, [references, textareaRef]);
 
   return { isOpen, matches, position, onSelect };
 }
