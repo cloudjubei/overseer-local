@@ -121,7 +121,7 @@
     },
     {
       "id": "11.9",
-      "status": "+",
+      "status": "-",
       "title": "Create project-wide dependency resolution service",
       "description": "Implement a service that can resolve dependency references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
       "plan": "",
@@ -129,10 +129,15 @@
         "src/types/tasks.ts",
         "src/renderer/components/tasks/DependencyBullet.tsx",
         "src/renderer/services/tasksService.ts",
-        "src/renderer/hooks/useTasksIndex.ts"
+        "src/renderer/hooks/useTasksIndex.ts",
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/hooks/useDependencyResolver.ts",
+        "src/renderer/components/TaskForm.tsx",
+        "src/renderer/components/FeatureForm.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "dependencies": [],
+      "rejection": "wherever dependencies need to be calculated or referenced it should use the new dependency resolver. FeatureForm and TaskForm use it currently and calculate it on the go - BAD."
     },
     {
       "id": "11.10",
