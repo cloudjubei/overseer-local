@@ -457,6 +457,16 @@
       ],
       "acceptance": [],
       "dependencies": []
+    },
+    {
+      "id": "7.33",
+      "status": "-",
+      "title": "Creating a task is broken",
+      "description": "The status fields don't match the Task specification",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
     }
   ]
 }

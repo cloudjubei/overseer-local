@@ -1,0 +1,8 @@
+{
+  "id": 14,
+  "status": "-",
+  "title": "File references",
+  "description": "Right now there's the document indexer but we need to make it become a File indexer. It must be possible to reference any file to be provided as context into a Feature. Feature's have the context field, and this needs to be editable in edit or create mode. First there needs to be a standard file selector that is accesible in those edit/create popups. Second, each file needs to have a custom reusable display (name, size, last modification date, file type). Third, when hovering over a file - it should show a small preview card. Fourth, when clicking the summary card it should take the user to the full File view inside the Documents screen (which needs to be renamed Files) - but if the user has any pending changes (because of being in edit/create mode - then it should first alert the user about it). The now renamed Files screen should show all files, but only for Markdown we should have the nice editor - for everything else we should just show a basic viewer if possible.\n\nAn important factor here is that the custom reusable display needs to be used inside chat whenever there is a document mentioned. In chat, whenever the user starts typing '@' a small documents browser/selector should show where the user can keep on typing the name and it will filter all files so the user can select the appropriate one to reference. At the beginning, just show the browser with some useful information.\n\nVery important - it must be possible to reference any file in the whole project scope - as defined by the project's config.json under /projects.",
+  "features": [
+  ]
+}
