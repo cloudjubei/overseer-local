@@ -131,6 +131,36 @@ const standardToolSchemas = [
       },
       required: ['files']
     }
+  },
+  {
+    name: 'preview_run',
+    description: 'Load a component via preview.html (or any app URL) in an isolated headless browser, perform scripted interactions, and evaluate assertions or custom script to verify outcomes.',
+    parameters: {
+      type: 'object',
+      properties: {
+        mode: { type: 'string', enum: ['component', 'url'], description: 'component: build preview.html URL; url: use provided absolute/relative URL' },
+        id: { type: 'string', description: 'Module path under src/ with optional #ExportName, e.g., renderer/components/ui/Button.tsx#default' },
+        props: { type: 'object', description: 'Props override object for the target export' },
+        props_b64: { type: 'boolean', description: 'If true, encode props as base64 and set props_b64=1' },
+        needs: { type: 'array', items: { type: 'string' }, description: 'Additional preview provider keys' },
+        theme: { type: 'string', enum: ['light', 'dark', 'system'], description: 'Preview theme' },
+        variant: { type: 'string', description: 'Variant name to select (hash portion)' },
+        url: { type: 'string', description: 'Absolute or relative URL (relative resolved against base_url) when mode=url' },
+        base_url: { type: 'string', description: 'Dev server base URL (e.g., http://localhost:5173). Defaults to PREVIEW_BASE_URL or auto-detect.' },
+        auto_detect: { type: 'boolean', description: 'If true, try common localhost ports for base_url if not provided. Default true' },
+        width: { type: 'number', description: 'Viewport width (CSS px). Default 1024' },
+        height: { type: 'number', description: 'Viewport height (CSS px). Default 768' },
+        device_scale_factor: { type: 'number', description: 'Device scale factor (pixel ratio). Default 1' },
+        wait_selector: { type: 'string', description: 'CSS selector to wait for initial readiness; defaults to #preview-stage in component mode' },
+        delay_ms: { type: 'number', description: 'Additional delay before running assertions (ms)' },
+        interactions: { type: 'array', description: 'Array of interaction steps to perform before assertions (see preview_screenshot docs)', items: { type: 'object' } },
+        asserts: { type: 'array', description: 'List of assertion objects to evaluate in the page. Supported types: dom_text, exists, count, has_class, attr, eval', items: { type: 'object' } },
+        script: { type: 'string', description: 'Optional custom JS code to evaluate in the page context; should return a JSON-serializable value.' },
+        html_selector: { type: 'string', description: 'Optional selector to return outerHTML for inspection (default none). Common: #preview-stage' },
+        timeout_ms: { type: 'number', description: 'Overall timeout for navigation + waits (ms). Default 30000' }
+      },
+      required: []
+    }
   }
 ];
 
@@ -758,6 +788,264 @@ const standardToolFunctions = {
 
     const okAll = results.every(r => r.ok);
     return { ok: okAll, results, changed_count: changedCount, skipped_count: skippedCount, error_count: errorCount };
+  },
+  async preview_run(params = {}) {
+    const {
+      mode = 'component',
+      id,
+      props,
+      props_b64 = false,
+      needs = [],
+      theme,
+      variant,
+      url: urlParam,
+      base_url,
+      auto_detect = true,
+      width = 1024,
+      height = 768,
+      device_scale_factor = 1,
+      wait_selector: waitSelectorParam,
+      delay_ms = 0,
+      interactions = [],
+      asserts = [],
+      script,
+      html_selector,
+      timeout_ms = 30000,
+    } = params || {};
+
+    if (!puppeteer) {
+      return { ok: false, error: 'Puppeteer is not installed. Install "puppeteer" or "puppeteer-core" to use preview_run.', reason: 'missing_dependency' };
+    }
+
+    // Resolve base URL
+    let baseUrl = base_url || process.env.PREVIEW_BASE_URL || null;
+    if ((!baseUrl || baseUrl.trim() === '') && auto_detect) {
+      baseUrl = await probeBaseUrl();
+    }
+
+    // Build final URL
+    let finalUrl = '';
+    if (mode === 'component') {
+      if (!baseUrl) {
+        const hint = 'No base_url found. Set PREVIEW_BASE_URL or pass base_url. Example: http://localhost:5173';
+        return { ok: false, error: hint, reason: 'no_base_url', id };
+      }
+      finalUrl = buildComponentPreviewUrl({ baseUrl, id, props, props_b64, needs, theme, variant });
+    } else {
+      finalUrl = urlParam || '';
+      const isAbsolute = /^https?:\/\//i.test(finalUrl);
+      if (!isAbsolute) {
+        if (!baseUrl) {
+          const hint = 'Relative url used but no base_url found. Set PREVIEW_BASE_URL or pass base_url.';
+          return { ok: false, error: hint, reason: 'no_base_url' };
+        }
+        finalUrl = `${baseUrl.replace(/\/$/, '')}/${finalUrl.replace(/^\//, '')}`;
+      }
+    }
+
+    // Default wait selector for component previews is the stage container
+    const wait_selector = waitSelectorParam || (mode === 'component' ? '#preview-stage' : undefined);
+
+    // Launch browser
+    const launchOptions = {
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    };
+    if (puppeteer && (!puppeteer.executablePath || typeof puppeteer.executablePath !== 'function')) {
+      const exe = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH || process.env.CHROMIUM_PATH;
+      if (exe) launchOptions.executablePath = exe;
+    }
+
+    let browser;
+    let page;
+    const consoleLogs = [];
+    const pageErrors = [];
+
+    try {
+      browser = await puppeteer.launch(launchOptions);
+      page = await browser.newPage();
+      await page.setViewport({ width, height, deviceScaleFactor: device_scale_factor || 1 });
+
+      page.on('console', (msg) => {
+        try {
+          const args = msg.args ? msg.args().map(() => null) : [];
+          consoleLogs.push({ type: msg.type?.(), text: msg.text?.(), location: msg.location?.() || null, args_count: args.length });
+        } catch (_) {
+          consoleLogs.push({ type: 'log', text: msg.text?.() });
+        }
+      });
+      page.on('pageerror', (err) => {
+        pageErrors.push(String(err?.message || err));
+      });
+
+      await page.goto(finalUrl, { waitUntil: wait_selector ? 'domcontentloaded' : 'networkidle0', timeout: timeout_ms });
+      if (wait_selector) {
+        await page.waitForSelector(wait_selector, { timeout: Math.max(5000, Math.min(20000, timeout_ms)) });
+      }
+      try {
+        await page.waitForFunction(() => !!window.__PREVIEW_READY, { timeout: 5000 });
+      } catch (_) { /* ignore */ }
+
+      if (delay_ms && delay_ms > 0) {
+        await page.waitForTimeout(delay_ms);
+      }
+
+      if (Array.isArray(interactions) && interactions.length > 0) {
+        await performInteractions(page, interactions);
+      }
+
+      const results = [];
+
+      // Assertion runners executed in page context
+      async function runOne(a) {
+        try {
+          const res = await page.evaluate((assert) => {
+            function toRegex(rx, flags) {
+              try { return new RegExp(rx, flags || undefined); } catch (_) { return null; }
+            }
+            function cmpText(actual, assert) {
+              if (typeof assert.equals === 'string') return { pass: actual === assert.equals, expected: assert.equals, actual };
+              if (typeof assert.contains === 'string') return { pass: actual.includes(assert.contains), expected: `contains:${assert.contains}`, actual };
+              if (typeof assert.regex === 'string') {
+                const re = toRegex(assert.regex, assert.regex_flags);
+                if (!re) return { pass: false, expected: `regex:${assert.regex}`, actual, message: 'Invalid regex' };
+                return { pass: re.test(actual), expected: `regex:${assert.regex}` , actual };
+              }
+              return { pass: true, actual };
+            }
+            function countCompare(count, op, value) {
+              switch (op) {
+                case 'eq': return { pass: count === value };
+                case 'gte': return { pass: count >= value };
+                case 'lte': return { pass: count <= value };
+                case 'gt': return { pass: count > value };
+                case 'lt': return { pass: count < value };
+                default: return { pass: false, message: `Unknown op ${op}` };
+              }
+            }
+
+            const type = assert.type || 'eval';
+            if (type === 'dom_text') {
+              const el = document.querySelector(assert.selector);
+              if (!el) return { type, pass: false, message: `Element not found: ${assert.selector}` };
+              const text = (el.textContent || '').trim();
+              const c = cmpText(text, assert);
+              return { type, pass: c.pass, expected: c.expected, actual: c.actual, message: c.message };
+            }
+            if (type === 'exists') {
+              const count = document.querySelectorAll(assert.selector).length;
+              const present = count > 0;
+              const expected = assert.present !== false; // default true
+              const pass = expected ? present : !present;
+              return { type, pass, expected, actual: present, count };
+            }
+            if (type === 'count') {
+              const count = document.querySelectorAll(assert.selector).length;
+              const op = assert.op || 'eq';
+              const value = Number(assert.value || 0);
+              const r = countCompare(count, op, value);
+              return { type, pass: r.pass, op, value, actual: count, message: r.message };
+            }
+            if (type === 'has_class') {
+              const el = document.querySelector(assert.selector);
+              if (!el) return { type, pass: assert.present === false ? true : false, message: `Element not found: ${assert.selector}` };
+              const present = el.classList.contains(assert.class);
+              const expected = assert.present !== false; // default true
+              const pass = expected ? present : !present;
+              return { type, pass, expected, class: assert.class, actual: present };
+            }
+            if (type === 'attr') {
+              const el = document.querySelector(assert.selector);
+              if (!el) return { type, pass: false, message: `Element not found: ${assert.selector}` };
+              const val = el.getAttribute(assert.name);
+              if (typeof assert.equals === 'string' || typeof assert.contains === 'string' || typeof assert.regex === 'string') {
+                const c = cmpText(val ?? '', assert);
+                return { type, pass: c.pass, expected: c.expected, actual: c.actual, message: c.message, name: assert.name };
+              }
+              const present = val != null;
+              const expected = assert.present !== false; // default true
+              const pass = expected ? present : !present;
+              return { type, pass, expected, name: assert.name, actual: val };
+            }
+            if (type === 'eval') {
+              let value;
+              try {
+                // Treat expr as a JS expression; avoid Function constructor for safety if possible
+                if (typeof assert.expr === 'string' && assert.expr.trim()) {
+                  // eslint-disable-next-line no-new-func
+                  const fn = new Function(`return (${assert.expr})`);
+                  value = fn();
+                } else if (typeof assert.fn === 'function') {
+                  value = assert.fn();
+                } else {
+                  value = null;
+                }
+              } catch (e) {
+                return { type, pass: false, error: String(e?.message || e) };
+              }
+              if (Object.prototype.hasOwnProperty.call(assert, 'expect')) {
+                const pass = JSON.stringify(value) === JSON.stringify(assert.expect);
+                return { type, pass, expected: assert.expect, actual: value };
+              }
+              return { type, pass: true, actual: value };
+            }
+
+            return { type, pass: false, message: `Unknown assertion type: ${type}` };
+          }, a);
+          return { ok: true, ...res };
+        } catch (e) {
+          return { ok: false, type: a?.type, error: String(e?.message || e) };
+        }
+      }
+
+      for (const a of Array.isArray(asserts) ? asserts : []) {
+        // eslint-disable-next-line no-await-in-loop
+        const r = await runOne(a);
+        results.push(r);
+      }
+
+      let scriptResult = undefined;
+      if (typeof script === 'string' && script.trim()) {
+        try {
+          // eslint-disable-next-line no-new-func
+          const code = `(function(){ ${script}\n})();`;
+          scriptResult = await page.evaluate(new Function(`return ${JSON.stringify(code)}`));
+        } catch (e) {
+          scriptResult = { error: String(e?.message || e) };
+        }
+      }
+
+      let html = undefined;
+      if (typeof html_selector === 'string' && html_selector.trim()) {
+        try {
+          html = await page.$eval(html_selector, (el) => el.outerHTML);
+        } catch (e) {
+          html = undefined;
+        }
+      }
+
+      const failed = results.filter((r) => !(r && r.ok !== false && r.pass !== false)).length;
+
+      await page.close();
+      await browser.close();
+
+      return {
+        ok: failed === 0,
+        url: finalUrl,
+        results,
+        failures_count: failed,
+        console_logs: consoleLogs,
+        page_errors: pageErrors,
+        script_result: scriptResult,
+        html,
+        width,
+        height
+      };
+    } catch (error) {
+      try { if (page) await page.close(); } catch (_) {}
+      try { if (browser) await browser.close(); } catch (_) {}
+      return { ok: false, error: String(error?.message || error), url: finalUrl };
+    }
   }
 };
 

@@ -24,7 +24,7 @@
     },
     {
       "id": "10.3",
-      "status": "-",
+      "status": "+",
       "title": "Tool for running a view",
       "description": "WebContainers allows running code in an isolated environment - we want to extract this into a tool so that an agent could use this to check if the code they wrote results in the required outcome.",
       "plan": "",

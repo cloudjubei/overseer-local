@@ -49,8 +49,8 @@ This document describes how files and directories are organised in this reposito
     - Usage: visit /preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&theme=light
       - id: path (relative to src/) plus optional #ExportName (default: default)
       - props: URL-encoded JSON of props (or base64 if props_b64=1)
-      - needs: comma-separated dependency keys to include (in addition to defaults)
-      - theme: light | dark (applies data-theme attr)
+      - needs: Comma-separated dependency keys to include (in addition to defaults)
+      - theme: light | dark (applies data-theme on <html>)
   - src/renderer/screens/
     - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
   - src/renderer/tasks/: Screens and views for tasks.
@@ -98,6 +98,7 @@ This document describes how files and directories are organised in this reposito
     - analyzer.js: Library to analyze TSX components for preview capability.
   - Agent-facing tools:
     - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
+    - preview_run (in standardTools.js): Loads a component or URL in a headless browser, performs interactions, and runs assertions or custom script to verify behavior. See docs/PREVIEW_RUN_TOOL.md.
     - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
     - format_files (in standardTools.js): Formats specified files using Prettier and returns per-file statuses (changed/unchanged/skipped/errors). Writes changes by default and respects .prettierignore/config.
 - src/capture/: Main-process screenshot capture service and related utilities.
@@ -152,6 +153,13 @@ Notes:
 - Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md for details.
 - Requires a running dev server; provide base_url or set PREVIEW_BASE_URL.
 
+## Agent Preview Run Tool
+- Integrated into src/tools/standardTools.js as preview_run.
+- Purpose: Execute and validate a component or URL in headless Chromium, performing interactions and DOM/script assertions.
+- Input: { mode, id/url, props?, needs?, theme?, variant?, base_url?, auto_detect?, width?, height?, device_scale_factor?, wait_selector?, delay_ms?, interactions?, asserts?, script?, html_selector?, timeout_ms? }
+- Output: { ok, url, results[], failures_count, console_logs[], page_errors[], script_result?, html?, width, height }
+- See docs/PREVIEW_RUN_TOOL.md for details and examples.
+
 ## TypeScript Compile Check Tool (Agent)
 - Integrated into src/tools/standardTools.js as ts_compile_check.
 - Purpose: Quickly verify whether specific TS/TSX files compile (type-check) successfully against the project tsconfig.json.
@@ -174,6 +182,7 @@ repo_root/
 │  ├─ COMPONENT_PREVIEWS.md
 │  ├─ PREVIEW_ANALYZER.md
 │  ├─ PREVIEW_TOOL.md
+│  ├─ PREVIEW_RUN_TOOL.md
 │  ├─ STANDARDS.md
 │  ├─ BUILD_SIGNING.md
 │  ├─ design/
@@ -183,10 +192,9 @@ repo_root/
 │  │  └─ MONDAY_PALETTE_REFERENCE.md
 │  ├─ ux/
 │  │  └─ LINEAR_UX_GUIDELINES.md
-│  ├─ styleguide/
-│  │  ├─ index.html
-│  │  └─ README.md
-│  └─ tailwind.config.tokens.example.js
+│  └─ styleguide/
+│     ├─ index.html
+│     └─ README.md
 ├─ src/
 │  ├─ renderer/
 │  │  ├─ preview/
@@ -199,7 +207,7 @@ repo_root/
 │  │  │     └─ coreMocks.tsx
 │  │  └─ ...
 │  ├─ tools/
-│  │  ├─ standardTools.js   ← includes preview_screenshot, ts_compile_check, format_files tools
+│  │  ├─ standardTools.js   ← includes preview_screenshot, preview_run, ts_compile_check, format_files
 │  │  └─ preview/
 │  │     └─ analyzer.js
 │  └─ capture/
