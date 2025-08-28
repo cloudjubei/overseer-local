@@ -42,12 +42,13 @@
     },
     {
       "id": "11.4",
-      "status": "-",
+      "status": "?",
       "title": "Implement dependency browsing and selection interface",
       "description": "Create a dependency selector component that allows users to browse and select features and tasks from across the entire project scope when creating or editing features. This should include search/filter capabilities, project organization, and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, tasks, and features.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Cannot access or modify main process and preload scripts to implement cross-project data loading for the dependency selector. Files like src/preload/index.ts and src/main.ts are not found, preventing addition of required IPC handlers for reading /projects directory and config.json files."
     },
     {
       "id": "11.5",
