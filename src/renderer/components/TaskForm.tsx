@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Status } from 'src/types/tasks'
 
 export type TaskFormValues = {
   id: number
   title: string
-  status?: 'queued' | 'working' | 'review' | 'done' | 'stuck' | 'on_hold'
+  status: Status
   description?: string
 }
 
@@ -16,19 +17,18 @@ type Props = {
   titleRef?: React.RefObject<HTMLInputElement>
 }
 
-const STATUS_OPTIONS: Array<{ value: TaskFormValues['status']; label: string }> = [
-  { value: 'queued', label: 'Queued' },
-  { value: 'working', label: 'Working' },
-  { value: 'review', label: 'In Review' },
-  { value: 'done', label: 'Done' },
-  { value: 'stuck', label: 'Stuck' },
-  { value: 'on_hold', label: 'On Hold' },
+const STATUS_OPTIONS: Array<{ value: Status; label: string }> = [
+  { value: '-', label: 'Pending' },
+  { value: '~', label: 'In Progress' },
+  { value: '+', label: 'Done' },
+  { value: '?', label: 'Blocked' },
+  { value: '=', label: 'Deferred' },
 ]
 
 export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef }: Props) {
   const [id, setId] = useState<number>(initialValues?.id ?? 0)
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
-  const [status, setStatus] = useState<TaskFormValues['status']>(initialValues?.status ?? 'queued')
+  const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
   const [errors, setErrors] = useState<{ id?: string; title?: string }>({})
 
@@ -49,7 +49,7 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
   }, [id, title, submitting])
 
   function validate(): boolean {
-    const next: { id?: string; title?: string } = {}
+    const next: { id?: string; title?: فی string } = {}
     if (!Number.isInteger(id) || id <= 0) next.id = 'ID must be a positive integer'
     if (!title.trim()) next.title = 'Title is required'
     setErrors(next)
@@ -62,7 +62,7 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
     const payload: TaskFormValues = {
       id,
       title: title.trim(),
-      status: status ?? 'queued',
+      status,
       description: description?.trim() || '',
     }
     await onSubmit(payload)
@@ -130,13 +130,13 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
           <label htmlFor="task-status" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Status</label>
           <select
             id="task-status"
-            value={status ?? 'queued'}
-            onChange={(e) => setStatus(e.target.value as TaskFormValues['status'])}
+            value={status}
+            onChange={(e) => setStatus(e.target.value as Status)}
             disabled={submitting}
             className="ui-select w-full"
           >
             {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value ?? ''}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
