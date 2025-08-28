@@ -9,6 +9,7 @@ import Skeleton, { SkeletonText } from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import MarkdownEditor from '../components/MarkdownEditor';
+import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
 
 // Types from docs indexer (mirroring the browser view types for local use)
 type DocHeading = { level: number; text: string };
@@ -153,40 +154,38 @@ export default function DocumentsView() {
   const [selected, setSelected] = useState<string | null>(null);
   const [openSet, setOpenSet] = useState<Set<string>>(() => new Set(['<root>']));
 
-  // Collapsible sidebar state (persisted)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
-    try {
-      const v = localStorage.getItem('docs.sidebarCollapsed');
-      return v === '1';
-    } catch {
-      return false;
-    }
-  });
-  const toggleSidebar = useCallback(() => {
-    setSidebarCollapsed((prev) => {
-      const next = !prev;
-      try { localStorage.setItem('docs.sidebarCollapsed', next ? '1' : '0'); } catch {}
-      return next;
-    });
-  }, []);
-
   const searchRef = useRef<HTMLInputElement | null>(null);
   useKeyShortcut('/', () => searchRef.current?.focus());
+  useKeyShortcut('ArrowDown', () => {
+    const visibleFiles = visibleEntries.filter((e) => e.kind === 'file');
+    if (visibleFiles.length === 0) return;
+    if (!selected) {
+      setSelected(visibleFiles[0].relPath);
+      return;
+    }
+    const idx = visibleFiles.findIndex((e) => e.relPath === selected);
+    const nextIdx = Math.min(visibleFiles.length - 1, idx + 1);
+    if (nextIdx >= 0) setSelected(visibleFiles[nextIdx].relPath);
+  });
+  useKeyShortcut('ArrowUp', () => {
+    const visibleFiles = visibleEntries.filter((e) => e.kind === 'file');
+    if (visibleFiles.length === 0) return;
+    if (!selected) {
+      setSelected(visibleFiles[0].relPath);
+      return;
+    }
+    const idx = visibleFiles.findIndex((e) => e.relPath === selected);
+    const prevIdx = Math.max(0, idx - 1);
+    if (prevIdx >= 0) setSelected(visibleFiles[prevIdx].relPath);
+  });
+  const editPaneRef = useRef<{ startEdit: () => void } | null>(null);
+  useKeyShortcut('e', () => {
+    if (selected && editPaneRef.current) editPaneRef.current.startEdit();
+  });
 
   const root: DocDirNode | null = snapshot?.tree || null;
-  const filteredTree = useMemo(() => {
-    if (!root) return null;
-    return filterTree(root, query, sortBy);
-  }, [root, query, sortBy]);
-
-  // Flatten visible entries for keyboard navigation
-  const visibleEntries = useMemo(() => {
-    if (!filteredTree) return [] as VisibleEntry[];
-    return flattenVisibleFiles(filteredTree, openSet);
-  }, [filteredTree, openSet]);
-
-  const visibleFiles = useMemo(() => visibleEntries.filter((e) => e.kind === 'file'), [visibleEntries]);
-
+  const filteredTree = useMemo(() => root ? filterTree(root, query, sortBy) : null, [root, query, sortBy]);
+  const visibleEntries = useMemo(() => filteredTree ? flattenVisibleFiles(filteredTree, openSet) : [], [filteredTree, openSet]);
   const selectedFile = useMemo(() => findFileByRelPath(root, selected), [root, selected]);
 
   const handleToggleOpen = useCallback((key: string) => {
@@ -212,7 +211,6 @@ export default function DocumentsView() {
     setOpenSet(new Set(['<root>']));
   }, []);
 
-  // Ensure parents of selected are open
   useEffect(() => {
     if (!selected || !root) return;
     const parts = selected.split('/');
@@ -224,36 +222,6 @@ export default function DocumentsView() {
       return next;
     });
   }, [selected, root]);
-
-  // Keyboard navigation: Up/Down cycles files; Enter focuses/open handled by selection already
-  useKeyShortcut('ArrowDown', () => {
-    if (visibleFiles.length === 0) return;
-    if (!selected) {
-      setSelected(visibleFiles[0].relPath);
-      return;
-    }
-    const idx = visibleFiles.findIndex((e) => e.relPath === selected);
-    const nextIdx = Math.min(visibleFiles.length - 1, idx + 1);
-    if (nextIdx >= 0) setSelected(visibleFiles[nextIdx].relPath);
-  });
-
-  useKeyShortcut('ArrowUp', () => {
-    if (visibleFiles.length === 0) return;
-    if (!selected) {
-      setSelected(visibleFiles[0].relPath);
-      return;
-    }
-    const idx = visibleFiles.findIndex((e) => e.relPath === selected);
-    const prevIdx = Math.max(0, idx - 1);
-    if (prevIdx >= 0) setSelected(visibleFiles[prevIdx].relPath);
-  });
-
-  // Start editing with 'e'
-  const editPaneRef = useRef<{ startEdit: () => void } | null>(null);
-  useKeyShortcut('e', () => {
-    // only if a file is selected
-    if (selected && editPaneRef.current) editPaneRef.current.startEdit();
-  });
 
   const totalFiles = snapshot?.files?.length ?? 0;
   const filteredFilesCount = useMemo(() => {
@@ -268,98 +236,80 @@ export default function DocumentsView() {
   }, [filteredTree]);
 
   return (
-    <div className="flex min-h-0 w-full h-full flex-col">
-      <header className="shrink-0 border-b border-border-subtle bg-surface-base">
-        <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0 flex items-center gap-2">
-            <Button variant="secondary" size="md" onClick={toggleSidebar} aria-label={sidebarCollapsed ? 'Show documents list' : 'Hide documents list'}>
-              {sidebarCollapsed ? '📂' : '🗂️'}
-            </Button>
-            <div className="min-w-0">
-              <h1 className="m-0 truncate text-lg font-semibold text-text-primary">Documents</h1>
-              <div className="text-xs text-text-muted">{filteredFilesCount || totalFiles} files{query ? ' • filtered' : ''}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-72">
-              <Input
-                ref={searchRef}
-                type="search"
-                placeholder="Search docs (/)"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                aria-label="Search documents"
-              />
-            </div>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
-              <SelectTrigger aria-label="Sort documents">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="recent">Recently updated</SelectItem>
-                <SelectItem value="size">Size</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex items-center gap-1">
-              <Tooltip content="Expand all">
-                <Button variant="secondary" size="md" onClick={handleExpandAll} aria-label="Expand all folders">▾▾</Button>
-              </Tooltip>
-              <Tooltip content="Collapse all">
-                <Button variant="secondary" size="md" onClick={handleCollapseAll} aria-label="Collapse all folders">▸▸</Button>
-              </Tooltip>
-              <Tooltip content="Refresh index">
-                <Button variant="secondary" size="md" onClick={() => window.location.reload()} aria-label="Refresh documents">
-                  ⟳
-                </Button>
-              </Tooltip>
-            </div>
-          </div>
+    <CollapsibleSidebar
+      items={[]}
+      activeId=""
+      onSelect={() => {}}
+      storageKey="docs-panel-collapsed"
+      headerTitle="Documents"
+      headerSubtitle={`${filteredFilesCount || totalFiles} files${query ? ' • filtered' : ''}`}
+      headerAction={
+        <div className="flex items-center gap-2">
+          <Input
+            ref={searchRef}
+            type="search"
+            placeholder="Search docs (/)"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-48"
+          />
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="recent">Recently updated</SelectItem>
+              <SelectItem value="size">Size</SelectItem>
+            </SelectContent>
+          </Select>
+          <Tooltip content="Expand all">
+            <Button variant="ghost" size="sm" onClick={handleExpandAll}>▼▼</Button>
+          </Tooltip>
+          <Tooltip content="Collapse all">
+            <Button variant="ghost" size="sm" onClick={handleCollapseAll}>►►</Button>
+          </Tooltip>
+          <Tooltip content="Refresh index">
+            <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>↳</Button>
+          </Tooltip>
         </div>
-      </header>
-
-      <main className="flex-1 min-h-0 min-w-0">
-        <div className="flex h-full min-h-0 w-full">
-          {!sidebarCollapsed && (
-            <aside className="h-full w-80 shrink-0 border-r border-border-subtle bg-surface-base/60 overflow-y-auto" aria-label="Documents folders">
-              <div className="px-2 py-2">
-                {!root ? (
-                  <div className="p-3 text-sm text-text-muted">
-                    <Skeleton className="h-4 w-40" />
-                    <div className="mt-2">
-                      <SkeletonText lines={3} />
-                    </div>
-                  </div>
-                ) : filteredTree ? (
-                  <DirTree
-                    node={filteredTree}
-                    level={0}
-                    openSet={openSet}
-                    toggleOpen={handleToggleOpen}
-                    selected={selected}
-                    onSelect={(p) => setSelected(p)}
-                  />
-                ) : (
-                  <EmptyState query={query} />
-                )}
+      }
+      sidebarClassName="w-80"
+      navContent={
+        <div className="px-2 py-2">
+          {!root ? (
+            <div className="p-3 text-sm text-text-muted">
+              <Skeleton className="h-4 w-40" />
+              <div className="mt-2">
+                <SkeletonText lines={3} />
               </div>
-            </aside>
+            </div>
+          ) : filteredTree ? (
+            <DirTree
+              node={filteredTree}
+              level={0}
+              openSet={openSet}
+              toggleOpen={handleToggleOpen}
+              selected={selected}
+              onSelect={setSelected}
+            />
+          ) : (
+            <EmptyState query={query} />
           )}
-          <section className="flex-1 min-w-0 min-h-0 overflow-auto">
-            {!selected ? (
-              <div className="h-full w-full grid place-items-center">
-                <div className="text-center px-6 py-8">
-                  <div className="text-2xl mb-2">📄</div>
-                  <div className="text-sm text-text-secondary">Select a document from the list to view it.</div>
-                </div>
-              </div>
-            ) : (
-              <DocumentPane relPath={selected} file={selectedFile} ref={editPaneRef} />
-            )}
-          </section>
         </div>
-      </main>
-    </div>
+      }
+    >
+      {!selected ? (
+        <div className="h-full w-full grid place-items-center">
+          <div className="text-center px-6 py-8">
+            <div className="text-2xl mb-2">📄</div>
+            <div className="text-sm text-text-secondary">Select a document from the list to view it.</div>
+          </div>
+        </div>
+      ) : (
+        <DocumentPane relPath={selected} file={selectedFile} ref={editPaneRef} />
+      )}
+    </CollapsibleSidebar>
   );
 }
 
@@ -375,7 +325,7 @@ function EmptyState({ query }: { query: string }) {
 
 function Caret({ open }: { open: boolean }) {
   return (
-    <span className="inline-block w-4 text-[10px] text-text-muted" aria-hidden>{open ? '▾' : '▸'}</span>
+    <span className="inline-block w-4 text-[10px] text-text-muted" aria-hidden>{open ? '▼' : '►'}</span>
   );
 }
 

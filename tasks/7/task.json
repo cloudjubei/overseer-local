@@ -409,7 +409,7 @@
     },
     {
       "id": "7.30",
-      "status": "-",
+      "status": "+",
       "title": "Reuse the sidepanel for Documents",
       "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",

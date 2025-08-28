@@ -20,6 +20,8 @@ type Props = {
   headerAction?: React.ReactNode;
   emptyMessage?: string;
   children?: React.ReactNode;
+  sidebarClassName?: string;
+  navContent?: React.ReactNode;
 };
 
 function useMediaQuery(query: string) {
@@ -39,7 +41,7 @@ function useMediaQuery(query: string) {
 }
 
 export default function CollapsibleSidebar(props: Props) {
-  const { items, activeId, onSelect, storageKey, headerTitle, headerSubtitle, headerAction, emptyMessage, children } = props;
+  const { items, activeId, onSelect, storageKey, headerTitle, headerSubtitle, headerAction, emptyMessage, children, sidebarClassName, navContent } = props;
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (!storageKey) return false;
     try {
@@ -57,31 +59,34 @@ export default function CollapsibleSidebar(props: Props) {
       } catch {}
     }, [collapsed]);
 
-    const activeIndex = useMemo(() => {
-      const idx = items.findIndex((n) => n.id === activeId);
-      return idx >= 0 ? idx : 0;
-    }, [items, activeId]);
+    let onKeyDownList: ((e: React.KeyboardEvent) => void) | undefined;
+    if (!navContent) {
+      const activeIndex = useMemo(() => {
+        const idx = items.findIndex((n) => n.id === activeId);
+        return idx >= 0 ? idx : 0;
+      }, [items, activeId]);
 
-    const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
+      const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
 
-    useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
+      useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
 
-    const onKeyDownList = useCallback((e: React.KeyboardEvent) => {
-      const max = items.length - 1;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setFocusIndex((i) => (i >= max ? 0 : i + 1));
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setFocusIndex((i) => (i <= 0 ? max : i - 1));
-      } else if (e.key === 'Home') {
-        e.preventDefault();
-        setFocusIndex(0);
-      } else if (e.key === 'End') {
-        e.preventDefault();
-        setFocusIndex(max);
-      }
-    }, [items.length]);
+      onKeyDownList = useCallback((e: React.KeyboardEvent) => {
+        const max = items.length - 1;
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setFocusIndex((i) => (i >= max ? 0 : i + 1));
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setFocusIndex((i) => (i <= 0 ? max : i - 1));
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          setFocusIndex(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          setFocusIndex(max);
+        }
+      }, [items.length]);
+    }
 
     return (
       <aside
@@ -112,52 +117,54 @@ export default function CollapsibleSidebar(props: Props) {
         </div>
 
         <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
-          <ul className="nav-list" role="list">
-            {items.length === 0 && emptyMessage && (
-              <li key="empty" className="nav-li">
-                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 px-2 py-1.5">{emptyMessage}</div>
-              </li>
-            )}
-            {items.map((item, i) => {
-              const isActive = activeId === item.id;
-              const Btn = (
-                <button
-                  type="button"
-                  className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => onSelect(item.id)}
-                  title={item.label}
-                  tabIndex={focusIndex === i ? 0 : -1}
-                  onFocus={() => setFocusIndex(i)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onSelect(item.id);
-                    }
-                  }}
-                >
-                  {item.icon && <span className="nav-item__icon">{item.icon}</span>}
-                  {!collapsed && <span className="nav-item__label">{item.label}</span>}
-                  {item.badge && item.badge > 0 && (
-                    <span className="nav-item__badge">{item.badge}</span>
-                  )}
-                  {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
-                </button>
-              );
-              return (
-                <li key={item.id} className="nav-li">
-                  {collapsed ? <Tooltip content={item.label} placement="right">{Btn}</Tooltip> : Btn}
+          {navContent || (
+            <ul className="nav-list" role="list">
+              {items.length === 0 && emptyMessage && (
+                <li key="empty" className="nav-li">
+                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 px-2 py-1.5">{emptyMessage}</div>
                 </li>
-              );
-            })}
-          </ul>
+              )}
+              {items.map((item, i) => {
+                const isActive = activeId === item.id;
+                const Btn = (
+                  <button
+                    type="button"
+                    className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => onSelect(item.id)}
+                    title={item.label}
+                    tabIndex={focusIndex === i ? 0 : -1}
+                    onFocus={() => setFocusIndex(i)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelect(item.id);
+                      }
+                    }}
+                  >
+                    {item.icon && <span className="nav-item__icon">{item.icon}</span>}
+                    {!collapsed && <span className="nav-item__label">{item.label}</span>}
+                    {item.badge && item.badge > 0 && (
+                      <span className="nav-item__badge">{item.badge}</span>
+                    )}
+                    {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
+                  </button>
+                );
+                return (
+                  <li key={item.id} className="nav-li">
+                    {collapsed ? <Tooltip content={item.label} placement="right">{Btn}</Tooltip> : Btn}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </nav>
       </aside>
     );
   };
 
   if (!children) {
-    return <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} />;
+    return <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} className={sidebarClassName} />;
   }
 
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -202,7 +209,7 @@ export default function CollapsibleSidebar(props: Props) {
               aria-hidden
             />
             <div className="fixed inset-y-0 left-0 z-30" style={{ width: 260 }}>
-              <SidebarContent collapsed={false} setCollapsed={() => setMobileOpen(false)} />
+              <SidebarContent collapsed={false} setCollapsed={() => setMobileOpen(false)} className={sidebarClassName} />
             </div>
           </>
         )}
@@ -214,7 +221,7 @@ export default function CollapsibleSidebar(props: Props) {
   } else {
     return (
       <div className="flex h-full w-full min-w-0">
-        <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} />
+        <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} className={sidebarClassName} />
         <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
           {children}
         </main>
