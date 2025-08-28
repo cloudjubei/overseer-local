@@ -416,7 +416,7 @@
     },
     {
       "id": "7.30",
-      "status": "-",
+      "status": "+",
       "title": "Reuse the sidepanel for Notifications",
       "description": "The Notifications screen should have the same kind of sidepanel that the Settings screen has. For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
       "plan": "",
