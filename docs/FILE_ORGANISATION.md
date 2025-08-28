@@ -39,7 +39,7 @@ This document describes how files and directories are organised in this reposito
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - PriorityTag.tsx: Priority tags P0–P3.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
-    - DependencyBullet.tsx: Reusable bullet for task/feature dependencies with hover summary and click navigation.
+    - DependencyBullet.tsx: Reusable bullet for task/feature dependencies with hover summary and click navigation. Now uses the central dependencyResolver service for resolution and summaries.
     - FeatureSummaryCallout.tsx: Summary card for feature on hover.
     - TaskSummaryCallout.tsx: Summary card for task on hover.
   - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
@@ -70,7 +70,7 @@ This document describes how files and directories are organised in this reposito
     - docsService.ts
     - tasksService.ts
     - notificationsService.ts
-    - dependencyResolver.ts ← Project-wide dependency resolution and validation service. Indexes all tasks and features, resolves refs like "#12" / "#12.4", builds reverse dependency graph, and exposes search helpers. Listens to tasks index updates.
+    - dependencyResolver.ts ← Project-wide dependency resolution and validation service. Indexes all tasks and features, resolves refs like "#12" / "#12.4", builds reverse dependency graph, tracks invalid references, detects cycles, and exposes search + validation helpers. Listens to tasks index updates.
   - src/renderer/hooks/
     - useChats.ts
     - useDocsIndex.ts

@@ -32,11 +32,18 @@ export interface InvalidRefError {
   message: string;
 }
 
+export interface InvalidEdgeRecord {
+  from: string; // referrer ref (task or feature)
+  to: string; // referenced ref string
+  error: InvalidRefError;
+}
+
 export interface DependencyResolverIndex {
   project?: ProjectSpec | null;
   tasksById: Record<number, Task>;
   featuresById: Record<string, Feature>; // key: "{taskId}.{featureId}"
   dependentsOf: Record<string, string[]>; // reverse index: key is ref (task or feature), value is list of refs that depend on it
+  invalidEdges: InvalidEdgeRecord[]; // broken references encountered while indexing
 }
 
 export class DependencyResolver {
@@ -46,6 +53,7 @@ export class DependencyResolver {
     tasksById: {},
     featuresById: {},
     dependentsOf: {},
+    invalidEdges: [],
   };
   private ready = false;
   private unsubscribeTasks?: () => void;
@@ -95,38 +103,53 @@ export class DependencyResolver {
     const tasksById: Record<number, Task> = { ...snapshot.tasksById };
     const featuresById: Record<string, Feature> = {};
     const dependentsOf: Record<string, string[]> = {};
+    const invalidEdges: InvalidEdgeRecord[] = [];
 
     const addDependent = (targetRef: string, dependentRef: string) => {
       if (!dependentsOf[targetRef]) dependentsOf[targetRef] = [];
       if (!dependentsOf[targetRef].includes(dependentRef)) dependentsOf[targetRef].push(dependentRef);
     };
 
-    // Build feature map and reverse dependencies
+    // Build feature map first
+    for (const taskIdStr of Object.keys(tasksById)) {
+      const taskId = Number(taskIdStr);
+      const task = tasksById[taskId];
+      if (!task) continue;
+      for (const feat of task.features || []) {
+        featuresById[`${taskId}.${feat.id}`] = { ...feat };
+      }
+    }
+
+    // Build reverse dependencies and collect invalid edges
     for (const taskIdStr of Object.keys(tasksById)) {
       const taskId = Number(taskIdStr);
       const task = tasksById[taskId];
       if (!task) continue;
 
-      // Map features
-      for (const feat of task.features || []) {
-        featuresById[`${taskId}.${feat.id}`] = { ...feat };
-      }
-
-      // Reverse from task-level dependencies
+      const fromTaskRef = `${taskId}`;
       for (const dep of task.dependencies || []) {
-        addDependent(dep, String(task.id));
+        const validation = this.validateRef(dep);
+        if (!validation.ok) {
+          invalidEdges.push({ from: fromTaskRef, to: dep, error: validation.error });
+        } else {
+          addDependent(dep, fromTaskRef);
+        }
       }
 
-      // Reverse from feature-level dependencies
       for (const feat of task.features || []) {
-        if (!feat.dependencies) continue;
-        for (const dep of feat.dependencies) {
-          addDependent(dep, `${taskId}.${feat.id}`);
+        const fromFeatRef = `${taskId}.${feat.id}`;
+        for (const dep of feat.dependencies || []) {
+          const validation = this.validateRef(dep);
+          if (!validation.ok) {
+            invalidEdges.push({ from: fromFeatRef, to: dep, error: validation.error });
+          } else {
+            addDependent(dep, fromFeatRef);
+          }
         }
       }
     }
 
-    this.index = { project, tasksById, featuresById, dependentsOf };
+    this.index = { project, tasksById, featuresById, dependentsOf, invalidEdges };
     if (this.ready) this.notify();
   }
 
@@ -180,6 +203,106 @@ export class DependencyResolver {
   validateRef(ref: string): { ok: true } | { ok: false; error: InvalidRefError } {
     const resolved = this.resolveRef(ref);
     if ('code' in resolved) return { ok: false, error: resolved };
+    return { ok: true };
+  }
+
+  // Validate a proposed dependency list for a given context node (task or feature ref)
+  // - Checks: duplicates, invalid/broken refs, self-reference, cycle detection.
+  validateDependencyList(
+    contextRef: string | null,
+    proposed: string[]
+  ): {
+    ok: boolean;
+    message?: string;
+    duplicates?: string[];
+    invalid?: InvalidRefError[];
+    cycles?: { exists: boolean };
+  } {
+    const duplicates: string[] = [];
+    const seen = new Set<string>();
+    for (const d of proposed) {
+      if (seen.has(d)) duplicates.push(d);
+      seen.add(d);
+    }
+
+    const invalid: InvalidRefError[] = [];
+    for (const ref of proposed) {
+      const v = this.validateRef(ref);
+      if (!v.ok) invalid.push(v.error);
+    }
+
+    if (contextRef && proposed.includes(contextRef)) {
+      return { ok: false, message: 'Self-dependency is not allowed', duplicates: duplicates.length ? duplicates : undefined, invalid: invalid.length ? invalid : undefined, cycles: { exists: false } };
+    }
+
+    if (duplicates.length || invalid.length) {
+      const msgParts: string[] = [];
+      if (duplicates.length) msgParts.push(`Duplicate dependencies: ${Array.from(new Set(duplicates)).join(', ')}`);
+      if (invalid.length) msgParts.push(`Invalid references: ${invalid.map((e) => e.input).join(', ')}`);
+      return { ok: false, message: msgParts.join(' | '), duplicates, invalid, cycles: { exists: false } };
+    }
+
+    // Cycle detection: Build a graph of valid edges, then set/replace context node edges with proposed.
+    type Graph = Map<string, string[]>;
+    const graph: Graph = new Map();
+    const addEdge = (from: string, to: string) => {
+      const arr = graph.get(from) || [];
+      arr.push(to);
+      graph.set(from, arr);
+    };
+
+    // Add all tasks/features and their valid dependencies
+    for (const [taskIdStr, task] of Object.entries(this.index.tasksById)) {
+      const taskId = Number(taskIdStr);
+      const taskRef = `${taskId}`;
+      graph.set(taskRef, []);
+      for (const dep of task.dependencies || []) {
+        if (this.validateRef(dep).ok) addEdge(taskRef, dep);
+      }
+
+      for (const feat of task.features || []) {
+        const featRef = `${taskId}.${feat.id}`;
+        graph.set(featRef, []);
+        for (const dep of feat.dependencies || []) {
+          if (this.validateRef(dep).ok) addEdge(featRef, dep);
+        }
+      }
+    }
+
+    // If creating a new feature (no contextRef), add a temporary node
+    const ctx = contextRef ?? '__new__';
+    graph.set(ctx, []);
+
+    // Replace context edges with proposed valid ones
+    graph.set(ctx, proposed.filter((r) => this.validateRef(r).ok));
+
+    // DFS to detect cycles
+    const visited = new Set<string>();
+    const stack = new Set<string>();
+    const dfs = (node: string): boolean => {
+      visited.add(node);
+      stack.add(node);
+      const neighbors = graph.get(node) || [];
+      for (const n of neighbors) {
+        if (!visited.has(n)) {
+          if (dfs(n)) return true;
+        } else if (stack.has(n)) {
+          return true;
+        }
+      }
+      stack.delete(node);
+      return false;
+    };
+
+    // Run DFS starting from all nodes (cheap; graph is small)
+    for (const node of graph.keys()) {
+      if (!visited.has(node)) {
+        if (dfs(node)) {
+          return { ok: false, message: 'Dependency cycle detected', cycles: { exists: true } };
+        }
+      }
+    }
+
     return { ok: true };
   }
 

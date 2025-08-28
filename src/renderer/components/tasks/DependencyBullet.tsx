@@ -1,42 +1,40 @@
 import React from 'react';
-import { useTasksIndex } from '../../hooks/useTasksIndex';
 import { useNavigator } from '../../navigation/Navigator';
 import Tooltip from '../ui/Tooltip';
 import type { Status } from 'src/types/tasks';
 import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
+import { dependencyResolver } from '../../services/dependencyResolver';
 
 export interface DependencyBulletProps {
-  dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
+  dependency: string; // format: "taskId" or "taskId.featureId"
   isInbound?: boolean;
 }
 
 const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbound = false }) => {
-  const index = useTasksIndex();
   const { navigateTaskDetails, tasksRoute } = useNavigator();
 
-  const parts = dependency.split('.');
-  const isFeatureDependency = parts.length > 1;
-  const taskId = parseInt(parts[0], 10);
-  const featureId = isFeatureDependency ? parts[1] : undefined;
+  const resolved = dependencyResolver.resolveRef(dependency);
+  const isFeatureDependency = !("code" in resolved) && resolved.kind === 'feature';
 
-  const task = index?.tasksById?.[taskId];
-  const feature = isFeatureDependency ? task?.features?.find((f) => f.id === featureId) : undefined;
+  let summary: { title: string; description: string; status: Status } = { title: 'Not found', description: '', status: '-' as Status };
 
-  const summary = isFeatureDependency
-    ? feature
-      ? {
-          title: feature.title,
-          description: feature.description,
-          status: feature.status as Status,
-        }
-      : { title: 'Not found', description: '', status: '-' as Status }
-    : task
-    ? { title: task.title, description: task.description, status: task.status as Status }
-    : { title: 'Not found', description: '', status: '-' as Status };
+  if (!('code' in resolved)) {
+    if (resolved.kind === 'task') {
+      summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status };
+    } else {
+      summary = { title: resolved.feature.title, description: resolved.feature.description, status: resolved.feature.status as Status };
+    }
+  }
 
   const handleClick = () => {
-    const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === taskId;
+    // Determine navigation target if resolved
+    if ('code' in resolved) return;
+
+    const targetTaskId = resolved.kind === 'task' ? resolved.id : resolved.taskId;
+    const featureId = resolved.kind === 'feature' ? resolved.featureId : undefined;
+
+    const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === targetTaskId;
     if (isSameTask) {
       if (featureId) {
         const row = document.querySelector(`.feature-row[data-feature-id="${featureId}"]`);
@@ -55,12 +53,13 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
       }
     } else {
       if (featureId) {
-        navigateTaskDetails(taskId, featureId);
+        navigateTaskDetails(targetTaskId, featureId);
       } else {
-        navigateTaskDetails(taskId, undefined, true);
+        navigateTaskDetails(targetTaskId, undefined, true);
       }
     }
   };
+
   const content = isFeatureDependency ? <FeatureSummaryCallout {...summary} /> : <TaskSummaryCallout {...summary} />;
 
   return (

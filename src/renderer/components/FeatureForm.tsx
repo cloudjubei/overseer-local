@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Task, Feature, Status } from 'src/types/tasks'
+import type { Status } from 'src/types/tasks'
 import StatusBullet from './tasks/StatusBullet'
 import StatusBadge from './tasks/StatusBadge'
 import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
 import type { TasksIndexSnapshot } from '../services/tasksService'
 import type { ProjectsIndexSnapshot } from '../services/projectsService'
+import { dependencyResolver } from '../services/dependencyResolver'
 
 export type FeatureFormValues = {
   title: string
@@ -26,83 +27,6 @@ type Props = {
   allProjectsSnapshot?: ProjectsIndexSnapshot
   taskId: number
   featureId?: string
-}
-
-function validateDependencies(
-  proposed: string[],
-  snapshot: TasksIndexSnapshot,
-  featureId?: string
-): { ok: boolean; message?: string } {
-  const invalid: string[] = []
-  const nodes = new Set<string>()
-  const graph = new Map<string, string[]>()
-  const tasksById = snapshot.tasksById || {}
-
-  Object.values(tasksById).forEach((task: Task) => {
-    const tid = `${task.id}`
-    nodes.add(tid)
-    graph.set(tid, (task.dependencies || []))
-    task.features.forEach((f: Feature) => {
-      const fid = `${f.id}`
-      nodes.add(fid)
-      graph.set(fid, (f.dependencies || []))
-    })
-  })
-
-  const unique = new Set(proposed)
-  if (unique.size !== proposed.length) {
-    return { ok: false, message: 'Duplicate dependencies' }
-  }
-
-  const proposedNodes: string[] = []
-  for (const dep of proposed) {
-    if (featureId && dep === featureId) {
-      invalid.push(dep)
-      continue
-    }
-    if (!nodes.has(dep)) {
-      invalid.push(dep)
-      continue
-    }
-    proposedNodes.push(dep)
-  }
-  if (invalid.length) {
-    return { ok: false, message: `Invalid or self dependencies: ${invalid.join(', ')}` }
-  }
-
-  const thisNode = featureId ? `${featureId}` : "new"
-  if (featureId) {
-    graph.set(thisNode, proposedNodes)
-  } else {
-    nodes.add(thisNode)
-    graph.set(thisNode, proposedNodes)
-  }
-
-  const visited = new Set<string>()
-  const recStack = new Set<string>()
-  function dfs(node: string): boolean {
-    visited.add(node)
-    recStack.add(node)
-    const neighbors = graph.get(node) || []
-    for (const nei of neighbors) {
-      if (!visited.has(nei)) {
-        if (dfs(nei)) return true
-      } else if (recStack.has(nei)) {
-        return true
-      }
-    }
-    recStack.delete(node)
-    return false
-  }
-
-  for (const node of graph.keys()) {
-    if (!visited.has(node)) {
-      if (dfs(node)) {
-        return { ok: false, message: 'Dependency cycle detected' }
-      }
-    }
-  }
-  return { ok: true }
 }
 
 export function FeatureForm({
@@ -150,15 +74,16 @@ export function FeatureForm({
     } else {
       setError(null)
     }
-    if (allTasksSnapshot) {
-      const depVal = validateDependencies(dependencies, allTasksSnapshot, featureId)
-      if (!depVal.ok) {
-        setDepError(depVal.message ?? 'Invalid dependencies')
-        valid = false
-      } else {
-        setDepError(null)
-      }
+
+    const contextRef = featureId ? `${taskId}.${featureId}` : null
+    const depVal = dependencyResolver.validateDependencyList(contextRef, dependencies)
+    if (!depVal.ok) {
+      setDepError(depVal.message ?? 'Invalid dependencies')
+      valid = false
+    } else {
+      setDepError(null)
     }
+
     return valid
   }
 
