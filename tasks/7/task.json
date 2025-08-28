@@ -430,7 +430,7 @@
     },
     {
       "id": "7.31",
-      "status": "-",
+      "status": "+",
       "title": "Sidepanel issues when in mobile mode",
       "description": "When in mobile mode (i.e. small screen) the main sidebar gets pushed to the top. On a screen that has the CollapsibleSidebar - when then main sidebar is closed everything is ok, but when it's open - it gets pushed underneath the CollapsibleSidebar.\nOn mobile the CollapsibleSidebar should behave the same way as the main Sidebar.",
       "plan": "",
