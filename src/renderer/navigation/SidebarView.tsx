@@ -174,16 +174,18 @@ export default function SidebarView({}: SidebarProps) {
     return <div key="Home" className="flex flex-col flex-1 min-h-0 view-transition"><TasksView /></div>;
   }, [currentView]);
 
+  const effectiveCollapsed = isMobile ? false : collapsed;
+
   // Sidebar element (shared for desktop and mobile drawer)
   const Aside = (
     <aside
-      className={`sidebar relative z-30 flex h-full shrink-0 flex-col border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${collapsed ? 'collapsed' : ''}`}
+      className={`sidebar relative z-30 flex h-full shrink-0 flex-col border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${effectiveCollapsed ? 'collapsed' : ''}`}
       aria-label="Primary navigation"
-      data-collapsed={collapsed ? 'true' : 'false'}
+      data-collapsed={effectiveCollapsed ? 'true' : 'false'}
       style={{}}
     >
-      <div className={`mb-2 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}>
-        {!collapsed && (
+      <div className={`mb-2 flex items-center ${effectiveCollapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}>
+        {!effectiveCollapsed && (
           <div className="px-1">
             <div className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Workspace</div>
             <div className="text-[11px] text-neutral-500 dark:text-neutral-400">Navigation</div>
@@ -193,11 +195,11 @@ export default function SidebarView({}: SidebarProps) {
           type="button"
           onClick={() => (isMobile ? setMobileOpen(false) : setCollapsed((v) => !v))}
           className="nav-toggle"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          aria-expanded={!collapsed}
-          title={collapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
+          aria-label={effectiveCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!effectiveCollapsed}
+          title={effectiveCollapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
         >
-          <span aria-hidden>{collapsed ? '»' : '«'}</span>
+          <span aria-hidden>{effectiveCollapsed ? '»' : '«'}</span>
         </button>
       </div>
 
@@ -211,7 +213,7 @@ export default function SidebarView({}: SidebarProps) {
               <button
                 ref={ref as any}
                 type="button"
-                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'brand'}`}
+                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'brand'}`}
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => onActivate(item.view)}
                 title={item.label}
@@ -225,7 +227,7 @@ export default function SidebarView({}: SidebarProps) {
                 }}
               >
                 <span className="nav-item__icon">{item.icon}</span>
-                {!collapsed && <span className="nav-item__label">{item.label}</span>}
+                {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
                 {showBadge && (
                   <span className="nav-item__badge">
                     {unreadCount}
@@ -235,7 +237,7 @@ export default function SidebarView({}: SidebarProps) {
             );
             return (
               <li key={item.id} className="nav-li">
-                {collapsed ? (
+                {effectiveCollapsed ? (
                   <Tooltip content={item.label} placement="right">{Btn}</Tooltip>
                 ) : Btn}
               </li>
@@ -253,7 +255,7 @@ export default function SidebarView({}: SidebarProps) {
             const Btn = (
               <button
                 type="button"
-                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => onActivate(item.view)}
                 title={item.label}
@@ -267,12 +269,12 @@ export default function SidebarView({}: SidebarProps) {
                 }}
               >
                 <span className="nav-item__icon">{item.icon}</span>
-                {!collapsed && <span className="nav-item__label">{item.label}</span>}
+                {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
               </button>
             );
             return (
               <li key={item.id} className="nav-li">
-                {collapsed ? (
+                {effectiveCollapsed ? (
                   <Tooltip content={item.label} placement="right">{Btn}</Tooltip>
                 ) : Btn}
               </li>
@@ -282,7 +284,7 @@ export default function SidebarView({}: SidebarProps) {
 
         <div className="nav-sep" />
         {/* Projects section */}
-        {!collapsed && (
+        {!effectiveCollapsed && (
           <div className="px-3" aria-hidden>
             <div style={{ color: 'var(--text-secondary)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <span>Projects</span>
@@ -297,30 +299,30 @@ export default function SidebarView({}: SidebarProps) {
           {/* Main project */}
           <li className="nav-li">
             <button
-              className={classNames('nav-item nav-accent-gray', isMain && 'nav-item--active', collapsed && 'nav-item--compact')}
+              className={classNames('nav-item nav-accent-gray', isMain && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
               aria-current={isMain ? 'true' : undefined}
               onClick={() => switchToMainProject()}
               title="Main project"
             >
               <span className="nav-item__icon" aria-hidden>🗂️</span>
-              {!collapsed && <span className="nav-item__label">Main project</span>}
+              {!effectiveCollapsed && <span className="nav-item__label">Main project</span>}
             </button>
           </li>
 
           {/* Child projects */}
           {loading && (
             <li className="nav-li">
-              <div className={classNames('nav-item', collapsed && 'nav-item--compact')}>
+              <div className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')}>
                 <span className="nav-item__icon" aria-hidden>⏳</span>
-                {!collapsed && <span className="nav-item__label">Loading projects…</span>}
+                {!effectiveCollapsed && <span className="nav-item__label">Loading projects…</span>}
               </div>
             </li>
           )}
           {error && !loading && (
             <li className="nav-li">
-              <div className={classNames('nav-item', collapsed && 'nav-item--compact')} role="status">
+              <div className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')} role="status">
                 <span className="nav-item__icon" aria-hidden>⚠️</span>
-                {!collapsed && <span className="nav-item__label">Failed to load</span>}
+                {!effectiveCollapsed && <span className="nav-item__label">Failed to load</span>}
               </div>
             </li>
           )}
@@ -330,13 +332,13 @@ export default function SidebarView({}: SidebarProps) {
             return (
               <li className="nav-li" key={p.id}>
                 <button
-                  className={classNames('nav-item', accent, active && 'nav-item--active', collapsed && 'nav-item--compact')}
+                  className={classNames('nav-item', accent, active && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
                   aria-current={active ? 'true' : undefined}
                   onClick={() => setActiveProjectId(p.id)}
                   title={p.title}
                 >
                   <span className="nav-item__icon" aria-hidden>📁</span>
-                  {!collapsed && <span className="nav-item__label">{p.title}</span>}
+                  {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
                 </button>
               </li>
             )

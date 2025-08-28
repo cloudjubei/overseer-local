@@ -449,7 +449,7 @@
     },
     {
       "id": "7.32",
-      "status": "-",
+      "status": "+",
       "title": "Sidepanel issues when in mobile mode",
       "description": "When in mobile mode (i.e. small screen) the CollapsibleSidebar cannot be closed by clicking the open/close button (it closes when tapping outside but needs to close on button click). The main Sidebar also has an issue - when the screen switches to mobiles mode and it's collapsed - then when trying to open it, it stays collapsed. In mobile mode both sidebars should always open non-collapsed.",
       "plan": "",
