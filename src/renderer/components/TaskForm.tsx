@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Status } from 'src/types/tasks'
+import StatusBullet from './tasks/StatusBullet'
+import StatusBadge from './tasks/StatusBadge'
 
 export type TaskFormValues = {
   title: string
@@ -17,14 +19,6 @@ type Props = {
   titleRef?: React.RefObject<HTMLInputElement>
   onDelete?: () => void
 }
-
-const STATUS_OPTIONS: Array<{ value: Status; label: string }> = [
-  { value: '-', label: 'Pending' },
-  { value: '~', label: 'In Progress' },
-  { value: '+', label: 'Done' },
-  { value: '?', label: 'Blocked' },
-  { value: '=', label: 'Deferred' },
-]
 
 export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
@@ -91,7 +85,14 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
             }}
           />
         </div>}
-
+        <div className="status-inline">
+          <StatusBadge status={status} />
+          <StatusBullet
+            status={status}
+            onChange={setStatus}
+            className="reveal-on-hover"
+          />
+        </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="task-title" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Title</label>
           <input
@@ -115,22 +116,6 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
             <div id="task-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{errors.title}</div>
           ) : null}
         </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="task-status" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Status</label>
-          <select
-            id="task-status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as Status)}
-            disabled={submitting}
-            className="ui-select w-full"
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-
         <div className="flex flex-col gap-1">
           <label htmlFor="task-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
           <textarea
@@ -140,7 +125,7 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
@@ -149,7 +134,6 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
           />
         </div>
       </div>
-
       <div className="flex justify-end gap-2 pt-2">
         {onDelete && (
           <button

@@ -253,7 +253,7 @@ export function FeatureForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
@@ -271,7 +271,7 @@ export function FeatureForm({
             value={rejection}
             onChange={(e) => setRejection(e.target.value)}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
@@ -283,7 +283,7 @@ export function FeatureForm({
         <div className="flex flex-col gap-1">
           <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
           <ul
-            className="dependencies-list border rounded-md min-h-[4rem] p-2 space-y-1"
+            className="dependencies-list border rounded-md min-h-[4rem] p-2 space-y-1 overflow-y-auto max-h-64"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDepDrop}
             onDragEnd={clearDepDnd}

@@ -97,7 +97,7 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
       <div
         ref={panelRef}
         className={
-          `relative z-10 w-full ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh]` +
+          `relative z-10 w-full flex flex-col ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh]` +
           " border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95"
         }
         role="dialog"

@@ -52,6 +52,14 @@ function IconExclamation({ className }: { className?: string }) {
   )
 }
 
+function IconChevron({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  )
+}
+
 export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [task, setTask] = useState<Task | null>(null)
@@ -59,6 +67,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const { openModal, navigateView, tasksRoute } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const { projectId } = useActiveProject()
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
   // DnD state (match Tasks list patterns)
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
@@ -288,6 +297,15 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
       <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
         <section className="panel shrink-0">
           <div className="section-header">
+            <button
+              type="button"
+              className="collapse-toggle btn-icon"
+              aria-expanded={isOverviewExpanded}
+              aria-controls="overview-content"
+              onClick={() => setIsOverviewExpanded((prev) => !prev)}
+            >
+              <IconChevron className={`icon-chevron ${isOverviewExpanded ? 'expanded' : ''}`} />
+            </button>
             <h2 className="section-title">Overview</h2>
             <div className="section-actions">
               <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={handleEditTask}>
@@ -295,7 +313,9 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
               </button>
             </div>
           </div>
-          <p className="task-desc">{task.description || 'No description provided.'}</p>
+          <div id="overview-content" className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}>
+            <p className="task-desc">{task.description || 'No description provided.'}</p>
+          </div>
         </section>
 
         <section className="panel flex flex-col flex-1 min-h-0">
