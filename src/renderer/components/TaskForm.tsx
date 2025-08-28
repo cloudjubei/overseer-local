@@ -15,6 +15,7 @@ type Props = {
   submitting?: boolean
   isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
+  onDelete?: () => void
 }
 
 const STATUS_OPTIONS: Array<{ value: Status; label: string }> = [
@@ -25,7 +26,7 @@ const STATUS_OPTIONS: Array<{ value: Status; label: string }> = [
   { value: '=', label: 'Deferred' },
 ]
 
-export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef }: Props) {
+export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
   const [id, setId] = useState<number>(initialValues?.id ?? 0)
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
@@ -86,8 +87,7 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
             inputMode="numeric"
             min={1}
             value={isCreate ? id : (initialValues?.id ?? id)}
-            onChange={(e) => setId(parseInt(e.target.value, 10))}
-            disabled={!isCreate || submitting}
+            disabled={true}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
             style={{
               background: 'var(--surface-raised)',
@@ -161,6 +161,16 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitting = false
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
+        {onDelete && (
+          <button
+            type="button"
+            className="btn-destructive mr-auto"
+            onClick={onDelete}
+            disabled={submitting}
+          >
+            Delete
+          </button>
+        )}
         <button
           type="button"
           className="btn-secondary"

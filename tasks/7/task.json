@@ -383,7 +383,7 @@
     },
     {
       "id": "7.28",
-      "status": "-",
+      "status": "+",
       "title": "Task fixes",
       "description": "When creating a task - the user shouldn't be able to select the ID - this should just be auto assigned as the next available one in order.\n\nIt should be possible to delete a task from the edit screen (after extra alert confirmation).",
       "plan": "",
