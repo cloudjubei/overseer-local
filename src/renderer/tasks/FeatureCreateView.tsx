@@ -4,29 +4,15 @@ import { taskService } from '../services/taskService'
 import { projectsService } from '../services/projectsService'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import type { TasksIndexSnapshot } from '../services/taskService'
-import type { ProjectsIndexSnapshot } from '../services/projectsService'
+import { useActiveProject } from '../projects/ProjectContext'
 
-export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
+export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
-  const [projectsSnapshot, setProjectsSnapshot] = useState<ProjectsIndexSnapshot | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    const fetchSnapshots = async () => {
-      const [tasksSnap, projectsSnap] = await Promise.all([
-        taskService.getSnapshot(),
-        projectsService.getSnapshot()
-      ])
-      setSnapshot(tasksSnap)
-      setProjectsSnapshot(projectsSnap)
-    }
-    fetchSnapshots()
-  }, [])
+  const { project } = useActiveProject()
 
   const doClose = () => {
     onRequestClose?.()
@@ -34,14 +20,19 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
 
   const onSubmit = useCallback(
     async (values: FeatureFormValues) => {
-      if (!taskId || !Number.isInteger(taskId)) {
+      if (!project) {
+        setAlertMessage('No project selected.')
+        setShowAlert(true)
+        return
+      }
+      if (!taskId) {
         setAlertMessage('No valid Task ID provided.')
         setShowAlert(true)
         return
       }
       setSubmitting(true)
       try {
-        const res = await taskService.addFeature(taskId, values)
+        const res = await taskService.addFeature(project, taskId, values)
         if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
         toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
         doClose()
@@ -52,7 +43,7 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
         setSubmitting(false)
       }
     },
-    [taskId, toast]
+    [taskId, toast, project]
   )
 
   if (!taskId) {
@@ -66,10 +57,7 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
           onSubmit={onSubmit}
           onCancel={doClose}
           submitting={submitting}
-          isCreate={true}
           titleRef={titleRef}
-          allTasksSnapshot={snapshot}
-          allProjectsSnapshot={projectsSnapshot}
           taskId={taskId}
         />
       </Modal>

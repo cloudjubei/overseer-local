@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
 import { taskService } from '../services/taskService'
 import { projectsService } from '../services/projectsService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import type { Feature, Task } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../services/taskService'
-import type { ProjectsIndexSnapshot } from '../services/projectsService'
+import { useActiveProject } from '../projects/ProjectContext'
 
-export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
+export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: string; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
   const [task, setTask] = useState<Task | null>(null)
   const [initialValues, setInitialValues] = useState<Feature | null>(null)
@@ -16,12 +15,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
-  const [projectsSnapshot, setProjectsSnapshot] = useState<ProjectsIndexSnapshot | null>(null)
-
-  useEffect(() => {
-    projectsService.getSnapshot().then(setProjectsSnapshot)
-  }, [])
+  const { project } = useActiveProject()
 
   const doClose = () => {
     onRequestClose?.()
@@ -53,20 +47,28 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     }
   }, [taskId, featureId])
 
-  const onSubmit = async (values: FeatureFormValues) => {
-    setSubmitting(true)
-    try {
-      const res = await taskService.updateFeature(taskId, featureId, values)
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
-      toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
-      doClose()
-    } catch (e: any) {
-      setAlertMessage(`Failed to update feature: ${e?.message || String(e)}`)
-      setShowAlert(true)
-    } finally {
-      setSubmitting(false)
-    }
-  }
+  const onSubmit = useCallback(
+    async (values: FeatureFormValues) => {
+      if (!project) {
+        setAlertMessage('No project selected.')
+        setShowAlert(true)
+        return
+      }
+      setSubmitting(true)
+      try {
+        const res = await taskService.updateFeature(project, taskId, featureId, values)
+        if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+        toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
+        doClose()
+      } catch (e: any) {
+        setAlertMessage(`Failed to update feature: ${e?.message || String(e)}`)
+        setShowAlert(true)
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [taskId, toast, project]
+  )
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false)

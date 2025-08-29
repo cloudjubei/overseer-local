@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Feature, Status, Task } from 'src/types/tasks'
+import type { Feature, ProjectSpec, Status, Task } from 'src/types/tasks'
 import { taskService } from '../services/taskService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
+import { projectsService } from '../services/projectsService'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -59,13 +60,14 @@ function IconChevron({ className }: { className?: string }) {
   )
 }
 
-export default function TaskDetailsView({ taskId }: { taskId: number }) {
-  const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
+export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
   const { openModal, navigateView, tasksRoute } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const { projectId } = useActiveProject()
+  const [project, setProject] = useState<ProjectSpec | null>(null)
+  const [taskIndex, setTaskIndex] = useState<TasksIndexSnapshot | null>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
   // DnD state (match Tasks list patterns)
@@ -75,63 +77,67 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
 
+  console.log("taskId: ", taskId)
+
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
         const idx = await taskService.getSnapshot()
-        if (!cancelled) setIndex(idx)
+        if (!cancelled) setTaskIndex(idx)
       } catch (e) {
         console.error('Failed to load tasks index.', e)
       }
     })()
-    const unsubscribe = taskService.onUpdate((idx) => setIndex(idx))
+    const unsubscribe = taskService.onUpdate((idx) => setTaskIndex(idx))
     return () => {
       cancelled = true
       if (typeof unsubscribe === 'function') unsubscribe()
     }
   }, [projectId])
+    useEffect(() => {
+      let cancelled = false
+      ;(async () => {
+        try {
+          const project = await projectsService.getById(projectId)
+          if (!cancelled && project) setProject(project)
+        } catch (e) {
+          console.error('Failed to load project index.', e)
+        }
+      })()
+      const unsubscribe = projectsService.onUpdate(async (idx) => {
+        const project = await projectsService.getById(projectId)
+        if (project){
+          setProject(project)
+        }
+      })
+      return () => {
+        cancelled = true
+        if (typeof unsubscribe === 'function') unsubscribe()
+      }
+    }, [projectId])
 
   useEffect(() => {
-    if (taskId && index && (index as any).tasksById) {
-      const t = (index as any).tasksById?.[taskId]
-      setTask(t || null)
+    if (taskId && taskIndex) {
+      const t = taskIndex.tasksById[taskId]
+      setTask(t)
     } else {
       setTask(null)
     }
-  }, [taskId, index])
-
-  const globalDependents = useMemo(() => {
-    const map: Record<string, string[]> = {}
-    if (!index?.tasksById) return map
-    Object.entries(index.tasksById).forEach(([tId, tsk]) => {
-      const taskId = parseInt(tId, 10);
-      ;(tsk.dependencies || []).forEach(dep => {
-        if (!map[dep]) map[dep] = []
-        map[dep].push(`${taskId}`)
-      });
-      tsk.features.forEach(f => {
-        ;(f.dependencies || []).forEach(dep => {
-          if (!map[dep]) map[dep] = []
-          map[dep].push(`${f.id}`)
-        })
-      });
-    })
-    return map
-  }, [index])
+  }, [taskId, taskIndex])
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
   const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
 
-  const handleTaskStatusChange = async (taskId: number, status: Status) => {
+  const handleTaskStatusChange = async (taskId: string, status: Status) => {
     try {
       await taskService.updateTask(taskId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
   }
-  const handleFeatureStatusChange = async (taskId: number, featureId: string, status: Status) => {
+  const handleFeatureStatusChange = async (taskId: string, featureId: string, status: Status) => {
     try {
       await taskService.updateFeature(taskId, featureId, { status })
     } catch (e) {
@@ -139,11 +145,11 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     }
   }
 
-  const handleMoveFeature = async (fromId: string, toIndex: number) => {
+  const handleMoveFeature = async (fromIndex: number, toIndex: number) => {
     if (!task) return
     setSaving(true)
     try {
-      const res = await taskService.reorderFeatures(task.id, { fromId, toIndex })
+      const res = await taskService.reorderFeatures(task.id, { fromIndex, toIndex })
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)
@@ -238,15 +244,15 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
   const dndEnabled = !saving
 
   const onListDrop = () => {
-    if (dragFeatureId != null && dropIndex != null && dropPosition != null) {
+    if (dragFeatureId != null && draggingIndex != null && dropIndex != null && dropPosition != null) {
       const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
-      handleMoveFeature(dragFeatureId, toIndex)
+      handleMoveFeature(draggingIndex, toIndex)
     }
     clearDndState()
   }
 
   const taskDeps = Array.isArray(task.dependencies) ? task.dependencies : []
-  const taskDependents = globalDependents[String(task.id)] || []
+  const taskDependents : string[] = [] //TODO:
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -339,8 +345,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
             >
               {task.features.map((f: Feature, idx: number) => {
                 const deps = Array.isArray(f.dependencies) ? f.dependencies : []
-                const fullId = `${f.id}`
-                const dependents = globalDependents[fullId] || []
+                const dependents : string[] = [] //TODO:
 
                 const isDragSource = dragFeatureId === f.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
@@ -374,7 +379,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                             <IconExclamation className="w-4 h-4" />
                           </span>
                         )}
-                        <span className="id-chip">{f.id || ''}</span>
+                        <span className="id-chip">{task.featureIdToDisplayIndex[f.id]}</span>
                         <StatusControl
                           status={f.status}
                           onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}

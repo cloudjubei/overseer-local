@@ -1,21 +1,20 @@
 import React, { useMemo, useState } from 'react'
-import type { ProjectSpec } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../../services/taskService'
-import type { ProjectsIndexSnapshot } from '../../services/projectsService'
+import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
+import { taskService } from '../../services/taskService'
+import { projectsService } from '../../services/projectsService'
 
 type DependencySelectorProps = {
-  allTasksSnapshot?: TasksIndexSnapshot
-  allProjectsSnapshot?: ProjectsIndexSnapshot
   onConfirm?: (deps: string[]) => void
-  currentTaskId?: number
+  currentTaskId?: string
   currentFeatureId?: string
   existingDeps?: string[]
 }
 
-function getTaskIdsForProject(spec: ProjectSpec): number[] {
-  const ids = new Set<number>()
-  spec.requirements.forEach((r) => r.tasks.forEach((id) => ids.add(id)))
-  return Array.from(ids).sort((a, b) => a - b)
+function getTaskIdsForProject(spec: ProjectSpec): string[] {
+  const ids = new Set<string>()
+  return Array.from(ids) //TODO: fix
+  // spec.requirements.forEach((r) => r.tasks.forEach((id) => ids.add(id)))
+  // return Array.from(ids).sort((a, b) => a - b)
 }
 
 function doesTaskMatch(task: any, q: string): boolean {
@@ -34,7 +33,7 @@ function doesFeatureMatch(f: any, q: string): boolean {
   )
 }
 
-function doesProjectMatch(project: ProjectSpec, tasksById: Record<number, any>, q: string): boolean {
+function doesProjectMatch(project: ProjectSpec, tasksById: Record<string, Task>, q: string): boolean {
   if (project.title.toLowerCase().includes(q) || (project.description || '').toLowerCase().includes(q)) return true
   const taskIds = getTaskIdsForProject(project)
   for (const tid of taskIds) {
@@ -47,8 +46,6 @@ function doesProjectMatch(project: ProjectSpec, tasksById: Record<number, any>, 
 }
 
 export const DependencySelector: React.FC<DependencySelectorProps> = ({
-  allTasksSnapshot,
-  allProjectsSnapshot,
   onConfirm,
   currentTaskId,
   currentFeatureId,
@@ -69,9 +66,13 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     setSelected(newSelected)
   }
 
-  if (!allTasksSnapshot || !allProjectsSnapshot) {
-    return <div>Loading dependencies...</div>
-  }
+  const currentProject = projectsService.getSnapshot()
+  projectsService.getById()
+  // taskService
+
+  // if (!allTasksSnapshot || !allProjectsSnapshot) {
+  //   return <div>Loading dependencies...</div>
+  // }
 
   const tasksById = allTasksSnapshot.tasksById || {}
   const projectsById = allProjectsSnapshot.projectsById || {}
@@ -117,10 +118,10 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
           #{tid} {task.title} (Task)
         </div>
         <ul className="ml-4 space-y-1">
-          {matchingFeatures.map((f) => {
-            const fdep = `${f.id}`
+          {matchingFeatures.map((f: Feature) => {
             const isSelf = currentTaskId === tid && currentFeatureId === f.id
-            const isFDisabled = isSelf || existingDeps.includes(fdep)
+            const isFDisabled = isSelf || existingDeps.includes(f.id)
+            const dependencyDisplay = "x.x" //TODO: task.fea
             return (
               <li
                 key={f.id}
@@ -128,8 +129,8 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
               >
                 <input
                   type="checkbox"
-                  checked={selected.has(fdep)}
-                  onChange={() => toggle(fdep)}
+                  checked={selected.has(f.id)}
+                  onChange={() => toggle(f.id)}
                   disabled={isFDisabled}
                 />
                 #{fdep} {f.title} (Feature)

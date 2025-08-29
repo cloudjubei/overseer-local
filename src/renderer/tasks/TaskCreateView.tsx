@@ -1,8 +1,10 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
-import { taskService } from '../services/taskService'
+import { TaskCreateInput, taskService } from '../services/taskService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
+import { projectsService } from '../services/projectsService'
+import { useActiveProject } from '../projects/ProjectContext'
 
 export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -10,6 +12,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
+  const { project } = useActiveProject()
 
   const doClose = () => {
     onRequestClose?.()
@@ -17,9 +20,14 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
 
   const onSubmit = useCallback(
     async (values: TaskFormValues) => {
+      if (!project) {
+        setAlertMessage('No project selected.')
+        setShowAlert(true)
+        return
+      }
       setSubmitting(true)
       try {
-        const res = await taskService.addTask({ ...values })
+        const res = await taskService.addTask(project, { ...values } as TaskCreateInput)
         if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
         toast({ title: 'Success', description: 'Task created successfully', variant: 'success' })
         doClose()
@@ -30,7 +38,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
         setSubmitting(false)
       }
     },
-    [toast]
+    [toast, project]
   )
 
   return (

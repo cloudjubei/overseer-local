@@ -3,13 +3,13 @@ import { NavigationView } from '../types';
 
 export type TasksRoute =
   | { name: 'list' }
-  | { name: 'details'; taskId: number; highlightFeatureId?: string; highlightTask?: boolean };
+  | { name: 'details'; taskId: string; highlightFeatureId?: string; highlightTask?: boolean };
 
 export type ModalRoute =
   | { type: 'task-create' }
-  | { type: 'task-edit'; taskId: number }
-  | { type: 'feature-create'; taskId: number }
-  | { type: 'feature-edit'; taskId: number; featureId: string }
+  | { type: 'task-edit'; taskId: string }
+  | { type: 'feature-create'; taskId: string }
+  | { type: 'feature-edit'; taskId: string; featureId: string }
   | { type: 'llm-config-add' }
   | { type: 'llm-config-edit'; id: string }
   | { type: 'projects-manage' };
@@ -26,7 +26,7 @@ export type NavigatorApi = NavigatorState & ModalState & {
   openModal: (m: ModalRoute) => void;
   closeModal: () => void;
   navigateView: (v: NavigationView) => void;
-  navigateTaskDetails: (taskId: number, highlightFeatureId?: string, highlightTask?: boolean) => void;
+  navigateTaskDetails: (taskId: string, highlightFeatureId?: string, highlightTask?: boolean) => void;
 };
 
 function viewPrefixToView(prefix: string): NavigationView {
@@ -45,6 +45,8 @@ function viewPrefixToView(prefix: string): NavigationView {
   }
 }
 
+const uuidRegex = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/
+
 function parseHash(hashRaw: string): NavigatorState {
   const raw = (hashRaw || '').replace(/^#/, '');
 
@@ -55,8 +57,8 @@ function parseHash(hashRaw: string): NavigatorState {
 
   let tasksRoute: TasksRoute = { name: 'list' };
   let m: RegExpExecArray | null;
-  if ((m = /^task\/(\d+)(?:\/highlight-task)?(?:\/highlight-feature\/(\w+))?/.exec(raw))) {
-    const taskId = parseInt(m[1], 10);
+  if ((m = /^task\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})(?:\/highlight-task)?(?:\/highlight-feature\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}))?/.exec(raw))) {
+    const taskId = m[1];
     const highlightFeatureId = m[2] || undefined;
     const highlightTask = raw.includes('/highlight-task') ? true : undefined;
     tasksRoute = { name: 'details', taskId, highlightFeatureId, highlightTask };
@@ -109,7 +111,7 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const navigateTaskDetails = useCallback((taskId: number, highlightFeatureId?: string, highlightTask: boolean = false) => {
+  const navigateTaskDetails = useCallback((taskId: string, highlightFeatureId?: string, highlightTask: boolean = false) => {
     let hash = `#task/${taskId}`;
     if (highlightFeatureId) {
       hash += `/highlight-feature/${highlightFeatureId}`;

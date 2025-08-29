@@ -6,6 +6,8 @@ export function validateProjectSpec(spec) {
   if (typeof spec.description !== 'string') errors.push('description must be a string');
   if (typeof spec.path !== 'string' || !spec.path.trim()) errors.push('path must be a non-empty string');
   if (typeof spec.repo_url !== 'string') errors.push('repo_url must be a string');
+  if (typeof spec.taskIdToDisplayIndex !== 'object') errors.push('taskIdToDisplayIndex must be an object');
+  
   if (!Array.isArray(spec.requirements)) errors.push('requirements must be an array');
   else {
     for (let i = 0; i < spec.requirements.length; i++) {

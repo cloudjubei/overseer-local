@@ -61,7 +61,7 @@ async function runCli() {
 
     let features = json['features']
     const featureIdToDisplayIndex = {}
-    let index = 0
+    let index = 1
     for(const f of features){
       const newFeatureId = uuidv4()
       referencesMap[`${f['id']}`] = newFeatureId
@@ -111,7 +111,7 @@ async function runCli() {
 
   let projectTasks = {}
   for(let i=0; i<newTasks.length; i++){
-    projectTasks[newTasks[i].id] = i
+    projectTasks[newTasks[i].id] = i+1
   }
   config['taskIdToDisplayIndex'] = projectTasks
 

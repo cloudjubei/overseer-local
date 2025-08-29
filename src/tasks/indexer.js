@@ -2,6 +2,7 @@ import fs from 'fs/promises'
 import path from 'path';
 import chokidar from 'chokidar';
 import { validateTask } from './validator';
+import { randomUUID } from 'crypto';
 
 function isNumericDir(name) {
     return /^\d+$/.test(name)
@@ -144,8 +145,8 @@ export class TasksIndexer {
             } else {
                 const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
                 for (const dirent of taskDirs) {
-                    if (dirent.isDirectory() && isNumericDir(dirent.name)) {
-                        const taskId = parseInt(dirent.name, 10);
+                    if (dirent.isDirectory()) {
+                        const taskId = dirent.name;
                         const taskFilePath = path.join(this.tasksDir, dirent.name, 'task.json');
                         try {
                             const content = await fs.readFile(taskFilePath, 'utf-8');
@@ -332,19 +333,13 @@ export class TasksIndexer {
             throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
         }
 
-        let features = taskData.features;
+        let features = taskData.features.sort((a, b) => taskData.featureIdToDisplayIndex[a] - taskData.featureIdToDisplayIndex[b]);
+
         const currentOrder = features.map(f => f.id);
         let newOrder;
 
-        if (payload.order) {
-            newOrder = payload.order;
-            const orderSet = new Set(newOrder);
-            if (orderSet.size !== currentOrder.length || !newOrder.every(id => currentOrder.includes(id))) {
-                throw new Error('Invalid order: must include all existing feature IDs without duplicates');
-            }
-        } else if (payload.fromId && payload.toIndex !== undefined) {
-            const fromIndex = features.findIndex(f => f.id === payload.fromId);
-            if (fromIndex === -1) throw new Error(`Feature ${payload.fromId} not found`);
+        if (payload.fromIndex && payload.toIndex !== undefined) {
+            if (payload.fromIndex < 0 || payload.fromIndex > features.length) throw new Error('Invalid source index');
             if (payload.toIndex < 0 || payload.toIndex > features.length) throw new Error('Invalid target index');
             newOrder = [...currentOrder];
             const [moved] = newOrder.splice(fromIndex, 1);
@@ -359,64 +354,11 @@ export class TasksIndexer {
         if (JSON.stringify(newOrder) === JSON.stringify(currentOrder)) {
             return { ok: true };
         }
-
-        // Reorder features
-        const reorderedFeatures = newOrder.map(id => features.find(f => f.id === id));
-
-        // Renumber IDs
-        const idUpdateMap = new Map();
-        reorderedFeatures.forEach((feature, index) => {
-            const newId = `${taskId}.${index + 1}`;
-            if (feature.id !== newId) {
-                idUpdateMap.set(feature.id, newId);
-                feature.id = newId;
-            }
-        });
-
-        // Update dependencies within this task
-        reorderedFeatures.forEach(feature => {
-            if (feature.dependencies) {
-                feature.dependencies = feature.dependencies.map(dep => idUpdateMap.has(dep) ? idUpdateMap.get(dep) : dep);
-            }
-        });
-
-        taskData.features = reorderedFeatures;
-
-        // Update dependencies across all tasks
-        const tasksToUpdate = {};
-        tasksToUpdate[String(taskId)] = taskData;
-
-        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-        const taskDirNames = taskDirs.filter(d => d.isDirectory() && isNumericDir(d.name)).map(d => d.name);
-
-        for (const currentTaskId of taskDirNames) {
-            if (currentTaskId === String(taskId)) continue;
-
-            const currentTaskPath = path.join(this.tasksDir, currentTaskId, 'task.json');
-            let currentTaskData;
-            try {
-                currentTaskData = JSON.parse(await fs.readFile(currentTaskPath, 'utf-8'));
-            } catch (e) {
-                console.warn(`Skipping dependency update for unreadable task: ${currentTaskId}`);
-                continue;
-            }
-
-            let taskModified = false;
-            for (const feature of currentTaskData.features) {
-                if (!feature.dependencies || feature.dependencies.length === 0) continue;
-
-                const updatedDeps = feature.dependencies.map(dep => idUpdateMap.has(dep) ? idUpdateMap.get(dep) : dep);
-
-                if (JSON.stringify(updatedDeps) !== JSON.stringify(feature.dependencies)) {
-                    feature.dependencies = updatedDeps;
-                    taskModified = true;
-                }
-            }
-
-            if (taskModified) {
-                tasksToUpdate[currentTaskId] = currentTaskData;
-            }
+        let newIndex = {}
+        for(let i=0; i<newOrder.length; i++){
+            newIndex[newOrder[i]] = newOrder+1
         }
+        taskData.featureIdToDisplayIndex = newIndex;
 
         // Write updated tasks
         await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
@@ -428,9 +370,13 @@ export class TasksIndexer {
         return { ok: true };
     }
 
-    async reorderTasks(payload) {
+    async reorderTasks(payload) {  //TODO: THIS SHOULD be a projectManager function
         const tasksDirAbs = path.resolve(this.tasksDir);
         const taskDirs = await fs.readdir(tasksDirAbs, { withFileTypes: true });
+
+        // let features = taskData.features.sort((a, b) => taskData.featureIdToDisplayIndex[a] - taskData.featureIdToDisplayIndex[b]);
+        // const currentOrder = features.map(f => f.id);
+
         let currentOrder = taskDirs
             .filter(d => d.isDirectory() && isNumericDir(d.name))
             .map(d => parseInt(d.name, 10))
@@ -590,7 +536,7 @@ export class TasksIndexer {
         }
 
         const newIndex = taskData.features.length + 1;
-        const newId = `${taskId}.${newIndex}`;
+        const newId = randomUUID()
         const newFeature = {
             id: newId,
             status: feature.status || '-',
@@ -603,6 +549,7 @@ export class TasksIndexer {
             rejection: feature.rejection
         };
         taskData.features.push(newFeature);
+        taskData.featureIdToDisplayIndex[newId] = newIndex
 
         const { valid, errors } = validateTask(taskData);
         if (!valid) {
@@ -614,30 +561,38 @@ export class TasksIndexer {
         return { ok: true };
     }
 
-    async addTask(task) {
-        const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-        const existingIds = taskDirs
-            .filter(d => d.isDirectory() && isNumericDir(d.name))
-            .map(d => parseInt(d.name, 10));
-        const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+    async addTask(project, task) {
+        const tasksDir = `${project.path}/tasks`
 
-        const newTaskDir = path.join(this.tasksDir, String(nextId));
+        const newId = randomUUID()
+        const newTaskDir = path.join(tasksDir, newId);
         await fs.mkdir(newTaskDir, { recursive: true });
 
         const newTask = {
-            id: nextId,
+            id: newId,
             status: task.status || '-',
             title: task.title || '',
             description: task.description || '',
-            features: task.features || [],
-            rejection: task.rejection
+            features: [],
+            rejection: task.rejection,
+            featureIdToDisplayIndex: {}
         };
 
-        newTask.features = newTask.features.map((f, index) => ({
-            ...f,
-            id: `${nextId}.${index + 1}`,
-            status: f.status || '-'
-        }));
+        let features = task.features || []
+        let featureIdToDisplayIndex = {}
+        for(let i=0; i<task.features.length; i++){
+            const newId = randomUUID()
+            const f = task.features[i]
+            features.push({
+                ...f,
+                id: newId,
+                status: f.status || '-'
+            })
+            featureIdToDisplayIndex[newId] = i
+        }
+
+        newTask.features = features
+        newTask.featureIdToDisplayIndex = featureIdToDisplayIndex
 
         const { valid, errors } = validateTask(newTask);
         if (!valid) {
@@ -647,6 +602,15 @@ export class TasksIndexer {
 
         const taskPath = path.join(newTaskDir, 'task.json');
         await fs.writeFile(taskPath, JSON.stringify(newTask, null, 2), 'utf-8');
+
+        //TODO: also update project json
+        const projectPath = `./project/${project.id}.json`
+        const projectRaw = await fs.readFile(projectPath);
+        let projectJson = JSON.parse(projectRaw)
+
+        projectJson.taskIdToDisplayIndex[newId] = projectJson.taskIdToDisplayIndex.length + 1
+        await fs.writeFile(projectPath, JSON.stringify(projectJson, null, 2), 'utf-8');
+
         await this.rebuildAndNotify(`New task ${nextId} added, index rebuilt.`);
         return { ok: true };
     }
