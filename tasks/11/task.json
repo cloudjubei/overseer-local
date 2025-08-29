@@ -137,8 +137,7 @@
         "src/main.js"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Currently 'useDependencyResolver' is never used whereas it seems to be the only point where 'dependencyResolver.init' is called.\nWhere is a good place to call this?"
+      "dependencies": []
     },
     {
       "id": "11.10",

@@ -161,8 +161,7 @@
       "acceptance": [],
       "dependencies": [
         "2.9"
-      ],
-      "rejection": "the first theme needs to have very bland and readable colors. Right now I can't see any buttons. When clicking on any of the themes - nothing changes - there needs to be 3 themes defined so that the change can be visible"
+      ]
     },
     {
       "id": "2.11",
@@ -179,8 +178,7 @@
       "dependencies": [
         "2.4",
         "2.10"
-      ],
-      "rejection": "when moving a feature it doesn't update dependencies -> it should always do that."
+      ]
     },
     {
       "id": "2.12",
@@ -197,8 +195,7 @@
       "dependencies": [
         "2.4",
         "2.11"
-      ],
-      "rejection": "when clicking the up/down buttons - it opens the task detail view - it shouldn't"
+      ]
     },
     {
       "id": "2.13",

@@ -66,7 +66,6 @@ function App()
   return (
     <ToastProvider>
       <ProjectsProvider>
-        {/* Initialize and keep dependency resolver in-sync with current project */}
         <DependencyResolverBootstrap />
         <NavigatorProvider>
           <ShortcutsProvider>
