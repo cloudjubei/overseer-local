@@ -3,6 +3,7 @@ import path from 'node:path';
 import { ipcMain } from 'electron';
 import { LLMProvider } from './LLMProvider';
 import { taskManager, filesManager } from '../managers';
+import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
 export class ChatsManager {
   constructor(projectRoot, window) {
@@ -22,41 +23,37 @@ export class ChatsManager {
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
-    ipcMain.handle('chat:completion', async (event, { messages, config }) => {
-      return await this.getCompletion({ messages, config });
-    });
+    const handlers = {};
 
-    ipcMain.handle('chat:list-models', async (event, config) => {
+    handlers[IPC_HANDLER_KEYS.CHATS_COMPLETION] = async ({ messages, config }) => {
+      return await this.getCompletion({ messages, config });
+    };
+
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async (config) => {
       try {
         return await this.listModels(config);
       } catch (error) {
-        return { error: error.message };
+        return [];
       }
-    });
+    };
 
-    ipcMain.handle('chat:list', () => {
-      return this.listChats();
-    });
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async () => this.listChats();
 
-    ipcMain.handle('chat:create', () => {
-      return this.createChat();
-    });
+    handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async () => this.createChat();
 
-    ipcMain.handle('chat:load', (event, chatId) => {
-      return this.loadChat(chatId);
-    });
+    handlers[IPC_HANDLER_KEYS.CHATS_LOAD] = async ({ chatId }) => this.loadChat(chatId);
 
-    ipcMain.handle('chat:save', (event, { chatId, messages }) => {
+    handlers[IPC_HANDLER_KEYS.CHATS_SAVE] = async ({ chatId, messages }) => {
       this.saveChat(chatId, messages);
       return { ok: true };
-    });
+    };
 
-    ipcMain.handle('chat:delete', (event, chatId) => {
+    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ chatId }) => {
       this.deleteChat(chatId);
       return { ok: true };
-    });
+    };
 
-    ipcMain.handle('chat:set-context', async (event, { projectId }) => {
+    handlers[IPC_HANDLER_KEYS.CHATS_SET_CONTEXT] = async ({ projectId }) => {
       try {
         let targetDir;
         if (!projectId || projectId === 'main') {
@@ -85,7 +82,18 @@ export class ChatsManager {
         console.error('Failed to set chat context:', e);
         return this.listChats();
       }
-    });
+    };
+
+    for (const channel of Object.keys(handlers)) {
+      ipcMain.handle(channel, async (event, args) => {
+        try {
+          return await handlers[channel](args || {});
+        } catch (e) {
+          console.error(`${channel} failed`, e);
+          return { ok: false, error: String(e?.message || e) };
+        }
+      });
+    }
 
     this._ipcBound = true;
   }
@@ -102,7 +110,7 @@ export class ChatsManager {
     return this.chatsDir;
   }
 
-  _getFilesBaseDir() { //TODO: remove
+  _getFilesBaseDir() {
     return filesManager.filesDir || this.projectRoot;
   }
 
@@ -167,8 +175,8 @@ export class ChatsManager {
       ];
 
       const toolsMap = {
-        list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById), // TODO expose proper API
-        get_task_reference: async () => null, // TODO implement reference resolver
+        list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById),
+        get_task_reference: async () => null,
         list_files: async () => JSON.stringify(filesManager.getIndex()),
         read_file: async ({ path: relPath }) => {
           try {

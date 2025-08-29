@@ -1,6 +1,7 @@
 import { FilesIndex } from 'src/renderer/services/filesService';
 import type { Task, Feature, ProjectSpec } from './tasks'
 import { ProjectsService } from 'src/renderer/services/projectsService';
+import type { ChatsService } from 'src/renderer/services/chatsService'
 
 export type ServiceResult = { ok: boolean; error?: string }
 
@@ -44,7 +45,7 @@ declare global {
   interface Window {
     tasksIndex: TasksIndexAPI
     filesManager: FilesManagerAPI
-    chat: any
+    chatsService: ChatsService
     notifications: any
     projectsService: ProjectsService
   }

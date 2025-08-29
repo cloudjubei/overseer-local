@@ -42,15 +42,16 @@ const TASKS_API = {
   setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
 };
 
-const CHAT_API = {
-  getCompletion: (messages, config) => ipcRenderer.invoke('chat:completion', {messages, config}),
-  listModels: (config) => ipcRenderer.invoke('chat:list-models', config),
-  list: () => ipcRenderer.invoke('chat:list'),
-  create: () => ipcRenderer.invoke('chat:create'),
-  load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
-  save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
-  delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
-  setContext: (projectId) => ipcRenderer.invoke('chat:set-context', { projectId }),
+// Chats API exposed as a service (mirrors projectsService style)
+const CHATS_API = {
+  getCompletion: (messages, config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, { messages, config }),
+  listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, config),
+  list: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST),
+  create: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE),
+  load: (chatId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LOAD, { chatId }),
+  save: (chatId, messages) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_SAVE, { chatId, messages }),
+  delete: (chatId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { chatId }),
+  setContext: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_SET_CONTEXT, { projectId }),
 };
 
 const NOTIFICATIONS_API = {
@@ -90,8 +91,8 @@ const PROJECTS_API = {
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
-contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
 contextBridge.exposeInMainWorld('files', FILES_API);
+contextBridge.exposeInMainWorld('chatsService', CHATS_API);

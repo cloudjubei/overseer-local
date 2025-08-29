@@ -11,13 +11,4 @@ export type ChatsService = {
   setContext: (projectId: 'main' | string) => Promise<string[]>;
 };
 
-export const chatsService: ChatsService = {
-  getCompletion: (messages, config) => window.chat.getCompletion(messages, config),
-  listModels: (config) => window.chat.listModels(config),
-  list: () => window.chat.list(),
-  create: () => window.chat.create(),
-  load: (chatId) => window.chat.load(chatId),
-  save: (chatId, messages) => window.chat.save(chatId, messages),
-  delete: (chatId) => window.chat.delete(chatId),
-  setContext: (projectId) => window.chat.setContext(projectId),
-};
+export const chatsService: ChatsService = { ...window.chatsService } as any;

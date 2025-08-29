@@ -112,7 +112,7 @@ This document describes how files and directories are organised in this reposito
 - src/files/
   - manager.js: FilesManager responsible for indexing files, watching for changes, publishing updates to renderer, and now registering all 'files:*' IPC handlers (index, context, read/write, delete, rename, upload, ensure-dir). This keeps main.js thin.
 - src/chat/
-  - manager.js: ChatsManager now also registers all 'chat:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context). This further thins main.js.
+  - manager.js: ChatsManager registers all 'chats:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context) using centralized IPC handler keys. This mirrors the ProjectsManager pattern and keeps main.js thin.
 - src/projects/
   - manager.js: ProjectsManager owns indexing and watching project configs and now registers all 'projects:*' IPC handlers (projects-index:get, projects:create, projects:update, projects:delete). This keeps main.js thin.
 - src/tasks/
@@ -164,8 +164,8 @@ Notes:
 
 ## New Components/Services
 - src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
-- src/files/manager.js: Now also owns registration of all 'files:*' IPC handlers so main.js remains thin.
-- src/chat/manager.js: Now also owns registration of all 'chat:*' IPC handlers so main.js remains thin.
-- src/projects/manager.js: Now also owns registration of all 'projects:*' IPC handlers so main.js remains thin.
-- src/tasks/manager.js: Now also owns registration of all 'tasks:*' IPC handlers so main.js remains thin.
-- src/notifications/manager.js: Now owns registration of all 'notifications:*' IPC handlers (send OS notifications and click forwarding) so main.js remains thin.
+- src/files/manager.js: Registers all 'files:*' IPC handlers so main.js remains thin.
+- src/chat/manager.js: Now registers all 'chats:*' IPC handlers using centralized keys and is accessed via the renderer's chatsService (window.chatsService exposed from preload).
+- src/projects/manager.js: Registers all 'projects:*' IPC handlers so main.js remains thin.
+- src/tasks/manager.js: Registers all 'tasks:*' IPC handlers so main.js remains thin.
+- src/notifications/manager.js: Registers all 'notifications:*' IPC handlers so main.js remains thin.

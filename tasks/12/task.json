@@ -122,7 +122,7 @@
     },
     {
       "id": "12.10",
-      "status": "-",
+      "status": "+",
       "title": "ChatsManager needs to follow ProjectsManager",
       "description": "ProjectsManager has been refactored - make ChatsManager follow the same exact patterns. ProjectsManager is in the isolated world, and ProjectsService in rendeder - make sure chats follow the same patterns.",
       "plan": "",
@@ -130,7 +130,6 @@
         "src/main.js",
         "src/chat/manager.js",
         "src/renderer/services/chatsService.ts",
-
         "src/projects/manager.js",
         "src/renderer/services/projectsService.ts",
         "src/ipcHandlersKeys.js",
@@ -150,7 +149,6 @@
         "src/main.js",
         "src/files/manager.js",
         "src/renderer/services/filesService.ts",
-
         "src/projects/manager.js",
         "src/renderer/services/projectsService.ts",
         "src/ipcHandlersKeys.js",
@@ -170,7 +168,6 @@
         "src/main.js",
         "src/tasks/manager.js",
         "src/renderer/services/tasksService.ts",
-
         "src/projects/manager.js",
         "src/renderer/services/projectsService.ts",
         "src/ipcHandlersKeys.js",
@@ -190,7 +187,6 @@
         "src/main.js",
         "src/notifications/manager.js",
         "src/renderer/services/notificationsService.ts",
-
         "src/projects/manager.js",
         "src/renderer/services/projectsService.ts",
         "src/ipcHandlersKeys.js",
