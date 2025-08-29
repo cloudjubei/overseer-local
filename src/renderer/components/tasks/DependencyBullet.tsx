@@ -9,17 +9,19 @@ import { dependencyResolver } from '../../services/dependencyResolver';
 export interface DependencyBulletProps {
   dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
   isInbound?: boolean;
+  onRemove?: () => void;
 }
 
-const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbound = false }) => {
+const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbound = false, onRemove }) => {
   const { navigateTaskDetails, tasksRoute } = useNavigator();
 
   const resolved = dependencyResolver.resolveRef(dependency);
-  const isFeatureDependency = !("code" in resolved) && resolved.kind === 'feature';
+  const isError = 'code' in resolved;
+  const isFeatureDependency = !isError && resolved.kind === 'feature';
 
   let summary: { title: string; description: string; status: Status } = { title: 'Not found', description: '', status: '-' as Status };
 
-  if (!('code' in resolved)) {
+  if (!isError) {
     if (resolved.kind === 'task') {
       summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status };
     } else {
@@ -28,11 +30,15 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   }
 
   const handleClick = () => {
-    // Determine navigation target if resolved
-    if ('code' in resolved) return;
+    if (onRemove){
+      onRemove()
+      return
+    }
+    if (isError) return;
 
     const targetTaskId = resolved.kind === 'task' ? resolved.id : resolved.taskId;
     const featureId = resolved.kind === 'feature' ? resolved.featureId : undefined;
+
 
     const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === targetTaskId;
     if (isSameTask) {
@@ -61,7 +67,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   return (
     <Tooltip content={content}>
       <span
-        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isInbound ? 'chip--blocks' : 'dep-chip--ok'}`}
+        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isInbound ? 'chip--blocks' : 'chip--ok')}`}
         title={`${dependency}${isInbound ? ' (requires this)' : ''}`}
         onClick={handleClick}
         role="button"
@@ -74,6 +80,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
         }}
       >
         #{dependency}
+        {onRemove && <span aria-hidden="true">x</span>}
       </span>
     </Tooltip>
   );

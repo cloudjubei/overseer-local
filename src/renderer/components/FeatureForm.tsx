@@ -6,6 +6,7 @@ import { Modal } from './ui/Modal'
 import type { TasksIndexSnapshot } from '../../types/external'
 import type { ProjectsIndexSnapshot } from '../services/projectsService'
 import { dependencyResolver } from '../services/dependencyResolver'
+import DependencyBullet from './tasks/DependencyBullet'
 
 export type FeatureFormValues = {
   title: string
@@ -200,21 +201,8 @@ export function FeatureForm({
             }}
           >
             {dependencies.map((dep, idx) => {
-              const resolved = dependencyResolver.resolveRef(dep as string)
-              const kindClass = !('code' in resolved) ? (resolved.kind === 'feature' ? 'feature' : 'task') : ''
-              const missingClass = 'code' in resolved ? 'chip--missing' : ''
               return (
-                <div key={`${dep}-${idx}`} className={`chip ${kindClass} ${missingClass}`} title={`#${dep}`}>
-                  <span>#{dep}</span>
-                  <button
-                    type="button"
-                    className="chip__close"
-                    aria-label={`Remove dependency #${dep}`}
-                    onClick={() => removeDependencyAt(idx)}
-                  >
-                    ×
-                  </button>
-                </div>
+                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeDependencyAt(idx)} isInbound/>
               )
             })}
             <button
