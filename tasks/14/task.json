@@ -1,7 +1,7 @@
 {
   "id": 14,
   "status": "-",
-  "title": "Combining with the factory",
-  "description": "TODO",
+  "title": "Refactor Task.id and Feature.id into UUIDs.",
+  "description": "Write a script that will go over all the tasks and features and will update them with this new UUID.\nThis means that all dependency references must be updated to be matching:\n'{taskId}.{featureId}' or '{taskId}'\n\nThe display index of a feature is its position in the task's feature list.\nThe display index of a task in the main list must be stored - in the ProjectSpec.\nThere needs to be some way of looking these indices up quickly - as whenever a dependency is shown to the user it should shown as:\n'{taskIndex}.{featureIndex}' \n\nThe dependencyResolver should be updated accordingly too.",
   "features": []
 }

@@ -1,7 +1,7 @@
 {
   "id": 18,
   "status": "-",
-  "title": "React Native mobile versions",
-  "description": "Reuse as much code of this project as possible to make a complete mobile version using React Native. All business logic needs to be decoupled so that any project can easily reference it. View logic should be reused as much as possible, but if there are platform specific details - those should be well organised and structured. There needs to be clear documentation as to how to launch/manage this etc.",
+  "title": "Preparing for a React web version and React Native mobile version - backend is needed",
+  "description": "Up until now everything was running locally, but once we introduce other clients (mobile and web) we need to be able to have some centralised storage. There needs to be a good workflow for all clients to operate locally and sync with the backend (as much as possible should be achievable in offline mode). A very important consideration is how to integrate this with TheFactory project (given that that is a python project) or any other such project in the future.",
   "features": []
 }

@@ -1,7 +1,7 @@
 {
   "id": 19,
   "status": "-",
-  "title": "Web version",
-  "description": "Reuse as much code of this project as possible to make a complete web version using React and Typescript. A mobile version should already be in place - so make sure this project respects the dependency. There needs to be clear documentation as to how to launch/manage this etc.",
+  "title": "React Native mobile versions",
+  "description": "Reuse as much code of this project as possible to make a complete mobile version using React Native. All business logic needs to be decoupled so that any project can easily reference it. View logic should be reused as much as possible, but if there are platform specific details - those should be well organised and structured. There needs to be clear documentation as to how to launch/manage this etc.",
   "features": []
 }
