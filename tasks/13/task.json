@@ -15,22 +15,21 @@
     },
     {
       "id": "13.2",
-      "status": "+",
+      "status": "-",
       "title": "FileService is the only interface for handling files across app",
       "description": "FileIndex needs to be only used by the FileService - all other places use FileService and never FileIndex directly. All places that reference it are in the context.",
       "plan": "",
       "context": [
         "src/renderer/services/fileService.ts",
-        "src/renderer/hooks/useChats.ts",
-        "src/renderer/screens/ChatView.tsx",
-        "src/renderer/components/ui/FileSelector.tsx",
-        "src/renderer/screens/FilesView.tsx"
+        "src/renderer/screens/FilesView.tsx",
+        "src/main.js",
+        "src/docs/indexer.js"
       ],
       "acceptance": [],
       "dependencies": [
         "13.1"
       ],
-      "rejection": "upload isn't implemented - it's used by useChats"
+      "rejection": "No files found in FilesView. FileService (or its index) doesn't seem to be initilised properly - main.js still has a reference to the old DocsIndexer"
     },
     {
       "id": "13.3",
@@ -71,7 +70,6 @@
         "src/renderer/screens/DocumentsView.tsx"
       ],
       "acceptance": [],
-      "rejection": "The new FilesView doesn't display anything. The whole directory navigation seems to be gone from the code too. The previous DocumentsView is included as a reference.",
       "dependencies": [
         "13.2"
       ]
