@@ -3,10 +3,10 @@ import path from 'node:path';
 import { LLMProvider } from './LLMProvider';
 
 export class ChatManager {
-  constructor(projectRoot, taskIndexer, docsIndexer) {
+  constructor(projectRoot, taskIndexer, fileIndexer) {
     this.projectRoot = projectRoot;
     this.taskIndexer = taskIndexer;
-    this.docsIndexer = docsIndexer;
+    this.fileIndexer = fileIndexer;
     this.chatsDir = path.join(projectRoot, 'chats');
     if (!fs.existsSync(this.chatsDir)) {
       fs.mkdirSync(this.chatsDir, { recursive: true });
@@ -25,36 +25,53 @@ export class ChatManager {
     return this.chatsDir;
   }
 
+  _getFilesBaseDir() {
+    try {
+      const snap = this.fileIndexer.getIndex();
+      return snap.filesDir || snap.root || this.fileIndexer.filesDir || this.projectRoot;
+    } catch {
+      return this.projectRoot;
+    }
+  }
+
   async getCompletion({ messages, config }) {
     try {
-      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, documents, and related topics. Use tools to query project info. If user mentions @path, use read_doc. You can create new documents using create_doc.' };
+      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
       let currentMessages = [systemPrompt, ...messages];
       const tools = [
         {
           type: 'function',
           function: {
             name: 'list_tasks',
-            description: 'List all tasks in the project',
+            description: 'List all indexed files in the current project scope',
             parameters: { type: 'object', properties: {} },
           },
         },
         {
           type: 'function',
           function: {
-            name: 'list_docs',
-            description: 'List all documents in the project',
+            name: 'get_task_reference',
+            description: 'Get a task or feature by its visual reference in the current project scope',
             parameters: { type: 'object', properties: {} },
           },
         },
         {
           type: 'function',
           function: {
-            name: 'read_doc',
-            description: 'Read the content of a document by its relative path',
+            name: 'list_files',
+            description: 'List all indexed files in the current project scope',
+            parameters: { type: 'object', properties: {} },
+          },
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'read_file',
+            description: 'Read the content of a file by its project-relative path',
             parameters: {
               type: 'object',
               properties: {
-                path: { type: 'string', description: 'Relative path to the doc' },
+                path: { type: 'string', description: 'Project-relative path to the file' },
               },
               required: ['path'],
             },
@@ -63,43 +80,57 @@ export class ChatManager {
         {
           type: 'function',
           function: {
-            name: 'create_doc',
-            description: 'Create a new document with the given name and content',
+            name: 'create_file',
+            description: 'Create a new file with the given name and content (relative to project scope root)',
             parameters: {
               type: 'object',
               properties: {
-                name: { type: 'string', description: 'Name of the document (relative path, including .md extension)' },
-                content: { type: 'string', description: 'Content of the document' },
+                name: { type: 'string', description: 'Project-relative path (include extension, e.g. notes/todo.md)' },
+                content: { type: 'string', description: 'Content of the file' },
               },
               required: ['name', 'content'],
             },
           },
         },
       ];
+
       const toolsMap = {
         list_tasks: async () => JSON.stringify(this.taskIndexer.getIndex().tasksById),
-        list_docs: async () => JSON.stringify(this.docsIndexer.getIndex().tree),
-        read_doc: async ({ path }) => {
+        get_task_reference: async () => null, //TODO:
+        list_files: async () => JSON.stringify(this.fileIndexer.getIndex()),
+        read_file: async ({ path: relPath }) => {
           try {
-            return await this.docsIndexer.getFile(path);
+            const base = this._getFilesBaseDir();
+            const abs = path.join(base, relPath);
+            return fs.readFileSync(abs, 'utf8');
           } catch (error) {
             return `Error: ${error.message}`;
           }
         },
-        create_doc: async ({ name, content }) => {
+        create_file: async ({ name, content }) => {
           try {
-            const relPath = name;
-            const absPath = path.join(this.docsIndexer.docsDir, relPath);
+            const base = this._getFilesBaseDir();
+            const absPath = path.join(base, name);
             const dir = path.dirname(absPath);
             if (!fs.existsSync(dir)) {
               fs.mkdirSync(dir, { recursive: true });
             }
             fs.writeFileSync(absPath, content, 'utf8');
-            this.docsIndexer.buildIndex();
-            return `Document ${name} created successfully.`;
+            if (typeof this.fileIndexer.buildIndex === 'function') {
+              this.fileIndexer.buildIndex();
+            }
+            return `File ${name} created successfully.`;
           } catch (error) {
-            return `Error creating document: ${error.message}`;
+            return `Error creating file: ${error.message}`;
           }
+        },
+        // Aliases for backward compatibility
+        list_docs: async () => JSON.stringify(this.fileIndexer.getIndex()),
+        read_doc: async ({ path: relPath }) => {
+          return await toolsMap.read_file({ path: relPath });
+        },
+        create_doc: async ({ name, content }) => {
+          return await toolsMap.create_file({ name, content });
         },
       };
 

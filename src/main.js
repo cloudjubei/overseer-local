@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TaskIndexer }  from './tasks/indexer';
-import { DocsIndexer } from './docs/indexer';
+import { FileIndexer } from './files/indexer';
 import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
@@ -13,8 +13,8 @@ if (started) {
   app.quit();
 }
 let mainWindow;
-let indexer;
-let docsIndexer;
+let indexer; // tasks
+let fileIndexer;
 let projectsIndexer;
 let chatManager;
 
@@ -38,24 +38,23 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
 
   // Register screenshot service with access to the current main window
   registerScreenshotService(() => mainWindow);
 
   const projectRoot = app.getAppPath();
-  indexer = new TaskIndexer(projectRoot, mainWindow);
-  indexer.init();
-
-  docsIndexer = new DocsIndexer(projectRoot, mainWindow);
-  docsIndexer.init();
 
   projectsIndexer = new ProjectsIndexer(projectRoot, mainWindow);
+  indexer = new TaskIndexer(projectRoot, mainWindow);
+  fileIndexer = new FileIndexer(projectRoot, mainWindow);
+  chatManager = new ChatManager(projectRoot, indexer, fileIndexer);
+
   projectsIndexer.init();
-
-  chatManager = new ChatManager(projectRoot, indexer, docsIndexer);
-
+  indexer.init();
+  await fileIndexer.init();
+  
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -68,10 +67,22 @@ app.on('window-all-closed', () => {
     app.quit();
   }
   if (indexer) { indexer.stopWatching(); }
-  if (docsIndexer) { docsIndexer.stopWatching(); }
+  if (fileIndexer) { fileIndexer.stopWatching(); }
   if (projectsIndexer) { projectsIndexer.stopWatching(); }
 });
 
+// Helper to resolve current files base directory
+function getFilesBaseDir() {
+  try {
+    const snap = fileIndexer.getIndex();
+    // Prefer explicit properties; fall back to indexer internal or project root
+    return snap.filesDir || snap.root || fileIndexer.filesDir || app.getAppPath();
+  } catch {
+    return app.getAppPath();
+  }
+}
+
+// Tasks
 ipcMain.handle('tasks-index:get', async () => {
   return indexer.getIndex();
 });
@@ -134,51 +145,100 @@ ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
-ipcMain.handle('docs-index:get', async () => {
-  return docsIndexer.getIndex();
+
+// Files — unified index used by renderer FileService
+ipcMain.handle('files-index:get', async () => {
+  return fileIndexer.getIndex();
 });
 
-ipcMain.handle('docs:set-context', async (event, { projectId }) => {
+ipcMain.handle('files:set-context', async (event, { projectId }) => {
   try {
     let targetDir;
     if (!projectId || projectId === 'main') {
-      targetDir = docsIndexer.getDefaultDocsDir();
+      targetDir = fileIndexer.getDefaultFilesDir();
     } else {
       const snap = projectsIndexer.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {
-        const projectAbs = path.resolve(projectsDirAbs, spec.path);
-        targetDir = path.join(projectAbs, 'docs');
+        targetDir = path.resolve(projectsDirAbs, spec.path);
       } else {
-        targetDir = docsIndexer.getDefaultDocsDir();
+        targetDir = fileIndexer.getDefaultFilesDir();
       }
     }
-    const res = await docsIndexer.setDocsDir(targetDir);
+    const res = await fileIndexer.setFilesDir(targetDir);
     return res;
   } catch (e) {
-    console.error('Failed to set docs context:', e);
-    return docsIndexer.getIndex();
+    console.error('Failed to set files context:', e);
+    return fileIndexer.getIndex();
   }
 });
 
-ipcMain.handle('docs-file:get', async (event, { relPath }) => {
-  return await docsIndexer.getFile(relPath);
-});
-ipcMain.handle('docs-file:save', async (event, { relPath, content }) => {
-  return await docsIndexer.saveFile(relPath, content);
+// Files content bridges for renderer FileService (optional best-effort bridges)
+ipcMain.handle('files:read', async (event, { relPath, encoding }) => {
+  const base = getFilesBaseDir();
+  const abs = path.join(base, relPath);
+  const data = fs.readFileSync(abs);
+  if (encoding) return data.toString(encoding);
+  return data; // Buffer will be serialized by Electron
 });
 
-ipcMain.handle('docs:upload', (event, {name, content}) => {
-  const uploadsDir = path.join(docsIndexer.getIndex().docsDir, 'uploads');
+ipcMain.handle('files:read-binary', async (event, { relPath }) => {
+  const base = getFilesBaseDir();
+  const abs = path.join(base, relPath);
+  return fs.readFileSync(abs);
+});
+
+ipcMain.handle('files:ensure-dir', async (event, { relPath }) => {
+  const base = getFilesBaseDir();
+  const abs = path.join(base, relPath);
+  if (!fs.existsSync(abs)) fs.mkdirSync(abs, { recursive: true });
+  return { ok: true };
+});
+
+ipcMain.handle('files:write', async (event, { relPath, content, encoding = 'utf8' }) => {
+  const base = getFilesBaseDir();
+  const abs = path.join(base, relPath);
+  const dir = path.dirname(abs);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(abs, content, encoding);
+  // ask indexer to rebuild so UI updates (it may already watch and emit)
+  if (typeof fileIndexer.rebuildAndNotify === 'function') {
+    await fileIndexer.rebuildAndNotify('File written via IPC');
+  }
+  return { ok: true };
+});
+ipcMain.handle('files:delete', async (event, { relPath }) => {
+  const base = getFilesBaseDir();
+  const abs = path.join(base, relPath);
+  if (fs.lstatSync(abs).isDirectory()){
+    fs.rmdirSync(abs)
+  }else{
+    fs.unlinkSync(abs)
+  }
+});
+ipcMain.handle('files:rename', async (event, { relPathSource, relPathTarget }) => {
+  const base = getFilesBaseDir();
+  const absSource = path.join(base, relPathSource);
+  const absTarget = path.join(base, relPathTarget);
+  fs.renameSync(absSource, absTarget)
+});
+
+ipcMain.handle('files:upload', (event, { name, content }) => {
+  const base = getFilesBaseDir();
+  const uploadsDir = path.join(base, 'uploads');
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
   const filePath = path.join(uploadsDir, name);
-  fs.writeFileSync(filePath, content);
-  docsIndexer.buildIndex();
+  fs.writeFileSync(filePath, content, 'utf8');
+  if (typeof fileIndexer.buildIndex === 'function') {
+    fileIndexer.buildIndex();
+  }
   return 'uploads/' + name;
 });
+
+
 
 // Projects
 ipcMain.handle('projects-index:get', async () => {

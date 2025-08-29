@@ -1,5 +1,22 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+const FILES_API = {
+  get: () => ipcRenderer.invoke('files-index:get'),
+  subscribe: (callback) => {
+    const listener = (_event, snapshot) => callback(snapshot);
+    ipcRenderer.on('files-index:update', listener);
+    return () => ipcRenderer.removeListener('files-index:update', listener);
+  },
+  readFile: (relPath, encoding = 'utf8') => ipcRenderer.invoke('files:read', { relPath, encoding }),
+  readFileBinary: (relPath) => ipcRenderer.invoke('files:read-binary', { relPath }),
+  writeFile: (relPath, content, encoding = 'utf8') => ipcRenderer.invoke('files:write', { relPath, content, encoding }),
+  deleteFile: (relPath) => ipcRenderer.invoke('files:delete', { relPath }),
+  renameFile: (relPathSource, relPathTarget) => ipcRenderer.invoke('files:rename', { relPathSource, relPathTarget }),
+  ensureDir: (relPath) => ipcRenderer.invoke('files:ensure-dir', { relPath }),
+  upload: (name, content) => ipcRenderer.invoke('files:upload', { name, content }),
+  setContext: (projectId) => ipcRenderer.invoke('files:set-context', { projectId }),
+};
+
 // Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
 const TASKS_API = {
   getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
@@ -21,23 +38,7 @@ const TASKS_API = {
     ipcRenderer.on('set-task-id', listener);
     return () => ipcRenderer.removeListener('set-task-id', listener);
   },
-  // NEW: set active tasks context (project-aware)
   setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
-};
-
-// Docs Index API exposed to renderer as window.docsIndex
-const DOCS_API = {
-  get: () => ipcRenderer.invoke('docs-index:get'),
-  subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback(snapshot);
-    ipcRenderer.on('docs-index:update', listener);
-    return () => ipcRenderer.removeListener('docs-index:update', listener);
-  },
-  getFile: (relPath) => ipcRenderer.invoke('docs-file:get', { relPath }),
-  saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
-  upload: (name, content) => ipcRenderer.invoke('docs:upload', { name, content }),
-  // NEW: set active docs context (project-aware)
-  setContext: (projectId) => ipcRenderer.invoke('docs:set-context', { projectId }),
 };
 
 const CHAT_API = {
@@ -48,7 +49,6 @@ const CHAT_API = {
   load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
   save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
   delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
-  // NEW: set active chat context (project-aware)
   setContext: (projectId) => ipcRenderer.invoke('chat:set-context', { projectId }),
 };
 
@@ -89,8 +89,8 @@ const PROJECTS_API = {
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
-contextBridge.exposeInMainWorld('docsIndex', DOCS_API);
 contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
+contextBridge.exposeInMainWorld('files', FILES_API);

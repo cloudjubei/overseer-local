@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TasksView from '../screens/TasksView';
-import DocumentsView from '../screens/DocumentsView';
+import FilesView from '../screens/FilesView';
 import SettingsView from '../screens/SettingsView';
 import ChatView from '../screens/ChatView';
 import NotificationsView from '../screens/NotificationsView';
@@ -9,6 +9,7 @@ import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { useProjectContext } from '../projects/ProjectContext';
+import type { NavigationView } from '../types';
 
 export type SidebarProps = {};
 
@@ -19,14 +20,14 @@ function classNames(...xs: Array<string | false | null | undefined>) {
 type NavDef = {
   id: string;
   label: string;
-  view: 'Home' | 'Documents' | 'Chat' | 'Settings' | 'Notifications';
+  view: NavigationView;
   icon: React.ReactNode;
   accent?: 'brand' | 'purple' | 'teal' | 'gray';
 };
 
 const NAV_ITEMS: NavDef[] = [
   { id: 'home', label: 'Home', view: 'Home', icon: <span aria-hidden>🏠</span>, accent: 'brand' },
-  { id: 'docs', label: 'Docs', view: 'Documents', icon: <span aria-hidden>📚</span>, accent: 'purple' },
+  { id: 'files', label: 'Files', view: 'Files', icon: <span aria-hidden>📚</span>, accent: 'purple' },
   { id: 'chat', label: 'Chat', view: 'Chat', icon: <span aria-hidden>💬</span>, accent: 'teal' },
   { id: 'notifications', label: 'Notifications', view: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'teal' },
   { id: 'settings', label: 'Settings', view: 'Settings', icon: <span aria-hidden>⚙️</span>, accent: 'gray' },
@@ -167,7 +168,7 @@ export default function SidebarView({}: SidebarProps) {
   }, [navigateView, isMobile]);
 
   const renderedView = useMemo(() => {
-    if (currentView === 'Documents') return <div key="Documents" className="flex flex-col flex-1 min-h-0 view-transition"><DocumentsView /></div>;
+    if (currentView === 'Files') return <div key="Files" className="flex flex-col flex-1 min-h-0 view-transition"><FilesView /></div>;
     if (currentView === 'Settings') return <div key="Settings" className="flex flex-col flex-1 min-h-0 view-transition"><SettingsView /></div>;
     if (currentView === 'Chat') return <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition"><ChatView /></div>;
     if (currentView === 'Notifications') return <div key="Notifications" className="flex flex-col flex-1 min-h-0 view-transition"><NotificationsView /></div>;

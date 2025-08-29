@@ -45,8 +45,8 @@ function NotificationClickHandler() {
         nav.navigateView('Chat');
         // TODO: handle specific chat
       } else if (metadata.documentPath) {
-        nav.navigateView('Documents');
-        // TODO: open specific doc
+        nav.navigateView('Files');
+        // TODO: open specific file
       } else if (metadata.actionUrl) {
         // Handle custom URL if needed
       }

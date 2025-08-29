@@ -10,13 +10,13 @@ export type NotificationType =
   | 'task' 
   | 'system' 
   | 'chat' 
-  | 'docs';
+  | 'files';
 
 export type NotificationCategory = 
   | 'general'
   | 'tasks'
   | 'chat'
-  | 'documents'
+  | 'files'
   | 'system'
   | 'updates';
 

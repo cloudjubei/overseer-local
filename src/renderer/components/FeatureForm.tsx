@@ -7,6 +7,8 @@ import type { TasksIndexSnapshot } from '../../types/external'
 import type { ProjectsIndexSnapshot } from '../services/projectsService'
 import { dependencyResolver } from '../services/dependencyResolver'
 import DependencyBullet from './tasks/DependencyBullet'
+import { FileSelector } from './ui/FileSelector'
+import ContextFileChip from './tasks/ContextFileChip'
 
 export type FeatureFormValues = {
   title: string
@@ -14,6 +16,7 @@ export type FeatureFormValues = {
   rejection?: string
   status: Status
   dependencies?: string[]
+  context: string[]
 }
 
 type Props = {
@@ -46,9 +49,11 @@ export function FeatureForm({
   const [rejection, setRejection] = useState<string>(initialValues?.rejection ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
   const [dependencies, setDependencies] = useState<string[]>(initialValues?.dependencies ?? [])
+  const [context, setContext] = useState<string[]>(initialValues?.context ?? [])
   const [error, setError] = useState<string | null>(null)
   const [depError, setDepError] = useState<string | null>(null)
   const [showSelector, setShowSelector] = useState(false)
+  const [showFileSelector, setShowFileSelector] = useState(false)
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
@@ -104,6 +109,7 @@ export function FeatureForm({
       rejection: rejection?.trim() || undefined,
       status,
       dependencies,
+      context,
     }
     await onSubmit(payload)
   }
@@ -117,6 +123,10 @@ export function FeatureForm({
 
   function removeDependencyAt(idx: number) {
     setDependencies((deps) => deps.filter((_, i) => i !== idx))
+  }
+
+  function removeContextAt(idx: number) {
+    setContext((ctx) => ctx.filter((_, i) => i !== idx))
   }
 
   const depErrorId = depError ? 'feature-deps-error' : undefined
@@ -152,7 +162,7 @@ export function FeatureForm({
           <div id="feature-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{error}</div>
         ) : null}
 
-          <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1">
             <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
             <textarea
               id="feature-description"
@@ -172,6 +182,7 @@ export function FeatureForm({
 
         <div className="flex flex-col gap-1">
           <label htmlFor="feature-rejection" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Reason</label>
+
           <textarea
             id="feature-rejection"
             rows={3}
@@ -186,6 +197,20 @@ export function FeatureForm({
               color: 'var(--text-primary)'
             }}
           />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Context Files</label>
+          <div className="flex flex-wrap gap-2 border rounded-md min-h-[3rem] p-2" style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}>
+            {context.map((p, idx) => (
+              <ContextFileChip key={p} path={p} onRemove={() => removeContextAt(idx)} />
+            ))}
+            <button type="button" onClick={() => setShowFileSelector(true)} className="chip chip--ok" title="Add context files">
+              <span>Add</span>
+              <span aria-hidden>+</span>
+            </button>
+          </div>
+          <div className="text-xs text-text-muted">Select any files across the project that provide useful context for this feature.</div>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -272,6 +297,21 @@ export function FeatureForm({
             currentTaskId={taskId}
             currentFeatureId={featureId}
             existingDeps={dependencies}
+          />
+        </Modal>
+      )}
+
+      {showFileSelector && (
+        <Modal title="Select Context Files" onClose={() => setShowFileSelector(false)} isOpen={true} size="lg">
+          <FileSelector
+            selected={context}
+            onCancel={() => setShowFileSelector(false)}
+            onConfirm={(paths) => {
+              const unique = Array.from(new Set([...(context || []), ...paths]))
+              setContext(unique)
+              setShowFileSelector(false)
+            }}
+            allowMultiple
           />
         </Modal>
       )}
