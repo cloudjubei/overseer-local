@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
 import { DocsIndexer } from './docs/indexer';
+import { FilesIndexer } from './files/indexer';
 import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
@@ -13,8 +14,9 @@ if (started) {
   app.quit();
 }
 let mainWindow;
-let indexer;
-let docsIndexer;
+let indexer; // tasks
+let docsIndexer; // markdown docs (legacy, used by chat manager)
+let filesIndexer; // unified files index for FileService
 let projectsIndexer;
 let chatManager;
 
@@ -38,18 +40,24 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
 
   // Register screenshot service with access to the current main window
   registerScreenshotService(() => mainWindow);
 
   const projectRoot = app.getAppPath();
+
   indexer = new TasksIndexer(projectRoot, mainWindow);
   indexer.init();
 
+  // Keep DocsIndexer for chat features that rely on it
   docsIndexer = new DocsIndexer(projectRoot, mainWindow);
   docsIndexer.init();
+
+  // New: FilesIndexer is the source of truth for FileService (renderer)
+  filesIndexer = new FilesIndexer(projectRoot, mainWindow);
+  await filesIndexer.init();
 
   projectsIndexer = new ProjectsIndexer(projectRoot, mainWindow);
   projectsIndexer.init();
@@ -69,9 +77,11 @@ app.on('window-all-closed', () => {
   }
   if (indexer) { indexer.stopWatching(); }
   if (docsIndexer) { docsIndexer.stopWatching(); }
+  if (filesIndexer) { filesIndexer.stopWatching(); }
   if (projectsIndexer) { projectsIndexer.stopWatching(); }
 });
 
+// Tasks
 ipcMain.handle('tasks-index:get', async () => {
   return indexer.getIndex();
 });
@@ -134,6 +144,7 @@ ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
+// Legacy Docs (Markdown) — retained for Chat and backwards compatibility
 ipcMain.handle('docs-index:get', async () => {
   return docsIndexer.getIndex();
 });
@@ -178,6 +189,35 @@ ipcMain.handle('docs:upload', (event, {name, content}) => {
   fs.writeFileSync(filePath, content);
   docsIndexer.buildIndex();
   return 'uploads/' + name;
+});
+
+// Files — unified index used by renderer FileService
+ipcMain.handle('files-index:get', async () => {
+  return filesIndexer.getIndex();
+});
+
+ipcMain.handle('files:set-context', async (event, { projectId }) => {
+  try {
+    let targetDir;
+    if (!projectId || projectId === 'main') {
+      targetDir = filesIndexer.getDefaultFilesDir();
+    } else {
+      const snap = projectsIndexer.getIndex();
+      const spec = snap.projectsById?.[projectId];
+      const projectsDirAbs = path.resolve(snap.projectsDir);
+      if (spec) {
+        // For Files, index the entire project path (not just docs or tasks)
+        targetDir = path.resolve(projectsDirAbs, spec.path);
+      } else {
+        targetDir = filesIndexer.getDefaultFilesDir();
+      }
+    }
+    const res = await filesIndexer.setFilesDir(targetDir);
+    return res;
+  } catch (e) {
+    console.error('Failed to set files context:', e);
+    return filesIndexer.getIndex();
+  }
 });
 
 // Projects
