@@ -24,7 +24,7 @@
         "src/main.js",
         "src/preload.js",
         "src/docs/indexer.js",
-        "src/chat/manager.js",
+        "src/chat/manager.js"
       ],
       "acceptance": [],
       "dependencies": [
