@@ -1,0 +1,8 @@
+{
+  "id": "overseer-local",
+  "title": "Overser Local",
+  "description": "the overseer local project",
+  "path": "../",
+  "repo_url": "https://github.com/cloudjubei/overseer-local",
+  "requirements": []
+}

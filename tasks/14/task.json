@@ -87,6 +87,18 @@
       "plan": "",
       "context": [],
       "acceptance": []
+    },
+    {
+      "id": "14.9",
+      "status": "-",
+      "title": "Update the migration script",
+      "description": "Use the current version and extend it so it can be run via command line passing in a path to project's config.json (i.e. in this project there's 'thefactory.json' - referenced here).",
+      "plan": "",
+      "context": [
+        "scripts/migrate-uuids.ts",
+        "projects/thefactory.json"
+      ],
+      "acceptance": []
     }
   ]
 }
