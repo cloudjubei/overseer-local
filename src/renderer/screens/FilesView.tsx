@@ -147,7 +147,7 @@ function relTime(ms: number | undefined) {
   return `${w}w ago`;
 }
 
-export default function DocumentsView() {
+export default function FilesView() {
   const { snapshot } = useDocsIndex();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortBy>('name');
@@ -240,15 +240,15 @@ export default function DocumentsView() {
       items={[]}
       activeId=""
       onSelect={() => {}}
-      storageKey="docs-panel-collapsed"
-      headerTitle="Documents"
+      storageKey="files-panel-collapsed"
+      headerTitle="Files"
       headerSubtitle={`${filteredFilesCount || totalFiles} files${query ? ' • filtered' : ''}`}
       headerAction={
         <div className="flex items-center gap-2">
           <Input
             ref={searchRef}
             type="search"
-            placeholder="Search docs (/)"
+            placeholder="Search files (/)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-48"
@@ -264,10 +264,10 @@ export default function DocumentsView() {
             </SelectContent>
           </Select>
           <Tooltip content="Expand all">
-            <Button variant="ghost" size="sm" onClick={handleExpandAll}>▼▼</Button>
+            <Button variant="ghost" size="sm" onClick={handleExpandAll}>▾▾</Button>
           </Tooltip>
           <Tooltip content="Collapse all">
-            <Button variant="ghost" size="sm" onClick={handleCollapseAll}>►►</Button>
+            <Button variant="ghost" size="sm" onClick={handleCollapseAll}>▸▸</Button>
           </Tooltip>
           <Tooltip content="Refresh index">
             <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>↳</Button>
@@ -303,7 +303,7 @@ export default function DocumentsView() {
         <div className="h-full w-full grid place-items-center">
           <div className="text-center px-6 py-8">
             <div className="text-2xl mb-2">📄</div>
-            <div className="text-sm text-text-secondary">Select a document from the list to view it.</div>
+            <div className="text-sm text-text-secondary">Select a file from the list to view it.</div>
           </div>
         </div>
       ) : (
@@ -317,7 +317,7 @@ function EmptyState({ query }: { query: string }) {
   return (
     <div className="px-4 py-8 text-center">
       <div className="text-xl mb-2">🔍</div>
-      <div className="text-sm text-text-secondary">No documents match "{query}"</div>
+      <div className="text-sm text-text-secondary">No files match "{query}"</div>
       <div className="text-xs text-text-muted mt-1">Try a different search or clear filters.</div>
     </div>
   );
@@ -325,7 +325,7 @@ function EmptyState({ query }: { query: string }) {
 
 function Caret({ open }: { open: boolean }) {
   return (
-    <span className="inline-block w-4 text-[10px] text-text-muted" aria-hidden>{open ? '▼' : '►'}</span>
+    <span className="inline-block w-4 text-[10px] text-text-muted" aria-hidden>{open ? '▾' : '▸'}</span>
   );
 }
 
@@ -360,10 +360,10 @@ function DirTree({ node, level, openSet, toggleOpen, selected, onSelect }: {
           type="button"
           onClick={() => !isRoot && toggleOpen(key)}
           className="group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
-          title={isRoot ? 'docs' : node.name}
+          title={isRoot ? 'files' : node.name}
         >
           <span className="text-sm" aria-hidden>{isRoot ? '📚' : isOpen ? '📂' : '📁'}</span>
-          <span className="truncate font-medium text-text-primary">{isRoot ? 'docs' : node.name}</span>
+          <span className="truncate font-medium text-text-primary">{isRoot ? 'files' : node.name}</span>
           <span className="ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]">{node.files.length}</span>
         </button>
       </div>
@@ -457,7 +457,7 @@ const DocumentPane = React.forwardRef<DocumentPaneHandle, { relPath: string; fil
         </div>
         <div className="flex items-center gap-2">
           {!isEditing ? (
-            <Button variant="primary" onClick={onStartEdit} aria-label="Edit document (E)">Edit</Button>
+            <Button variant="primary" onClick={onStartEdit} aria-label="Edit file (E)">Edit</Button>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="secondary" onClick={onCancel}>Cancel</Button>

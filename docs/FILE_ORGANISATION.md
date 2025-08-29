@@ -27,7 +27,7 @@ This document describes how files and directories are organised in this reposito
     - screens/tasks.css: Tasks list and toolbar styles + DnD transitions. Includes interactive status bullet and status picker patterns used in the list view.
     - screens/task-details.css: Task details panel and features list.
     - screens/board.css: Board (kanban) columns and interactions.
-    - screens/docs.css: Documents view.
+    - screens/docs.css: Files view (legacy filename retained for now; styles apply to the Files screen).
     - screens/settings.css: Settings view.
 - src/renderer/: React renderer (screens, components, hooks, services, navigation).
   - src/renderer/components/ui/: Shared UI primitives.
@@ -58,7 +58,12 @@ This document describes how files and directories are organised in this reposito
       - needs: Comma-separated dependency keys to include (in addition to defaults)
       - theme: light | dark (applies data-theme on <html>)
   - src/renderer/screens/
-    - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
+    - SidebarView.tsx
+    - TasksView.tsx
+    - FilesView.tsx
+    - ChatView.tsx ← Chat interface. Supports `#` typing to open a Task & Feature selector and renders references as dependency bullets.
+    - SettingsView.tsx
+    - NotificationsView.tsx
   - src/renderer/tasks/: Screens and views for tasks.
     - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor. Now also displays task dependencies in a dedicated column before Features.
     - TaskDetailsView.tsx: Right-side details panel. Now displays task-level dependencies next to the status, using the same chips and hover callouts as feature dependencies. Also computes inbound dependents (Blocks).
@@ -89,39 +94,7 @@ This document describes how files and directories are organised in this reposito
     - useNotificationPreferences.ts
     - useTasksIndex.ts: Hook to access the tasks index snapshot.
     - useDependencyResolver.ts ← Hook to access and subscribe to the dependency resolver index. Accepts optional ProjectSpec.
-  - src/renderer/screens/
-    - SidebarView.tsx
-    - TasksView.tsx
-    - DocumentsView.tsx
-    - ChatView.tsx ← Chat interface. Now supports `#` typing to open a Task & Feature selector and renders references as dependency bullets.
-    - SettingsView.tsx
-    - NotificationsView.tsx
-  - src/renderer/tasks/
-    - TaskCreateView.tsx
-    - TaskEditView.tsx
-    - FeatureCreateView.tsx
-    - FeatureEditView.tsx
-  - src/renderer/App.tsx
-  - src/renderer/types.ts
-- src/chat/ (providers and manager) – may be supplied by preload/main glue.
-- src/tools/
-  - standardTools.js
-  - preview/: Preview analyzer tooling
-    - analyzer.js: Library to analyze TSX components for preview capability.
-  - Agent-facing tools:
-    - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
-    - preview_run (in standardTools.js): Loads a component or URL in a headless browser, performs interactions, and runs assertions or custom script to verify behavior. See docs/PREVIEW_RUN_TOOL.md.
-    - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
-    - format_files (in standardTools.js): Formats specified files using Prettier and returns per-file statuses (changed/unchanged/skipped/errors). Writes changes by default and respects .prettierignore/config.
-    - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode.
-- src/capture/: Main-process screenshot capture service and related utilities.
-  - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
-- scripts/: Project automation scripts (e.g., setup-linting-formatting).
-  - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
-- build/: Packaging resources for electron-builder (icons, entitlements, etc.).
-  - build/icons/icon.icns, icon.ico, icon.png
-  - build/entitlements.mac.plist
-- .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
+  - src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
 
 Notes:
 - All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.

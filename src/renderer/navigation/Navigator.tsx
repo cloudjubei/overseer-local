@@ -31,8 +31,9 @@ export type NavigatorApi = NavigatorState & ModalState & {
 
 function viewPrefixToView(prefix: string): NavigationView {
   switch (prefix) {
-    case 'documents':
-      return 'Documents';
+    case 'files':
+    case 'documents': // backward compatibility with old hashes
+      return 'Files';
     case 'chat':
       return 'Chat';
     case 'settings':
@@ -94,8 +95,8 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
       case 'Home':
         window.location.hash = '#home';
         break;
-      case 'Documents':
-        window.location.hash = '#documents';
+      case 'Files':
+        window.location.hash = '#files';
         break;
       case 'Chat':
         window.location.hash = '#chat';
