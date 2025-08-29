@@ -44,7 +44,7 @@
     },
     {
       "id": "14.5",
-      "status": "-",
+      "status": "+",
       "title": "Add index lookup utilities for display formatting",
       "description": "Create utility functions that can quickly resolve UUID-based dependencies back to user-friendly display indices (e.g., '3.2' for the 2nd feature of the 3rd task). These utilities should use the display index mappings for fast lookups when rendering dependency references in the UI.",
       "plan": "",
