@@ -148,7 +148,7 @@
     },
     {
       "id": "12.12",
-      "status": "-",
+      "status": "+",
       "title": "main.js needs to be thin",
       "description": "All the 'tasks' ipc handlers should be moved to the TaskManager - they should be performing these actions, that's why they're there for.",
       "plan": "",

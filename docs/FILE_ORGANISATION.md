@@ -115,6 +115,8 @@ This document describes how files and directories are organised in this reposito
   - manager.js: ChatManager now also registers all 'chat:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context). This further thins main.js.
 - src/projects/
   - manager.js: ProjectManager owns indexing and watching project configs and now registers all 'projects:*' IPC handlers (projects-index:get, projects:create, projects:update, projects:delete). This keeps main.js thin.
+- src/tasks/
+  - manager.js: TaskManager owns indexing of tasks and features, file watching, and now registers all 'tasks:*' IPC handlers (tasks-index:get, tasks:set-context, tasks:update, tasks-feature:update/add/delete, tasks-features:reorder, tasks:add, tasks:delete, tasks:reorder). This keeps main.js thin.
 - src/managers.js: Exports shared manager instances for cross-manager references.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
@@ -163,3 +165,4 @@ Notes:
 - src/files/manager.js: Now also owns registration of all 'files:*' IPC handlers so main.js remains thin.
 - src/chat/manager.js: Now also owns registration of all 'chat:*' IPC handlers so main.js remains thin.
 - src/projects/manager.js: Now also owns registration of all 'projects:*' IPC handlers so main.js remains thin.
+- src/tasks/manager.js: Now also owns registration of all 'tasks:*' IPC handlers so main.js remains thin.

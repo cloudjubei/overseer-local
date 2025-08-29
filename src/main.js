@@ -52,69 +52,6 @@ app.on('window-all-closed', () => {
   if (projectManager) { projectManager.stopWatching(); }
 });
 
-// Tasks
-ipcMain.handle('tasks-index:get', async () => {
-  return taskManager.getIndex();
-});
-
-ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
-  try {
-    // Compute tasks directory based on projectId
-    let targetDir;
-    if (!projectId || projectId === 'main') {
-      targetDir = taskManager.getDefaultTasksDir();
-    } else {
-      const snap = projectManager.getIndex();
-      const spec = snap.projectsById?.[projectId];
-      const projectsDirAbs = path.resolve(snap.projectsDir);
-      if (spec) {
-        const projectAbs = path.resolve(projectsDirAbs, spec.path);
-        targetDir = path.join(projectAbs, 'tasks');
-      } else {
-        // Fallback to main if project not found
-        targetDir = taskManager.getDefaultTasksDir();
-      }
-    }
-    const res = await taskManager.setTasksDir(targetDir);
-    return res;
-  } catch (e) {
-    console.error('Failed to set tasks context:', e);
-    return taskManager.getIndex();
-  }
-});
-
-ipcMain.handle('tasks:update', async (event, { taskId, data }) => {
-  return await taskManager.updateTask(taskId, data);
-});
-
-ipcMain.handle('tasks-feature:update', async (event, { taskId, featureId, data }) => {
-  return await taskManager.updateFeature(taskId, featureId, data);
-});
-
-ipcMain.handle('tasks-feature:add', async (event, { taskId, feature }) => {
-  return await taskManager.addFeature(taskId, feature);
-});
-
-ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
-  return await taskManager.deleteFeature(taskId, featureId);
-});
-
-ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
-  return await taskManager.reorderFeatures(taskId, payload);
-});
-
-ipcMain.handle('tasks:add', async (event, task) => {
-    return await taskManager.addTask(task);
-});
-
-ipcMain.handle('tasks:delete', async (event, { taskId }) => {
-  return await taskManager.deleteTask(taskId);
-});
-
-ipcMain.handle('tasks:reorder', async (event, payload) => {
-  return await taskManager.reorderTasks(payload);
-});
-
 // Notifications
 ipcMain.handle('notifications:send-os', async (event, data) => {
   

@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path';
 import chokidar from 'chokidar';
+import { ipcMain } from 'electron';
 import { validateTask } from './validator';
 
 function isNumericDir(name) {
@@ -43,6 +44,7 @@ export class TaskManager {
         };
         this.watcher = null;
         this.window = window;
+        this._ipcBound = false;
     }
 
     getIndex() {
@@ -67,6 +69,80 @@ export class TaskManager {
         }
         await this.buildIndex();
         await this._startWatcher();
+        this._registerIpcHandlers();
+    }
+
+    _registerIpcHandlers() {
+        if (this._ipcBound) return;
+
+        ipcMain.handle('tasks-index:get', async () => {
+            return this.getIndex();
+        });
+
+        ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
+            try {
+                let targetDir;
+                if (!projectId || projectId === 'main') {
+                    targetDir = this.getDefaultTasksDir();
+                } else {
+                    let snap;
+                    try {
+                        const mgrs = await import('../managers.js');
+                        snap = mgrs?.projectManager?.getIndex?.();
+                    } catch (_) {
+                        snap = null;
+                    }
+                    if (snap) {
+                        const spec = snap.projectsById?.[projectId];
+                        const projectsDirAbs = path.resolve(snap.projectsDir);
+                        if (spec) {
+                            const projectAbs = path.resolve(projectsDirAbs, spec.path);
+                            targetDir = path.join(projectAbs, 'tasks');
+                        }
+                    }
+                    if (!targetDir) targetDir = this.getDefaultTasksDir();
+                }
+                const res = await this.setTasksDir(targetDir);
+                return res;
+            } catch (e) {
+                console.error('Failed to set tasks context:', e);
+                return this.getIndex();
+            }
+        });
+
+        ipcMain.handle('tasks:update', async (event, { taskId, data }) => {
+            return await this.updateTask(taskId, data);
+        });
+
+        ipcMain.handle('tasks-feature:update', async (event, { taskId, featureId, data }) => {
+            return await this.updateFeature(taskId, featureId, data);
+        });
+
+        ipcMain.handle('tasks-feature:add', async (event, { taskId, feature }) => {
+            return await this.addFeature(taskId, feature);
+        });
+
+        ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
+            return await this.deleteFeature(taskId, featureId);
+        });
+
+        ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
+            return await this.reorderFeatures(taskId, payload);
+        });
+
+        ipcMain.handle('tasks:add', async (event, task) => {
+            return await this.addTask(task);
+        });
+
+        ipcMain.handle('tasks:delete', async (event, { taskId }) => {
+            return await this.deleteTask(taskId);
+        });
+
+        ipcMain.handle('tasks:reorder', async (event, payload) => {
+            return await this.reorderTasks(payload);
+        });
+
+        this._ipcBound = true;
     }
 
     async _startWatcher() {
