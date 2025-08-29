@@ -1,0 +1,334 @@
+import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
+import type { TasksIndexSnapshot } from '../../types/external'
+import { TaskService } from './taskService';
+
+export type ReferenceKind = 'task' | 'feature';
+
+export interface ResolvedTaskRef {
+  kind: 'task';
+  id: number;
+  task: Task;
+}
+
+export interface ResolvedFeatureRef {
+  kind: 'feature';
+  id: string; // "{taskId}.{featureId}"
+  taskId: number;
+  featureId: string;
+  task: Task;
+  feature: Feature;
+}
+
+export type ResolvedRef = ResolvedTaskRef | ResolvedFeatureRef;
+
+export interface InvalidRefError {
+  input: string;
+  code:
+    | 'EMPTY'
+    | 'BAD_FORMAT'
+    | 'BAD_TASK_ID'
+    | 'TASK_NOT_FOUND'
+    | 'FEATURE_NOT_FOUND';
+  message: string;
+}
+
+export interface InvalidEdgeRecord {
+  from: string; // referrer ref (task or feature)
+  to: string; // referenced ref string
+  error: InvalidRefError;
+}
+
+export interface DependencyResolverIndex {
+  project?: ProjectSpec | null;
+  tasksById: Record<number, Task>;
+  featuresById: Record<string, Feature>; // key: "{taskId}.{featureId}"
+  dependentsOf: Record<string, string[]>; // reverse index: key is ref (task or feature), value is list of refs that depend on it
+  invalidEdges: InvalidEdgeRecord[]; // broken references encountered while indexing
+}
+
+export default class DependencyResolver {
+  private static instance: DependencyResolver | null = null;
+  private index: DependencyResolverIndex = {
+    project: null,
+    tasksById: {},
+    featuresById: {},
+    dependentsOf: {},
+    invalidEdges: [],
+  };
+  private ready = false;
+  private unsubscribeTasks?: () => void;
+  private listeners: Set<(idx: DependencyResolverIndex) => void> = new Set();
+
+  static getInstance() {
+    if (!DependencyResolver.instance) {
+      DependencyResolver.instance = new DependencyResolver();
+    }
+    return DependencyResolver.instance;
+  }
+
+  onUpdate(cb: (idx: DependencyResolverIndex) => void) {
+    this.listeners.add(cb);
+    if (this.ready) cb(this.index);
+    return () => this.listeners.delete(cb);
+  }
+
+  private notify() {
+    for (const cb of this.listeners) cb(this.index);
+  }
+
+  async init(taskService: TaskService, project?: ProjectSpec | null) {
+    // Attach tasks index subscription and build our index once
+    if (!this.unsubscribeTasks) {
+      this.unsubscribeTasks = taskService.onUpdate((snapshot) => {
+        this.rebuild(snapshot, this.index.project ?? null);
+      });
+    }
+    const snapshot = await taskService.getSnapshot();
+    this.rebuild(snapshot, project ?? this.index.project ?? null);
+    this.ready = true;
+    return this.index;
+  }
+
+  setProject(project: ProjectSpec | null) {
+    // Allows injecting current project spec from elsewhere in app
+    this.index.project = project;
+    if (this.ready) this.notify();
+  }
+
+  getIndex(): DependencyResolverIndex {
+    return this.index;
+  }
+
+  private rebuild(snapshot: TasksIndexSnapshot, project: ProjectSpec | null) {
+    const tasksById: Record<number, Task> = { ...snapshot.tasksById };
+    const featuresById: Record<string, Feature> = {};
+    const dependentsOf: Record<string, string[]> = {};
+    const invalidEdges: InvalidEdgeRecord[] = [];
+
+    const addDependent = (targetRef: string, dependentRef: string) => {
+      if (!dependentsOf[targetRef]) dependentsOf[targetRef] = [];
+      if (!dependentsOf[targetRef].includes(dependentRef)) dependentsOf[targetRef].push(dependentRef);
+    };
+
+    // Build feature map first
+    for (const taskIdStr of Object.keys(tasksById)) {
+      const taskId = Number(taskIdStr);
+      const task = tasksById[taskId];
+      if (!task) continue;
+      for (const feat of task.features || []) {
+        featuresById[`${feat.id}`] = { ...feat };
+      }
+    }
+
+    // Build reverse dependencies and collect invalid edges
+    for (const taskIdStr of Object.keys(tasksById)) {
+      const taskId = Number(taskIdStr);
+      const task = tasksById[taskId];
+      if (!task) continue;
+
+      const fromTaskRef = `${taskId}`;
+      for (const dep of task.dependencies || []) {
+        const validation = this.validateRef(dep);
+        if (!validation.ok) {
+          invalidEdges.push({ from: fromTaskRef, to: dep, error: validation.error });
+        } else {
+          addDependent(dep, fromTaskRef);
+        }
+      }
+
+      for (const feat of task.features || []) {
+        const fromFeatRef = `${feat.id}`;
+        for (const dep of feat.dependencies || []) {
+          const validation = this.validateRef(dep);
+          if (!validation.ok) {
+            invalidEdges.push({ from: fromFeatRef, to: dep, error: validation.error });
+          } else {
+            addDependent(dep, fromFeatRef);
+          }
+        }
+      }
+    }
+
+    this.index = { project, tasksById, featuresById, dependentsOf, invalidEdges };
+    if (this.ready) this.notify();
+  }
+
+  parseRef(ref: string): { kind: ReferenceKind; taskId: number; featureId?: string } | InvalidRefError {
+    if (!ref || !ref.trim()) {
+      return { input: ref, code: 'EMPTY', message: 'Empty reference' };
+    }
+    const parts = ref.split('.');
+    if (parts.length > 2 || parts.length < 1) {
+      return { input: ref, code: 'BAD_FORMAT', message: 'Reference must be #<taskId> or #<taskId>.<featureId>' };
+    }
+    const taskId = Number(parts[0]);
+    if (!Number.isInteger(taskId)) {
+      return { input: ref, code: 'BAD_TASK_ID', message: 'Task id must be an integer' };
+    }
+    if (parts.length === 1) return { kind: 'task', taskId } as const;
+    return { kind: 'feature', taskId, featureId: ref } as const;
+  }
+
+  resolveRef(ref: string): ResolvedRef | InvalidRefError {
+    const parsed = this.parseRef(ref);
+    if ('code' in parsed) return parsed;
+
+    if (parsed.kind === 'task') {
+      const task = this.index.tasksById[parsed.taskId];
+      if (!task) {
+        return { input: ref, code: 'TASK_NOT_FOUND', message: `Task ${parsed.taskId} not found` };
+      }
+      return { kind: 'task', id: parsed.taskId, task };
+    }
+
+    const task = this.index.tasksById[parsed.taskId];
+    if (!task) {
+      return { input: ref, code: 'TASK_NOT_FOUND', message: `Task ${parsed.taskId} not found` };
+    }
+    const key = `${parsed.featureId}`;
+    const feature = this.index.featuresById[key];
+    if (!feature) {
+      return { input: ref, code: 'FEATURE_NOT_FOUND', message: `Feature ${key} not found` };
+    }
+    return {
+      kind: 'feature',
+      id: key,
+      taskId: parsed.taskId,
+      featureId: parsed.featureId!,
+      task,
+      feature,
+    };
+  }
+
+  validateRef(ref: string): { ok: true } | { ok: false; error: InvalidRefError } {
+    const resolved = this.resolveRef(ref);
+    if ('code' in resolved) return { ok: false, error: resolved };
+    return { ok: true };
+  }
+
+  // Validate a proposed dependency list for a given context node (task or feature ref)
+  // - Checks: duplicates, invalid/broken refs, self-reference, cycle detection.
+  validateDependencyList(
+    contextRef: string | null,
+    proposed: string[]
+  ): {
+    ok: boolean;
+    message?: string;
+    duplicates?: string[];
+    invalid?: InvalidRefError[];
+    cycles?: { exists: boolean };
+  } {
+    const duplicates: string[] = [];
+    const seen = new Set<string>();
+    for (const d of proposed) {
+      if (seen.has(d)) duplicates.push(d);
+      seen.add(d);
+    }
+
+    const invalid: InvalidRefError[] = [];
+    for (const ref of proposed) {
+      const v = this.validateRef(ref);
+      if (!v.ok) invalid.push(v.error);
+    }
+
+    if (contextRef && proposed.includes(contextRef)) {
+      return { ok: false, message: 'Self-dependency is not allowed', duplicates: duplicates.length ? duplicates : undefined, invalid: invalid.length ? invalid : undefined, cycles: { exists: false } };
+    }
+
+    if (duplicates.length || invalid.length) {
+      const msgParts: string[] = [];
+      if (duplicates.length) msgParts.push(`Duplicate dependencies: ${Array.from(new Set(duplicates)).join(', ')}`);
+      if (invalid.length) msgParts.push(`Invalid references: ${invalid.map((e) => e.input).join(', ')}`);
+      return { ok: false, message: msgParts.join(' | '), duplicates, invalid, cycles: { exists: false } };
+    }
+
+    // Cycle detection: Build a graph of valid edges, then set/replace context node edges with proposed.
+    type Graph = Map<string, string[]>;
+    const graph: Graph = new Map();
+    const addEdge = (from: string, to: string) => {
+      const arr = graph.get(from) || [];
+      arr.push(to);
+      graph.set(from, arr);
+    };
+
+    // Add all tasks/features and their valid dependencies
+    for (const [taskIdStr, task] of Object.entries(this.index.tasksById)) {
+      const taskId = Number(taskIdStr);
+      const taskRef = `${taskId}`;
+      graph.set(taskRef, []);
+      for (const dep of task.dependencies || []) {
+        if (this.validateRef(dep).ok) addEdge(taskRef, dep);
+      }
+
+      for (const feat of task.features || []) {
+        const featRef = `${feat.id}`;
+        graph.set(featRef, []);
+        for (const dep of feat.dependencies || []) {
+          if (this.validateRef(dep).ok) addEdge(featRef, dep);
+        }
+      }
+    }
+
+    // If creating a new feature (no contextRef), add a temporary node
+    const ctx = contextRef ?? '__new__';
+    graph.set(ctx, []);
+
+    // Replace context edges with proposed valid ones
+    graph.set(ctx, proposed.filter((r) => this.validateRef(r).ok));
+
+    // DFS to detect cycles
+    const visited = new Set<string>();
+    const stack = new Set<string>();
+    const dfs = (node: string): boolean => {
+      visited.add(node);
+      stack.add(node);
+      const neighbors = graph.get(node) || [];
+      for (const n of neighbors) {
+        if (!visited.has(n)) {
+          if (dfs(n)) return true;
+        } else if (stack.has(n)) {
+          return true;
+        }
+      }
+      stack.delete(node);
+      return false;
+    };
+
+    // Run DFS starting from all nodes (cheap; graph is small)
+    for (const node of graph.keys()) {
+      if (!visited.has(node)) {
+        if (dfs(node)) {
+          return { ok: false, message: 'Dependency cycle detected', cycles: { exists: true } };
+        }
+      }
+    }
+
+    return { ok: true };
+  }
+
+  getDependents(ref: string): string[] {
+    return this.index.dependentsOf[ref] || [];
+  }
+
+  search(query: string, limit = 50): { ref: string; kind: ReferenceKind; title: string; subtitle?: string }[] {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const results: { ref: string; kind: ReferenceKind; title: string; subtitle?: string }[] = [];
+
+    for (const [idStr, task] of Object.entries(this.index.tasksById)) {
+      const taskId = Number(idStr);
+      if (task.title.toLowerCase().includes(q)) {
+        results.push({ ref: `${taskId}`, kind: 'task', title: task.title, subtitle: `Task #${taskId}` });
+      }
+      for (const feat of task.features || []) {
+        const ref = `${feat.id}`;
+        if (feat.title.toLowerCase().includes(q)) {
+          results.push({ ref, kind: 'feature', title: feat.title, subtitle: `Feature #${ref}` });
+        }
+      }
+      if (results.length >= limit) break;
+    }
+
+    return results.slice(0, limit);
+  }
+}

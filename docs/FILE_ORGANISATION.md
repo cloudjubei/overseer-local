@@ -69,7 +69,6 @@ This document describes how files and directories are organised in this reposito
     - docsService.ts
     - tasksService.ts
     - notificationsService.ts
-    - Note: dependency resolution is now integrated into tasksService.ts ← Project-wide dependency resolution and validation service. Indexes all tasks and features, resolves refs like "#12" / "#12.4", builds reverse dependency graph, tracks invalid references, detects cycles, and exposes search + validation helpers. Listens to tasks index updates.
   - src/renderer/hooks/
     - useChats.ts
     - useDocsIndex.ts

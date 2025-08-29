@@ -1,6 +1,6 @@
 {
   "id": 12,
-  "status": "-",
+  "status": "+",
   "title": "UI and UX fixes",
   "description": "",
   "features": [
@@ -62,7 +62,7 @@
     },
     {
       "id": "12.6",
-      "status": "?",
+      "status": "+",
       "title": "TaskService should be the only interface for task related ops",
       "description": "TaskService should be the only interface to handle tasks - it uses TaskIndex",
       "plan": "",
@@ -72,12 +72,11 @@
         "src/tasks/indexer.js"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Blocked: Feature description, plan, and acceptance criteria are missing or marked as 'None', preventing precise implementation. Critical details on how TaskService should exclusively handle tasks using TaskIndex are not provided."
+      "dependencies": []
     },
     {
       "id": "12.7",
-      "status": "?",
+      "status": "+",
       "title": "TaskService should be used only for task related ops",
       "description": "All references to task ops must go through TaskService. All involved files are in the context.",
       "plan": "",
@@ -92,8 +91,7 @@
       "acceptance": [],
       "dependencies": [
         "12.5"
-      ],
-      "rejection": "Blocked: Agent loop failed: litellm.APIError: APIError: XaiException - <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>cloudflare</center>\r\n</body>\r\n</html>\r\n"
+      ]
     }
   ]
 }
