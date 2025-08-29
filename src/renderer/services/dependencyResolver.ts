@@ -1,6 +1,6 @@
 import type { Feature, ProjectSpec, Task } from 'src/types/tasks';
 import { tasksService } from './tasksService';
-import type { TasksIndexSnapshot } from '../../types/external';
+import { TasksIndexSnapshot } from '../../types/external';
 
 export type ReferenceKind = 'task' | 'feature';
 
