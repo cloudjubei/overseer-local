@@ -46,9 +46,9 @@
     },
     {
       "id": "12.5",
-      "status": "?",
+      "status": "-",
       "title": "TaskService should be the only interface for task related ops",
-      "description": "Currently TasksIndex (TasksIndexSnapshot) is exposed as well as dependencyResolver. These should not be available outside of the TaskService - this service should be the only interface for handling tasks. All references to the involved files are in the context.",
+      "description": "Currently TasksIndex (TasksIndexSnapshot) is exposed as well as dependencyResolver. These should not be available outside of the TaskService - this service should be the only interface for handling tasks.",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
@@ -59,7 +59,19 @@
         "src/renderer/App.tsx",
         "src/renderer/projects/DependencyResolverBootstrap.tsx",
         "src/main.js",
-        "src/tasks/indexer.js",
+        "src/tasks/indexer.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.6",
+      "status": "-",
+      "title": "TaskService should be used only for task related ops",
+      "description": "All references to task ops must go through TaskService. All involved files are in the context.",
+      "plan": "",
+      "context": [
+        "src/renderer/services/taskService.ts",
         "src/renderer/tasks/FeatureCreateView.tsx",
         "src/renderer/tasks/FeatureEditView.tsx",
         "src/renderer/tasks/TaskDetailsView.tsx",
@@ -67,23 +79,7 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
-    },
-    {
-      "id": "12.6",
-      "status": "+",
-      "title": "DependencyBullet with remove should show nice icon",
-      "description": "When the DependencyBullet allows removal - it should show a nice crisp close icon. It should also make sure that all the content within is centered.",
-      "plan": "",
-      "context": [
-        "src/renderer/components/tasks/DependencyBullet.tsx",
-        "src/renderer/components/FeatureForm.tsx",
-        "src/styles/components/badges.css",
-        "src/styles/screens/tasks.css"
-      ],
-      "acceptance": [],
-      "dependencies": []
+      "dependencies": ["12.5"]
     }
   ]
 }
