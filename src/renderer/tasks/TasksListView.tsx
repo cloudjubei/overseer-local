@@ -19,15 +19,9 @@ const STATUS_LABELS: Record<Status, string> = {
 }
 
 function toTasksArray(index: TasksIndexSnapshot): Task[] {
-  const tasksById = index?.tasksById || {}
-  const arr = Object.values(tasksById) as Task[]
-  // Keep stable by orderedIds if provided; otherwise by id desc
-  if (index?.orderedIds && Array.isArray(index.orderedIds)) {
-    const byId: Record<number, Task> = tasksById as any
-    return index.orderedIds.map((id) => byId[id]).filter(Boolean)
-  }
-  arr.sort((a, b) => (b.id || 0) - (a.id || 0))
-  return arr
+  const tasksById = index.tasksById
+  const byId: Record<string, Task> = tasksById as any
+  return index.orderedIds.map((id) => byId[id]).filter(Boolean)
 }
 
 function countFeatures(task: Task) {

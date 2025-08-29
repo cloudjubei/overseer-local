@@ -9,7 +9,7 @@ export type ReorderFeaturesPayload = { fromId: string; toIndex: number }
 export interface TasksIndexSnapshot {
   // All task IDs are UUID strings
   tasksById: Record<string, Task>
-  orderedIds?: string[]
+  orderedIds: string[]
 }
 
 export interface TasksIndexAPI {
