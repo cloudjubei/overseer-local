@@ -65,7 +65,7 @@ export function useChats() {
     }
   }, [messages, currentChatId]);
 
-  const uploadFile = useCallback(async (name: string, content: string) => {
+  const uploadDocument = useCallback(async (name: string, content: string) => {
     if (!currentChatId) return;
     try {
       const returnedPath = await fileService.upload(name, content);

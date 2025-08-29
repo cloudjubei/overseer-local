@@ -216,9 +216,88 @@ export function inferFileType(pathOrName: string): string {
   return 'unknown';
 }
 
-export function upload(name: string, content: string)
-{
-  //TODO: save a new file to a new folder 'uploads'
+function basename(name: string): string {
+  const parts = name.split(/[\\/]+/);
+  return parts[parts.length - 1] || name;
+}
+
+function sanitizeFilename(name: string): string {
+  // remove illegal path chars and trim
+  return name.replace(/[^A-Za-z0-9_.\-\s]/g, '').replace(/\s+/g, ' ').trim() || 'untitled.txt';
+}
+
+async function ensureDir(dir: string): Promise<void> {
+  const w = window as any;
+  try {
+    if (w.api?.ensureDir) {
+      await w.api.ensureDir(dir);
+      return;
+    }
+    if (w.api?.mkdirp) {
+      await w.api.mkdirp(dir);
+      return;
+    }
+    if (w.files?.ensureDir) {
+      await w.files.ensureDir(dir);
+      return;
+    }
+    if (w.ensureDir) {
+      await w.ensureDir(dir);
+      return;
+    }
+  } catch (e) {
+    console.warn('fileService: ensureDir failed (continuing, backend may autocreate)', e);
+  }
+}
+
+async function writeTextFile(relPath: string, content: string): Promise<void> {
+  const w = window as any;
+  // try a series of known bridges
+  if (w.api?.writeFile) {
+    await w.api.writeFile(relPath, content, 'utf8');
+    return;
+  }
+  if (w.api?.writeTextFile) {
+    await w.api.writeTextFile(relPath, content);
+    return;
+  }
+  if (w.files?.writeFile) {
+    await w.files.writeFile(relPath, content, 'utf8');
+    return;
+  }
+  if (w.writeFile) {
+    await w.writeFile(relPath, content, 'utf8');
+    return;
+  }
+  throw new Error('No file write bridge is available');
+}
+
+function pickNonConflictingPath(targetDir: string, base: string): string {
+  // Avoid collisions using current index snapshot
+  const name = basename(base);
+  const dot = name.lastIndexOf('.');
+  const stem = dot > 0 ? name.slice(0, dot) : name;
+  const ext = dot > 0 ? name.slice(dot) : '';
+  let candidate = `${targetDir}/${name}`;
+  const taken = new Set(currentIndex.files.map(f => f.path));
+  let counter = 1;
+  while (taken.has(candidate)) {
+    candidate = `${targetDir}/${stem} (${counter})${ext}`;
+    counter++;
+  }
+  return candidate;
+}
+
+export async function upload(name: string, content: string): Promise<string> {
+  // Save under project-relative uploads/
+  const safeBase = sanitizeFilename(basename(name));
+  const targetDir = 'uploads';
+  await ensureDir(targetDir);
+  const relPath = pickNonConflictingPath(targetDir, safeBase);
+  await writeTextFile(relPath, content);
+  // Refresh index so new file appears everywhere
+  await refreshIndex();
+  return relPath;
 }
 
 export default {

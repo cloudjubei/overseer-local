@@ -15,7 +15,7 @@
     },
     {
       "id": "13.2",
-      "status": "-",
+      "status": "+",
       "title": "FileService is the only interface for handling files across app",
       "description": "FileIndex needs to be only used by the FileService - all other places use FileService and never FileIndex directly. All places that reference it are in the context.",
       "plan": "",
