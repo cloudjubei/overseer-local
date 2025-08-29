@@ -32,7 +32,6 @@ export type NavigatorApi = NavigatorState & ModalState & {
 function viewPrefixToView(prefix: string): NavigationView {
   switch (prefix) {
     case 'files':
-    case 'documents': // backward compatibility with old hashes
       return 'Files';
     case 'chat':
       return 'Chat';

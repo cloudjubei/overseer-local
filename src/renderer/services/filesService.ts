@@ -1,10 +1,6 @@
 /*
   filesService: generic file indexing + content access with graceful fallbacks.
-  - Index source priority:
-    1) window.filesIndex (preferred)
-    2) window.docsIndex (legacy)
-    3) empty list fallback
-  - Content access attempts common Electron preload bridges, else returns null.
+  Content access attempts common Electron preload bridges, else returns null.
 */
 
 export type FileMeta = {
@@ -66,23 +62,12 @@ function toFileMetaLike(x: any): FileMeta | null {
 function readGlobalIndex(): FileMeta[] {
   const w = window as any;
   try {
-    // Prefer new filesIndex
     if (w.filesIndex) {
       const fi = w.filesIndex;
       if (Array.isArray(fi)) return fi.map(toFileMetaLike).filter(Boolean) as FileMeta[];
       if (Array.isArray(fi.files)) return fi.files.map(toFileMetaLike).filter(Boolean) as FileMeta[];
       if (typeof fi.list === 'function') {
         const arr = fi.list();
-        if (Array.isArray(arr)) return arr.map(toFileMetaLike).filter(Boolean) as FileMeta[];
-      }
-    }
-    // Legacy docsIndex compatibility
-    if (w.docsIndex) {
-      const di = w.docsIndex;
-      if (Array.isArray(di)) return di.map(toFileMetaLike).filter(Boolean) as FileMeta[];
-      if (Array.isArray(di.docs)) return di.docs.map(toFileMetaLike).filter(Boolean) as FileMeta[];
-      if (typeof di.list === 'function') {
-        const arr = di.list();
         if (Array.isArray(arr)) return arr.map(toFileMetaLike).filter(Boolean) as FileMeta[];
       }
     }
@@ -231,6 +216,11 @@ export function inferFileType(pathOrName: string): string {
   return 'unknown';
 }
 
+export function upload(name: string, content: string)
+{
+  //TODO: save a new file to a new folder 'uploads'
+}
+
 export default {
   getIndex,
   refreshIndex,
@@ -239,6 +229,7 @@ export default {
   readFileText,
   readFileBinary,
   guessLanguageFromExt,
+  upload
 };
 
 // Named exports for convenience in existing import sites
@@ -250,4 +241,5 @@ export const filesService = {
   readFileText,
   readFileBinary,
   guessLanguageFromExt,
+  upload
 };

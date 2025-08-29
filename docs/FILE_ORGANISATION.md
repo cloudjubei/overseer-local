@@ -27,7 +27,6 @@ This document describes how files and directories are organised in this reposito
     - screens/tasks.css: Tasks list and toolbar styles + DnD transitions. Includes interactive status bullet and status picker patterns used in the list view.
     - screens/task-details.css: Task details panel and features list.
     - screens/board.css: Board (kanban) columns and interactions.
-    - screens/docs.css: Files view (legacy filename retained for now; styles apply to the Files screen).
     - screens/settings.css: Settings view.
 - src/renderer/: React renderer (screens, components, hooks, services, navigation).
   - src/renderer/components/ui/: Shared UI primitives.

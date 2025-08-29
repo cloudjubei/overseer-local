@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
 import { useChats } from '../hooks/useChats'
-import { useDocsIndex } from '../hooks/useDocsIndex'
-import { useDocsAutocomplete } from '../hooks/useDocsAutocomplete'
+import { useFilesAutocomplete } from '../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../hooks/useReferencesAutocomplete'
 import { useLLMConfig } from '../hooks/useLLMConfig'
 import { useNavigator } from '../navigation/Navigator'
@@ -25,7 +24,6 @@ export default function ChatView() {
     uploadDocument,
   } = useChats()
 
-  const { docsList } = useDocsIndex()
   const { index } = useFilesIndex()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
@@ -41,7 +39,7 @@ export default function ChatView() {
     matches: matchingDocs,
     position: autocompletePosition,
     onSelect: onAutocompleteSelect,
-  } = useDocsAutocomplete({ docsList, input, setInput, textareaRef, mirrorRef })
+  } = useFilesAutocomplete({ filesList: index.files.map(f => f.path), input, setInput, textareaRef, mirrorRef })
 
   const {
     isOpen: isRefsOpen,

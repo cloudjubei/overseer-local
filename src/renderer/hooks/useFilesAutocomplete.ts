@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export function useDocsAutocomplete(params: {
-  docsList: string[];
+export function useFilesAutocomplete(params: {
+  filesList: string[];
   input: string;
   setInput: (v: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   mirrorRef: React.RefObject<HTMLDivElement>;
 }) {
-  const { docsList, input, setInput, textareaRef, mirrorRef } = params;
+  const { filesList, input, setInput, textareaRef, mirrorRef } = params;
   const [isOpen, setIsOpen] = useState(false);
   const [matches, setMatches] = useState<string[]>([]);
   const [mentionStart, setMentionStart] = useState<number | null>(null);
@@ -56,7 +56,7 @@ export function useDocsAutocomplete(params: {
     const word = text.slice(start, pos);
     if (word.startsWith('@')) {
       const query = word.slice(1);
-      const filtered = docsList.filter((p) => p.toLowerCase().includes(query.toLowerCase()));
+      const filtered = filesList.filter((p) => p.toLowerCase().includes(query.toLowerCase()));
       setMatches(filtered);
       setMentionStart(start);
       if (filtered.length > 0) {
