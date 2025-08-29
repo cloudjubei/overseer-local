@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../components/ui/Button'
 import { Task, Status } from 'src/types/tasks'
-import { tasksService } from '../services/tasksService'
+import { taskService } from '../services/taskService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import BoardView from './BoardView'
@@ -96,13 +96,13 @@ export default function TasksListView() {
     let cancelled = false
     ;(async () => {
       try {
-        const idx = await tasksService.getSnapshot()
+        const idx = await taskService.getSnapshot()
         if (!cancelled) setIndex(idx)
       } catch (e) {
         console.error('Failed to load tasks index.', e)
       }
     })()
-    const unsubscribe = tasksService.onUpdate((idx) => {
+    const unsubscribe = taskService.onUpdate((idx) => {
       setIndex(idx)
     })
     return () => {
@@ -182,7 +182,7 @@ export default function TasksListView() {
     if (saving) return
     setSaving(true)
     try {
-      const res = await tasksService.reorderTasks({ fromId, toIndex })
+      const res = await taskService.reorderTasks({ fromId, toIndex })
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder task: ${e.message || e}`)
@@ -193,7 +193,7 @@ export default function TasksListView() {
 
   const handleStatusChange = async (taskId: number, status: Status) => {
     try {
-      await tasksService.updateTask(taskId, { status })
+      await taskService.updateTask(taskId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }

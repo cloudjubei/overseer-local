@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import type { ProjectSpec } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../../services/tasksService'
+import type { TasksIndexSnapshot } from '../../services/taskService'
 import type { ProjectsIndexSnapshot } from '../../services/projectsService'
 
 type DependencySelectorProps = {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Feature, Status, Task } from 'src/types/tasks'
-import { tasksService } from '../services/tasksService'
+import { taskService } from '../services/taskService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import DependencyBullet from '../components/tasks/DependencyBullet'
@@ -79,13 +79,13 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     let cancelled = false
     ;(async () => {
       try {
-        const idx = await tasksService.getSnapshot()
+        const idx = await taskService.getSnapshot()
         if (!cancelled) setIndex(idx)
       } catch (e) {
         console.error('Failed to load tasks index.', e)
       }
     })()
-    const unsubscribe = tasksService.onUpdate((idx) => setIndex(idx))
+    const unsubscribe = taskService.onUpdate((idx) => setIndex(idx))
     return () => {
       cancelled = true
       if (typeof unsubscribe === 'function') unsubscribe()
@@ -126,14 +126,14 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
 
   const handleTaskStatusChange = async (taskId: number, status: Status) => {
     try {
-      await tasksService.updateTask(taskId, { status })
+      await taskService.updateTask(taskId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
   }
   const handleFeatureStatusChange = async (taskId: number, featureId: string, status: Status) => {
     try {
-      await tasksService.updateFeature(taskId, featureId, { status })
+      await taskService.updateFeature(taskId, featureId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
@@ -143,7 +143,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
     if (!task) return
     setSaving(true)
     try {
-      const res = await tasksService.reorderFeatures(task.id, { fromId, toIndex })
+      const res = await taskService.reorderFeatures(task.id, { fromId, toIndex })
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)

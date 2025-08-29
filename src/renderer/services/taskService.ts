@@ -3,7 +3,7 @@ import type { TasksIndexSnapshot, ReorderFeaturesPayload, ReorderTasksPayload, S
 
 export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection' | 'dependencies'>>
 
-export type TasksService = {
+export type TaskService = {
   getSnapshot: () => Promise<TasksIndexSnapshot>
   onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
   addTask: (task: TaskCreateInput) => Promise<ServiceResult>
@@ -16,7 +16,7 @@ export type TasksService = {
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
 }
 
-export const tasksService: TasksService = {
+export const taskService: TaskService = {
   getSnapshot: () => window.tasksIndex.getSnapshot(),
   onUpdate: (callback) => window.tasksIndex.onUpdate(callback),
   addTask: (task) => window.tasksIndex.addTask(task),

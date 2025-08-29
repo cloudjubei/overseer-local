@@ -17,8 +17,8 @@
     {
       "id": "12.2",
       "status": "+",
-      "title": "Board view fixes",
-      "description": "Fix clicking. Only drag works - not even key press does.",
+      "title": "The Tooltip for DependencyBullet should show close to the center of the screen",
+      "description": "In many cases when the DependencyBullet is close to the right or bottom edge, the tooltip it shows gets cut off by the window end.\nWhenever the tooltip is close to an edge - it should offset in the opposite direction.",
       "plan": "",
       "context": [],
       "acceptance": [],
@@ -37,8 +37,8 @@
     {
       "id": "12.4",
       "status": "+",
-      "title": "The Tooltip for DependencyBullet should show close to the center of the screen",
-      "description": "In many cases when the DependencyBullet is close to the right or bottom edge, the tooltip it shows gets cut off by the window end.\nWhenever the tooltip is close to an edge - it should offset in the opposite direction.",
+      "title": "Board view fixes",
+      "description": "Fix clicking. Only drag works - not even key press does.",
       "plan": "",
       "context": [],
       "acceptance": [],
@@ -46,6 +46,31 @@
     },
     {
       "id": "12.5",
+      "status": "-",
+      "title": "TaskService should be the only interface for task related ops",
+      "description": "Currently TasksIndex (TasksIndexSnapshot) is exposed as well as dependencyResolver. These should not be available outside of the TaskService - this service should be the only interface for handling tasks. All references to the involved files are in the context.",
+      "plan": "",
+      "context": [
+        "src/types/tasks.ts",
+        "src/types/external.d.ts", 
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/services/taskService.ts",
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/App.tsx",
+        "src/renderer/projects/DependencyResolverBootstrap.tsx",
+        "src/main.js",
+        "src/tasks/indexer.js",
+        "src/renderer/tasks/FeatureCreateView.tsx",
+        "src/renderer/tasks/FeatureEditView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TaskEditView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.6",
       "status": "-",
       "title": "DependencyBullet with remove should show nice icon",
       "description": "When the DependencyBullet allows removal - it should show a nice crisp close icon. It should also make sure that all the content within is centered.",

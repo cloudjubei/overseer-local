@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
-import { tasksService } from '../services/tasksService'
+import { taskService } from '../services/taskService'
 import { projectsService } from '../services/projectsService'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import type { TasksIndexSnapshot } from '../services/tasksService'
+import type { TasksIndexSnapshot } from '../services/taskService'
 import type { ProjectsIndexSnapshot } from '../services/projectsService'
 
 export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
@@ -19,7 +19,7 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
   useEffect(() => {
     const fetchSnapshots = async () => {
       const [tasksSnap, projectsSnap] = await Promise.all([
-        tasksService.getSnapshot(),
+        taskService.getSnapshot(),
         projectsService.getSnapshot()
       ])
       setSnapshot(tasksSnap)
@@ -41,7 +41,7 @@ export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: 
       }
       setSubmitting(true)
       try {
-        const res = await tasksService.addFeature(taskId, values)
+        const res = await taskService.addFeature(taskId, values)
         if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
         toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
         doClose()
