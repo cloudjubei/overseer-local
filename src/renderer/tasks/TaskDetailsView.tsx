@@ -368,31 +368,33 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
                     >
-                        <div className="col col-id flex flex-col items-center gap-1">
-                          {f.rejection && (
-                            <span className="rejection-badge" aria-label="Has rejection reason" title={f.rejection}>
-                              <IconExclamation className="w-4 h-4" />
-                            </span>
-                          )}
-                          <span className="id-chip">{f.id || ''}</span>
-                          <StatusControl
-                            status={f.status}
-                            onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
-                          />
-                        </div>
-                        <div className="col col-title">
-                          <div className="title-line"><span className="title-text">{f.title || ''}</span></div>
-                          <div className="desc-line" title={f.description || ''}>{f.description || ''}</div>
-                        </div>
-                        <div className="col col-actions">
-                          <div className="row-actions">
-                            <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={() => handleEditFeature(f.id)}>
-                              <IconEdit />
-                            </button>
-                          </div>
+                      <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
+                        {f.rejection && (
+                          <span className="rejection-badge" aria-label="Has rejection reason" title={f.rejection}>
+                            <IconExclamation className="w-4 h-4" />
+                          </span>
+                        )}
+                        <span className="id-chip">{f.id || ''}</span>
+                        <StatusControl
+                          status={f.status}
+                          onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
+                        />
+                      </div>
+                      <div className="title-line" style={{ gridRow: 1, gridColumn: 2 }}>
+                        <span className="title-text">{f.title || ''}</span>
+                      </div>
+                      <div className="desc-line" style={{ gridRow: 2, gridColumn: 2 }} title={f.description || ''}>
+                        {f.description || ''}
+                      </div>
+                      <div className="col col-actions" style={{ gridRow: 2, gridColumn: 3 }}>
+                        <div className="row-actions">
+                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={() => handleEditFeature(f.id)}>
+                            <IconEdit />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex gap-8 ml-16" aria-label={`Dependencies for Feature ${f.id}`}>
+
+                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex gap-8" aria-label={`Dependencies for Feature ${f.id}`}>
                         <div className="chips-list">
                           <span className="chips-sub__label">References</span>
                           {deps.length === 0 ? (
@@ -409,11 +411,12 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                             <span className="chips-sub__label" title="No dependents">None</span>
                           ) : (
                             dependents.map((d) => (
-                                <DependencyBullet key={d} dependency={d} isInbound />
+                              <DependencyBullet key={d} dependency={d} isInbound />
                             ))
                           )}
                         </div>
                       </div>
+                    </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )
@@ -423,7 +426,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
         </section>
       </main>
 
-      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering a6</div>}
+      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
     </div>
   )
 }
