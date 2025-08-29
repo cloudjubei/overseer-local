@@ -1,8 +1,6 @@
 import { app, BrowserWindow, ipcMain, Notification } from 'electron';
 import path from 'node:path';
-import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
-import { validateProjectSpec } from './projects/validator';
 import { registerScreenshotService } from './capture/screenshotService';
 import { initManagers, taskManager, fileManager, projectManager } from './managers';
 
@@ -115,88 +113,6 @@ ipcMain.handle('tasks:delete', async (event, { taskId }) => {
 
 ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await taskManager.reorderTasks(payload);
-});
-
-// Projects
-ipcMain.handle('projects-index:get', async () => {
-  return projectManager.getIndex();
-});
-
-function ensureProjectsDirExists() {
-  const dir = projectManager.getIndex().projectsDir;
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  return dir;
-}
-
-function getProjectConfigPathForId(id) {
-  const snap = projectManager.getIndex();
-  const rel = snap.configPathsById?.[id];
-  if (rel) return path.join(snap.projectsDir, rel);
-  // default convention: projects/<id>.json
-  return path.join(snap.projectsDir, `${id}.json`);
-}
-
-ipcMain.handle('projects:create', async (event, { spec }) => {
-  try {
-    const sanitized = { ...spec };
-    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
-    const { valid, errors } = validateProjectSpec(sanitized);
-    if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
-
-    const dir = ensureProjectsDirExists();
-    const snap = projectManager.getIndex();
-    if (snap.projectsById[sanitized.id]) {
-      return { ok: false, error: `Project with id ${sanitized.id} already exists` };
-    }
-
-    const target = path.join(dir, `${sanitized.id}.json`);
-    fs.writeFileSync(target, JSON.stringify(sanitized, null, 2), 'utf8');
-    // watcher will pick up; but proactively rebuild to notify immediately
-    await projectManager.rebuildAndNotify('Project created');
-    return { ok: true };
-  } catch (e) {
-    console.error('projects:create failed', e);
-    return { ok: false, error: String(e?.message || e) };
-  }
-});
-
-ipcMain.handle('projects:update', async (event, { id, spec }) => {
-  try {
-    const sanitized = { ...spec };
-    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
-    if (!sanitized.id) sanitized.id = id;
-    const { valid, errors } = validateProjectSpec(sanitized);
-    if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
-
-    ensureProjectsDirExists();
-    const snap = projectManager.getIndex();
-    const existingPath = getProjectConfigPathForId(id);
-    // If id changed, we will write to new file and delete old file if different
-    const writePath = getProjectConfigPathForId(sanitized.id);
-
-    fs.writeFileSync(writePath, JSON.stringify(sanitized, null, 2), 'utf8');
-    if (fs.existsSync(existingPath) && path.resolve(existingPath) !== path.resolve(writePath)) {
-      try { fs.unlinkSync(existingPath); } catch {}
-    }
-
-    await projectManager.rebuildAndNotify('Project updated');
-    return { ok: true };
-  } catch (e) {
-    console.error('projects:update failed', e);
-    return { ok: false, error: String(e?.message || e) };
-  }
-});
-
-ipcMain.handle('projects:delete', async (event, { id }) => {
-  try {
-    const p = getProjectConfigPathForId(id);
-    if (fs.existsSync(p)) fs.unlinkSync(p);
-    await projectManager.rebuildAndNotify('Project deleted');
-    return { ok: true };
-  } catch (e) {
-    console.error('projects:delete failed', e);
-    return { ok: false, error: String(e?.message || e) };
-  }
 });
 
 // Notifications

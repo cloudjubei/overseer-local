@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import chokidar from 'chokidar';
+import { ipcMain } from 'electron';
 import { validateProjectSpec } from './validator';
 
 async function pathExists(p) { try { await fs.stat(p); return true } catch { return false } }
@@ -22,6 +23,7 @@ export class ProjectManager {
       configPathsById: {},
     };
     this.watcher = null;
+    this._ipcBound = false;
   }
 
   getIndex() { return this.index; }
@@ -41,6 +43,7 @@ export class ProjectManager {
         .on('addDir', (p) => this.rebuildAndNotify(`Dir added: ${p}`))
         .on('unlinkDir', (p) => this.rebuildAndNotify(`Dir removed: ${p}`));
     }
+    this._registerIpcHandlers();
   }
 
   stopWatching() { if (this.watcher) { this.watcher.close(); this.watcher = null; } }
@@ -136,5 +139,107 @@ export class ProjectManager {
     next.projectsById[id] = { ...json, path: path.relative(projectsDirAbs, resolved) };
     // store config file relative to projectsDir for maintenance (update/delete)
     next.configPathsById[id] = path.relative(projectsDirAbs, configAbsPath);
+  }
+
+  _registerIpcHandlers() {
+    if (this._ipcBound) return;
+
+    ipcMain.handle('projects-index:get', async () => {
+      return this.getIndex();
+    });
+
+    ipcMain.handle('projects:create', async (event, { spec }) => {
+      try {
+        const result = await this.createProject(spec);
+        return result;
+      } catch (e) {
+        console.error('projects:create failed', e);
+        return { ok: false, error: String(e?.message || e) };
+      }
+    });
+
+    ipcMain.handle('projects:update', async (event, { id, spec }) => {
+      try {
+        const result = await this.updateProject(id, spec);
+        return result;
+      } catch (e) {
+        console.error('projects:update failed', e);
+        return { ok: false, error: String(e?.message || e) };
+      }
+    });
+
+    ipcMain.handle('projects:delete', async (event, { id }) => {
+      try {
+        const result = await this.deleteProject(id);
+        return result;
+      } catch (e) {
+        console.error('projects:delete failed', e);
+        return { ok: false, error: String(e?.message || e) };
+      }
+    });
+
+    this._ipcBound = true;
+  }
+
+  async ensureProjectsDirExists() {
+    const dir = this.getIndex().projectsDir;
+    try {
+      await fs.mkdir(dir, { recursive: true });
+    } catch {}
+    return dir;
+  }
+
+  getProjectConfigPathForId(id) {
+    const snap = this.getIndex();
+    const rel = snap.configPathsById?.[id];
+    if (rel) return path.join(snap.projectsDir, rel);
+    return path.join(snap.projectsDir, `${id}.json`);
+  }
+
+  async createProject(spec) {
+    const sanitized = { ...spec };
+    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
+    const { valid, errors } = validateProjectSpec(sanitized);
+    if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
+
+    const dir = await this.ensureProjectsDirExists();
+    const snap = this.getIndex();
+    if (snap.projectsById[sanitized.id]) {
+      return { ok: false, error: `Project with id ${sanitized.id} already exists` };
+    }
+
+    const target = path.join(dir, `${sanitized.id}.json`);
+    await fs.writeFile(target, JSON.stringify(sanitized, null, 2), 'utf8');
+    await this.rebuildAndNotify('Project created');
+    return { ok: true };
+  }
+
+  async updateProject(id, spec) {
+    const sanitized = { ...spec };
+    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
+    if (!sanitized.id) sanitized.id = id;
+    const { valid, errors } = validateProjectSpec(sanitized);
+    if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
+
+    await this.ensureProjectsDirExists();
+    const existingPath = this.getProjectConfigPathForId(id);
+    const writePath = this.getProjectConfigPathForId(sanitized.id);
+
+    await fs.writeFile(writePath, JSON.stringify(sanitized, null, 2), 'utf8');
+    if (await pathExists(existingPath) && path.resolve(existingPath) !== path.resolve(writePath)) {
+      try { await fs.unlink(existingPath); } catch {}
+    }
+
+    await this.rebuildAndNotify('Project updated');
+    return { ok: true };
+  }
+
+  async deleteProject(id) {
+    const p = this.getProjectConfigPathForId(id);
+    if (await pathExists(p)) {
+      await fs.unlink(p);
+    }
+    await this.rebuildAndNotify('Project deleted');
+    return { ok: true };
   }
 }
