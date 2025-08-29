@@ -26,7 +26,7 @@ export function DependencyResolverBootstrap() {
       }
     })();
     return () => { cancelled = true; };
-  }, [currentProject?.id]);
+  }, [currentProject]);
 
   return null;
 }

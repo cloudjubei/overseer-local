@@ -17,7 +17,7 @@ export function useDependencyResolver(project?: ProjectSpec | null) {
     return () => {
       if (unsub) unsub();
     };
-  }, [project?.id]);
+  }, [project]);
 
   return idx;
 }

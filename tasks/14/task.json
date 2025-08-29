@@ -35,7 +35,7 @@
     },
     {
       "id": "14.4",
-      "status": "-",
+      "status": "+",
       "title": "Update dependencyResolver service for UUID-based dependencies",
       "description": "Modify the dependencyResolver service to handle UUID-based task and feature references instead of numeric IDs. Update dependency resolution, validation, cycle detection, and reverse dependency tracking to work with UUID strings while maintaining the same API surface.",
       "plan": "",

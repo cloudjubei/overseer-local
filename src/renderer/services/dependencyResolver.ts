@@ -6,14 +6,14 @@ export type ReferenceKind = 'task' | 'feature';
 
 export interface ResolvedTaskRef {
   kind: 'task';
-  id: number;
+  id: string;
   task: Task;
 }
 
 export interface ResolvedFeatureRef {
   kind: 'feature';
   id: string; // "{taskId}.{featureId}"
-  taskId: number;
+  taskId: string;
   featureId: string;
   task: Task;
   feature: Feature;
@@ -26,7 +26,6 @@ export interface InvalidRefError {
   code:
     | 'EMPTY'
     | 'BAD_FORMAT'
-    | 'BAD_TASK_ID'
     | 'TASK_NOT_FOUND'
     | 'FEATURE_NOT_FOUND';
   message: string;
@@ -40,7 +39,7 @@ export interface InvalidEdgeRecord {
 
 export interface DependencyResolverIndex {
   project?: ProjectSpec | null;
-  tasksById: Record<number, Task>;
+  tasksById: Record<string, Task>;
   featuresById: Record<string, Feature>; // key: "{taskId}.{featureId}"
   dependentsOf: Record<string, string[]>; // reverse index: key is ref (task or feature), value is list of refs that depend on it
   invalidEdges: InvalidEdgeRecord[]; // broken references encountered while indexing
@@ -100,7 +99,7 @@ export class DependencyResolver {
   }
 
   private rebuild(snapshot: TasksIndexSnapshot, project: ProjectSpec | null) {
-    const tasksById: Record<number, Task> = { ...snapshot.tasksById };
+    const tasksById: Record<string, Task> = { ...snapshot.tasksById };
     const featuresById: Record<string, Feature> = {};
     const dependentsOf: Record<string, string[]> = {};
     const invalidEdges: InvalidEdgeRecord[] = [];
@@ -111,22 +110,21 @@ export class DependencyResolver {
     };
 
     // Build feature map first
-    for (const taskIdStr of Object.keys(tasksById)) {
-      const taskId = Number(taskIdStr);
+    for (const taskId in tasksById) {
       const task = tasksById[taskId];
       if (!task) continue;
       for (const feat of task.features || []) {
-        featuresById[`${feat.id}`] = { ...feat };
+        const fullId = `${taskId}.${feat.id}`;
+        featuresById[fullId] = { ...feat };
       }
     }
 
     // Build reverse dependencies and collect invalid edges
-    for (const taskIdStr of Object.keys(tasksById)) {
-      const taskId = Number(taskIdStr);
+    for (const taskId in tasksById) {
       const task = tasksById[taskId];
       if (!task) continue;
 
-      const fromTaskRef = `${taskId}`;
+      const fromTaskRef = taskId;
       for (const dep of task.dependencies || []) {
         const validation = this.validateRef(dep);
         if (!validation.ok) {
@@ -137,7 +135,7 @@ export class DependencyResolver {
       }
 
       for (const feat of task.features || []) {
-        const fromFeatRef = `${feat.id}`;
+        const fromFeatRef = `${taskId}.${feat.id}`;
         for (const dep of feat.dependencies || []) {
           const validation = this.validateRef(dep);
           if (!validation.ok) {
@@ -153,20 +151,18 @@ export class DependencyResolver {
     if (this.ready) this.notify();
   }
 
-  parseRef(ref: string): { kind: ReferenceKind; taskId: number; featureId?: string } | InvalidRefError {
+  parseRef(ref: string): { kind: ReferenceKind; taskId: string; featureId?: string } | InvalidRefError {
     if (!ref || !ref.trim()) {
       return { input: ref, code: 'EMPTY', message: 'Empty reference' };
     }
     const parts = ref.split('.');
-    if (parts.length > 2 || parts.length < 1) {
-      return { input: ref, code: 'BAD_FORMAT', message: 'Reference must be #<taskId> or #<taskId>.<featureId>' };
+    if (parts.length < 1 || parts.length > 2 || parts.some(p => !p.trim())) {
+      return { input: ref, code: 'BAD_FORMAT', message: 'Reference must be <taskId> or <taskId>.<featureId>' };
     }
-    const taskId = Number(parts[0]);
-    if (!Number.isInteger(taskId)) {
-      return { input: ref, code: 'BAD_TASK_ID', message: 'Task id must be an integer' };
-    }
-    if (parts.length === 1) return { kind: 'task', taskId } as const;
-    return { kind: 'feature', taskId, featureId: ref } as const;
+    const taskId = parts[0].trim();
+    if (parts.length === 1) return { kind: 'task', taskId };
+    const featureId = parts[1].trim();
+    return { kind: 'feature', taskId, featureId };
   }
 
   resolveRef(ref: string): ResolvedRef | InvalidRefError {
@@ -185,7 +181,7 @@ export class DependencyResolver {
     if (!task) {
       return { input: ref, code: 'TASK_NOT_FOUND', message: `Task ${parsed.taskId} not found` };
     }
-    const key = `${parsed.featureId}`;
+    const key = `${parsed.taskId}.${parsed.featureId}`;
     const feature = this.index.featuresById[key];
     if (!feature) {
       return { input: ref, code: 'FEATURE_NOT_FOUND', message: `Feature ${key} not found` };
@@ -194,7 +190,7 @@ export class DependencyResolver {
       kind: 'feature',
       id: key,
       taskId: parsed.taskId,
-      featureId: parsed.featureId!,
+      featureId: parsed.featureId,
       task,
       feature,
     };
@@ -204,6 +200,22 @@ export class DependencyResolver {
     const resolved = this.resolveRef(ref);
     if ('code' in resolved) return { ok: false, error: resolved };
     return { ok: true };
+  }
+
+  getDisplayRef(ref: string): string | null {
+    const parsed = this.parseRef(ref);
+    if ('code' in parsed) return null;
+    if (!this.index.project) return null;
+    const taskIndex = this.index.project.taskIdToDisplayIndex[parsed.taskId];
+    if (taskIndex === undefined) return null;
+    if (parsed.kind === 'task') {
+      return `${taskIndex}`;
+    }
+    const task = this.index.tasksById[parsed.taskId];
+    if (!task) return null;
+    const featureIndex = task.featureIdToDisplayIndex[parsed.featureId!];
+    if (featureIndex === undefined) return null;
+    return `${taskIndex}.${featureIndex}`;
   }
 
   // Validate a proposed dependency list for a given context node (task or feature ref)
@@ -252,16 +264,15 @@ export class DependencyResolver {
     };
 
     // Add all tasks/features and their valid dependencies
-    for (const [taskIdStr, task] of Object.entries(this.index.tasksById)) {
-      const taskId = Number(taskIdStr);
-      const taskRef = `${taskId}`;
+    for (const [taskId, task] of Object.entries(this.index.tasksById)) {
+      const taskRef = taskId;
       graph.set(taskRef, []);
       for (const dep of task.dependencies || []) {
         if (this.validateRef(dep).ok) addEdge(taskRef, dep);
       }
 
       for (const feat of task.features || []) {
-        const featRef = `${feat.id}`;
+        const featRef = `${taskId}.${feat.id}`;
         graph.set(featRef, []);
         for (const dep of feat.dependencies || []) {
           if (this.validateRef(dep).ok) addEdge(featRef, dep);
@@ -317,15 +328,16 @@ export class DependencyResolver {
     if (!q) return [];
     const results: { ref: string; kind: ReferenceKind; title: string; subtitle?: string }[] = [];
 
-    for (const [idStr, task] of Object.entries(this.index.tasksById)) {
-      const taskId = Number(idStr);
+    for (const [taskId, task] of Object.entries(this.index.tasksById)) {
       if (task.title.toLowerCase().includes(q)) {
-        results.push({ ref: `${taskId}`, kind: 'task', title: task.title, subtitle: `Task #${taskId}` });
+        const display = this.getDisplayRef(taskId) ?? taskId;
+        results.push({ ref: taskId, kind: 'task', title: task.title, subtitle: `Task #${display}` });
       }
       for (const feat of task.features || []) {
-        const ref = `${feat.id}`;
+        const ref = `${taskId}.${feat.id}`;
         if (feat.title.toLowerCase().includes(q)) {
-          results.push({ ref, kind: 'feature', title: feat.title, subtitle: `Feature #${ref}` });
+          const display = this.getDisplayRef(ref) ?? ref;
+          results.push({ ref, kind: 'feature', title: feat.title, subtitle: `Feature #${display}` });
         }
       }
       if (results.length >= limit) break;
