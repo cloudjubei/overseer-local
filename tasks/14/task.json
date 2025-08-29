@@ -16,7 +16,7 @@
     },
     {
       "id": "14.2",
-      "status": "-",
+      "status": "+",
       "title": "Add display index tracking to ProjectSpec and Task types",
       "description": "Extend the ProjectSpec type to include a mapping of task UUIDs to their display indices (position in the main task list). Add display index fields to track feature positions within tasks. This enables fast lookup of user-friendly indices for UI display.",
       "plan": "",

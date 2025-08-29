@@ -12,3 +12,26 @@ export type LLMConfig = {
   apiKey: string,
   model: string
 };
+
+export interface Feature {
+  id: string; // UUID
+  title: string;
+  description: string;
+  dependencies?: string[]; // UUIDs
+}
+
+export interface Task {
+  id: string; // UUID
+  title: string;
+  description: string;
+  status?: string;
+  dependencies?: string[]; // UUIDs
+  features: Feature[];
+  featureIdToDisplayIndex: Record<string, number>;
+}
+
+export interface ProjectSpec {
+  name?: string;
+  tasks: Task[];
+  taskIdToDisplayIndex: Record<string, number>;
+}
