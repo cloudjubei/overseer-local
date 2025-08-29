@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "12.1",
-      "status": "-",
+      "status": "+",
       "title": "TasksList fixes",
       "description": "Allow sorting of tasks and display them in reverse to begin with.\nThe status dropdown should be the same as the one StatusControl uses.\nThe search box needs to be bigger and the Clear button only showing if searching. This can just be a (x) icon at the end of the search input.",
       "plan": "",
