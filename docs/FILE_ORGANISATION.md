@@ -37,12 +37,14 @@ This document describes how files and directories are organised in this reposito
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
     - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
     - FileDisplay.tsx: Reusable file summary display showing name, size, last modified date, and file type. Supports compact density and interactive states.
+    - FileSelector.tsx: Reusable searchable file selector component using FileDisplay; supports multi-select and is used in Feature create/edit forms to populate the context field.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
     - DependencyBullet.tsx: Reusable bullet for task/feature dependencies with hover summary and click navigation. Now uses the central dependencyResolver service for resolution and summaries.
     - FeatureSummaryCallout.tsx: Summary card for feature on hover.
     - TaskSummaryCallout.tsx: Summary card for task on hover.
+    - ContextFileChip.tsx: Small inline display for a selected context file with remove action. Used in FeatureForm.
   - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
     - previewHost.tsx: React PreviewHost component that dynamically loads a component module and mounts it with provided props and providers. Wraps content in a stable `#preview-stage` container and signals readiness via `window.__PREVIEW_READY` + `preview:ready` event.
     - main.tsx: Entry point that boots the preview host.
@@ -75,7 +77,7 @@ This document describes how files and directories are organised in this reposito
     - dependencyResolver.ts ← Project-wide dependency resolution and validation service. Indexes all tasks and features, resolves refs like "#12" / "#12.4", builds reverse dependency graph, tracks invalid references, detects cycles, and exposes search + validation helpers. Listens to tasks index updates.
   - src/renderer/hooks/
     - useChats.ts
-    - useFilesIndex.ts ← New: Hook to access the files index snapshot and flattened file list.
+    - useFilesIndex.ts ← Hook to access the files index snapshot and flattened file list.
     - useDocsIndex.ts ← Compatibility shim delegating to useFilesIndex.
     - useDocsAutocomplete.ts
     - useReferencesAutocomplete.ts ← Autocomplete for `#` references in chat and editors. Uses tasks index to suggest tasks and features by `taskId` or `taskId.featureId` and inserts a reference token.

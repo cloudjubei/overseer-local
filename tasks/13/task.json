@@ -33,7 +33,7 @@
     },
     {
       "id": "13.4",
-      "status": "-",
+      "status": "+",
       "title": "Create file selector for Feature context",
       "description": "Build a FileSelector component that can be used in Feature create/edit forms to select files for the context field. This should show a searchable/filterable list of all files in the project using the FileDisplay component. Integrate this into the FeatureCreateView and FeatureEditView forms.",
       "plan": "",
