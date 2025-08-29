@@ -1,6 +1,6 @@
-import type { Feature, ProjectSpec, Task } from 'src/types/tasks';
-import { taskService } from './taskService';
-import { TasksIndexSnapshot } from '../../types/external';
+import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
+import type { TasksIndexSnapshot } from '../../types/external'
+import { TaskService } from './taskService';
 
 export type ReferenceKind = 'task' | 'feature';
 
@@ -46,7 +46,7 @@ export interface DependencyResolverIndex {
   invalidEdges: InvalidEdgeRecord[]; // broken references encountered while indexing
 }
 
-export class DependencyResolver {
+export default class DependencyResolver {
   private static instance: DependencyResolver | null = null;
   private index: DependencyResolverIndex = {
     project: null,
@@ -76,7 +76,7 @@ export class DependencyResolver {
     for (const cb of this.listeners) cb(this.index);
   }
 
-  async init(project?: ProjectSpec | null) {
+  async init(taskService: TaskService, project?: ProjectSpec | null) {
     // Attach tasks index subscription and build our index once
     if (!this.unsubscribeTasks) {
       this.unsubscribeTasks = taskService.onUpdate((snapshot) => {
@@ -306,12 +306,10 @@ export class DependencyResolver {
     return { ok: true };
   }
 
-  // All inbound dependents (what depends on the given ref)
   getDependents(ref: string): string[] {
     return this.index.dependentsOf[ref] || [];
   }
 
-  // Quick search across tasks & features by title; useful for pickers/autocomplete
   search(query: string, limit = 50): { ref: string; kind: ReferenceKind; title: string; subtitle?: string }[] {
     const q = query.trim().toLowerCase();
     if (!q) return [];
@@ -334,5 +332,3 @@ export class DependencyResolver {
     return results.slice(0, limit);
   }
 }
-
-export const dependencyResolver = DependencyResolver.getInstance();

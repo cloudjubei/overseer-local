@@ -1,7 +1,10 @@
-import type { Task, Feature } from 'src/types/tasks'
+import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
 import type { TasksIndexSnapshot, ReorderFeaturesPayload, ReorderTasksPayload, ServiceResult } from '../../types/external'
+import DependencyResolver, { DependencyResolverIndex, InvalidRefError, ReferenceKind, ResolvedRef } from './dependencyResolver'
 
 export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection' | 'dependencies'>>
+
+const resolver = DependencyResolver.getInstance();
 
 export type TaskService = {
   getSnapshot: () => Promise<TasksIndexSnapshot>
@@ -14,6 +17,15 @@ export type TaskService = {
   deleteFeature: (taskId: number, featureId: string) => Promise<ServiceResult>
   reorderFeatures: (taskId: number, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
+  initDependencies: (project?: ProjectSpec | null) => Promise<DependencyResolverIndex>
+  setProject: (project: ProjectSpec | null) => void
+  onDependenciesUpdate: (cb: (idx: DependencyResolverIndex) => void) => () => void
+  getDependencyIndex: () => DependencyResolverIndex
+  resolveRef: (ref: string) => ResolvedRef | InvalidRefError
+  validateRef: (ref: string) => { ok: true } | { ok: false; error: InvalidRefError }
+  validateDependencyList: (contextRef: string | null, proposed: string[]) => { ok: boolean; message?: string; duplicates?: string[]; invalid?: InvalidRefError[]; cycles?: { exists: boolean } }
+  getDependents: (ref: string) => string[]
+  search: (query: string, limit?: number) => { ref: string; kind: ReferenceKind; title: string; subtitle?: string }[]
 }
 
 export const taskService: TaskService = {
@@ -27,4 +39,13 @@ export const taskService: TaskService = {
   deleteFeature: (taskId, featureId) => window.tasksIndex.deleteFeature(taskId, featureId),
   reorderFeatures: (taskId, payload) => window.tasksIndex.reorderFeatures(taskId, payload),
   reorderTasks: (payload) => window.tasksIndex.reorderTasks(payload),
+  initDependencies: (project) => resolver.init(taskService, project),
+  setProject: (project) => resolver.setProject(project),
+  onDependenciesUpdate: (cb) => resolver.onUpdate(cb),
+  getDependencyIndex: () => resolver.getIndex(),
+  resolveRef: (ref) => resolver.resolveRef(ref),
+  validateRef: (ref) => resolver.validateRef(ref),
+  validateDependencyList: (contextRef, proposed) => resolver.validateDependencyList(contextRef, proposed),
+  getDependents: (ref) => resolver.getDependents(ref),
+  search: (query, limit = 50) => resolver.search(query, limit),
 }

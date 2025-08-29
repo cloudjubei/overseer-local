@@ -46,7 +46,7 @@
     },
     {
       "id": "12.5",
-      "status": "-",
+      "status": "+",
       "title": "TaskService should be the only interface for task related ops",
       "description": "Currently TasksIndex (TasksIndexSnapshot) is exposed as well as dependencyResolver. These should not be available outside of the TaskService - this service should be the only interface for handling tasks.",
       "plan": "",
@@ -62,7 +62,7 @@
     },
     {
       "id": "12.6",
-      "status": "-",
+      "status": "+",
       "title": "TaskService should be the only interface for task related ops",
       "description": "TaskService should be the only interface to handle tasks - it uses TaskIndex",
       "plan": "",
@@ -76,7 +76,7 @@
     },
     {
       "id": "12.7",
-      "status": "-",
+      "status": "+",
       "title": "TaskService should be used only for task related ops",
       "description": "All references to task ops must go through TaskService. All involved files are in the context.",
       "plan": "",

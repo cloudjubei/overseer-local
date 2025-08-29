@@ -20,13 +20,13 @@ This document describes how files and directories are organised in this reposito
     - components/overlays.css: Command menu, help overlay.
     - components/cards.css: Task card.
     - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle.
-    - components/file-display.css: Styles for the reusable FileDisplay component (name, size, date, type). Used across selectors, chat references, and listings.
   - src/styles/layout/: Layout building blocks like sidebar/nav.
     - layout/nav.css: Sidebar and navigation styles.
   - src/styles/screens/: Screen-scoped styles that compose primitives/components.
     - screens/tasks.css: Tasks list and toolbar styles + DnD transitions. Includes interactive status bullet and status picker patterns used in the list view.
     - screens/task-details.css: Task details panel and features list.
     - screens/board.css: Board (kanban) columns and interactions.
+    - screens/docs.css: Documents view.
     - screens/settings.css: Settings view.
 - src/renderer/: React renderer (screens, components, hooks, services, navigation).
   - src/renderer/components/ui/: Shared UI primitives.
@@ -35,18 +35,12 @@ This document describes how files and directories are organised in this reposito
     - Select.tsx, Input.tsx, Tooltip.tsx, etc.
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
     - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
-    - FileDisplay.tsx: Reusable file summary display showing name, size, last modified date, and file type. Supports compact density and interactive states. Clicking an interactive FileDisplay navigates to the full Files screen view for that file, with unsaved changes protection.
-    - FileSelector.tsx: Reusable searchable file selector component using FileDisplay; supports multi-select and is used in Feature create/edit forms to populate the context field.
-  - src/renderer/components/files/: File-specific viewers and editors used within the Files screen.
-    - MarkdownEditor.tsx: Markdown editor with split edit/preview experience. Used when viewing .md/.mdx files. Registers unsaved-changes checks so navigation away prompts if there are pending edits.
-    - BasicFileViewer.tsx: Fallback/basic viewer for non-Markdown files. Displays text for text/code files and shows file information when content viewing isn’t feasible.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
     - DependencyBullet.tsx: Reusable bullet for task/feature dependencies with hover summary and click navigation. Now uses the central dependencyResolver service for resolution and summaries.
     - FeatureSummaryCallout.tsx: Summary card for feature on hover.
     - TaskSummaryCallout.tsx: Summary card for task on hover.
-    - ContextFileChip.tsx: Small inline display for a selected context file with remove action. Used in FeatureForm. Now interactive to navigate to Files screen with unsaved changes protection.
   - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
     - previewHost.tsx: React PreviewHost component that dynamically loads a component module and mounts it with provided props and providers. Wraps content in a stable `#preview-stage` container and signals readiness via `window.__PREVIEW_READY` + `preview:ready` event.
     - main.tsx: Entry point that boots the preview host.
@@ -60,28 +54,26 @@ This document describes how files and directories are organised in this reposito
       - needs: Comma-separated dependency keys to include (in addition to defaults)
       - theme: light | dark (applies data-theme on <html>)
   - src/renderer/screens/
-    - SidebarView.tsx
-    - TasksView.tsx
-    - FilesView.tsx ← Files screen shows a directory tree of all files; uses MarkdownEditor for Markdown files and BasicFileViewer for other types. Selection is synced with URL hash (#files/<path> or legacy #documents/<path>), and navigation is guarded by unsaved-changes prompts.
-    - ChatView.tsx ← Chat interface. Supports `@` typing to open a Files selector and renders references using FileDisplay.
-    - SettingsView.tsx
-    - NotificationsView.tsx
+    - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
+  - src/renderer/tasks/: Screens and views for tasks.
+    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor. Now also displays task dependencies in a dedicated column before Features.
+    - TaskDetailsView.tsx: Right-side details panel. Now displays task-level dependencies next to the status, using the same chips and hover callouts as feature dependencies. Also computes inbound dependents (Blocks).
+    - BoardView.tsx: Kanban-style board with columns by status.
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
     - ModalHost.tsx
-    - UnsavedChanges.ts ← Global registry and helpers for unsaved-changes prompts.
-    - filesNavigation.ts ← Helpers to navigate to a file in the Files screen and parse file from hash (supports #files and legacy #documents).
+  - src/renderer/settings/
+    - SettingsLLMConfigModal.tsx: Modal used for adding/editing LLM provider configurations. Opened via Navigator + ModalHost.
   - src/renderer/services/
     - chatService.ts
-    - fileService.ts ← Generic project file indexer service + content access. Indexes all files and exposes file metadata (name, size, mtime, type). Provides readFileText/readFileBinary best-effort bridges. Also exports a simple inferFileType(name) helper.
+    - docsService.ts
     - tasksService.ts
     - notificationsService.ts
-    - dependencyResolver.ts ← Project-wide dependency resolution and validation service.
   - src/renderer/hooks/
     - useChats.ts
-    - useFilesIndex.ts ← Hook to access the files index snapshot and flattened file list.
-    - useFilesAutocomplete.ts
-    - useReferencesAutocomplete.ts ← Autocomplete for `#` references in chat and editors.
+    - useDocsIndex.ts
+    - useDocsAutocomplete.ts
+    - useReferencesAutocomplete.ts ← Autocomplete for `#` references in chat and editors. Uses tasks index to suggest tasks and features by `taskId` or `taskId.featureId` and inserts a reference token.
     - useLLMConfig.ts
     - useNextTaskId.ts
     - useShortcuts.tsx
@@ -89,7 +81,40 @@ This document describes how files and directories are organised in this reposito
     - useNotifications.ts
     - useNotificationPreferences.ts
     - useTasksIndex.ts: Hook to access the tasks index snapshot.
-    - useDependencyResolver.ts ← Hook for dependency resolver.
+    - useDependencyResolver.ts ← Hook to access and subscribe to the dependency resolver index. Accepts optional ProjectSpec.
+  - src/renderer/screens/
+    - SidebarView.tsx
+    - TasksView.tsx
+    - DocumentsView.tsx
+    - ChatView.tsx ← Chat interface. Now supports `#` typing to open a Task & Feature selector and renders references as dependency bullets.
+    - SettingsView.tsx
+    - NotificationsView.tsx
+  - src/renderer/tasks/
+    - TaskCreateView.tsx
+    - TaskEditView.tsx
+    - FeatureCreateView.tsx
+    - FeatureEditView.tsx
+  - src/renderer/App.tsx
+  - src/renderer/types.ts
+- src/chat/ (providers and manager) – may be supplied by preload/main glue.
+- src/tools/
+  - standardTools.js
+  - preview/: Preview analyzer tooling
+    - analyzer.js: Library to analyze TSX components for preview capability.
+  - Agent-facing tools:
+    - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
+    - preview_run (in standardTools.js): Loads a component or URL in a headless browser, performs interactions, and runs assertions or custom script to verify behavior. See docs/PREVIEW_RUN_TOOL.md.
+    - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
+    - format_files (in standardTools.js): Formats specified files using Prettier and returns per-file statuses (changed/unchanged/skipped/errors). Writes changes by default and respects .prettierignore/config.
+    - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode.
+- src/capture/: Main-process screenshot capture service and related utilities.
+  - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
+- scripts/: Project automation scripts (e.g., setup-linting-formatting).
+  - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
+- build/: Packaging resources for electron-builder (icons, entitlements, etc.).
+  - build/icons/icon.icns, icon.ico, icon.png
+  - build/entitlements.mac.plist
+- .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
 
 Notes:
 - All changes should be localized to the smallest reasonable scope (task- or doc-specific) to reduce coupling.
@@ -127,12 +152,4 @@ Notes:
 - See docs/PREVIEW_TOOL.md and docs/PREVIEW_RUN_TOOL.md for usage details.
 
 ## New Components/Services
-- src/renderer/navigation/UnsavedChanges.ts: Initializes a simple registry to track unsaved changes across editors and forms. Provides confirmDiscardIfUnsaved used before navigation.
-- src/renderer/navigation/filesNavigation.ts: Navigation utility to open the Files screen focused on a specific file and parse file from hash. Used by FileDisplay and FilesView.
-- src/renderer/components/files/MarkdownEditor.tsx: Markdown editor for .md/.mdx with split view. Registers unsaved state with UnsavedChanges.
-- src/renderer/services/fileService.ts: File index and content access with graceful fallbacks. Exports inferFileType for UI components.
-- src/renderer/hooks/useFilesIndex.ts: Hook to access the file index and groupings.
-- FilesView replaces the previous DocumentsView; legacy '#documents' hashes are still supported and routed to the Files screen.
-- src/files/indexer.js: Main-process FileIndexer that scans and watches the current project scope directory for all files (excluding common build and VCS folders). On changes, it rebuilds the index and publishes it to the renderer via both an IPC event ('files-index:update'). The renderer's FileService consumes a global window.filesIndex proxy exposed by preload for synchronous access.
-- main process wiring: src/main.js initializes FileIndexer and exposes IPC handlers 'files-index:get' and 'files:set-context' to switch scope based on projects configuration. FileIndexer is the only source of the files listing; UI accesses it exclusively via renderer FileService. Legacy DocsIndexer and related IPC routes have been removed and superseded by FileIndexer + FileService.
-- Preload wiring: src/preload.js exposes `window.filesIndex` (with a synchronous list() and files getter) and `window.files` helpers (readFile/readFileBinary/writeFile/ensureDir/upload) used by renderer FileService as optional bridges.
+- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.

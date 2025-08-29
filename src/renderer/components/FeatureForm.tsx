@@ -5,7 +5,7 @@ import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
 import type { TasksIndexSnapshot } from '../../types/external'
 import type { ProjectsIndexSnapshot } from '../services/projectsService'
-import { dependencyResolver } from '../services/dependencyResolver'
+import { taskService } from '../services/taskService'
 import DependencyBullet from './tasks/DependencyBullet'
 import { FileSelector } from './ui/FileSelector'
 import ContextFileChip from './tasks/ContextFileChip'
@@ -69,7 +69,7 @@ export function FeatureForm({
   // Live dependency validation so errors show immediately in UI
   useEffect(() => {
     const contextRef = featureId ? `${featureId}` : null
-    const result = dependencyResolver.validateDependencyList(contextRef, dependencies)
+    const result = taskService.validateDependencyList(contextRef, dependencies)
     if (!result.ok) {
       setDepError(result.message ?? 'Invalid dependencies')
     } else {
@@ -89,7 +89,7 @@ export function FeatureForm({
     }
 
     const contextRef = featureId ? `${featureId}` : null
-    const depVal = dependencyResolver.validateDependencyList(contextRef, dependencies)
+    const depVal = taskService.validateDependencyList(contextRef, dependencies)
     if (!depVal.ok) {
       setDepError(depVal.message ?? 'Invalid dependencies')
       valid = false
