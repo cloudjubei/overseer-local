@@ -6,13 +6,13 @@
   "features": [
     {
       "id": "14.1",
-      "status": "-",
+      "status": "+",
       "title": "Update Task and Feature type definitions to use UUIDs",
       "description": "Modify the TypeScript type definitions for Task and Feature to replace the numeric 'id' field with a UUID string field. Update related types and interfaces that reference these IDs throughout the codebase, including dependency reference formats.",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
-        "src/types/external.d.ts", 
+        "src/types/external.d.ts",
         "src/renderer/services/dependencyResolver.ts"
       ],
       "acceptance": [],
@@ -37,7 +37,7 @@
       "plan": "",
       "context": [
         "src/types/tasks.ts",
-        "src/types/external.d.ts", 
+        "src/types/external.d.ts",
         "src/renderer/services/dependencyResolver.ts",
         "scripts/migrate-uuids.ts"
       ],
