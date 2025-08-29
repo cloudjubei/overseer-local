@@ -10,6 +10,7 @@ import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
+import DependencyResolverBootstrap from './projects/DependencyResolverBootstrap';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
@@ -65,6 +66,8 @@ function App()
   return (
     <ToastProvider>
       <ProjectsProvider>
+        {/* Initialize and keep dependency resolver in-sync with current project */}
+        <DependencyResolverBootstrap />
         <NavigatorProvider>
           <ShortcutsProvider>
             <GlobalShortcutsBootstrap />

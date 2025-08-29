@@ -152,3 +152,6 @@ Notes:
 
 ## Agent Preview Tools
 - See docs/PREVIEW_TOOL.md and docs/PREVIEW_RUN_TOOL.md for usage details.
+
+## New Components/Services
+- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
