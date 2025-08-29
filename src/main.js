@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TaskManager }  from './tasks/manager';
 import { FileManager } from './files/manager';
-import { ProjectsManager } from './projects/manager';
+import { ProjectManager } from './projects/manager';
 import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
 import { registerScreenshotService } from './capture/screenshotService';
@@ -13,9 +13,9 @@ if (started) {
   app.quit();
 }
 let mainWindow;
-let taskManager; // tasks
+let taskManager;
 let fileManager;
-let projectsManager;
+let projectManager;
 let chatManager;
 
 const createWindow = () => {
@@ -23,9 +23,7 @@ const createWindow = () => {
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      // contextIsolation: true,
-      // nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js')
     },
   });
 
@@ -41,17 +39,16 @@ const createWindow = () => {
 app.whenReady().then(async () => {
   createWindow();
 
-  // Register screenshot service with access to the current main window
   registerScreenshotService(() => mainWindow);
 
   const projectRoot = app.getAppPath();
 
-  projectsManager = new ProjectsManager(projectRoot, mainWindow);
+  projectManager = new ProjectManager(projectRoot, mainWindow);
   taskManager = new TaskManager(projectRoot, mainWindow);
   fileManager = new FileManager(projectRoot, mainWindow);
   chatManager = new ChatManager(projectRoot, taskManager, fileManager);
 
-  projectsManager.init();
+  projectManager.init();
   taskManager.init();
   await fileManager.init();
   
@@ -68,7 +65,7 @@ app.on('window-all-closed', () => {
   }
   if (taskManager) { taskManager.stopWatching(); }
   if (fileManager) { fileManager.stopWatching(); }
-  if (projectsManager) { projectsManager.stopWatching(); }
+  if (projectManager) { projectManager.stopWatching(); }
 });
 
 // Helper to resolve current files base directory
@@ -94,7 +91,7 @@ ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
     if (!projectId || projectId === 'main') {
       targetDir = taskManager.getDefaultTasksDir();
     } else {
-      const snap = projectsManager.getIndex();
+      const snap = projectManager.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {
@@ -157,7 +154,7 @@ ipcMain.handle('files:set-context', async (event, { projectId }) => {
     if (!projectId || projectId === 'main') {
       targetDir = fileManager.getDefaultFilesDir();
     } else {
-      const snap = projectsManager.getIndex();
+      const snap = projectManager.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {
@@ -242,17 +239,17 @@ ipcMain.handle('files:upload', (event, { name, content }) => {
 
 // Projects
 ipcMain.handle('projects-index:get', async () => {
-  return projectsManager.getIndex();
+  return projectManager.getIndex();
 });
 
 function ensureProjectsDirExists() {
-  const dir = projectsManager.getIndex().projectsDir;
+  const dir = projectManager.getIndex().projectsDir;
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
 
 function getProjectConfigPathForId(id) {
-  const snap = projectsManager.getIndex();
+  const snap = projectManager.getIndex();
   const rel = snap.configPathsById?.[id];
   if (rel) return path.join(snap.projectsDir, rel);
   // default convention: projects/<id>.json
@@ -267,7 +264,7 @@ ipcMain.handle('projects:create', async (event, { spec }) => {
     if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
 
     const dir = ensureProjectsDirExists();
-    const snap = projectsManager.getIndex();
+    const snap = projectManager.getIndex();
     if (snap.projectsById[sanitized.id]) {
       return { ok: false, error: `Project with id ${sanitized.id} already exists` };
     }
@@ -275,7 +272,7 @@ ipcMain.handle('projects:create', async (event, { spec }) => {
     const target = path.join(dir, `${sanitized.id}.json`);
     fs.writeFileSync(target, JSON.stringify(sanitized, null, 2), 'utf8');
     // watcher will pick up; but proactively rebuild to notify immediately
-    await projectsManager.rebuildAndNotify('Project created');
+    await projectManager.rebuildAndNotify('Project created');
     return { ok: true };
   } catch (e) {
     console.error('projects:create failed', e);
@@ -292,7 +289,7 @@ ipcMain.handle('projects:update', async (event, { id, spec }) => {
     if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
 
     ensureProjectsDirExists();
-    const snap = projectsManager.getIndex();
+    const snap = projectManager.getIndex();
     const existingPath = getProjectConfigPathForId(id);
     // If id changed, we will write to new file and delete old file if different
     const writePath = getProjectConfigPathForId(sanitized.id);
@@ -302,7 +299,7 @@ ipcMain.handle('projects:update', async (event, { id, spec }) => {
       try { fs.unlinkSync(existingPath); } catch {}
     }
 
-    await projectsManager.rebuildAndNotify('Project updated');
+    await projectManager.rebuildAndNotify('Project updated');
     return { ok: true };
   } catch (e) {
     console.error('projects:update failed', e);
@@ -314,7 +311,7 @@ ipcMain.handle('projects:delete', async (event, { id }) => {
   try {
     const p = getProjectConfigPathForId(id);
     if (fs.existsSync(p)) fs.unlinkSync(p);
-    await projectsManager.rebuildAndNotify('Project deleted');
+    await projectManager.rebuildAndNotify('Project deleted');
     return { ok: true };
   } catch (e) {
     console.error('projects:delete failed', e);
@@ -361,7 +358,7 @@ ipcMain.handle('chat:set-context', async (event, { projectId }) => {
     if (!projectId || projectId === 'main') {
       targetDir = chatManager.getDefaultChatsDir();
     } else {
-      const snap = projectsManager.getIndex();
+      const snap = projectManager.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {

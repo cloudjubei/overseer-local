@@ -95,9 +95,23 @@
     },
     {
       "id": "12.8",
-      "status": "+",
-      "title": "Refactor all indexers to be managers",
-      "description": "Managers will run on the main process and will handle all logical operations (CRUD). Services are the renderer facing interfaces (thin) that will expose only the absolutely necessary data to the view components. Currently we have Indexers in main.js - these need to be refactored into the newly called 'Manager' classes and all views that use a 'Indexer' directly shouldn't - they should all go via their respective 'Service' class that lives on the rendered side.",
+      "status": "-",
+      "title": "ChatManager shouldn't be using getIndex but the other methods directly from other managers",
+      "description": "If possible - managers should reference each other via import not directly passed in the constructor",
+      "plan": "",
+      "context": [
+        "src/chat/manager.js",
+        "src/main.js",
+        "src/types/external.d.ts"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.9",
+      "status": "-",
+      "title": "main.js needs to be thin",
+      "description": "All the code that does something in the ipc handlers should be moved to the respective manager - they should be performing these actions, that's why they're there for.",
       "plan": "",
       "context": [
         "src/main.js",
