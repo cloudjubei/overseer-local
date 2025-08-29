@@ -1,6 +1,5 @@
 import type { Task, Feature } from 'src/types/tasks'
 import type { TasksIndexSnapshot, ReorderFeaturesPayload, ReorderTasksPayload, ServiceResult } from '../../types/external'
-export type { TasksIndexSnapshot } from '../../types/external'
 
 export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection' | 'dependencies'>>
 
