@@ -38,7 +38,8 @@
       "context": [
         "src/types/tasks.ts",
         "src/types/external.d.ts", 
-        "src/renderer/services/dependencyResolver.ts"
+        "src/renderer/services/dependencyResolver.ts",
+        "scripts/migrate-uuids.ts"
       ],
       "acceptance": []
     },
