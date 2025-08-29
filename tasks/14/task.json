@@ -25,12 +25,13 @@
     },
     {
       "id": "14.3",
-      "status": "-",
+      "status": "?",
       "title": "Create UUID migration script for existing tasks and features",
       "description": "Write a migration script that reads all existing tasks and features, generates UUIDs for each, updates all dependency references from numeric format (taskId.featureId) to UUID format, and preserves display indices based on current ordering.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Cannot proceed with writing the migration script because the data storage format, persistence mechanism, and details on current task/feature ordering (e.g., from TasksIndexSnapshot or project files) are not available. Attempted to retrieve relevant files like src/main/tasksIndex.ts and src/types/external.ts, but they were not found."
     },
     {
       "id": "14.4",
