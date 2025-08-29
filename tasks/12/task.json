@@ -62,7 +62,7 @@
     },
     {
       "id": "12.6",
-      "status": "-",
+      "status": "?",
       "title": "TaskService should be the only interface for task related ops",
       "description": "TaskService should be the only interface to handle tasks - it uses TaskIndex",
       "plan": "",
@@ -72,7 +72,8 @@
         "src/tasks/indexer.js"
       ],
       "acceptance": [],
-      "dependencies": []
+      "dependencies": [],
+      "rejection": "Blocked: Feature description, plan, and acceptance criteria are missing or marked as 'None', preventing precise implementation. Critical details on how TaskService should exclusively handle tasks using TaskIndex are not provided."
     },
     {
       "id": "12.7",
