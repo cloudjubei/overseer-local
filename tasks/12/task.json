@@ -53,6 +53,21 @@
       "context": [],
       "acceptance": [],
       "dependencies": []
+    },
+    {
+      "id": "12.6",
+      "status": "-",
+      "title": "Explain the whole IPC idea in a doc",
+      "description": "main.js and preload.js and external.d.ts have all these interfaces, and then we have the services that use them - please explain why this is needed and we can't just have a service - like FileService be created in main.js and everything be routed through it directly (via imports) rather than this IPC ?",
+      "plan": "",
+      "context": [
+        "src/main.js",
+        "src/preload.js",
+        "src/types/external.d.ts",
+        "src/renderer/services/fileService.ts"
+      ],
+      "acceptance": [],
+      "dependencies": []
     }
   ]
 }

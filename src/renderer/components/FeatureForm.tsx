@@ -162,14 +162,33 @@ export function FeatureForm({
           <div id="feature-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{error}</div>
         ) : null}
 
+                  <div className="flex flex-col gap-1">
+            <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+            <textarea
+              id="feature-description"
+              rows={4}
+              placeholder="Optional details or acceptance criteria"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={submitting}
+              className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+              style={{
+                background: 'var(--surface-raised)',
+                borderColor: 'var(--border-default)',
+                color: 'var(--text-primary)'
+              }}
+            />
+        </div>
+
         <div className="flex flex-col gap-1">
-          <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+          <label htmlFor="feature-rejection" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Reason</label>
+
           <textarea
-            id="feature-description"
-            rows={4}
-            placeholder="Optional details or acceptance criteria"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            id="feature-rejection"
+            rows={3}
+            placeholder="Optional reason for rejection (leave blank to remove)"
+            value={rejection}
+            onChange={(e) => setRejection(e.target.value)}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{

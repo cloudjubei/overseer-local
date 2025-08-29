@@ -113,20 +113,19 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return snapshot.projectsById[activeProjectId] || null
   }, [snapshot, activeProjectId])
 
-  // Sync active project with tasks, docs, chat, and notifications context in main via preload API
+  // Sync active project with tasks, files, chat, and notifications context in main via preload API
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
         if (window.tasksIndex && typeof window.tasksIndex.setContext === 'function') {
           window.tasksIndex.setContext(activeProjectId)
         }
-        if (window.docsIndex && typeof window.docsIndex.setContext === 'function') {
-          window.docsIndex.setContext(activeProjectId)
+        if (window.fileIndex && typeof window.fileIndex.setContext === 'function') {
+          window.fileIndex.setContext(activeProjectId)
         }
         if (window.chat && typeof window.chat.setContext === 'function') {
           window.chat.setContext(activeProjectId)
         }
-        // Renderer-local notifications: switch storage namespace
         notificationsService.setContext(activeProjectId)
       }
     } catch { /* ignore */ }

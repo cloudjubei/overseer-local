@@ -29,8 +29,7 @@
       "acceptance": [],
       "dependencies": [
         "13.1"
-      ],
-      "rejection": "ChatManager uses DocsIndexer - it should instead use FileService when it needs to. DocsIndexer should be removed - FileService and FilesIndexer completely supersedes it. The IPC handlers in main.js that reference the DocsIndexer like 'docs:upload' should use the FilesIndexer."
+      ]
     },
     {
       "id": "13.3",

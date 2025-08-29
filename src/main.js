@@ -46,18 +46,15 @@ app.whenReady().then(async () => {
 
   const projectRoot = app.getAppPath();
 
-  indexer = new TasksIndexer(projectRoot, mainWindow);
-  indexer.init();
-  
-  filesIndexer = new FilesIndexer(projectRoot, mainWindow);
-  await filesIndexer.init();
-
   projectsIndexer = new ProjectsIndexer(projectRoot, mainWindow);
-  projectsIndexer.init();
-
-  // ChatManager now uses FilesIndexer for file-related tooling
+  indexer = new TasksIndexer(projectRoot, mainWindow);
+  filesIndexer = new FilesIndexer(projectRoot, mainWindow);
   chatManager = new ChatManager(projectRoot, indexer, filesIndexer);
 
+  projectsIndexer.init();
+  indexer.init();
+  await filesIndexer.init();
+  
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -148,6 +145,7 @@ ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await indexer.reorderTasks(payload);
 });
 
+
 // Files — unified index used by renderer FileService
 ipcMain.handle('files-index:get', async () => {
   return filesIndexer.getIndex();
@@ -163,7 +161,6 @@ ipcMain.handle('files:set-context', async (event, { projectId }) => {
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {
-        // For Files, index the entire project path (not just docs or tasks)
         targetDir = path.resolve(projectsDirAbs, spec.path);
       } else {
         targetDir = filesIndexer.getDefaultFilesDir();
@@ -211,6 +208,21 @@ ipcMain.handle('files:write', async (event, { relPath, content, encoding = 'utf8
   }
   return { ok: true };
 });
+ipcMain.handle('files:delete', async (event, { relPath }) => {
+  const base = getFilesBaseDir();
+  const abs = path.join(base, relPath);
+  if (fs.lstatSync(abs).isDirectory()){
+    fs.rmdirSync(abs)
+  }else{
+    fs.unlinkSync(abs)
+  }
+});
+ipcMain.handle('files:rename', async (event, { relPathSource, relPathTarget }) => {
+  const base = getFilesBaseDir();
+  const absSource = path.join(base, relPathSource);
+  const absTarget = path.join(base, relPathTarget);
+  fs.renameSync(absSource, absTarget)
+});
 
 ipcMain.handle('files:upload', (event, { name, content }) => {
   const base = getFilesBaseDir();
@@ -225,6 +237,8 @@ ipcMain.handle('files:upload', (event, { name, content }) => {
   }
   return 'uploads/' + name;
 });
+
+
 
 // Projects
 ipcMain.handle('projects-index:get', async () => {

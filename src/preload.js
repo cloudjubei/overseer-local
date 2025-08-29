@@ -1,32 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-// Keep an internal snapshot of files index for synchronous access by renderer FileService
-let __filesIndexSnapshot = { files: [] };
-
-// Expose a minimal filesIndex object that FileService can read synchronously
-const FILES_INDEX_BRIDGE = {
-  list: () => (__filesIndexSnapshot.files || []),
-  get files() { return __filesIndexSnapshot.files || []; },
-};
-
-// Prime and subscribe to files-index updates from main/indexer
-(async () => {
-  try {
-    const snap = await ipcRenderer.invoke('files-index:get');
-    __filesIndexSnapshot = snap || { files: [] };
-  } catch {
-    __filesIndexSnapshot = { files: [] };
-  }
-})();
-
-ipcRenderer.on('files-index:update', (_event, snapshot) => {
-  __filesIndexSnapshot = snapshot || { files: [] };
-});
-
-// Provide Files content helpers used by renderer fileService (best-effort bridges)
 const FILES_API = {
-  getSnapshot: () => ipcRenderer.invoke('files-index:get'),
-  onUpdate: (callback) => {
+  get: () => ipcRenderer.invoke('files-index:get'),
+  subscribe: (callback) => {
     const listener = (_event, snapshot) => callback(snapshot);
     ipcRenderer.on('files-index:update', listener);
     return () => ipcRenderer.removeListener('files-index:update', listener);
@@ -34,9 +10,10 @@ const FILES_API = {
   readFile: (relPath, encoding = 'utf8') => ipcRenderer.invoke('files:read', { relPath, encoding }),
   readFileBinary: (relPath) => ipcRenderer.invoke('files:read-binary', { relPath }),
   writeFile: (relPath, content, encoding = 'utf8') => ipcRenderer.invoke('files:write', { relPath, content, encoding }),
+  deleteFile: (relPath) => ipcRenderer.invoke('files:delete', { relPath }),
+  renameFile: (relPathSource, relPathTarget) => ipcRenderer.invoke('files:rename', { relPathSource, relPathTarget }),
   ensureDir: (relPath) => ipcRenderer.invoke('files:ensure-dir', { relPath }),
   upload: (name, content) => ipcRenderer.invoke('files:upload', { name, content }),
-  // set active files context (project-aware)
   setContext: (projectId) => ipcRenderer.invoke('files:set-context', { projectId }),
 };
 
@@ -61,7 +38,6 @@ const TASKS_API = {
     ipcRenderer.on('set-task-id', listener);
     return () => ipcRenderer.removeListener('set-task-id', listener);
   },
-  // NEW: set active tasks context (project-aware)
   setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
 };
 
@@ -73,7 +49,6 @@ const CHAT_API = {
   load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
   save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
   delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
-  // NEW: set active chat context (project-aware)
   setContext: (projectId) => ipcRenderer.invoke('chat:set-context', { projectId }),
 };
 
@@ -118,6 +93,4 @@ contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
-// Expose files index + bridges for renderer FileService
-contextBridge.exposeInMainWorld('filesIndex', FILES_INDEX_BRIDGE);
 contextBridge.exposeInMainWorld('files', FILES_API);

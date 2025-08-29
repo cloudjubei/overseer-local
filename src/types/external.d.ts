@@ -1,3 +1,4 @@
+import { FilesIndex } from 'src/renderer/services/fileService';
 import type { Task, Feature, ProjectSpec } from './tasks'
 
 export type ServiceResult = { ok: boolean; error?: string }
@@ -23,6 +24,19 @@ export interface TasksIndexAPI {
   deleteFeature: (taskId: number, featureId: string) => Promise<ServiceResult>
   reorderFeatures: (taskId: number, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
+  setContext: (projectId: string) => Promise<void>
+}
+export interface FileIndexAPI {
+  get: () => Promise<FilesIndex>
+  subscribe: (callback: (callback: FilesIndex) => void) => () => void
+  readFile: (relPath: string, encoding: string) => Promise<string>
+  readFileBinary: (relPath: string) => Promise<any>
+  writeFile: (relPath: string, content: string, encoding: string) => Promise<void>
+  deleteFile: (relPath: string) => Promise<void>
+  renameFile: (relPathSource: string, relPathTarget: string) => Promise<void>
+  ensureDir: (relPath: string) => Promise<void>
+  upload: (name: string, content: string) => Promise<void>
+  setContext: (projectId: string) => Promise<void>
 }
 
 export type ProjectsIndexSnapshot = {
@@ -43,13 +57,7 @@ export interface ProjectsIndexAPI {
 declare global {
   interface Window {
     tasksIndex: TasksIndexAPI
-    docsIndex: {
-      get: () => Promise<any>
-      subscribe: (callback: (snapshot: any) => void) => () => void
-      getFile: (relPath: string) => Promise<string>
-      saveFile: (relPath: string, content: string) => Promise<any>
-      upload: (name: string, content: Buffer | Uint8Array) => Promise<string>
-    }
+    fileIndex: FileIndexAPI
     chat: any
     notifications: any
     projectsIndex: ProjectsIndexAPI
