@@ -62,7 +62,7 @@
     },
     {
       "id": "14.7",
-      "status": "-",
+      "status": "+",
       "title": "Update reference autocomplete and chat to handle UUID dependencies",
       "description": "Modify useReferencesAutocomplete hook and ChatView components to work with UUID-based dependencies while still showing display indices to users. Ensure # references are properly resolved and inserted as UUID-based tokens that display as friendly indices.",
       "plan": "",

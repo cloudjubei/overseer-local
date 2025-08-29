@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useTasksIndex } from './useTasksIndex';
+import { dependencyResolver } from '../services/dependencyResolver';
+import { useDependencyResolver } from './useDependencyResolver';
 
 type RefItem = {
   ref: string;
+  display: string;
   title: string;
   type: 'task' | 'feature';
 };
@@ -14,19 +16,22 @@ export function useReferencesAutocomplete(params: {
   mirrorRef: React.RefObject<HTMLDivElement>;
 }) {
   const { input, setInput, textareaRef, mirrorRef } = params;
-  const index = useTasksIndex();
+  const idx = useDependencyResolver();
 
   const references = useMemo<RefItem[]>(() => {
-    if (!index?.tasksById) return [];
+    if (!idx?.tasksById) return [];
     const refs: RefItem[] = [];
-    Object.values(index.tasksById).forEach((task) => {
-      refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
+    Object.entries(idx.tasksById).forEach(([taskId, task]) => {
+      const display = dependencyResolver.getDisplayRef(taskId) ?? taskId.slice(0, 8);
+      refs.push({ ref: taskId, display, title: task.title, type: 'task' });
       (task.features || []).forEach((f) => {
-        refs.push({ ref: `${f.id}`, title: f.title, type: 'feature' });
+        const featRef = `${taskId}.${f.id}`;
+        const featDisplay = dependencyResolver.getDisplayRef(featRef) ?? featRef.slice(0, 8);
+        refs.push({ ref: featRef, display: featDisplay, title: f.title, type: 'feature' });
       });
     });
-    return refs.sort((a, b) => a.ref.localeCompare(b.ref));
-  }, [index]);
+    return refs.sort((a, b) => a.display.localeCompare(b.display, undefined, { numeric: true }));
+  }, [idx]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [matches, setMatches] = useState<RefItem[]>([]);
@@ -87,12 +92,10 @@ export function useReferencesAutocomplete(params: {
   }
 
   const isBoundaryChar = (ch: string) => {
-    // Consider whitespace and common punctuation as word boundaries (exclude '#')
     return /[\s\n\t\(\)\[\]\{\}<>,.!?:;"'`]/.test(ch);
   };
 
   const checkForMention = (text: string, pos: number) => {
-    // Determine the current word starting point
     let start = pos;
     while (start > 0 && !isBoundaryChar(text[start - 1])) {
       start--;
@@ -102,17 +105,16 @@ export function useReferencesAutocomplete(params: {
     if (word.startsWith('#')) {
       const query = word.slice(1).toLowerCase();
       const filtered = references.filter(
-        (item) => item.ref.toLowerCase().startsWith(query) || item.title.toLowerCase().includes(query)
+        (item) => item.display.toLowerCase().startsWith(query) || item.title.toLowerCase().includes(query)
       );
       setMatches(filtered);
       setMentionStart(start);
 
-      // Position the suggestion list ABOVE the textarea, aligned to caret X
       const textarea = textareaRef.current!;
       const coords = getCursorCoordinates(textarea, pos);
       const textareaRect = textarea.getBoundingClientRect();
       const cursorLeft = textareaRect.left + window.scrollX + coords.x;
-      const topAboveTextarea = textareaRect.top + window.scrollY - 8; // 8px gap above input
+      const topAboveTextarea = textareaRect.top + window.scrollY - 8;
       setPosition({ left: cursorLeft, top: topAboveTextarea });
       setIsOpen(true);
       return;
@@ -140,7 +142,6 @@ export function useReferencesAutocomplete(params: {
     setMentionStart(null);
   };
 
-  // Track caret position via selectionchange, independent of keystroke handling
   useEffect(() => {
     const handleSelectionChange = () => {
       const ta = textareaRef.current;
@@ -157,11 +158,9 @@ export function useReferencesAutocomplete(params: {
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
   }, [textareaRef]);
 
-  // Compute suggestions purely from the controlled input and current caret position
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    // Ensure caretPos reflects current state when input changes
     const pos = textarea.selectionStart ?? caretPos;
     checkForMention(input, pos);
     // eslint-disable-next-line react-hooks/exhaustive-deps
