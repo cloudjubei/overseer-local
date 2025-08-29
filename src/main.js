@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Notification } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { registerScreenshotService } from './capture/screenshotService';
@@ -50,30 +50,4 @@ app.on('window-all-closed', () => {
   if (taskManager) { taskManager.stopWatching(); }
   if (fileManager) { fileManager.stopWatching(); }
   if (projectManager) { projectManager.stopWatching(); }
-});
-
-// Notifications
-ipcMain.handle('notifications:send-os', async (event, data) => {
-  
-  if (!Notification.isSupported()) {
-    return { success: false, error: 'Notifications not supported' };
-  }
-
-  try {
-    const notification = new Notification({
-      title: data.title,
-      body: data.message,
-      silent: !data.soundsEnabled,
-      timeoutType: data.displayDuration > 0 ? 'default' : 'never',
-    });
-    notification.on('click', () => {
-      mainWindow.focus();
-      mainWindow.webContents.send('notifications:clicked', data.metadata);
-    });
-
-    notification.show();
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: String(error) };
-  }
 });

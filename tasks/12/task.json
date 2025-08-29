@@ -161,7 +161,7 @@
     },
     {
       "id": "12.13",
-      "status": "-",
+      "status": "+",
       "title": "main.js needs to be thin",
       "description": "All the 'notifications' ipc handlers should be moved to a NotificationManager - look at how TaskManager is setup and follow the same patterns.",
       "plan": "",
