@@ -3,6 +3,7 @@ import path from 'path';
 import chokidar from 'chokidar';
 import { ipcMain } from 'electron';
 import { validateProjectSpec } from './validator';
+import IPC_HANDLER_KEYS from "../ipcHandlersKeys"
 
 async function pathExists(p) { try { await fs.stat(p); return true } catch { return false } }
 
@@ -52,7 +53,7 @@ export class ProjectManager {
     if (msg) console.log(msg);
     await this.buildIndex();
     if (this.window) {
-      this.window.webContents.send('projects-index:update', this.getIndex());
+      this.window.webContents.send(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE);
     }
   }
 
@@ -144,39 +145,23 @@ export class ProjectManager {
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
-    ipcMain.handle('projects-index:get', async () => {
-      return this.getIndex();
-    });
+    const handlers = {  }
+    handlers[IPC_HANDLER_KEYS.PROJECTS_LIST] = (args) => this.listProjects(args)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_GET] = (args) => this.getProject(args)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = (args) => this.createProject(args)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_UPDATE] = (args) => this.updateProject(args)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_DELETE] = (args) => this.deleteProject(args)
 
-    ipcMain.handle('projects:create', async (event, { spec }) => {
-      try {
-        const result = await this.createProject(spec);
-        return result;
-      } catch (e) {
-        console.error('projects:create failed', e);
-        return { ok: false, error: String(e?.message || e) };
-      }
-    });
-
-    ipcMain.handle('projects:update', async (event, { id, spec }) => {
-      try {
-        const result = await this.updateProject(id, spec);
-        return result;
-      } catch (e) {
-        console.error('projects:update failed', e);
-        return { ok: false, error: String(e?.message || e) };
-      }
-    });
-
-    ipcMain.handle('projects:delete', async (event, { id }) => {
-      try {
-        const result = await this.deleteProject(id);
-        return result;
-      } catch (e) {
-        console.error('projects:delete failed', e);
-        return { ok: false, error: String(e?.message || e) };
-      }
-    });
+    for(const handler of Object.keys(handlers)){
+      ipcMain.handle(handler, async (event, args) => {
+        try {
+          return await handlers[handler](args)
+        } catch (e) {
+          console.error(`${handler} failed`, e);
+          return { ok: false, error: String(e?.message || e) };
+        }
+      });
+    }
 
     this._ipcBound = true;
   }
@@ -189,14 +174,22 @@ export class ProjectManager {
     return dir;
   }
 
-  getProjectConfigPathForId(id) {
+  getProjectConfigPathForId({id}) {
     const snap = this.getIndex();
     const rel = snap.configPathsById?.[id];
     if (rel) return path.join(snap.projectsDir, rel);
     return path.join(snap.projectsDir, `${id}.json`);
   }
 
-  async createProject(spec) {
+  async listProjects() {
+    return Object.values(this.index.projectsById)
+  }
+  
+  async getProject({id}) {
+    return this.index.projectsById[id]
+  }
+
+  async createProject({spec}) {
     const sanitized = { ...spec };
     if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
     const { valid, errors } = validateProjectSpec(sanitized);
@@ -214,7 +207,7 @@ export class ProjectManager {
     return { ok: true };
   }
 
-  async updateProject(id, spec) {
+  async updateProject({id, spec}) {
     const sanitized = { ...spec };
     if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
     if (!sanitized.id) sanitized.id = id;
@@ -234,7 +227,7 @@ export class ProjectManager {
     return { ok: true };
   }
 
-  async deleteProject(id) {
+  async deleteProject({id}) {
     const p = this.getProjectConfigPathForId(id);
     if (await pathExists(p)) {
       await fs.unlink(p);

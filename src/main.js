@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { registerScreenshotService } from './capture/screenshotService';
-import { initManagers, taskManager, fileManager, projectManager } from './managers';
+import { initManagers, stopManagers } from './managers';
 
 if (started) {
   app.quit();
@@ -47,7 +47,5 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-  if (taskManager) { taskManager.stopWatching(); }
-  if (fileManager) { fileManager.stopWatching(); }
-  if (projectManager) { projectManager.stopWatching(); }
+  stopManagers()
 });

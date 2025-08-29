@@ -1,23 +1,20 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ProjectSpec } from 'src/types/tasks'
-import { projectsService, type ProjectsIndexSnapshot } from '../services/projectsService'
+import { projectsService } from '../services/projectsService'
 import notificationsService from '../services/notificationsService'
 
-export type ProjectId = 'main' | string
+const MAIN_PROJECT = 'main'
 
 export type ProjectContextValue = {
-  // Identity
-  activeProjectId: ProjectId
+  activeProjectId: string
   isMain: boolean
-  // The ProjectSpec for a child project, or null when on main project
-  activeProject: ProjectSpec | null
+  activeProject?: ProjectSpec
 
   // Actions
-  setActiveProjectId: (id: ProjectId) => void
+  setActiveProjectId: (id: string) => void
   switchToMainProject: () => void
 
   // Data
-  snapshot: ProjectsIndexSnapshot | null
   projects: ProjectSpec[]
   loading: boolean
   error: Error | null
@@ -30,34 +27,33 @@ const ProjectContext = createContext<ProjectContextValue | null>(null)
 
 const STORAGE_KEY = 'app.activeProjectId'
 
-function loadStoredProjectId(): ProjectId {
+function loadStoredProjectId(): string {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return 'main'
-    return (raw as ProjectId) || 'main'
+    if (!raw) return MAIN_PROJECT
+    return raw
   } catch {
-    return 'main'
+    return MAIN_PROJECT
   }
 }
 
-function storeProjectId(id: ProjectId) {
+function storeProjectId(id: string) {
   try { localStorage.setItem(STORAGE_KEY, id) } catch {}
 }
 
 export function ProjectsProvider({ children }: { children: React.ReactNode }) {
-  const [activeProjectId, setActiveProjectIdState] = useState<ProjectId>(() => loadStoredProjectId())
-  const [snapshot, setSnapshot] = useState<ProjectsIndexSnapshot | null>(null)
+  const [activeProjectId, setActiveProjectIdState] = useState(() => loadStoredProjectId())
+  const [projects, setProjects] = useState<ProjectSpec[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  // Initial load
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        const snap = await projectsService.getSnapshot()
+        const projects = await projectsService.list()
         if (!cancelled) {
-          setSnapshot(snap)
+          setProjects(projects)
           setLoading(false)
         }
       } catch (e) {
@@ -70,50 +66,30 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true }
   }, [])
 
-  // Subscribe to updates
   useEffect(() => {
-    const unsubscribe = projectsService.onUpdate((snap) => {
-      setSnapshot(snap)
+    const unsubscribe = projectsService.subscribe(async () => {
+        const projects = await projectsService.list()
+        setProjects(projects)
     })
     return unsubscribe
   }, [])
 
-  // Validate selection against snapshot
-  useEffect(() => {
-    if (!snapshot) return
-
-    // If we're on main, always valid
-    if (activeProjectId === 'main') return
-
-    const exists = !!snapshot.projectsById[activeProjectId]
-    if (!exists) {
-      // Fallback: try first available child; otherwise main
-      const first = snapshot.orderedIds[0]
-      const nextId: ProjectId = first || 'main'
-      setActiveProjectIdState(nextId)
-      storeProjectId(nextId)
-    }
-  }, [snapshot, activeProjectId])
-
-  const setActiveProjectId = useCallback((id: ProjectId) => {
+  const setActiveProjectId = useCallback((id: string) => {
     setActiveProjectIdState(id)
     storeProjectId(id)
   }, [])
 
-  const switchToMainProject = useCallback(() => setActiveProjectId('main'), [setActiveProjectId])
+  const switchToMainProject = useCallback(() => setActiveProjectId(MAIN_PROJECT), [setActiveProjectId])
 
-  const projects = useMemo(() => {
-    if (!snapshot) return []
-    return snapshot.orderedIds.map((id) => snapshot.projectsById[id]).filter(Boolean)
-  }, [snapshot])
+  const getProjectById = useCallback((id: string) => {
+    if (projects.length == 0) return
+    return projects.find(p => p.id === id)
+  }, [projects])
 
-  const activeProject: ProjectSpec | null = useMemo(() => {
-    if (!snapshot) return null
-    if (activeProjectId === 'main') return null
-    return snapshot.projectsById[activeProjectId] || null
-  }, [snapshot, activeProjectId])
+  const activeProject: ProjectSpec | undefined = useMemo(() => {
+    return getProjectById(activeProjectId)
+  }, [projects, activeProjectId])
 
-  // Sync active project with tasks, files, chat, and notifications context in main via preload API
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
@@ -133,16 +109,15 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<ProjectContextValue>(() => ({
     activeProjectId,
-    isMain: activeProjectId === 'main',
+    isMain: activeProjectId === MAIN_PROJECT,
     activeProject,
     setActiveProjectId,
     switchToMainProject,
-    snapshot,
     projects,
     loading,
     error,
-    getProjectById: (id: string) => snapshot?.projectsById[id],
-  }), [activeProjectId, activeProject, setActiveProjectId, switchToMainProject, snapshot, projects, loading, error])
+    getProjectById,
+  }), [activeProjectId, activeProject, setActiveProjectId, switchToMainProject, projects, loading, error])
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
 }
@@ -154,10 +129,10 @@ export function useProjectContext(): ProjectContextValue {
 }
 
 export function useActiveProject() {
-  const { activeProjectId, activeProject } = useProjectContext()
+  const { activeProjectId, activeProject, isMain } = useProjectContext()
   return {
     projectId: activeProjectId,
     project: activeProject,
-    isMain: activeProjectId === 'main',
+    isMain
   }
 }

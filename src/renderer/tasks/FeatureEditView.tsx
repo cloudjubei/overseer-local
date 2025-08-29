@@ -5,8 +5,6 @@ import { projectsService } from '../services/projectsService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import type { Feature, Task } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../services/taskService'
-import type { ProjectsIndexSnapshot } from '../services/projectsService'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: number; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -16,8 +14,6 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [snapshot, setSnapshot] = useState<TasksIndexSnapshot | null>(null)
-  const [projectsSnapshot, setProjectsSnapshot] = useState<ProjectsIndexSnapshot | null>(null)
 
   useEffect(() => {
     projectsService.getSnapshot().then(setProjectsSnapshot)

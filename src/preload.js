@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import IPC_HANDLER_KEYS from "./ipcHandlersKeys"
 
 const FILES_API = {
   get: () => ipcRenderer.invoke('files-index:get'),
@@ -75,22 +76,22 @@ const SCREENSHOT_API = {
   capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
 };
 
-// Projects Index + CRUD API
 const PROJECTS_API = {
-  get: () => ipcRenderer.invoke('projects-index:get'),
   subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback(snapshot);
-    ipcRenderer.on('projects-index:update', listener);
-    return () => ipcRenderer.removeListener('projects-index:update', listener);
+    const listener = (_event, snapshot) => callback();
+    ipcRenderer.on(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener);
   },
-  create: (spec) => ipcRenderer.invoke('projects:create', { spec }),
-  update: (id, spec) => ipcRenderer.invoke('projects:update', { id, spec }),
-  delete: (id) => ipcRenderer.invoke('projects:delete', { id }),
+  list: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_LIST),
+  get: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_GET, { id }),
+  create: (spec) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { spec }),
+  update: (id, spec) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { id, spec }),
+  delete: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { id }),
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
 contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
-contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);
+contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
 contextBridge.exposeInMainWorld('files', FILES_API);

@@ -23,3 +23,8 @@ export async function initManagers(projectRoot, mainWindow) {
   await chatManager.init();
   await notificationManager.init();
 }
+export function stopManagers() {
+  if (taskManager) { taskManager.stopWatching(); }
+  if (fileManager) { fileManager.stopWatching(); }
+  if (projectManager) { projectManager.stopWatching(); }
+}

@@ -1,5 +1,6 @@
 import { FilesIndex } from 'src/renderer/services/fileService';
 import type { Task, Feature, ProjectSpec } from './tasks'
+import { ProjectsService } from 'src/renderer/services/projectsService';
 
 export type ServiceResult = { ok: boolean; error?: string }
 
@@ -39,28 +40,13 @@ export interface FileManagerAPI {
   setContext: (projectId: string) => Promise<void>
 }
 
-export type ProjectsIndexSnapshot = {
-  root: string
-  projectsDir: string
-  updatedAt: string | null
-  projectsById: Record<string, ProjectSpec>
-  orderedIds: string[]
-  errors: any[]
-  metrics: { lastScanMs: number; lastScanCount: number }
-}
-
-export interface ProjectsIndexAPI {
-  get: () => Promise<ProjectsIndexSnapshot>
-  subscribe: (callback: (snapshot: ProjectsIndexSnapshot) => void) => () => void
-}
-
 declare global {
   interface Window {
     tasksIndex: TasksIndexAPI
     fileManager: FileManagerAPI
     chat: any
     notifications: any
-    projectsIndex: ProjectsIndexAPI
+    projectsService: ProjectsService
   }
 }
 
