@@ -3,7 +3,6 @@ import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { TasksIndexer }  from './tasks/indexer';
-import { DocsIndexer } from './docs/indexer';
 import { FilesIndexer } from './files/indexer';
 import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
@@ -15,8 +14,7 @@ if (started) {
 }
 let mainWindow;
 let indexer; // tasks
-let docsIndexer; // markdown docs (legacy, used by chat manager)
-let filesIndexer; // unified files index for FileService
+let filesIndexer;
 let projectsIndexer;
 let chatManager;
 
@@ -50,12 +48,7 @@ app.whenReady().then(async () => {
 
   indexer = new TasksIndexer(projectRoot, mainWindow);
   indexer.init();
-
-  // Keep DocsIndexer for chat features that rely on it
-  docsIndexer = new DocsIndexer(projectRoot, mainWindow);
-  docsIndexer.init();
-
-  // New: FilesIndexer is the source of truth for FileService (renderer)
+  
   filesIndexer = new FilesIndexer(projectRoot, mainWindow);
   await filesIndexer.init();
 
