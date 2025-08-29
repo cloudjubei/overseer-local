@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { tasksService } from '../services/tasksService'
+import { taskService } from '../services/taskService'
 import type { Task } from 'src/types/tasks'
 import type { TasksIndexSnapshot } from '../../types/external'
 
@@ -9,7 +9,7 @@ export function useNextTaskId(): number {
     let unsub: null | (() => void) = null
     ;(async () => {
       try {
-        const idx: TasksIndexSnapshot = await tasksService.getSnapshot()
+        const idx: TasksIndexSnapshot = await taskService.getSnapshot()
         const ids = Object.values(idx?.tasksById || {})
           .map((t: Task) => t.id)
           .filter((n: number) => Number.isInteger(n))
@@ -17,7 +17,7 @@ export function useNextTaskId(): number {
         setNextId((max || 0) + 1)
       } catch (_) {}
       try {
-        unsub = tasksService.onUpdate((i: TasksIndexSnapshot) => {
+        unsub = taskService.onUpdate((i: TasksIndexSnapshot) => {
           const ids = Object.values(i?.tasksById || {})
             .map((t: Task) => t.id)
             .filter((n: number) => Number.isInteger(n))

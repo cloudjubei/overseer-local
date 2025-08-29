@@ -68,9 +68,12 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   return (
     <Tooltip content={content}>
       <span
-        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isInbound ? 'chip--blocks' : 'chip--ok')}`}
+        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isInbound ? 'chip--blocks' : 'chip--ok')} flex`}
         title={`${display}${isInbound ? ' (requires this)' : ''}`}
-        onClick={handleClick}
+        onClick={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
@@ -81,7 +84,12 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
         }}
       >
         #{display}
-        {onRemove && <span aria-hidden="true">x</span>}
+        {onRemove && (
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="3" x2="9" y2="9" />
+            <line x1="9" y1="3" x2="3" y2="9" />
+          </svg>
+        )}
       </span>
     </Tooltip>
   );

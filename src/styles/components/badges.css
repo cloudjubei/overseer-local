@@ -64,9 +64,6 @@
   border-color: var(--color-red-800);
 }
 
-/* Grid layout for chips, used in FeatureForm dependency editor */
-.chips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; align-items: start; }
-
 /* Close button for inline-removable chips */
 .chip__close { margin-left: 6px; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; }
 .chip__close:hover { background: var(--surface-hover); opacity: 1; }

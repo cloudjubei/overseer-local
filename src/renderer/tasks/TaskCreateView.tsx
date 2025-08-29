@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
-import { tasksService } from '../services/tasksService'
+import { taskService } from '../services/taskService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 
@@ -19,7 +19,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
     async (values: TaskFormValues) => {
       setSubmitting(true)
       try {
-        const res = await tasksService.addTask({ ...values })
+        const res = await taskService.addTask({ ...values })
         if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
         toast({ title: 'Success', description: 'Task created successfully', variant: 'success' })
         doClose()

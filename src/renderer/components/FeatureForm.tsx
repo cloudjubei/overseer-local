@@ -192,7 +192,7 @@ export function FeatureForm({
           <label htmlFor="feature-dependencies" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
           <div
             id="feature-dependencies"
-            className="chips-grid border rounded-md min-h-[3rem] p-2"
+            className="chips-list border rounded-md min-h-[3rem] p-2"
             aria-invalid={!!depError}
             aria-describedby={depErrorId}
             style={{

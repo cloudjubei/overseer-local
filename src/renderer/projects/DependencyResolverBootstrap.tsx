@@ -9,16 +9,16 @@ import { useProjectContext } from './ProjectContext';
  * - Rebuilds automatically on tasks index changes (handled in the service)
  */
 export function DependencyResolverBootstrap() {
-  const { currentProject } = useProjectContext?.() ?? { currentProject: null } as any;
+  const { activeProjectId, activeProject } = useProjectContext?.() ?? { project: null } as any;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        await dependencyResolver.init(currentProject ?? null);
+        await dependencyResolver.init(activeProject ?? null);
         if (!cancelled) {
           // Ensure project is set (init might have been called with null before context resolved)
-          dependencyResolver.setProject(currentProject ?? null);
+          dependencyResolver.setProject(activeProject ?? null);
         }
       } catch (e) {
         // Silently fail; UI components will surface missing refs as chips with error state
@@ -26,7 +26,7 @@ export function DependencyResolverBootstrap() {
       }
     })();
     return () => { cancelled = true; };
-  }, [currentProject]);
+  }, [activeProjectId]);
 
   return null;
 }

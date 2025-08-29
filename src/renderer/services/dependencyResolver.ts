@@ -1,5 +1,5 @@
 import type { Feature, ProjectSpec, Task } from 'src/types/tasks';
-import { tasksService } from './tasksService';
+import { taskService } from './taskService';
 import { TasksIndexSnapshot } from '../../types/external';
 
 export type ReferenceKind = 'task' | 'feature';
@@ -78,11 +78,11 @@ export class DependencyResolver {
   async init(project?: ProjectSpec | null) {
     // Attach tasks index subscription and build our index once
     if (!this.unsubscribeTasks) {
-      this.unsubscribeTasks = tasksService.onUpdate((snapshot) => {
+      this.unsubscribeTasks = taskService.onUpdate((snapshot) => {
         this.rebuild(snapshot, this.index.project ?? null);
       });
     }
-    const snapshot = await tasksService.getSnapshot();
+    const snapshot = await taskService.getSnapshot();
     this.rebuild(snapshot, project ?? this.index.project ?? null);
     this.ready = true;
     return this.index;
