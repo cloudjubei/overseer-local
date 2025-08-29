@@ -1,15 +1,14 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../components/ui/Button'
 import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
-import PriorityTag, { parsePriorityFromTitle, Priority } from '../components/tasks/PriorityTag'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
-import StatusControl from '../components/tasks/StatusControl'
+import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -18,8 +17,6 @@ const STATUS_LABELS: Record<Status, string> = {
   '?': 'Blocked',
   '=': 'Deferred',
 }
-
-const STATUSES: Status[] = ['+', '~', '-', '?', '=']
 
 function toTasksArray(index: TasksIndexSnapshot): Task[] {
   const tasksById = index?.tasksById || {}
@@ -50,7 +47,7 @@ function matchesQuery(task: Task, q: string) {
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
-    const byStatus = !status || status === 'any' ? true : t.status === (status as Status)
+    const byStatus = !status || status === 'all' ? true : t.status === (status as Status)
     return byStatus && matchesQuery(t, query)
   })
 }
@@ -73,87 +70,13 @@ function BoardIcon() {
   )
 }
 
-function useOutsideClick(refs: React.RefObject<HTMLElement>[], onOutside: () => void) {
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      const t = e.target as Node
-      const inside = refs.some(r => r.current && r.current.contains(t))
-      if (!inside) onOutside()
-    }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [refs, onOutside])
-}
-
-function positionFor(anchor: HTMLElement, gap = 8) {
-  const r = anchor.getBoundingClientRect()
-  const threshold = 180
-  const side = (window.innerHeight - r.bottom < threshold) ? 'top' : 'bottom'
-  let top: number
-  if (side === 'bottom') {
-    top = r.bottom + window.scrollY + gap
-  } else {
-    top = r.top + window.scrollY - threshold - gap
-  }
-  const left = r.left + window.scrollX
-  return { top, left, minWidth: r.width, side }
-}
-
-type StatusFilterPickerProps = {
-  anchorEl: HTMLElement
-  value: string
-  onSelect: (s: string) => void
-  onClose: () => void
-}
-
-function StatusFilterPicker({ anchorEl, value, onSelect, onClose }: StatusFilterPickerProps) {
-  const panelRef = useRef<HTMLDivElement>(null)
-  const [coords, setCoords] = useState<{ top: number; left: number; minWidth: number; side: 'top' | 'bottom' } | null>(null)
-
-  useLayoutEffect(() => {
-    setCoords(positionFor(anchorEl))
-  }, [anchorEl])
-
-  useOutsideClick([panelRef], onClose)
-
-  const options = useMemo(() => [
-    { value: 'any', label: 'All statuses' },
-    ...STATUSES.map(s => ({ value: s, label: `${STATUS_LABELS[s]} (${s})` }))
-  ], [])
-
-  return createPortal(
-    <div
-      ref={panelRef}
-      className={`status-picker status-picker--${coords?.side}`}
-      role="menu"
-      aria-label="Filter by status"
-      style={{ top: coords?.top, left: coords?.left, minWidth: Math.max(140, coords?.minWidth ?? 0 + 8) }}
-    >
-      {options.map((opt) => {
-        const selected = opt.value === value
-        return (
-          <button
-            key={opt.value}
-            role="menuitemradio"
-            aria-checked={selected}
-            className={`status-picker__item ${selected ? 'is-active' : ''}`}
-            onClick={(e) => { e.stopPropagation(); onSelect(opt.value) }}
-          >
-            <span className="status-picker__label">{opt.label}</span>
-            {selected && <span className="status-picker__check" aria-hidden>✓</span>}
-          </button>
-        )
-      })}
-    </div>,
-    document.body
-  )
-}
+const STATUS_ORDER = ['-', '~', '+', '=', '?']
 
 export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('any')
-  const [sortBy, setSortBy] = useState<'manual' | 'id_asc' | 'id_desc' | 'priority' | 'status'>('id_desc')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sortBy, setSortBy] = useState<'manual' | 'id_asc' | 'id_desc' | 'status'>('id_desc')
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
@@ -240,12 +163,6 @@ export default function TasksListView() {
         tasks.sort((a, b) => (a.id || 0) - (b.id || 0))
       } else if (sortBy === 'id_desc') {
         tasks.sort((a, b) => (b.id || 0) - (a.id || 0))
-      } else if (sortBy === 'priority') {
-        const pVal = (t: Task) => {
-          const p = parsePriorityFromTitle(t.title)
-          return { P0: 0, P1: 1, P2: 2, P3: 3, None: 4 }[p]
-        }
-        tasks.sort((a, b) => pVal(a) - pVal(b) || (a.id || 0) - (b.id || 0))
       } else if (sortBy === 'status') {
         const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
         tasks.sort((a, b) => sVal(a) - sVal(b) || (a.id || 0) - (b.id || 0))
@@ -255,8 +172,7 @@ export default function TasksListView() {
   }, [allTasks, sortBy])
 
   const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
-  const isFiltered = query !== '' || statusFilter !== 'any'
-  const STATUS_ORDER = ['-', '~', '+', '=', '?']
+  const isFiltered = query !== '' || statusFilter !== 'all'
 
   const handleAddTask = async () => {
     openModal({ type: 'task-create' })
@@ -346,7 +262,8 @@ export default function TasksListView() {
     clearDndState()
   }
 
-  const currentFilterLabel = statusFilter === 'any' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]} (${statusFilter})`
+  const currentFilterLabel = statusFilter === 'all' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]}`
+  const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
 
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
@@ -354,12 +271,11 @@ export default function TasksListView() {
         <div className="left">
           <div className="control search-wrapper">
             <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
-            {query && <button className="clear-search" onClick={() => setQuery('')} aria-label="Clear search">×</button>}
           </div>
           <div className="control">
             <div
               ref={statusFilterRef}
-              className="status-filter-btn ui-select"
+              className="status-filter-btn ui-select gap-2"
               role="button"
               aria-haspopup="menu"
               aria-expanded={openFilter}
@@ -368,15 +284,17 @@ export default function TasksListView() {
               onClick={() => setOpenFilter(true)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
             >
-              {currentFilterLabel}
+              <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+              <span className="status-picker__label">{currentFilterLabel}</span>
             </div>
             {openFilter && statusFilterRef.current && (
-              <StatusFilterPicker
-                anchorEl={statusFilterRef.current}
-                value={statusFilter}
+              <StatusPicker 
+                anchorEl={statusFilterRef.current} 
+                value={statusFilter as Status}
+                isAllAllowed={true}
                 onSelect={(val) => { setStatusFilter(val); setOpenFilter(false); }}
                 onClose={() => setOpenFilter(false)}
-              />
+                />
             )}
           </div>
           <div className="control">
@@ -384,7 +302,6 @@ export default function TasksListView() {
               <option value="manual">Manual order</option>
               <option value="id_asc">ID ascending</option>
               <option value="id_desc">ID descending</option>
-              <option value="priority">Priority high-low</option>
               <option value="status">Status</option>
             </select>
           </div>
@@ -437,7 +354,6 @@ export default function TasksListView() {
             >
               {filtered.map((t, idx) => {
                 const { done, total } = countFeatures(t)
-                const priority = parsePriorityFromTitle(t.title)
                 const isDragSource = dragTaskId === t.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
@@ -478,7 +394,6 @@ export default function TasksListView() {
                         <div className="col col-title">
                           <div className="title-line">
                             <span className="title-text">{t.title || ''}</span>
-                            <PriorityTag priority={priority} />
                           </div>
                         </div>
 

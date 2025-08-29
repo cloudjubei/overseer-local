@@ -11,7 +11,7 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 }
 
-function statusKey(s: Status): 'queued' | 'working' | 'done' | 'stuck' | 'onhold' {
+export function statusKey(s: Status): 'queued' | 'working' | 'done' | 'stuck' | 'onhold' {
   switch (s) {
     case '-': return 'queued'
     case '~': return 'working'
@@ -60,12 +60,13 @@ function positionFor(anchor: HTMLElement, gap = 8) {
 
 type PickerProps = {
   anchorEl: HTMLElement
-  value: Status
-  onSelect: (s: Status) => void
+  value: Status | 'all'
+  isAllAllowed?: boolean
+  onSelect: (s: Status | 'all') => void
   onClose: () => void
 }
 
-function StatusPicker({ anchorEl, value, onSelect, onClose }: PickerProps) {
+export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, onClose }: PickerProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [coords, setCoords] = useState<{ top: number; left: number; minWidth: number; side: 'top' | 'bottom' } | null>(null)
 
@@ -75,14 +76,14 @@ function StatusPicker({ anchorEl, value, onSelect, onClose }: PickerProps) {
 
   useOutsideClick([panelRef], onClose)
 
-  const [active, setActive] = useState<Status>(value)
+  const [active, setActive] = useState<Status | 'all'>(value)
   useEffect(() => setActive(value), [value])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!panelRef.current) return
       if (e.key === 'Escape') { e.preventDefault(); onClose(); return }
-      const idx = STATUS_ORDER.indexOf(active)
+      const idx = active === 'all' ? STATUS_ORDER.length : STATUS_ORDER.indexOf(active)
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault()
         const next = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length]
@@ -110,6 +111,20 @@ function StatusPicker({ anchorEl, value, onSelect, onClose }: PickerProps) {
       aria-label="Select status"
       style={{ top: coords.top, left: coords.left, minWidth: Math.max(140, coords.minWidth + 8) }}
     >
+      {isAllAllowed && 
+          <button
+            key={'all'}
+            role="menuitemradio"
+            aria-checked={value === 'all'}
+            className={`status-picker__item ${'all' === active ? 'is-active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onSelect('all') }}
+          >
+            <span className={`status-bullet status-bullet--queued`} aria-hidden />
+            <span className="status-picker__label">All Statuses</span>
+            {value === 'all' && <span className="status-picker__check" aria-hidden>✓</span>}
+          </button>
+        }
+
       {STATUS_ORDER.map((s) => {
         const k = statusKey(s)
         const selected = s === value
@@ -208,7 +223,7 @@ export default function StatusControl({ status, mode = 'normal', variant = 'soft
         )}
       </div>
       {open && containerRef.current && (
-        <StatusPicker anchorEl={containerRef.current} value={status as Status} onSelect={handleSelect} onClose={handleClose} />
+        <StatusPicker anchorEl={containerRef.current} value={status as Status} onSelect={(s) => handleSelect(s as Status)} onClose={handleClose} />
       )}
     </>
   )

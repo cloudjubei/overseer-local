@@ -1,6 +1,5 @@
 import React from 'react'
 import type { Task, Status } from 'src/types/tasks'
-import PriorityTag, { parsePriorityFromTitle } from './PriorityTag'
 import Tooltip from '../ui/Tooltip'
 import StatusControl from './StatusControl'
 
@@ -11,7 +10,6 @@ export default function TaskCard({ task, onClick, draggable = false, onDragStart
   onDragStart?: (e: React.DragEvent) => void
   onStatusChange?: (status: Status) => void | Promise<void>
 }) {
-  const p = parsePriorityFromTitle(task.title)
   return (
     <div
       className="task-card group"
@@ -39,7 +37,6 @@ export default function TaskCard({ task, onClick, draggable = false, onDragStart
       <div className="task-card__header">
         <div className="task-card__id">#{task.id}</div>
         <div className="flex-spacer" />
-        <PriorityTag priority={p} />
       </div>
       <div className="task-card__title" title={task.title}>{task.title}</div>
       <div className="task-card__meta flex items-center justify-between gap-2">
@@ -48,11 +45,6 @@ export default function TaskCard({ task, onClick, draggable = false, onDragStart
           <Tooltip content="Open details (Enter)" placement="top">
             <button className="btn-secondary !px-2 !py-1 text-sm" onClick={(e) => { e.stopPropagation(); onClick?.(); }} aria-label="Open details">
               ↗
-            </button>
-          </Tooltip>
-          <Tooltip content="Change status (S)" placement="top">
-            <button className="btn-secondary !px-2 !py-1 text-sm" aria-label="Change status">
-              S
             </button>
           </Tooltip>
         </div>

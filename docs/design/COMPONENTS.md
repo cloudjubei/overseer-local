@@ -50,10 +50,6 @@ StatusBadge
 - Variants: soft (default in dense lists/boards) and bold (for emphasis or headers).
 - Tokens: status.* soft/bold pairs; rounded pill shape.
 
-PriorityTag
-- Tiers: P0 (red), P1 (orange), P2 (blue), P3 (gray); soft backgrounds with strong border for readability.
-- Use in metadata rows, not as the sole indicator of urgency.
-
 TaskCard
 - Tokens: surface.raised; border.default; shadow-1; hover elevates to shadow-2 and nudges; quick actions appear on hover.
 - Behavior: keyboard focusable; Enter opens details panel; S/A/P/L/D shortcuts route to pickers.

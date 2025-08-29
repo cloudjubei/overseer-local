@@ -159,7 +159,7 @@ export default function BoardView({ tasks }: Props) {
               s === '+' ? 'header-done' : s === '~' ? 'header-inprogress' : s === '-' ? 'header-pending' : s === '?' ? 'header-blocked' : 'header-deferred'
             }`}>
               <div className="board-col__title">
-                <StatusControl status={s} /> {STATUS_LABELS[s]}
+                <StatusControl status={s} />
               </div>
               <div className="board-col__count">{totals[s]}</div>
             </div>
