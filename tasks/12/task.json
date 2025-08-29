@@ -48,9 +48,14 @@
       "id": "12.5",
       "status": "-",
       "title": "DependencyBullet with remove should show nice icon",
-      "description": "When the DependencyBullet allows removal - it should show a nice crisp close icon (similar to an 'x'). It should also make sure that all the content within is centered.",
+      "description": "When the DependencyBullet allows removal - it should show a nice crisp close icon. It should also make sure that all the content within is centered.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/components/FeatureForm.tsx",
+        "src/styles/components/badges.css",
+        "src/styles/screens/tasks.css"
+      ],
       "acceptance": [],
       "dependencies": []
     }
