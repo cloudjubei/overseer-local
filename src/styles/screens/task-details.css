@@ -19,9 +19,8 @@
 
 .features-list { list-style: none; padding: 0; margin: 0; }
 /* Compact ID and Actions columns using max-content; shrink Status and bias more width to Dependencies */
-.features-head { display:grid; grid-template-columns: 0.1fr 1.2fr max-content; gap: 20px; padding: 8px; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); }
 .feature-item + .feature-item { border-top: 1px solid var(--border-subtle); }
-.feature-row { display:grid; grid-template-columns: 0.1fr 1.3fr max-content; grid-template-rows: auto auto auto; gap: 8px 20px; align-items: center; padding: 8px; }
+.feature-row { display:grid; grid-template-columns: 0.1fr 1.3fr max-content; grid-template-rows: auto auto auto; gap: 2px 12px; align-items: center; padding: 12px 8px; }
 .feature-row:hover { background: color-mix(in srgb, var(--surface-raised) 95%, var(--text-primary) 5%); }
 .feature-row.draggable { cursor: grab; }
 .feature-row:focus { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent) inset; }

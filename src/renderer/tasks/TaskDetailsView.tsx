@@ -393,9 +393,10 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                           </button>
                         </div>
                       </div>
-                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex flex-col gap-2" aria-label={`Dependencies for Feature ${f.id}`}>
+
+                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex gap-8" aria-label={`Dependencies for Feature ${f.id}`}>
                         <div className="chips-list">
-                          <span className="chips-sub__label">Dependencies blocking</span>
+                          <span className="chips-sub__label">References</span>
                           {deps.length === 0 ? (
                             <span className="chips-sub__label" title="No dependencies">None</span>
                           ) : (
@@ -405,7 +406,7 @@ export default function TaskDetailsView({ taskId }: { taskId: number }) {
                           )}
                         </div>
                         <div className="chips-list">
-                          <span className="chips-sub__label">Dependencies blocked by</span>
+                          <span className="chips-sub__label">Blocks</span>
                           {dependents.length === 0 ? (
                             <span className="chips-sub__label" title="No dependents">None</span>
                           ) : (
