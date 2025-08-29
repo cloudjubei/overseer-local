@@ -9,8 +9,8 @@ import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import type { ChatMessage } from '../types'
 import FileDisplay from '../components/ui/FileDisplay'
-import { inferFileType } from '../services/filesService'
 import useFilesIndex from '../hooks/useFilesIndex'
+import { inferFileType } from '../services/fileService'
 
 export default function ChatView() {
   const {

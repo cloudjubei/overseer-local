@@ -1,5 +1,5 @@
 /*
-  filesService: generic file indexing + content access with graceful fallbacks.
+  fileService: generic file indexing + content access with graceful fallbacks.
   Content access attempts common Electron preload bridges, else returns null.
 */
 
@@ -72,7 +72,7 @@ function readGlobalIndex(): FileMeta[] {
       }
     }
   } catch (e) {
-    console.warn('filesService: failed to read global index', e);
+    console.warn('fileService: failed to read global index', e);
   }
   return [];
 }
@@ -154,7 +154,7 @@ export async function readFileText(path: string): Promise<string | null> {
       if (typeof res === 'string') return res;
     }
   } catch (e) {
-    console.warn('filesService: readFileText failed', e);
+    console.warn('fileService: readFileText failed', e);
   }
   return null;
 }
@@ -171,7 +171,7 @@ export async function readFileBinary(path: string): Promise<ArrayBuffer | null> 
       if (buf && (buf as ArrayBuffer).byteLength !== undefined) return buf as ArrayBuffer;
     }
   } catch (e) {
-    console.warn('filesService: readFileBinary failed', e);
+    console.warn('fileService: readFileBinary failed', e);
   }
   return null;
 }
@@ -233,7 +233,7 @@ export default {
 };
 
 // Named exports for convenience in existing import sites
-export const filesService = {
+export const fileService = {
   getIndex,
   refreshIndex,
   subscribe,

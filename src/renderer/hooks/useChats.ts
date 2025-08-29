@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { chatService } from '../services/chatService';
-import { filesService } from '../services/filesService';
+import { fileService } from '../services/fileService';
 import type { ChatMessage, LLMConfig } from '../types';
 
 export function useChats() {
@@ -68,7 +68,7 @@ export function useChats() {
   const uploadFile = useCallback(async (name: string, content: string) => {
     if (!currentChatId) return;
     try {
-      const returnedPath = await filesService.upload(name, content);
+      const returnedPath = await fileService.upload(name, content);
       const uploadMsg: ChatMessage = { role: 'user', content: `Uploaded file to @${returnedPath}` };
       setMessages((prev) => {
         const next = [...prev, uploadMsg];

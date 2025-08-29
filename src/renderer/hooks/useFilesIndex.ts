@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import filesService, { FilesIndex, FileMeta } from '../services/filesService';
+import fileService, { FilesIndex, FileMeta } from '../services/fileService';
 
 export function useFilesIndex() {
   const [index, setIndex] = useState<FilesIndex>({ files: [], byPath: new Map(), updatedAt: 0 });
@@ -7,12 +7,12 @@ export function useFilesIndex() {
 
   useEffect(() => {
     let mounted = true;
-    filesService.getIndex().then((idx) => {
+    fileService.getIndex().then((idx) => {
       if (!mounted) return;
       setIndex(idx);
       setLoading(false);
     });
-    const unsub = filesService.subscribe((idx) => {
+    const unsub = fileService.subscribe((idx) => {
       setIndex({ ...idx, byPath: new Map(idx.byPath) });
     });
     return () => { mounted = false; unsub(); };
@@ -29,7 +29,7 @@ export function useFilesIndex() {
     return map;
   }, [files]);
 
-  return { index, files, byExt, loading, refresh: filesService.refreshIndex } as const;
+  return { index, files, byExt, loading, refresh: fileService.refreshIndex } as const;
 }
 
 export default useFilesIndex;

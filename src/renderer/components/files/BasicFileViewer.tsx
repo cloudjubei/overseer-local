@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FileMeta, isLikelyText, readFileText, guessLanguageFromExt } from '../../services/filesService';
+import { FileMeta, isLikelyText, readFileText, guessLanguageFromExt } from '../../services/fileService';
 
 export type BasicFileViewerProps = {
   file: FileMeta;

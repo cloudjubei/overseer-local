@@ -1,6 +1,6 @@
 import React from 'react';
 import FileDisplay from '../ui/FileDisplay';
-import { inferFileType } from '../../services/filesService';
+import { inferFileType } from '../../services/fileService';
 
 export function ContextFileChip({ path, onRemove }: { path: string; onRemove?: () => void }) {
   const file = React.useMemo(() => {

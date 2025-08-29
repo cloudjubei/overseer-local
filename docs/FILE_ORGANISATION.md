@@ -73,8 +73,8 @@ This document describes how files and directories are organised in this reposito
     - filesNavigation.ts ← Helpers to navigate to a file in the Files screen and parse file from hash.
   - src/renderer/services/
     - chatService.ts
-    - filesService.ts ← Generic project file indexer service + content access. Indexes all files and exposes file metadata (name, size, mtime, type). Provides readFileText/readFileBinary best-effort bridges. Also exports a simple inferFileType(name) helper.
-    - docsService.ts ← Compatibility shim re-exporting filesService (to ease migration).
+    - fileService.ts ← Generic project file indexer service + content access. Indexes all files and exposes file metadata (name, size, mtime, type). Provides readFileText/readFileBinary best-effort bridges. Also exports a simple inferFileType(name) helper.
+    - docsService.ts ← Compatibility shim re-exporting fileService (to ease migration).
     - tasksService.ts
     - notificationsService.ts
     - dependencyResolver.ts ← Project-wide dependency resolution and validation service.
@@ -132,5 +132,5 @@ Notes:
 - src/renderer/navigation/UnsavedChanges.ts: Initializes a simple registry to track unsaved changes across editors and forms. Provides confirmDiscardIfUnsaved used before navigation.
 - src/renderer/navigation/filesNavigation.ts: Navigation utility to open the Files screen focused on a specific file and parse file path from URL hash. Used by FileDisplay and FilesView.
 - src/renderer/components/files/MarkdownEditor.tsx: Markdown editor for .md/.mdx with split view. Registers unsaved state with UnsavedChanges.
-- src/renderer/services/filesService.ts: File index and content access with graceful fallbacks. Now also exports inferFileType for UI components.
+- src/renderer/services/fileService.ts: File index and content access with graceful fallbacks. Now also exports inferFileType for UI components.
 - src/renderer/hooks/useFilesIndex.ts: Hook to access the file index and groupings.

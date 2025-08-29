@@ -8,7 +8,7 @@
       "id": "13.1",
       "status": "+",
       "title": "Convert document indexer to file indexer",
-      "description": "Transform the existing document indexer to become a file indexer that can handle any file type within the project scope as defined by config.json under /projects. Update the docsService.ts to become a filesService.ts that indexes all files (not just documents) and provides file metadata like name, size, last modification date, and file type. Update the useDocsIndex hook to become useFilesIndex.",
+      "description": "Transform the existing document indexer to become a file indexer that can handle any file type within the project scope as defined by config.json under /projects. Update the docsService.ts to become a fileService.ts that indexes all files (not just documents) and provides file metadata like name, size, last modification date, and file type. Update the useDocsIndex hook to become useFilesIndex.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -17,16 +17,20 @@
       "id": "13.2",
       "status": "-",
       "title": "FileService is the only interface for handling files across app",
-      "description": "FileIndex needs to be only used by the FileService - all other places use FileService and never FileIndex directly.",
+      "description": "FileIndex needs to be only used by the FileService - all other places use FileService and never FileIndex directly. All places that reference it are in the context.",
       "plan": "",
       "context": [
-        "src/renderer/services/filesService.ts",
-
+        "src/renderer/services/fileService.ts",
+        "src/renderer/hooks/useChats.ts",
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/components/ui/FileSelector.tsx",
+        "src/renderer/screens/FilesView.tsx"
       ],
       "acceptance": [],
       "dependencies": [
         "13.1"
-      ]
+      ],
+      "rejection": "upload isn't implemented - it's used by useChats"
     },
     {
       "id": "13.3",
@@ -62,13 +66,12 @@
       "description": "Rename the DocumentsView to FilesView and update all related navigation, routing, and references. Update the sidebar navigation to show 'Files' instead of 'Documents'. Ensure all existing functionality is preserved during the rename.",
       "plan": "",
       "context": [
-        "src/renderer/services/filesService.ts",
+        "src/renderer/services/fileService.ts",
         "src/renderer/screens/FilesView.tsx",
-        "src/renderer/screens/DocumentsView.tsx",
-        "src/renderer/docs/DocumentsBrowserView.tsx"
+        "src/renderer/screens/DocumentsView.tsx"
       ],
       "acceptance": [],
-      "rejection": "The new FilesView doesn't display anything. The whole directory navigation seems to be gone from the code too. DocumentsView is included as a reference as well as DocumentsBrowserView.",
+      "rejection": "The new FilesView doesn't display anything. The whole directory navigation seems to be gone from the code too. The previous DocumentsView is included as a reference.",
       "dependencies": [
         "13.2"
       ]

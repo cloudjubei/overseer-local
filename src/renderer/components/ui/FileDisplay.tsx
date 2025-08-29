@@ -1,6 +1,6 @@
 import React from 'react';
 import Tooltip from './Tooltip';
-import { filesService, inferFileType } from '../../services/filesService';
+import { fileService, inferFileType } from '../../services/fileService';
 import { goToFile } from '../../navigation/filesNavigation';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';
@@ -152,7 +152,7 @@ function useFilePreviewContent(file: FileMeta) {
     setState({ loading: true, error: null, text: null });
     (async () => {
       try {
-        const content = await (filesService as any).readFileText?.(relPath) ?? await (filesService as any).getFile?.(relPath);
+        const content = await (fileService as any).readFileText?.(relPath) ?? await (fileService as any).getFile?.(relPath);
         if (cancelled) return;
         if (typeof content === 'string') {
           const snippet = content.slice(0, MAX_PREVIEW_CHARS);
