@@ -128,10 +128,11 @@ Notes:
 
 ## New Components/Services
 - src/renderer/navigation/UnsavedChanges.ts: Initializes a simple registry to track unsaved changes across editors and forms. Provides confirmDiscardIfUnsaved used before navigation.
-- src/renderer/navigation/filesNavigation.ts: Navigation utility to open the Files screen focused on a specific file and parse file path from URL hash. Used by FileDisplay and FilesView.
+- src/renderer/navigation/filesNavigation.ts: Navigation utility to open the Files screen focused on a specific file and parse file from hash. Used by FileDisplay and FilesView.
 - src/renderer/components/files/MarkdownEditor.tsx: Markdown editor for .md/.mdx with split view. Registers unsaved state with UnsavedChanges.
 - src/renderer/services/fileService.ts: File index and content access with graceful fallbacks. Exports inferFileType for UI components.
 - src/renderer/hooks/useFilesIndex.ts: Hook to access the file index and groupings.
 - FilesView replaces the previous DocumentsView; legacy '#documents' hashes are still supported and routed to the Files screen.
-- src/files/indexer.js: Main-process FilesIndexer that scans and watches the current project scope directory for all files (excluding common build and VCS folders). On changes, it rebuilds the index and publishes it to the renderer via both an IPC event ('files-index:update') and by updating a global window.filesIndex. The renderer's FileService consumes this global and provides a unified API across the app.
-- main process wiring: src/main.js initializes FilesIndexer and exposes IPC handlers 'files-index:get' and 'files:set-context' to switch scope based on projects configuration. FilesIndexer is the only source of the files listing; UI accesses it exclusively via renderer FileService.
+- src/files/indexer.js: Main-process FilesIndexer that scans and watches the current project scope directory for all files (excluding common build and VCS folders). On changes, it rebuilds the index and publishes it to the renderer via both an IPC event ('files-index:update'). The renderer's FileService consumes a global window.filesIndex proxy exposed by preload for synchronous access.
+- main process wiring: src/main.js initializes FilesIndexer and exposes IPC handlers 'files-index:get' and 'files:set-context' to switch scope based on projects configuration. FilesIndexer is the only source of the files listing; UI accesses it exclusively via renderer FileService. Legacy DocsIndexer and related IPC routes have been removed and superseded by FilesIndexer + FileService.
+- Preload wiring: src/preload.js exposes `window.filesIndex` (with a synchronous list() and files getter) and `window.files` helpers (readFile/readFileBinary/writeFile/ensureDir/upload) used by renderer FileService as optional bridges.

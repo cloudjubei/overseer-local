@@ -1,5 +1,45 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+// Keep an internal snapshot of files index for synchronous access by renderer FileService
+let __filesIndexSnapshot = { files: [] };
+
+// Expose a minimal filesIndex object that FileService can read synchronously
+const FILES_INDEX_BRIDGE = {
+  list: () => (__filesIndexSnapshot.files || []),
+  get files() { return __filesIndexSnapshot.files || []; },
+};
+
+// Prime and subscribe to files-index updates from main/indexer
+(async () => {
+  try {
+    const snap = await ipcRenderer.invoke('files-index:get');
+    __filesIndexSnapshot = snap || { files: [] };
+  } catch {
+    __filesIndexSnapshot = { files: [] };
+  }
+})();
+
+ipcRenderer.on('files-index:update', (_event, snapshot) => {
+  __filesIndexSnapshot = snapshot || { files: [] };
+});
+
+// Provide Files content helpers used by renderer fileService (best-effort bridges)
+const FILES_API = {
+  getSnapshot: () => ipcRenderer.invoke('files-index:get'),
+  onUpdate: (callback) => {
+    const listener = (_event, snapshot) => callback(snapshot);
+    ipcRenderer.on('files-index:update', listener);
+    return () => ipcRenderer.removeListener('files-index:update', listener);
+  },
+  readFile: (relPath, encoding = 'utf8') => ipcRenderer.invoke('files:read', { relPath, encoding }),
+  readFileBinary: (relPath) => ipcRenderer.invoke('files:read-binary', { relPath }),
+  writeFile: (relPath, content, encoding = 'utf8') => ipcRenderer.invoke('files:write', { relPath, content, encoding }),
+  ensureDir: (relPath) => ipcRenderer.invoke('files:ensure-dir', { relPath }),
+  upload: (name, content) => ipcRenderer.invoke('files:upload', { name, content }),
+  // set active files context (project-aware)
+  setContext: (projectId) => ipcRenderer.invoke('files:set-context', { projectId }),
+};
+
 // Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
 const TASKS_API = {
   getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
@@ -23,21 +63,6 @@ const TASKS_API = {
   },
   // NEW: set active tasks context (project-aware)
   setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
-};
-
-// Docs Index API exposed to renderer as window.docsIndex
-const DOCS_API = {
-  get: () => ipcRenderer.invoke('docs-index:get'),
-  subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback(snapshot);
-    ipcRenderer.on('docs-index:update', listener);
-    return () => ipcRenderer.removeListener('docs-index:update', listener);
-  },
-  getFile: (relPath) => ipcRenderer.invoke('docs-file:get', { relPath }),
-  saveFile: (relPath, content) => ipcRenderer.invoke('docs-file:save', { relPath, content }),
-  upload: (name, content) => ipcRenderer.invoke('docs:upload', { name, content }),
-  // NEW: set active docs context (project-aware)
-  setContext: (projectId) => ipcRenderer.invoke('docs:set-context', { projectId }),
 };
 
 const CHAT_API = {
@@ -89,8 +114,10 @@ const PROJECTS_API = {
 };
 
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
-contextBridge.exposeInMainWorld('docsIndex', DOCS_API);
 contextBridge.exposeInMainWorld('chat', CHAT_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
+// Expose files index + bridges for renderer FileService
+contextBridge.exposeInMainWorld('filesIndex', FILES_INDEX_BRIDGE);
+contextBridge.exposeInMainWorld('files', FILES_API);
