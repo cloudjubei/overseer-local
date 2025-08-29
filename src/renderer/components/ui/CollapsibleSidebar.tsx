@@ -85,35 +85,6 @@ export default function CollapsibleSidebar(props: Props) {
       }
     }, [items.length]);
 
-    // let onKeyDownList: ((e: React.KeyboardEvent) => void) | undefined;
-    // if (!navContent) {
-    //   const activeIndex = useMemo(() => {
-    //     const idx = items.findIndex((n) => n.id === activeId);
-    //     return idx >= 0 ? idx : 0;
-    //   }, [items, activeId]);
-
-    //   const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
-
-    //   useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
-
-    //   onKeyDownList = useCallback((e: React.KeyboardEvent) => {
-    //     const max = items.length - 1;
-    //     if (e.key === 'ArrowDown') {
-    //       e.preventDefault();
-    //       setFocusIndex((i) => (i >= max ? 0 : i + 1));
-    //     } else if (e.key === 'ArrowUp') {
-    //       e.preventDefault();
-    //       setFocusIndex((i) => (i <= 0 ? max : i - 1));
-    //     } else if (e.key === 'Home') {
-    //       e.preventDefault();
-    //       setFocusIndex(0);
-    //     } else if (e.key === 'End') {
-    //       e.preventDefault();
-    //       setFocusIndex(max);
-    //     }
-    //   }, [items.length]);
-    // }
-
     return (
       <aside
         className={`sidebar relative z-30 flex h-full shrink-0 flex-col border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${collapsed ? 'collapsed' : ''} ${className}`}
@@ -154,9 +125,9 @@ export default function CollapsibleSidebar(props: Props) {
                 const isActive = activeId === item.id;
                 return (
                   <li key={item.id} className="nav-li">
-                    <button
-                      type="button"
+                    <div
                       className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                      role="button"
                       aria-current={isActive ? 'page' : undefined}
                       onClick={() => onSelect(item.id)}
                       title={item.label}
@@ -175,7 +146,7 @@ export default function CollapsibleSidebar(props: Props) {
                         <span className="nav-item__badge">{item.badge}</span>
                       )}
                       {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
-                    </button>
+                    </div>
                   </li>
                 );
               })}
