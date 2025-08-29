@@ -53,7 +53,7 @@
     },
     {
       "id": "14.6",
-      "status": "-",
+      "status": "+",
       "title": "Update dependency display components to use display indices",
       "description": "Modify DependencyBullet, TaskSummaryCallout, FeatureSummaryCallout and other components that display dependency references to show user-friendly display indices ('3.2') instead of UUIDs, while maintaining UUID-based navigation and resolution internally.",
       "plan": "",

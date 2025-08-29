@@ -18,14 +18,15 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   const resolved = dependencyResolver.resolveRef(dependency);
   const isError = 'code' in resolved;
   const isFeatureDependency = !isError && resolved.kind === 'feature';
+  const display = dependencyResolver.getDisplayRef(dependency) ?? dependency;
 
-  let summary: { title: string; description: string; status: Status } = { title: 'Not found', description: '', status: '-' as Status };
+  let summary: { title: string; description: string; status: Status; displayId: string } = { title: 'Not found', description: '', status: '-' as Status, displayId: display };
 
   if (!isError) {
     if (resolved.kind === 'task') {
-      summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status };
+      summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status, displayId: display };
     } else {
-      summary = { title: resolved.feature.title, description: resolved.feature.description, status: resolved.feature.status as Status };
+      summary = { title: resolved.feature.title, description: resolved.feature.description, status: resolved.feature.status as Status, displayId: display };
     }
   }
 
@@ -68,7 +69,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
     <Tooltip content={content}>
       <span
         className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isInbound ? 'chip--blocks' : 'chip--ok')}`}
-        title={`${dependency}${isInbound ? ' (requires this)' : ''}`}
+        title={`${display}${isInbound ? ' (requires this)' : ''}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -79,7 +80,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
           }
         }}
       >
-        #{dependency}
+        #{display}
         {onRemove && <span aria-hidden="true">x</span>}
       </span>
     </Tooltip>
