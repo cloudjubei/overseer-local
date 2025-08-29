@@ -346,8 +346,8 @@ export default function ChatView() {
 
               {isAutocompleteOpen && autocompletePosition && (
                 <div
-                  className="fixed z-[var(--z-dropdown,1000)] min-w={260} max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
-                  style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px` }}
+                  className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+                  style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px`, transform: 'translateY(-100%)' }}
                   role="listbox"
                   aria-label="Docs suggestions"
                 >
