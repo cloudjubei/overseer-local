@@ -112,6 +112,7 @@ This document describes how files and directories are organised in this reposito
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
+  - migrate-uuids.ts: Script to migrate task and feature IDs to UUIDs, updating dependencies and display indices.
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns, icon.ico, icon.png
   - build/entitlements.mac.plist
