@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "13.1",
-      "status": "-",
+      "status": "+",
       "title": "Convert document indexer to file indexer",
       "description": "Transform the existing document indexer to become a file indexer that can handle any file type within the project scope as defined by config.json under /projects. Update the docsService.ts to become a filesService.ts that indexes all files (not just documents) and provides file metadata like name, size, last modification date, and file type. Update the useDocsIndex hook to become useFilesIndex.",
       "plan": "",

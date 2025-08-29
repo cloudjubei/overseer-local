@@ -66,13 +66,15 @@ This document describes how files and directories are organised in this reposito
     - SettingsLLMConfigModal.tsx: Modal used for adding/editing LLM provider configurations. Opened via Navigator + ModalHost.
   - src/renderer/services/
     - chatService.ts
-    - docsService.ts
+    - filesService.ts ← New: Generic project file indexer service (replaces docsService). Indexes all files and exposes file metadata (name, size, mtime, type). Falls back to legacy window.docsIndex if window.filesIndex is unavailable.
+    - docsService.ts ← Compatibility shim re-exporting filesService (to ease migration).
     - tasksService.ts
     - notificationsService.ts
     - dependencyResolver.ts ← Project-wide dependency resolution and validation service. Indexes all tasks and features, resolves refs like "#12" / "#12.4", builds reverse dependency graph, tracks invalid references, detects cycles, and exposes search + validation helpers. Listens to tasks index updates.
   - src/renderer/hooks/
     - useChats.ts
-    - useDocsIndex.ts
+    - useFilesIndex.ts ← New: Hook to access the files index snapshot and flattened file list.
+    - useDocsIndex.ts ← Compatibility shim delegating to useFilesIndex.
     - useDocsAutocomplete.ts
     - useReferencesAutocomplete.ts ← Autocomplete for `#` references in chat and editors. Uses tasks index to suggest tasks and features by `taskId` or `taskId.featureId` and inserts a reference token.
     - useLLMConfig.ts
