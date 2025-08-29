@@ -32,6 +32,7 @@ export type NavigatorApi = NavigatorState & ModalState & {
 function viewPrefixToView(prefix: string): NavigationView {
   switch (prefix) {
     case 'files':
+    case 'documents': // legacy compatibility: map old Documents route to Files
       return 'Files';
     case 'chat':
       return 'Chat';

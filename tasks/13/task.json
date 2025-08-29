@@ -61,7 +61,7 @@
     },
     {
       "id": "13.6",
-      "status": "-",
+      "status": "+",
       "title": "Rename Documents to Files screen and update routing",
       "description": "Rename the DocumentsView to FilesView and update all related navigation, routing, and references. Update the sidebar navigation to show 'Files' instead of 'Documents'. Ensure all existing functionality is preserved during the rename.",
       "plan": "",

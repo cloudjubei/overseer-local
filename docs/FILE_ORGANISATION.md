@@ -62,27 +62,25 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/screens/
     - SidebarView.tsx
     - TasksView.tsx
-    - FilesView.tsx ← Files screen shows list of all files; uses MarkdownEditor for Markdown files and BasicFileViewer for other types. Selection is synced with URL hash (#files/<path>), and navigation is guarded by unsaved-changes prompts.
-    - ChatView.tsx ← Chat interface. Supports `#` typing to open a Task & Feature selector and renders references as dependency bullets.
+    - FilesView.tsx ← Files screen shows a directory tree of all files; uses MarkdownEditor for Markdown files and BasicFileViewer for other types. Selection is synced with URL hash (#files/<path> or legacy #documents/<path>), and navigation is guarded by unsaved-changes prompts.
+    - ChatView.tsx ← Chat interface. Supports `@` typing to open a Files selector and renders references using FileDisplay.
     - SettingsView.tsx
     - NotificationsView.tsx
   - src/renderer/navigation/: Navigation state + modal host.
     - Navigator.tsx
     - ModalHost.tsx
     - UnsavedChanges.ts ← Global registry and helpers for unsaved-changes prompts.
-    - filesNavigation.ts ← Helpers to navigate to a file in the Files screen and parse file from hash.
+    - filesNavigation.ts ← Helpers to navigate to a file in the Files screen and parse file from hash (supports #files and legacy #documents).
   - src/renderer/services/
     - chatService.ts
     - fileService.ts ← Generic project file indexer service + content access. Indexes all files and exposes file metadata (name, size, mtime, type). Provides readFileText/readFileBinary best-effort bridges. Also exports a simple inferFileType(name) helper.
-    - docsService.ts ← Compatibility shim re-exporting fileService (to ease migration).
     - tasksService.ts
     - notificationsService.ts
     - dependencyResolver.ts ← Project-wide dependency resolution and validation service.
   - src/renderer/hooks/
     - useChats.ts
     - useFilesIndex.ts ← Hook to access the files index snapshot and flattened file list.
-    - useDocsIndex.ts ← Compatibility shim delegating to useFilesIndex.
-    - useDocsAutocomplete.ts
+    - useFilesAutocomplete.ts
     - useReferencesAutocomplete.ts ← Autocomplete for `#` references in chat and editors.
     - useLLMConfig.ts
     - useNextTaskId.ts
@@ -132,5 +130,6 @@ Notes:
 - src/renderer/navigation/UnsavedChanges.ts: Initializes a simple registry to track unsaved changes across editors and forms. Provides confirmDiscardIfUnsaved used before navigation.
 - src/renderer/navigation/filesNavigation.ts: Navigation utility to open the Files screen focused on a specific file and parse file path from URL hash. Used by FileDisplay and FilesView.
 - src/renderer/components/files/MarkdownEditor.tsx: Markdown editor for .md/.mdx with split view. Registers unsaved state with UnsavedChanges.
-- src/renderer/services/fileService.ts: File index and content access with graceful fallbacks. Now also exports inferFileType for UI components.
+- src/renderer/services/fileService.ts: File index and content access with graceful fallbacks. Exports inferFileType for UI components.
 - src/renderer/hooks/useFilesIndex.ts: Hook to access the file index and groupings.
+- FilesView replaces the previous DocumentsView; legacy '#documents' hashes are still supported and routed to the Files screen.
