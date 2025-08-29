@@ -111,12 +111,64 @@
       "id": "12.9",
       "status": "-",
       "title": "main.js needs to be thin",
-      "description": "All the code that does something in the ipc handlers should be moved to the respective manager - they should be performing these actions, that's why they're there for.",
+      "description": "All the 'files' ipc handlers should be moved to the FileManager - they should be performing these actions, that's why they're there for.",
       "plan": "",
       "context": [
         "src/main.js",
-        "src/preload.js",
-        "src/types/external.d.ts"
+        "src/files/manager.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.10",
+      "status": "-",
+      "title": "main.js needs to be thin",
+      "description": "All the 'chat' ipc handlers should be moved to the ChatManager - they should be performing these actions, that's why they're there for.",
+      "plan": "",
+      "context": [
+        "src/main.js",
+        "src/chat/manager.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.11",
+      "status": "-",
+      "title": "main.js needs to be thin",
+      "description": "All the 'projects' ipc handlers should be moved to the ProjectManager - they should be performing these actions, that's why they're there for.",
+      "plan": "",
+      "context": [
+        "src/main.js",
+        "src/projects/manager.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.12",
+      "status": "-",
+      "title": "main.js needs to be thin",
+      "description": "All the 'tasks' ipc handlers should be moved to the TaskManager - they should be performing these actions, that's why they're there for.",
+      "plan": "",
+      "context": [
+        "src/main.js",
+        "src/tasks/manager.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.13",
+      "status": "-",
+      "title": "main.js needs to be thin",
+      "description": "All the 'notifications' ipc handlers should be moved to a NotificationManager - look at how TaskManager is setup and follow the same patterns.",
+      "plan": "",
+      "context": [
+        "src/main.js",
+        "src/tasks/manager.js",
+        "src/managers.js"
       ],
       "acceptance": [],
       "dependencies": []

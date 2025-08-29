@@ -120,8 +120,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
         if (window.tasksIndex && typeof window.tasksIndex.setContext === 'function') {
           window.tasksIndex.setContext(activeProjectId)
         }
-        if (window.fileIndex && typeof window.fileIndex.setContext === 'function') {
-          window.fileIndex.setContext(activeProjectId)
+        if (window.fileManager && typeof window.fileManager.setContext === 'function') {
+          window.fileManager.setContext(activeProjectId)
         }
         if (window.chat && typeof window.chat.setContext === 'function') {
           window.chat.setContext(activeProjectId)

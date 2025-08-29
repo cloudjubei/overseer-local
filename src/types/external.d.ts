@@ -26,7 +26,7 @@ export interface TasksIndexAPI {
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
   setContext: (projectId: string) => Promise<void>
 }
-export interface FileIndexAPI {
+export interface FileManagerAPI {
   get: () => Promise<FilesIndex>
   subscribe: (callback: (callback: FilesIndex) => void) => () => void
   readFile: (relPath: string, encoding: string) => Promise<string>
@@ -57,7 +57,7 @@ export interface ProjectsIndexAPI {
 declare global {
   interface Window {
     tasksIndex: TasksIndexAPI
-    fileIndex: FileIndexAPI
+    fileManager: FileManagerAPI
     chat: any
     notifications: any
     projectsIndex: ProjectsIndexAPI
