@@ -120,7 +120,7 @@ This document describes how files and directories are organised in this reposito
 - src/tasks/
   - manager.js: TaskManager owns indexing of tasks and features, file watching, and registers all 'tasks:*' IPC handlers using centralized keys. Broadcasts TASKS_SUBSCRIBE events on changes. This mirrors ProjectsManager.
 - src/notifications/
-  - manager.js: NotificationManager registers all 'notifications:*' IPC handlers (currently notifications:send-os and forwards notifications:clicked on OS notification click). This keeps main.js thin.
+  - manager.js: NotificationManager registers all notifications IPC handlers using centralized keys (NOTIFICATIONS_SEND_OS and NOTIFICATIONS_CLICKED). This keeps main.js thin and consistent with the ProjectsManager pattern.
 - src/managers.js: Exports shared manager instances for cross-manager references.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
@@ -166,3 +166,5 @@ Notes:
 - src/renderer/services/filesService.ts: Files service proxy (matches projectsService pattern) available in isolated world via preload as window.filesService (window.files kept as backward-compatible alias).
 - src/tasks/manager.js: Now mirrors ProjectsManager — registers all 'tasks:*' IPC handlers using centralized keys and emits TASKS_SUBSCRIBE on changes.
 - src/renderer/services/tasksService.ts: Tasks service proxy (matches projectsService pattern) available via preload as window.tasksService. Back-compat alias window.tasksIndex remains but should be considered deprecated.
+- src/notifications/manager.js: Now follows the ProjectsManager pattern — uses centralized IPC handler keys for NOTIFICATIONS_SEND_OS and NOTIFICATIONS_CLICKED.
+- src/preload.js: Exposes notificationsService (pattern-aligned) via contextBridge with a back-compat alias window.notifications.

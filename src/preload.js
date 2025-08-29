@@ -68,11 +68,11 @@ const CHATS_API = {
 };
 
 const NOTIFICATIONS_API = {
-  sendOs: (data) => ipcRenderer.invoke('notifications:send-os', data),
+  sendOs: (data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS, data),
   onClicked: (callback) => {
     const listener = (_event, metadata) => callback(metadata);
-    ipcRenderer.on('notifications:clicked', listener);
-    return () => ipcRenderer.removeListener('notifications:clicked', listener);
+    ipcRenderer.on(IPC_HANDLER_KEYS.NOTIFICATIONS_CLICKED, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.NOTIFICATIONS_CLICKED, listener);
   }
 };
 
@@ -97,6 +97,8 @@ const PROJECTS_API = {
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
 // Back-compat alias (older code may use window.tasksIndex)
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
+// Notifications service (pattern-aligned) + back-compat alias
+contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);

@@ -41,5 +41,9 @@ const IPC_HANDLER_KEYS = {
   TASKS_FEATURE_UPDATE: "tasks-feature:update",
   TASKS_FEATURE_DELETE: "tasks-feature:delete",
   TASKS_FEATURES_REORDER: "tasks-features:reorder",
+
+  // Notifications (follow Projects pattern)
+  NOTIFICATIONS_SEND_OS: "notifications:send-os",
+  NOTIFICATIONS_CLICKED: "notifications:clicked",
 }
 export default IPC_HANDLER_KEYS

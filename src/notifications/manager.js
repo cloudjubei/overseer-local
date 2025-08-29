@@ -1,4 +1,5 @@
 import { ipcMain, Notification } from 'electron';
+import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
 export class NotificationManager {
   constructor(projectRoot, window) {
@@ -18,7 +19,7 @@ export class NotificationManager {
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
-    ipcMain.handle('notifications:send-os', async (event, data) => {
+    ipcMain.handle(IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS, async (event, data) => {
       if (!Notification.isSupported()) {
         return { success: false, error: 'Notifications not supported' };
       }
@@ -35,7 +36,7 @@ export class NotificationManager {
           if (this.window) {
             try {
               this.window.focus();
-              this.window.webContents.send('notifications:clicked', data.metadata);
+              this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_CLICKED, data.metadata);
             } catch (_) {
               // Ignore focus/send errors if window is gone
             }

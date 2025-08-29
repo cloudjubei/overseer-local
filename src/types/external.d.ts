@@ -34,6 +34,7 @@ declare global {
     tasksIndex: TasksIndexAPI
     chatsService: ChatsService
     notifications: any
+    notificationsService: any
     projectsService: ProjectsService
     filesService: FilesService
     files?: FilesService

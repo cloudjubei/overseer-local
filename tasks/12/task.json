@@ -179,7 +179,7 @@
     },
     {
       "id": "12.13",
-      "status": "-",
+      "status": "+",
       "title": "NotificationsManager needs to follow ProjectsManager",
       "description": "ProjectsManager has been refactored - make NotificationsManager follow the same exact patterns. ProjectsManager is in the isolated world, and ProjectsService in rendeder - make sure notifications follow the same patterns.",
       "plan": "",
