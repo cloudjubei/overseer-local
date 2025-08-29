@@ -72,7 +72,7 @@
     },
     {
       "id": "12.6",
-      "status": "-",
+      "status": "+",
       "title": "DependencyBullet with remove should show nice icon",
       "description": "When the DependencyBullet allows removal - it should show a nice crisp close icon. It should also make sure that all the content within is centered.",
       "plan": "",

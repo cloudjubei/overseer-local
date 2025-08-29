@@ -202,7 +202,7 @@ export function FeatureForm({
           >
             {dependencies.map((dep, idx) => {
               return (
-                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeDependencyAt(idx)} isInbound/>
+                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeDependencyAt(idx)} />
               )
             })}
             <button

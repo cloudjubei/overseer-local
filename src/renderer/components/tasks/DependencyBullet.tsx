@@ -30,15 +30,10 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   }
 
   const handleClick = () => {
-    if (onRemove){
-      onRemove()
-      return
-    }
     if (isError) return;
 
     const targetTaskId = resolved.kind === 'task' ? resolved.id : resolved.taskId;
     const featureId = resolved.kind === 'feature' ? resolved.featureId : undefined;
-
 
     const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === targetTaskId;
     if (isSameTask) {
@@ -80,7 +75,21 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
         }}
       >
         #{dependency}
-        {onRemove && <span aria-hidden="true">x</span>}
+        {onRemove && (
+          <button
+            className="chip__close"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            aria-label={`Remove dependency #${dependency}`}
+          >
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="3" x2="9" y2="9" />
+              <line x1="9" y1="3" x2="3" y2="9" />
+            </svg>
+          </button>
+        )}
       </span>
     </Tooltip>
   );
