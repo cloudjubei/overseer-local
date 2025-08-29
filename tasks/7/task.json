@@ -301,7 +301,7 @@
       "id": "7.22",
       "status": "+",
       "title": "Creating a feature doesn't work",
-      "description": "The required connector/IPC isn't implemented - i.e. tasksService.addFeature doesn't work",
+      "description": "The required connector/IPC isn't implemented - i.e. taskService.addFeature doesn't work",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksDetailView.tsx",

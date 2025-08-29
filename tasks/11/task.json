@@ -97,7 +97,7 @@
         "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/components/tasks/DependencyBullet.tsx",
         "src/renderer/types.ts",
-        "src/renderer/services/tasksService.ts",
+        "src/renderer/services/taskService.ts",
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
@@ -114,7 +114,7 @@
         "src/renderer/tasks/TasksDetailsView.tsx",
         "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/components/tasks/DependencyBullet.tsx",
-        "src/renderer/services/tasksService.ts",
+        "src/renderer/services/taskService.ts",
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": []

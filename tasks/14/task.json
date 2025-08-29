@@ -83,7 +83,7 @@
       "id": "14.8",
       "status": "+",
       "title": "Update tasks service and related hooks for UUID operations",
-      "description": "Modify tasksService, useTasksIndex, and related data management hooks to work with UUID-based task and feature identification while maintaining display index tracking and providing backwards compatibility during the transition.",
+      "description": "Modify taskService, useTasksIndex, and related data management hooks to work with UUID-based task and feature identification while maintaining display index tracking and providing backwards compatibility during the transition.",
       "plan": "",
       "context": [],
       "acceptance": []
