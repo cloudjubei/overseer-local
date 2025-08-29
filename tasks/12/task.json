@@ -16,7 +16,7 @@
     },
     {
       "id": "12.2",
-      "status": "-",
+      "status": "+",
       "title": "Board view fixes",
       "description": "Fix clicking. Only drag works - not even key press does.",
       "plan": "",

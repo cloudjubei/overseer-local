@@ -4,6 +4,7 @@ import TaskCard from '../components/tasks/TaskCard'
 import { tasksService } from '../services/tasksService'
 import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
+import { useNavigator } from '../navigation/Navigator'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 const STATUS_LABELS: Record<Status, string> = {
@@ -27,6 +28,7 @@ export default function BoardView({ tasks }: Props) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const { projectId } = useActiveProject()
+  const { navigateTaskDetails } = useNavigator()
 
   const grouped = useMemo(() => {
     const map: Record<Status, Task[]> = { '+': [], '~': [], '-': [], '?': [], '=': [] }
@@ -98,6 +100,10 @@ export default function BoardView({ tasks }: Props) {
     // Re-evaluate when tasks or project changes (column counts/widths may shift)
   }, [tasks, projectId])
 
+  useEffect(() => {
+    viewportRef.current?.focus()
+  }, [])
+
   const scrollByCols = (dir: -1 | 1) => {
     const el = viewportRef.current
     if (!el) return
@@ -162,9 +168,20 @@ export default function BoardView({ tasks }: Props) {
                 <div className="empty">No tasks</div>
               ) : (
                 grouped[s].map((t) => (
-                  <div key={t.id} draggable className="task-card" onDragStart={(e) => onDragStart(e, t.id)} aria-label={`Drag task ${t.id}`}>
-                    <TaskCard task={t} />
-                  </div>
+                  <TaskCard 
+                    key={t.id}
+                    task={t}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, t.id)}
+                    onClick={() => navigateTaskDetails(t.id)}
+                    onStatusChange={async (next) => {
+                      try {
+                        await tasksService.updateTask(t.id, { status: next })
+                      } catch (err) {
+                        console.error('Failed to update status', err)
+                      }
+                    }}
+                  />
                 ))
               )}
             </div>
