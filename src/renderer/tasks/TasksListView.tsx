@@ -167,7 +167,6 @@ export default function TasksListView() {
   }
 
   const handleMoveTask = async (fromId: number, toIndex: number) => {
-    console.log("handleMoveTask fromId: ", fromId, " toIndex: ", toIndex, " saving: ", saving)
     if (saving) return
     setSaving(true)
     try {

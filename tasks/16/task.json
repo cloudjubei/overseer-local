@@ -1,7 +1,50 @@
 {
   "id": 16,
-  "status": "-",
-  "title": "Preparing for a React web version and React Native mobile version - backend is needed",
-  "description": "Up until now everything was running locally, but once we introduce other clients (mobile and web) we need to be able to have some centralised storage. There needs to be a good workflow for all clients to operate locally and sync with the backend (as much as possible should be achievable in offline mode). A very important consideration is how to integrate this with TheFactory project (given that that is a python project) or any other such project in the future.",
-  "features": []
+  "status": "?",
+  "title": "RAG/Knowledge graph - making the Agents clever",
+  "description": "The electron app developed in `src/` has an agentic chat which needs extra features to make the agents clever. References `docs/FILE_ORGANISATION.md`. We want to make them clever by exposing clever local tools for them to use and most importantly that they have scoped knowledge access.",
+  "features": [
+    {
+      "id": "16.1",
+      "status": "+",
+      "title": "Standard tools",
+      "description": "Create a set of standard agent tools that live in a library like code that have documentation that always gets updated whenever there's a new tool added. This document is meant to be passed to an agent so that it knows precisely how to use the tools. The doc needs to be concise and not contain too many descriptions.",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "16.2",
+      "status": "-",
+      "title": "Web search tool",
+      "description": "Create at least 3 versions of web search tools for the agent (for 3 different standard providers).",
+      "context": [],
+      "acceptance": [],
+      "dependencies": [
+        "16.1"
+      ],
+      "rejection": "include EXA as a tool"
+    },
+    {
+      "id": "16.3",
+      "status": "?",
+      "title": "Context retrieval for chat - using graphiti",
+      "description": "There's a library `https://github.com/getzep/graphiti` that provides an upgraded RAG database - a knowledge graph. Create agentic tools for this and allow local-only retrieval.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "rejection": ""
+    },
+    {
+      "id": "16.4",
+      "status": "-",
+      "title": "Areas of knowledge",
+      "description": "Assuming we have a knowledge graph in place - the user will want to ask questions about certain 'areas'/'contexts'/'scopes'. Imagine a knowledge graph about finance - it contains information about stocks, companies, cryptocurrencies, commodities etc. The user might want to limit the scope of a context when asking about Bitcoin to just cryptocurrencies - but maybe they want to see how Bitcoin affects the other knowledge or what commonalities it has.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": [
+        "16.3"
+      ]
+    }
+  ]
 }

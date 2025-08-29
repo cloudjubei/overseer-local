@@ -1,6 +1,6 @@
 {
   "id": 11,
-  "status": "+",
+  "status": "-",
   "title": "Tasks & Feature dependencies",
   "description": "Features should have editable dependencies. When creating or editing a feature it should be easy to browse and select other features as dependencies. If a feature has a dependency from a different task - the task should display these in the TaskDetails as well as in the Tasks list (similarly to how features have it in the TaskDetails).\n\nWhen hovering over a feature dependency bullet (in the TaskDetails) it should show a little summary card of that feature (as a callout) and when clicking on it it should take the user to the TaskDetails where that Feature is and highlight that Feature row.\nWhen hovering over a Task dependency it should behave analogously to the Features but for Tasks.\n\nIt's important to make reusable components for the Task dependency bullet and the Feature dependency bullet, as well as the summary callout cards.\nWhen talking in chat, it must be possible to reference a feature or task by starting to type '#' this should show a Task&Feature dependency selector. Whenever a a task or feature is referenced in the chat in such a way, the dependency bullets should be used with the standard behaviour described before.\n\nVery important - it must be possible to reference any task or feature in the whole project scope - as defined by the project's config.json under /projects.",
   "features": [
@@ -121,7 +121,7 @@
     },
     {
       "id": "11.9",
-      "status": "+",
+      "status": "-",
       "title": "Create project-wide dependency resolution service",
       "description": "Implement a service that can resolve dependency references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
       "plan": "",
@@ -151,7 +151,50 @@
         "src/renderer/hooks/useReferencesAutocomplete.ts"
       ],
       "acceptance": [],
-      "rejection": "the suggestion box shows at the bottom (below the input box) - it should show above it. Very important - useReferencesAutocomplete shouldn't check mentions based on key strokes, but based on input. Let textarea handle the input, and then pass it into the useReferencesAutocomplete. This way the user can keep on typing into the input box and filter out items.",
+      "dependencies": []
+    },
+    {
+      "id": "11.11",
+      "status": "-",
+      "title": "Dependency errors don't show in UI",
+      "description": "In FeatureForm the dependency errors don't show",
+      "plan": "",
+      "context": [
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/hooks/useDependencyResolver.ts",
+        "src/renderer/components/FeatureForm.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "11.12",
+      "status": "-",
+      "title": "When editing dependencies in FeatureForm - they should show as bullets with x",
+      "description": "The dependency should show a capsule, with the reference name and and x right next to it indicating that clicking it - removes the dependency.\nSo essentially the current display but with this extra \"x\" icon.\n\nThe list of dependencies can then be a grid of 5 or more items (depends on popup width) that keep on filling it up.\nThe add button can be a similar looking capsule with the word \"Add\" and a \"+\" at the end. The color should be green - using the classnme '.chip--ok' ",
+      "plan": "",
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/styles/components/badges.css"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "11.13",
+      "status": "-",
+      "title": "Refactor taskId and featureId to be UUID",
+      "description": "Write a script that will go over all the tasks and features and will update them with this new UUID.\nThis means that all dependency references must be updated to be matching:\n'{taskId}.{featureId}' or '{taskId}'\n\nThe display index of a feature is its position in the task's feature list.\nThe display index of a task in the main list must be stored - in the ProjectSpec.\nThere needs to be some way of looking these indices up quickly - as whenever a dependency is shown to the user it should shown as:\n'{taskIndex}.{featureIndex}' \n\nThe dependencyResolver should be updated accordingly too.",
+      "plan": "",
+      "context": [
+        "/docs/tasks/task_format.py",
+        "/src/types/tasks.ts",
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/hooks/useDependencyResolver.ts"
+      ],
+      "acceptance": [],
       "dependencies": []
     }
   ]
