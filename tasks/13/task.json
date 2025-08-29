@@ -69,7 +69,7 @@
     },
     {
       "id": "13.8",
-      "status": "-",
+      "status": "+",
       "title": "Integrate FileDisplay in chat for document mentions",
       "description": "Update the chat system to use the new FileDisplay component whenever a document/file is mentioned in chat messages. This ensures consistent file representation across the application and provides the same hover preview and click navigation functionality.",
       "plan": "",

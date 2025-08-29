@@ -9,6 +9,9 @@ import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import type { ChatMessage } from '../types'
+import FileDisplay from '../components/ui/FileDisplay'
+import { inferFileType } from '../services/filesService'
+import useFilesIndex from '../hooks/useFilesIndex'
 
 export default function ChatView() {
   const {
@@ -23,6 +26,7 @@ export default function ChatView() {
   } = useChats()
 
   const { docsList } = useDocsIndex()
+  const { index } = useFilesIndex()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
@@ -138,17 +142,43 @@ export default function ChatView() {
   })), [chatHistories, deleteChat])
 
   const renderMessageContent = (content: string) => {
-    const regex = /(#[0-9]+(?:\.[0-9A-Za-z_-]+)?)/g
+    // Match either task/feature refs like #12 or #12.a, or file mentions like @path/to/file.ext
+    const regex = /(@[^\s]+|#[0-9]+(?:\.[0-9A-Za-z_-]+)?)/g
     const parts: (string | JSX.Element)[] = []
     let lastIndex = 0
     let match: RegExpExecArray | null
+
     while ((match = regex.exec(content)) !== null) {
       const textBefore = content.slice(lastIndex, match.index)
       if (textBefore) parts.push(textBefore)
-      const dep = match[0].slice(1)
-      parts.push(<DependencyBullet key={`${match.index}-${dep}`} dependency={dep} />)
+      const token = match[0]
+
+      if (token.startsWith('#')) {
+        const dep = token.slice(1)
+        parts.push(<DependencyBullet key={`${match.index}-dep-${dep}`} dependency={dep} />)
+      } else if (token.startsWith('@')) {
+        const path = token.slice(1)
+        // Try to find full metadata; fallback to minimal
+        const meta = index.byPath.get(path)
+        const name = meta?.name || (path.split('/').pop() || path)
+        const type = meta?.type || inferFileType(path)
+        const size = meta?.size ?? undefined
+        const mtime = meta?.mtime ?? undefined
+        parts.push(
+          <span key={`${match.index}-file-${path}`} className="inline-flex align-middle">
+            <FileDisplay
+              file={{ name, path, type, size, mtime }}
+              density="compact"
+              interactive
+              showPreviewOnHover
+            />
+          </span>
+        )
+      }
+
       lastIndex = regex.lastIndex
     }
+
     const textAfter = content.slice(lastIndex)
     if (textAfter) parts.push(textAfter)
     return parts
@@ -230,7 +260,7 @@ export default function ChatView() {
               <div className="text-[18px] font-medium">Start chatting about the project</div>
               <div className="text-[13px] mt-2">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
               <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
-                Attach markdown or text files to give context. Mention docs with /, and reference tasks/features with #.
+                Attach markdown or text files to give context. Mention files with @, and reference tasks/features with #.
               </div>
             </div>
           ) : (
@@ -311,7 +341,7 @@ export default function ChatView() {
                   onInput={autoSizeTextarea}
                   onKeyDown={handleTextareaKeyDown}
                   className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
-                  placeholder={isConfigured ? 'Type your message…' : 'You can compose a message and reference docs (#) even before configuring. Configure LLM to send.'}
+                  placeholder={isConfigured ? 'Type your message…' : 'You can compose a message and reference files (@) and tasks/features (#) even before configuring. Configure LLM to send.'}
                   rows={1}
                   aria-label="Message input"
                   // Allow composing and referencing even if LLM isn't configured; only sending is gated
@@ -334,7 +364,7 @@ export default function ChatView() {
                       style={{ display: 'none' }}
                       onChange={handleFileUpload}
                     />
-                    <span className="hidden sm:inline">Tip: Use / for docs • Use # for tasks and features</span>
+                    <span className="hidden sm:inline">Tip: Use @ for files • Use # for tasks and features</span>
                   </div>
                   <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
                 </div>
