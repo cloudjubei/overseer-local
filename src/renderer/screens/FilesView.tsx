@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useFilesIndex from '../hooks/useFilesIndex';
-import { FileMeta } from '../services/fileService';
+import { FileMeta } from '../services/filesService';
 import { MarkdownEditor } from '../components/files/MarkdownEditor';
 import { BasicFileViewer } from '../components/files/BasicFileViewer';
 import { goToFile, parseFileFromHash } from '../navigation/filesNavigation';

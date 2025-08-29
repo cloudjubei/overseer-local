@@ -4,7 +4,7 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { useLLMConfig } from '../hooks/useLLMConfig';
-import { chatService } from '../services/chatService';
+import { chatsService } from '../services/chatsService';
 import type { LLMConfig, LLMProviderType } from '../types';
 import { useToast } from '../components/ui/Toast';
 
@@ -108,7 +108,7 @@ export default function SettingsLLMConfigModal({ mode, id, onRequestClose }: { m
     setModelsLoading(true);
     setModelsError(null);
     try {
-      const models = await chatService.listModels(form);
+      const models = await chatsService.listModels(form);
       setAvailableModels(models);
       if (!models.includes(form.model)) {
         setForm(prev => ({ ...prev, model: '' }));

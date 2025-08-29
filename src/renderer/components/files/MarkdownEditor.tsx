@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FileMeta } from '../../services/fileService';
-import fileService from '../../services/fileService';
+import { FileMeta } from '../../services/filesService';
+import fileService from '../../services/filesService';
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges';
 
 function escapeHtml(str: string) {

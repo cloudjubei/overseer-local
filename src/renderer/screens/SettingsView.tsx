@@ -5,7 +5,7 @@ import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { notificationsService } from '../services/notificationsService';
-import { chatService } from '../services/chatService';
+import { chatsService } from '../services/chatsService';
 import type { LLMConfig, LLMProviderType } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import { useToast } from '../components/ui/Toast';

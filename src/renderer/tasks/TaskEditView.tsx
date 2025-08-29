@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
-import { taskService } from '../services/taskService'
+import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useNavigator } from '../navigation/Navigator'
@@ -24,7 +24,7 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
     let cancelled = false
     ;(async () => {
       try {
-        const idx = await taskService.getSnapshot()
+        const idx = await tasksService.getSnapshot()
         const task = idx.tasksById[taskId]
         if (!task) throw new Error('Task not found')
         if (!cancelled) setInitialValues(task)
@@ -43,7 +43,7 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
   const onSubmit = async (values: TaskFormValues) => {
     setSubmitting(true)
     try {
-      const res = await taskService.updateTask(taskId, values)
+      const res = await tasksService.updateTask(taskId, values)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Task updated successfully', variant: 'success' })
       doClose()
@@ -59,7 +59,7 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
     setShowDeleteConfirm(false)
     setDeleting(true)
     try {
-      const res = await taskService.deleteTask(taskId)
+      const res = await tasksService.deleteTask(taskId)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Task deleted successfully', variant: 'success' })
       navigator.navigateView('Home')

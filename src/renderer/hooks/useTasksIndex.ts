@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { taskService } from '../services/taskService';
+import { tasksService } from '../services/tasksService';
 import type { TasksIndexSnapshot } from '../../types/external';
 
 export function useTasksIndex() {
@@ -7,11 +7,11 @@ export function useTasksIndex() {
 
   useEffect(() => {
     const load = async () => {
-      const idx = await taskService.getSnapshot();
+      const idx = await tasksService.getSnapshot();
       setIndex(idx);
     };
     load();
-    const unsubscribe = taskService.onUpdate(setIndex);
+    const unsubscribe = tasksService.onUpdate(setIndex);
     return unsubscribe;
   }, []);
 

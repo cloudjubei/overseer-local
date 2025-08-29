@@ -20,7 +20,7 @@ function inferTypeByExt(name) {
   return undefined;
 }
 
-export class FileManager {
+export class FilesManager {
   constructor(projectRoot, window, options = {}) {
     this.projectRoot = projectRoot;
     this.filesDir = options.filesDir || projectRoot;
@@ -80,12 +80,12 @@ export class FileManager {
         if (!projectId || projectId === 'main') {
           targetDir = this.getDefaultFilesDir();
         } else {
-          // Try to resolve via projectManager if available to avoid tight coupling
+          // Try to resolve via projectsManager if available to avoid tight coupling
           let snap;
           try {
-            // dynamic import to avoid cycles; managers should export projectManager
+            // dynamic import to avoid cycles; managers should export projectsManager
             const mgrs = await import('../managers.js');
-            snap = mgrs?.projectManager?.getIndex?.();
+            snap = mgrs?.projectsManager?.getIndex?.();
           } catch (_) {
             snap = null;
           }
@@ -340,7 +340,7 @@ export class FileManager {
       const payload = JSON.stringify(this.index.files);
       await this.window.webContents.executeJavaScript(`(function(){ try { window.filesIndex = ${payload}; } catch(e){} })();`);
     } catch (e) {
-      console.warn('FileManager: failed to publish to renderer', e);
+      console.warn('FilesManager: failed to publish to renderer', e);
     }
   }
 

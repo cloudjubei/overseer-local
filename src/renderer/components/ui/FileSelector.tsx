@@ -2,7 +2,7 @@ import React from 'react';
 import { Input } from './Input';
 import FileDisplay from './FileDisplay';
 import { useFilesIndex } from '../../hooks/useFilesIndex';
-import { inferFileType } from '../../services/fileService';
+import { inferFileType } from '../../services/filesService';
 
 export type FileSelectorProps = {
   selected?: string[]; // relPaths

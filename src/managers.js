@@ -1,30 +1,30 @@
 import { TaskManager } from './tasks/manager';
-import { FileManager } from './files/manager';
-import { ProjectManager } from './projects/manager';
-import { ChatManager } from './chat/manager';
+import { FilesManager } from './files/manager';
+import { ProjectsManager } from './projects/manager';
+import { ChatsManager } from './chat/manager';
 import { NotificationManager } from './notifications/manager';
 
 export let taskManager;
-export let fileManager;
-export let projectManager;
-export let chatManager;
+export let filesManager;
+export let projectsManager;
+export let chatsManager;
 export let notificationManager;
 
 export async function initManagers(projectRoot, mainWindow) {
-  projectManager = new ProjectManager(projectRoot, mainWindow);
+  projectsManager = new ProjectsManager(projectRoot, mainWindow);
   taskManager = new TaskManager(projectRoot, mainWindow);
-  fileManager = new FileManager(projectRoot, mainWindow);
-  chatManager = new ChatManager(projectRoot, mainWindow);
+  filesManager = new FilesManager(projectRoot, mainWindow);
+  chatsManager = new ChatsManager(projectRoot, mainWindow);
   notificationManager = new NotificationManager(projectRoot, mainWindow);
 
-  projectManager.init();
+  projectsManager.init();
   taskManager.init();
-  await fileManager.init();
-  await chatManager.init();
+  await filesManager.init();
+  await chatsManager.init();
   await notificationManager.init();
 }
 export function stopManagers() {
   if (taskManager) { taskManager.stopWatching(); }
-  if (fileManager) { fileManager.stopWatching(); }
-  if (projectManager) { projectManager.stopWatching(); }
+  if (filesManager) { filesManager.stopWatching(); }
+  if (projectsManager) { projectsManager.stopWatching(); }
 }

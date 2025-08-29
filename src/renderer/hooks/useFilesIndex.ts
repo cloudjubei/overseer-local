@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import fileService, { FilesIndex, FileMeta } from '../services/fileService';
+import fileService, { FilesIndex, FileMeta } from '../services/filesService';
 
 export function useFilesIndex() {
   const [index, setIndex] = useState<FilesIndex>({ files: [], byPath: new Map(), updatedAt: 0 });

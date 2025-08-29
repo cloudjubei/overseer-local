@@ -88,7 +88,7 @@ export class TaskManager {
                     let snap;
                     try {
                         const mgrs = await import('../managers.js');
-                        snap = mgrs?.projectManager?.getIndex?.();
+                        snap = mgrs?.projectsManager?.getIndex?.();
                     } catch (_) {
                         snap = null;
                     }

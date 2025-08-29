@@ -2,9 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ipcMain } from 'electron';
 import { LLMProvider } from './LLMProvider';
-import { taskManager, fileManager } from '../managers';
+import { taskManager, filesManager } from '../managers';
 
-export class ChatManager {
+export class ChatsManager {
   constructor(projectRoot, window) {
     this.projectRoot = projectRoot;
     this.window = window;
@@ -103,7 +103,7 @@ export class ChatManager {
   }
 
   _getFilesBaseDir() { //TODO: remove
-    return fileManager.filesDir || this.projectRoot;
+    return filesManager.filesDir || this.projectRoot;
   }
 
   async getCompletion({ messages, config }) {
@@ -169,7 +169,7 @@ export class ChatManager {
       const toolsMap = {
         list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById), // TODO expose proper API
         get_task_reference: async () => null, // TODO implement reference resolver
-        list_files: async () => JSON.stringify(fileManager.getIndex()),
+        list_files: async () => JSON.stringify(filesManager.getIndex()),
         read_file: async ({ path: relPath }) => {
           try {
             const base = this._getFilesBaseDir();
@@ -188,8 +188,8 @@ export class ChatManager {
               fs.mkdirSync(dir, { recursive: true });
             }
             fs.writeFileSync(absPath, content, 'utf8');
-            if (typeof fileManager.buildIndex === 'function') {
-              fileManager.buildIndex();
+            if (typeof filesManager.buildIndex === 'function') {
+              filesManager.buildIndex();
             }
             return `File ${name} created successfully.`;
           } catch (error) {

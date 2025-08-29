@@ -1,6 +1,6 @@
 import React from 'react';
 import Tooltip from './Tooltip';
-import { fileService, inferFileType } from '../../services/fileService';
+import { fileService, inferFileType } from '../../services/filesService';
 import { goToFile } from '../../navigation/filesNavigation';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';

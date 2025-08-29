@@ -6,7 +6,7 @@ export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & P
 
 const resolver = DependencyResolver.getInstance();
 
-export type TaskService = {
+export type TasksService = {
   getSnapshot: () => Promise<TasksIndexSnapshot>
   onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
   addTask: (task: TaskCreateInput) => Promise<ServiceResult>
@@ -28,7 +28,7 @@ export type TaskService = {
   search: (query: string, limit?: number) => { ref: string; kind: ReferenceKind; title: string; subtitle?: string }[]
 }
 
-export const taskService: TaskService = {
+export const tasksService: TasksService = {
   getSnapshot: () => window.tasksIndex.getSnapshot(),
   onUpdate: (callback) => window.tasksIndex.onUpdate(callback),
   addTask: (task) => window.tasksIndex.addTask(task),
@@ -39,7 +39,7 @@ export const taskService: TaskService = {
   deleteFeature: (taskId, featureId) => window.tasksIndex.deleteFeature(taskId, featureId),
   reorderFeatures: (taskId, payload) => window.tasksIndex.reorderFeatures(taskId, payload),
   reorderTasks: (payload) => window.tasksIndex.reorderTasks(payload),
-  initDependencies: (project) => resolver.init(taskService, project),
+  initDependencies: (project) => resolver.init(tasksService, project),
   setProject: (project) => resolver.setProject(project),
   onDependenciesUpdate: (cb) => resolver.onUpdate(cb),
   getDependencyIndex: () => resolver.getIndex(),

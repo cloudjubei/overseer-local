@@ -1,4 +1,4 @@
-import { FilesIndex } from 'src/renderer/services/fileService';
+import { FilesIndex } from 'src/renderer/services/filesService';
 import type { Task, Feature, ProjectSpec } from './tasks'
 import { ProjectsService } from 'src/renderer/services/projectsService';
 
@@ -27,7 +27,7 @@ export interface TasksIndexAPI {
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
   setContext: (projectId: string) => Promise<void>
 }
-export interface FileManagerAPI {
+export interface FilesManagerAPI {
   get: () => Promise<FilesIndex>
   subscribe: (callback: (callback: FilesIndex) => void) => () => void
   readFile: (relPath: string, encoding: string) => Promise<string>
@@ -43,7 +43,7 @@ export interface FileManagerAPI {
 declare global {
   interface Window {
     tasksIndex: TasksIndexAPI
-    fileManager: FileManagerAPI
+    filesManager: FilesManagerAPI
     chat: any
     notifications: any
     projectsService: ProjectsService

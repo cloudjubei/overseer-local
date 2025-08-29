@@ -110,11 +110,11 @@ This document describes how files and directories are organised in this reposito
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - src/files/
-  - manager.js: FileManager responsible for indexing files, watching for changes, publishing updates to renderer, and now registering all 'files:*' IPC handlers (index, context, read/write, delete, rename, upload, ensure-dir). This keeps main.js thin.
+  - manager.js: FilesManager responsible for indexing files, watching for changes, publishing updates to renderer, and now registering all 'files:*' IPC handlers (index, context, read/write, delete, rename, upload, ensure-dir). This keeps main.js thin.
 - src/chat/
-  - manager.js: ChatManager now also registers all 'chat:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context). This further thins main.js.
+  - manager.js: ChatsManager now also registers all 'chat:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context). This further thins main.js.
 - src/projects/
-  - manager.js: ProjectManager owns indexing and watching project configs and now registers all 'projects:*' IPC handlers (projects-index:get, projects:create, projects:update, projects:delete). This keeps main.js thin.
+  - manager.js: ProjectsManager owns indexing and watching project configs and now registers all 'projects:*' IPC handlers (projects-index:get, projects:create, projects:update, projects:delete). This keeps main.js thin.
 - src/tasks/
   - manager.js: TaskManager owns indexing of tasks and features, file watching, and now registers all 'tasks:*' IPC handlers (tasks-index:get, tasks:set-context, tasks:update, tasks-feature:update/add/delete, tasks-features:reorder, tasks:add, tasks:delete, tasks:reorder). This keeps main.js thin.
 - src/notifications/

@@ -10,7 +10,7 @@ import DependencyBullet from '../components/tasks/DependencyBullet'
 import type { ChatMessage } from '../types'
 import FileDisplay from '../components/ui/FileDisplay'
 import useFilesIndex from '../hooks/useFilesIndex'
-import { inferFileType } from '../services/fileService'
+import { inferFileType } from '../services/filesService'
 
 export default function ChatView() {
   const {

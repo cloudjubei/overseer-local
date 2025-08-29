@@ -1,6 +1,6 @@
 import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
 import type { TasksIndexSnapshot } from '../../types/external'
-import { TaskService } from './taskService';
+import { TasksService } from './tasksService';
 
 export type ReferenceKind = 'task' | 'feature';
 
@@ -76,7 +76,7 @@ export default class DependencyResolver {
     for (const cb of this.listeners) cb(this.index);
   }
 
-  async init(taskService: TaskService, project?: ProjectSpec | null) {
+  async init(taskService: TasksService, project?: ProjectSpec | null) {
     // Attach tasks index subscription and build our index once
     if (!this.unsubscribeTasks) {
       this.unsubscribeTasks = taskService.onUpdate((snapshot) => {

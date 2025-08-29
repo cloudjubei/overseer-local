@@ -1,6 +1,6 @@
 import { ChatMessage, LLMConfig } from '../types';
 
-export type ChatService = {
+export type ChatsService = {
   getCompletion: (messages: ChatMessage[], config: LLMConfig) => Promise<ChatMessage>;
   listModels: (config: LLMConfig) => Promise<string[]>;
   list: () => Promise<string[]>;
@@ -11,7 +11,7 @@ export type ChatService = {
   setContext: (projectId: 'main' | string) => Promise<string[]>;
 };
 
-export const chatService: ChatService = {
+export const chatsService: ChatsService = {
   getCompletion: (messages, config) => window.chat.getCompletion(messages, config),
   listModels: (config) => window.chat.listModels(config),
   list: () => window.chat.list(),

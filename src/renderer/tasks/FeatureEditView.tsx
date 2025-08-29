@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
-import { taskService } from '../services/taskService'
+import { tasksService } from '../services/tasksService'
 import { projectsService } from '../services/projectsService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
@@ -27,7 +27,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
     let cancelled = false
     ;(async () => {
       try {
-        const idx = await taskService.getSnapshot()
+        const idx = await tasksService.getSnapshot()
         const loadedTask: Task | undefined = idx.tasksById[taskId]
         if (!loadedTask) throw new Error('Task not found')
         const feature = loadedTask.features.find((f: Feature) => f.id === featureId)
@@ -52,7 +52,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
   const onSubmit = async (values: FeatureFormValues) => {
     setSubmitting(true)
     try {
-      const res = await taskService.updateFeature(taskId, featureId, values)
+      const res = await tasksService.updateFeature(taskId, featureId, values)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
       doClose()
@@ -72,9 +72,9 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
       const dependents = task.features.filter(f => f.dependencies?.includes(featureId) ?? false)
       for (const dep of dependents) {
         const newDeps = dep.dependencies.filter(d => d !== featureId)
-        await taskService.updateFeature(taskId, dep.id, { dependencies: newDeps })
+        await tasksService.updateFeature(taskId, dep.id, { dependencies: newDeps })
       }
-      const res = await taskService.deleteFeature(taskId, featureId)
+      const res = await tasksService.deleteFeature(taskId, featureId)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
       doClose()
