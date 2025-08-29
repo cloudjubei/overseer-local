@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FileMeta } from '../../services/filesService';
 import filesService from '../../services/filesService';
+import { useUnsavedChanges } from '../../navigation/UnsavedChanges';
 
 function escapeHtml(str: string) {
   return str
@@ -39,6 +40,9 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [saveSupported, setSaveSupported] = useState<boolean>(false);
   const [dirty, setDirty] = useState<boolean>(false);
+
+  // Register unsaved changes checker for this editor instance
+  useUnsavedChanges(`markdown:${file.path}`, () => dirty);
 
   useEffect(() => {
     let mounted = true;

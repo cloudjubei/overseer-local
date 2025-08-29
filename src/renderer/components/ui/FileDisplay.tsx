@@ -1,6 +1,7 @@
 import React from 'react';
 import Tooltip from './Tooltip';
 import { filesService, inferFileType } from '../../services/filesService';
+import { goToFile } from '../../navigation/filesNavigation';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';
 
@@ -62,6 +63,10 @@ export interface FileDisplayProps {
    * Delay for showing the preview (ms)
    */
   previewDelayMs?: number;
+  /**
+   * If true (default), clicking an interactive FileDisplay with no onClick handler navigates to the Files screen to view this file.
+   */
+  navigateOnClick?: boolean;
   /**
    * Data attributes passthrough
    */
@@ -147,7 +152,7 @@ function useFilePreviewContent(file: FileMeta) {
     setState({ loading: true, error: null, text: null });
     (async () => {
       try {
-        const content = await filesService.getFile(relPath);
+        const content = await (filesService as any).readFileText?.(relPath) ?? await (filesService as any).getFile?.(relPath);
         if (cancelled) return;
         if (typeof content === 'string') {
           const snippet = content.slice(0, MAX_PREVIEW_CHARS);
@@ -211,6 +216,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
   showPreviewOnHover = false,
   previewPlacement = 'right',
   previewDelayMs = 300,
+  navigateOnClick = true,
   ...dataAttrs
 }) => {
   const sizeLabel = formatBytes(file.size ?? null);
@@ -228,11 +234,21 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
   const tabIndex = interactive ? 0 : undefined;
   const aria = ariaLabel || `${file.name}${meta ? `, ${meta}` : ''}`;
 
+  async function handleNavigate(e: React.MouseEvent) {
+    if (!file.path) return;
+    await goToFile(file.path);
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (!interactive || !onClick) return;
+    if (!interactive) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClick(file, (e as unknown) as React.MouseEvent);
+      if (onClick) {
+        onClick(file, (e as unknown) as React.MouseEvent);
+      } else if (navigateOnClick) {
+        // synthesize click navigation
+        handleNavigate((e as unknown) as React.MouseEvent);
+      }
     }
   }
 
@@ -252,7 +268,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
       tabIndex={tabIndex}
       aria-label={aria}
       onKeyDown={handleKeyDown}
-      onClick={interactive && onClick ? (e) => onClick(file, e) : undefined}
+      onClick={interactive ? (onClick ? (e) => onClick(file, e) : (navigateOnClick ? handleNavigate : undefined)) : undefined}
       {...(dataAttrs as Record<string, string>)}
     >
       <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>

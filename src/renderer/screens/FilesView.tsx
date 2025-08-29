@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useFilesIndex from '../hooks/useFilesIndex';
 import { FileMeta } from '../services/filesService';
 import { MarkdownEditor } from '../components/files/MarkdownEditor';
 import { BasicFileViewer } from '../components/files/BasicFileViewer';
+import { goToFile, parseFileFromHash } from '../navigation/filesNavigation';
 
 function isMarkdown(f: FileMeta) {
   return f.ext === 'md' || f.ext === 'mdx';
@@ -11,7 +12,31 @@ function isMarkdown(f: FileMeta) {
 export const FilesView: React.FC = () => {
   const { files, loading, refresh } = useFilesIndex();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const selectedFile = useMemo(() => files.find(f => f.path === selectedPath) || files[0], [files, selectedPath]);
+
+  // Sync selection with URL hash (#files/<path>)
+  useEffect(() => {
+    function syncFromHash() {
+      const p = parseFileFromHash();
+      setSelectedPath(p);
+    }
+    window.addEventListener('hashchange', syncFromHash);
+    syncFromHash();
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, []);
+
+  useEffect(() => {
+    // If no hash-specified file and files available, keep current or fallback to first
+    if (!selectedPath && files.length > 0) {
+      // Do not mutate hash silently; just hold local state fallback to display first file
+    }
+  }, [selectedPath, files]);
+
+  const selectedFile = useMemo(() => {
+    if (!files.length) return undefined;
+    const sp = selectedPath;
+    if (sp) return files.find((f) => f.path === sp) || files[0];
+    return files[0];
+  }, [files, selectedPath]);
 
   return (
     <div className="files-view" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', height: '100%' }}>
@@ -30,7 +55,7 @@ export const FilesView: React.FC = () => {
               {files.map((f) => (
                 <li key={f.path}>
                   <button
-                    onClick={() => setSelectedPath(f.path)}
+                    onClick={() => goToFile(f.path)}
                     className="file-list-item"
                     style={{
                       display: 'flex', alignItems: 'center', gap: 8, width: '100%',

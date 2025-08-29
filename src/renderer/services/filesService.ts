@@ -225,7 +225,24 @@ export function guessLanguageFromExt(ext?: string): string | undefined {
   }
 }
 
+export function inferFileType(pathOrName: string): string {
+  const i = pathOrName.lastIndexOf('.');
+  if (i > 0 && i < pathOrName.length - 1) return pathOrName.slice(i + 1).toLowerCase();
+  return 'unknown';
+}
+
 export default {
+  getIndex,
+  refreshIndex,
+  subscribe,
+  isLikelyText,
+  readFileText,
+  readFileBinary,
+  guessLanguageFromExt,
+};
+
+// Named exports for convenience in existing import sites
+export const filesService = {
   getIndex,
   refreshIndex,
   subscribe,

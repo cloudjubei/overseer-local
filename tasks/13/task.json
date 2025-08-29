@@ -60,7 +60,7 @@
     },
     {
       "id": "13.7",
-      "status": "-",
+      "status": "+",
       "title": "Add file navigation with unsaved changes handling",
       "description": "Implement navigation from FileDisplay components to the full File view in the Files screen. Add logic to detect when a user has unsaved changes (in edit/create modes) and show an alert before navigating away. This should work from file selectors, chat references, and any other places where files are displayed.",
       "plan": "",
