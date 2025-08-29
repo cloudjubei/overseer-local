@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Task, Feature, Status } from 'src/types/tasks'
+import type { Status } from 'src/types/tasks'
 import StatusControl from './tasks/StatusControl'
 import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
@@ -48,9 +48,6 @@ export function FeatureForm({
   const [error, setError] = useState<string | null>(null)
   const [depError, setDepError] = useState<string | null>(null)
   const [showSelector, setShowSelector] = useState(false)
-  const [dragDepIndex, setDragDepIndex] = useState<number | null>(null)
-  const [dropDepIndex, setDropDepIndex] = useState<number | null>(null)
-  const [dropDepPos, setDropDepPos] = useState<'before' | 'after' | null>(null)
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
@@ -117,31 +114,8 @@ export function FeatureForm({
     }
   }
 
-  function clearDepDnd() {
-    setDragDepIndex(null)
-    setDropDepIndex(null)
-    setDropDepPos(null)
-  }
-
-  function computeDropForDep(e: React.DragEvent<HTMLElement>, idx: number) {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const offsetY = e.clientY - rect.top
-    let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
-    if (dragDepIndex != null && (idx === dragDepIndex || (idx === dragDepIndex - 1 && pos === 'after') || (idx === dragDepIndex + 1 && pos === 'before'))) {
-      pos = null
-    }
-    setDropDepIndex(idx)
-    setDropDepPos(pos)
-  }
-
-  function handleDepDrop() {
-    if (dragDepIndex == null || dropDepIndex == null || dropDepPos == null) return
-    const newDeps = [...dependencies]
-    const [moved] = newDeps.splice(dragDepIndex, 1)
-    const insertAt = dropDepPos === 'before' ? dropDepIndex : dropDepIndex + 1
-    newDeps.splice(insertAt, 0, moved)
-    setDependencies(newDeps)
-    clearDepDnd()
+  function removeDependencyAt(idx: number) {
+    setDependencies((deps) => deps.filter((_, i) => i !== idx))
   }
 
   const depErrorId = depError ? 'feature-deps-error' : undefined
@@ -215,12 +189,9 @@ export function FeatureForm({
 
         <div className="flex flex-col gap-1">
           <label htmlFor="feature-dependencies" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
-          <ul
+          <div
             id="feature-dependencies"
-            className="dependencies-list border rounded-md min-h-[4rem] p-2 space-y-1 overflow-y-auto max-h-64"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDepDrop}
-            onDragEnd={clearDepDnd}
+            className="chips-grid border rounded-md min-h-[3rem] p-2"
             aria-invalid={!!depError}
             aria-describedby={depErrorId}
             style={{
@@ -229,39 +200,33 @@ export function FeatureForm({
             }}
           >
             {dependencies.map((dep, idx) => {
-              const isDrag = idx === dragDepIndex
-              const isDropBefore = dropDepIndex === idx && dropDepPos === 'before'
-              const isDropAfter = dropDepIndex === idx && dropDepPos === 'after'
+              const resolved = dependencyResolver.resolveRef(dep as string)
+              const kindClass = !('code' in resolved) ? (resolved.kind === 'feature' ? 'feature' : 'task') : ''
+              const missingClass = 'code' in resolved ? 'chip--missing' : ''
               return (
-                <React.Fragment key={idx}>
-                  {isDropBefore && <div className="drop-indicator" />}
-                  <div
-                    className={`dep-row flex items-center justify-between p-2 rounded bg-neutral-100 dark:bg-neutral-700 ${isDrag ? 'is-dragging opacity-50' : ''}`}
-                    draggable
-                    onDragStart={() => setDragDepIndex(idx)}
-                    onDragOver={(e) => computeDropForDep(e, idx)}
+                <div key={`${dep}-${idx}`} className={`chip ${kindClass} ${missingClass}`} title={`#${dep}`}>
+                  <span>#{dep}</span>
+                  <button
+                    type="button"
+                    className="chip__close"
+                    aria-label={`Remove dependency #${dep}`}
+                    onClick={() => removeDependencyAt(idx)}
                   >
-                    <span>{dep}</span>
-                    <button
-                      type="button"
-                      onClick={() => setDependencies(dependencies.filter((_, i) => i !== idx))}
-                      className="text-sm text-red-500"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  {isDropAfter && <div className="drop-indicator" />}
-                </React.Fragment>
+                    ×
+                  </button>
+                </div>
               )
             })}
-          </ul>
-          <button
-            type="button"
-            onClick={() => setShowSelector(true)}
-            className="btn-secondary mt-2 self-start"
-          >
-            Add Dependency
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowSelector(true)}
+              className="chip chip--ok"
+              title="Add dependency"
+            >
+              <span>Add</span>
+              <span aria-hidden="true">+</span>
+            </button>
+          </div>
           {depError && (
             <div id={depErrorId} className="text-xs" style={{ color: 'var(--status-stuck-bg)' }}>
               {depError}
