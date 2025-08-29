@@ -12,7 +12,8 @@ export function useDocsAutocomplete(params: {
   const [matches, setMatches] = useState<string[]>([]);
   const [mentionStart, setMentionStart] = useState<number | null>(null);
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
-  const handlersRef = useRef<{ handleEvent: () => void } | null>(null);
+  const [caretPos, setCaretPos] = useState<number>(0);
+
 
   function getCursorCoordinates(textarea: HTMLTextAreaElement, pos: number) {
     const mirror = mirrorRef.current;
@@ -59,14 +60,13 @@ export function useDocsAutocomplete(params: {
       setMatches(filtered);
       setMentionStart(start);
       if (filtered.length > 0) {
+        // Position the suggestion list ABOVE the textarea, aligned to caret X
         const textarea = textareaRef.current!;
         const coords = getCursorCoordinates(textarea, pos);
         const textareaRect = textarea.getBoundingClientRect();
-        const style = window.getComputedStyle(textarea);
-        const lineHeight = parseFloat(style.lineHeight) || 20;
         const cursorLeft = textareaRect.left + coords.x;
-        const cursorTop = textareaRect.top + coords.y + lineHeight;
-        setPosition({ left: cursorLeft, top: cursorTop });
+        const topAboveTextarea = textareaRect.top + window.scrollY - 8; // 8px gap above input
+        setPosition({ left: cursorLeft, top: topAboveTextarea });
         setIsOpen(true);
         return;
       }
@@ -81,7 +81,7 @@ export function useDocsAutocomplete(params: {
     const currentPos = textarea.selectionStart;
     const before = currentText.slice(0, mentionStart);
     const after = currentText.slice(currentPos);
-    const newText = `${before}@${path}${after}`;
+    const newText = `${before}@${path} ${after}`;
     setInput(newText);
     const newPos = before.length + 1 + path.length;
     setTimeout(() => {
@@ -93,29 +93,29 @@ export function useDocsAutocomplete(params: {
   };
 
   useEffect(() => {
+    const handleSelectionChange = () => {
+      const ta = textareaRef.current;
+      if (!ta) return;
+      if (document.activeElement === ta) {
+        try {
+          setCaretPos(ta.selectionStart ?? 0);
+        } catch {
+          // ignore
+        }
+      }
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, [textareaRef]);
+
+  // Compute suggestions purely from the controlled input and current caret position
+  useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
-    const handleInputEvent = () => {
-      const pos = textarea.selectionStart;
-      const text = textarea.value;
-      checkForMention(text, pos);
-    };
-
-    handlersRef.current = { handleEvent: handleInputEvent };
-
-    textarea.addEventListener('input', handleInputEvent);
-    textarea.addEventListener('keyup', handleInputEvent);
-    textarea.addEventListener('keydown', handleInputEvent);
-    textarea.addEventListener('click', handleInputEvent);
-
-    return () => {
-      textarea.removeEventListener('input', handleInputEvent);
-      textarea.removeEventListener('keyup', handleInputEvent);
-      textarea.removeEventListener('keydown', handleInputEvent);
-      textarea.removeEventListener('click', handleInputEvent);
-    };
-  }, [docsList, textareaRef.current]);
+    // Ensure caretPos reflects current state when input changes
+    const pos = textarea.selectionStart ?? caretPos;
+    checkForMention(input, pos);
+  }, [input, matches, caretPos]);
 
   return { isOpen, matches, position, onSelect };
 }

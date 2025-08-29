@@ -32,6 +32,7 @@ export function useReferencesAutocomplete(params: {
   const [matches, setMatches] = useState<RefItem[]>([]);
   const [mentionStart, setMentionStart] = useState<number | null>(null);
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+  const [caretPos, setCaretPos] = useState<number>(0);
 
   function getCursorCoordinates(textarea: HTMLTextAreaElement, pos: number) {
     const mirror = mirrorRef.current;
@@ -91,11 +92,13 @@ export function useReferencesAutocomplete(params: {
   };
 
   const checkForMention = (text: string, pos: number) => {
+    // Determine the current word starting point
     let start = pos;
     while (start > 0 && !isBoundaryChar(text[start - 1])) {
       start--;
     }
     const word = text.slice(start, pos);
+
     if (word.startsWith('#')) {
       const query = word.slice(1).toLowerCase();
       const filtered = references.filter(
@@ -104,18 +107,17 @@ export function useReferencesAutocomplete(params: {
       setMatches(filtered);
       setMentionStart(start);
 
-      // Position the suggestion list near the caret
+      // Position the suggestion list ABOVE the textarea, aligned to caret X
       const textarea = textareaRef.current!;
       const coords = getCursorCoordinates(textarea, pos);
       const textareaRect = textarea.getBoundingClientRect();
-      const style = window.getComputedStyle(textarea);
-      const lineHeight = parseFloat(style.lineHeight) || 20;
       const cursorLeft = textareaRect.left + window.scrollX + coords.x;
-      const cursorTop = textareaRect.top + window.scrollY + coords.y + lineHeight;
-      setPosition({ left: cursorLeft, top: cursorTop });
+      const topAboveTextarea = textareaRect.top + window.scrollY - 8; // 8px gap above input
+      setPosition({ left: cursorLeft, top: topAboveTextarea });
       setIsOpen(true);
       return;
     }
+
     setIsOpen(false);
     setMentionStart(null);
   };
@@ -138,35 +140,32 @@ export function useReferencesAutocomplete(params: {
     setMentionStart(null);
   };
 
-  // React to text/caret changes to trigger detection; avoid 'keydown' to not interfere with typing
+  // Track caret position via selectionchange, independent of keystroke handling
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const ta = textareaRef.current;
+      if (!ta) return;
+      if (document.activeElement === ta) {
+        try {
+          setCaretPos(ta.selectionStart ?? 0);
+        } catch {
+          // ignore
+        }
+      }
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, [textareaRef]);
+
+  // Compute suggestions purely from the controlled input and current caret position
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
-    const handleInputEvent = () => {
-      const pos = textarea.selectionStart;
-      const text = textarea.value;
-      checkForMention(text, pos);
-    };
-
-    textarea.addEventListener('input', handleInputEvent);
-    textarea.addEventListener('keyup', handleInputEvent);
-    textarea.addEventListener('click', handleInputEvent);
-
-    return () => {
-      textarea.removeEventListener('input', handleInputEvent);
-      textarea.removeEventListener('keyup', handleInputEvent);
-      textarea.removeEventListener('click', handleInputEvent);
-    };
-  }, [references, textareaRef]);
-
-  // Also run whenever controlled input state changes (e.g., programmatic updates)
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    checkForMention(input, textarea.selectionStart);
+    // Ensure caretPos reflects current state when input changes
+    const pos = textarea.selectionStart ?? caretPos;
+    checkForMention(input, pos);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, references]);
+  }, [input, references, caretPos]);
 
   return { isOpen, matches, position, onSelect };
 }
