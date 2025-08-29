@@ -36,9 +36,25 @@ export class ChatManager {
 
   async getCompletion({ messages, config }) {
     try {
-      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file. You can create new files using create_file (use .md if it is a markdown note).' };
+      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
       let currentMessages = [systemPrompt, ...messages];
       const tools = [
+        {
+          type: 'function',
+          function: {
+            name: 'list_tasks',
+            description: 'List all indexed files in the current project scope',
+            parameters: { type: 'object', properties: {} },
+          },
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'get_task_reference',
+            description: 'Get a task or feature by its visual reference in the current project scope',
+            parameters: { type: 'object', properties: {} },
+          },
+        },
         {
           type: 'function',
           function: {
@@ -76,42 +92,11 @@ export class ChatManager {
             },
           },
         },
-        // Back-compat tool names used previously (docs)
-        {
-          type: 'function',
-          function: {
-            name: 'list_docs',
-            description: 'Alias of list_files',
-            parameters: { type: 'object', properties: {} },
-          },
-        },
-        {
-          type: 'function',
-          function: {
-            name: 'read_doc',
-            description: 'Alias of read_file',
-            parameters: {
-              type: 'object',
-              properties: { path: { type: 'string' } },
-              required: ['path'],
-            },
-          },
-        },
-        {
-          type: 'function',
-          function: {
-            name: 'create_doc',
-            description: 'Alias of create_file',
-            parameters: {
-              type: 'object',
-              properties: { name: { type: 'string' }, content: { type: 'string' } },
-              required: ['name', 'content'],
-            },
-          },
-        },
       ];
 
       const toolsMap = {
+        list_tasks: async () => JSON.stringify(this.tasksIndexer.getIndex().tasksById),
+        get_task_reference: async () => null, //TODO:
         list_files: async () => JSON.stringify(this.filesIndexer.getIndex()),
         read_file: async ({ path: relPath }) => {
           try {
