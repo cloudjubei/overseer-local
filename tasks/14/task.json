@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "14.1",
-      "status": "-",
+      "status": "?",
       "title": "Update Task and Feature type definitions to use UUIDs",
       "description": "Modify the TypeScript type definitions for Task and Feature to replace the numeric 'id' field with a UUID string field. Update related types and interfaces that reference these IDs throughout the codebase, including dependency reference formats.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: Timeout Error: XaiException - litellm.Timeout: Connection timed out after 600.0 seconds."
     },
     {
       "id": "14.2",
