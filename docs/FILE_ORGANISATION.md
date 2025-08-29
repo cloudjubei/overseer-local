@@ -109,6 +109,7 @@ This document describes how files and directories are organised in this reposito
     - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
+- src/managers.js: Exports shared manager instances for cross-manager references.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).

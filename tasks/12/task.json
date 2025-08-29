@@ -95,7 +95,7 @@
     },
     {
       "id": "12.8",
-      "status": "-",
+      "status": "+",
       "title": "ChatManager shouldn't be using getIndex but the other methods directly from other managers",
       "description": "If possible - managers should reference each other via import not directly passed in the constructor",
       "plan": "",

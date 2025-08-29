@@ -2,21 +2,14 @@ import { app, BrowserWindow, ipcMain, Notification } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
-import { TaskManager }  from './tasks/manager';
-import { FileManager } from './files/manager';
-import { ProjectManager } from './projects/manager';
-import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
 import { registerScreenshotService } from './capture/screenshotService';
+import { initManagers, taskManager, fileManager, projectManager, chatManager } from './managers';
 
 if (started) {
   app.quit();
 }
 let mainWindow;
-let taskManager;
-let fileManager;
-let projectManager;
-let chatManager;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -43,14 +36,7 @@ app.whenReady().then(async () => {
 
   const projectRoot = app.getAppPath();
 
-  projectManager = new ProjectManager(projectRoot, mainWindow);
-  taskManager = new TaskManager(projectRoot, mainWindow);
-  fileManager = new FileManager(projectRoot, mainWindow);
-  chatManager = new ChatManager(projectRoot, taskManager, fileManager);
-
-  projectManager.init();
-  taskManager.init();
-  await fileManager.init();
+  await initManagers(projectRoot, mainWindow);
   
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
