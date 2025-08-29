@@ -27,7 +27,7 @@ function resolveTasksDir(projectRoot) {
     return candidates[0] // initial default; we will correct in init if needed
 }
 
-export class TasksIndexer {
+export class TaskIndexer {
     constructor(projectRoot, window) {
         this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot);
         this.tasksDir = resolveTasksDir(this.projectRoot);

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, Notification } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
-import { TasksIndexer }  from './tasks/indexer';
+import { TaskIndexer }  from './tasks/indexer';
 import { DocsIndexer } from './docs/indexer';
 import { ProjectsIndexer } from './projects/indexer';
 import { ChatManager } from './chat/manager';
@@ -45,7 +45,7 @@ app.whenReady().then(() => {
   registerScreenshotService(() => mainWindow);
 
   const projectRoot = app.getAppPath();
-  indexer = new TasksIndexer(projectRoot, mainWindow);
+  indexer = new TaskIndexer(projectRoot, mainWindow);
   indexer.init();
 
   docsIndexer = new DocsIndexer(projectRoot, mainWindow);

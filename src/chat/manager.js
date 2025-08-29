@@ -3,9 +3,9 @@ import path from 'node:path';
 import { LLMProvider } from './LLMProvider';
 
 export class ChatManager {
-  constructor(projectRoot, tasksIndexer, docsIndexer) {
+  constructor(projectRoot, taskIndexer, docsIndexer) {
     this.projectRoot = projectRoot;
-    this.tasksIndexer = tasksIndexer;
+    this.taskIndexer = taskIndexer;
     this.docsIndexer = docsIndexer;
     this.chatsDir = path.join(projectRoot, 'chats');
     if (!fs.existsSync(this.chatsDir)) {
@@ -77,7 +77,7 @@ export class ChatManager {
         },
       ];
       const toolsMap = {
-        list_tasks: async () => JSON.stringify(this.tasksIndexer.getIndex().tasksById),
+        list_tasks: async () => JSON.stringify(this.taskIndexer.getIndex().tasksById),
         list_docs: async () => JSON.stringify(this.docsIndexer.getIndex().tree),
         read_doc: async ({ path }) => {
           try {

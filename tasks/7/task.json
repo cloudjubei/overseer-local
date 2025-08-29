@@ -336,7 +336,7 @@
       "id": "7.25",
       "status": "+",
       "title": "Tasks list dragging error",
-      "description": "When dragging an item in the Tasks list - it results an error of the TasksIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
+      "description": "When dragging an item in the Tasks list - it results an error of the TaskIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
