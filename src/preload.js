@@ -2,20 +2,20 @@ import { contextBridge, ipcRenderer } from 'electron';
 import IPC_HANDLER_KEYS from "./ipcHandlersKeys"
 
 const FILES_API = {
-  get: () => ipcRenderer.invoke('files-index:get'),
+  get: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_GET),
   subscribe: (callback) => {
     const listener = (_event, snapshot) => callback(snapshot);
-    ipcRenderer.on('files-index:update', listener);
-    return () => ipcRenderer.removeListener('files-index:update', listener);
+    ipcRenderer.on(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener);
   },
-  readFile: (relPath, encoding = 'utf8') => ipcRenderer.invoke('files:read', { relPath, encoding }),
-  readFileBinary: (relPath) => ipcRenderer.invoke('files:read-binary', { relPath }),
-  writeFile: (relPath, content, encoding = 'utf8') => ipcRenderer.invoke('files:write', { relPath, content, encoding }),
-  deleteFile: (relPath) => ipcRenderer.invoke('files:delete', { relPath }),
-  renameFile: (relPathSource, relPathTarget) => ipcRenderer.invoke('files:rename', { relPathSource, relPathTarget }),
-  ensureDir: (relPath) => ipcRenderer.invoke('files:ensure-dir', { relPath }),
-  upload: (name, content) => ipcRenderer.invoke('files:upload', { name, content }),
-  setContext: (projectId) => ipcRenderer.invoke('files:set-context', { projectId }),
+  readFile: (relPath, encoding = 'utf8') => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ, { relPath, encoding }),
+  readFileBinary: (relPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_BINARY, { relPath }),
+  writeFile: (relPath, content, encoding = 'utf8') => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_WRITE, { relPath, content, encoding }),
+  deleteFile: (relPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_DELETE, { relPath }),
+  renameFile: (relPathSource, relPathTarget) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_RENAME, { relPathSource, relPathTarget }),
+  ensureDir: (relPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_ENSURE_DIR, { relPath }),
+  upload: (name, content) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPLOAD, { name, content }),
+  setContext: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_SET_CONTEXT, { projectId }),
 };
 
 // Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
@@ -94,5 +94,8 @@ contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
+// New: Files service (pattern matches projectsService)
+contextBridge.exposeInMainWorld('filesService', FILES_API);
+// Back-compat alias (old code may use window.files)
 contextBridge.exposeInMainWorld('files', FILES_API);
 contextBridge.exposeInMainWorld('chatsService', CHATS_API);

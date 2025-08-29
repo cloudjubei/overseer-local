@@ -69,6 +69,8 @@ This document describes how files and directories are organised in this reposito
     - docsService.ts
     - tasksService.ts
     - notificationsService.ts
+    - projectsService.ts
+    - filesService.ts ← Thin proxy to preload’s isolated-world filesService
   - src/renderer/hooks/
     - useChats.ts
     - useDocsIndex.ts
@@ -110,13 +112,13 @@ This document describes how files and directories are organised in this reposito
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - src/files/
-  - manager.js: FilesManager responsible for indexing files, watching for changes, publishing updates to renderer, and now registering all 'files:*' IPC handlers (index, context, read/write, delete, rename, upload, ensure-dir). This keeps main.js thin.
+  - manager.js: FilesManager responsible for indexing files, watching for changes, and registering all 'files:*' IPC handlers using centralized IPC handler keys. Emits FILES_SUBSCRIBE on updates and also publishes window.filesIndex for legacy consumers.
 - src/chat/
-  - manager.js: ChatsManager registers all 'chats:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context) using centralized IPC handler keys. This mirrors the ProjectsManager pattern and keeps main.js thin.
+  - manager.js: ChatsManager registers all 'chats:*' IPC handlers (currently unchanged).
 - src/projects/
-  - manager.js: ProjectsManager owns indexing and watching project configs and now registers all 'projects:*' IPC handlers (projects-index:get, projects:create, projects:update, projects:delete). This keeps main.js thin.
+  - manager.js: ProjectsManager owns indexing and watching project configs and registers all 'projects:*' IPC handlers.
 - src/tasks/
-  - manager.js: TaskManager owns indexing of tasks and features, file watching, and now registers all 'tasks:*' IPC handlers (tasks-index:get, tasks:set-context, tasks:update, tasks-feature:update/add/delete, tasks-features:reorder, tasks:add, tasks:delete, tasks:reorder). This keeps main.js thin.
+  - manager.js: TaskManager owns indexing of tasks and features, file watching, and now registers all 'tasks:*' IPC handlers.
 - src/notifications/
   - manager.js: NotificationManager registers all 'notifications:*' IPC handlers (currently notifications:send-os and forwards notifications:clicked on OS notification click). This keeps main.js thin.
 - src/managers.js: Exports shared manager instances for cross-manager references.
@@ -149,23 +151,16 @@ Notes:
 
 ## Preview System
 - Dedicated component preview is provided via preview.html and the src/renderer/preview/ runtime.
-- In dev, open http://localhost:<vite-port>/preview.html with query params:
-  - id: module path under src (e.g., renderer/components/ui/Button.tsx#default)
-  - props: URL-encoded JSON of props (or base64 if props_b64=1)
-  - needs: Comma-separated dependency keys to include (in addition to defaults)
-  - theme: light | dark (applies data-theme on <html>)
 
 ## Preview Analyzer
 - Location: src/tools/preview/analyzer.js (library), scripts/preview-scan.js (CLI).
-- Purpose: Analyze components to determine preview compatibility, required providers/mocks, props requirements, and blockers.
 
 ## Agent Preview Tools
 - See docs/PREVIEW_TOOL.md and docs/PREVIEW_RUN_TOOL.md for usage details.
 
-## New Components/Services
-- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
-- src/files/manager.js: Registers all 'files:*' IPC handlers so main.js remains thin.
-- src/chat/manager.js: Now registers all 'chats:*' IPC handlers using centralized keys and is accessed via the renderer's chatsService (window.chatsService exposed from preload).
+## New/Updated Services
+- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext.
 - src/projects/manager.js: Registers all 'projects:*' IPC handlers so main.js remains thin.
-- src/tasks/manager.js: Registers all 'tasks:*' IPC handlers so main.js remains thin.
-- src/notifications/manager.js: Registers all 'notifications:*' IPC handlers so main.js remains thin.
+- src/files/manager.js: Now mirrors ProjectsManager pattern — registers all 'files:*' IPC handlers using centralized keys, emits FILES_SUBSCRIBE on changes, and preload exposes a filesService.
+- src/renderer/services/projectsService.ts: Projects service proxy available in isolated world via preload.
+- src/renderer/services/filesService.ts: Files service proxy (matches projectsService pattern) available in isolated world via preload as window.filesService (window.files kept as backward-compatible alias).

@@ -141,7 +141,7 @@
     },
     {
       "id": "12.11",
-      "status": "-",
+      "status": "+",
       "title": "FilesManager needs to follow ProjectsManager",
       "description": "ProjectsManager has been refactored - make FilesManager follow the same exact patterns. ProjectsManager is in the isolated world, and ProjectsService in rendeder - make sure files follow the same patterns.",
       "plan": "",

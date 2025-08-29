@@ -16,5 +16,17 @@ const IPC_HANDLER_KEYS = {
   CHATS_SAVE: "chats:save",
   CHATS_DELETE: "chats:delete",
   CHATS_SET_CONTEXT: "chats:set-context",
+
+  // Files (aligned with Projects pattern)
+  FILES_GET: "files:get",
+  FILES_SUBSCRIBE: "files:subscribe",
+  FILES_SET_CONTEXT: "files:set-context",
+  FILES_READ: "files:read",
+  FILES_READ_BINARY: "files:read-binary",
+  FILES_WRITE: "files:write",
+  FILES_DELETE: "files:delete",
+  FILES_RENAME: "files:rename",
+  FILES_ENSURE_DIR: "files:ensure-dir",
+  FILES_UPLOAD: "files:upload",
 }
 export default IPC_HANDLER_KEYS

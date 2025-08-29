@@ -3,6 +3,7 @@ import fssync from 'fs';
 import path from 'path';
 import chokidar from 'chokidar';
 import { ipcMain } from 'electron';
+import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
 // Simple mime-like inference by extension
 function inferTypeByExt(name) {
@@ -69,12 +70,11 @@ export class FilesManager {
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
-    // Files  index and context
-    ipcMain.handle('files-index:get', async () => {
-      return this.getIndex();
-    });
+    const handlers = {};
 
-    ipcMain.handle('files:set-context', async (event, { projectId }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_GET] = async () => this.getIndex();
+
+    handlers[IPC_HANDLER_KEYS.FILES_SET_CONTEXT] = async ({ projectId }) => {
       try {
         let targetDir;
         if (!projectId || projectId === 'main') {
@@ -83,7 +83,6 @@ export class FilesManager {
           // Try to resolve via projectsManager if available to avoid tight coupling
           let snap;
           try {
-            // dynamic import to avoid cycles; managers should export projectsManager
             const mgrs = await import('../managers.js');
             snap = mgrs?.projectsManager?.getIndex?.();
           } catch (_) {
@@ -105,31 +104,30 @@ export class FilesManager {
         console.error('Failed to set files context:', e);
         return this.getIndex();
       }
-    });
+    };
 
-    // Files content bridges
-    ipcMain.handle('files:read', async (event, { relPath, encoding }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_READ] = async ({ relPath, encoding }) => {
       const base = this.getBaseDir();
       const abs = path.join(base, relPath);
       const data = await fs.readFile(abs);
       if (encoding) return data.toString(encoding);
       return data;
-    });
+    };
 
-    ipcMain.handle('files:read-binary', async (event, { relPath }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_READ_BINARY] = async ({ relPath }) => {
       const base = this.getBaseDir();
       const abs = path.join(base, relPath);
       return await fs.readFile(abs);
-    });
+    };
 
-    ipcMain.handle('files:ensure-dir', async (event, { relPath }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_ENSURE_DIR] = async ({ relPath }) => {
       const base = this.getBaseDir();
       const abs = path.join(base, relPath);
       await fs.mkdir(abs, { recursive: true });
       return { ok: true };
-    });
+    };
 
-    ipcMain.handle('files:write', async (event, { relPath, content, encoding = 'utf8' }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_WRITE] = async ({ relPath, content, encoding = 'utf8' }) => {
       const base = this.getBaseDir();
       const abs = path.join(base, relPath);
       const dir = path.dirname(abs);
@@ -141,9 +139,9 @@ export class FilesManager {
       }
       await this.rebuildAndNotify('File written via IPC');
       return { ok: true };
-    });
+    };
 
-    ipcMain.handle('files:delete', async (event, { relPath }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_DELETE] = async ({ relPath }) => {
       const base = this.getBaseDir();
       const abs = path.join(base, relPath);
       try {
@@ -158,9 +156,9 @@ export class FilesManager {
       } catch (e) {
         return { ok: false, error: e?.message || String(e) };
       }
-    });
+    };
 
-    ipcMain.handle('files:rename', async (event, { relPathSource, relPathTarget }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_RENAME] = async ({ relPathSource, relPathTarget }) => {
       const base = this.getBaseDir();
       const absSource = path.join(base, relPathSource);
       const absTarget = path.join(base, relPathTarget);
@@ -169,9 +167,9 @@ export class FilesManager {
       await fs.rename(absSource, absTarget);
       await this.rebuildAndNotify('File renamed via IPC');
       return { ok: true };
-    });
+    };
 
-    ipcMain.handle('files:upload', async (event, { name, content }) => {
+    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD] = async ({ name, content }) => {
       const base = this.getBaseDir();
       const uploadsDir = path.join(base, 'uploads');
       await fs.mkdir(uploadsDir, { recursive: true });
@@ -183,7 +181,18 @@ export class FilesManager {
       }
       await this.rebuildAndNotify('File uploaded via IPC');
       return 'uploads/' + name;
-    });
+    };
+
+    for (const channel of Object.keys(handlers)) {
+      ipcMain.handle(channel, async (_event, args) => {
+        try {
+          return await handlers[channel](args || {});
+        } catch (e) {
+          console.error(`${channel} failed`, e);
+          return { ok: false, error: String(e?.message || e) };
+        }
+      });
+    }
 
     this._ipcBound = true;
   }
@@ -218,7 +227,7 @@ export class FilesManager {
       if (msg) console.log(msg);
       await this.buildIndex();
       if (this.window) {
-        this.window.webContents.send('files-index:update', this.index);
+        this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, this.index);
       }
       await this._publishToRenderer();
     };
@@ -243,7 +252,7 @@ export class FilesManager {
     await this.buildIndex();
     await this._startWatcher();
     if (this.window) {
-      this.window.webContents.send('files-index:update', this.getIndex());
+      this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, this.getIndex());
     }
     await this._publishToRenderer();
     return this.getIndex();
@@ -253,7 +262,7 @@ export class FilesManager {
     if (logMessage) console.log(logMessage);
     await this.buildIndex();
     if (this.window) {
-      this.window.webContents.send('files-index:update', this.getIndex());
+      this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, this.getIndex());
     }
     await this._publishToRenderer();
   }
