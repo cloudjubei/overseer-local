@@ -63,7 +63,18 @@ export function FeatureForm({
     }
   }, [combinedTitleRef])
 
-  const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
+  // Live dependency validation so errors show immediately in UI
+  useEffect(() => {
+    const contextRef = featureId ? `${featureId}` : null
+    const result = dependencyResolver.validateDependencyList(contextRef, dependencies)
+    if (!result.ok) {
+      setDepError(result.message ?? 'Invalid dependencies')
+    } else {
+      setDepError(null)
+    }
+  }, [dependencies, featureId])
+
+  const canSubmit = useMemo(() => title.trim().length > 0 && !submitting && !depError, [title, submitting, depError])
 
   function validate(): boolean {
     let valid = true
@@ -133,6 +144,8 @@ export function FeatureForm({
     clearDepDnd()
   }
 
+  const depErrorId = depError ? 'feature-deps-error' : undefined
+
   return (
     <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}>
       <div className="grid grid-cols-1 gap-3">
@@ -165,48 +178,19 @@ export function FeatureForm({
         ) : null}
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
-          <textarea
-            id="feature-description"
-            rows={4}
-            placeholder="Optional details or acceptance criteria"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-            style={{
-              background: 'var(--surface-raised)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)'
-            }}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="feature-rejection" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Reason</label>
-          <textarea
-            id="feature-rejection"
-            rows={3}
-            placeholder="Optional reason for rejection (leave blank to remove)"
-            value={rejection}
-            onChange={(e) => setRejection(e.target.value)}
-            disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-            style={{
-              background: 'var(--surface-raised)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)'
-            }}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
+          <label htmlFor="feature-dependencies" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
           <ul
+            id="feature-dependencies"
             className="dependencies-list border rounded-md min-h-[4rem] p-2 space-y-1 overflow-y-auto max-h-64"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDepDrop}
             onDragEnd={clearDepDnd}
+            aria-invalid={!!depError}
+            aria-describedby={depErrorId}
+            style={{
+              borderColor: depError ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+              background: 'var(--surface-raised)'
+            }}
           >
             {dependencies.map((dep, idx) => {
               const isDrag = idx === dragDepIndex
@@ -243,7 +227,7 @@ export function FeatureForm({
             Add Dependency
           </button>
           {depError && (
-            <div className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>
+            <div id={depErrorId} className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>
               {depError}
             </div>
           )}

@@ -155,7 +155,7 @@
     },
     {
       "id": "11.11",
-      "status": "-",
+      "status": "+",
       "title": "Dependency errors don't show in UI",
       "description": "In FeatureForm the dependency errors don't show",
       "plan": "",
