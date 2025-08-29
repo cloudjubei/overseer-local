@@ -51,7 +51,7 @@
     },
     {
       "id": "13.6",
-      "status": "-",
+      "status": "+",
       "title": "Implement different file viewers in Files screen",
       "description": "Update the Files screen to show all files but provide different viewing experiences: keep the nice editor for Markdown files, and implement a basic file viewer for other file types. The viewer should display file content when possible (text files, code files) or show file information when content viewing isn't feasible.",
       "plan": "",

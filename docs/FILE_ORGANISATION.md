@@ -38,6 +38,9 @@ This document describes how files and directories are organised in this reposito
     - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
     - FileDisplay.tsx: Reusable file summary display showing name, size, last modified date, and file type. Supports compact density and interactive states.
     - FileSelector.tsx: Reusable searchable file selector component using FileDisplay; supports multi-select and is used in Feature create/edit forms to populate the context field.
+  - src/renderer/components/files/: File-specific viewers and editors used within the Files screen.
+    - MarkdownEditor.tsx: Markdown editor with split edit/preview experience. Used when viewing .md/.mdx files.
+    - BasicFileViewer.tsx: Fallback/basic viewer for non-Markdown files. Displays text for text/code files and shows file information when content viewing isn’t feasible.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
@@ -60,7 +63,7 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/screens/
     - SidebarView.tsx
     - TasksView.tsx
-    - FilesView.tsx
+    - FilesView.tsx ← Files screen shows list of all files; uses MarkdownEditor for Markdown files and BasicFileViewer for other types.
     - ChatView.tsx ← Chat interface. Supports `#` typing to open a Task & Feature selector and renders references as dependency bullets.
     - SettingsView.tsx
     - NotificationsView.tsx
@@ -75,7 +78,7 @@ This document describes how files and directories are organised in this reposito
     - SettingsLLMConfigModal.tsx: Modal used for adding/editing LLM provider configurations. Opened via Navigator + ModalHost.
   - src/renderer/services/
     - chatService.ts
-    - filesService.ts ← New: Generic project file indexer service (replaces docsService). Indexes all files and exposes file metadata (name, size, mtime, type). Falls back to legacy window.docsIndex if window.filesIndex is unavailable.
+    - filesService.ts ← Generic project file indexer service + content access. Indexes all files and exposes file metadata (name, size, mtime, type). Falls back to legacy window.docsIndex if window.filesIndex is unavailable. Provides readFileText/readFileBinary best-effort bridges.
     - docsService.ts ← Compatibility shim re-exporting filesService (to ease migration).
     - tasksService.ts
     - notificationsService.ts
@@ -133,3 +136,7 @@ Notes:
 
 ## New Components/Services
 - src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
+- src/renderer/components/files/MarkdownEditor.tsx: Markdown editor for .md/.mdx with split view.
+- src/renderer/components/files/BasicFileViewer.tsx: Basic viewer for non-Markdown files, showing text when possible or file info fallback.
+- src/renderer/services/filesService.ts: File index and content access with graceful fallbacks.
+- src/renderer/hooks/useFilesIndex.ts: Hook to access the file index and groupings.
