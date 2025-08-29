@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
 import { validateProjectSpec } from './projects/validator';
 import { registerScreenshotService } from './capture/screenshotService';
-import { initManagers, taskManager, fileManager, projectManager, chatManager } from './managers';
+import { initManagers, taskManager, fileManager, projectManager } from './managers';
 
 if (started) {
   app.quit();
@@ -196,63 +196,6 @@ ipcMain.handle('projects:delete', async (event, { id }) => {
   } catch (e) {
     console.error('projects:delete failed', e);
     return { ok: false, error: String(e?.message || e) };
-  }
-});
-
-// Chat
-ipcMain.handle('chat:completion', async (event, {messages, config}) => {
-  return await chatManager.getCompletion({messages, config});
-});
-
-ipcMain.handle('chat:list-models', async (event, config) => {
-  try {
-    return await chatManager.listModels(config);
-  } catch (error) {
-    return { error: error.message };
-  }
-});
-
-ipcMain.handle('chat:list', () => {
-  return chatManager.listChats();
-});
-
-ipcMain.handle('chat:create', () => {
-  return chatManager.createChat();
-});
-
-ipcMain.handle('chat:load', (event, chatId) => {
-  return chatManager.loadChat(chatId);
-});
-
-ipcMain.handle('chat:save', (event, {chatId, messages}) => {
-  chatManager.saveChat(chatId, messages);
-});
-
-ipcMain.handle('chat:delete', (event, chatId) => {
-  chatManager.deleteChat(chatId);
-});
-
-ipcMain.handle('chat:set-context', async (event, { projectId }) => {
-  try {
-    let targetDir;
-    if (!projectId || projectId === 'main') {
-      targetDir = chatManager.getDefaultChatsDir();
-    } else {
-      const snap = projectManager.getIndex();
-      const spec = snap.projectsById?.[projectId];
-      const projectsDirAbs = path.resolve(snap.projectsDir);
-      if (spec) {
-        const projectAbs = path.resolve(projectsDirAbs, spec.path);
-        targetDir = path.join(projectAbs, 'chats');
-      } else {
-        targetDir = chatManager.getDefaultChatsDir();
-      }
-    }
-    chatManager.setChatsDir(targetDir);
-    return chatManager.listChats();
-  } catch (e) {
-    console.error('Failed to set chat context:', e);
-    return chatManager.listChats();
   }
 });
 

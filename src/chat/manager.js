@@ -1,15 +1,93 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { ipcMain } from 'electron';
 import { LLMProvider } from './LLMProvider';
 import { taskManager, fileManager } from '../managers';
 
 export class ChatManager {
-  constructor(projectRoot) {
+  constructor(projectRoot, window) {
     this.projectRoot = projectRoot;
+    this.window = window;
     this.chatsDir = path.join(projectRoot, 'chats');
     if (!fs.existsSync(this.chatsDir)) {
       fs.mkdirSync(this.chatsDir, { recursive: true });
     }
+    this._ipcBound = false;
+  }
+
+  async init() {
+    this._registerIpcHandlers();
+  }
+
+  _registerIpcHandlers() {
+    if (this._ipcBound) return;
+
+    ipcMain.handle('chat:completion', async (event, { messages, config }) => {
+      return await this.getCompletion({ messages, config });
+    });
+
+    ipcMain.handle('chat:list-models', async (event, config) => {
+      try {
+        return await this.listModels(config);
+      } catch (error) {
+        return { error: error.message };
+      }
+    });
+
+    ipcMain.handle('chat:list', () => {
+      return this.listChats();
+    });
+
+    ipcMain.handle('chat:create', () => {
+      return this.createChat();
+    });
+
+    ipcMain.handle('chat:load', (event, chatId) => {
+      return this.loadChat(chatId);
+    });
+
+    ipcMain.handle('chat:save', (event, { chatId, messages }) => {
+      this.saveChat(chatId, messages);
+      return { ok: true };
+    });
+
+    ipcMain.handle('chat:delete', (event, chatId) => {
+      this.deleteChat(chatId);
+      return { ok: true };
+    });
+
+    ipcMain.handle('chat:set-context', async (event, { projectId }) => {
+      try {
+        let targetDir;
+        if (!projectId || projectId === 'main') {
+          targetDir = this.getDefaultChatsDir();
+        } else {
+          let snap;
+          try {
+            const mgrs = await import('../managers.js');
+            snap = mgrs?.projectManager?.getIndex?.();
+          } catch (_) {
+            snap = null;
+          }
+          if (snap) {
+            const spec = snap.projectsById?.[projectId];
+            const projectsDirAbs = path.resolve(snap.projectsDir);
+            if (spec) {
+              const projectAbs = path.resolve(projectsDirAbs, spec.path);
+              targetDir = path.join(projectAbs, 'chats');
+            }
+          }
+          if (!targetDir) targetDir = this.getDefaultChatsDir();
+        }
+        this.setChatsDir(targetDir);
+        return this.listChats();
+      } catch (e) {
+        console.error('Failed to set chat context:', e);
+        return this.listChats();
+      }
+    });
+
+    this._ipcBound = true;
   }
 
   getDefaultChatsDir() {
@@ -89,11 +167,10 @@ export class ChatManager {
       ];
 
       const toolsMap = {
-        list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById), // taskManager.list_tasks //TODO
-        get_task_reference: async () => null, // taskManager.get_task_reference //TODO
-        list_files: async () => JSON.stringify(fileManager.getIndex()), // fileManager.list_files //TODO
+        list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById), // TODO expose proper API
+        get_task_reference: async () => null, // TODO implement reference resolver
+        list_files: async () => JSON.stringify(fileManager.getIndex()),
         read_file: async ({ path: relPath }) => {
-          // fileManager.read_file //TODO
           try {
             const base = this._getFilesBaseDir();
             const abs = path.join(base, relPath);
@@ -103,7 +180,6 @@ export class ChatManager {
           }
         },
         create_file: async ({ name, content }) => {
-          // fileManager.create_file //TODO
           try {
             const base = this._getFilesBaseDir();
             const absPath = path.join(base, name);
@@ -119,7 +195,7 @@ export class ChatManager {
           } catch (error) {
             return `Error creating file: ${error.message}`;
           }
-        }
+        },
       };
 
       const provider = new LLMProvider(config);
@@ -161,7 +237,6 @@ export class ChatManager {
         }
       }
     } catch (error) {
-      // Provide richer diagnostics to the UI
       const details = [
         error?.message,
         error?.response?.data ? JSON.stringify(error.response.data) : null,

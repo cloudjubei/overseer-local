@@ -111,6 +111,8 @@ This document describes how files and directories are organised in this reposito
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - src/files/
   - manager.js: FileManager responsible for indexing files, watching for changes, publishing updates to renderer, and now registering all 'files:*' IPC handlers (index, context, read/write, delete, rename, upload, ensure-dir). This keeps main.js thin.
+- src/chat/
+  - manager.js: ChatManager now also registers all 'chat:*' IPC handlers (completion, list-models, list/create/load/save/delete, set-context). This further thins main.js.
 - src/managers.js: Exports shared manager instances for cross-manager references.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
@@ -157,3 +159,4 @@ Notes:
 ## New Components/Services
 - src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
 - src/files/manager.js: Now also owns registration of all 'files:*' IPC handlers so main.js remains thin.
+- src/chat/manager.js: Now also owns registration of all 'chat:*' IPC handlers so main.js remains thin.

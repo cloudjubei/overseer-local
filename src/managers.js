@@ -12,9 +12,10 @@ export async function initManagers(projectRoot, mainWindow) {
   projectManager = new ProjectManager(projectRoot, mainWindow);
   taskManager = new TaskManager(projectRoot, mainWindow);
   fileManager = new FileManager(projectRoot, mainWindow);
-  chatManager = new ChatManager(projectRoot);
+  chatManager = new ChatManager(projectRoot, mainWindow);
 
   projectManager.init();
   taskManager.init();
   await fileManager.init();
+  await chatManager.init();
 }
