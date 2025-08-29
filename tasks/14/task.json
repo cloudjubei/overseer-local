@@ -3,5 +3,78 @@
   "status": "-",
   "title": "Refactor Task.id and Feature.id into UUIDs.",
   "description": "Write a script that will go over all the tasks and features and will update them with this new UUID.\nThis means that all dependency references must be updated to be matching:\n'{taskId}.{featureId}' or '{taskId}'\n\nThe display index of a feature is its position in the task's feature list.\nThe display index of a task in the main list must be stored - in the ProjectSpec.\nThere needs to be some way of looking these indices up quickly - as whenever a dependency is shown to the user it should shown as:\n'{taskIndex}.{featureIndex}' \n\nThe dependencyResolver should be updated accordingly too.",
-  "features": []
+  "features": [
+    {
+      "id": "14.1",
+      "status": "-",
+      "title": "Update Task and Feature type definitions to use UUIDs",
+      "description": "Modify the TypeScript type definitions for Task and Feature to replace the numeric 'id' field with a UUID string field. Update related types and interfaces that reference these IDs throughout the codebase, including dependency reference formats.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.2",
+      "status": "-",
+      "title": "Add display index tracking to ProjectSpec and Task types",
+      "description": "Extend the ProjectSpec type to include a mapping of task UUIDs to their display indices (position in the main task list). Add display index fields to track feature positions within tasks. This enables fast lookup of user-friendly indices for UI display.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.3",
+      "status": "-",
+      "title": "Create UUID migration script for existing tasks and features",
+      "description": "Write a migration script that reads all existing tasks and features, generates UUIDs for each, updates all dependency references from numeric format (taskId.featureId) to UUID format, and preserves display indices based on current ordering.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.4",
+      "status": "-",
+      "title": "Update dependencyResolver service for UUID-based dependencies",
+      "description": "Modify the dependencyResolver service to handle UUID-based task and feature references instead of numeric IDs. Update dependency resolution, validation, cycle detection, and reverse dependency tracking to work with UUID strings while maintaining the same API surface.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.5",
+      "status": "-",
+      "title": "Add index lookup utilities for display formatting",
+      "description": "Create utility functions that can quickly resolve UUID-based dependencies back to user-friendly display indices (e.g., '3.2' for the 2nd feature of the 3rd task). These utilities should use the display index mappings for fast lookups when rendering dependency references in the UI.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.6",
+      "status": "-",
+      "title": "Update dependency display components to use display indices",
+      "description": "Modify DependencyBullet, TaskSummaryCallout, FeatureSummaryCallout and other components that display dependency references to show user-friendly display indices ('3.2') instead of UUIDs, while maintaining UUID-based navigation and resolution internally.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.7",
+      "status": "-",
+      "title": "Update reference autocomplete and chat to handle UUID dependencies",
+      "description": "Modify useReferencesAutocomplete hook and ChatView components to work with UUID-based dependencies while still showing display indices to users. Ensure # references are properly resolved and inserted as UUID-based tokens that display as friendly indices.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14.8",
+      "status": "-",
+      "title": "Update tasks service and related hooks for UUID operations",
+      "description": "Modify tasksService, useTasksIndex, and related data management hooks to work with UUID-based task and feature identification while maintaining display index tracking and providing backwards compatibility during the transition.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ]
 }
