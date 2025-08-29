@@ -54,17 +54,6 @@ app.on('window-all-closed', () => {
   if (projectManager) { projectManager.stopWatching(); }
 });
 
-// Helper to resolve current files base directory
-function getFilesBaseDir() {
-  try {
-    const snap = fileManager.getIndex();
-    // Prefer explicit properties; fall back to manager internal or project root
-    return snap.filesDir || snap.root || fileManager.filesDir || app.getAppPath();
-  } catch {
-    return app.getAppPath();
-  }
-}
-
 // Tasks
 ipcMain.handle('tasks-index:get', async () => {
   return taskManager.getIndex();
@@ -127,101 +116,6 @@ ipcMain.handle('tasks:delete', async (event, { taskId }) => {
 ipcMain.handle('tasks:reorder', async (event, payload) => {
   return await taskManager.reorderTasks(payload);
 });
-
-
-// Files — unified index used by renderer FileService
-ipcMain.handle('files-index:get', async () => {
-  return fileManager.getIndex();
-});
-
-ipcMain.handle('files:set-context', async (event, { projectId }) => {
-  try {
-    let targetDir;
-    if (!projectId || projectId === 'main') {
-      targetDir = fileManager.getDefaultFilesDir();
-    } else {
-      const snap = projectManager.getIndex();
-      const spec = snap.projectsById?.[projectId];
-      const projectsDirAbs = path.resolve(snap.projectsDir);
-      if (spec) {
-        targetDir = path.resolve(projectsDirAbs, spec.path);
-      } else {
-        targetDir = fileManager.getDefaultFilesDir();
-      }
-    }
-    const res = await fileManager.setFilesDir(targetDir);
-    return res;
-  } catch (e) {
-    console.error('Failed to set files context:', e);
-    return fileManager.getIndex();
-  }
-});
-
-// Files content bridges for renderer FileService (optional best-effort bridges)
-ipcMain.handle('files:read', async (event, { relPath, encoding }) => {
-  const base = getFilesBaseDir();
-  const abs = path.join(base, relPath);
-  const data = fs.readFileSync(abs);
-  if (encoding) return data.toString(encoding);
-  return data; // Buffer will be serialized by Electron
-});
-
-ipcMain.handle('files:read-binary', async (event, { relPath }) => {
-  const base = getFilesBaseDir();
-  const abs = path.join(base, relPath);
-  return fs.readFileSync(abs);
-});
-
-ipcMain.handle('files:ensure-dir', async (event, { relPath }) => {
-  const base = getFilesBaseDir();
-  const abs = path.join(base, relPath);
-  if (!fs.existsSync(abs)) fs.mkdirSync(abs, { recursive: true });
-  return { ok: true };
-});
-
-ipcMain.handle('files:write', async (event, { relPath, content, encoding = 'utf8' }) => {
-  const base = getFilesBaseDir();
-  const abs = path.join(base, relPath);
-  const dir = path.dirname(abs);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(abs, content, encoding);
-  // ask manager to rebuild so UI updates (it may already watch and emit)
-  if (typeof fileManager.rebuildAndNotify === 'function') {
-    await fileManager.rebuildAndNotify('File written via IPC');
-  }
-  return { ok: true };
-});
-ipcMain.handle('files:delete', async (event, { relPath }) => {
-  const base = getFilesBaseDir();
-  const abs = path.join(base, relPath);
-  if (fs.lstatSync(abs).isDirectory()){
-    fs.rmdirSync(abs)
-  }else{
-    fs.unlinkSync(abs)
-  }
-});
-ipcMain.handle('files:rename', async (event, { relPathSource, relPathTarget }) => {
-  const base = getFilesBaseDir();
-  const absSource = path.join(base, relPathSource);
-  const absTarget = path.join(base, relPathTarget);
-  fs.renameSync(absSource, absTarget)
-});
-
-ipcMain.handle('files:upload', (event, { name, content }) => {
-  const base = getFilesBaseDir();
-  const uploadsDir = path.join(base, 'uploads');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  }
-  const filePath = path.join(uploadsDir, name);
-  fs.writeFileSync(filePath, content, 'utf8');
-  if (typeof fileManager.buildIndex === 'function') {
-    fileManager.buildIndex();
-  }
-  return 'uploads/' + name;
-});
-
-
 
 // Projects
 ipcMain.handle('projects-index:get', async () => {

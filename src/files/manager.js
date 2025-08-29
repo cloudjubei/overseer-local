@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
+import fssync from 'fs';
 import path from 'path';
 import chokidar from 'chokidar';
+import { ipcMain } from 'electron';
 
 // Simple mime-like inference by extension
 function inferTypeByExt(name) {
@@ -35,6 +37,9 @@ export class FileManager {
     };
 
     this.watcher = null;
+
+    // Whether IPC handlers are bound (to avoid double-binding on re-init)
+    this._ipcBound = false;
   }
 
   getIndex() {
@@ -45,10 +50,142 @@ export class FileManager {
     return this.projectRoot;
   }
 
+  getBaseDir() {
+    try {
+      const snap = this.getIndex();
+      return snap.filesDir || snap.root || this.filesDir || this.projectRoot;
+    } catch {
+      return this.filesDir || this.projectRoot;
+    }
+  }
+
   async init() {
     await this.buildIndex();
     await this._startWatcher();
     await this._publishToRenderer();
+    this._registerIpcHandlers();
+  }
+
+  _registerIpcHandlers() {
+    if (this._ipcBound) return;
+
+    // Files  index and context
+    ipcMain.handle('files-index:get', async () => {
+      return this.getIndex();
+    });
+
+    ipcMain.handle('files:set-context', async (event, { projectId }) => {
+      try {
+        let targetDir;
+        if (!projectId || projectId === 'main') {
+          targetDir = this.getDefaultFilesDir();
+        } else {
+          // Try to resolve via projectManager if available to avoid tight coupling
+          let snap;
+          try {
+            // dynamic import to avoid cycles; managers should export projectManager
+            const mgrs = await import('../managers.js');
+            snap = mgrs?.projectManager?.getIndex?.();
+          } catch (_) {
+            snap = null;
+          }
+          if (snap) {
+            const spec = snap.projectsById?.[projectId];
+            const projectsDirAbs = path.resolve(snap.projectsDir);
+            if (spec) {
+              const projectAbs = path.resolve(projectsDirAbs, spec.path);
+              targetDir = projectAbs;
+            }
+          }
+          if (!targetDir) targetDir = this.getDefaultFilesDir();
+        }
+        const res = await this.setFilesDir(targetDir);
+        return res;
+      } catch (e) {
+        console.error('Failed to set files context:', e);
+        return this.getIndex();
+      }
+    });
+
+    // Files content bridges
+    ipcMain.handle('files:read', async (event, { relPath, encoding }) => {
+      const base = this.getBaseDir();
+      const abs = path.join(base, relPath);
+      const data = await fs.readFile(abs);
+      if (encoding) return data.toString(encoding);
+      return data;
+    });
+
+    ipcMain.handle('files:read-binary', async (event, { relPath }) => {
+      const base = this.getBaseDir();
+      const abs = path.join(base, relPath);
+      return await fs.readFile(abs);
+    });
+
+    ipcMain.handle('files:ensure-dir', async (event, { relPath }) => {
+      const base = this.getBaseDir();
+      const abs = path.join(base, relPath);
+      await fs.mkdir(abs, { recursive: true });
+      return { ok: true };
+    });
+
+    ipcMain.handle('files:write', async (event, { relPath, content, encoding = 'utf8' }) => {
+      const base = this.getBaseDir();
+      const abs = path.join(base, relPath);
+      const dir = path.dirname(abs);
+      await fs.mkdir(dir, { recursive: true });
+      if (content instanceof Uint8Array || Buffer.isBuffer(content)) {
+        await fs.writeFile(abs, content);
+      } else {
+        await fs.writeFile(abs, content, { encoding });
+      }
+      await this.rebuildAndNotify('File written via IPC');
+      return { ok: true };
+    });
+
+    ipcMain.handle('files:delete', async (event, { relPath }) => {
+      const base = this.getBaseDir();
+      const abs = path.join(base, relPath);
+      try {
+        const st = await fs.lstat(abs);
+        if (st.isDirectory()) {
+          await fs.rm(abs, { recursive: true, force: true });
+        } else {
+          await fs.unlink(abs);
+        }
+        await this.rebuildAndNotify('File deleted via IPC');
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e?.message || String(e) };
+      }
+    });
+
+    ipcMain.handle('files:rename', async (event, { relPathSource, relPathTarget }) => {
+      const base = this.getBaseDir();
+      const absSource = path.join(base, relPathSource);
+      const absTarget = path.join(base, relPathTarget);
+      const targetDir = path.dirname(absTarget);
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.rename(absSource, absTarget);
+      await this.rebuildAndNotify('File renamed via IPC');
+      return { ok: true };
+    });
+
+    ipcMain.handle('files:upload', async (event, { name, content }) => {
+      const base = this.getBaseDir();
+      const uploadsDir = path.join(base, 'uploads');
+      await fs.mkdir(uploadsDir, { recursive: true });
+      const filePath = path.join(uploadsDir, name);
+      if (content instanceof Uint8Array || Buffer.isBuffer(content)) {
+        await fs.writeFile(filePath, content);
+      } else {
+        await fs.writeFile(filePath, content, { encoding: 'utf8' });
+      }
+      await this.rebuildAndNotify('File uploaded via IPC');
+      return 'uploads/' + name;
+    });
+
+    this._ipcBound = true;
   }
 
   async _startWatcher() {

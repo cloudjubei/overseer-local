@@ -109,7 +109,7 @@
     },
     {
       "id": "12.9",
-      "status": "-",
+      "status": "+",
       "title": "main.js needs to be thin",
       "description": "All the 'files' ipc handlers should be moved to the FileManager - they should be performing these actions, that's why they're there for.",
       "plan": "",
