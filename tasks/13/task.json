@@ -19,7 +19,10 @@
       "title": "FileService is the only interface for handling files across app",
       "description": "FileIndex needs to be only used by the FileService - all other places use FileService and never FileIndex directly.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/services/filesService.ts",
+
+      ],
       "acceptance": [],
       "dependencies": [
         "13.1"
@@ -59,6 +62,8 @@
       "description": "Rename the DocumentsView to FilesView and update all related navigation, routing, and references. Update the sidebar navigation to show 'Files' instead of 'Documents'. Ensure all existing functionality is preserved during the rename.",
       "plan": "",
       "context": [
+        "src/renderer/services/filesService.ts",
+        "src/renderer/screens/FilesView.tsx",
         "src/renderer/docs/DocumentsBrowserView.tsx"
       ],
       "acceptance": [],
