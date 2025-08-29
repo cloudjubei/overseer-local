@@ -24,7 +24,7 @@ export class ChatManager {
     return this.chatsDir;
   }
 
-  _getFilesBaseDir() {
+  _getFilesBaseDir() { //TODO: remove
     return fileManager.filesDir || this.projectRoot;
   }
 
@@ -89,10 +89,11 @@ export class ChatManager {
       ];
 
       const toolsMap = {
-        list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById),
-        get_task_reference: async () => null, //TODO:
-        list_files: async () => JSON.stringify(fileManager.getIndex()),
+        list_tasks: async () => JSON.stringify(taskManager.getIndex().tasksById), // taskManager.list_tasks //TODO
+        get_task_reference: async () => null, // taskManager.get_task_reference //TODO
+        list_files: async () => JSON.stringify(fileManager.getIndex()), // fileManager.list_files //TODO
         read_file: async ({ path: relPath }) => {
+          // fileManager.read_file //TODO
           try {
             const base = this._getFilesBaseDir();
             const abs = path.join(base, relPath);
@@ -102,6 +103,7 @@ export class ChatManager {
           }
         },
         create_file: async ({ name, content }) => {
+          // fileManager.create_file //TODO
           try {
             const base = this._getFilesBaseDir();
             const absPath = path.join(base, name);
@@ -117,15 +119,7 @@ export class ChatManager {
           } catch (error) {
             return `Error creating file: ${error.message}`;
           }
-        },
-        // Aliases for backward compatibility
-        list_docs: async () => JSON.stringify(fileManager.getIndex()),
-        read_doc: async ({ path: relPath }) => {
-          return await toolsMap.read_file({ path: relPath });
-        },
-        create_doc: async ({ name, content }) => {
-          return await toolsMap.create_file({ name, content });
-        },
+        }
       };
 
       const provider = new LLMProvider(config);
