@@ -9,49 +9,90 @@ export type TooltipProps = {
   disabled?: boolean;
 };
 
-function getAnchorRect(el: HTMLElement) {
-  const r = el.getBoundingClientRect();
-  return { top: r.top + window.scrollY, left: r.left + window.scrollX, width: r.width, height: r.height };
-}
-
 export default function Tooltip({ children, content, placement = 'right', delayMs = 200, disabled }: TooltipProps) {
   const [open, setOpen] = useState(false);
-  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const timerRef = useRef<number | null>(null);
   const anchorRef = useRef<HTMLElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const child = React.Children.only(children);
 
   useEffect(() => () => { if (timerRef.current) window.clearTimeout(timerRef.current); }, []);
 
   useLayoutEffect(() => {
-    if (!open || !anchorRef.current) return;
-    const a = anchorRef.current as HTMLElement;
-    const r = a.getBoundingClientRect();
-    const spacing = 8;
-    const tw = 260;
-    const th = 36;
-    let top = 0, left = 0;
-    switch (placement) {
-      case 'right':
-        top = r.top + window.scrollY + r.height / 2 - th / 2;
-        left = r.left + window.scrollX + r.width + spacing;
-        break;
-      case 'left':
-        top = r.top + window.scrollY + r.height / 2 - th / 2;
-        left = r.left + window.scrollX - spacing - tw;
-        break;
-      case 'top':
-        top = r.top + window.scrollY - spacing - th;
-        left = r.left + window.scrollX + r.width / 2 - tw / 2;
-        break;
-      case 'bottom':
-        top = r.top + window.scrollY + r.height + spacing;
-        left = r.left + window.scrollX + r.width / 2 - tw / 2;
-        break;
+    if (!open) {
+      setPosition(null);
+      return;
     }
-    setCoords({ top, left });
+    if (!anchorRef.current) return;
+    setPosition({ top: -9999, left: -9999 });
   }, [open, placement]);
+
+  useLayoutEffect(() => {
+    if (!open || !position || position.top !== -9999 || !tooltipRef.current || !anchorRef.current) return;
+
+    const tip = tooltipRef.current;
+    const tipRect = tip.getBoundingClientRect();
+    const anchor = anchorRef.current;
+    const anchorRect = anchor.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const spacing = 8;
+
+    const calcPos = (pl: string) => {
+      let t = 0, l = 0;
+      switch (pl) {
+        case 'right':
+          t = anchorRect.top + anchorRect.height / 2 - tipRect.height / 2;
+          l = anchorRect.right + spacing;
+          break;
+        case 'left':
+          t = anchorRect.top + anchorRect.height / 2 - tipRect.height / 2;
+          l = anchorRect.left - spacing - tipRect.width;
+          break;
+        case 'top':
+          t = anchorRect.top - spacing - tipRect.height;
+          l = anchorRect.left + anchorRect.width / 2 - tipRect.width / 2;
+          break;
+        case 'bottom':
+          t = anchorRect.bottom + spacing;
+          l = anchorRect.left + anchorRect.width / 2 - tipRect.width / 2;
+          break;
+      }
+      return { top: t, left: l };
+    };
+
+    const fits = (p: { top: number; left: number }) => {
+      return p.left >= 0 && p.top >= 0 && p.left + tipRect.width <= viewportWidth && p.top + tipRect.height <= viewportHeight;
+    };
+
+    let bestPlacement = placement;
+    let pos = calcPos(placement);
+
+    if (!fits(pos)) {
+      let opposite: string;
+      if (placement === 'right') opposite = 'left';
+      else if (placement === 'left') opposite = 'right';
+      else if (placement === 'top') opposite = 'bottom';
+      else opposite = 'top';
+
+      const oppPos = calcPos(opposite);
+      if (fits(oppPos)) {
+        bestPlacement = opposite;
+        pos = oppPos;
+      }
+    }
+
+    // Clamp to viewport
+    pos.top = Math.max(0, Math.min(pos.top, viewportHeight - tipRect.height));
+    pos.left = Math.max(0, Math.min(pos.left, viewportWidth - tipRect.width));
+
+    setPosition({
+      top: pos.top + window.pageYOffset,
+      left: pos.left + window.pageXOffset,
+    });
+  }, [open, position, placement]);
 
   const show = () => {
     if (disabled) return;
@@ -67,7 +108,6 @@ export default function Tooltip({ children, content, placement = 'right', delayM
     <>
       {React.cloneElement(child, {
         ref: (el: HTMLElement) => {
-          // merge ref if provided
           const anyChild: any = child as any;
           if (typeof anyChild.ref === 'function') anyChild.ref(el);
           else if (anyChild.ref) (anyChild.ref as any).current = el;
@@ -79,8 +119,8 @@ export default function Tooltip({ children, content, placement = 'right', delayM
         onBlur: (e: any) => { child.props.onBlur?.(e); hide(); },
         'aria-describedby': open ? 'tooltip' : undefined,
       })}
-      {open && coords && createPortal(
-        <div className="ui-tooltip" role="tooltip" style={{ top: coords.top, left: coords.left }}>
+      {open && position && createPortal(
+        <div className="ui-tooltip" role="tooltip" ref={tooltipRef} style={{ position: 'absolute', top: position.top, left: position.left }}>
           <div className="ui-tooltip__content">{content}</div>
         </div>,
         document.body

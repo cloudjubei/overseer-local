@@ -36,7 +36,7 @@
     },
     {
       "id": "12.4",
-      "status": "-",
+      "status": "+",
       "title": "The Tooltip for DependencyBullet should show close to the center of the screen",
       "description": "In many cases when the DependencyBullet is close to the right or bottom edge, the tooltip it shows gets cut off by the window end.\nWhenever the tooltip is close to an edge - it should offset in the opposite direction.",
       "plan": "",
