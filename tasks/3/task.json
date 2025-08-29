@@ -54,7 +54,7 @@
         "src/renderer/components/MarkdownRenderer.tsx"
       ],
       "acceptance": [],
-      "rejection": "when clicking a document - nothing shows"
+      "dependencies": []
     },
     {
       "id": "3.6",

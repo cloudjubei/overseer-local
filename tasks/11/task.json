@@ -121,7 +121,7 @@
     },
     {
       "id": "11.9",
-      "status": "-",
+      "status": "+",
       "title": "Create project-wide dependency resolution service",
       "description": "Implement a service that can resolve dependency references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
       "plan": "",
@@ -137,8 +137,7 @@
         "src/main.js"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Currently 'useDependencyResolver' is never used whereas it seems to be the only point where 'dependencyResolver.init' is called.\nWhere is a good place to call this?"
+      "dependencies": []
     },
     {
       "id": "11.10",

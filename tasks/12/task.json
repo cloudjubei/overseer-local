@@ -33,6 +33,26 @@
       "context": [],
       "acceptance": [],
       "dependencies": []
+    },
+    {
+      "id": "12.4",
+      "status": "-",
+      "title": "The Tooltip for DependencyBullet should show close to the center of the screen",
+      "description": "In many cases when the DependencyBullet is close to the right or bottom edge, the tooltip it shows gets cut off by the window end.\nWhenever the tooltip is close to an edge - it should offset in the opposite direction.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "12.5",
+      "status": "-",
+      "title": "DependencyBullet with remove should show nice icon",
+      "description": "When the DependencyBullet allows removal - it should show a nice crisp close icon (similar to an 'x'). It should also make sure that all the content within is centered.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
     }
   ]
 }

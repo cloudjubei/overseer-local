@@ -30,7 +30,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "rejection": "when trying to create a notification with notificationsService.create this error shows: Error occurred in handler for 'notifications:send-os': TypeError: require$$3$2.Notification.requestPermission is not a function"
+      "dependencies": []
     },
     {
       "id": "6.4",
@@ -50,7 +50,7 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "rejection": "When toggling the Enable Notifications in settings - it should request OS notification permissions."
+      "dependencies": []
     },
     {
       "id": "6.5",
