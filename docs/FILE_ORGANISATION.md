@@ -20,6 +20,7 @@ This document describes how files and directories are organised in this reposito
     - components/overlays.css: Command menu, help overlay.
     - components/cards.css: Task card.
     - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle.
+    - components/file-display.css: Styles for the reusable FileDisplay component (name, size, date, type). Used across selectors, chat references, and listings.
   - src/styles/layout/: Layout building blocks like sidebar/nav.
     - layout/nav.css: Sidebar and navigation styles.
   - src/styles/screens/: Screen-scoped styles that compose primitives/components.
@@ -35,6 +36,7 @@ This document describes how files and directories are organised in this reposito
     - Select.tsx, Input.tsx, Tooltip.tsx, etc.
     - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
     - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
+    - FileDisplay.tsx: Reusable file summary display showing name, size, last modified date, and file type. Supports compact density and interactive states.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).

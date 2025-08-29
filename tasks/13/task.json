@@ -15,7 +15,7 @@
     },
     {
       "id": "13.2",
-      "status": "-",
+      "status": "+",
       "title": "Create reusable file display component",
       "description": "Create a new reusable FileDisplay component that shows file information (name, size, last modification date, file type) in a consistent format. This component should be flexible enough to be used in different contexts like file selectors, chat references, and file listings. Place it in src/renderer/components/ui/ and style it appropriately.",
       "plan": "",

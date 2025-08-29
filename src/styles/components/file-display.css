@@ -1,0 +1,100 @@
+/* FileDisplay component styles */
+.file-display {
+  --fd-padding-y: 8px;
+  --fd-padding-x: 10px;
+  --fd-gap: 10px;
+  --fd-radius: var(--radii-md, 8px);
+  --fd-bg: var(--surface-1, #ffffff);
+  --fd-bg-hover: var(--surface-2, #f6f7f9);
+  --fd-border: var(--border-subtle, #e5e7eb);
+  --fd-shadow-hover: var(--elevation-1, 0 1px 2px rgba(0,0,0,0.06));
+
+  display: flex;
+  align-items: center;
+  padding: var(--fd-padding-y) var(--fd-padding-x);
+  gap: var(--fd-gap);
+  border: 1px solid var(--fd-border);
+  border-radius: var(--fd-radius);
+  background: var(--fd-bg);
+  min-width: 0;
+}
+
+.file-display.is-compact {
+  --fd-padding-y: 6px;
+  --fd-padding-x: 8px;
+  --fd-gap: 8px;
+  border-radius: calc(var(--fd-radius) - 2px);
+}
+
+.file-display.is-interactive {
+  cursor: pointer;
+  transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.file-display.is-interactive:hover {
+  background: var(--fd-bg-hover);
+  box-shadow: var(--fd-shadow-hover);
+}
+
+.file-display:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--focus-ring, #3b82f6);
+}
+
+.fd-leading {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.is-compact .fd-leading { width: 22px; height: 22px; }
+
+.fd-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 24px;
+}
+
+.is-compact .fd-icon { width: 16px; height: 20px; }
+
+.fd-content {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fd-name {
+  color: var(--text-strong, #1f2937);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.is-compact .fd-name { font-size: 13px; font-weight: 600; }
+
+.fd-meta {
+  color: var(--text-muted, #6b7280);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.is-compact .fd-meta { font-size: 11px; }
+
+.fd-trailing {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
