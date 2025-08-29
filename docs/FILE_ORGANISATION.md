@@ -118,7 +118,7 @@ This document describes how files and directories are organised in this reposito
 - src/projects/
   - manager.js: ProjectsManager owns indexing and watching project configs and registers all 'projects:*' IPC handlers.
 - src/tasks/
-  - manager.js: TaskManager owns indexing of tasks and features, file watching, and now registers all 'tasks:*' IPC handlers.
+  - manager.js: TaskManager owns indexing of tasks and features, file watching, and registers all 'tasks:*' IPC handlers using centralized keys. Broadcasts TASKS_SUBSCRIBE events on changes. This mirrors ProjectsManager.
 - src/notifications/
   - manager.js: NotificationManager registers all 'notifications:*' IPC handlers (currently notifications:send-os and forwards notifications:clicked on OS notification click). This keeps main.js thin.
 - src/managers.js: Exports shared manager instances for cross-manager references.
@@ -164,3 +164,5 @@ Notes:
 - src/files/manager.js: Now mirrors ProjectsManager pattern — registers all 'files:*' IPC handlers using centralized keys, emits FILES_SUBSCRIBE on changes, and preload exposes a filesService.
 - src/renderer/services/projectsService.ts: Projects service proxy available in isolated world via preload.
 - src/renderer/services/filesService.ts: Files service proxy (matches projectsService pattern) available in isolated world via preload as window.filesService (window.files kept as backward-compatible alias).
+- src/tasks/manager.js: Now mirrors ProjectsManager — registers all 'tasks:*' IPC handlers using centralized keys and emits TASKS_SUBSCRIBE on changes.
+- src/renderer/services/tasksService.ts: Tasks service proxy (matches projectsService pattern) available via preload as window.tasksService. Back-compat alias window.tasksIndex remains but should be considered deprecated.

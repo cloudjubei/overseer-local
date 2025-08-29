@@ -3,6 +3,7 @@ import path from 'path';
 import chokidar from 'chokidar';
 import { ipcMain } from 'electron';
 import { validateTask } from './validator';
+import IPC_HANDLER_KEYS from "../ipcHandlersKeys"
 
 function isNumericDir(name) {
     return /^\d+$/.test(name)
@@ -13,19 +14,13 @@ async function pathExists(p) {
 }
 
 function resolveTasksDir(projectRoot) {
-    // Ensure absolute and robust resolution to the real tasks directory in dev/packaged runs
     const candidates = []
     const root = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot)
     candidates.push(path.join(root, 'tasks'))
     candidates.push(path.resolve(root, '..', 'tasks'))
     candidates.push(path.resolve(root, '..', '..', 'tasks'))
     candidates.push(path.resolve(process.cwd(), 'tasks'))
-    for (const c of candidates) {
-        // Note: do not await here, we use sync-ish check pattern via fs.stat in init
-        // but we can return the first candidate; existence validated in init/buildIndex
-        // We still prefer the first that exists.
-    }
-    return candidates[0] // initial default; we will correct in init if needed
+    return candidates[0]
 }
 
 export class TaskManager {
@@ -52,7 +47,6 @@ export class TaskManager {
     }
 
     async init() {
-        // Ensure tasksDir resolves to an existing path; try common fallbacks
         const candidates = [
             path.join(this.projectRoot, 'tasks'),
             path.resolve(this.projectRoot, '..', 'tasks'),
@@ -75,11 +69,9 @@ export class TaskManager {
     _registerIpcHandlers() {
         if (this._ipcBound) return;
 
-        ipcMain.handle('tasks-index:get', async () => {
-            return this.getIndex();
-        });
-
-        ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
+        const handlers = {}
+        handlers[IPC_HANDLER_KEYS.TASKS_GET] = async () => this.getIndex()
+        handlers[IPC_HANDLER_KEYS.TASKS_SET_CONTEXT] = async ({ projectId }) => {
             try {
                 let targetDir;
                 if (!projectId || projectId === 'main') {
@@ -108,46 +100,32 @@ export class TaskManager {
                 console.error('Failed to set tasks context:', e);
                 return this.getIndex();
             }
-        });
+        }
+        handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ taskId, data }) => this.updateTask(taskId, data)
+        handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({ taskId, featureId, data }) => this.updateFeature(taskId, featureId, data)
+        handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_CREATE] = async ({ taskId, feature }) => this.addFeature(taskId, feature)
+        handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ taskId, featureId }) => this.deleteFeature(taskId, featureId)
+        handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ taskId, payload }) => this.reorderFeatures(taskId, payload)
+        handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ task }) => this.addTask(task)
+        handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ taskId }) => this.deleteTask(taskId)
+        handlers[IPC_HANDLER_KEYS.TASKS_REORDER] = async ({ payload }) => this.reorderTasks(payload)
 
-        ipcMain.handle('tasks:update', async (event, { taskId, data }) => {
-            return await this.updateTask(taskId, data);
-        });
-
-        ipcMain.handle('tasks-feature:update', async (event, { taskId, featureId, data }) => {
-            return await this.updateFeature(taskId, featureId, data);
-        });
-
-        ipcMain.handle('tasks-feature:add', async (event, { taskId, feature }) => {
-            return await this.addFeature(taskId, feature);
-        });
-
-        ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
-            return await this.deleteFeature(taskId, featureId);
-        });
-
-        ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
-            return await this.reorderFeatures(taskId, payload);
-        });
-
-        ipcMain.handle('tasks:add', async (event, task) => {
-            return await this.addTask(task);
-        });
-
-        ipcMain.handle('tasks:delete', async (event, { taskId }) => {
-            return await this.deleteTask(taskId);
-        });
-
-        ipcMain.handle('tasks:reorder', async (event, payload) => {
-            return await this.reorderTasks(payload);
-        });
+        for (const key of Object.keys(handlers)) {
+            ipcMain.handle(key, async (_event, args) => {
+                try {
+                    return await handlers[key](args || {})
+                } catch (e) {
+                    console.error(`${key} failed`, e);
+                    return { ok: false, error: String(e?.message || e) };
+                }
+            })
+        }
 
         this._ipcBound = true;
     }
 
     async _startWatcher() {
         if (!(await pathExists(this.tasksDir))) {
-            // No watcher if missing; still allow operations to rebuild later
             this.stopWatching();
             return;
         }
@@ -169,7 +147,6 @@ export class TaskManager {
             const next = path.isAbsolute(absDir) ? path.resolve(absDir) : path.resolve(absDir);
             const current = path.resolve(this.tasksDir || '');
             if (current === next) {
-                // No change
                 return this.getIndex();
             }
             this.stopWatching();
@@ -178,14 +155,13 @@ export class TaskManager {
             await this.buildIndex();
             await this._startWatcher();
             if (this.window) {
-                this.window.webContents.send('tasks-index:update', this.getIndex());
+                this.window.webContents.send(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE);
             }
             return this.getIndex();
         } catch (e) {
-            // Record error and propagate index anyway
             this.index.errors.push({ file: absDir, errors: [e.message || String(e)] });
             if (this.window) {
-                this.window.webContents.send('tasks-index:update', this.getIndex());
+                this.window.webContents.send(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE);
             }
             return this.getIndex();
         }
@@ -199,7 +175,7 @@ export class TaskManager {
         if (logMessage) console.log(logMessage);
         await this.buildIndex();
         if (this.window) {
-            this.window.webContents.send('tasks-index:update', this.getIndex());
+            this.window.webContents.send(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE);
         }
     }
 
@@ -424,22 +400,18 @@ export class TaskManager {
             if (payload.toIndex < 0 || payload.toIndex > features.length) throw new Error('Invalid target index');
             newOrder = [...currentOrder];
             const [moved] = newOrder.splice(fromIndex, 1);
-            // Allow moving to end (toIndex === length)
             if (payload.toIndex >= newOrder.length) newOrder.push(moved)
             else newOrder.splice(payload.toIndex, 0, moved);
         } else {
             throw new Error('Invalid payload for reorder');
         }
 
-        // Early exit if order did not change
         if (JSON.stringify(newOrder) === JSON.stringify(currentOrder)) {
             return { ok: true };
         }
 
-        // Reorder features
         const reorderedFeatures = newOrder.map(id => features.find(f => f.id === id));
 
-        // Renumber IDs
         const idUpdateMap = new Map();
         reorderedFeatures.forEach((feature, index) => {
             const newId = `${taskId}.${index + 1}`;
@@ -449,7 +421,6 @@ export class TaskManager {
             }
         });
 
-        // Update dependencies within this task
         reorderedFeatures.forEach(feature => {
             if (feature.dependencies) {
                 feature.dependencies = feature.dependencies.map(dep => idUpdateMap.has(dep) ? idUpdateMap.get(dep) : dep);
@@ -458,7 +429,6 @@ export class TaskManager {
 
         taskData.features = reorderedFeatures;
 
-        // Update dependencies across all tasks
         const tasksToUpdate = {};
         tasksToUpdate[String(taskId)] = taskData;
 
@@ -494,7 +464,6 @@ export class TaskManager {
             }
         }
 
-        // Write updated tasks
         await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
             const filePath = path.join(this.tasksDir, id, 'task.json');
             return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
@@ -525,7 +494,6 @@ export class TaskManager {
             if (payload.toIndex < 0 || payload.toIndex > currentOrder.length) throw new Error('Invalid target index');
             newOrder = [...currentOrder];
             const [moved] = newOrder.splice(fromIndex, 1);
-            // Allow moving to end (toIndex === length)
             if (payload.toIndex >= newOrder.length) newOrder.push(moved)
             else newOrder.splice(payload.toIndex, 0, moved);
         } else {
@@ -581,7 +549,6 @@ export class TaskManager {
             await fs.rename(oldDir, stagedDir);
         }
 
-        // Move from staging to new locations (by newId) and write updated task.json
         for (const [newIndex, oldId] of newOrder.entries()) {
             const newId = newIndex + 1;
             const stagedDir = path.join(stagingDir, String(oldId));
@@ -591,14 +558,12 @@ export class TaskManager {
             await fs.writeFile(newTaskPath, JSON.stringify(tasksData[oldId], null, 2), 'utf-8');
         }
 
-        // Attempt to remove the staging folder (should be empty)
         try { await fs.rmdir(stagingDir) } catch { /* ignore */ }
 
         await this.rebuildAndNotify('Tasks reordered, index rebuilt.');
         return { ok: true };
     }
 
-    // NEW: updateTask to support status/title/description/rejection updates from renderer (e.g., board drag)
     async updateTask(taskId, data) {
         console.log(`Updating task ${taskId}`);
         const taskDir = path.join(this.tasksDir, String(taskId));
@@ -611,11 +576,9 @@ export class TaskManager {
             throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
         }
 
-        // Do not allow changing ID via updateTask; everything else is merged
         const { id, features, ...patchable } = data || {};
         const next = { ...taskData, ...patchable };
 
-        // Validate before writing
         const { valid, errors } = validateTask(next);
         if (!valid) {
             throw new Error(`Invalid task update for ${taskId}: ${errors && errors.join ? errors.join(', ') : JSON.stringify(errors)}`);
@@ -638,7 +601,6 @@ export class TaskManager {
             throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
         }
 
-        // Do not allow changing ID via updateFeature; everything else is merged
         const { id, ...patchable } = data || {};
 
         const features = taskData.features.map(f => f.id == featureId ? { ...f, ...patchable } : f);

@@ -160,7 +160,7 @@
     },
     {
       "id": "12.12",
-      "status": "-",
+      "status": "+",
       "title": "TasksManager needs to follow ProjectsManager",
       "description": "ProjectsManager has been refactored - make TasksManager follow the same exact patterns. ProjectsManager is in the isolated world, and ProjectsService in rendeder - make sure tasks follow the same patterns.",
       "plan": "",

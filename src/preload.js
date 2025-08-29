@@ -18,28 +18,41 @@ const FILES_API = {
   setContext: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_SET_CONTEXT, { projectId }),
 };
 
-// Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
+// Tasks API now follows Projects pattern
 const TASKS_API = {
-  getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
-  onUpdate: (callback) => {
-    const listener = (_event, ...args) => callback(...args);
-    ipcRenderer.on('tasks-index:update', listener);
-    return () => ipcRenderer.removeListener('tasks-index:update', listener);
+  getSnapshot: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_GET),
+  subscribe: (callback) => {
+    const listener = (_event) => callback();
+    ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
   },
-  updateTask: (taskId, data) => ipcRenderer.invoke('tasks:update', { taskId, data }),
-  updateFeature: (taskId, featureId, data) => ipcRenderer.invoke('tasks-feature:update', { taskId, featureId, data }),
-  addFeature: (taskId, feature) => ipcRenderer.invoke('tasks-feature:add', { taskId, feature }),
-  deleteFeature: (taskId, featureId) => ipcRenderer.invoke('tasks-feature:delete', { taskId, featureId }),
-  reorderFeatures: (taskId, payload) => ipcRenderer.invoke('tasks-features:reorder', { taskId, payload }),
-  reorderTasks: (payload) => ipcRenderer.invoke('tasks:reorder', payload),
-  addTask: (task) => ipcRenderer.invoke('tasks:add', task),
-  deleteTask: (taskId) => ipcRenderer.invoke('tasks:delete', { taskId }),
+  // Back-compat signature for existing consumers expecting onUpdate(callback: (snapshot) => void)
+  onUpdate: (callback) => {
+    const listener = async () => {
+      try {
+        const snap = await TASKS_API.getSnapshot();
+        callback(snap);
+      } catch {
+        callback(undefined);
+      }
+    };
+    ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
+  },
+  updateTask: (taskId, data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_UPDATE, { taskId, data }),
+  updateFeature: (taskId, featureId, data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE, { taskId, featureId, data }),
+  addFeature: (taskId, feature) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_CREATE, { taskId, feature }),
+  deleteFeature: (taskId, featureId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE, { taskId, featureId }),
+  reorderFeatures: (taskId, payload) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER, { taskId, payload }),
+  reorderTasks: (payload) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REORDER, { payload }),
+  addTask: (task) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_CREATE, { task }),
+  deleteTask: (taskId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_DELETE, { taskId }),
   onSetTaskId: (callback) => {
     const listener = (_event, value) => callback(value);
     ipcRenderer.on('set-task-id', listener);
     return () => ipcRenderer.removeListener('set-task-id', listener);
   },
-  setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
+  setContext: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_SET_CONTEXT, { projectId }),
 };
 
 // Chats API exposed as a service (mirrors projectsService style)
@@ -65,15 +78,6 @@ const NOTIFICATIONS_API = {
 
 // Screenshot capture API
 const SCREENSHOT_API = {
-  /**
-   * Capture a screenshot.
-   * @param {Object} options
-   * @param {number} [options.windowId]
-   * @param {{x:number,y:number,width:number,height:number}} [options.rect]
-   * @param {'png'|'jpeg'} [options.format]
-   * @param {number} [options.quality] // 0-100 (jpeg only)
-   * @returns {{ok: boolean, dataUrl?: string, width?: number, height?: number, format?: string, error?: string}}
-   */
   capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
 };
 
@@ -90,12 +94,12 @@ const PROJECTS_API = {
   delete: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { id }),
 };
 
+contextBridge.exposeInMainWorld('tasksService', TASKS_API);
+// Back-compat alias (older code may use window.tasksIndex)
 contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
 contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
-// New: Files service (pattern matches projectsService)
 contextBridge.exposeInMainWorld('filesService', FILES_API);
-// Back-compat alias (old code may use window.files)
 contextBridge.exposeInMainWorld('files', FILES_API);
 contextBridge.exposeInMainWorld('chatsService', CHATS_API);

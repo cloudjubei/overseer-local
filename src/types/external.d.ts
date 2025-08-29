@@ -16,8 +16,6 @@ export interface TasksIndexSnapshot {
 export interface TasksIndexAPI {
   getSnapshot: () => Promise<TasksIndexSnapshot>
   onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
-  openTaskCreate: () => Promise<void>
-  openFeatureCreate: (taskId: number) => Promise<void>
   addTask: (task: Partial<any>) => Promise<ServiceResult>
   updateTask: (taskId: number, data: Partial<any>) => Promise<ServiceResult>
   deleteTask: (taskId: number) => Promise<ServiceResult>
@@ -27,16 +25,17 @@ export interface TasksIndexAPI {
   reorderFeatures: (taskId: number, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
   reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
   setContext: (projectId: string) => Promise<void>
+  subscribe?: (callback: () => void) => () => void
 }
 
 declare global {
   interface Window {
+    tasksService: TasksIndexAPI
     tasksIndex: TasksIndexAPI
     chatsService: ChatsService
     notifications: any
     projectsService: ProjectsService
     filesService: FilesService
-    // Back-compat alias
     files?: FilesService
   }
 }

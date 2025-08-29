@@ -29,16 +29,19 @@ export type TasksService = {
 }
 
 export const tasksService: TasksService = {
-  getSnapshot: () => window.tasksIndex.getSnapshot(),
-  onUpdate: (callback) => window.tasksIndex.onUpdate(callback),
-  addTask: (task) => window.tasksIndex.addTask(task),
-  updateTask: (taskId, data) => window.tasksIndex.updateTask(taskId, data),
-  deleteTask: (taskId) => window.tasksIndex.deleteTask(taskId),
-  addFeature: (taskId, feature) => window.tasksIndex.addFeature(taskId, feature),
-  updateFeature: (taskId, featureId, data) => window.tasksIndex.updateFeature(taskId, featureId, data),
-  deleteFeature: (taskId, featureId) => window.tasksIndex.deleteFeature(taskId, featureId),
-  reorderFeatures: (taskId, payload) => window.tasksIndex.reorderFeatures(taskId, payload),
-  reorderTasks: (payload) => window.tasksIndex.reorderTasks(payload),
+  getSnapshot: () => window.tasksService.getSnapshot(),
+  onUpdate: (callback) => window.tasksService.subscribe(async () => {
+    const snap = await window.tasksService.getSnapshot();
+    callback(snap);
+  }),
+  addTask: (task) => window.tasksService.addTask(task),
+  updateTask: (taskId, data) => window.tasksService.updateTask(taskId, data),
+  deleteTask: (taskId) => window.tasksService.deleteTask(taskId),
+  addFeature: (taskId, feature) => window.tasksService.addFeature(taskId, feature),
+  updateFeature: (taskId, featureId, data) => window.tasksService.updateFeature(taskId, featureId, data),
+  deleteFeature: (taskId, featureId) => window.tasksService.deleteFeature(taskId, featureId),
+  reorderFeatures: (taskId, payload) => window.tasksService.reorderFeatures(taskId, payload),
+  reorderTasks: (payload) => window.tasksService.reorderTasks(payload),
   initDependencies: (project) => resolver.init(tasksService, project),
   setProject: (project) => resolver.setProject(project),
   onDependenciesUpdate: (cb) => resolver.onUpdate(cb),
