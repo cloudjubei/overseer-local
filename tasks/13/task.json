@@ -64,10 +64,11 @@
       "context": [
         "src/renderer/services/filesService.ts",
         "src/renderer/screens/FilesView.tsx",
+        "src/renderer/screens/DocumentsView.tsx",
         "src/renderer/docs/DocumentsBrowserView.tsx"
       ],
       "acceptance": [],
-      "rejection": "The new FilesView doesn't display anything. The whole directory navigation seems to be gone from the code too.",
+      "rejection": "The new FilesView doesn't display anything. The whole directory navigation seems to be gone from the code too. DocumentsView is included as a reference as well as DocumentsBrowserView.",
       "dependencies": [
         "13.2"
       ]
