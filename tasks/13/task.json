@@ -24,7 +24,7 @@
     },
     {
       "id": "13.3",
-      "status": "-",
+      "status": "+",
       "title": "Implement file preview on hover",
       "description": "Add hover functionality to the FileDisplay component that shows a small preview card when hovering over a file. The preview should show additional file details and a small content preview when possible. Implement this using a tooltip-like overlay that appears on hover.",
       "plan": "",

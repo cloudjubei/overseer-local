@@ -1,4 +1,6 @@
 import React from 'react';
+import Tooltip from './Tooltip';
+import { filesService, inferFileType } from '../../services/filesService';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';
 
@@ -48,6 +50,18 @@ export interface FileDisplayProps {
    * Class name passthrough for external layout control
    */
   className?: string;
+  /**
+   * Show a small preview tooltip/card on hover.
+   */
+  showPreviewOnHover?: boolean;
+  /**
+   * Placement for the preview tooltip.
+   */
+  previewPlacement?: 'top' | 'bottom' | 'left' | 'right';
+  /**
+   * Delay for showing the preview (ms)
+   */
+  previewDelayMs?: number;
   /**
    * Data attributes passthrough
    */
@@ -111,6 +125,79 @@ function defaultIconFor(file: FileMeta): React.ReactNode {
   );
 }
 
+// Small preview card shown inside the tooltip overlay
+const textLikeTypes = new Set(['markdown', 'text', 'json', 'yaml', 'yml', 'javascript', 'typescript', 'styles', 'css', 'md', 'txt']);
+
+function isTextLike(file: FileMeta): boolean {
+  const t = (file.type || inferFileType(file.path || file.name)).toString().toLowerCase();
+  return textLikeTypes.has(t);
+}
+
+const MAX_PREVIEW_CHARS = 1200; // ~ a few paragraphs
+
+function useFilePreviewContent(file: FileMeta) {
+  const [state, setState] = React.useState<{ loading: boolean; error: string | null; text: string | null }>({ loading: false, error: null, text: null });
+  React.useEffect(() => {
+    let cancelled = false;
+    const relPath = file.path; // convention: FileMeta.path is relPath within project scope
+    if (!relPath || !isTextLike(file)) {
+      setState((s) => ({ ...s, loading: false, text: null, error: null }));
+      return;
+    }
+    setState({ loading: true, error: null, text: null });
+    (async () => {
+      try {
+        const content = await filesService.getFile(relPath);
+        if (cancelled) return;
+        if (typeof content === 'string') {
+          const snippet = content.slice(0, MAX_PREVIEW_CHARS);
+          setState({ loading: false, error: null, text: snippet });
+        } else {
+          setState({ loading: false, error: null, text: null });
+        }
+      } catch (e: any) {
+        if (!cancelled) setState({ loading: false, error: e?.message || String(e), text: null });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [file.path, file.type, file.name]);
+  return state;
+}
+
+function FilePreviewCard({ file }: { file: FileMeta }) {
+  const sizeLabel = formatBytes(file.size ?? null);
+  const dateLabel = formatDate(file.mtime ?? null);
+  const typeLabel = (file.type || inferFileType(file.path || file.name)).toString();
+  const relPath = file.path;
+  const { loading, error, text } = useFilePreviewContent(file);
+
+  return (
+    <div className="file-preview-card">
+      <div className="file-preview-card__header">
+        <div className="file-preview-card__title" title={relPath || file.name}>{file.name}</div>
+        <div className="file-preview-card__meta">
+          {typeLabel}{sizeLabel ? ` • ${sizeLabel}` : ''}{dateLabel ? ` • ${dateLabel}` : ''}
+        </div>
+      </div>
+      {relPath && (
+        <div className="file-preview-card__path" title={relPath}>{relPath}</div>
+      )}
+      <div className="file-preview-card__body">
+        {loading && <div className="file-preview-card__loading">Loading preview…</div>}
+        {error && <div className="file-preview-card__error">{error}</div>}
+        {!loading && !error && text && (
+          <pre className="file-preview-card__pre"><code>{text}</code></pre>
+        )}
+        {!loading && !error && !text && (
+          <div className="file-preview-card__empty">No preview available</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export const FileDisplay: React.FC<FileDisplayProps> = ({
   file,
   density = 'normal',
@@ -121,6 +208,9 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
   ariaLabel,
   onClick,
   className = '',
+  showPreviewOnHover = false,
+  previewPlacement = 'right',
+  previewDelayMs = 300,
   ...dataAttrs
 }) => {
   const sizeLabel = formatBytes(file.size ?? null);
@@ -155,7 +245,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
     .filter(Boolean)
     .join(' ');
 
-  return (
+  const content = (
     <div
       className={cls}
       role={role}
@@ -174,6 +264,14 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
       </div>
       {trailing && <div className="fd-trailing">{trailing}</div>}
     </div>
+  );
+
+  if (!showPreviewOnHover) return content;
+
+  return (
+    <Tooltip content={<FilePreviewCard file={file} />} placement={previewPlacement} delayMs={previewDelayMs}>
+      {content as React.ReactElement}
+    </Tooltip>
   );
 };
 
