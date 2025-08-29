@@ -1,0 +1,103 @@
+{
+  "id": "f375e3cb-f377-43b5-bb79-b2ffbf778d15",
+  "status": "?",
+  "title": "Cross-platform packaging configuration with a CI pipeline for build and release",
+  "description": "Configure electron-builder to produce distributables for macOS (dmg), Windows (nsis), and Linux (AppImage). Include app icons and code signing placeholders",
+  "features": [
+    {
+      "id": "e5b7a2fb-0c8b-443e-82bb-a61be05bbe47",
+      "status": "+",
+      "title": "Install electron-builder dependency",
+      "description": "Add electron-builder as a devDependency in package.json and install it using npm. This enables packaging capabilities for the Electron app.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "80887aaf-042c-459b-b072-c83fe611454c",
+      "status": "+",
+      "title": "Create a document explaining exactly step by step how to create a release version of the application for each platform",
+      "description": "`docs/APP_RELEASE.md` should contain all the information. Explain from the ground up about getting any required credentials or certificates needed for each platform. Provide instructions on how to configure these within the project's build scripts or environment variables. Then finally which scripts to run to get a build out.",
+      "plan": "",
+      "context": [
+        "docs/APP_RELEASE.md"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "30523735-4beb-4f5b-a643-d109f2ee5915",
+      "status": "+",
+      "title": "Configure macOS DMG packaging",
+      "description": "In the build configuration, add mac-specific settings including target 'dmg', icon path (icns), and any necessary entitlements or artifacts.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "b2b610f6-4db9-4d55-aa83-f635c5e281ce",
+      "status": "+",
+      "title": "Configure Windows NSIS packaging",
+      "description": "In the build configuration, add win-specific settings including target 'nsis', icon path (ico), and installer options like one-click installation.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "ba3ff74f-48f0-4558-8db7-fe0cfaf543c6",
+      "status": "+",
+      "title": "Configure Linux AppImage packaging",
+      "description": "In the build configuration, add linux-specific settings including target 'appimage', icon path (png), and desktop entry details.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "168763b0-6174-44cf-9a14-a3974a23c2c6",
+      "status": "+",
+      "title": "Add app icons for all platforms",
+      "description": "Create or add placeholder icon files (icon.icns for macOS, icon.ico for Windows, icon.png for Linux) in a build resources directory (e.g., build/), and reference them in the build configuration.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "11ffb764-8b10-4435-8620-04166ffe7266",
+      "status": "+",
+      "title": "Add code signing placeholders",
+      "description": "In the build configuration, add placeholders for code signing, such as CSC_LINK and CSC_KEY_PASSWORD environment variables for macOS and Windows, with documentation on how to set them for production builds.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "19319127-a318-4a58-8b18-335e4795a67e",
+      "status": "?",
+      "title": "Set up CI pipeline for building distributables",
+      "description": "Create a GitHub Actions workflow file (.github/workflows/build.yml) that runs on push to main, installs dependencies, builds the app for all platforms using electron-builder, and archives the artifacts.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "eb216f50-292a-4e8e-a683-753ed7a11790",
+      "status": "?",
+      "title": "Configure CI for release on tags",
+      "description": "Extend the CI workflow to run on tags (e.g., v*), build the distributables, and automatically create a GitHub release with the built files attached.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "e5b7a2fb-0c8b-443e-82bb-a61be05bbe47": 0,
+    "80887aaf-042c-459b-b072-c83fe611454c": 1,
+    "30523735-4beb-4f5b-a643-d109f2ee5915": 2,
+    "b2b610f6-4db9-4d55-aa83-f635c5e281ce": 3,
+    "ba3ff74f-48f0-4558-8db7-fe0cfaf543c6": 4,
+    "168763b0-6174-44cf-9a14-a3974a23c2c6": 5,
+    "11ffb764-8b10-4435-8620-04166ffe7266": 6,
+    "19319127-a318-4a58-8b18-335e4795a67e": 7,
+    "eb216f50-292a-4e8e-a683-753ed7a11790": 8
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "7dbda629-2ad6-41bb-b20a-2e1e32bdce6a",
+  "status": "-",
+  "title": "UI and UX fixes",
+  "description": "",
+  "features": [
+    {
+      "id": "af51b414-6ecf-48a6-afe6-bc1bd2c45419",
+      "status": "+",
+      "title": "TasksList fixes",
+      "description": "Allow sorting of tasks and display them in reverse to begin with.\nThe status dropdown should be the same as the one StatusControl uses.\nThe search box needs to be bigger and the Clear button only showing if searching. This can just be a (x) icon at the end of the search input.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "3ea0f62c-5068-40c6-87b4-747e85959718",
+      "status": "+",
+      "title": "The Tooltip for DependencyBullet should show close to the center of the screen",
+      "description": "In many cases when the DependencyBullet is close to the right or bottom edge, the tooltip it shows gets cut off by the window end.\nWhenever the tooltip is close to an edge - it should offset in the opposite direction.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "7a5efff9-125d-481f-bb73-51dc3991bdae",
+      "status": "+",
+      "title": "ChatView errors",
+      "description": "When opening ChatView - there's an error:\n\nvalidateDOMNesting(...): <button> cannot appear as a descendant of <button>.\n    at button\n    at span\n    at button\n    at li\n    at ul\n    at nav\n    at aside\n    at SidebarContent (http://localhost:5173/src/renderer/components/ui/CollapsibleSidebar.tsx:50:40)",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "916bebdb-a2c4-429f-a559-dff03aed4eef",
+      "status": "+",
+      "title": "Board view fixes",
+      "description": "Fix clicking. Only drag works - not even key press does.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "06680296-05e8-434c-868c-b07a44f86570",
+      "status": "-",
+      "title": "TaskService should be the only interface for task related ops",
+      "description": "Currently TasksIndex (TasksIndexSnapshot) is exposed as well as dependencyResolver. These should not be available outside of the TaskService - this service should be the only interface for handling tasks.",
+      "plan": "",
+      "context": [
+        "src/types/tasks.ts",
+        "src/types/external.d.ts",
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/services/taskService.ts",
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/App.tsx",
+        "src/renderer/projects/DependencyResolverBootstrap.tsx",
+        "src/main.js",
+        "src/tasks/indexer.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe",
+      "status": "-",
+      "title": "TaskService should be used only for task related ops",
+      "description": "All references to task ops must go through TaskService. All involved files are in the context.",
+      "plan": "",
+      "context": [
+        "src/renderer/services/taskService.ts",
+        "src/renderer/tasks/FeatureCreateView.tsx",
+        "src/renderer/tasks/FeatureEditView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TaskEditView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "06680296-05e8-434c-868c-b07a44f86570"
+      ]
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "af51b414-6ecf-48a6-afe6-bc1bd2c45419": 0,
+    "3ea0f62c-5068-40c6-87b4-747e85959718": 1,
+    "7a5efff9-125d-481f-bb73-51dc3991bdae": 2,
+    "916bebdb-a2c4-429f-a559-dff03aed4eef": 3,
+    "06680296-05e8-434c-868c-b07a44f86570": 4,
+    "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 5
+  }
+}

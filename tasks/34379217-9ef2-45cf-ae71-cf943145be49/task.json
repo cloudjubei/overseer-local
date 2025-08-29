@@ -1,0 +1,57 @@
+{
+  "id": "34379217-9ef2-45cf-ae71-cf943145be49",
+  "status": "+",
+  "title": "Terminal/code running tool",
+  "description": "There are multiple problems we are facing: 1st the agent makes changes to files, but cannot verify the outcome of its work. We need to provide tools for it so that it would be able to check each new file it makes to see if it compiles. If possible, we should also think of allowing the agent of running the code in some isolated environment.",
+  "features": [
+    {
+      "id": "a21b5241-fe74-4bcd-a82b-a172e4fd8c3c",
+      "status": "+",
+      "title": "Tool for compilation checks for typescript",
+      "description": "Node.js VM Module has the possibility to run isolated code. When an agent writes to a file we would want to check if that file compiles. So the tool needs to accept a list of filenames, try to compile each one, and return a list of statuses.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "e033dd37-8cbf-489f-8649-1545e87b172c",
+      "status": "+",
+      "title": "Tool for running code formatter on a file",
+      "description": "When an agent writes to a file we would want to apply common formatting rules. So the tool needs to accept a list of filenames, apply formatting to them, and return a list of statuses.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "20cd32ba-3998-4e32-99b7-ffc5ef33da72",
+      "status": "+",
+      "title": "Tool for running a view",
+      "description": "WebContainers allows running code in an isolated environment - we want to extract this into a tool so that an agent could use this to check if the code they wrote results in the required outcome.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "9180c802-2e8a-4d88-bc1a-534fd8ed89bc",
+      "status": "+",
+      "title": "Tool for running any code",
+      "description": "Similarly to feature 10.3, we want to be able to run code in isolated ephemeral Docker containers (e.g., via dockerode library).",
+      "plan": "",
+      "context": [
+        "src/tools/standardTools.js",
+        "package.json",
+        "docs/FILE_ORGANISATION.md"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "20cd32ba-3998-4e32-99b7-ffc5ef33da72"
+      ]
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "a21b5241-fe74-4bcd-a82b-a172e4fd8c3c": 0,
+    "e033dd37-8cbf-489f-8649-1545e87b172c": 1,
+    "20cd32ba-3998-4e32-99b7-ffc5ef33da72": 2,
+    "9180c802-2e8a-4d88-bc1a-534fd8ed89bc": 3
+  }
+}

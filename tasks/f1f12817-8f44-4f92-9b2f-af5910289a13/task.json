@@ -1,0 +1,51 @@
+{
+  "id": "f1f12817-8f44-4f92-9b2f-af5910289a13",
+  "status": "+",
+  "title": "Electron + React + TypeScript scaffold",
+  "description": "Initialize the app using a modern toolchain (electron-vite with React + TypeScript).",
+  "features": [
+    {
+      "id": "aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7",
+      "status": "+",
+      "title": "Initialize Project",
+      "description": "Create the Electron + React + TypeScript scaffolding so that dev work can begin",
+      "plan": "Run `npx create-electron-app@latest overseer-local` inside the project root",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "d00b39cc-32dd-4694-942c-0bbd3bd606cd",
+      "status": "+",
+      "title": "Configure Linting and Formatting",
+      "description": "Make sure there's linting and formatting enabled. Assume the usage of VSCode.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": [
+        "aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7"
+      ]
+    },
+    {
+      "id": "dcb2019c-6430-49bd-a2a5-f32d33ae52a0",
+      "status": "+",
+      "title": "README.md",
+      "description": "A README.md file documenting information and steps to take for developers to launch the app.",
+      "plan": "",
+      "context": [
+        "src/",
+        "README.md",
+        "docs/FILE_ORGANISATION.md"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7",
+        "d00b39cc-32dd-4694-942c-0bbd3bd606cd"
+      ]
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7": 0,
+    "d00b39cc-32dd-4694-942c-0bbd3bd606cd": 1,
+    "dcb2019c-6430-49bd-a2a5-f32d33ae52a0": 2
+  }
+}

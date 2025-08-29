@@ -1,0 +1,97 @@
+{
+  "id": "38477f37-1d05-428f-9045-5400d7508eef",
+  "status": "+",
+  "title": "Markdown documentation explorer and renderer",
+  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Implement a docs browser that lists Markdown files under docs/ (including docs/). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Introduce a sidebar that will have the sections of the app - currently Home (Tasks - task 2) and Docs (this feature).",
+  "features": [
+    {
+      "id": "c105dc5d-27f3-469a-8e5f-7316ed5d6d52",
+      "status": "+",
+      "title": "Add sidebar navigation to the application UI",
+      "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "69146d70-0cfa-43bf-b28b-11f35ba1db84",
+      "status": "+",
+      "title": "Implement DocsIndexer for scanning markdown files",
+      "description": "Create a DocsIndexer class in `src/docs/indexer.js`, similar to TasksIndexer (in `src/tasks/indexer.js`). It should scan the docs/ directory (and subdirectories) under the projectRoot for .md files, build an in-memory index (e.g., a tree structure with paths and metadata). Include methods to get the index snapshot, initialize scanning, and watch for file changes to refresh the index.",
+      "plan": "",
+      "context": [
+        "src/docs/indexer.js",
+        "src/tasks/indexer.js"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "a3883c9e-b7c6-43d8-8b19-869cb52f388e",
+      "status": "+",
+      "title": "Add IPC channels for Docs index and file content",
+      "description": "In the Electron main process, instantiate DocsIndexer and expose IPC channels: 'docs-index:get' to retrieve the index snapshot, 'docs-index:update' for event-based updates on changes, and 'docs-file:get' to read and return the content of a specific .md file by relative path. In preload.js, expose corresponding methods on window.docsIndex for renderer access.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "d4765260-4872-4def-a1f8-e7fe61929dcc",
+      "status": "+",
+      "title": "Create Docs browser view component with file listing",
+      "description": "Create a React component that fetches the docs index via IPC, renders a tree or collapsible list of markdown files and directories under docs/. Handle selection of a file to display its content (to be rendered in later features). Subscribe to index updates for real-time refreshes and handle empty states or errors.",
+      "plan": "",
+      "acceptance": []
+    },
+    {
+      "id": "c172a9c9-58ea-46c4-a880-95cc58ab1941",
+      "status": "+",
+      "title": "Implement basic Markdown rendering with extensions",
+      "description": "In the Docs browser view, upon file selection, fetch the file content via IPC and render it using a Markdown parser (e.g., react-markdown or marked). Support basic extensions: tables and code highlighting (integrate highlight.js or similar for syntax highlighting in code blocks). Display the rendered content in a dedicated pane or section of the view.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/DocumentsView.js",
+        "src/renderer/docs/DocumentsBrowserView.tsx",
+        "src/renderer/components/MarkdownRenderer.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "4152e447-4fe4-48e2-9360-3760a4c57cba",
+      "status": "+",
+      "title": "Add HTML sanitization to Markdown rendering",
+      "description": "Enhance the Markdown rendering to include safe HTML sanitization using a library like dompurify. Sanitize the generated HTML before rendering to prevent XSS vulnerabilities, ensuring only safe tags and attributes are allowed while preserving the formatting from Markdown extensions.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "c6e1a5ab-3f2d-493d-b57d-26a544fed0a5",
+      "status": "+",
+      "title": "Implement internal link navigation in rendered Markdown",
+      "description": "In the rendered Markdown content, intercept clicks on internal links (relative paths to other .md files or anchors within the same file). For relative .md links, navigate to the corresponding file in the Docs browser view by updating the selection. Handle anchor links (#fragment) by scrolling to the section within the current rendered content.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "42afe580-cad3-4a43-936e-43eeb89cea17",
+      "status": "+",
+      "title": "Markdown editor",
+      "description": "When clicking edit in a viewer, the user can go to a Markdown editor where they can change the text in a WYSIWYG style and save it.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "c105dc5d-27f3-469a-8e5f-7316ed5d6d52": 0,
+    "69146d70-0cfa-43bf-b28b-11f35ba1db84": 1,
+    "a3883c9e-b7c6-43d8-8b19-869cb52f388e": 2,
+    "d4765260-4872-4def-a1f8-e7fe61929dcc": 3,
+    "c172a9c9-58ea-46c4-a880-95cc58ab1941": 4,
+    "4152e447-4fe4-48e2-9360-3760a4c57cba": 5,
+    "c6e1a5ab-3f2d-493d-b57d-26a544fed0a5": 6,
+    "42afe580-cad3-4a43-936e-43eeb89cea17": 7
+  }
+}

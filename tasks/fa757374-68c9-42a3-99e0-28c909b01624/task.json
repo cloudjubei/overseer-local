@@ -1,0 +1,100 @@
+{
+  "id": "fa757374-68c9-42a3-99e0-28c909b01624",
+  "status": "-",
+  "title": "File references",
+  "description": "Right now there's the document indexer but we need to make it become a File indexer. It must be possible to reference any file to be provided as context into a Feature. Feature's have the context field, and this needs to be editable in edit or create mode. First there needs to be a standard file selector that is accesible in those edit/create popups. Second, each file needs to have a custom reusable display (name, size, last modification date, file type). Third, when hovering over a file - it should show a small preview card. Fourth, when clicking the summary card it should take the user to the full File view inside the Documents screen (which needs to be renamed Files) - but if the user has any pending changes (because of being in edit/create mode - then it should first alert the user about it). The now renamed Files screen should show all files, but only for Markdown we should have the nice editor - for everything else we should just show a basic viewer if possible.\n\nAn important factor here is that the custom reusable display needs to be used inside chat whenever there is a document mentioned. In chat, whenever the user starts typing '@' a small documents browser/selector should show where the user can keep on typing the name and it will filter all files so the user can select the appropriate one to reference. At the beginning, just show the browser with some useful information.\n\nVery important - it must be possible to reference any file in the whole project scope - as defined by the project's config.json under /projects.",
+  "features": [
+    {
+      "id": "8306a943-9845-48f8-92da-1b823eb10218",
+      "status": "-",
+      "title": "Convert document indexer to file indexer",
+      "description": "Transform the existing document indexer to become a file indexer that can handle any file type within the project scope as defined by config.json under /projects. Update the docsService.ts to become a filesService.ts that indexes all files (not just documents) and provides file metadata like name, size, last modification date, and file type. Update the useDocsIndex hook to become useFilesIndex.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8560d88d-e4b3-45f4-bdb0-db7eea4bda46",
+      "status": "-",
+      "title": "Create reusable file display component",
+      "description": "Create a new reusable FileDisplay component that shows file information (name, size, last modification date, file type) in a consistent format. This component should be flexible enough to be used in different contexts like file selectors, chat references, and file listings. Place it in src/renderer/components/ui/ and style it appropriately.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "818dd587-aaef-41fc-ac96-e451ab4b52f4",
+      "status": "-",
+      "title": "Implement file preview on hover",
+      "description": "Add hover functionality to the FileDisplay component that shows a small preview card when hovering over a file. The preview should show additional file details and a small content preview when possible. Implement this using a tooltip-like overlay that appears on hover.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "266c7aab-d35f-4a37-be83-9a06b79332cf",
+      "status": "-",
+      "title": "Create file selector for Feature context",
+      "description": "Build a FileSelector component that can be used in Feature create/edit forms to select files for the context field. This should show a searchable/filterable list of all files in the project using the FileDisplay component. Integrate this into the FeatureCreateView and FeatureEditView forms.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "d8d01c33-19e5-4809-8e95-9878bc527a12",
+      "status": "-",
+      "title": "Rename Documents to Files screen and update routing",
+      "description": "Rename the DocumentsView to FilesView and update all related navigation, routing, and references. Update the sidebar navigation to show 'Files' instead of 'Documents'. Ensure all existing functionality is preserved during the rename.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "bf3f3627-6833-47c8-a782-738f6b5bd035",
+      "status": "-",
+      "title": "Implement different file viewers in Files screen",
+      "description": "Update the Files screen to show all files but provide different viewing experiences: keep the nice editor for Markdown files, and implement a basic file viewer for other file types. The viewer should display file content when possible (text files, code files) or show file information when content viewing isn't feasible.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8365b984-4ac2-48fc-baf1-b1aad5f65407",
+      "status": "-",
+      "title": "Add file navigation with unsaved changes handling",
+      "description": "Implement navigation from FileDisplay components to the full File view in the Files screen. Add logic to detect when a user has unsaved changes (in edit/create modes) and show an alert before navigating away. This should work from file selectors, chat references, and any other places where files are displayed.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "1b5838ed-7e8b-41df-840b-7a8b456a7047",
+      "status": "-",
+      "title": "Integrate FileDisplay in chat for document mentions",
+      "description": "Update the chat system to use the new FileDisplay component whenever a document/file is mentioned in chat messages. This ensures consistent file representation across the application and provides the same hover preview and click navigation functionality.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "5eb2653c-d98b-4bd0-9a5f-7db79512c746",
+      "status": "-",
+      "title": "Implement '@' file browser in chat input",
+      "description": "Add functionality to the chat input where typing '@' opens a file browser/selector. The user should be able to continue typing to filter files by name. Implement this as a dropdown/overlay that shows filtered files using the FileDisplay component. Allow users to select files to reference in their chat messages.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "8306a943-9845-48f8-92da-1b823eb10218": 0,
+    "8560d88d-e4b3-45f4-bdb0-db7eea4bda46": 1,
+    "818dd587-aaef-41fc-ac96-e451ab4b52f4": 2,
+    "266c7aab-d35f-4a37-be83-9a06b79332cf": 3,
+    "d8d01c33-19e5-4809-8e95-9878bc527a12": 4,
+    "bf3f3627-6833-47c8-a782-738f6b5bd035": 5,
+    "8365b984-4ac2-48fc-baf1-b1aad5f65407": 6,
+    "1b5838ed-7e8b-41df-840b-7a8b456a7047": 7,
+    "5eb2653c-d98b-4bd0-9a5f-7db79512c746": 8
+  }
+}

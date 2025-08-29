@@ -49,6 +49,6 @@ export interface ProjectSpec {
   path: string;
   repo_url: string;
   requirements: ProjectRequirement[];
-  tasks: Task[]; // <-- new
   taskIdToDisplayIndex: Record<string, number>; // <-- new
+  tasks: Task[]; // <-- new - helper - only exists in code side - not present in file
 }
