@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { dependencyResolver } from '../services/dependencyResolver';
+import { taskService } from '../services/taskService';
 import { useProjectContext } from './ProjectContext';
 
 /**
@@ -15,10 +15,10 @@ export function DependencyResolverBootstrap() {
     let cancelled = false;
     (async () => {
       try {
-        await dependencyResolver.init(activeProject ?? null);
+        await taskService.initDependencies(activeProject ?? null);
         if (!cancelled) {
           // Ensure project is set (init might have been called with null before context resolved)
-          dependencyResolver.setProject(activeProject ?? null);
+          taskService.setProject(activeProject ?? null);
         }
       } catch (e) {
         // Silently fail; UI components will surface missing refs as chips with error state
