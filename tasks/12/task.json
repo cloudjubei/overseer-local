@@ -95,15 +95,14 @@
     },
     {
       "id": "12.8",
-      "status": "+",
-      "title": "Explain the whole IPC idea in a doc",
-      "description": "main.js and preload.js and external.d.ts have all these interfaces, and then we have the services that use them - please explain why this is needed and we can't just have a service - like FileService be created in main.js and everything be routed through it directly (via imports) rather than this IPC ?",
+      "status": "-",
+      "title": "Refactor all indexers to be managers",
+      "description": "Managers will run on the main process and will handle all logical operations (CRUD). Services are the renderer facing interfaces (thin) that will expose only the absolutely necessary data to the view components. Currently we have Indexers in main.js - these need to be refactored into the newly called 'Manager' classes and all views that use a 'Indexer' directly shouldn't - they should all go via their respective 'Service' class that lives on the rendered side.",
       "plan": "",
       "context": [
         "src/main.js",
         "src/preload.js",
-        "src/types/external.d.ts",
-        "src/renderer/services/fileService.ts"
+        "src/types/external.d.ts"
       ],
       "acceptance": [],
       "dependencies": []
