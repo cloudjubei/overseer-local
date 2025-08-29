@@ -1,8 +1,13 @@
 /* Screens: Tasks (list + toolbar) */
 .tasks-toolbar { display:flex; align-items:center; justify-content: space-between; padding: 8px 12px; gap: 8px; border-bottom: 1px solid var(--border-subtle); background: var(--surface-base); }
 .tasks-toolbar .left, .tasks-toolbar .right { display:flex; align-items:center; gap: 8px; }
-.tasks-toolbar .control input[type="search"] { height: var(--control-h-md); padding: 0 var(--control-pad-x); background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: var(--radius-2); color: var(--text-primary); }
+.tasks-toolbar .control input[type="search"] { width: 320px; height: var(--control-h-md); padding: 0 var(--control-pad-x); background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: var(--radius-2); color: var(--text-primary); }
 .tasks-toolbar .control input[type="search"]:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.tasks-toolbar .search-wrapper { position: relative; }
+.tasks-toolbar .clear-search { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 0; line-height: 1; }
+.tasks-toolbar .clear-search:hover { color: var(--text-primary); }
+.tasks-toolbar .status-filter-btn { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--control-pad-x); height: var(--control-h-md); background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: var(--radius-2); color: var(--text-primary); cursor: pointer; }
+.tasks-toolbar .status-filter-btn:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
 
 .tasks-list { list-style: none; margin: 0; padding: 0; }
 .task-item + .task-item { border-top: 1px solid var(--border-subtle); }

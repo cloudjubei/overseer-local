@@ -37,7 +37,6 @@ This document describes how files and directories are organised in this reposito
     - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
   - src/renderer/components/tasks/: Task-specific UI pieces.
     - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
-    - PriorityTag.tsx: Priority tags P0–P3.
     - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
     - DependencyBullet.tsx: Reusable bullet for task/feature dependencies with hover summary and click navigation. Now uses the central dependencyResolver service for resolution and summaries.
     - FeatureSummaryCallout.tsx: Summary card for feature on hover.

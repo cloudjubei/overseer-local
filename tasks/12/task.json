@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "12.1",
-      "status": "-",
+      "status": "+",
       "title": "TasksList fixes",
       "description": "Allow sorting of tasks and display them in reverse to begin with.\nThe status dropdown should be the same as the one StatusControl uses.\nThe search box needs to be bigger and the Clear button only showing if searching. This can just be a (x) icon at the end of the search input.",
       "plan": "",
@@ -16,7 +16,7 @@
     },
     {
       "id": "12.2",
-      "status": "-",
+      "status": "+",
       "title": "Board view fixes",
       "description": "Fix clicking. Only drag works - not even key press does.",
       "plan": "",
@@ -26,7 +26,7 @@
     },
     {
       "id": "12.3",
-      "status": "-",
+      "status": "+",
       "title": "ChatView errors",
       "description": "When opening ChatView - there's an error:\n\nvalidateDOMNesting(...): <button> cannot appear as a descendant of <button>.\n    at button\n    at span\n    at button\n    at li\n    at ul\n    at nav\n    at aside\n    at SidebarContent (http://localhost:5173/src/renderer/components/ui/CollapsibleSidebar.tsx:50:40)",
       "plan": "",

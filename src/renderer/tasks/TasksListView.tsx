@@ -4,12 +4,11 @@ import { Task, Status } from 'src/types/tasks'
 import { tasksService } from '../services/tasksService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
-import PriorityTag, { parsePriorityFromTitle } from '../components/tasks/PriorityTag'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
-import StatusControl from '../components/tasks/StatusControl'
+import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -19,17 +18,15 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 }
 
-const STATUSES: Status[] = ['+', '~', '-', '?', '=']
-
 function toTasksArray(index: TasksIndexSnapshot): Task[] {
   const tasksById = index?.tasksById || {}
   const arr = Object.values(tasksById) as Task[]
-  // Keep stable by orderedIds if provided; otherwise by id asc
+  // Keep stable by orderedIds if provided; otherwise by id desc
   if (index?.orderedIds && Array.isArray(index.orderedIds)) {
     const byId: Record<number, Task> = tasksById as any
     return index.orderedIds.map((id) => byId[id]).filter(Boolean)
   }
-  arr.sort((a, b) => (a.id || 0) - (b.id || 0))
+  arr.sort((a, b) => (b.id || 0) - (a.id || 0))
   return arr
 }
 
@@ -50,7 +47,7 @@ function matchesQuery(task: Task, q: string) {
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
-    const byStatus = !status || status === 'any' ? true : t.status === (status as Status)
+    const byStatus = !status || status === 'all' ? true : t.status === (status as Status)
     return byStatus && matchesQuery(t, query)
   })
 }
@@ -73,10 +70,13 @@ function BoardIcon() {
   )
 }
 
+const STATUS_ORDER = ['-', '~', '+', '=', '?']
+
 export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('any')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sortBy, setSortBy] = useState<'manual' | 'id_asc' | 'id_desc' | 'status'>('id_desc')
   const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
@@ -88,6 +88,8 @@ export default function TasksListView() {
   const ulRef = useRef<HTMLUListElement>(null)
   const { openModal, navigateTaskDetails } = useNavigator()
   const { projectId } = useActiveProject()
+  const [openFilter, setOpenFilter] = useState(false)
+  const statusFilterRef = useRef<HTMLDivElement>(null)
 
   // Subscribe to tasks index updates and refresh when project context changes
   useEffect(() => {
@@ -154,13 +156,23 @@ export default function TasksListView() {
     return () => window.removeEventListener('keydown', onKey)
   }, [openModal])
 
-  const filtered = useMemo(() => filterTasks(allTasks, { query, status: statusFilter }), [allTasks, query, statusFilter])
-  const isFiltered = query !== '' || statusFilter !== 'any'
+  const sorted = useMemo(() => {
+    let tasks = [...allTasks]
+    if (sortBy !== 'manual') {
+      if (sortBy === 'id_asc') {
+        tasks.sort((a, b) => (a.id || 0) - (b.id || 0))
+      } else if (sortBy === 'id_desc') {
+        tasks.sort((a, b) => (b.id || 0) - (a.id || 0))
+      } else if (sortBy === 'status') {
+        const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
+        tasks.sort((a, b) => sVal(a) - sVal(b) || (a.id || 0) - (b.id || 0))
+      }
+    }
+    return tasks
+  }, [allTasks, sortBy])
 
-  const handleClear = () => {
-    setQuery('')
-    setStatusFilter('any')
-  }
+  const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
+  const isFiltered = query !== '' || statusFilter !== 'all'
 
   const handleAddTask = async () => {
     openModal({ type: 'task-create' })
@@ -187,7 +199,7 @@ export default function TasksListView() {
     }
   }
 
-  const dndEnabled = !isFiltered && view === 'list'
+  const dndEnabled = sortBy === 'manual' && !isFiltered && view === 'list'
 
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     // Do not show drop indicators when hovering the dragged row itself
@@ -250,25 +262,48 @@ export default function TasksListView() {
     clearDndState()
   }
 
+  const currentFilterLabel = statusFilter === 'all' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]}`
+  const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
+
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
       <div className="tasks-toolbar shrink-0">
         <div className="left">
-          <div className="control">
+          <div className="control search-wrapper">
             <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
           <div className="control">
-            <select id="tasks-status-select" className="ui-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="any">All statuses</option>
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {STATUS_LABELS[s]} ({s})
-                </option>
-              ))}
-            </select>
+            <div
+              ref={statusFilterRef}
+              className="status-filter-btn ui-select gap-2"
+              role="button"
+              aria-haspopup="menu"
+              aria-expanded={openFilter}
+              aria-label="Filter by status"
+              tabIndex={0}
+              onClick={() => setOpenFilter(true)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
+            >
+              <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+              <span className="status-picker__label">{currentFilterLabel}</span>
+            </div>
+            {openFilter && statusFilterRef.current && (
+              <StatusPicker 
+                anchorEl={statusFilterRef.current} 
+                value={statusFilter as Status}
+                isAllAllowed={true}
+                onSelect={(val) => { setStatusFilter(val); setOpenFilter(false); }}
+                onClose={() => setOpenFilter(false)}
+                />
+            )}
           </div>
           <div className="control">
-            <Button variant="secondary" onClick={handleClear}>Clear</Button>
+            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by">
+              <option value="manual">Manual order</option>
+              <option value="id_asc">ID ascending</option>
+              <option value="id_desc">ID descending</option>
+              <option value="status">Status</option>
+            </select>
           </div>
         </div>
         <div className="right">
@@ -319,7 +354,6 @@ export default function TasksListView() {
             >
               {filtered.map((t, idx) => {
                 const { done, total } = countFeatures(t)
-                const priority = parsePriorityFromTitle(t.title)
                 const isDragSource = dragTaskId === t.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
@@ -360,7 +394,6 @@ export default function TasksListView() {
                         <div className="col col-title">
                           <div className="title-line">
                             <span className="title-text">{t.title || ''}</span>
-                            <PriorityTag priority={priority} />
                           </div>
                         </div>
 
