@@ -3,10 +3,10 @@ import path from 'node:path';
 import { LLMProvider } from './LLMProvider';
 
 export class ChatManager {
-  constructor(projectRoot, taskIndexer, fileIndexer) {
+  constructor(projectRoot, taskManager, fileManager) {
     this.projectRoot = projectRoot;
-    this.taskIndexer = taskIndexer;
-    this.fileIndexer = fileIndexer;
+    this.taskManager = taskManager;
+    this.fileManager = fileManager;
     this.chatsDir = path.join(projectRoot, 'chats');
     if (!fs.existsSync(this.chatsDir)) {
       fs.mkdirSync(this.chatsDir, { recursive: true });
@@ -27,8 +27,8 @@ export class ChatManager {
 
   _getFilesBaseDir() {
     try {
-      const snap = this.fileIndexer.getIndex();
-      return snap.filesDir || snap.root || this.fileIndexer.filesDir || this.projectRoot;
+      const snap = this.fileManager.getIndex();
+      return snap.filesDir || snap.root || this.fileManager.filesDir || this.projectRoot;
     } catch {
       return this.projectRoot;
     }
@@ -95,9 +95,9 @@ export class ChatManager {
       ];
 
       const toolsMap = {
-        list_tasks: async () => JSON.stringify(this.taskIndexer.getIndex().tasksById),
+        list_tasks: async () => JSON.stringify(this.taskManager.getIndex().tasksById),
         get_task_reference: async () => null, //TODO:
-        list_files: async () => JSON.stringify(this.fileIndexer.getIndex()),
+        list_files: async () => JSON.stringify(this.fileManager.getIndex()),
         read_file: async ({ path: relPath }) => {
           try {
             const base = this._getFilesBaseDir();
@@ -116,8 +116,8 @@ export class ChatManager {
               fs.mkdirSync(dir, { recursive: true });
             }
             fs.writeFileSync(absPath, content, 'utf8');
-            if (typeof this.fileIndexer.buildIndex === 'function') {
-              this.fileIndexer.buildIndex();
+            if (typeof this.fileManager.buildIndex === 'function') {
+              this.fileManager.buildIndex();
             }
             return `File ${name} created successfully.`;
           } catch (error) {
@@ -125,7 +125,7 @@ export class ChatManager {
           }
         },
         // Aliases for backward compatibility
-        list_docs: async () => JSON.stringify(this.fileIndexer.getIndex()),
+        list_docs: async () => JSON.stringify(this.fileManager.getIndex()),
         read_doc: async ({ path: relPath }) => {
           return await toolsMap.read_file({ path: relPath });
         },

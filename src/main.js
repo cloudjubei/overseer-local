@@ -2,9 +2,9 @@ import { app, BrowserWindow, ipcMain, Notification } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import started from 'electron-squirrel-startup';
-import { TaskIndexer }  from './tasks/indexer';
-import { FileIndexer } from './files/indexer';
-import { ProjectsIndexer } from './projects/indexer';
+import { TaskManager }  from './tasks/manager';
+import { FileManager } from './files/manager';
+import { ProjectsManager } from './projects/manager';
 import { ChatManager } from './chat/manager';
 import { validateProjectSpec } from './projects/validator';
 import { registerScreenshotService } from './capture/screenshotService';
@@ -13,9 +13,9 @@ if (started) {
   app.quit();
 }
 let mainWindow;
-let indexer; // tasks
-let fileIndexer;
-let projectsIndexer;
+let taskManager; // tasks
+let fileManager;
+let projectsManager;
 let chatManager;
 
 const createWindow = () => {
@@ -46,14 +46,14 @@ app.whenReady().then(async () => {
 
   const projectRoot = app.getAppPath();
 
-  projectsIndexer = new ProjectsIndexer(projectRoot, mainWindow);
-  indexer = new TaskIndexer(projectRoot, mainWindow);
-  fileIndexer = new FileIndexer(projectRoot, mainWindow);
-  chatManager = new ChatManager(projectRoot, indexer, fileIndexer);
+  projectsManager = new ProjectsManager(projectRoot, mainWindow);
+  taskManager = new TaskManager(projectRoot, mainWindow);
+  fileManager = new FileManager(projectRoot, mainWindow);
+  chatManager = new ChatManager(projectRoot, taskManager, fileManager);
 
-  projectsIndexer.init();
-  indexer.init();
-  await fileIndexer.init();
+  projectsManager.init();
+  taskManager.init();
+  await fileManager.init();
   
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -66,17 +66,17 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-  if (indexer) { indexer.stopWatching(); }
-  if (fileIndexer) { fileIndexer.stopWatching(); }
-  if (projectsIndexer) { projectsIndexer.stopWatching(); }
+  if (taskManager) { taskManager.stopWatching(); }
+  if (fileManager) { fileManager.stopWatching(); }
+  if (projectsManager) { projectsManager.stopWatching(); }
 });
 
 // Helper to resolve current files base directory
 function getFilesBaseDir() {
   try {
-    const snap = fileIndexer.getIndex();
-    // Prefer explicit properties; fall back to indexer internal or project root
-    return snap.filesDir || snap.root || fileIndexer.filesDir || app.getAppPath();
+    const snap = fileManager.getIndex();
+    // Prefer explicit properties; fall back to manager internal or project root
+    return snap.filesDir || snap.root || fileManager.filesDir || app.getAppPath();
   } catch {
     return app.getAppPath();
   }
@@ -84,7 +84,7 @@ function getFilesBaseDir() {
 
 // Tasks
 ipcMain.handle('tasks-index:get', async () => {
-  return indexer.getIndex();
+  return taskManager.getIndex();
 });
 
 ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
@@ -92,9 +92,9 @@ ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
     // Compute tasks directory based on projectId
     let targetDir;
     if (!projectId || projectId === 'main') {
-      targetDir = indexer.getDefaultTasksDir();
+      targetDir = taskManager.getDefaultTasksDir();
     } else {
-      const snap = projectsIndexer.getIndex();
+      const snap = projectsManager.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {
@@ -102,75 +102,75 @@ ipcMain.handle('tasks:set-context', async (event, { projectId }) => {
         targetDir = path.join(projectAbs, 'tasks');
       } else {
         // Fallback to main if project not found
-        targetDir = indexer.getDefaultTasksDir();
+        targetDir = taskManager.getDefaultTasksDir();
       }
     }
-    const res = await indexer.setTasksDir(targetDir);
+    const res = await taskManager.setTasksDir(targetDir);
     return res;
   } catch (e) {
     console.error('Failed to set tasks context:', e);
-    return indexer.getIndex();
+    return taskManager.getIndex();
   }
 });
 
 ipcMain.handle('tasks:update', async (event, { taskId, data }) => {
-  return await indexer.updateTask(taskId, data);
+  return await taskManager.updateTask(taskId, data);
 });
 
 ipcMain.handle('tasks-feature:update', async (event, { taskId, featureId, data }) => {
-  return await indexer.updateFeature(taskId, featureId, data);
+  return await taskManager.updateFeature(taskId, featureId, data);
 });
 
 ipcMain.handle('tasks-feature:add', async (event, { taskId, feature }) => {
-  return await indexer.addFeature(taskId, feature);
+  return await taskManager.addFeature(taskId, feature);
 });
 
 ipcMain.handle('tasks-feature:delete', async (event, { taskId, featureId }) => {
-  return await indexer.deleteFeature(taskId, featureId);
+  return await taskManager.deleteFeature(taskId, featureId);
 });
 
 ipcMain.handle('tasks-features:reorder', async (event, { taskId, payload }) => {
-  return await indexer.reorderFeatures(taskId, payload);
+  return await taskManager.reorderFeatures(taskId, payload);
 });
 
 ipcMain.handle('tasks:add', async (event, task) => {
-    return await indexer.addTask(task);
+    return await taskManager.addTask(task);
 });
 
 ipcMain.handle('tasks:delete', async (event, { taskId }) => {
-  return await indexer.deleteTask(taskId);
+  return await taskManager.deleteTask(taskId);
 });
 
 ipcMain.handle('tasks:reorder', async (event, payload) => {
-  return await indexer.reorderTasks(payload);
+  return await taskManager.reorderTasks(payload);
 });
 
 
 // Files — unified index used by renderer FileService
 ipcMain.handle('files-index:get', async () => {
-  return fileIndexer.getIndex();
+  return fileManager.getIndex();
 });
 
 ipcMain.handle('files:set-context', async (event, { projectId }) => {
   try {
     let targetDir;
     if (!projectId || projectId === 'main') {
-      targetDir = fileIndexer.getDefaultFilesDir();
+      targetDir = fileManager.getDefaultFilesDir();
     } else {
-      const snap = projectsIndexer.getIndex();
+      const snap = projectsManager.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {
         targetDir = path.resolve(projectsDirAbs, spec.path);
       } else {
-        targetDir = fileIndexer.getDefaultFilesDir();
+        targetDir = fileManager.getDefaultFilesDir();
       }
     }
-    const res = await fileIndexer.setFilesDir(targetDir);
+    const res = await fileManager.setFilesDir(targetDir);
     return res;
   } catch (e) {
     console.error('Failed to set files context:', e);
-    return fileIndexer.getIndex();
+    return fileManager.getIndex();
   }
 });
 
@@ -202,9 +202,9 @@ ipcMain.handle('files:write', async (event, { relPath, content, encoding = 'utf8
   const dir = path.dirname(abs);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(abs, content, encoding);
-  // ask indexer to rebuild so UI updates (it may already watch and emit)
-  if (typeof fileIndexer.rebuildAndNotify === 'function') {
-    await fileIndexer.rebuildAndNotify('File written via IPC');
+  // ask manager to rebuild so UI updates (it may already watch and emit)
+  if (typeof fileManager.rebuildAndNotify === 'function') {
+    await fileManager.rebuildAndNotify('File written via IPC');
   }
   return { ok: true };
 });
@@ -232,8 +232,8 @@ ipcMain.handle('files:upload', (event, { name, content }) => {
   }
   const filePath = path.join(uploadsDir, name);
   fs.writeFileSync(filePath, content, 'utf8');
-  if (typeof fileIndexer.buildIndex === 'function') {
-    fileIndexer.buildIndex();
+  if (typeof fileManager.buildIndex === 'function') {
+    fileManager.buildIndex();
   }
   return 'uploads/' + name;
 });
@@ -242,17 +242,17 @@ ipcMain.handle('files:upload', (event, { name, content }) => {
 
 // Projects
 ipcMain.handle('projects-index:get', async () => {
-  return projectsIndexer.getIndex();
+  return projectsManager.getIndex();
 });
 
 function ensureProjectsDirExists() {
-  const dir = projectsIndexer.getIndex().projectsDir;
+  const dir = projectsManager.getIndex().projectsDir;
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
 
 function getProjectConfigPathForId(id) {
-  const snap = projectsIndexer.getIndex();
+  const snap = projectsManager.getIndex();
   const rel = snap.configPathsById?.[id];
   if (rel) return path.join(snap.projectsDir, rel);
   // default convention: projects/<id>.json
@@ -267,7 +267,7 @@ ipcMain.handle('projects:create', async (event, { spec }) => {
     if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
 
     const dir = ensureProjectsDirExists();
-    const snap = projectsIndexer.getIndex();
+    const snap = projectsManager.getIndex();
     if (snap.projectsById[sanitized.id]) {
       return { ok: false, error: `Project with id ${sanitized.id} already exists` };
     }
@@ -275,7 +275,7 @@ ipcMain.handle('projects:create', async (event, { spec }) => {
     const target = path.join(dir, `${sanitized.id}.json`);
     fs.writeFileSync(target, JSON.stringify(sanitized, null, 2), 'utf8');
     // watcher will pick up; but proactively rebuild to notify immediately
-    await projectsIndexer.rebuildAndNotify('Project created');
+    await projectsManager.rebuildAndNotify('Project created');
     return { ok: true };
   } catch (e) {
     console.error('projects:create failed', e);
@@ -292,7 +292,7 @@ ipcMain.handle('projects:update', async (event, { id, spec }) => {
     if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
 
     ensureProjectsDirExists();
-    const snap = projectsIndexer.getIndex();
+    const snap = projectsManager.getIndex();
     const existingPath = getProjectConfigPathForId(id);
     // If id changed, we will write to new file and delete old file if different
     const writePath = getProjectConfigPathForId(sanitized.id);
@@ -302,7 +302,7 @@ ipcMain.handle('projects:update', async (event, { id, spec }) => {
       try { fs.unlinkSync(existingPath); } catch {}
     }
 
-    await projectsIndexer.rebuildAndNotify('Project updated');
+    await projectsManager.rebuildAndNotify('Project updated');
     return { ok: true };
   } catch (e) {
     console.error('projects:update failed', e);
@@ -314,7 +314,7 @@ ipcMain.handle('projects:delete', async (event, { id }) => {
   try {
     const p = getProjectConfigPathForId(id);
     if (fs.existsSync(p)) fs.unlinkSync(p);
-    await projectsIndexer.rebuildAndNotify('Project deleted');
+    await projectsManager.rebuildAndNotify('Project deleted');
     return { ok: true };
   } catch (e) {
     console.error('projects:delete failed', e);
@@ -361,7 +361,7 @@ ipcMain.handle('chat:set-context', async (event, { projectId }) => {
     if (!projectId || projectId === 'main') {
       targetDir = chatManager.getDefaultChatsDir();
     } else {
-      const snap = projectsIndexer.getIndex();
+      const snap = projectsManager.getIndex();
       const spec = snap.projectsById?.[projectId];
       const projectsDirAbs = path.resolve(snap.projectsDir);
       if (spec) {

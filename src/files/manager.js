@@ -18,7 +18,7 @@ function inferTypeByExt(name) {
   return undefined;
 }
 
-export class FileIndexer {
+export class FileManager {
   constructor(projectRoot, window, options = {}) {
     this.projectRoot = projectRoot;
     this.filesDir = options.filesDir || projectRoot;
@@ -203,7 +203,7 @@ export class FileIndexer {
       const payload = JSON.stringify(this.index.files);
       await this.window.webContents.executeJavaScript(`(function(){ try { window.filesIndex = ${payload}; } catch(e){} })();`);
     } catch (e) {
-      console.warn('FileIndexer: failed to publish to renderer', e);
+      console.warn('FileManager: failed to publish to renderer', e);
     }
   }
 

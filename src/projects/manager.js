@@ -5,7 +5,7 @@ import { validateProjectSpec } from './validator';
 
 async function pathExists(p) { try { await fs.stat(p); return true } catch { return false } }
 
-export class ProjectsIndexer {
+export class ProjectsManager {
   constructor(projectRoot, window) {
     this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot);
     this.projectsDir = path.join(this.projectRoot, 'projects');
