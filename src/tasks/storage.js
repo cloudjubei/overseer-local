@@ -22,7 +22,7 @@ export default class TasksStorage {
       updatedAt: null,
       tasksById: {},
       featuresById: {},
-      outboundByFeatureId: {},
+      inboundByFeatureId: {},
       errors: [],
       metrics: { lastScanMs: 0, lastScanCount: 0 }
     };
@@ -111,17 +111,17 @@ export default class TasksStorage {
             }
           }
         }
-        // Compute outbound dependencies
-        const outbound = {};
+        
+        const inbound = {};
         for (const task of tasks) {
           for (const feature of task.features) {
             for (const dep of feature.dependencies || []) {
-              if (!outbound[dep]) outbound[dep] = [];
-              outbound[dep].push(feature.id);
+              if (!inbound[dep]) inbound[dep] = [];
+              inbound[dep].push(feature.id);
             }
           }
         }
-        newIndex.outboundByFeatureId = outbound;
+        newIndex.inboundByFeatureId = inbound;
       }
     } catch (err) {
       newIndex.errors.push({ file: this.tasksDir, errors: [err.message] });
@@ -403,11 +403,11 @@ export default class TasksStorage {
     return { ok: true };
   }
 
-  async getReferencesOutbound(reference) {
-    return this.index.outboundByFeatureId[reference] || [];
+  async getReferencesInbound(reference) {
+    return this.index.inboundByFeatureId[reference] || [];
   }
 
-  async getReferencesInbound(reference) {
+  async getReferencesOutbound(reference) {
     const feature = this.index.featuresById[reference];
     if (!feature) return [];
     return feature.dependencies || [];
