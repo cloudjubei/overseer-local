@@ -14,7 +14,7 @@ function resolveTasksDir(projectRoot) {
   return candidates[0];
 }
 
-export class TaskManager {
+export class TasksManager {
   constructor(projectRoot, window) {
     this.projectRoot = projectRoot;
     this.window = window;

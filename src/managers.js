@@ -1,4 +1,4 @@
-import { TaskManager } from './tasks/manager';
+import { TasksManager } from './tasks/manager';
 import { FilesManager } from './files/manager';
 import { ProjectsManager } from './projects/manager';
 import { ChatsManager } from './chat/manager';
@@ -12,7 +12,7 @@ export let notificationManager;
 
 export async function initManagers(projectRoot, mainWindow) {
   projectsManager = new ProjectsManager(projectRoot, mainWindow);
-  taskManager = new TaskManager(projectRoot, mainWindow);
+  taskManager = new TasksManager(projectRoot, mainWindow);
   filesManager = new FilesManager(projectRoot, mainWindow);
   chatsManager = new ChatsManager(projectRoot, mainWindow);
   notificationManager = new NotificationManager(projectRoot, mainWindow);

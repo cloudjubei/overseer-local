@@ -39,7 +39,6 @@ export class FilesManager { //TODO: index per project + ensure files are project
 
     this.watcher = null;
 
-    // Whether IPC handlers are bound (to avoid double-binding on re-init)
     this._ipcBound = false;
   }
 

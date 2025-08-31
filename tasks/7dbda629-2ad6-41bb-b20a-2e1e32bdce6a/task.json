@@ -82,25 +82,15 @@
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "+",
-      "title": "TaskManager follows NotificationManager",
-      "description": "NotificationManager has this nice separation of its storage into a separate reusable class NotificationsStorage. TaskManager should follow the same pattern. TaskManager needs to have a quick lookup of all tasks by id (per project), features by id (per project) and outbound dependencies for features (features.dependencies declares inbound dependencies).",
+      "status": "-",
+      "title": "FilesManager follows TasksManager",
+      "description": "TasksManager has this nice separation of its storage into a separate reusable class TasksStorage. FilesManager should follow the same pattern.",
       "plan": "",
       "context": [
-        "src/notifications/manager.js",
-        "src/notifications/storage.js",
-        "src/tasks/manager.js"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "+",
-      "title": "NotificationsStorage cannot use localStorage",
-      "description": "NotificationsStorage is running in the main process so it doesn't have access to the localStorage. If there's no electron based solution - we should simply create a class AppStorage and use it whenever we need to store data instead of localStorage.",
-      "plan": "",
-      "context": [
-        "src/notifications/storage.js"
+        "src/files/manager.js",
+        "src/notiffilesications/storage.js",
+        "src/tasks/manager.js",
+        "src/tasks/storage.js"
       ],
       "acceptance": []
     }
@@ -112,7 +102,6 @@
     "916bebdb-a2c4-429f-a559-dff03aed4eef": 4,
     "06680296-05e8-434c-868c-b07a44f86570": 5,
     "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 6,
-    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7,
-    "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe": 8
+    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7
   }
 }
