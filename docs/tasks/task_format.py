@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Literal
+from typing import Dict, TypedDict, List, Literal
 
 try:
     from typing import NotRequired
@@ -21,24 +21,24 @@ class Feature(TypedDict):
     plan: str
     context: List[str]
     acceptance: List[str]
-    dependencies: NotRequired[str] # ["{task_id}.{feature_id}","{task_id}"]
+    dependencies: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
     rejection: NotRequired[str]
 
-
 class Task(TypedDict):
-    id: int
+    id: str
     status: Status
     title: str
     description: str
     features: List[Feature]
-    dependencies: NotRequired[str] # ["{task_id}.{feature_id}","{task_id}"]
+    dependencies: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
     rejection: NotRequired[str]
+    featureIdToDisplayIndex: Dict[str,int]
 
 class ProjectRequirement(TypedDict):
     id: int
     status: Status
     description: str
-    tasks: List[int]
+    tasks: List[str]
 
 class ProjectSpec(TypedDict):
     id: str
@@ -47,4 +47,4 @@ class ProjectSpec(TypedDict):
     path: str
     repo_url: str
     requirements: List[ProjectRequirement]
-
+    taskIdToDisplayIndex: Dict[str,int]

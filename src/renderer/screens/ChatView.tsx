@@ -54,12 +54,11 @@ export default function ChatView() {
     el.scrollTo({ top: el.scrollHeight })
   }, [messages])
 
-  // Textarea autosize for better composing UX
   const autoSizeTextarea = () => {
     const el = textareaRef.current
     if (!el) return
     el.style.height = 'auto'
-    const max = 200 // px
+    const max = 200
     const next = Math.min(el.scrollHeight, max)
     el.style.height = next + 'px'
   }
@@ -106,7 +105,6 @@ export default function ChatView() {
     isFirstInGroup?: boolean
   }
 
-  // Enhance messages: show model chip when it changes; group consecutive by role
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
     return messages.map((msg, index) => {
       let showModel = false
@@ -140,12 +138,11 @@ export default function ChatView() {
   })), [chatHistories, deleteChat])
 
   const renderMessageContent = (content: string) => {
-    // Match either task/feature refs like #12 or #12.a, or file mentions like @path/to/file.ext
-    const regex = /(@[^\s]+|#[0-9]+(?:\.[0-9A-Za-z_-]+)?)/g
-    const parts: (string | JSX.Element)[] = []
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-
+    const uuidPattern = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
+    const regex = new RegExp(`#(${uuidPattern})(?:\.(${uuidPattern}))?`, 'g');
+    const parts: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
     while ((match = regex.exec(content)) !== null) {
       const textBefore = content.slice(lastIndex, match.index)
       if (textBefore) parts.push(textBefore)
@@ -194,14 +191,12 @@ export default function ChatView() {
       emptyMessage="No chats yet"
     >
       <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
-        {/* Hidden mirror for caret positioning (docs & refs autocomplete) */}
         <div
           ref={mirrorRef}
           aria-hidden="true"
           className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none"
         />
 
-        {/* Row 1: Header */}
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
@@ -236,7 +231,6 @@ export default function ChatView() {
           </div>
         </header>
 
-        {/* Row 2: Callout (non-scroll) */}
         {!isConfigured && (
           <div
             className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
@@ -251,7 +245,6 @@ export default function ChatView() {
           </div>
         )}
 
-        {/* Row 3: Messages (only scrollable region) */}
         <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
           {enhancedMessages.length === 0 ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
@@ -285,7 +278,6 @@ export default function ChatView() {
                       isUser ? 'flex-row-reverse' : 'flex-row',
                     ].join(' ')}
                   >
-                    {/* Avatar */}
                     <div
                       className={[
                         'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
@@ -299,7 +291,6 @@ export default function ChatView() {
                     </div>
 
                     <div className={['max-w-[72%] min-w-[80px] flex flex-col', isUser ? 'items-end' : 'items-start'].join(' ')}>
-                      {/* Model chip on assistant model change */}
                       {!isUser && msg.showModel && msg.model && (
                         <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
@@ -307,7 +298,6 @@ export default function ChatView() {
                         </div>
                       )}
 
-                      {/* Message bubble */}
                       <div
                         className={[
                           'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
@@ -327,7 +317,6 @@ export default function ChatView() {
           )}
         </div>
 
-        {/* Row 4: Composer (fixed at bottom) */}
         <div className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
           <div className="p-3">
             <div className="relative flex items-end gap-2">
@@ -342,7 +331,6 @@ export default function ChatView() {
                   placeholder={isConfigured ? 'Type your message…' : 'You can compose a message and reference files (@) and tasks/features (#) even before configuring. Configure LLM to send.'}
                   rows={1}
                   aria-label="Message input"
-                  // Allow composing and referencing even if LLM isn't configured; only sending is gated
                   style={{ maxHeight: 200, overflowY: 'auto' }}
                 />
                 <div className="px-3 py-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[12px] text-[var(--text-muted)]">
@@ -414,7 +402,7 @@ export default function ChatView() {
                       role="option"
                       onClick={() => onRefsSelect(item.ref)}
                     >
-                      #{item.ref} - {item.title} ({item.type})
+                      #{item.display} - {item.title} ({item.type})
                     </div>
                   ))}
                 </div>

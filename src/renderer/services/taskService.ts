@@ -1,22 +1,19 @@
-import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
+import type { Task, Feature, ProjectSpec } from 'src/types/tasks'
 import type { TasksIndexSnapshot, ReorderFeaturesPayload, ReorderTasksPayload, ServiceResult } from '../../types/external'
-import DependencyResolver, { DependencyResolverIndex, InvalidRefError, ReferenceKind, ResolvedRef } from './dependencyResolver'
 
 export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection' | 'dependencies'>>
 
-const resolver = DependencyResolver.getInstance();
-
 export type TaskService = {
   getSnapshot: () => Promise<TasksIndexSnapshot>
-  onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
-  addTask: (task: TaskCreateInput) => Promise<ServiceResult>
-  updateTask: (taskId: number, data: Partial<Task>) => Promise<ServiceResult>
-  deleteTask: (taskId: number) => Promise<ServiceResult>
-  addFeature: (taskId: number, feature: Omit<Feature, 'id'> | Partial<Feature>) => Promise<ServiceResult>
-  updateFeature: (taskId: number, featureId: string, data: Partial<Feature>) => Promise<ServiceResult>
-  deleteFeature: (taskId: number, featureId: string) => Promise<ServiceResult>
-  reorderFeatures: (taskId: number, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
-  reorderTasks: (payload: ReorderTasksPayload) => Promise<ServiceResult>
+onUpdate: (callback: (snapshot: TasksIndexSnapshot) => void) => () => void
+addTask: (project: ProjectSpec, task: TaskCreateInput) => Promise<ServiceResult>
+updateTask: (project: ProjectSpec, taskId: string, data: Partial<Task>) => Promise<ServiceResult>
+deleteTask: (project: ProjectSpec, taskId: string) => Promise<ServiceResult>
+addFeature: (project: ProjectSpec, taskId: string, feature: Omit<Feature, 'id'> | Partial<Feature>) => Promise<ServiceResult>
+updateFeature: (project: ProjectSpec, taskId: string, featureId: string, data: Partial<Feature>) => Promise<ServiceResult>
+deleteFeature: (project: ProjectSpec, taskId: string, featureId: string) => Promise<ServiceResult>
+reorderFeatures: (project: ProjectSpec, taskId: string, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
+reorderTasks: (project: ProjectSpec, payload: ReorderTasksPayload) => Promise<ServiceResult>
   initDependencies: (project?: ProjectSpec | null) => Promise<DependencyResolverIndex>
   setProject: (project: ProjectSpec | null) => void
   onDependenciesUpdate: (cb: (idx: DependencyResolverIndex) => void) => () => void

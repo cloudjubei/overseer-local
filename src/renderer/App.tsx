@@ -40,7 +40,7 @@ function NotificationClickHandler() {
   useEffect(() => {
     const unsubscribe = window.notifications.onClicked((metadata: NotificationMetadata) => {
       if (metadata.taskId) {
-        nav.navigateTaskDetails(parseInt(metadata.taskId, 10));
+        nav.navigateTaskDetails(metadata.taskId, metadata.featureId);
       } else if (metadata.chatId) {
         nav.navigateView('Chat');
         // TODO: handle specific chat

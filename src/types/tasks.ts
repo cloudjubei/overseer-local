@@ -25,13 +25,14 @@ export interface Feature {
 }
 
 export interface Task {
-  id: number;
+  id: string; // UUID <-- new
   status: Status;
   title: string;
   description: string;
   features: Feature[];
-  dependencies?: string[];// ["{task_id}.{feature_id}","{task_id}"]
+  dependencies?: string[]; // UUIDs <-- new
   rejection?: string;
+  featureIdToDisplayIndex: Record<string, number>; // <-- new
 }
 
 export interface ProjectRequirement {
@@ -48,4 +49,5 @@ export interface ProjectSpec {
   path: string;
   repo_url: string;
   requirements: ProjectRequirement[];
+  taskIdToDisplayIndex: Record<string, number>; // <-- new
 }

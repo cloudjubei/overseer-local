@@ -40,7 +40,7 @@ const NODE_BUILTINS = new Set([
 const PROVIDER_MAP = [
   { test: m => m === 'react-router-dom', need: 'router' },
   { test: m => /renderer\/hooks\/useTheme(\.ts)?$/.test(m) || /useTheme$/.test(m), need: 'theme' },
-  { test: m => /renderer\/services\/tasksService(\.ts)?$/.test(m), need: 'tasksMock' },
+  { test: m => /renderer\/services\/taskService(\.ts)?$/.test(m), need: 'tasksMock' },
   { test: m => /renderer\/services\/notificationsService(\.ts)?$/.test(m), need: 'notificationsMock' },
   { test: m => /src\/chat\//.test(m) || /renderer\/services\/chatService(\.ts)?$/.test(m), need: 'llmMock' },
   { test: m => /renderer\/preview\//.test(m), need: null }, // preview infra itself, ignore

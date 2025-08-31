@@ -18,14 +18,15 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   const resolved = taskService.resolveRef(dependency);
   const isError = 'code' in resolved;
   const isFeatureDependency = !isError && resolved.kind === 'feature';
+  const display = dependencyResolver.getDisplayRef(dependency) ?? dependency;
 
-  let summary: { title: string; description: string; status: Status } = { title: 'Not found', description: '', status: '-' as Status };
+  let summary: { title: string; description: string; status: Status; displayId: string } = { title: 'Not found', description: '', status: '-' as Status, displayId: display };
 
   if (!isError) {
     if (resolved.kind === 'task') {
-      summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status };
+      summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status, displayId: display };
     } else {
-      summary = { title: resolved.feature.title, description: resolved.feature.description, status: resolved.feature.status as Status };
+      summary = { title: resolved.feature.title, description: resolved.feature.description, status: resolved.feature.status as Status, displayId: display };
     }
   }
 
@@ -68,7 +69,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
     <Tooltip content={content}>
       <span
         className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isInbound ? 'chip--blocks' : 'chip--ok')} flex`}
-        title={`${dependency}${isInbound ? ' (requires this)' : ''}`}
+        title={`${display}${isInbound ? ' (requires this)' : ''}`}
         onClick={(e) => {
           e.preventDefault();
           handleClick();
@@ -82,7 +83,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
           }
         }}
       >
-        #{dependency}
+        #{display}
         {onRemove && (
           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="3" x2="9" y2="9" />

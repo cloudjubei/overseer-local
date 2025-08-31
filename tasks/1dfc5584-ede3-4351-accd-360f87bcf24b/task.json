@@ -1,0 +1,607 @@
+{
+  "id": "1dfc5584-ede3-4351-accd-360f87bcf24b",
+  "status": "+",
+  "title": "UI design and patterns matching best in class",
+  "description": "We want to follow Linear.app and Monday.com as they are one of the best task management apps in the world. We want to mimic Monday's colorful style and palette, but we also want to improve on it. We want to match and improve on Linear's UX and controls.",
+  "features": [
+    {
+      "id": "c252e663-69a5-47cb-a980-923205df778c",
+      "status": "+",
+      "title": "Research and document Monday.com color palette and design tokens",
+      "description": "Analyze Monday.com's colorful design system and document their color palette, including primary colors, secondary colors, status colors, and semantic color usage. Create a comprehensive color token system that captures their vibrant aesthetic while considering accessibility and contrast ratios. Document findings in a design tokens specification that can be implemented in CSS/Tailwind.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "564eb06f-5273-4428-a4dc-730c95b86ca3",
+      "status": "+",
+      "title": "Research and document Linear.app UX patterns and interaction controls",
+      "description": "Study Linear.app's user experience patterns, focusing on their clean interface design, keyboard shortcuts, task management flows, navigation patterns, modal behaviors, form controls, and micro-interactions. Document best practices for task creation, editing, status changes, and overall workflow efficiency. Create UX guidelines that can be applied to our task management application.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "5566fb47-2c85-4655-87f9-4bc52090ab4d",
+      "status": "+",
+      "title": "Implement Monday.com-inspired color system and theming",
+      "description": "Create a comprehensive theming system based on Monday.com's colorful palette but with improvements. Update Tailwind configuration with custom color variables, implement CSS custom properties for dynamic theming, and create color utility classes. Ensure the color system supports light/dark modes and maintains accessibility standards while capturing Monday's vibrant aesthetic.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "a50102d6-d92b-4a6d-94bc-95c25c155359",
+      "status": "+",
+      "title": "Redesign core UI components with Linear.app-inspired UX patterns",
+      "description": "Refactor existing UI components (buttons, modals, forms, inputs, dropdowns) to follow Linear.app's clean and efficient interaction patterns. Implement consistent spacing, typography hierarchy, subtle animations, and intuitive keyboard navigation. Focus on reducing visual clutter while maintaining functionality and improving user efficiency.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "f277d42e-9c88-450a-9d52-8ac41ab39de2",
+      "status": "+",
+      "title": "Implement task management interface inspired by both platforms",
+      "description": "Redesign the main task management interface combining Monday's colorful status indicators and visual hierarchy with Linear's clean layout and efficient workflows. Implement color-coded task statuses, priority indicators, drag-and-drop functionality, and streamlined task creation/editing flows. Ensure the interface feels both visually engaging and highly functional.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "df20aaee-c187-4356-b606-4abd8bed9f23",
+      "status": "+",
+      "title": "Create responsive navigation and sidebar inspired by Linear's layout",
+      "description": "Redesign the application navigation and sidebar to match Linear's clean, collapsible sidebar design with clear hierarchy and efficient space usage. Implement smooth animations for expand/collapse states, keyboard navigation, and proper responsive behavior. Maintain Monday's colorful accent touches while achieving Linear's organizational clarity.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "2529f35a-0fb5-4014-b065-59b01cfafe81",
+      "status": "+",
+      "title": "Implement advanced interaction patterns and micro-animations",
+      "description": "Add sophisticated interaction patterns inspired by both platforms including hover states, loading animations, success/error feedback, smooth transitions between states, and contextual tooltips. Implement Linear-style keyboard shortcuts and Monday-style visual feedback for user actions. Focus on creating a polished, professional feel that exceeds both reference applications.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "827db036-9c40-45f4-9dc5-9289238db732",
+      "status": "+",
+      "title": "Create comprehensive design system documentation and component library",
+      "description": "Document the complete design system including color palette, typography scales, spacing system, component usage guidelines, and interaction patterns. Create a living style guide that demonstrates all UI components and their variants. Ensure the design system is maintainable and extensible for future development while clearly showing improvements over the reference applications.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "16a00de8-3df8-4151-a94d-1338c7e59277",
+      "status": "+",
+      "title": "Sidebar on the left, collapsible, main screen in the middle",
+      "description": "The main screen should be responsive (adapt well to size changes) and allow for vertical scrolling (horizontal scrolling shouldn't really be allowed for the whole screen - only inside for some components).",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "3c4d2fc5-9efd-4eb1-bc6b-62e1f6d51c9f",
+      "status": "+",
+      "title": "Feature details view",
+      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where dependencies lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "fb625722-957a-4324-8aa2-0cbe7eed1610",
+      "status": "+",
+      "title": "Dragging tasks in list view requires visible target areas and animations",
+      "description": "Remember - these are react components, using tailwind.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "dcf61f83-e5a4-4c5f-8e45-1367fba9d0b7",
+      "status": "+",
+      "title": "Tasks list and features list should allow their lists to scroll",
+      "description": "The whole screen doesn't scroll - just the list of items inside",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "94e5e319-b1f5-4c16-bac3-a192c273b17d",
+      "status": "+",
+      "title": "Documents screen - each section allows scrolling",
+      "description": "The whole screen doesn't scroll - just the list of items inside the documents list and the document itself - both separately.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/DocumentsView.tsx",
+        "src/renderer/docs/DocumentsBrowserView.tsx"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "d6d6a791-57e1-4698-86b0-3afd66ffe412",
+      "status": "+",
+      "title": "Chats screen - each section allows scrolling",
+      "description": "The whole screen doesn't scroll - just the list of items inside the chats list and the chat messages itself (ONLY THE MESSAGES, the top settings and bottom message composer are stuck)",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "16cecd70-5f3c-4c7b-ba5b-ef5d3dd9546d",
+      "status": "+",
+      "title": "DocumentsView according to latest design",
+      "description": "Remember - these are react components, using tailwind.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/DocumentsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "6977845f-5145-4646-b801-e1c3fe0de5ff",
+      "status": "+",
+      "title": "SettingsView according to latest design",
+      "description": "Remember - these are react components, using tailwind.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "9b970029-6a4e-45f5-9f1d-1c991acbecd3",
+      "status": "+",
+      "title": "The button style in the tasks list needs rework",
+      "description": "Currently I can see a rectangular blue button - this should be made according to design. It should look slick. Remember - these are react components, using tailwind. The Clear button is almost invisible (it has not border). Rethink the whole button design and make it consistent and readable.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "fd9e5a98-49fd-4b20-a22a-caf851e84d03",
+      "status": "+",
+      "title": "In the features list the Actions should only show on hover",
+      "description": "Make the Edit button an icon button not the words. The Edit Task button can show as the same button icon, but in the Task Overview Area. The Add Feature can also be changed into a nice '+' button. We should also have a standard Back button with an icon.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "8ad954ce-d2be-4a97-b5b0-1c1eff479b91",
+      "status": "+",
+      "title": "index.css has grown to be massive",
+      "description": "The file should really contain reusable effects that can be applied to many different components - then those components will have correct classnames set to use them. We need to shrink index.css and make reusable styles - this way everything is cleaner and in general the views and codebase will be more standardized.",
+      "plan": "",
+      "context": [
+        "src/index.css",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "95c60b20-cf41-4891-810d-40660900dafb",
+      "status": "+",
+      "title": "Feature dragging should follow the same pattern as Task dragging.",
+      "description": "The same visual cues need to be used in both places with nice animations.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "1532cce2-94dd-4a08-95ca-6b762a5b597e",
+      "status": "+",
+      "title": "Home - List <-> Board switch",
+      "description": "The switch doesn't look good - it should be made to look according to latest design paradigms.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "2423693e-56b2-40f5-8ac1-3cc6e6c1d058",
+      "status": "+",
+      "title": "Creating a feature doesn't work",
+      "description": "The required connector/IPC isn't implemented - i.e. taskService.addFeature doesn't work",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksDetailView.tsx",
+        "src/renderer/screens/FeatureCreateView.tsx",
+        "src/renderer/screens/FeatureEditView.tsx"
+      ]
+    },
+    {
+      "id": "5cfbded4-9668-4456-8339-0651236253f8",
+      "status": "+",
+      "title": "Edit feature should allow editing the rejection field",
+      "description": "When nothing is input, the key is removed from the feature - otherwise it should be saved. If a feature has a rejection, it should display an exclamation badge next to the status in the Feature list.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksDetailView.tsx",
+        "src/renderer/screens/FeatureEditView.tsx"
+      ]
+    },
+    {
+      "id": "a0321906-ff87-4677-b67b-6d8cd346012b",
+      "status": "+",
+      "title": "Edit and create feature views should show the Status Bullet",
+      "description": "Both views need to allow editing of the feature's status",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksDetailView.tsx",
+        "src/renderer/screens/FeatureCreateView.tsx",
+        "src/renderer/screens/FeatureEditView.tsx"
+      ]
+    },
+    {
+      "id": "fba81ba7-d9bd-451e-8d2b-d14195984f7d",
+      "status": "+",
+      "title": "Tasks list dragging error",
+      "description": "When dragging an item in the Tasks list - it results an error of the TaskIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "docs/design/COMPONENTS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/styleguide/index.html",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "15cff978-e138-4bfc-abc2-3cd848334c70",
+      "status": "+",
+      "title": "Creating a task is broken",
+      "description": "The status fields don't match the Task specification",
+      "plan": "",
+      "context": [
+        "src/renderer/components/TaskForm.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "fbc0b91a-8722-4321-af49-5c1625b74b77",
+      "status": "+",
+      "title": "Create a unified screen with side panel style - Settings screen",
+      "description": "Settings should have a panel that behaves similarly to the Sidebar (it's collapsible). It holds the different sections. This kind of component, a screen with a sidepanel needs to be unified, reusable and made slick and pretty.",
+      "plan": "",
+      "context": [
+        "src/index.css",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/SidebarView.tsx",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "docs/STANDARDS.md"
+      ],
+      "acceptance": []
+    },
+    {
+      "id": "b0bd5b09-c838-4826-863e-7d70a236e65b",
+      "status": "+",
+      "title": "Task deletion",
+      "description": "It should be possible to delete a task from the edit screen (after extra alert confirmation).\nThe user should be then taken to the TasksList screen.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/TaskForm.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "814f68ef-150e-4738-8659-fdbfdbdbb869",
+      "status": "+",
+      "title": "Feature removal",
+      "description": "It should be possible to remove a feature from the edit form (after extra alert confirmation) - all existing dependencies to this feature should be removed as well.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "be9c6340-9409-431f-b7ce-4634be6e5fe4",
+      "status": "+",
+      "title": "Reuse the sidepanel for Documents",
+      "description": "The Documents screen should have the same kind of sidepanel that the Settings screen has. For Docs it holds the list of documents and the topbar (search and sorting). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/DocumentsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "fbc0b91a-8722-4321-af49-5c1625b74b77"
+      ]
+    },
+    {
+      "id": "b902122f-7c2e-4144-a52e-7fe40b2fddad",
+      "status": "+",
+      "title": "Reuse the sidepanel for Chat",
+      "description": "The Chat screen should have the same kind of sidepanel that the Settings screen has. For Chat it holds the list of all chats (i.e. chat history). Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/NotificationsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "fbc0b91a-8722-4321-af49-5c1625b74b77"
+      ]
+    },
+    {
+      "id": "06743509-2393-4b11-8728-e400e874af78",
+      "status": "+",
+      "title": "Reuse the sidepanel for Notifications",
+      "description": "The Notifications screen should have the same kind of sidepanel that the Settings screen has. For Notifications it can hold different sections similarly to Settings - for now these can be just general and messages. Make sure the CollapsibleSidebar has full height - i.e. it takes the maximum given and the main view follows.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "fbc0b91a-8722-4321-af49-5c1625b74b77"
+      ]
+    },
+    {
+      "id": "7de1829b-c85a-4426-bb39-381753902526",
+      "status": "+",
+      "title": "Sidepanel issues when in mobile mode",
+      "description": "When in mobile mode (i.e. small screen) the main sidebar gets pushed to the top. On a screen that has the CollapsibleSidebar - when then main sidebar is closed everything is ok, but when it's open - it gets pushed underneath the CollapsibleSidebar.\nOn mobile the CollapsibleSidebar should behave the same way as the main Sidebar.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "2432fd5d-3ebf-4190-9652-5f5563e8fd9e",
+      "status": "+",
+      "title": "Sidepanel issues when in mobile mode",
+      "description": "When in mobile mode (i.e. small screen) the CollapsibleSidebar cannot be closed by clicking the open/close button (it closes when tapping outside but needs to close on button click). The main Sidebar also has an issue - when the screen switches to mobiles mode and it's collapsed - then when trying to open it, it stays collapsed. In mobile mode both sidebars should always open non-collapsed.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "33cfe746-7a21-4a2b-97b4-b99746d7a8c5",
+      "status": "+",
+      "title": "Modal contents can grow bigger than the popup",
+      "description": "For instance, Create New Feature using the FeatureForm has textboxes that can be expanded, and Dependencies that can grow forever.\nThese stretch the whole content beyond the screen.\n\nThe simplest solution is to have the header and footer sticky, and the middle section scrollable - thus allowing stretching (but textboxes should be limited to half the popup size or something sensible).",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Modal.tsx",
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/components/TaskForm.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "244fad46-c4a4-4718-8c0b-b42ac49dea7f",
+      "status": "+",
+      "title": "StatusBadge + StatusBullet edit improvement",
+      "description": "StatusBadge and StatusBullet should be merged into one reusable component (FeatureForm shows an example of this). In some places it can be in edit mode - then StatusBullet shows - and highlights when the either the badge or bullet are hovered.\nClicking either also triggers the dropdown to show.\nThe dropdown needs to show above the badge+bullet if it's close to the bottom of the screen.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/tasks/StatusBadge.tsx",
+        "src/renderer/components/tasks/StatusBullet.tsx",
+        "src/renderer/components/FeatureForm.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "4c489806-ac2d-4c5b-a6af-d1e8aa3c455f",
+      "status": "+",
+      "title": "TaskDetailsView",
+      "description": "Overview needs to be collapsible. When expanded, it can be scrolled and should be fitting at most 4 lines of text.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "6e8417be-2501-4b61-acc8-8f8cafaf6add",
+      "status": "+",
+      "title": "The TaskForm should use the StatusBullet and StatusBadge",
+      "description": "Follow the implementation in FeatureForm",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Modal.tsx",
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/components/TaskForm.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "4095a67b-2e97-495c-b0c1-fac51d568c6c",
+      "status": "+",
+      "title": "The task view (task row) inside TasksListView needs to change",
+      "description": "the way it should be laid out in the following grid (id should be in the middle between the two rows):\n| ID | Title | {features_done}/{all_features} |\n| | Description | Status |\nDependencies this task is blocking\nDependencies this task is blocked by",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "ff934b3d-7ff8-41ae-96cd-fbfa71b8b7b5",
+      "status": "+",
+      "title": "The feature view (feature row) inside TaskDetailsView needs to change - it should follow TasksListView",
+      "description": "the way it should be laid out in the following grid (id+status should be in the middle between the three rows):\n| ID | Title | |\n| Status | Description | Edit Action |\n| | Dependencies blocking\nDependencies blocked by | |",
+      "plan": "",
+      "context": [
+        "src/styles/screens/task-details.css",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": [
+        "4095a67b-2e97-495c-b0c1-fac51d568c6c"
+      ]
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "c252e663-69a5-47cb-a980-923205df778c": 0,
+    "564eb06f-5273-4428-a4dc-730c95b86ca3": 1,
+    "5566fb47-2c85-4655-87f9-4bc52090ab4d": 2,
+    "a50102d6-d92b-4a6d-94bc-95c25c155359": 3,
+    "f277d42e-9c88-450a-9d52-8ac41ab39de2": 4,
+    "df20aaee-c187-4356-b606-4abd8bed9f23": 5,
+    "2529f35a-0fb5-4014-b065-59b01cfafe81": 6,
+    "827db036-9c40-45f4-9dc5-9289238db732": 7,
+    "16a00de8-3df8-4151-a94d-1338c7e59277": 8,
+    "3c4d2fc5-9efd-4eb1-bc6b-62e1f6d51c9f": 9,
+    "fb625722-957a-4324-8aa2-0cbe7eed1610": 10,
+    "dcf61f83-e5a4-4c5f-8e45-1367fba9d0b7": 11,
+    "94e5e319-b1f5-4c16-bac3-a192c273b17d": 12,
+    "d6d6a791-57e1-4698-86b0-3afd66ffe412": 13,
+    "16cecd70-5f3c-4c7b-ba5b-ef5d3dd9546d": 14,
+    "6977845f-5145-4646-b801-e1c3fe0de5ff": 15,
+    "9b970029-6a4e-45f5-9f1d-1c991acbecd3": 16,
+    "fd9e5a98-49fd-4b20-a22a-caf851e84d03": 17,
+    "8ad954ce-d2be-4a97-b5b0-1c1eff479b91": 18,
+    "95c60b20-cf41-4891-810d-40660900dafb": 19,
+    "1532cce2-94dd-4a08-95ca-6b762a5b597e": 20,
+    "2423693e-56b2-40f5-8ac1-3cc6e6c1d058": 21,
+    "5cfbded4-9668-4456-8339-0651236253f8": 22,
+    "a0321906-ff87-4677-b67b-6d8cd346012b": 23,
+    "fba81ba7-d9bd-451e-8d2b-d14195984f7d": 24,
+    "15cff978-e138-4bfc-abc2-3cd848334c70": 25,
+    "fbc0b91a-8722-4321-af49-5c1625b74b77": 26,
+    "b0bd5b09-c838-4826-863e-7d70a236e65b": 27,
+    "814f68ef-150e-4738-8659-fdbfdbdbb869": 28,
+    "be9c6340-9409-431f-b7ce-4634be6e5fe4": 29,
+    "b902122f-7c2e-4144-a52e-7fe40b2fddad": 30,
+    "06743509-2393-4b11-8728-e400e874af78": 31,
+    "7de1829b-c85a-4426-bb39-381753902526": 32,
+    "2432fd5d-3ebf-4190-9652-5f5563e8fd9e": 33,
+    "33cfe746-7a21-4a2b-97b4-b99746d7a8c5": 34,
+    "244fad46-c4a4-4718-8c0b-b42ac49dea7f": 35,
+    "4c489806-ac2d-4c5b-a6af-d1e8aa3c455f": 36,
+    "6e8417be-2501-4b61-acc8-8f8cafaf6add": 37,
+    "4095a67b-2e97-495c-b0c1-fac51d568c6c": 38,
+    "ff934b3d-7ff8-41ae-96cd-fbfa71b8b7b5": 39
+  }
+}

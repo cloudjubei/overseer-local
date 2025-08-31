@@ -67,7 +67,7 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/services/
     - chatService.ts
     - docsService.ts
-    - tasksService.ts
+    - taskService.ts
     - notificationsService.ts
   - src/renderer/hooks/
     - useChats.ts
@@ -111,6 +111,7 @@ This document describes how files and directories are organised in this reposito
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
+  - migrate-uuids.ts: Script to migrate task and feature IDs to UUIDs, updating dependencies and display indices. Can be used as a library or invoked via CLI.
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns, icon.ico, icon.png
   - build/entitlements.mac.plist
@@ -153,3 +154,17 @@ Notes:
 
 ## New Components/Services
 - src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
+
+## Migration Script (UUIDs)
+- Location: scripts/migrate-uuids.ts
+- Purpose: Migrate task and feature IDs from numeric to UUID, updating all dependency references and capturing display indices for fast lookup (taskIdToDisplayIndex on ProjectSpec and featureIdToDisplayIndex on each Task).
+- Usage (CLI):
+  - ts-node scripts/migrate-uuids.ts --config projects/thefactory.json [options]
+  - Options:
+    - --snapshot <path>: Input TasksIndexSnapshot JSON (overrides config)
+    - --project <path>: Input ProjectSpec JSON (overrides config)
+    - --out-snapshot <path>: Output path for migrated snapshot (default: overwrite input)
+    - --out-project <path>: Output path for migrated project (default: overwrite input)
+    - --dry-run: Do not write files; print summary only
+    - --pretty: Pretty-print JSON output
+  - Config resolution: The provided config JSON may include either top-level keys or under a 'paths' object: tasksSnapshot, projectSpec. If not provided, defaults are resolved relative to the config file directory: tasks-index.json and project-spec.json.

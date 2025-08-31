@@ -26,9 +26,7 @@ type Props = {
   onDelete?: () => void
   submitting?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
-  allTasksSnapshot?: TasksIndexSnapshot
-  allProjectsSnapshot?: ProjectsIndexSnapshot
-  taskId: number
+  taskId: string
   featureId?: string
 }
 
@@ -39,8 +37,6 @@ export function FeatureForm({
   onDelete,
   submitting = false,
   titleRef,
-  allTasksSnapshot,
-  allProjectsSnapshot,
   taskId,
   featureId = undefined,
 }: Props) {
@@ -287,8 +283,8 @@ export function FeatureForm({
       {showSelector && (
         <Modal title="Select Dependency" onClose={() => setShowSelector(false)} isOpen={true} size="md">
           <DependencySelector
-            allTasksSnapshot={allTasksSnapshot}
-            allProjectsSnapshot={allProjectsSnapshot}
+            // allTasksSnapshot={allTasksSnapshot}
+            // allProjectsSnapshot={allProjectsSnapshot}
             onConfirm={(deps) => {
               const newDeps = deps.filter((d) => !dependencies.includes(d))
               setDependencies([...dependencies, ...newDeps])

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../components/ui/Button'
-import { Task, Status } from 'src/types/tasks'
+import { Task, Status, ProjectSpec } from 'src/types/tasks'
 import { taskService } from '../services/taskService'
 import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
@@ -9,6 +9,7 @@ import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
+import { projectsService } from '../services/projectsService'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -18,16 +19,11 @@ const STATUS_LABELS: Record<Status, string> = {
   '=': 'Deferred',
 }
 
-function toTasksArray(index: TasksIndexSnapshot): Task[] {
-  const tasksById = index?.tasksById || {}
-  const arr = Object.values(tasksById) as Task[]
-  // Keep stable by orderedIds if provided; otherwise by id desc
-  if (index?.orderedIds && Array.isArray(index.orderedIds)) {
-    const byId: Record<number, Task> = tasksById as any
-    return index.orderedIds.map((id) => byId[id]).filter(Boolean)
-  }
-  arr.sort((a, b) => (b.id || 0) - (a.id || 0))
-  return arr
+function toTasksArray(tasks: TasksIndexSnapshot, taskIdToDisplayIndex: Record<string, number>): Task[] {
+  const tasksById = tasks.tasksById
+  const byId: Record<string, Task> = tasksById as any
+  const sortedTaskIds = Object.keys(taskIdToDisplayIndex).sort((a, b) => taskIdToDisplayIndex[a] - taskIdToDisplayIndex[b])
+  return sortedTaskIds.map((id) => byId[id]).filter(Boolean)
 }
 
 function countFeatures(task: Task) {
@@ -76,11 +72,12 @@ export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [sortBy, setSortBy] = useState<'manual' | 'id_asc' | 'id_desc' | 'status'>('id_desc')
-  const [index, setIndex] = useState<TasksIndexSnapshot | null>(null)
+  const [sortBy, setSortBy] = useState<'manual' | 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
+  const [taskIndex, setTaskIndex] = useState<TasksIndexSnapshot | null>(null)
+  const [project, setProject] = useState<ProjectSpec | null>(null)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
-  const [dragTaskId, setDragTaskId] = useState<number | null>(null)
+  const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
@@ -97,13 +94,34 @@ export default function TasksListView() {
     ;(async () => {
       try {
         const idx = await taskService.getSnapshot()
-        if (!cancelled) setIndex(idx)
+        if (!cancelled) setTaskIndex(idx)
       } catch (e) {
-        console.error('Failed to load tasks index.', e)
+        console.error('Failed to load task index.', e)
       }
     })()
     const unsubscribe = taskService.onUpdate((idx) => {
-      setIndex(idx)
+      setTaskIndex(idx)
+    })
+    return () => {
+      cancelled = true
+      if (typeof unsubscribe === 'function') unsubscribe()
+    }
+  }, [projectId])
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const project = await projectsService.getById(projectId)
+        if (!cancelled && project) setProject(project)
+      } catch (e) {
+        console.error('Failed to load project index.', e)
+      }
+    })()
+    const unsubscribe = projectsService.onUpdate(async (idx) => {
+      const project = await projectsService.getById(projectId)
+      if (project){
+        setProject(project)
+      }
     })
     return () => {
       cancelled = true
@@ -111,33 +129,17 @@ export default function TasksListView() {
     }
   }, [projectId])
 
+  const taskIdToDisplayIndex = useMemo(() => {
+    return project?.taskIdToDisplayIndex ?? {}
+  }, [project]) 
+
   useEffect(() => {
-    if (index) {
-      setAllTasks(toTasksArray(index))
+    if (taskIndex) {
+      setAllTasks(toTasksArray(taskIndex, taskIdToDisplayIndex))
     } else {
       setAllTasks([])
     }
-  }, [index])
-
-  // Build a dependents map: key is dependency id (taskId or taskId.featureId), value is array of dependents (taskId or featureId strings)
-  const globalDependents = useMemo(() => {
-    const map: Record<string, string[]> = {}
-    if (!index?.tasksById) return map
-    Object.entries(index.tasksById).forEach(([tId, tsk]) => {
-      const tid = parseInt(tId, 10)
-      ;(tsk.dependencies || []).forEach((dep) => {
-        if (!map[dep]) map[dep] = []
-        map[dep].push(`${tid}`)
-      })
-      ;(tsk.features || []).forEach((f) => {
-        ;(f.dependencies || []).forEach((dep) => {
-          if (!map[dep]) map[dep] = []
-          map[dep].push(`${f.id}`)
-        })
-      })
-    })
-    return map
-  }, [index])
+  }, [taskIndex, taskIdToDisplayIndex])
 
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
@@ -158,18 +160,21 @@ export default function TasksListView() {
 
   const sorted = useMemo(() => {
     let tasks = [...allTasks]
-    if (sortBy !== 'manual') {
-      if (sortBy === 'id_asc') {
-        tasks.sort((a, b) => (a.id || 0) - (b.id || 0))
-      } else if (sortBy === 'id_desc') {
-        tasks.sort((a, b) => (b.id || 0) - (a.id || 0))
-      } else if (sortBy === 'status') {
+    if (project && sortBy !== 'manual') {
+      if (sortBy === 'index_asc') {
+        tasks.sort((a, b) => project.taskIdToDisplayIndex[a.id] - project.taskIdToDisplayIndex[b.id])
+      } else if (sortBy === 'index_desc') {
+        tasks.sort((a, b) => project.taskIdToDisplayIndex[b.id] - project.taskIdToDisplayIndex[a.id])
+      } else if (sortBy === 'status_asc') {
         const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
-        tasks.sort((a, b) => sVal(a) - sVal(b) || (a.id || 0) - (b.id || 0))
+        tasks.sort((a, b) => sVal(a) - sVal(b) || project.taskIdToDisplayIndex[a.id] - project.taskIdToDisplayIndex[b.id])
+      } else if (sortBy === 'status_desc') {
+        const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
+        tasks.sort((a, b) => sVal(b) - sVal(a) || project.taskIdToDisplayIndex[b.id] - project.taskIdToDisplayIndex[a.id])
       }
     }
     return tasks
-  }, [allTasks, sortBy])
+  }, [project, allTasks, sortBy])
 
   const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
   const isFiltered = query !== '' || statusFilter !== 'all'
@@ -178,11 +183,11 @@ export default function TasksListView() {
     openModal({ type: 'task-create' })
   }
 
-  const handleMoveTask = async (fromId: number, toIndex: number) => {
+  const handleMoveTask = async (fromIndex: number, toIndex: number) => {
     if (saving) return
     setSaving(true)
     try {
-      const res = await taskService.reorderTasks({ fromId, toIndex })
+      const res = await taskService.reorderTasks({ fromIndex, toIndex })
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder task: ${e.message || e}`)
@@ -191,7 +196,7 @@ export default function TasksListView() {
     }
   }
 
-  const handleStatusChange = async (taskId: number, status: Status) => {
+  const handleStatusChange = async (taskId: string, status: Status) => {
     try {
       await taskService.updateTask(taskId, { status })
     } catch (e) {
@@ -221,7 +226,7 @@ export default function TasksListView() {
     setDropPosition(null)
   }
 
-  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, taskId: number) => {
+  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, taskId: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       navigateTaskDetails(taskId)
@@ -256,7 +261,7 @@ export default function TasksListView() {
       const toIndex = dropIndex //+ (dropPosition === 'after' ? 1 : 0)
       
       if (fromIndex !== -1 && toIndex !== fromIndex) {
-        handleMoveTask(dragTaskId, toIndex)
+        handleMoveTask(fromIndex, toIndex)
       }
     }
     clearDndState()
@@ -300,9 +305,10 @@ export default function TasksListView() {
           <div className="control">
             <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by">
               <option value="manual">Manual order</option>
-              <option value="id_asc">ID ascending</option>
-              <option value="id_desc">ID descending</option>
-              <option value="status">Status</option>
+              <option value="index_asc">Ascending</option>
+              <option value="index_desc">Descending</option>
+              <option value="status_asc">Status ^</option>
+              <option value="status_desc">Status \/</option>
             </select>
           </div>
         </div>
@@ -358,7 +364,7 @@ export default function TasksListView() {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 const deps = Array.isArray(t.dependencies) ? t.dependencies : []
-                const dependents = globalDependents[String(t.id)] || []
+                const dependents : string[] =  [] //TODO:
                 return (
                   <li key={t.id} className="task-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -390,7 +396,7 @@ export default function TasksListView() {
 
                         {/* <div className="col col-id"><span className="chips-sub__label">{String(t.id)}</span></div> */}
 
-                        <div className="col col-id"><span className="id-chip">{String(t.id)}</span></div>
+                        <div className="col col-id"><span className="id-chip">{taskIdToDisplayIndex[t.id]}</span></div>
                         <div className="col col-title">
                           <div className="title-line">
                             <span className="title-text">{t.title || ''}</span>
