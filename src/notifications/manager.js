@@ -65,6 +65,31 @@ export class NotificationManager {
     this._ipcBound = true;
   }
 
+  //TODO: on create call ->
+  // __showOsNotification(notification) {
+  //   const prefs = this.getPreferences();
+  //   if (!prefs.osNotificationsEnabled) return;
+  //   if (prefs.categoriesEnabled && !prefs.categoriesEnabled[notification.category]) return;
+
+  //   const data = {
+  //     title: notification.title,
+  //     message: notification.message,
+  //     metadata: {
+  //       ...(notification.metadata || {}),
+  //       projectId: this.currentProjectId,
+  //     },
+  //     soundsEnabled: prefs.soundsEnabled,
+  //     displayDuration: prefs.displayDuration
+  //   };
+
+  //   try {
+  //     //TODO:
+  //     await window.notifications.sendOs(data);
+  //   } catch (error) {
+  //     console.error('Failed to send OS notification:', error);
+  //   }
+  // }
+  
   sendOs(data) {
     if (!Notification.isSupported()) {
       return { success: false, error: 'Notifications not supported' };
@@ -75,6 +100,7 @@ export class NotificationManager {
         title: data.title,
         body: data.message,
         silent: !data.soundsEnabled,
+        timeoutType: data.displayDuration > 0 ? 'default' : 'never',
       });
 
       notification.on('click', () => {
