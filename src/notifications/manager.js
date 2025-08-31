@@ -11,29 +11,27 @@ export class NotificationManager {
     this.window = window;
     this._ipcBound = false;
 
-    this.storages = {}
-    this.systemPreferences = new NotificationsSystemPreferences()
-    this.preferences = {}
+    this.storages = {};
+    this.systemPreferences = new NotificationsSystemPreferences();
+    this.preferences = {};
   }
 
-  __getStorage(projectId)
-  {
-    if (!this.storages[projectId]){
-      this.storages[projectId] = new NotificationsStorage(projectId)
+  __getStorage(projectId) {
+    if (!this.storages[projectId]) {
+      this.storages[projectId] = new NotificationsStorage(projectId);
     }
-    return this.storages[projectId]
+    return this.storages[projectId];
   }
-  __getPreferences(projectId)
-  {
-    if (!this.preferences[projectId]){
-      this.preferences[projectId] = new NotificationsPreferences(projectId)
+  __getPreferences(projectId) {
+    if (!this.preferences[projectId]) {
+      this.preferences[projectId] = new NotificationsPreferences(projectId);
     }
-    return this.preferences[projectId]
+    return this.preferences[projectId];
   }
 
   async init() {
-    this.__getStorage('main')
-    this.__getPreferences('main')
+    this.__getStorage('main');
+    this.__getPreferences('main');
 
     this._registerIpcHandlers();
   }
@@ -41,22 +39,22 @@ export class NotificationManager {
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
-    const handlers = {  }
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = (args) => this.sendOs(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = (args) => this.getRecentNotifications(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT] = (args) => this.getUnreadNotificationsCount(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = (args) => this.markAllNotificationsAsRead(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = (args) => this.markNotificationAsRead(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL] = (args) => this.deleteAllNotifications(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM] = (args) => this.getSystemPreferences(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM_UPDATE] = (args) => this.updateSystemPreferences(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT] = (args) => this.getProjectPreferences(args)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT_UPDATE] = (args) => this.updateProjectPreferences(args)
+    const handlers = {};
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = (args) => this.sendOs(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = (args) => this.getRecentNotifications(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT] = (args) => this.getUnreadNotificationsCount(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = (args) => this.markAllNotificationsAsRead(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = (args) => this.markNotificationAsRead(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL] = (args) => this.deleteAllNotifications(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM] = (args) => this.getSystemPreferences(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM_UPDATE] = (args) => this.updateSystemPreferences(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT] = (args) => this.getProjectPreferences(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT_UPDATE] = (args) => this.updateProjectPreferences(args);
 
-    for(const handler of Object.keys(handlers)){
+    for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
         try {
-          return await handlers[handler](args)
+          return await handlers[handler](args);
         } catch (e) {
           console.error(`${handler} failed`, e);
           return { ok: false, error: String(e?.message || e) };
@@ -67,31 +65,6 @@ export class NotificationManager {
     this._ipcBound = true;
   }
 
-  //TODO: on create call ->
-  // __showOsNotification(notification) {
-  //   const prefs = this.getPreferences();
-  //   if (!prefs.osNotificationsEnabled) return;
-  //   if (prefs.categoriesEnabled && !prefs.categoriesEnabled[notification.category]) return;
-
-  //   const data = {
-  //     title: notification.title,
-  //     message: notification.message,
-  //     metadata: {
-  //       ...(notification.metadata || {}),
-  //       projectId: this.currentProjectId,
-  //     },
-  //     soundsEnabled: prefs.soundsEnabled,
-  //     displayDuration: prefs.displayDuration
-  //   };
-
-  //   try {
-  //     //TODO:
-  //     await window.notifications.sendOs(data);
-  //   } catch (error) {
-  //     console.error('Failed to send OS notification:', error);
-  //   }
-  // }
-  
   sendOs(data) {
     if (!Notification.isSupported()) {
       return { success: false, error: 'Notifications not supported' };
@@ -102,7 +75,6 @@ export class NotificationManager {
         title: data.title,
         body: data.message,
         silent: !data.soundsEnabled,
-        timeoutType: data.displayDuration > 0 ? 'default' : 'never',
       });
 
       notification.on('click', () => {
@@ -123,40 +95,38 @@ export class NotificationManager {
     }
   }
 
-
   getRecentNotifications({ project }) {
-    const storage = this.__getStorage(project.id)
-    return storage.getRecent()
+    const storage = this.__getStorage(project.id);
+    return storage.getRecent();
   }
   getUnreadNotificationsCount({ project }) {
-    const storage = this.__getStorage(project.id)
-    return storage.getUnread(id).length
+    const storage = this.__getStorage(project.id);
+    return storage.getUnread().length;
   }
   markAllNotificationsAsRead({ project }) {
-    const storage = this.__getStorage(project.id)
-    storage.markAllAsRead()
+    const storage = this.__getStorage(project.id);
+    storage.markAllAsRead();
   }
   markNotificationAsRead({ project, id }) {
-    const storage = this.__getStorage(project.id)
-    storage.markAsRead(id)
+    const storage = this.__getStorage(project.id);
+    storage.markAsRead(id);
   }
   deleteAllNotifications({ project }) {
-    const storage = this.__getStorage(project.id)
-    storage.deleteAll()
+    const storage = this.__getStorage(project.id);
+    storage.deleteAll();
   }
 
   getSystemPreferences() {
-    return this.systemPreferences
+    return this.systemPreferences.getPreferences();
   }
   updateSystemPreferences({ updates }) {
-    return this.systemPreferences.savePreferences(updates)
+    return this.systemPreferences.savePreferences(updates);
   }
   getProjectPreferences({ project }) {
-    return this.__getPreferences(project.id)
+    return this.__getPreferences(project.id).getPreferences();
   }
   updateProjectPreferences({ project, updates }) {
-    const preferences = this.__getPreferences(project.id)
-    return preferences.savePreferences(updates)
+    const preferences = this.__getPreferences(project.id);
+    return preferences.savePreferences(updates);
   }
 }
-
