@@ -52,6 +52,8 @@ async function runCli() {
 
   const taskFolders = await fs.readdir(tasksInPath)
   for (const taskFolder of taskFolders){
+    const s = await fs.lstat(tasksInPath + "/" + taskFolder)
+    if (!s.isDirectory()) continue
     const raw = await fs.readFile(`${tasksInPath}/${taskFolder}/task.json`)
     const json = JSON.parse(raw, 'utf8')
 
