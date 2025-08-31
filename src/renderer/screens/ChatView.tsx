@@ -9,8 +9,7 @@ import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import type { ChatMessage } from '../types'
 import FileDisplay from '../components/ui/FileDisplay'
-import useFilesIndex from '../hooks/useFilesIndex'
-import { inferFileType } from '../services/fileService'
+import useFiles, { inferFileType } from '../../renderer/hooks/useFiles';
 
 export default function ChatView() {
   const {
@@ -24,7 +23,7 @@ export default function ChatView() {
     uploadDocument,
   } = useChats()
 
-  const { index } = useFilesIndex()
+  const { files, getFileByPath } = useFiles()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
@@ -39,7 +38,7 @@ export default function ChatView() {
     matches: matchingDocs,
     position: autocompletePosition,
     onSelect: onAutocompleteSelect,
-  } = useFilesAutocomplete({ filesList: index.files.map(f => f.path), input, setInput, textareaRef, mirrorRef })
+  } = useFilesAutocomplete({ filesList: files.map(f => f.path), input, setInput, textareaRef, mirrorRef })
 
   const {
     isOpen: isRefsOpen,
@@ -154,7 +153,7 @@ export default function ChatView() {
       } else if (token.startsWith('@')) {
         const path = token.slice(1)
         // Try to find full metadata; fallback to minimal
-        const meta = index.byPath.get(path)
+        const meta = getFileByPath(path)
         const name = meta?.name || (path.split('/').pop() || path)
         const type = meta?.type || inferFileType(path)
         const size = meta?.size ?? undefined
@@ -368,7 +367,7 @@ export default function ChatView() {
                   aria-label="Files suggestions"
                 >
                   {matchingDocs.map((path, idx) => {
-                    const meta = index.byPath.get(path)
+                    const meta = getFileByPath(path)
                     const name = meta?.name || (path.split('/').pop() || path)
                     const type = meta?.type || inferFileType(path)
                     const size = meta?.size ?? undefined

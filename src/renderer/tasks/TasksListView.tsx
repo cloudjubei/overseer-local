@@ -1,15 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../components/ui/Button'
-import { Task, Status, ProjectSpec } from 'src/types/tasks'
-import { taskService } from '../services/taskService'
-import type { TasksIndexSnapshot } from '../../types/external'
+import { Task, Status } from 'src/types/tasks'
 import { useNavigator } from '../navigation/Navigator'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
-import { projectsService } from '../services/projectsService'
+import { useTasks } from '../hooks/useTasks'
 
 const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -17,13 +15,6 @@ const STATUS_LABELS: Record<Status, string> = {
   '-': 'Pending',
   '?': 'Blocked',
   '=': 'Deferred',
-}
-
-function toTasksArray(tasks: TasksIndexSnapshot, taskIdToDisplayIndex: Record<string, number>): Task[] {
-  const tasksById = tasks.tasksById
-  const byId: Record<string, Task> = tasksById as any
-  const sortedTaskIds = Object.keys(taskIdToDisplayIndex).sort((a, b) => taskIdToDisplayIndex[a] - taskIdToDisplayIndex[b])
-  return sortedTaskIds.map((id) => byId[id]).filter(Boolean)
 }
 
 function countFeatures(task: Task) {
@@ -73,8 +64,6 @@ export default function TasksListView() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'manual' | 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
-  const [taskIndex, setTaskIndex] = useState<TasksIndexSnapshot | null>(null)
-  const [project, setProject] = useState<ProjectSpec | null>(null)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
@@ -87,60 +76,12 @@ export default function TasksListView() {
   const { projectId } = useActiveProject()
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
-
-  // Subscribe to tasks index updates and refresh when project context changes
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const idx = await taskService.getSnapshot()
-        if (!cancelled) setTaskIndex(idx)
-      } catch (e) {
-        console.error('Failed to load task index.', e)
-      }
-    })()
-    const unsubscribe = taskService.onUpdate((idx) => {
-      setTaskIndex(idx)
-    })
-    return () => {
-      cancelled = true
-      if (typeof unsubscribe === 'function') unsubscribe()
-    }
-  }, [projectId])
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const project = await projectsService.getById(projectId)
-        if (!cancelled && project) setProject(project)
-      } catch (e) {
-        console.error('Failed to load project index.', e)
-      }
-    })()
-    const unsubscribe = projectsService.onUpdate(async (idx) => {
-      const project = await projectsService.getById(projectId)
-      if (project){
-        setProject(project)
-      }
-    })
-    return () => {
-      cancelled = true
-      if (typeof unsubscribe === 'function') unsubscribe()
-    }
-  }, [projectId])
-
-  const taskIdToDisplayIndex = useMemo(() => {
-    return project?.taskIdToDisplayIndex ?? {}
-  }, [project]) 
+  const { tasksById, updateTask, reorderTasks, getReferencesOutbound } = useTasks()
 
   useEffect(() => {
-    if (taskIndex) {
-      setAllTasks(toTasksArray(taskIndex, taskIdToDisplayIndex))
-    } else {
-      setAllTasks([])
-    }
-  }, [taskIndex, taskIdToDisplayIndex])
-
+    setAllTasks(Object.values(tasksById))
+  }, [tasksById])
+  
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -187,7 +128,7 @@ export default function TasksListView() {
     if (saving) return
     setSaving(true)
     try {
-      const res = await taskService.reorderTasks({ fromIndex, toIndex })
+      const res = await reorderTasks(fromIndex, toIndex)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder task: ${e.message || e}`)
@@ -198,7 +139,7 @@ export default function TasksListView() {
 
   const handleStatusChange = async (taskId: string, status: Status) => {
     try {
-      await taskService.updateTask(taskId, { status })
+      await updateTask(taskId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
@@ -364,7 +305,7 @@ export default function TasksListView() {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 const deps = Array.isArray(t.dependencies) ? t.dependencies : []
-                const dependents : string[] =  [] //TODO:
+                const dependents = getReferencesOutbound(t.id)
                 return (
                   <li key={t.id} className="task-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}

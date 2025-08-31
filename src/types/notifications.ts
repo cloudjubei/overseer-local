@@ -81,9 +81,11 @@ export interface NotificationStats {
   byType: Record<NotificationType, number>;
 }
 
-export interface NotificationPreferences {
+export interface NotificationSystemPreferences {
   osNotificationsEnabled: boolean;
-  categoriesEnabled: Partial<Record<NotificationCategory, boolean>>;
   soundsEnabled: boolean;
   displayDuration: number; // seconds, 0 for persistent
+}
+export interface NotificationProjectPreferences {
+  categoriesEnabled: Partial<Record<NotificationCategory, boolean>>;
 }

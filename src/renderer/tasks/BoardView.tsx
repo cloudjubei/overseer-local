@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Task, Status } from 'src/types/tasks'
 import TaskCard from '../components/tasks/TaskCard'
-import { taskService } from '../services/taskService'
+import { tasksService } from '../services/tasksService'
 import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { useNavigator } from '../navigation/Navigator'
@@ -68,7 +68,7 @@ export default function BoardView({ tasks }: Props) {
     const task = tasks.find(t => t.id === fromId)
     if (!task || task.status === status) return
     try {
-      await taskService.updateTask(fromId, { status })
+      await tasksService.updateTask(fromId, { status })
     } catch (err) {
       console.error('Failed to move task', err)
       alert('Failed to move task')
@@ -176,7 +176,7 @@ export default function BoardView({ tasks }: Props) {
                     onClick={() => navigateTaskDetails(t.id)}
                     onStatusChange={async (next) => {
                       try {
-                        await taskService.updateTask(t.id, { status: next })
+                        await tasksService.updateTask(t.id, { status: next })
                       } catch (err) {
                         console.error('Failed to update status', err)
                       }

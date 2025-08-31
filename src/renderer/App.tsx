@@ -10,7 +10,6 @@ import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
-import DependencyResolverBootstrap from './projects/DependencyResolverBootstrap';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
@@ -38,7 +37,7 @@ function NotificationClickHandler() {
   const nav = useNavigator();
 
   useEffect(() => {
-    const unsubscribe = window.notifications.onClicked((metadata: NotificationMetadata) => {
+    const unsubscribe = window.notificationsService.onOpenNotification((metadata: NotificationMetadata) => {
       if (metadata.taskId) {
         nav.navigateTaskDetails(metadata.taskId, metadata.featureId);
       } else if (metadata.chatId) {
@@ -66,7 +65,6 @@ function App()
   return (
     <ToastProvider>
       <ProjectsProvider>
-        <DependencyResolverBootstrap />
         <NavigatorProvider>
           <ShortcutsProvider>
             <GlobalShortcutsBootstrap />

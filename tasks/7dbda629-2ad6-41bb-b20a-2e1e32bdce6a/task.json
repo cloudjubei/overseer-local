@@ -1,6 +1,6 @@
 {
   "id": "7dbda629-2ad6-41bb-b20a-2e1e32bdce6a",
-  "status": "-",
+  "status": "+",
   "title": "UI and UX fixes",
   "description": "",
   "features": [
@@ -78,6 +78,19 @@
       "dependencies": [
         "06680296-05e8-434c-868c-b07a44f86570"
       ]
+    },
+    {
+      "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
+      "status": "-",
+      "title": "TaskManager follows NotificationManager",
+      "description": "NotificationManager has this nice separation of its storage into a separate reusable class NotificationsStorage. TaskManager should follow the same pattern. TaskManager needs to have a quick lookup of all tasks by id (per project), features by id (per project) and outbound dependencies for features (features.dependencies declares inbound dependencies).",
+      "plan": "",
+      "context": [
+        "src/notifications/manager.js",
+        "src/notifications/storage.js",
+        "src/tasks/manager.js"
+      ],
+      "acceptance": []
     }
   ],
   "featureIdToDisplayIndex": {

@@ -1,96 +1,101 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import IPC_HANDLER_KEYS from "./ipcHandlersKeys"
 
 const FILES_API = {
-  get: () => ipcRenderer.invoke('files-index:get'),
   subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback(snapshot);
-    ipcRenderer.on('files-index:update', listener);
-    return () => ipcRenderer.removeListener('files-index:update', listener);
+    const listener = (_event) => callback();
+    ipcRenderer.on(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener);
   },
-  readFile: (relPath, encoding = 'utf8') => ipcRenderer.invoke('files:read', { relPath, encoding }),
-  readFileBinary: (relPath) => ipcRenderer.invoke('files:read-binary', { relPath }),
-  writeFile: (relPath, content, encoding = 'utf8') => ipcRenderer.invoke('files:write', { relPath, content, encoding }),
-  deleteFile: (relPath) => ipcRenderer.invoke('files:delete', { relPath }),
-  renameFile: (relPathSource, relPathTarget) => ipcRenderer.invoke('files:rename', { relPathSource, relPathTarget }),
-  ensureDir: (relPath) => ipcRenderer.invoke('files:ensure-dir', { relPath }),
-  upload: (name, content) => ipcRenderer.invoke('files:upload', { name, content }),
-  setContext: (projectId) => ipcRenderer.invoke('files:set-context', { projectId }),
+  listFiles: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_LIST, { project }),
+  readFile: (project, relPath, encoding = 'utf8') => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ, { project, relPath, encoding }),
+  readFileBinary: (project, relPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_BINARY, { project, relPath }),
+  readDirectory: (project, relPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_DIRECTORY, { project, relPath }),
+  writeFile: (project, relPath, content, encoding = 'utf8') => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_WRITE, { project, relPath, content, encoding }),
+  deleteFile: (project, relPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_DELETE, { project, relPath }),
+  renameFile: (project, relPathSource, relPathTarget) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_RENAME, { project, relPathSource, relPathTarget }),
+  uploadFile: (project, name, content) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPLOAD, { project, name, content })
 };
 
-// Tasks API: Data access + mutations only. UI navigation (modals) is handled in the renderer via Navigator/ModalHost.
 const TASKS_API = {
-  getSnapshot: () => ipcRenderer.invoke('tasks-index:get'),
-  onUpdate: (callback) => {
-    const listener = (_event, ...args) => callback(...args);
-    ipcRenderer.on('tasks-index:update', listener);
-    return () => ipcRenderer.removeListener('tasks-index:update', listener);
+  subscribe: (callback) => {
+    const listener = (_event) => callback();
+    ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
   },
-  updateTask: (taskId, data) => ipcRenderer.invoke('tasks:update', { taskId, data }),
-  updateFeature: (taskId, featureId, data) => ipcRenderer.invoke('tasks-feature:update', { taskId, featureId, data }),
-  addFeature: (taskId, feature) => ipcRenderer.invoke('tasks-feature:add', { taskId, feature }),
-  deleteFeature: (taskId, featureId) => ipcRenderer.invoke('tasks-feature:delete', { taskId, featureId }),
-  reorderFeatures: (taskId, payload) => ipcRenderer.invoke('tasks-features:reorder', { taskId, payload }),
-  reorderTasks: (payload) => ipcRenderer.invoke('tasks:reorder', payload),
-  addTask: (task) => ipcRenderer.invoke('tasks:add', task),
-  deleteTask: (taskId) => ipcRenderer.invoke('tasks:delete', { taskId }),
-  onSetTaskId: (callback) => {
-    const listener = (_event, value) => callback(value);
-    ipcRenderer.on('set-task-id', listener);
-    return () => ipcRenderer.removeListener('set-task-id', listener);
-  },
-  setContext: (projectId) => ipcRenderer.invoke('tasks:set-context', { projectId }),
+  listTasks: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_LIST, { project }),
+  getTask: (project, taskId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_GET, { project, taskId }),
+  createTask: (project, task) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_CREATE, { project, task }),
+  updateTask: (project, taskId, data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_UPDATE, { project, taskId, data }),
+  deleteTask: (project, taskId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_DELETE, { project, taskId }),
+  getFeature: (project, featureId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_GET, { project, featureId }),
+  addFeature: (project, taskId, feature) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { project, taskId, feature }),
+  updateFeature: (project, taskId, featureId, data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE, { project, taskId, featureId, data }),
+  deleteFeature: (project, taskId, featureId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE, { project, taskId, featureId }),
+  reorderFeatures: (project, taskId, payload) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER, { project, taskId, payload }),
+
+  getReferencesOutbound: (project, reference) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_OUTBOUND, { project, reference }),
+  getReferencesInbound: (project, reference) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_INBOUND, { project, reference }),
+  validateReference: (project, reference) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCE_VALIDATE, { project, reference }),
+  validateReferences: (project, reference, proposed) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_VALIDATE, { project, reference, proposed }),
+  searchReferences: (project, query, limit) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_SEARCH, { project, query, limit })
 };
 
-const CHAT_API = {
-  getCompletion: (messages, config) => ipcRenderer.invoke('chat:completion', {messages, config}),
-  listModels: (config) => ipcRenderer.invoke('chat:list-models', config),
-  list: () => ipcRenderer.invoke('chat:list'),
-  create: () => ipcRenderer.invoke('chat:create'),
-  load: (chatId) => ipcRenderer.invoke('chat:load', chatId),
-  save: (chatId, messages) => ipcRenderer.invoke('chat:save', {chatId, messages}),
-  delete: (chatId) => ipcRenderer.invoke('chat:delete', chatId),
-  setContext: (projectId) => ipcRenderer.invoke('chat:set-context', { projectId }),
+const CHATS_API = {
+  getCompletion: (messages, config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, { messages, config }),
+  listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, { config }),
+  listChats: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST, { project }),
+  createChat: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE, { project }),
+  loadChat: (project, chatId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LOAD, { project, chatId }),
+  saveChat: (project, chatId, messages) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_SAVE, { cproject, hatId, messages }),
+  deleteChat: (project, chatId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { project, chatId }),
 };
 
 const NOTIFICATIONS_API = {
-  sendOs: (data) => ipcRenderer.invoke('notifications:send-os', data),
-  onClicked: (callback) => {
+  onOpenNotification: (callback) => {
     const listener = (_event, metadata) => callback(metadata);
-    ipcRenderer.on('notifications:clicked', listener);
-    return () => ipcRenderer.removeListener('notifications:clicked', listener);
-  }
+    ipcRenderer.on(IPC_HANDLER_KEYS.NOTIFICATIONS_ON_OPEN, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.NOTIFICATIONS_ON_OPEN, listener);
+  },
+
+  sendOs: (data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS, data),
+  subscribe: (callback) => {
+    const listener = (_event, snapshot) => callback();
+    ipcRenderer.on(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, listener);
+  },
+  getRecentNotifications: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT, { project }),
+  getUnreadNotificationsCount: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT, { project }),
+  markAllNotificationsAsRead: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD, { project }),
+  markNotificationAsRead: (project, id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD, { project, id }),
+  deleteAllNotifications: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL, { project }),
+  getSystemPreferences: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM),
+  updateSystemPreferences: (updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM_UPDATE, { updates }),
+  getProjectPreferences: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT, { project }),
+  updateProjectPreferences: (project, updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT_UPDATE, { project, updates }),
 };
 
-// Screenshot capture API
+const PROJECTS_API = {
+  subscribe: (callback) => {
+    const listener = (_event, snapshot) => callback();
+    ipcRenderer.on(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener);
+  },
+  listProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_LIST),
+  getProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_GET, { id }),
+  createProject: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { project }),
+  updateProject: (id, project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { id, project }),
+  deleteProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { id }),
+  reorderTask: (project, fromIndex, toIndex) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { project, fromIndex, toIndex }),
+};
+
 const SCREENSHOT_API = {
-  /**
-   * Capture a screenshot.
-   * @param {Object} options
-   * @param {number} [options.windowId]
-   * @param {{x:number,y:number,width:number,height:number}} [options.rect]
-   * @param {'png'|'jpeg'} [options.format]
-   * @param {number} [options.quality] // 0-100 (jpeg only)
-   * @returns {{ok: boolean, dataUrl?: string, width?: number, height?: number, format?: string, error?: string}}
-   */
   capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
 };
 
-// Projects Index + CRUD API
-const PROJECTS_API = {
-  get: () => ipcRenderer.invoke('projects-index:get'),
-  subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback(snapshot);
-    ipcRenderer.on('projects-index:update', listener);
-    return () => ipcRenderer.removeListener('projects-index:update', listener);
-  },
-  create: (spec) => ipcRenderer.invoke('projects:create', { spec }),
-  update: (id, spec) => ipcRenderer.invoke('projects:update', { id, spec }),
-  delete: (id) => ipcRenderer.invoke('projects:delete', { id }),
-};
-
-contextBridge.exposeInMainWorld('tasksIndex', TASKS_API);
-contextBridge.exposeInMainWorld('chat', CHAT_API);
-contextBridge.exposeInMainWorld('notifications', NOTIFICATIONS_API);
-contextBridge.exposeInMainWorld('projectsIndex', PROJECTS_API);
+contextBridge.exposeInMainWorld('tasksService', TASKS_API);
+contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
+contextBridge.exposeInMainWorld('filesService', FILES_API);
+contextBridge.exposeInMainWorld('chatsService', CHATS_API);
+contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
-contextBridge.exposeInMainWorld('files', FILES_API);

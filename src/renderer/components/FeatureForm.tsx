@@ -3,12 +3,10 @@ import type { Status } from 'src/types/tasks'
 import StatusControl from './tasks/StatusControl'
 import { DependencySelector } from './tasks/DependencySelector'
 import { Modal } from './ui/Modal'
-import type { TasksIndexSnapshot } from '../../types/external'
-import type { ProjectsIndexSnapshot } from '../services/projectsService'
-import { taskService } from '../services/taskService'
 import DependencyBullet from './tasks/DependencyBullet'
 import { FileSelector } from './ui/FileSelector'
 import ContextFileChip from './tasks/ContextFileChip'
+import { useTasks } from '../hooks/useTasks'
 
 export type FeatureFormValues = {
   title: string
@@ -50,6 +48,7 @@ export function FeatureForm({
   const [depError, setDepError] = useState<string | null>(null)
   const [showSelector, setShowSelector] = useState(false)
   const [showFileSelector, setShowFileSelector] = useState(false)
+  const { validateReferences } = useTasks()
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
@@ -65,9 +64,9 @@ export function FeatureForm({
   // Live dependency validation so errors show immediately in UI
   useEffect(() => {
     const contextRef = featureId ? `${featureId}` : null
-    const result = taskService.validateDependencyList(contextRef, dependencies)
+    const result = validateReferences(contextRef, dependencies)
     if (!result.ok) {
-      setDepError(result.message ?? 'Invalid dependencies')
+      setDepError(result.error ?? 'Invalid dependencies')
     } else {
       setDepError(null)
     }
@@ -85,9 +84,9 @@ export function FeatureForm({
     }
 
     const contextRef = featureId ? `${featureId}` : null
-    const depVal = taskService.validateDependencyList(contextRef, dependencies)
+    const depVal = validateReferences(contextRef, dependencies)
     if (!depVal.ok) {
-      setDepError(depVal.message ?? 'Invalid dependencies')
+      setDepError(depVal.error ?? 'Invalid dependencies')
       valid = false
     } else {
       setDepError(null)
@@ -283,8 +282,6 @@ export function FeatureForm({
       {showSelector && (
         <Modal title="Select Dependency" onClose={() => setShowSelector(false)} isOpen={true} size="md">
           <DependencySelector
-            // allTasksSnapshot={allTasksSnapshot}
-            // allProjectsSnapshot={allProjectsSnapshot}
             onConfirm={(deps) => {
               const newDeps = deps.filter((d) => !dependencies.includes(d))
               setDependencies([...dependencies, ...newDeps])

@@ -21,7 +21,7 @@ function getIconForType(type: Notification['type']): string {
     case 'task': return '📋';
     case 'system': return '🖥️';
     case 'chat': return '💬';
-    case 'docs': return '📄';
+    case 'files': return '📄';
     default: return '🔔';
   }
 }

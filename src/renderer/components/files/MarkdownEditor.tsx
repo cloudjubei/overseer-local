@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FileMeta } from '../../services/fileService';
-import fileService from '../../services/fileService';
+import { FileMeta } from '../../services/filesService';
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges';
+import useFiles from '../../../renderer/hooks/useFiles';
 
 function escapeHtml(str: string) {
   return str
@@ -36,6 +36,7 @@ export type MarkdownEditorProps = {
 };
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
+  const { readFile } = useFiles()
   const [value, setValue] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [saveSupported, setSaveSupported] = useState<boolean>(false);
@@ -48,7 +49,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
     let mounted = true;
     setLoading(true);
     setDirty(false);
-    fileService.readFileText(file.path).then((txt) => {
+    readFile(file.path).then((txt) => {
       if (!mounted) return;
       setValue(txt ?? '');
       setLoading(false);

@@ -1,20 +1,48 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { ipcMain } from 'electron';
 import { LLMProvider } from './LLMProvider';
+import { taskManager, filesManager, projectsManager } from '../managers';
+import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
-export class ChatManager {
-  constructor(projectRoot, taskIndexer, fileIndexer) {
+export class ChatsManager {
+  constructor(projectRoot, window) {
     this.projectRoot = projectRoot;
-    this.taskIndexer = taskIndexer;
-    this.fileIndexer = fileIndexer;
-    this.chatsDir = path.join(projectRoot, 'chats');
-    if (!fs.existsSync(this.chatsDir)) {
-      fs.mkdirSync(this.chatsDir, { recursive: true });
-    }
+    this.window = window;
+    this.chatsDir = path.join(projectRoot, 'projects/main/chats');
+    this._ipcBound = false;
   }
 
-  getDefaultChatsDir() {
-    return path.join(this.projectRoot, 'chats');
+  async init() {
+    this.setChatsDir(this.chatsDir)
+    this._registerIpcHandlers();
+  }
+
+  _registerIpcHandlers() {
+    if (this._ipcBound) return;
+
+    const handlers = {};
+
+    handlers[IPC_HANDLER_KEYS.CHATS_COMPLETION] = async (args) => this.getCompletion(args)
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async (args) => this.listModels(args)
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async (args) => this.listChats(args);
+    handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async (args) => this.createChat(args);
+    handlers[IPC_HANDLER_KEYS.CHATS_LOAD] = async (args) => this.loadChat(args);
+    handlers[IPC_HANDLER_KEYS.CHATS_SAVE] = async (args) => this.saveChat(args);
+    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async (args) => this.deleteChat(args);
+
+    for (const channel of Object.keys(handlers)) {
+      ipcMain.handle(channel, async (event, args) => {
+        try {
+          return await handlers[channel](args || {});
+        } catch (e) {
+          console.error(`${channel} failed`, e);
+          return { ok: false, error: String(e?.message || e) };
+        }
+      });
+    }
+
+    this._ipcBound = true;
   }
 
   setChatsDir(dir) {
@@ -26,12 +54,7 @@ export class ChatManager {
   }
 
   _getFilesBaseDir() {
-    try {
-      const snap = this.fileIndexer.getIndex();
-      return snap.filesDir || snap.root || this.fileIndexer.filesDir || this.projectRoot;
-    } catch {
-      return this.projectRoot;
-    }
+    return filesManager.filesDir || this.projectRoot;
   }
 
   async getCompletion({ messages, config }) {
@@ -95,43 +118,11 @@ export class ChatManager {
       ];
 
       const toolsMap = {
-        list_tasks: async () => JSON.stringify(this.taskIndexer.getIndex().tasksById),
-        get_task_reference: async () => null, //TODO:
-        list_files: async () => JSON.stringify(this.fileIndexer.getIndex()),
-        read_file: async ({ path: relPath }) => {
-          try {
-            const base = this._getFilesBaseDir();
-            const abs = path.join(base, relPath);
-            return fs.readFileSync(abs, 'utf8');
-          } catch (error) {
-            return `Error: ${error.message}`;
-          }
-        },
-        create_file: async ({ name, content }) => {
-          try {
-            const base = this._getFilesBaseDir();
-            const absPath = path.join(base, name);
-            const dir = path.dirname(absPath);
-            if (!fs.existsSync(dir)) {
-              fs.mkdirSync(dir, { recursive: true });
-            }
-            fs.writeFileSync(absPath, content, 'utf8');
-            if (typeof this.fileIndexer.buildIndex === 'function') {
-              this.fileIndexer.buildIndex();
-            }
-            return `File ${name} created successfully.`;
-          } catch (error) {
-            return `Error creating file: ${error.message}`;
-          }
-        },
-        // Aliases for backward compatibility
-        list_docs: async () => JSON.stringify(this.fileIndexer.getIndex()),
-        read_doc: async ({ path: relPath }) => {
-          return await toolsMap.read_file({ path: relPath });
-        },
-        create_doc: async ({ name, content }) => {
-          return await toolsMap.create_file({ name, content });
-        },
+        list_tasks: async (args) => taskManager.listTasks(args),
+        get_task_reference: async (args) => taskManager.getTaskReference(args),
+        list_files: async (args) => filesManager.listFiles(args),
+        read_file: async (args) => filesManager.readFile(args),
+        create_file: async (args) => filesManager.createFile(args)
       };
 
       const provider = new LLMProvider(config);
@@ -173,7 +164,6 @@ export class ChatManager {
         }
       }
     } catch (error) {
-      // Provide richer diagnostics to the UI
       const details = [
         error?.message,
         error?.response?.data ? JSON.stringify(error.response.data) : null,
@@ -186,7 +176,11 @@ export class ChatManager {
     }
   }
 
-  async listModels(config) {
+  _getChastDir(project) {
+    return path.join(projectRoot, `projects/${project.id}/chats`)
+  }
+
+  async listModels({config}) {
     try {
       const provider = new LLMProvider(config);
       if (typeof provider.listModels === 'function') {
@@ -198,38 +192,43 @@ export class ChatManager {
     }
   }
 
-  listChats() {
-    return fs
-      .readdirSync(this.chatsDir)
-      .filter((file) => file.endsWith('.json'))
+  async listChats({project})
+  {
+    const chatsDir = this._getChastDir(project)
+    const out = await fs.readdir(chatDir)
+    return out.filter((file) => file.endsWith('.json'))
       .map((file) => file.replace('.json', ''));
   }
 
-  createChat() {
+  async createChat({project})
+  {
+    const chatsDir = this._getChastDir(project)
     const chatId = Date.now().toString();
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    fs.writeFileSync(filePath, JSON.stringify([]));
+    const filePath = path.join(chatsDir, `${chatId}.json`);
+    await fs.writeFile(filePath, JSON.stringify([]));
     return chatId;
   }
 
-  loadChat(chatId) {
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    try {
-      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    } catch {
-      return [];
-    }
+  async loadChat({project,chatId}) {
+    const chatsDir = this._getChastDir(project)
+    const filePath = path.join(chatsDir, `${chatId}.json`);
+    const out = fs.readFileSync(filePath, 'utf8')
+    return JSON.parse(out);
   }
 
-  saveChat(chatId, messages) {
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(messages));
+  async saveChat({project, chatId, messages}) {
+    const chatsDir = this._getChastDir(project)
+    const filePath = path.join(chatsDir, `${chatId}.json`);
+    await fs.writeFile(filePath, JSON.stringify(messages));
   }
 
-  deleteChat(chatId) {
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+  async deleteChat({project,chatId}) {
+    const chatsDir = this._getChastDir(project)
+    const filePath = path.join(chatsDir, `${chatId}.json`);
+
+    const exists = await fs.exists(filePath)
+    if (exists) {
+      await fs.unlink(filePath);
     }
   }
 }

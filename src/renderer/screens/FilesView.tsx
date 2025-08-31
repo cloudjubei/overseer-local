@@ -1,61 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useFilesIndex from '../hooks/useFilesIndex';
-import { FileMeta } from '../services/fileService';
+import useFiles, { DirNode } from '../hooks/useFiles';
+import { FileMeta } from '../services/filesService';
 import { MarkdownEditor } from '../components/files/MarkdownEditor';
-import { BasicFileViewer } from '../components/files/BasicFileViewer';
+import BasicFileViewer from '../components/files/BasicFileViewer';
 import { goToFile, parseFileFromHash } from '../navigation/filesNavigation';
 
 function isMarkdown(f: FileMeta) {
   return f.ext === 'md' || f.ext === 'mdx';
-}
-
-// Directory tree types built from file paths
-interface DirNode {
-  type: 'dir';
-  name: string; // directory name only
-  relPath: string; // '' for root or 'dir/subdir'
-  dirs: DirNode[];
-  files: FileMeta[];
-}
-
-function buildDirTree(files: FileMeta[]): DirNode {
-  const root: DirNode = { type: 'dir', name: '', relPath: '', dirs: [], files: [] };
-  const dirMap = new Map<string, DirNode>();
-  dirMap.set('', root);
-
-  function ensureDir(relPath: string): DirNode {
-    const existing = dirMap.get(relPath);
-    if (existing) return existing;
-    const parts = relPath.split('/').filter(Boolean);
-    const name = parts[parts.length - 1] || '';
-    const parentPath = parts.slice(0, -1).join('/');
-    const parent = ensureDir(parentPath);
-    const node: DirNode = { type: 'dir', name, relPath, dirs: [], files: [] };
-    parent.dirs.push(node);
-    dirMap.set(relPath, node);
-    return node;
-  }
-
-  for (const f of files) {
-    const path = f.path || f.name;
-    const parts = path.split('/');
-    const fileName = parts.pop() || f.name;
-    const dirPath = parts.join('/');
-    const dirNode = ensureDir(dirPath);
-    // Normalize name
-    const meta: FileMeta = { ...f, name: fileName };
-    dirNode.files.push(meta);
-  }
-
-  // Sort directories and files
-  const sortTree = (node: DirNode) => {
-    node.dirs.sort((a, b) => a.name.localeCompare(b.name));
-    node.files.sort((a, b) => a.name.localeCompare(b.name));
-    node.dirs.forEach(sortTree);
-  };
-  sortTree(root);
-
-  return root;
 }
 
 function Caret({ open }: { open: boolean }) {
@@ -80,13 +31,12 @@ function relTime(ms: number | undefined) {
 }
 
 export const FilesView: React.FC = () => {
-  const { files, loading, refresh } = useFilesIndex();
+  const { files, directoryTree } = useFiles();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [openSet, setOpenSet] = useState<Set<string>>(() => new Set([''])); // '' is root
   const searchRef = useRef<HTMLInputElement | null>(null);
 
-  // Sync selection with URL hash (#files/<path> or #documents/<path>)
   useEffect(() => {
     function syncFromHash() {
       const p = parseFileFromHash();
@@ -97,10 +47,6 @@ export const FilesView: React.FC = () => {
     return () => window.removeEventListener('hashchange', syncFromHash);
   }, []);
 
-  // Build tree from index
-  const tree = useMemo(() => buildDirTree(files), [files]);
-
-  // Expand the directory path of selected file
   useEffect(() => {
     if (!selectedPath) return;
     const parts = selectedPath.split('/');
@@ -242,16 +188,15 @@ export const FilesView: React.FC = () => {
             style={{ width: 160 }}
             aria-label="Search files"
           />
-          <button className="btn btn--ghost" onClick={() => refresh()}>Refresh</button>
         </div>
         <div style={{ overflow: 'auto', flex: 1 }}>
-          {loading ? (
+          {directoryTree ? (
             <div style={{ padding: 12 }}>Loading index...</div>
           ) : files.length === 0 ? (
             <div style={{ padding: 12, color: 'var(--text-muted)' }}>No files found.</div>
           ) : (
             <div className="px-2 py-2">
-              <DirTree node={query.trim() ? (filterDir(tree, filterMatch) || { ...tree, dirs: [], files: [] }) : tree} level={0} />
+              <DirTree node={query.trim() ? (filterDir(directoryTree!, filterMatch) || { ...directoryTree!, dirs: [], files: [] }) : directoryTree!} level={0} />
             </div>
           )}
         </div>

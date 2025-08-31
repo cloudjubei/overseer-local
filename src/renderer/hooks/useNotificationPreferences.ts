@@ -1,48 +1,77 @@
 import { useState, useEffect } from 'react';
-import type { NotificationPreferences, NotificationCategory } from '../../types/notifications';
+import type { NotificationSystemPreferences, NotificationProjectPreferences } from '../../types/notifications';
+import { useProjectContext } from '../projects/ProjectContext';
+import { notificationsService } from '../services/notificationsService';
 
-const STORAGE_KEY = 'notification_preferences';
-
-const DEFAULT_PREFERENCES: NotificationPreferences = {
+const DEFAULT_SYSTEM_PREFERENCES: NotificationSystemPreferences = {
   osNotificationsEnabled: true,
+  soundsEnabled: true,
+  displayDuration: 5
+};
+const DEFAULT_PROJECT_PREFERENCES: NotificationProjectPreferences = {
   categoriesEnabled: {
     general: true,
     tasks: true,
     chat: true,
-    documents: true,
+    files: true,
     system: true,
     updates: true,
-  },
-  soundsEnabled: true,
-  displayDuration: 5,
+  }
 };
 
 export function useNotificationPreferences() {
-  const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
+  const {
+    activeProject
+  } = useProjectContext()
+  const [systemPreferences, setSystemPreferences] = useState<NotificationSystemPreferences>(DEFAULT_SYSTEM_PREFERENCES);
+  const [projectPreferences, setProjectPreferences] = useState<NotificationProjectPreferences>(DEFAULT_PROJECT_PREFERENCES);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setPreferences(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Failed to load notification preferences:', error);
+    const update = async () => {
+      setSystemPreferences(await notificationsService.getSystemPreferences())
     }
+    update()
   }, []);
-
-  const updatePreferences = (updates: Partial<NotificationPreferences>) => {
-    const newPrefs = { ...preferences, ...updates };
-    if (updates.categoriesEnabled) {
-      newPrefs.categoriesEnabled = { ...preferences.categoriesEnabled, ...updates.categoriesEnabled };
+  useEffect(() => {
+    if (activeProject){
+      const update = async () => {
+        setProjectPreferences(await notificationsService.getProjectPreferences(activeProject))
+      }
+      update()
     }
-    setPreferences(newPrefs);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newPrefs));
-    } catch (error) {
-      console.error('Failed to save notification preferences:', error);
+  }, [activeProject]);
+
+  const updateSystemPreferences = async (updates: Partial<NotificationSystemPreferences>) => {
+    const newPreferences = await notificationsService.updateSystemPreferences(updates)
+    setSystemPreferences(newPreferences)
+  };
+  const updateProjectPreferences = async (updates: Partial<NotificationProjectPreferences>) => {
+    if (activeProject){
+      const newPreferences = await notificationsService.updateProjectPreferences(activeProject, updates)
+      setProjectPreferences(newPreferences)
     }
   };
 
-  return { preferences, updatePreferences };
+  const changeNotifications = async (enabled: boolean) : Promise<boolean> =>
+  {
+    if (enabled) {
+      try {
+        const result = await window.notificationsService.sendOs({
+          title: 'Notifications Enabled',
+          message: 'You will now receive desktop notifications for important events.',
+          soundsEnabled: false,
+          displayDuration: 5
+        });
+        if (result.error){
+          // handle error UI if needed
+        }
+        return result.ok
+      } catch (err) {
+        // handle error UI if needed
+      }
+    }
+    return false
+  }
+
+  return { systemPreferences, updateSystemPreferences, projectPreferences, updateProjectPreferences, changeNotifications };
 }

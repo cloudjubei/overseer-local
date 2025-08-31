@@ -66,8 +66,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const { openModal, navigateView, tasksRoute } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const { projectId } = useActiveProject()
-  const [project, setProject] = useState<ProjectSpec | null>(null)
-  const [taskIndex, setTaskIndex] = useState<TasksIndexSnapshot | null>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
   // DnD state (match Tasks list patterns)
@@ -77,19 +75,17 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
 
-  console.log("taskId: ", taskId)
-
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        const idx = await taskService.getSnapshot()
-        if (!cancelled) setTaskIndex(idx)
+        const idx = await tasksService.getSnapshot()
+        if (!cancelled) setIndex(idx)
       } catch (e) {
         console.error('Failed to load tasks index.', e)
       }
     })()
-    const unsubscribe = taskService.onUpdate((idx) => setTaskIndex(idx))
+    const unsubscribe = tasksService.onUpdate((idx) => setIndex(idx))
     return () => {
       cancelled = true
       if (typeof unsubscribe === 'function') unsubscribe()
@@ -132,14 +128,14 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
 
   const handleTaskStatusChange = async (taskId: string, status: Status) => {
     try {
-      await taskService.updateTask(taskId, { status })
+      await tasksService.updateTask(taskId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
   }
   const handleFeatureStatusChange = async (taskId: string, featureId: string, status: Status) => {
     try {
-      await taskService.updateFeature(taskId, featureId, { status })
+      await tasksService.updateFeature(taskId, featureId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }

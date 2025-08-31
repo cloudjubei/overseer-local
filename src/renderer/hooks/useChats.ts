@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { chatService } from '../services/chatService';
-import { fileService } from '../services/fileService';
+import { chatsService } from '../services/chatsService';
+import { filesService } from '../services/filesService';
 import type { ChatMessage, LLMConfig } from '../types';
 
 export function useChats() {
@@ -10,7 +10,7 @@ export function useChats() {
 
   useEffect(() => {
     (async () => {
-      const chats = await chatService.list();
+      const chats = await chatsService.list();
       setChatHistories(chats);
       if (chats.length > 0) setCurrentChatId(chats[0]);
     })();
@@ -19,13 +19,13 @@ export function useChats() {
   useEffect(() => {
     (async () => {
       if (!currentChatId) return;
-      const saved = await chatService.load(currentChatId);
+      const saved = await chatsService.load(currentChatId);
       setMessages(saved || []);
     })();
   }, [currentChatId]);
 
   const createChat = useCallback(async () => {
-    const newChatId = await chatService.create();
+    const newChatId = await chatsService.create();
     setChatHistories((prev) => [...prev, newChatId]);
     setCurrentChatId(newChatId);
     setMessages([]);
@@ -33,7 +33,7 @@ export function useChats() {
   }, []);
 
   const deleteChat = useCallback(async (chatId: string) => {
-    await chatService.delete(chatId);
+    await chatsService.delete(chatId);
     setChatHistories((prev) => prev.filter((id) => id !== chatId));
     setMessages((prev) => prev);
     setCurrentChatId((prev) => {
@@ -54,11 +54,11 @@ export function useChats() {
     setMessages([...newMessages, loadingMsg]);
 
     try {
-      const response = await chatService.getCompletion(newMessages, config);
+      const response = await chatsService.getCompletion(newMessages, config);
       const assistantMsg: ChatMessage = { role: 'assistant', content: response.content, model: config.model };
       const final = [...newMessages, assistantMsg];
       setMessages(final);
-      await chatService.save(currentChatId, final);
+      await chatsService.save(currentChatId, final);
     } catch (error: any) {
       const errorMsg: ChatMessage = { role: 'assistant', content: `Error: ${error?.message || String(error)}` };
       setMessages([...newMessages, errorMsg]);
@@ -68,18 +68,18 @@ export function useChats() {
   const uploadDocument = useCallback(async (name: string, content: string) => {
     if (!currentChatId) return;
     try {
-      const returnedPath = await fileService.upload(name, content);
+      const returnedPath = await filesService.upload(name, content);
       const uploadMsg: ChatMessage = { role: 'user', content: `Uploaded file to @${returnedPath}` };
       setMessages((prev) => {
         const next = [...prev, uploadMsg];
-        chatService.save(currentChatId, next);
+        chatsService.save(currentChatId, next);
         return next;
       });
     } catch (err: any) {
       const errorMsg: ChatMessage = { role: 'assistant', content: `Upload failed: ${err.message}` };
       setMessages((prev) => {
         const next = [...prev, errorMsg];
-        chatService.save(currentChatId, next);
+        chatsService.save(currentChatId, next);
         return next;
       });
     }
@@ -87,7 +87,7 @@ export function useChats() {
 
   const saveMessages = useCallback(async () => {
     if (!currentChatId) return;
-    await chatService.save(currentChatId, messages);
+    await chatsService.save(currentChatId, messages);
   }, [currentChatId, messages]);
 
   return {

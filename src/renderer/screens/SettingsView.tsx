@@ -1,15 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
-import { notificationsService } from '../services/notificationsService';
-import { chatService } from '../services/chatService';
-import type { LLMConfig, LLMProviderType } from '../types';
 import { useTheme, type Theme } from '../hooks/useTheme';
-import { useToast } from '../components/ui/Toast';
-import { Modal } from '../components/ui/Modal';
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
 import { useNavigator } from '../navigation/Navigator';
 
@@ -18,14 +13,14 @@ const CATEGORIES = [
   { id: 'visual', label: 'Visual', icon: <span aria-hidden>🎨</span>, accent: 'purple' },
   { id: 'llms', label: 'LLMs', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
   { id: 'notifications', label: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'brand' }
-] as const;
+];
 
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 export default function SettingsView() {
   const themes: Theme[] = ['light', 'dark'];
   const { theme, setTheme } = useTheme();
-  const { preferences, updatePreferences } = useNotificationPreferences();
+  const { systemPreferences, updateSystemPreferences, projectPreferences, updateProjectPreferences, changeNotifications } = useNotificationPreferences();
 
   const { configs, activeConfigId, removeConfig, setActive } = useLLMConfig();
   const { openModal } = useNavigator();
@@ -99,13 +94,13 @@ export default function SettingsView() {
       <h2 className="text-xl font-semibold mb-3">Notification Preferences</h2>
       <div className="space-y-4">
         <Switch
-          checked={preferences.osNotificationsEnabled}
+          checked={systemPreferences.osNotificationsEnabled}
           onCheckedChange={async (checked) => {
-            const success = await notificationsService.changeNotifications(checked)
+            const success = await changeNotifications(checked)
             if (success){
-              updatePreferences({ osNotificationsEnabled: true });
+              updateSystemPreferences({ osNotificationsEnabled: true });
             }else{
-              updatePreferences({ osNotificationsEnabled: false });
+              updateSystemPreferences({ osNotificationsEnabled: false });
             }
           }}
           label="Enable OS Notifications"
@@ -113,26 +108,26 @@ export default function SettingsView() {
         <div>
           <h3 className="font-medium mb-2">Notification Categories</h3>
           <div className="space-y-2">
-            {Object.entries(preferences.categoriesEnabled).map(([category, enabled]) => (
+            {Object.entries(projectPreferences.categoriesEnabled).map(([category, enabled]) => (
               <Switch
                 key={category}
                 checked={enabled ?? true}
-                onCheckedChange={(checked) => updatePreferences({ categoriesEnabled: { [category]: checked } })}
+                onCheckedChange={(checked) => updateProjectPreferences({ categoriesEnabled: { [category]: checked } })}
                 label={category.charAt(0).toUpperCase() + category.slice(1)}
               />
             ))}
           </div>
         </div>
         <Switch
-          checked={preferences.soundsEnabled}
-          onCheckedChange={(checked) => updatePreferences({ soundsEnabled: checked })}
+          checked={systemPreferences.soundsEnabled}
+          onCheckedChange={(checked) => updateSystemPreferences({ soundsEnabled: checked })}
           label="Enable Notification Sounds"
         />
         <div>
           <label className="block text-sm font-medium mb-1">Notification Display Duration</label>
           <Select
-            value={preferences.displayDuration.toString()}
-            onValueChange={(value) => updatePreferences({ displayDuration: parseInt(value) })}
+            value={systemPreferences.displayDuration.toString()}
+            onValueChange={(value) => updateSystemPreferences({ displayDuration: parseInt(value) })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select duration" />

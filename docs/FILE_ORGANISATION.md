@@ -69,6 +69,8 @@ This document describes how files and directories are organised in this reposito
     - docsService.ts
     - taskService.ts
     - notificationsService.ts
+    - projectsService.ts
+    - filesService.ts ← Thin proxy to preload’s isolated-world filesService
   - src/renderer/hooks/
     - useChats.ts
     - useDocsIndex.ts
@@ -109,9 +111,19 @@ This document describes how files and directories are organised in this reposito
     - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode.
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
+- src/files/
+  - manager.js: FilesManager responsible for indexing files, watching for changes, and registering all 'files:*' IPC handlers using centralized IPC handler keys. Emits FILES_SUBSCRIBE on updates and also publishes window.filesIndex for legacy consumers.
+- src/chat/
+  - manager.js: ChatsManager registers all 'chats:*' IPC handlers (currently unchanged).
+- src/projects/
+  - manager.js: ProjectsManager owns indexing and watching project configs and registers all 'projects:*' IPC handlers.
+- src/tasks/
+  - manager.js: TaskManager owns indexing of tasks and features, file watching, and registers all 'tasks:*' IPC handlers using centralized keys. Broadcasts TASKS_SUBSCRIBE events on changes. This mirrors ProjectsManager.
+- src/notifications/
+  - manager.js: NotificationManager registers all notifications IPC handlers using centralized keys (NOTIFICATIONS_SEND_OS and NOTIFICATIONS_OPEN). This keeps main.js thin and consistent with the ProjectsManager pattern.
+- src/managers.js: Exports shared manager instances for cross-manager references.
 - scripts/: Project automation scripts (e.g., setup-linting-formatting).
   - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
-  - migrate-uuids.ts: Script to migrate task and feature IDs to UUIDs, updating dependencies and display indices. Can be used as a library or invoked via CLI.
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
   - build/icons/icon.icns, icon.ico, icon.png
   - build/entitlements.mac.plist
@@ -152,19 +164,13 @@ Notes:
 ## Agent Preview Tools
 - See docs/PREVIEW_TOOL.md and docs/PREVIEW_RUN_TOOL.md for usage details.
 
-## New Components/Services
-- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext. This ensures all components can use dependency resolution without individually initializing the service.
-
-## Migration Script (UUIDs)
-- Location: scripts/migrate-uuids.ts
-- Purpose: Migrate task and feature IDs from numeric to UUID, updating all dependency references and capturing display indices for fast lookup (taskIdToDisplayIndex on ProjectSpec and featureIdToDisplayIndex on each Task).
-- Usage (CLI):
-  - ts-node scripts/migrate-uuids.ts --config projects/thefactory.json [options]
-  - Options:
-    - --snapshot <path>: Input TasksIndexSnapshot JSON (overrides config)
-    - --project <path>: Input ProjectSpec JSON (overrides config)
-    - --out-snapshot <path>: Output path for migrated snapshot (default: overwrite input)
-    - --out-project <path>: Output path for migrated project (default: overwrite input)
-    - --dry-run: Do not write files; print summary only
-    - --pretty: Pretty-print JSON output
-  - Config resolution: The provided config JSON may include either top-level keys or under a 'paths' object: tasksSnapshot, projectSpec. If not provided, defaults are resolved relative to the config file directory: tasks-index.json and project-spec.json.
+## New/Updated Services
+- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext.
+- src/projects/manager.js: Registers all 'projects:*' IPC handlers so main.js remains thin.
+- src/files/manager.js: Now mirrors ProjectsManager pattern — registers all 'files:*' IPC handlers using centralized keys, emits FILES_SUBSCRIBE on changes, and preload exposes a filesService.
+- src/renderer/services/projectsService.ts: Projects service proxy available in isolated world via preload.
+- src/renderer/services/filesService.ts: Files service proxy (matches projectsService pattern) available in isolated world via preload as window.filesService (window.files kept as backward-compatible alias).
+- src/tasks/manager.js: Now mirrors ProjectsManager — registers all 'tasks:*' IPC handlers using centralized keys and emits TASKS_SUBSCRIBE on changes.
+- src/renderer/services/tasksService.ts: Tasks service proxy (matches projectsService pattern) available via preload as window.tasksService. Back-compat alias window.tasksIndex remains but should be considered deprecated.
+- src/notifications/manager.js: Now follows the ProjectsManager pattern — uses centralized IPC handler keys for NOTIFICATIONS_SEND_OS and NOTIFICATIONS_OPEN.
+- src/preload.js: Exposes notificationsService (pattern-aligned) via contextBridge with a back-compat alias window.notifications.

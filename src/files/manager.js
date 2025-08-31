@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
+import fssync from 'fs';
 import path from 'path';
 import chokidar from 'chokidar';
+import { ipcMain } from 'electron';
+import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
 // Simple mime-like inference by extension
 function inferTypeByExt(name) {
@@ -18,7 +21,7 @@ function inferTypeByExt(name) {
   return undefined;
 }
 
-export class FileIndexer {
+export class FilesManager { //TODO: index per project + ensure files are project scoped only
   constructor(projectRoot, window, options = {}) {
     this.projectRoot = projectRoot;
     this.filesDir = options.filesDir || projectRoot;
@@ -35,20 +38,42 @@ export class FileIndexer {
     };
 
     this.watcher = null;
-  }
 
-  getIndex() {
-    return this.index;
-  }
-
-  getDefaultFilesDir() {
-    return this.projectRoot;
+    // Whether IPC handlers are bound (to avoid double-binding on re-init)
+    this._ipcBound = false;
   }
 
   async init() {
     await this.buildIndex();
     await this._startWatcher();
-    await this._publishToRenderer();
+    this._registerIpcHandlers();
+  }
+
+  _registerIpcHandlers() {
+    if (this._ipcBound) return;
+
+    const handlers = {}
+    handlers[IPC_HANDLER_KEYS.FILES_LIST] = async (args) => this.listFiles(args)
+    handlers[IPC_HANDLER_KEYS.FILES_READ] = async (args) => this.readFile(args)
+    handlers[IPC_HANDLER_KEYS.FILES_READ_BINARY] = async (args) => this.readFileBinary(args)
+    handlers[IPC_HANDLER_KEYS.FILES_READ_DIRECTORY] = async (args) => this.readDirectory(args)
+    handlers[IPC_HANDLER_KEYS.FILES_WRITE] = async (args) => this.writeFile(args)
+    handlers[IPC_HANDLER_KEYS.FILES_DELETE] = async (args) => this.deleteFile(args)
+    handlers[IPC_HANDLER_KEYS.FILES_RENAME] = async (args) => this.renameFile(args)
+    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD] = async (args) => this.uploadFile(args)
+
+    for(const handler of Object.keys(handlers)){
+      ipcMain.handle(handler, async (event, args) => {
+        try {
+          return await handlers[handler](args)
+        } catch (e) {
+          console.error(`${handler} failed`, e);
+          return { ok: false, error: String(e?.message || e) };
+        }
+      });
+    }
+
+    this._ipcBound = true;
   }
 
   async _startWatcher() {
@@ -81,9 +106,8 @@ export class FileIndexer {
       if (msg) console.log(msg);
       await this.buildIndex();
       if (this.window) {
-        this.window.webContents.send('files-index:update', this.index);
+        this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE);
       }
-      await this._publishToRenderer();
     };
 
     this.watcher
@@ -103,22 +127,16 @@ export class FileIndexer {
     this.stopWatching();
     this.filesDir = normalizedNext;
     this.index.filesDir = this.filesDir;
-    await this.buildIndex();
+    await this.__rebuildAndNotify();
     await this._startWatcher();
-    if (this.window) {
-      this.window.webContents.send('files-index:update', this.getIndex());
-    }
-    await this._publishToRenderer();
-    return this.getIndex();
   }
-
-  async rebuildAndNotify(logMessage) {
+  
+  async __rebuildAndNotify(logMessage) {
     if (logMessage) console.log(logMessage);
     await this.buildIndex();
     if (this.window) {
-      this.window.webContents.send('files-index:update', this.getIndex());
+      this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, this.getIndex());
     }
-    await this._publishToRenderer();
   }
 
   async buildIndex() {
@@ -197,20 +215,84 @@ export class FileIndexer {
     }
   }
 
-  async _publishToRenderer() {
-    try {
-      if (!this.window || this.window.isDestroyed()) return;
-      const payload = JSON.stringify(this.index.files);
-      await this.window.webContents.executeJavaScript(`(function(){ try { window.filesIndex = ${payload}; } catch(e){} })();`);
-    } catch (e) {
-      console.warn('FileIndexer: failed to publish to renderer', e);
-    }
-  }
-
   stopWatching() {
     if (this.watcher) {
       try { this.watcher.close(); } catch {}
       this.watcher = null;
     }
+  }
+
+  async listFiles({project})
+  {
+    return this.index.files
+  }
+  async readFile({project, relPath, encoding})
+  {
+      const abs = path.join(project.path, relPath);
+      const data = await fs.readFile(abs);
+      return readFileBinary({project, relPath}).toString(encoding)
+  }
+
+  async readFileBinary({project, relPath})
+  {
+      const abs = path.join(project.path, relPath);
+      return await fs.readFile(abs);
+  }
+  
+  async readDirectory({project, relPath})
+  {
+      const abs = path.join(project.path, relPath);
+      return fs.readdir(abs, { withFileTypes: true });
+  }
+
+  async writeFile({project, relPath, content, encoding})
+  {
+      const abs = path.join(project.path, relPath);
+      const dir = path.dirname(abs);
+      await fs.mkdir(dir, { recursive: true });
+      
+      if (content instanceof Uint8Array || Buffer.isBuffer(content)) {
+        await fs.writeFile(abs, content);
+      } else {
+        await fs.writeFile(abs, content, { encoding });
+      }
+      await this.__rebuildAndNotify('File written: ' + relPath);
+  }
+
+  async deleteFile({project, relPath})
+  {
+    const abs = path.join(project.path, relPath);
+    
+    const st = await fs.lstat(abs);
+    if (st.isDirectory()) {
+      await fs.rm(abs, { recursive: true, force: true });
+    } else {
+      await fs.unlink(abs);
+    }
+    await this.__rebuildAndNotify('File deleted: ' + relPath);
+  }
+
+  async renameFile({project, relPathSource, relPathTarget})
+  {
+    const absSource = path.join(project.path, relPathSource);
+    const absTarget = path.join(project.path, relPathTarget);
+    const targetDir = path.dirname(absTarget);
+    
+    await fs.mkdir(targetDir, { recursive: true });
+    await fs.rename(absSource, absTarget);
+    await this.__rebuildAndNotify('File renamed from: ' + relPathSource + ' to: ' + relPathTarget);
+  }
+  async uploadFile({project, name, content})
+  {
+    const uploadsDir = path.join(project.path, 'uploads');
+    await fs.mkdir(uploadsDir, { recursive: true });
+    const filePath = path.join(uploadsDir, name);
+    
+    if (content instanceof Uint8Array || Buffer.isBuffer(content)) {
+      await fs.writeFile(filePath, content);
+    } else {
+      await fs.writeFile(filePath, content, { encoding: 'utf8' });
+    }
+    await this.__rebuildAndNotify('File uploaded: ' + name);
   }
 }

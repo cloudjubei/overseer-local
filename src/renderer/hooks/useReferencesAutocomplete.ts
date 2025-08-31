@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { dependencyResolver } from '../services/dependencyResolver';
-import { useDependencyResolver } from './useDependencyResolver';
+import { useTasks } from './useTasks';
 
 type RefItem = {
   ref: string;
@@ -16,22 +15,20 @@ export function useReferencesAutocomplete(params: {
   mirrorRef: React.RefObject<HTMLDivElement>;
 }) {
   const { input, setInput, textareaRef, mirrorRef } = params;
-  const idx = useDependencyResolver();
+  const { tasksById } = useTasks();
 
   const references = useMemo<RefItem[]>(() => {
-    if (!idx?.tasksById) return [];
     const refs: RefItem[] = [];
-    Object.entries(idx.tasksById).forEach(([taskId, task]) => {
-      const display = dependencyResolver.getDisplayRef(taskId) ?? taskId.slice(0, 8);
-      refs.push({ ref: taskId, display, title: task.title, type: 'task' });
+    Object.values(tasksById).forEach((task) => {
+      refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
       (task.features || []).forEach((f) => {
         const featRef = `${taskId}.${f.id}`;
         const featDisplay = dependencyResolver.getDisplayRef(featRef) ?? featRef.slice(0, 8);
         refs.push({ ref: featRef, display: featDisplay, title: f.title, type: 'feature' });
       });
     });
-    return refs.sort((a, b) => a.display.localeCompare(b.display, undefined, { numeric: true }));
-  }, [idx]);
+    return refs.sort((a, b) => a.ref.localeCompare(b.ref));
+  }, [tasksById]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [matches, setMatches] = useState<RefItem[]>([]);

@@ -1,7 +1,7 @@
 import React from 'react';
 import Tooltip from './Tooltip';
-import { fileService, inferFileType } from '../../services/fileService';
 import { goToFile } from '../../navigation/filesNavigation';
+import useFiles, { inferFileType } from '../../../renderer/hooks/useFiles';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';
 
@@ -141,6 +141,7 @@ function isTextLike(file: FileMeta): boolean {
 const MAX_PREVIEW_CHARS = 1200; // ~ a few paragraphs
 
 function useFilePreviewContent(file: FileMeta) {
+  const { readFile } = useFiles()
   const [state, setState] = React.useState<{ loading: boolean; error: string | null; text: string | null }>({ loading: false, error: null, text: null });
   React.useEffect(() => {
     let cancelled = false;
@@ -152,7 +153,7 @@ function useFilePreviewContent(file: FileMeta) {
     setState({ loading: true, error: null, text: null });
     (async () => {
       try {
-        const content = await (fileService as any).readFileText?.(relPath) ?? await (fileService as any).getFile?.(relPath);
+        const content = await readFile(relPath)
         if (cancelled) return;
         if (typeof content === 'string') {
           const snippet = content.slice(0, MAX_PREVIEW_CHARS);

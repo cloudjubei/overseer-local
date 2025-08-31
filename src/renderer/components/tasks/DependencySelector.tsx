@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
-import { taskService } from '../../services/taskService'
-import { projectsService } from '../../services/projectsService'
+// import { useActiveProject } from 'src/renderer/projects/ProjectContext'
+// import { useTasks } from 'src/renderer/hooks/useTasks'
 
 type DependencySelectorProps = {
   onConfirm?: (deps: string[]) => void
@@ -10,14 +10,7 @@ type DependencySelectorProps = {
   existingDeps?: string[]
 }
 
-function getTaskIdsForProject(spec: ProjectSpec): string[] {
-  const ids = new Set<string>()
-  return Array.from(ids) //TODO: fix
-  // spec.requirements.forEach((r) => r.tasks.forEach((id) => ids.add(id)))
-  // return Array.from(ids).sort((a, b) => a - b)
-}
-
-function doesTaskMatch(task: any, q: string): boolean {
+function doesTaskMatch(project: ProjectSpec, task: Task, q: string): boolean {
   return (
     `${task.id}`.toLowerCase().includes(q) ||
     task.title.toLowerCase().includes(q) ||
@@ -25,24 +18,12 @@ function doesTaskMatch(task: any, q: string): boolean {
   )
 }
 
-function doesFeatureMatch(f: any, q: string): boolean {
+function doesFeatureMatch(task: Task, f: Feature, q: string): boolean {
   return (
     `${f.id}`.toLowerCase().includes(q) ||
     f.title.toLowerCase().includes(q) ||
     (f.description || '').toLowerCase().includes(q)
   )
-}
-
-function doesProjectMatch(project: ProjectSpec, tasksById: Record<string, Task>, q: string): boolean {
-  if (project.title.toLowerCase().includes(q) || (project.description || '').toLowerCase().includes(q)) return true
-  const taskIds = getTaskIdsForProject(project)
-  for (const tid of taskIds) {
-    const task = tasksById[tid]
-    if (!task) continue
-    if (doesTaskMatch(task, q)) return true
-    if (task.features.some((f: any) => doesFeatureMatch(f, q))) return true
-  }
-  return false
 }
 
 export const DependencySelector: React.FC<DependencySelectorProps> = ({
@@ -51,8 +32,13 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   currentFeatureId,
   existingDeps = [],
 }) => {
+  const project : ProjectSpec | undefined = undefined
+  // const { project } = useActiveProject()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  // const { projectsById } = useProjects() //TODO:
+  // const { tasksById } = useTasks()
+  const tasksById : Record<string,Task> = {}
 
   const q = search.trim().toLowerCase()
 
@@ -66,23 +52,15 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     setSelected(newSelected)
   }
 
-  const currentProject = projectsService.getSnapshot()
-  projectsService.getById()
-  // taskService
+  if (!project) {
+    return <div>Loading dependencies...</div>
+  }
 
-  // if (!allTasksSnapshot || !allProjectsSnapshot) {
-  //   return <div>Loading dependencies...</div>
-  // }
-
-  const tasksById = allTasksSnapshot.tasksById || {}
-  const projectsById = allProjectsSnapshot.projectsById || {}
-  const filteredProjects = allProjectsSnapshot.orderedIds
-    .map((id) => projectsById[id])
-    .filter((p) => !q || doesProjectMatch(p, tasksById, q))
-
-  const allAssigned = new Set<number>(
-    allProjectsSnapshot.orderedIds.flatMap((id) => getTaskIdsForProject(projectsById[id]))
-  )
+  const allAssigned = new Set<number>() //TODO:
+  // const allAssigned = new Set<number>(
+  //   allProjectsSnapshot.orderedIds.flatMap((id) => getTaskIdsForProject(projectsById[id]))
+  // )
+  const allAssignedIds = Array.from(allAssigned)
   const unassignedIds = Object.keys(tasksById)
     .map(Number)
     .filter((tid) => !allAssigned.has(tid))
@@ -91,8 +69,8 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
       const task = tasksById[tid]
       if (!task) return false
       if (!q) return true
-      if (doesTaskMatch(task, q)) return true
-      return task.features.some((f: any) => doesFeatureMatch(f, q))
+      if (doesTaskMatch(project, task, q)) return true
+      return task.features.some((f: any) => doesFeatureMatch(task, f, q))
     })
 
   const renderTaskItem = (tid: number, isUnassigned = false) => {
@@ -100,8 +78,8 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     if (!task) return null
     const dep = `${tid}`
     const isDisabled = existingDeps.includes(dep)
-    const taskMatches = !q || doesTaskMatch(task, q)
-    const matchingFeatures = task.features.filter((f) => !q || doesFeatureMatch(f, q))
+    const taskMatches = !q || doesTaskMatch(project, task, q)
+    const matchingFeatures = task.features.filter((f) => !q || doesFeatureMatch(task, f, q))
     if (!taskMatches && matchingFeatures.length === 0) return null
 
     return (
@@ -152,14 +130,12 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
         className="w-full rounded-md border px-3 py-2 text-sm"
       />
       <div className="mt-4 space-y-4 max-h-96 overflow-auto">
-        {filteredProjects.map((project) => (
-          <div key={project.id}>
-            <h3 className="text-lg font-semibold">{project.title}</h3>
-            <ul className="space-y-2">
-              {getTaskIdsForProject(project).map((tid) => renderTaskItem(tid))}
-            </ul>
-          </div>
-        ))}
+        <div>
+          <h3 className="text-lg font-semibold">{project.title}</h3>
+          <ul className="space-y-2">
+            {allAssignedIds.map((tid) => renderTaskItem(tid))}
+          </ul>
+        </div>
         {unassignedIds.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold">Other Tasks</h3>

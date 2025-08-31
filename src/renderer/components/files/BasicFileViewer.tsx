@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { FileMeta, isLikelyText, readFileText, guessLanguageFromExt } from '../../services/fileService';
+import { FileMeta } from '../../services/filesService';
+import useFiles, { isLikelyText, guessLanguageFromExt } from '../../../renderer/hooks/useFiles';
 
 export type BasicFileViewerProps = {
   file: FileMeta;
 };
 
-export const BasicFileViewer: React.FC<BasicFileViewerProps> = ({ file }) => {
+const BasicFileViewer: React.FC<BasicFileViewerProps> = ({ file }) => {
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const { readFile } = useFiles()
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setContent(null);
     if (isLikelyText(file)) {
-      readFileText(file.path).then((txt) => {
+      readFile(file.path).then((txt) => {
         if (!mounted) return;
-        setContent(txt);
+        if (txt){
+          setContent(txt);
+        }
         setLoading(false);
       });
     } else {

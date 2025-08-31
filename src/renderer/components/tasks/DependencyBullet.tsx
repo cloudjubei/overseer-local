@@ -4,7 +4,7 @@ import Tooltip from '../ui/Tooltip';
 import type { Status } from 'src/types/tasks';
 import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
-import { taskService } from '../../services/taskService';
+import { tasksService } from '../../services/tasksService';
 
 export interface DependencyBulletProps {
   dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
@@ -15,7 +15,7 @@ export interface DependencyBulletProps {
 const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbound = false, onRemove }) => {
   const { navigateTaskDetails, tasksRoute } = useNavigator();
 
-  const resolved = taskService.resolveRef(dependency);
+  const resolved = tasksService.resolveRef(dependency);
   const isError = 'code' in resolved;
   const isFeatureDependency = !isError && resolved.kind === 'feature';
   const display = dependencyResolver.getDisplayRef(dependency) ?? dependency;

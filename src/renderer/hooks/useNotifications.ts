@@ -1,37 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { notificationsService } from '../services/notificationsService';
 import type { Notification } from '../../types/notifications';
+import { useProjectContext } from '../projects/ProjectContext';
 
 export function useNotifications() {
+  const {
+    activeProject
+  } = useProjectContext()
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
+  const updateCurrentProjectNotifications = async () => {
+    if (activeProject){
+      setNotifications(await notificationsService.getRecentNotifications(activeProject));
+      setUnreadCount(await notificationsService.getUnreadNotificationsCount(activeProject));
+    }
+  }
+
   useEffect(() => {
-    const updateNotifications = () => {
-      const recent = notificationsService.getRecent(); // Default 24 hours, or adjust as needed
-      setNotifications(recent);
-      setUnreadCount(notificationsService.getUnreadCount());
-    };
+    updateCurrentProjectNotifications();
 
-    updateNotifications();
-
-    const unsubscribe = notificationsService.subscribe(updateNotifications);
+    const unsubscribe = notificationsService.subscribe(updateCurrentProjectNotifications);
 
     return () => {
       unsubscribe();
     };
   }, []);
+  useEffect(() => {
+    updateCurrentProjectNotifications();
+  }, [activeProject]);
 
   const markAsRead = (id: string) => {
-    notificationsService.markAsRead(id);
+    if (activeProject){
+      notificationsService.markNotificationAsRead(activeProject, id);
+    }
   };
 
   const markAllAsRead = () => {
-    notificationsService.markAllAsRead();
+    if (activeProject){
+      notificationsService.markAllNotificationsAsRead(activeProject);
+    }
   };
 
   const clearAll = () => {
-    notificationsService.deleteAll();
+    if (activeProject){
+      notificationsService.deleteAllNotifications(activeProject);
+    }
   };
 
   return {

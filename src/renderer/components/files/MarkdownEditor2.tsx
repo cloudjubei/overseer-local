@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import MarkdownRenderer from './MarkdownRenderer';
+import MarkdownRenderer from '../MarkdownRenderer';
 
 export type MarkdownEditorProps = {
   value: string;
@@ -23,7 +23,7 @@ function useUnsavedGuard(enabled: boolean) {
   }, [enabled]);
 }
 
-export default function MarkdownEditor({ value, onChange, onSave, onCancel, className, fileRelPath }: MarkdownEditorProps) {
+export default function MarkdownEditor2({ value, onChange, onSave, onCancel, className, fileRelPath }: MarkdownEditorProps) {
   const [text, setText] = useState<string>(value || '');
   const [dirty, setDirty] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
-import { taskService } from '../services/taskService'
+import { tasksService } from '../services/tasksService'
 import { projectsService } from '../services/projectsService'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'

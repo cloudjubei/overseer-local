@@ -1,8 +1,7 @@
 import React from 'react';
 import { Input } from './Input';
 import FileDisplay from './FileDisplay';
-import { useFilesIndex } from '../../hooks/useFilesIndex';
-import { inferFileType } from '../../services/fileService';
+import useFiles, { inferFileType } from '../../../renderer/hooks/useFiles';
 
 export type FileSelectorProps = {
   selected?: string[]; // relPaths
@@ -23,7 +22,7 @@ function pathToMeta(path: string) {
 }
 
 export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onConfirm, onCancel, allowMultiple = true, title }) => {
-  const { snapshot, filesList } = useFilesIndex();
+  const { files } = useFiles();
   const [query, setQuery] = React.useState('');
   const [localSelected, setLocalSelected] = React.useState<string[]>(selected);
 
@@ -31,23 +30,22 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
     setLocalSelected(selected);
   }, [selected]);
 
-  const files = React.useMemo(() => {
-    const list: string[] = Array.isArray(filesList) ? filesList : [];
+  const filteredFiles = React.useMemo(() => {
+    
     const q = query.trim().toLowerCase();
     const filtered = q
-      ? list.filter((p) => p.toLowerCase().includes(q))
-      : list;
+      ? files.filter((p) => p.name.toLowerCase().includes(q))
+      : files;
     // Basic sort: prioritize filename match, then alphabetical
     return filtered.sort((a, b) => {
       if (q) {
-        const aName = a.split('/').pop() || a; const bName = b.split('/').pop() || b;
-        const aScore = (aName?.toLowerCase().indexOf(q) ?? 9999);
-        const bScore = (bName?.toLowerCase().indexOf(q) ?? 9999);
+        const aScore = a.name.toLowerCase().indexOf(q)
+        const bScore = b.name.toLowerCase().indexOf(q)
         if (aScore !== bScore) return aScore - bScore;
       }
-      return a.localeCompare(b);
+      return a.name.localeCompare(b.name);
     });
-  }, [filesList, query]);
+  }, [files, query]);
 
   function toggle(path: string) {
     setLocalSelected((prev) => {
@@ -74,22 +72,21 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
           />
         </div>
         <div className="text-xs text-text-muted whitespace-nowrap pl-1">
-          {files.length} files
+          {filteredFiles.length} files
         </div>
       </div>
 
       <div role="listbox" aria-label={title || 'Files'} className="border rounded-md max-h-[50vh] overflow-auto p-1 bg-surface-raised border-border">
-        {files.map((path) => {
-          const file = pathToMeta(path);
-          const selected = isSelected(path);
+        {filteredFiles.map((file) => {
+          const selected = isSelected(file.path);
           return (
-            <div key={path} role="option" aria-selected={selected} className="flex items-center">
+            <div key={file.path} role="option" aria-selected={selected} className="flex items-center">
               <FileDisplay
                 file={file}
                 density="compact"
                 interactive
                 showPreviewOnHover
-                onClick={() => toggle(path)}
+                onClick={() => toggle(file.path)}
                 trailing={
                   <span
                     className={
@@ -108,7 +105,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
             </div>
           );
         })}
-        {files.length === 0 && (
+        {filteredFiles.length === 0 && (
           <div className="p-4 text-sm text-text-muted">No files match your search.</div>
         )}
       </div>
