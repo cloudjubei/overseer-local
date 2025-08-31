@@ -13,7 +13,6 @@ export class ProjectsManager {
     this.projectsDir = path.join(this.projectRoot, 'projects');
     this.window = window;
     
-    console.log("ProjectsManager this.projectRoot: ", this.projectRoot, " this.projectsDir : ", this.projectsDir )
     this.index = {
       projectsById: {},
       errors: [],
@@ -89,7 +88,7 @@ export class ProjectsManager {
 
     this.index = next;
     this.index.metrics.lastScanMs = Date.now() - start;
-    this.index.metrics.lastScanCount = next.orderedIds.length;
+    this.index.metrics.lastScanCount = Object.keys(this.index.projectsById).length
   }
 
   async _tryLoadProjectConfig(configAbsPath, projectsDirAbs, rootAbs, next) {
@@ -145,7 +144,6 @@ export class ProjectsManager {
     handlers[IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER] = async (args) => this.reorderTask(payload)
 
     for(const handler of Object.keys(handlers)){
-      console.log("REGISTERING HANDLER: ", handler)
       ipcMain.handle(handler, async (event, args) => {
         try {
           return await handlers[handler](args)

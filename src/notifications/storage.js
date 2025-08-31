@@ -18,16 +18,16 @@ export default class NotificationsStorage
       const stored = localStorage.getItem(this.storageKey());
       if (stored) {
         const data = JSON.parse(stored);
-        this.notifications.clear();
+        this.notifications = {}
         data.forEach(notification => {
           this.notifications.set(notification.id, notification);
         });
       } else {
-        this.notifications.clear();
+        this.notifications = {}
       }
     } catch (error) {
       console.error('Failed to load notifications from storage:', error);
-      this.notifications.clear();
+      this.notifications = {}
     }
   }
 
@@ -126,7 +126,7 @@ export default class NotificationsStorage
 
   deleteAll() {
     if (this.notifications.size > 0) {
-      this.notifications.clear();
+      this.notifications = {};
       this.saveToStorage();
       this.notifyListeners();
     }
