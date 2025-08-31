@@ -17,14 +17,16 @@ export async function initManagers(projectRoot, mainWindow) {
   chatsManager = new ChatsManager(projectRoot, mainWindow);
   notificationManager = new NotificationManager(projectRoot, mainWindow);
 
-  projectsManager.init();
-  taskManager.init();
+  await projectsManager.init();
+  await taskManager.init();
   await filesManager.init();
   await chatsManager.init();
   await notificationManager.init();
 }
 export function stopManagers() {
+  if (projectsManager) { projectsManager.stopWatching(); }
   if (taskManager) { taskManager.stopWatching(); }
   if (filesManager) { filesManager.stopWatching(); }
-  if (projectsManager) { projectsManager.stopWatching(); }
+  if (chatsManager) { chatsManager.stopWatching(); }
+  if (notificationManager) { notificationManager.stopWatching(); }
 }

@@ -12,16 +12,15 @@ export class ProjectsManager {
     this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot);
     this.projectsDir = path.join(this.projectRoot, 'projects');
     this.window = window;
+    
     this.index = {
-      root: this.projectRoot,
-      projectsDir: this.projectsDir,
-      updatedAt: null,
       projectsById: {},
-      orderedIds: [],
       errors: [],
       metrics: { lastScanMs: 0, lastScanCount: 0 },
       configPathsById: {},
+      updatedAt: null,
     };
+
     this.watcher = null;
     this._ipcBound = false;
   }
@@ -89,7 +88,7 @@ export class ProjectsManager {
 
     this.index = next;
     this.index.metrics.lastScanMs = Date.now() - start;
-    this.index.metrics.lastScanCount = next.orderedIds.length;
+    this.index.metrics.lastScanCount = Object.keys(this.index.projectsById).length
   }
 
   async _tryLoadProjectConfig(configAbsPath, projectsDirAbs, rootAbs, next) {

@@ -1,6 +1,6 @@
 {
   "id": "7dbda629-2ad6-41bb-b20a-2e1e32bdce6a",
-  "status": "+",
+  "status": "-",
   "title": "UI and UX fixes",
   "description": "",
   "features": [
@@ -91,14 +91,27 @@
         "src/tasks/manager.js"
       ],
       "acceptance": []
+    },
+    {
+      "id": "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe",
+      "status": "-",
+      "title": "NotificationsStorage cannot use localStorage",
+      "description": "NotificationsStorage is running in the main process so it doesn't have access to the localStorage. If there's no electron based solution - we should simply create a class AppStorage and use it whenever we need to store data instead of localStorage.",
+      "plan": "",
+      "context": [
+        "src/notifications/storage.js"
+      ],
+      "acceptance": []
     }
   ],
   "featureIdToDisplayIndex": {
-    "af51b414-6ecf-48a6-afe6-bc1bd2c45419": 0,
-    "3ea0f62c-5068-40c6-87b4-747e85959718": 1,
-    "7a5efff9-125d-481f-bb73-51dc3991bdae": 2,
-    "916bebdb-a2c4-429f-a559-dff03aed4eef": 3,
-    "06680296-05e8-434c-868c-b07a44f86570": 4,
-    "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 5
+    "af51b414-6ecf-48a6-afe6-bc1bd2c45419": 1,
+    "3ea0f62c-5068-40c6-87b4-747e85959718": 2,
+    "7a5efff9-125d-481f-bb73-51dc3991bdae": 3,
+    "916bebdb-a2c4-429f-a559-dff03aed4eef": 4,
+    "06680296-05e8-434c-868c-b07a44f86570": 5,
+    "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 6,
+    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7,
+    "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe": 8
   }
 }
