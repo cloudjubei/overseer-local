@@ -11,13 +11,9 @@ export class NotificationManager {
     this.window = window;
     this._ipcBound = false;
 
-    this.storages = {
-      'main': __getStorage('main')
-    }
+    this.storages = {}
     this.systemPreferences = new NotificationsSystemPreferences()
-    this.preferences = {
-      'main': __getPreferences('main')
-    }
+    this.preferences = {}
   }
 
   __getStorage(projectId)
@@ -36,6 +32,9 @@ export class NotificationManager {
   }
 
   async init() {
+    this.__getStorage('main')
+    this.__getPreferences('main')
+
     this._registerIpcHandlers();
   }
 

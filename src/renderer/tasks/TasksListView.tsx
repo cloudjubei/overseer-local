@@ -73,7 +73,7 @@ export default function TasksListView() {
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
   const { openModal, navigateTaskDetails } = useNavigator()
-  const { projectId } = useActiveProject()
+  const { project } = useActiveProject()
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
   const { tasksById, updateTask, reorderTasks, getReferencesOutbound } = useTasks()
@@ -99,23 +99,25 @@ export default function TasksListView() {
     return () => window.removeEventListener('keydown', onKey)
   }, [openModal])
 
+  const taskIdToDisplayIndex : Record<string, number> = useMemo(() => { return project?.taskIdToDisplayIndex ?? {} }, [project])
+
   const sorted = useMemo(() => {
     let tasks = [...allTasks]
     if (project && sortBy !== 'manual') {
       if (sortBy === 'index_asc') {
-        tasks.sort((a, b) => project.taskIdToDisplayIndex[a.id] - project.taskIdToDisplayIndex[b.id])
+        tasks.sort((a, b) => taskIdToDisplayIndex[a.id] - taskIdToDisplayIndex[b.id])
       } else if (sortBy === 'index_desc') {
-        tasks.sort((a, b) => project.taskIdToDisplayIndex[b.id] - project.taskIdToDisplayIndex[a.id])
+        tasks.sort((a, b) => taskIdToDisplayIndex[b.id] - taskIdToDisplayIndex[a.id])
       } else if (sortBy === 'status_asc') {
         const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
-        tasks.sort((a, b) => sVal(a) - sVal(b) || project.taskIdToDisplayIndex[a.id] - project.taskIdToDisplayIndex[b.id])
+        tasks.sort((a, b) => sVal(a) - sVal(b) || taskIdToDisplayIndex[a.id] - taskIdToDisplayIndex[b.id])
       } else if (sortBy === 'status_desc') {
         const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
-        tasks.sort((a, b) => sVal(b) - sVal(a) || project.taskIdToDisplayIndex[b.id] - project.taskIdToDisplayIndex[a.id])
+        tasks.sort((a, b) => sVal(b) - sVal(a) || taskIdToDisplayIndex[b.id] - taskIdToDisplayIndex[a.id])
       }
     }
     return tasks
-  }, [project, allTasks, sortBy])
+  }, [taskIdToDisplayIndex, allTasks, sortBy])
 
   const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
   const isFiltered = query !== '' || statusFilter !== 'all'
@@ -374,7 +376,7 @@ export default function TasksListView() {
                             <span className="chips-sub__label" title="No dependents">None</span>
                           ) : (
                             dependents.map((d) => (
-                                <DependencyBullet key={d} dependency={d} isInbound />
+                              <DependencyBullet key={d.id} dependency={d.id} isInbound />
                             ))
                           )}
                         </div>

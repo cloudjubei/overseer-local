@@ -81,7 +81,7 @@
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "-",
+      "status": "+",
       "title": "TaskManager follows NotificationManager",
       "description": "NotificationManager has this nice separation of its storage into a separate reusable class NotificationsStorage. TaskManager should follow the same pattern. TaskManager needs to have a quick lookup of all tasks by id (per project), features by id (per project) and outbound dependencies for features (features.dependencies declares inbound dependencies).",
       "plan": "",

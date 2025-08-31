@@ -118,7 +118,8 @@ This document describes how files and directories are organised in this reposito
 - src/projects/
   - manager.js: ProjectsManager owns indexing and watching project configs and registers all 'projects:*' IPC handlers.
 - src/tasks/
-  - manager.js: TaskManager owns indexing of tasks and features, file watching, and registers all 'tasks:*' IPC handlers using centralized keys. Broadcasts TASKS_SUBSCRIBE events on changes. This mirrors ProjectsManager.
+  - manager.js: TaskManager manages per-project TasksStorage instances, registers all 'tasks:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts TASKS_SUBSCRIBE events on changes with projectId.
+  - storage.js: Per-project tasks storage, indexing, and file watching. Provides quick lookups for tasks by ID, features by ID, and outbound dependencies. Mirrors NotificationsStorage pattern.
 - src/notifications/
   - manager.js: NotificationManager registers all notifications IPC handlers using centralized keys (NOTIFICATIONS_SEND_OS and NOTIFICATIONS_OPEN). This keeps main.js thin and consistent with the ProjectsManager pattern.
 - src/managers.js: Exports shared manager instances for cross-manager references.
