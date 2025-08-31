@@ -1,6 +1,5 @@
 {
   "id": "7dbda629-2ad6-41bb-b20a-2e1e32bdce6a",
-  "status": "-",
   "status": "+",
   "title": "UI and UX fixes",
   "description": "",
@@ -82,7 +81,7 @@
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "-",
+      "status": "+",
       "title": "FilesManager follows TasksManager",
       "description": "TasksManager has this nice separation of its storage into a separate reusable class TasksStorage. FilesManager should follow the same pattern.",
       "plan": "",
