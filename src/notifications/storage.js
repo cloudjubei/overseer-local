@@ -1,54 +1,50 @@
+import AppStorage from './appStorage';
 
-export default class NotificationsStorage
-{
+export default class NotificationsStorage {
   constructor(projectId) {
-    this.projectId = projectId
-    this.notifications = {}
-    this.listeners = new Set()
+    this.projectId = projectId;
+    this.appStorage = new AppStorage();
+    this.notifications = new Map();
+    this.listeners = new Set();
 
     this.__loadFromStorage();
   }
 
   storageKey() { return `app_notifications__${this.projectId}`; }
   prefsKey() { return `notification_preferences__${this.projectId}`; }
-  generateId() {  return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; }
+  generateId() { return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; }
 
   __loadFromStorage() {
     try {
-      const stored = localStorage.getItem(this.storageKey());
+      const stored = this.appStorage.getItem(this.storageKey());
       if (stored) {
         const data = JSON.parse(stored);
-        this.notifications = {}
+        this.notifications = new Map();
         data.forEach(notification => {
           this.notifications.set(notification.id, notification);
         });
       } else {
-        this.notifications = {}
+        this.notifications = new Map();
       }
     } catch (error) {
       console.error('Failed to load notifications from storage:', error);
-      this.notifications = {}
+      this.notifications = new Map();
     }
   }
 
   saveToStorage() {
     try {
       const data = Array.from(this.notifications.values());
-      localStorage.setItem(this.storageKey(), JSON.stringify(data));
+      this.appStorage.setItem(this.storageKey(), JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save notifications to storage:', error);
     }
   }
 
-
   notifyListeners() {
     this.listeners.forEach(listener => listener());
   }
 
-
-  /**
-   * Create a new notification
-   */
   create(input) {
     const notification = {
       id: this.generateId(),
@@ -58,7 +54,7 @@ export default class NotificationsStorage
       title: input.title,
       message: input.message,
       read: false,
-      metadata: { ...(input.metadata || {}), projectId: this.currentProjectId }
+      metadata: { ...(input.metadata || {}), projectId: this.projectId }
     };
 
     this.notifications.set(notification.id, notification);
@@ -72,7 +68,7 @@ export default class NotificationsStorage
     return this.notifications.get(id) || null;
   }
 
-  update(id, updates)  {
+  update(id, updates) {
     const notification = this.notifications.get(id);
     if (!notification) {
       return null;
@@ -101,11 +97,11 @@ export default class NotificationsStorage
     return existed;
   }
 
-  markAsRead(id){
+  markAsRead(id) {
     return this.update(id, { read: true });
   }
 
-  markAsUnread(id){
+  markAsUnread(id) {
     return this.update(id, { read: false });
   }
 
@@ -126,7 +122,7 @@ export default class NotificationsStorage
 
   deleteAll() {
     if (this.notifications.size > 0) {
-      this.notifications = {};
+      this.notifications = new Map();
       this.saveToStorage();
       this.notifyListeners();
     }
@@ -191,17 +187,12 @@ export default class NotificationsStorage
   query(query = {}) {
     let results = Array.from(this.notifications.values());
 
-    // Apply filters
     if (query.filter) {
-      results = results.filter(notification => 
-        this.__matchesFilter(notification, query.filter)
-      );
+      results = results.filter(notification => this.__matchesFilter(notification, query.filter));
     }
 
-    // Apply sorting (default: newest first)
     results = this.__sortNotifications(results, query.sort || { field: 'timestamp', order: 'desc' });
 
-    // Apply pagination
     const offset = query.offset || 0;
     const limit = query.limit;
     
@@ -214,7 +205,7 @@ export default class NotificationsStorage
     return results;
   }
 
-  getAll(){
+  getAll() {
     return this.query();
   }
 
@@ -261,8 +252,8 @@ export default class NotificationsStorage
     };
 
     notifications.forEach(notification => {
-      byCategory[notification.category]++;
-      byType[notification.type]++;
+      byCategory[notification.category] = (byCategory[notification.category] || 0) + 1;
+      byType[notification.type] = (byType[notification.type] || 0) + 1;
     });
 
     return {
