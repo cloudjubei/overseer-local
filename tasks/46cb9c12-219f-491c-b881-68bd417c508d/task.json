@@ -47,7 +47,7 @@
     },
     {
       "id": "632d7c0e-6caa-4f11-85a1-73cc4ad378bd",
-      "status": "-",
+      "status": "+",
       "title": "Store and restore task view configuration",
       "description": "Integrate user preferences into the tasks view system to store whether the user was in list or board view mode. Update TasksView.tsx and related components to persist the current view mode and restore it when navigating back to tasks or restarting the app.",
       "plan": "",

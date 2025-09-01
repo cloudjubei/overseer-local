@@ -274,6 +274,8 @@ export default function TasksListView() {
   const currentFilterLabel = statusFilter === 'all' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]}`
   const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
 
+  const prefsLoading = !viewLoaded || !sortingLoaded
+
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
       <div className="tasks-toolbar shrink-0">
@@ -307,7 +309,7 @@ export default function TasksListView() {
             )}
           </div>
           <div className="control">
-            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by">
+            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by" disabled={prefsLoading}>
               <option value="index_asc">Ascending</option>
               <option value="index_desc">Descending</option>
               <option value="status_asc">Status ^</option>
@@ -331,7 +333,7 @@ export default function TasksListView() {
       </div>
 
       <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
-        Showing {filtered.length} of {allTasks.length} tasks
+        Showing {filtered.length} of {allTasks.length} tasks{prefsLoading ? ' • Loading settings…' : ''}
       </div>
 
       {view === 'board' ? (
@@ -340,7 +342,9 @@ export default function TasksListView() {
         </div>
       ) : (
         <div id="tasks-results" className="flex-1 min-h-0 overflow-y-auto tasks-results" tabIndex={-1}>
-          {filtered.length === 0 ? (
+          {prefsLoading ? (
+            <div className="empty" aria-live="polite">Loading your preferences…</div>
+          ) : filtered.length === 0 ? (
             <div className="empty">No tasks found.</div>
           ) : (
             <ul
