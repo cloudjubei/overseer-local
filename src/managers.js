@@ -3,12 +3,14 @@ import { FilesManager } from './files/manager';
 import { ProjectsManager } from './projects/manager';
 import { ChatsManager } from './chat/manager';
 import { NotificationManager } from './notifications/manager';
+import { PreferencesManager } from './preferences/manager';
 
 export let tasksManager;
 export let filesManager;
 export let projectsManager;
 export let chatsManager;
 export let notificationManager;
+export let preferencesManager;
 
 export async function initManagers(projectRoot, mainWindow) {
   projectsManager = new ProjectsManager(projectRoot, mainWindow);
@@ -16,12 +18,15 @@ export async function initManagers(projectRoot, mainWindow) {
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager);
   chatsManager = new ChatsManager(projectRoot, mainWindow, projectsManager, tasksManager, filesManager);
   notificationManager = new NotificationManager(projectRoot, mainWindow);
+  preferencesManager = new PreferencesManager();
 
   await projectsManager.init();
   await tasksManager.init();
   await filesManager.init();
   await chatsManager.init();
   await notificationManager.init();
+  // Register IPC handlers for preferences
+  preferencesManager.init();
 }
 export function stopManagers() {
   if (projectsManager) { projectsManager.stopWatching(); }
