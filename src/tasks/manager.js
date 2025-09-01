@@ -75,7 +75,7 @@ export class TasksManager {
     if (!newTask){ return { ok: false, error: "task couldn't be created" } }
 
     const newProject = {...project}
-    newProject.taskIdToDisplayIndex[newTask.id] = Object.keys(newProject.taskIdToDisplayIndex).length
+    newProject.taskIdToDisplayIndex[newTask.id] = Object.keys(newProject.taskIdToDisplayIndex).length + 1
     await this.projectsManager.updateProject(project.id, newProject)
     return { ok: true }
   }
