@@ -16,7 +16,10 @@
         "src/notifications/manager.js",
         "src/ipcHandlersKeys.js",
         "src/renderer/services/notificationsService.ts",
-        "src/preload.js"
+        "src/preload.js",
+        "src/preferences/manager.js",
+        "src/preferences/userPreferences.js",
+        "src/types/userPreferences.ts"
       ],
       "acceptance": [],
       "dependencies": []
@@ -29,7 +32,10 @@
       "plan": "",
       "context": [
         "src/renderer/navigation/SidebarView.tsx",
-        "src/renderer/screens/SettingsView.tsx"
+        "src/renderer/screens/SettingsView.tsx",
+        "src/preferences/userPreferences.js",
+        "src/types/userPreferences.ts",
+        "src/preferences/manager.js"
       ],
       "acceptance": [],
       "dependencies": []
@@ -59,12 +65,31 @@
       ],
       "acceptance": [],
       "dependencies": []
+    },
+    {
+      "id": "d3c0aaf2-7919-4c1c-a21d-3a079d5c2c23",
+      "status": "-",
+      "title": "Notifications need to use new userPreferences",
+      "description": "Notifications are using their own (old way) of storing preferences - everything that was using the preferences via the useNotifications should use the new way",
+      "plan": "",
+      "context": [
+        "src/preferences/userPreferences.js",
+        "src/types/userPreferences.ts",
+        "src/preferences/manager.js",
+        "src/notifications/manager.js",
+        "src/renderer/services/notificationsService.ts",
+        "src/renderer/hooks/useNotificationPreferences.ts",
+        "src/renderer/hooks/useNotifications.ts"
+      ],
+      "acceptance": [],
+      "dependencies": []
     }
   ],
   "featureIdToDisplayIndex": {
     "4aa629d1-91be-4c45-82cc-b210dacab4f4": 1,
     "d877642c-9e5d-44ca-b100-dbe5a7ad119c": 2,
     "632d7c0e-6caa-4f11-85a1-73cc4ad378bd": 3,
-    "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1": 4
+    "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1": 4,
+    "d3c0aaf2-7919-4c1c-a21d-3a079d5c2c23": 5
   }
 }
