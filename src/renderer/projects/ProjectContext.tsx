@@ -69,7 +69,6 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   }, [projects])
 
   const activeProject: ProjectSpec | undefined = useMemo(() => {
-    console.log("activeProjectId: ", activeProjectId)
     return getProjectById(activeProjectId)
   }, [projects, activeProjectId])
 
