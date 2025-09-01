@@ -11,7 +11,7 @@ export type FileMeta = {
 };
 
 export type FilesService = {
-  subscribe: (callback: () => void) => () => void
+  subscribe: (callback: (files: FileMeta[]) => void) => () => void
   listFiles: (project: ProjectSpec) => Promise<FileMeta[]>
   readFile: (project: ProjectSpec, relPath: string, encoding?: string) => Promise<string>
   readFileBinary: (project: ProjectSpec, relPath: string) => Promise<ArrayBuffer>

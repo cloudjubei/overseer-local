@@ -9,16 +9,10 @@ export type ProjectContextValue = {
   isMain: boolean
   activeProject?: ProjectSpec
 
-  // Actions
+  projects: ProjectSpec[]
+
   setActiveProjectId: (id: string) => void
   switchToMainProject: () => void
-
-  // Data
-  projects: ProjectSpec[]
-  loading: boolean
-  error: Error | null
-
-  // Helpers
   getProjectById: (id: string) => ProjectSpec | undefined
 }
 
@@ -43,35 +37,24 @@ function storeProjectId(id: string) {
 export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const [activeProjectId, setActiveProjectIdState] = useState(() => loadStoredProjectId())
   const [projects, setProjects] = useState<ProjectSpec[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
 
+  const update = async () => {
+      const files = await projectsService.listProjects()
+      updateCurrentProjects(files)
+  }
+  const updateCurrentProjects = (projects: ProjectSpec[]) => {
+    setProjects(projects)
+  }
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const projects = await projectsService.listProjects()
-        if (!cancelled) {
-          setProjects(projects)
-          setLoading(false)
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e as Error)
-          setLoading(false)
-        }
-      }
-    })()
-    return () => { cancelled = true }
-  }, [])
+    update();
 
-  useEffect(() => {
-    const unsubscribe = projectsService.subscribe(async () => {
-        const projects = await projectsService.listProjects()
-        setProjects(projects)
-    })
-    return unsubscribe
-  }, [])
+    const unsubscribe = projectsService.subscribe(updateCurrentProjects);
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
 
   const setActiveProjectId = useCallback((id: string) => {
     setActiveProjectIdState(id)
@@ -86,6 +69,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   }, [projects])
 
   const activeProject: ProjectSpec | undefined = useMemo(() => {
+    console.log("activeProjectId: ", activeProjectId)
     return getProjectById(activeProjectId)
   }, [projects, activeProjectId])
 
@@ -96,10 +80,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     setActiveProjectId,
     switchToMainProject,
     projects,
-    loading,
-    error,
     getProjectById,
-  }), [activeProjectId, activeProject, setActiveProjectId, switchToMainProject, projects, loading, error])
+  }), [activeProjectId, activeProject, setActiveProjectId, switchToMainProject, projects])
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
 }

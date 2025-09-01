@@ -2,7 +2,6 @@ import { ipcMain } from 'electron';
 import path from 'path';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import TasksStorage from './storage';
-import { projectsManager } from '../managers';
 
 function resolveTasksDir(projectRoot) {
   const candidates = [];
@@ -15,20 +14,20 @@ function resolveTasksDir(projectRoot) {
 }
 
 export class TasksManager {
-  constructor(projectRoot, window) {
+  constructor(projectRoot, window, projectsManager) {
     this.projectRoot = projectRoot;
     this.window = window;
     this.storages = {};
     this._ipcBound = false;
+
+    this.projectsManager = projectsManager
   }
 
   async __getStorage(projectId) {
     if (!this.storages[projectId]) {
-      const project = projectsManager.index.projectsById[projectId];
-      if (!project) {
-        throw new Error(`Unknown project ${projectId}`);
-      }
-      const projectRoot = path.resolve(projectsManager.projectsDir, project.path);
+      const project = await this.projectsManager.getProject(projectId)
+      if (!project){ return }
+      const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path);
       const tasksDir = resolveTasksDir(projectRoot);
       const storage = new TasksStorage(projectId, tasksDir, this.window);
       await storage.init();
@@ -38,26 +37,25 @@ export class TasksManager {
   }
 
   async init() {
+    await this.__getStorage('main');
+
     this._registerIpcHandlers();
-    // Pre-init storages for existing projects
-    const projects = await projectsManager.listProjects();
-    await Promise.all(projects.map(async (p) => await this.__getStorage(p.id)));
   }
 
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
     const handlers = {};
-    handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ project }) => (await this.__getStorage(project.id)).listTasks();
-    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ project, id }) => (await this.__getStorage(project.id)).getTask(id);
-    handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ project, task }) => (await this.__getStorage(project.id)).createTask(task);
-    handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ project, taskId, data }) => (await this.__getStorage(project.id)).updateTask(taskId, data);
-    handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ project, taskId }) => (await this.__getStorage(project.id)).deleteTask(taskId);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id)).getFeature(taskId, featureId);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ project, taskId, feature }) => (await this.__getStorage(project.id)).addFeature(taskId, feature);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({ project, taskId, featureId, data }) => (await this.__getStorage(project.id)).updateFeature(taskId, featureId, data);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id)).deleteFeature(taskId, featureId);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ project, taskId, payload }) => (await this.__getStorage(project.id)).reorderFeatures(taskId, payload);
+    handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ project }) => (await this.__getStorage(project.id))?.listTasks();
+    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ project, id }) => (await this.__getStorage(project.id))?.getTask(id);
+    handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ project, task }) => (await this.__getStorage(project.id))?.createTask(task);
+    handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ project, taskId, data }) => (await this.__getStorage(project.id))?.updateTask(taskId, data);
+    handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ project, taskId }) => (await this.__getStorage(project.id))?.deleteTask(taskId);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id))?.getFeature(taskId, featureId);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ project, taskId, feature }) => (await this.__getStorage(project.id))?.addFeature(taskId, feature);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({ project, taskId, featureId, data }) => (await this.__getStorage(project.id))?.updateFeature(taskId, featureId, data);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id))?.deleteFeature(taskId, featureId);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ project, taskId, payload }) => (await this.__getStorage(project.id))?.reorderFeatures(taskId, payload);
 
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {

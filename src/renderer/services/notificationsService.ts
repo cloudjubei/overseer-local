@@ -7,7 +7,7 @@ export type NotificationsService = {
   onOpenNotification: (callback: (metadata: NotificationMetadata) => void) => () => void
 
   sendOs: (data: any) => Promise<ServiceResult>
-  subscribe: (callback: () => void) => () => void
+  subscribe: (callback: (notifications: Notification[]) => void) => () => void
   getRecentNotifications: (project: ProjectSpec) => Promise<Notification[]>
   getUnreadNotificationsCount: (project: ProjectSpec) => Promise<number>
   markAllNotificationsAsRead: (project: ProjectSpec) => Promise<void>

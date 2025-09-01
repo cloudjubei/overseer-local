@@ -16,6 +16,13 @@ export class NotificationManager {
     this.preferences = {};
   }
 
+  async init() {
+    await this.__getStorage('main');
+    await this.__getPreferences('main');
+
+    this._registerIpcHandlers();
+  }
+
   __getStorage(projectId) {
     if (!this.storages[projectId]) {
       this.storages[projectId] = new NotificationsStorage(projectId);
@@ -27,13 +34,6 @@ export class NotificationManager {
       this.preferences[projectId] = new NotificationsPreferences(projectId);
     }
     return this.preferences[projectId];
-  }
-
-  async init() {
-    this.__getStorage('main');
-    this.__getPreferences('main');
-
-    this._registerIpcHandlers();
   }
 
   _registerIpcHandlers() {

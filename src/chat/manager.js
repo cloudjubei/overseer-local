@@ -6,11 +6,13 @@ import { taskManager, filesManager, projectsManager } from '../managers';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
 export class ChatsManager {
-  constructor(projectRoot, window) {
+  constructor(projectRoot, window, projectsManager) {
     this.projectRoot = projectRoot;
     this.window = window;
     this.chatsDir = path.join(projectRoot, 'projects/main/chats');
     this._ipcBound = false;
+
+    this.projectsManager = projectsManager
   }
 
   async init() {

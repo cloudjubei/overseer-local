@@ -5,10 +5,6 @@ import { validateTask } from './validator';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import { randomUUID } from 'crypto';
 
-function isNumericDir(name) {
-  return /^\d+$/.test(name);
-}
-
 async function pathExists(p) {
   try { await fs.stat(p); return true; } catch { return false; }
 }
@@ -52,7 +48,7 @@ export default class TasksStorage {
   __notify(msg) {
     if (msg) console.log(msg);
     if (this.window) {
-      this.window.webContents.send(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, { projectId: this.projectId });
+      this.window.webContents.send(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, this.tasks);
     }
   }
   async __rebuildAndNotify(msg) {
@@ -101,7 +97,7 @@ export default class TasksStorage {
   async createTask(task) {
     const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
     const existingIds = taskDirs
-      .filter(d => d.isDirectory() && isNumericDir(d.name))
+      .filter(d => d.isDirectory())
       .map(d => parseInt(d.name, 10));
     const nextIdNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
     const nextId = String(nextIdNum);

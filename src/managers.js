@@ -12,9 +12,9 @@ export let notificationManager;
 
 export async function initManagers(projectRoot, mainWindow) {
   projectsManager = new ProjectsManager(projectRoot, mainWindow);
-  taskManager = new TasksManager(projectRoot, mainWindow);
-  filesManager = new FilesManager(projectRoot, mainWindow);
-  chatsManager = new ChatsManager(projectRoot, mainWindow);
+  taskManager = new TasksManager(projectRoot, mainWindow, projectsManager);
+  filesManager = new FilesManager(projectRoot, mainWindow, projectsManager);
+  chatsManager = new ChatsManager(projectRoot, mainWindow, projectsManager);
   notificationManager = new NotificationManager(projectRoot, mainWindow);
 
   await projectsManager.init();

@@ -70,7 +70,7 @@ export default function TasksListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project } = useActiveProject()
-  const { tasksById, updateTask, reorderTasks, getReferencesInbound, getReferencesOutbound } = useTasks()
+  const { tasksById, updateTask, reorderTask, getReferencesInbound, getReferencesOutbound } = useTasks()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
@@ -124,7 +124,7 @@ export default function TasksListView() {
     if (saving) return
     setSaving(true)
     try {
-      const res = await reorderTasks(fromIndex, toIndex)
+      const res = await reorderTask(fromIndex, toIndex)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder task: ${e.message || e}`)
@@ -141,7 +141,7 @@ export default function TasksListView() {
     }
   }
 
-  const dndEnabled = sortBy === "index_asc" && !isFiltered && view === 'list'
+  const dndEnabled = (sortBy === "index_asc" || sortBy === "index_desc") && !isFiltered && view === 'list'
 
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     // Do not show drop indicators when hovering the dragged row itself
@@ -193,9 +193,10 @@ export default function TasksListView() {
   }
 
   const onListDrop = () => {
-    if (dragTaskId != null && dropIndex != null && dropPosition != null) {
-      const fromIndex = allTasks.findIndex(t => t.id === dragTaskId)
-      const toIndex = dropIndex //+ (dropPosition === 'after' ? 1 : 0)
+    if (project != null && dragTaskId != null && dropIndex != null && dropPosition != null) {
+      const fromIndex = project.taskIdToDisplayIndex[dragTaskId] - 1 //offsetting the display
+      const toTask = sorted[dropIndex] //+ (dropPosition === 'after' ? 1 : 0)
+      const toIndex = project.taskIdToDisplayIndex[toTask.id] - 1 //offsetting the display
       
       if (fromIndex !== -1 && toIndex !== fromIndex) {
         handleMoveTask(fromIndex, toIndex)

@@ -46,7 +46,7 @@ export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & P
 export type ReorderFeaturesPayload = { fromIndex: number; toIndex: number }
 
 export type TasksService = {
-  subscribe: (callback: () => void) => () => void
+  subscribe: (callback: (tasks: Task[]) => void) => () => void
   listTasks: (project: ProjectSpec) => Promise<Task[]>
   getTask: (project: ProjectSpec, taskId: string) => Promise<Task | undefined>
   createTask: (project: ProjectSpec, task: TaskCreateInput) => Promise<ServiceResult>

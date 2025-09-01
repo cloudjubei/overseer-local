@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { chatsService } from '../services/chatsService';
+import { ChatMessage, chatsService } from '../services/chatsService';
 import { filesService } from '../services/filesService';
-import type { ChatMessage, LLMConfig } from '../types';
 
 export function useChats() {
   const [chatHistories, setChatHistories] = useState<string[]>([]);

@@ -9,26 +9,25 @@ function resolveFilesDir(projectRoot) {
 }
 
 export class FilesManager {
-  constructor(projectRoot, window, options = {}) {
+  constructor(projectRoot, window, projectsManager) {
     this.window = window;
     this.storages = {};
     this._ipcBound = false;
+
+    this.projectsManager = projectsManager
   }
 
   async init() {
+    await this.__getStorage('main');
+
     this._registerIpcHandlers();
-    // Pre-init storages for existing projects
-    const projects = await projectsManager.listProjects();
-    await Promise.all(projects.map(async (p) => await this.__getStorage(p.id)));
   }
 
   async __getStorage(projectId) {
     if (!this.storages[projectId]) {
-      const project = projectsManager.index.projectsById[projectId];
-      if (!project) {
-        throw new Error(`Unknown project ${projectId}`);
-      }
-      const projectRoot = path.resolve(projectsManager.projectsDir, project.path);
+      const project = await this.projectsManager.getProject(projectId);
+      if (!project){ return }
+      const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path);
       const filesDir = resolveFilesDir(projectRoot);
       const storage = new FilesStorage(projectId, filesDir, this.window);
       await storage.init();

@@ -14,60 +14,67 @@ export function useTasks() {
   const [featuresById, setFeaturesById] = useState<Record<string,Feature>>({});
   const [referencesById, setReferencesById] = useState<Record<string,ResolvedRef[]>>({});
 
-  const updateCurrentProjectTasks = async () => {
+  const update = async () => {
     if (project){
       const tasks = await tasksService.listTasks(project)
-      const newTasksById : Record<string,Task> = {}
-      const newFeaturesById : Record<string,Feature> = {}
-      for(const t of tasks){
-        newTasksById[t.id] = t
-        for(const f of t.features){
-          newFeaturesById[f.id] = f
+      updateCurrentProjectTasks(project, tasks)
+    }
+  }
+  const updateCurrentProjectTasks = (project: ProjectSpec, tasks: Task[]) => {
+    const newTasksById : Record<string,Task> = {}
+    const newFeaturesById : Record<string,Feature> = {}
+    for(const t of tasks){
+      newTasksById[t.id] = t
+      for(const f of t.features){
+        newFeaturesById[f.id] = f
+      }
+    }
+    setTasksById(newTasksById)
+    setFeaturesById(newFeaturesById)
+
+    const outbound : Record<string,ResolvedRef[]> = {};
+    for (const task of tasks) {
+      for (const d of task.dependencies || []) {
+        const parts = d.split(".")
+        if (parts.length > 1){
+          if (!outbound[parts[1]]) outbound[parts[1]] = [];
+          outbound[parts[1]].push({ id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
+        }else{
+          if (!outbound[parts[0]]) outbound[parts[0]] = [];
+          outbound[parts[0]].push({ id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
         }
       }
-      setTasksById(newTasksById)
-      setFeaturesById(newFeaturesById)
-
-      const outbound : Record<string,ResolvedRef[]> = {};
-      for (const task of tasks) {
-        for (const d of task.dependencies || []) {
+      for (const feature of task.features) {
+        for (const d of feature.dependencies || []) {
           const parts = d.split(".")
           if (parts.length > 1){
             if (!outbound[parts[1]]) outbound[parts[1]] = [];
-            outbound[parts[1]].push({ id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
+            outbound[parts[1]].push({ id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
           }else{
             if (!outbound[parts[0]]) outbound[parts[0]] = [];
-            outbound[parts[0]].push({ id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
-          }
-        }
-        for (const feature of task.features) {
-          for (const d of feature.dependencies || []) {
-            const parts = d.split(".")
-            if (parts.length > 1){
-              if (!outbound[parts[1]]) outbound[parts[1]] = [];
-              outbound[parts[1]].push({ id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
-            }else{
-              if (!outbound[parts[0]]) outbound[parts[0]] = [];
-              outbound[parts[0]].push({ id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
-            }
+            outbound[parts[0]].push({ id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
           }
         }
       }
-      setReferencesById(outbound)
     }
+    setReferencesById(outbound)
   }
 
   useEffect(() => {
-    updateCurrentProjectTasks();
+    update();
 
-    const unsubscribe = tasksService.subscribe(updateCurrentProjectTasks);
+    const unsubscribe = tasksService.subscribe((tasks) => {
+      if (project){
+        updateCurrentProjectTasks(project, tasks)
+      }
+    });
 
     return () => {
       unsubscribe();
     };
   }, []);
   useEffect(() => {
-    updateCurrentProjectTasks();
+    update();
   }, [project]);
 
   const resolveDependency = (dependency: string) : ResolvedRef | InvalidRefError =>
@@ -137,9 +144,9 @@ export function useTasks() {
   }
   
 
-  const reorderTasks = async (fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
+  const reorderTask = async (fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
     if (project){
-      return await projectsService.reorderTasks(project, fromIndex, toIndex)
+      return await projectsService.reorderTask(project.id, fromIndex, toIndex)
     }
     return { ok: false }
   }
@@ -154,20 +161,5 @@ export function useTasks() {
     return referencesById[id] ?? []
   }
 
-  // async searchReferences(query, limit = 10) {
-  //   const results = [];
-  //   Object.entries(this.index.tasksById).forEach(([id, task]) => {
-  //     if (id.includes(query) || task.title.toLowerCase().includes(query.toLowerCase())) {
-  //       results.push({ type: 'task', id, title: task.title });
-  //     }
-  //   });
-  //   Object.entries(this.index.featuresById).forEach(([id, feature]) => {
-  //     if (id.includes(query) || feature.title.toLowerCase().includes(query.toLowerCase())) {
-  //       results.push({ type: 'feature', id, title: feature.title });
-  //     }
-  //   });
-  //   return results.slice(0, limit);
-  // }
-
-  return { tasksById, createTask, updateTask, deleteTask, featuresById, addFeature, updateFeature, deleteFeature, reorderFeatures, reorderTasks, getReferencesOutbound, getReferencesInbound, resolveDependency };
+  return { tasksById, createTask, updateTask, deleteTask, featuresById, addFeature, updateFeature, deleteFeature, reorderFeatures, reorderTask, getReferencesOutbound, getReferencesInbound, resolveDependency };
 }

@@ -92,6 +92,21 @@
         "src/tasks/storage.js"
       ],
       "acceptance": []
+    },
+    {
+      "id": "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe",
+      "status": "-",
+      "title": "NotificationsStorage follows TasksStorage",
+      "description": "NotificationsStorage needs to follow the exact same pattern as TasksStorage when it comes to storing the notifications data and notifying the ipc",
+      "plan": "",
+      "context": [
+        "src/tasks/manager.js",
+        "src/tasks/storage.js",
+        "src/notifications/manager.js",
+        "src/notifications/storage.js",
+        "src/ipcHandlersKeys.js"
+      ],
+      "acceptance": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -101,6 +116,7 @@
     "916bebdb-a2c4-429f-a559-dff03aed4eef": 4,
     "06680296-05e8-434c-868c-b07a44f86570": 5,
     "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 6,
-    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7
+    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7,
+    "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe": 8
   }
 }

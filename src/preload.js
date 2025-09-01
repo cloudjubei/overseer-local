@@ -3,7 +3,7 @@ import IPC_HANDLER_KEYS from "./ipcHandlersKeys"
 
 const FILES_API = {
   subscribe: (callback) => {
-    const listener = (_event) => callback();
+    const listener = (_event, files) => callback(files);
     ipcRenderer.on(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener);
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener);
   },
@@ -19,7 +19,7 @@ const FILES_API = {
 
 const TASKS_API = {
   subscribe: (callback) => {
-    const listener = (_event) => callback();
+    const listener = (_event, tasks) => callback(tasks);
     ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
   },
@@ -32,18 +32,17 @@ const TASKS_API = {
   addFeature: (project, taskId, feature) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { project, taskId, feature }),
   updateFeature: (project, taskId, featureId, data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE, { project, taskId, featureId, data }),
   deleteFeature: (project, taskId, featureId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE, { project, taskId, featureId }),
-  reorderFeatures: (project, taskId, payload) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER, { project, taskId, payload }),
-
-  getReferencesOutbound: (project, reference) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_OUTBOUND, { project, reference }),
-  getReferencesInbound: (project, reference) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_INBOUND, { project, reference }),
-  validateReference: (project, reference) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCE_VALIDATE, { project, reference }),
-  validateReferences: (project, reference, proposed) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_VALIDATE, { project, reference, proposed }),
-  searchReferences: (project, query, limit) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_REFERENCES_SEARCH, { project, query, limit })
+  reorderFeatures: (project, taskId, payload) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER, { project, taskId, payload })
 };
 
 const CHATS_API = {
   getCompletion: (messages, config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, { messages, config }),
   listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, { config }),
+  subscribe: (callback) => {
+    const listener = (_event, chats) => callback(chats);
+    ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, listener);
+  },
   listChats: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST, { project }),
   createChat: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE, { project }),
   loadChat: (project, chatId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LOAD, { project, chatId }),
@@ -59,8 +58,8 @@ const NOTIFICATIONS_API = {
   },
 
   sendOs: (data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS, data),
-  subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback();
+  subscribe: (callback, notifications) => {
+    const listener = (_event, snapshot) => callback(notifications);
     ipcRenderer.on(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, listener);
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, listener);
   },
@@ -77,7 +76,7 @@ const NOTIFICATIONS_API = {
 
 const PROJECTS_API = {
   subscribe: (callback) => {
-    const listener = (_event, snapshot) => callback();
+    const listener = (_event, projects) => callback(projects);
     ipcRenderer.on(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener);
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener);
   },
@@ -86,7 +85,7 @@ const PROJECTS_API = {
   createProject: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { project }),
   updateProject: (id, project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { id, project }),
   deleteProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { id }),
-  reorderTask: (project, fromIndex, toIndex) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { project, fromIndex, toIndex }),
+  reorderTask: (projectId, fromIndex, toIndex) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { projectId, fromIndex, toIndex }),
 };
 
 const SCREENSHOT_API = {

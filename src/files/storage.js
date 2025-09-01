@@ -63,7 +63,7 @@ export default class FilesStorage {
   __notify(logMessage) {
     if (logMessage) console.log(logMessage);
     if (this.window) {
-      this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, { projectId: this.projectId });
+      this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, this.files);
     }
   }
   async __rebuildAndNotify(logMessage) {

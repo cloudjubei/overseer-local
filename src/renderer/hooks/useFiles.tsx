@@ -58,17 +58,20 @@ export default function useFiles() {
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [directoryTree, setDirectoryTree] = useState<DirNode | null>(null)
 
-  const updateCurrentFiles = async () => {
+  const update = async () => {
     if (project){
       const files = await filesService.listFiles(project)
-      setFiles(files)
-      const newTree = buildDirTree(files)
-      setDirectoryTree(newTree)
+      updateCurrentFiles(files)
     }
+  }
+  const updateCurrentFiles = (files: FileMeta[]) => {
+    setFiles(files)
+    const newTree = buildDirTree(files)
+    setDirectoryTree(newTree)
   }
   
   useEffect(() => {
-    updateCurrentFiles();
+    update();
 
     const unsubscribe = filesService.subscribe(updateCurrentFiles);
 
@@ -76,6 +79,9 @@ export default function useFiles() {
       unsubscribe();
     };
   }, []);
+  useEffect(() => {
+    update();
+  }, [project]);
 
   const readFile = async (path: string) : Promise<string | undefined> =>  {
     if (project){
