@@ -149,9 +149,6 @@ export default class TasksStorage {
 
   async deleteTask(taskId) {
     const taskDirPath = path.join(this.tasksDir, taskId);
-    const deletedTask = this.index.tasksById[taskId];
-    const deletedFeatureIds = new Set(deletedTask ? deletedTask.features.map(f => f.id) : []);
-
     try {
       await fs.rm(taskDirPath, { recursive: true, force: true });
     } catch (e) {

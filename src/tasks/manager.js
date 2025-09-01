@@ -93,21 +93,21 @@ export class TasksManager {
 
   async deleteTask(projectId, taskId)
   {
-    const project = this.projectsManager.getProject(projectId)
+    const project = await this.projectsManager.getProject(projectId)
     if (!project) { return { ok: false, error: "project couldn't be found"} }
 
-    const storage = await this.__getStorage(project.id)
+    const storage = await this.__getStorage(projectId)
     await storage?.deleteTask(taskId)
     
     const newProject = {...project}
-    const index = newProject.taskIdToDisplayIndex[task.id]
-    delete newProject.taskIdToDisplayIndex[task.id]
+    const index = newProject.taskIdToDisplayIndex[taskId]
+    delete newProject.taskIdToDisplayIndex[taskId]
     for(const key of Object.keys(newProject.taskIdToDisplayIndex)){
       if (newProject.taskIdToDisplayIndex[key] > index){
         newProject.taskIdToDisplayIndex[key] = newProject.taskIdToDisplayIndex[key] - 1
       }
     }
-    await this.projectsManager.updateProject(project.id, newProject)
+    await this.projectsManager.updateProject(projectId, newProject)
     return { ok: true }
   }
   async getFeature(projectId, taskId, featureId)

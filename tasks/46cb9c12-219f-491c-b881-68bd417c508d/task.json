@@ -38,7 +38,7 @@
         "src/renderer/screens/SettingsView.tsx",
         "src/preferences/userPreferences.js",
         "src/types/userPreferences.ts",
-        "src/preferences/manager.js"
+        "src/preferences/manager.js",
         "src/managers.js"
       ],
       "acceptance": [],
