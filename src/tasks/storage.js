@@ -196,7 +196,7 @@ export default class TasksStorage {
       plan: feature.plan || '',
       context: feature.context || [],
       acceptance: feature.acceptance || [],
-      dependencies: feature.dependencies || [],
+      dependencies: feature.dependencies,
       rejection: feature.rejection
     };
     task.features.push(newFeature);
