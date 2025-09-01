@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "4aa629d1-91be-4c45-82cc-b210dacab4f4",
-      "status": "-",
+      "status": "+",
       "title": "Create user preferences storage service",
       "description": "Create a new service that provides methods to get, set, and persist user preferences. The service should handle storing preferences like last active project, task view mode (list/board), and list view sorting preferences. \nCurrently useNotificationPreferences is already using and storing some system preferences. This should be extracted from there and moved to a new class responsible for all such system-wide settings.",
       "plan": "",

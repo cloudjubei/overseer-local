@@ -12,7 +12,7 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, etc.).
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.
-    - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications).
+    - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications/user-preferences).
     - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
   - src/chat/: Chat providers, manager, and storage.
@@ -23,6 +23,7 @@ This document describes how files and directories are organised in this reposito
   - src/projects/: Projects manager and indexing.
   - src/tasks/: Tasks manager and per-project storage.
   - src/notifications/: Notifications manager and IPC integration.
+  - src/preferences/: Preferences manager and user settings storage (system-wide user preferences such as last active project, task view mode, list sorting, notification settings), with IPC exposure.
 - scripts/: Project automation scripts and CLIs (e.g., preview scanning).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
 

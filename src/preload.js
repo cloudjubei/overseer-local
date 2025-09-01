@@ -91,9 +91,15 @@ const SCREENSHOT_API = {
   capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
 };
 
+const PREFERENCES_API = {
+  getPreferences: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PREFERENCES_GET),
+  updatePreferences: (updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PREFERENCES_UPDATE, { updates }),
+};
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('filesService', FILES_API);
 contextBridge.exposeInMainWorld('chatsService', CHATS_API);
 contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
+contextBridge.exposeInMainWorld('preferencesService', PREFERENCES_API);
