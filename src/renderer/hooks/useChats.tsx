@@ -14,27 +14,23 @@ export function useChats() {
   const update = async () => {
     if (project){
       const chats = await chatsService.listChats(project.id)
-      updateCurrentProjectChats(project, chats)
+      updateCurrentProjectChats(chats)
     }
   }
-  const updateCurrentProjectChats = (project: ProjectSpec, chats: Chat[]) => {
+  const updateCurrentProjectChats = (chats: Chat[]) => {
     const newChats = chats.reduce((acc, c) => {
       acc[c.id] = c;
       return acc;
     }, {} as Record<string, Chat>)
     setChatsById(newChats);
     if (!currentChatId || !chatsById[currentChatId]){
-      setCurrentChatId(newChats[0]?.id)
+      setCurrentChatId(chats[0]?.id)
     }
   }
   useEffect(() => {
     update();
 
-    const unsubscribe = chatsService.subscribe((chats) => {
-      if (project){
-        updateCurrentProjectChats(project, chats)
-      }
-    });
+    const unsubscribe = chatsService.subscribe(updateCurrentProjectChats);
 
     return () => {
       unsubscribe();
@@ -57,15 +53,16 @@ export function useChats() {
     return { ok: false };
   };
 
-  const sendMessage = async (message: string, config: LLMConfig): Promise<Chat | undefined> => {
+  const sendMessage = async (message: string, config: LLMConfig): Promise<ServiceResult> => {
     if (project && currentChatId) {
       const newMessages: ChatMessage[] = [{ role: 'user', content: message }]
-      const c = await chatsService.getCompletion(project.id, currentChatId, newMessages, config);
+      const newChat = chatsById[currentChatId]
       const newChatsById = { ...chatsById }
-      newChatsById[c.id] = c
+      newChatsById[newChat.id] = { ...newChat, messages: [...newChat.messages, ...newMessages]}
       setChatsById(newChatsById)
-      return c
+      return await chatsService.getCompletion(project.id, currentChatId, newMessages, config);
     }
+    return { ok: false };
   };
 
   const listModels = async (config: LLMConfig): Promise<string[]> => {

@@ -39,7 +39,7 @@ const CHATS_API = {
   listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, { config }),
   subscribe: (callback) => {
     const listener = (_event, chats) => callback(chats);
-    ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener);
+    ipcRenderer.on(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, listener);
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, listener);
   },
   listChats: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST, { projectId }),

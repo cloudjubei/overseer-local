@@ -22,7 +22,7 @@ export type ChatsService = {
   createChat: (projectId: string) => Promise<Chat>;
   getChat: (projectId: string, chatId: string) => Promise<Chat>;
   deleteChat: (projectId: string, chatId: string) => Promise<ServiceResult>;
-  getCompletion: (projectId: string, chatId: string, newMessages: ChatMessage[], config: LLMConfig) => Promise<Chat>;
+  getCompletion: (projectId: string, chatId: string, newMessages: ChatMessage[], config: LLMConfig) => Promise<ServiceResult>;
 };
 
 export const chatsService: ChatsService = { ...window.chatsService }

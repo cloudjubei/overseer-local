@@ -5,7 +5,7 @@ export class LLMProvider {
     this.client = new OpenAI({
       baseURL: config.apiBaseUrl,
       apiKey: config.apiKey,
-      timeout: 1000,
+      timeout: 10000,
     });
   }
 

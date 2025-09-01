@@ -9,7 +9,7 @@ import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import FileDisplay from '../components/ui/FileDisplay'
 import useFiles, { inferFileType } from '../../renderer/hooks/useFiles';
-import { ChatMessage } from '../services/chatsService'
+import { Chat, ChatMessage } from '../services/chatsService'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -29,6 +29,7 @@ export default function ChatView() {
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
+  const [currentChat, setCurrentChat] = useState<Chat | undefined>()
   const [input, setInput] = useState<string>('')
   const messageListRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -59,9 +60,16 @@ export default function ChatView() {
   useEffect(() => {
     if (currentChatId){
       const chat = chatsById[currentChatId]
-      setMessages(chat?.messages ?? [])
+      setCurrentChat(chat)
     }
   }, [currentChatId, chatsById])
+
+  useEffect(() => {
+    if (currentChat){
+      setMessages(currentChat.messages)
+    }
+  }, [currentChat])
+
   
   const chatHistories = useMemo(() => {
     return Object.values(chatsById).sort((a,b) => new Date(a.updateDate).getMilliseconds() - new Date(b.updateDate).getMilliseconds())

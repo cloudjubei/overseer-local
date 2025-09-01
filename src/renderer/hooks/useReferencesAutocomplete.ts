@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTasks } from './useTasks';
+import { useActiveProject } from '../projects/ProjectContext';
 
 type RefItem = {
   ref: string;
@@ -14,21 +15,23 @@ export function useReferencesAutocomplete(params: {
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   mirrorRef: React.RefObject<HTMLDivElement>;
 }) {
+  const { project } = useActiveProject();
   const { input, setInput, textareaRef, mirrorRef } = params;
-  const { tasksById } = useTasks();
+  const { tasksById, getReferencesInbound, getReferencesOutbound } = useTasks();
 
   const references = useMemo<RefItem[]>(() => {
+    if (!project) { return [] }
     const refs: RefItem[] = [];
     Object.values(tasksById).forEach((task) => {
-      refs.push({ ref: `${task.id}`, title: task.title, type: 'task' });
+      const taskDisplay = `${project.taskIdToDisplayIndex[task.id]}`
+      refs.push({ ref: `${task.id}`, display: taskDisplay, title: task.title, type: 'task' });
       (task.features || []).forEach((f) => {
-        const featRef = `${taskId}.${f.id}`;
-        const featDisplay = dependencyResolver.getDisplayRef(featRef) ?? featRef.slice(0, 8);
-        refs.push({ ref: featRef, display: featDisplay, title: f.title, type: 'feature' });
+        const featureDisplay = `${task.featureIdToDisplayIndex[f.id]}`
+        refs.push({ ref: `${task.id}.${f.id}`, display: `${taskDisplay}.${featureDisplay}`, title: f.title, type: 'feature' });
       });
     });
     return refs.sort((a, b) => a.ref.localeCompare(b.ref));
-  }, [tasksById]);
+  }, [tasksById, project]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [matches, setMatches] = useState<RefItem[]>([]);

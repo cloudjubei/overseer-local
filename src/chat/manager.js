@@ -68,7 +68,8 @@ export class ChatsManager {
 
   async getCompletion(projectId, chatId, newMessages, config) {
     try {
-      let chat = await this.__getStorage(projectId)?.getChat(chatId)
+      const storage = await this.__getStorage(projectId)
+      const chat = await storage.getChat(chatId)
       if (!chat) throw new Error(`Couldn't load chat with chatId: ${chatId}`)
 
       const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
@@ -152,7 +153,6 @@ export class ChatsManager {
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,
           tool_choice: tools.length > 0 ? 'auto' : undefined,
-          timeout: 1000,
           stream: false,
         });
 
@@ -163,8 +163,7 @@ export class ChatsManager {
         rawResponses.push(JSON.stringify(response))
 
         if (!message.tool_calls || message.tool_calls.length === 0) {
-          chat = await this.__getStorage(projectId)?.saveChat(chatId, [...chat.messages, newMessages, message], [...chat.rawResponses, rawResponses])
-          break;
+          return await storage.saveChat(chatId, [...chat.messages, ...newMessages, message], [...(chat.rawResponses ?? []), rawResponses])
         }
 
         currentMessages.push(message);
@@ -192,7 +191,6 @@ export class ChatsManager {
       ].filter(Boolean).join('\n');
       console.error('Error in chat completion:', details);
     }
-    return chat
   }
 
   async listModels(config) {
