@@ -8,19 +8,18 @@
       "id": "4aa629d1-91be-4c45-82cc-b210dacab4f4",
       "status": "-",
       "title": "Create user preferences storage service",
-      "description": "Create a new service in src/renderer/services/userPreferencesService.ts that provides methods to get, set, and persist user preferences. The service should handle storing preferences like last active project, task view mode (list/board), and list view sorting preferences. Include proper TypeScript types and error handling.",
+      "description": "Create a new service that provides methods to get, set, and persist user preferences. The service should handle storing preferences like last active project, task view mode (list/board), and list view sorting preferences. \nCurrently useNotificationPreferences is already using and storing some system preferences. This should be extracted from there and moved to a new class responsible for all such system-wide settings.",
       "plan": "",
-      "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "e9d16b35-ee65-43ac-9ba1-49cc76a78baa",
-      "status": "-",
-      "title": "Add user preferences hook",
-      "description": "Create a React hook in src/renderer/hooks/useUserPreferences.ts that wraps the user preferences service and provides reactive state management for preferences. The hook should return current preferences, loading state, and methods to update preferences with proper re-rendering when preferences change.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/hooks/useNotificationPreferences.ts",
+        "src/renderer/hooks/useNotifications.ts",
+        "src/notifications/manager.js",
+        "src/ipcHandlersKeys.js",
+        "src/renderer/services/notificationsService.ts",
+        "src/preload.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
     },
     {
       "id": "d877642c-9e5d-44ca-b100-dbe5a7ad119c",
@@ -28,8 +27,12 @@
       "title": "Store and restore last active project",
       "description": "Integrate user preferences into the projects system to automatically store the last active project when it changes and restore it on app startup. Update the projects service and relevant components to persist and load the last active project preference.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
     },
     {
       "id": "632d7c0e-6caa-4f11-85a1-73cc4ad378bd",
@@ -37,8 +40,13 @@
       "title": "Store and restore task view configuration",
       "description": "Integrate user preferences into the tasks view system to store whether the user was in list or board view mode. Update TasksView.tsx and related components to persist the current view mode and restore it when navigating back to tasks or restarting the app.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/BoardView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
     },
     {
       "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
@@ -46,25 +54,17 @@
       "title": "Store and restore list view sorting preferences",
       "description": "When the user is in list view, store their sorting preferences (sort field and direction). Update TasksListView.tsx to persist sorting state and restore it when returning to list view or restarting the app. Only applicable when in list view mode.",
       "plan": "",
-      "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "444d8afe-2895-4c56-a10f-976d4c5e2356",
-      "status": "-",
-      "title": "Add main process preferences persistence",
-      "description": "Create a main process service to persist user preferences to disk (likely in user data directory) so they survive app restarts. Add IPC handlers for getting and setting preferences, and ensure preferences are loaded on app startup and saved when they change.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
     }
   ],
   "featureIdToDisplayIndex": {
-    "4aa629d1-91be-4c45-82cc-b210dacab4f4": 2,
-    "e9d16b35-ee65-43ac-9ba1-49cc76a78baa": 3,
-    "d877642c-9e5d-44ca-b100-dbe5a7ad119c": 4,
-    "632d7c0e-6caa-4f11-85a1-73cc4ad378bd": 5,
-    "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1": 6,
-    "444d8afe-2895-4c56-a10f-976d4c5e2356": 7
+    "4aa629d1-91be-4c45-82cc-b210dacab4f4": 1,
+    "d877642c-9e5d-44ca-b100-dbe5a7ad119c": 2,
+    "632d7c0e-6caa-4f11-85a1-73cc4ad378bd": 3,
+    "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1": 4
   }
 }
