@@ -1,6 +1,6 @@
 {
   "id": "46cb9c12-219f-491c-b881-68bd417c508d",
-  "status": "-",
+  "status": "+",
   "title": "Store app usage user preferences",
   "description": "Following setting storing, we want to store the last project active, the configuration active for tasks (i.e. list vs board), if it was list - then which sorting was used.\nEssentially we want the user to resume the app in exactly the same state as they left it.",
   "features": [
@@ -68,7 +68,7 @@
     },
     {
       "id": "d3c0aaf2-7919-4c1c-a21d-3a079d5c2c23",
-      "status": "-",
+      "status": "+",
       "title": "Notifications need to use new userPreferences",
       "description": "Notifications are using their own (old way) of storing preferences - everything that was using the preferences via the useNotifications should use the new way",
       "plan": "",
