@@ -9,6 +9,7 @@ import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
+import { userPreferencesService } from '../services/userPreferencesService'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -59,6 +60,7 @@ export default function TasksListView() {
   const [sortBy, setSortBy] = useState<'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
+  const [viewLoaded, setViewLoaded] = useState(false)
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -75,6 +77,33 @@ export default function TasksListView() {
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
+
+  // Load persisted view mode on mount
+  useEffect(() => {
+    let mounted = true
+    userPreferencesService.getTasksViewMode()
+      .then((mode) => {
+        if (!mounted) return
+        if (mode === 'list' || mode === 'board') {
+          setView(mode)
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load tasks view mode', err)
+      })
+      .finally(() => {
+        if (mounted) setViewLoaded(true)
+      })
+    return () => { mounted = false }
+  }, [])
+
+  // Persist view mode changes (after initial load)
+  useEffect(() => {
+    if (!viewLoaded) return
+    userPreferencesService.setTasksViewMode(view).catch((err) => {
+      console.error('Failed to save tasks view mode', err)
+    })
+  }, [view, viewLoaded])
   
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
