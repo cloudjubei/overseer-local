@@ -3,7 +3,6 @@ import { chatsService } from '../services/chatsService';
 import { useActiveProject } from '../projects/ProjectContext';
 import { Chat, ChatMessage, LLMConfig } from '../services/chatsService';
 import { ServiceResult } from '../services/serviceResult';
-import { ProjectSpec } from 'src/types/tasks';
 
 export function useChats() {
   const { project } = useActiveProject();
@@ -26,7 +25,6 @@ export function useChats() {
 
     setChatsById(newChats);
 
-    // If no current chat selected or it no longer exists, pick the most recently updated chat
     if (!currentChatId || !newChats[currentChatId]) {
       const mostRecent = chats
         .slice()
@@ -49,38 +47,59 @@ export function useChats() {
     update();
   }, [project]);
 
-  const createChat = async (): Promise<Chat | undefined> => {
+  const createChat = async (): Promise<string | undefined> => {
     if (!project) return undefined;
-    const chat = await chatsService.createChat(project.id);
-    if (chat) {
-      // Optimistically add to local state and select it
-      setChatsById((prev) => ({ ...prev, [chat.id]: chat }));
-      setCurrentChatId(chat.id);
+    const res = await chatsService.createChat(project.id);
+
+    // The main implementation may return { ok, id } or a full Chat
+    const newChatId = (res as any)?.id as string | undefined;
+    if (newChatId) {
+      setCurrentChatId(newChatId);
     }
-    return chat;
+
+    // Ensure local state refreshes from storage
+    update();
+
+    return newChatId;
   };
 
   const deleteChat = async (chatId: string): Promise<ServiceResult> => {
     if (project) {
-      return await chatsService.deleteChat(project.id, chatId);
+      const result = await chatsService.deleteChat(project.id, chatId);
+      // Optimistic cleanup; storage watcher will also update
+      setChatsById((prev) => {
+        const next = { ...prev };
+        delete next[chatId];
+        return next;
+      });
+      if (currentChatId === chatId) setCurrentChatId(undefined);
+      return result;
     }
     return { ok: false };
   };
 
-  const sendMessage = async (message: string, config: LLMConfig): Promise<ServiceResult> => {
+  const sendMessage = async (
+    message: string,
+    config: LLMConfig,
+    attachments?: string[]
+  ): Promise<ServiceResult> => {
     if (!project) return { ok: false };
 
     let targetChatId = currentChatId;
-    // If no chat selected, create one and select it
     if (!targetChatId || !chatsById[targetChatId]) {
-      const newChat = await chatsService.createChat(project.id);
-      if (!newChat) return { ok: false };
-      targetChatId = newChat.id;
-      setCurrentChatId(newChat.id);
-      setChatsById((prev) => ({ ...prev, [newChat.id]: newChat }));
+      const res = await chatsService.createChat(project.id);
+      const newChatId = (res as any)?.id as string | undefined;
+      if (!newChatId) return { ok: false };
+      targetChatId = newChatId;
+      setCurrentChatId(newChatId);
+      // We'll rely on storage subscription to populate messages
     }
 
-    const newMessages: ChatMessage[] = [{ role: 'user', content: message }];
+    const newMessages: ChatMessage[] = [
+      { role: 'user', content: message, attachments: attachments && attachments.length ? attachments : undefined },
+    ];
+
+    // Optimistically reflect outgoing message
     setChatsById((prev) => {
       const existing = prev[targetChatId!];
       if (!existing) return prev;

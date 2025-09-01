@@ -31,6 +31,7 @@ export default function ChatView() {
 
   const [currentChat, setCurrentChat] = useState<Chat | undefined>()
   const [input, setInput] = useState<string>('')
+  const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const messageListRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
@@ -89,9 +90,9 @@ export default function ChatView() {
 
   const handleSend = async () => {
     if (!input.trim() || !activeConfig) return
-    // sendMessage will auto-create and select a new chat if none is selected
-    await sendMessage(input, activeConfig)
+    await sendMessage(input, activeConfig, pendingAttachments)
     setInput('')
+    setPendingAttachments([])
     requestAnimationFrame(() => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto'
@@ -105,11 +106,15 @@ export default function ChatView() {
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const content = event.target?.result as string
-      uploadFile(file.name, content)
+      await uploadFile(file.name, content)
+      // Assume upload path is the file name at project root unless service returns enriched path
+      setPendingAttachments((prev) => Array.from(new Set([...prev, file.name])))
     }
     reader.readAsText(file)
+    // Reset input to allow re-uploading same file name in a row
+    e.currentTarget.value = ''
   }
 
   const handleTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
@@ -167,7 +172,6 @@ export default function ChatView() {
         parts.push(<DependencyBullet key={`${match.index}-dep-${dep}`} dependency={dep} />)
       } else if (token.startsWith('@')) {
         const path = token.slice(1)
-        // Try to find full metadata; fallback to minimal
         const meta = getFileByPath(path)
         const name = meta?.name || (path.split('/').pop() || path)
         const type = meta?.type || inferFileType(path)
@@ -318,6 +322,30 @@ export default function ChatView() {
                       >
                         {renderMessageContent(msg.content)}
                       </div>
+
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className={[
+                          'mt-1 flex flex-wrap gap-1',
+                          isUser ? 'justify-end' : 'justify-start'
+                        ].join(' ')}>
+                          {msg.attachments.map((path, i) => {
+                            const meta = getFileByPath(path)
+                            const name = meta?.name || (path.split('/').pop() || path)
+                            const type = meta?.type || inferFileType(path)
+                            const size = meta?.size ?? undefined
+                            const mtime = meta?.mtime ?? undefined
+                            return (
+                              <FileDisplay
+                                key={`${index}-att-${i}-${path}`}
+                                file={{ name, path, type, size, mtime }}
+                                density="compact"
+                                interactive
+                                showPreviewOnHover
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
@@ -342,26 +370,57 @@ export default function ChatView() {
                   aria-label="Message input"
                   style={{ maxHeight: 200, overflowY: 'auto' }}
                 />
-                <div className="px-3 py-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[12px] text-[var(--text-muted)]">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="btn-secondary"
-                      aria-label="Attach a document"
-                      type="button"
-                    >
-                      Attach
-                    </button>
-                    <input
-                      type="file"
-                      accept=".md,.txt"
-                      ref={fileInputRef}
-                      style={{ display: 'none' }}
-                      onChange={handleFileUpload}
-                    />
-                    <span className="hidden sm:inline">Tip: Use @ for files • Use # for tasks and features</span>
+                <div className="px-3 py-1 border-t border-[var(--border-subtle)]">
+                  {pendingAttachments.length > 0 && (
+                    <div className="mb-1 flex flex-wrap gap-1">
+                      {pendingAttachments.map((path, idx) => {
+                        const meta = getFileByPath(path)
+                        const name = meta?.name || (path.split('/').pop() || path)
+                        const type = meta?.type || inferFileType(path)
+                        const size = meta?.size ?? undefined
+                        const mtime = meta?.mtime ?? undefined
+                        return (
+                          <div key={`${idx}-${path}`} className="inline-flex items-center gap-1">
+                            <FileDisplay
+                              file={{ name, path, type, size, mtime }}
+                              density="compact"
+                              interactive
+                              showPreviewOnHover
+                            />
+                            <button
+                              type="button"
+                              className="btn-secondary"
+                              aria-label={`Remove ${name}`}
+                              onClick={() => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn-secondary"
+                        aria-label="Attach a document"
+                        type="button"
+                      >
+                        Attach
+                      </button>
+                      <input
+                        type="file"
+                        accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                      />
+                      <span className="hidden sm:inline">Tip: Use @ for files • Use # for tasks and features</span>
+                    </div>
+                    <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
                   </div>
-                  <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
                 </div>
               </div>
 

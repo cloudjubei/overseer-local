@@ -12,17 +12,18 @@ export type LLMConfig = {
 };
 
 export type ChatRole = 'user' | 'assistant' | 'system';
-export type ChatMessage = { role: ChatRole, content: string, model?: string };
+export type ChatMessage = { role: ChatRole, content: string, model?: string, attachments?: string[] };
 export type Chat = { id: string, messages: ChatMessage[], creationDate: string, updateDate: string };
 
 export type ChatsService = {
   listModels: (config: LLMConfig) => Promise<string[]>;
   subscribe: (callback: (chats: Chat[]) => void) => () => void
   listChats: (projectId: string) => Promise<Chat[]>;
-  createChat: (projectId: string) => Promise<Chat>;
+  // Note: createChat may return a Chat object or an object containing id, depending on main implementation
+  createChat: (projectId: string) => Promise<Chat | { ok: boolean; id: string }>;
   getChat: (projectId: string, chatId: string) => Promise<Chat>;
   deleteChat: (projectId: string, chatId: string) => Promise<ServiceResult>;
   getCompletion: (projectId: string, chatId: string, newMessages: ChatMessage[], config: LLMConfig) => Promise<ServiceResult>;
 };
 
-export const chatsService: ChatsService = { ...window.chatsService }
+export const chatsService: ChatsService = { ...(window as any).chatsService };

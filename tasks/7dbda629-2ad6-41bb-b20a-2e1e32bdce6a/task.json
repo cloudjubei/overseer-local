@@ -1,6 +1,6 @@
 {
   "id": "7dbda629-2ad6-41bb-b20a-2e1e32bdce6a",
-  "status": "-",
+  "status": "+",
   "title": "UI and UX fixes",
   "description": "",
   "features": [
@@ -77,7 +77,7 @@
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "-",
+      "status": "+",
       "title": "ChatView needs to correctly pass file attachments to useChats",
       "description": "useChats via ipc uses ChatsManager - this needs to allow for file attachments as messages",
       "plan": "",

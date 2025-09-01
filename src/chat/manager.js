@@ -62,6 +62,20 @@ export class ChatsManager {
     this._ipcBound = true;
   }
 
+  _withAttachmentsAsMentions(messages) {
+    // Transform messages with attachments into content that includes @path mentions
+    return (messages || []).map((m) => {
+      try {
+        if (m && Array.isArray(m.attachments) && m.attachments.length) {
+          const unique = Array.from(new Set(m.attachments.filter(Boolean)));
+          const attachText = unique.map((p) => `@${p}`).join("\n");
+          const sep = m.content && attachText ? "\n\n" : '';
+          return { ...m, content: `${m.content || ''}${sep}Attached files:\n${attachText}` };
+        }
+      } catch {}
+      return m;
+    });
+  }
 
   async getCompletion(projectId, chatId, newMessages, config) {
     try {
@@ -74,7 +88,9 @@ export class ChatsManager {
       if (messagesHistory.length > MESSAGES_TO_SEND){
         messagesHistory.splice(0, messagesHistory.length - MESSAGES_TO_SEND)
       }
-      let currentMessages = [systemPrompt, ...messagesHistory];
+      // Build provider messages with attachments folded into content for tool discovery
+      const providerMessages = this._withAttachmentsAsMentions(messagesHistory);
+      let currentMessages = [systemPrompt, ...providerMessages];
       const tools = [
         {
           type: 'function',
