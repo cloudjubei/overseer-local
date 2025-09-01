@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import chokidar from 'chokidar';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
+import { randomUUID } from 'crypto';
 
 async function pathExists(p) {
   try { await fs.stat(p); return true; } catch { return false; }
@@ -13,7 +14,8 @@ export default class ChatsStorage {
     this.chatsDir = chatsDir;
     this.window = window;
     this.watcher = null;
-    this.chats = {};
+
+    this.chats = []
   }
 
   async init() {
@@ -24,7 +26,7 @@ export default class ChatsStorage {
   async __startWatcher() {
     if (this.watcher) this.stopWatching();
     if (!(await pathExists(this.chatsDir))) return;
-    this.watcher = chokidar.watch(path.join(this.chatsDir, '*.json'), {
+    this.watcher = chokidar.watch(path.join(this.chatsDir, '*/chat.json'), {
       ignored: /(^|[\/\\])\../,
       persistent: true,
       ignoreInitial: true,
@@ -45,69 +47,101 @@ export default class ChatsStorage {
   __notify(msg) {
     if (msg) console.log(msg);
     if (this.window) {
-      this.window.webContents.send(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, { projectId: this.projectId });
+      this.window.webContents.send(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, this.chats);
     }
   }
-
   async __rebuildAndNotify(msg) {
     await this.__buildIndex();
-    this.__notify(msg);
+    this.__notify(msg)
   }
 
   async __buildIndex() {
-    this.chats = {};
     try {
       if (await pathExists(this.chatsDir)) {
-        const files = await fs.readdir(this.chatsDir, { withFileTypes: true });
-        for (const file of files) {
-          if (file.isFile() && file.name.endsWith('.json')) {
-            const chatId = file.name.slice(0, -5);
-            const filePath = path.join(this.chatsDir, file.name);
+        const chatDirs = await fs.readdir(this.chatsDir, { withFileTypes: true });
+        const chats = [];
+        for (const dirent of chatDirs) {
+          if (dirent.isDirectory()) {
+            const chatId = dirent.name;
+            const chatFilePath = path.join(this.chatsDir, chatId, 'chat.json');
             try {
-              const content = await fs.readFile(filePath, 'utf-8');
-              this.chats[chatId] = JSON.parse(content);
+              const content = await fs.readFile(chatFilePath, 'utf-8');
+              const chat = JSON.parse(content);
+              if (chat.id !== chatId) {
+                continue;
+              }
+              chats.push(chat);
             } catch (err) {
-              console.error(`Failed to load chat ${chatId}: ${err}`);
             }
           }
         }
+        this.chats = chats
       }
     } catch (err) {
-      console.error(`Failed to build chats index: ${err}`);
     }
   }
 
   async listChats() {
-    return Object.keys(this.chats);
+    return this.chats
+  }
+
+  async getChat(id) {
+    return this.chats.find(c => c.id === id)
   }
 
   async createChat() {
-    const chatId = Date.now().toString();
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    await fs.mkdir(this.chatsDir, { recursive: true });
-    await fs.writeFile(filePath, JSON.stringify([]), 'utf-8');
-    this.chats[chatId] = [];
-    this.__notify(`New chat ${chatId} created.`);
-    return chatId;
-  }
+    const chatDirs = await fs.readdir(this.chatsDir, { withFileTypes: true });
+    const existingIds = chatDirs
+      .filter(d => d.isDirectory())
+      .map(d => parseInt(d.name, 10));
+    const nextIdNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+    const nextId = String(nextIdNum);
 
-  async loadChat(chatId) {
-    return this.chats[chatId] || null;
+    const newChatDir = path.join(this.chatsDir, nextId);
+    await fs.mkdir(newChatDir, { recursive: true });
+
+    const newChat = {
+      id: nextId,
+      messages: []
+    };
+
+    const chatPath = path.join(newChatDir, 'chat.json');
+    await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8');
+    this.chats.push(newChat)
+    await this.__notify(`New chat ${nextId} added.`)
+    return { ok: true, id: nextId };
   }
 
   async saveChat(chatId, messages) {
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    await fs.writeFile(filePath, JSON.stringify(messages), 'utf-8');
-    this.chats[chatId] = messages;
-    this.__notify(`Chat ${chatId} saved.`);
+    const chatPath = path.join(this.chatsDir, chatId, 'chat.json');
+    let chatData;
+    try {
+      const raw = await fs.readFile(chatPath, 'utf-8');
+      chatData = JSON.parse(raw);
+    } catch (e) {
+      throw new Error(`Could not read or parse chat file for chat ${chatId}: ${e.message}`);
+    }
+
+    const next = { ...chatData, messages };
+
+    await fs.writeFile(chatPath, JSON.stringify(next, null, 2), 'utf-8');
+    this.chats = this.chats.map(c => c.id === next.id ? next : c)
+
+    await this.__notify(`Chat ${chatId} saved.`)
+    return { ok: true };
   }
 
   async deleteChat(chatId) {
-    const filePath = path.join(this.chatsDir, `${chatId}.json`);
-    if (await pathExists(filePath)) {
-      await fs.unlink(filePath);
-      delete this.chats[chatId];
-      this.__notify(`Chat ${chatId} deleted.`);
+    const chatDirPath = path.join(this.chatsDir, chatId);
+    try {
+      await fs.rm(chatDirPath, { recursive: true, force: true });
+    } catch (e) {
+      throw new Error(`Could not delete chat directory for chat ${chatId}: ${e.message}`);
     }
+
+    this.chats = this.chats.filter(c => c.id !== chatId)
+
+    await this.__notify(`Chat ${chatId} deleted.`);
+    return { ok: true };
   }
 }
