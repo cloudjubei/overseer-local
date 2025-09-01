@@ -2,17 +2,15 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import type { ProjectSpec } from 'src/types/tasks'
 import { projectsService } from '../services/projectsService'
 
-const MAIN_PROJECT = 'main'
+export const MAIN_PROJECT = 'main'
 
 export type ProjectContextValue = {
   activeProjectId: string
-  isMain: boolean
   activeProject?: ProjectSpec
 
   projects: ProjectSpec[]
 
   setActiveProjectId: (id: string) => void
-  switchToMainProject: () => void
   getProjectById: (id: string) => ProjectSpec | undefined
 }
 
@@ -74,10 +72,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<ProjectContextValue>(() => ({
     activeProjectId,
-    isMain: activeProjectId === MAIN_PROJECT,
     activeProject,
     setActiveProjectId,
-    switchToMainProject,
     projects,
     getProjectById,
   }), [activeProjectId, activeProject, setActiveProjectId, switchToMainProject, projects])
@@ -92,10 +88,9 @@ export function useProjectContext(): ProjectContextValue {
 }
 
 export function useActiveProject() {
-  const { activeProjectId, activeProject, isMain } = useProjectContext()
+  const { activeProjectId, activeProject } = useProjectContext()
   return {
     projectId: activeProjectId,
-    project: activeProject,
-    isMain
+    project: activeProject
   }
 }

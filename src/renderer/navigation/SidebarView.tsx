@@ -8,7 +8,7 @@ import { useNavigator } from './Navigator';
 import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
 import { useShortcuts } from '../hooks/useShortcuts';
-import { useProjectContext } from '../projects/ProjectContext';
+import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
 
 export type SidebarProps = {};
@@ -49,7 +49,8 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
-function useAccentClass(seed: string): string {
+function useAccentClass(seed: string, isMain: boolean): string {
+  if (isMain) { return 'nav-item nav-accent-gray' }
   // Stable but simple accent class selection based on id
   const n = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0)
   const i = n % 3
@@ -72,8 +73,6 @@ export default function SidebarView({}: SidebarProps) {
     isMain,
     activeProjectId,
     projects,
-    loading,
-    error,
     setActiveProjectId,
     switchToMainProject,
   } = useProjectContext()
@@ -297,29 +296,7 @@ export default function SidebarView({}: SidebarProps) {
           </div>
         )}
         <ul className="nav-list" aria-label="Projects">
-          {/* Main project */}
-          <li className="nav-li">
-            <button
-              className={classNames('nav-item nav-accent-gray', isMain && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
-              aria-current={isMain ? 'true' : undefined}
-              onClick={() => switchToMainProject()}
-              title="Main project"
-            >
-              <span className="nav-item__icon" aria-hidden>🗂️</span>
-              {!effectiveCollapsed && <span className="nav-item__label">Main project</span>}
-            </button>
-          </li>
-
-          {/* Child projects */}
-          {loading && (
-            <li className="nav-li">
-              <div className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')}>
-                <span className="nav-item__icon" aria-hidden>⏳</span>
-                {!effectiveCollapsed && <span className="nav-item__label">Loading projects…</span>}
-              </div>
-            </li>
-          )}
-          {error && !loading && (
+          {projects.length == 0 && (
             <li className="nav-li">
               <div className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')} role="status">
                 <span className="nav-item__icon" aria-hidden>⚠️</span>
@@ -327,9 +304,10 @@ export default function SidebarView({}: SidebarProps) {
               </div>
             </li>
           )}
-          {!loading && !error && projects.map((p) => {
+          {projects.map((p) => {
+            const isMain = p.id === MAIN_PROJECT
             const active = activeProjectId === p.id
-            const accent = useAccentClass(p.id)
+            const accent = useAccentClass(p.id, isMain)
             return (
               <li className="nav-li" key={p.id}>
                 <button
@@ -338,7 +316,8 @@ export default function SidebarView({}: SidebarProps) {
                   onClick={() => setActiveProjectId(p.id)}
                   title={p.title}
                 >
-                  <span className="nav-item__icon" aria-hidden>📁</span>
+                  {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
+                  {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
                   {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
                 </button>
               </li>
