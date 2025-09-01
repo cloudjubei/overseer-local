@@ -62,7 +62,7 @@
     },
     {
       "id": "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "-",
+      "status": "+",
       "title": "no chat send message error",
       "description": "when sending a messages and no chat is selected - it needs to auto-select the newly created chat",
       "plan": "",

@@ -72,7 +72,7 @@ export default function ChatView() {
 
   
   const chatHistories = useMemo(() => {
-    return Object.values(chatsById).sort((a,b) => new Date(a.updateDate).getMilliseconds() - new Date(b.updateDate).getMilliseconds())
+    return Object.values(chatsById).sort((a,b) => new Date(a.updateDate).getTime() - new Date(b.updateDate).getTime())
   }, [chatsById])
 
   const autoSizeTextarea = () => {
@@ -89,10 +89,8 @@ export default function ChatView() {
 
   const handleSend = async () => {
     if (!input.trim() || !activeConfig) return
-    if (!currentChatId) {
-      await createChat()
-    }
-    sendMessage(input, activeConfig)
+    // sendMessage will auto-create and select a new chat if none is selected
+    await sendMessage(input, activeConfig)
     setInput('')
     requestAnimationFrame(() => {
       if (textareaRef.current) {
