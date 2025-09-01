@@ -13,7 +13,6 @@ const IPC_HANDLER_KEYS = {
   CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_COMPLETION: "chats:completion",
   CHATS_LIST_MODELS: "chats:list-models",
-  CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_LIST: "chats:list",
   CHATS_CREATE: "chats:create",
   CHATS_GET: "chats:get",
@@ -42,6 +41,10 @@ const IPC_HANDLER_KEYS = {
   TASKS_FEATURE_UPDATE: "tasks-feature:update",
   TASKS_FEATURE_DELETE: "tasks-feature:delete",
   TASKS_FEATURES_REORDER: "tasks-features:reorder",
+
+  // User Preferences
+  PREFERENCES_GET: "preferences:get",
+  PREFERENCES_UPDATE: "preferences:update",
 
   // Notifications
   NOTIFICATIONS_ON_OPEN: "notifications:on-open",
