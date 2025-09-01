@@ -102,7 +102,7 @@ export default class ChatsStorage {
     await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8');
     this.chats.push(newChat)
     await this.__notify(`New chat ${chatId} added.`)
-    return { ok: true, id: chatId };
+    return newChat
   }
 
   async saveChat(chatId, messages, rawResponses) {

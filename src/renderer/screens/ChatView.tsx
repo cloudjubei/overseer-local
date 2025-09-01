@@ -108,13 +108,14 @@ export default function ChatView() {
     const reader = new FileReader()
     reader.onload = async (event) => {
       const content = event.target?.result as string
-      await uploadFile(file.name, content)
-      // Assume upload path is the file name at project root unless service returns enriched path
-      setPendingAttachments((prev) => Array.from(new Set([...prev, file.name])))
+      const newPath = await uploadFile(file.name, content)
+      console.log("newPath: ", newPath)
+      if (newPath){
+        setPendingAttachments((prev) => Array.from(new Set([...prev, newPath])))
+      }
     }
     reader.readAsText(file)
-    // Reset input to allow re-uploading same file name in a row
-    e.currentTarget.value = ''
+    // e.currentTarget.value = ''
   }
 
   const handleTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {

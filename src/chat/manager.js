@@ -83,7 +83,7 @@ export class ChatsManager {
       const chat = await storage.getChat(chatId)
       if (!chat) throw new Error(`Couldn't load chat with chatId: ${chatId}`)
 
-      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
+      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using write_file (use .md if it is a markdown note).' };
       let messagesHistory = [...chat.messages, ...newMessages];
       if (messagesHistory.length > MESSAGES_TO_SEND){
         messagesHistory.splice(0, messagesHistory.length - MESSAGES_TO_SEND)
@@ -139,8 +139,8 @@ export class ChatsManager {
         {
           type: 'function',
           function: {
-            name: 'create_file',
-            description: 'Create a new file with the given name and content (relative to project root)',
+            name: 'write_file',
+            description: 'Writes a new file with the given name and content (relative to project root)',
             parameters: {
               type: 'object',
               properties: {
@@ -154,11 +154,11 @@ export class ChatsManager {
       ];
 
       const toolsMap = {
-        list_tasks: async (args) => this.tasksManager.listTasks(args),
-        get_task_reference: async (args) => this.tasksManager.getTaskReference(args),
-        list_files: async (args) => this.filesManager.listFiles(args),
-        read_file: async (args) => this.filesManager.readFile(args),
-        create_file: async (args) => this.filesManager.createFile(args)
+        list_tasks: async (args) => this.tasksManager.listTasks(projectId),
+        get_task_reference: async (args) => this.getTaskReference(projectId, args.reference),
+        list_files: async (args) => this.filesManager.listFiles(projectId),
+        read_file: async (args) => this.filesManager.readFile(projectId, args.path),
+        write_file: async (args) => this.filesManager.writeFile(projectId, args.path, args.name, args.content)
       };
 
       const provider = new LLMProvider(config);
@@ -220,5 +220,37 @@ export class ChatsManager {
     } catch (error) {
       throw error;
     }
+  }
+
+  async getTaskReference(projectId, reference)
+  {
+    const parts = reference.split(".")
+
+    const project = await this.projectsManager.getProject(projectId)
+    if (!project) { throw new Error("project not found") }
+
+    const taskIndex = parts[0]
+    let taskId
+    for(const id of Object.keys(project.taskIdToDisplayIndex)){
+      if (project.taskIdToDisplayIndex[id] == taskIndex){
+        taskId = id
+        break
+      }
+    }
+    if (!taskId) { throw new Error("task not found") }
+
+    const task = await this.tasksManager.getTask(taskId)
+    if (parts.length <= 1){
+      return task
+    }
+    const featureIndex = parts[1]
+    let featureId
+    for(const id of Object.keys(task.featureIdToDisplayIndex)){
+      if (task.featureIdToDisplayIndex[id] == featureIndex){
+        featureId = id
+        break
+      }
+    }
+    return task.features.find(f => f.id === featureId)
   }
 }

@@ -40,12 +40,12 @@ export class TasksManager {
     if (this._ipcBound) return;
 
     const handlers = {};
-    handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => (await this.__getStorage(projectId))?.listTasks();
-    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, id }) => (await this.__getStorage(projectId))?.getTask(id);
+    handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => await this.listTasks(projectId);
+    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, id }) => await this.getTask(projectId, id);
     handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ projectId, task }) => (await this.createTask(projectId, task));
     handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ projectId, taskId, data }) => (await this.__getStorage(projectId))?.updateTask(taskId, data);
     handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ projectId, taskId }) => (await this.deleteTask(projectId, taskId));
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ projectId, taskId, featureId }) => (await this.__getStorage(projectId))?.getFeature(taskId, featureId);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ projectId, taskId, featureId }) => await this.getFeature(projectId, taskId, featureId);
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ projectId, taskId, feature }) => (await this.__getStorage(projectId))?.addFeature(taskId, feature);
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({ projectId, taskId, featureId, data }) => (await this.__getStorage(projectId))?.updateFeature(taskId, featureId, data);
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ projectId, taskId, featureId }) => (await this.__getStorage(projectId))?.deleteFeature(taskId, featureId);
@@ -63,6 +63,17 @@ export class TasksManager {
     }
 
     this._ipcBound = true;
+  }
+
+  async listTasks(projectId)
+  {
+    const s = await this.__getStorage(projectId)
+    return await s?.listTasks()
+  }
+  async getTask(projectId, id)
+  {
+    const s = await this.__getStorage(projectId)
+    return await s?.getTask(id)
   }
 
   async createTask(projectId, taskData)
@@ -98,5 +109,10 @@ export class TasksManager {
     }
     await this.projectsManager.updateProject(project.id, newProject)
     return { ok: true }
+  }
+  async getFeature(projectId, taskId, featureId)
+  {
+    const s = await this.__getStorage(projectId)
+    return await s?.getFeature(taskId, featureId)
   }
 }

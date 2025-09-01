@@ -102,9 +102,9 @@ export default function useFiles() {
       }
     }
   }
-  const uploadFile = async (name: string, content: string) : Promise<void> =>  {
+  const uploadFile = async (name: string, content: string) : Promise<string | undefined> =>  {
     if (project){
-      await filesService.uploadFile(project.id, name, content)
+      return await filesService.uploadFile(project.id, name, content)
     }
   }
 

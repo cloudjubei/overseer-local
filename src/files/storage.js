@@ -167,7 +167,7 @@ export default class FilesStorage {
     } else {
       await fs.writeFile(abs, content, { encoding });
     }
-    await this.rebuildAndNotify('File written: ' + relPath);
+    await this.__rebuildAndNotify('File written: ' + relPath);
   }
 
   async deleteFile(relPath) {
@@ -178,7 +178,7 @@ export default class FilesStorage {
     } else {
       await fs.unlink(abs);
     }
-    await this.rebuildAndNotify('File deleted: ' + relPath);
+    await this.__rebuildAndNotify('File deleted: ' + relPath);
   }
 
   async renameFile(relPathSource, relPathTarget) {
@@ -187,7 +187,7 @@ export default class FilesStorage {
     const targetDir = path.dirname(absTarget);
     await fs.mkdir(targetDir, { recursive: true });
     await fs.rename(absSource, absTarget);
-    await this.rebuildAndNotify('File renamed from: ' + relPathSource + ' to: ' + relPathTarget);
+    await this.__rebuildAndNotify('File renamed from: ' + relPathSource + ' to: ' + relPathTarget);
   }
 
   async uploadFile(name, content) {
@@ -199,6 +199,7 @@ export default class FilesStorage {
     } else {
       await fs.writeFile(filePath, content, { encoding: 'utf8' });
     }
-    await this.rebuildAndNotify('File uploaded: ' + name);
+    await this.__rebuildAndNotify('File uploaded: ' + name);
+    return path.join('uploads', name);
   }
 }

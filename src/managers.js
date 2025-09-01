@@ -14,7 +14,7 @@ export async function initManagers(projectRoot, mainWindow) {
   projectsManager = new ProjectsManager(projectRoot, mainWindow);
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager);
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager);
-  chatsManager = new ChatsManager(projectRoot, mainWindow, projectsManager, tasksManager, chatsManager);
+  chatsManager = new ChatsManager(projectRoot, mainWindow, projectsManager, tasksManager, filesManager);
   notificationManager = new NotificationManager(projectRoot, mainWindow);
 
   await projectsManager.init();
