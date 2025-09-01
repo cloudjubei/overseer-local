@@ -68,22 +68,6 @@ export default function TaskForm({ id, initialValues, onSubmit, onCancel, submit
   return (
     <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Task' : 'Edit Task'}>
       <div className="grid grid-cols-1 gap-3">
-        {!isCreate && <div className="flex flex-col gap-1">
-          <label htmlFor="task-id" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Task ID</label>
-          <input
-            id="task-id"
-            type="number"
-            inputMode="numeric"
-            value={id}
-            disabled={true}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
-            style={{
-              background: 'var(--surface-raised)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)'
-            }}
-          />
-        </div>}
         <StatusControl
           status={status}
           onChange={setStatus}
