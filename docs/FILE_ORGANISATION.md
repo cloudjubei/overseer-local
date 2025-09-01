@@ -13,7 +13,10 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.
     - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications/user-preferences).
+      - userPreferencesService.ts: Typed wrapper over window.preferencesService providing get/update plus convenience accessors for last active project, task view mode, tasks list sorting, and notification system preferences.
     - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
+      - useAppPreferences.ts: Centralized app preferences hook for reading/updating system-wide user preferences (last active project, task view mode, list sorting, notification system preferences).
+      - useNotificationPreferences.ts: Project-scoped notification preferences (categories per project). System-wide notification preferences are not managed here.
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
   - src/chat/: Chat providers, manager, and storage.
   - src/tools/: Developer and agent tooling (preview analysis, formatting, compile checks, docker helpers).
