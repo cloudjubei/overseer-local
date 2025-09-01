@@ -77,18 +77,11 @@
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "+",
-      "title": "ChatView needs to correctly pass file attachments to useChats",
-      "description": "useChats via ipc uses ChatsManager - this needs to allow for file attachments as messages",
+      "status": "-",
+      "title": "go over the FILE_ORGANISATION.md and update the Top-Level Directory Layout for missing values",
+      "description": "only folders need describing and only up to a certain level where it still remains significant",
       "plan": "",
-      "context": [
-        "src/renderer/screens/ChatView.tsx",
-        "src/chats/manager.js",
-        "src/chats/storage.js",
-        "src/ipcHandlersKeys.js",
-        "src/renderer/services/chatsService.ts",
-        "src/renderer/hooks/useChats.tsx"
-      ],
+      "context": [],
       "acceptance": []
     }
   ],
