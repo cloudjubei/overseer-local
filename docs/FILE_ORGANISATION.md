@@ -137,7 +137,7 @@ Notes:
 
 ## File Naming Conventions
 - Tasks and features:
-  - Task directories are numeric IDs: tasks/{id}/ (e.g., tasks/1/).
+  - Task directories are uuids: tasks/{id}/
   - Tests are named per-feature: tasks/{task_id}/tests/test_{task_id}_{feature_number}.py (e.g., tasks/15/tests/test_15_3.py).
 - Python modules: snake_case.py (e.g., task_format.py, run_local_agent.py).
 - Javascript/TypeScript modules: camelCase.js/ts (e.g., taskFormat.js, runLocalAgent.ts). For schema mirrors adjacent to Python specs, a matching snake_case.ts is acceptable under docs/.
@@ -165,14 +165,3 @@ Notes:
 
 ## Agent Preview Tools
 - See docs/PREVIEW_TOOL.md and docs/PREVIEW_RUN_TOOL.md for usage details.
-
-## New/Updated Services
-- src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext.
-- src/projects/manager.js: Registers all 'projects:*' IPC handlers so main.js remains thin.
-- src/files/manager.js: FilesManager manages per-project FilesStorage instances, registers all 'files:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Emits FILES_SUBSCRIBE on changes with projectId.
-- src/renderer/services/projectsService.ts: Projects service proxy available in isolated world via preload.
-- src/renderer/services/filesService.ts: Files service proxy (matches projectsService pattern) available in isolated world via preload as window.filesService (window.files kept as backward-compatible alias).
-- src/tasks/manager.js: Now mirrors ProjectsManager — registers all 'tasks:*' IPC handlers using centralized keys and emits TASKS_SUBSCRIBE on changes.
-- src/renderer/services/tasksService.ts: Tasks service proxy (matches projectsService pattern) available via preload as window.tasksService. Back-compat alias window.tasksIndex remains but should be considered deprecated.
-- src/notifications/manager.js: Now follows the ProjectsManager pattern — uses centralized IPC handler keys for NOTIFICATIONS_SEND_OS and NOTIFICATIONS_OPEN.
-- src/preload.js: Exposes notificationsService (pattern-aligned) via contextBridge with a back-compat alias window.notifications.
