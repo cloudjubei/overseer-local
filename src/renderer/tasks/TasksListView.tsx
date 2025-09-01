@@ -60,8 +60,7 @@ export default function TasksListView() {
   const [sortBy, setSortBy] = useState<'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
-  const [viewLoaded, setViewLoaded] = useState(false)
-  const [sortingLoaded, setSortingLoaded] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -79,60 +78,48 @@ export default function TasksListView() {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
 
-  // Load persisted view mode on mount
+  // Load persisted preferences (view mode + list sorting) on mount
   useEffect(() => {
     let mounted = true
-    userPreferencesService.getTasksViewMode()
-      .then((mode) => {
+    ;(async () => {
+      try {
+        const [mode, listPrefs] = await Promise.all([
+          userPreferencesService.getTasksViewMode().catch((e) => { console.error('Failed to load tasks view mode', e); return undefined }),
+          userPreferencesService.getTasksListView().catch((e) => { console.error('Failed to load tasks list sorting', e); return undefined }),
+        ])
         if (!mounted) return
         if (mode === 'list' || mode === 'board') {
           setView(mode)
         }
-      })
-      .catch((err) => {
-        console.error('Failed to load tasks view mode', err)
-      })
-      .finally(() => {
-        if (mounted) setViewLoaded(true)
-      })
-    return () => { mounted = false }
-  }, [])
-
-  // Load persisted list sorting preferences
-  useEffect(() => {
-    let mounted = true
-    userPreferencesService.getTasksListView()
-      .then((prefs) => {
-        if (!mounted || !prefs) return
-        const field = prefs.sortBy
-        const dir = prefs.sortDirection
-        if ((field === 'index' || field === 'status') && (dir === 'asc' || dir === 'desc')) {
-          const combined = `${field}_${dir}` as 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
-          setSortBy(combined)
+        if (listPrefs) {
+          const field = listPrefs.sortBy
+          const dir = listPrefs.sortDirection
+          if ((field === 'index' || field === 'status') && (dir === 'asc' || dir === 'desc')) {
+            const combined = `${field}_${dir}` as 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
+            setSortBy(combined)
+          }
         }
-      })
-      .catch((err) => {
-        console.error('Failed to load tasks list sorting', err)
-      })
-      .finally(() => { if (mounted) setSortingLoaded(true) })
+      } finally {
+        if (mounted) setIsLoaded(true)
+      }
+    })()
     return () => { mounted = false }
   }, [])
 
   // Persist view mode changes (after initial load)
   useEffect(() => {
-    if (!viewLoaded) return
+    if (!isLoaded) return
     userPreferencesService.setTasksViewMode(view).catch((err) => {
       console.error('Failed to save tasks view mode', err)
     })
-  }, [view, viewLoaded])
+  }, [view, isLoaded])
   
-  // Persist list sorting when in list view (after initial sorting load)
+  // Persist list sorting when in list view (after initial load)
   useEffect(() => {
-    if (!sortingLoaded) return
+    if (!isLoaded) return
     if (view !== 'list') return // only applicable in list view
 
     const [field, dir] = sortBy.split('_') as ['index' | 'status', 'asc' | 'desc']
-    // Validate
     const validField = field === 'index' || field === 'status'
     const validDir = dir === 'asc' || dir === 'desc'
     if (!validField || !validDir) return
@@ -140,7 +127,7 @@ export default function TasksListView() {
     userPreferencesService
       .updateTasksListView({ sortBy: field, sortDirection: dir })
       .catch((err) => console.error('Failed to save list sorting preferences', err))
-  }, [sortBy, view, sortingLoaded])
+  }, [sortBy, view, isLoaded])
   
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
@@ -274,7 +261,7 @@ export default function TasksListView() {
   const currentFilterLabel = statusFilter === 'all' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]}`
   const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
 
-  const prefsLoading = !viewLoaded || !sortingLoaded
+  const prefsLoading = !isLoaded
 
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
