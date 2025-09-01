@@ -61,6 +61,7 @@ export default function TasksListView() {
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
   const [viewLoaded, setViewLoaded] = useState(false)
+  const [sortingLoaded, setSortingLoaded] = useState(false)
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -97,6 +98,26 @@ export default function TasksListView() {
     return () => { mounted = false }
   }, [])
 
+  // Load persisted list sorting preferences
+  useEffect(() => {
+    let mounted = true
+    userPreferencesService.getTasksListView()
+      .then((prefs) => {
+        if (!mounted || !prefs) return
+        const field = prefs.sortBy
+        const dir = prefs.sortDirection
+        if ((field === 'index' || field === 'status') && (dir === 'asc' || dir === 'desc')) {
+          const combined = `${field}_${dir}` as 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
+          setSortBy(combined)
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load tasks list sorting', err)
+      })
+      .finally(() => { if (mounted) setSortingLoaded(true) })
+    return () => { mounted = false }
+  }, [])
+
   // Persist view mode changes (after initial load)
   useEffect(() => {
     if (!viewLoaded) return
@@ -104,6 +125,22 @@ export default function TasksListView() {
       console.error('Failed to save tasks view mode', err)
     })
   }, [view, viewLoaded])
+  
+  // Persist list sorting when in list view (after initial sorting load)
+  useEffect(() => {
+    if (!sortingLoaded) return
+    if (view !== 'list') return // only applicable in list view
+
+    const [field, dir] = sortBy.split('_') as ['index' | 'status', 'asc' | 'desc']
+    // Validate
+    const validField = field === 'index' || field === 'status'
+    const validDir = dir === 'asc' || dir === 'desc'
+    if (!validField || !validDir) return
+
+    userPreferencesService
+      .updateTasksListView({ sortBy: field, sortDirection: dir })
+      .catch((err) => console.error('Failed to save list sorting preferences', err))
+  }, [sortBy, view, sortingLoaded])
   
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
