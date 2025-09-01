@@ -77,7 +77,7 @@
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "-",
+      "status": "+",
       "title": "go over the FILE_ORGANISATION.md and update the Top-Level Directory Layout for missing values",
       "description": "only folders need describing and only up to a certain level where it still remains significant",
       "plan": "",

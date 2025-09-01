@@ -3,132 +3,30 @@
 This document describes how files and directories are organised in this repository to keep the project navigable, consistent, and easy to evolve.
 
 ## Top-Level Directory Layout
-- src/: Electron + React + TypeScript app (electron-vite)
-- src/types/: Shared TypeScript types (generated from docs where applicable)
-- src/styles/: Shared CSS assets and design tokens.
-  - src/styles/design-tokens.css: CSS variable-based design tokens (Monday-inspired palette + semantics). Supports light/dark via .dark or [data-theme="dark"]. Includes typography, spacing, radii, elevation, motion, and z-index tokens.
-  - src/styles/foundations/: Foundational CSS not specific to components (metrics, global control sizes).
-    - foundations/metrics.css: Root control sizes, paddings, focus ring width, and sidebar metrics.
-  - src/styles/primitives/: Low-level reusable effects/utilities.
-    - primitives/effects.css: Focus ring utility, pressable, elevation helpers, hover-raise, reveal-on-hover, DnD helpers, view transition keyframes.
-  - src/styles/components/: Reusable component styles.
-    - components/buttons.css: .btn variants and states.
-    - components/forms.css: .ui-input, .ui-textarea, .ui-select and generic form layouts.
-    - components/feedback.css: Spinner and Skeleton styles.
-    - components/badges.css: Status badges and priority tags.
-    - components/tooltip.css: Tooltip.
-    - components/overlays.css: Command menu, help overlay.
-    - components/cards.css: Task card.
-    - components/segmented.css: Segmented control (pill-style switch) used for List ↔ Board view toggle.
-  - src/styles/layout/: Layout building blocks like sidebar/nav.
-    - layout/nav.css: Sidebar and navigation styles.
-  - src/styles/screens/: Screen-scoped styles that compose primitives/components.
-    - screens/tasks.css: Tasks list and toolbar styles + DnD transitions. Includes interactive status bullet and status picker patterns used in the list view.
-    - screens/task-details.css: Task details panel and features list.
-    - screens/board.css: Board (kanban) columns and interactions.
-    - screens/docs.css: Documents view.
-    - screens/settings.css: Settings view.
-- src/renderer/: React renderer (screens, components, hooks, services, navigation).
-  - src/renderer/components/ui/: Shared UI primitives.
-    - Button.tsx: Button component with variants and loading state.
-    - Spinner.tsx: Inline spinner.
-    - Select.tsx, Input.tsx, Tooltip.tsx, etc.
-    - SegmentedControl.tsx: Accessible segmented (radiogroup) control with icons/labels used for List ↔ Board toggle.
-    - CollapsibleSidebar.tsx: Reusable collapsible navigation sidebar component, used in main app navigation and screens like Settings.
-  - src/renderer/components/tasks/: Task-specific UI pieces.
-    - StatusBadge.tsx: Status pill (soft/bold variants) using status tokens.
-    - StatusBullet.tsx: Interactive status bullet trigger + inline popover picker for changing a task’s status in the list (hover enlarges, shows edit glyph, click to open picker).
-    - DependencyBullet.tsx: Reusable bullet for task/feature dependencies with hover summary and click navigation. Now uses the central dependencyResolver service for resolution and summaries.
-    - FeatureSummaryCallout.tsx: Summary card for feature on hover.
-    - TaskSummaryCallout.tsx: Summary card for task on hover.
-  - src/renderer/preview/: Component preview infrastructure (Storybook-like isolated renderer)
-    - previewHost.tsx: React PreviewHost component that dynamically loads a component module and mounts it with provided props and providers. Wraps content in a stable `#preview-stage` container and signals readiness via `window.__PREVIEW_READY` + `preview:ready` event.
-    - main.tsx: Entry point that boots the preview host.
-    - previewTypes.ts: Types for declaring preview metadata and provider registry.
-    - previewRegistry.tsx: Lightweight registry for provider factories and composition helpers.
-    - withPreview.tsx: Helpers to resolve providers and apply wrappers based on meta + URL.
-    - mocks/coreMocks.tsx: Default providers (theme, router, frame) and in-memory mocks (tasks, notifications, llm).
-    - Usage: visit /preview.html?id=renderer/components/ui/Button.tsx#default&props=%7B%22children%22%3A%22Click%20me%22%7D&theme=light
-      - id: path (relative to src/) plus optional #ExportName (default: default)
-      - props: URL-encoded JSON of props (or base64 if props_b64=1)
-      - needs: Comma-separated dependency keys to include (in addition to defaults)
-      - theme: light | dark (applies data-theme on <html>)
-  - src/renderer/screens/
-    - TasksView.tsx: Top-level tasks screen wrapper (routes between list and details views).
-  - src/renderer/tasks/: Screens and views for tasks.
-    - TasksListView.tsx: List view with search/filter, DnD, inline status bullet editor. Now also displays task dependencies in a dedicated column before Features.
-    - TaskDetailsView.tsx: Right-side details panel. Now displays task-level dependencies next to the status, using the same chips and hover callouts as feature dependencies. Also computes inbound dependents (Blocks).
-    - BoardView.tsx: Kanban-style board with columns by status.
-  - src/renderer/navigation/: Navigation state + modal host.
-    - Navigator.tsx
-    - ModalHost.tsx
-  - src/renderer/settings/
-    - SettingsLLMConfigModal.tsx: Modal used for adding/editing LLM provider configurations. Opened via Navigator + ModalHost.
-  - src/renderer/services/
-    - chatService.ts
-    - docsService.ts
-    - taskService.ts
-    - notificationsService.ts
-    - projectsService.ts
-    - filesService.ts ← Thin proxy to preload’s isolated-world filesService
-  - src/renderer/hooks/
-    - useChats.ts
-    - useDocsIndex.ts
-    - useDocsAutocomplete.ts
-    - useReferencesAutocomplete.ts ← Autocomplete for `#` references in chat and editors. Uses tasks index to suggest tasks and features by `taskId` or `taskId.featureId` and inserts a reference token.
-    - useLLMConfig.ts
-    - useNextTaskId.ts
-    - useShortcuts.tsx
-    - useTheme.ts
-    - useNotifications.ts
-    - useNotificationPreferences.ts
-    - useTasksIndex.ts: Hook to access the tasks index snapshot.
-    - useDependencyResolver.ts ← Hook to access and subscribe to the dependency resolver index. Accepts optional ProjectSpec.
-  - src/renderer/screens/
-    - SidebarView.tsx
-    - TasksView.tsx
-    - DocumentsView.tsx
-    - ChatView.tsx ← Chat interface. Now supports `#` typing to open a Task & Feature selector and renders references as dependency bullets.
-    - SettingsView.tsx
-    - NotificationsView.tsx
-  - src/renderer/tasks/
-    - TaskCreateView.tsx
-    - TaskEditView.tsx
-    - FeatureCreateView.tsx
-    - FeatureEditView.tsx
-  - src/renderer/App.tsx
-  - src/renderer/types.ts
-- src/chat/: Chat providers, manager, and storage.
-  - manager.js: ChatsManager owns per-project ChatsStorage instances, registers all 'chats:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts CHATS_SUBSCRIBE events on changes with projectId. Also handles LLM completion and model listing.
-  - storage.js: Per-project chats storage, indexing, and file watching.
-- src/tools/
-  - standardTools.js
-  - preview/: Preview analyzer tooling
-    - analyzer.js: Library to analyze TSX components for preview capability.
-  - Agent-facing tools:
-    - preview_screenshot (in standardTools.js): Captures screenshots of components (preview.html) or any URL using Puppeteer. Supports scripted interactions and before/after capture. See docs/PREVIEW_TOOL.md.
-    - preview_run (in standardTools.js): Loads a component or URL in a headless browser, performs interactions, and runs assertions or custom script to verify behavior. See docs/PREVIEW_RUN_TOOL.md.
-    - ts_compile_check (in standardTools.js): Type-checks specified TypeScript/TSX files using the project tsconfig.json and returns per-file compile status and diagnostics (no emit).
-    - format_files (in standardTools.js): Formats specified files using Prettier and returns per-file statuses (changed/unchanged/skipped/errors). Writes changes by default and respects .prettierignore/config.
-    - docker_run (in standardTools.js): Runs a command in an ephemeral Docker container via dockerode.
-- src/capture/: Main-process screenshot capture service and related utilities.
-  - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
-- src/files/
-  - manager.js: FilesManager owns per-project FilesStorage instances, registers all 'files:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts FILES_SUBSCRIBE events on changes with projectId.
-  - storage.js: Per-project files storage, indexing, and file watching.
-- src/projects/
-  - manager.js: ProjectsManager owns indexing and watching project configs and registers all 'projects:*' IPC handlers.
-- src/tasks/
-  - manager.js: TaskManager manages per-project TasksStorage instances, registers all 'tasks:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts TASKS_SUBSCRIBE events on changes with projectId.
-  - storage.js: Per-project tasks storage, indexing, and file watching. Provides quick lookups for tasks by ID, features by ID, and outbound dependencies. Mirrors NotificationsStorage pattern.
-- src/notifications/
-  - manager.js: NotificationManager registers all notifications IPC handlers using centralized keys (NOTIFICATIONS_SEND_OS and NOTIFICATIONS_OPEN). This keeps main.js thin and consistent with the ProjectsManager pattern.
-- src/managers.js: Exports shared manager instances for cross-manager references.
-- scripts/: Project automation scripts (e.g., setup-linting-formatting).
-  - preview-scan.js: CLI to scan a directory of components and output a preview analysis JSON report.
+- docs/: Project documentation and specs (single source of truth for protocols, formats, and guidelines).
+- src/: Application source (Electron main + React renderer + tooling).
+  - src/styles/: Shared CSS assets and design tokens, grouped by role (foundations, primitives, components, layout, screens).
+  - src/types/: Shared TypeScript types.
+  - src/renderer/: React renderer (components, screens, hooks, services, navigation, preview runtime).
+    - src/renderer/components/: Reusable UI and domain-specific components.
+    - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, etc.).
+    - src/renderer/tasks/: Task/feature create/edit/list/board views.
+    - src/renderer/navigation/: Navigation state and modal host.
+    - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications).
+    - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
+    - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
+  - src/chat/: Chat providers, manager, and storage.
+  - src/tools/: Developer and agent tooling (preview analysis, formatting, compile checks, docker helpers).
+    - src/tools/preview/: Preview analyzer tooling.
+  - src/capture/: Screenshot capture service (main process).
+  - src/files/: Files manager and per-project storage.
+  - src/projects/: Projects manager and indexing.
+  - src/tasks/: Tasks manager and per-project storage.
+  - src/notifications/: Notifications manager and IPC integration.
+- scripts/: Project automation scripts and CLIs (e.g., preview scanning).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
-  - build/icons/icon.icns, icon.ico, icon.png
-  - build/entitlements.mac.plist
+
+Also present at repo root:
 - .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
 
 Notes:
