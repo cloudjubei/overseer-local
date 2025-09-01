@@ -62,21 +62,17 @@
     },
     {
       "id": "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "+",
-      "title": "TaskService should be used only for task related ops",
-      "description": "All references to task ops must go through TaskService. All involved files are in the context.",
+      "status": "-",
+      "title": "no chat send message error",
+      "description": "when sending a messages and no chat is selected - it needs to auto-select the newly created chat",
       "plan": "",
       "context": [
-        "src/renderer/services/taskService.ts",
-        "src/renderer/tasks/FeatureCreateView.tsx",
-        "src/renderer/tasks/FeatureEditView.tsx",
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/tasks/TaskEditView.tsx",
-        "src/renderer/tasks/TasksListView.tsx"
-      ],
-      "acceptance": [],
-      "dependencies": [
-        "06680296-05e8-434c-868c-b07a44f86570"
+        "src/renderer/screens/ChatView.tsx",
+        "src/chats/manager.js",
+        "src/chats/storage.js",
+        "src/ipcHandlersKeys.js",
+        "src/renderer/services/chatsService.ts",
+        "src/renderer/hooks/useChats.tsx"
       ]
     },
     {
@@ -86,6 +82,7 @@
       "description": "useChats via ipc uses ChatsManager - this needs to allow for file attachments as messages",
       "plan": "",
       "context": [
+        "src/renderer/screens/ChatView.tsx",
         "src/chats/manager.js",
         "src/chats/storage.js",
         "src/ipcHandlersKeys.js",

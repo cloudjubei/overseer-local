@@ -216,13 +216,8 @@ export default function ChatView() {
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-              Project Chat {currentChatId ? `(ID: ${currentChatId})` : ''}
+              Project Chat {currentChat ? `(${new Date(currentChat.updateDate).toLocaleString()})` : ''}
             </h1>
-            {activeConfig && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[12px] text-[var(--text-secondary)] border border-[var(--border-subtle)] bg-[var(--surface-overlay)] px-2 py-0.5 rounded-full">
-                Model: <strong className="font-medium text-[var(--text-primary)]">{activeConfig.name}</strong>
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-2">
             <Select value={activeConfigId || ''} onValueChange={setActive}>

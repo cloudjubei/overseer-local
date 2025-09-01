@@ -61,16 +61,11 @@ export default class ChatsStorage {
         const chatFiles = await fs.readdir(this.chatsDir, { withFileTypes: true });
         const chats = [];
         for (const file of chatFiles) {
-          if (file.isFile()) {
-            const chatFilePath = path.join(this.chatsDir, chatId, 'chat.json');
+          if (file.isFile() && file.name.includes('.json')) {
+            const chatFilePath = path.join(this.chatsDir, file.name);
             const content = await fs.readFile(chatFilePath, 'utf-8');
-
-            const chatId = dirent.name;
             try {
               const chat = JSON.parse(content);
-              if (chat.id !== chatId) {
-                continue;
-              }
               chats.push(chat);
             } catch (err) {
             }
@@ -91,32 +86,28 @@ export default class ChatsStorage {
   }
 
   async createChat() {
-    const chatDirs = await fs.readdir(this.chatsDir, { withFileTypes: true });
-    const existingIds = chatDirs
-      .filter(d => d.isDirectory())
-      .map(d => parseInt(d.name, 10));
-    const nextIdNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-    const nextId = String(nextIdNum);
+    const chatId = randomUUID()
 
-    const newChatDir = path.join(this.chatsDir, nextId);
-    await fs.mkdir(newChatDir, { recursive: true });
+    await fs.mkdir(this.chatsDir, { recursive: true });
 
     const newChat = {
-      id: nextId,
+      id: chatId,
       messages: [],
       creationDate: new Date().toISOString(), 
       updateDate: new Date().toISOString()
     }
 
-    const chatPath = path.join(newChatDir, 'chat.json');
+    const chatPath = path.join(this.chatsDir,`${chatId}.json`);
+    console.log("createChat in path: ", chatPath)
     await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8');
     this.chats.push(newChat)
-    await this.__notify(`New chat ${nextId} added.`)
-    return { ok: true, id: nextId };
+    await this.__notify(`New chat ${chatId} added.`)
+    return { ok: true, id: chatId };
   }
 
   async saveChat(chatId, messages, rawResponses) {
-    const chatPath = path.join(this.chatsDir, chatId, 'chat.json');
+    const chatPath = path.join(this.chatsDir,`${chatId}.json`);
+    console.log("saveChat in path: ", chatPath)
     let chatData;
     try {
       const raw = await fs.readFile(chatPath, 'utf-8');
@@ -135,9 +126,9 @@ export default class ChatsStorage {
   }
 
   async deleteChat(chatId) {
-    const chatDirPath = path.join(this.chatsDir, chatId);
+    const chatPath = path.join(this.chatsDir,`${chatId}.json`);
     try {
-      await fs.rm(chatDirPath, { recursive: true, force: true });
+      await fs.rm(chatPath, { recursive: true, force: true });
     } catch (e) {
       throw new Error(`Could not delete chat directory for chat ${chatId}: ${e.message}`);
     }

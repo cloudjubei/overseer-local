@@ -4,11 +4,8 @@ import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import ChatsStorage from './storage';
 import { LLMProvider } from './LLMProvider'
 import { tasksManager, filesManager, projectsManager } from '../managers';
-import fetch from 'node-fetch';
 
-function resolveChatsDir(projectRoot) {
-  return path.join(projectRoot, 'chats');
-}
+const MESSAGES_TO_SEND = 10
 
 export class ChatsManager {
   constructor(projectRoot, window, projectsManager, tasksManager, filesManager) {
@@ -26,8 +23,7 @@ export class ChatsManager {
     if (!this.storages[projectId]) {
       const project = await this.projectsManager.getProject(projectId)
       if (!project){ return }
-      const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path);
-      const chatsDir = resolveChatsDir(projectRoot);
+      const chatsDir = path.join(this.projectsManager.projectsDir, `${projectId}/chats`);
       const storage = new ChatsStorage(projectId, chatsDir, this.window);
       await storage.init();
       this.storages[projectId] = storage;
@@ -66,6 +62,7 @@ export class ChatsManager {
     this._ipcBound = true;
   }
 
+
   async getCompletion(projectId, chatId, newMessages, config) {
     try {
       const storage = await this.__getStorage(projectId)
@@ -73,7 +70,11 @@ export class ChatsManager {
       if (!chat) throw new Error(`Couldn't load chat with chatId: ${chatId}`)
 
       const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
-      let currentMessages = [systemPrompt, ...chat.messages, ...newMessages];
+      let messagesHistory = [...chat.messages, ...newMessages];
+      if (messagesHistory.length > MESSAGES_TO_SEND){
+        messagesHistory.splice(0, messagesHistory.length - MESSAGES_TO_SEND)
+      }
+      let currentMessages = [systemPrompt, ...messagesHistory];
       const tools = [
         {
           type: 'function',
