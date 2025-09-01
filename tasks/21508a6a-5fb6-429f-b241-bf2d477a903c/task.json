@@ -1,8 +1,8 @@
 {
   "id": "21508a6a-5fb6-429f-b241-bf2d477a903c",
   "status": "-",
-  "title": "Combining with the factory",
-  "description": "TODO",
+  "title": "Combining with TheFactory",
+  "description": "Allow launching, controlling, scheduling configured agents on tasks and child projects, while seeing current status, time taken (record various timing statistics) and all costs per model.",
   "features": [],
   "featureIdToDisplayIndex": {}
 }

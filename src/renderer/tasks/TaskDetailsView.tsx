@@ -65,6 +65,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
+  const { project } = useActiveProject()
   const { tasksById, updateTask, updateFeature, reorderFeatures, getReferencesInbound, getReferencesOutbound } = useTasks()
 
 
@@ -217,12 +218,18 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           <button type="button" className="btn-secondary" onClick={() => { navigateView('Home') }} aria-label="Back to Tasks">
             <IconBack />
           </button>
+
+          <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
+            <span className="id-chip">{project?.taskIdToDisplayIndex[task.id] ?? 0}</span>
+            <StatusControl
+              status={task.status}
+              className="ml-2"
+              onChange={(next) => handleTaskStatusChange(task.id, next)}
+            />
+          </div>
+          
           <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
-          <StatusControl
-            status={task.status}
-            className="ml-2"
-            onChange={(next) => handleTaskStatusChange(task.id, next)}
-          />
+          
           <div className="flex gap-4 ml-2" aria-label={`Dependencies for Task ${task.id}`}>
             <div className="chips-list">
               <span className="chips-sub__label">References</span>
