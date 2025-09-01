@@ -41,11 +41,6 @@ const IPC_HANDLER_KEYS = {
   TASKS_FEATURE_UPDATE: "tasks-feature:update",
   TASKS_FEATURE_DELETE: "tasks-feature:delete",
   TASKS_FEATURES_REORDER: "tasks-features:reorder",
-  TASKS_REFERENCES_OUTBOUND: "tasks-references:outbound",
-  TASKS_REFERENCES_INBOUND: "tasks-references:inbound",
-  TASKS_REFERENCE_VALIDATE: "tasks-reference:validate",
-  TASKS_REFERENCES_VALIDATE: "tasks-references:validate",
-  TASKS_REFERENCES_SEARCH: "tasks-references:search",
 
   // Notifications
   NOTIFICATIONS_ON_OPEN: "notifications:on-open",

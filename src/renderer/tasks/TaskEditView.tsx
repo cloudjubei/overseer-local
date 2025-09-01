@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { TaskForm, TaskFormValues } from '../components/TaskForm'
-import { tasksService } from '../services/tasksService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useNavigator } from '../navigation/Navigator'
 import type { Task } from 'src/types/tasks'
+import { useTasks } from '../hooks/useTasks'
 
-export default function TaskEditView({ taskId, onRequestClose }: { taskId: number; onRequestClose?: () => void }) {
+export default function TaskEditView({ taskId, onRequestClose }: { taskId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
   const navigator = useNavigator()
   const [initialValues, setInitialValues] = useState<Task | null>(null)
@@ -15,35 +15,25 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const { tasksById, updateTask, deleteTask } = useTasks()
+
+  useEffect(() => {
+    if (taskId && tasksById) {
+      const t = tasksById[taskId]
+      setInitialValues(t)
+    } else {
+      setInitialValues(null)
+    }
+  }, [taskId, tasksById])
 
   const doClose = () => {
     onRequestClose?.()
   }
 
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const idx = await tasksService.getSnapshot()
-        const task = idx.tasksById[taskId]
-        if (!task) throw new Error('Task not found')
-        if (!cancelled) setInitialValues(task)
-      } catch (e: any) {
-        if (!cancelled) {
-          setAlertMessage(`Failed to load task: ${e.message || String(e)}`)
-          setShowAlert(true)
-        }
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [taskId])
-
   const onSubmit = async (values: TaskFormValues) => {
     setSubmitting(true)
     try {
-      const res = await tasksService.updateTask(taskId, values)
+      const res = await updateTask(taskId, values)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Task updated successfully', variant: 'success' })
       doClose()
@@ -59,7 +49,7 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: numbe
     setShowDeleteConfirm(false)
     setDeleting(true)
     try {
-      const res = await tasksService.deleteTask(taskId)
+      const res = await deleteTask(taskId)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Task deleted successfully', variant: 'success' })
       navigator.navigateView('Home')

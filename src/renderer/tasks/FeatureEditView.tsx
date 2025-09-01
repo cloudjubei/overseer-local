@@ -1,62 +1,37 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FeatureForm, FeatureFormValues } from '../components/FeatureForm'
-import { tasksService } from '../services/tasksService'
-import { projectsService } from '../services/projectsService'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
-import type { Feature, Task } from 'src/types/tasks'
-import { useActiveProject } from '../projects/ProjectContext'
+import type { Feature } from 'src/types/tasks'
+import { useTasks } from '../hooks/useTasks'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: string; featureId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()
-  const [task, setTask] = useState<Task | null>(null)
   const [initialValues, setInitialValues] = useState<Feature | null>(null)
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const { project } = useActiveProject()
+  const { featuresById, updateFeature, deleteFeature } = useTasks()
 
   const doClose = () => {
     onRequestClose?.()
   }
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const idx = await tasksService.getSnapshot()
-        const loadedTask: Task | undefined = idx.tasksById[taskId]
-        if (!loadedTask) throw new Error('Task not found')
-        const feature = loadedTask.features.find((f: Feature) => f.id === featureId)
-        if (!feature) throw new Error('Feature not found')
-        if (!cancelled) {
-          setTask(loadedTask)
-          setInitialValues(feature)
-          setSnapshot(idx)
-        }
-      } catch (e: any) {
-        if (!cancelled) {
-          setAlertMessage(`Failed to load feature: ${e.message || String(e)}`)
-          setShowAlert(true)
-        }
-      }
-    })()
-    return () => {
-      cancelled = true
+    if (taskId && featuresById) {
+      const f = featuresById[featureId]
+      setInitialValues(f)
+    } else {
+      setInitialValues(null)
     }
-  }, [taskId, featureId])
+  }, [taskId, featureId, featuresById])
 
   const onSubmit = useCallback(
     async (values: FeatureFormValues) => {
-      if (!project) {
-        setAlertMessage('No project selected.')
-        setShowAlert(true)
-        return
-      }
       setSubmitting(true)
       try {
-        const res = await tasksService.updateFeature(project, taskId, featureId, values)
+        const res = await updateFeature(taskId, featureId, values)
         if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
         toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
         doClose()
@@ -67,20 +42,14 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         setSubmitting(false)
       }
     },
-    [taskId, toast, project]
+    [taskId, featureId, toast, updateFeature]
   )
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false)
     setSubmitting(true)
     try {
-      if (!task) throw new Error('Task not found')
-      const dependents = task.features.filter(f => f.dependencies?.includes(featureId) ?? false)
-      for (const dep of dependents) {
-        const newDeps = dep.dependencies.filter(d => d !== featureId)
-        await tasksService.updateFeature(taskId, dep.id, { dependencies: newDeps })
-      }
-      const res = await tasksService.deleteFeature(taskId, featureId)
+      const res = await deleteFeature(taskId, featureId)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
       toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
       doClose()
@@ -102,9 +71,6 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             onCancel={doClose}
             onDelete={() => setShowDeleteConfirm(true)}
             submitting={submitting}
-            isCreate={false}
-            allTasksSnapshot={snapshot}
-            allProjectsSnapshot={projectsSnapshot}
             taskId={taskId}
             featureId={featureId}
           />

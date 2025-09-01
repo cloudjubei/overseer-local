@@ -7,15 +7,8 @@ import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../projects/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
+import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
-
-const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done',
-  '~': 'In Progress',
-  '-': 'Pending',
-  '?': 'Blocked',
-  '=': 'Deferred',
-}
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -63,7 +56,7 @@ export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [sortBy, setSortBy] = useState<'manual' | 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
+  const [sortBy, setSortBy] = useState<'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<'list' | 'board'>('list')
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
@@ -73,10 +66,11 @@ export default function TasksListView() {
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
   const { openModal, navigateTaskDetails } = useNavigator()
-  const { project } = useActiveProject()
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
-  const { tasksById, updateTask, reorderTasks, getReferencesOutbound } = useTasks()
+
+  const { project } = useActiveProject()
+  const { tasksById, updateTask, reorderTasks, getReferencesInbound, getReferencesOutbound } = useTasks()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
@@ -103,7 +97,7 @@ export default function TasksListView() {
 
   const sorted = useMemo(() => {
     let tasks = [...allTasks]
-    if (project && sortBy !== 'manual') {
+    if (project) {
       if (sortBy === 'index_asc') {
         tasks.sort((a, b) => taskIdToDisplayIndex[a.id] - taskIdToDisplayIndex[b.id])
       } else if (sortBy === 'index_desc') {
@@ -147,7 +141,7 @@ export default function TasksListView() {
     }
   }
 
-  const dndEnabled = sortBy === 'manual' && !isFiltered && view === 'list'
+  const dndEnabled = sortBy === "index_asc" && !isFiltered && view === 'list'
 
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     // Do not show drop indicators when hovering the dragged row itself
@@ -247,7 +241,6 @@ export default function TasksListView() {
           </div>
           <div className="control">
             <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by">
-              <option value="manual">Manual order</option>
               <option value="index_asc">Ascending</option>
               <option value="index_desc">Descending</option>
               <option value="status_asc">Status ^</option>
@@ -306,8 +299,8 @@ export default function TasksListView() {
                 const isDragSource = dragTaskId === t.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
-                const deps = Array.isArray(t.dependencies) ? t.dependencies : []
-                const dependents = getReferencesOutbound(t.id)
+                const dependenciesInbound = getReferencesInbound(t.id)
+                const dependenciesOutbound = getReferencesOutbound(t.id)
                 return (
                   <li key={t.id} className="task-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -333,12 +326,9 @@ export default function TasksListView() {
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                      aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${deps.length} dependencies this task is blocked by, ${dependents.length} dependencies this task is blocking. Press Enter to view details.`}
+                      aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${dependenciesOutbound.length} dependencies this task is blocked by, ${dependenciesInbound.length} dependencies this task is blocking. Press Enter to view details.`}
                     >
                       <div className="task-grid">
-
-                        {/* <div className="col col-id"><span className="chips-sub__label">{String(t.id)}</span></div> */}
-
                         <div className="col col-id"><span className="id-chip">{taskIdToDisplayIndex[t.id]}</span></div>
                         <div className="col col-title">
                           <div className="title-line">
@@ -362,21 +352,21 @@ export default function TasksListView() {
                       <div className="flex gap-8 ml-8" aria-label={`Dependencies for Task ${t.id}`}>
                         <div className="chips-list">
                           <span className="chips-sub__label">References</span>
-                          {deps.length === 0 ? (
+                          {dependenciesInbound.length === 0 ? (
                             <span className="chips-sub__label" title="No dependencies">None</span>
                           ) : (
-                            deps.map((d) => (
-                              <DependencyBullet key={d} dependency={d} />
+                            dependenciesInbound.map((d) => (
+                              <DependencyBullet key={d.id} dependency={d.id} />
                             ))
                           )}
                         </div>
                         <div className="chips-list">
                           <span className="chips-sub__label">Blocks</span>
-                          {dependents.length === 0 ? (
+                          {dependenciesOutbound.length === 0 ? (
                             <span className="chips-sub__label" title="No dependents">None</span>
                           ) : (
-                            dependents.map((d) => (
-                              <DependencyBullet key={d.id} dependency={d.id} isInbound />
+                            dependenciesOutbound.map((d) => (
+                              <DependencyBullet key={d.id} dependency={d.id} isOutbound />
                             ))
                           )}
                         </div>

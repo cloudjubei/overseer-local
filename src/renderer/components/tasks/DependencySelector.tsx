@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
+import { useActiveProject } from '../../../renderer/projects/ProjectContext'
 import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
-// import { useActiveProject } from 'src/renderer/projects/ProjectContext'
-// import { useTasks } from 'src/renderer/hooks/useTasks'
+import { useTasks } from '../../../renderer/hooks/useTasks'
 
 type DependencySelectorProps = {
   onConfirm?: (deps: string[]) => void
@@ -10,17 +10,19 @@ type DependencySelectorProps = {
   existingDeps?: string[]
 }
 
-function doesTaskMatch(project: ProjectSpec, task: Task, q: string): boolean {
+function doesTaskMatch(project: ProjectSpec, selected: Set<string>, task: Task, q: string): boolean {
+  const display = `${project.taskIdToDisplayIndex[task.id]}`
   return (
-    `${task.id}`.toLowerCase().includes(q) ||
+    display.toLowerCase().includes(q) ||
     task.title.toLowerCase().includes(q) ||
     (task.description || '').toLowerCase().includes(q)
   )
 }
 
-function doesFeatureMatch(task: Task, f: Feature, q: string): boolean {
+function doesFeatureMatch(project: ProjectSpec, selected: Set<string>, task: Task, f: Feature, q: string): boolean {
+  const display = `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[f.id]}`
   return (
-    `${f.id}`.toLowerCase().includes(q) ||
+    display.toLowerCase().includes(q) ||
     f.title.toLowerCase().includes(q) ||
     (f.description || '').toLowerCase().includes(q)
   )
@@ -32,13 +34,10 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   currentFeatureId,
   existingDeps = [],
 }) => {
-  const project : ProjectSpec | undefined = undefined
-  // const { project } = useActiveProject()
+  const { project } = useActiveProject()
   const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  // const { projectsById } = useProjects() //TODO:
-  // const { tasksById } = useTasks()
-  const tasksById : Record<string,Task> = {}
+  const [selected, setSelected] = useState<Set<string>>(new Set(existingDeps))
+  const { tasksById } = useTasks()
 
   const q = search.trim().toLowerCase()
 
@@ -56,62 +55,48 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     return <div>Loading dependencies...</div>
   }
 
-  const allAssigned = new Set<number>() //TODO:
-  // const allAssigned = new Set<number>(
-  //   allProjectsSnapshot.orderedIds.flatMap((id) => getTaskIdsForProject(projectsById[id]))
-  // )
-  const allAssignedIds = Array.from(allAssigned)
-  const unassignedIds = Object.keys(tasksById)
-    .map(Number)
-    .filter((tid) => !allAssigned.has(tid))
-    .sort((a, b) => a - b)
-    .filter((tid) => {
-      const task = tasksById[tid]
-      if (!task) return false
-      if (!q) return true
-      if (doesTaskMatch(project, task, q)) return true
-      return task.features.some((f: any) => doesFeatureMatch(task, f, q))
-    })
-
-  const renderTaskItem = (tid: number, isUnassigned = false) => {
-    const task = tasksById[tid]
+  const renderTaskItem = (project: ProjectSpec, taskId: string) => {
+    const task = tasksById[taskId]
     if (!task) return null
-    const dep = `${tid}`
-    const isDisabled = existingDeps.includes(dep)
-    const taskMatches = !q || doesTaskMatch(project, task, q)
-    const matchingFeatures = task.features.filter((f) => !q || doesFeatureMatch(task, f, q))
+    const taskDep = `${taskId}`
+    const isDisabled = existingDeps.includes(taskDep)
+    const taskMatches = !q || doesTaskMatch(project, selected, task, q)
+    const matchingFeatures = task.features.filter((f) => !q || doesFeatureMatch(project, selected, task, f, q))
     if (!taskMatches && matchingFeatures.length === 0) return null
 
+    const display = `${project.taskIdToDisplayIndex[taskId]}`
+
     return (
-      <li key={tid}>
+      <li key={taskId}>
         <div
-          className={`selector-item ${isDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+          className={`selector-item flex gap-2 ${isDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
         >
           <input
             type="checkbox"
-            checked={selected.has(dep)}
-            onChange={() => toggle(dep)}
+            checked={selected.has(taskDep)}
+            onChange={() => toggle(taskDep)}
             disabled={isDisabled}
           />
-          #{tid} {task.title} (Task)
+          #{display} {task.title}
         </div>
         <ul className="ml-4 space-y-1">
           {matchingFeatures.map((f: Feature) => {
-            const isSelf = currentTaskId === tid && currentFeatureId === f.id
-            const isFDisabled = isSelf || existingDeps.includes(f.id)
-            const dependencyDisplay = "x.x" //TODO: task.fea
+            const featureDep = `${taskId}.${f.id}`
+            const isSelf = currentTaskId === taskId && currentFeatureId === f.id
+            const isFDisabled = isSelf || existingDeps.includes(featureDep)
+            const featureDisplay = `${display}.${task.featureIdToDisplayIndex[f.id]}`
             return (
               <li
-                key={f.id}
-                className={`selector-item ${isFDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                key={`${featureDep}`}
+                className={`selector-item flex gap-2 ${isFDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
               >
                 <input
                   type="checkbox"
-                  checked={selected.has(f.id)}
-                  onChange={() => toggle(f.id)}
+                  checked={selected.has(featureDep)}
+                  onChange={() => toggle(featureDep)}
                   disabled={isFDisabled}
                 />
-                #{fdep} {f.title} (Feature)
+                #{featureDisplay} {f.title}
               </li>
             )
           })}
@@ -119,6 +104,8 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
       </li>
     )
   }
+
+  const taskIds = Object.keys(tasksById).sort((a,b) => project.taskIdToDisplayIndex[a] - project.taskIdToDisplayIndex[b])
 
   return (
     <div className="dependency-selector">
@@ -132,17 +119,11 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
       <div className="mt-4 space-y-4 max-h-96 overflow-auto">
         <div>
           <h3 className="text-lg font-semibold">{project.title}</h3>
-          <ul className="space-y-2">
-            {allAssignedIds.map((tid) => renderTaskItem(tid))}
-          </ul>
         </div>
-        {unassignedIds.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold">Other Tasks</h3>
-            <ul className="space-y-2">
-              {unassignedIds.map((tid) => renderTaskItem(tid, true))}
-            </ul>
-          </div>
+        {taskIds.length > 0 && (
+          <ul className="space-y-2">
+            {taskIds.map((taskId) => renderTaskItem(project, taskId))}
+          </ul>
         )}
       </div>
       <button

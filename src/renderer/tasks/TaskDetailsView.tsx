@@ -1,20 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Feature, ProjectSpec, Status, Task } from 'src/types/tasks'
-import { taskService } from '../services/taskService'
-import type { TasksIndexSnapshot } from '../../types/external'
 import { useNavigator } from '../navigation/Navigator'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
-import { projectsService } from '../services/projectsService'
+import { STATUS_LABELS } from '../services/tasksService';
+import { useTasks } from '../hooks/useTasks'
 
-const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done',
-  '~': 'In Progress',
-  '-': 'Pending',
-  '?': 'Blocked',
-  '=': 'Deferred',
-}
 
 function IconBack({ className }: { className?: string }) {
   return (
@@ -65,7 +57,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [saving, setSaving] = useState(false)
   const { openModal, navigateView, tasksRoute } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
-  const { projectId } = useActiveProject()
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
   // DnD state (match Tasks list patterns)
@@ -74,53 +65,22 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
+  const { tasksById, updateTask, updateFeature, reorderFeatures, getReferencesInbound, getReferencesOutbound } = useTasks()
+
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const idx = await tasksService.getSnapshot()
-        if (!cancelled) setIndex(idx)
-      } catch (e) {
-        console.error('Failed to load tasks index.', e)
-      }
-    })()
-    const unsubscribe = tasksService.onUpdate((idx) => setIndex(idx))
-    return () => {
-      cancelled = true
-      if (typeof unsubscribe === 'function') unsubscribe()
-    }
-  }, [projectId])
-    useEffect(() => {
-      let cancelled = false
-      ;(async () => {
-        try {
-          const project = await projectsService.getById(projectId)
-          if (!cancelled && project) setProject(project)
-        } catch (e) {
-          console.error('Failed to load project index.', e)
-        }
-      })()
-      const unsubscribe = projectsService.onUpdate(async (idx) => {
-        const project = await projectsService.getById(projectId)
-        if (project){
-          setProject(project)
-        }
-      })
-      return () => {
-        cancelled = true
-        if (typeof unsubscribe === 'function') unsubscribe()
-      }
-    }, [projectId])
-
-  useEffect(() => {
-    if (taskId && taskIndex) {
-      const t = taskIndex.tasksById[taskId]
+    if (taskId && tasksById) {
+      const t = tasksById[taskId]
       setTask(t)
     } else {
       setTask(null)
     }
-  }, [taskId, taskIndex])
+  }, [taskId, tasksById])
+
+  const sortedFeatures = useMemo(() => {
+    if (!task) { return []}
+    return task.features.sort((a,b) => task.featureIdToDisplayIndex[a.id] - task.featureIdToDisplayIndex[b.id])
+  }, [task, tasksById])
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
@@ -128,14 +88,14 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
 
   const handleTaskStatusChange = async (taskId: string, status: Status) => {
     try {
-      await tasksService.updateTask(taskId, { status })
+      await updateTask(taskId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
   }
   const handleFeatureStatusChange = async (taskId: string, featureId: string, status: Status) => {
     try {
-      await tasksService.updateFeature(taskId, featureId, { status })
+      await updateFeature(taskId, featureId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }
@@ -145,7 +105,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     if (!task) return
     setSaving(true)
     try {
-      const res = await taskService.reorderFeatures(task.id, { fromIndex, toIndex })
+      const res = await reorderFeatures(task.id, fromIndex, toIndex)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)
@@ -247,8 +207,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     clearDndState()
   }
 
-  const taskDeps = Array.isArray(task.dependencies) ? task.dependencies : []
-  const taskDependents : string[] = [] //TODO:
+  const taskDependenciesInbound = getReferencesInbound(task.id)
+  const taskDependenciesOutbound = getReferencesOutbound(task.id)
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -266,21 +226,21 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           <div className="flex gap-4 ml-2" aria-label={`Dependencies for Task ${task.id}`}>
             <div className="chips-list">
               <span className="chips-sub__label">References</span>
-              {taskDeps.length === 0 ? (
+              {taskDependenciesInbound.length === 0 ? (
                 <span className="chips-sub__label" title="No dependencies">None</span>
               ) : (
-                taskDeps.map((d) => (
-                  <DependencyBullet key={d} dependency={d} />
+                taskDependenciesInbound.map((d) => (
+                  <DependencyBullet key={d.id} dependency={d.id} />
                 ))
               )}
             </div>
             <div className="chips-list">
               <span className="chips-sub__label">Blocks</span>
-              {taskDependents.length === 0 ? (
+              {taskDependenciesOutbound.length === 0 ? (
                 <span className="chips-sub__label" title="No dependents">None</span>
               ) : (
-                taskDependents.map((d) => (
-                    <DependencyBullet key={d} dependency={d} isInbound />
+                taskDependenciesOutbound.map((d) => (
+                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
                 ))
               )}
             </div>
@@ -323,7 +283,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </div>
           </div>
 
-          {task.features.length === 0 ? (
+          {sortedFeatures.length === 0 ? (
             <div className="flex-1 min-h-0 overflow-y-auto empty">No features defined for this task.</div>
           ) : (
             <ul
@@ -339,9 +299,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               }}
               onDragEnd={() => clearDndState()}
             >
-              {task.features.map((f: Feature, idx: number) => {
-                const deps = Array.isArray(f.dependencies) ? f.dependencies : []
-                const dependents : string[] = [] //TODO:
+              {sortedFeatures.map((f: Feature, idx: number) => {
+                const dependenciesInbound = getReferencesInbound(task.id, f.id)
+                const dependenciesOutbound = getReferencesOutbound(f.id)
 
                 const isDragSource = dragFeatureId === f.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
@@ -367,7 +327,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       }}
                       onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
-                      aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${deps.length} dependencies, ${dependents.length} dependents. Press Enter to edit.`}
+                      aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${dependenciesOutbound.length} dependencies, ${dependenciesInbound.length} dependents. Press Enter to edit.`}
                     >
                       <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
                         {f.rejection && (
@@ -398,21 +358,21 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex gap-8" aria-label={`Dependencies for Feature ${f.id}`}>
                         <div className="chips-list">
                           <span className="chips-sub__label">References</span>
-                          {deps.length === 0 ? (
+                          {dependenciesInbound.length === 0 ? (
                             <span className="chips-sub__label" title="No dependencies">None</span>
                           ) : (
-                            deps.map((d) => (
-                              <DependencyBullet key={d} dependency={d} />
+                            dependenciesInbound.map((d) => (
+                              <DependencyBullet key={d.id} dependency={d.id} />
                             ))
                           )}
                         </div>
                         <div className="chips-list">
                           <span className="chips-sub__label">Blocks</span>
-                          {dependents.length === 0 ? (
+                          {dependenciesOutbound.length === 0 ? (
                             <span className="chips-sub__label" title="No dependents">None</span>
                           ) : (
-                            dependents.map((d) => (
-                              <DependencyBullet key={d} dependency={d} isInbound />
+                            dependenciesOutbound.map((d) => (
+                              <DependencyBullet key={d.id} dependency={d.id} isOutbound />
                             ))
                           )}
                         </div>

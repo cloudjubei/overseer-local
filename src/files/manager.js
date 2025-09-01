@@ -21,7 +21,7 @@ function inferTypeByExt(name) {
   return undefined;
 }
 
-export class FilesManager { //TODO: index per project + ensure files are project scoped only
+export class FilesManager { //TODO: ensure files are project scoped only
   constructor(projectRoot, window, options = {}) {
     this.projectRoot = projectRoot;
     this.filesDir = options.filesDir || projectRoot;

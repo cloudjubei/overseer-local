@@ -1,27 +1,37 @@
-import type { Feature, ProjectSpec, Task } from 'src/types/tasks'
+import type { Feature, ProjectSpec, Status, Task } from 'src/types/tasks'
 import { ServiceResult } from './serviceResult';
 
+export const STATUS_LABELS: Record<Status, string> = {
+  '+': 'Done',
+  '~': 'In Progress',
+  '-': 'Pending',
+  '?': 'Blocked',
+  '=': 'Deferred',
+}
 export type ReferenceKind = 'task' | 'feature';
 
 export interface ResolvedTaskRef {
   kind: 'task';
   id: string;
+  taskId: string;
   task: Task;
+  display: string;
 }
 
 export interface ResolvedFeatureRef {
   kind: 'feature';
-  id: string; // "{taskId}.{featureId}" || "{taskId}"
-  taskId: number;
+  id: string;
+  taskId: string;
   featureId: string;
   task: Task;
   feature: Feature;
+  display: string;
 }
 
 export type ResolvedRef = ResolvedTaskRef | ResolvedFeatureRef;
 
 export interface InvalidRefError {
-  input: string;
+  id: string;
   code:
     | 'EMPTY'
     | 'BAD_FORMAT'
@@ -37,22 +47,16 @@ export type ReorderFeaturesPayload = { fromIndex: number; toIndex: number }
 
 export type TasksService = {
   subscribe: (callback: () => void) => () => void
-  listTasks: (project: ProjectSpec) => Task[]
-  getTask: (project: ProjectSpec, taskId: string) => Task | undefined
+  listTasks: (project: ProjectSpec) => Promise<Task[]>
+  getTask: (project: ProjectSpec, taskId: string) => Promise<Task | undefined>
   createTask: (project: ProjectSpec, task: TaskCreateInput) => Promise<ServiceResult>
   updateTask: (project: ProjectSpec, taskId: string, data: Partial<Task>) => Promise<ServiceResult>
   deleteTask: (project: ProjectSpec, taskId: string) => Promise<ServiceResult>
-  getFeature: (project: ProjectSpec, featureId: string) => Feature | undefined
+  getFeature: (project: ProjectSpec, featureId: string) => Promise<Feature | undefined>
   addFeature: (project: ProjectSpec, taskId: string, feature: Omit<Feature, 'id'> | Partial<Feature>) => Promise<ServiceResult>
   updateFeature: (project: ProjectSpec, taskId: string, featureId: string, data: Partial<Feature>) => Promise<ServiceResult>
   deleteFeature: (project: ProjectSpec, taskId: string, featureId: string) => Promise<ServiceResult>
   reorderFeatures: (project: ProjectSpec, taskId: string, payload: ReorderFeaturesPayload) => Promise<ServiceResult>
-
-  getReferencesOutbound: (project: ProjectSpec, reference: string) => ResolvedRef[]
-  getReferencesInbound: (project: ProjectSpec, reference: string) => ResolvedRef[]
-  validateReference: (project: ProjectSpec, reference: string) => ServiceResult
-  validateReferences: (project: ProjectSpec, reference: string | null, proposed: string[]) => (ResolvedRef | InvalidRefError)[]
-  searchReferences: (project: ProjectSpec, query: string, limit?: number) => ResolvedRef[]
 }
 
 export const tasksService: TasksService = { ...window.tasksService }

@@ -4,21 +4,22 @@ import Tooltip from '../ui/Tooltip';
 import type { Status } from 'src/types/tasks';
 import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
-import { tasksService } from '../../services/tasksService';
+import { useTasks } from '../../../renderer/hooks/useTasks';
 
 export interface DependencyBulletProps {
   dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
-  isInbound?: boolean;
+  isOutbound?: boolean;
   onRemove?: () => void;
 }
 
-const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbound = false, onRemove }) => {
+const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isOutbound = false, onRemove }) => {
   const { navigateTaskDetails, tasksRoute } = useNavigator();
+  const { resolveDependency } = useTasks()
 
-  const resolved = tasksService.resolveRef(dependency);
+  const resolved = resolveDependency(dependency);
   const isError = 'code' in resolved;
   const isFeatureDependency = !isError && resolved.kind === 'feature';
-  const display = dependencyResolver.getDisplayRef(dependency) ?? dependency;
+  const display = isError ? dependency : resolved.display
 
   let summary: { title: string; description: string; status: Status; displayId: string } = { title: 'Not found', description: '', status: '-' as Status, displayId: display };
 
@@ -68,8 +69,8 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isInbou
   return (
     <Tooltip content={content}>
       <span
-        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isInbound ? 'chip--blocks' : 'chip--ok')} flex`}
-        title={`${display}${isInbound ? ' (requires this)' : ''}`}
+        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isOutbound ? 'chip--blocks' : 'chip--ok')} flex`}
+        title={`${display}${isOutbound ? ' (requires this)' : ''}`}
         onClick={(e) => {
           e.preventDefault();
           handleClick();

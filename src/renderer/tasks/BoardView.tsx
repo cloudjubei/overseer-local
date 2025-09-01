@@ -1,43 +1,38 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Task, Status } from 'src/types/tasks'
 import TaskCard from '../components/tasks/TaskCard'
-import { tasksService } from '../services/tasksService'
+import { STATUS_LABELS, tasksService } from '../services/tasksService'
 import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { useNavigator } from '../navigation/Navigator'
+import { useTasks } from '../hooks/useTasks'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
-const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done',
-  '~': 'In Progress',
-  '-': 'Pending',
-  '?': 'Blocked',
-  '=': 'Deferred',
-}
 
 type Props = {
   tasks: Task[]
 }
 
 export default function BoardView({ tasks }: Props) {
-  const [dragId, setDragId] = useState<number | null>(null)
+  const [dragId, setDragId] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState<Status | null>(null)
   const colRefs = useRef<Record<Status, HTMLDivElement | null>>({ '+': null, '~': null, '-': null, '?': null, '=': null })
 
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
-  const { projectId } = useActiveProject()
+  const { project } = useActiveProject()
   const { navigateTaskDetails } = useNavigator()
+  const { updateTask } = useTasks()
 
   const grouped = useMemo(() => {
     const map: Record<Status, Task[]> = { '+': [], '~': [], '-': [], '?': [], '=': [] }
     for (const t of tasks) { map[t.status].push(t) }
     for (const k of Object.keys(map) as Status[]) {
-      map[k].sort((a, b) => (a.id || 0) - (b.id || 0))
+      map[k].sort((a, b) => (project?.taskIdToDisplayIndex[a.id] || 0) - (project?.taskIdToDisplayIndex[b.id] || 0))
     }
     return map
-  }, [tasks])
+  }, [tasks, project])
 
   const totals = useMemo(() => {
     const res: Record<Status, number> = { '+': 0, '~': 0, '-': 0, '?': 0, '=': 0 }
@@ -45,9 +40,9 @@ export default function BoardView({ tasks }: Props) {
     return res
   }, [grouped])
 
-  const onDragStart = (e: React.DragEvent, taskId: number) => {
+  const onDragStart = (e: React.DragEvent, taskId: string) => {
     setDragId(taskId)
-    e.dataTransfer.setData('text/plain', String(taskId))
+    e.dataTransfer.setData('text/plain', taskId)
     e.dataTransfer.effectAllowed = 'move'
   }
 
@@ -60,7 +55,7 @@ export default function BoardView({ tasks }: Props) {
   const onDropCol = async (e: React.DragEvent, status: Status) => {
     e.preventDefault()
     const idStr = e.dataTransfer.getData('text/plain')
-    const fromId = idStr ? parseInt(idStr, 10) : dragId
+    const fromId = idStr ? idStr : dragId
     setDragOver(null)
     setDragId(null)
     if (!fromId) return
@@ -68,7 +63,7 @@ export default function BoardView({ tasks }: Props) {
     const task = tasks.find(t => t.id === fromId)
     if (!task || task.status === status) return
     try {
-      await tasksService.updateTask(fromId, { status })
+      await updateTask(fromId, { status })
     } catch (err) {
       console.error('Failed to move task', err)
       alert('Failed to move task')
@@ -98,7 +93,7 @@ export default function BoardView({ tasks }: Props) {
       ro.disconnect()
     }
     // Re-evaluate when tasks or project changes (column counts/widths may shift)
-  }, [tasks, projectId])
+  }, [tasks])
 
   useEffect(() => {
     viewportRef.current?.focus()
@@ -176,7 +171,7 @@ export default function BoardView({ tasks }: Props) {
                     onClick={() => navigateTaskDetails(t.id)}
                     onStatusChange={async (next) => {
                       try {
-                        await tasksService.updateTask(t.id, { status: next })
+                        await updateTask(t.id, { status: next })
                       } catch (err) {
                         console.error('Failed to update status', err)
                       }

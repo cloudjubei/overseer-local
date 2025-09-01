@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status } from 'src/types/tasks'
 import StatusControl from './tasks/StatusControl'
 import { DependencySelector } from './tasks/DependencySelector'
-import { Modal } from './ui/Modal'
 import DependencyBullet from './tasks/DependencyBullet'
 import { FileSelector } from './ui/FileSelector'
 import ContextFileChip from './tasks/ContextFileChip'
 import { useTasks } from '../hooks/useTasks'
+import { Modal } from './ui/modal'
 
 export type FeatureFormValues = {
   title: string
@@ -45,10 +45,8 @@ export function FeatureForm({
   const [dependencies, setDependencies] = useState<string[]>(initialValues?.dependencies ?? [])
   const [context, setContext] = useState<string[]>(initialValues?.context ?? [])
   const [error, setError] = useState<string | null>(null)
-  const [depError, setDepError] = useState<string | null>(null)
   const [showSelector, setShowSelector] = useState(false)
   const [showFileSelector, setShowFileSelector] = useState(false)
-  const { validateReferences } = useTasks()
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
@@ -61,18 +59,7 @@ export function FeatureForm({
     }
   }, [combinedTitleRef])
 
-  // Live dependency validation so errors show immediately in UI
-  useEffect(() => {
-    const contextRef = featureId ? `${featureId}` : null
-    const result = validateReferences(contextRef, dependencies)
-    if (!result.ok) {
-      setDepError(result.error ?? 'Invalid dependencies')
-    } else {
-      setDepError(null)
-    }
-  }, [dependencies, featureId])
-
-  const canSubmit = useMemo(() => title.trim().length > 0 && !submitting && !depError, [title, submitting, depError])
+  const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
 
   function validate(): boolean {
     let valid = true
@@ -81,15 +68,6 @@ export function FeatureForm({
       valid = false
     } else {
       setError(null)
-    }
-
-    const contextRef = featureId ? `${featureId}` : null
-    const depVal = validateReferences(contextRef, dependencies)
-    if (!depVal.ok) {
-      setDepError(depVal.error ?? 'Invalid dependencies')
-      valid = false
-    } else {
-      setDepError(null)
     }
 
     return valid
@@ -123,8 +101,6 @@ export function FeatureForm({
   function removeContextAt(idx: number) {
     setContext((ctx) => ctx.filter((_, i) => i !== idx))
   }
-
-  const depErrorId = depError ? 'feature-deps-error' : undefined
 
   return (
     <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}>
@@ -213,16 +189,14 @@ export function FeatureForm({
           <div
             id="feature-dependencies"
             className="chips-list border rounded-md min-h-[3rem] p-2"
-            aria-invalid={!!depError}
-            aria-describedby={depErrorId}
             style={{
-              borderColor: depError ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+              borderColor: 'var(--border-default)', //depError ? 'var(--status-stuck-soft-border)' : 
               background: 'var(--surface-raised)'
             }}
           >
             {dependencies.map((dep, idx) => {
               return (
-                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeDependencyAt(idx)} isInbound/>
+                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeDependencyAt(idx)} />
               )
             })}
             <button
@@ -235,11 +209,6 @@ export function FeatureForm({
               <span aria-hidden="true">+</span>
             </button>
           </div>
-          {depError && (
-            <div id={depErrorId} className="text-xs" style={{ color: 'var(--status-stuck-bg)' }}>
-              {depError}
-            </div>
-          )}
         </div>
       </div>
 

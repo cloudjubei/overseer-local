@@ -59,12 +59,6 @@ export class TasksManager {
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id)).deleteFeature(taskId, featureId);
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ project, taskId, payload }) => (await this.__getStorage(project.id)).reorderFeatures(taskId, payload);
 
-    handlers[IPC_HANDLER_KEYS.TASKS_REFERENCES_OUTBOUND] = async ({ project, reference }) => (await this.__getStorage(project.id)).getReferencesOutbound(reference);
-    handlers[IPC_HANDLER_KEYS.TASKS_REFERENCES_INBOUND] = async ({ project, reference }) => (await this.__getStorage(project.id)).getReferencesInbound(reference);
-    handlers[IPC_HANDLER_KEYS.TASKS_REFERENCE_VALIDATE] = async ({ project, reference }) => (await this.__getStorage(project.id)).validateReference(reference);
-    handlers[IPC_HANDLER_KEYS.TASKS_REFERENCES_VALIDATE] = async ({ project, references }) => (await this.__getStorage(project.id)).validateReferences(references);
-    handlers[IPC_HANDLER_KEYS.TASKS_REFERENCES_SEARCH] = async ({ project, query, limit }) => (await this.__getStorage(project.id)).searchReferences(query, limit);
-
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
         try {

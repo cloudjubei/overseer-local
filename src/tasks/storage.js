@@ -3,6 +3,7 @@ import path from 'path';
 import chokidar from 'chokidar';
 import { validateTask } from './validator';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
+import { randomUUID } from 'crypto';
 
 function isNumericDir(name) {
   return /^\d+$/.test(name);
@@ -17,28 +18,17 @@ export default class TasksStorage {
     this.projectId = projectId;
     this.tasksDir = tasksDir;
     this.window = window;
-    this.index = {
-      tasksDir: this.tasksDir,
-      updatedAt: null,
-      tasksById: {},
-      featuresById: {},
-      inboundByFeatureId: {},
-      errors: [],
-      metrics: { lastScanMs: 0, lastScanCount: 0 }
-    };
     this.watcher = null;
+
+    this.tasks = []
   }
 
   async init() {
-    await this.buildIndex();
-    await this.startWatcher();
+    await this.__buildIndex();
+    await this.__startWatcher();
   }
 
-  getIndex() {
-    return this.index;
-  }
-
-  async startWatcher() {
+  async __startWatcher() {
     if (this.watcher) this.stopWatching();
     if (!(await pathExists(this.tasksDir))) return;
     this.watcher = chokidar.watch(path.join(this.tasksDir, '*/task.json'), {
@@ -47,9 +37,9 @@ export default class TasksStorage {
       ignoreInitial: true,
     });
     this.watcher
-      .on('add', (p) => this.rebuildAndNotify(`File added: ${p}`))
-      .on('change', (p) => this.rebuildAndNotify(`File changed: ${p}`))
-      .on('unlink', (p) => this.rebuildAndNotify(`File removed: ${p}`));
+      .on('add', (p) => this.__rebuildAndNotify(`File added: ${p}`))
+      .on('change', (p) => this.__rebuildAndNotify(`File changed: ${p}`))
+      .on('unlink', (p) => this.__rebuildAndNotify(`File removed: ${p}`));
   }
 
   stopWatching() {
@@ -59,85 +49,53 @@ export default class TasksStorage {
     }
   }
 
-  async rebuildAndNotify(msg) {
+  __notify(msg) {
     if (msg) console.log(msg);
-    await this.buildIndex();
     if (this.window) {
       this.window.webContents.send(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, { projectId: this.projectId });
     }
   }
+  async __rebuildAndNotify(msg) {
+    await this.__buildIndex();
+    this.__notify(msg)
+  }
 
-  async buildIndex() {
-    const startTime = Date.now();
-    const newIndex = {
-      tasksDir: this.tasksDir,
-      updatedAt: new Date().toISOString(),
-      tasksById: {},
-      featuresById: {},
-      outboundByFeatureId: {},
-      errors: [],
-      metrics: { lastScanMs: 0, lastScanCount: 0 }
-    };
-
+  async __buildIndex() {
     try {
-      if (!await pathExists(this.tasksDir)) {
-        newIndex.errors.push({ file: this.tasksDir, errors: ['Tasks directory not found'] });
-      } else {
+      if (await pathExists(this.tasksDir)) {
         const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
         const tasks = [];
         for (const dirent of taskDirs) {
-          if (dirent.isDirectory() && isNumericDir(dirent.name)) {
+          if (dirent.isDirectory()) {
             const taskId = dirent.name;
             const taskFilePath = path.join(this.tasksDir, taskId, 'task.json');
             try {
               const content = await fs.readFile(taskFilePath, 'utf-8');
               const task = JSON.parse(content);
               if (task.id !== taskId) {
-                newIndex.errors.push({ file: taskFilePath, errors: [`Task ID mismatch: file has ${task.id}, dir is ${taskId}`] });
                 continue;
               }
               const { valid, errors } = validateTask(task);
               if (!valid) {
-                newIndex.errors.push({ file: taskFilePath, errors });
                 continue;
               }
-              newIndex.tasksById[taskId] = task;
-              task.features.forEach(feature => {
-                newIndex.featuresById[feature.id] = feature;
-              });
               tasks.push(task);
             } catch (err) {
-              newIndex.errors.push({ file: taskFilePath, errors: [err.message] });
             }
           }
         }
-        
-        const inbound = {};
-        for (const task of tasks) {
-          for (const feature of task.features) {
-            for (const dep of feature.dependencies || []) {
-              if (!inbound[dep]) inbound[dep] = [];
-              inbound[dep].push(feature.id);
-            }
-          }
-        }
-        newIndex.inboundByFeatureId = inbound;
+        this.tasks = tasks
       }
     } catch (err) {
-      newIndex.errors.push({ file: this.tasksDir, errors: [err.message] });
     }
-
-    this.index = newIndex;
-    this.index.metrics.lastScanMs = Date.now() - startTime;
-    this.index.metrics.lastScanCount = Object.keys(newIndex.tasksById).length;
   }
 
   async listTasks() {
-    return Object.values(this.index.tasksById);
+    return this.tasks
   }
 
   async getTask(id) {
-    return this.index.tasksById[id];
+    return this.tasks.find(t => t.id == id)
   }
 
   async createTask(task) {
@@ -172,7 +130,8 @@ export default class TasksStorage {
 
     const taskPath = path.join(newTaskDir, 'task.json');
     await fs.writeFile(taskPath, JSON.stringify(newTask, null, 2), 'utf-8');
-    await this.rebuildAndNotify(`New task ${nextId} added.`);
+    this.tasks.push(newTask)
+    await this.__notify(`New task ${nextId} added.`)
     return { ok: true, id: nextId };
   }
 
@@ -195,7 +154,9 @@ export default class TasksStorage {
     }
 
     await fs.writeFile(taskPath, JSON.stringify(next, null, 2), 'utf-8');
-    await this.rebuildAndNotify(`Task ${taskId} updated`);
+    this.tasks = this.tasks.map(t => t.id === next.id ? next : t)
+
+    await this.__notify(`Task ${taskId} updated.`)
     return { ok: true };
   }
 
@@ -210,53 +171,23 @@ export default class TasksStorage {
       throw new Error(`Could not delete task directory for task ${taskId}: ${e.message}`);
     }
 
-    if (deletedFeatureIds.size > 0) {
-      const tasksToUpdate = {};
-      for (const currentTaskId of Object.keys(this.index.tasksById)) {
-        const currentTaskData = this.index.tasksById[currentTaskId];
-        let taskModified = false;
-        const updatedFeatures = currentTaskData.features.map(feature => {
-          if (!feature.dependencies || feature.dependencies.length === 0) return feature;
-          const filtered = feature.dependencies.filter(dep => !deletedFeatureIds.has(dep));
-          if (filtered.length !== feature.dependencies.length) {
-            taskModified = true;
-            return { ...feature, dependencies: filtered };
-          }
-          return feature;
-        });
-        if (taskModified) {
-          tasksToUpdate[currentTaskId] = { ...currentTaskData, features: updatedFeatures };
-        }
-      }
+    this.tasks = this.tasks.filter(t => t.id !== taskId)
 
-      await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
-        const filePath = path.join(this.tasksDir, id, 'task.json');
-        return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
-      }));
-    }
-
-    await this.rebuildAndNotify(`Task ${taskId} deleted, dependencies updated.`);
+    await this.__notify(`Task ${taskId} deleted.`);
     return { ok: true };
   }
 
   async getFeature(taskId, featureId) {
-    const task = this.index.tasksById[taskId];
+    const task = await this.getTask(taskId)
     if (!task) return null;
-    return task.features.find(f => f.id === featureId) || null;
+    return task.features.find(f => f.id === featureId);
   }
 
   async addFeature(taskId, feature) {
-    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
-    let taskData;
-    try {
-      const rawData = await fs.readFile(taskPath, 'utf-8');
-      taskData = JSON.parse(rawData);
-    } catch (e) {
-      throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
-    }
+    const task = await this.getTask(taskId)
+    if (!task){ throw new Error(`Task with id: ${taskId} not found`)}
 
-    const nextFeatureNum = taskData.features.length + 1;
-    const newId = `${taskId}.${nextFeatureNum}`;
+    const newId = randomUUID()
     const newFeature = {
       id: newId,
       status: feature.status || '-',
@@ -268,112 +199,66 @@ export default class TasksStorage {
       dependencies: feature.dependencies || [],
       rejection: feature.rejection
     };
-    taskData.features.push(newFeature);
-    if (!taskData.featureIdToDisplayIndex) taskData.featureIdToDisplayIndex = {};
-    taskData.featureIdToDisplayIndex[newId] = nextFeatureNum;
+    task.features.push(newFeature);
+    task.featureIdToDisplayIndex[newId] = task.features.length + 1;
 
-    const { valid, errors } = validateTask(taskData);
+    const { valid, errors } = validateTask(task);
     if (!valid) {
       throw new Error(`Invalid task after adding feature: ${errors.join(', ')}`);
     }
 
-    await fs.writeFile(taskPath, JSON.stringify(taskData, null, 2), 'utf-8');
-    await this.rebuildAndNotify(`Feature added to task ${taskId}.`);
+    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
+    await fs.writeFile(taskPath, JSON.stringify(task, null, 2), 'utf-8');
+    await this.__notify(`Feature added to task ${taskId}.`);
     return { ok: true, id: newId };
   }
 
   async updateFeature(taskId, featureId, data) {
-    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
-    let taskData;
-    try {
-      const raw = await fs.readFile(taskPath, 'utf-8');
-      taskData = JSON.parse(raw);
-    } catch (e) {
-      throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
-    }
-
+    const task = await this.getTask(taskId)
+    if (!task){ throw new Error(`Task with id: ${taskId} not found`)}
+    
     const { id, ...patchable } = data || {};
-    const features = taskData.features.map(f => f.id === featureId ? { ...f, ...patchable } : f);
-    const next = { ...taskData, features };
+    task.features = task.features.map(f => f.id === featureId ? { ...f, ...patchable } : f);
 
-    const { valid, errors } = validateTask(next);
+    const { valid, errors } = validateTask(task);
     if (!valid) {
       throw new Error(`Invalid task update for ${taskId}: ${errors.join(', ')}`);
     }
 
-    await fs.writeFile(taskPath, JSON.stringify(next, null, 2), 'utf-8');
-    await this.rebuildAndNotify(`Feature ${featureId} updated in task ${taskId}`);
+    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
+    await fs.writeFile(taskPath, JSON.stringify(task, null, 2), 'utf-8');
+    await this.__notify(`Feature ${featureId} updated in task ${taskId}`);
     return { ok: true };
   }
 
   async deleteFeature(taskId, featureId) {
-    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
-    let taskData;
-    try {
-      const rawData = await fs.readFile(taskPath, 'utf-8');
-      taskData = JSON.parse(rawData);
-    } catch (e) {
-      throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
-    }
+    const task = await this.getTask(taskId)
+    if (!task){ throw new Error(`Task with id: ${taskId} not found`)}
 
     const featureIndex = taskData.features.findIndex(f => f.id === featureId);
     if (featureIndex === -1) {
       throw new Error(`Feature ${featureId} not found in task ${taskId}`);
     }
-    taskData.features.splice(featureIndex, 1);
+    task.features.splice(featureIndex, 1);
 
-    // Rebuild featureIdToDisplayIndex
-    if (taskData.featureIdToDisplayIndex) {
-      const sortedFeatures = [...taskData.features].sort((a, b) => taskData.featureIdToDisplayIndex[a.id] - taskData.featureIdToDisplayIndex[b.id]);
-      const newIndex = {};
-      sortedFeatures.forEach((f, i) => {
-        newIndex[f.id] = i + 1;
-      });
-      taskData.featureIdToDisplayIndex = newIndex;
-    }
+    const sortedFeatures = task.features.sort((a, b) => task.featureIdToDisplayIndex[a.id] - task.featureIdToDisplayIndex[b.id]);
+    const newIndex = {};
+    sortedFeatures.forEach((f, i) => {
+      newIndex[f.id] = i + 1;
+    });
+    task.featureIdToDisplayIndex = newIndex;
 
-    // Cleanup dependencies across all tasks
-    const deletedFeatureIds = new Set([featureId]);
-    const tasksToUpdate = {};
-    for (const currentTaskId of Object.keys(this.index.tasksById)) {
-      const currentTaskData = this.index.tasksById[currentTaskId];
-      let taskModified = false;
-      const updatedFeatures = currentTaskData.features.map(feature => {
-        if (!feature.dependencies || feature.dependencies.length === 0) return feature;
-        const filtered = feature.dependencies.filter(dep => !deletedFeatureIds.has(dep));
-        if (filtered.length !== feature.dependencies.length) {
-          taskModified = true;
-          return { ...feature, dependencies: filtered };
-        }
-        return feature;
-      });
-      if (taskModified) {
-        tasksToUpdate[currentTaskId] = { ...currentTaskData, features: updatedFeatures };
-      }
-    }
-    tasksToUpdate[taskId] = taskData; // Include the updated task itself
-
-    await Promise.all(Object.entries(tasksToUpdate).map(([id, data]) => {
-      const filePath = path.join(this.tasksDir, id, 'task.json');
-      return fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
-    }));
-
-    await this.rebuildAndNotify(`Feature ${featureId} deleted from task ${taskId}, dependencies updated.`);
+    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
+    await fs.writeFile(taskPath, JSON.stringify(task, null, 2), 'utf-8');
+    await this.__notify(`Feature ${featureId} deleted from task ${taskId}.`);
     return { ok: true };
   }
 
   async reorderFeatures(taskId, payload) {
-    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
-    let taskData;
-    try {
-      const rawData = await fs.readFile(taskPath, 'utf-8');
-      taskData = JSON.parse(rawData);
-    } catch (e) {
-      throw new Error(`Could not read or parse task file for task ${taskId}: ${e.message}`);
-    }
+    const task = await this.getTask(taskId)
+    if (!task){ throw new Error(`Task with id: ${taskId} not found`)}
 
-    if (!taskData.featureIdToDisplayIndex) taskData.featureIdToDisplayIndex = {};
-    const currentOrder = taskData.features.map(f => f.id).sort((a, b) => taskData.featureIdToDisplayIndex[a] - taskData.featureIdToDisplayIndex[b]);
+    const currentOrder = task.features.map(f => f.id).sort((a, b) => task.featureIdToDisplayIndex[a] - task.featureIdToDisplayIndex[b]);
 
     let newOrder;
     if (payload.fromIndex !== undefined && payload.toIndex !== undefined) {
@@ -396,49 +281,11 @@ export default class TasksStorage {
     newOrder.forEach((id, i) => {
       newIndex[id] = i + 1;
     });
-    taskData.featureIdToDisplayIndex = newIndex;
+    task.featureIdToDisplayIndex = newIndex;
 
-    await fs.writeFile(taskPath, JSON.stringify(taskData, null, 2), 'utf-8');
-    await this.rebuildAndNotify(`Features reordered for task ${taskId}.`);
+    const taskPath = path.join(this.tasksDir, taskId, 'task.json');
+    await fs.writeFile(taskPath, JSON.stringify(task, null, 2), 'utf-8');
+    await this.__notify(`Features reordered for task ${taskId}.`);
     return { ok: true };
-  }
-
-  async getReferencesInbound(reference) {
-    return this.index.inboundByFeatureId[reference] || [];
-  }
-
-  async getReferencesOutbound(reference) {
-    const feature = this.index.featuresById[reference];
-    if (!feature) return [];
-    return feature.dependencies || [];
-  }
-
-  async validateReference(reference) {
-    if (this.index.tasksById[reference]) return { valid: true, type: 'task' };
-    if (this.index.featuresById[reference]) return { valid: true, type: 'feature' };
-    return { valid: false, reason: 'Not found' };
-  }
-
-  async validateReferences(references) {
-    const results = {};
-    for (const ref of references) {
-      results[ref] = await this.validateReference(ref);
-    }
-    return results;
-  }
-
-  async searchReferences(query, limit = 10) {
-    const results = [];
-    Object.entries(this.index.tasksById).forEach(([id, task]) => {
-      if (id.includes(query) || task.title.toLowerCase().includes(query.toLowerCase())) {
-        results.push({ type: 'task', id, title: task.title });
-      }
-    });
-    Object.entries(this.index.featuresById).forEach(([id, feature]) => {
-      if (id.includes(query) || feature.title.toLowerCase().includes(query.toLowerCase())) {
-        results.push({ type: 'feature', id, title: feature.title });
-      }
-    });
-    return results.slice(0, limit);
   }
 }
