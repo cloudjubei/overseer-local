@@ -29,7 +29,7 @@
     },
     {
       "id": "d877642c-9e5d-44ca-b100-dbe5a7ad119c",
-      "status": "-",
+      "status": "+",
       "title": "Store and restore last active project",
       "description": "Integrate user preferences into the projects system to automatically store the last active project when it changes and restore it on app startup. Update the projects service and relevant components to persist and load the last active project preference.",
       "plan": "",

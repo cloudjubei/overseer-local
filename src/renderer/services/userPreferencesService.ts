@@ -1,67 +1,102 @@
-import type { UserPreferences, NotificationSystemPreferences, TasksListViewPreferences } from 'src/types/userPreferences'
+import type { UserPreferences } from '../../types/userPreferences';
 
-export type UserPreferencesService = {
-  getPreferences: () => Promise<UserPreferences>
-  updatePreferences: (updates: Partial<UserPreferences>) => Promise<UserPreferences>
+// Default preferences mirror main process defaults
+const DEFAULT_PREFERENCES: Required<UserPreferences> = {
+  lastActiveProjectId: null as unknown as string | undefined,
+  tasksViewMode: 'list',
+  tasksListView: {
+    sortBy: 'order',
+    sortDirection: 'asc',
+  },
+  notifications: {
+    osNotificationsEnabled: true,
+    soundsEnabled: true,
+    displayDuration: 5,
+  },
+} as any;
 
-  // Convenience getters/setters
-  getLastActiveProjectId: () => Promise<string | null>
-  setLastActiveProjectId: (projectId: string | null) => Promise<UserPreferences>
+// Fallback localStorage key
+const LS_KEY = 'user-preferences';
 
-  getTasksViewMode: () => Promise<'list' | 'board'>
-  setTasksViewMode: (mode: 'list' | 'board') => Promise<UserPreferences>
+type PreferencesUpdates = Partial<UserPreferences>;
 
-  getTasksListViewPreferences: () => Promise<TasksListViewPreferences>
-  updateTasksListViewPreferences: (updates: Partial<TasksListViewPreferences>) => Promise<UserPreferences>
-
-  getNotificationSystemPreferences: () => Promise<NotificationSystemPreferences>
-  updateNotificationSystemPreferences: (updates: Partial<NotificationSystemPreferences>) => Promise<UserPreferences>
+function getBridge() {
+  // Attempt preload-exposed API first
+  return (window as any).preferencesService as
+    | { get: () => Promise<UserPreferences>; update: (updates: PreferencesUpdates) => Promise<UserPreferences> }
+    | undefined;
 }
 
-const base = window.preferencesService as { getPreferences: () => Promise<UserPreferences>; updatePreferences: (updates: Partial<UserPreferences>) => Promise<UserPreferences> }
-
-export const userPreferencesService: UserPreferencesService = {
-  async getPreferences() {
-    return base.getPreferences()
-  },
-  async updatePreferences(updates) {
-    return base.updatePreferences(updates)
-  },
-
-  async getLastActiveProjectId() {
-    const prefs = await base.getPreferences()
-    // Normalize undefined to null for consumers
-    return prefs.lastActiveProjectId ?? null
-  },
-  async setLastActiveProjectId(projectId) {
-    return base.updatePreferences({ lastActiveProjectId: projectId })
-  },
-
-  async getTasksViewMode() {
-    const prefs = await base.getPreferences()
-    return prefs.tasksViewMode ?? 'list'
-  },
-  async setTasksViewMode(mode) {
-    return base.updatePreferences({ tasksViewMode: mode })
-  },
-
-  async getTasksListViewPreferences() {
-    const prefs = await base.getPreferences()
-    return prefs.tasksListView ?? { sortBy: 'order', sortDirection: 'asc' }
-  },
-  async updateTasksListViewPreferences(updates) {
-    const prefs = await base.getPreferences()
-    const current = prefs.tasksListView ?? { sortBy: 'order', sortDirection: 'asc' }
-    return base.updatePreferences({ tasksListView: { ...current, ...updates } })
-  },
-
-  async getNotificationSystemPreferences() {
-    const prefs = await base.getPreferences()
-    return prefs.notifications ?? { osNotificationsEnabled: true, soundsEnabled: true, displayDuration: 5 }
-  },
-  async updateNotificationSystemPreferences(updates) {
-    const prefs = await base.getPreferences()
-    const current = prefs.notifications ?? { osNotificationsEnabled: true, soundsEnabled: true, displayDuration: 5 }
-    return base.updatePreferences({ notifications: { ...current, ...(updates || {}) } })
-  },
+async function getViaBridge(): Promise<UserPreferences | null> {
+  try {
+    const bridge = getBridge();
+    if (!bridge) return null;
+    const prefs = await bridge.get();
+    return prefs || {};
+  } catch {
+    return null;
+  }
 }
+
+async function updateViaBridge(updates: PreferencesUpdates): Promise<UserPreferences | null> {
+  try {
+    const bridge = getBridge();
+    if (!bridge) return null;
+    const prefs = await bridge.update(updates);
+    return prefs || {};
+  } catch {
+    return null;
+  }
+}
+
+function getViaLocal(): UserPreferences {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { ...DEFAULT_PREFERENCES };
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_PREFERENCES, ...parsed };
+  } catch {
+    return { ...DEFAULT_PREFERENCES };
+  }
+}
+
+function updateViaLocal(updates: PreferencesUpdates): UserPreferences {
+  const current = getViaLocal();
+  const merged: UserPreferences = {
+    ...current,
+    ...updates,
+    // deep-merge known nested shapes to avoid clobbering
+    tasksListView: { ...current.tasksListView, ...(updates.tasksListView || {}) },
+    notifications: { ...current.notifications, ...(updates.notifications || {}) },
+  };
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(merged));
+  } catch {}
+  return merged;
+}
+
+export const userPreferencesService = {
+  async getPreferences(): Promise<UserPreferences> {
+    const viaBridge = await getViaBridge();
+    if (viaBridge) return { ...DEFAULT_PREFERENCES, ...viaBridge };
+    return getViaLocal();
+  },
+
+  async updatePreferences(updates: PreferencesUpdates): Promise<UserPreferences> {
+    const viaBridge = await updateViaBridge(updates);
+    if (viaBridge) return { ...DEFAULT_PREFERENCES, ...viaBridge };
+    return updateViaLocal(updates);
+  },
+
+  async getLastActiveProjectId(): Promise<string | null> {
+    const prefs = await this.getPreferences();
+    const id = prefs.lastActiveProjectId ?? null;
+    return id as string | null;
+  },
+
+  async setLastActiveProjectId(projectId: string | null): Promise<void> {
+    await this.updatePreferences({ lastActiveProjectId: projectId ?? undefined });
+  },
+};
+
+export default userPreferencesService;

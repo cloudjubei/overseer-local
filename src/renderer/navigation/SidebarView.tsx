@@ -10,6 +10,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
+import { userPreferencesService } from '../services/userPreferencesService';
 
 export type SidebarProps = {};
 
@@ -74,6 +75,32 @@ export default function SidebarView({}: SidebarProps) {
     projects,
     setActiveProjectId,
   } = useProjectContext()
+
+  // Restore last active project once when projects are available
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    if (!projects || projects.length === 0) return;
+    restoredRef.current = true;
+    (async () => {
+      try {
+        const lastId = await userPreferencesService.getLastActiveProjectId();
+        if (!lastId) return;
+        const exists = projects.some(p => p.id === lastId);
+        if (exists && activeProjectId !== lastId) {
+          setActiveProjectId(lastId);
+        }
+      } catch {
+        // no-op
+      }
+    })();
+  }, [projects, activeProjectId, setActiveProjectId]);
+
+  // Persist active project changes to preferences
+  useEffect(() => {
+    if (!activeProjectId) return;
+    userPreferencesService.setLastActiveProjectId(activeProjectId).catch(() => {});
+  }, [activeProjectId]);
 
   // Persistent collapsed state (desktop)
   const [collapsed, setCollapsed] = useState<boolean>(() => {
