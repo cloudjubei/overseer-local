@@ -174,10 +174,10 @@ export const FilesView: React.FC = () => {
   }
 
   return (
-    <div className="files-view" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: '100%' }}>
-      <aside style={{ borderRight: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <strong style={{ flex: 1 }}>Files</strong>
+    <div className="files-view grid h-full" style={{ gridTemplateColumns: '320px 1fr' }}>
+      <aside className="flex-col w-min-[0] overflow-hidden"  style={{ borderRight: '1px solid var(--border-subtle)' }}>
+        <div className="flex p-2 gap-2 items-center" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <strong className="flex-1">Files</strong>
           <input
             ref={searchRef}
             type="search"
@@ -189,14 +189,14 @@ export const FilesView: React.FC = () => {
             aria-label="Search files"
           />
         </div>
-        <div style={{ overflow: 'auto', flex: 1 }}>
-          {directoryTree ? (
-            <div style={{ padding: 12 }}>Loading index...</div>
+        <div className="flex-1">
+          {!directoryTree ? (
+            <div className="p-3">Loading index...</div>
           ) : files.length === 0 ? (
-            <div style={{ padding: 12, color: 'var(--text-muted)' }}>No files found.</div>
+            <div className="p-3" style={{ color: 'var(--text-muted)' }}>No files found.</div>
           ) : (
-            <div className="px-2 py-2">
-              <DirTree node={query.trim() ? (filterDir(directoryTree!, filterMatch) || { ...directoryTree!, dirs: [], files: [] }) : directoryTree!} level={0} />
+            <div className="flex-col overflow-auto px-2 py-2">
+              <DirTree node={query.trim() ? (filterDir(directoryTree, filterMatch) || { ...directoryTree, dirs: [], files: [] }) : directoryTree} level={0} />
             </div>
           )}
         </div>

@@ -112,7 +112,8 @@ This document describes how files and directories are organised in this reposito
 - src/capture/: Main-process screenshot capture service and related utilities.
   - screenshotService.js: Registers IPC handler 'screenshot:capture' to capture full-window or region screenshots with PNG/JPEG output and quality settings.
 - src/files/
-  - manager.js: FilesManager responsible for indexing files, watching for changes, and registering all 'files:*' IPC handlers using centralized IPC handler keys. Emits FILES_SUBSCRIBE on updates and also publishes window.filesIndex for legacy consumers.
+  - manager.js: FilesManager owns per-project FilesStorage instances, registers all 'files:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts FILES_SUBSCRIBE events on changes with projectId.
+  - storage.js: Per-project files storage, indexing, and file watching.
 - src/chat/
   - manager.js: ChatsManager registers all 'chats:*' IPC handlers (currently unchanged).
 - src/projects/
@@ -168,7 +169,7 @@ Notes:
 ## New/Updated Services
 - src/renderer/projects/DependencyResolverBootstrap.tsx: Initializes the project-wide dependency resolver service and keeps it in sync with the current project from ProjectContext.
 - src/projects/manager.js: Registers all 'projects:*' IPC handlers so main.js remains thin.
-- src/files/manager.js: Now mirrors ProjectsManager pattern — registers all 'files:*' IPC handlers using centralized keys, emits FILES_SUBSCRIBE on changes, and preload exposes a filesService.
+- src/files/manager.js: FilesManager manages per-project FilesStorage instances, registers all 'files:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Emits FILES_SUBSCRIBE on changes with projectId.
 - src/renderer/services/projectsService.ts: Projects service proxy available in isolated world via preload.
 - src/renderer/services/filesService.ts: Files service proxy (matches projectsService pattern) available in isolated world via preload as window.filesService (window.files kept as backward-compatible alias).
 - src/tasks/manager.js: Now mirrors ProjectsManager — registers all 'tasks:*' IPC handlers using centralized keys and emits TASKS_SUBSCRIBE on changes.
