@@ -1,42 +1,61 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { ipcMain } from 'electron';
+import path from 'path';
+import fs from 'fs/promises';
 import { LLMProvider } from './LLMProvider';
-import { taskManager, filesManager, projectsManager } from '../managers';
-import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
+import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
+import ChatsStorage from './storage';
+import { tasksManager, filesManager, projectsManager } from '../managers';
+
+function resolveChatsDir(projectRoot) {
+  return path.join(projectRoot, 'chats');
+}
 
 export class ChatsManager {
-  constructor(projectRoot, window) {
-    this.projectRoot = projectRoot;
+  constructor(window, options = {}) {
     this.window = window;
-    this.chatsDir = path.join(projectRoot, 'projects/main/chats');
+    this.storages = {};
     this._ipcBound = false;
   }
 
   async init() {
-    this.setChatsDir(this.chatsDir)
     this._registerIpcHandlers();
+    const projects = await projectsManager.listProjects();
+    await Promise.all(projects.map(async (p) => await this.__getStorage(p.id)));
+  }
+
+  async __getStorage(projectId) {
+    if (!this.storages[projectId]) {
+      const project = projectsManager.index.projectsById[projectId];
+      if (!project) {
+        throw new Error(`Unknown project ${projectId}`);
+      }
+      const projectRoot = path.resolve(projectsManager.projectsDir, project.path);
+      const chatsDir = resolveChatsDir(projectRoot);
+      const storage = new ChatsStorage(projectId, chatsDir, this.window);
+      await storage.init();
+      this.storages[projectId] = storage;
+    }
+    return this.storages[projectId];
   }
 
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
     const handlers = {};
+    handlers[IPC_HANDLER_KEYS.CHATS_COMPLETION] = async (args) => this.getCompletion(args);
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async (args) => this.listModels(args);
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ project }) => (await this.__getStorage(project.id)).listChats();
+    handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ project }) => (await this.__getStorage(project.id)).createChat();
+    handlers[IPC_HANDLER_KEYS.CHATS_LOAD] = async ({ project, chatId }) => (await this.__getStorage(project.id)).loadChat(chatId);
+    handlers[IPC_HANDLER_KEYS.CHATS_SAVE] = async ({ project, chatId, messages }) => (await this.__getStorage(project.id)).saveChat(chatId, messages);
+    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ project, chatId }) => (await this.__getStorage(project.id)).deleteChat(chatId);
 
-    handlers[IPC_HANDLER_KEYS.CHATS_COMPLETION] = async (args) => this.getCompletion(args)
-    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async (args) => this.listModels(args)
-    handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async (args) => this.listChats(args);
-    handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async (args) => this.createChat(args);
-    handlers[IPC_HANDLER_KEYS.CHATS_LOAD] = async (args) => this.loadChat(args);
-    handlers[IPC_HANDLER_KEYS.CHATS_SAVE] = async (args) => this.saveChat(args);
-    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async (args) => this.deleteChat(args);
-
-    for (const channel of Object.keys(handlers)) {
-      ipcMain.handle(channel, async (event, args) => {
+    for (const handler of Object.keys(handlers)) {
+      ipcMain.handle(handler, async (event, args) => {
         try {
-          return await handlers[channel](args || {});
+          return await handlers[handler](args);
         } catch (e) {
-          console.error(`${channel} failed`, e);
+          console.error(`${handler} failed`, e);
           return { ok: false, error: String(e?.message || e) };
         }
       });
@@ -45,28 +64,19 @@ export class ChatsManager {
     this._ipcBound = true;
   }
 
-  setChatsDir(dir) {
-    this.chatsDir = dir;
-    if (!fs.existsSync(this.chatsDir)) {
-      fs.mkdirSync(this.chatsDir, { recursive: true });
-    }
-    return this.chatsDir;
-  }
-
-  _getFilesBaseDir() {
-    return filesManager.filesDir || this.projectRoot;
-  }
-
-  async getCompletion({ messages, config }) {
+  async getCompletion({ project, messages, config }) {
     try {
-      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
+      const tasksStorage = await tasksManager.__getStorage(project.id);
+      const filesStorage = await filesManager.__getStorage(project.id);
+
+      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file. If user mentions #reference, use get_task_reference. You can create new files using create_file (use .md if it is a markdown note).' };
       let currentMessages = [systemPrompt, ...messages];
       const tools = [
         {
           type: 'function',
           function: {
             name: 'list_tasks',
-            description: 'List all indexed files in the current project scope',
+            description: 'List all tasks in the current project',
             parameters: { type: 'object', properties: {} },
           },
         },
@@ -74,15 +84,21 @@ export class ChatsManager {
           type: 'function',
           function: {
             name: 'get_task_reference',
-            description: 'Get a task or feature by its visual reference in the current project scope',
-            parameters: { type: 'object', properties: {} },
+            description: 'Get a task or feature by its reference in the current project',
+            parameters: {
+              type: 'object',
+              properties: {
+                reference: { type: 'string', description: 'Task or feature reference (e.g., #1 or #1.2)' },
+              },
+              required: ['reference'],
+            },
           },
         },
         {
           type: 'function',
           function: {
             name: 'list_files',
-            description: 'List all indexed files in the current project scope',
+            description: 'List all files in the current project',
             parameters: { type: 'object', properties: {} },
           },
         },
@@ -104,7 +120,7 @@ export class ChatsManager {
           type: 'function',
           function: {
             name: 'create_file',
-            description: 'Create a new file with the given name and content (relative to project scope root)',
+            description: 'Create a new file with the given name and content (relative to project root)',
             parameters: {
               type: 'object',
               properties: {
@@ -118,11 +134,14 @@ export class ChatsManager {
       ];
 
       const toolsMap = {
-        list_tasks: async (args) => taskManager.listTasks(args),
-        get_task_reference: async (args) => taskManager.getTaskReference(args),
-        list_files: async (args) => filesManager.listFiles(args),
-        read_file: async (args) => filesManager.readFile(args),
-        create_file: async (args) => filesManager.createFile(args)
+        list_tasks: async () => tasksStorage.listTasks(),
+        get_task_reference: async (args) => {
+          // Assuming TasksStorage has getTaskReference; if not, implement or adjust
+          return tasksStorage.getTaskReference ? tasksStorage.getTaskReference(args.reference) : 'Not implemented';
+        },
+        list_files: async () => filesStorage.listFiles(),
+        read_file: async (args) => filesStorage.readFile(args.path, 'utf-8'),
+        create_file: async (args) => filesStorage.writeFile(args.name, args.content, 'utf-8'),
       };
 
       const provider = new LLMProvider(config);
@@ -168,19 +187,13 @@ export class ChatsManager {
         error?.message,
         error?.response?.data ? JSON.stringify(error.response.data) : null,
         error?.cause?.message || null,
-      ]
-        .filter(Boolean)
-        .join('\n');
+      ].filter(Boolean).join('\n');
       console.error('Error in chat completion:', details);
       return { role: 'assistant', content: `An error occurred: ${details}` };
     }
   }
 
-  _getChastDir(project) {
-    return path.join(projectRoot, `projects/${project.id}/chats`)
-  }
-
-  async listModels({config}) {
+  async listModels({ config }) {
     try {
       const provider = new LLMProvider(config);
       if (typeof provider.listModels === 'function') {
@@ -189,46 +202,6 @@ export class ChatsManager {
       return [];
     } catch (error) {
       throw error;
-    }
-  }
-
-  async listChats({project})
-  {
-    const chatsDir = this._getChastDir(project)
-    const out = await fs.readdir(chatDir)
-    return out.filter((file) => file.endsWith('.json'))
-      .map((file) => file.replace('.json', ''));
-  }
-
-  async createChat({project})
-  {
-    const chatsDir = this._getChastDir(project)
-    const chatId = Date.now().toString();
-    const filePath = path.join(chatsDir, `${chatId}.json`);
-    await fs.writeFile(filePath, JSON.stringify([]));
-    return chatId;
-  }
-
-  async loadChat({project,chatId}) {
-    const chatsDir = this._getChastDir(project)
-    const filePath = path.join(chatsDir, `${chatId}.json`);
-    const out = fs.readFileSync(filePath, 'utf8')
-    return JSON.parse(out);
-  }
-
-  async saveChat({project, chatId, messages}) {
-    const chatsDir = this._getChastDir(project)
-    const filePath = path.join(chatsDir, `${chatId}.json`);
-    await fs.writeFile(filePath, JSON.stringify(messages));
-  }
-
-  async deleteChat({project,chatId}) {
-    const chatsDir = this._getChastDir(project)
-    const filePath = path.join(chatsDir, `${chatId}.json`);
-
-    const exists = await fs.exists(filePath)
-    if (exists) {
-      await fs.unlink(filePath);
     }
   }
 }

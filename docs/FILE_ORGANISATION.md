@@ -98,7 +98,9 @@ This document describes how files and directories are organised in this reposito
     - FeatureEditView.tsx
   - src/renderer/App.tsx
   - src/renderer/types.ts
-- src/chat/ (providers and manager) – may be supplied by preload/main glue.
+- src/chat/: Chat providers, manager, and storage.
+  - manager.js: ChatsManager owns per-project ChatsStorage instances, registers all 'chats:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts CHATS_SUBSCRIBE events on changes with projectId. Also handles LLM completion and model listing.
+  - storage.js: Per-project chats storage, indexing, and file watching.
 - src/tools/
   - standardTools.js
   - preview/: Preview analyzer tooling
@@ -114,8 +116,6 @@ This document describes how files and directories are organised in this reposito
 - src/files/
   - manager.js: FilesManager owns per-project FilesStorage instances, registers all 'files:*' IPC handlers using centralized keys, and delegates operations to the appropriate storage. Broadcasts FILES_SUBSCRIBE events on changes with projectId.
   - storage.js: Per-project files storage, indexing, and file watching.
-- src/chat/
-  - manager.js: ChatsManager registers all 'chats:*' IPC handlers (currently unchanged).
 - src/projects/
   - manager.js: ProjectsManager owns indexing and watching project configs and registers all 'projects:*' IPC handlers.
 - src/tasks/
