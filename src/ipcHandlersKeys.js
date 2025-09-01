@@ -13,6 +13,7 @@ const IPC_HANDLER_KEYS = {
   CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_COMPLETION: "chats:completion",
   CHATS_LIST_MODELS: "chats:list-models",
+  CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_LIST: "chats:list",
   CHATS_CREATE: "chats:create",
   CHATS_GET: "chats:get",
