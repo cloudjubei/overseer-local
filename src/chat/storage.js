@@ -26,7 +26,7 @@ export default class ChatsStorage {
   async __startWatcher() {
     if (this.watcher) this.stopWatching();
     if (!(await pathExists(this.chatsDir))) return;
-    this.watcher = chokidar.watch(path.join(this.chatsDir, '*/chat.json'), {
+    this.watcher = chokidar.watch(path.join(this.chatsDir, '*.json'), {
       ignored: /(^|[\/\\])\../,
       persistent: true,
       ignoreInitial: true,
@@ -58,14 +58,15 @@ export default class ChatsStorage {
   async __buildIndex() {
     try {
       if (await pathExists(this.chatsDir)) {
-        const chatDirs = await fs.readdir(this.chatsDir, { withFileTypes: true });
+        const chatFiles = await fs.readdir(this.chatsDir, { withFileTypes: true });
         const chats = [];
-        for (const dirent of chatDirs) {
-          if (dirent.isDirectory()) {
-            const chatId = dirent.name;
+        for (const file of chatFiles) {
+          if (file.isFile()) {
             const chatFilePath = path.join(this.chatsDir, chatId, 'chat.json');
+            const content = await fs.readFile(chatFilePath, 'utf-8');
+
+            const chatId = dirent.name;
             try {
-              const content = await fs.readFile(chatFilePath, 'utf-8');
               const chat = JSON.parse(content);
               if (chat.id !== chatId) {
                 continue;
@@ -102,8 +103,10 @@ export default class ChatsStorage {
 
     const newChat = {
       id: nextId,
-      messages: []
-    };
+      messages: [],
+      creationDate: new Date().toISOString(), 
+      updateDate: new Date().toISOString()
+    }
 
     const chatPath = path.join(newChatDir, 'chat.json');
     await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8');
@@ -112,7 +115,7 @@ export default class ChatsStorage {
     return { ok: true, id: nextId };
   }
 
-  async saveChat(chatId, messages) {
+  async saveChat(chatId, messages, rawResponses) {
     const chatPath = path.join(this.chatsDir, chatId, 'chat.json');
     let chatData;
     try {
@@ -122,7 +125,7 @@ export default class ChatsStorage {
       throw new Error(`Could not read or parse chat file for chat ${chatId}: ${e.message}`);
     }
 
-    const next = { ...chatData, messages };
+    const next = { ...chatData, messages, rawResponses, updateDate: new Date().toISOString() };
 
     await fs.writeFile(chatPath, JSON.stringify(next, null, 2), 'utf-8');
     this.chats = this.chats.map(c => c.id === next.id ? next : c)

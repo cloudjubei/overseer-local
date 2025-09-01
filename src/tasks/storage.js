@@ -95,40 +95,31 @@ export default class TasksStorage {
   }
 
   async createTask(task) {
-    const taskDirs = await fs.readdir(this.tasksDir, { withFileTypes: true });
-    const existingIds = taskDirs
-      .filter(d => d.isDirectory())
-      .map(d => parseInt(d.name, 10));
-    const nextIdNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-    const nextId = String(nextIdNum);
-
-    const newTaskDir = path.join(this.tasksDir, nextId);
-    await fs.mkdir(newTaskDir, { recursive: true });
+    const newId = randomUUID()
 
     const newTask = {
-      id: nextId,
+      id: newId,
       status: task.status || '-',
       title: task.title || '',
       description: task.description || '',
-      features: (task.features || []).map((f, index) => ({
-        ...f,
-        id: `${nextId}.${index + 1}`,
-        status: f.status || '-'
-      })),
+      features: [],
       rejection: task.rejection
     };
 
     const { valid, errors } = validateTask(newTask);
     if (!valid) {
-      await fs.rm(newTaskDir, { recursive: true, force: true });
       throw new Error(`Invalid new task: ${errors.join(', ')}`);
     }
 
+    const newTaskDir = path.join(this.tasksDir, newId);
+    await fs.mkdir(newTaskDir, { recursive: true });
+
     const taskPath = path.join(newTaskDir, 'task.json');
     await fs.writeFile(taskPath, JSON.stringify(newTask, null, 2), 'utf-8');
+    
     this.tasks.push(newTask)
-    await this.__notify(`New task ${nextId} added.`)
-    return { ok: true, id: nextId };
+    await this.__notify(`New task ${newId} added.`)
+    return newTask
   }
 
   async updateTask(taskId, data) {
@@ -196,7 +187,7 @@ export default class TasksStorage {
       rejection: feature.rejection
     };
     task.features.push(newFeature);
-    task.featureIdToDisplayIndex[newId] = task.features.length + 1;
+    task.featureIdToDisplayIndex[newId] = task.features.length
 
     const { valid, errors } = validateTask(task);
     if (!valid) {
@@ -231,18 +222,19 @@ export default class TasksStorage {
     const task = await this.getTask(taskId)
     if (!task){ throw new Error(`Task with id: ${taskId} not found`)}
 
-    const featureIndex = taskData.features.findIndex(f => f.id === featureId);
+    const featureIndex = task.features.findIndex(f => f.id === featureId);
     if (featureIndex === -1) {
       throw new Error(`Feature ${featureId} not found in task ${taskId}`);
     }
     task.features.splice(featureIndex, 1);
 
-    const sortedFeatures = task.features.sort((a, b) => task.featureIdToDisplayIndex[a.id] - task.featureIdToDisplayIndex[b.id]);
-    const newIndex = {};
-    sortedFeatures.forEach((f, i) => {
-      newIndex[f.id] = i + 1;
-    });
-    task.featureIdToDisplayIndex = newIndex;
+    const index = task.featureIdToDisplayIndex[featureId]
+    delete task.featureIdToDisplayIndex[featureId]
+    for(const key of Object.keys(task.featureIdToDisplayIndex)){
+      if (task.featureIdToDisplayIndex[key] > index){
+        task.featureIdToDisplayIndex[key] = task.featureIdToDisplayIndex[key] - 1
+      }
+    }
 
     const taskPath = path.join(this.tasksDir, taskId, 'task.json');
     await fs.writeFile(taskPath, JSON.stringify(task, null, 2), 'utf-8');

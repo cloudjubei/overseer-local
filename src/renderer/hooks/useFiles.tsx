@@ -60,7 +60,7 @@ export default function useFiles() {
 
   const update = async () => {
     if (project){
-      const files = await filesService.listFiles(project)
+      const files = await filesService.listFiles(project.id)
       updateCurrentFiles(files)
     }
   }
@@ -85,13 +85,13 @@ export default function useFiles() {
 
   const readFile = async (path: string) : Promise<string | undefined> =>  {
     if (project){
-      return await filesService.readFile(project, path)
+      return await filesService.readFile(project.id, path)
     }
     return undefined
   }
   const saveFile = async (path: string, content: string) : Promise<void> =>  {
     if (project){
-      await filesService.writeFile(project, path, content)
+      await filesService.writeFile(project.id, path, content)
     }
   }
 
@@ -102,8 +102,13 @@ export default function useFiles() {
       }
     }
   }
+  const uploadFile = async (name: string, content: string) : Promise<void> =>  {
+    if (project){
+      await filesService.uploadFile(project.id, name, content)
+    }
+  }
 
-  return { files, directoryTree, readFile, saveFile, getFileByPath } as const;
+  return { files, directoryTree, readFile, saveFile, getFileByPath, uploadFile } as const;
 }
   
 const textExts = new Set([

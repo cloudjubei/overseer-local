@@ -12,14 +12,14 @@ export type FileMeta = {
 
 export type FilesService = {
   subscribe: (callback: (files: FileMeta[]) => void) => () => void
-  listFiles: (project: ProjectSpec) => Promise<FileMeta[]>
-  readFile: (project: ProjectSpec, relPath: string, encoding?: string) => Promise<string>
-  readFileBinary: (project: ProjectSpec, relPath: string) => Promise<ArrayBuffer>
-  readDirectory: (project: ProjectSpec, relPath: string) => Promise<string[]>
-  writeFile: (project: ProjectSpec, relPath: string, content: string | Uint8Array, encoding?: string) => Promise<ServiceResult>
-  deleteFile: (project: ProjectSpec, relPath: string) => Promise<ServiceResult>
-  renameFile: (project: ProjectSpec, relPathSource: string, relPathTarget: string) => Promise<ServiceResult>
-  uploadFile: (project: ProjectSpec, name: string, content: string | Uint8Array) => Promise<string>
+  listFiles: (projectId: string) => Promise<FileMeta[]>
+  readFile: (projectId: string, relPath: string, encoding?: string) => Promise<string>
+  readFileBinary: (projectId: string, relPath: string) => Promise<ArrayBuffer>
+  readDirectory: (projectId: string, relPath: string) => Promise<string[]>
+  writeFile: (projectId: string, relPath: string, content: string | Uint8Array, encoding?: string) => Promise<ServiceResult>
+  deleteFile: (projectId: string, relPath: string) => Promise<ServiceResult>
+  renameFile: (projectId: string, relPathSource: string, relPathTarget: string) => Promise<ServiceResult>
+  uploadFile: (projectId: string, name: string, content: string | Uint8Array) => Promise<string>
 }
 
 export const filesService: FilesService = { ...window.filesService }

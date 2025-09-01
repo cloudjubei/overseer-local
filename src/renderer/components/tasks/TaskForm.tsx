@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Status } from 'src/types/tasks'
-import StatusControl from './tasks/StatusControl'
+import StatusControl from './StatusControl'
 
 export type TaskFormValues = {
   title: string
@@ -19,7 +19,7 @@ type Props = {
   onDelete?: () => void
 }
 
-export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
+export default function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -165,4 +165,3 @@ export function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = f
     </form>
   )
 }
-export default TaskForm

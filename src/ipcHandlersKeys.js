@@ -16,8 +16,7 @@ const IPC_HANDLER_KEYS = {
   CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_LIST: "chats:list",
   CHATS_CREATE: "chats:create",
-  CHATS_LOAD: "chats:load",
-  CHATS_SAVE: "chats:save",
+  CHATS_GET: "chats:get",
   CHATS_DELETE: "chats:delete",
 
   // Files 

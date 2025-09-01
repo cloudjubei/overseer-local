@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LLMConfigManager, LLM_CONFIGS_CHANGED_EVENT } from '../utils/LLMConfigManager';
-import type { LLMConfig } from '../types';
+import { LLMConfig } from '../services/chatsService';
 
 export function useLLMConfig() {
   const managerRef = useRef<LLMConfigManager>(new LLMConfigManager());

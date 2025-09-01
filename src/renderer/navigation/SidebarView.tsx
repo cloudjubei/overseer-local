@@ -70,11 +70,9 @@ export default function SidebarView({}: SidebarProps) {
   const { unreadCount } = useNotifications();
   const { register } = useShortcuts();
   const {
-    isMain,
     activeProjectId,
     projects,
     setActiveProjectId,
-    switchToMainProject,
   } = useProjectContext()
 
   // Persistent collapsed state (desktop)

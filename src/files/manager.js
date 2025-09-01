@@ -40,14 +40,14 @@ export class FilesManager {
     if (this._ipcBound) return;
 
     const handlers = {};
-    handlers[IPC_HANDLER_KEYS.FILES_LIST] = async ({ project }) => (await this.__getStorage(project.id)).listFiles();
-    handlers[IPC_HANDLER_KEYS.FILES_READ] = async ({ project, relPath, encoding }) => (await this.__getStorage(project.id)).readFile(relPath, encoding);
-    handlers[IPC_HANDLER_KEYS.FILES_READ_BINARY] = async ({ project, relPath }) => (await this.__getStorage(project.id)).readFileBinary(relPath);
-    handlers[IPC_HANDLER_KEYS.FILES_READ_DIRECTORY] = async ({ project, relPath }) => (await this.__getStorage(project.id)).readDirectory(relPath);
-    handlers[IPC_HANDLER_KEYS.FILES_WRITE] = async ({ project, relPath, content, encoding }) => (await this.__getStorage(project.id)).writeFile(relPath, content, encoding);
-    handlers[IPC_HANDLER_KEYS.FILES_DELETE] = async ({ project, relPath }) => (await this.__getStorage(project.id)).deleteFile(relPath);
-    handlers[IPC_HANDLER_KEYS.FILES_RENAME] = async ({ project, relPathSource, relPathTarget }) => (await this.__getStorage(project.id)).renameFile(relPathSource, relPathTarget);
-    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD] = async ({ project, name, content }) => (await this.__getStorage(project.id)).uploadFile(name, content);
+    handlers[IPC_HANDLER_KEYS.FILES_LIST] = async ({ projectId }) => (await this.__getStorage(projectId))?.listFiles();
+    handlers[IPC_HANDLER_KEYS.FILES_READ] = async ({ projectId, relPath, encoding }) => (await this.__getStorage(projectId))?.readFile(relPath, encoding);
+    handlers[IPC_HANDLER_KEYS.FILES_READ_BINARY] = async ({ projectId, relPath }) => (await this.__getStorage(projectId))?.readFileBinary(relPath);
+    handlers[IPC_HANDLER_KEYS.FILES_READ_DIRECTORY] = async ({ projectId, relPath }) => (await this.__getStorage(projectId))?.readDirectory(relPath);
+    handlers[IPC_HANDLER_KEYS.FILES_WRITE] = async ({ projectId, relPath, content, encoding }) => (await this.__getStorage(projectId))?.writeFile(relPath, content, encoding);
+    handlers[IPC_HANDLER_KEYS.FILES_DELETE] = async ({ projectId, relPath }) => (await this.__getStorage(projectId))?.deleteFile(relPath);
+    handlers[IPC_HANDLER_KEYS.FILES_RENAME] = async ({ projectId, relPathSource, relPathTarget }) => (await this.__getStorage(projectId))?.renameFile(relPathSource, relPathTarget);
+    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD] = async ({ projectId, name, content }) => (await this.__getStorage(projectId))?.uploadFile(name, content);
 
     for(const handler of Object.keys(handlers)){
       ipcMain.handle(handler, async (event, args) => {

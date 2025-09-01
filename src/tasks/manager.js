@@ -4,13 +4,7 @@ import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import TasksStorage from './storage';
 
 function resolveTasksDir(projectRoot) {
-  const candidates = [];
-  const root = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot);
-  candidates.push(path.join(root, 'tasks'));
-  candidates.push(path.resolve(root, '..', 'tasks'));
-  candidates.push(path.resolve(root, '..', '..', 'tasks'));
-  candidates.push(path.resolve(process.cwd(), 'tasks'));
-  return candidates[0];
+  return path.join(projectRoot, 'tasks');
 }
 
 export class TasksManager {
@@ -46,16 +40,16 @@ export class TasksManager {
     if (this._ipcBound) return;
 
     const handlers = {};
-    handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ project }) => (await this.__getStorage(project.id))?.listTasks();
-    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ project, id }) => (await this.__getStorage(project.id))?.getTask(id);
-    handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ project, task }) => (await this.__getStorage(project.id))?.createTask(task);
-    handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ project, taskId, data }) => (await this.__getStorage(project.id))?.updateTask(taskId, data);
-    handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ project, taskId }) => (await this.__getStorage(project.id))?.deleteTask(taskId);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id))?.getFeature(taskId, featureId);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ project, taskId, feature }) => (await this.__getStorage(project.id))?.addFeature(taskId, feature);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({ project, taskId, featureId, data }) => (await this.__getStorage(project.id))?.updateFeature(taskId, featureId, data);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ project, taskId, featureId }) => (await this.__getStorage(project.id))?.deleteFeature(taskId, featureId);
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ project, taskId, payload }) => (await this.__getStorage(project.id))?.reorderFeatures(taskId, payload);
+    handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => (await this.__getStorage(projectId))?.listTasks();
+    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, id }) => (await this.__getStorage(projectId))?.getTask(id);
+    handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ projectId, task }) => (await this.createTask(projectId, task));
+    handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ projectId, taskId, data }) => (await this.__getStorage(projectId))?.updateTask(taskId, data);
+    handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ projectId, taskId }) => (await this.deleteTask(projectId, taskId));
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ projectId, taskId, featureId }) => (await this.__getStorage(projectId))?.getFeature(taskId, featureId);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ projectId, taskId, feature }) => (await this.__getStorage(projectId))?.addFeature(taskId, feature);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({ projectId, taskId, featureId, data }) => (await this.__getStorage(projectId))?.updateFeature(taskId, featureId, data);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ projectId, taskId, featureId }) => (await this.__getStorage(projectId))?.deleteFeature(taskId, featureId);
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ projectId, taskId, payload }) => (await this.__getStorage(projectId))?.reorderFeatures(taskId, payload);
 
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
@@ -69,5 +63,40 @@ export class TasksManager {
     }
 
     this._ipcBound = true;
+  }
+
+  async createTask(projectId, taskData)
+  {
+    const project = await this.projectsManager.getProject(projectId)
+    if (!project) { return { ok: false, error: "project couldn't be found"} }
+
+    const storage = await this.__getStorage(projectId)
+    const newTask = await storage?.createTask(taskData)
+    if (!newTask){ return { ok: false, error: "task couldn't be created" } }
+
+    const newProject = {...project}
+    newProject.taskIdToDisplayIndex[newTask.id] = Object.keys(newProject.taskIdToDisplayIndex).length
+    await this.projectsManager.updateProject(project.id, newProject)
+    return { ok: true }
+  }
+
+  async deleteTask(projectId, taskId)
+  {
+    const project = this.projectsManager.getProject(projectId)
+    if (!project) { return { ok: false, error: "project couldn't be found"} }
+
+    const storage = await this.__getStorage(project.id)
+    await storage?.deleteTask(taskId)
+    
+    const newProject = {...project}
+    const index = newProject.taskIdToDisplayIndex[task.id]
+    delete newProject.taskIdToDisplayIndex[task.id]
+    for(const key of Object.keys(newProject.taskIdToDisplayIndex)){
+      if (newProject.taskIdToDisplayIndex[key] > index){
+        newProject.taskIdToDisplayIndex[key] = newProject.taskIdToDisplayIndex[key] - 1
+      }
+    }
+    await this.projectsManager.updateProject(project.id, newProject)
+    return { ok: true }
   }
 }

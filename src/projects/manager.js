@@ -210,7 +210,6 @@ export class ProjectsManager {
 
   async reorderTask(projectId, fromIndex, toIndex)
   {
-      console.log("ProjectsManager reorderTaskprojectId: ", projectId)
     const project = await this.getProject(projectId)
     if (!project){ throw new Error(`Project with id: ${projectId} not found`)}
   

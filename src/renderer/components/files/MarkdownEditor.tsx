@@ -36,48 +36,31 @@ export type MarkdownEditorProps = {
 };
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
-  const { readFile } = useFiles()
+  const { readFile, saveFile } = useFiles()
   const [value, setValue] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [saveSupported, setSaveSupported] = useState<boolean>(false);
   const [dirty, setDirty] = useState<boolean>(false);
 
-  // Register unsaved changes checker for this editor instance
   useUnsavedChanges(`markdown:${file.path}`, () => dirty);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setSaveSupported(false);
     setDirty(false);
     readFile(file.path).then((txt) => {
       if (!mounted) return;
       setValue(txt ?? '');
       setLoading(false);
+      setSaveSupported(true);
     });
-    const w = window as any;
-    setSaveSupported(!!(w.api?.writeFile || w.writeFile || w.files?.writeFile));
     return () => { mounted = false; };
   }, [file.path]);
 
   async function handleSave() {
-    const w = window as any;
     try {
-      if (w.api?.writeFile) {
-        await w.api.writeFile(file.path, value, 'utf8');
-        setDirty(false);
-        return;
-      }
-      if (w.writeFile) {
-        await w.writeFile(file.path, value, 'utf8');
-        setDirty(false);
-        return;
-      }
-      if (w.files?.writeFile) {
-        await w.files.writeFile(file.path, value, 'utf8');
-        setDirty(false);
-        return;
-      }
-      alert('Saving not supported in this environment');
+      await saveFile(file.path, value)
     } catch (e) {
       console.error('Save failed', e);
       alert('Failed to save file');

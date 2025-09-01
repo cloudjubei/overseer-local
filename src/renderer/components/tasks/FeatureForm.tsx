@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status } from 'src/types/tasks'
-import StatusControl from './tasks/StatusControl'
-import { DependencySelector } from './tasks/DependencySelector'
-import DependencyBullet from './tasks/DependencyBullet'
-import { FileSelector } from './ui/FileSelector'
-import ContextFileChip from './tasks/ContextFileChip'
-import { useTasks } from '../hooks/useTasks'
-import { Modal } from './ui/modal'
+import StatusControl from './StatusControl'
+import { DependencySelector } from './DependencySelector'
+import DependencyBullet from './DependencyBullet'
+import { FileSelector } from '../ui/FileSelector'
+import ContextFileChip from './ContextFileChip'
+import { Modal } from '../ui/Modal'
 
 export type FeatureFormValues = {
   title: string
@@ -28,7 +27,7 @@ type Props = {
   featureId?: string
 }
 
-export function FeatureForm({
+export default function FeatureForm({
   initialValues,
   onSubmit,
   onCancel,
@@ -280,5 +279,3 @@ export function FeatureForm({
     </form>
   )
 }
-
-export default FeatureForm

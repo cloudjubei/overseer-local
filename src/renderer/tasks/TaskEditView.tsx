@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TaskForm, TaskFormValues } from '../components/TaskForm'
+import TaskForm, { TaskFormValues } from '../components/tasks/TaskForm'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useNavigator } from '../navigation/Navigator'

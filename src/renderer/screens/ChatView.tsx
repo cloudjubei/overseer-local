@@ -7,23 +7,25 @@ import { useLLMConfig } from '../hooks/useLLMConfig'
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import DependencyBullet from '../components/tasks/DependencyBullet'
-import type { ChatMessage } from '../types'
 import FileDisplay from '../components/ui/FileDisplay'
 import useFiles, { inferFileType } from '../../renderer/hooks/useFiles';
+import { ChatMessage } from '../services/chatsService'
+
+interface EnhancedMessage extends ChatMessage {
+  showModel?: boolean
+  isFirstInGroup?: boolean
+}
 
 export default function ChatView() {
   const {
-    chatHistories,
     currentChatId,
     setCurrentChatId,
-    messages,
+    chatsById,
     createChat,
     deleteChat,
-    sendMessage,
-    uploadDocument,
+    sendMessage
   } = useChats()
-
-  const { files, getFileByPath } = useFiles()
+  const { files, getFileByPath, uploadFile } = useFiles()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
@@ -32,6 +34,7 @@ export default function ChatView() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
 
   const {
     isOpen: isAutocompleteOpen,
@@ -51,7 +54,18 @@ export default function ChatView() {
     const el = messageListRef.current
     if (!el) return
     el.scrollTo({ top: el.scrollHeight })
-  }, [messages])
+  }, [chatsById])
+
+  useEffect(() => {
+    if (currentChatId){
+      const chat = chatsById[currentChatId]
+      setMessages(chat?.messages ?? [])
+    }
+  }, [currentChatId, chatsById])
+  
+  const chatHistories = useMemo(() => {
+    return Object.values(chatsById).sort((a,b) => new Date(a.updateDate).getMilliseconds() - new Date(b.updateDate).getMilliseconds())
+  }, [chatsById])
 
   const autoSizeTextarea = () => {
     const el = textareaRef.current
@@ -87,7 +101,7 @@ export default function ChatView() {
     const reader = new FileReader()
     reader.onload = (event) => {
       const content = event.target?.result as string
-      uploadDocument(file.name, content)
+      uploadFile(file.name, content)
     }
     reader.readAsText(file)
   }
@@ -97,11 +111,6 @@ export default function ChatView() {
       e.preventDefault()
       handleSend()
     }
-  }
-
-  interface EnhancedMessage extends ChatMessage {
-    showModel?: boolean
-    isFirstInGroup?: boolean
   }
 
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
@@ -119,16 +128,16 @@ export default function ChatView() {
 
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
-  const chatItems = useMemo(() => chatHistories.map((id) => ({
-    id,
-    label: `Chat ${id}`,
+  const chatItems = useMemo(() => chatHistories.map((chat) => ({
+    id: chat.id,
+    label: `Chat ${new Date(chat.creationDate)}`,
     icon: <span aria-hidden>💬</span>,
     accent: 'gray',
     action: (
       <button
         onClick={(e) => {
           e.stopPropagation()
-          deleteChat(id)
+          deleteChat(chat.id)
         }}
       >
         Delete

@@ -16,7 +16,7 @@ export function useTasks() {
 
   const update = async () => {
     if (project){
-      const tasks = await tasksService.listTasks(project)
+      const tasks = await tasksService.listTasks(project.id)
       updateCurrentProjectTasks(project, tasks)
     }
   }
@@ -98,47 +98,47 @@ export function useTasks() {
 
   const createTask = async (updates: TaskCreateInput) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.createTask(project, updates)
+      return await tasksService.createTask(project.id, updates)
     }
     return { ok: false }
   }
   const updateTask = async (taskId: string, updates: Partial<Omit<Task,"id">>) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.updateTask(project, taskId, updates)
+      return await tasksService.updateTask(project.id, taskId, updates)
     }
     return { ok: false }
   }
 
   const deleteTask = async (taskId: string) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.deleteTask(project, taskId)
+      return await tasksService.deleteTask(project.id, taskId)
     }
     return { ok: false }
   }
 
   const addFeature = async (taskId: string, updates: Partial<Omit<Feature,"id">>) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.addFeature(project, taskId, updates)
+      return await tasksService.addFeature(project.id, taskId, updates)
     }
     return { ok: false }
   }
   const updateFeature = async (taskId: string, featureId: string, updates: Partial<Omit<Feature,"id">>) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.updateFeature(project, taskId, featureId, updates)
+      return await tasksService.updateFeature(project.id, taskId, featureId, updates)
     }
     return { ok: false }
   }
 
   const deleteFeature = async (taskId: string, featureId: string) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.deleteFeature(project, taskId, featureId)
+      return await tasksService.deleteFeature(project.id, taskId, featureId)
     }
     return { ok: false }
   }
 
   const reorderFeatures = async (taskId: string, fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
     if (project){
-      return await tasksService.reorderFeatures(project, taskId, { fromIndex, toIndex })
+      return await tasksService.reorderFeatures(project.id, taskId, { fromIndex, toIndex })
     }
     return { ok: false }
   }
