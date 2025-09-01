@@ -82,29 +82,18 @@
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
       "status": "-",
-      "title": "ChatsManager follows TasksManager",
-      "description": "TasksManager has this nice separation of its storage into a separate reusable class TasksStorage. ChatsManager should follow the same pattern.",
+      "title": "ChatsService types updates",
+      "description": "useChats needs to update after the typing in ChatsService has been updated. It needs to follow the same patterns as useTasks. ChatsManager and ChatsStorage neds to update accordingly too - following TasksManager and TasksStorage.",
       "plan": "",
       "context": [
-        "src/files/manager.js",
-        "src/notiffilesications/storage.js",
-        "src/tasks/manager.js",
-        "src/tasks/storage.js"
-      ],
-      "acceptance": []
-    },
-    {
-      "id": "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe",
-      "status": "-",
-      "title": "NotificationsStorage follows TasksStorage",
-      "description": "NotificationsStorage needs to follow the exact same pattern as TasksStorage when it comes to storing the notifications data and notifying the ipc",
-      "plan": "",
-      "context": [
+        "src/chats/manager.js",
+        "src/chats/storage.js",
         "src/tasks/manager.js",
         "src/tasks/storage.js",
-        "src/notifications/manager.js",
-        "src/notifications/storage.js",
-        "src/ipcHandlersKeys.js"
+        "src/ipcHandlersKeys.js",
+        "src/renderer/services/chatsService.ts",
+        "src/renderer/hooks/useChats.tsx",
+        "src/renderer/hooks/useTasks.tsx"
       ],
       "acceptance": []
     }
@@ -116,7 +105,6 @@
     "916bebdb-a2c4-429f-a559-dff03aed4eef": 4,
     "06680296-05e8-434c-868c-b07a44f86570": 5,
     "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 6,
-    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7,
-    "ee6ac3c2-5d10-4e38-ba0a-fec322c1babe": 8
+    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7
   }
 }

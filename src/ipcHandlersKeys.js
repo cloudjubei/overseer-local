@@ -10,6 +10,7 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_TASK_REORDER: "projects:reorder_task",
 
   // Chats
+  CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_COMPLETION: "chats:completion",
   CHATS_LIST_MODELS: "chats:list-models",
   CHATS_SUBSCRIBE: "chats:subscribe",
