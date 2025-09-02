@@ -62,9 +62,7 @@
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
-        "ffc07e5a-e89d-4094-958a-90f9e5a4d67d.3cd73d96-21d0-488c-a484-2ed49a70032d"
-      ]
+      "dependencies": []
     },
     {
       "id": "2f441c51-532f-494b-b29b-ae9920a75750",
@@ -79,9 +77,7 @@
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
-        "ffc07e5a-e89d-4094-958a-90f9e5a4d67d.89144d73-7cdd-4984-9422-2341c2ed77b5"
-      ]
+      "dependencies": []
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
@@ -96,17 +92,15 @@
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
-        "ffc07e5a-e89d-4094-958a-90f9e5a4d67d.2f441c51-532f-494b-b29b-ae9920a75750"
-      ]
+      "dependencies": []
     }
   ],
   "featureIdToDisplayIndex": {
     "3cd73d96-21d0-488c-a484-2ed49a70032d": 1,
     "a46e12c6-1d72-4ab3-8301-b278b56b5814": 2,
-    "bce3592f-e8e3-440c-9675-acff8965f3d8": 3,
-    "89144d73-7cdd-4984-9422-2341c2ed77b5": 4,
-    "2f441c51-532f-494b-b29b-ae9920a75750": 5,
-    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 6
+    "89144d73-7cdd-4984-9422-2341c2ed77b5": 3,
+    "2f441c51-532f-494b-b29b-ae9920a75750": 4,
+    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 5,
+    "bce3592f-e8e3-440c-9675-acff8965f3d8": 6
   }
 }
