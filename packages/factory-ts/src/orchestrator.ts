@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall } from './types.js';
 import type { TaskUtils } from './taskUtils.js';
 import type { GitManager } from './gitManager.js';
@@ -208,7 +209,7 @@ async function runConversation(opts: {
       }
       doEmit({ type: 'llm/messages/error', payload: { error: String(e), messages: messages.slice() } });
       doEmit({ type: 'run/progress/snapshot', payload: { progress: undefined, message: 'Error encountered' } });
-      logger.error('Agent loop error:', e);
+      logger.error('Agent loop error:', e as any);
       complete('block', e);
       return;
     }
@@ -330,5 +331,115 @@ export async function runOrchestrator(opts: {
     }
     await runAgentOnFeature(model, agentType, freshTask, next, tools, git, completion, emit);
     processed.add(next.id);
+  }
+}
+
+// --- Isolated Runner (mimic Python run.py) ---
+
+function shouldIgnoreCopy(relPath: string): boolean {
+  // Mirror Python ignore patterns: venv, __pycache__, *.pyc, .idea
+  const parts = relPath.split(path.sep);
+  if (parts.includes('venv')) return true;
+  if (parts.includes('__pycache__')) return true;
+  if (parts.includes('.idea')) return true;
+  if (relPath.endsWith('.pyc')) return true;
+  return false;
+}
+
+async function copyTree(src: string, dest: string) {
+  // Recursively copy, respecting ignore patterns
+  const stat = fs.statSync(src);
+  if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
+  fs.mkdirSync(dest, { recursive: true });
+
+  const walk = (from: string, to: string) => {
+    for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+      const rel = path.relative(src, path.join(from, entry.name));
+      if (shouldIgnoreCopy(rel)) continue;
+      const srcPath = path.join(from, entry.name);
+      const dstPath = path.join(to, entry.name);
+      if (entry.isDirectory()) {
+        fs.mkdirSync(dstPath, { recursive: true });
+        walk(srcPath, dstPath);
+      } else if (entry.isSymbolicLink()) {
+        // Resolve symlink target and copy contents (best-effort)
+        try {
+          const linkTarget = fs.readlinkSync(srcPath);
+          const resolved = path.resolve(path.dirname(srcPath), linkTarget);
+          const st = fs.statSync(resolved);
+          if (st.isDirectory()) {
+            fs.mkdirSync(dstPath, { recursive: true });
+            walk(resolved, dstPath);
+          } else {
+            fs.copyFileSync(resolved, dstPath);
+          }
+        } catch {
+          // Fallback: copy file bytes of the link itself (as file)
+          try { fs.copyFileSync(srcPath, dstPath); } catch {}
+        }
+      } else if (entry.isFile()) {
+        fs.copyFileSync(srcPath, dstPath);
+      }
+    }
+  };
+
+  walk(src, dest);
+}
+
+export async function runIsolatedOrchestrator(opts: {
+  model: string;
+  agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
+  taskId: string;
+  projectDir?: string | null; // child project relative to repo root
+  toolsFactory: (projectRoot: string) => TaskUtils; // tools bound to projectRoot
+  gitFactory: (projectRoot: string) => GitManager;  // git bound to projectRoot
+  completion: CompletionClient;
+  emit?: (e: { type: string; payload?: any }) => void;
+}) {
+  const { model, agentType, taskId, projectDir, toolsFactory, gitFactory, completion, emit } = opts;
+
+  // Determine repo root: assume current working directory is repo root
+  const repoRoot = FRAMEWORK_ROOT;
+
+  // Create temp workspace
+  const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'factory-ts-'));
+  const workspace = path.join(tmpBase, 'workspace');
+
+  logger.info(`Copying repository from '${repoRoot}' to temporary workspace: '${workspace}'`);
+  try {
+    await copyTree(repoRoot, workspace);
+  } catch (e) {
+    logger.error(`FATAL: Failed to copy repository to temporary directory: ${e}`);
+    // best-effort cleanup
+    try { fs.rmSync(tmpBase, { recursive: true, force: true }); } catch {}
+    return;
+  }
+
+  // Resolve the project directory inside the workspace
+  const workspaceProjectDir = projectDir ? path.join(workspace, projectDir) : workspace;
+  const tools = toolsFactory(workspaceProjectDir);
+  const git = gitFactory(workspaceProjectDir);
+
+  try {
+    await runOrchestrator({
+      model,
+      agentType,
+      taskId,
+      projectDir: workspaceProjectDir,
+      tools,
+      git,
+      completion,
+      emit,
+    });
+  } catch (e) {
+    logger.error(`An error occurred while running the agent orchestrator: ${e}`);
+  } finally {
+    // Cleanup temporary directory
+    try {
+      fs.rmSync(tmpBase, { recursive: true, force: true });
+      logger.info('Agent run finished. Temporary directory cleaned up.');
+    } catch (e) {
+      logger.warn(`Failed to cleanup temporary directory '${tmpBase}': ${e}`);
+    }
   }
 }

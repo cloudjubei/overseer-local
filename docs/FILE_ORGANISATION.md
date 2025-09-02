@@ -38,7 +38,7 @@ This document describes how files and directories are organised in this reposito
 - packages/: Local monorepo packages used by the app.
   - packages/factory-ts/: Agent orchestration library used by the app and CLI. See packages/factory-ts/FACTORY_TS_OVERVIEW.md.
     - packages/factory-ts/src/taskUtils.ts: TypeScript implementation mirroring Python task_utils.py, used by orchestrator.ts for file/task/feature/test operations and Git commits.
-    - packages/factory-ts/src/orchestrator.ts: Orchestrator that mirrors Python run_local_agent.py conversation loop.
+    - packages/factory-ts/src/orchestrator.ts: Orchestrator that mirrors Python run_local_agent.py conversation loop. Also provides runIsolatedOrchestrator which mirrors Python run.py by copying the repository to a temporary workspace, running the orchestrator inside it, and then cleaning up. It preserves .git and ignores venv, __pycache__, .idea, and *.pyc.
     - packages/factory-ts/src/completion.ts: Self-contained CompletionClient that supports OpenAI-compatible chat APIs and a mock client.
     - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator and a stub createHistoryStore. This is what Electron main loads to start task/feature runs.
 

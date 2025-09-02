@@ -131,7 +131,7 @@
     },
     {
       "id": "8eec6280-97ff-443c-a7a9-fcbb58eeb119",
-      "status": "-",
+      "status": "+",
       "title": "`orchestrator.ts` needs to also mimic `run.py`",
       "description": "`orchestrator.ts` is based on the python script  `run.py` and `run_local_agent.py`, in which before the agent is run - the whole project is copied to a separate temporary directory, the agent runs the conversation and does changes - appropriate git commands happen - and then once it's finished the temporary directory is cleaned up. This is to ensure that the local project copy isn't affected and that the agent runs in an isolated environment.",
       "plan": "",
