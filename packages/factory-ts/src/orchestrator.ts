@@ -3,6 +3,7 @@ import path from 'node:path';
 import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall } from './types.js';
 import type { TaskUtils } from './taskUtils.js';
 import type { GitManager } from './gitManager.js';
+import { logger, logLLMStep } from './logger.js';
 
 const MAX_TURNS_PER_FEATURE = 100;
 
@@ -152,8 +153,12 @@ async function runConversation(opts: {
       // Emit assistant message and timing
       doEmit({ type: 'llm/message', payload: { message: assistant, turn: i, durationMs } });
 
-      const parsed = JSON.parse(assistant.content) as AgentResponse;
-      const toolCalls: ToolCall[] = parsed.tool_calls ?? [];
+      // Parse and log succinct info to console via logger
+      let parsed: AgentResponse | undefined;
+      try { parsed = JSON.parse(assistant.content) as AgentResponse; } catch (e) { parsed = undefined; }
+      const toolCalls: ToolCall[] = parsed?.tool_calls ?? [];
+      logLLMStep({ turn: i, thoughts: parsed?.thoughts, toolCalls, durationMs, tag: agentType });
+
       if (!toolCalls.length) {
         // No tool calls; continue loop. Emit snapshot for completeness
         doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'no_tool_calls' } });
@@ -203,6 +208,7 @@ async function runConversation(opts: {
       }
       doEmit({ type: 'llm/messages/error', payload: { error: String(e), messages: messages.slice() } });
       doEmit({ type: 'run/progress/snapshot', payload: { progress: undefined, message: 'Error encountered' } });
+      logger.error('Agent loop error:', e);
       complete('block', e);
       return;
     }
@@ -216,11 +222,12 @@ async function runConversation(opts: {
   }
   doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), reason: 'max_turns' } });
   doEmit({ type: 'run/progress/snapshot', payload: { progress: 1, message: 'Max turns reached' } });
+  logger.warn('Max turns reached without completion.');
   complete('max_turns');
 }
 
 export async function runAgentOnTask(model: string, agentType: string, task: Task, tools: TaskUtils, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
-  console.log(`\n--- Activating Agent ${agentType} for task: [${task.id}] ${task.title} ---`);
+  logger.debug(`\n--- Activating Agent ${agentType} for task: [${task.id}] ${task.title} ---`);
   const agentDocs = loadAgentDocs(agentType);
   const contextFiles = ['docs/FILE_ORGANISATION.md'];
   const [funcs, sigs] = toolSigsForAgent(agentType, tools, git);
@@ -243,7 +250,7 @@ export async function runAgentOnTask(model: string, agentType: string, task: Tas
 }
 
 export async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, tools: TaskUtils, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
-  console.log(`\n--- Activating Agent ${agentType} for Feature: [${feature.id}] ${feature.title} ---`);
+  logger.debug(`\n--- Activating Agent ${agentType} for Feature: [${feature.id}] ${feature.title} ---`);
 
   if (agentType === 'developer') await tools.updateFeatureStatus?.(task.id, feature.id, '~');
 
@@ -287,23 +294,23 @@ export async function runOrchestrator(opts: {
 
   const currentTask: Task = await Promise.resolve(tools.getTask(taskId));
   if (!currentTask) {
-    console.log('No available tasks to work on in the repository.');
+    logger.warn('No available tasks to work on in the repository.');
     return;
   }
 
-  console.log(`Selected Task: [${currentTask.id}] ${currentTask.title}`);
+  logger.debug(`Selected Task: [${currentTask.id}] ${currentTask.title}`);
 
   const branch = `features/${currentTask.id}`;
   try {
     await Promise.resolve(git.checkoutBranch(branch, true));
   } catch (e) {
-    console.log(`Could not create or checkout branch '${branch}': ${e}`);
+    logger.warn(`Could not create or checkout branch '${branch}': ${e}`);
     await Promise.resolve(git.checkoutBranch(branch, false));
   }
   try {
     await Promise.resolve(git.pull(branch));
   } catch (e) {
-    console.log(`Could not pull branch '${branch}': ${e}`);
+    logger.warn(`Could not pull branch '${branch}': ${e}`);
   }
 
   const processed = new Set<string>();
@@ -318,7 +325,7 @@ export async function runOrchestrator(opts: {
     const freshTask = await Promise.resolve(tools.getTask(currentTask.id));
     const next = tools.findNextAvailableFeature(freshTask, processed, agentType !== 'developer');
     if (!next) {
-      console.log(`\nNo more available features for task ${freshTask.id}.`);
+      logger.debug(`\nNo more available features for task ${freshTask.id}.`);
       break;
     }
     await runAgentOnFeature(model, agentType, freshTask, next, tools, git, completion, emit);

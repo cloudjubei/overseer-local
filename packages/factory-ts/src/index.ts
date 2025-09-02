@@ -4,6 +4,7 @@ import { taskUtils as defaultTaskUtils, TaskUtils } from './taskUtils.js';
 import GitManager from './gitManager.js';
 import { runAgentOnTask, runAgentOnFeature } from './orchestrator.js';
 import { createCompletionClient, type CompletionClient } from './completion.js';
+import { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './logger.js';
 
 export type LLMConfig = {
   model: string;
@@ -214,4 +215,6 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
   };
 }
 
-export default { createOrchestrator, createHistoryStore };
+export { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger };
+
+export default { createOrchestrator, createHistoryStore, setFactoryDebug, setLoggerConfig, getLoggerConfig, logger };
