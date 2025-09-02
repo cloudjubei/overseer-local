@@ -24,7 +24,6 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isOutbo
   let summary: { title: string; description: string; status: Status; displayId: string } = { title: 'Not found', description: '', status: '-' as Status, displayId: display };
 
   if (!isError) {
-    console.log("ResolvedRef resolved: ", resolved)
     if (resolved.kind === 'task') {
       summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status, displayId: display };
     } else {

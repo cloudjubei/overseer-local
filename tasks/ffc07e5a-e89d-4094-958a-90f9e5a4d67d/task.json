@@ -33,6 +33,21 @@
       "dependencies": []
     },
     {
+      "id": "bce3592f-e8e3-440c-9675-acff8965f3d8",
+      "status": "-",
+      "title": "factory-ts is the source of truth when it comes to Project,Task,Feature types",
+      "description": "Integrate them inside this project meaning that 'src/types/tasks.ts' is no longer needed. All places where they were used must be updated.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts",
+        "packages/factory-ts/FACTORY_TS_OVERVIEW.md",
+        "packages/factory-ts/CONFIGURATION.md",
+        "src/types/tasks.ts"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
       "status": "-",
       "title": "Allow agents to run on tasks and features using the factory-ts package",
@@ -89,8 +104,9 @@
   "featureIdToDisplayIndex": {
     "3cd73d96-21d0-488c-a484-2ed49a70032d": 1,
     "a46e12c6-1d72-4ab3-8301-b278b56b5814": 2,
-    "89144d73-7cdd-4984-9422-2341c2ed77b5": 3,
-    "2f441c51-532f-494b-b29b-ae9920a75750": 4,
-    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 5
+    "bce3592f-e8e3-440c-9675-acff8965f3d8": 3,
+    "89144d73-7cdd-4984-9422-2341c2ed77b5": 4,
+    "2f441c51-532f-494b-b29b-ae9920a75750": 5,
+    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 6
   }
 }
