@@ -2,34 +2,7 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-// Local minimal type mirrors to avoid import cycles
-export type Status = '+' | '-' | '~' | '?';
-export interface Feature {
-  id: string;
-  status: Status;
-  title: string;
-  description: string;
-  plan?: string;
-  context?: string[];
-  acceptance?: string[];
-  dependencies?: string[];
-  rejection?: string;
-}
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status?: Status;
-  rejection?: string;
-  features: Feature[];
-  featureIdToDisplayIndex?: Record<string, number>;
-}
-export interface GitManager {
-  stage_files?: (paths: string[]) => Promise<void> | void; // Python name for reference
-  stageFiles?: (paths: string[]) => Promise<void> | void;  // TS-friendly
-  commit: (message: string) => Promise<void> | void;
-  push: () => Promise<void> | void;
-}
+import type { Status, Feature, Task, GitManager } from './types.js';
 
 let PROJECT_ROOT = path.resolve(process.cwd());
 const TASKS_DIR_NAME = 'tasks';

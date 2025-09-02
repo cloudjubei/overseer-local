@@ -25,4 +25,3 @@ export type CompletionClient = (req: { model: string; messages: CompletionMessag
 export type ToolCall = { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any };
 export type AgentResponse = { thoughts?: string; tool_calls?: ToolCall[] };
 export type GitManager = import('./git/gitManager.js').default;
-export type TaskUtils = import('./taskUtils.js').TaskUtils;

@@ -106,7 +106,7 @@
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts `types.ts`, `taskUtils.ts`, `orchestrator.ts` have duplicate types",
       "description": "all duplicate types or interfaces need to be cleaned up",
       "plan": "",
