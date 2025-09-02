@@ -52,9 +52,9 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "+",
+      "status": "-",
       "title": "Running an agent doesn't work",
-      "description": "The agent should be run with the active LLMConfig (the same that is used for chats).\nAll messages sent to and from agent should be visible in the console logs.",
+      "description": "There are no messages exchanged when an agent is run (on a task or a feature). It seems the whole orchestrator loop isn't sending messages to an LLM. Write more logs so it's possible to determine where things go wrong (ideally you can find it and fix).\nonly console logs like the one below get emitted:\n[factory] event run_mf2wd43g_e1om5p run/progress/snapshot usage/update",
       "plan": "",
       "context": [
         "src/renderer/screens/AgentsView.tsx",
@@ -125,17 +125,6 @@
         "src/renderer/screens/SettingsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "The 'All Agents' is a separate screen from Settings - it is positioned just below it in the Sidebar."
-    },
-    {
-      "id": "1cfab451-03b4-415a-b5b3-624787c2ec13",
-      "status": "+",
-      "title": "Electron errors - when using history or trying to run an agent",
-      "description": "Module \"node:path\" has been externalized for browser compatibility. Cannot access \"node:path.resolve\" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.\n    at Object.get (__vite-browser-external:node:path:3:11)\n    at resolveConfig (index.ts:100:28)\n    at getConfig (index.ts:185:39)\n    at createOrchestrator (orchestrator.ts:44:15)\n    at runFeature (orchestrator.ts:244:16)\n    at startFeatureRun (orchestratorBridge.ts:21:18)\n    at AgentsServiceImpl.startFeatureAgent (agentsService.ts:135:32)\n    at useAgents.ts:13:113\n    at onClick (TaskDetailsView.tsx:384:128)",
-      "plan": "",
-      "context": [],
-      "acceptance": [],
       "dependencies": []
     }
   ],
@@ -147,7 +136,6 @@
     "89144d73-7cdd-4984-9422-2341c2ed77b5": 5,
     "2f441c51-532f-494b-b29b-ae9920a75750": 6,
     "92caffb1-e207-4cb0-a774-0e69e8d719ea": 7,
-    "1cfab451-03b4-415a-b5b3-624787c2ec13": 8,
-    "bce3592f-e8e3-440c-9675-acff8965f3d8": 9
+    "bce3592f-e8e3-440c-9675-acff8965f3d8": 8
   }
 }

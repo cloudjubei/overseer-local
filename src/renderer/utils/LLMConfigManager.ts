@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { LLMConfig } from '../types';
+import { LLMConfig } from '../services/chatsService';
 
 export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed';
 
