@@ -52,7 +52,7 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "-",
+      "status": "+",
       "title": "Running an agent doesn't work",
       "description": "There are no messages exchanged when an agent is run (on a task or a feature). It seems the whole orchestrator loop isn't sending messages to an LLM. Write more logs so it's possible to determine where things go wrong (ideally you can find it and fix).\nonly console logs like the one below get emitted:\n[factory] event run_mf2wd43g_e1om5p run/progress/snapshot usage/update",
       "plan": "",

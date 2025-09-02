@@ -8,6 +8,7 @@ import { attachRunRecorder } from './artifacts/recorder';
 import { getConfig } from './config';
 import { addUsage, UsageStats } from './telemetry';
 import { logger } from './utils/logger';
+import { makeLLMClient } from './llm/factory';
 
 export type LLMConfig = {
   provider?: string;
@@ -49,6 +50,10 @@ export function createOrchestrator(options?: { projectRoot?: string; history?: H
   const projectRoot = options?.projectRoot ?? cfg.projectRoot;
 
   logger.info('createOrchestrator()', { projectRoot });
+
+  function emit(bus: SimpleEventBus, event: RunEvent) {
+    try { bus.emit(event); } catch (e) { logger.warn('bus.emit failed', { type: event?.type, error: String(e) }); }
+  }
 
   function startRun(params: StartRunParams): RunHandle {
     logger.info('startRun()', {
@@ -103,7 +108,7 @@ export function createOrchestrator(options?: { projectRoot?: string; history?: H
       },
     } as any;
     logger.debug('emit event run/started', { runId });
-    bus.emit(startEvent);
+    emit(bus, startEvent);
 
     // Periodic usage snapshot and budget check
     ctx.usageTimer = setInterval(() => {
@@ -117,10 +122,10 @@ export function createOrchestrator(options?: { projectRoot?: string; history?: H
         },
       } as any;
       logger.debug('emit event run/progress/snapshot', { runId, usage: ctx.usage });
-      bus.emit(snapshot);
+      emit(bus, snapshot);
       if (ctx.budgetUSD != null && ctx.usage.costUSD != null && ctx.usage.costUSD > ctx.budgetUSD) {
         logger.warn('budget exceeded; cancelling run', { runId, costUSD: ctx.usage.costUSD, budgetUSD: ctx.budgetUSD });
-        bus.emit({ type: 'run/budget-exceeded', time: toISO(), runId, payload: ctx.usage });
+        emit(bus, { type: 'run/budget-exceeded', time: toISO(), runId, payload: ctx.usage } as any);
         handle.cancel('Budget exceeded');
       }
     }, 2000);
@@ -140,8 +145,63 @@ export function createOrchestrator(options?: { projectRoot?: string; history?: H
     // Initial progress
     queueMicrotask(() => {
       logger.debug('emit event run/progress (init)', { runId });
-      bus.emit({ type: 'run/progress', time: toISO(), runId, payload: { message: 'Initializing', step: 'init', progress: 0.05 } });
+      emit(bus, { type: 'run/progress', time: toISO(), runId, payload: { message: 'Initializing', step: 'init', progress: 0.05 } } as any);
     });
+
+    // Kick off a minimal LLM step to validate pipeline
+    ;(async () => {
+      const llmCfg = params.llmConfig;
+      if (!llmCfg || !llmCfg.provider || !llmCfg.model) {
+        logger.info('No LLM config provided; skipping LLM step', { runId });
+        emit(bus, { type: 'run/log', time: toISO(), runId, payload: { level: 'info', message: 'No LLM configured; run will only emit progress and usage events.' } } as any);
+        return;
+      }
+
+      emit(bus, { type: 'llm/start', time: toISO(), runId, payload: { provider: llmCfg.provider, model: (llmCfg as any).model } } as any);
+      try {
+        const client = await makeLLMClient({ ...(llmCfg as any) });
+        const promptMessages = [
+          { role: 'system', content: 'You are an engineering assistant helping with a software project.' },
+          { role: 'user', content: `Project ${meta.projectId}. Task ${meta.taskId ?? ''}${meta.featureId ? ` Feature ${meta.featureId}` : ''}. Briefly acknowledge with a one-sentence plan.` },
+        ];
+
+        // Stream for visibility to UI (we emit llm/delta events for renderer to see activity)
+        const stream = await client.chatCompletionStream({ messages: promptMessages as any, temperature: (llmCfg as any).temperature, maxTokens: (llmCfg as any).maxTokens });
+        for await (const ev of stream.stream) {
+          if ((handle as any).signal?.aborted) {
+            logger.info('LLM stream aborted by user', { runId });
+            throw new Error('aborted');
+          }
+          if (ev?.type === 'delta') {
+            emit(bus, { type: 'llm/delta', time: toISO(), runId, payload: { content: ev.content ?? '' } } as any);
+          }
+        }
+        const final = await stream.final;
+        emit(bus, { type: 'llm/end', time: toISO(), runId, payload: { text: final.text } } as any);
+
+        // Usage and cost update (estimated for streams)
+        try {
+          const u = client.getUsage?.();
+          if (u) {
+            ctx.usage = addUsage(ctx.usage, { promptTokens: u.promptTokens ?? 0, completionTokens: u.completionTokens ?? 0, totalTokens: (u.totalTokens ?? ((u.promptTokens ?? 0) + (u.completionTokens ?? 0))) } as any, client.provider, client.model);
+            emit(bus, { type: 'run/usage', time: toISO(), runId, payload: { ...ctx.usage, provider: client.provider, model: client.model } } as any);
+          }
+        } catch (e) {
+          logger.warn('Failed to compute usage snapshot from client', { runId, error: String(e) });
+        }
+
+        // Advance progress and complete
+        emit(bus, { type: 'run/progress', time: toISO(), runId, payload: { message: 'LLM step complete', progress: 1 } } as any);
+        emit(bus, { type: 'run/completed', time: toISO(), runId, payload: { success: true, message: 'Completed initial LLM step' } } as any);
+      } catch (err) {
+        if ((err as any)?.message === 'aborted') {
+          emit(bus, { type: 'run/cancelled', time: toISO(), runId, payload: { reason: 'User cancelled' } } as any);
+        } else {
+          logger.error('LLM step failed', { runId, error: String(err) });
+          emit(bus, { type: 'run/error', time: toISO(), runId, payload: { message: String(err) } } as any);
+        }
+      }
+    })().catch((e) => logger.warn('LLM pipeline task crashed', { runId, error: String(e) }));
 
     return handle;
   }
@@ -152,7 +212,7 @@ export function createOrchestrator(options?: { projectRoot?: string; history?: H
       logger.warn('addUsageToRun: unknown runId', { runId });
       return;
     }
-    ctx.usage = addUsage(ctx.usage, delta, llm?.provider, llm?.model);
+    ctx.usage = addUsage(ctx.usage, delta, (llm as any)?.provider, (llm as any)?.model);
     logger.debug('emit event run/usage', { runId, delta, usage: ctx.usage });
     ctx.bus.emit({ type: 'run/usage', time: toISO(), runId, payload: ctx.usage });
   }
