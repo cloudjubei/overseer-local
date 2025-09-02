@@ -19,6 +19,20 @@
       "dependencies": []
     },
     {
+      "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
+      "status": "-",
+      "title": "factory-ts needs updating to support all features",
+      "description": "Requirements:\n- agents can be configured, currently LLMConfigs are specified for chat and those can be reused\n- allow launching agents on a specific feature or a whole task\n- allow monitoring their progress and performance (speed, token usage and cost).\n- we require as much history and information as possible about each agent, so that a user can share if a given run was satisfactory or not. This way a user will be able to gauge the performance of an agent in terms of work done.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts",
+        "packages/factory-ts/FACTORY_TS_OVERVIEW.md",
+        "packages/factory-ts/CONFIGURATION.md"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
       "status": "-",
       "title": "Allow agents to run on tasks and features using the factory-ts package",
@@ -74,8 +88,9 @@
   ],
   "featureIdToDisplayIndex": {
     "3cd73d96-21d0-488c-a484-2ed49a70032d": 1,
-    "89144d73-7cdd-4984-9422-2341c2ed77b5": 2,
-    "2f441c51-532f-494b-b29b-ae9920a75750": 3,
-    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 4
+    "a46e12c6-1d72-4ab3-8301-b278b56b5814": 2,
+    "89144d73-7cdd-4984-9422-2341c2ed77b5": 3,
+    "2f441c51-532f-494b-b29b-ae9920a75750": 4,
+    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 5
   }
 }
