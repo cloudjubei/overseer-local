@@ -24,10 +24,11 @@ export class SettingsManager
   _registerIpcHandlers() {
     if (this._ipcBound) return;
 
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_APP, () => this.getAppSettings());
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_APP, ({ updates }) => this.updateAppSettings(updates));
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_PROJECT, ({projectId}) => this.__loadProjectSettings(projectId).get());
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT, ({ projectId, updates }) => this.__loadProjectSettings(projectId).save(updates));
+    // Note: ipcMain.handle signature is (event, args). We must read payload from the second param.
+    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_APP, (_event) => this.getAppSettings());
+    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_APP, (_event, { updates }) => this.updateAppSettings(updates));
+    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_PROJECT, (_event, { projectId }) => this.__loadProjectSettings(projectId).get());
+    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT, (_event, { projectId, updates }) => this.__loadProjectSettings(projectId).save(updates));
 
     this._ipcBound = true;
   }

@@ -37,7 +37,7 @@
     },
     {
       "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
-      "status": "-",
+      "status": "+",
       "title": "Settings are not being stored in AppSettings",
       "description": "when a user toggles anything in the SettingsView - nothing happens",
       "plan": "",
