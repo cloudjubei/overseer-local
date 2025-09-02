@@ -1,4 +1,4 @@
-export type Status = '+' | '-' | '~' | '?';
+export type Status = '+' | '-' | '~' | '?' | '=';
 export interface Feature {
   id: string;
   status: Status;
@@ -18,6 +18,22 @@ export interface Task {
   rejection?: string;
   features: Feature[];
   featureIdToDisplayIndex?: Record<string, number>;
+  dependencies?: string[];
+}
+export interface ProjectRequirement {
+  id: number;
+  status: Status;
+  description: string;
+  tasks: number[];
+}
+export interface ProjectSpec {
+  id: string;
+  title: string;
+  description: string;
+  path: string;
+  repo_url: string;
+  requirements: ProjectRequirement[];
+  taskIdToDisplayIndex: Record<string, number>;
 }
 export type CompletionMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 export type CompletionResponse = { message: { role: 'assistant'; content: string } };

@@ -1,4 +1,4 @@
-import type { Feature, Status, Task } from 'src/types/tasks'
+import type { Feature, Status, Task } from '../../../packages/factory-ts/src/types'
 import { ServiceResult } from './serviceResult';
 
 export const STATUS_LABELS: Record<Status, string> = {

@@ -1,4 +1,4 @@
-import type { ProjectSpec } from 'src/types/tasks'
+import type { ProjectSpec } from '../../../packages/factory-ts/src/types'
 import { ServiceResult } from './serviceResult';
 
 export type ProjectsService = {

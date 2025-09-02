@@ -1,36 +1,11 @@
-import { useEffect, useState } from 'react'
-import { tasksService } from '../services/tasksService'
-import type { Task } from 'src/types/tasks'
-import type { TasksIndexSnapshot } from '../../types/external'
+import { useMemo } from 'react'
+import type { Task } from '../../../packages/factory-ts/src/types'
 
-export function useNextTaskId(): number {
-  const [nextId, setNextId] = useState<number>(1)
-  useEffect(() => {
-    let unsub: null | (() => void) = null
-    ;(async () => {
-      try {
-        const idx: TasksIndexSnapshot = await tasksService.getSnapshot()
-        const ids = Object.values(idx?.tasksById || {})
-          .map((t: Task) => t.id)
-          .filter((n: number) => Number.isInteger(n))
-        const max = ids.length > 0 ? Math.max(...ids) : 0
-        setNextId((max || 0) + 1)
-      } catch (_) {}
-      try {
-        unsub = tasksService.onUpdate((i: TasksIndexSnapshot) => {
-          const ids = Object.values(i?.tasksById || {})
-            .map((t: Task) => t.id)
-            .filter((n: number) => Number.isInteger(n))
-          const max = ids.length > 0 ? Math.max(...ids) : 0
-          setNextId((max || 0) + 1)
-        })
-      } catch (_) {}
-    })()
-    return () => {
-      try {
-        unsub && unsub()
-      } catch (_) {}
-    }
-  }, [])
-  return nextId
+export function useNextTaskId(tasks: Task[]) {
+  return useMemo(() => {
+    let next = 1
+    const existing = new Set(tasks.map(t => Number(t.id)).filter(n => !Number.isNaN(n)))
+    while (existing.has(next)) next++
+    return String(next)
+  }, [tasks])
 }

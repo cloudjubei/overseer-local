@@ -1,15 +1,13 @@
-import React from 'react';
-import { Feature } from 'src/types/tasks';
-import StatusBadge from './StatusBadge';
+import React from 'react'
+import type { Feature } from '../../../../packages/factory-ts/src/types'
 
-export default function FeatureSummaryCard({ feature, className = '' }: { feature: Feature; className?: string }) {
+export function FeatureSummaryCard({ feature, onClick }: { feature: Feature; onClick?: () => void }) {
   return (
-    <div className={`feature-summary-card ${className}`}>
-      <div className="summary-card__header">
-        <h4 className="summary-card__title">{feature.title}</h4>
-        <StatusBadge status={feature.status} />
+    <div className="card bg-base-100 shadow cursor-pointer hover:shadow-lg" onClick={onClick}>
+      <div className="card-body">
+        <h3 className="card-title">[{feature.id}] {feature.title}</h3>
+        <p className="text-sm opacity-70">{feature.description}</p>
       </div>
-      <p className="summary-card__description">{feature.description}</p>
     </div>
-  );
+  )
 }

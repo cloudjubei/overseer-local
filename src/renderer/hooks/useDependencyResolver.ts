@@ -1,23 +1,22 @@
-import { useEffect, useState } from 'react';
-import { dependencyResolver, type DependencyResolverIndex } from '../services/dependencyResolver';
-import type { ProjectSpec } from 'src/types/tasks';
+import { useMemo } from 'react'
+import type { Feature, Task } from '../../../packages/factory-ts/src/types'
 
-export function useDependencyResolver(project?: ProjectSpec | null) {
-  const [idx, setIdx] = useState<DependencyResolverIndex | null>(null);
+export function useDependencyResolver(tasks: Task[]) {
+  const map = useMemo(() => new Map(tasks.map(t => [t.id, t])), [tasks])
 
-  useEffect(() => {
-    let unsub: undefined | (() => void);
-    const run = async () => {
-      const _idx = await dependencyResolver.init(project ?? null);
-      setIdx(_idx);
-      unsub = dependencyResolver.onUpdate(setIdx);
-      if (project) dependencyResolver.setProject(project);
-    };
-    run();
-    return () => {
-      if (unsub) unsub();
-    };
-  }, [project]);
+  const getFeatureDependencies = (taskId: string, featureId: string): Feature[] => {
+    const task = map.get(taskId)
+    if (!task) return []
+    const f = (task.features || []).find(x => x.id === featureId)
+    if (!f) return []
+    const deps = f.dependencies || []
+    const all: Feature[] = []
+    for (const depId of deps) {
+      const dep = (task.features || []).find(x => x.id === depId)
+      if (dep) all.push(dep)
+    }
+    return all
+  }
 
-  return idx;
+  return useMemo(() => ({ getFeatureDependencies }), [map])
 }
