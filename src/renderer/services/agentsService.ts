@@ -34,7 +34,6 @@ function getEventTs(e: any): string {
 
 function getCostUSD(payload: any | undefined): number | undefined {
   if (!payload) return undefined;
-  // Support both costUSD and costUsd
   return payload.costUSD ?? payload.costUsd ?? payload.usd ?? undefined;
 }
 
@@ -54,7 +53,6 @@ class AgentsServiceImpl {
 
   subscribe(cb: Subscriber): () => void {
     this.subscribers.add(cb);
-    // initial push
     cb(Array.from(this.runs.values()).map(this.publicFromRecord));
     return () => {
       this.subscribers.delete(cb);
@@ -69,7 +67,7 @@ class AgentsServiceImpl {
     const rec = this.runs.get(runId);
     console.log('[agentsService] cancelRun', { runId, known: !!rec });
     if (!rec) return;
-    try { rec.cancel('User requested'); } catch (err) { console.warn('[agentsService] cancel error', err?.message || err); }
+    try { rec.cancel('User requested'); } catch (err) { console.warn('[agentsService] cancel error', (err as any)?.message || err); }
     rec.state = 'cancelled';
     rec.updatedAt = new Date().toISOString();
     this.notify();
@@ -104,16 +102,15 @@ class AgentsServiceImpl {
       }
       this.notify();
       if (run.state !== 'running') {
-        // auto close listener
         try { run.events.close(); } catch {}
       }
     };
     run.events.addEventListener('*', onAny);
   }
 
-  startTaskAgent(projectId: string, taskId: string): AgentRun {
+  async startTaskAgent(projectId: string, taskId: string): Promise<AgentRun> {
     console.log('[agentsService] startTaskAgent', { projectId, taskId });
-    const { handle, events } = startTaskRun({ projectId, taskId });
+    const { handle, events } = await startTaskRun({ projectId, taskId });
     const run: RunRecord = {
       runId: handle.id,
       projectId,
@@ -132,9 +129,9 @@ class AgentsServiceImpl {
     return this.publicFromRecord(run);
   }
 
-  startFeatureAgent(projectId: string, taskId: string, featureId: string): AgentRun {
+  async startFeatureAgent(projectId: string, taskId: string, featureId: string): Promise<AgentRun> {
     console.log('[agentsService] startFeatureAgent', { projectId, taskId, featureId });
-    const { handle, events } = startFeatureRun({ projectId, taskId, featureId });
+    const { handle, events } = await startFeatureRun({ projectId, taskId, featureId });
     const run: RunRecord = {
       runId: handle.id,
       projectId,

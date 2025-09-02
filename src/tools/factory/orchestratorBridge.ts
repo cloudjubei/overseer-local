@@ -7,7 +7,7 @@ export type EventSourceLike = {
 
 export type RunHandle = { id: string; cancel: (reason?: string) => void };
 
-export type StartTaskRunParams = { projectId: string; taskId: string | number };
+export type StartTaskRunParams = { projectId: string; taskId: string | number; options?: Record<string, any> };
 export type StartFeatureRunParams = StartTaskRunParams & { featureId: string | number };
 
 function makeEventSourceLike(runId: string): EventSourceLike {
@@ -20,7 +20,6 @@ function makeEventSourceLike(runId: string): EventSourceLike {
       // subscribe via preload
       unsubscribe = (window as any).factory.subscribe(runId, (e: any) => {
         try {
-          // Light trace for events
           if (e?.type) console.log('[factory:renderer] event', runId, e.type);
         } catch {}
         onAny?.(e);
@@ -35,27 +34,31 @@ function makeEventSourceLike(runId: string): EventSourceLike {
   };
 }
 
-export function startTaskRun(params: StartTaskRunParams): { handle: RunHandle; events: EventSourceLike } {
+export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
-  const { projectId, taskId } = params;
+  const { projectId, taskId, options } = params;
   console.log('[factory:renderer] Starting task run', { projectId, taskId: String(taskId) });
-  const { runId } = (window as any).factory.startTaskRun(projectId, String(taskId));
+  const res = await (window as any).factory.startTaskRun(projectId, String(taskId), options ?? {});
+  const runId: string = res?.runId;
+  if (!runId) throw new Error('Failed to start task run: missing runId');
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
   const events = makeEventSourceLike(runId);
   return { handle, events };
 }
 
-export function startFeatureRun(params: StartFeatureRunParams): { handle: RunHandle; events: EventSourceLike } {
+export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
-  const { projectId, taskId, featureId } = params;
+  const { projectId, taskId, featureId, options } = params;
   console.log('[factory:renderer] Starting feature run', { projectId, taskId: String(taskId), featureId: String(featureId) });
-  const { runId } = (window as any).factory.startFeatureRun(projectId, String(taskId), String(featureId));
+  const res = await (window as any).factory.startFeatureRun(projectId, String(taskId), String(featureId), options ?? {});
+  const runId: string = res?.runId;
+  if (!runId) throw new Error('Failed to start feature run: missing runId');
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
   const events = makeEventSourceLike(runId);
   return { handle, events };
 }
 
-export function startRunGeneric(params: { projectId: string; taskId?: string | number; featureId?: string | number }) {
+export async function startRunGeneric(params: { projectId: string; taskId?: string | number; featureId?: string | number; options?: Record<string, any> }) {
   if (params.featureId != null) return startFeatureRun(params as any);
   if (params.taskId != null) return startTaskRun(params as any);
   throw new Error('taskId or featureId required');

@@ -83,3 +83,5 @@ Notes:
 - Renderer bridge: src/tools/factory/orchestratorBridge.ts calls the preload API, avoiding Node-only modules in the renderer to prevent node:path externalization issues.
 - Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts can consume the renderer bridge and receive EventSource-like streams.
 - CLI: scripts/runAgent.mjs streams JSONL events for a run. Build the package with npm run factory:build and then use npm run run:agent.
+
+Also note: orchestratorBridge start functions are async (await preload invoke). Ensure callers handle Promises appropriately.

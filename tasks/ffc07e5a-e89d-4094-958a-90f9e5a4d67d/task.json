@@ -45,7 +45,7 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "-",
+      "status": "+",
       "title": "Running an agent doesn't work",
       "description": "1) running an agent on a task seems to do nothing.\n2) Opening the Agents tab, after clicking run agent on a feature, crashes the whole app.",
       "plan": "",

@@ -9,8 +9,8 @@ export function useAgents() {
     return () => unsub();
   }, []);
 
-  const startTaskAgent = useCallback((projectId: string, taskId: string) => agentsService.startTaskAgent(projectId, taskId), []);
-  const startFeatureAgent = useCallback((projectId: string, taskId: string, featureId: string) => agentsService.startFeatureAgent(projectId, taskId, featureId), []);
+  const startTaskAgent = useCallback(async (projectId: string, taskId: string) => agentsService.startTaskAgent(projectId, taskId), []);
+  const startFeatureAgent = useCallback(async (projectId: string, taskId: string, featureId: string) => agentsService.startFeatureAgent(projectId, taskId, featureId), []);
   const cancelRun = useCallback((runId: string) => agentsService.cancelRun(runId), []);
 
   const activeRuns = useMemo(() => runs.filter(r => r.state === 'running'), [runs]);
