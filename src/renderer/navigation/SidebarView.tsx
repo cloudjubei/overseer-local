@@ -5,6 +5,7 @@ import SettingsView from '../screens/SettingsView';
 import ChatView from '../screens/ChatView';
 import NotificationsView from '../screens/NotificationsView';
 import AgentsView from '../screens/AgentsView';
+import AllAgentsView from '../screens/AllAgentsView';
 import { useNavigator } from './Navigator';
 import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
@@ -34,6 +35,7 @@ const NAV_ITEMS: NavDef[] = [
   { id: 'agents', label: 'Agents', view: 'Agents', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
   { id: 'notifications', label: 'Notifications', view: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'teal' },
   { id: 'settings', label: 'Settings', view: 'Settings', icon: <span aria-hidden>⚙️</span>, accent: 'gray' },
+  { id: 'all-agents', label: 'All Agents', view: 'AllAgents', icon: <span aria-hidden>🗂️</span>, accent: 'teal' },
 ];
 
 function useMediaQuery(query: string) {
@@ -174,6 +176,7 @@ export default function SidebarView({}: SidebarProps) {
   const renderedView = useMemo(() => {
     if (currentView === 'Files') return <div key="Files" className="flex flex-col flex-1 min-h-0 view-transition"><FilesView /></div>;
     if (currentView === 'Settings') return <div key="Settings" className="flex flex-col flex-1 min-h-0 view-transition"><SettingsView /></div>;
+    if (currentView === 'AllAgents') return <div key="AllAgents" className="flex flex-col flex-1 min-h-0 view-transition"><AllAgentsView /></div>;
     if (currentView === 'Chat') return <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition"><ChatView /></div>;
     if (currentView === 'Notifications') return <div key="Notifications" className="flex flex-col flex-1 min-h-0 view-transition"><NotificationsView /></div>;
     if (currentView === 'Agents') return <div key="Agents" className="flex flex-col flex-1 min-h-0 view-transition"><AgentsView /></div>;
@@ -211,7 +214,7 @@ export default function SidebarView({}: SidebarProps) {
 
       <nav className="nav" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
-          {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
+          {NAV_ITEMS.filter((n) => n.view !== 'Settings' && n.view !== 'AllAgents').map((item, i) => {
             const isActive = currentView === item.view;
             const ref = i === 0 ? firstItemRef : undefined;
             const showBadge = item.view === 'Notifications' && unreadCount > 0;
@@ -254,9 +257,8 @@ export default function SidebarView({}: SidebarProps) {
         <div className="nav-sep" aria-hidden />
 
         <ul className="nav-list" role="list">
-          {/* Keep Settings at bottom */}
-          {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item) => {
-            const idx = NAV_ITEMS.findIndex((n) => n.view === 'Settings');
+          {NAV_ITEMS.filter((n) => n.view === 'Settings' || n.view === 'AllAgents').map((item) => {
+            const idx = NAV_ITEMS.findIndex((n) => n.view === item.view);
             const isActive = currentView === item.view;
             const Btn = (
               <button

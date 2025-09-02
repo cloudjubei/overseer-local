@@ -1,1 +1,1 @@
-export type NavigationView = 'Home' | 'Files' | 'Settings' | 'Chat' | 'Notifications' | 'Agents';
+export type NavigationView = 'Home' | 'Files' | 'Settings' | 'Chat' | 'Notifications' | 'Agents' | 'AllAgents';

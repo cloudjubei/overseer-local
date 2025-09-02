@@ -42,6 +42,8 @@ function viewPrefixToView(prefix: string): NavigationView {
       return 'Notifications';
     case 'agents':
       return 'Agents';
+    case 'all-agents':
+      return 'AllAgents';
     case 'home':
     default:
       return 'Home';
@@ -113,6 +115,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break;
       case 'Agents':
         window.location.hash = '#agents';
+        break;
+      case 'AllAgents':
+        window.location.hash = '#all-agents';
         break;
     }
   }, []);
