@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { EventEmitter } from 'node:events';
 import { taskUtils as defaultTaskUtils, TaskUtils } from './taskUtils.js';
-import GitManager from './git/gitManager.js';
+import GitManager from './gitManager.js';
 import { runAgentOnTask, runAgentOnFeature } from './orchestrator.js';
 import { createCompletionClient, type CompletionClient } from './completion.js';
 

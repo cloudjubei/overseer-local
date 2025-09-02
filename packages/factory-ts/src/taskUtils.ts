@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Status, Feature, Task, GitManager } from './types.js';
+import type { Status, Feature, Task } from './types.js';
+import type { GitManager } from './gitManager.js';
 
 let PROJECT_ROOT = path.resolve(process.cwd());
 const TASKS_DIR_NAME = 'tasks';
@@ -189,7 +190,7 @@ async function blockFeature(taskId: string, featureId: string, reason: string, a
   else if (agentType === 'contexter') msg = `BLOCKED context: Set context for feature ${featureId} - ${title}`;
   else throw new Error(`Unknown agent_type '${agentType}' called block_feature.`);
 
-  try { await (git.stageFiles?.(['.']) ?? git.stage_files?.(['.'])); } catch (e) { console.warn('Warning: Could not stage files.', e); }
+  try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
   try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
   try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
 
@@ -203,7 +204,7 @@ async function blockTask(taskId: string, reason: string, agentType: string, git:
   t.rejection = `Blocked: ${reason}`;
   await saveTask(t);
   const msg = `BLOCKED task: ${t.id} - ${t.title}`;
-  try { await (git.stageFiles?.(['.']) ?? git.stage_files?.(['.'])); } catch (e) { console.warn('Warning: Could not stage files.', e); }
+  try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
   try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
   try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
   console.log(`Task ${taskId} blocked. Reason: ${reason}`);
@@ -240,7 +241,7 @@ async function finishFeature(taskId: string, featureId: string, agentType: strin
   } else {
     throw new Error(`Unknown agent_type '${agentType}' called finish_feature.`);
   }
-  try { await (git.stageFiles?.(['.']) ?? git.stage_files?.(['.'])); } catch (e) { console.warn('Warning: Could not stage files.', e); }
+  try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
   try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
   try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
   return `Feature ${featureId} finished by ${agentType} and changes committed.`;
@@ -248,7 +249,7 @@ async function finishFeature(taskId: string, featureId: string, agentType: strin
 
 async function finishSpec(taskId: string, agentType: string, git: GitManager) {
   if (agentType !== 'speccer') throw new Error(`Unknown agent_type '${agentType}' called finish_spec.`);
-  try { await (git.stageFiles?.(['.']) ?? git.stage_files?.(['.'])); } catch (e) { console.warn('Warning: Could not stage files.', e); }
+  try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
   const msg = `spec: Added spec for task: ${taskId}`;
   try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
   try { await git.push(); } catch (e) { console.warn('Could not push:', e); }

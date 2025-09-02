@@ -24,4 +24,3 @@ export type CompletionResponse = { message: { role: 'assistant'; content: string
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 export type ToolCall = { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any };
 export type AgentResponse = { thoughts?: string; tool_calls?: ToolCall[] };
-export type GitManager = import('./git/gitManager.js').default;

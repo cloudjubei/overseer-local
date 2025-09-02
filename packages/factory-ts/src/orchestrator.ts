@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { AgentResponse, CompletionClient, CompletionMessage, Feature, GitManager, Task, ToolCall } from './types.js';
+import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall } from './types.js';
 import type { TaskUtils } from './taskUtils.js';
+import type { GitManager } from './gitManager.js';
 
 const MAX_TURNS_PER_FEATURE = 100;
 
