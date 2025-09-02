@@ -19,14 +19,37 @@
       "dependencies": []
     },
     {
-      "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
+      "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
       "status": "-",
-      "title": "Running an agent doesn't work",
-      "description": "1) running an agent on a task seems to do nothing.\n2) running an agent on a feature creates this bullet that shows an agent running. The bullet should show the agent status. Clicking on it, should take the user to the appropriate agent in the Agents tab.\n3) There should be console logs for everything the agents do so it's easy to follow what is happening.\n4) Opening the Agents tab, after clicking run agent on a feature, crashes the whole app.",
+      "title": "Missing console logs",
+      "description": "There should be console logs for everything the agents do so it's easy to follow what is happening.",
       "plan": "",
       "context": [
         "src/main.js",
-        "src/preload.js",
+        "src/preload.js"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
+      "status": "-",
+      "title": "TaskDetailsView improvements after running an agent",
+      "description": "Running an agent on a feature creates this bullet that shows an agent running. The bullet should show the agent status. Clicking on it, should take the user to the appropriate agent in the Agents tab.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
+      "status": "-",
+      "title": "Running an agent doesn't work",
+      "description": "1) running an agent on a task seems to do nothing.\n2) Opening the Agents tab, after clicking run agent on a feature, crashes the whole app.",
+      "plan": "",
+      "context": [
         "src/renderer/screens/AgentsView.tsx"
       ],
       "acceptance": [],
@@ -107,11 +130,13 @@
   ],
   "featureIdToDisplayIndex": {
     "3cd73d96-21d0-488c-a484-2ed49a70032d": 1,
-    "a46e12c6-1d72-4ab3-8301-b278b56b5814": 2,
-    "89144d73-7cdd-4984-9422-2341c2ed77b5": 3,
-    "2f441c51-532f-494b-b29b-ae9920a75750": 4,
-    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 5,
-    "1cfab451-03b4-415a-b5b3-624787c2ec13": 6,
-    "bce3592f-e8e3-440c-9675-acff8965f3d8": 7
+    "dbf85f17-a547-46fd-b4ce-12bb9e006ccb": 2,
+    "20b01258-fc70-4a0a-913d-74ff1ca24dc6": 3,
+    "a46e12c6-1d72-4ab3-8301-b278b56b5814": 4,
+    "89144d73-7cdd-4984-9422-2341c2ed77b5": 5,
+    "2f441c51-532f-494b-b29b-ae9920a75750": 6,
+    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 7,
+    "1cfab451-03b4-415a-b5b3-624787c2ec13": 8,
+    "bce3592f-e8e3-440c-9675-acff8965f3d8": 9
   }
 }
