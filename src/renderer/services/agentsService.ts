@@ -67,8 +67,9 @@ class AgentsServiceImpl {
 
   cancelRun(runId: string) {
     const rec = this.runs.get(runId);
+    console.log('[agentsService] cancelRun', { runId, known: !!rec });
     if (!rec) return;
-    try { rec.cancel('User requested'); } catch {}
+    try { rec.cancel('User requested'); } catch (err) { console.warn('[agentsService] cancel error', err?.message || err); }
     rec.state = 'cancelled';
     rec.updatedAt = new Date().toISOString();
     this.notify();
@@ -76,10 +77,10 @@ class AgentsServiceImpl {
 
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
+      console.log('[agentsService] event', run.runId, e?.type);
       run.updatedAt = getEventTs(e);
       if (e.type === 'run/progress' || e.type === 'run/progress/snapshot') {
         run.message = e.payload?.message ?? run.message;
-        // Support either numeric 0..1 or percentage fields
         if (typeof e.payload?.progress === 'number') {
           run.progress = e.payload.progress;
         } else if (typeof e.payload?.percent === 'number') {
@@ -99,7 +100,6 @@ class AgentsServiceImpl {
         run.message = e.payload?.reason || 'Cancelled';
       } else if (e.type === 'run/completed' || e.type === 'run/complete') {
         run.state = 'completed';
-        // Prefer summary or message if present
         run.message = e.payload?.message || e.payload?.summary || 'Completed';
       }
       this.notify();
@@ -112,6 +112,7 @@ class AgentsServiceImpl {
   }
 
   startTaskAgent(projectId: string, taskId: string): AgentRun {
+    console.log('[agentsService] startTaskAgent', { projectId, taskId });
     const { handle, events } = startTaskRun({ projectId, taskId });
     const run: RunRecord = {
       runId: handle.id,
@@ -132,6 +133,7 @@ class AgentsServiceImpl {
   }
 
   startFeatureAgent(projectId: string, taskId: string, featureId: string): AgentRun {
+    console.log('[agentsService] startFeatureAgent', { projectId, taskId, featureId });
     const { handle, events } = startFeatureRun({ projectId, taskId, featureId });
     const run: RunRecord = {
       runId: handle.id,

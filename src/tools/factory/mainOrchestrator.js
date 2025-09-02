@@ -7,12 +7,23 @@ import path from 'node:path';
 let factoryTs;
 async function loadFactory() {
   if (factoryTs) return factoryTs;
-  // Prefer built dist when present, fallback to src via ts code transpiled by tsup during package install.
+  const cwd = process.cwd();
+  const distEsm = path.resolve(cwd, 'packages/factory-ts/dist/index.js');
+  const distCjs = path.resolve(cwd, 'packages/factory-ts/dist/index.cjs');
   try {
-    factoryTs = await import(path.resolve(process.cwd(), 'packages/factory-ts/dist/index.js'));
-  } catch {
-    factoryTs = await import(path.resolve(process.cwd(), 'packages/factory-ts/dist/index.cjs'));
+    console.log('[factory] Loading factory-ts from', distEsm);
+    factoryTs = await import(distEsm);
+  } catch (errEsm) {
+    console.warn('[factory] Failed to load ESM build, trying CJS', errEsm?.message || errEsm);
+    try {
+      factoryTs = await import(distCjs);
+    } catch (errCjs) {
+      console.error('[factory] Failed to load factory-ts from dist. Did you build it? npm run factory:build');
+      console.error(errCjs?.stack || String(errCjs));
+      throw errCjs;
+    }
   }
+  console.log('[factory] factory-ts loaded successfully');
   return factoryTs;
 }
 
@@ -25,61 +36,99 @@ function broadcastEventToSubscribers(runId, event) {
   for (const wcId of subscribers) {
     const wc = webContents.fromId(wcId);
     if (wc && !wc.isDestroyed()) {
-      wc.send(IPC_HANDLER_KEYS.FACTORY_EVENT, { runId, event });
+      try {
+        wc.send(IPC_HANDLER_KEYS.FACTORY_EVENT, { runId, event });
+      } catch (err) {
+        console.warn(`[factory] Failed to send event to wc ${wcId} for run ${runId}:`, err?.message || err);
+      }
     }
   }
 }
 
 export async function registerFactoryIPC(mainWindow, projectRoot) {
-  const { createOrchestrator } = await loadFactory();
-  // Re-enable history store only in main process context
+  console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
+  const { createOrchestrator, createHistoryStore } = await loadFactory();
+
   let historyStore = undefined;
   try {
-    const mod = await import(path.resolve(process.cwd(), 'packages/factory-ts/dist/index.js'));
-    if (mod && mod.createHistoryStore) {
-      historyStore = mod.createHistoryStore({ dbPath: path.join(projectRoot, '.factory', 'history.sqlite') });
+    const dbPath = path.join(projectRoot, '.factory', 'history.sqlite');
+    if (typeof createHistoryStore === 'function') {
+      console.log('[factory] Initializing history store at', dbPath);
+      historyStore = createHistoryStore({ dbPath });
+    } else {
+      console.log('[factory] History store not available; proceeding without persistence');
     }
-  } catch {
-    // optional history, continue without persistence
+  } catch (err) {
+    console.warn('[factory] Optional history init failed; continuing without it:', err?.message || err);
   }
 
+  console.log('[factory] Creating orchestrator');
   const orchestrator = createOrchestrator({ projectRoot /*, history: historyStore*/ });
+  console.log('[factory] Orchestrator ready');
 
   function attachRun(runHandle) {
+    console.log('[factory] Attaching run', runHandle?.id);
     RUNS.set(runHandle.id, runHandle);
     const unsubscribe = runHandle.onEvent((e) => {
+      try {
+        // Lightweight log for visibility; avoid spamming huge payloads
+        console.log('[factory] event', runHandle.id, e?.type, e?.payload?.message || '');
+      } catch {}
       broadcastEventToSubscribers(runHandle.id, e);
     });
     const cleanup = () => {
-      unsubscribe();
+      console.log('[factory] Cleaning up run', runHandle.id);
+      try { unsubscribe(); } catch {}
       RUNS.delete(runHandle.id);
       RUN_SUBSCRIBERS.delete(runHandle.id);
     };
     runHandle.onEvent((e) => {
-      if (e.type === 'run/cancelled' || e.type === 'run/completed') cleanup();
+      if (e?.type === 'run/cancelled' || e?.type === 'run/completed' || e?.type === 'run/complete') {
+        cleanup();
+      }
     });
   }
 
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { projectId, taskId, llmConfig, budgetUSD, metadata }) => {
-    const run = orchestrator.startTaskRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
-    attachRun(run);
-    return { runId: run.id };
+    console.log('[factory] START_TASK', { projectId, taskId, llmConfig, budgetUSD, metadata });
+    try {
+      const run = orchestrator.startTaskRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
+      console.log('[factory] Run started (task)', run?.id);
+      attachRun(run);
+      return { runId: run.id };
+    } catch (err) {
+      console.error('[factory] Failed to start task run', err?.stack || String(err));
+      throw err;
+    }
   });
 
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { projectId, taskId, featureId, llmConfig, budgetUSD, metadata }) => {
-    const run = orchestrator.startFeatureRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
-    attachRun(run);
-    return { runId: run.id };
+    console.log('[factory] START_FEATURE', { projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
+    try {
+      const run = orchestrator.startFeatureRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
+      console.log('[factory] Run started (feature)', run?.id);
+      attachRun(run);
+      return { runId: run.id };
+    } catch (err) {
+      console.error('[factory] Failed to start feature run', err?.stack || String(err));
+      throw err;
+    }
   });
 
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_CANCEL_RUN, (_evt, { runId, reason }) => {
+    console.log('[factory] CANCEL_RUN', { runId, reason });
     const run = RUNS.get(runId);
-    if (run) run.cancel(reason);
+    if (run) {
+      try { run.cancel(reason); } catch (err) { console.warn('[factory] Error cancelling run', runId, err?.message || err); }
+    } else {
+      console.warn('[factory] Cancel requested for unknown run', runId);
+    }
     return { ok: true };
   });
 
   ipcMain.on(IPC_HANDLER_KEYS.FACTORY_SUBSCRIBE, (evt, { runId }) => {
     const wcId = evt.sender.id;
+    console.log('[factory] SUBSCRIBE', { runId, wcId });
     let set = RUN_SUBSCRIBERS.get(runId);
     if (!set) {
       set = new Set();
@@ -88,7 +137,15 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     set.add(wcId);
     evt.sender.once('destroyed', () => {
       const s = RUN_SUBSCRIBERS.get(runId);
-      if (s) s.delete(wcId);
+      if (s) {
+        s.delete(wcId);
+        console.log('[factory] Unsubscribed (wc destroyed)', { runId, wcId });
+      }
     });
   });
+
+  // Log window lifecycle for context
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.on('destroyed', () => console.log('[factory] Main window destroyed'));
+  }
 }

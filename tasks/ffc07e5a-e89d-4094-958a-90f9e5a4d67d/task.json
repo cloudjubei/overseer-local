@@ -20,7 +20,7 @@
     },
     {
       "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
-      "status": "-",
+      "status": "+",
       "title": "Missing console logs",
       "description": "There should be console logs for everything the agents do so it's easy to follow what is happening.",
       "plan": "",

@@ -77,7 +77,7 @@ const PROJECTS_API = {
   },
   listProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_LIST),
   getProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_GET, { id }),
-  createProject: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { project }),
+  createProject: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { id: project?.id, project }),
   updateProject: (id, project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { id, project }),
   deleteProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { id }),
   reorderTask: (projectId, fromIndex, toIndex) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { projectId, fromIndex, toIndex }),
@@ -101,16 +101,27 @@ const SETTINGS_API = {
 
 // Factory orchestrator API exposed to renderer
 const FACTORY_API = {
-  startTaskRun: (projectId, taskId, options = {}) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_TASK, { projectId, taskId, ...options }),
-  startFeatureRun: (projectId, taskId, featureId, options = {}) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, { projectId, taskId, featureId, ...options }),
-  cancelRun: (runId, reason) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_CANCEL_RUN, { runId, reason }),
+  startTaskRun: (projectId, taskId, options = {}) => {
+    console.log('[preload:factory] startTaskRun', { projectId, taskId, options });
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_TASK, { projectId, taskId, ...options });
+  },
+  startFeatureRun: (projectId, taskId, featureId, options = {}) => {
+    console.log('[preload:factory] startFeatureRun', { projectId, taskId, featureId, options });
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, { projectId, taskId, featureId, ...options });
+  },
+  cancelRun: (runId, reason) => {
+    console.log('[preload:factory] cancelRun', { runId, reason });
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_CANCEL_RUN, { runId, reason });
+  },
   subscribe: (runId, callback) => {
+    console.log('[preload:factory] subscribe', { runId });
     const listener = (_event, data) => {
       if (data.runId === runId) callback(data.event);
     };
     ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
     ipcRenderer.send(IPC_HANDLER_KEYS.FACTORY_SUBSCRIBE, { runId });
     return () => {
+      console.log('[preload:factory] unsubscribe', { runId });
       ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
     };
   },

@@ -16,13 +16,19 @@ function makeEventSourceLike(runId: string): EventSourceLike {
   return {
     addEventListener: (_type: string, handler: (e: any) => void) => {
       onAny = handler;
+      console.log('[factory:renderer] Subscribing to run events', { runId });
       // subscribe via preload
       unsubscribe = (window as any).factory.subscribe(runId, (e: any) => {
+        try {
+          // Light trace for events
+          if (e?.type) console.log('[factory:renderer] event', runId, e.type);
+        } catch {}
         onAny?.(e);
       });
     },
     close: () => {
-      unsubscribe?.();
+      console.log('[factory:renderer] Closing event subscription', { runId });
+      try { unsubscribe?.(); } catch {}
       unsubscribe = null;
       onAny = null;
     },
@@ -32,6 +38,7 @@ function makeEventSourceLike(runId: string): EventSourceLike {
 export function startTaskRun(params: StartTaskRunParams): { handle: RunHandle; events: EventSourceLike } {
   if (!(window as any).factory) throw new Error('Factory preload not available');
   const { projectId, taskId } = params;
+  console.log('[factory:renderer] Starting task run', { projectId, taskId: String(taskId) });
   const { runId } = (window as any).factory.startTaskRun(projectId, String(taskId));
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
   const events = makeEventSourceLike(runId);
@@ -41,6 +48,7 @@ export function startTaskRun(params: StartTaskRunParams): { handle: RunHandle; e
 export function startFeatureRun(params: StartFeatureRunParams): { handle: RunHandle; events: EventSourceLike } {
   if (!(window as any).factory) throw new Error('Factory preload not available');
   const { projectId, taskId, featureId } = params;
+  console.log('[factory:renderer] Starting feature run', { projectId, taskId: String(taskId), featureId: String(featureId) });
   const { runId } = (window as any).factory.startFeatureRun(projectId, String(taskId), String(featureId));
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
   const events = makeEventSourceLike(runId);
