@@ -1,364 +1,278 @@
-import { DefaultRunHandle, SimpleEventBus, makeRunId } from './events/runtime';
-import { RunEvent, RunHandle, toISO } from './events/types';
-import { FileChangeManager, FileChange } from './files/fileChangeManager';
-import { SandboxOverlay } from './files/sandboxOverlay';
-import { createHistoryStore, HistoryStore } from './db/store';
-import { InMemoryGitService, GitService } from './git/gitService';
-import { attachRunRecorder } from './artifacts/recorder';
-import { getConfig } from './config';
-import { addUsage, UsageStats } from './telemetry';
-import { logger } from './utils/logger';
-import { makeLLMClient } from './llm/factory';
+import fs from 'node:fs';
+import path from 'node:path';
+import { AgentResponse, CompletionClient, CompletionMessage, Feature, GitManager, Task, TaskUtils, ToolCall } from './types.js';
 
-export type LLMConfig = {
-  provider?: string;
-  model?: string;
-  apiKeyEnv?: string;
-  temperature?: number;
-  maxTokens?: number;
-};
+const MAX_TURNS_PER_FEATURE = 100;
 
-export type StartRunParams = {
-  projectId: string;
-  taskId?: string | number;
-  featureId?: string | number;
-  llmConfig?: LLMConfig;
-  budgetUSD?: number;
-  metadata?: Record<string, unknown>;
-};
+const FRAMEWORK_ROOT = path.resolve(process.cwd());
+const NEWLINE = '\n';
 
-type RunContext = {
-  bus: SimpleEventBus;
-  handle: DefaultRunHandle;
-  overlay: SandboxOverlay;
-  fcm: FileChangeManager;
-  history?: HistoryStore;
-  git: GitService;
-  usage: UsageStats;
-  usageTimer?: any;
-  budgetUSD?: number;
-  meta: { projectId: string; taskId?: string; featureId?: string };
-};
+function loadAgentDocs(agent: string): string {
+  const p = path.join(FRAMEWORK_ROOT, 'packages', 'factory-ts', 'docs', `AGENT_${agent.toUpperCase()}.md`);
+  return fs.readFileSync(p, 'utf8');
+}
 
-const RUNS = new Map<string, RunContext>();
+function loadProtocolExample(): string {
+  try {
+    const p = path.join(FRAMEWORK_ROOT, 'packages', 'factory-ts', 'docs', 'agent_response_example.json');
+    const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+    return JSON.stringify(data, null, 2);
+  } catch {
+    return '{\n  "thoughts": "Your reasoning here...",\n  "tool_calls": [ ... ]\n}';
+  }
+}
 
-export function createOrchestrator(options?: { projectRoot?: string; history?: HistoryStore; git?: GitService; fcm?: FileChangeManager }) {
-  const cfg = getConfig();
-  const history = options?.history; // optional, provided by host (Electron main)
-  const git = options?.git ?? new InMemoryGitService();
-  const fcm = options?.fcm ?? new FileChangeManager();
-  const projectRoot = options?.projectRoot ?? cfg.projectRoot;
+const PROTOCOL_INSTRUCTIONS = (() => {
+  const example = loadProtocolExample();
+  return [
+    'You **MUST** respond in a single, valid JSON object. This object must adhere to the following structure:',
+    '```json',
+    example,
+    '```',
+    'The thoughts field is for your reasoning, and tool_calls is a list of actions to execute.',
+    'Your response will be parsed as JSON. Do not include any text outside of this JSON object.'
+  ].join('\n');
+})();
 
-  logger.info('createOrchestrator()', { projectRoot });
+function toolSigsForAgent(agent: string, tools: TaskUtils, git: GitManager): [Record<string, Function>, string[]] {
+  const base: Record<string, [Function, string]> = {
+    read_files: [tools.readFiles, "read_files(paths: list[str]) -> list[str>" as any],
+    search_files: [tools.searchFiles, "search_files(query: str, path: str = '.') -> list[str]"],
+    block_feature: [ (args: { task_id: string; feature_id: string; reason: string }) => tools.blockFeature?.(args.task_id, args.feature_id, args.reason, agent, git), 'block_feature(reason: str)'],
+    finish_feature: [ (args: { task_id: string; feature_id: string }) => tools.finishFeature?.(args.task_id, args.feature_id, agent, git), 'finish_feature()'],
+    list_files: [tools.listFiles, 'list_files(path: str)']
+  };
 
-  function emit(bus: SimpleEventBus, event: RunEvent) {
-    try { bus.emit(event); } catch (e) { logger.warn('bus.emit failed', { type: event?.type, error: String(e) }); }
+  const agentTools: Record<string, [Function, string]> = {};
+  if (agent === 'speccer') {
+    agentTools.create_feature = [ (args: { task_id: string; title: string; description: string }) => tools.createFeature?.(args.task_id, args.title, args.description), 'create_feature(title: str, description: str)'];
+    agentTools.finish_spec = [ (args: { task_id: string }) => tools.finishSpec?.(args.task_id, agent, git), 'finish_spec()'];
+    agentTools.block_task = [ (args: { task_id: string; reason: string }) => tools.blockTask?.(args.task_id, args.reason, agent, git), 'block_task()'];
+  } else if (agent === 'developer') {
+    if (tools.writeFile) agentTools.write_file = [ tools.writeFile, 'write_file(filename: str, content: str)' ];
+    if (tools.renameFile) agentTools.rename_file = [ tools.renameFile, 'rename_file(filename: str, new_filename: str)' ];
+    if (tools.deleteFile) agentTools.delete_file = [ tools.deleteFile, 'delete_file(filename: str)' ];
+    if (tools.runTest) agentTools.run_test = [ (args: { task_id: string; feature_id: string }) => tools.runTest?.(args.task_id, args.feature_id), 'run_test() -> str' ];
+  } else if (agent === 'planner') {
+    if (tools.updateFeaturePlan) agentTools.update_feature_plan = [ (args: { task_id: string; feature_id: string; plan: any }) => tools.updateFeaturePlan?.(args.task_id, args.feature_id, args.plan), 'update_feature_plan(plan: str)' ];
+  } else if (agent === 'tester') {
+    if (tools.updateAcceptanceCriteria) agentTools.update_acceptance_criteria = [ (args: { task_id: string; feature_id: string; criteria: string[] }) => tools.updateAcceptanceCriteria?.(args.task_id, args.feature_id, args.criteria), 'update_acceptance_criteria(criteria: list[str])' ];
+    if (tools.updateTest) agentTools.update_test = [ (args: { task_id: string; feature_id: string; test: string }) => tools.updateTest?.(args.task_id, args.feature_id, args.test), 'update_test(test: str)' ];
+    if (tools.runTest) agentTools.run_test = [ (args: { task_id: string; feature_id: string }) => tools.runTest?.(args.task_id, args.feature_id), 'run_test() -> str' ];
+  } else if (agent === 'contexter') {
+    if (tools.updateFeatureContext) agentTools.update_feature_context = [ (args: { task_id: string; feature_id: string; context: string[] }) => tools.updateFeatureContext?.(args.task_id, args.feature_id, args.context), 'update_feature_context(context: list[str])' ];
   }
 
-  function startRun(params: StartRunParams): RunHandle {
-    logger.info('startRun()', {
-      projectId: params.projectId,
-      taskId: params.taskId != null ? String(params.taskId) : undefined,
-      featureId: params.featureId != null ? String(params.featureId) : undefined,
-      llm: params.llmConfig?.model,
-      budgetUSD: params.budgetUSD,
-    });
+  const all = { ...base, ...agentTools } as Record<string, [Function, string]>;
+  const functions: Record<string, Function> = {};
+  const sigs: string[] = [];
+  for (const [name, [fn, sig]] of Object.entries(all)) {
+    if (fn) {
+      functions[name] = fn;
+      sigs.push(sig);
+    }
+  }
+  return [functions, sigs];
+}
 
-    const bus = new SimpleEventBus();
-    const id = makeRunId('run');
-    const handle = new DefaultRunHandle(id, bus);
+function constructSystemPrompt(agent: string, task: Task, feature: Feature | null, agentSystemPrompt: string, context: string, toolSignatures: string[]): string {
+  const plan = feature && (agent === 'developer' || agent === 'tester' || agent === 'contexter' || agent === 'planner') ? (feature.plan ?? 'EMPTY') : '';
+  const acceptance = feature && (agent === 'developer' || agent === 'tester') ? (feature.acceptance ?? []) : [];
+  const acceptanceStr = acceptance.map((c, i) => `${i + 1}. ${c}`).join('\n');
+  const toolSignaturesStr = toolSignatures.map(sig => `- ${sig}`).join('\n');
 
-    // Recorder subscribes to run lifecycle for history/export
-    attachRunRecorder(handle, history);
+  const featureBlock = feature ? `#ASSIGNED FEATURE: ${feature.title} (ID: ${feature.id}\n##DESCRIPTION: ${feature.description}\n` : '';
+  const featureRejection = feature?.rejection ? `##REJECTION REASON:${NEWLINE}${feature.rejection}${NEWLINE}` : '';
+  const taskRejection = task.rejection ? `##REJECTION REASON:${NEWLINE}${task.rejection}` : '';
 
-    const overlay = new SandboxOverlay({ projectRoot, id });
-    overlay
-      .init()
-      .then(() => logger.debug('overlay.init() complete', { runId: id }))
-      .catch((e) => logger.warn('overlay.init() failed (non-fatal)', { runId: id, error: String(e) }));
-    overlay.attachAbortSignal((handle as any).signal);
+  return [
+    agentSystemPrompt,
+    `#CURRENT TASK (ID: ${task.id})`,
+    '##TITLE:',
+    task.title,
+    '##DESCRIPTION:',
+    task.description,
+    taskRejection,
+    '',
+    featureBlock,
+    featureRejection,
+    '#THE PLAN',
+    plan,
+    '',
+    '#ACCEPTANCE CRITERIA:',
+    acceptanceStr,
+    '',
+    '#TOOL SIGNATURES:',
+    `'${toolSignaturesStr}'`,
+    '',
+    '#RESPONSE FORMAT INSTRUCTIONS:',
+    PROTOCOL_INSTRUCTIONS,
+    '',
+    '#CONTEXT FILES PROVIDED:',
+    context,
+    '',
+    'Begin now.'
+  ].join('\n');
+}
 
-    const runId = handle.id;
-    const meta = {
-      projectId: params.projectId,
-      taskId: params.taskId != null ? String(params.taskId) : undefined,
-      featureId: params.featureId != null ? String(params.featureId) : undefined,
-    };
+async function runConversation(opts: {
+  model: string;
+  availableTools: Record<string, Function>;
+  systemPrompt: string;
+  task: Task;
+  feature: Feature | null;
+  agentType: string;
+  tools: TaskUtils;
+  git: GitManager;
+  complete: (why: 'finish' | 'block' | 'max_turns', info?: any) => void;
+  completion: CompletionClient;
+}) {
+  const { model, availableTools, systemPrompt, task, feature, agentType, tools, git, complete, completion } = opts;
+  const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
 
-    const usage: UsageStats = { requests: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0, costUSD: 0 };
-    const budgetUSD = params.budgetUSD ?? cfg.budgetUSD;
+  for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
+    try {
+      const res = await completion({ model, messages, response_format: { type: 'json_object' } });
+      const assistant = { role: 'assistant' as const, content: res.message.content };
+      messages.push(assistant);
 
-    const ctx: RunContext = { bus, handle, overlay, fcm, history, git, usage, budgetUSD, meta };
-    RUNS.set(runId, ctx);
+      const parsed = JSON.parse(assistant.content) as AgentResponse;
+      const thoughts = parsed.thoughts ?? 'No thoughts provided.';
+      const toolCalls = parsed.tool_calls ?? [];
 
-    // Emit start
-    const startEvent: RunEvent = {
-      type: 'run/started',
-      time: toISO(),
-      runId,
-      payload: {
-        projectId: meta.projectId,
-        taskId: meta.taskId,
-        featureId: meta.featureId,
-        meta: {
-          llm: params.llmConfig?.model,
-          budgetUSD: budgetUSD,
-          ...(params.metadata ?? {}),
-        },
-      },
-    } as any;
-    logger.debug('emit event run/started', { runId });
-    emit(bus, startEvent);
+      if (!toolCalls.length) continue;
 
-    // Periodic usage snapshot and budget check
-    ctx.usageTimer = setInterval(() => {
-      const snapshot: RunEvent = {
-        type: 'run/progress/snapshot',
-        time: toISO(),
-        runId,
-        payload: {
-          message: 'usage/update',
-          usage: ctx.usage,
-        },
-      } as any;
-      logger.debug('emit event run/progress/snapshot', { runId, usage: ctx.usage });
-      emit(bus, snapshot);
-      if (ctx.budgetUSD != null && ctx.usage.costUSD != null && ctx.usage.costUSD > ctx.budgetUSD) {
-        logger.warn('budget exceeded; cancelling run', { runId, costUSD: ctx.usage.costUSD, budgetUSD: ctx.budgetUSD });
-        emit(bus, { type: 'run/budget-exceeded', time: toISO(), runId, payload: ctx.usage } as any);
-        handle.cancel('Budget exceeded');
-      }
-    }, 2000);
+      const toolOutputs: string[] = [];
+      for (const call of toolCalls) {
+        const toolName = (call.tool_name || call.tool || call.name || 'unknown_tool');
+        const args = (call.arguments || call.parameters || {}) as Record<string, any>;
 
-    const unsubscribe = handle.onEvent((e) => {
-      if (e.type === 'run/cancelled' || e.type === 'run/completed') {
-        logger.info('run finished; cleaning up', { runId, type: e.type });
-        clearInterval(ctx.usageTimer);
-        overlay
-          .cleanup()
-          .then(() => logger.debug('overlay.cleanup() complete', { runId }))
-          .catch((err) => logger.warn('overlay.cleanup() failed (non-fatal)', { runId, error: String(err) }));
-        unsubscribe();
-      }
-    });
-
-    // Initial progress
-    queueMicrotask(() => {
-      logger.debug('emit event run/progress (init)', { runId });
-      emit(bus, { type: 'run/progress', time: toISO(), runId, payload: { message: 'Initializing', step: 'init', progress: 0.05 } } as any);
-    });
-
-    // Kick off a minimal LLM step to validate pipeline
-    ;(async () => {
-      const llmCfg = params.llmConfig;
-      if (!llmCfg || !llmCfg.provider || !llmCfg.model) {
-        logger.info('No LLM config provided; skipping LLM step', { runId });
-        emit(bus, { type: 'run/log', time: toISO(), runId, payload: { level: 'info', message: 'No LLM configured; run will only emit progress and usage events.' } } as any);
-        return;
-      }
-
-      emit(bus, { type: 'llm/start', time: toISO(), runId, payload: { provider: llmCfg.provider, model: (llmCfg as any).model } } as any);
-      try {
-        const client = await makeLLMClient({ ...(llmCfg as any) });
-        const promptMessages = [
-          { role: 'system', content: 'You are an engineering assistant helping with a software project.' },
-          { role: 'user', content: `Project ${meta.projectId}. Task ${meta.taskId ?? ''}${meta.featureId ? ` Feature ${meta.featureId}` : ''}. Briefly acknowledge with a one-sentence plan.` },
-        ];
-
-        // Stream for visibility to UI (we emit llm/delta events for renderer to see activity)
-        const stream = await client.chatCompletionStream({ messages: promptMessages as any, temperature: (llmCfg as any).temperature, maxTokens: (llmCfg as any).maxTokens });
-        for await (const ev of stream.stream) {
-          if ((handle as any).signal?.aborted) {
-            logger.info('LLM stream aborted by user', { runId });
-            throw new Error('aborted');
-          }
-          if (ev?.type === 'delta') {
-            emit(bus, { type: 'llm/delta', time: toISO(), runId, payload: { content: ev.content ?? '' } } as any);
-          }
-        }
-        const final = await stream.final;
-        emit(bus, { type: 'llm/end', time: toISO(), runId, payload: { text: final.text } } as any);
-
-        // Usage and cost update (estimated for streams)
-        try {
-          const u = client.getUsage?.();
-          if (u) {
-            ctx.usage = addUsage(ctx.usage, { promptTokens: u.promptTokens ?? 0, completionTokens: u.completionTokens ?? 0, totalTokens: (u.totalTokens ?? ((u.promptTokens ?? 0) + (u.completionTokens ?? 0))) } as any, client.provider, client.model);
-            emit(bus, { type: 'run/usage', time: toISO(), runId, payload: { ...ctx.usage, provider: client.provider, model: client.model } } as any);
-          }
-        } catch (e) {
-          logger.warn('Failed to compute usage snapshot from client', { runId, error: String(e) });
-        }
-
-        // Advance progress and complete
-        emit(bus, { type: 'run/progress', time: toISO(), runId, payload: { message: 'LLM step complete', progress: 1 } } as any);
-        emit(bus, { type: 'run/completed', time: toISO(), runId, payload: { success: true, message: 'Completed initial LLM step' } } as any);
-      } catch (err) {
-        if ((err as any)?.message === 'aborted') {
-          emit(bus, { type: 'run/cancelled', time: toISO(), runId, payload: { reason: 'User cancelled' } } as any);
+        if (availableTools[toolName]) {
+          const fn = availableTools[toolName];
+          // inject task_id/feature_id if the tool expects them
+          if (!('task_id' in args)) args.task_id = task.id;
+          if (feature && !('feature_id' in args)) args.feature_id = feature.id;
+          const result = await Promise.resolve(fn(args));
+          toolOutputs.push(`Tool ${toolName} returned: ${result}`);
         } else {
-          logger.error('LLM step failed', { runId, error: String(err) });
-          emit(bus, { type: 'run/error', time: toISO(), runId, payload: { message: String(err) } } as any);
+          toolOutputs.push(`Error: Tool '${toolName}' not found.`);
+        }
+
+        if (['finish_feature', 'block_feature', 'finish_spec', 'block_task'].includes(toolName)) {
+          complete(toolName === 'block_feature' || toolName === 'block_task' ? 'block' : 'finish');
+          return;
         }
       }
-    })().catch((e) => logger.warn('LLM pipeline task crashed', { runId, error: String(e) }));
 
-    return handle;
-  }
-
-  async function addUsageToRun(runId: string, delta: Partial<UsageStats>, llm?: LLMConfig) {
-    const ctx = RUNS.get(runId);
-    if (!ctx) {
-      logger.warn('addUsageToRun: unknown runId', { runId });
-      return;
-    }
-    ctx.usage = addUsage(ctx.usage, delta, (llm as any)?.provider, (llm as any)?.model);
-    logger.debug('emit event run/usage', { runId, delta, usage: ctx.usage });
-    ctx.bus.emit({ type: 'run/usage', time: toISO(), runId, payload: ctx.usage });
-  }
-
-  function proposeChanges(runId: string, changes: Array<Omit<FileChange, 'diff' | 'hunks'>> & FileChange[], title?: string): string {
-    const ctx = RUNS.get(runId);
-    if (!ctx) throw new Error(`Unknown runId: ${runId}`);
-    logger.info('proposeChanges()', { runId, count: changes?.length ?? 0, title });
-    const proposal = ctx.fcm.createProposal(projectRoot, changes as any);
-
-    // Stage into overlay
-    (async () => {
-      for (const ch of ctx.fcm.listProposalFiles(proposal.id)) {
-        try {
-          if (ch.status === 'deleted') {
-            await ctx.overlay.delete(ch.path);
-            logger.debug('overlay.delete()', { runId, path: ch.path });
-          } else if (ch.status === 'modified' || ch.status === 'added') {
-            await ctx.overlay.write(ch.path, ch.newContent ?? '');
-            logger.debug('overlay.write()', { runId, path: ch.path });
-          }
-        } catch (e) {
-          logger.warn('overlay staging failed (non-fatal)', { runId, path: ch.path, error: String(e) });
-        }
+      messages.push({ role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') });
+    } catch (e) {
+      // Block on error, mirroring Python behavior
+      if (feature) {
+        await tools.blockFeature?.(task.id, feature.id, `Agent loop failed: ${e}`, agentType, git);
+      } else {
+        await tools.blockTask?.(task.id, `Agent loop failed: ${e}`, agentType, git);
       }
-    })().catch((e) => logger.warn('overlay staging task crashed', { runId, error: String(e) }));
-
-    const summary = ctx.fcm.getSummary(proposal.id);
-    logger.debug('emit event file/proposal', { runId, proposalId: proposal.id, summary: summary?.counts });
-    ctx.bus.emit({ type: 'file/proposal', time: toISO(), runId, payload: { proposalId: proposal.id, title, summary: { added: summary.counts.added, modified: summary.counts.modified, deleted: summary.counts.deleted } } });
-    const diffFiles = ctx.fcm.getProposalDiff(proposal.id).files.map((f) => ({
-      filePath: f.path,
-      status: f.status as any,
-      unifiedDiff: f.diff ?? '',
-    }));
-    logger.debug('emit event file/diff', { runId, proposalId: proposal.id, files: diffFiles.length });
-    ctx.bus.emit({ type: 'file/diff', time: toISO(), runId, payload: { proposalId: proposal.id, files: diffFiles as any, summary: { added: summary.counts.added, modified: summary.counts.modified, deleted: summary.counts.deleted } } });
-    return proposal.id;
-  }
-
-  const reviewService = {
-    async acceptAll(runId: string, proposalId: string) {
-      const ctx = RUNS.get(runId);
-      if (!ctx) throw new Error(`Unknown runId: ${runId}`);
-      logger.info('review.acceptAll()', { runId, proposalId });
-      const files = ctx.fcm.listProposalFiles(proposalId).map((f) => f.path);
-      await ctx.overlay.acceptFiles(files);
-      logger.debug('emit event file/proposal-state accepted', { runId, proposalId });
-      ctx.bus.emit({ type: 'file/proposal-state', time: toISO(), runId, payload: { proposalId, state: 'accepted' } });
-    },
-    async acceptFiles(runId: string, proposalId: string, files: string[]) {
-      const ctx = RUNS.get(runId);
-      if (!ctx) throw new Error(`Unknown runId: ${runId}`);
-      logger.info('review.acceptFiles()', { runId, proposalId, filesCount: files?.length ?? 0 });
-      await ctx.overlay.acceptFiles(files);
-      logger.debug('emit event file/proposal-state partial', { runId, proposalId });
-      ctx.bus.emit({ type: 'file/proposal-state', time: toISO(), runId, payload: { proposalId, state: 'partial' } });
-    },
-    async rejectAll(runId: string, proposalId: string) {
-      const ctx = RUNS.get(runId);
-      if (!ctx) throw new Error(`Unknown runId: ${runId}`);
-      logger.info('review.rejectAll()', { runId, proposalId });
-      await ctx.overlay.rejectAll();
-      logger.debug('emit event file/proposal-state rejected', { runId, proposalId });
-      ctx.bus.emit({ type: 'file/proposal-state', time: toISO(), runId, payload: { proposalId, state: 'rejected' } });
-    },
-    async rejectFiles(runId: string, proposalId: string, _files: string[]) {
-      const ctx = RUNS.get(runId);
-      if (!ctx) throw new Error(`Unknown runId: ${runId}`);
-      logger.info('review.rejectFiles()', { runId, proposalId });
-      // Overlay has no explicit per-file rejection; unchanged files remain staged only
-      logger.debug('emit event file/proposal-state partial (rejectFiles no-op)', { runId, proposalId });
-      ctx.bus.emit({ type: 'file/proposal-state', time: toISO(), runId, payload: { proposalId, state: 'partial' } });
-    },
-    async finalize(runId: string, proposalId: string, message?: string) {
-      const ctx = RUNS.get(runId);
-      if (!ctx) throw new Error(`Unknown runId: ${runId}`);
-      logger.info('review.finalize()', { runId, proposalId, message });
-      await ctx.git.applyProposalToBranch(proposalId);
-      const sha = await ctx.git.commitProposal(proposalId, message ?? `Accept proposal ${proposalId}`);
-      logger.debug('emit event git/commit', { runId, proposalId, sha });
-      ctx.bus.emit({ type: 'git/commit', time: toISO(), runId, payload: { proposalId, commitSha: sha, message: message ?? '' } });
-      return { commitSha: sha };
-    },
-  };
-
-  function runTask(params: { projectId: string; taskId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-    logger.info('runTask()', { projectId: params.projectId, taskId: String(params.taskId) });
-    return startRun({ ...params });
-  }
-
-  function runFeature(params: { projectId: string; taskId: string | number; featureId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-    logger.info('runFeature()', { projectId: params.projectId, taskId: String(params.taskId), featureId: String(params.featureId) });
-    return startRun({ ...params });
-  }
-
-  function complete(runId: string, payload?: { success?: boolean; message?: string }) {
-    const ctx = RUNS.get(runId);
-    if (!ctx) {
-      logger.warn('complete(): unknown runId', { runId });
+      complete('block', e);
       return;
     }
-    logger.info('complete()', { runId, success: payload?.success });
-    ctx.bus.emit({ type: 'run/completed', time: toISO(), runId, payload: { success: payload?.success ?? true, usage: ctx.usage, message: payload?.message } as any });
+  }
+  // Max turns
+  if (feature) {
+    await tools.blockFeature?.(task.id, feature.id, 'Agent loop exceeded max turns', agentType, git);
+  } else {
+    await tools.blockTask?.(task.id, 'Agent loop exceeded max turns', agentType, git);
+  }
+  complete('max_turns');
+}
+
+export async function runAgentOnTask(model: string, agentType: string, task: Task, tools: TaskUtils, git: GitManager, completion: CompletionClient) {
+  const agentDocs = loadAgentDocs(agentType);
+  const contextFiles = ['docs/FILE_ORGANISATION.md'];
+  const [funcs, sigs] = toolSigsForAgent(agentType, tools, git);
+  const context = await Promise.resolve(tools.readFiles(contextFiles));
+  const systemPrompt = constructSystemPrompt(agentType, task, null, agentDocs, context, sigs);
+
+  await runConversation({
+    model,
+    availableTools: funcs,
+    systemPrompt,
+    task,
+    feature: null,
+    agentType,
+    tools,
+    git,
+    completion,
+    complete: () => {}
+  });
+}
+
+export async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, tools: TaskUtils, git: GitManager, completion: CompletionClient) {
+  if (agentType === 'developer') await tools.updateFeatureStatus?.(task.id, feature.id, '~');
+
+  const agentDocs = loadAgentDocs(agentType);
+  const featureContextFiles = ['docs/FILE_ORGANISATION.md', ...(feature.context ?? [])];
+  const [funcs, sigs] = toolSigsForAgent(agentType, tools, git);
+  const context = await Promise.resolve(tools.readFiles(featureContextFiles));
+  const systemPrompt = constructSystemPrompt(agentType, task, feature, agentDocs, context, sigs);
+
+  if (agentType === 'developer') await tools.updateFeatureStatus?.(task.id, feature.id, '~');
+
+  await runConversation({
+    model,
+    availableTools: funcs,
+    systemPrompt,
+    task,
+    feature,
+    agentType,
+    tools,
+    git,
+    completion,
+    complete: () => {}
+  });
+}
+
+export async function runOrchestrator(opts: {
+  model: string;
+  agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
+  taskId?: string | null;
+  projectDir?: string | null;
+  tools: TaskUtils;
+  git: GitManager;
+  completion: CompletionClient;
+}) {
+  const { model, agentType, taskId, projectDir, tools, git, completion } = opts;
+
+  if (projectDir) tools.setProjectRoot(projectDir);
+
+  let currentTask: Task | null;
+  if (taskId) currentTask = await Promise.resolve(tools.getTask(taskId));
+  else currentTask = await Promise.resolve(tools.findNextPendingTask());
+
+  if (!currentTask) {
+    console.log('No available tasks to work on in the repository.');
+    return;
   }
 
-  function cancel(runId: string, reason?: string) {
-    const ctx = RUNS.get(runId);
-    if (!ctx) {
-      logger.warn('cancel(): unknown runId', { runId });
-      return;
+  const branch = `features/${currentTask.id}`;
+  try { await Promise.resolve(git.checkoutBranch(branch, true)); } catch { await Promise.resolve(git.checkoutBranch(branch, false)); }
+  try { await Promise.resolve(git.pull(branch)); } catch {}
+
+  const processed = new Set<string>();
+
+  if (agentType === 'speccer') {
+    currentTask = await Promise.resolve(tools.getTask(currentTask.id));
+    await runAgentOnTask(model, agentType, currentTask, tools, git, completion);
+    return;
+  }
+
+  while (true) {
+    currentTask = await Promise.resolve(tools.getTask(currentTask.id));
+    const next = tools.findNextAvailableFeature(currentTask, processed, agentType !== 'developer');
+    if (!next) {
+      console.log(`\nNo more available features for task ${currentTask.id}.`);
+      break;
     }
-    logger.info('cancel()', { runId, reason });
-    ctx.handle.cancel(reason);
+    await runAgentOnFeature(model, agentType, currentTask, next, tools, git, completion);
+    processed.add(next.id);
   }
-
-  return {
-    startRun,
-    startTaskRun: runTask,
-    startFeatureRun: runFeature,
-    addUsageToRun,
-    proposeChanges,
-    complete,
-    cancel,
-    reviewService,
-  };
-}
-
-// Legacy exports retained
-export { createOrchestrator as default };
-
-// Minimal default start functions for compatibility
-export function startRun(params: StartRunParams): RunHandle {
-  logger.info('default.startRun()', { projectId: params.projectId, taskId: params.taskId != null ? String(params.taskId) : undefined, featureId: params.featureId != null ? String(params.featureId) : undefined });
-  const orch = createOrchestrator({ history: createHistoryStore() });
-  return orch.startRun(params);
-}
-
-export function runTask(params: { projectId: string; taskId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-  logger.info('default.runTask()', { projectId: params.projectId, taskId: String(params.taskId) });
-  const orch = createOrchestrator({ history: createHistoryStore() });
-  return orch.startTaskRun(params);
-}
-
-export function runFeature(params: { projectId: string; taskId: string | number; featureId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-  logger.info('default.runFeature()', { projectId: params.projectId, taskId: String(params.taskId), featureId: String(params.featureId) });
-  const orch = createOrchestrator({ history: createHistoryStore() });
-  return orch.startFeatureRun(params);
 }

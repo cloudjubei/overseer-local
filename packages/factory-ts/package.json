@@ -3,20 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
-    "clean": "rimraf dist",
-    "test": "vitest run",
-    "test:watch": "vitest"
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "prepare": "npm run build"
+  },
+  "dependencies": {},
   "devDependencies": {
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.2",
-    "rimraf": "^6.0.1",
-    "vitest": "^3.2.4",
-    "zod": "^4.1.5"
+    "typescript": "^5.5.4",
+    "rimraf": "^5.0.5"
   }
 }
