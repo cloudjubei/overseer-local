@@ -1,13 +1,15 @@
 import React from 'react'
-import type { Task, Status } from 'packages/factory-ts/src/types'
+import type { Task, Status, ProjectSpec } from 'packages/factory-ts/src/types'
 import Tooltip from '../ui/Tooltip'
 import StatusControl from './StatusControl'
 
-export default function TaskCard({ task, onClick, draggable = false, onDragStart, onStatusChange }: {
+export default function TaskCard({ project, task, onClick, draggable = false, onDragStart, showStatus = true, onStatusChange }: {
+  project: ProjectSpec,
   task: Task
   onClick?: () => void
   draggable?: boolean
   onDragStart?: (e: React.DragEvent) => void
+  showStatus?: boolean,
   onStatusChange?: (status: Status) => void | Promise<void>
 }) {
   return (
@@ -35,11 +37,11 @@ export default function TaskCard({ task, onClick, draggable = false, onDragStart
       aria-label={`Task ${task.id} ${task.title}`}
     >
       <div className="task-card__header">
-        <div className="task-card__id">#{task.id}</div>
+        <span className="id-chip">{project.taskIdToDisplayIndex[task.id]}</span>
         <div className="flex-spacer" />
       </div>
       <div className="task-card__title" title={task.title}>{task.title}</div>
-      <div className="task-card__meta flex items-center justify-between gap-2">
+      {showStatus && <div className="task-card__meta flex items-center justify-between gap-2">
         <StatusControl status={task.status} onChange={onStatusChange} />
         <div className="task-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
           <Tooltip content="Open details (Enter)" placement="top">
@@ -48,7 +50,7 @@ export default function TaskCard({ task, onClick, draggable = false, onDragStart
             </button>
           </Tooltip>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

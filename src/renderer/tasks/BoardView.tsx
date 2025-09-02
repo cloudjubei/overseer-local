@@ -123,6 +123,10 @@ export default function BoardView({ tasks }: Props) {
     }
   }
 
+  if (!project){
+    return  <div className="empty" aria-live="polite">Loading...</div>
+  }
+
   const viewportClass = `board-viewport${canScrollLeft ? ' is-scroll-left' : ''}${canScrollRight ? ' is-scroll-right' : ''}`
 
   return (
@@ -165,10 +169,12 @@ export default function BoardView({ tasks }: Props) {
                 grouped[s].map((t) => (
                   <TaskCard 
                     key={t.id}
+                    project={project}
                     task={t}
                     draggable
                     onDragStart={(e) => onDragStart(e, t.id)}
                     onClick={() => navigateTaskDetails(t.id)}
+                    showStatus={false}
                     onStatusChange={async (next) => {
                       try {
                         await updateTask(t.id, { status: next })
