@@ -27,6 +27,7 @@ export type NavigatorApi = NavigatorState & ModalState & {
   closeModal: () => void;
   navigateView: (v: NavigationView) => void;
   navigateTaskDetails: (taskId: string, highlightFeatureId?: string, highlightTask?: boolean) => void;
+  navigateAgentRun: (runId: string) => void;
 };
 
 function viewPrefixToView(prefix: string): NavigationView {
@@ -126,6 +127,10 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     window.location.hash = hash;
   }, []);
 
+  const navigateAgentRun = useCallback((runId: string) => {
+    window.location.hash = `#agents/run/${runId}`;
+  }, []);
+
   const value = useMemo<NavigatorApi>(() => ({
     ...state,
     ...modal,
@@ -133,7 +138,8 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     closeModal,
     navigateView,
     navigateTaskDetails,
-  }), [state, modal, openModal, closeModal, navigateView, navigateTaskDetails]);
+    navigateAgentRun,
+  }), [state, modal, openModal, closeModal, navigateView, navigateTaskDetails, navigateAgentRun]);
 
   return <NavigatorContext.Provider value={value}>{children}</NavigatorContext.Provider>;
 }

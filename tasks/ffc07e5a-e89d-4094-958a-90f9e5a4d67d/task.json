@@ -33,7 +33,7 @@
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
-      "status": "-",
+      "status": "+",
       "title": "TaskDetailsView improvements after running an agent",
       "description": "Running an agent on a feature creates this bullet that shows an agent running. The bullet should show the agent status. Clicking on it, should take the user to the appropriate agent in the Agents tab.",
       "plan": "",

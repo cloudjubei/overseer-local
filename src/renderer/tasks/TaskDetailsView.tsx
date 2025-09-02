@@ -8,6 +8,7 @@ import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { Button } from '../components/ui/Button'
 import { useAgents } from '../hooks/useAgents'
+import AgentRunBullet from '../components/agents/AgentRunBullet'
 
 function IconBack({ className }: { className?: string }) {
   return (
@@ -64,7 +65,7 @@ function IconPlay({ className }: { className?: string }) {
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
-  const { openModal, navigateView, tasksRoute } = useNavigator()
+  const { openModal, navigateView, tasksRoute, navigateAgentRun } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
@@ -266,7 +267,11 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           <div className="spacer" />
           <div className="flex items-center gap-3">
             {taskRuns.length > 0 && (
-              <span className="chips-sub__label">Agents: {taskRuns.length}</span>
+              <div className="flex items-center gap-2" aria-label={`Active agents for Task ${task.id}`}>
+                {taskRuns.map((run) => (
+                  <AgentRunBullet key={run.runId} run={run} onClick={() => navigateAgentRun(run.runId)} />
+                ))}
+              </div>
             )}
             <Button size="sm" variant="secondary" onClick={() => { if (!projectId) return; startTaskAgent(projectId, task.id) }}>
               <span className="inline-flex items-center gap-1"><IconPlay /> Run Agent</span>
@@ -412,7 +417,11 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         </div>
                         <div className="flex items-center gap-3 pr-2">
                           {runsForFeature.length > 0 && (
-                            <span className="chips-sub__label">Agents: {runsForFeature.length}</span>
+                            <div className="flex items-center gap-2" aria-label={`Active agents for Feature ${f.id}`}>
+                              {runsForFeature.map((run) => (
+                                <AgentRunBullet key={run.runId} run={run} onClick={(e) => { e.stopPropagation(); navigateAgentRun(run.runId) }} />
+                              ))}
+                            </div>
                           )}
                         </div>
                       </div>

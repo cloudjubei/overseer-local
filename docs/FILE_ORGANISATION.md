@@ -9,6 +9,8 @@ This document describes how files and directories are organised in this reposito
   - src/types/: Shared TypeScript types.
   - src/renderer/: React renderer (components, screens, hooks, services, navigation, preview runtime).
     - src/renderer/components/: Reusable UI and domain-specific components.
+      - src/renderer/components/tasks/: Task-related UI elements (status controls, dependency bullets, etc.).
+      - src/renderer/components/agents/: Agent-related UI elements (AgentRunBullet and future agent widgets).
     - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, Agents, etc.).
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.

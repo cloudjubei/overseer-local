@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useAgents } from '../hooks/useAgents';
 import { useProjectContext } from '../projects/ProjectContext';
 
 function formatUSD(n?: number) {
-  if (n == null) return '—';
+  if (n == null) return '\u2014';
   return `$${n.toFixed(4)}`;
 }
 
@@ -24,6 +24,24 @@ export default function AgentsView() {
   const projectRuns = useMemo(() => runs.filter(r => r.projectId === activeProjectId), [runs, activeProjectId]);
   const activeProjectRuns = useMemo(() => activeRuns.filter(r => r.projectId === activeProjectId), [activeRuns, activeProjectId]);
 
+  useEffect(() => {
+    // If hash contains an anchor like #agents/run/<id>, scroll to that run if present.
+    const hash = (window.location.hash || '').replace(/^#/, '');
+    const m = /^agents\/run\/(.+)$/.exec(hash);
+    if (m && m[1]) {
+      const id = m[1];
+      // Defer scroll until after list renders
+      setTimeout(() => {
+        const el = document.getElementById(`run-${id}`);
+        if (el) {
+          el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          el.classList.add('highlighted');
+          setTimeout(() => el.classList.remove('highlighted'), 2000);
+        }
+      }, 0);
+    }
+  }, [projectRuns.length]);
+
   return (
     <div className="flex-1 overflow-auto">
       <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
@@ -41,7 +59,7 @@ export default function AgentsView() {
           ) : (
             <ul className="space-y-2">
               {activeProjectRuns.map(run => (
-                <li key={run.runId} className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                <li id={`run-${run.runId}`} key={run.runId} className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate">
@@ -57,7 +75,7 @@ export default function AgentsView() {
                   <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                     <div className="rounded bg-neutral-50 dark:bg-neutral-800 p-2">
                       <div className="text-neutral-500">Progress</div>
-                      <div className="font-medium">{run.progress != null ? `${Math.round((run.progress ?? 0) * 100)}%` : '—'}</div>
+                      <div className="font-medium">{run.progress != null ? `${Math.round((run.progress ?? 0) * 100)}%` : '\u2014'}</div>
                     </div>
                     <div className="rounded bg-neutral-50 dark:bg-neutral-800 p-2">
                       <div className="text-neutral-500">Cost</div>
@@ -102,11 +120,11 @@ export default function AgentsView() {
                 </thead>
                 <tbody>
                   {projectRuns.map(r => (
-                    <tr key={r.runId} className="border-t border-neutral-200 dark:border-neutral-800">
+                    <tr id={`run-${r.runId}`} key={r.runId} className="border-t border-neutral-200 dark:border-neutral-800">
                       <td className="px-3 py-2 font-mono text-xs">{r.runId.slice(0,8)}</td>
-                      <td className="px-3 py-2">{r.taskId ?? '—'}{r.featureId ? ` · ${r.featureId}` : ''}</td>
+                      <td className="px-3 py-2">{r.taskId ?? '\u2014'}{r.featureId ? ` · ${r.featureId}` : ''}</td>
                       <td className="px-3 py-2">{r.state}</td>
-                      <td className="px-3 py-2 truncate max-w-[280px]" title={r.message ?? ''}>{r.message ?? '—'}</td>
+                      <td className="px-3 py-2 truncate max-w-[280px]" title={r.message ?? ''}>{r.message ?? '\u2014'}</td>
                       <td className="px-3 py-2">{formatUSD(r.costUSD)}</td>
                       <td className="px-3 py-2">{r.promptTokens ?? 0} / {r.completionTokens ?? 0}</td>
                       <td className="px-3 py-2">{formatTs(r.startedAt)}</td>
@@ -115,7 +133,7 @@ export default function AgentsView() {
                         {r.state === 'running' ? (
                           <button className="btn-secondary" onClick={() => cancelRun(r.runId)}>Cancel</button>
                         ) : (
-                          <span className="text-neutral-400">—</span>
+                          <span className="text-neutral-400">\u2014</span>
                         )}
                       </td>
                     </tr>
