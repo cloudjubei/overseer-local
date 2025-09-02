@@ -4,6 +4,15 @@ import { LLMConfigManager } from '../utils/LLMConfigManager';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
+export type AgentRunMessage = {
+  role: string;
+  content: string;
+  turn?: number;
+  source?: string;
+  ts?: string;
+  durationMs?: number;
+};
+
 export type AgentRun = {
   runId: string;
   projectId: string;
@@ -19,6 +28,7 @@ export type AgentRun = {
   model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
+  messages?: AgentRunMessage[]; // Running conversation
 };
 
 // Internal structure to keep handle + eventSource
@@ -87,6 +97,7 @@ class AgentsServiceImpl {
             model: m.model,
             startedAt: m.startedAt || new Date().toISOString(),
             updatedAt: m.updatedAt || new Date().toISOString(),
+            messages: [],
             events,
             cancel: (reason?: string) => handle.cancel(reason),
           } as RunRecord;
@@ -144,10 +155,50 @@ class AgentsServiceImpl {
     }
   }
 
+  private ensureMessages(run: RunRecord) {
+    if (!run.messages) run.messages = [];
+  }
+
+  private appendMessage(run: RunRecord, msg: any, extra?: Partial<AgentRunMessage>) {
+    this.ensureMessages(run);
+    const m: AgentRunMessage = {
+      role: String(msg?.role ?? ''),
+      content: String(msg?.content ?? ''),
+      ...(extra || {}),
+    };
+    run.messages!.push(m);
+  }
+
+  private replaceMessages(run: RunRecord, arr: any[], turn?: number) {
+    try {
+      run.messages = Array.isArray(arr) ? arr.map((m: any) => ({ role: String(m?.role ?? ''), content: String(m?.content ?? ''), turn })) : [];
+    } catch {
+      run.messages = [];
+    }
+  }
+
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
       run.updatedAt = getEventTs(e);
+
+      // Conversation handling
+      if (e.type === 'llm/messages/init') {
+        const msgs = e.payload?.messages ?? [];
+        this.replaceMessages(run, msgs, undefined);
+      } else if (e.type === 'llm/messages/snapshot') {
+        const msgs = e.payload?.messages ?? [];
+        this.replaceMessages(run, msgs, e.payload?.turn);
+      } else if (e.type === 'llm/message') {
+        const msg = e.payload?.message;
+        const extra = { turn: e.payload?.turn, source: e.payload?.source, durationMs: e.payload?.durationMs, ts: getEventTs(e) } as Partial<AgentRunMessage>;
+        if (msg) this.appendMessage(run, msg, extra);
+      } else if (e.type === 'llm/messages/final') {
+        const msgs = e.payload?.messages ?? [];
+        this.replaceMessages(run, msgs, undefined);
+      }
+
+      // Meta updates
       if (e.type === 'run/progress' || e.type === 'run/progress/snapshot') {
         run.message = e.payload?.message ?? run.message;
         if (typeof e.payload?.progress === 'number') {
@@ -217,6 +268,7 @@ class AgentsServiceImpl {
       updatedAt: new Date().toISOString(),
       provider: llmConfig?.provider,
       model: llmConfig?.model,
+      messages: [],
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;
@@ -243,6 +295,7 @@ class AgentsServiceImpl {
       updatedAt: new Date().toISOString(),
       provider: llmConfig?.provider,
       model: llmConfig?.model,
+      messages: [],
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;

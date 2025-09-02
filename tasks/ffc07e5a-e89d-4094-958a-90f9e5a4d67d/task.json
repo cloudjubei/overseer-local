@@ -1,6 +1,6 @@
 {
   "id": "ffc07e5a-e89d-4094-958a-90f9e5a4d67d",
-  "status": "-",
+  "status": "+",
   "title": "Integrate the factory-ts package",
   "description": "A local package was created that is currently placed in `packages/factory-ts` relative to this project.\nThis package allows calling agents to run on specific projects, tasks and features. It needs to be integrated into this project so agents can be ran on specific tasks or features and agent performance can be monitored. This whole package was based on 4 python scripts that are palced under packages/factory-ts/blueprint",
   "features": [
@@ -145,7 +145,7 @@
     },
     {
       "id": "0c4a2db2-adcf-4778-bc92-c943664ce450",
-      "status": "-",
+      "status": "+",
       "title": "When looking at an agent inside `AgentsView.tsx` it must be possible to view the whole conversation",
       "description": "Whether for historical runs or a current run - a given agent's run view must display the running conversation.",
       "plan": "",
