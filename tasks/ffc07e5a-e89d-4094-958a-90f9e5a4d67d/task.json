@@ -20,7 +20,7 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts isn't linked via ipc bridge like all the other managers",
       "description": "make it possible to run an agent on a feature or task. Watch out to avoid errors: Module \"node:path\" has been externalized for browser compatibility. Because of this the whole history service had to be disabled from factory-its. It should be fixed and reenabled.",
       "plan": "",

@@ -2,7 +2,7 @@ import { DefaultRunHandle, SimpleEventBus, makeRunId } from './events/runtime';
 import { RunEvent, RunHandle, toISO } from './events/types';
 import { FileChangeManager, FileChange } from './files/fileChangeManager';
 import { SandboxOverlay } from './files/sandboxOverlay';
-// import { createHistoryStore, HistoryStore } from './db/store';
+import { createHistoryStore, HistoryStore } from './db/store';
 import { InMemoryGitService, GitService } from './git/gitService';
 import { attachRunRecorder } from './artifacts/recorder';
 import { getConfig } from './config';
@@ -30,7 +30,7 @@ type RunContext = {
   handle: DefaultRunHandle;
   overlay: SandboxOverlay;
   fcm: FileChangeManager;
-  // history: HistoryStore;
+  history?: HistoryStore;
   git: GitService;
   usage: UsageStats;
   usageTimer?: any;
@@ -40,9 +40,9 @@ type RunContext = {
 
 const RUNS = new Map<string, RunContext>();
 
-export function createOrchestrator(options?: { projectRoot?: string; /*history?: HistoryStore;*/ git?: GitService; fcm?: FileChangeManager }) {
+export function createOrchestrator(options?: { projectRoot?: string; history?: HistoryStore; git?: GitService; fcm?: FileChangeManager }) {
   const cfg = getConfig();
-  // const history = options?.history ?? createHistoryStore();
+  const history = options?.history; // optional, provided by host (Electron main)
   const git = options?.git ?? new InMemoryGitService();
   const fcm = options?.fcm ?? new FileChangeManager();
   const projectRoot = options?.projectRoot ?? cfg.projectRoot;
@@ -53,7 +53,7 @@ export function createOrchestrator(options?: { projectRoot?: string; /*history?:
     const handle = new DefaultRunHandle(id, bus);
 
     // Recorder subscribes to run lifecycle for history/export
-    attachRunRecorder(handle);
+    attachRunRecorder(handle, history);
 
     const overlay = new SandboxOverlay({ projectRoot, id });
     overlay.init().catch(() => {});
@@ -69,7 +69,7 @@ export function createOrchestrator(options?: { projectRoot?: string; /*history?:
     const usage: UsageStats = { requests: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0, costUSD: 0 };
     const budgetUSD = params.budgetUSD ?? cfg.budgetUSD;
 
-    const ctx: RunContext = { bus, handle, overlay, fcm, /*history,*/ git, usage, budgetUSD, meta };
+    const ctx: RunContext = { bus, handle, overlay, fcm, history, git, usage, budgetUSD, meta };
     RUNS.set(runId, ctx);
 
     // Emit start
@@ -231,16 +231,16 @@ export { createOrchestrator as default };
 
 // Minimal default start functions for compatibility
 export function startRun(params: StartRunParams): RunHandle {
-  const orch = createOrchestrator();
+  const orch = createOrchestrator({ history: createHistoryStore({ dbPath: './factory.history.sqlite' }) });
   return orch.startRun(params);
 }
 
 export function runTask(params: { projectId: string; taskId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-  const orch = createOrchestrator();
+  const orch = createOrchestrator({ history: createHistoryStore({ dbPath: './factory.history.sqlite' }) });
   return orch.startTaskRun(params);
 }
 
 export function runFeature(params: { projectId: string; taskId: string | number; featureId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-  const orch = createOrchestrator();
+  const orch = createOrchestrator({ history: createHistoryStore({ dbPath: './factory.history.sqlite' }) });
   return orch.startFeatureRun(params);
 }

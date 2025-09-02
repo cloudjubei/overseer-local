@@ -99,6 +99,23 @@ const SETTINGS_API = {
   updateProjectSettings: (projectId, updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT, { projectId, updates }),
 };
 
+// Factory orchestrator API exposed to renderer
+const FACTORY_API = {
+  startTaskRun: (projectId, taskId, options = {}) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_TASK, { projectId, taskId, ...options }),
+  startFeatureRun: (projectId, taskId, featureId, options = {}) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, { projectId, taskId, featureId, ...options }),
+  cancelRun: (runId, reason) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_CANCEL_RUN, { runId, reason }),
+  subscribe: (runId, callback) => {
+    const listener = (_event, data) => {
+      if (data.runId === runId) callback(data.event);
+    };
+    ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
+    ipcRenderer.send(IPC_HANDLER_KEYS.FACTORY_SUBSCRIBE, { runId });
+    return () => {
+      ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
+    };
+  },
+};
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('filesService', FILES_API);
@@ -106,3 +123,4 @@ contextBridge.exposeInMainWorld('chatsService', CHATS_API);
 contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API);
+contextBridge.exposeInMainWorld('factory', FACTORY_API);

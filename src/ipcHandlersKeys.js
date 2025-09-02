@@ -13,7 +13,6 @@ const IPC_HANDLER_KEYS = {
   CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_COMPLETION: "chats:completion",
   CHATS_LIST_MODELS: "chats:list-models",
-  CHATS_SUBSCRIBE: "chats:subscribe",
   CHATS_LIST: "chats:list",
   CHATS_CREATE: "chats:create",
   CHATS_GET: "chats:get",
@@ -59,5 +58,12 @@ const IPC_HANDLER_KEYS = {
   NOTIFICATIONS_MARKALLASREAD: "notifications:mark-all-as-read",
   NOTIFICATIONS_MARKASREAD: "notifications:mark-as-read",
   NOTIFICATIONS_DELETEALL: "notifications:delete-all",
+
+  // Factory (agent orchestrator)
+  FACTORY_START_TASK: "factory:start-task",
+  FACTORY_START_FEATURE: "factory:start-feature",
+  FACTORY_CANCEL_RUN: "factory:cancel",
+  FACTORY_SUBSCRIBE: "factory:subscribe",
+  FACTORY_EVENT: "factory:event",
 }
 export default IPC_HANDLER_KEYS
