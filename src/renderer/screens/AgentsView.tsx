@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useAgents } from '../hooks/useAgents';
-import { useProjectContext } from '../projects/ProjectContext';
+import { useActiveProject, useProjectContext } from '../projects/ProjectContext';
 import type { AgentRun, AgentRunMessage } from '../services/agentsService';
 
 function formatUSD(n?: number) {
@@ -37,7 +37,7 @@ function ConversationView({ run }: { run: AgentRun }) {
               <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.role === 'assistant' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200'}`}>{m.role}</div>
               <div className="flex-1">
                 <pre className="whitespace-pre-wrap text-xs leading-relaxed">{m.content}</pre>
-                <div className="text-[10px] text-neutral-500 mt-1">{m.turn != null ? `turn ${m.turn}` : ''} {m.durationMs ? `\u00b7 ${m.durationMs}ms` : ''}</div>
+                <div className="text-xs text-neutral-500 mt-1">{m.turn != null ? `turn ${m.turn}` : ''} {m.durationMs ? `${m.durationMs}ms` : ''}</div>
               </div>
             </li>
           ))}
@@ -50,11 +50,11 @@ function ConversationView({ run }: { run: AgentRun }) {
 
 export default function AgentsView() {
   const { runs, activeRuns, cancelRun } = useAgents();
-  const { activeProjectId } = useProjectContext();
+  const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
-  const projectRuns = useMemo(() => runs.filter(r => r.projectId === activeProjectId), [runs, activeProjectId]);
-  const activeProjectRuns = useMemo(() => activeRuns.filter(r => r.projectId === activeProjectId), [activeRuns, activeProjectId]);
+  const projectRuns = useMemo(() => runs.filter(r => r.projectId === projectId), [runs, projectId]);
+  const activeProjectRuns = useMemo(() => activeRuns.filter(r => r.projectId === projectId), [activeRuns, projectId]);
 
   useEffect(() => {
     const hash = (window.location.hash || '').replace(/^#/, '');
@@ -78,6 +78,7 @@ export default function AgentsView() {
   };
 
   const selectedRun = findRunById(openRunId || '');
+
 
   return (
     <div className="flex-1 overflow-auto">
@@ -159,10 +160,10 @@ export default function AgentsView() {
                 <tbody>
                   {projectRuns.map(r => (
                     <tr id={`run-${r.runId ?? 'unknown'}`} key={r.runId ?? Math.random().toString(36)} className="border-t border-neutral-200 dark:border-neutral-800">
-                      <td className="px-3 py-2 font-mono text-xs">{(r.runId ?? '').slice(0,8) || '\u2014'}</td>
-                      <td className="px-3 py-2">{r.taskId ?? '\u2014'}{r.featureId ? ` \u00b7 ${r.featureId}` : ''}</td>
+                      <td className="px-3 py-2 font-mono text-xs">{(r.runId ?? '').slice(-8) || ''}</td>
+                      <td className="px-3 py-2">{r.taskId ?? ''}<br/>{r.featureId ?? ''}</td>
                       <td className="px-3 py-2">{r.state}</td>
-                      <td className="px-3 py-2 truncate max-w-[280px]" title={r.message ?? ''}>{r.message ?? '\u2014'}</td>
+                      <td className="px-3 py-2 truncate max-w-[280px]" title={r.message ?? ''}>{r.message ?? ''}</td>
                       <td className="px-3 py-2">{formatUSD(r.costUSD)}</td>
                       <td className="px-3 py-2">{r.promptTokens ?? 0} / {r.completionTokens ?? 0}</td>
                       <td className="px-3 py-2">{formatTs(r.startedAt)}</td>

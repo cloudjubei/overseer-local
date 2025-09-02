@@ -6,11 +6,20 @@ function formatUSD(n?: number) {
   return `$${n.toFixed(4)}`;
 }
 
-function formatTs(iso?: string) {
+function formatDate(iso?: string) {
   if (!iso) return '';
   try {
     const d = new Date(iso);
-    return d.toLocaleString();
+    return d.toLocaleDateString();
+  } catch {
+    return iso;
+  }
+}
+function formatTime(iso?: string) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString();
   } catch {
     return iso;
   }
@@ -107,7 +116,7 @@ export default function AllAgentsView() {
                       <td className="px-3 py-2 text-right">{formatUSD(m.cost)}</td>
                       <td className="px-3 py-2 text-right">{formatUSD(m.avgCost)}</td>
                       <td className="px-3 py-2 text-right">{m.prompt} / {m.completion}</td>
-                      <td className="px-3 py-2 text-right">{formatTs(m.lastUpdated)}</td>
+                      <td className="px-3 py-2 text-right">{formatDate(m.lastUpdated)}<br/>{formatTime(m.lastUpdated)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -142,13 +151,13 @@ export default function AllAgentsView() {
                     <tr key={r.runId} className="border-t border-neutral-200 dark:border-neutral-800">
                       <td className="px-3 py-2 font-mono text-xs">{r.runId.slice(0,8)}</td>
                       <td className="px-3 py-2">{r.projectId}</td>
-                      <td className="px-3 py-2">{r.taskId ?? '\u2014'}{r.featureId ? ` \u00b7 ${r.featureId}` : ''}</td>
-                      <td className="px-3 py-2">{r.provider ?? '\u2014'}{r.model ? ` / ${r.model}` : ''}</td>
+                      <td className="px-3 py-2">{r.taskId ?? ''}<br/>{r.featureId ? `${r.featureId}` : ''}</td>
+                      <td className="px-3 py-2">{r.provider ?? ''}<br/>{r.model ? `${r.model}` : ''}</td>
                       <td className="px-3 py-2">{r.state}</td>
                       <td className="px-3 py-2 truncate max-w-[320px]" title={r.message ?? ''}>{r.message ?? '\u2014'}</td>
                       <td className="px-3 py-2 text-right">{formatUSD(r.costUSD)}</td>
                       <td className="px-3 py-2 text-right">{(r.promptTokens ?? 0)} / {(r.completionTokens ?? 0)}</td>
-                      <td className="px-3 py-2 text-right">{formatTs(r.updatedAt)}</td>
+                      <td className="px-3 py-2 text-right">{formatDate(r.updatedAt)}<br/>{formatTime(r.updatedAt)}</td>
                     </tr>
                   ))}
                 </tbody>

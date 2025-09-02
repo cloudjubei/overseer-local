@@ -82,12 +82,12 @@ function toolSigsForAgent(agent: string, tools: TaskUtils, git: GitManager): [Re
 }
 
 function constructSystemPrompt(agent: string, task: Task, feature: Feature | null, agentSystemPrompt: string, context: string, toolSignatures: string[]): string {
-  const plan = feature && (agent === 'developer' || agent === 'tester' || agent === 'contexter' || agent === 'planner') ? (feature.plan ?? 'EMPTY') : '';
-  const acceptance = feature && (agent === 'developer' || agent === 'tester') ? (feature.acceptance ?? []) : [];
-  const acceptanceStr = acceptance.map((c, i) => `${i + 1}. ${c}`).join('\n');
+  const plan = feature && (agent === 'developer' || agent === 'tester' || agent === 'contexter' || agent === 'planner') ? feature.plan : undefined;
+  const acceptance = feature && (agent === 'developer' || agent === 'tester') ? feature.acceptance : undefined
+  const acceptanceStr = acceptance?.map((c, i) => `${i + 1}. ${c}`).join('\n');
   const toolSignaturesStr = toolSignatures.map(sig => `- ${sig}`).join('\n');
 
-  const featureBlock = feature ? `#ASSIGNED FEATURE: ${feature.title} (ID: ${feature.id}${NEWLINE}##DESCRIPTION: ${feature.description}${NEWLINE}` : '';
+  const featureBlock = feature ? `#ASSIGNED FEATURE: ${feature.title} (ID: ${feature.id})${NEWLINE}##DESCRIPTION: ${feature.description}${NEWLINE}` : '';
   const featureRejection = feature?.rejection ? `##REJECTION REASON:${NEWLINE}${feature.rejection}${NEWLINE}` : '';
   const taskRejection = task.rejection ? `##REJECTION REASON:${NEWLINE}${task.rejection}` : '';
 
@@ -102,14 +102,12 @@ function constructSystemPrompt(agent: string, task: Task, feature: Feature | nul
     '',
     featureBlock,
     featureRejection,
-    '#THE PLAN',
-    plan,
+    plan ? '#THE PLAN' + plan : '',
     '',
-    '#ACCEPTANCE CRITERIA:',
-    acceptanceStr,
+    acceptanceStr ? '#ACCEPTANCE CRITERIA:' + acceptanceStr : '',
     '',
     '#TOOL SIGNATURES:',
-    `'${toolSignaturesStr}'`,
+    `${toolSignaturesStr}`,
     '',
     '#RESPONSE FORMAT INSTRUCTIONS:',
     PROTOCOL_INSTRUCTIONS,
