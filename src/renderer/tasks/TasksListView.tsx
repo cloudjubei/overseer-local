@@ -73,7 +73,7 @@ export default function TasksListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project } = useActiveProject()
-  const { appSettings } = useAppSettings()
+  const { appSettings, setTasksListViewSorting, setTasksViewMode } = useAppSettings()
   const { tasksById, updateTask, reorderTask, getReferencesInbound, getReferencesOutbound } = useTasks()
 
   useEffect(() => {
@@ -98,16 +98,15 @@ export default function TasksListView() {
 
   useEffect(() => {
     if (!isLoaded) return
-    //TODO:
-    // appSettings.setTasksViewMode(view)
-  }, [view, isLoaded])
+    // Persist view mode
+    setTasksViewMode(view)
+  }, [view, isLoaded, setTasksViewMode])
   
   // Persist list sorting when in list view (after initial load)
   useEffect(() => {
     if (!isLoaded) return
-    //TODO:
-    // appSettings.setTasksListViewSorting(sortBy)
-  }, [sortBy, isLoaded])
+    setTasksListViewSorting(sortBy)
+  }, [sortBy, isLoaded, setTasksListViewSorting])
   
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
