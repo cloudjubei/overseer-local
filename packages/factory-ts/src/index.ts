@@ -8,6 +8,7 @@ export * from './git';
 export * from './db/store';
 export * as artifacts from './artifacts';
 export * from './config';
+export * from './orchestrator';
 
 // Minimal factory API to satisfy existing tests
 export class OverseerFactory {

@@ -18,14 +18,17 @@ This document describes how files and directories are organised in this reposito
   - src/chat/: Chat providers, manager, and storage.
   - src/tools/: Developer and agent tooling (preview analysis, formatting, compile checks, docker helpers).
     - src/tools/preview/: Preview analyzer tooling.
+    - src/tools/factory/: Integration layer for the local factory-ts package (orchestrator bridge and helpers).
   - src/capture/: Screenshot capture service (main process).
   - src/files/: Files manager and per-project storage.
   - src/projects/: Projects manager and indexing.
   - src/tasks/: Tasks manager and per-project storage.
   - src/notifications/: Notifications manager and IPC integration.
   - src/preferences/: Preferences manager and user settings storage (system-wide user preferences such as last active project, task view mode, list sorting, notification settings), with IPC exposure.
-- scripts/: Project automation scripts and CLIs (e.g., preview scanning).
+- scripts/: Project automation scripts and CLIs (e.g., preview scanning, runAgent.mjs runner for factory-ts).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
+- packages/: Local monorepo packages used by the app.
+  - packages/factory-ts/: Agent orchestration library used by the app and CLI. See packages/factory-ts/FACTORY_TS_OVERVIEW.md.
 
 Also present at repo root:
 - .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
@@ -64,3 +67,8 @@ Notes:
 
 ## Agent Preview Tools
 - See docs/PREVIEW_TOOL.md and docs/PREVIEW_RUN_TOOL.md for usage details.
+
+## Factory TS Integration
+- Library location: packages/factory-ts (local package).
+- App bridge: src/tools/factory/orchestratorBridge.ts provides startTaskRun/startFeatureRun helpers that produce an EventSource-like stream for UI consumption.
+- CLI: scripts/runAgent.mjs streams JSONL events for a run. Build the package with npm run factory:build and then use npm run run:agent.

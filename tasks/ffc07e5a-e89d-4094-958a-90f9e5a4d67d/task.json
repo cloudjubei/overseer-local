@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "3cd73d96-21d0-488c-a484-2ed49a70032d",
-      "status": "-",
+      "status": "+",
       "title": "Add the local 'factory-ts' package into this project",
       "description": "The package is located at `packages/factory-ts`\nThe factor-ts documentation is\n`packages/factory-ts/FACTORY_TS_OVERVIEW.md` whereas the configuration documantion is: `packages/factory-ts/CONFIGURATION.md`",
       "plan": "",

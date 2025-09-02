@@ -13,7 +13,9 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "factory:build": "npm --prefix packages/factory-ts run build",
+    "run:agent": "node scripts/runAgent.mjs"
   },
   "keywords": [],
   "author": {
