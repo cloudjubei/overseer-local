@@ -4,6 +4,7 @@ import FilesView from '../screens/FilesView';
 import SettingsView from '../screens/SettingsView';
 import ChatView from '../screens/ChatView';
 import NotificationsView from '../screens/NotificationsView';
+import AgentsView from '../screens/AgentsView';
 import { useNavigator } from './Navigator';
 import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
@@ -30,6 +31,7 @@ const NAV_ITEMS: NavDef[] = [
   { id: 'home', label: 'Home', view: 'Home', icon: <span aria-hidden>🏠</span>, accent: 'brand' },
   { id: 'files', label: 'Files', view: 'Files', icon: <span aria-hidden>📚</span>, accent: 'purple' },
   { id: 'chat', label: 'Chat', view: 'Chat', icon: <span aria-hidden>💬</span>, accent: 'teal' },
+  { id: 'agents', label: 'Agents', view: 'Agents', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
   { id: 'notifications', label: 'Notifications', view: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'teal' },
   { id: 'settings', label: 'Settings', view: 'Settings', icon: <span aria-hidden>⚙️</span>, accent: 'gray' },
 ];
@@ -174,6 +176,7 @@ export default function SidebarView({}: SidebarProps) {
     if (currentView === 'Settings') return <div key="Settings" className="flex flex-col flex-1 min-h-0 view-transition"><SettingsView /></div>;
     if (currentView === 'Chat') return <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition"><ChatView /></div>;
     if (currentView === 'Notifications') return <div key="Notifications" className="flex flex-col flex-1 min-h-0 view-transition"><NotificationsView /></div>;
+    if (currentView === 'Agents') return <div key="Agents" className="flex flex-col flex-1 min-h-0 view-transition"><AgentsView /></div>;
     return <div key="Home" className="flex flex-col flex-1 min-h-0 view-transition"><TasksView /></div>;
   }, [currentView]);
 
