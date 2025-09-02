@@ -49,7 +49,7 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts `orchestrator.ts` needs an implementation of a `CompletionClient`",
       "description": "`orchestrator.ts` is mirroring `run_local_agent.py` - which uses a library `litellm` to communicate with LLMs.\nThe `orchestrator.ts` should be a self-contained library - just like `run_local_agent.py` was. If the correct configuration is passed to it, it should run the LLM conversations. Thus, it requires an equivalent of `litellm` locally to run.",
       "plan": "",

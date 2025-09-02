@@ -38,6 +38,8 @@ This document describes how files and directories are organised in this reposito
 - packages/: Local monorepo packages used by the app.
   - packages/factory-ts/: Agent orchestration library used by the app and CLI. See packages/factory-ts/FACTORY_TS_OVERVIEW.md.
     - packages/factory-ts/src/taskUtils.ts: TypeScript implementation mirroring Python task_utils.py, used by orchestrator.ts for file/task/feature/test operations and Git commits.
+    - packages/factory-ts/src/orchestrator.ts: Orchestrator that mirrors Python run_local_agent.py conversation loop.
+    - packages/factory-ts/src/completion.ts: Self-contained CompletionClient that supports OpenAI-compatible chat APIs (OpenAI, Azure OpenAI, Together, Groq, OpenRouter, Ollama, or custom baseURL) and a mock client for tests.
 
 Also present at repo root:
 - .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
