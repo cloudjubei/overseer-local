@@ -2,7 +2,7 @@
   "id": "ffc07e5a-e89d-4094-958a-90f9e5a4d67d",
   "status": "-",
   "title": "Integrate the factory-ts package",
-  "description": "A local package was created that is currently placed in `packages/factory-ts` relative to this project.\nThis package allows calling agents to run on specific projects, tasks and features. It needs to be integrated into this project so agents can be ran on specific tasks or features and agent performance can be monitored. If at any point changes are required in the factory-ts - those can be applied directly.",
+  "description": "A local package was created that is currently placed in `packages/factory-ts` relative to this project.\nThis package allows calling agents to run on specific projects, tasks and features. It needs to be integrated into this project so agents can be ran on specific tasks or features and agent performance can be monitored. This whole package was based on 3 python scripts that are palced under packages/factory-ts/blueprint",
   "features": [
     {
       "id": "3cd73d96-21d0-488c-a484-2ed49a70032d",
@@ -20,45 +20,46 @@
     },
     {
       "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
-      "status": "+",
-      "title": "factory-ts needs to mirror original python scripts",
-      "description": "factory-ts has been adapted from working python scripts that run agents. factory-ts should do EXACTLY the same as is the orchestrator flow inside run_local_agent.py.\nThat class references a few markdown files that are always supplied to the agents - those are all under packages\\factory-ts\\docs . There's no need to inspect them - just use them in exactly the same way as they are used in run_local_agent.py.\nFor this feature to be complete the orchestrator should mirror exactly the run_local_agent.py orchestrator. task_utils.py is only supplied as reference, as in this project (Overseer) we already have most of these tools in place. This feature is only about the orchestrator, places where equivalent task_utils.py and git_manager.py functions would be used can be stubbed out for now.",
+      "status": "-",
+      "title": "factory-ts orchestrator needs to mirror original python script",
+      "description": "orchestrator.ts should do EXACTLY the same as is the orchestrator flow inside run_local_agent.py\nIt must allow running agents on tasks or a task's specific feature until done or blocked.\nGo over run_local_agent.py and make sure the functionality is mirrored exactly inside orchestrator.ts",
       "plan": "",
       "context": [
         "packages/factory-ts/blueprint/git_manager.py",
         "packages/factory-ts/blueprint/task_utils.py",
-        "packages/factory-ts/blueprint/run_local_agent.py"
+        "packages/factory-ts/blueprint/run_local_agent.py",
+        "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
-      "status": "+",
-      "title": "TaskDetailsView improvements after running an agent",
-      "description": "The AgentRunBullet should use the same chip styles as a DependencyBullet.\nBoth features and tasks can only ever have 1 agent running on them.",
+      "status": "-",
+      "title": "factory-ts orchestrator.ts needs an implementation of a git manager",
+      "description": "orchestrator.ts is mirroring run_local_agent.py - which uses git_manager.py\nThe equivalent to git_manager.py needs to also exist inside factory-ts so that orchestrator.ts can use it.",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/components/agents/AgentRunBullet.tsx",
-        "src/renderer/screens/TasksView.tsx",
-        "src/renderer/components/tasks/DependencyBullet.tsx"
+        "packages/factory-ts/src/orchestrator.ts",
+        "packages/factory-ts/blueprint/git_manager.py",
+        "packages/factory-ts/blueprint/run_local_agent.py"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "+",
-      "title": "Running an agent doesn't work",
-      "description": "There are no messages exchanged when an agent is run (on a task or a feature). It seems the whole orchestrator loop isn't sending messages to an LLM. Write more logs so it's possible to determine where things go wrong (ideally you can find it and fix).\nonly console logs like the one below get emitted:\n[factory] event run_mf2wd43g_e1om5p run/progress/snapshot usage/update",
+      "status": "-",
+      "title": "factory-ts orchestrator.ts needs an implementation of task_utils",
+      "description": "orchestrator.ts is mirroring run_local_agent.py - which uses task_utils.py\nThe equivalent to task_utils.py needs to also exist inside factory-ts so that orchestrator.ts can use it.\nNote that a lot of these tools already exist inside the Overseer (TasksManager, ProjectsManager and FilesManager) - thus their functionalities should be supplied into the orchestrator.ts in some clean way.",
       "plan": "",
       "context": [
-        "src/renderer/screens/AgentsView.tsx",
-        "src/renderer/utils/LLMConfigManager.ts",
-        "src/renderer/hooks/useLLMConfig.ts",
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/tasks/TasksListView.tsx"
+        "packages/factory-ts/blueprint/run_local_agent.py",
+        "packages/factory-ts/blueprint/task_utils.py",
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/files/manager.js",
+        "src/projects/manager.js",
+        "src/tasks/manager.js"
       ],
       "acceptance": [],
       "dependencies": []

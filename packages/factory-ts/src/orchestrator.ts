@@ -36,7 +36,7 @@ const PROTOCOL_INSTRUCTIONS = (() => {
 
 function toolSigsForAgent(agent: string, tools: TaskUtils, git: GitManager): [Record<string, Function>, string[]] {
   const base: Record<string, [Function, string]> = {
-    read_files: [tools.readFiles, "read_files(paths: list[str]) -> list[str>" as any],
+    read_files: [tools.readFiles, "read_files(paths: list[str]) -> list[str]" as any],
     search_files: [tools.searchFiles, "search_files(query: str, path: str = '.') -> list[str]"],
     block_feature: [ (args: { task_id: string; feature_id: string; reason: string }) => tools.blockFeature?.(args.task_id, args.feature_id, args.reason, agent, git), 'block_feature(reason: str)'],
     finish_feature: [ (args: { task_id: string; feature_id: string }) => tools.finishFeature?.(args.task_id, args.feature_id, agent, git), 'finish_feature()'],
@@ -236,11 +236,12 @@ export async function runOrchestrator(opts: {
   agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
   taskId?: string | null;
   projectDir?: string | null;
-  tools: TaskUtils;
-  git: GitManager;
   completion: CompletionClient;
 }) {
-  const { model, agentType, taskId, projectDir, tools, git, completion } = opts;
+  const tools : TaskUtils = new TaskUtils()
+  const git : GitManager = new GitManager()
+  
+  const { model, agentType, taskId, projectDir, completion } = opts;
 
   if (projectDir) tools.setProjectRoot(projectDir);
 

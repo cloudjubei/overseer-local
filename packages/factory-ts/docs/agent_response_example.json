@@ -1,9 +1,12 @@
 {
-  "thoughts": "I will read the file organization, then list files, then write the feature implementation, and finally run tests.",
+  "thoughts": "A string explaining your reasoning, analysis, and plan for this step. For example: 'I need to create the main application file and then add the basic boilerplate.'",
   "tool_calls": [
     {
-      "tool_name": "list_files",
-      "arguments": { "path": "." }
+      "tool_name": "name_of_the_tool_to_call",
+      "arguments": {
+        "arg1": "value1",
+        "arg2": "value2"
+      }
     }
   ]
 }

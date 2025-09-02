@@ -7,24 +7,11 @@ import traceback
 from dotenv import load_dotenv
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable, Tuple
-import tempfile
-import shutil
 import subprocess
 
 # Add project root (framework root) to sys.path
 framework_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(framework_root))
-
-DEPRECATION_BANNER = """
-[DEPRECATION NOTICE]
-This Python orchestrator (scripts/run_local_agent.py) is deprecated.
-Prefer the Node CLI:
-  npx -y tsx scripts/runAgent.ts --project-root . --task-id <id>
-See docs/RUN_AGENT_CLI.md for details.
-
-This script will attempt to delegate to the Node CLI automatically when available.
-Set FACTORY_FORCE_PYTHON=1 or FACTORY_BRIDGE_TO_NODE=0 to skip delegation.
-""".strip()
 
 # Lazy-safe import for litellm
 try:
@@ -294,7 +281,7 @@ def _run_agent_conversation(model: str, available_tools: Dict[str, Callable], sy
     return True
 
 
-def run_orchestrator(model: str, agent_type: str, task_id: Optional[str], project_dir: Optional[str] = None):
+def run_orchestrator(model: str, agent_type: str, task_id: str, project_dir: Optional[str] = None):
     """
     Main orchestration loop. It can target a child project directory or the current working directory.
     """
@@ -304,16 +291,12 @@ def run_orchestrator(model: str, agent_type: str, task_id: Optional[str], projec
         print(f"Target project root: {target_root}")
         task_utils.set_project_root(target_root)
 
-        if task_id:
-            current_task = task_utils.get_task(task_id) 
-        else:
-            current_task = task_utils.find_next_pending_task()
+        current_task = task_utils.get_task(task_id) 
 
         if not current_task:
             print("No available tasks to work on in the repository.")
             return
         
-        task_id = current_task.get('id')
         print(f"Selected Task: [{task_id}] {current_task.get('title')}")
         
         git_manager = GitManager(str(target_root))
@@ -352,15 +335,13 @@ def run_orchestrator(model: str, agent_type: str, task_id: Optional[str], projec
         print("------------------------\n")
 
 def main():
-    parser = argparse.ArgumentParser(description="Run an autonomous AI agent (deprecated Python orchestrator).")
-    parser.add_argument("--model", type=str, default="gpt-5", help="LLM model name (legacy only).")
-    parser.add_argument("--agent", type=str, required=True, choices=['developer', 'tester', 'planner', 'contexter', 'speccer'], help="Agent persona (legacy only).")
-    parser.add_argument("--task", type=str, help="Optional: Specify a task ID to work on.")
+    parser = argparse.ArgumentParser(description="Run an autonomous AI agent.")
+    parser.add_argument("--model", type=str, default="gpt-5", help="LLM model name.")
+    parser.add_argument("--agent", type=str, required=True, choices=['developer', 'tester', 'planner', 'contexter', 'speccer'], help="Agent persona.")
+    parser.add_argument("--task", type=str, required=True, help="Specify a task ID to work on.")
     parser.add_argument("--project-dir", type=str, help="Optional: Target child project directory.")
     
     args = parser.parse_args()
-
-    print(DEPRECATION_BANNER)
 
     # Attempt to bridge to Node CLI (only pass minimal args that map clearly)
     bridged = try_bridge_to_node(args.project_dir, args.task)

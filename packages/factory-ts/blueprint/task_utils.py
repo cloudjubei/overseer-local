@@ -455,19 +455,6 @@ def run_test(task_id: str, feature_id: str) -> str:
 
 # --- Orchestrator Helpers ---
 
-def find_next_pending_task() -> Optional[Task]: # TODO needs to be updated to take into account project.json ordering
-    """Scans task directories and returns the first task that is pending or in progress."""
-    if not _get_tasks_dir().exists(): return None
-    for task_dir in sorted(_get_tasks_dir().iterdir(), key=lambda x: int(x.name)):
-        if task_dir.is_dir():
-            try:
-                task_id = task_dir.name
-                task = get_task(task_id)
-                if task.get("status") in ["-", "~"]: return task
-            except (ValueError, FileNotFoundError): continue
-    return None
-
-
 def find_next_available_feature(task: Task, exclude_ids: set = set(), ignore_depedencies: bool = False) -> Optional[Feature]:
     """
     Finds the first pending feature in a task whose dependencies are all met,
