@@ -2,7 +2,7 @@ import { DefaultRunHandle, SimpleEventBus, makeRunId } from './events/runtime';
 import { RunEvent, RunHandle, toISO } from './events/types';
 import { FileChangeManager, FileChange } from './files/fileChangeManager';
 import { SandboxOverlay } from './files/sandboxOverlay';
-import { createHistoryStore, HistoryStore } from './db/store';
+// import { createHistoryStore, HistoryStore } from './db/store';
 import { InMemoryGitService, GitService } from './git/gitService';
 import { attachRunRecorder } from './artifacts/recorder';
 import { getConfig } from './config';
@@ -30,7 +30,7 @@ type RunContext = {
   handle: DefaultRunHandle;
   overlay: SandboxOverlay;
   fcm: FileChangeManager;
-  history: HistoryStore;
+  // history: HistoryStore;
   git: GitService;
   usage: UsageStats;
   usageTimer?: any;
@@ -40,9 +40,9 @@ type RunContext = {
 
 const RUNS = new Map<string, RunContext>();
 
-export function createOrchestrator(options?: { projectRoot?: string; history?: HistoryStore; git?: GitService; fcm?: FileChangeManager }) {
+export function createOrchestrator(options?: { projectRoot?: string; /*history?: HistoryStore;*/ git?: GitService; fcm?: FileChangeManager }) {
   const cfg = getConfig();
-  const history = options?.history ?? createHistoryStore();
+  // const history = options?.history ?? createHistoryStore();
   const git = options?.git ?? new InMemoryGitService();
   const fcm = options?.fcm ?? new FileChangeManager();
   const projectRoot = options?.projectRoot ?? cfg.projectRoot;
@@ -69,7 +69,7 @@ export function createOrchestrator(options?: { projectRoot?: string; history?: H
     const usage: UsageStats = { requests: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0, costUSD: 0 };
     const budgetUSD = params.budgetUSD ?? cfg.budgetUSD;
 
-    const ctx: RunContext = { bus, handle, overlay, fcm, history, git, usage, budgetUSD, meta };
+    const ctx: RunContext = { bus, handle, overlay, fcm, /*history,*/ git, usage, budgetUSD, meta };
     RUNS.set(runId, ctx);
 
     // Emit start

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import os from 'node:os';
-import { setRecorderLimits, TruncationStrategy } from '../errors/redact';
+import { TruncationStrategy } from '../errors/redact';
+import { setRecorderLimits } from '../artifacts/recorder';
 
 export type ProviderKeys = {
   openai?: { apiKey?: string };

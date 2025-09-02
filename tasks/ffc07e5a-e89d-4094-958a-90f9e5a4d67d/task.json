@@ -93,6 +93,16 @@
       ],
       "acceptance": [],
       "dependencies": []
+    },
+    {
+      "id": "1cfab451-03b4-415a-b5b3-624787c2ec13",
+      "status": "-",
+      "title": "Electron errors - when using history or trying to run an agent",
+      "description": "Module \"node:path\" has been externalized for browser compatibility. Cannot access \"node:path.resolve\" in client code.  See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.\n    at Object.get (__vite-browser-external:node:path:3:11)\n    at resolveConfig (index.ts:100:28)\n    at getConfig (index.ts:185:39)\n    at createOrchestrator (orchestrator.ts:44:15)\n    at runFeature (orchestrator.ts:244:16)\n    at startFeatureRun (orchestratorBridge.ts:21:18)\n    at AgentsServiceImpl.startFeatureAgent (agentsService.ts:135:32)\n    at useAgents.ts:13:113\n    at onClick (TaskDetailsView.tsx:384:128)",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -101,6 +111,7 @@
     "89144d73-7cdd-4984-9422-2341c2ed77b5": 3,
     "2f441c51-532f-494b-b29b-ae9920a75750": 4,
     "92caffb1-e207-4cb0-a774-0e69e8d719ea": 5,
-    "bce3592f-e8e3-440c-9675-acff8965f3d8": 6
+    "1cfab451-03b4-415a-b5b3-624787c2ec13": 6,
+    "bce3592f-e8e3-440c-9675-acff8965f3d8": 7
   }
 }

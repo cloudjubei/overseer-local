@@ -1,10 +1,11 @@
 import { defaultFileChangeManager, FileChangeManager, ProposalSummary, FileChange } from '../files/fileChangeManager';
 import { defaultGitService, GitService } from '../git/gitService';
-import { defaultHistoryStore, HistoryStore, RunId } from '../db/store';
+// import { defaultHistoryStore, HistoryStore, RunId } from '../db/store';
 
 export interface ReviewOptions {
   message?: string;
-  runId?: RunId;
+  // runId?: RunId;
+  runId?: string
 }
 
 export interface ListFilesResponse {
@@ -22,7 +23,7 @@ export class ReviewService {
   constructor(
     private files: FileChangeManager = defaultFileChangeManager,
     private git: GitService = defaultGitService,
-    private history: HistoryStore = defaultHistoryStore
+    // private history: HistoryStore = defaultHistoryStore
   ) {}
 
   async listProposalFiles(proposalId: string): Promise<ListFilesResponse> {
@@ -47,16 +48,17 @@ export class ReviewService {
     const sha = await this.git.commitProposal(proposalId, opts.message ?? `Accept all changes for ${proposalId}`);
 
     const summary = this.files.getSummary(proposalId);
-    await this.history.recordCommit({
-      runId: opts.runId,
-      proposalId,
-      commitSha: sha,
-      message: opts.message,
-      files: all,
-      counts: summary.counts,
-      createdAt: Date.now(),
-    });
-    await this.history.updateProposalState(proposalId, 'accepted');
+    //TODO:
+    // await this.history.recordCommit({
+    //   runId: opts.runId,
+    //   proposalId,
+    //   commitSha: sha,
+    //   message: opts.message,
+    //   files: all,
+    //   counts: summary.counts,
+    //   createdAt: Date.now(),
+    // });
+    // await this.history.updateProposalState(proposalId, 'accepted');
     return { commitSha: sha, summary };
   }
 

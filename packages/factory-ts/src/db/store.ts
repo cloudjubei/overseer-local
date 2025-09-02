@@ -1,8 +1,8 @@
 import { getConfig } from '../config';
+import { ProposalState } from '../events';
 
 export type RunId = string;
 export type ProposalId = string;
-export type ProposalState = 'open' | 'partiallyAccepted' | 'accepted' | 'rejected';
 
 export interface CommitRecord {
   runId?: RunId;
