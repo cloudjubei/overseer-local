@@ -1,7 +1,6 @@
 import { ipcMain, webContents } from 'electron';
-import IPC_HANDLER_KEYS from '../ipcHandlersKeys.js';
+import IPC_HANDLER_KEYS from '../../ipcHandlersKeys.js';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 // Load local package factory-ts from monorepo
 // Use dynamic import to avoid issues with CJS/ESM resolution in Electron
