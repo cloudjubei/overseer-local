@@ -8,6 +8,7 @@ const FRAMEWORK_ROOT = path.resolve(process.cwd());
 const NEWLINE = '\n';
 
 function loadAgentDocs(agent: string): string {
+  // Mirror Python: docs live under packages/factory-ts/docs
   const p = path.join(FRAMEWORK_ROOT, 'packages', 'factory-ts', 'docs', `AGENT_${agent.toUpperCase()}.md`);
   return fs.readFileSync(p, 'utf8');
 }
@@ -17,7 +18,7 @@ function loadProtocolExample(): string {
     const p = path.join(FRAMEWORK_ROOT, 'packages', 'factory-ts', 'docs', 'agent_response_example.json');
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
     return JSON.stringify(data, null, 2);
-  } catch {
+  } catch (e) {
     return '{\n  "thoughts": "Your reasoning here...",\n  "tool_calls": [ ... ]\n}';
   }
 }
@@ -34,45 +35,46 @@ const PROTOCOL_INSTRUCTIONS = (() => {
   ].join('\n');
 })();
 
-function toolSigsForAgent(agent: string, tools: TaskUtils, git: GitManager): [Record<string, Function>, string[]] {
-  const base: Record<string, [Function, string]> = {
-    read_files: [tools.readFiles, "read_files(paths: list[str]) -> list[str]" as any],
-    search_files: [tools.searchFiles, "search_files(query: str, path: str = '.') -> list[str]"],
-    block_feature: [ (args: { task_id: string; feature_id: string; reason: string }) => tools.blockFeature?.(args.task_id, args.feature_id, args.reason, agent, git), 'block_feature(reason: str)'],
-    finish_feature: [ (args: { task_id: string; feature_id: string }) => tools.finishFeature?.(args.task_id, args.feature_id, agent, git), 'finish_feature()'],
-    list_files: [tools.listFiles, 'list_files(path: str)']
+function toolSigsForAgent(agent: string, tools: TaskUtils, git: GitManager): [Record<string, (args: any) => Promise<any> | any>, string[]] {
+  const base: Record<string, [(args: any) => Promise<any> | any, string]> = {
+    read_files: [ (args: { paths: string[] }) => tools.readFiles(args.paths), "read_files(paths: list[str]) -> list[str]" ],
+    search_files: [ (args: { query: string; path?: string }) => tools.searchFiles(args.query, args.path ?? '.'), "search_files(query: str, path: str = '.') -> list[str]" ],
+    block_feature: [ (args: { task_id: string; feature_id: string; reason: string }) => tools.blockFeature?.(args.task_id, args.feature_id, args.reason, agent, git), 'block_feature(reason: str)' ],
+    finish_feature: [ (args: { task_id: string; feature_id: string }) => tools.finishFeature?.(args.task_id, args.feature_id, agent, git), 'finish_feature()' ],
+    list_files: [ (args: { path: string }) => tools.listFiles(args.path), 'list_files(path: str)' ],
   };
 
-  const agentTools: Record<string, [Function, string]> = {};
+  const agentTools: Record<string, [(args: any) => Promise<any> | any, string]> = {};
+
   if (agent === 'speccer') {
-    agentTools.create_feature = [ (args: { task_id: string; title: string; description: string }) => tools.createFeature?.(args.task_id, args.title, args.description), 'create_feature(title: str, description: str)'];
-    agentTools.finish_spec = [ (args: { task_id: string }) => tools.finishSpec?.(args.task_id, agent, git), 'finish_spec()'];
-    agentTools.block_task = [ (args: { task_id: string; reason: string }) => tools.blockTask?.(args.task_id, args.reason, agent, git), 'block_task()'];
+    agentTools.create_feature = [ (args: { task_id: string; title: string; description: string }) => tools.createFeature?.(args.task_id, args.title, args.description), 'create_feature(title: str, description: str)' ];
+    agentTools.finish_spec = [ (args: { task_id: string }) => tools.finishSpec?.(args.task_id, agent, git), 'finish_spec()' ];
+    agentTools.block_task = [ (args: { task_id: string; reason: string }) => tools.blockTask?.(args.task_id, args.reason, agent, git), 'block_task()' ];
   } else if (agent === 'developer') {
-    if (tools.writeFile) agentTools.write_file = [ tools.writeFile, 'write_file(filename: str, content: str)' ];
-    if (tools.renameFile) agentTools.rename_file = [ tools.renameFile, 'rename_file(filename: str, new_filename: str)' ];
-    if (tools.deleteFile) agentTools.delete_file = [ tools.deleteFile, 'delete_file(filename: str)' ];
-    if (tools.runTest) agentTools.run_test = [ (args: { task_id: string; feature_id: string }) => tools.runTest?.(args.task_id, args.feature_id), 'run_test() -> str' ];
+    agentTools.write_file = [ (args: { filename: string; content: string }) => tools.writeFile(args.filename, args.content), 'write_file(filename: str, content: str)' ];
+    agentTools.rename_file = [ (args: { filename: string; new_filename: string }) => tools.renameFile(args.filename, args.new_filename), 'rename_file(filename: str, new_filename: str)' ];
+    agentTools.delete_file = [ (args: { filename: string }) => tools.deleteFile(args.filename), 'delete_file(filename: str)' ];
+    agentTools.run_test = [ (args: { task_id: string; feature_id: string }) => tools.runTest?.(args.task_id, args.feature_id), 'run_test() -> str' ];
   } else if (agent === 'planner') {
-    if (tools.updateFeaturePlan) agentTools.update_feature_plan = [ (args: { task_id: string; feature_id: string; plan: any }) => tools.updateFeaturePlan?.(args.task_id, args.feature_id, args.plan), 'update_feature_plan(plan: str)' ];
+    agentTools.update_feature_plan = [ (args: { task_id: string; feature_id: string; plan: any }) => tools.updateFeaturePlan?.(args.task_id, args.feature_id, args.plan), 'update_feature_plan(plan: str)' ];
   } else if (agent === 'tester') {
-    if (tools.updateAcceptanceCriteria) agentTools.update_acceptance_criteria = [ (args: { task_id: string; feature_id: string; criteria: string[] }) => tools.updateAcceptanceCriteria?.(args.task_id, args.feature_id, args.criteria), 'update_acceptance_criteria(criteria: list[str])' ];
-    if (tools.updateTest) agentTools.update_test = [ (args: { task_id: string; feature_id: string; test: string }) => tools.updateTest?.(args.task_id, args.feature_id, args.test), 'update_test(test: str)' ];
-    if (tools.runTest) agentTools.run_test = [ (args: { task_id: string; feature_id: string }) => tools.runTest?.(args.task_id, args.feature_id), 'run_test() -> str' ];
+    agentTools.update_acceptance_criteria = [ (args: { task_id: string; feature_id: string; criteria: string[] }) => tools.updateAcceptanceCriteria?.(args.task_id, args.feature_id, args.criteria), 'update_acceptance_criteria(criteria: list[str])' ];
+    agentTools.update_test = [ (args: { task_id: string; feature_id: string; test: string }) => tools.updateTest?.(args.task_id, args.feature_id, args.test), 'update_test(test: str)' ];
+    agentTools.run_test = [ (args: { task_id: string; feature_id: string }) => tools.runTest?.(args.task_id, args.feature_id), 'run_test() -> str' ];
   } else if (agent === 'contexter') {
-    if (tools.updateFeatureContext) agentTools.update_feature_context = [ (args: { task_id: string; feature_id: string; context: string[] }) => tools.updateFeatureContext?.(args.task_id, args.feature_id, args.context), 'update_feature_context(context: list[str])' ];
+    agentTools.update_feature_context = [ (args: { task_id: string; feature_id: string; context: string[] }) => tools.updateFeatureContext?.(args.task_id, args.feature_id, args.context), 'update_feature_context(context: list[str])' ];
   }
 
-  const all = { ...base, ...agentTools } as Record<string, [Function, string]>;
-  const functions: Record<string, Function> = {};
+  const merged = { ...base, ...agentTools };
+  const funcs: Record<string, (args: any) => Promise<any> | any> = {};
   const sigs: string[] = [];
-  for (const [name, [fn, sig]] of Object.entries(all)) {
+  for (const [name, [fn, sig]] of Object.entries(merged)) {
     if (fn) {
-      functions[name] = fn;
+      funcs[name] = fn;
       sigs.push(sig);
     }
   }
-  return [functions, sigs];
+  return [funcs, sigs];
 }
 
 function constructSystemPrompt(agent: string, task: Task, feature: Feature | null, agentSystemPrompt: string, context: string, toolSignatures: string[]): string {
@@ -81,7 +83,7 @@ function constructSystemPrompt(agent: string, task: Task, feature: Feature | nul
   const acceptanceStr = acceptance.map((c, i) => `${i + 1}. ${c}`).join('\n');
   const toolSignaturesStr = toolSignatures.map(sig => `- ${sig}`).join('\n');
 
-  const featureBlock = feature ? `#ASSIGNED FEATURE: ${feature.title} (ID: ${feature.id}\n##DESCRIPTION: ${feature.description}\n` : '';
+  const featureBlock = feature ? `#ASSIGNED FEATURE: ${feature.title} (ID: ${feature.id}${NEWLINE}##DESCRIPTION: ${feature.description}${NEWLINE}` : '';
   const featureRejection = feature?.rejection ? `##REJECTION REASON:${NEWLINE}${feature.rejection}${NEWLINE}` : '';
   const taskRejection = task.rejection ? `##REJECTION REASON:${NEWLINE}${task.rejection}` : '';
 
@@ -117,17 +119,17 @@ function constructSystemPrompt(agent: string, task: Task, feature: Feature | nul
 
 async function runConversation(opts: {
   model: string;
-  availableTools: Record<string, Function>;
+  availableTools: Record<string, (args: any) => Promise<any> | any>;
   systemPrompt: string;
   task: Task;
   feature: Feature | null;
   agentType: string;
   tools: TaskUtils;
   git: GitManager;
-  complete: (why: 'finish' | 'block' | 'max_turns', info?: any) => void;
   completion: CompletionClient;
+  complete: (why: 'finish' | 'block' | 'max_turns', info?: any) => void;
 }) {
-  const { model, availableTools, systemPrompt, task, feature, agentType, tools, git, complete, completion } = opts;
+  const { model, availableTools, systemPrompt, task, feature, agentType, tools, git, completion, complete } = opts;
   const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
@@ -137,27 +139,27 @@ async function runConversation(opts: {
       messages.push(assistant);
 
       const parsed = JSON.parse(assistant.content) as AgentResponse;
-      const thoughts = parsed.thoughts ?? 'No thoughts provided.';
-      const toolCalls = parsed.tool_calls ?? [];
-
+      const toolCalls: ToolCall[] = parsed.tool_calls ?? [];
       if (!toolCalls.length) continue;
 
       const toolOutputs: string[] = [];
+
       for (const call of toolCalls) {
         const toolName = (call.tool_name || call.tool || call.name || 'unknown_tool');
         const args = (call.arguments || call.parameters || {}) as Record<string, any>;
 
         if (availableTools[toolName]) {
-          const fn = availableTools[toolName];
-          // inject task_id/feature_id if the tool expects them
+          // Inject task_id and feature_id as Python orchestrator does via inspect signature
           if (!('task_id' in args)) args.task_id = task.id;
           if (feature && !('feature_id' in args)) args.feature_id = feature.id;
-          const result = await Promise.resolve(fn(args));
+
+          const result = await Promise.resolve(availableTools[toolName](args));
           toolOutputs.push(`Tool ${toolName} returned: ${result}`);
         } else {
           toolOutputs.push(`Error: Tool '${toolName}' not found.`);
         }
 
+        // Termination tools mirror Python
         if (['finish_feature', 'block_feature', 'finish_spec', 'block_task'].includes(toolName)) {
           complete(toolName === 'block_feature' || toolName === 'block_task' ? 'block' : 'finish');
           return;
@@ -166,7 +168,7 @@ async function runConversation(opts: {
 
       messages.push({ role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') });
     } catch (e) {
-      // Block on error, mirroring Python behavior
+      // On error: block task/feature, same as Python
       if (feature) {
         await tools.blockFeature?.(task.id, feature.id, `Agent loop failed: ${e}`, agentType, git);
       } else {
@@ -176,7 +178,8 @@ async function runConversation(opts: {
       return;
     }
   }
-  // Max turns
+
+  // Max turns reached -> block
   if (feature) {
     await tools.blockFeature?.(task.id, feature.id, 'Agent loop exceeded max turns', agentType, git);
   } else {
@@ -186,6 +189,7 @@ async function runConversation(opts: {
 }
 
 export async function runAgentOnTask(model: string, agentType: string, task: Task, tools: TaskUtils, git: GitManager, completion: CompletionClient) {
+  console.log(`\n--- Activating Agent ${agentType} for task: [${task.id}] ${task.title} ---`);
   const agentDocs = loadAgentDocs(agentType);
   const contextFiles = ['docs/FILE_ORGANISATION.md'];
   const [funcs, sigs] = toolSigsForAgent(agentType, tools, git);
@@ -207,6 +211,8 @@ export async function runAgentOnTask(model: string, agentType: string, task: Tas
 }
 
 export async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, tools: TaskUtils, git: GitManager, completion: CompletionClient) {
+  console.log(`\n--- Activating Agent ${agentType} for Feature: [${feature.id}] ${feature.title} ---`);
+
   if (agentType === 'developer') await tools.updateFeatureStatus?.(task.id, feature.id, '~');
 
   const agentDocs = loadAgentDocs(agentType);
@@ -234,46 +240,54 @@ export async function runAgentOnFeature(model: string, agentType: string, task: 
 export async function runOrchestrator(opts: {
   model: string;
   agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
-  taskId?: string | null;
+  taskId: string; // required to mirror Python CLI behavior path used here
   projectDir?: string | null;
+  tools: TaskUtils;
+  git: GitManager;
   completion: CompletionClient;
 }) {
-  const tools : TaskUtils = new TaskUtils()
-  const git : GitManager = new GitManager()
-  
-  const { model, agentType, taskId, projectDir, completion } = opts;
+  const { model, agentType, taskId, projectDir, tools, git, completion } = opts;
 
+  // Configure project root for task utils
   if (projectDir) tools.setProjectRoot(projectDir);
 
-  let currentTask: Task | null;
-  if (taskId) currentTask = await Promise.resolve(tools.getTask(taskId));
-  else currentTask = await Promise.resolve(tools.findNextPendingTask());
-
+  const currentTask: Task = await Promise.resolve(tools.getTask(taskId));
   if (!currentTask) {
     console.log('No available tasks to work on in the repository.');
     return;
   }
 
+  console.log(`Selected Task: [${currentTask.id}] ${currentTask.title}`);
+
   const branch = `features/${currentTask.id}`;
-  try { await Promise.resolve(git.checkoutBranch(branch, true)); } catch { await Promise.resolve(git.checkoutBranch(branch, false)); }
-  try { await Promise.resolve(git.pull(branch)); } catch {}
+  try {
+    await Promise.resolve(git.checkoutBranch(branch, true));
+  } catch (e) {
+    console.log(`Could not create or checkout branch '${branch}': ${e}`);
+    await Promise.resolve(git.checkoutBranch(branch, false));
+  }
+  try {
+    await Promise.resolve(git.pull(branch));
+  } catch (e) {
+    console.log(`Could not pull branch '${branch}': ${e}`);
+  }
 
   const processed = new Set<string>();
 
   if (agentType === 'speccer') {
-    currentTask = await Promise.resolve(tools.getTask(currentTask.id));
-    await runAgentOnTask(model, agentType, currentTask, tools, git, completion);
+    const freshTask = await Promise.resolve(tools.getTask(currentTask.id));
+    await runAgentOnTask(model, agentType, freshTask, tools, git, completion);
     return;
   }
 
   while (true) {
-    currentTask = await Promise.resolve(tools.getTask(currentTask.id));
-    const next = tools.findNextAvailableFeature(currentTask, processed, agentType !== 'developer');
+    const freshTask = await Promise.resolve(tools.getTask(currentTask.id));
+    const next = tools.findNextAvailableFeature(freshTask, processed, agentType !== 'developer');
     if (!next) {
-      console.log(`\nNo more available features for task ${currentTask.id}.`);
+      console.log(`\nNo more available features for task ${freshTask.id}.`);
       break;
     }
-    await runAgentOnFeature(model, agentType, currentTask, next, tools, git, completion);
+    await runAgentOnFeature(model, agentType, freshTask, next, tools, git, completion);
     processed.add(next.id);
   }
 }

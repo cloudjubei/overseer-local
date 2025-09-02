@@ -20,7 +20,7 @@
     },
     {
       "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts orchestrator needs to mirror original python script",
       "description": "orchestrator.ts should do EXACTLY the same as is the orchestrator flow inside run_local_agent.py\nIt must allow running agents on tasks or a task's specific feature until done or blocked.\nGo over run_local_agent.py and make sure the functionality is mirrored exactly inside orchestrator.ts",
       "plan": "",
