@@ -2,7 +2,7 @@
   "id": "ffc07e5a-e89d-4094-958a-90f9e5a4d67d",
   "status": "-",
   "title": "Integrate the factory-ts package",
-  "description": "A local package was created that is currently placed in `packages/factory-ts` relative to this project.\nThis package allows calling agents to run on specific projects, tasks and features. It needs to be integrated into this project so agents can be ran on specific tasks or features and agent performance can be monitored. This whole package was based on 3 python scripts that are palced under packages/factory-ts/blueprint",
+  "description": "A local package was created that is currently placed in `packages/factory-ts` relative to this project.\nThis package allows calling agents to run on specific projects, tasks and features. It needs to be integrated into this project so agents can be ran on specific tasks or features and agent performance can be monitored. This whole package was based on 4 python scripts that are palced under packages/factory-ts/blueprint",
   "features": [
     {
       "id": "3cd73d96-21d0-488c-a484-2ed49a70032d",
@@ -62,15 +62,13 @@
     },
     {
       "id": "bce3592f-e8e3-440c-9675-acff8965f3d8",
-      "status": "?",
-      "title": "factory-ts is the source of truth when it comes to Project,Task,Feature types",
-      "description": "Integrate them inside this project meaning that 'src/types/tasks.ts' is no longer needed. All places where they were used must be updated.",
+      "status": "-",
+      "title": "factory-ts is the source of truth when it comes to types for ProjectSpec, Feature and Task",
+      "description": "Integrate the relevant types inside `types.ts` from factory-ts , meaning that 'src/types/tasks.ts' is no longer needed. All places where they were used must be updated.",
       "plan": "",
       "context": [
-        "packages/factory-ts",
-        "packages/factory-ts/FACTORY_TS_OVERVIEW.md",
-        "packages/factory-ts/CONFIGURATION.md",
-        "src/types/tasks.ts"
+        "src/types/tasks.ts",
+        "packages/factory-ts/src/types.ts"
       ],
       "acceptance": [],
       "dependencies": []
@@ -93,27 +91,67 @@
     },
     {
       "id": "2f441c51-532f-494b-b29b-ae9920a75750",
-      "status": "+",
-      "title": "the new `orchestrator.ts` needs to gather statistics",
-      "description": "`orchestrator.ts` needs to store all messages sent between itself and an LLM so that usage, performance and cost data can be gathered.",
+      "status": "-",
+      "title": "the new `orchestrator.ts` needs to gather statistics that is displayed to the user",
+      "description": "Right now when looking at the \"All Agents\" (`AllAgentsView.tsx`) or \"Agents\" (`AgentsView.tsx`) tabs no performance information is  shown.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/orchestrator.ts",
-        "src/tools/factory/mainOrchestrator.js"
+        "src/tools/factory/mainOrchestrator.js",
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
-      "status": "+",
-      "title": "factory-ts `types.ts`, `taskUtils.ts`, `orchestrator.ts` have duplicate types",
-      "description": "all duplicate types or interfaces need to be cleaned up",
+      "status": "-",
+      "title": "The `orchestrator.ts` should use the `logger.ts` to be able to limit the number of data in the console",
+      "description": "There's a lot of meta information sent in a conversation with an LLM - that needs to be recorded and stored but in the console we just need the most relevant information:\n- llm's 'thoughts'\n- llm's tool calls \n- time it took to respond\n\nUpdate `logger.ts` to be able to be configurable for factory-ts .\nWe want to be able to have an admin (running in dev mode) set these configs later.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/types.ts",
         "packages/factory-ts/src/orchestrator.ts",
-        "packages/factory-ts/src/taskUtils.ts"
+        "packages/factory-ts/src/taskUtils.ts",
+        "packages/factory-ts/src/logger.ts"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "94a8ab44-a4d9-4165-bd1e-fe2c3c2217e2",
+      "status": "-",
+      "title": "When running an agent - it stops showing as running after some time",
+      "description": "The agent is still running and working, but it stops showing anywhere in the UI",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "8eec6280-97ff-443c-a7a9-fcbb58eeb119",
+      "status": "-",
+      "title": "`orchestrator.ts` needs to also mimic `run.py`",
+      "description": "`orchestrator.ts` is based on the python script  `run.py` and `run_local_agent.py`, in which before the agent is run - the whole project is copied to a separate temporary directory, the agent runs the conversation and does changes - appropriate git commands happen - and then once it's finished the temporary directory is cleaned up. This is to ensure that the local project copy isn't affected and that the agent runs in an isolated environment.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "packages/factory-ts/blueprint/run.py",
+        "packages/factory-ts/blueprint/run_local_agent.py"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "0c4a2db2-adcf-4778-bc92-c943664ce450",
+      "status": "-",
+      "title": "When looking at an agent inside `AgentsView.tsx` it must be possible to view the whole conversation",
+      "description": "Whether for historical runs or a current run - a given agent's run view must display the running conversation.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
       "dependencies": []
@@ -125,8 +163,11 @@
     "20b01258-fc70-4a0a-913d-74ff1ca24dc6": 3,
     "a46e12c6-1d72-4ab3-8301-b278b56b5814": 4,
     "89144d73-7cdd-4984-9422-2341c2ed77b5": 5,
-    "2f441c51-532f-494b-b29b-ae9920a75750": 6,
-    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 7,
-    "bce3592f-e8e3-440c-9675-acff8965f3d8": 8
+    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 6,
+    "bce3592f-e8e3-440c-9675-acff8965f3d8": 7,
+    "2f441c51-532f-494b-b29b-ae9920a75750": 8,
+    "94a8ab44-a4d9-4165-bd1e-fe2c3c2217e2": 9,
+    "8eec6280-97ff-443c-a7a9-fcbb58eeb119": 10,
+    "0c4a2db2-adcf-4778-bc92-c943664ce450": 11
   }
 }
