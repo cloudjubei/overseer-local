@@ -29,19 +29,25 @@ async function loadFactory() {
 
 const RUN_SUBSCRIBERS = new Map(); // runId -> Set<webContentsId>
 const RUNS = new Map(); // runId -> RunHandle
+const RUN_META = new Map(); // runId -> metadata snapshot
+const RUN_TIMERS = new Map(); // runId -> heartbeat timer
+
+function sendEventToWC(wcId, runId, event) {
+  const wc = webContents.fromId(wcId);
+  if (wc && !wc.isDestroyed()) {
+    try {
+      wc.send(IPC_HANDLER_KEYS.FACTORY_EVENT, { runId, event });
+    } catch (err) {
+      console.warn(`[factory] Failed to send event to wc ${wcId} for run ${runId}:`, err?.message || err);
+    }
+  }
+}
 
 function broadcastEventToSubscribers(runId, event) {
   const subscribers = RUN_SUBSCRIBERS.get(runId);
   if (!subscribers || subscribers.size === 0) return;
   for (const wcId of subscribers) {
-    const wc = webContents.fromId(wcId);
-    if (wc && !wc.isDestroyed()) {
-      try {
-        wc.send(IPC_HANDLER_KEYS.FACTORY_EVENT, { runId, event });
-      } catch (err) {
-        console.warn(`[factory] Failed to send event to wc ${wcId} for run ${runId}:`, err?.message || err);
-      }
-    }
+    sendEventToWC(wcId, runId, event);
   }
 }
 
@@ -54,6 +60,43 @@ function maskSecrets(obj) {
     return o;
   } catch {
     return obj;
+  }
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function updateMetaFromEvent(runId, e) {
+  const meta = RUN_META.get(runId);
+  if (!meta) return;
+  meta.updatedAt = e?.ts || e?.time || nowIso();
+  const type = e?.type;
+  const payload = e?.payload || {};
+  if (type === 'run/progress' || type === 'run/progress/snapshot') {
+    if (typeof payload?.progress === 'number') meta.progress = payload.progress;
+    else if (typeof payload?.percent === 'number') meta.progress = Math.max(0, Math.min(1, payload.percent / 100));
+    if (payload?.message) meta.message = payload.message;
+  } else if (type === 'run/usage') {
+    if (payload?.costUSD != null) meta.costUSD = payload.costUSD;
+    else if (payload?.costUsd != null) meta.costUSD = payload.costUsd;
+    else if (payload?.usd != null) meta.costUSD = payload.usd;
+    if (payload?.promptTokens != null) meta.promptTokens = payload.promptTokens;
+    if (payload?.completionTokens != null) meta.completionTokens = payload.completionTokens;
+    if (payload?.provider) meta.provider = payload.provider;
+    if (payload?.model) meta.model = payload.model;
+  } else if (type === 'run/start') {
+    if (payload?.llm?.provider) meta.provider = payload.llm.provider;
+    if (payload?.llm?.model) meta.model = payload.llm.model;
+  } else if (type === 'run/error') {
+    meta.state = 'error';
+    meta.message = payload?.message || payload?.error || 'Error';
+  } else if (type === 'run/cancelled') {
+    meta.state = 'cancelled';
+    meta.message = payload?.reason || 'Cancelled';
+  } else if (type === 'run/completed' || type === 'run/complete') {
+    meta.state = 'completed';
+    meta.message = payload?.message || payload?.summary || 'Completed';
   }
 }
 
@@ -78,9 +121,36 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   const orchestrator = createOrchestrator({ projectRoot /*, history: historyStore*/ });
   console.log('[factory] Orchestrator ready');
 
-  function attachRun(runHandle) {
+  function startHeartbeat(runId) {
+    const prev = RUN_TIMERS.get(runId);
+    if (prev) clearInterval(prev);
+    const timer = setInterval(() => {
+      const meta = RUN_META.get(runId);
+      if (!meta) return;
+      // Only heartbeat while running
+      if (meta.state === 'running') {
+        const evt = { type: 'run/heartbeat', payload: {}, ts: nowIso() };
+        updateMetaFromEvent(runId, evt);
+        broadcastEventToSubscribers(runId, evt);
+      }
+    }, 15000);
+    RUN_TIMERS.set(runId, timer);
+  }
+
+  function stopHeartbeat(runId) {
+    const t = RUN_TIMERS.get(runId);
+    if (t) {
+      clearInterval(t);
+      RUN_TIMERS.delete(runId);
+    }
+  }
+
+  function attachRun(runHandle, initMeta) {
     console.log('[factory] Attaching run', runHandle?.id);
     RUNS.set(runHandle.id, runHandle);
+    RUN_META.set(runHandle.id, initMeta);
+    startHeartbeat(runHandle.id);
+
     const unsubscribe = runHandle.onEvent((e) => {
       try {
         // Rich log for visibility; include payload for llm events
@@ -93,16 +163,21 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
           console.log('[factory] event', runHandle.id, t);
         }
       } catch {}
+      updateMetaFromEvent(runHandle.id, e);
       broadcastEventToSubscribers(runHandle.id, e);
     });
+
     const cleanup = () => {
       console.log('[factory] Cleaning up run', runHandle.id);
       try { unsubscribe(); } catch {}
+      stopHeartbeat(runHandle.id);
       RUNS.delete(runHandle.id);
       RUN_SUBSCRIBERS.delete(runHandle.id);
+      RUN_META.delete(runHandle.id);
     };
+
     runHandle.onEvent((e) => {
-      if (e?.type === 'run/cancelled' || e?.type === 'run/completed' || e?.type === 'run/complete') {
+      if (e?.type === 'run/cancelled' || e?.type === 'run/completed' || e?.type === 'run/complete' || e?.type === 'run/error') {
         cleanup();
       }
     });
@@ -113,7 +188,25 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     try {
       const run = orchestrator.startTaskRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (task)', run?.id);
-      attachRun(run);
+      const initMeta = {
+        runId: run.id,
+        projectId,
+        taskId: String(taskId),
+        featureId: undefined,
+        state: 'running',
+        message: 'Starting agent... ',
+        progress: undefined,
+        costUSD: undefined,
+        promptTokens: undefined,
+        completionTokens: undefined,
+        provider: llmConfig?.provider,
+        model: llmConfig?.model,
+        startedAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      attachRun(run, initMeta);
+      // Emit a synthetic start snapshot
+      broadcastEventToSubscribers(run.id, { type: 'run/snapshot', payload: initMeta, ts: nowIso() });
       return { runId: run.id };
     } catch (err) {
       console.error('[factory] Failed to start task run', err?.stack || String(err));
@@ -126,7 +219,25 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     try {
       const run = orchestrator.startFeatureRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (feature)', run?.id);
-      attachRun(run);
+      const initMeta = {
+        runId: run.id,
+        projectId,
+        taskId: String(taskId),
+        featureId: String(featureId),
+        state: 'running',
+        message: 'Starting agent... ',
+        progress: undefined,
+        costUSD: undefined,
+        promptTokens: undefined,
+        completionTokens: undefined,
+        provider: llmConfig?.provider,
+        model: llmConfig?.model,
+        startedAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      attachRun(run, initMeta);
+      // Emit a synthetic start snapshot
+      broadcastEventToSubscribers(run.id, { type: 'run/snapshot', payload: initMeta, ts: nowIso() });
       return { runId: run.id };
     } catch (err) {
       console.error('[factory] Failed to start feature run', err?.stack || String(err));
@@ -161,6 +272,23 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
         console.log('[factory] Unsubscribed (wc destroyed)', { runId, wcId });
       }
     });
+
+    // Immediately send a snapshot to this subscriber to sync current state
+    const meta = RUN_META.get(runId);
+    if (meta) {
+      sendEventToWC(wcId, runId, { type: 'run/snapshot', payload: meta, ts: nowIso() });
+    }
+  });
+
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_LIST_ACTIVE, () => {
+    // Return currently running runs (best-effort snapshot)
+    const list = [];
+    for (const [runId, meta] of RUN_META.entries()) {
+      if (meta?.state === 'running') {
+        list.push({ ...meta, runId });
+      }
+    }
+    return list;
   });
 
   // Log window lifecycle for context

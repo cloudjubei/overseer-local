@@ -1,5 +1,4 @@
-import { EventSourceLike } from '../../tools/factory/orchestratorBridge';
-import { startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
+import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
 import { LLMConfig } from './chatsService';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
 
@@ -49,6 +48,7 @@ class AgentsServiceImpl {
   private runs = new Map<string, RunRecord>();
   private subscribers = new Set<Subscriber>();
   private llmManager = new LLMConfigManager();
+  private bootstrapped = false;
 
   private notify() {
     const list = Array.from(this.runs.values()).map(this.publicFromRecord);
@@ -60,8 +60,50 @@ class AgentsServiceImpl {
     return pub as AgentRun;
   }
 
+  private async bootstrapFromActiveRuns() {
+    if (this.bootstrapped) return;
+    this.bootstrapped = true;
+    try {
+      const factory = (window as any).factory;
+      if (!factory || typeof factory.listActiveRuns !== 'function') return;
+      const active = await factory.listActiveRuns();
+      if (Array.isArray(active)) {
+        for (const m of active) {
+          if (!m?.runId) continue;
+          if (this.runs.has(m.runId)) continue;
+          const { handle, events } = attachToRun(m.runId);
+          const run: RunRecord = {
+            runId: handle.id,
+            projectId: m.projectId,
+            taskId: m.taskId ?? undefined,
+            featureId: m.featureId ?? undefined,
+            state: m.state ?? 'running',
+            message: m.message ?? 'Running... ',
+            progress: m.progress,
+            costUSD: m.costUSD,
+            promptTokens: m.promptTokens,
+            completionTokens: m.completionTokens,
+            provider: m.provider,
+            model: m.model,
+            startedAt: m.startedAt || new Date().toISOString(),
+            updatedAt: m.updatedAt || new Date().toISOString(),
+            events,
+            cancel: (reason?: string) => handle.cancel(reason),
+          } as RunRecord;
+          this.wireRunEvents(run);
+          this.runs.set(run.runId, run);
+        }
+        this.notify();
+      }
+    } catch (err) {
+      console.warn('[agentsService] bootstrapFromActiveRuns failed', (err as any)?.message || err);
+    }
+  }
+
   subscribe(cb: Subscriber): () => void {
     this.subscribers.add(cb);
+    // Lazy bootstrap when first subscriber attaches
+    this.bootstrapFromActiveRuns();
     cb(Array.from(this.runs.values()).map(this.publicFromRecord));
     return () => {
       this.subscribers.delete(cb);
@@ -69,6 +111,8 @@ class AgentsServiceImpl {
   }
 
   list(): AgentRun[] {
+    // Also attempt a bootstrap if not yet done (defensive)
+    this.bootstrapFromActiveRuns();
     return Array.from(this.runs.values()).map(this.publicFromRecord);
   }
 
@@ -88,7 +132,7 @@ class AgentsServiceImpl {
       const payload = e?.payload;
       if (String(type).startsWith('llm/')) {
         console.log('[agentsService] LLM event', run.runId, type, payload ? JSON.parse(JSON.stringify(payload)) : undefined);
-      } else if (type === 'run/log' || type === 'run/progress' || type === 'run/progress/snapshot') {
+      } else if (type === 'run/log' || type === 'run/progress' || type === 'run/progress/snapshot' || type === 'run/snapshot' || type === 'run/heartbeat') {
         console.log('[agentsService] event', run.runId, type, payload?.message || '');
       } else if (type) {
         console.log('[agentsService] event', run.runId, type);
@@ -121,6 +165,18 @@ class AgentsServiceImpl {
         // initialize from start payload if present
         run.provider = e.payload?.llm?.provider ?? run.provider;
         run.model = e.payload?.llm?.model ?? run.model;
+      } else if (e.type === 'run/snapshot') {
+        // synchronize local state with snapshot from main
+        const p = e.payload || {};
+        run.message = p.message ?? run.message;
+        if (typeof p.progress === 'number') run.progress = p.progress;
+        if (p.costUSD != null) run.costUSD = p.costUSD;
+        if (p.promptTokens != null) run.promptTokens = p.promptTokens;
+        if (p.completionTokens != null) run.completionTokens = p.completionTokens;
+        if (p.provider) run.provider = p.provider;
+        if (p.model) run.model = p.model;
+        if (p.state) run.state = p.state;
+        if (p.startedAt) run.startedAt = p.startedAt;
       } else if (e.type === 'run/error') {
         run.state = 'error';
         run.message = e.payload?.message || e.payload?.error || 'Error';

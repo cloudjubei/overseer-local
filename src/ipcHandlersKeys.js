@@ -65,5 +65,6 @@ const IPC_HANDLER_KEYS = {
   FACTORY_CANCEL_RUN: "factory:cancel",
   FACTORY_SUBSCRIBE: "factory:subscribe",
   FACTORY_EVENT: "factory:event",
+  FACTORY_LIST_ACTIVE: "factory:list-active",
 }
 export default IPC_HANDLER_KEYS

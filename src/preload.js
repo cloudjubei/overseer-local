@@ -125,6 +125,9 @@ const FACTORY_API = {
       ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
     };
   },
+  listActiveRuns: () => {
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_LIST_ACTIVE);
+  }
 };
 
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);

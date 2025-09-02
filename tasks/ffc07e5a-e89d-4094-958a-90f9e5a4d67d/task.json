@@ -121,7 +121,7 @@
     },
     {
       "id": "94a8ab44-a4d9-4165-bd1e-fe2c3c2217e2",
-      "status": "-",
+      "status": "+",
       "title": "When running an agent - it stops showing as running after some time",
       "description": "The agent is still running and working, but it stops showing anywhere in the UI",
       "plan": "",

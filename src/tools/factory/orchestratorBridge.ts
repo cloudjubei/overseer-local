@@ -80,6 +80,13 @@ export async function startRunGeneric(params: { projectId: string; taskId?: stri
   throw new Error('taskId or featureId required');
 }
 
+export function attachToRun(runId: string): { handle: RunHandle; events: EventSourceLike } {
+  if (!(window as any).factory) throw new Error('Factory preload not available');
+  const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
+  const events = makeEventSourceLike(runId);
+  return { handle, events };
+}
+
 export function streamRunJSONL(_handle: RunHandle) {
   throw new Error('streamRunJSONL is not available in renderer. Use main/CLI.');
 }
