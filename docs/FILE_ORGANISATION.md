@@ -17,17 +17,19 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
       - src/renderer/hooks/useAgents.ts: Hook to subscribe to active agent runs and start/cancel them.
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
-  - src/chat/: Chat providers, manager, and storage.
   - src/tools/: Developer and agent tooling (preview analysis, formatting, compile checks, docker helpers).
     - src/tools/preview/: Preview analyzer tooling.
     - src/tools/factory/: Integration layer for the local factory-ts package (orchestrator bridge and helpers).
-      - src/tools/factory/orchestratorBridge.ts: Bridges to the local packages/factory-ts orchestrator, returning an EventSource-like stream for UI consumption.
+      - src/tools/factory/orchestratorBridge.ts: Renderer bridge that calls Electron preload API to start runs and receive events from the main process. Avoids importing Node-only modules in the renderer.
+  - src/chat/: Chat providers, manager, and storage.
   - src/capture/: Screenshot capture service (main process).
   - src/files/: Files manager and per-project storage.
   - src/projects/: Projects manager and indexing.
   - src/tasks/: Tasks manager and per-project storage.
   - src/notifications/: Notifications manager and IPC integration.
   - src/preferences/: Preferences manager and user settings storage (system-wide user preferences such as last active project, task view mode, list sorting, notification settings), with IPC exposure.
+  - src/main.ts: Electron main process entry that owns the factory-ts orchestrator and bridges runs/events over IPC.
+  - src/preload.ts: Preload script exposing a minimal window.factory API to the renderer (startTaskRun, startFeatureRun, cancelRun, subscribe).
 - scripts/: Project automation scripts and CLIs (e.g., preview scanning, runAgent.mjs runner for factory-ts).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
 - packages/: Local monorepo packages used by the app.
@@ -73,7 +75,8 @@ Notes:
 
 ## Factory TS Integration
 - Library location: packages/factory-ts (local package).
-- App bridge: src/tools/factory/orchestratorBridge.ts provides startTaskRun/startFeatureRun helpers that produce an EventSource-like stream for UI consumption.
-- Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts expose a simple in-memory registry of runs. These are used by TasksListView and TaskDetailsView to start and show active agents, and the Agents screen to monitor runs.
-- UI: src/renderer/screens/AgentsView.tsx renders the Agents tab accessible from the Sidebar to monitor agents' performance and costs in the active project; Settings > All Agents provides a global summary across projects, including total cost and model performance.
+- Main process: src/main.ts owns the orchestrator (createOrchestrator) and exposes IPC handlers for starting runs and streaming events.
+- Preload: src/preload.ts exposes window.factory with methods used by the renderer to interact with the orchestrator safely.
+- Renderer bridge: src/tools/factory/orchestratorBridge.ts now calls the preload API instead of importing factory-ts directly, avoiding Node-only modules in the renderer.
+- Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts remain the same, consuming the renderer bridge and receiving EventSource-like streams.
 - CLI: scripts/runAgent.mjs streams JSONL events for a run. Build the package with npm run factory:build and then use npm run run:agent.
