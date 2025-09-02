@@ -3,6 +3,7 @@ import type { ChatsService } from 'src/renderer/services/chatsService'
 import type { FilesService } from 'src/renderer/services/filesService'
 import type { TasksService } from 'src/renderer/services/tasksService';
 import type { NotificationsService } from 'src/renderer/services/notificationsService';
+import type { SettingsService } from 'src/renderer/services/settingsService';
 
 declare global {
   interface Window {
@@ -11,6 +12,7 @@ declare global {
     filesService: FilesService
     chatsService: ChatsService
     notificationsService: NotificationsService
+    settingsService: SettingsService
   }
 }
 export {}

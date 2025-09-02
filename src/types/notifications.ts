@@ -80,12 +80,3 @@ export interface NotificationStats {
   byCategory: Record<NotificationCategory, number>;
   byType: Record<NotificationType, number>;
 }
-
-export interface NotificationSystemPreferences {
-  osNotificationsEnabled: boolean;
-  soundsEnabled: boolean;
-  displayDuration: number; // seconds, 0 for persistent
-}
-export interface NotificationProjectPreferences {
-  categoriesEnabled: Partial<Record<NotificationCategory, boolean>>;
-}

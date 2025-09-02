@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal } from '../components/ui/Modal';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
-import { useLLMConfig } from '../hooks/useLLMConfig';
-import { chatsService } from '../services/chatsService';
-import type { LLMConfig, LLMProviderType } from '../types';
-import { useToast } from '../components/ui/Toast';
+import { Modal } from '../renderer/components/ui/Modal';
+import { Input } from '../renderer/components/ui/Input';
+import { Button } from '../renderer/components/ui/Button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../renderer/components/ui/Select';
+import { useLLMConfig } from '../renderer/hooks/useLLMConfig';
+import { chatsService, LLMConfig, LLMProviderType } from '../renderer/services/chatsService';
+import { useToast } from '../renderer/components/ui/Toast';
 
 const PROVIDER_DEFAULT_URL: Record<LLMProviderType, string> = {
   openai: 'https://api.openai.com/v1',

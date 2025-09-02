@@ -10,6 +10,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
+import { useAppSettings } from '../hooks/useAppSettings';
 
 export type SidebarProps = {};
 
@@ -74,13 +75,17 @@ export default function SidebarView({}: SidebarProps) {
     projects,
     setActiveProjectId,
   } = useProjectContext()
+  const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
 
-  // Persistent collapsed state (desktop)
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; }
-  });
+  const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed);
+
   useEffect(() => {
-    try { localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+    if (isAppSettingsLoaded){
+      setCollapsed(appSettings.userPreferences.sidebarCollapsed)
+    }
+  }, [isAppSettingsLoaded]);
+  useEffect(() => {
+    updateAppSettings({ userPreferences: { ...appSettings.userPreferences, sidebarCollapsed: collapsed }})
   }, [collapsed]);
 
   // Responsive: on small screens, render as overlay drawer

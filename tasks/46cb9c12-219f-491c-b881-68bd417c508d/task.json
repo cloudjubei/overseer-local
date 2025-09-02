@@ -1,35 +1,12 @@
 {
   "id": "46cb9c12-219f-491c-b881-68bd417c508d",
-  "status": "-",
+  "status": "+",
   "title": "Store app usage user preferences",
   "description": "Following setting storing, we want to store the last project active, the configuration active for tasks (i.e. list vs board), if it was list - then which sorting was used.\nEssentially we want the user to resume the app in exactly the same state as they left it.",
   "features": [
     {
-      "id": "4aa629d1-91be-4c45-82cc-b210dacab4f4",
-      "status": "-",
-      "title": "Create user preferences storage service",
-      "description": "Create a new service that provides methods to get, set, and persist user preferences. The service should handle storing preferences like last active project, task view mode (list/board), and list view sorting preferences. \nCurrently useNotificationPreferences is already using and storing some system preferences. This should be extracted from there and moved to a new class responsible for all such system-wide settings.",
-      "plan": "",
-      "context": [
-        "src/renderer/hooks/useNotificationPreferences.ts",
-        "src/renderer/hooks/useNotifications.ts",
-        "src/notifications/manager.js",
-        "src/ipcHandlersKeys.js",
-        "src/renderer/services/notificationsService.ts",
-        "src/preload.js",
-        "src/preferences/manager.js",
-        "src/preferences/userPreferences.js",
-        "src/types/userPreferences.ts",
-        "src/renderer/services/tasksService.ts",
-        "src/notifications/systemPreferences.js"
-      ],
-      "acceptance": [],
-      "dependencies": [],
-      "rejection": "the new userPreferencesService.ts needs to follow tasksService.ts for all standards\nuseNotificationPreferences.ts should not allow setting notification preferences - this should be the job of a new useAppPreferences.ts"
-    },
-    {
       "id": "d877642c-9e5d-44ca-b100-dbe5a7ad119c",
-      "status": "-",
+      "status": "+",
       "title": "Store and restore last active project",
       "description": "Integrate user preferences into the projects system to automatically store the last active project when it changes and restore it on app startup. Update the projects service and relevant components to persist and load the last active project preference.",
       "plan": "",
@@ -42,12 +19,11 @@
         "src/managers.js"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "PreferencesManager should follow TasksManager for all style and formatting rules."
+      "dependencies": []
     },
     {
       "id": "632d7c0e-6caa-4f11-85a1-73cc4ad378bd",
-      "status": "-",
+      "status": "+",
       "title": "Store and restore task view configuration",
       "description": "Integrate user preferences into the tasks view system to store whether the user was in list or board view mode. Update TasksView.tsx and related components to persist the current view mode and restore it when navigating back to tasks or restarting the app.",
       "plan": "",
@@ -57,21 +33,22 @@
         "src/renderer/tasks/BoardView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Let's have a generic loading setting that will show if something still needs to load here (like the user preferences)."
+      "dependencies": []
     },
     {
       "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
       "status": "-",
-      "title": "Store and restore list view sorting preferences",
-      "description": "When the user is in list view, store their sorting preferences (sort field and direction). Update TasksListView.tsx to persist sorting state and restore it when returning to list view or restarting the app. Only applicable when in list view mode.",
+      "title": "Settings are not being stored in AppSettings",
+      "description": "when a user toggles anything in the SettingsView - nothing happens",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TasksListView.tsx"
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/hooks/useAppSettings.ts",
+        "src/settings/manager.js",
+        "src/settings/appSettings.js"
       ],
       "acceptance": [],
-      "dependencies": [],
-      "rejection": "Use the general isLoaded in TasksListView - waiting for everything to get ready rather than splitting it per item."
+      "dependencies": []
     }
   ],
   "featureIdToDisplayIndex": {

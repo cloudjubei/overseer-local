@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { notificationsService } from '../services/notificationsService';
 import type { Notification } from '../../types/notifications';
 import { useProjectContext } from '../projects/ProjectContext';
@@ -48,7 +48,22 @@ export function useNotifications() {
     }
   };
 
+  const enableNotifications = async () => {
+    try {
+      const result = await notificationsService.sendOs({
+        title: 'Notifications Enabled',
+        message: 'You will now receive desktop notifications for important events.',
+        soundsEnabled: false,
+        displayDuration: 5,
+      })
+      return (result as any).ok ?? (result as any).success ?? false
+    } catch (_) {
+      return false
+    }
+  }
+
   return {
+    enableNotifications,
     notifications,
     unreadCount,
     markAsRead,

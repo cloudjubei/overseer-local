@@ -5,7 +5,7 @@ import TaskCreateView from '../tasks/TaskCreateView';
 import TaskEditView from '../tasks/TaskEditView';
 import FeatureCreateView from '../tasks/FeatureCreateView';
 import FeatureEditView from '../tasks/FeatureEditView';
-import SettingsLLMConfigModal from '../settings/SettingsLLMConfigModal';
+import SettingsLLMConfigModal from '../../settings/SettingsLLMConfigModal';
 import ProjectManagerModal from '../projects/ProjectManagerModal';
 
 export default function ModalHost() {

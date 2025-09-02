@@ -1,9 +1,9 @@
-import AppStorage from './appStorage';
+import AppStorage from '../settings/appStorage';
 
 export default class NotificationsStorage {
   constructor(projectId) {
     this.projectId = projectId;
-    this.appStorage = new AppStorage();
+    this.appStorage = new AppStorage("notifications");
     this.notifications = new Map();
     this.listeners = new Set();
 

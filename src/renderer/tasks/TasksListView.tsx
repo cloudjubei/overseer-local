@@ -9,7 +9,8 @@ import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
-import { userPreferencesService } from '../services/userPreferencesService'
+import { useAppSettings } from '../hooks/useAppSettings'
+import { TaskListViewSorting, TaskViewMode } from '../services/settingsService'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -57,11 +58,10 @@ export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [sortBy, setSortBy] = useState<'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'>('index_desc')
+  const [sortBy, setSortBy] = useState<TaskListViewSorting>('index_desc')
   const [saving, setSaving] = useState(false)
-  const [view, setView] = useState<'list' | 'board'>('list')
-  const [viewLoaded, setViewLoaded] = useState(false)
-  const [sortingLoaded, setSortingLoaded] = useState(false)
+  const [view, setView] = useState<TaskViewMode>('list')
+  const [isLoaded, setIsLoaded] = useState(false)
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -73,74 +73,41 @@ export default function TasksListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project } = useActiveProject()
+  const { appSettings } = useAppSettings()
   const { tasksById, updateTask, reorderTask, getReferencesInbound, getReferencesOutbound } = useTasks()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
 
-  // Load persisted view mode on mount
   useEffect(() => {
     let mounted = true
-    userPreferencesService.getTasksViewMode()
-      .then((mode) => {
+    ;(async () => {
+      try {
         if (!mounted) return
-        if (mode === 'list' || mode === 'board') {
-          setView(mode)
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load tasks view mode', err)
-      })
-      .finally(() => {
-        if (mounted) setViewLoaded(true)
-      })
+        const mode = appSettings.userPreferences.tasksViewMode
+        setView(mode)
+        const sorting = appSettings.userPreferences.tasksListViewSorting
+        setSortBy(sorting)
+      } finally {
+        if (mounted) setIsLoaded(true)
+      }
+    })()
     return () => { mounted = false }
   }, [])
 
-  // Load persisted list sorting preferences
   useEffect(() => {
-    let mounted = true
-    userPreferencesService.getTasksListView()
-      .then((prefs) => {
-        if (!mounted || !prefs) return
-        const field = prefs.sortBy
-        const dir = prefs.sortDirection
-        if ((field === 'index' || field === 'status') && (dir === 'asc' || dir === 'desc')) {
-          const combined = `${field}_${dir}` as 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
-          setSortBy(combined)
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load tasks list sorting', err)
-      })
-      .finally(() => { if (mounted) setSortingLoaded(true) })
-    return () => { mounted = false }
-  }, [])
-
-  // Persist view mode changes (after initial load)
-  useEffect(() => {
-    if (!viewLoaded) return
-    userPreferencesService.setTasksViewMode(view).catch((err) => {
-      console.error('Failed to save tasks view mode', err)
-    })
-  }, [view, viewLoaded])
+    if (!isLoaded) return
+    //TODO:
+    // appSettings.setTasksViewMode(view)
+  }, [view, isLoaded])
   
-  // Persist list sorting when in list view (after initial sorting load)
+  // Persist list sorting when in list view (after initial load)
   useEffect(() => {
-    if (!sortingLoaded) return
-    if (view !== 'list') return // only applicable in list view
-
-    const [field, dir] = sortBy.split('_') as ['index' | 'status', 'asc' | 'desc']
-    // Validate
-    const validField = field === 'index' || field === 'status'
-    const validDir = dir === 'asc' || dir === 'desc'
-    if (!validField || !validDir) return
-
-    userPreferencesService
-      .updateTasksListView({ sortBy: field, sortDirection: dir })
-      .catch((err) => console.error('Failed to save list sorting preferences', err))
-  }, [sortBy, view, sortingLoaded])
+    if (!isLoaded) return
+    //TODO:
+    // appSettings.setTasksListViewSorting(sortBy)
+  }, [sortBy, isLoaded])
   
   // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
@@ -274,6 +241,8 @@ export default function TasksListView() {
   const currentFilterLabel = statusFilter === 'all' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]}`
   const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
 
+  const prefsLoading = !isLoaded
+
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
       <div className="tasks-toolbar shrink-0">
@@ -307,7 +276,7 @@ export default function TasksListView() {
             )}
           </div>
           <div className="control">
-            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by">
+            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by" disabled={prefsLoading}>
               <option value="index_asc">Ascending</option>
               <option value="index_desc">Descending</option>
               <option value="status_asc">Status ^</option>
@@ -331,7 +300,7 @@ export default function TasksListView() {
       </div>
 
       <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
-        Showing {filtered.length} of {allTasks.length} tasks
+        Showing {filtered.length} of {allTasks.length} tasks{prefsLoading ? ' • Loading settings…' : ''}
       </div>
 
       {view === 'board' ? (
@@ -340,7 +309,9 @@ export default function TasksListView() {
         </div>
       ) : (
         <div id="tasks-results" className="flex-1 min-h-0 overflow-y-auto tasks-results" tabIndex={-1}>
-          {filtered.length === 0 ? (
+          {prefsLoading ? (
+            <div className="empty" aria-live="polite">Loading your preferences…</div>
+          ) : filtered.length === 0 ? (
             <div className="empty">No tasks found.</div>
           ) : (
             <ul

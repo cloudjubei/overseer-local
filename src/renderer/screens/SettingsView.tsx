@@ -3,10 +3,12 @@ import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useLLMConfig } from '../hooks/useLLMConfig';
-import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
 import { useNavigator } from '../navigation/Navigator';
+import { useAppSettings } from '../hooks/useAppSettings';
+import { useProjectSettings } from '../hooks/useProjectSettings';
+import { useNotifications } from '../hooks/useNotifications';
 
 // Settings Categories
 const CATEGORIES = [
@@ -20,7 +22,9 @@ type CategoryId = typeof CATEGORIES[number]['id'];
 export default function SettingsView() {
   const themes: Theme[] = ['light', 'dark'];
   const { theme, setTheme } = useTheme();
-  const { systemPreferences, updateSystemPreferences, projectPreferences, updateProjectPreferences, changeNotifications } = useNotificationPreferences();
+  const { appSettings, updateAppSettings } = useAppSettings()
+  const { projectSettings, updateProjectSettings } = useProjectSettings()
+  const { enableNotifications } = useNotifications()
 
   const { configs, activeConfigId, removeConfig, setActive } = useLLMConfig();
   const { openModal } = useNavigator();
@@ -94,13 +98,17 @@ export default function SettingsView() {
       <h2 className="text-xl font-semibold mb-3">Notification Preferences</h2>
       <div className="space-y-4">
         <Switch
-          checked={systemPreferences.osNotificationsEnabled}
+          checked={appSettings.notificationSystemSettings.osNotificationsEnabled}
           onCheckedChange={async (checked) => {
-            const success = await changeNotifications(checked)
-            if (success){
-              updateSystemPreferences({ osNotificationsEnabled: true });
+            if (checked){
+              const success = await enableNotifications()
+              if (success){
+                updateAppSettings({...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, osNotificationsEnabled: true }});
+              }else{
+                updateAppSettings({...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, osNotificationsEnabled: false }});
+              }
             }else{
-              updateSystemPreferences({ osNotificationsEnabled: false });
+                updateAppSettings({...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, osNotificationsEnabled: false }});
             }
           }}
           label="Enable OS Notifications"
@@ -108,26 +116,26 @@ export default function SettingsView() {
         <div>
           <h3 className="font-medium mb-2">Notification Categories</h3>
           <div className="space-y-2">
-            {Object.entries(projectPreferences.categoriesEnabled).map(([category, enabled]) => (
+            {Object.entries(projectSettings.notifications.categoriesEnabled).map(([category, enabled]) => (
               <Switch
                 key={category}
                 checked={enabled ?? true}
-                onCheckedChange={(checked) => updateProjectPreferences({ categoriesEnabled: { [category]: checked } })}
+                onCheckedChange={(checked) => updateProjectSettings({ notifications: { categoriesEnabled: { ...projectSettings.notifications.categoriesEnabled, [category]: checked } }})}
                 label={category.charAt(0).toUpperCase() + category.slice(1)}
               />
             ))}
           </div>
         </div>
         <Switch
-          checked={systemPreferences.soundsEnabled}
-          onCheckedChange={(checked) => updateSystemPreferences({ soundsEnabled: checked })}
+          checked={appSettings.notificationSystemSettings.soundsEnabled}
+          onCheckedChange={(checked) => updateAppSettings({ ...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, soundsEnabled: checked }})}
           label="Enable Notification Sounds"
         />
         <div>
           <label className="block text-sm font-medium mb-1">Notification Display Duration</label>
           <Select
-            value={systemPreferences.displayDuration.toString()}
-            onValueChange={(value) => updateSystemPreferences({ displayDuration: parseInt(value) })}
+            value={appSettings.notificationSystemSettings.displayDuration.toString()}
+            onValueChange={(value) => updateAppSettings({ ...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, displayDuration: parseInt(value) }})}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select duration" />

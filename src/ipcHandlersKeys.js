@@ -43,9 +43,12 @@ const IPC_HANDLER_KEYS = {
   TASKS_FEATURE_DELETE: "tasks-feature:delete",
   TASKS_FEATURES_REORDER: "tasks-features:reorder",
 
-  // User Preferences
-  PREFERENCES_GET: "preferences:get",
-  PREFERENCES_UPDATE: "preferences:update",
+  // Settings
+  SETTINGS_SUBSCRIBE: "preferences:subscribe",
+  SETTINGS_GET_APP: "preferences:get-app",
+  SETTINGS_UPDATE_APP: "preferences:update-app",
+  SETTINGS_GET_PROJECT: "preferences:get-project",
+  SETTINGS_UPDATE_PROJECT: "preferences:update-project",
 
   // Notifications
   NOTIFICATIONS_ON_OPEN: "notifications:on-open",
@@ -56,9 +59,5 @@ const IPC_HANDLER_KEYS = {
   NOTIFICATIONS_MARKALLASREAD: "notifications:mark-all-as-read",
   NOTIFICATIONS_MARKASREAD: "notifications:mark-as-read",
   NOTIFICATIONS_DELETEALL: "notifications:delete-all",
-  NOTIFICATIONS_PREFERENCES_SYSTEM: "notifications:preferences-system",
-  NOTIFICATIONS_PREFERENCES_SYSTEM_UPDATE: "notifications:preferences-system-update",
-  NOTIFICATIONS_PREFERENCES_PROJECT: "notifications:preferences-project",
-  NOTIFICATIONS_PREFERENCES_PROJECT_UPDATE: "notifications:preferences-project-update"
 }
 export default IPC_HANDLER_KEYS

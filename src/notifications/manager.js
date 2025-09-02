@@ -1,8 +1,6 @@
 import { ipcMain, Notification } from 'electron';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 import NotificationsStorage from './storage';
-import NotificationsPreferences from './preferences';
-import UserPreferences from '../preferences/userPreferences';
 
 export class NotificationManager {
 
@@ -12,14 +10,10 @@ export class NotificationManager {
     this._ipcBound = false;
 
     this.storages = {};
-    // Use centralized user preferences for system-level notification preferences
-    this.userPreferences = new UserPreferences();
-    this.preferences = {};
   }
 
   async init() {
     await this.__getStorage('main');
-    await this.__getPreferences('main');
 
     this._registerIpcHandlers();
   }
@@ -29,12 +23,6 @@ export class NotificationManager {
       this.storages[projectId] = new NotificationsStorage(projectId);
     }
     return this.storages[projectId];
-  }
-  __getPreferences(projectId) {
-    if (!this.preferences[projectId]) {
-      this.preferences[projectId] = new NotificationsPreferences(projectId);
-    }
-    return this.preferences[projectId];
   }
 
   _registerIpcHandlers() {
@@ -47,13 +35,7 @@ export class NotificationManager {
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = (args) => this.markAllNotificationsAsRead(args);
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = (args) => this.markNotificationAsRead(args);
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL] = (args) => this.deleteAllNotifications(args);
-    // System preferences (now backed by centralized user preferences)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM] = (args) => this.getSystemPreferences(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM_UPDATE] = (args) => this.updateSystemPreferences(args);
-    // Project-scoped notification preferences remain project-specific
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT] = (args) => this.getProjectPreferences(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT_UPDATE] = (args) => this.updateProjectPreferences(args);
-
+    
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
         try {
@@ -143,26 +125,5 @@ export class NotificationManager {
   deleteAllNotifications({ project }) {
     const storage = this.__getStorage(project.id);
     storage.deleteAll();
-  }
-
-  // System preferences via centralized user preferences
-  getSystemPreferences() {
-    const prefs = this.userPreferences.getPreferences();
-    return prefs.notifications || { osNotificationsEnabled: true, soundsEnabled: true, displayDuration: 5 };
-  }
-  updateSystemPreferences({ updates }) {
-    const current = this.userPreferences.getPreferences();
-    const updatedNotifications = { ...(current.notifications || {}), ...(updates || {}) };
-    this.userPreferences.updatePreferences({ notifications: updatedNotifications });
-    return updatedNotifications;
-  }
-
-  // Project-scoped notification preferences remain in notifications storage
-  getProjectPreferences({ project }) {
-    return this.__getPreferences(project.id).getPreferences();
-  }
-  updateProjectPreferences({ project, updates }) {
-    const preferences = this.__getPreferences(project.id);
-    return preferences.savePreferences(updates);
   }
 }

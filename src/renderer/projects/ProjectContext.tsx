@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ProjectSpec } from 'src/types/tasks'
 import { projectsService } from '../services/projectsService'
-import { userPreferencesService } from '../services/userPreferencesService'
+import { useAppSettings } from '../hooks/useAppSettings'
 
 export const MAIN_PROJECT = 'main'
 
@@ -18,6 +18,8 @@ export type ProjectContextValue = {
 const ProjectContext = createContext<ProjectContextValue | null>(null)
 
 export function ProjectsProvider({ children }: { children: React.ReactNode }) {
+  const { appSettings, updateAppSettings } = useAppSettings()
+  const [initialLoad, setInitialLoad] = useState(true)
   const [activeProjectId, setActiveProjectIdState] = useState<string>(MAIN_PROJECT)
   const [projects, setProjects] = useState<ProjectSpec[]>([])
 
@@ -35,28 +37,17 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return () => { unsubscribe(); };
   }, [])
 
-  // Restore last active project id from user preferences on mount
   useEffect(() => {
-    let mounted = true
-    const load = async () => {
-      try {
-        const id = await userPreferencesService.getLastActiveProjectId()
-        if (!mounted) return
-        if (id) {
-          setActiveProjectIdState(id)
-        } else {
-          setActiveProjectIdState(MAIN_PROJECT)
-        }
-      } catch {
-        // Fallback to MAIN_PROJECT silently
+    if (appSettings && initialLoad){
+      if (appSettings.userPreferences.lastActiveProjectId) {
+        setActiveProjectIdState(appSettings.userPreferences.lastActiveProjectId)
+      } else {
         setActiveProjectIdState(MAIN_PROJECT)
       }
+      setInitialLoad(false)
     }
-    load()
-    return () => { mounted = false }
-  }, [])
+  }, [appSettings])
 
-  // If the current active project id is not present in the projects list, fallback to MAIN_PROJECT
   useEffect(() => {
     if (!projects || projects.length === 0) return
     const exists = projects.some(p => p.id === activeProjectId)
@@ -67,8 +58,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   const setActiveProjectId = useCallback((id: string) => {
     setActiveProjectIdState(id)
-    // Persist choice for next app launch
-    userPreferencesService.setLastActiveProjectId(id).catch(() => { /* ignore */ })
+    updateAppSettings({ ...appSettings, userPreferences: { ...appSettings.userPreferences, lastActiveProjectId: id }})
   }, [])
 
   const getProjectById = useCallback((id: string) => {

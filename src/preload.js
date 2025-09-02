@@ -66,11 +66,7 @@ const NOTIFICATIONS_API = {
   getUnreadNotificationsCount: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT, { project }),
   markAllNotificationsAsRead: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD, { project }),
   markNotificationAsRead: (project, id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD, { project, id }),
-  deleteAllNotifications: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL, { project }),
-  getSystemPreferences: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM),
-  updateSystemPreferences: (updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_SYSTEM_UPDATE, { updates }),
-  getProjectPreferences: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT, { project }),
-  updateProjectPreferences: (project, updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_PREFERENCES_PROJECT_UPDATE, { project, updates }),
+  deleteAllNotifications: (project) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL, { project })
 };
 
 const PROJECTS_API = {
@@ -91,9 +87,16 @@ const SCREENSHOT_API = {
   capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
 };
 
-const PREFERENCES_API = {
-  getPreferences: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PREFERENCES_GET),
-  updatePreferences: (updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PREFERENCES_UPDATE, { updates }),
+const SETTINGS_API = {
+  subscribe: (callback) => {
+    const listener = (_event, projectSettings) => callback(projectSettings);
+    ipcRenderer.on(IPC_HANDLER_KEYS.SETTINGS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.SETTINGS_SUBSCRIBE, listener);
+  },
+  getAppSettings: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.SETTINGS_GET_APP),
+  updateAppSettings: (updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.SETTINGS_UPDATE_APP, { updates }),
+  getProjectSettings: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.SETTINGS_GET_PROJECT, { projectId }),
+  updateProjectSettings: (projectId, updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT, { projectId, updates }),
 };
 
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
@@ -102,4 +105,4 @@ contextBridge.exposeInMainWorld('filesService', FILES_API);
 contextBridge.exposeInMainWorld('chatsService', CHATS_API);
 contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
-contextBridge.exposeInMainWorld('preferencesService', PREFERENCES_API);
+contextBridge.exposeInMainWorld('settingsService', SETTINGS_API);

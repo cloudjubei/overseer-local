@@ -3,7 +3,7 @@ import path from 'path';
 import { app } from 'electron';
 
 export default class AppStorage {
-  constructor(subdir = 'notifications') {
+  constructor(subdir) {
     this.basePath = path.join(app.getPath('userData'), subdir);
     if (!fs.existsSync(this.basePath)) {
       fs.mkdirSync(this.basePath, { recursive: true });
