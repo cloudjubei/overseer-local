@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 export type CompletionMessage = { role: 'system' | 'user' | 'assistant'; content: string };
-export type CompletionResponse = { message: { role: 'assistant'; content: string } };
+export type CompletionResponse = { message: { role: 'assistant'; content: string }, usage?: { promptTokens?: number; completionTokens?: number; totalTokens?: number; costUSD?: number; provider?: string; model?: string } };
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 
 export function createCompletionClient(cfg: { model: string; provider?: string; apiKey?: string; baseURL?: string; [k: string]: any }): CompletionClient {
@@ -12,10 +12,10 @@ export function createCompletionClient(cfg: { model: string; provider?: string; 
 
   // Mock mode if no apiKey
   if (!apiKey && process.env.FACTORY_MOCK_LLM === '1') {
-    return async ({ messages }) => {
+    return async ({ messages, model }) => {
       const last = messages[messages.length - 1]?.content || '{}';
       const content = typeof last === 'string' && last.includes('tool_calls') ? last : '{"thoughts":"mock","tool_calls":[]}';
-      return { message: { role: 'assistant', content } };
+      return { message: { role: 'assistant', content }, usage: { provider, model } };
     };
   }
 
@@ -37,6 +37,14 @@ export function createCompletionClient(cfg: { model: string; provider?: string; 
     }
     const data = await res.json();
     const msg = data.choices?.[0]?.message || { role: 'assistant', content: '{}' };
-    return { message: msg };
+    const usageRaw = data.usage || {};
+    const usage = {
+      promptTokens: usageRaw.prompt_tokens,
+      completionTokens: usageRaw.completion_tokens,
+      totalTokens: usageRaw.total_tokens,
+      provider,
+      model,
+    };
+    return { message: msg, usage };
   };
 }

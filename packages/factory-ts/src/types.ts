@@ -36,7 +36,15 @@ export interface ProjectSpec {
   taskIdToDisplayIndex: Record<string, number>;
 }
 export type CompletionMessage = { role: 'system' | 'user' | 'assistant'; content: string };
-export type CompletionResponse = { message: { role: 'assistant'; content: string } };
+export type CompletionUsage = {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+  costUSD?: number;
+  provider?: string;
+  model?: string;
+};
+export type CompletionResponse = { message: { role: 'assistant'; content: string }; usage?: CompletionUsage };
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 export type ToolCall = { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any };
 export type AgentResponse = { thoughts?: string; tool_calls?: ToolCall[] };

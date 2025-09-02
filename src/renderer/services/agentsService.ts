@@ -117,9 +117,13 @@ class AgentsServiceImpl {
         run.completionTokens = e.payload?.completionTokens ?? run.completionTokens;
         run.provider = e.payload?.provider ?? run.provider;
         run.model = e.payload?.model ?? run.model;
+      } else if (e.type === 'run/start') {
+        // initialize from start payload if present
+        run.provider = e.payload?.llm?.provider ?? run.provider;
+        run.model = e.payload?.llm?.model ?? run.model;
       } else if (e.type === 'run/error') {
         run.state = 'error';
-        run.message = e.payload?.message || 'Error';
+        run.message = e.payload?.message || e.payload?.error || 'Error';
       } else if (e.type === 'run/cancelled') {
         run.state = 'cancelled';
         run.message = e.payload?.reason || 'Cancelled';
@@ -152,8 +156,11 @@ class AgentsServiceImpl {
       projectId,
       taskId: String(taskId),
       state: 'running',
+      message: 'Starting agent... ',
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      provider: llmConfig?.provider,
+      model: llmConfig?.model,
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;
@@ -175,8 +182,11 @@ class AgentsServiceImpl {
       taskId: String(taskId),
       featureId: String(featureId),
       state: 'running',
+      message: 'Starting agent... ',
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      provider: llmConfig?.provider,
+      model: llmConfig?.model,
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;

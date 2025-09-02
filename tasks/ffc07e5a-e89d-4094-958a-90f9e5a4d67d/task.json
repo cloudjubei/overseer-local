@@ -91,7 +91,7 @@
     },
     {
       "id": "2f441c51-532f-494b-b29b-ae9920a75750",
-      "status": "-",
+      "status": "+",
       "title": "the new `orchestrator.ts` needs to gather statistics that is displayed to the user",
       "description": "Right now when looking at the \"All Agents\" (`AllAgentsView.tsx`) or \"Agents\" (`AgentsView.tsx`) tabs no performance information is  shown.",
       "plan": "",

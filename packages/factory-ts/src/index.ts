@@ -55,7 +55,12 @@ function buildCompletion(llmConfig: LLMConfig): CompletionClient {
   return createCompletionClient(llmConfig);
 }
 
-function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void): CompletionClient {
+function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, meta?: { provider?: string }): CompletionClient {
+  // Accumulate usage across the run
+  let totalPrompt = 0;
+  let totalCompletion = 0;
+  let totalUSD = 0;
+
   // Wrap the completion client to emit llm events including request messages and timing
   const wrapped: CompletionClient = async (req) => {
     const startedAt = Date.now();
@@ -66,6 +71,25 @@ function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void): 
       const res = await comp(req);
       const durationMs = Date.now() - startedAt;
       emit({ type: 'llm/response', payload: { model: req.model, message: res.message, durationMs } });
+      // Usage (if provided by client)
+      const u = res.usage || {};
+      if (u.promptTokens) totalPrompt += u.promptTokens;
+      if (u.completionTokens) totalCompletion += u.completionTokens;
+      if (u.costUSD) totalUSD += u.costUSD;
+      try {
+        emit({
+          type: 'run/usage',
+          payload: {
+            provider: meta?.provider,
+            model: u.model || req.model,
+            promptTokens: totalPrompt,
+            completionTokens: totalCompletion,
+            totalTokens: (totalPrompt + totalCompletion) || u.totalTokens,
+            costUSD: totalUSD || undefined,
+            lastDurationMs: durationMs,
+          }
+        } satisfies RunEvent);
+      } catch {}
       return res;
     } catch (err) {
       const durationMs = Date.now() - startedAt;
@@ -134,13 +158,13 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
   function startTaskRun(args: StartTaskRunArgs): RunHandle {
     const { id, ee, handle } = newRunHandle('task');
     (async () => {
-      ee.emit('event', { type: 'run/start', payload: { scope: 'task', id, taskId: args.taskId, llm: { model: args.llmConfig?.model } } } satisfies RunEvent);
+      ee.emit('event', { type: 'run/start', payload: { scope: 'task', id, taskId: args.taskId, llm: { model: args.llmConfig?.model, provider: args.llmConfig?.provider } } } satisfies RunEvent);
       try {
         const tools = makeTooling();
         const git = makeGit();
         await ensureBranch(git, args.taskId, ee);
 
-        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e));
+        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider });
         const agent = getAgentFromArgs(args, 'developer');
 
         // Load task then run agent on task
@@ -160,13 +184,13 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
   function startFeatureRun(args: StartFeatureRunArgs): RunHandle {
     const { id, ee, handle } = newRunHandle('feature');
     (async () => {
-      ee.emit('event', { type: 'run/start', payload: { scope: 'feature', id, taskId: args.taskId, featureId: args.featureId, llm: { model: args.llmConfig?.model } } } satisfies RunEvent);
+      ee.emit('event', { type: 'run/start', payload: { scope: 'feature', id, taskId: args.taskId, featureId: args.featureId, llm: { model: args.llmConfig?.model, provider: args.llmConfig?.provider } } } satisfies RunEvent);
       try {
         const tools = makeTooling();
         const git = makeGit();
         await ensureBranch(git, args.taskId, ee);
 
-        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e));
+        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider });
         const agent = getAgentFromArgs(args, 'developer');
 
         const task = await tools.getTask(args.taskId);

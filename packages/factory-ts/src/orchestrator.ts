@@ -157,6 +157,8 @@ async function runConversation(opts: {
       if (!toolCalls.length) {
         // No tool calls; continue loop. Emit snapshot for completeness
         doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'no_tool_calls' } });
+        // progress hint
+        doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i + 1} complete` } });
         continue;
       }
 
@@ -190,6 +192,8 @@ async function runConversation(opts: {
       messages.push(toolResultMsg);
       // Emit user/tool results message appended
       doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
+      // progress hint after tools
+      doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i + 1} tool calls processed` } });
     } catch (e) {
       // On error: block task/feature, same as Python
       if (feature) {
@@ -198,6 +202,7 @@ async function runConversation(opts: {
         await tools.blockTask?.(task.id, `Agent loop failed: ${e}`, agentType, git);
       }
       doEmit({ type: 'llm/messages/error', payload: { error: String(e), messages: messages.slice() } });
+      doEmit({ type: 'run/progress/snapshot', payload: { progress: undefined, message: 'Error encountered' } });
       complete('block', e);
       return;
     }
@@ -210,6 +215,7 @@ async function runConversation(opts: {
     await tools.blockTask?.(task.id, 'Agent loop exceeded max turns', agentType, git);
   }
   doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), reason: 'max_turns' } });
+  doEmit({ type: 'run/progress/snapshot', payload: { progress: 1, message: 'Max turns reached' } });
   complete('max_turns');
 }
 
