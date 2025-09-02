@@ -32,7 +32,6 @@ export type NavigatorApi = NavigatorState & ModalState & {
 function viewPrefixToView(prefix: string): NavigationView {
   switch (prefix) {
     case 'files':
-    case 'documents': // legacy compatibility: map old Documents route to Files
       return 'Files';
     case 'chat':
       return 'Chat';
@@ -40,6 +39,8 @@ function viewPrefixToView(prefix: string): NavigationView {
       return 'Settings';
     case 'notifications':
       return 'Notifications';
+    case 'agents':
+      return 'Agents';
     case 'home':
     default:
       return 'Home';
@@ -108,6 +109,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break;
       case 'Notifications':
         window.location.hash = '#notifications';
+        break;
+      case 'Agents':
+        window.location.hash = '#agents';
         break;
     }
   }, []);

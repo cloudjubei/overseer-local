@@ -231,16 +231,16 @@ export { createOrchestrator as default };
 
 // Minimal default start functions for compatibility
 export function startRun(params: StartRunParams): RunHandle {
-  const orch = createOrchestrator({ history: createHistoryStore({ dbPath: './factory.history.sqlite' }) });
+  const orch = createOrchestrator({ history: createHistoryStore() });
   return orch.startRun(params);
 }
 
 export function runTask(params: { projectId: string; taskId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-  const orch = createOrchestrator({ history: createHistoryStore({ dbPath: './factory.history.sqlite' }) });
+  const orch = createOrchestrator({ history: createHistoryStore() });
   return orch.startTaskRun(params);
 }
 
 export function runFeature(params: { projectId: string; taskId: string | number; featureId: string | number; llmConfig?: LLMConfig; budgetUSD?: number; metadata?: Record<string, unknown> }): RunHandle {
-  const orch = createOrchestrator({ history: createHistoryStore({ dbPath: './factory.history.sqlite' }) });
+  const orch = createOrchestrator({ history: createHistoryStore() });
   return orch.startFeatureRun(params);
 }

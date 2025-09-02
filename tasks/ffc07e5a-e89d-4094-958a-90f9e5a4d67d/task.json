@@ -20,14 +20,14 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "+",
-      "title": "factory-ts isn't linked via ipc bridge like all the other managers",
-      "description": "make it possible to run an agent on a feature or task. Watch out to avoid errors: Module \"node:path\" has been externalized for browser compatibility. Because of this the whole history service had to be disabled from factory-its. It should be fixed and reenabled.",
+      "status": "-",
+      "title": "Running an agent doesn't work",
+      "description": "1) running an agent on a task seems to do nothing.\n2) running an agent on a feature creates this bullet that shows an agent running. The bullet should show the agent status. Clicking on it, should take the user to the appropriate agent in the Agents tab.\n3) There should be console logs for everything the agents do so it's easy to follow what is happening.\n4) Opening the Agents tab, after clicking run agent on a feature, crashes the whole app.",
       "plan": "",
       "context": [
         "src/main.js",
         "src/preload.js",
-        "src/managers.js"
+        "src/renderer/screens/AgentsView.tsx"
       ],
       "acceptance": [],
       "dependencies": []

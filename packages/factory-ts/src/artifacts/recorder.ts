@@ -1,5 +1,6 @@
 import { EventBus, RunEvent, RunHandle, RunId } from '../events/types';
 import { deepRedact, redactObject, redactString, truncateString, TruncationStrategy } from '../errors/redact';
+import { HistoryStore } from '../db/store';
 
 export interface InternalRunRecord {
   runId: RunId;
@@ -115,7 +116,7 @@ function dropHead(rec: InternalRunRecord, count: number, reason: 'maxEvents' | '
   rec._eventsBytes = (rec._eventsBytes ?? 0) + Buffer.byteLength(JSON.stringify(marker), 'utf8');
 }
 
-export function attachRunRecorder(handle: RunHandle): () => void {
+export function attachRunRecorder(handle: RunHandle, history?: HistoryStore): () => void {
   const id = handle.id;
   if (!registry.has(id)) {
     registry.set(id, { runId: id, events: [], proposals: new Map(), commits: [], _eventsBytes: 0 });

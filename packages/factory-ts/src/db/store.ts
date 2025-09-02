@@ -39,9 +39,9 @@ export class InMemoryHistoryStore implements HistoryStore {
 
 // Default store remains in-memory for now. Consumers should acquire a store from
 // createHistoryStore() so config can later swap implementations (e.g., SQLite).
-export function createHistoryStore(): HistoryStore {
+export function createHistoryStore(dbPath: string = './factory.history.sqlite' ): HistoryStore {
   const cfg = getConfig();
-  // Placeholder: when a SQLite-backed store is introduced, use cfg.paths.dbPath here.
+  // Placeholder: when a SQLite-backed store is introduced, use dbPath here.
   void cfg; // avoid unused warning
   return new InMemoryHistoryStore();
 }
