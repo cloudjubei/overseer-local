@@ -128,19 +128,35 @@ async function runConversation(opts: {
   git: GitManager;
   completion: CompletionClient;
   complete: (why: 'finish' | 'block' | 'max_turns', info?: any) => void;
+  emit?: (e: { type: string; payload?: any }) => void; // event sink for logging/stats
 }) {
-  const { model, availableTools, systemPrompt, task, feature, agentType, tools, git, completion, complete } = opts;
+  const { model, availableTools, systemPrompt, task, feature, agentType, tools, git, completion, complete, emit } = opts;
+  const doEmit = (e: { type: string; payload?: any }) => { try { emit?.(e); } catch {} };
+
   const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
+  // Initial snapshot (contains the system/user bootstrap prompt)
+  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice() } });
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
     try {
+      // Emit snapshot of request context before calling the LLM
+      doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i } });
+      const startedAt = Date.now();
       const res = await completion({ model, messages, response_format: { type: 'json_object' } });
+      const durationMs = Date.now() - startedAt;
+
       const assistant = { role: 'assistant' as const, content: res.message.content };
       messages.push(assistant);
+      // Emit assistant message and timing
+      doEmit({ type: 'llm/message', payload: { message: assistant, turn: i, durationMs } });
 
       const parsed = JSON.parse(assistant.content) as AgentResponse;
       const toolCalls: ToolCall[] = parsed.tool_calls ?? [];
-      if (!toolCalls.length) continue;
+      if (!toolCalls.length) {
+        // No tool calls; continue loop. Emit snapshot for completeness
+        doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'no_tool_calls' } });
+        continue;
+      }
 
       const toolOutputs: string[] = [];
 
@@ -161,12 +177,17 @@ async function runConversation(opts: {
 
         // Termination tools mirror Python
         if (['finish_feature', 'block_feature', 'finish_spec', 'block_task'].includes(toolName)) {
+          // Final conversation snapshot before termination
+          doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), tool: toolName } });
           complete(toolName === 'block_feature' || toolName === 'block_task' ? 'block' : 'finish');
           return;
         }
       }
 
-      messages.push({ role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') });
+      const toolResultMsg: CompletionMessage = { role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') };
+      messages.push(toolResultMsg);
+      // Emit user/tool results message appended
+      doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
     } catch (e) {
       // On error: block task/feature, same as Python
       if (feature) {
@@ -174,6 +195,7 @@ async function runConversation(opts: {
       } else {
         await tools.blockTask?.(task.id, `Agent loop failed: ${e}`, agentType, git);
       }
+      doEmit({ type: 'llm/messages/error', payload: { error: String(e), messages: messages.slice() } });
       complete('block', e);
       return;
     }
@@ -185,10 +207,11 @@ async function runConversation(opts: {
   } else {
     await tools.blockTask?.(task.id, 'Agent loop exceeded max turns', agentType, git);
   }
+  doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), reason: 'max_turns' } });
   complete('max_turns');
 }
 
-export async function runAgentOnTask(model: string, agentType: string, task: Task, tools: TaskUtils, git: GitManager, completion: CompletionClient) {
+export async function runAgentOnTask(model: string, agentType: string, task: Task, tools: TaskUtils, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
   console.log(`\n--- Activating Agent ${agentType} for task: [${task.id}] ${task.title} ---`);
   const agentDocs = loadAgentDocs(agentType);
   const contextFiles = ['docs/FILE_ORGANISATION.md'];
@@ -206,11 +229,12 @@ export async function runAgentOnTask(model: string, agentType: string, task: Tas
     tools,
     git,
     completion,
-    complete: () => {}
+    complete: () => {},
+    emit,
   });
 }
 
-export async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, tools: TaskUtils, git: GitManager, completion: CompletionClient) {
+export async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, tools: TaskUtils, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
   console.log(`\n--- Activating Agent ${agentType} for Feature: [${feature.id}] ${feature.title} ---`);
 
   if (agentType === 'developer') await tools.updateFeatureStatus?.(task.id, feature.id, '~');
@@ -233,7 +257,8 @@ export async function runAgentOnFeature(model: string, agentType: string, task: 
     tools,
     git,
     completion,
-    complete: () => {}
+    complete: () => {},
+    emit,
   });
 }
 
@@ -245,8 +270,9 @@ export async function runOrchestrator(opts: {
   tools: TaskUtils;
   git: GitManager;
   completion: CompletionClient;
+  emit?: (e: { type: string; payload?: any }) => void;
 }) {
-  const { model, agentType, taskId, projectDir, tools, git, completion } = opts;
+  const { model, agentType, taskId, projectDir, tools, git, completion, emit } = opts;
 
   // Configure project root for task utils
   if (projectDir) tools.setProjectRoot(projectDir);
@@ -276,7 +302,7 @@ export async function runOrchestrator(opts: {
 
   if (agentType === 'speccer') {
     const freshTask = await Promise.resolve(tools.getTask(currentTask.id));
-    await runAgentOnTask(model, agentType, freshTask, tools, git, completion);
+    await runAgentOnTask(model, agentType, freshTask, tools, git, completion, emit);
     return;
   }
 
@@ -287,7 +313,7 @@ export async function runOrchestrator(opts: {
       console.log(`\nNo more available features for task ${freshTask.id}.`);
       break;
     }
-    await runAgentOnFeature(model, agentType, freshTask, next, tools, git, completion);
+    await runAgentOnFeature(model, agentType, freshTask, next, tools, git, completion, emit);
     processed.add(next.id);
   }
 }

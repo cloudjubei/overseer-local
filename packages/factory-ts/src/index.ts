@@ -56,15 +56,20 @@ function buildCompletion(llmConfig: LLMConfig): CompletionClient {
 }
 
 function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void): CompletionClient {
-  // Wrap the completion client to emit llm events
+  // Wrap the completion client to emit llm events including request messages and timing
   const wrapped: CompletionClient = async (req) => {
-    emit({ type: 'llm/request', payload: { model: req.model } });
+    const startedAt = Date.now();
+    try {
+      emit({ type: 'llm/request', payload: { model: req.model, messages: req.messages } });
+    } catch {}
     try {
       const res = await comp(req);
-      emit({ type: 'llm/response', payload: { model: req.model, message: res.message } });
+      const durationMs = Date.now() - startedAt;
+      emit({ type: 'llm/response', payload: { model: req.model, message: res.message, durationMs } });
       return res;
     } catch (err) {
-      emit({ type: 'llm/error', payload: { error: String((err as Error)?.message || err) } });
+      const durationMs = Date.now() - startedAt;
+      emit({ type: 'llm/error', payload: { error: String((err as Error)?.message || err), durationMs } });
       throw err;
     }
   };
@@ -140,7 +145,7 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
 
         // Load task then run agent on task
         const task = await tools.getTask(args.taskId);
-        await runAgentOnTask(args.llmConfig.model, agent, task, tools, git, completion);
+        await runAgentOnTask(args.llmConfig.model, agent, task, tools, git, completion, (e) => ee.emit('event', e));
 
         ee.emit('event', { type: 'run/completed', payload: { ok: true } } satisfies RunEvent);
       } catch (err) {
@@ -168,7 +173,7 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
         const feature = (task.features || []).find(f => f.id === args.featureId);
         if (!feature) throw new Error(`Feature ${args.featureId} not found in task ${args.taskId}`);
 
-        await runAgentOnFeature(args.llmConfig.model, agent, task, feature, tools, git, completion);
+        await runAgentOnFeature(args.llmConfig.model, agent, task, feature, tools, git, completion, (e) => ee.emit('event', e));
         ee.emit('event', { type: 'run/completed', payload: { ok: true } } satisfies RunEvent);
       } catch (err) {
         ee.emit('event', { type: 'run/error', payload: { error: String((err as Error)?.stack || err) } } satisfies RunEvent);
