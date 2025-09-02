@@ -1,1 +1,2 @@
-export * from './gitService';
+export * from './gitService.js';
+export * from './gitManager.js';

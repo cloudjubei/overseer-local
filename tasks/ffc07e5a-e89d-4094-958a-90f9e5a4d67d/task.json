@@ -35,7 +35,7 @@
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts orchestrator.ts needs an implementation of a git manager",
       "description": "orchestrator.ts is mirroring run_local_agent.py - which uses git_manager.py\nThe equivalent to git_manager.py needs to also exist inside factory-ts so that orchestrator.ts can use it.",
       "plan": "",
