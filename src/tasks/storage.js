@@ -103,7 +103,8 @@ export default class TasksStorage {
       title: task.title || '',
       description: task.description || '',
       features: [],
-      rejection: task.rejection
+      rejection: task.rejection,
+      featureIdToDisplayIndex: {}
     };
 
     const { valid, errors } = validateTask(newTask);

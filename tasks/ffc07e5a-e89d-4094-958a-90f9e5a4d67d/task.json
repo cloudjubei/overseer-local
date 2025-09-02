@@ -1,0 +1,64 @@
+{
+  "id": "ffc07e5a-e89d-4094-958a-90f9e5a4d67d",
+  "status": "-",
+  "title": "Integrate the factory-ts package",
+  "description": "A local package was created that is currently placed in `../../packages/factory-ts` relative to this project.\nThis package allows calling agents to run on specific projects, tasks and features. It needs to be integrated into this project so agents can be ran on specific tasks or features and agent performance can be monitored. If at any point changes are required in the factory-ts - create a doc `FACTORY-TS-CHANGES.md` listing the details.",
+  "features": [
+    {
+      "id": "3cd73d96-21d0-488c-a484-2ed49a70032d",
+      "status": "-",
+      "title": "Add the local 'factory-ts' package into this project",
+      "description": "The package is located at `../../packages/factory-ts`\nThe factor-ts documentation is\n`../../docs/FACTORY_TS_OVERVIEW.md` whereas the configuration documantion is: `../../docs/CONFIGURATION.md`",
+      "plan": "",
+      "context": [
+        "../../packages/factory-ts",
+        "../../docs/FACTORY_TS_OVERVIEW.md",
+        "../../docs/CONFIGURATION.md"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
+      "status": "-",
+      "title": "Allow agents to run on tasks and features using the factory-ts package",
+      "description": "Inside TasksListView.tsx and TaskDetailsView.tsx it must be possible to launch agents and to see agents that are already working.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": [
+        "ffc07e5a-e89d-4094-958a-90f9e5a4d67d.3cd73d96-21d0-488c-a484-2ed49a70032d"
+      ]
+    },
+    {
+      "id": "2f441c51-532f-494b-b29b-ae9920a75750",
+      "status": "-",
+      "title": "Add an 'Agents' tab to monitor agents working",
+      "description": "All agents that are running on a given project can be monitored from this tab, showing their performance and costs.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": [
+        "ffc07e5a-e89d-4094-958a-90f9e5a4d67d.89144d73-7cdd-4984-9422-2341c2ed77b5"
+      ]
+    },
+    {
+      "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
+      "status": "-",
+      "title": "Add an 'All Agents' tab under 'Settings' where summaries of all agents can be seen",
+      "description": "All runs of agents can be seen and analysed. Seeing the costs and performance. And seeing which models perform well.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "dependencies": [
+        "ffc07e5a-e89d-4094-958a-90f9e5a4d67d.2f441c51-532f-494b-b29b-ae9920a75750"
+      ]
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "3cd73d96-21d0-488c-a484-2ed49a70032d": 1,
+    "89144d73-7cdd-4984-9422-2341c2ed77b5": 2,
+    "2f441c51-532f-494b-b29b-ae9920a75750": 3,
+    "92caffb1-e207-4cb0-a774-0e69e8d719ea": 4
+  }
+}
