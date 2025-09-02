@@ -37,6 +37,7 @@ This document describes how files and directories are organised in this reposito
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
 - packages/: Local monorepo packages used by the app.
   - packages/factory-ts/: Agent orchestration library used by the app and CLI. See packages/factory-ts/FACTORY_TS_OVERVIEW.md.
+    - packages/factory-ts/src/taskUtils.ts: TypeScript implementation mirroring Python task_utils.py, used by orchestrator.ts for file/task/feature/test operations and Git commits.
 
 Also present at repo root:
 - .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs

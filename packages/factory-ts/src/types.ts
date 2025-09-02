@@ -1,6 +1,5 @@
-export type Status = '-' | '~' | '+' | '?' ;
-
-export type Feature = {
+export type Status = '+' | '-' | '~' | '?';
+export interface Feature {
   id: string;
   status: Status;
   title: string;
@@ -8,73 +7,75 @@ export type Feature = {
   plan?: string;
   context?: string[];
   acceptance?: string[];
+  dependencies?: string[];
   rejection?: string;
-};
-
-export type Task = {
+}
+export interface Task {
   id: string;
   title: string;
   description: string;
-  status: Status;
-  features: Feature[];
+  status?: Status;
   rejection?: string;
-  featureIdToDisplayIndex: Record<string, number>;
-};
+  features: Feature[];
+  featureIdToDisplayIndex?: Record<string, number>;
+}
 
-export type ToolCall = {
+export interface ToolCall {
   tool_name?: string;
   tool?: string;
   name?: string;
   arguments?: Record<string, any>;
   parameters?: Record<string, any>;
-};
-
-export type AgentResponse = {
-  thoughts: string;
+}
+export interface AgentResponse {
+  thoughts?: string;
   tool_calls?: ToolCall[];
-};
-
-export type GitManager = {
-  checkoutBranch: (name: string, create?: boolean) => Promise<void>
-  pull: (name?: string) => Promise<void>
-  stageAll: () => Promise<void>
-  commit: (message: string) => Promise<void>
-  push: () => Promise<void>
-};
-
-export type TaskUtils = {
-  setProjectRoot: (p: string) => void;
-  getTask: (taskId: string) => Promise<Task>
-  findNextAvailableFeature: (task: Task, excludeIds?: Set<string>, ignoreDependencies?: boolean) => Feature | null;
-  updateTaskStatus: (taskId: string, status: Status) => Promise<Task>
-  updateFeatureStatus: (taskId: string, featureId: string, status: Status) => Promise<Feature | null>
-  // Generic file tools
-  readFiles: (paths: string[]) => Promise<string>;
-  searchFiles: (query: string, path?: string) => Promise<string[]>
-  listFiles: (path: string) => Promise<string[]>
-  writeFile: (filename: string, content: string) => Promise<void>
-  renameFile: (filename: string, newFilename: string) => Promise<void>
-  deleteFile: (filename: string) => Promise<void>
-  // Tester tools
-  runTest: (taskId: string, featureId: string) => Promise<string>
-  updateTest: (taskId: string, featureId: string, test: string) => Promise<string>
-  updateAcceptanceCriteria: (taskId: string, featureId: string, criteria: string[]) => Promise<Feature | null>
-  // Planner/Contexter
-  updateFeaturePlan: (taskId: string, featureId: string, plan: any) => Promise<Feature | null>
-  updateFeatureContext: (taskId: string, featureId: string, context: string[]) => Promise<Feature | null>
-  // Spec
-  createFeature: (taskId: string, title: string, description: string) => Promise<Feature> 
-  // Finish/Block
-  finishFeature: (taskId: string, featureId: string, agentType: string, git: GitManager) => Promise<string>
-  blockFeature: (taskId: string, featureId: string, reason: string, agentType: string, git: GitManager) => Promise<Feature | null> 
-  finishSpec: (taskId: string, agentType: string, git: GitManager) => Promise<string>
-  blockTask: (taskId: string, reason: string, agentType: string, git: GitManager) => Promise<Task>
-};
+}
 
 export type CompletionMessage = { role: 'user' | 'assistant'; content: string };
+export type CompletionClient = (args: { model: string; messages: CompletionMessage[]; response_format?: { type: 'json_object' } }) => Promise<{ message: { content: string } }>
 
-export type CompletionClient = (opts: {
-  model: string;
-  messages: CompletionMessage[];
-  response_format?: { type: 'json_object' };
-}) => Promise<{ message: { content: string } }>;
+export interface GitManager {
+  checkoutBranch: (name: string, create?: boolean) => Promise<void> | void;
+  pull: (name: string) => Promise<void> | void;
+  stageFiles?: (paths: string[]) => Promise<void> | void;
+  stage_files?: (paths: string[]) => Promise<void> | void; // compatibility
+  commit: (message: string) => Promise<void> | void;
+  push: () => Promise<void> | void;
+}
+
+export interface TaskUtils {
+  setProjectRoot: (p: string) => void;
+  getProjectRoot?: () => string | any;
+  getTask: (taskId: string) => Promise<Task> | Task;
+  saveTask?: (task: Task) => Promise<void> | void;
+  updateTaskStatus?: (taskId: string, status: Status) => Promise<Task> | Task;
+
+  // Developer
+  readFiles: (paths: string[]) => Promise<string> | string;
+  listFiles: (path: string) => Promise<string[]> | string[];
+  writeFile: (filename: string, content: string) => Promise<any> | any;
+  renameFile: (filename: string, newFilename: string) => Promise<any> | any;
+  deleteFile: (filename: string) => Promise<any> | any;
+  searchFiles: (query: string, path?: string) => Promise<string[]> | string[];
+
+  // Feature ops
+  updateFeatureStatus?: (taskId: string, featureId: string, status: Status) => Promise<Feature | undefined> | Feature | undefined;
+  blockFeature?: (taskId: string, featureId: string, reason: string, agentType: string, git: GitManager) => Promise<Feature | undefined> | Feature | undefined;
+  blockTask?: (taskId: string, reason: string, agentType: string, git: GitManager) => Promise<Task> | Task;
+  finishFeature?: (taskId: string, featureId: string, agentType: string, git: GitManager) => Promise<any> | any;
+  finishSpec?: (taskId: string, agentType: string, git: GitManager) => Promise<any> | any;
+
+  // Tester
+  getTest?: (taskId: string, featureId: string) => Promise<string> | string;
+  updateAcceptanceCriteria?: (taskId: string, featureId: string, criteria: string[]) => Promise<Feature | undefined> | Feature | undefined;
+  updateTest?: (taskId: string, featureId: string, test: string) => Promise<any> | any;
+  deleteTest?: (taskId: string, featureId: string) => Promise<any> | any;
+  runTest?: (taskId: string, featureId: string) => Promise<string> | string;
+
+  // Orchestrator helpers
+  findNextAvailableFeature: (task: Task, exclude: Set<string>, ignoreDeps: boolean) => Feature | undefined;
+  createFeature?: (taskId: string, title: string, description: string) => Promise<Feature> | Feature;
+  updateFeaturePlan?: (taskId: string, featureId: string, plan: any) => Promise<Feature | undefined> | Feature | undefined;
+  updateFeatureContext?: (taskId: string, featureId: string, context: string[]) => Promise<Feature | undefined> | Feature | undefined;
+}

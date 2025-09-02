@@ -49,7 +49,7 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts orchestrator.ts needs an implementation of task_utils",
       "description": "orchestrator.ts is mirroring run_local_agent.py - which uses task_utils.py\nThe equivalent to task_utils.py needs to also exist inside factory-ts so that orchestrator.ts can use it.\nNote that a lot of these tools already exist inside the Overseer (TasksManager, ProjectsManager and FilesManager) - thus their functionalities should be supplied into the orchestrator.ts in some clean way.",
       "plan": "",
