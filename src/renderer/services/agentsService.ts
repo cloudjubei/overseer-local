@@ -1,5 +1,7 @@
 import { EventSourceLike } from '../../tools/factory/orchestratorBridge';
 import { startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
+import { LLMConfig } from './chatsService';
+import { LLMConfigManager } from '../utils/LLMConfigManager';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
@@ -37,9 +39,16 @@ function getCostUSD(payload: any | undefined): number | undefined {
   return payload.costUSD ?? payload.costUsd ?? payload.usd ?? undefined;
 }
 
+function redactConfig(config: LLMConfig | null | undefined) {
+  if (!config) return null;
+  const { apiKey, ...rest } = config as any;
+  return { ...rest, apiKey: apiKey ? '***' : '' };
+}
+
 class AgentsServiceImpl {
   private runs = new Map<string, RunRecord>();
   private subscribers = new Set<Subscriber>();
+  private llmManager = new LLMConfigManager();
 
   private notify() {
     const list = Array.from(this.runs.values()).map(this.publicFromRecord);
@@ -73,9 +82,27 @@ class AgentsServiceImpl {
     this.notify();
   }
 
+  private logEventVerbose(run: RunRecord, e: any) {
+    try {
+      const type = e?.type || 'unknown';
+      const payload = e?.payload;
+      if (String(type).startsWith('llm/')) {
+        console.log('[agentsService] LLM event', run.runId, type, payload ? JSON.parse(JSON.stringify(payload)) : undefined);
+      } else if (type === 'run/log' || type === 'run/progress' || type === 'run/progress/snapshot') {
+        console.log('[agentsService] event', run.runId, type, payload?.message || '');
+      } else if (type) {
+        console.log('[agentsService] event', run.runId, type);
+      } else {
+        console.log('[agentsService] event', run.runId, e);
+      }
+    } catch (err) {
+      console.warn('[agentsService] logEventVerbose error', (err as any)?.message || err);
+    }
+  }
+
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
-      console.log('[agentsService] event', run.runId, e?.type);
+      this.logEventVerbose(run, e);
       run.updatedAt = getEventTs(e);
       if (e.type === 'run/progress' || e.type === 'run/progress/snapshot') {
         run.message = e.payload?.message ?? run.message;
@@ -108,9 +135,18 @@ class AgentsServiceImpl {
     run.events.addEventListener('*', onAny);
   }
 
+  private getActiveLLMConfig(): LLMConfig | null {
+    try {
+      return this.llmManager.getActiveConfig() as unknown as LLMConfig;
+    } catch {
+      return null;
+    }
+  }
+
   async startTaskAgent(projectId: string, taskId: string): Promise<AgentRun> {
-    console.log('[agentsService] startTaskAgent', { projectId, taskId });
-    const { handle, events } = await startTaskRun({ projectId, taskId });
+    const llmConfig = this.getActiveLLMConfig();
+    console.log('[agentsService] startTaskAgent', { projectId, taskId, llmConfig: redactConfig(llmConfig) });
+    const { handle, events } = await startTaskRun({ projectId, taskId, options: { llmConfig } });
     const run: RunRecord = {
       runId: handle.id,
       projectId,
@@ -130,8 +166,9 @@ class AgentsServiceImpl {
   }
 
   async startFeatureAgent(projectId: string, taskId: string, featureId: string): Promise<AgentRun> {
-    console.log('[agentsService] startFeatureAgent', { projectId, taskId, featureId });
-    const { handle, events } = await startFeatureRun({ projectId, taskId, featureId });
+    const llmConfig = this.getActiveLLMConfig();
+    console.log('[agentsService] startFeatureAgent', { projectId, taskId, featureId, llmConfig: redactConfig(llmConfig) });
+    const { handle, events } = await startFeatureRun({ projectId, taskId, featureId, options: { llmConfig } });
     const run: RunRecord = {
       runId: handle.id,
       projectId,

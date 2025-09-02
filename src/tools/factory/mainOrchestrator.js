@@ -45,6 +45,18 @@ function broadcastEventToSubscribers(runId, event) {
   }
 }
 
+function maskSecrets(obj) {
+  try {
+    const o = JSON.parse(JSON.stringify(obj));
+    if (o && o.llmConfig && typeof o.llmConfig === 'object') {
+      if ('apiKey' in o.llmConfig) o.llmConfig.apiKey = '***';
+    }
+    return o;
+  } catch {
+    return obj;
+  }
+}
+
 export async function registerFactoryIPC(mainWindow, projectRoot) {
   console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
   const { createOrchestrator, createHistoryStore } = await loadFactory();
@@ -71,8 +83,15 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     RUNS.set(runHandle.id, runHandle);
     const unsubscribe = runHandle.onEvent((e) => {
       try {
-        // Lightweight log for visibility; avoid spamming huge payloads
-        console.log('[factory] event', runHandle.id, e?.type, e?.payload?.message || '');
+        // Rich log for visibility; include payload for llm events
+        const t = e?.type || 'unknown';
+        if (String(t).startsWith('llm/')) {
+          console.log('[factory] event', runHandle.id, t, e?.payload ? JSON.parse(JSON.stringify(e.payload)) : undefined);
+        } else if (t === 'run/log' || t === 'run/progress' || t === 'run/progress/snapshot') {
+          console.log('[factory] event', runHandle.id, t, e?.payload?.message || '');
+        } else {
+          console.log('[factory] event', runHandle.id, t);
+        }
       } catch {}
       broadcastEventToSubscribers(runHandle.id, e);
     });
@@ -90,7 +109,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   }
 
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { projectId, taskId, llmConfig, budgetUSD, metadata }) => {
-    console.log('[factory] START_TASK', { projectId, taskId, llmConfig, budgetUSD, metadata });
+    console.log('[factory] START_TASK', maskSecrets({ projectId, taskId, llmConfig, budgetUSD, metadata }));
     try {
       const run = orchestrator.startTaskRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (task)', run?.id);
@@ -103,7 +122,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   });
 
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { projectId, taskId, featureId, llmConfig, budgetUSD, metadata }) => {
-    console.log('[factory] START_FEATURE', { projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
+    console.log('[factory] START_FEATURE', maskSecrets({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata }));
     try {
       const run = orchestrator.startFeatureRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (feature)', run?.id);

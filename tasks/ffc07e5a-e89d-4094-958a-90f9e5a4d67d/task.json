@@ -52,7 +52,7 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "-",
+      "status": "+",
       "title": "Running an agent doesn't work",
       "description": "The agent should be run with the active LLMConfig (the same that is used for chats).\nAll messages sent to and from agent should be visible in the console logs.",
       "plan": "",

@@ -21,6 +21,9 @@ function makeEventSourceLike(runId: string): EventSourceLike {
       unsubscribe = (window as any).factory.subscribe(runId, (e: any) => {
         try {
           if (e?.type) console.log('[factory:renderer] event', runId, e.type);
+          if (String(e?.type || '').startsWith('llm/')) {
+            try { console.log('[factory:renderer] LLM event', runId, e.type, e?.payload ? JSON.parse(JSON.stringify(e.payload)) : undefined); } catch {}
+          }
         } catch {}
         onAny?.(e);
       });
@@ -34,10 +37,23 @@ function makeEventSourceLike(runId: string): EventSourceLike {
   };
 }
 
+function redactOptions(options?: Record<string, any>) {
+  if (!options) return {};
+  try {
+    const o = JSON.parse(JSON.stringify(options));
+    if (o.llmConfig && typeof o.llmConfig === 'object') {
+      if ('apiKey' in o.llmConfig) o.llmConfig.apiKey = '***';
+    }
+    return o;
+  } catch {
+    return {};
+  }
+}
+
 export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
   const { projectId, taskId, options } = params;
-  console.log('[factory:renderer] Starting task run', { projectId, taskId: String(taskId) });
+  console.log('[factory:renderer] Starting task run', { projectId, taskId: String(taskId), options: redactOptions(options) });
   const res = await (window as any).factory.startTaskRun(projectId, String(taskId), options ?? {});
   const runId: string = res?.runId;
   if (!runId) throw new Error('Failed to start task run: missing runId');
@@ -49,7 +65,7 @@ export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle
 export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
   const { projectId, taskId, featureId, options } = params;
-  console.log('[factory:renderer] Starting feature run', { projectId, taskId: String(taskId), featureId: String(featureId) });
+  console.log('[factory:renderer] Starting feature run', { projectId, taskId: String(taskId), featureId: String(featureId), options: redactOptions(options) });
   const res = await (window as any).factory.startFeatureRun(projectId, String(taskId), String(featureId), options ?? {});
   const runId: string = res?.runId;
   if (!runId) throw new Error('Failed to start feature run: missing runId');
