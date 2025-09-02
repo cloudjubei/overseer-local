@@ -81,7 +81,7 @@
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
-      "status": "-",
+      "status": "+",
       "title": "Add an 'All Agents' tab under 'Settings' (in Sidebar) where summaries of all agents can be seen",
       "description": "All runs of agents can be seen and analysed. Seeing the costs and performance. And seeing which models perform well.",
       "plan": "",

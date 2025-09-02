@@ -14,6 +14,8 @@ export type AgentRun = {
   costUSD?: number;
   promptTokens?: number;
   completionTokens?: number;
+  provider?: string;
+  model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
 };
@@ -25,6 +27,16 @@ interface RunRecord extends AgentRun {
 }
 
 type Subscriber = (runs: AgentRun[]) => void;
+
+function getEventTs(e: any): string {
+  return e?.ts || e?.time || new Date().toISOString();
+}
+
+function getCostUSD(payload: any | undefined): number | undefined {
+  if (!payload) return undefined;
+  // Support both costUSD and costUsd
+  return payload.costUSD ?? payload.costUsd ?? payload.usd ?? undefined;
+}
 
 class AgentsServiceImpl {
   private runs = new Map<string, RunRecord>();
@@ -62,6 +74,43 @@ class AgentsServiceImpl {
     this.notify();
   }
 
+  private wireRunEvents(run: RunRecord) {
+    const onAny = (e: any) => {
+      run.updatedAt = getEventTs(e);
+      if (e.type === 'run/progress' || e.type === 'run/progress/snapshot') {
+        run.message = e.payload?.message ?? run.message;
+        // Support either numeric 0..1 or percentage fields
+        if (typeof e.payload?.progress === 'number') {
+          run.progress = e.payload.progress;
+        } else if (typeof e.payload?.percent === 'number') {
+          run.progress = Math.max(0, Math.min(1, e.payload.percent / 100));
+        }
+      } else if (e.type === 'run/usage') {
+        run.costUSD = getCostUSD(e.payload) ?? run.costUSD;
+        run.promptTokens = e.payload?.promptTokens ?? run.promptTokens;
+        run.completionTokens = e.payload?.completionTokens ?? run.completionTokens;
+        run.provider = e.payload?.provider ?? run.provider;
+        run.model = e.payload?.model ?? run.model;
+      } else if (e.type === 'run/error') {
+        run.state = 'error';
+        run.message = e.payload?.message || 'Error';
+      } else if (e.type === 'run/cancelled') {
+        run.state = 'cancelled';
+        run.message = e.payload?.reason || 'Cancelled';
+      } else if (e.type === 'run/completed' || e.type === 'run/complete') {
+        run.state = 'completed';
+        // Prefer summary or message if present
+        run.message = e.payload?.message || e.payload?.summary || 'Completed';
+      }
+      this.notify();
+      if (run.state !== 'running') {
+        // auto close listener
+        try { run.events.close(); } catch {}
+      }
+    };
+    run.events.addEventListener('*', onAny);
+  }
+
   startTaskAgent(projectId: string, taskId: string): AgentRun {
     const { handle, events } = startTaskRun({ projectId, taskId });
     const run: RunRecord = {
@@ -75,34 +124,7 @@ class AgentsServiceImpl {
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;
 
-    // wire events
-    const onAny = (e: any) => {
-      run.updatedAt = e.time || new Date().toISOString();
-      if (e.type === 'run/progress' || e.type === 'run/progress/snapshot') {
-        run.message = e.payload?.message;
-        run.progress = e.payload?.progress ?? run.progress;
-      } else if (e.type === 'run/usage') {
-        run.costUSD = e.payload?.costUSD ?? run.costUSD;
-        run.promptTokens = e.payload?.promptTokens ?? run.promptTokens;
-        run.completionTokens = e.payload?.completionTokens ?? run.completionTokens;
-      } else if (e.type === 'run/error') {
-        run.state = 'error';
-        run.message = e.payload?.message || 'Error';
-      } else if (e.type === 'run/cancelled') {
-        run.state = 'cancelled';
-        run.message = e.payload?.reason || 'Cancelled';
-      } else if (e.type === 'run/completed') {
-        run.state = 'completed';
-        // Prefer summary message if present
-        run.message = e.payload?.message || 'Completed';
-      }
-      this.notify();
-      if (run.state !== 'running') {
-        // auto close listener
-        try { run.events.close(); } catch {}
-      }
-    };
-    events.addEventListener('*', onAny);
+    this.wireRunEvents(run);
 
     this.runs.set(run.runId, run);
     this.notify();
@@ -123,31 +145,7 @@ class AgentsServiceImpl {
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;
 
-    const onAny = (e: any) => {
-      run.updatedAt = e.time || new Date().toISOString();
-      if (e.type === 'run/progress' || e.type === 'run/progress/snapshot') {
-        run.message = e.payload?.message;
-        run.progress = e.payload?.progress ?? run.progress;
-      } else if (e.type === 'run/usage') {
-        run.costUSD = e.payload?.costUSD ?? run.costUSD;
-        run.promptTokens = e.payload?.promptTokens ?? run.promptTokens;
-        run.completionTokens = e.payload?.completionTokens ?? run.completionTokens;
-      } else if (e.type === 'run/error') {
-        run.state = 'error';
-        run.message = e.payload?.message || 'Error';
-      } else if (e.type === 'run/cancelled') {
-        run.state = 'cancelled';
-        run.message = e.payload?.reason || 'Cancelled';
-      } else if (e.type === 'run/completed') {
-        run.state = 'completed';
-        run.message = e.payload?.message || 'Completed';
-      }
-      this.notify();
-      if (run.state !== 'running') {
-        try { run.events.close(); } catch {}
-      }
-    };
-    events.addEventListener('*', onAny);
+    this.wireRunEvents(run);
 
     this.runs.set(run.runId, run);
     this.notify();

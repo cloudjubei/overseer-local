@@ -13,7 +13,7 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.
     - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications/user-preferences).
-      - src/renderer/services/agentsService.ts: In-memory orchestrator client that starts/monitors agent runs using the local factory-ts bridge.
+      - src/renderer/services/agentsService.ts: In-memory orchestrator client that starts/monitors agent runs using the local factory-ts bridge. Tracks provider/model, costs, and token usage across runs.
     - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
       - src/renderer/hooks/useAgents.ts: Hook to subscribe to active agent runs and start/cancel them.
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
@@ -74,6 +74,6 @@ Notes:
 ## Factory TS Integration
 - Library location: packages/factory-ts (local package).
 - App bridge: src/tools/factory/orchestratorBridge.ts provides startTaskRun/startFeatureRun helpers that produce an EventSource-like stream for UI consumption.
-- Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts expose a simple in-memory registry of runs. These are used by TasksListView and TaskDetailsView to start and show active agents, and the Agents screen to monitor all runs.
-- UI: src/renderer/screens/AgentsView.tsx renders the Agents tab accessible from the Sidebar to monitor agents' performance and costs across the active project.
+- Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts expose a simple in-memory registry of runs. These are used by TasksListView and TaskDetailsView to start and show active agents, and the Agents screen to monitor runs.
+- UI: src/renderer/screens/AgentsView.tsx renders the Agents tab accessible from the Sidebar to monitor agents' performance and costs in the active project; Settings > All Agents provides a global summary across projects, including total cost and model performance.
 - CLI: scripts/runAgent.mjs streams JSONL events for a run. Build the package with npm run factory:build and then use npm run run:agent.
