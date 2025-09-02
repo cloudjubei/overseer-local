@@ -49,17 +49,13 @@
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "+",
-      "title": "factory-ts orchestrator.ts needs an implementation of task_utils",
-      "description": "orchestrator.ts is mirroring run_local_agent.py - which uses task_utils.py\nThe equivalent to task_utils.py needs to also exist inside factory-ts so that orchestrator.ts can use it.\nNote that a lot of these tools already exist inside the Overseer (TasksManager, ProjectsManager and FilesManager) - thus their functionalities should be supplied into the orchestrator.ts in some clean way.",
+      "status": "-",
+      "title": "factory-ts `orchestrator.ts` needs an implementation of a `CompletionClient`",
+      "description": "`orchestrator.ts` is mirroring `run_local_agent.py` - which uses a library `litellm` to communicate with LLMs.\nThe `orchestrator.ts` should be a self-contained library - just like `run_local_agent.py` was. If the correct configuration is passed to it, it should run the LLM conversations. Thus, it requires an equivalent of `litellm` locally to run.",
       "plan": "",
       "context": [
         "packages/factory-ts/blueprint/run_local_agent.py",
-        "packages/factory-ts/blueprint/task_utils.py",
-        "packages/factory-ts/src/orchestrator.ts",
-        "src/files/manager.js",
-        "src/projects/manager.js",
-        "src/tasks/manager.js"
+        "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
       "dependencies": []
@@ -81,46 +77,43 @@
     },
     {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
-      "status": "+",
-      "title": "Allow agents to run on tasks and features using the factory-ts package",
-      "description": "Inside TasksListView.tsx and TaskDetailsView.tsx it must be possible to launch agents and to see agents that are already working.",
+      "status": "-",
+      "title": "Integrate the new `orchestrator.ts` (inside factory-ts) with `mainOrchestrator.ts`",
+      "description": "We need to be able to run agents using the new `orchestrator.ts` .\nThat file is based on `run_local_agent.py`which was part of a python project.\nLook at `orchestrator.ts` - iron out any inconsistencies with regards to `run_local_agent.py` and make sure it is possible to call it all properly from within `mainOrchestrator.js` .",
       "plan": "",
       "context": [
-        "packages/factory-ts",
-        "packages/factory-ts/FACTORY_TS_OVERVIEW.md",
-        "packages/factory-ts/CONFIGURATION.md",
-        "src/renderer/screens/TasksView.tsx",
-        "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/tasks/TaskDetailsView.tsx"
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js",
+        "packages/factory-ts/blueprint/run_local_agent.py",
+        "packages/factory-ts/src/taskUtils.ts",
+        "packages/factory-ts/src/git/gitManager.ts"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "2f441c51-532f-494b-b29b-ae9920a75750",
-      "status": "+",
-      "title": "Add an 'Agents' tab (in Sidebar) to monitor agents working",
-      "description": "All agents that are running on a given project can be monitored from this tab, showing their performance and costs.",
+      "status": "-",
+      "title": "the new `orchestrator.ts` needs to gather statistics",
+      "description": "`orchestrator.ts` needs to store all messages sent between itself and an LLM so that usage, performance and cost data can be gathered.",
       "plan": "",
       "context": [
-        "packages/factory-ts",
-        "packages/factory-ts/FACTORY_TS_OVERVIEW.md",
-        "packages/factory-ts/CONFIGURATION.md",
-        "src/renderer/navigation/SidebarView.tsx"
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
-      "status": "+",
-      "title": "Add an 'All Agents' tab under 'Settings' (in Sidebar) where summaries of all agents can be seen",
-      "description": "All runs of agents can be seen and analysed. Seeing the costs and performance. And seeing which models perform well.",
+      "status": "-",
+      "title": "factory-ts `types.ts`, `taskUtils.ts`, `orchestrator.ts` have duplicate types",
+      "description": "all duplicate types or interfaces need to be cleaned up",
       "plan": "",
       "context": [
-        "src/renderer/navigation/SidebarView.tsx",
-        "src/renderer/components/ui/CollapsibleSidebar.tsx",
-        "src/renderer/screens/SettingsView.tsx"
+        "packages/factory-ts/src/types.ts",
+        "packages/factory-ts/src/orchestrator.ts",
+        "packages/factory-ts/src/taskUtils.ts"
       ],
       "acceptance": [],
       "dependencies": []
