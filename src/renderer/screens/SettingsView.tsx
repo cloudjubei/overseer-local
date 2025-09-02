@@ -22,8 +22,8 @@ type CategoryId = typeof CATEGORIES[number]['id'];
 export default function SettingsView() {
   const themes: Theme[] = ['light', 'dark'];
   const { theme, setTheme } = useTheme();
-  const { appSettings, updateAppSettings } = useAppSettings()
-  const { projectSettings, updateProjectSettings } = useProjectSettings()
+  const { isAppSettingsLoaded, appSettings, updateAppSettings, setNotificationSystemSettings } = useAppSettings()
+  const { projectSettings, updateProjectSettings, setNotificationProjectSettings } = useProjectSettings()
   const { enableNotifications } = useNotifications()
 
   const { configs, activeConfigId, removeConfig, setActive } = useLLMConfig();
@@ -103,12 +103,12 @@ export default function SettingsView() {
             if (checked){
               const success = await enableNotifications()
               if (success){
-                updateAppSettings({...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, osNotificationsEnabled: true }});
+                setNotificationSystemSettings({ osNotificationsEnabled: true });
               }else{
-                updateAppSettings({...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, osNotificationsEnabled: false }});
+                setNotificationSystemSettings({ osNotificationsEnabled: false });
               }
             }else{
-                updateAppSettings({...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, osNotificationsEnabled: false }});
+                setNotificationSystemSettings({ osNotificationsEnabled: false });
             }
           }}
           label="Enable OS Notifications"
@@ -120,7 +120,7 @@ export default function SettingsView() {
               <Switch
                 key={category}
                 checked={enabled ?? true}
-                onCheckedChange={(checked) => updateProjectSettings({ notifications: { categoriesEnabled: { ...projectSettings.notifications.categoriesEnabled, [category]: checked } }})}
+                onCheckedChange={(checked) => setNotificationProjectSettings({ categoriesEnabled: { ...projectSettings.notifications.categoriesEnabled, [category]: checked } })}
                 label={category.charAt(0).toUpperCase() + category.slice(1)}
               />
             ))}
@@ -128,14 +128,14 @@ export default function SettingsView() {
         </div>
         <Switch
           checked={appSettings.notificationSystemSettings.soundsEnabled}
-          onCheckedChange={(checked) => updateAppSettings({ ...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, soundsEnabled: checked }})}
+          onCheckedChange={(checked) => setNotificationSystemSettings({ ...appSettings.notificationSystemSettings, soundsEnabled: checked })}
           label="Enable Notification Sounds"
         />
         <div>
           <label className="block text-sm font-medium mb-1">Notification Display Duration</label>
           <Select
             value={appSettings.notificationSystemSettings.displayDuration.toString()}
-            onValueChange={(value) => updateAppSettings({ ...appSettings, notificationSystemSettings: { ...appSettings.notificationSystemSettings, displayDuration: parseInt(value) }})}
+            onValueChange={(value) => setNotificationSystemSettings({ ...appSettings.notificationSystemSettings, displayDuration: parseInt(value) })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select duration" />
@@ -161,9 +161,10 @@ export default function SettingsView() {
       headerTitle="Categories"
       headerSubtitle=""
     >
-      {activeCategory === 'visual' && renderVisualSection()}
-      {activeCategory === 'llms' && renderLLMsSection()}
-      {activeCategory === 'notifications' && renderNotificationsSection()}
+      {!isAppSettingsLoaded && <div className="empty" aria-live="polite">Loading your preferences…</div>}
+      {isAppSettingsLoaded && activeCategory === 'visual' && renderVisualSection()}
+      {isAppSettingsLoaded && activeCategory === 'llms' && renderLLMsSection()}
+      {isAppSettingsLoaded && activeCategory === 'notifications' && renderNotificationsSection()}
     </CollapsibleSidebar>
   );
 }

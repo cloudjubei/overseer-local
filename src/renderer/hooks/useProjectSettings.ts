@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { settingsService } from '../services/settingsService'
 import { useProjectContext } from '../projects/ProjectContext'
-import { DEFAULT_PROJECT_SETTINGS, ProjectSettings } from '../../types/settings'
+import { DEFAULT_PROJECT_SETTINGS, NotificationProjectSettings, ProjectSettings } from '../../types/settings'
 
 export function useProjectSettings() {
   const {
@@ -43,8 +43,17 @@ export function useProjectSettings() {
     }
   }
 
+    const setNotificationProjectSettings = async (updates: Partial<NotificationProjectSettings>): Promise<ProjectSettings | undefined> => {
+      const next = {
+        ...projectSettings.notifications,
+        ...updates
+      }
+      return updateProjectSettings({ notifications: next })
+    }
+
   return {
     projectSettings,
     updateProjectSettings,
+    setNotificationProjectSettings
   }
 }

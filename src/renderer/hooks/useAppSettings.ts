@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { settingsService } from '../services/settingsService'
-import { AppSettings, DEFAULT_APP_SETTINGS, TaskListViewSorting, TaskViewMode } from '../../types/settings';
+import { AppSettings, DEFAULT_APP_SETTINGS, NotificationSystemSettings, TaskListViewSorting, TaskViewMode, UserPreferences } from '../../types/settings';
 
 export function useAppSettings() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -21,34 +21,26 @@ export function useAppSettings() {
     return newAppSettings
   }
 
-  // Convenience helpers for nested userPreferences updates
-  const setTasksViewMode = async (mode: TaskViewMode): Promise<AppSettings> => {
+  const setUserPreferences = async (updates: Partial<UserPreferences>): Promise<AppSettings> => {
     const next = {
-      ...appSettings,
-      userPreferences: {
-        ...appSettings.userPreferences,
-        tasksViewMode: mode,
-      },
+      ...appSettings.userPreferences,
+      ...updates
     }
-    return updateAppSettings(next)
+    return updateAppSettings({ userPreferences: next })
   }
-
-  const setTasksListViewSorting = async (sorting: TaskListViewSorting): Promise<AppSettings> => {
+  const setNotificationSystemSettings = async (updates: Partial<NotificationSystemSettings>): Promise<AppSettings> => {
     const next = {
-      ...appSettings,
-      userPreferences: {
-        ...appSettings.userPreferences,
-        tasksListViewSorting: sorting,
-      },
+      ...appSettings.notificationSystemSettings,
+      ...updates
     }
-    return updateAppSettings(next)
+    return updateAppSettings({ notificationSystemSettings: next })
   }
 
   return {
     isAppSettingsLoaded: isLoaded,
     appSettings,
     updateAppSettings,
-    setTasksViewMode,
-    setTasksListViewSorting,
+    setUserPreferences,
+    setNotificationSystemSettings
   }
 }
