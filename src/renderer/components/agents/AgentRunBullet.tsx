@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import type { AgentRun } from '../../services/agentsService';
 
 function stateColor(state: AgentRun['state']) {
@@ -16,7 +16,7 @@ function stateColor(state: AgentRun['state']) {
   }
 }
 
-export default function AgentRunBullet({ run, onClick }: { run: AgentRun; onClick?: () => void }) {
+export default function AgentRunBullet({ run, onClick }: { run: AgentRun; onClick?: (e: any) => void }) {
   const color = stateColor(run.state);
   const label = `Agent ${run.runId.slice(0, 8)} · ${run.state}${run.progress != null ? ` · ${Math.round((run.progress ?? 0) * 100)}%` : ''}${run.message ? ` · ${run.message}` : ''}`;
 

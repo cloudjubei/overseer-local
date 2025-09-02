@@ -1,4 +1,3 @@
-import { ProjectSpec } from "src/types/tasks";
 import { ServiceResult } from './serviceResult';
 
 export type FileMeta = {

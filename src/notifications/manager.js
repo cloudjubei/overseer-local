@@ -29,12 +29,12 @@ export class NotificationManager {
     if (this._ipcBound) return;
 
     const handlers = {};
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = (args) => this.sendOs(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = (args) => this.getRecentNotifications(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT] = (args) => this.getUnreadNotificationsCount(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = (args) => this.markAllNotificationsAsRead(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = (args) => this.markNotificationAsRead(args);
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL] = (args) => this.deleteAllNotifications(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = ({args}) => this.sendOs(args);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = ({projectId}) => this.getRecentNotifications(projectId);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT] = ({projectId}) => this.getUnreadNotificationsCount(projectId);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = ({projectId}) => this.markAllNotificationsAsRead(projectId);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = ({projectId, id}) => this.markNotificationAsRead(projectId, id);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL] = ({projectId}) => this.deleteAllNotifications(projectId);
     
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
@@ -106,24 +106,24 @@ export class NotificationManager {
     }
   }
 
-  getRecentNotifications({ project }) {
-    const storage = this.__getStorage(project.id);
+  getRecentNotifications(projectId) {
+    const storage = this.__getStorage(projectId);
     return storage.getRecent();
   }
-  getUnreadNotificationsCount({ project }) {
-    const storage = this.__getStorage(project.id);
+  getUnreadNotificationsCount(projectId) {
+    const storage = this.__getStorage(projectId);
     return storage.getUnread().length;
   }
-  markAllNotificationsAsRead({ project }) {
-    const storage = this.__getStorage(project.id);
+  markAllNotificationsAsRead(projectId) {
+    const storage = this.__getStorage(projectId);
     storage.markAllAsRead();
   }
-  markNotificationAsRead({ project, id }) {
-    const storage = this.__getStorage(project.id);
+  markNotificationAsRead(projectId, id) {
+    const storage = this.__getStorage(projectId);
     storage.markAsRead(id);
   }
-  deleteAllNotifications({ project }) {
-    const storage = this.__getStorage(project.id);
+  deleteAllNotifications(projectId) {
+    const storage = this.__getStorage(projectId);
     storage.deleteAll();
   }
 }

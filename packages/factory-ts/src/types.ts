@@ -4,8 +4,8 @@ export interface Feature {
   status: Status;
   title: string;
   description: string;
+  context: string[];
   plan?: string;
-  context?: string[];
   acceptance?: string[];
   dependencies?: string[];
   rejection?: string;
@@ -14,17 +14,17 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  status?: Status;
-  rejection?: string;
+  status: Status;
   features: Feature[];
-  featureIdToDisplayIndex?: Record<string, number>;
+  featureIdToDisplayIndex: Record<string, number>;
   dependencies?: string[];
+  rejection?: string;
 }
 export interface ProjectRequirement {
   id: number;
   status: Status;
   description: string;
-  tasks: number[];
+  tasks: string[];
 }
 export interface ProjectSpec {
   id: string;

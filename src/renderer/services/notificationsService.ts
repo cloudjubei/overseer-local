@@ -1,5 +1,5 @@
-import { Notification, NotificationMetadata, NotificationProjectPreferences, NotificationSystemPreferences } from "src/types/notifications"
-import { ProjectSpec } from "src/types/tasks"
+import { Notification, NotificationMetadata } from "src/types/notifications"
+import { ProjectSpec } from "packages/factory-ts/src/types"
 import { ServiceResult } from "./serviceResult"
 
 export type NotificationsService = {
@@ -8,15 +8,11 @@ export type NotificationsService = {
 
   sendOs: (data: any) => Promise<ServiceResult>
   subscribe: (callback: (notifications: Notification[]) => void) => () => void
-  getRecentNotifications: (project: ProjectSpec) => Promise<Notification[]>
-  getUnreadNotificationsCount: (project: ProjectSpec) => Promise<number>
-  markAllNotificationsAsRead: (project: ProjectSpec) => Promise<void>
-  markNotificationAsRead: (project: ProjectSpec, id: string) => Promise<void>
-  deleteAllNotifications: (project: ProjectSpec) => Promise<void>
-  getSystemPreferences: () => Promise<NotificationSystemPreferences>
-  updateSystemPreferences: (updates: Partial<NotificationSystemPreferences>) => Promise<NotificationSystemPreferences>
-  getProjectPreferences: (project: ProjectSpec) => Promise<NotificationProjectPreferences>
-  updateProjectPreferences: (project: ProjectSpec, updates: Partial<NotificationProjectPreferences>) => Promise<NotificationProjectPreferences>
+  getRecentNotifications: (projectId: string) => Promise<Notification[]>
+  getUnreadNotificationsCount: (projectId: string) => Promise<number>
+  markAllNotificationsAsRead: (projectId: string) => Promise<void>
+  markNotificationAsRead: (projectId: string, id: string) => Promise<void>
+  deleteAllNotifications: (projectId: string) => Promise<void>
 }
 
 

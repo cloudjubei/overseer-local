@@ -1,15 +1,14 @@
-import React from 'react'
-import type { Task } from '../../../../packages/factory-ts/src/types'
+import { Task } from 'packages/factory-ts/src/types'
+import StatusControl from './StatusControl';
 
-export function TaskSummaryCard({ task, onClick }: { task: Task; onClick?: () => void }) {
-  const total = (task.features || []).length
-  const done = (task.features || []).filter(f => f.status === '+').length
+export default function TaskSummaryCard({ task, className = '' }: { task: Task; className?: string }) {
   return (
-    <div className="card bg-base-200 shadow cursor-pointer" onClick={onClick}>
-      <div className="card-body">
-        <h3 className="card-title">[{task.id}] {task.title}</h3>
-        <div className="text-sm">{done}/{total} features complete</div>
+    <div className={`task-summary-card ${className}`}>
+      <div className="summary-card__header">
+        <h4 className="summary-card__title">{task.title}</h4>
+        <StatusControl status={task.status} />
       </div>
+      <p className="summary-card__description">{task.description}</p>
     </div>
-  )
+  );
 }

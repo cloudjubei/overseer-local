@@ -12,8 +12,8 @@ export function useNotifications() {
 
   const updateCurrentProjectNotifications = async () => {
     if (activeProject){
-      setNotifications(await notificationsService.getRecentNotifications(activeProject));
-      setUnreadCount(await notificationsService.getUnreadNotificationsCount(activeProject));
+      setNotifications(await notificationsService.getRecentNotifications(activeProject.id));
+      setUnreadCount(await notificationsService.getUnreadNotificationsCount(activeProject.id));
     }
   }
 
@@ -32,19 +32,19 @@ export function useNotifications() {
 
   const markAsRead = (id: string) => {
     if (activeProject){
-      notificationsService.markNotificationAsRead(activeProject, id);
+      notificationsService.markNotificationAsRead(activeProject.id, id);
     }
   };
 
   const markAllAsRead = () => {
     if (activeProject){
-      notificationsService.markAllNotificationsAsRead(activeProject);
+      notificationsService.markAllNotificationsAsRead(activeProject.id);
     }
   };
 
   const clearAll = () => {
     if (activeProject){
-      notificationsService.deleteAllNotifications(activeProject);
+      notificationsService.deleteAllNotifications(activeProject.id);
     }
   };
 

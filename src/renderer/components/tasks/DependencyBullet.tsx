@@ -1,11 +1,99 @@
-import React from 'react'
-import type { Feature } from '../../../../packages/factory-ts/src/types'
+import React from 'react';
+import { useNavigator } from '../../navigation/Navigator';
+import Tooltip from '../ui/Tooltip';
+import type { Status } from 'packages/factory-ts/src/types'
+import TaskSummaryCallout from './TaskSummaryCallout';
+import FeatureSummaryCallout from './FeatureSummaryCallout';
+import { useTasks } from '../../../renderer/hooks/useTasks';
 
-export function DependencyBullet({ feature, id, onRemove }: { feature: Feature; id: string; onRemove: (id: string) => void }) {
-  const checked = (feature.dependencies || []).includes(id)
-  return (
-    <div className="badge badge-outline cursor-pointer" onClick={() => onRemove(id)}>
-      {checked ? '✓' : '•'} {id}
-    </div>
-  )
+export interface DependencyBulletProps {
+  dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
+  isOutbound?: boolean;
+  onRemove?: () => void;
 }
+
+const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isOutbound = false, onRemove }) => {
+  const { navigateTaskDetails, tasksRoute } = useNavigator();
+  const { resolveDependency } = useTasks()
+
+  const resolved = resolveDependency(dependency);
+  const isError = 'code' in resolved;
+  const isFeatureDependency = !isError && resolved.kind === 'feature';
+  const display = isError ? dependency : resolved.display
+
+  let summary: { title: string; description: string; status: Status; displayId: string } = { title: 'Not found', description: '', status: '-' as Status, displayId: display };
+
+  if (!isError) {
+    if (resolved.kind === 'task') {
+      summary = { title: resolved.task.title, description: resolved.task.description, status: resolved.task.status as Status, displayId: display };
+    } else {
+      summary = { title: resolved.feature.title, description: resolved.feature.description, status: resolved.feature.status as Status, displayId: display };
+    }
+  }
+
+  const handleClick = () => {
+    if (onRemove){
+      onRemove()
+      return
+    }
+    if (isError) return;
+
+    const targetTaskId = resolved.kind === 'task' ? resolved.id : resolved.taskId;
+    const featureId = resolved.kind === 'feature' ? resolved.featureId : undefined;
+
+
+    const isSameTask = tasksRoute.name === 'details' && tasksRoute.taskId === targetTaskId;
+    if (isSameTask) {
+      if (featureId) {
+        const row = document.querySelector(`.feature-row[data-feature-id="${featureId}"]`);
+        if (row) {
+          row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          row.classList.add('highlighted');
+          setTimeout(() => row.classList.remove('highlighted'), 2000);
+        }
+      } else {
+        const element = document.querySelector('.details-header');
+        if (element) {
+          element.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          element.classList.add('highlighted');
+          setTimeout(() => element.classList.remove('highlighted'), 2000);
+        }
+      }
+    } else {
+      navigateTaskDetails(targetTaskId, featureId, !featureId);
+    }
+  };
+
+  const content = isFeatureDependency ? <FeatureSummaryCallout {...summary} /> : <TaskSummaryCallout {...summary} />;
+
+  return (
+    <Tooltip content={content}>
+      <span
+        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isOutbound ? 'chip--blocks' : 'chip--ok')} flex`}
+        title={`${display}${isOutbound ? ' (requires this)' : ''}`}
+        onClick={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+      >
+        #{display}
+        {onRemove && (
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="3" x2="9" y2="9" />
+            <line x1="9" y1="3" x2="3" y2="9" />
+          </svg>
+        )}
+      </span>
+    </Tooltip>
+  );
+};
+
+export default DependencyBullet;
