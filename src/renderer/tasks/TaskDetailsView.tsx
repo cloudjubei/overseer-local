@@ -221,7 +221,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskDependenciesInbound = getReferencesInbound(task.id)
   const taskDependenciesOutbound = getReferencesOutbound(task.id)
 
-  const taskRuns = activeRuns.filter(r => r.taskId === task.id && !r.featureId)
+  // Only one agent can run per task (no featureId)
+  const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
+  const taskHasActiveRun = !!taskRun
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -266,14 +268,12 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </div>
           <div className="spacer" />
           <div className="flex items-center gap-3">
-            {taskRuns.length > 0 && (
+            {taskRun && (
               <div className="flex items-center gap-2" aria-label={`Active agents for Task ${task.id}`}>
-                {taskRuns.map((run) => (
-                  <AgentRunBullet key={run.runId} run={run} onClick={() => navigateAgentRun(run.runId)} />
-                ))}
+                <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            <Button size="sm" variant="secondary" onClick={() => { if (!projectId) return; startTaskAgent(projectId, task.id) }}>
+            <Button size="sm" variant="secondary" onClick={() => { if (!projectId || taskHasActiveRun) return; startTaskAgent(projectId, task.id) }} disabled={taskHasActiveRun}>
               <span className="inline-flex items-center gap-1"><IconPlay /> Run Agent</span>
             </Button>
           </div>
@@ -338,7 +338,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                const runsForFeature = activeRuns.filter(r => r.taskId === task.id && r.featureId === f.id)
+                // Only one agent can run per feature
+                const featureRun = activeRuns.find(r => r.taskId === task.id && r.featureId === f.id)
+                const featureHasActiveRun = !!featureRun
 
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
@@ -386,7 +388,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                           <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
                             <IconEdit />
                           </button>
-                          <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId) return; startFeatureAgent(projectId, task.id, f.id) }}>
+                          <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId || featureHasActiveRun) return; startFeatureAgent(projectId, task.id, f.id) }} disabled={featureHasActiveRun}>
                             <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
                           </Button>
                         </div>
@@ -416,11 +418,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 pr-2">
-                          {runsForFeature.length > 0 && (
+                          {featureRun && (
                             <div className="flex items-center gap-2" aria-label={`Active agents for Feature ${f.id}`}>
-                              {runsForFeature.map((run) => (
-                                <AgentRunBullet key={run.runId} run={run} onClick={(e) => { e.stopPropagation(); navigateAgentRun(run.runId) }} />
-                              ))}
+                              <AgentRunBullet key={featureRun.runId} run={featureRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(featureRun.runId) }} />
                             </div>
                           )}
                         </div>

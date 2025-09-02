@@ -37,7 +37,7 @@
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
-      "status": "-",
+      "status": "+",
       "title": "TaskDetailsView improvements after running an agent",
       "description": "The AgentRunBullet should use the same chip styles as a DependencyBullet.\nBoth features and tasks can only ever have 1 agent running on them.",
       "plan": "",

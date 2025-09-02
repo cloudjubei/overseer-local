@@ -18,18 +18,21 @@ function stateColor(state: AgentRun['state']) {
 
 export default function AgentRunBullet({ run, onClick }: { run: AgentRun; onClick?: () => void }) {
   const color = stateColor(run.state);
-  const label = `Agent ${run.runId.slice(0,8)} · ${run.state}${run.progress != null ? ` · ${Math.round((run.progress ?? 0) * 100)}%` : ''}${run.message ? ` · ${run.message}` : ''}`;
+  const label = `Agent ${run.runId.slice(0, 8)} · ${run.state}${run.progress != null ? ` · ${Math.round((run.progress ?? 0) * 100)}%` : ''}${run.message ? ` · ${run.message}` : ''}`;
+
+  // Use the same chip classes as DependencyBullet for visual consistency
+  // Default to chip--ok; state is additionally conveyed via the colored dot and accessible label
   return (
     <button
       type="button"
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+      className="chip chip--ok flex items-center gap-1"
       style={{ lineHeight: 1 }}
     >
       <span className={`inline-block w-2 h-2 rounded-full ${color}`} aria-hidden />
-      <span className="hidden sm:inline text-neutral-700 dark:text-neutral-300">{run.state}</span>
+      <span className="hidden sm:inline">{run.state}</span>
     </button>
   );
 }
