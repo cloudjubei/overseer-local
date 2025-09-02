@@ -20,37 +20,48 @@
     },
     {
       "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
-      "status": "+",
+      "status": "-",
       "title": "Missing console logs",
-      "description": "There should be console logs for everything the agents do so it's easy to follow what is happening.",
+      "description": "If the factory-ts is run in development mode - there should be console logs for all crucial operations to be able to trace what is happening with the agents.",
       "plan": "",
       "context": [
         "src/main.js",
-        "src/preload.js"
+        "src/preload.js",
+        "packages/factory-ts/src/llm/factory.ts",
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js",
+        "src/tools/factory/orchestratorBridge.ts"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
-      "status": "+",
+      "status": "-",
       "title": "TaskDetailsView improvements after running an agent",
-      "description": "Running an agent on a feature creates this bullet that shows an agent running. The bullet should show the agent status. Clicking on it, should take the user to the appropriate agent in the Agents tab.",
+      "description": "The AgentRunBullet should use the same chip styles as a DependencyBullet.\nBoth features and tasks can only ever have 1 agent running on them.",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TaskDetailsView.tsx"
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx",
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
-      "status": "+",
+      "status": "-",
       "title": "Running an agent doesn't work",
-      "description": "1) running an agent on a task seems to do nothing.\n2) Opening the Agents tab, after clicking run agent on a feature, crashes the whole app.",
+      "description": "The agent should be run with the active LLMConfig (the same that is used for chats).\nAll messages sent to and from agent should be visible in the console logs.",
       "plan": "",
       "context": [
-        "src/renderer/screens/AgentsView.tsx"
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/utils/LLMConfigManager.ts",
+        "src/renderer/hooks/useLLMConfig.ts",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
       "dependencies": []
@@ -104,18 +115,18 @@
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
-      "status": "+",
+      "status": "-",
       "title": "Add an 'All Agents' tab under 'Settings' (in Sidebar) where summaries of all agents can be seen",
       "description": "All runs of agents can be seen and analysed. Seeing the costs and performance. And seeing which models perform well.",
       "plan": "",
       "context": [
-        "packages/factory-ts",
-        "packages/factory-ts/FACTORY_TS_OVERVIEW.md",
-        "packages/factory-ts/CONFIGURATION.md",
-        "src/renderer/navigation/SidebarView.tsx"
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/screens/SettingsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "dependencies": [],
+      "rejection": "The 'All Agents' is a separate screen from Settings - it is positioned just below it in the Sidebar."
     },
     {
       "id": "1cfab451-03b4-415a-b5b3-624787c2ec13",
