@@ -10,7 +10,7 @@ import StatusControl, { StatusPicker, statusKey } from '../components/tasks/Stat
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { useAppSettings } from '../hooks/useAppSettings'
-import { TaskListViewSorting, TaskViewMode } from '../services/settingsService'
+import { TaskListViewSorting, TaskViewMode } from '../../types/settings'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []

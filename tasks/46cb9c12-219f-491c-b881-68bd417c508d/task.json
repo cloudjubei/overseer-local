@@ -37,12 +37,12 @@
     },
     {
       "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
-      "status": "+",
-      "title": "Settings are not being stored in AppSettings",
-      "description": "when a user toggles anything in the SettingsView - nothing happens",
+      "status": "-",
+      "title": "TasksListView has 2 TODOs",
+      "description": "make useAppSettings easier to use, by adding top level settings helper functions",
       "plan": "",
       "context": [
-        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/hooks/useAppSettings.ts",
         "src/settings/manager.js",
         "src/settings/appSettings.js"
