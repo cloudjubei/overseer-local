@@ -77,7 +77,7 @@
     },
     {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
-      "status": "-",
+      "status": "+",
       "title": "Integrate the new `orchestrator.ts` (inside factory-ts) with `mainOrchestrator.ts`",
       "description": "We need to be able to run agents using the new `orchestrator.ts` .\nThat file is based on `run_local_agent.py`which was part of a python project.\nLook at `orchestrator.ts` - iron out any inconsistencies with regards to `run_local_agent.py` and make sure it is possible to call it all properly from within `mainOrchestrator.js` .",
       "plan": "",
