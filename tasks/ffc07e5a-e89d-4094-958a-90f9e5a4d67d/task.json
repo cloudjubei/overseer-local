@@ -34,7 +34,7 @@
     },
     {
       "id": "bce3592f-e8e3-440c-9675-acff8965f3d8",
-      "status": "-",
+      "status": "?",
       "title": "factory-ts is the source of truth when it comes to Project,Task,Feature types",
       "description": "Integrate them inside this project meaning that 'src/types/tasks.ts' is no longer needed. All places where they were used must be updated.",
       "plan": "",
