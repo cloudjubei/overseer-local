@@ -13,12 +13,15 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.
     - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications/user-preferences).
+      - src/renderer/services/agentsService.ts: In-memory orchestrator client that starts/monitors agent runs using the local factory-ts bridge.
     - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
+      - src/renderer/hooks/useAgents.ts: Hook to subscribe to active agent runs and start/cancel them.
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
   - src/chat/: Chat providers, manager, and storage.
   - src/tools/: Developer and agent tooling (preview analysis, formatting, compile checks, docker helpers).
     - src/tools/preview/: Preview analyzer tooling.
     - src/tools/factory/: Integration layer for the local factory-ts package (orchestrator bridge and helpers).
+      - src/tools/factory/orchestratorBridge.ts: Bridges to the local packages/factory-ts orchestrator, returning an EventSource-like stream for UI consumption.
   - src/capture/: Screenshot capture service (main process).
   - src/files/: Files manager and per-project storage.
   - src/projects/: Projects manager and indexing.
@@ -71,4 +74,5 @@ Notes:
 ## Factory TS Integration
 - Library location: packages/factory-ts (local package).
 - App bridge: src/tools/factory/orchestratorBridge.ts provides startTaskRun/startFeatureRun helpers that produce an EventSource-like stream for UI consumption.
+- Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts expose a simple in-memory registry of runs. These are used by TasksListView and TaskDetailsView to start and show active agents.
 - CLI: scripts/runAgent.mjs streams JSONL events for a run. Build the package with npm run factory:build and then use npm run run:agent.

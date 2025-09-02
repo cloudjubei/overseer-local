@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Feature, ProjectSpec, Status, Task } from 'src/types/tasks'
+import type { Feature, Status, Task } from 'src/types/tasks'
 import { useNavigator } from '../navigation/Navigator'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
-
+import { Button } from '../components/ui/Button'
+import { useAgents } from '../hooks/useAgents'
 
 function IconBack({ className }: { className?: string }) {
   return (
@@ -52,6 +53,14 @@ function IconChevron({ className }: { className?: string }) {
   )
 }
 
+function IconPlay({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <polygon points="8,5 19,12 8,19" />
+    </svg>
+  )
+}
+
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
@@ -65,9 +74,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
-  const { project } = useActiveProject()
+  const { project, projectId } = useActiveProject()
   const { tasksById, updateTask, updateFeature, reorderFeatures, getReferencesInbound, getReferencesOutbound } = useTasks()
-
+  const { activeRuns, startTaskAgent, startFeatureAgent, cancelRun } = useAgents()
 
   useEffect(() => {
     if (taskId && tasksById) {
@@ -162,8 +171,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       const row = document.querySelector(`.feature-row[data-feature-id="${highlightFeatureId}"]`)
       if (row) {
         row.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        row.classList.add('highlighted')
-        setTimeout(() => row.classList.remove('highlighted'), 2000)
+        (row as HTMLElement).classList.add('highlighted')
+        setTimeout(() => (row as HTMLElement).classList.remove('highlighted'), 2000)
       }
     }
   }, [highlightFeatureId])
@@ -173,8 +182,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       const element = document.querySelector('.details-header')
       if (element) {
         element.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        element.classList.add('highlighted')
-        setTimeout(() => element.classList.remove('highlighted'), 2000)
+        ;(element as HTMLElement).classList.add('highlighted')
+        setTimeout(() => (element as HTMLElement).classList.remove('highlighted'), 2000)
       }
     }
   }, [highlightTaskFlag])
@@ -210,6 +219,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
 
   const taskDependenciesInbound = getReferencesInbound(task.id)
   const taskDependenciesOutbound = getReferencesOutbound(task.id)
+
+  const taskRuns = activeRuns.filter(r => r.taskId === task.id && !r.featureId)
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -253,6 +264,14 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </div>
           </div>
           <div className="spacer" />
+          <div className="flex items-center gap-3">
+            {taskRuns.length > 0 && (
+              <span className="chips-sub__label">Agents: {taskRuns.length}</span>
+            )}
+            <Button size="sm" variant="secondary" onClick={() => { if (!projectId) return; startTaskAgent(projectId, task.id) }}>
+              <span className="inline-flex items-center gap-1"><IconPlay /> Run Agent</span>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -313,6 +332,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDragSource = dragFeatureId === f.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
+
+                const runsForFeature = activeRuns.filter(r => r.taskId === task.id && r.featureId === f.id)
+
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -355,32 +377,42 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         {f.description || ''}
                       </div>
                       <div className="col col-actions" style={{ gridRow: 2, gridColumn: 3 }}>
-                        <div className="row-actions">
-                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={() => handleEditFeature(f.id)}>
+                        <div className="row-actions flex items-center gap-2">
+                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
                             <IconEdit />
                           </button>
+                          <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId) return; startFeatureAgent(projectId, task.id, f.id) }}>
+                            <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
+                          </Button>
                         </div>
                       </div>
 
-                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex gap-8" aria-label={`Dependencies for Feature ${f.id}`}>
-                        <div className="chips-list">
-                          <span className="chips-sub__label">References</span>
-                          {dependenciesInbound.length === 0 ? (
-                            <span className="chips-sub__label" title="No dependencies">None</span>
-                          ) : (
-                            dependenciesInbound.map((d) => (
-                              <DependencyBullet key={d.id} dependency={d.id} />
-                            ))
-                          )}
+                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Dependencies and actions for Feature ${f.id}`}>
+                        <div className="flex gap-8">
+                          <div className="chips-list">
+                            <span className="chips-sub__label">References</span>
+                            {dependenciesInbound.length === 0 ? (
+                              <span className="chips-sub__label" title="No dependencies">None</span>
+                            ) : (
+                              dependenciesInbound.map((d) => (
+                                <DependencyBullet key={d.id} dependency={d.id} />
+                              ))
+                            )}
+                          </div>
+                          <div className="chips-list">
+                            <span className="chips-sub__label">Blocks</span>
+                            {dependenciesOutbound.length === 0 ? (
+                              <span className="chips-sub__label" title="No dependents">None</span>
+                            ) : (
+                              dependenciesOutbound.map((d) => (
+                                <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                              ))
+                            )}
+                          </div>
                         </div>
-                        <div className="chips-list">
-                          <span className="chips-sub__label">Blocks</span>
-                          {dependenciesOutbound.length === 0 ? (
-                            <span className="chips-sub__label" title="No dependents">None</span>
-                          ) : (
-                            dependenciesOutbound.map((d) => (
-                              <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                            ))
+                        <div className="flex items-center gap-3 pr-2">
+                          {runsForFeature.length > 0 && (
+                            <span className="chips-sub__label">Agents: {runsForFeature.length}</span>
                           )}
                         </div>
                       </div>

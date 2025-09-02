@@ -49,7 +49,7 @@
     },
     {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
-      "status": "-",
+      "status": "+",
       "title": "Allow agents to run on tasks and features using the factory-ts package",
       "description": "Inside TasksListView.tsx and TaskDetailsView.tsx it must be possible to launch agents and to see agents that are already working.",
       "plan": "",

@@ -11,6 +11,7 @@ import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { useAppSettings } from '../hooks/useAppSettings'
 import { TaskListViewSorting, TaskViewMode } from '../../types/settings'
+import { useAgents } from '../hooks/useAgents'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -71,9 +72,10 @@ export default function TasksListView() {
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
-  const { project } = useActiveProject()
+  const { project, projectId } = useActiveProject()
   const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
   const { tasksById, updateTask, reorderTask, getReferencesInbound, getReferencesOutbound } = useTasks()
+  const { activeRuns, startTaskAgent, cancelRun } = useAgents()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
@@ -326,6 +328,8 @@ export default function TasksListView() {
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 const dependenciesInbound = getReferencesInbound(t.id)
                 const dependenciesOutbound = getReferencesOutbound(t.id)
+                const myActiveRuns = activeRuns.filter(r => r.taskId === t.id)
+                const onRun = () => { if (!projectId) return; startTaskAgent(projectId, t.id) }
                 return (
                   <li key={t.id} className="task-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -374,26 +378,38 @@ export default function TasksListView() {
                           />
                         </div>
                       </div>
-                      <div className="flex gap-8 ml-8" aria-label={`Dependencies for Task ${t.id}`}>
-                        <div className="chips-list">
-                          <span className="chips-sub__label">References</span>
-                          {dependenciesInbound.length === 0 ? (
-                            <span className="chips-sub__label" title="No dependencies">None</span>
-                          ) : (
-                            dependenciesInbound.map((d) => (
-                              <DependencyBullet key={d.id} dependency={d.id} />
-                            ))
-                          )}
+                      <div className="flex items-center gap-8 ml-8 justify-between" aria-label={`Dependencies and actions for Task ${t.id}`}>
+                        <div className="flex gap-8">
+                          <div className="chips-list">
+                            <span className="chips-sub__label">References</span>
+                            {dependenciesInbound.length === 0 ? (
+                              <span className="chips-sub__label" title="No dependencies">None</span>
+                            ) : (
+                              dependenciesInbound.map((d) => (
+                                <DependencyBullet key={d.id} dependency={d.id} />
+                              ))
+                            )}
+                          </div>
+                          <div className="chips-list">
+                            <span className="chips-sub__label">Blocks</span>
+                            {dependenciesOutbound.length === 0 ? (
+                              <span className="chips-sub__label" title="No dependents">None</span>
+                            ) : (
+                              dependenciesOutbound.map((d) => (
+                                <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                              ))
+                            )}
+                          </div>
                         </div>
-                        <div className="chips-list">
-                          <span className="chips-sub__label">Blocks</span>
-                          {dependenciesOutbound.length === 0 ? (
-                            <span className="chips-sub__label" title="No dependents">None</span>
-                          ) : (
-                            dependenciesOutbound.map((d) => (
-                              <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                            ))
+                        <div className="flex items-center gap-3 pr-4">
+                          {myActiveRuns.length > 0 && (
+                            <span className="chips-sub__label" title={`Agents running: ${myActiveRuns.length}`}>
+                              Agents: {myActiveRuns.length}
+                            </span>
                           )}
+                          <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); onRun(); }}>
+                            Run Agent
+                          </Button>
                         </div>
                       </div>
                     </div>
