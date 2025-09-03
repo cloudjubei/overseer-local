@@ -109,7 +109,7 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
       className={`status-picker status-picker--${coords.side}`}
       role="menu"
       aria-label="Select status"
-      style={{ top: coords.top, left: coords.left, minWidth: Math.max(140, coords.minWidth + 8) }}
+      style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8) }}
     >
       {isAllAllowed && 
           <button
@@ -119,8 +119,8 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
             className={`status-picker__item ${'all' === active ? 'is-active' : ''}`}
             onClick={(e) => { e.stopPropagation(); onSelect('all') }}
           >
-            <span className={`status-bullet status-bullet--queued`} aria-hidden />
-            <span className="status-picker__label">All Statuses</span>
+            <span className={`status-bullet status-bullet--empty`} aria-hidden />
+            <span className="status-picker__label">All</span>
             {value === 'all' && <span className="status-picker__check" aria-hidden>✓</span>}
           </button>
         }

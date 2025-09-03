@@ -12,6 +12,9 @@ import { useAppSettings } from '../hooks/useAppSettings'
 import { TaskListViewSorting, TaskViewMode } from '../../types/settings'
 import { useAgents } from '../hooks/useAgents'
 import { Status, Task } from 'packages/factory-ts/src/types'
+import ExclamationChip from '../components/tasks/ExclamationChip'
+import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
+import AgentRunBullet from '../components/agents/AgentRunBullet'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -35,24 +38,6 @@ function filterTasks(tasks: Task[], { query, status }: { query: string; status: 
   })
 }
 
-function ListIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/>
-      <circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/>
-    </svg>
-  )
-}
-
-function BoardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="10" rx="1.5"/>
-      <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="15" width="7" height="6" rx="1.5"/>
-    </svg>
-  )
-}
-
 const STATUS_ORDER = ['-', '~', '+', '=', '?']
 
 export default function TasksListView() {
@@ -68,7 +53,7 @@ export default function TasksListView() {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
-  const { openModal, navigateTaskDetails } = useNavigator()
+  const { openModal, navigateTaskDetails, navigateAgentRun } = useNavigator()
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
@@ -140,8 +125,12 @@ export default function TasksListView() {
   const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
   const isFiltered = query !== '' || statusFilter !== 'all'
 
-  const handleAddTask = async () => {
+  const handleAddTask = () => {
     openModal({ type: 'task-create' })
+  }
+
+  const handleEditTask = (taskId: string) => { 
+    openModal({ type: 'task-edit', taskId })
   }
 
   const handleMoveTask = async (fromIndex: number, toIndex: number) => {
@@ -229,7 +218,7 @@ export default function TasksListView() {
     clearDndState()
   }
 
-  const currentFilterLabel = statusFilter === 'all' ? 'All statuses' : `${STATUS_LABELS[statusFilter as Status]}`
+  const currentFilterLabel = statusFilter === 'all' ? 'All' : `${STATUS_LABELS[statusFilter as Status]}`
   const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
 
   return (
@@ -284,12 +273,19 @@ export default function TasksListView() {
             onChange={(v) => setView(v as 'list' | 'board')}
             size="sm"
           />
-          <Button onClick={handleAddTask}>New Task</Button>
         </div>
       </div>
-
-      <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
-        Showing {filtered.length} of {allTasks.length} tasks{!isAppSettingsLoaded ? ' • Loading settings…' : ''}
+      <div className="tasks-toolbar shrink-0">
+        <div className="left">
+          <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
+            Showing {filtered.length} of {allTasks.length} tasks{!isAppSettingsLoaded ? ' • Loading settings…' : ''}
+          </div>
+        </div>
+        <div className="right">
+          <button type="button" className="btn btn-icon" aria-label="Add Task" onClick={handleAddTask}>
+            <IconPlus />
+          </button>
+        </div>
       </div>
 
       {view === 'board' ? (
@@ -328,13 +324,9 @@ export default function TasksListView() {
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 const dependenciesInbound = getReferencesInbound(t.id)
                 const dependenciesOutbound = getReferencesOutbound(t.id)
-                const myActiveRuns = activeRuns.filter(r => r.taskId === t.id)
-                const onRun = () => { if (!projectId) return; startTaskAgent(projectId, t.id) }
-
-                // Determine if any features are rejected
-                const rejectedFeatures = (t.features || []).filter(f => !!(f as any).rejection)
-                const hasRejectedFeatures = rejectedFeatures.length > 0
-                const firstRejection = hasRejectedFeatures ? (rejectedFeatures[0] as any).rejection as string : ''
+                const hasRejectedFeatures = t.features.filter(f => !!f.rejection).length > 0
+                const taskRun = activeRuns.find(r => r.taskId === t.id)
+                const taskHasActiveRun = !!taskRun
 
                 return (
                   <li key={t.id} className="task-item" role="listitem">
@@ -364,40 +356,38 @@ export default function TasksListView() {
                       aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${dependenciesOutbound.length} dependencies this task is blocked by, ${dependenciesInbound.length} dependencies this task is blocking. Press Enter to view details.`}
                     >
                       <div className="task-grid">
-                        <div className="col col-id">
-                          {hasRejectedFeatures && (
-                            <span className="rejection-badge" aria-label="Has rejection reason" title={firstRejection || 'One or more features were rejected'}>
-                              {/* Using the same icon as features in TaskDetailsView */}
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="12" y1="8" x2="12" y2="12" />
-                                <line x1="12" y1="16" x2="12.01" y2="16" />
-                              </svg>
-                            </span>
-                          )}
+                        <div className="col col-id" >
                           <span className="id-chip">{taskIdToDisplayIndex[t.id]}</span>
+                          <StatusControl
+                            status={t.status}
+                            onChange={(next) => handleStatusChange(t.id, next)}
+                          />
+                          <div className="flex justify-center gap-1">
+                            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip={"Has rejection reason"} />}
+                            <span className="chips-sub__label" title="No dependencies">{done}/{total}</span>
+                          </div>
                         </div>
                         <div className="col col-title">
                           <div className="title-line">
                             <span className="title-text">{t.title || ''}</span>
                           </div>
                         </div>
-
-                        <div className="col col-features flex justify-center">
-                            <span className="chips-sub__label" title="No dependencies">{done}/{total}</span>
-                        </div>
-                        <div className="col col-desc">
+                        <div className="col col-description">
                           <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
                         </div>
-                        <div className="col col-status">
-                          <StatusControl
-                            status={t.status}
-                            onChange={(next) => handleStatusChange(t.id, next)}
-                          />
+                        <div className="col col-actions" >
+                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditTask(t.id) }}>
+                            <IconEdit />
+                          </button>
+                          {taskRun ? (
+                            <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }} />
+                          ) : (
+                            <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId) return; startTaskAgent(projectId, t.id) } }>
+                              <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
+                            </Button>
+                          )}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-8 ml-8 justify-between" aria-label={`Dependencies and actions for Task ${t.id}`}>
-                        <div className="flex gap-8">
+                        <div className="col col-blockers" aria-label={`Blockers for Task ${t.id}`}>
                           <div className="chips-list">
                             <span className="chips-sub__label">References</span>
                             {dependenciesInbound.length === 0 ? (
@@ -418,16 +408,6 @@ export default function TasksListView() {
                               ))
                             )}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3 pr-4">
-                          {myActiveRuns.length > 0 && (
-                            <span className="chips-sub__label" title={`Agents running: ${myActiveRuns.length}`}>
-                              Agents: {myActiveRuns.length}
-                            </span>
-                          )}
-                          <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); onRun(); }}>
-                            Run Agent
-                          </Button>
                         </div>
                       </div>
                     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import FileDisplay from '../ui/FileDisplay';
 import { inferFileType } from '../../../renderer/hooks/useFiles';
 
-export function ContextFileChip({ path, onRemove }: { path: string; onRemove?: () => void }) {
+export default function ContextFileChip({ path, onRemove }: { path: string; onRemove?: () => void }) {
   const file = React.useMemo(() => {
     const parts = path.split('/');
     const name = parts[parts.length - 1] || path;
@@ -20,5 +20,3 @@ export function ContextFileChip({ path, onRemove }: { path: string; onRemove?: (
     </div>
   );
 }
-
-export default ContextFileChip;

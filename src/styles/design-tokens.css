@@ -130,6 +130,8 @@
   --focus-ring: var(--color-brand-400);
 
   /* Status: bold */
+  --status-empty-bg: var(#FFFFFF);
+  --status-empty-fg: #000000;
   --status-done-bg: var(--color-green-600);
   --status-done-fg: #053B2E;
   --status-working-bg: var(--color-orange-650);
@@ -316,6 +318,8 @@
 .badge { display: inline-flex; align-items: center; gap: 0.375rem; font-weight: 600; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; }
 .badge--soft { background: var(--status-queued-soft-bg); color: var(--status-queued-soft-fg); border-color: var(--status-queued-soft-border); }
 .badge--bold { background: var(--status-queued-bg); color: var(--status-queued-fg); }
+.badge--empty.badge--soft { background: var(--status-empty-soft-bg); color: var(--status-empty-soft-fg); border-color: var(--status-empty-soft-border); }
+.badge--empty.badge--bold { background: var(--status-empty-bg); color: var(--status-empty-fg); }
 .badge--done.badge--soft { background: var(--status-done-soft-bg); color: var(--status-done-soft-fg); border-color: var(--status-done-soft-border); }
 .badge--done.badge--bold { background: var(--status-done-bg); color: var(--status-done-fg); }
 .badge--working.badge--soft { background: var(--status-working-soft-bg); color: var(--status-working-soft-fg); border-color: var(--status-working-soft-border); }

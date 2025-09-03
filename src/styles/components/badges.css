@@ -1,5 +1,6 @@
 /* Components: Badges and Priority Tags */
 .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-round); font-size: var(--fs-xs, 12px); line-height: 1; border: 1px solid transparent; }
+.badge--soft.badge--empty { background: var(--status-empty-soft-bg); color: var(--status-empty-soft-fg); border-color: var(--status-empty-soft-border); }
 .badge--soft.badge--done { background: var(--status-done-soft-bg); color: var(--status-done-soft-fg); border-color: var(--status-done-soft-border); }
 .badge--soft.badge--working { background: var(--status-working-soft-bg); color: var(--status-working-soft-fg); border-color: var(--status-working-soft-border); }
 .badge--soft.badge--stuck { background: var(--status-stuck-soft-bg); color: var(--status-stuck-soft-fg); border-color: var(--status-stuck-soft-border); }
@@ -9,6 +10,7 @@
 .badge--soft.badge--blocked { background: color-mix(in srgb, var(--status-blocked-bg) 14%, transparent); color: var(--status-blocked-fg); border-color: color-mix(in srgb, var(--status-blocked-bg) 55%, transparent); }
 
 /* Bold variant */
+.badge--bold.badge--empty{ background: var(--status-empty-bg); color: var(--status-empty-fg); }
 .badge--bold.badge--done { background: var(--status-done-bg); color: var(--status-done-fg); }
 .badge--bold.badge--working { background: var(--status-working-bg); color: var(--status-working-fg); }
 .badge--bold.badge--stuck { background: var(--status-stuck-bg); color: var(--status-stuck-fg); }

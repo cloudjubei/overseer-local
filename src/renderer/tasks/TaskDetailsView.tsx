@@ -9,58 +9,8 @@ import { Button } from '../components/ui/Button'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { Feature, Status, Task } from 'packages/factory-ts/src/types'
-
-function IconBack({ className }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-  )
-}
-
-function IconEdit({ className }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-    </svg>
-  )
-}
-
-function IconPlus({ className }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  )
-}
-
-function IconExclamation({ className }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  )
-}
-
-function IconChevron({ className }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-  )
-}
-
-function IconPlay({ className }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <polygon points="8,5 19,12 8,19" />
-    </svg>
-  )
-}
+import { IconBack, IconChevron, IconEdit, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
+import ExclamationChip from '../components/tasks/ExclamationChip'
 
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
@@ -224,11 +174,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   // Only one agent can run per task (no featureId)
   const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
   const taskHasActiveRun = !!taskRun
-
-  // Any rejected features?
-  const rejectedFeatures = (task.features || []).filter(f => !!(f as any).rejection)
-  const hasRejectedFeatures = rejectedFeatures.length > 0
-  const firstRejection = hasRejectedFeatures ? (rejectedFeatures[0] as any).rejection as string : ''
+  const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -239,11 +185,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </button>
 
           <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
-            {hasRejectedFeatures && (
-              <span className="rejection-badge" aria-label="Has rejection reason" title={firstRejection || 'One or more features were rejected'}>
-                <IconExclamation className="w-4 h-4" />
-              </span>
-            )}
+            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip={"Has rejection reason"} />}
             <span className="id-chip">{project?.taskIdToDisplayIndex[task.id] ?? 0}</span>
             <StatusControl
               status={task.status}
@@ -348,7 +290,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                // Only one agent can run per feature
                 const featureRun = activeRuns.find(r => r.taskId === task.id && r.featureId === f.id)
                 const featureHasActiveRun = !!featureRun
 
@@ -375,33 +316,28 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${dependenciesOutbound.length} dependencies, ${dependenciesInbound.length} dependents. Press Enter to edit.`}
                     >
-                      <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
-                        {f.rejection && (
-                          <span className="rejection-badge" aria-label="Has rejection reason" title={f.rejection}>
-                            <IconExclamation className="w-4 h-4" />
-                          </span>
-                        )}
+                      <div className="col col-id">
                         <span className="id-chip">{task.featureIdToDisplayIndex[f.id]}</span>
                         <StatusControl
                           status={f.status}
                           onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
                         />
+                        {f.rejection && <ExclamationChip title={f.rejection} tooltip={"Has rejection reason"} />}
                       </div>
+
                       <div className="title-line" style={{ gridRow: 1, gridColumn: 2 }}>
                         <span className="title-text">{f.title || ''}</span>
                       </div>
                       <div className="desc-line" style={{ gridRow: 2, gridColumn: 2 }} title={f.description || ''}>
                         {f.description || ''}
                       </div>
-                      <div className="col col-actions" style={{ gridRow: 2, gridColumn: 3 }}>
-                        <div className="row-actions flex items-center gap-2">
-                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
-                            <IconEdit />
-                          </button>
-                          <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId || featureHasActiveRun) return; startFeatureAgent(projectId, task.id, f.id) }} disabled={featureHasActiveRun}>
-                            <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
-                          </Button>
-                        </div>
+                      <div className="col col-actions">
+                        <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
+                          <IconEdit />
+                        </button>
+                        <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId || featureHasActiveRun) return; startFeatureAgent(projectId, task.id, f.id) }} disabled={featureHasActiveRun}>
+                          <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
+                        </Button>
                       </div>
 
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Dependencies and actions for Feature ${f.id}`}>
