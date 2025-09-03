@@ -160,7 +160,7 @@
     },
     {
       "id": "ba3e0af6-3a04-4523-90c7-b90b0d37514b",
-      "status": "-",
+      "status": "+",
       "title": "If any of a task's features are rejected (showing the exclamation circle) so should the task",
       "description": "The way this displays should follow exactly how Features are displayed inside TaskDetailsView",
       "plan": "",

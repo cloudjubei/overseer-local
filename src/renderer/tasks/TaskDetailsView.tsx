@@ -225,6 +225,11 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
   const taskHasActiveRun = !!taskRun
 
+  // Any rejected features?
+  const rejectedFeatures = (task.features || []).filter(f => !!(f as any).rejection)
+  const hasRejectedFeatures = rejectedFeatures.length > 0
+  const firstRejection = hasRejectedFeatures ? (rejectedFeatures[0] as any).rejection as string : ''
+
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
@@ -234,6 +239,11 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </button>
 
           <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
+            {hasRejectedFeatures && (
+              <span className="rejection-badge" aria-label="Has rejection reason" title={firstRejection || 'One or more features were rejected'}>
+                <IconExclamation className="w-4 h-4" />
+              </span>
+            )}
             <span className="id-chip">{project?.taskIdToDisplayIndex[task.id] ?? 0}</span>
             <StatusControl
               status={task.status}

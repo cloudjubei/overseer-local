@@ -330,6 +330,12 @@ export default function TasksListView() {
                 const dependenciesOutbound = getReferencesOutbound(t.id)
                 const myActiveRuns = activeRuns.filter(r => r.taskId === t.id)
                 const onRun = () => { if (!projectId) return; startTaskAgent(projectId, t.id) }
+
+                // Determine if any features are rejected
+                const rejectedFeatures = (t.features || []).filter(f => !!(f as any).rejection)
+                const hasRejectedFeatures = rejectedFeatures.length > 0
+                const firstRejection = hasRejectedFeatures ? (rejectedFeatures[0] as any).rejection as string : ''
+
                 return (
                   <li key={t.id} className="task-item" role="listitem">
                     {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -358,7 +364,19 @@ export default function TasksListView() {
                       aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${dependenciesOutbound.length} dependencies this task is blocked by, ${dependenciesInbound.length} dependencies this task is blocking. Press Enter to view details.`}
                     >
                       <div className="task-grid">
-                        <div className="col col-id"><span className="id-chip">{taskIdToDisplayIndex[t.id]}</span></div>
+                        <div className="col col-id">
+                          {hasRejectedFeatures && (
+                            <span className="rejection-badge" aria-label="Has rejection reason" title={firstRejection || 'One or more features were rejected'}>
+                              {/* Using the same icon as features in TaskDetailsView */}
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                              </svg>
+                            </span>
+                          )}
+                          <span className="id-chip">{taskIdToDisplayIndex[t.id]}</span>
+                        </div>
                         <div className="col col-title">
                           <div className="title-line">
                             <span className="title-text">{t.title || ''}</span>
