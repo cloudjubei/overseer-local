@@ -87,7 +87,7 @@
     },
     {
       "id": "c2192f2a-9151-4615-b376-986bb0540042",
-      "status": "-",
+      "status": "+",
       "title": "The \"Run Agent\" button should be standardised",
       "description": "The views that should have it updated are:\n`TasksListView.tsx`, `TaskDetailsView.tsx`.\nIt should be a round play button as is common in music players.",
       "plan": "",

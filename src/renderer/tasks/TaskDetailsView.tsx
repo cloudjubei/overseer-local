@@ -226,9 +226,16 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            <Button size="sm" variant="secondary" onClick={() => { if (!projectId || taskHasActiveRun) return; startTaskAgent(projectId, task.id) }} disabled={taskHasActiveRun}>
-              <span className="inline-flex items-center gap-1"><IconPlay /> Run Agent</span>
-            </Button>
+            <button
+              type="button"
+              className="btn btn-icon"
+              aria-label="Run Agent"
+              onClick={() => { if (!projectId || taskHasActiveRun) return; startTaskAgent(projectId, task.id) }}
+              title="Run Agent"
+              disabled={taskHasActiveRun}
+            >
+              <IconPlay />
+            </button>
           </div>
         </div>
       </header>
@@ -336,9 +343,16 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
                           <IconEdit />
                         </button>
-                        <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId || featureHasActiveRun) return; startFeatureAgent(projectId, task.id, f.id) }} disabled={featureHasActiveRun}>
-                          <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
-                        </Button>
+                        <button
+                          type="button"
+                          className="btn btn-icon"
+                          aria-label="Run Agent"
+                          onClick={(e) => { e.stopPropagation(); if (!projectId || featureHasActiveRun) return; startFeatureAgent(projectId, task.id, f.id) }}
+                          title="Run Agent"
+                          disabled={featureHasActiveRun}
+                        >
+                          <IconPlay />
+                        </button>
                       </div>
 
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Blockers and actions for Feature ${f.id}`}>
