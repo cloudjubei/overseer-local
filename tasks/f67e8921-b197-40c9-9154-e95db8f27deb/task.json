@@ -177,7 +177,7 @@
     },
     {
       "id": "67edb097-edf3-4988-939d-30e3fc3007c1",
-      "status": "-",
+      "status": "+",
       "title": "Go over all the tasks in this project and update inline file references",
       "description": "in a lot of the tasks a file could've been referenced as:\n`TasksListView.tsx` \nor simply\nTasksListView.tsx\n\nMake sure that these are transformed into the format:\n@Filepath\n\nThen inside `TasksListView.tsx` and `TaskDetailsView.tsx`, make sure that titles and descriptions for tasks and features show a nice hoverable ui that shows a tooltip about the file. Inside all forms it should just show @Filename so it's easy to edit.",
       "plan": "",
