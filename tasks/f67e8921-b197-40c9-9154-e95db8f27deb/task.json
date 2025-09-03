@@ -74,7 +74,7 @@
     },
     {
       "id": "98c76bd6-8c5c-4aaf-a778-54f5f57f679a",
-      "status": "-",
+      "status": "+",
       "title": "Agent run costs and times are always empty",
       "description": "It seems these are either not recorded correctly or not passed, so that they cannot be viewed properly inside `AgentsView.tsx` and `AllAgentsView.tsx`",
       "plan": "",

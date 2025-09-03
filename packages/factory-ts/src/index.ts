@@ -73,9 +73,12 @@ function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, o
       totalPrompt += pDelta;
       totalCompletion += cDelta;
 
-      // Compute cost incrementally using pricing if available
+      // Compute/accumulate cost incrementally
       let lastCostUSD: number | undefined = undefined;
-      if (opts?.pricing) {
+      // Prefer provider-reported cost if available
+      if (u.costUSD != null && isFinite(Number(u.costUSD))) {
+        lastCostUSD = Number(u.costUSD);
+      } else if (opts?.pricing) {
         const price = opts.pricing.getPrice(u.provider || opts.provider, u.model || req.model);
         lastCostUSD = estimateCostUSD(pDelta, cDelta, price);
       }
@@ -90,7 +93,8 @@ function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, o
             promptTokens: totalPrompt,
             completionTokens: totalCompletion,
             totalTokens: (totalPrompt + totalCompletion) || u.totalTokens,
-            costUSD: totalUSD || undefined,
+            // Emit 0 when no price is available yet, rather than undefined
+            costUSD: totalUSD,
             lastDurationMs: durationMs,
           }
         } satisfies RunEvent);
@@ -145,15 +149,15 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
     (async () => {
       ee.emit('event', { type: 'run/start', payload: { scope: 'task', id, taskId: args.taskId, llm: { model: args.llmConfig?.model, provider: args.llmConfig?.provider } } } satisfies RunEvent);
       try {
-        const taskTools = { ...defaultTaskUtils }
-        const fileTools = { ...defaultFileTools }
+        const taskTools = { ...defaultTaskUtils };
+        const fileTools = { ...defaultFileTools };
 
         const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider, pricing });
         const agentType = getAgentFromArgs(args, 'developer');
 
-        const taskId = args.taskId
-        const featureId = args.featureId
-        await runIsolatedOrchestrator({ model: args.llmConfig.model, agentType, taskId, featureId, gitFactory: (p) => new GitManager(p), taskTools, fileTools, completion, emit: (e) => ee.emit('event', e) })
+        const taskId = args.taskId;
+        const featureId = args.featureId;
+        await runIsolatedOrchestrator({ model: args.llmConfig.model, agentType, taskId, featureId, gitFactory: (p) => new GitManager(p), taskTools, fileTools, completion, emit: (e) => ee.emit('event', e) });
 
         ee.emit('event', { type: 'run/completed', payload: { ok: true } } satisfies RunEvent);
       } catch (err) {
