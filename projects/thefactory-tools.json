@@ -1,0 +1,10 @@
+{
+  "id": "thefactory-tools",
+  "title": "TheFactory Tools",
+  "description": "A project responsible for running AI agents. It exposes various tools that agents can use.",
+  "path": "../packages/factory-ts",
+  "repo_url": "https://github.com/cloudjubei/thefactory-tools.git",
+  "requirements": [],
+  "taskIdToDisplayIndex": {
+  }
+}

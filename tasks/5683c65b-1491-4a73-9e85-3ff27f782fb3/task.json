@@ -2,7 +2,7 @@
   "id": "5683c65b-1491-4a73-9e85-3ff27f782fb3",
   "status": "?",
   "title": "RAG/Knowledge graph - making the Agents clever",
-  "description": "The electron app developed in `src/` has an agentic chat which needs extra features to make the agents clever. References `docs/FILE_ORGANISATION.md`. We want to make them clever by exposing clever local tools for them to use and most importantly that they have scoped knowledge access.",
+  "description": "This app has an agentic chat and can run agents to perform the tasks and features given to them. Agents need extra features to make them clever. \nWe want to expose clever local tools for them to use and most importantly that they have scoped knowledge access.",
   "features": [
     {
       "id": "90340040-698d-4146-9256-882e9e094fe1",

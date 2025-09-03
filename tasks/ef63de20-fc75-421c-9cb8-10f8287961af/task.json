@@ -16,7 +16,7 @@
         "src/renderer/services/dependencyResolver.ts"
       ],
       "acceptance": [],
-      "rejection": "Places where these are used are not all updated."
+      "blockers": []
     },
     {
       "id": "a10c08b8-86dd-4afb-b9c9-3ef4c5c0e529",
