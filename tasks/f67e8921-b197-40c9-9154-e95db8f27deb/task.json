@@ -102,7 +102,7 @@
     },
     {
       "id": "0ce98597-907f-4bdf-a5a8-c8e8b253e612",
-      "status": "-",
+      "status": "+",
       "title": "Persist locally agent runs",
       "description": "Make sure the history of agent runs is persisted and read when app is started",
       "plan": "",
@@ -166,7 +166,7 @@
     },
     {
       "id": "b2ad0ce4-b71a-40bc-baa7-3550153bef88",
-      "status": "-",
+      "status": "+",
       "title": "When running the orchestrator, finding the next feature for a task should be based on the feature index",
       "description": "the Task.featureIdToDisplayIndex is the means by which the features should be sorted for this.",
       "plan": "",

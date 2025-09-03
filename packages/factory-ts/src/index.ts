@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs';
 import { EventEmitter } from 'node:events';
 import { taskUtils as defaultTaskUtils, TaskUtils } from './taskUtils.js';
 import { fileTools as defaultFileTools, FileTools } from './fileTools.js';
@@ -36,11 +37,99 @@ export interface RunHandle {
   cancel(reason?: string): void;
 }
 
-export interface HistoryStore { /* placeholder for future persistence */ }
+export type RunMeta = {
+  runId: string;
+  projectId?: string;
+  taskId?: string;
+  featureId?: string;
+  state: 'running' | 'completed' | 'cancelled' | 'error';
+  message?: string;
+  progress?: number;
+  costUSD?: number;
+  promptTokens?: number;
+  completionTokens?: number;
+  provider?: string;
+  model?: string;
+  startedAt?: string;
+  updatedAt?: string;
+};
 
-export function createHistoryStore(_opts: { dbPath: string }): HistoryStore {
-  // No-op stub to satisfy Electron integration; implement later
-  return {} as HistoryStore;
+export interface HistoryStore {
+  addOrUpdateRun(meta: RunMeta): void;
+  updateRunMeta(runId: string, patch: Partial<RunMeta>): void;
+  writeMessages(runId: string, messages: any[]): void;
+  listRuns(): RunMeta[];
+  getRun(runId: string): RunMeta | undefined;
+  getRunMessages(runId: string): any[];
+}
+
+function ensureDir(p: string) {
+  try { fs.mkdirSync(p, { recursive: true }); } catch {}
+}
+
+export function createHistoryStore(opts: { dbPath: string }): HistoryStore {
+  // Use a file-backed store under <dirname(dbPath)>/history
+  const baseDir = path.join(path.dirname(opts.dbPath || ''), 'history');
+  const runsDir = path.join(baseDir, 'runs');
+  const indexFile = path.join(baseDir, 'runs.json');
+  ensureDir(runsDir);
+
+  function readIndex(): RunMeta[] {
+    try {
+      const raw = fs.readFileSync(indexFile, 'utf8');
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr as RunMeta[];
+      return [];
+    } catch {
+      return [];
+    }
+  }
+  function writeIndex(list: RunMeta[]) {
+    try { fs.writeFileSync(indexFile, JSON.stringify(list, null, 2), 'utf8'); } catch {}
+  }
+
+  function addOrUpdateRun(meta: RunMeta) {
+    const list = readIndex();
+    const idx = list.findIndex(r => r.runId === meta.runId);
+    const merged = { ...(idx >= 0 ? list[idx] : {}), ...meta } as RunMeta;
+    if (idx >= 0) list[idx] = merged; else list.push(merged);
+    // Keep sorted by updatedAt desc if present
+    list.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+    writeIndex(list);
+  }
+
+  function updateRunMeta(runId: string, patch: Partial<RunMeta>) {
+    const list = readIndex();
+    const idx = list.findIndex(r => r.runId === runId);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...patch, runId } as RunMeta;
+      list.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+      writeIndex(list);
+    } else {
+      addOrUpdateRun({ runId, state: 'running', ...patch } as RunMeta);
+    }
+  }
+
+  function messagesFile(runId: string) { return path.join(runsDir, `${runId}.messages.json`); }
+
+  function writeMessages(runId: string, messages: any[]) {
+    try { fs.writeFileSync(messagesFile(runId), JSON.stringify(messages ?? [], null, 2), 'utf8'); } catch {}
+  }
+
+  function getRunMessages(runId: string): any[] {
+    try {
+      const raw = fs.readFileSync(messagesFile(runId), 'utf8');
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function listRuns(): RunMeta[] { return readIndex(); }
+  function getRun(runId: string): RunMeta | undefined { return readIndex().find(r => r.runId === runId); }
+
+  return { addOrUpdateRun, updateRunMeta, writeMessages, listRuns, getRun, getRunMessages } satisfies HistoryStore;
 }
 
 function makeId(prefix: string) { return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`; }

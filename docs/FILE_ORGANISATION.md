@@ -16,7 +16,7 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.
     - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications/user-preferences).
-      - src/renderer/services/agentsService.ts: In-memory orchestrator client that starts/monitors agent runs using the local factory-ts bridge. Tracks provider/model, costs, and token usage across runs.
+      - src/renderer/services/agentsService.ts: In-memory orchestrator client that starts/monitors agent runs using the local factory-ts bridge. Tracks provider/model, costs, and token usage across runs. On app start, it bootstraps from both active in-memory runs and persisted history loaded via preload factory IPC.
     - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, blocker resolver, etc.).
       - src/renderer/hooks/useAgents.ts: Hook to subscribe to active agent runs and start/cancel them.
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
@@ -24,7 +24,7 @@ This document describes how files and directories are organised in this reposito
     - src/tools/preview/: Preview analyzer tooling.
     - src/tools/factory/: Integration layer for the local factory-ts package (orchestrator bridge and helpers).
       - src/tools/factory/orchestratorBridge.ts: Renderer bridge that calls Electron preload API to start runs and receive events from the main process. Avoids importing Node-only modules in the renderer.
-      - src/tools/factory/mainOrchestrator.js: Electron main-side IPC handlers that manage factory-ts orchestrator runs and stream events to renderers.
+      - src/tools/factory/mainOrchestrator.js: Electron main-side IPC handlers that manage factory-ts orchestrator runs and stream events to renderers. Now persists metadata and conversation snapshots for runs via the factory-ts HistoryStore, and exposes IPC endpoints to list history and fetch messages.
   - src/chat/: Chat providers, manager, and storage.
   - src/capture/: Screenshot capture service (main process).
   - src/files/: Files manager and per-project storage.
@@ -33,7 +33,7 @@ This document describes how files and directories are organised in this reposito
   - src/notifications/: Notifications manager and IPC integration.
   - src/preferences/: Preferences manager and user settings storage (system-wide user preferences such as last active project, task view mode, list sorting, notification settings), with IPC exposure.
   - src/main.js: Electron main process entry that owns the factory-ts orchestrator and exposes IPC handlers for starting runs and streaming events via src/tools/factory/mainOrchestrator.js.
-  - src/preload.js: Preload script exposing a minimal window.factory API to the renderer (startTaskRun, startFeatureRun, cancelRun, subscribe).
+  - src/preload.js: Preload script exposing a minimal window.factory API to the renderer (startTaskRun, startFeatureRun, cancelRun, subscribe, listActiveRuns). New: listRunHistory and getRunMessages to access persisted history.
 - scripts/: Project automation scripts and CLIs (e.g., preview scanning, runAgent.mjs runner for factory-ts).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).
 - packages/: Local monorepo packages used by the app.
@@ -42,7 +42,7 @@ This document describes how files and directories are organised in this reposito
     - packages/factory-ts/src/orchestrator.ts: Orchestrator that mirrors Python run_local_agent.py conversation loop. Also provides runIsolatedOrchestrator which mirrors Python run.py by copying the repository to a temporary workspace, running the orchestrator inside it, and then cleaning up. It preserves .git and ignores venv, __pycache__, .idea, and *.pyc.
     - packages/factory-ts/src/completion.ts: Self-contained CompletionClient that supports OpenAI-compatible chat APIs and a mock client.
     - packages/factory-ts/src/pricing.ts: Pricing manager that loads/saves local model prices, estimates costs per-provider/model, and can refresh from configurable supplier URLs. Stores data under .factory/prices.json.
-    - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator, createPricingManager and a stub createHistoryStore. This is what Electron main loads to start task/feature runs.
+    - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator, createPricingManager and a file-backed createHistoryStore. HistoryStore persists run metadata under .factory/history/runs.json and per-run messages under .factory/history/runs/<runId>.messages.json.
     - packages/factory-ts/assets/default-prices.json: Built-in default price list used on first run or if local file is missing.
 
 Also present at repo root:
@@ -97,5 +97,12 @@ The orchestrator now calculates token usage and costs for LLM calls and emits ru
 - The main process exposes pricing IPC handlers:
   - factory:pricing:get returns current prices and updatedAt.
   - factory:pricing:refresh optionally accepts { provider, url } to refresh from a configurable supplier URL.
+
+History persistence for agent runs:
+- Main process initializes a HistoryStore (packages/factory-ts) under .factory/history/.
+- Run metadata is persisted continuously to .factory/history/runs.json.
+- Conversation messages are saved per-run in .factory/history/runs/<runId>.messages.json based on llm/messages snapshot events.
+- Renderer can load history via preload factory API: listRunHistory() and getRunMessages(runId).
+- agentsService bootstraps runs from both active (in-memory) and persisted history on start.
 
 Also note: orchestratorBridge start functions are async (await preload invoke). Ensure callers handle Promises appropriately.

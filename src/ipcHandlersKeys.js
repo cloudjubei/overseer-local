@@ -67,6 +67,10 @@ const IPC_HANDLER_KEYS = {
   FACTORY_EVENT: "factory:event",
   FACTORY_LIST_ACTIVE: "factory:list-active",
 
+  // Factory history
+  FACTORY_HISTORY_LIST: "factory:history:list",
+  FACTORY_HISTORY_MESSAGES: "factory:history:messages",
+
   // Factory pricing
   FACTORY_PRICING_GET: "factory:pricing:get",
   FACTORY_PRICING_REFRESH: "factory:pricing:refresh",

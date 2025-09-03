@@ -127,6 +127,12 @@ const FACTORY_API = {
   },
   listActiveRuns: () => {
     return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_LIST_ACTIVE);
+  },
+  listRunHistory: () => {
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_HISTORY_LIST);
+  },
+  getRunMessages: (runId) => {
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_HISTORY_MESSAGES, { runId });
   }
 };
 

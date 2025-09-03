@@ -54,6 +54,8 @@ function redactConfig(config: LLMConfig | null | undefined) {
   return { ...rest, apiKey: apiKey ? '***' : '' };
 }
 
+const NOOP_EVENTS: EventSourceLike = { addEventListener: (_t: string, _h: (e: any) => void) => {}, close: () => {} };
+
 class AgentsServiceImpl {
   private runs = new Map<string, RunRecord>();
   private subscribers = new Set<Subscriber>();
@@ -75,37 +77,80 @@ class AgentsServiceImpl {
     this.bootstrapped = true;
     try {
       const factory = (window as any).factory;
-      if (!factory || typeof factory.listActiveRuns !== 'function') return;
-      const active = await factory.listActiveRuns();
-      if (Array.isArray(active)) {
-        for (const m of active) {
-          if (!m?.runId) continue;
-          if (this.runs.has(m.runId)) continue;
-          const { handle, events } = attachToRun(m.runId);
-          const run: RunRecord = {
-            runId: handle.id,
-            projectId: m.projectId,
-            taskId: m.taskId ?? undefined,
-            featureId: m.featureId ?? undefined,
-            state: m.state ?? 'running',
-            message: m.message ?? 'Running... ',
-            progress: m.progress,
-            costUSD: m.costUSD,
-            promptTokens: m.promptTokens,
-            completionTokens: m.completionTokens,
-            provider: m.provider,
-            model: m.model,
-            startedAt: m.startedAt || new Date().toISOString(),
-            updatedAt: m.updatedAt || new Date().toISOString(),
-            messages: [],
-            events,
-            cancel: (reason?: string) => handle.cancel(reason),
-          } as RunRecord;
-          this.wireRunEvents(run);
-          this.runs.set(run.runId, run);
+      if (!factory) return;
+      // 1) Attach to active
+      if (typeof factory.listActiveRuns === 'function') {
+        const active = await factory.listActiveRuns();
+        if (Array.isArray(active)) {
+          for (const m of active) {
+            if (!m?.runId) continue;
+            if (this.runs.has(m.runId)) continue;
+            const { handle, events } = attachToRun(m.runId);
+            const run: RunRecord = {
+              runId: handle.id,
+              projectId: m.projectId,
+              taskId: m.taskId ?? undefined,
+              featureId: m.featureId ?? undefined,
+              state: m.state ?? 'running',
+              message: m.message ?? 'Running... ',
+              progress: m.progress,
+              costUSD: m.costUSD,
+              promptTokens: m.promptTokens,
+              completionTokens: m.completionTokens,
+              provider: m.provider,
+              model: m.model,
+              startedAt: m.startedAt || new Date().toISOString(),
+              updatedAt: m.updatedAt || new Date().toISOString(),
+              messages: [],
+              events,
+              cancel: (reason?: string) => handle.cancel(reason),
+            } as RunRecord;
+            this.wireRunEvents(run);
+            this.runs.set(run.runId, run);
+          }
         }
-        this.notify();
       }
+
+      // 2) Load history snapshot from disk
+      if (typeof factory.listRunHistory === 'function') {
+        const history = await factory.listRunHistory();
+        if (Array.isArray(history)) {
+          for (const m of history) {
+            if (!m?.runId) continue;
+            if (this.runs.has(m.runId)) continue;
+            const rec: RunRecord = {
+              runId: m.runId,
+              projectId: m.projectId,
+              taskId: m.taskId ?? undefined,
+              featureId: m.featureId ?? undefined,
+              state: m.state ?? 'completed',
+              message: m.message ?? '',
+              progress: m.progress,
+              costUSD: m.costUSD,
+              promptTokens: m.promptTokens,
+              completionTokens: m.completionTokens,
+              provider: m.provider,
+              model: m.model,
+              startedAt: m.startedAt || new Date().toISOString(),
+              updatedAt: m.updatedAt || new Date().toISOString(),
+              messages: [],
+              events: NOOP_EVENTS,
+              cancel: () => {},
+            } as RunRecord;
+            this.runs.set(rec.runId, rec);
+            // Load messages lazily and notify
+            try {
+              if (typeof factory.getRunMessages === 'function') {
+                const msgs = await factory.getRunMessages(rec.runId);
+                if (Array.isArray(msgs)) {
+                  rec.messages = msgs.map((mm: any) => ({ role: String(mm?.role ?? ''), content: String(mm?.content ?? ''), turn: mm?.turn }))
+                }
+              }
+            } catch {}
+          }
+        }
+      }
+      this.notify();
     } catch (err) {
       console.warn('[agentsService] bootstrapFromActiveRuns failed', (err as any)?.message || err);
     }
