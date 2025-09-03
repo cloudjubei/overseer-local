@@ -48,45 +48,6 @@ Your response will be parsed as JSON. Do not include any text outside of this JS
 
 NEWLINE = "\n"
 
-# --- Bridge helper ---
-
-def try_bridge_to_node(project_dir: Optional[str], task_id: Optional[str]) -> bool:
-    """
-    Attempt to delegate to the Node CLI from this script.
-    Returns True if we launched Node and should exit this path (success or handled failure),
-    False if delegation was not attempted or should continue with Python.
-    """
-    if os.getenv("FACTORY_FORCE_PYTHON") == "1" or os.getenv("FACTORY_BRIDGE_TO_NODE") == "0":
-        return False
-
-    node_cmd_override = os.getenv("FACTORY_NODE_CMD")
-    if node_cmd_override:
-        base_cmd = node_cmd_override.split()
-    else:
-        base_cmd = ["npx", "-y", "tsx", "scripts/runAgent.ts"]
-
-    args: List[str] = []
-    # project-root: if project_dir was provided, prefer it; otherwise use CWD
-    project_root = Path(project_dir).resolve() if project_dir else Path.cwd().resolve()
-    args += ["--project-root", str(project_root)]
-    if task_id:
-        args += ["--task-id", str(task_id)]
-
-    print("\n[Bridge] Delegating to Node CLI from run_local_agent.py:")
-    print(" ", " ".join(base_cmd + args))
-
-    try:
-        result = subprocess.run(base_cmd + args, cwd=Path.cwd(), check=False)
-        if result.returncode == 0:
-            print("[Bridge] Node CLI completed successfully. Exiting legacy orchestrator.")
-            return True
-        else:
-            print(f"[Bridge] Node CLI exited with code {result.returncode}. Continuing with Python orchestrator.")
-            return False
-    except FileNotFoundError:
-        print("[Bridge] Node tooling (npx/tsx) not found. Continuing with Python orchestrator.")
-        return False
-
 # --- Tool Mapping ---
 
 def get_available_tools(agent_type: str, git_manager: GitManager) -> Tuple[Dict[str, Callable], List[str]]:
