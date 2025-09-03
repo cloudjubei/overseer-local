@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "27156e19-3aeb-41de-adc2-75b1c7ca9774",
-      "status": "-",
+      "status": "+",
       "title": "Agents require a search-files tool",
       "description": "The agent calls the tool with a list of keywords, the whole project file system is searched and if any of them are found in a given file it will be returned in a final list.\nThe result is the list of relative file paths.",
       "plan": "",
@@ -18,16 +18,19 @@
       "id": "8ed1e913-44e2-4321-a631-f1c2c9033177",
       "status": "-",
       "title": "For standard agent suppliers - discover the latest prices",
-      "description": "It must be possible to view the latest prices per model and refresh them via a configurable link to the given supplier's website.",
+      "description": "It must be possible to view the latest prices per model and refresh them via a configurable link to the given supplier's website. Store the latest ones in a local file that is read on app start.\nRight now the costs are always 0 - the tokens are not counted anywhere, they should be.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/tools/factory/mainOrchestrator.js",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
       "acceptance": [],
       "dependencies": []
     },
     {
       "id": "bec521df-8a4b-41b2-b589-8334100f048f",
       "status": "-",
-      "title": "factory-ts must be added as a project to this",
+      "title": "factory-ts must be added as a project here",
       "description": "A new task must be created for it - to be able to view and edit Agent personas.",
       "plan": "",
       "context": [],
@@ -58,21 +61,94 @@
     },
     {
       "id": "a480aa54-f697-409d-95a7-1b369c3da9ff",
-      "status": "=",
-      "title": "Dependencies in Feature are misunderstood and don't work correctly in the Agent",
-      "description": "",
+      "status": "-",
+      "title": "the word dependencies in Features and Tasks should be changed to 'blockers'",
+      "description": "This change should be reflected in any file that uses 'dependencies'",
       "plan": "",
       "context": [],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "0964b90b-396a-43b0-9f4a-a60d0034360e",
+      "status": "-",
+      "title": "Make an Agent run chat display prettier",
+      "description": "make the thoughts as a bubble, and then the tool calls as expandable rows to view the details (mainly for read_files & write_file - the rest of the tools are short enough that they can always display).\nSame goes for the responses to the LLM - apply a similar view as above.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "98c76bd6-8c5c-4aaf-a778-54f5f57f679a",
+      "status": "-",
+      "title": "Agent run costs and times are always empty",
+      "description": "It seems these are either not recorded correctly or not passed, so that they cannot be viewed properly inside `AgentsView.tsx` and `AllAgentsView.tsx`",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "c2192f2a-9151-4615-b376-986bb0540042",
+      "status": "-",
+      "title": "The \"Run Agent\" button should be standardised",
+      "description": "It should be a round play button as is common in music players.\nWherever there is a Run Agent button it should be using the new standard one.\nTaskCard should also have it in the top right.\nTasks and Features should only have this button display if they are pending.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/components/tasks/TaskCard.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "0ce98597-907f-4bdf-a5a8-c8e8b253e612",
+      "status": "-",
+      "title": "Persist locally agent runs",
+      "description": "Make sure the history of agent runs is persisted and read when app is started",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "dependencies": []
+    },
+    {
+      "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
+      "status": "-",
+      "title": "A project's details must be editable",
+      "description": "On hover in the projects list (Sidebar) an edit button should show at the end (similar to Feature edit in TaskDetailsView) which would take the user to a ProjectEditView where the details about the project can be edited.",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/components/tasks/FeatureForm.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "packages/factory-ts/src/types.ts"
+      ],
       "acceptance": [],
       "dependencies": []
     }
   ],
   "featureIdToDisplayIndex": {
     "27156e19-3aeb-41de-adc2-75b1c7ca9774": 1,
-    "8ed1e913-44e2-4321-a631-f1c2c9033177": 2,
-    "bec521df-8a4b-41b2-b589-8334100f048f": 3,
-    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 4,
-    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 5,
-    "a480aa54-f697-409d-95a7-1b369c3da9ff": 6
+    "0964b90b-396a-43b0-9f4a-a60d0034360e": 2,
+    "c2192f2a-9151-4615-b376-986bb0540042": 3,
+    "98c76bd6-8c5c-4aaf-a778-54f5f57f679a": 4,
+    "8ed1e913-44e2-4321-a631-f1c2c9033177": 5,
+    "a480aa54-f697-409d-95a7-1b369c3da9ff": 6,
+    "3a11fceb-bb37-4570-a159-2f39622ca364": 7,
+    "bec521df-8a4b-41b2-b589-8334100f048f": 8,
+    "0ce98597-907f-4bdf-a5a8-c8e8b253e612": 9,
+    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 10,
+    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 11
   }
 }

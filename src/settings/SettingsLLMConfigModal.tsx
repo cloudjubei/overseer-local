@@ -18,22 +18,21 @@ const PROVIDER_DEFAULT_URL: Record<LLMProviderType, string> = {
 
 const PROVIDER_MODELS: Record<Exclude<LLMProviderType, 'local' | 'custom'>, string[]> = {
   openai: [
+    'gpt-5',
     'gpt-4o',
     'gpt-4o-mini',
-    'o3-mini',
   ],
   anthropic: [
-    'claude-3-5-sonnet-20240620',
-    'claude-3-opus-20240229',
-    'claude-3-haiku-20240307',
+    'claude-sonnet-4-20250514',
+    'claude-4.1-opus',
+    'claude-opus-4',
   ],
   gemini: [
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
   ],
   xai: [
-    'grok-1.5',
-    'grok-1',
+    'grok-4'
   ],
 };
 
