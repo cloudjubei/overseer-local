@@ -113,7 +113,7 @@
     },
     {
       "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
-      "status": "-",
+      "status": "+",
       "title": "IconDelete",
       "description": "`IconDelete` inside `Icons.tsx` needs to actually be a proper delete icon",
       "plan": "",
