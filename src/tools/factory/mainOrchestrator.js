@@ -33,6 +33,7 @@ const RUN_META = new Map(); // runId -> metadata snapshot
 const RUN_TIMERS = new Map(); // runId -> heartbeat timer
 
 let PRICING = null;
+let HISTORY = null;
 
 function sendEventToWC(wcId, runId, event) {
   const wc = webContents.fromId(wcId);
@@ -69,6 +70,15 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function persistMeta(runId) {
+  try {
+    const meta = RUN_META.get(runId);
+    if (meta && HISTORY) HISTORY.addOrUpdateRun(meta);
+  } catch (e) {
+    console.warn('[factory] persistMeta error', e?.message || e);
+  }
+}
+
 function updateMetaFromEvent(runId, e) {
   const meta = RUN_META.get(runId);
   if (!meta) return;
@@ -100,18 +110,19 @@ function updateMetaFromEvent(runId, e) {
     meta.state = 'completed';
     meta.message = payload?.message || payload?.summary || 'Completed';
   }
+  // Persist snapshot on each update
+  persistMeta(runId);
 }
 
 export async function registerFactoryIPC(mainWindow, projectRoot) {
   console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
   const { createOrchestrator, createHistoryStore, createPricingManager } = await loadFactory();
 
-  let historyStore = undefined;
   try {
     const dbPath = path.join(projectRoot, '.factory', 'history.sqlite');
     if (typeof createHistoryStore === 'function') {
       console.log('[factory] Initializing history store at', dbPath);
-      historyStore = createHistoryStore({ dbPath });
+      HISTORY = createHistoryStore({ dbPath });
     } else {
       console.log('[factory] History store not available; proceeding without persistence');
     }
@@ -128,7 +139,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   }
 
   console.log('[factory] Creating orchestrator');
-  const orchestrator = createOrchestrator({ projectRoot, history: historyStore, pricing: PRICING });
+  const orchestrator = createOrchestrator({ projectRoot, history: HISTORY, pricing: PRICING });
   console.log('[factory] Orchestrator ready');
 
   function startHeartbeat(runId) {
@@ -159,6 +170,8 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     console.log('[factory] Attaching run', runHandle?.id);
     RUNS.set(runHandle.id, runHandle);
     RUN_META.set(runHandle.id, initMeta);
+    // Persist initial meta
+    persistMeta(runHandle.id);
     startHeartbeat(runHandle.id);
 
     const unsubscribe = runHandle.onEvent((e) => {
@@ -173,6 +186,16 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
           console.log('[factory] event', runHandle.id, t);
         }
       } catch {}
+
+      // Persist message snapshots when provided
+      try {
+        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final') && e?.payload?.messages && HISTORY) {
+          HISTORY.writeMessages(runHandle.id, e.payload.messages);
+        }
+      } catch (err) {
+        console.warn('[factory] Failed to persist messages for', runHandle.id, err?.message || err);
+      }
+
       updateMetaFromEvent(runHandle.id, e);
       broadcastEventToSubscribers(runHandle.id, e);
     });
@@ -183,6 +206,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       stopHeartbeat(runHandle.id);
       RUNS.delete(runHandle.id);
       RUN_SUBSCRIBERS.delete(runHandle.id);
+      // keep RUN_META for a while? Persisted already
       RUN_META.delete(runHandle.id);
     };
 
@@ -299,6 +323,24 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       }
     }
     return list;
+  });
+
+  // History listing and messages API
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_HISTORY_LIST, () => {
+    try {
+      return HISTORY?.listRuns?.() || [];
+    } catch (e) {
+      console.warn('[factory] history:list error', e?.message || e);
+      return [];
+    }
+  });
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_HISTORY_MESSAGES, (_evt, { runId }) => {
+    try {
+      return HISTORY?.getRunMessages?.(runId) || [];
+    } catch (e) {
+      console.warn('[factory] history:messages error', e?.message || e);
+      return [];
+    }
   });
 
   // Pricing handlers
