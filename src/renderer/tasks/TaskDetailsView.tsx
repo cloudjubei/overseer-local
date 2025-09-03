@@ -168,13 +168,14 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     clearDndState()
   }
 
-  const taskDependenciesInbound = getBlockers(task.id)
-  const taskDependenciesOutbound = getBlockersOutbound(task.id)
+  const taskBlockers = getBlockers(task.id)
+  const taskBlockersOutbound = getBlockersOutbound(task.id)
 
   // Only one agent can run per task (no featureId)
   const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
   const taskHasActiveRun = !!taskRun
   const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
+  const taskDisplayIndex = project?.taskIdToDisplayIndex[task.id] ?? 0
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -186,7 +187,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
 
           <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
             {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip={"Has rejection reason"} />}
-            <span className="id-chip">{project?.taskIdToDisplayIndex[task.id] ?? 0}</span>
+            <span className="id-chip">{taskDisplayIndex}</span>
             <StatusControl
               status={task.status}
               className="ml-2"
@@ -194,26 +195,26 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             />
           </div>
           
-          <h1 id="task-details-heading" className="details-title">{task.title || `Task ${task.id}`}</h1>
+          <h1 id="task-details-heading" className="details-title">{task.title || `Task ${taskDisplayIndex}`}</h1>
           
-          <div className="flex gap-4 ml-2" aria-label={`Dependencies for Task ${task.id}`}>
+          <div className="flex flex-col gap-2 ml-2" aria-label={`Blockers for Task ${taskDisplayIndex}`}>
             <div className="chips-list">
-              <span className="chips-sub__label">References</span>
-              {taskDependenciesInbound.length === 0 ? (
+              <span className="chips-sub__label">Blockers</span>
+              {taskBlockers.length === 0 ? (
                 <span className="chips-sub__label" title="No dependencies">None</span>
               ) : (
-                taskDependenciesInbound.map((d) => (
+                taskBlockers.map((d) => (
                   <DependencyBullet key={d.id} dependency={d.id} />
                 ))
               )}
             </div>
             <div className="chips-list">
               <span className="chips-sub__label">Blocks</span>
-              {taskDependenciesOutbound.length === 0 ? (
+              {taskBlockersOutbound.length === 0 ? (
                 <span className="chips-sub__label" title="No dependents">None</span>
               ) : (
-                taskDependenciesOutbound.map((d) => (
-                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                taskBlockersOutbound.map((d) => (
+                  <DependencyBullet key={d.id} dependency={d.id} isOutbound />
                 ))
               )}
             </div>

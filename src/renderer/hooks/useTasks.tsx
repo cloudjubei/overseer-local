@@ -38,10 +38,10 @@ export function useTasks() {
         const parts = d.split(".")
         if (parts.length > 1){
           if (!outbound[parts[1]]) outbound[parts[1]] = [];
-          outbound[parts[1]].push({ id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
+          outbound[parts[1]].push({ kind: "task", id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
         }else{
           if (!outbound[parts[0]]) outbound[parts[0]] = [];
-          outbound[parts[0]].push({ id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
+          outbound[parts[0]].push({ kind: "task", id: task.id, taskId: task.id, task: task, display: `${project.taskIdToDisplayIndex[task.id]}`} as ResolvedTaskRef)
         }
       }
       for (const feature of task.features) {
@@ -49,10 +49,10 @@ export function useTasks() {
           const parts = d.split(".")
           if (parts.length > 1){
             if (!outbound[parts[1]]) outbound[parts[1]] = [];
-            outbound[parts[1]].push({ id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
+            outbound[parts[1]].push({ kind: "feature", id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
           }else{
             if (!outbound[parts[0]]) outbound[parts[0]] = [];
-            outbound[parts[0]].push({ id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
+            outbound[parts[0]].push({ kind: "feature", id: `${task.id}.${feature.id}`, taskId: task.id, featureId: feature.id, task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}` } as ResolvedFeatureRef)
           }
         }
       }
@@ -91,9 +91,9 @@ export function useTasks() {
       if (!feature){
         return { id: dependency, code: 'FEATURE_NOT_FOUND', message: "Feature wasn't found" }
       }
-      return { id: dependency, taskId: parts[0], featureId: parts[1], task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}`} as ResolvedFeatureRef
+      return { kind: "feature", id: dependency, taskId: parts[0], featureId: parts[1], task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}`} as ResolvedFeatureRef
     }
-    return { id: dependency, taskId: parts[0], task, display: `${project.taskIdToDisplayIndex[task.id]}` } as ResolvedTaskRef
+    return { kind: "task", id: dependency, taskId: parts[0], task, display: `${project.taskIdToDisplayIndex[task.id]}` } as ResolvedTaskRef
   }
 
   const createTask = async (updates: TaskCreateInput) : Promise<ServiceResult> => {
