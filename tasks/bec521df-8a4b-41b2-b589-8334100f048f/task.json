@@ -1,0 +1,46 @@
+{
+  "id": "bec521df-8a4b-41b2-b589-8334100f048f",
+  "status": "+",
+  "title": "factory-ts as a project + Agent Personas management",
+  "description": "Add the local factory-ts package as a first-class project in this workspace and implement UI capability to view and edit Agent personas (name, role, system prompt, defaults).",
+  "features": [
+    {
+      "id": "e9c8a8d9-82a9-4d13-9f3a-7b6cd4a2e9f1",
+      "status": "+",
+      "title": "Add factory-ts as a project entry",
+      "description": "Ensure the factory-ts local package is recognized as a project in the app so it can be browsed and developed within the workspace. Update any project indexing if necessary to include packages/factory-ts.",
+      "plan": "- Verify projects indexing includes packages/ subprojects.\n- If needed, add an entry so factory-ts appears in project selector.",
+      "context": [
+        "packages/factory-ts/",
+        "src/projects/"
+      ],
+      "acceptance": [
+        "factory-ts appears as a selectable project in the app (or projects list)"
+      ]
+    },
+    {
+      "id": "a3b3d2e4-5b6c-4f7d-9c1a-8d2f3e4b5c6d",
+      "status": "+",
+      "title": "Personas list and editor (Agents)",
+      "description": "Create a screen to view, create, edit, and delete Agent personas used by the orchestrator. Each persona includes: id, name, description/role, system prompt, default provider/model, temperature, and optional tools/permissions. Implement storage under .factory/personas.json.",
+      "plan": "- Define PersonasStore interface under src/renderer/services.\n- Add UI under Agents screen: list personas, edit modal/form.\n- Wire save/load to local storage file .factory/personas.json.",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/services/agentsService.ts",
+        "src/tools/factory/orchestratorBridge.ts",
+        "packages/factory-ts/src/index.ts"
+      ],
+      "acceptance": [
+        "Users can see a list of personas with name and role",
+        "Users can create a new persona and it persists",
+        "Users can edit an existing persona's fields and save",
+        "Users can delete a persona",
+        "Personas are stored in .factory/personas.json"
+      ]
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "e9c8a8d9-82a9-4d13-9f3a-7b6cd4a2e9f1": 0,
+    "a3b3d2e4-5b6c-4f7d-9c1a-8d2f3e4b5c6d": 1
+  }
+}

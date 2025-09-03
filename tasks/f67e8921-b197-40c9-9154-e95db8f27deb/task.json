@@ -29,7 +29,7 @@
     },
     {
       "id": "bec521df-8a4b-41b2-b589-8334100f048f",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts must be added as a project here",
       "description": "A new task must be created for it - to be able to view and edit Agent personas.",
       "plan": "",
