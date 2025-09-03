@@ -16,7 +16,7 @@
     },
     {
       "id": "8ed1e913-44e2-4321-a631-f1c2c9033177",
-      "status": "-",
+      "status": "+",
       "title": "For standard agent suppliers - discover the latest prices",
       "description": "It must be possible to view the latest prices per model and refresh them via a configurable link to the given supplier's website. Store the latest ones in a local file that is read on app start.\nRight now the costs are always 0 - the tokens are not counted anywhere, they should be.",
       "plan": "",

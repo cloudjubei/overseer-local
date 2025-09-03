@@ -6,6 +6,7 @@ import GitManager from './gitManager.js';
 import { runIsolatedOrchestrator } from './orchestrator.js';
 import { createCompletionClient, type CompletionClient } from './completion.js';
 import { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './logger.js';
+import { createPricingManager, PricingManager, estimateCostUSD } from './pricing.js';
 
 export type LLMConfig = {
   model: string;
@@ -49,7 +50,7 @@ function buildCompletion(llmConfig: LLMConfig): CompletionClient {
   return createCompletionClient(llmConfig);
 }
 
-function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, meta?: { provider?: string }): CompletionClient {
+function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, opts?: { provider?: string; pricing?: PricingManager }): CompletionClient {
   // Accumulate usage across the run
   let totalPrompt = 0;
   let totalCompletion = 0;
@@ -67,14 +68,24 @@ function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, m
       emit({ type: 'llm/response', payload: { model: req.model, message: res.message, durationMs } });
       // Usage (if provided by client)
       const u = res.usage || {};
-      if (u.promptTokens) totalPrompt += u.promptTokens;
-      if (u.completionTokens) totalCompletion += u.completionTokens;
-      if (u.costUSD) totalUSD += u.costUSD;
+      const pDelta = Number(u.promptTokens || 0);
+      const cDelta = Number(u.completionTokens || 0);
+      totalPrompt += pDelta;
+      totalCompletion += cDelta;
+
+      // Compute cost incrementally using pricing if available
+      let lastCostUSD: number | undefined = undefined;
+      if (opts?.pricing) {
+        const price = opts.pricing.getPrice(u.provider || opts.provider, u.model || req.model);
+        lastCostUSD = estimateCostUSD(pDelta, cDelta, price);
+      }
+      if (lastCostUSD != null) totalUSD += lastCostUSD;
+
       try {
         emit({
           type: 'run/usage',
           payload: {
-            provider: meta?.provider,
+            provider: u.provider || opts?.provider,
             model: u.model || req.model,
             promptTokens: totalPrompt,
             completionTokens: totalCompletion,
@@ -94,11 +105,14 @@ function attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, m
   return wrapped;
 }
 
-export function createOrchestrator(opts: { projectRoot?: string; history?: HistoryStore }) {
+export function createOrchestrator(opts: { projectRoot?: string; history?: HistoryStore; pricing?: PricingManager }) {
   const projectRoot = path.resolve(opts.projectRoot || process.cwd());
 
   // A run registry
   const runs = new Map<string, { ee: EventEmitter; cancelled: boolean; cancel: (r?: string) => void }>();
+
+  // Pricing manager (load/set defaults from disk on app start)
+  const pricing = opts.pricing || createPricingManager({ projectRoot });
 
   function newRunHandle(prefix: string): { id: string; ee: EventEmitter; handle: RunHandle; signalCancelled: () => boolean } {
     const id = makeId(prefix);
@@ -134,7 +148,7 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
         const taskTools = { ...defaultTaskUtils }
         const fileTools = { ...defaultFileTools }
 
-        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider });
+        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider, pricing });
         const agentType = getAgentFromArgs(args, 'developer');
 
         const taskId = args.taskId
@@ -151,12 +165,12 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
     return handle;
   }
 
-
   return {
     startRun,
+    pricing, // expose for external IPC if needed
   };
 }
 
-export { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger };
+export { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger, createPricingManager };
 
-export default { createOrchestrator, createHistoryStore, setFactoryDebug, setLoggerConfig, getLoggerConfig, logger };
+export default { createOrchestrator, createHistoryStore, setFactoryDebug, setLoggerConfig, getLoggerConfig, logger, createPricingManager };

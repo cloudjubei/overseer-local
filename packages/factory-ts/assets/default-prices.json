@@ -1,0 +1,9 @@
+{
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "prices": [
+    { "provider": "openai", "model": "gpt-4o-mini", "inputPerMTokensUSD": 150, "outputPerMTokensUSD": 600 },
+    { "provider": "openai", "model": "gpt-4o", "inputPerMTokensUSD": 5000, "outputPerMTokensUSD": 15000 },
+    { "provider": "openai", "model": "gpt-4o-realtime", "inputPerMTokensUSD": 5000, "outputPerMTokensUSD": 15000 },
+    { "provider": "openai", "model": "gpt-3.5-turbo", "inputPerMTokensUSD": 1500, "outputPerMTokensUSD": 2000 }
+  ]
+}

@@ -32,6 +32,8 @@ const RUNS = new Map(); // runId -> RunHandle
 const RUN_META = new Map(); // runId -> metadata snapshot
 const RUN_TIMERS = new Map(); // runId -> heartbeat timer
 
+let PRICING = null;
+
 function sendEventToWC(wcId, runId, event) {
   const wc = webContents.fromId(wcId);
   if (wc && !wc.isDestroyed()) {
@@ -102,7 +104,7 @@ function updateMetaFromEvent(runId, e) {
 
 export async function registerFactoryIPC(mainWindow, projectRoot) {
   console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
-  const { createOrchestrator, createHistoryStore } = await loadFactory();
+  const { createOrchestrator, createHistoryStore, createPricingManager } = await loadFactory();
 
   let historyStore = undefined;
   try {
@@ -117,8 +119,16 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     console.warn('[factory] Optional history init failed; continuing without it:', err?.message || err);
   }
 
+  // Initialize pricing manager and keep reference for IPC operations
+  try {
+    PRICING = createPricingManager({ projectRoot });
+    console.log('[factory] Pricing manager initialized. Loaded', PRICING?.listPrices()?.prices?.length || 0, 'prices.');
+  } catch (err) {
+    console.warn('[factory] Failed to initialize pricing manager:', err?.message || err);
+  }
+
   console.log('[factory] Creating orchestrator');
-  const orchestrator = createOrchestrator({ projectRoot /*, history: historyStore*/ });
+  const orchestrator = createOrchestrator({ projectRoot, /* history: historyStore, */ pricing: PRICING });
   console.log('[factory] Orchestrator ready');
 
   function startHeartbeat(runId) {
@@ -289,6 +299,25 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       }
     }
     return list;
+  });
+
+  // Pricing handlers
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_PRICING_GET, () => {
+    try {
+      const state = PRICING?.listPrices();
+      return state || { updatedAt: nowIso(), prices: [] };
+    } catch (e) {
+      return { updatedAt: nowIso(), prices: [] };
+    }
+  });
+
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, async (_evt, { provider, url }) => {
+    try {
+      const state = await PRICING?.refresh(provider, url);
+      return state || { updatedAt: nowIso(), prices: [] };
+    } catch (e) {
+      return { updatedAt: nowIso(), prices: [] };
+    }
   });
 
   // Log window lifecycle for context

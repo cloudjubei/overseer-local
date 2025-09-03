@@ -40,7 +40,9 @@ This document describes how files and directories are organised in this reposito
     - packages/factory-ts/src/taskUtils.ts: TypeScript implementation mirroring Python task_utils.py, used by orchestrator.ts for file/task/feature/test operations and Git commits.
     - packages/factory-ts/src/orchestrator.ts: Orchestrator that mirrors Python run_local_agent.py conversation loop. Also provides runIsolatedOrchestrator which mirrors Python run.py by copying the repository to a temporary workspace, running the orchestrator inside it, and then cleaning up. It preserves .git and ignores venv, __pycache__, .idea, and *.pyc.
     - packages/factory-ts/src/completion.ts: Self-contained CompletionClient that supports OpenAI-compatible chat APIs and a mock client.
-    - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator and a stub createHistoryStore. This is what Electron main loads to start task/feature runs.
+    - packages/factory-ts/src/pricing.ts: Pricing manager that loads/saves local model prices, estimates costs per-provider/model, and can refresh from configurable supplier URLs. Stores data under .factory/prices.json.
+    - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator, createPricingManager and a stub createHistoryStore. This is what Electron main loads to start task/feature runs.
+    - packages/factory-ts/assets/default-prices.json: Built-in default price list used on first run or if local file is missing.
 
 Also present at repo root:
 - .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
@@ -82,10 +84,17 @@ Notes:
 
 ## Factory TS Integration
 - Library location: packages/factory-ts (local package).
-- Main process: src/main.js owns the orchestrator (createOrchestrator) and exposes IPC handlers for starting runs and streaming events via src/tools/factory/mainOrchestrator.js.
+- Main process: src/main.js owns the factory-ts orchestrator and exposes IPC handlers for starting runs and streaming events via src/tools/factory/mainOrchestrator.js.
 - Preload: src/preload.js exposes window.factory with methods used by the renderer to interact with the orchestrator safely.
 - Renderer bridge: src/tools/factory/orchestratorBridge.ts calls the preload API, avoiding Node-only modules in the renderer to prevent node:path externalization issues.
 - Renderer service/hook: src/renderer/services/agentsService.ts and src/renderer/hooks/useAgents.ts can consume the renderer bridge and receive EventSource-like streams.
 - CLI: scripts/runAgent.mjs streams JSONL events for a run. Build the package with npm run factory:build and then use npm run run:agent.
+
+The orchestrator now calculates token usage and costs for LLM calls and emits run/usage events:
+- Tokens are accumulated across the run (promptTokens, completionTokens).
+- Costs are computed using per-provider/model prices stored under .factory/prices.json via the PricingManager.
+- The main process exposes pricing IPC handlers:
+  - factory:pricing:get returns current prices and updatedAt.
+  - factory:pricing:refresh optionally accepts { provider, url } to refresh from a configurable supplier URL.
 
 Also note: orchestratorBridge start functions are async (await preload invoke). Ensure callers handle Promises appropriately.
