@@ -53,56 +53,69 @@ function useToastsState() {
   return { items, add, startClose, remove };
 }
 
-export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: string) => void }) {
-  // Keep background solid to avoid transparency bleed.
-  const variantAccent = (() => {
-    switch (item.variant) {
+function VariantIcon({ variant }: { variant: ToastVariant }) {
+  const styles = (() => {
+    switch (variant) {
       case 'success':
-        return 'border-l-4 border-l-emerald-500';
+        return { wrapper: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400', icon: '✔' };
       case 'error':
-        return 'border-l-4 border-l-red-500';
+        return { wrapper: 'bg-red-500/15 text-red-600 dark:text-red-400', icon: '⚠' };
       case 'warning':
-        return 'border-l-4 border-l-amber-500';
+        return { wrapper: 'bg-amber-500/20 text-amber-700 dark:text-amber-300', icon: '!' };
       default:
-        return 'border-l-4 border-l-gray-400 dark:border-l-gray-500';
+        return { wrapper: 'bg-gray-500/15 text-gray-600 dark:text-gray-300', icon: '•' };
     }
   })();
+  return (
+    <div className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center ${styles.wrapper}`}
+         aria-hidden="true">
+      <span className="text-sm leading-none">{styles.icon}</span>
+    </div>
+  );
+}
 
+export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: string) => void }) {
+  // iOS-like: rounded pill, subtle translucent background, compact spacing
   const anim = item.isClosing
     ? 'animate-out fade-out-0 slide-out-to-top-2 duration-200 ease-in'
     : 'animate-in fade-in-50 slide-in-from-top-2 duration-200 ease-out';
 
   return (
     <div
-      className={`pointer-events-auto w-[320px] overflow-hidden rounded-md border border-border bg-surface-raised text-text-primary shadow-lg ${variantAccent} ${anim}`}
+      className={`pointer-events-auto w-[340px] overflow-hidden rounded-2xl shadow-xl ${anim}`}
       role="status"
       aria-live="polite"
     >
-      <div className="p-2.5">
-        {item.title ? <div className="text-sm font-medium">{item.title}</div> : null}
-        {item.description ? <div className="mt-0.5 text-xs opacity-90">{item.description}</div> : null}
-        <div className="mt-2 flex items-center justify-between gap-2">
-          {item.action?.label ? (
-            <button
-              className="text-xs font-medium text-brand-600 hover:underline"
-              onClick={() => {
-                item.action?.onClick?.();
-                onClose(item.id);
-              }}
-            >
-              {item.action.label}
-            </button>
-          ) : (
-            <span />
-          )}
-          <button
-            className="rounded p-1 text-text-muted hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={() => onClose(item.id)}
-            aria-label="Close"
-          >
-            ×
-          </button>
+      <div
+        className="group flex items-start gap-3 px-3.5 py-3 rounded-2xl border border-black/5 dark:border-white/5 bg-white/80 dark:bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md"
+      >
+        <VariantIcon variant={item.variant} />
+        <div className="min-w-0 flex-1">
+          {item.title ? <div className="text-sm font-medium text-text-primary truncate">{item.title}</div> : null}
+          {item.description ? (
+            <div className="mt-0.5 text-[13px] text-text-secondary line-clamp-3">{item.description}</div>
+          ) : null}
+          <div className="mt-2 flex items-center gap-2">
+            {item.action?.label ? (
+              <button
+                className="text-xs font-medium px-2 py-1 rounded-full bg-black/5 dark:bg-white/10 text-text-primary hover:bg-black/10 dark:hover:bg-white/15 transition"
+                onClick={() => {
+                  item.action?.onClick?.();
+                  onClose(item.id);
+                }}
+              >
+                {item.action.label}
+              </button>
+            ) : null}
+          </div>
         </div>
+        <button
+          className="-m-1.5 rounded-full p-1.5 text-text-muted hover:bg-black/5 dark:hover:bg-white/10 transition"
+          onClick={() => onClose(item.id)}
+          aria-label="Close"
+        >
+          ×
+        </button>
       </div>
     </div>
   );
@@ -110,7 +123,7 @@ export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: st
 
 function ToastViewport({ items, onClose }: { items: ToastItem[]; onClose: (id: string) => void }) {
   return createPortal(
-    <div className="pointer-events-none fixed top-4 left-1/2 -translate-x-1/2 z-[1100] flex flex-col items-center gap-2">
+    <div className="pointer-events-none fixed top-5 left-1/2 -translate-x-1/2 z-[1100] flex flex-col items-center gap-2.5">
       {items.map((t) => (
         <ToastView key={t.id} item={t} onClose={onClose} />
       ))}
