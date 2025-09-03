@@ -12,7 +12,7 @@ export function useTasks() {
 
   const [tasksById, setTasksById] = useState<Record<string,Task>>({});
   const [featuresById, setFeaturesById] = useState<Record<string,Feature>>({});
-  const [referencesById, setReferencesById] = useState<Record<string,ResolvedRef[]>>({});
+  const [blockersOutboundById, setReferencesById] = useState<Record<string,ResolvedRef[]>>({});
 
   const update = async () => {
     if (project){
@@ -34,7 +34,7 @@ export function useTasks() {
 
     const outbound : Record<string,ResolvedRef[]> = {};
     for (const task of tasks) {
-      for (const d of task.dependencies || []) {
+      for (const d of task.blockers || []) {
         const parts = d.split(".")
         if (parts.length > 1){
           if (!outbound[parts[1]]) outbound[parts[1]] = [];
@@ -45,7 +45,7 @@ export function useTasks() {
         }
       }
       for (const feature of task.features) {
-        for (const d of feature.dependencies || []) {
+        for (const d of feature.blockers || []) {
           const parts = d.split(".")
           if (parts.length > 1){
             if (!outbound[parts[1]]) outbound[parts[1]] = [];
@@ -151,15 +151,15 @@ export function useTasks() {
     return { ok: false }
   }
 
-  const getReferencesInbound = (taskId: string, featureId?: string) : (ResolvedRef | InvalidRefError)[] => {
+  const getBlockers = (taskId: string, featureId?: string) : (ResolvedRef | InvalidRefError)[] => {
     if (featureId){
-      return featuresById[featureId]?.dependencies?.map(d => resolveDependency(d)) ?? []
+      return featuresById[featureId]?.blockers?.map(d => resolveDependency(d)) ?? []
     }
-    return tasksById[taskId]?.dependencies?.map(d => resolveDependency(d)) ?? []
+    return tasksById[taskId]?.blockers?.map(d => resolveDependency(d)) ?? []
   }
-  const getReferencesOutbound = (id: string) : ResolvedRef[] => {
-    return referencesById[id] ?? []
+  const getBlockersOutbound = (id: string) : ResolvedRef[] => {
+    return blockersOutboundById[id] ?? []
   }
 
-  return { tasksById, createTask, updateTask, deleteTask, featuresById, addFeature, updateFeature, deleteFeature, reorderFeatures, reorderTask, getReferencesOutbound, getReferencesInbound, resolveDependency };
+  return { tasksById, createTask, updateTask, deleteTask, featuresById, addFeature, updateFeature, deleteFeature, reorderFeatures, reorderTask, getBlockersOutbound, getBlockers, resolveDependency };
 }

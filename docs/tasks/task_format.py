@@ -21,7 +21,7 @@ class Feature(TypedDict):
     plan: str
     context: List[str]
     acceptance: List[str]
-    dependencies: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
+    blockers: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
     rejection: NotRequired[str]
 
 class Task(TypedDict):
@@ -30,7 +30,7 @@ class Task(TypedDict):
     title: str
     description: str
     features: List[Feature]
-    dependencies: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
+    blockers: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
     rejection: NotRequired[str]
     featureIdToDisplayIndex: Dict[str,int]
 

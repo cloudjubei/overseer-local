@@ -17,7 +17,7 @@ export function useReferencesAutocomplete(params: {
 }) {
   const { project } = useActiveProject();
   const { input, setInput, textareaRef, mirrorRef } = params;
-  const { tasksById, getReferencesInbound, getReferencesOutbound } = useTasks();
+  const { tasksById } = useTasks();
 
   const references = useMemo<RefItem[]>(() => {
     if (!project) { return [] }

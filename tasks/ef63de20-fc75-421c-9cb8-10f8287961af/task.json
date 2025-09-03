@@ -46,7 +46,7 @@
     {
       "id": "4822c949-26fd-417e-9598-8b82816bcd97",
       "status": "+",
-      "title": "Update dependencyResolver service for UUID-based dependencies",
+      "title": "Update dependencyResolver service for UUID-based blockers",
       "description": "Modify the dependencyResolver service to handle UUID-based task and feature references instead of numeric IDs. Update dependency resolution, validation, cycle detection, and reverse dependency tracking to work with UUID strings while maintaining the same API surface.",
       "plan": "",
       "context": [],
@@ -56,7 +56,7 @@
       "id": "bf41dff7-c0c8-4d42-8084-c7e864449b90",
       "status": "+",
       "title": "Add index lookup utilities for display formatting",
-      "description": "Create utility functions that can quickly resolve UUID-based dependencies back to user-friendly display indices (e.g., '3.2' for the 2nd feature of the 3rd task). These utilities should use the display index mappings for fast lookups when rendering dependency references in the UI.",
+      "description": "Create utility functions that can quickly resolve UUID-based blockers back to user-friendly display indices (e.g., '3.2' for the 2nd feature of the 3rd task). These utilities should use the display index mappings for fast lookups when rendering dependency references in the UI.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -73,8 +73,8 @@
     {
       "id": "1a9969ff-4fb8-469e-9d79-7b2c091fcf70",
       "status": "+",
-      "title": "Update reference autocomplete and chat to handle UUID dependencies",
-      "description": "Modify useReferencesAutocomplete hook and ChatView components to work with UUID-based dependencies while still showing display indices to users. Ensure # references are properly resolved and inserted as UUID-based tokens that display as friendly indices.",
+      "title": "Update reference autocomplete and chat to handle UUID blockers",
+      "description": "Modify useReferencesAutocomplete hook and ChatView components to work with UUID-based blockers while still showing display indices to users. Ensure # references are properly resolved and inserted as UUID-based tokens that display as friendly indices.",
       "plan": "",
       "context": [],
       "acceptance": []

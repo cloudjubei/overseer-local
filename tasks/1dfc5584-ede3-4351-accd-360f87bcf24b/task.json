@@ -98,7 +98,7 @@
       "id": "3c4d2fc5-9efd-4eb1-bc6b-62e1f6d51c9f",
       "status": "+",
       "title": "Feature details view",
-      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where dependencies lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
+      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where blockers lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TaskDetailsView.tsx",
@@ -363,7 +363,7 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "fbc0b91a-8722-4321-af49-5c1625b74b77",
@@ -392,20 +392,20 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "814f68ef-150e-4738-8659-fdbfdbdbb869",
       "status": "+",
       "title": "Feature removal",
-      "description": "It should be possible to remove a feature from the edit form (after extra alert confirmation) - all existing dependencies to this feature should be removed as well.",
+      "description": "It should be possible to remove a feature from the edit form (after extra alert confirmation) - all existing blockers to this feature should be removed as well.",
       "plan": "",
       "context": [
         "src/renderer/components/FeatureForm.tsx",
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "be9c6340-9409-431f-b7ce-4634be6e5fe4",
@@ -419,7 +419,7 @@
         "src/renderer/screens/DocumentsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
+      "blockers": [
         "fbc0b91a-8722-4321-af49-5c1625b74b77"
       ]
     },
@@ -435,7 +435,7 @@
         "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
+      "blockers": [
         "fbc0b91a-8722-4321-af49-5c1625b74b77"
       ]
     },
@@ -451,7 +451,7 @@
         "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
+      "blockers": [
         "fbc0b91a-8722-4321-af49-5c1625b74b77"
       ]
     },
@@ -466,7 +466,7 @@
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "2432fd5d-3ebf-4190-9652-5f5563e8fd9e",
@@ -479,13 +479,13 @@
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "33cfe746-7a21-4a2b-97b4-b99746d7a8c5",
       "status": "+",
       "title": "Modal contents can grow bigger than the popup",
-      "description": "For instance, Create New Feature using the FeatureForm has textboxes that can be expanded, and Dependencies that can grow forever.\nThese stretch the whole content beyond the screen.\n\nThe simplest solution is to have the header and footer sticky, and the middle section scrollable - thus allowing stretching (but textboxes should be limited to half the popup size or something sensible).",
+      "description": "For instance, Create New Feature using the FeatureForm has textboxes that can be expanded, and Blockers that can grow forever.\nThese stretch the whole content beyond the screen.\n\nThe simplest solution is to have the header and footer sticky, and the middle section scrollable - thus allowing stretching (but textboxes should be limited to half the popup size or something sensible).",
       "plan": "",
       "context": [
         "src/renderer/components/ui/Modal.tsx",
@@ -493,7 +493,7 @@
         "src/renderer/components/TaskForm.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "244fad46-c4a4-4718-8c0b-b42ac49dea7f",
@@ -507,7 +507,7 @@
         "src/renderer/components/FeatureForm.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "4c489806-ac2d-4c5b-a6af-d1e8aa3c455f",
@@ -519,7 +519,7 @@
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "6e8417be-2501-4b61-acc8-8f8cafaf6add",
@@ -533,23 +533,23 @@
         "src/renderer/components/TaskForm.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "4095a67b-2e97-495c-b0c1-fac51d568c6c",
       "status": "+",
       "title": "The task view (task row) inside TasksListView needs to change",
-      "description": "the way it should be laid out in the following grid (id should be in the middle between the two rows):\n| ID | Title | {features_done}/{all_features} |\n| | Description | Status |\nDependencies this task is blocking\nDependencies this task is blocked by",
+      "description": "the way it should be laid out in the following grid (id should be in the middle between the two rows):\n| ID | Title | {features_done}/{all_features} |\n| | Description | Status |\nBlockers this task is blocking\nBlockers this task is blocked by",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "ff934b3d-7ff8-41ae-96cd-fbfa71b8b7b5",
       "status": "+",
       "title": "The feature view (feature row) inside TaskDetailsView needs to change - it should follow TasksListView",
-      "description": "the way it should be laid out in the following grid (id+status should be in the middle between the three rows):\n| ID | Title | |\n| Status | Description | Edit Action |\n| | Dependencies blocking\nDependencies blocked by | |",
+      "description": "the way it should be laid out in the following grid (id+status should be in the middle between the three rows):\n| ID | Title | |\n| Status | Description | Edit Action |\n| | Blockers blocking\nBlockers blocked by | |",
       "plan": "",
       "context": [
         "src/styles/screens/task-details.css",
@@ -557,7 +557,7 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "dependencies": [
+      "blockers": [
         "4095a67b-2e97-495c-b0c1-fac51d568c6c"
       ]
     }

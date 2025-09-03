@@ -19,7 +19,7 @@
       "description": "Create at least 3 versions of web search tools for the agent (for 3 different standard providers).",
       "context": [],
       "acceptance": [],
-      "dependencies": [
+      "blockers": [
         "5683c65b-1491-4a73-9e85-3ff27f782fb3.90340040-698d-4146-9256-882e9e094fe1"
       ],
       "rejection": "include EXA as a tool"
@@ -42,7 +42,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": [
+      "blockers": [
         "5683c65b-1491-4a73-9e85-3ff27f782fb3.2ff4242f-8da0-44f6-9d65-2356605a195f"
       ]
     }

@@ -26,7 +26,7 @@
       "id": "e89d60a0-78f6-433f-bd29-f9a29ca2b68c",
       "status": "+",
       "title": "Component stub and mock system",
-      "description": "Develop a system for providing stubs and mock data for component previews. Create a methodology for components to declare their preview requirements (props, context, dependencies). Build a registry system that can automatically provide sensible defaults and mocks for common component dependencies like services, hooks, and external data.",
+      "description": "Develop a system for providing stubs and mock data for component previews. Create a methodology for components to declare their preview requirements (props, context, blockers). Build a registry system that can automatically provide sensible defaults and mocks for common component blockers like services, hooks, and external data.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -35,7 +35,7 @@
       "id": "d347020b-d15b-4298-a719-1fbd2e91c531",
       "status": "+",
       "title": "Preview capability detection",
-      "description": "Implement a system that can analyze components and determine if they can be previewed. This should scan component files to detect dependencies, required props, and external requirements. Create metadata that indicates preview compatibility and any special requirements. Provide clear feedback when components cannot be previewed and why.",
+      "description": "Implement a system that can analyze components and determine if they can be previewed. This should scan component files to detect blockers, required props, and external requirements. Create metadata that indicates preview compatibility and any special requirements. Provide clear feedback when components cannot be previewed and why.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -71,7 +71,7 @@
         "/docs/COMPONENT_PREVIEWS.md"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {

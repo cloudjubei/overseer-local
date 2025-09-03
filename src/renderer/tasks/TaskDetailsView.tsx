@@ -26,7 +26,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const { project, projectId } = useActiveProject()
-  const { tasksById, updateTask, updateFeature, reorderFeatures, getReferencesInbound, getReferencesOutbound } = useTasks()
+  const { tasksById, updateTask, updateFeature, reorderFeatures, getBlockers, getBlockersOutbound } = useTasks()
   const { activeRuns, startTaskAgent, startFeatureAgent, cancelRun } = useAgents()
 
   useEffect(() => {
@@ -168,8 +168,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     clearDndState()
   }
 
-  const taskDependenciesInbound = getReferencesInbound(task.id)
-  const taskDependenciesOutbound = getReferencesOutbound(task.id)
+  const taskDependenciesInbound = getBlockers(task.id)
+  const taskDependenciesOutbound = getBlockersOutbound(task.id)
 
   // Only one agent can run per task (no featureId)
   const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
@@ -283,8 +283,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               onDragEnd={() => clearDndState()}
             >
               {sortedFeatures.map((f: Feature, idx: number) => {
-                const dependenciesInbound = getReferencesInbound(task.id, f.id)
-                const dependenciesOutbound = getReferencesOutbound(f.id)
+                const blockers = getBlockers(task.id, f.id)
+                const blockersOutbound = getBlockersOutbound(f.id)
 
                 const isDragSource = dragFeatureId === f.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
@@ -314,7 +314,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       }}
                       onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
-                      aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${dependenciesOutbound.length} dependencies, ${dependenciesInbound.length} dependents. Press Enter to edit.`}
+                      aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${blockers.length} items this feature is blocked by, ${blockersOutbound.length} items this feature is blocking.  Press Enter to edit.`}
                     >
                       <div className="col col-id">
                         <span className="id-chip">{task.featureIdToDisplayIndex[f.id]}</span>
@@ -340,24 +340,24 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         </Button>
                       </div>
 
-                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Dependencies and actions for Feature ${f.id}`}>
+                      <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Blockers and actions for Feature ${f.id}`}>
                         <div className="flex gap-8">
                           <div className="chips-list">
                             <span className="chips-sub__label">References</span>
-                            {dependenciesInbound.length === 0 ? (
+                            {blockers.length === 0 ? (
                               <span className="chips-sub__label" title="No dependencies">None</span>
                             ) : (
-                              dependenciesInbound.map((d) => (
+                              blockers.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} />
                               ))
                             )}
                           </div>
                           <div className="chips-list">
                             <span className="chips-sub__label">Blocks</span>
-                            {dependenciesOutbound.length === 0 ? (
+                            {blockersOutbound.length === 0 ? (
                               <span className="chips-sub__label" title="No dependents">None</span>
                             ) : (
-                              dependenciesOutbound.map((d) => (
+                              blockersOutbound.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} isOutbound />
                               ))
                             )}

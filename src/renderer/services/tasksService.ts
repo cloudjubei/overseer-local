@@ -41,7 +41,7 @@ export interface InvalidRefError {
   message: string;
 }
 
-export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection' | 'dependencies'>>
+export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> & Partial<Pick<Task, 'features' | 'rejection' | 'blockers'>>
 
 export type ReorderFeaturesPayload = { fromIndex: number; toIndex: number }
 

@@ -214,7 +214,7 @@ function findNextAvailableFeature(task: Task, excludeIds: Set<string> = new Set(
   for (const f of task.features || []) {
     if (excludeIds.has(f.id)) continue;
     if (f.status === '-') {
-      const deps = f.dependencies || [];
+      const deps = f.blockers || [];
       if (ignoreDependencies || deps.every(d => completed.has(d))) return f;
     }
   }

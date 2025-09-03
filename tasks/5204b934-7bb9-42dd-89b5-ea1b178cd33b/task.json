@@ -30,7 +30,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "324f16b0-68bb-4ee7-b15a-f2cbf7623a9b",
@@ -50,7 +50,7 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "e5e46ae9-7d25-42ae-967f-028d6e70b5b0",

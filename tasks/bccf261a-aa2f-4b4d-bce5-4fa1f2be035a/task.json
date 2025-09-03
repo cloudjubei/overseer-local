@@ -1,14 +1,14 @@
 {
   "id": "bccf261a-aa2f-4b4d-bce5-4fa1f2be035a",
   "status": "+",
-  "title": "Tasks & Feature dependencies",
-  "description": "Features should have editable dependencies. When creating or editing a feature it should be easy to browse and select other features as dependencies. If a feature has a dependency from a different task - the task should display these in the TaskDetails as well as in the Tasks list (similarly to how features have it in the TaskDetails).\n\nWhen hovering over a feature dependency bullet (in the TaskDetails) it should show a little summary card of that feature (as a callout) and when clicking on it it should take the user to the TaskDetails where that Feature is and highlight that Feature row.\nWhen hovering over a Task dependency it should behave analogously to the Features but for Tasks.\n\nIt's important to make reusable components for the Task dependency bullet and the Feature dependency bullet, as well as the summary callout cards.\nWhen talking in chat, it must be possible to reference a feature or task by starting to type '#' this should show a Task&Feature dependency selector. Whenever a a task or feature is referenced in the chat in such a way, the dependency bullets should be used with the standard behaviour described before.\n\nVery important - it must be possible to reference any task or feature in the whole project scope - as defined by the project's config.json under /projects.",
+  "title": "Tasks & Feature blockers",
+  "description": "Features should have editable blockers. When creating or editing a feature it should be easy to browse and select other features as blockers. If a feature has a blocker from a different task - the task should display these in the TaskDetails as well as in the Tasks list (similarly to how features have it in the TaskDetails).\n\nWhen hovering over a feature blocker bullet (in the TaskDetails) it should show a little summary card of that feature (as a callout) and when clicking on it it should take the user to the TaskDetails where that Feature is and highlight that Feature row.\nWhen hovering over a Task blocker it should behave analogously to the Features but for Tasks.\n\nIt's important to make reusable components for the Task blocker bullet and the Feature blocker bullet, as well as the summary callout cards.\nWhen talking in chat, it must be possible to reference a feature or task by starting to type '#' this should show a Task&Feature blocker selector. Whenever a a task or feature is referenced in the chat in such a way, the blocker bullets should be used with the standard behaviour described before.\n\nVery important - it must be possible to reference any task or feature in the whole project scope - as defined by the project's config.json under /projects.",
   "features": [
     {
       "id": "2b445d1d-375d-4555-84e6-c3623c2ac54b",
       "status": "+",
       "title": "Add dependency types and data structures",
-      "description": "Extend the TypeScript types to support dependencies between features and tasks. Add dependency arrays to Feature and Task types, and create supporting types for dependency references that can point to features or tasks across the entire project scope. Update the data structures to store and validate these cross-references.",
+      "description": "Extend the TypeScript types to support blockers between features and tasks. Add blocker arrays to Feature and Task types, and create supporting types for blocker references that can point to features or tasks across the entire project scope. Update the data structures to store and validate these cross-references.",
       "plan": "",
       "context": [
         "/docs/tasks/task_format.py",
@@ -20,7 +20,7 @@
       "id": "7e9dfa0f-d700-4c75-ba3f-1a54c2642c93",
       "status": "+",
       "title": "Create reusable dependency bullet components",
-      "description": "Create reusable React components for displaying dependency bullets: FeatureDependencyBullet and TaskDependencyBullet. These should be small, clickable elements that show the dependency type and provide hover states. Include proper styling to match the existing design system and ensure they work in both light and dark themes.",
+      "description": "Create reusable React components for displaying blocker bullets: FeatureDependencyBullet and TaskDependencyBullet. These should be small, clickable elements that show the blocker type and provide hover states. Include proper styling to match the existing design system and ensure they work in both light and dark themes.",
       "plan": "",
       "context": [
         "/docs/tasks/task_format.py",
@@ -33,7 +33,7 @@
       "id": "77cbec31-1f74-44b2-826d-2a98fae3f9ba",
       "status": "+",
       "title": "Create dependency summary callout cards",
-      "description": "Implement summary callout card components that appear on hover over dependency bullets. Create FeatureSummaryCard and TaskSummaryCard that show key information about the referenced feature/task (title, status, brief description). These should be styled as tooltips/popovers and positioned appropriately relative to the trigger element.",
+      "description": "Implement summary callout card components that appear on hover over blocker bullets. Create FeatureSummaryCard and TaskSummaryCard that show key information about the referenced feature/task (title, status, brief description). These should be styled as tooltips/popovers and positioned appropriately relative to the trigger element.",
       "plan": "",
       "context": [
         "/docs/tasks/task_format.py",
@@ -46,7 +46,7 @@
       "id": "73caec53-eec1-4266-9ec9-54b83e43bd41",
       "status": "+",
       "title": "Implement dependency browsing and selection interface",
-      "description": "Create a dependency selector component that allows users to browse and select features and tasks from across the current project when creating or editing features. This should include search/filter capabilities and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, tasks, and features.",
+      "description": "Create a blocker selector component that allows users to browse and select features and tasks from across the current project when creating or editing features. This should include search/filter capabilities and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, tasks, and features.",
       "plan": "",
       "context": [
         "src/renderer/components/FeatureForm.tsx",
@@ -61,7 +61,7 @@
       "id": "8db22861-ea13-4d23-b4a6-9990f9d5a565",
       "status": "+",
       "title": "Add dependency editing to feature creation and editing forms",
-      "description": "Integrate the dependency selection interface into the FeatureCreateView and FeatureEditView components. Add form fields and UI for managing dependencies, including the ability to add, remove, and reorder dependencies. Ensure proper validation and user feedback for dependency cycles or invalid references.",
+      "description": "Integrate the blocker selection interface into the FeatureCreateView and FeatureEditView components. Add form fields and UI for managing blockers, including the ability to add, remove, and reorder blockers. Ensure proper validation and user feedback for blocker cycles or invalid references.",
       "plan": "",
       "context": [
         "src/renderer/components/FeatureForm.tsx",
@@ -75,8 +75,8 @@
     {
       "id": "82914e76-685b-4a71-94d5-b211123f0ef7",
       "status": "+",
-      "title": "Display feature dependencies in TaskDetails",
-      "description": "Update the TaskDetailsView to show dependency bullets for each feature that has dependencies. Display both inbound dependencies (features that depend on this one) and outbound dependencies (features this one depends on). Include proper grouping and labeling to make the dependency relationships clear.",
+      "title": "Display feature blockers in TaskDetails",
+      "description": "Update the TaskDetailsView to show blocker bullets for each feature that has blockers. Display both inbound blockers (features that depend on this one) and outbound blockers (features this one depends on). Include proper grouping and labeling to make the blocker relationships clear.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TasksDetailsView.tsx",
@@ -88,8 +88,8 @@
     {
       "id": "441fa016-262b-4bb5-93bb-3c7999868afc",
       "status": "+",
-      "title": "Display task dependencies in TaskDetailsView and TasksListView",
-      "description": "When a task has dependencies show these in:\n1) TaskDetails view next to the Status.\n2) TasksListView as a the one but last column.\nBoth should have it presented in the same way as a Feature does in the TaskDetailsView",
+      "title": "Display task blockers in TaskDetailsView and TasksListView",
+      "description": "When a task has blockers show these in:\n1) TaskDetails view next to the Status.\n2) TasksListView as a the one but last column.\nBoth should have it presented in the same way as a Feature does in the TaskDetailsView",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
@@ -101,13 +101,13 @@
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "d2f19809-fd04-4d34-b136-85b2081b409d",
       "status": "+",
       "title": "Implement click navigation and highlighting for dependency bullets",
-      "description": "Add click handlers to dependency bullets that navigate to the target feature or task and highlight it. For feature dependencies, navigate to the TaskDetails containing that feature and highlight the specific feature row. For task dependencies, navigate to the task and provide appropriate highlighting. Ensure smooth transitions and clear visual feedback.",
+      "description": "Add click handlers to blocker bullets that navigate to the target feature or task and highlight it. For feature blockers, navigate to the TaskDetails containing that feature and highlight the specific feature row. For task blockers, navigate to the task and provide appropriate highlighting. Ensure smooth transitions and clear visual feedback.",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
@@ -123,7 +123,7 @@
       "id": "fa2dd209-a2ab-47b6-bded-48ab0c1cb6ea",
       "status": "+",
       "title": "Create project-wide dependency resolution service",
-      "description": "Implement a service that can resolve dependency references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all tasks, and features, providing fast lookup and validation of dependency references. Include error handling for broken or invalid references.",
+      "description": "Implement a service that can resolve blocker references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all tasks, and features, providing fast lookup and validation of blocker references. Include error handling for broken or invalid references.",
       "plan": "",
       "context": [
         "src/types/tasks.ts",
@@ -137,13 +137,13 @@
         "src/main.js"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "041d42bb-0156-4e04-bc58-58c6b16bce9a",
       "status": "+",
       "title": "Implement chat '#' reference selector for tasks and features",
-      "description": "Add functionality to the chat interface that shows a Task&Feature dependency selector when users type '#'. This should provide autocomplete/search functionality across all tasks and features in the project scope, allowing users to easily reference and link to specific items. The selected references should be rendered using the standard dependency bullet components.",
+      "description": "Add functionality to the chat interface that shows a Task&Feature blocker selector when users type '#'. This should provide autocomplete/search functionality across all tasks and features in the project scope, allowing users to easily reference and link to specific items. The selected references should be rendered using the standard blocker bullet components.",
       "plan": "",
       "context": [
         "src/renderer/services/dependencyResolver.ts",
@@ -152,13 +152,13 @@
         "src/renderer/hooks/useReferencesAutocomplete.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "ddfb39dd-d250-4fc8-ac53-c1534aa3b0b7",
       "status": "+",
       "title": "Dependency errors don't show in UI",
-      "description": "In FeatureForm the dependency errors don't show",
+      "description": "In FeatureForm the blocker errors don't show",
       "plan": "",
       "context": [
         "src/renderer/services/dependencyResolver.ts",
@@ -166,13 +166,13 @@
         "src/renderer/components/FeatureForm.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "4131dd1a-3f9f-4ad1-95c8-02f7eea251f7",
       "status": "+",
-      "title": "When editing dependencies in FeatureForm - they should show as bullets with x",
-      "description": "The dependency should show a capsule, with the reference name and and x right next to it indicating that clicking it - removes the dependency.\nSo essentially the current display but with this extra \"x\" icon.\n\nThe list of dependencies can then be a grid of 5 or more items (depends on popup width) that keep on filling it up.\nThe add button can be a similar looking capsule with the word \"Add\" and a \"+\" at the end. The color should be green - using the classnme '.chip--ok' ",
+      "title": "When editing blockers in FeatureForm - they should show as bullets with x",
+      "description": "The blocker should show a capsule, with the reference name and and x right next to it indicating that clicking it - removes the blocker.\nSo essentially the current display but with this extra \"x\" icon.\n\nThe list of blockers can then be a grid of 5 or more items (depends on popup width) that keep on filling it up.\nThe add button can be a similar looking capsule with the word \"Add\" and a \"+\" at the end. The color should be green - using the classnme '.chip--ok' ",
       "plan": "",
       "context": [
         "src/renderer/components/FeatureForm.tsx",
@@ -181,7 +181,7 @@
         "src/styles/components/badges.css"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {

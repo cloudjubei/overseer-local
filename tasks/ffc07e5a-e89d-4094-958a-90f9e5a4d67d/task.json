@@ -16,7 +16,7 @@
         "packages/factory-ts/CONFIGURATION.md"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
@@ -31,7 +31,7 @@
         "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
@@ -45,7 +45,7 @@
         "packages/factory-ts/blueprint/run_local_agent.py"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
@@ -58,7 +58,7 @@
         "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "bce3592f-e8e3-440c-9675-acff8965f3d8",
@@ -71,7 +71,7 @@
         "packages/factory-ts/src/types.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
@@ -87,7 +87,7 @@
         "packages/factory-ts/src/git/gitManager.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "2f441c51-532f-494b-b29b-ae9920a75750",
@@ -102,7 +102,7 @@
         "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
@@ -117,7 +117,7 @@
         "packages/factory-ts/src/logger.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "94a8ab44-a4d9-4165-bd1e-fe2c3c2217e2",
@@ -127,7 +127,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "8eec6280-97ff-443c-a7a9-fcbb58eeb119",
@@ -141,7 +141,7 @@
         "packages/factory-ts/blueprint/run_local_agent.py"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "0c4a2db2-adcf-4778-bc92-c943664ce450",
@@ -154,7 +154,7 @@
         "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {

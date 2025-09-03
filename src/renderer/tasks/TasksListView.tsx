@@ -59,8 +59,8 @@ export default function TasksListView() {
 
   const { project, projectId } = useActiveProject()
   const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
-  const { tasksById, updateTask, reorderTask, getReferencesInbound, getReferencesOutbound } = useTasks()
-  const { activeRuns, startTaskAgent, cancelRun } = useAgents()
+  const { tasksById, updateTask, reorderTask, getBlockers, getBlockersOutbound } = useTasks()
+  const { activeRuns, startTaskAgent } = useAgents()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
@@ -322,11 +322,10 @@ export default function TasksListView() {
                 const isDragSource = dragTaskId === t.id
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
-                const dependenciesInbound = getReferencesInbound(t.id)
-                const dependenciesOutbound = getReferencesOutbound(t.id)
+                const blockers = getBlockers(t.id)
+                const blockersOutbound = getBlockersOutbound(t.id)
                 const hasRejectedFeatures = t.features.filter(f => !!f.rejection).length > 0
                 const taskRun = activeRuns.find(r => r.taskId === t.id)
-                const taskHasActiveRun = !!taskRun
 
                 return (
                   <li key={t.id} className="task-item" role="listitem">
@@ -353,7 +352,7 @@ export default function TasksListView() {
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                      aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${dependenciesOutbound.length} dependencies this task is blocked by, ${dependenciesInbound.length} dependencies this task is blocking. Press Enter to view details.`}
+                      aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${blockers.length} items this task is blocked by, ${blockersOutbound.length} items this task is blocking. Press Enter to view details.`}
                     >
                       <div className="task-grid">
                         <div className="col col-id" >
@@ -390,20 +389,20 @@ export default function TasksListView() {
                         <div className="col col-blockers" aria-label={`Blockers for Task ${t.id}`}>
                           <div className="chips-list">
                             <span className="chips-sub__label">References</span>
-                            {dependenciesInbound.length === 0 ? (
+                            {blockers.length === 0 ? (
                               <span className="chips-sub__label" title="No dependencies">None</span>
                             ) : (
-                              dependenciesInbound.map((d) => (
+                              blockers.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} />
                               ))
                             )}
                           </div>
                           <div className="chips-list">
                             <span className="chips-sub__label">Blocks</span>
-                            {dependenciesOutbound.length === 0 ? (
+                            {blockersOutbound.length === 0 ? (
                               <span className="chips-sub__label" title="No dependents">None</span>
                             ) : (
-                              dependenciesOutbound.map((d) => (
+                              blockersOutbound.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} isOutbound />
                               ))
                             )}

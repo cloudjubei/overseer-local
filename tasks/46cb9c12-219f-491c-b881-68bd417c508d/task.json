@@ -19,7 +19,7 @@
         "src/managers.js"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "632d7c0e-6caa-4f11-85a1-73cc4ad378bd",
@@ -33,7 +33,7 @@
         "src/renderer/tasks/BoardView.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
@@ -48,7 +48,7 @@
         "src/settings/appSettings.js"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {

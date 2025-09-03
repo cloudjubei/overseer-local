@@ -12,7 +12,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "3ea0f62c-5068-40c6-87b4-747e85959718",
@@ -22,7 +22,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "7a5efff9-125d-481f-bb73-51dc3991bdae",
@@ -32,7 +32,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "916bebdb-a2c4-429f-a559-dff03aed4eef",
@@ -42,7 +42,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "06680296-05e8-434c-868c-b07a44f86570",
@@ -58,7 +58,7 @@
         "src/tasks/indexer.js"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe",

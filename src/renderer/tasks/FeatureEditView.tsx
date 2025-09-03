@@ -83,7 +83,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         title="Delete Feature"
-        description="Are you sure you want to delete this feature? This will also remove any dependencies referencing it. This action cannot be undone."
+        description="Are you sure you want to delete this feature? This action cannot be undone."
         confirmText="Delete"
         onConfirm={handleDelete}
       />

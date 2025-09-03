@@ -12,7 +12,7 @@ export type FeatureFormValues = {
   description?: string
   rejection?: string
   status: Status
-  dependencies?: string[]
+  blockers?: string[]
   context: string[]
 }
 
@@ -41,7 +41,7 @@ export default function FeatureForm({
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
   const [rejection, setRejection] = useState<string>(initialValues?.rejection ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
-  const [dependencies, setDependencies] = useState<string[]>(initialValues?.dependencies ?? [])
+  const [blockers, setBlockers] = useState<string[]>(initialValues?.blockers ?? [])
   const [context, setContext] = useState<string[]>(initialValues?.context ?? [])
   const [error, setError] = useState<string | null>(null)
   const [showSelector, setShowSelector] = useState(false)
@@ -80,7 +80,7 @@ export default function FeatureForm({
       description: description?.trim() || '',
       rejection: rejection?.trim() || undefined,
       status,
-      dependencies,
+      blockers,
       context,
     }
     await onSubmit(payload)
@@ -93,8 +93,8 @@ export default function FeatureForm({
     }
   }
 
-  function removeDependencyAt(idx: number) {
-    setDependencies((deps) => deps.filter((_, i) => i !== idx))
+  function removeBlockerAt(idx: number) {
+    setBlockers((deps) => deps.filter((_, i) => i !== idx))
   }
 
   function removeContextAt(idx: number) {
@@ -184,25 +184,25 @@ export default function FeatureForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="feature-dependencies" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dependencies</label>
+          <label htmlFor="feature-blockers" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Blockers</label>
           <div
-            id="feature-dependencies"
+            id="feature-blockers"
             className="chips-list border rounded-md min-h-[3rem] p-2"
             style={{
               borderColor: 'var(--border-default)',
               background: 'var(--surface-raised)'
             }}
           >
-            {dependencies.map((dep, idx) => {
+            {blockers.map((dep, idx) => {
               return (
-                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeDependencyAt(idx)} />
+                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeBlockerAt(idx)} />
               )
             })}
             <button
               type="button"
               onClick={() => setShowSelector(true)}
               className="chip chip--ok"
-              title="Add dependency"
+              title="Add blocker"
             >
               <span>Add</span>
               <span aria-hidden="true">+</span>
@@ -248,16 +248,16 @@ export default function FeatureForm({
       </div>
 
       {showSelector && (
-        <Modal title="Select Dependency" onClose={() => setShowSelector(false)} isOpen={true} size="md">
+        <Modal title="Select Blocker" onClose={() => setShowSelector(false)} isOpen={true} size="md">
           <DependencySelector
             onConfirm={(deps) => {
-              const newDeps = deps.filter((d) => !dependencies.includes(d))
-              setDependencies([...dependencies, ...newDeps])
+              const newDeps = deps.filter((d) => !blockers.includes(d))
+              setBlockers([...blockers, ...newDeps])
               setShowSelector(false)
             }}
             currentTaskId={taskId}
             currentFeatureId={featureId}
-            existingDeps={dependencies}
+            existingDeps={blockers}
           />
         </Modal>
       )}
