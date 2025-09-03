@@ -1,0 +1,64 @@
+[
+  {
+    "runId": "task_2pw9on9f_mf4ksj3a",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Turn 4 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-03T22:55:33.287Z",
+    "updatedAt": "2025-09-03T23:01:18.367Z",
+    "costUSD": 0,
+    "promptTokens": 59051,
+    "completionTokens": 13773,
+    "progress": 0.04
+  },
+  {
+    "runId": "task_zys3skji_mf4klfxz",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-03T22:50:02.616Z",
+    "updatedAt": "2025-09-03T22:50:03.484Z"
+  },
+  {
+    "runId": "task_4nl6vlkn_mf4kjk4k",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-03T22:48:34.725Z",
+    "updatedAt": "2025-09-03T22:48:34.733Z"
+  },
+  {
+    "runId": "task_kr1szzpc_mf4kggrl",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-03T22:46:10.402Z",
+    "updatedAt": "2025-09-03T22:46:10.408Z"
+  },
+  {
+    "runId": "task_sm4fz468_mf4k5gqo",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-03T22:37:37.153Z",
+    "updatedAt": "2025-09-03T22:40:13.446Z",
+    "costUSD": 0,
+    "promptTokens": 10091,
+    "completionTokens": 10249
+  }
+]
