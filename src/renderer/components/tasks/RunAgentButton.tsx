@@ -116,25 +116,55 @@ export type RunAgentButtonProps = {
 export default function RunAgentButton({ className = '', onClick }: RunAgentButtonProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const bulletRef = useRef<HTMLButtonElement>(null)
 
-  const handleOpen = () => setOpen(true) //TODO: needs to be called on button long press
+  const pressTimer = useRef<number | null>(null)
+  const longPressTriggered = useRef(false)
+  const LONG_PRESS_MS = 500
+
+  const clearPressTimer = () => {
+    if (pressTimer.current != null) {
+      window.clearTimeout(pressTimer.current)
+      pressTimer.current = null
+    }
+  }
+
+  const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   const handleSelect = (t: AgentType) => {
     onClick(t)
     setOpen(false)
   }
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!bulletRef.current) return
-      if (document.activeElement === bulletRef.current && (e.key === 'Enter' || e.key === ' ')) {
-        e.preventDefault()
-        setOpen((v) => !v)
-      }
+  const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    // Only consider primary button or touch
+    if (e.button !== 0 && e.pointerType !== 'touch') return
+    longPressTriggered.current = false
+    clearPressTimer()
+    pressTimer.current = window.setTimeout(() => {
+      longPressTriggered.current = true
+      handleOpen()
+    }, LONG_PRESS_MS)
+  }
+
+  const endPress = () => {
+    clearPressTimer()
+  }
+
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    // If the long press already opened the picker, suppress the normal action
+    if (longPressTriggered.current) {
+      e.preventDefault()
+      e.stopPropagation()
+      longPressTriggered.current = false
+      return
     }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    // Normal click runs the developer agent
+    e.stopPropagation()
+    onClick('developer')
+  }
+
+  useEffect(() => {
+    return () => clearPressTimer()
   }, [])
 
   return (
@@ -144,8 +174,12 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
           type="button"
           className="btn btn-icon"
           aria-label="Run Agent"
-          onClick={(e) => { e.stopPropagation(); onClick('developer'); }}
           title="Run Agent"
+          onPointerDown={handlePointerDown}
+          onPointerUp={endPress}
+          onPointerCancel={endPress}
+          onPointerLeave={endPress}
+          onClick={handleClick}
         >
           <IconPlay />
         </Button>
