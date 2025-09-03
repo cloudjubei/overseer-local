@@ -9,6 +9,7 @@ import { logger, logLLMStep } from './logger.js';
 
 const MAX_TURNS_PER_FEATURE = 100;
 
+// Prefer process.cwd(), but do not assume it points to a real filesystem root when packaged (asar)
 const FRAMEWORK_ROOT = path.resolve(process.cwd());
 const NEWLINE = '\n';
 
@@ -379,42 +380,65 @@ function shouldIgnoreCopy(relPath: string): boolean {
   if (lower.endsWith('.pyc')) return true; // Python bytecode files
   if (lower.endsWith('.tsbuildinfo')) return true; // TypeScript incremental build info
 
+  // Ignore Electron asar content markers when encountered as path segments
+  if (parts.some(p => p.endsWith('.asar') || p.endsWith('.asar.unpacked'))) return true;
+
   return false;
 }
 
 async function copyTree(src: string, dest: string) {
-  // Recursively copy, respecting ignore patterns
+  // Recursively copy, respecting ignore patterns and skipping asar/virtual entries
   const stat = fs.statSync(src);
   if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
   fs.mkdirSync(dest, { recursive: true });
 
   const walk = (from: string, to: string) => {
-    for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(from, { withFileTypes: true });
+    } catch (e) {
+      // Skip unreadable directories (e.g., asar virtuals)
+      return;
+    }
+
+    for (const entry of entries) {
       const rel = path.relative(src, path.join(from, entry.name));
       if (shouldIgnoreCopy(rel)) continue;
       const srcPath = path.join(from, entry.name);
       const dstPath = path.join(to, entry.name);
-      if (entry.isDirectory()) {
-        fs.mkdirSync(dstPath, { recursive: true });
-        walk(srcPath, dstPath);
-      } else if (entry.isSymbolicLink()) {
-        // Resolve symlink target and copy contents (best-effort)
-        try {
-          const linkTarget = fs.readlinkSync(srcPath);
-          const resolved = path.resolve(path.dirname(srcPath), linkTarget);
-          const st = fs.statSync(resolved);
-          if (st.isDirectory()) {
-            fs.mkdirSync(dstPath, { recursive: true });
-            walk(resolved, dstPath);
-          } else {
-            fs.copyFileSync(resolved, dstPath);
+
+      // Skip any path that traverses into an asar archive
+      if (srcPath.includes('.asar')) continue;
+
+      try {
+        if (entry.isDirectory()) {
+          fs.mkdirSync(dstPath, { recursive: true });
+          walk(srcPath, dstPath);
+        } else if (entry.isSymbolicLink()) {
+          // Resolve symlink target and copy contents (best-effort)
+          try {
+            const linkTarget = fs.readlinkSync(srcPath);
+            const resolved = path.resolve(path.dirname(srcPath), linkTarget);
+            const st = fs.statSync(resolved);
+            if (st.isDirectory()) {
+              fs.mkdirSync(dstPath, { recursive: true });
+              walk(resolved, dstPath);
+            } else {
+              fs.copyFileSync(resolved, dstPath);
+            }
+          } catch {
+            // Fallback: copy file bytes of the link itself (as file)
+            try { fs.copyFileSync(srcPath, dstPath); } catch {}
           }
-        } catch {
-          // Fallback: copy file bytes of the link itself (as file)
-          try { fs.copyFileSync(srcPath, dstPath); } catch {}
+        } else if (entry.isFile()) {
+          fs.copyFileSync(srcPath, dstPath);
         }
-      } else if (entry.isFile()) {
-        fs.copyFileSync(srcPath, dstPath);
+      } catch (e: any) {
+        // Skip problematic entries (e.g., ENOENT due to virtualized packaging paths)
+        if (e && (e.code === 'ENOENT' || e.code === 'EBUSY' || e.code === 'EPERM')) {
+          continue;
+        }
+        throw e;
       }
     }
   };
@@ -422,30 +446,59 @@ async function copyTree(src: string, dest: string) {
   walk(src, dest);
 }
 
+function resolveRepoRootHint(hint?: string): string {
+  if (hint && path.isAbsolute(hint)) return hint;
+
+  // If hint is relative, resolve relative to current working dir
+  if (hint) return path.resolve(hint);
+
+  const cwd = FRAMEWORK_ROOT;
+  // If cwd includes an asar, move up to its parent directory to avoid virtual FS
+  if (cwd.includes('.asar')) {
+    // Typical packaged Electron path: <App>.app/Contents/Resources/app.asar
+    // Use the Resources dir or its parent as base
+    const asarIndex = cwd.indexOf('.asar');
+    const up = path.dirname(cwd.slice(0, asarIndex));
+    // If that path isn't readable, fallback to OS temp dir
+    try {
+      const st = fs.statSync(up);
+      if (st.isDirectory()) return up;
+    } catch {}
+    return os.tmpdir();
+  }
+
+  return cwd;
+}
+
 export async function runIsolatedOrchestrator(opts: {
   model: string;
   agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
   taskId: string;
   featureId?: string; 
-  projectDir?: string; // child project relative to repo root
+  projectDir?: string; // child project relative to repo root OR absolute path
+  repoRoot?: string;   // absolute path to repo root to copy from; avoids app.asar in production
   taskTools: TaskUtils,
   fileTools: FileTools,
   gitFactory: (projectRoot: string) => GitManager;  // git bound to projectRoot
   completion: CompletionClient;
   emit?: (e: { type: string; payload?: any }) => void;
 }) {
-  const { model, agentType, taskId, featureId, projectDir, taskTools, fileTools, gitFactory, completion, emit } = opts;
+  const { model, agentType, taskId, featureId, projectDir, repoRoot: repoRootOpt, taskTools, fileTools, gitFactory, completion, emit } = opts;
 
-  // Determine repo root: assume current working directory is repo root
-  const repoRoot = FRAMEWORK_ROOT;
+  // Determine repo root: prefer explicitly provided repoRoot; otherwise resolve from cwd while avoiding asar
+  const repoRoot = resolveRepoRootHint(repoRootOpt);
+
+  // If projectDir is absolute, treat it as the project root to copy instead of entire repo
+  const sourceRoot = projectDir && path.isAbsolute(projectDir) ? projectDir : repoRoot;
 
   // Create temp workspace
   const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'factory-ts-'));
+  // Keep a subfolder to host the copied source
   const workspace = path.join(tmpBase, 'workspace');
 
-  logger.info(`Copying repository from '${repoRoot}' to temporary workspace: '${workspace}'`);
+  logger.info(`Copying repository from '${sourceRoot}' to temporary workspace: '${workspace}'`);
   try {
-    await copyTree(repoRoot, workspace);
+    await copyTree(sourceRoot, workspace);
   } catch (e) {
     logger.error(`FATAL: Failed to copy repository to temporary directory: ${e}`);
     // best-effort cleanup
@@ -454,7 +507,19 @@ export async function runIsolatedOrchestrator(opts: {
   }
 
   // Resolve the project directory inside the workspace
-  const workspaceProjectDir = projectDir ? path.join(workspace, projectDir) : workspace;
+  let workspaceProjectDir: string;
+  if (projectDir) {
+    if (path.isAbsolute(projectDir)) {
+      // If caller passed an absolute projectDir and we copied that absolute path directly into workspace,
+      // then the project root is exactly workspace.
+      workspaceProjectDir = workspace;
+    } else {
+      workspaceProjectDir = path.join(workspace, projectDir);
+    }
+  } else {
+    workspaceProjectDir = workspace;
+  }
+
   const git = gitFactory(workspaceProjectDir);
 
   try {

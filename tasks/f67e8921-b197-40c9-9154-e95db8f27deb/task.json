@@ -202,7 +202,7 @@
     },
     {
       "id": "75ce3787-2580-46a7-88e2-4b52a8ecba47",
-      "status": "-",
+      "status": "+",
       "title": "Error with copying when running Agent",
       "description": "This error inside the `copyTree` function inside `orchestrator.ts`, the error:\n\n[factory-ts] 2025-09-03T10:05:52.841Z FATAL: Failed to copy repository to temporary directory: Error: ENOENT,  not found in /out/electron-darwin-arm64/electron.app/Contents/Resources/app.asar",
       "plan": "",
