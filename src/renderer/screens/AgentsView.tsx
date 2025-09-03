@@ -3,19 +3,45 @@ import { useAgents } from '../hooks/useAgents';
 import { useActiveProject } from '../projects/ProjectContext';
 import type { AgentRun } from '../services/agentsService';
 import ChatConversation from '../components/agents/ChatConversation';
+import { IconChevron, IconDelete } from '../components/ui/Icons';
 
 function formatUSD(n?: number) {
   if (n == null) return '\u2014';
   return `$${n.toFixed(4)}`;
 }
 
-function formatTs(iso?: string) {
+function formatTime(iso?: string) {
   if (!iso) return '';
   try {
     const d = new Date(iso);
     return d.toLocaleTimeString();
   } catch {
-    return iso;
+    return iso ?? '';
+  }
+}
+
+function formatDate(iso?: string) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString();
+  } catch {
+    return iso ?? '';
+  }
+}
+
+function stateDotColor(state: AgentRun['state']) {
+  switch (state) {
+    case 'running':
+      return 'bg-blue-500';
+    case 'completed':
+      return 'bg-green-500';
+    case 'cancelled':
+      return 'bg-neutral-400';
+    case 'error':
+      return 'bg-red-500';
+    default:
+      return 'bg-neutral-400';
   }
 }
 
@@ -76,7 +102,7 @@ export default function AgentsView() {
                       <div className="text-xs text-neutral-500 mt-0.5 truncate">{run.message ?? 'Running...'}</div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">{run.state}</span>
+                      <span className={`inline-block w-2 h-2 rounded-full ${stateDotColor(run.state)}`} aria-label={run.state} title={run.state} />
                       <button className="btn-secondary" onClick={() => setOpenRunId(run.runId)}>View</button>
                       <button className="btn-secondary" onClick={() => run.runId && cancelRun(run.runId)}>Cancel</button>
                     </div>
@@ -96,7 +122,10 @@ export default function AgentsView() {
                     </div>
                     <div className="rounded bg-neutral-50 dark:bg-neutral-800 p-2">
                       <div className="text-neutral-500">Updated</div>
-                      <div className="font-medium">{formatTs(run.updatedAt)}</div>
+                      <div className="font-medium leading-tight">
+                        <div>{formatDate(run.updatedAt)}</div>
+                        <div className="text-neutral-500">{formatTime(run.updatedAt)}</div>
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -118,7 +147,7 @@ export default function AgentsView() {
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Task/Feature</th>
-                    <th className="text-left px-3 py-2">State</th>
+                    <th className="text-left px-3 py-2">Status</th>
                     <th className="text-left px-3 py-2">Message</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
@@ -129,24 +158,34 @@ export default function AgentsView() {
                 </thead>
                 <tbody>
                   {projectRuns.map(r => (
-                    <tr id={`run-${r.runId ?? 'unknown'}`} key={r.runId ?? Math.random().toString(36)} className="border-t border-neutral-200 dark:border-neutral-800">
+                    <tr id={`run-${r.runId ?? 'unknown'}`} key={r.runId ?? Math.random().toString(36)} className="border-t border-neutral-200 dark:border-neutral-800 group">
                       <td className="px-3 py-2 font-mono text-xs">{(r.runId ?? '').slice(-8) || ''}</td>
                       <td className="px-3 py-2">{r.taskId ?? ''}<br/>{r.featureId ?? ''}</td>
-                      <td className="px-3 py-2">{r.state}</td>
+                      <td className="px-3 py-2">
+                        <span className={`inline-block w-2 h-2 rounded-full ${stateDotColor(r.state)}`} aria-label={r.state} title={r.state} />
+                      </td>
                       <td className="px-3 py-2 truncate max-w-[280px]" title={r.message ?? ''}>{r.message ?? ''}</td>
                       <td className="px-3 py-2">{formatUSD(r.costUSD)}</td>
                       <td className="px-3 py-2">{r.promptTokens ?? 0} / {r.completionTokens ?? 0}</td>
-                      <td className="px-3 py-2">{formatTs(r.startedAt)}</td>
-                      <td className="px-3 py-2">{formatTs(r.updatedAt)}</td>
+                      <td className="px-3 py-2 leading-tight">
+                        <div>{formatDate(r.startedAt)}</div>
+                        <div className="text-neutral-500">{formatTime(r.startedAt)}</div>
+                      </td>
+                      <td className="px-3 py-2 leading-tight">
+                        <div>{formatDate(r.updatedAt)}</div>
+                        <div className="text-neutral-500">{formatTime(r.updatedAt)}</div>
+                      </td>
                       <td className="px-3 py-2 text-right">
-                        {r.state === 'running' && r.runId ? (
-                          <div className="flex gap-2 justify-end">
-                            <button className="btn-secondary" onClick={() => setOpenRunId(r.runId!)}>View</button>
-                            <button className="btn-secondary" onClick={() => cancelRun(r.runId!)}>Cancel</button>
-                          </div>
-                        ) : (
-                          <button className="btn-secondary" onClick={() => setOpenRunId(r.runId!)}>View</button>
-                        )}
+                        <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="btn-secondary btn-icon" aria-label="View" onClick={() => r.runId && setOpenRunId(r.runId)}>
+                            <IconChevron />
+                          </button>
+                          {r.state === 'running' && r.runId ? (
+                            <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => cancelRun(r.runId!)}>
+                              <IconDelete />
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -164,7 +203,7 @@ export default function AgentsView() {
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
                 <div className="font-semibold text-sm truncate">Run #{selectedRun.runId.slice(0,8)} \u00b7 {selectedRun.taskId ?? 'Task'}{selectedRun.featureId ? ` \u00b7 Feature ${selectedRun.featureId}` : ''}</div>
-                <div className="text-xs text-neutral-500 truncate">{selectedRun.provider ?? '\u2014'}{selectedRun.model ? ` / ${selectedRun.model}` : ''} \u00b7 {selectedRun.state} \u00b7 Updated {formatTs(selectedRun.updatedAt)}</div>
+                <div className="text-xs text-neutral-500 truncate">{selectedRun.provider ?? '\u2014'}{selectedRun.model ? ` / ${selectedRun.model}` : ''} \u00b7 {selectedRun.state} \u00b7 Updated {formatTime(selectedRun.updatedAt)}</div>
               </div>
               <button className="btn-secondary" onClick={() => setOpenRunId(null)}>Close</button>
             </div>

@@ -209,7 +209,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Agents - run histories UI improvements",
       "description": "The runs table:\nThe Status field should be a symbol (not text)\nStarted and Updated should show Date and Time below.\nThe action buttons should be hidden and show on hover (similar to actions in @src/renderer/tasks/TasksListView.tsx ). The action buttons should be icon only - no text.",
       "plan": "",
