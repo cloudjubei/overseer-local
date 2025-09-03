@@ -28,16 +28,6 @@
       "dependencies": []
     },
     {
-      "id": "bec521df-8a4b-41b2-b589-8334100f048f",
-      "status": "+",
-      "title": "factory-ts must be added as a project here",
-      "description": "A new task must be created for it - to be able to view and edit Agent personas.",
-      "plan": "",
-      "context": [],
-      "acceptance": [],
-      "dependencies": []
-    },
-    {
       "id": "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3",
       "status": "-",
       "title": "Local database for file querying",
@@ -205,10 +195,9 @@
     "8ed1e913-44e2-4321-a631-f1c2c9033177": 8,
     "a480aa54-f697-409d-95a7-1b369c3da9ff": 9,
     "3a11fceb-bb37-4570-a159-2f39622ca364": 10,
-    "bec521df-8a4b-41b2-b589-8334100f048f": 11,
-    "0ce98597-907f-4bdf-a5a8-c8e8b253e612": 12,
-    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 13,
-    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 14,
-    "b2ad0ce4-b71a-40bc-baa7-3550153bef88": 15
+    "0ce98597-907f-4bdf-a5a8-c8e8b253e612": 11,
+    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 12,
+    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 13,
+    "b2ad0ce4-b71a-40bc-baa7-3550153bef88": 14
   }
 }
