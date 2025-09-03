@@ -234,9 +234,9 @@
     },
     {
       "id": "6e24f575-cf4d-451f-994f-7190d45ebaaa",
-      "status": "+",
-      "title": "Toasts should change appearance",
-      "description": "Toasts need to be round and compact - they should look like iOS notifications",
+      "status": "-",
+      "title": "Toasts should animate",
+      "description": "Toasts need to slide down with an animation when appearing and slide up when hiding.\nThey need to be snappy. It should also be possible to flick them up to make them disappear (like notifications on a mobile device).",
       "plan": "",
       "context": [
         "src/renderer/components/ui/Toast.tsx"
@@ -246,7 +246,7 @@
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "+",
+      "status": "-",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
@@ -255,7 +255,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "Not working"
+      "rejection": "The long press cannot bleed or propagate onto the parent row drag. It needs to prevent the drag.\nAlso, the popup needs to display away from the sides of the screen - right now when it shows, it can be cut off by the edge of the app window."
     },
     {
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
