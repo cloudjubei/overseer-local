@@ -73,7 +73,19 @@ function nowIso() {
 function persistMeta(runId) {
   try {
     const meta = RUN_META.get(runId);
-    if (meta && HISTORY) HISTORY.addOrUpdateRun(meta);
+    if (!meta || !HISTORY) return;
+    const h = HISTORY;
+    if (typeof h.addOrUpdateRun === 'function') {
+      h.addOrUpdateRun(meta);
+    } else if (typeof h.updateRunMeta === 'function') {
+      h.updateRunMeta(meta.runId, meta);
+    } else if (typeof h.upsertRun === 'function') {
+      h.upsertRun(meta);
+    } else if (typeof h.addRun === 'function') {
+      h.addRun(meta);
+    } else {
+      // No known persistence API; noop
+    }
   } catch (e) {
     console.warn('[factory] persistMeta error', e?.message || e);
   }
@@ -190,7 +202,12 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       // Persist message snapshots when provided
       try {
         if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final') && e?.payload?.messages && HISTORY) {
-          HISTORY.writeMessages(runHandle.id, e.payload.messages);
+          const h = HISTORY;
+          if (typeof h.writeMessages === 'function') {
+            h.writeMessages(runHandle.id, e.payload.messages);
+          } else if (typeof h.saveMessages === 'function') {
+            h.saveMessages(runHandle.id, e.payload.messages);
+          }
         }
       } catch (err) {
         console.warn('[factory] Failed to persist messages for', runHandle.id, err?.message || err);

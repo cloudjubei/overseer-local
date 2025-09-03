@@ -87,7 +87,7 @@
     },
     {
       "id": "c2192f2a-9151-4615-b376-986bb0540042",
-      "status": "-",
+      "status": "+",
       "title": "The \"Run Agent\" button should be standardised",
       "description": "The views that should have it updated are:\n`TasksListView.tsx`, `TaskDetailsView.tsx`.\nIt should be a round play button as is common in music players.",
       "plan": "",
@@ -113,7 +113,7 @@
     },
     {
       "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
-      "status": "-",
+      "status": "+",
       "title": "IconDelete",
       "description": "`IconDelete` inside `Icons.tsx` needs to actually be a proper delete icon",
       "plan": "",
@@ -190,7 +190,7 @@
     },
     {
       "id": "f46696d7-3eee-4f9d-8aee-9419dcee20c9",
-      "status": "-",
+      "status": "+",
       "title": "Standardise the Delete, Edit, Add, Create buttons",
       "description": "wherever there's a button that just says Delete we should have it use the standard `DeleteIcon`\nwherever there's a button that just says Add or Create we should have it use the standard `PlusIcon`\nwherever there's a button that just says Edit we should have it use the standard `EditIcon`",
       "plan": "",
@@ -202,7 +202,7 @@
     },
     {
       "id": "75ce3787-2580-46a7-88e2-4b52a8ecba47",
-      "status": "-",
+      "status": "+",
       "title": "Error with copying when running Agent",
       "description": "This error inside the `copyTree` function inside `orchestrator.ts`, the error:\n\n[factory-ts] 2025-09-03T10:05:52.841Z FATAL: Failed to copy repository to temporary directory: Error: ENOENT,  not found in /out/electron-darwin-arm64/electron.app/Contents/Resources/app.asar",
       "plan": "",
@@ -214,7 +214,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Error with persisting history when running an agent",
       "description": "This error occurs inside `mainOrchestrator.js` the function is `persistMeta`, the error:\n\n[factory] persistMeta error HISTORY.addOrUpdateRun is not a function",
       "plan": "",

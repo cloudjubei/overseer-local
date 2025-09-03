@@ -6,6 +6,7 @@ import DependencyBullet from './DependencyBullet'
 import { FileSelector } from '../ui/FileSelector'
 import ContextFileChip from './ContextFileChip'
 import { Modal } from '../ui/Modal'
+import { IconDelete, IconPlus } from '../ui/Icons'
 
 export type FeatureFormValues = {
   title: string
@@ -176,8 +177,8 @@ export default function FeatureForm({
               <ContextFileChip key={p} path={p} onRemove={() => removeContextAt(idx)} />
             ))}
             <button type="button" onClick={() => setShowFileSelector(true)} className="chip chip--ok" title="Add context files">
+              <IconPlus className="w-3 h-3" />
               <span>Add</span>
-              <span aria-hidden>+</span>
             </button>
           </div>
           <div className="text-xs text-text-muted">Select any files across the project that provide useful context for this feature.</div>
@@ -204,8 +205,8 @@ export default function FeatureForm({
               className="chip chip--ok"
               title="Add blocker"
             >
+              <IconPlus className="w-3 h-3" />
               <span>Add</span>
-              <span aria-hidden="true">+</span>
             </button>
           </div>
         </div>
@@ -223,6 +224,7 @@ export default function FeatureForm({
               color: 'var(--status-stuck-fg)'
             }}
           >
+            <IconDelete className="w-4 h-4" />
             Delete
           </button>
         ) : null}
@@ -268,7 +270,7 @@ export default function FeatureForm({
             selected={context}
             onCancel={() => setShowFileSelector(false)}
             onConfirm={(paths) => {
-              const unique = Array.from(new Set([...(context || []), ...paths]))
+              const unique = Array.from(new Set([...(context or []), ...paths]))
               setContext(unique)
               setShowFileSelector(false)
             }}

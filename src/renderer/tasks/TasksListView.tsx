@@ -381,9 +381,15 @@ export default function TasksListView() {
                           {taskRun ? (
                             <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }} />
                           ) : (
-                            <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); if (!projectId) return; startTaskAgent(projectId, t.id) } }>
-                              <span className="inline-flex items-center gap-1"><IconPlay /> Run</span>
-                            </Button>
+                            <button
+                              type="button"
+                              className="btn btn-icon"
+                              aria-label="Run Agent"
+                              onClick={(e) => { e.stopPropagation(); if (!projectId) return; startTaskAgent(projectId, t.id) }}
+                              title="Run Agent"
+                            >
+                              <IconPlay />
+                            </button>
                           )}
                         </div>
                         <div className="col col-blockers" aria-label={`Blockers for Task ${t.id}`}>

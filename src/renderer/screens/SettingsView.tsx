@@ -9,6 +9,7 @@ import { useNavigator } from '../navigation/Navigator';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
+import { IconEdit, IconDelete } from '../components/ui/Icons';
 
 // Settings Categories
 const CATEGORIES = [
@@ -78,8 +79,14 @@ export default function SettingsView() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id })} variant="outline">Edit</Button>
-              <Button onClick={() => removeConfig(cfg.id)} variant="danger">Delete</Button>
+              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id })} variant="outline">
+                <IconEdit className="w-4 h-4 mr-1.5" />
+                Edit
+              </Button>
+              <Button onClick={() => removeConfig(cfg.id)} variant="danger">
+                <IconDelete className="w-4 h-4 mr-1.5" />
+                Delete
+              </Button>
               {activeConfigId !== cfg.id && (
                 <Button onClick={() => setActive(cfg.id)}>Set Active</Button>
               )}
