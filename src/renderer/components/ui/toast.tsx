@@ -9,67 +9,108 @@ type ToastCtx = { toast: (msg: ToastMessage) => void };
 
 const Ctx = createContext<ToastCtx | null>(null);
 
+type ToastItem = Required<ToastMessage> & { isClosing?: boolean };
+
 function useToastsState() {
-  const [items, setItems] = useState<Required<ToastMessage>[]>([] as any);
+  const [items, setItems] = useState<ToastItem[]>([]);
   const idSeq = useRef(0);
+  const closeTimers = useRef(new Map<string, number>());
 
   const remove = useCallback((id: string) => {
-    setItems((xs) => xs.filter(x => x.id !== id));
+    setItems((xs) => xs.filter((x) => x.id !== id));
+    const t = closeTimers.current.get(id);
+    if (t) {
+      clearTimeout(t);
+      closeTimers.current.delete(id);
+    }
   }, []);
+
+  const startClose = useCallback((id: string, afterMs = 220) => {
+    setItems((xs) => xs.map((x) => (x.id === id ? { ...x, isClosing: true } : x)));
+    // remove after the out animation
+    const timeout = window.setTimeout(() => remove(id), afterMs);
+    closeTimers.current.set(id, timeout);
+  }, [remove]);
 
   const add = useCallback((msg: ToastMessage) => {
     const id = msg.id || String(++idSeq.current);
     const duration = msg.durationMs ?? 3500;
-    const item: Required<ToastMessage> = {
+    const item: ToastItem = {
       id,
       title: msg.title ?? '',
       description: msg.description ?? '',
       variant: msg.variant ?? 'default',
       durationMs: duration,
       action: msg.action ?? ({ label: '', onClick: () => {} } as any),
+      isClosing: false,
     };
     setItems((xs) => [...xs, item]);
     if (duration > 0) {
-      setTimeout(() => remove(id), duration);
+      window.setTimeout(() => startClose(id), duration);
     }
-  }, [remove]);
+  }, [startClose]);
 
-  return { items, add, remove };
+  return { items, add, startClose, remove };
 }
 
-export function ToastView({ item, onClose }: { item: Required<ToastMessage>; onClose: (id: string) => void }) {
-  const color = (() => {
+export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: string) => void }) {
+  // Keep background solid to avoid transparency bleed.
+  const variantAccent = (() => {
     switch (item.variant) {
       case 'success':
-        return 'bg-[color:var(--status-done-soft-bg)] text-[color:var(--status-done-soft-fg)] border-[color:var(--status-done-soft-border)]';
+        return 'border-l-4 border-l-emerald-500';
       case 'error':
-        return 'bg-[color:var(--status-stuck-soft-bg)] text-[color:var(--status-stuck-soft-fg)] border-[color:var(--status-stuck-soft-border)]';
+        return 'border-l-4 border-l-red-500';
       case 'warning':
-        return 'bg-[color:var(--status-working-soft-bg)] text-[color:var(--status-working-soft-fg)] border-[color:var(--status-working-soft-border)]';
+        return 'border-l-4 border-l-amber-500';
       default:
-        return 'bg-surface-raised text-text-primary border-border';
+        return 'border-l-4 border-l-gray-400 dark:border-l-gray-500';
     }
   })();
+
+  const anim = item.isClosing
+    ? 'animate-out fade-out-0 slide-out-to-top-2 duration-200 ease-in'
+    : 'animate-in fade-in-50 slide-in-from-top-2 duration-200 ease-out';
+
   return (
-    <div className={`pointer-events-auto w-[360px] overflow-hidden rounded-md border shadow-md ${color} animate-in fade-in-50 slide-in-from-top-2`}
-         role="status" aria-live="polite">
-      <div className="p-3">
-        {item.title ? <div className="text-sm font-semibold">{item.title}</div> : null}
-        {item.description ? <div className="mt-0.5 text-sm opacity-90">{item.description}</div> : null}
+    <div
+      className={`pointer-events-auto w-[320px] overflow-hidden rounded-md border border-border bg-surface-raised text-text-primary shadow-lg ${variantAccent} ${anim}`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="p-2.5">
+        {item.title ? <div className="text-sm font-medium">{item.title}</div> : null}
+        {item.description ? <div className="mt-0.5 text-xs opacity-90">{item.description}</div> : null}
         <div className="mt-2 flex items-center justify-between gap-2">
           {item.action?.label ? (
-            <button className="text-sm font-medium text-brand-600 hover:underline" onClick={() => { item.action?.onClick?.(); onClose(item.id); }}> {item.action.label} </button>
-          ) : <span />}
-          <button className="rounded p-1 text-text-muted hover:bg-gray-100 dark:hover:bg-gray-800" onClick={() => onClose(item.id)} aria-label="Close">×</button>
+            <button
+              className="text-xs font-medium text-brand-600 hover:underline"
+              onClick={() => {
+                item.action?.onClick?.();
+                onClose(item.id);
+              }}
+            >
+              {item.action.label}
+            </button>
+          ) : (
+            <span />
+          )}
+          <button
+            className="rounded p-1 text-text-muted hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => onClose(item.id)}
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function ToastViewport({ items, onClose }: { items: Required<ToastMessage>[]; onClose: (id: string) => void }) {
+function ToastViewport({ items, onClose }: { items: ToastItem[]; onClose: (id: string) => void }) {
   return createPortal(
-    <div className="pointer-events-none fixed top-4 right-4 z-[1100] flex flex-col gap-2">
+    <div className="pointer-events-none fixed top-4 left-1/2 -translate-x-1/2 z-[1100] flex flex-col items-center gap-2">
       {items.map((t) => (
         <ToastView key={t.id} item={t} onClose={onClose} />
       ))}
@@ -80,12 +121,12 @@ function ToastViewport({ items, onClose }: { items: Required<ToastMessage>[]; on
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const { items, add, remove } = useToastsState();
+  const { items, add, startClose } = useToastsState();
   const api = useMemo<ToastCtx>(() => ({ toast: add }), [add]);
   return (
     <Ctx.Provider value={api}>
       {children}
-      <ToastViewport items={items} onClose={remove} />
+      <ToastViewport items={items} onClose={startClose} />
     </Ctx.Provider>
   );
 }
