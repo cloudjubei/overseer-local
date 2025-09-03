@@ -226,9 +226,9 @@
     },
     {
       "id": "6e24f575-cf4d-451f-994f-7190d45ebaaa",
-      "status": "+",
+      "status": "-",
       "title": "Toasts should change appearance",
-      "description": "Currently when toasts appear, they show in the top right.\nThey should ideally show in the top middle and shouldn't have a transparent background as they then bleed onto other text below.\nIn general they should be smaller - they should feel like an os notification.\nWhen they appear they should have a nice animation sliding in and when disappearing - sliding out.",
+      "description": "Toasts need to be round and compact - they should look like iOS notifications",
       "plan": "",
       "context": [
         "src/renderer/components/ui/Toast.tsx"
@@ -238,23 +238,27 @@
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "?",
+      "status": "-",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/components/tasks/RunAgentButton.tsx"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Not working"
     },
     {
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
-      "status": "?",
+      "status": "-",
       "title": "TaskCard missing RunAgent on hover",
       "description": "@src/renderer/components/tasks/TaskCard.tsx should have the \"Run Agent\" button in the top right.\nSame as in @src/renderer/tasks/TasksListView.tsx if the task has a running agent - show the status.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/components/tasks/TaskCard.tsx"
+        "src/renderer/components/tasks/TaskCard.tsx",
+        "src/renderer/components/tasks/RunAgentButton.tsx"
       ],
       "acceptance": [],
       "blockers": []
