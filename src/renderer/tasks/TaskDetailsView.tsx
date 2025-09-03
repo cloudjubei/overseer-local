@@ -8,9 +8,10 @@ import { useTasks } from '../hooks/useTasks'
 import { Button } from '../components/ui/Button'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
-import { Feature, Status, Task } from 'packages/factory-ts/src/types'
+import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
 import { IconBack, IconChevron, IconEdit, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
+import RunAgentButton from '../components/tasks/RunAgentButton'
 
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
@@ -226,16 +227,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            <button
-              type="button"
-              className="btn btn-icon"
-              aria-label="Run Agent"
-              onClick={() => { if (!projectId || taskHasActiveRun) return; startTaskAgent(projectId, task.id) }}
-              title="Run Agent"
-              disabled={taskHasActiveRun}
-            >
-              <IconPlay />
-            </button>
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
       </header>
@@ -333,26 +325,17 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         {f.rejection && <ExclamationChip title={f.rejection} tooltip={"Has rejection reason"} />}
                       </div>
 
-                      <div className="title-line" style={{ gridRow: 1, gridColumn: 2 }}>
+                      <div className="col col-title" >
                         <span className="title-text">{f.title || ''}</span>
                       </div>
-                      <div className="desc-line" style={{ gridRow: 2, gridColumn: 2 }} title={f.description || ''}>
+                      <div className="col col-description"  title={f.description || ''}>
                         {f.description || ''}
                       </div>
                       <div className="col col-actions">
                         <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
                           <IconEdit />
                         </button>
-                        <button
-                          type="button"
-                          className="btn btn-icon"
-                          aria-label="Run Agent"
-                          onClick={(e) => { e.stopPropagation(); if (!projectId || featureHasActiveRun) return; startFeatureAgent(projectId, task.id, f.id) }}
-                          title="Run Agent"
-                          disabled={featureHasActiveRun}
-                        >
-                          <IconPlay />
-                        </button>
+                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>}
                       </div>
 
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Blockers and actions for Feature ${f.id}`}>

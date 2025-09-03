@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { agentsService, AgentRun } from '../services/agentsService';
+import { AgentType } from 'packages/factory-ts/src/types';
 
 export function useAgents() {
   const [runs, setRuns] = useState<AgentRun[]>(() => agentsService.list());
@@ -9,8 +10,8 @@ export function useAgents() {
     return () => unsub();
   }, []);
 
-  const startTaskAgent = useCallback(async (projectId: string, taskId: string) => agentsService.startTaskAgent(projectId, taskId), []);
-  const startFeatureAgent = useCallback(async (projectId: string, taskId: string, featureId: string) => agentsService.startFeatureAgent(projectId, taskId, featureId), []);
+  const startTaskAgent = useCallback(async (agentType: AgentType, projectId: string, taskId: string) => agentsService.startTaskAgent(agentType, projectId, taskId), []);
+  const startFeatureAgent = useCallback(async (agentType: AgentType, projectId: string, taskId: string, featureId: string) => agentsService.startFeatureAgent(agentType, projectId, taskId, featureId), []);
   const cancelRun = useCallback((runId: string) => agentsService.cancelRun(runId), []);
 
   const activeRuns = useMemo(() => runs.filter(r => r.state === 'running'), [runs]);

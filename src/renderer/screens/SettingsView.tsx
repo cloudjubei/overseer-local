@@ -9,7 +9,7 @@ import { useNavigator } from '../navigation/Navigator';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
-import { IconEdit, IconDelete } from '../components/ui/Icons';
+import { IconEdit, IconDelete, IconPlus } from '../components/ui/Icons';
 
 // Settings Categories
 const CATEGORIES = [
@@ -64,7 +64,7 @@ export default function SettingsView() {
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold">LLM Configurations</h2>
-        <Button onClick={() => openModal({ type: 'llm-config-add' })}>Add New Config</Button>
+        <Button onClick={() => openModal({ type: 'llm-config-add' })}><IconPlus/></Button>
       </div>
       <div className="border rounded-md divide-y">
         {configs.length === 0 && (
@@ -73,23 +73,21 @@ export default function SettingsView() {
         {configs.map((cfg) => (
           <div key={cfg.id} className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between">
             <div className="min-w-0">
-              <div className="font-medium truncate">{cfg.name} {activeConfigId === cfg.id ? <span className="ml-2 text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: 'var(--border-default)' }}>Active</span> : null}</div>
+              <div className="font-medium truncate">{cfg.name} {activeConfigId === cfg.id ? <span className="badge badge--soft badge--done">Active</span> : null}</div>
               <div className="text-sm text-gray-600 truncate">
                 Provider: {cfg.provider} • Model: {cfg.model || '—'}
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id })} variant="outline">
-                <IconEdit className="w-4 h-4 mr-1.5" />
-                Edit
-              </Button>
-              <Button onClick={() => removeConfig(cfg.id)} variant="danger">
-                <IconDelete className="w-4 h-4 mr-1.5" />
-                Delete
-              </Button>
               {activeConfigId !== cfg.id && (
                 <Button onClick={() => setActive(cfg.id)}>Set Active</Button>
               )}
+              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id })} variant="outline">
+                <IconEdit className="w-4 h-4" />
+              </Button>
+              <Button onClick={() => removeConfig(cfg.id)} variant="danger">
+                <IconDelete className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         ))}

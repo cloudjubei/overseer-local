@@ -1,6 +1,7 @@
 import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
 import { LLMConfig } from './chatsService';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
+import { AgentType } from 'packages/factory-ts/src/types';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
@@ -15,8 +16,9 @@ export type AgentRunMessage = {
 
 export type AgentRun = {
   runId: string;
+  agentType: AgentType;
   projectId: string;
-  taskId?: string;
+  taskId: string;
   featureId?: string;
   state: AgentRunState;
   message?: string;
@@ -88,8 +90,9 @@ class AgentsServiceImpl {
             const { handle, events } = attachToRun(m.runId);
             const run: RunRecord = {
               runId: handle.id,
+              agentType: m.agentType,
               projectId: m.projectId,
-              taskId: m.taskId ?? undefined,
+              taskId: m.taskId,
               featureId: m.featureId ?? undefined,
               state: m.state ?? 'running',
               message: m.message ?? 'Running... ',
@@ -120,8 +123,9 @@ class AgentsServiceImpl {
             if (this.runs.has(m.runId)) continue;
             const rec: RunRecord = {
               runId: m.runId,
+              agentType: m.agentType,
               projectId: m.projectId,
-              taskId: m.taskId ?? undefined,
+              taskId: m.taskId,
               featureId: m.featureId ?? undefined,
               state: m.state ?? 'completed',
               message: m.message ?? '',
@@ -299,14 +303,15 @@ class AgentsServiceImpl {
     }
   }
 
-  async startTaskAgent(projectId: string, taskId: string): Promise<AgentRun> {
+  async startTaskAgent(agentType: AgentType, projectId: string, taskId: string): Promise<AgentRun> {
     const llmConfig = this.getActiveLLMConfig();
-    console.log('[agentsService] startTaskAgent', { projectId, taskId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startTaskRun({ projectId, taskId, options: { llmConfig } });
+    console.log('[agentsService] startTaskAgent', { agentType, projectId, taskId, llmConfig: redactConfig(llmConfig) });
+    const { handle, events } = await startTaskRun({ agentType, projectId, taskId, options: { llmConfig } });
     const run: RunRecord = {
       runId: handle.id,
+      agentType,
       projectId,
-      taskId: String(taskId),
+      taskId,
       state: 'running',
       message: 'Starting agent... ',
       startedAt: new Date().toISOString(),
@@ -325,15 +330,16 @@ class AgentsServiceImpl {
     return this.publicFromRecord(run);
   }
 
-  async startFeatureAgent(projectId: string, taskId: string, featureId: string): Promise<AgentRun> {
+  async startFeatureAgent(agentType: AgentType, projectId: string, taskId: string, featureId: string): Promise<AgentRun> {
     const llmConfig = this.getActiveLLMConfig();
-    console.log('[agentsService] startFeatureAgent', { projectId, taskId, featureId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startFeatureRun({ projectId, taskId, featureId, options: { llmConfig } });
+    console.log('[agentsService] startFeatureAgent', { agentType, projectId, taskId, featureId, llmConfig: redactConfig(llmConfig) });
+    const { handle, events } = await startFeatureRun({ agentType, projectId, taskId, featureId, options: { llmConfig } });
     const run: RunRecord = {
       runId: handle.id,
+      agentType,
       projectId,
-      taskId: String(taskId),
-      featureId: String(featureId),
+      taskId,
+      featureId,
       state: 'running',
       message: 'Starting agent... ',
       startedAt: new Date().toISOString(),

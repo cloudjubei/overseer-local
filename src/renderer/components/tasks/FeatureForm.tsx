@@ -270,7 +270,7 @@ export default function FeatureForm({
             selected={context}
             onCancel={() => setShowFileSelector(false)}
             onConfirm={(paths) => {
-              const unique = Array.from(new Set([...(context or []), ...paths]))
+              const unique = Array.from(new Set([...(context || []), ...paths]))
               setContext(unique)
               setShowFileSelector(false)
             }}

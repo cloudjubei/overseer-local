@@ -1,5 +1,7 @@
 /* Renderer-side bridge: talks to Electron preload (window.factory) instead of importing Node modules. */
 
+import { AgentType } from "packages/factory-ts/src/types";
+
 export type EventSourceLike = {
   addEventListener: (type: string, handler: (e: any) => void) => void;
   close: () => void;
@@ -7,7 +9,7 @@ export type EventSourceLike = {
 
 export type RunHandle = { id: string; cancel: (reason?: string) => void };
 
-export type StartTaskRunParams = { projectId: string; taskId: string | number; options?: Record<string, any> };
+export type StartTaskRunParams = { agentType: AgentType, projectId: string; taskId: string; options?: Record<string, any> };
 export type StartFeatureRunParams = StartTaskRunParams & { featureId: string | number };
 
 function makeEventSourceLike(runId: string): EventSourceLike {

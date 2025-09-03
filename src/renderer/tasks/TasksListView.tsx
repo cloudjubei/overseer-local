@@ -15,6 +15,7 @@ import { Status, Task } from 'packages/factory-ts/src/types'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
+import RunAgentButton from '../components/tasks/RunAgentButton'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -241,7 +242,7 @@ export default function TasksListView() {
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
             >
               <span className={`status-bullet status-bullet--${k}`} aria-hidden />
-              <span className="status-picker__label">{currentFilterLabel}</span>
+              <span className="standard-picker__label">{currentFilterLabel}</span>
             </div>
             {openFilter && statusFilterRef.current && (
               <StatusPicker 
@@ -381,15 +382,7 @@ export default function TasksListView() {
                           {taskRun ? (
                             <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }} />
                           ) : (
-                            <button
-                              type="button"
-                              className="btn btn-icon"
-                              aria-label="Run Agent"
-                              onClick={(e) => { e.stopPropagation(); if (!projectId) return; startTaskAgent(projectId, t.id) }}
-                              title="Run Agent"
-                            >
-                              <IconPlay />
-                            </button>
+                            <RunAgentButton onClick={(agentType) => {if (!projectId) return; startTaskAgent(agentType, projectId, t.id) }}/>
                           )}
                         </div>
                         <div className="col col-blockers" aria-label={`Blockers for Task ${t.id}`}>

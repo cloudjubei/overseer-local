@@ -106,7 +106,7 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
   return createPortal(
     <div
       ref={panelRef}
-      className={`status-picker status-picker--${coords.side}`}
+      className={`standard-picker standard-picker--${coords.side}`}
       role="menu"
       aria-label="Select status"
       style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8) }}
@@ -116,12 +116,12 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
             key={'all'}
             role="menuitemradio"
             aria-checked={value === 'all'}
-            className={`status-picker__item ${'all' === active ? 'is-active' : ''}`}
+            className={`standard-picker__item ${'all' === active ? 'is-active' : ''}`}
             onClick={(e) => { e.stopPropagation(); onSelect('all') }}
           >
             <span className={`status-bullet status-bullet--empty`} aria-hidden />
-            <span className="status-picker__label">All</span>
-            {value === 'all' && <span className="status-picker__check" aria-hidden>✓</span>}
+            <span className="standard-picker__label">All</span>
+            {value === 'all' && <span className="standard-picker__check" aria-hidden>✓</span>}
           </button>
         }
 
@@ -134,12 +134,12 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
             key={s}
             role="menuitemradio"
             aria-checked={selected}
-            className={`status-picker__item ${activeItem ? 'is-active' : ''}`}
+            className={`standard-picker__item ${activeItem ? 'is-active' : ''}`}
             onClick={(e) => { e.stopPropagation(); onSelect(s) }}
           >
             <span className={`status-bullet status-bullet--${k}`} aria-hidden />
-            <span className="status-picker__label">{STATUS_LABELS[s]}</span>
-            {selected && <span className="status-picker__check" aria-hidden>✓</span>}
+            <span className="standard-picker__label">{STATUS_LABELS[s]}</span>
+            {selected && <span className="standard-picker__check" aria-hidden>✓</span>}
           </button>
         )
       })}

@@ -1,34 +1,15 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { EventEmitter } from 'node:events';
-import { taskUtils as defaultTaskUtils, TaskUtils } from './taskUtils.js';
-import { fileTools as defaultFileTools, FileTools } from './fileTools.js';
+import { taskUtils as defaultTaskUtils } from './taskUtils.js';
+import { fileTools as defaultFileTools } from './fileTools.js';
 import GitManager from './gitManager.js';
 import { runIsolatedOrchestrator } from './orchestrator.js';
 import { createCompletionClient, type CompletionClient } from './completion.js';
 import { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './logger.js';
 import { createPricingManager, PricingManager, estimateCostUSD } from './pricing.js';
+import { LLMConfig, RunEvent, AgentRun } from './types.js';
 
-export type LLMConfig = {
-  model: string;
-  provider?: string; // e.g., openai, azure, together, groq, openrouter, ollama, custom
-  apiKey?: string;
-  baseURL?: string;
-  // extra provider fields (azure etc.) tolerated
-  [key: string]: any;
-};
-
-export type StartRun = {
-  agent: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
-  projectId?: string;
-  taskId: string;
-  featureId?: string;
-  llmConfig: LLMConfig;
-  budgetUSD?: number;
-  metadata?: Record<string, any>;
-};
-
-export type RunEvent = { type: string; payload?: any };
 export type Unsubscribe = () => void;
 
 export interface RunHandle {
@@ -233,7 +214,7 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
     return args.agent || args.metadata?.agent || fallback;
   }
 
-  function startRun(args: StartRun): RunHandle {
+  function startRun(args: AgentRun): RunHandle {
     const { id, ee, handle } = newRunHandle('task');
     (async () => {
       ee.emit('event', { type: 'run/start', payload: { scope: 'task', id, taskId: args.taskId, llm: { model: args.llmConfig?.model, provider: args.llmConfig?.provider } } } satisfies RunEvent);

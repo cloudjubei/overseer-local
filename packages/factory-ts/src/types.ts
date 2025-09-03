@@ -35,7 +35,8 @@ export interface ProjectSpec {
   requirements: ProjectRequirement[];
   taskIdToDisplayIndex: Record<string, number>;
 }
-export type CompletionMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+export type CompletionMessageRole = 'system' | 'user' | 'assistant';
+export type CompletionMessage = { role: CompletionMessageRole; content: string };
 export type CompletionUsage = {
   promptTokens?: number;
   completionTokens?: number;
@@ -48,3 +49,25 @@ export type CompletionResponse = { message: { role: 'assistant'; content: string
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 export type ToolCall = { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any };
 export type AgentResponse = { thoughts?: string; tool_calls?: ToolCall[] };
+
+
+export type LLMConfig = {
+  model: string;
+  provider?: string; // e.g., openai, azure, together, groq, openrouter, ollama, custom
+  apiKey?: string;
+  baseURL?: string;
+  // extra provider fields (azure etc.) tolerated
+  [key: string]: any;
+};
+
+export type AgentType = 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
+export type AgentRun = {
+  agent: AgentType;
+  projectId?: string;
+  taskId: string;
+  featureId?: string;
+  llmConfig: LLMConfig;
+  budgetUSD?: number;
+  metadata?: Record<string, any>;
+};
+export type RunEvent = { type: string; payload?: any };

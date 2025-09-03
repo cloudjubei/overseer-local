@@ -18,17 +18,14 @@
 .task-row:focus { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent) inset; }
 
 /* New grid for main task info */
-.task-grid { display: grid; grid-template-columns: max-content 1fr auto; grid-template-rows: repeat(2, auto); gap: 4px 12px; align-items: center; }
-.task-grid .col-id { grid-row: 1 / 4; display:flex; flex-direction: column; gap: 4px; align-self: center; align-items: center; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-.task-grid .col-title { grid-row: 1; grid-column: 2; }
-.task-grid .col-description { grid-row: 2; grid-column: 2; }
+.task-grid { display: grid; grid-template-columns: 0.1fr 1.3fr max-content; grid-template-rows: auto auto auto; gap: 4px 12px; align-items: center; padding: 4px 2px; }
+.task-grid .col-id { grid-row: 1 / 4; width: 60px; display:flex; flex-direction: column; gap: 4px; align-self: center; align-items: center; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.task-grid .col-title { grid-row: 1; grid-column: 2; display:flex; align-items:center; gap: 8px; font-weight: var(--fw-medium, 500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-grid .col-description { grid-row: 2; grid-column: 2; color: var(--text-muted); font-size: var(--fs-xs, 12px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .task-grid .col-actions { grid-row: 2; grid-column: 3; display:inline-flex; gap: 6px; opacity: 0; pointer-events: none; transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease); }
 .task-grid .col-blockers { grid-row: 3; grid-column: 2; display:flex; gap: 32px; }
 
 .task-grid:hover .col-actions, .col-row:focus .col-actions { opacity: 1; pointer-events: auto; }
-
-.title-line { display:flex; align-items:center; gap: 8px; font-weight: var(--fw-medium, 500); }
-.desc-line { color: var(--text-muted); font-size: var(--fs-xs, 12px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Dependencies sections */
 .task-deps { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
@@ -55,11 +52,11 @@
 .status-bullet--onhold { background: var(--status-on_hold-bg); }
 
 /* Picker popover */
-.status-picker { position: absolute; z-index: var(--z-dropdown, 1000); background: var(--surface-overlay); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: var(--radius-3); box-shadow: var(--shadow-2); padding: 6px; }
-.status-picker__item { display:flex; align-items:center; gap: 8px; width: 100%; padding: 6px 8px; background: transparent; border: 0; border-radius: var(--radius-2); cursor: pointer; color: inherit; text-align: left; }
-.status-picker__item:hover, .status-picker__item.is-active { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
-.status-picker__label { font-size: 13px; }
-.status-picker__check { margin-left: auto; color: var(--text-secondary); }
+.standard-picker { position: absolute; z-index: var(--z-dropdown, 1000); background: var(--surface-overlay); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: var(--radius-3); box-shadow: var(--shadow-2); padding: 6px; }
+.standard-picker__item { display:flex; align-items:center; gap: 8px; width: 100%; padding: 6px 8px; background: transparent; border: 0; border-radius: var(--radius-2); cursor: pointer; color: inherit; text-align: left; }
+.standard-picker__item:hover, .standard-picker__item.is-active { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+.standard-picker__label { font-size: 13px; }
+.standard-picker__check { margin-left: auto; color: var(--text-secondary); }
 
 /* #tasks-view specific DnD transitions and drop indicators */
 #tasks-view .tasks-list { position: relative; }
