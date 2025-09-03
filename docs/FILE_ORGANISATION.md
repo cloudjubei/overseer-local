@@ -10,7 +10,7 @@ This document describes how files and directories are organised in this reposito
   - src/renderer/: React renderer (components, screens, hooks, services, navigation, preview runtime).
     - src/renderer/components/: Reusable UI and domain-specific components.
       - src/renderer/components/tasks/: Task-related UI elements (status controls, dependency bullets, etc.).
-      - src/renderer/components/agents/: Agent-related UI elements (AgentRunBullet and future agent widgets).
+      - src/renderer/components/agents/: Agent-related UI elements (AgentRunBullet and future agent widgets). Now includes ChatConversation.tsx to render agent run chat with bubbles for thoughts and expandable tool call rows.
     - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, Agents, etc.).
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.

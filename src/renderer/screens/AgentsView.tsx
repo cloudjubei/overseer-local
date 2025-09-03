@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useAgents } from '../hooks/useAgents';
-import { useActiveProject, useProjectContext } from '../projects/ProjectContext';
-import type { AgentRun, AgentRunMessage } from '../services/agentsService';
+import { useActiveProject } from '../projects/ProjectContext';
+import type { AgentRun } from '../services/agentsService';
+import ChatConversation from '../components/agents/ChatConversation';
 
 function formatUSD(n?: number) {
   if (n == null) return '\u2014';
@@ -16,36 +17,6 @@ function formatTs(iso?: string) {
   } catch {
     return iso;
   }
-}
-
-function ConversationView({ run }: { run: AgentRun }) {
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [run?.messages?.length]);
-
-  const msgs = run.messages ?? [];
-  return (
-    <div className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3">
-      {msgs.length === 0 ? (
-        <div className="text-sm text-neutral-500">No conversation yet.</div>
-      ) : (
-        <ul className="space-y-2">
-          {msgs.map((m: AgentRunMessage, idx: number) => (
-            <li key={idx} className="flex gap-2 items-start">
-              <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.role === 'assistant' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200'}`}>{m.role}</div>
-              <div className="flex-1">
-                <pre className="whitespace-pre-wrap text-xs leading-relaxed">{m.content}</pre>
-                <div className="text-xs text-neutral-500 mt-1">{m.turn != null ? `turn ${m.turn}` : ''} {m.durationMs ? `${m.durationMs}ms` : ''}</div>
-              </div>
-            </li>
-          ))}
-          <div ref={bottomRef} />
-        </ul>
-      )}
-    </div>
-  );
 }
 
 export default function AgentsView() {
@@ -78,7 +49,6 @@ export default function AgentsView() {
   };
 
   const selectedRun = findRunById(openRunId || '');
-
 
   return (
     <div className="flex-1 overflow-auto">
@@ -199,7 +169,7 @@ export default function AgentsView() {
               <button className="btn-secondary" onClick={() => setOpenRunId(null)}>Close</button>
             </div>
             <div className="p-4">
-              <ConversationView run={selectedRun} />
+              <ChatConversation run={selectedRun} />
             </div>
           </div>
         </div>
