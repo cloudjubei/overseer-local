@@ -94,8 +94,8 @@ export class PricingManager {
         for (const raw of arr) {
           // Best-effort normalization
           if (raw && raw.provider && raw.model) {
-            const input = Number(raw.inputPerMTokensUSD ?? raw.input_per_m_tokens_usd ?? raw.inputPerKTokensUSD * 1000 ?? 0);
-            const output = Number(raw.outputPerMTokensUSD ?? raw.output_per_m_tokens_usd ?? raw.outputPerKTokensUSD * 1000 ?? 0);
+            const input = Number(raw.inputPerMTokensUSD ?? raw.input_per_m_tokens_usd ?? raw.inputPerKTokensUSD * 1000 );
+            const output = Number(raw.outputPerMTokensUSD ?? raw.output_per_m_tokens_usd ?? raw.outputPerKTokensUSD * 1000 );
             if (!isFinite(input) || !isFinite(output)) continue;
             newPrices.push({ provider: String(raw.provider), model: String(raw.model), inputPerMTokensUSD: input, outputPerMTokensUSD: output, currency: 'USD' });
           }
@@ -127,15 +127,9 @@ function loadBuiltInDefaults(): ModelPrice[] {
   try {
     const p = path.join(process.cwd(), 'packages', 'factory-ts', 'assets', 'default-prices.json');
     const raw = fs.readFileSync(p, 'utf8');
-    const data = JSON.parse(raw);
-    const arr: any[] = Array.isArray(data) ? data : (Array.isArray(data?.prices) ? data.prices : []);
-    return arr.filter(Boolean).map((x: any) => ({
-      provider: String(x.provider || 'openai'),
-      model: String(x.model || ''),
-      inputPerMTokensUSD: Number(x.inputPerMTokensUSD ?? x.input_per_m_tokens_usd ?? x.inputPerKTokensUSD * 1000 ?? 0),
-      outputPerMTokensUSD: Number(x.outputPerMTokensUSD ?? x.output_per_m_tokens_usd ?? x.outputPerKTokensUSD * 1000 ?? 0),
-      currency: 'USD',
-    })).filter((p: ModelPrice) => p.model);
+    const data = JSON.parse(raw) as { prices: ModelPrice[] };
+    const arr: ModelPrice[] = Array.isArray(data) ? data : (Array.isArray(data?.prices) ? data.prices : []);
+    return arr
   } catch {
     // Minimal safe defaults if asset missing
     return [
