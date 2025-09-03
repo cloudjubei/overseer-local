@@ -115,7 +115,7 @@
     },
     {
       "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
-      "status": "-",
+      "status": "+",
       "title": "A project's details must be editable",
       "description": "On hover in the projects list (`SidebarView.tsx`) an edit button should show at the end (similar to `FeatureEditView.tsx` and `FeatureCreateView.tsx` using `FeatureForm.tsx` in `TaskDetailsView.tsx`) which would take the user to `ProjectManagerModal.tsx`.\nThe `ProjectManagerModal.tsx` is outdated - it needs to be adapted to use the new `ProjectContext.tsx`",
       "plan": "",

@@ -70,6 +70,15 @@ function useAccentClass(seed: string, isMain: boolean): string {
   }
 }
 
+function IconEdit({ className }: { className?: string }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  )
+}
+
 export default function SidebarView({}: SidebarProps) {
   const { currentView, navigateView, openModal } = useNavigator();
   const { unreadCount } = useNotifications();
@@ -318,16 +327,29 @@ export default function SidebarView({}: SidebarProps) {
             const accent = useAccentClass(p.id, isMain)
             return (
               <li className="nav-li" key={p.id}>
-                <button
-                  className={classNames('nav-item', accent, active && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
-                  aria-current={active ? 'true' : undefined}
-                  onClick={() => setActiveProjectId(p.id)}
-                  title={p.title}
-                >
-                  {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
-                  {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
-                  {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
-                </button>
+                <div className="flex items-center">
+                  <button
+                    className={classNames('nav-item flex-1', accent, active && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
+                    aria-current={active ? 'true' : undefined}
+                    onClick={() => setActiveProjectId(p.id)}
+                    title={p.title}
+                  >
+                    {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
+                    {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
+                    {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+                  </button>
+                  {!effectiveCollapsed && (
+                    <button
+                      type="button"
+                      className="btn-secondary btn-icon ml-1"
+                      title="Edit project"
+                      aria-label={`Edit project ${p.title}`}
+                      onClick={() => openModal({ type: 'projects-manage', mode: 'edit', projectId: p.id })}
+                    >
+                      <IconEdit />
+                    </button>
+                  )}
+                </div>
               </li>
             )
           })}
