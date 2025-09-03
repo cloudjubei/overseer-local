@@ -338,15 +338,47 @@ export async function runOrchestrator(opts: {
 // --- Isolated Runner (mimic Python run.py) ---
 
 function shouldIgnoreCopy(relPath: string): boolean {
-  // Mirror Python ignore patterns: venv, __pycache__, *.pyc, .idea
+  // Ignore common build, cache, and IDE artifacts for TypeScript/Node/Electron projects
+  // Preserve .git (do NOT ignore)
   const parts = relPath.split(path.sep);
-  if (parts.includes('node_modules')) return true;
-  if (parts.includes('dist')) return true;
-  if (parts.includes('build')) return true;
-  if (parts.includes('venv')) return true;
-  if (parts.includes('__pycache__')) return true;
-  if (parts.includes('.idea')) return true;
-  if (relPath.endsWith('.pyc')) return true;
+  const name = parts[parts.length - 1] || relPath;
+
+  // If path is within .git, do not ignore (preserve repo history/branches)
+  if (parts.includes('.git')) return false;
+
+  const dirIgnore = new Set([
+    // Package managers and caches
+    'node_modules', '.pnpm', '.pnp', '.pnp.cjs', '.pnp.js', '.npm', '.yarn', '.yarn-cache', '.yarnrc',
+    // Build/output directories
+    'dist', 'build', 'out', 'release', 'storybook-static',
+    // Framework-specific
+    '.next', 'next', '.nuxt', '.svelte-kit',
+    // Bundlers and dev servers caches
+    '.vite', '.rollup.cache', '.parcel-cache', '.webpack',
+    // Test/coverage
+    'coverage', '.nyc_output',
+    // Monorepo/turbo caches
+    '.turbo',
+    // Generic caches
+    '.cache', '.eslintcache', '.rpt2_cache', '.tscache',
+    // Editors/IDE
+    '.idea', '.vscode',
+    // Python (from original mirror)
+    'venv', '__pycache__',
+    // Logs and temp
+    'logs', 'tmp', 'temp'
+  ]);
+
+  // If any path segment matches an ignored dir name
+  if (parts.some(p => dirIgnore.has(p))) return true;
+
+  // Ignore specific file patterns
+  const lower = name.toLowerCase();
+  if (lower === '.ds_Store'.toLowerCase() || lower === 'thumbs.db') return true;
+  if (lower.endsWith('.log')) return true; // npm/yarn/pnpm debug logs
+  if (lower.endsWith('.pyc')) return true; // Python bytecode files
+  if (lower.endsWith('.tsbuildinfo')) return true; // TypeScript incremental build info
+
   return false;
 }
 

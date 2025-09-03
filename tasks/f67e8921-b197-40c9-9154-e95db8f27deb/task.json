@@ -134,7 +134,7 @@
     },
     {
       "id": "4df75808-637f-4841-9d31-b8630b1ac8bf",
-      "status": "-",
+      "status": "+",
       "title": "running an agent causes an error when it tries to make a local copy of the project",
       "description": "shouldIgnoreCopy inside orchestrator.ts should ignore all sorts of files and folders specific to typescript, node, electron.",
       "plan": "",
