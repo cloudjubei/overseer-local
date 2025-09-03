@@ -1,8 +1,70 @@
 {
   "id": "2cd244ee-c255-487c-882c-c28cd857156e",
   "status": "-",
-  "title": "Preparing for a React web version and React Native mobile version - backend is needed",
+  "title": "Preparing for a React web version and React Native mobile version -Backend is needed",
   "description": "Up until now everything was running locally, but once we introduce other clients (mobile and web) we need to be able to have some centralised storage. There needs to be a good workflow for all clients to operate locally and sync with the backend (as much as possible should be achievable in offline mode). \nAnother thing to note is that this app (Electron) should share as much logic with the React web app and React Native mobile apps. So all sorts of common logic should be handled cleanly.\nThe first task created for this should be to make a document outlining the overall plan for this whole undertaking.",
-  "features": [],
-  "featureIdToDisplayIndex": {}
+  "features": [
+    {
+      "id": "4057beb1-5d59-4fbb-8825-9e89b9e9711d",
+      "status": "-",
+      "title": "Create comprehensive multi-platform architecture plan document",
+      "description": "Create a detailed document (docs/MULTI_PLATFORM_ARCHITECTURE.md) that outlines the overall plan for supporting React web, React Native mobile, and the existing Electron app. The document should cover: 1) High-level architecture with backend services, 2) Shared logic organization and extraction strategy, 3) Offline-first sync strategy, 4) Client-specific adaptation plans, 5) Migration roadmap with phases, 6) Technology stack decisions, 7) Data flow and state management across platforms, 8) Development workflow for multi-platform teams.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "f393fa84-4782-4044-aa36-5beff900c05e",
+      "status": "-",
+      "title": "Design backend API specification and data models",
+      "description": "Create detailed backend API specification document (docs/BACKEND_API_SPEC.md) defining: 1) RESTful endpoints for tasks, documents, projects, files, and user data, 2) Authentication and authorization strategy, 3) Database schema design for centralized storage, 4) Sync API endpoints for offline-first operations (conflict resolution, incremental sync), 5) WebSocket/SSE endpoints for real-time updates, 6) File upload/download endpoints with metadata, 7) Rate limiting and security considerations, 8) API versioning strategy.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4b19f97b-904e-483a-a418-d2b5eafd47d5",
+      "status": "-",
+      "title": "Plan shared logic extraction and package organization",
+      "description": "Create a shared logic organization plan (docs/SHARED_LOGIC_STRATEGY.md) that defines: 1) Which existing logic should be extracted from the Electron app, 2) New package structure for shared components, utilities, and services, 3) Platform-specific abstraction layers, 4) Shared TypeScript types and interfaces, 5) Common business logic modules (tasks, documents, files management), 6) Shared UI components that work across React and React Native, 7) Build and packaging strategy for shared packages, 8) Dependency management across platforms.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "db653afa-6e0a-431b-949d-375c704904f7",
+      "status": "-",
+      "title": "Design offline-first sync strategy and conflict resolution",
+      "description": "Create detailed offline-first sync strategy document (docs/OFFLINE_SYNC_STRATEGY.md) covering: 1) Local storage strategy for each platform (SQLite, IndexedDB, AsyncStorage), 2) Data synchronization patterns and algorithms, 3) Conflict resolution strategies for concurrent edits, 4) Optimistic updates and rollback mechanisms, 5) Network detection and queue management, 6) Incremental sync with timestamps/version vectors, 7) Cache invalidation and data consistency, 8) Background sync for mobile platforms, 9) Offline indicator UX patterns.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "51917927-c444-482f-8866-b63bce8f9fb1",
+      "status": "-",
+      "title": "Define client-specific adaptation and platform considerations",
+      "description": "Create platform-specific adaptation plan (docs/PLATFORM_ADAPTATIONS.md) that outlines: 1) Electron app migration plan to use backend services while maintaining existing functionality, 2) React web app specific considerations (PWA features, browser limitations, responsive design), 3) React Native mobile app considerations (navigation, native modules, platform-specific UI), 4) Platform-specific file handling and storage, 5) Authentication flows for each platform, 6) Push notifications strategy for mobile, 7) Desktop vs mobile UX differences, 8) Platform-specific build and deployment processes.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "de4cc76f-3e7a-464e-a82b-4a23aac73d33",
+      "status": "-",
+      "title": "Create development workflow and tooling strategy",
+      "description": "Create development workflow document (docs/MULTI_PLATFORM_WORKFLOW.md) defining: 1) Monorepo vs multi-repo strategy, 2) Shared development environment setup, 3) Cross-platform testing strategy, 4) Code sharing and version management, 5) CI/CD pipeline for all platforms, 6) Local development with backend services, 7) Debugging and profiling across platforms, 8) Documentation and knowledge sharing processes, 9) Team coordination and release management.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "4057beb1-5d59-4fbb-8825-9e89b9e9711d": 1,
+    "f393fa84-4782-4044-aa36-5beff900c05e": 2,
+    "4b19f97b-904e-483a-a418-d2b5eafd47d5": 3,
+    "db653afa-6e0a-431b-949d-375c704904f7": 4,
+    "51917927-c444-482f-8866-b63bce8f9fb1": 5,
+    "de4cc76f-3e7a-464e-a82b-4a23aac73d33": 6
+  }
 }
