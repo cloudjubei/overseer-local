@@ -12,7 +12,7 @@ export type ModalRoute =
   | { type: 'feature-edit'; taskId: string; featureId: string }
   | { type: 'llm-config-add' }
   | { type: 'llm-config-edit'; id: string }
-  | { type: 'projects-manage' };
+  | { type: 'projects-manage'; mode?: 'list' | 'create' | 'edit'; projectId?: string };
 
 export type NavigatorState = {
   currentView: NavigationView;

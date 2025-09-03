@@ -116,18 +116,11 @@
     {
       "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
       "status": "-",
-      "title": "A project's details must be editable",
-      "description": "On hover in the projects list (`SidebarView.tsx`) an edit button should show at the end (similar to `FeatureEditView.tsx` and `FeatureCreateView.tsx` using `FeatureForm.tsx` in `TaskDetailsView.tsx`) which would take the user to `ProjectManagerModal.tsx`.\nThe `ProjectManagerModal.tsx` is outdated - it needs to be adapted to use the new `ProjectContext.tsx`",
+      "title": "IconDelete",
+      "description": "`IconDelete` inside `Icons.tsx` needs to actually be a proper delete icon",
       "plan": "",
       "context": [
-        "src/renderer/navigation/SidebarView.tsx",
-        "src/renderer/components/tasks/FeatureForm.tsx",
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "packages/factory-ts/src/types.ts",
-        "src/renderer/projects/ProjectManagerModal.tsx",
-        "src/renderer/projects/ProjectContext.tsx",
-        "src/renderer/tasks/FeatureEditView.tsx",
-        "src/renderer/tasks/FeatureCreateView.tsx"
+        "src/renderer/components/ui/Icons.tsx"
       ],
       "acceptance": [],
       "blockers": []

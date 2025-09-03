@@ -36,7 +36,7 @@ export default function ModalHost() {
       break;
     case 'projects-manage':
       content = (
-        <ProjectManagerModal onRequestClose={closeModal} />
+        <ProjectManagerModal onRequestClose={closeModal} initialMode={modal.mode} initialProjectId={modal.projectId} />
       );
       break;
     default:

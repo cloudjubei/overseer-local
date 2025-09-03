@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Modal } from '../components/ui/Modal'
 import { projectsService } from '../services/projectsService'
 import { validateProjectClient } from './validateProject'
+import { useProjectContext } from './ProjectContext'
+import { IconDelete, IconEdit, IconPlay, IconPlus } from '../components/ui/Icons'
+import { Button } from '../components/ui/Button'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -23,13 +26,12 @@ function TextArea({ label, value, onChange, placeholder }: any) {
   )
 }
 
-export default function ProjectManagerModal({ onRequestClose }: { onRequestClose?: () => void}) {
-  const [snapshot, setSnapshot] = useState<any | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function ProjectManagerModal({ onRequestClose, initialMode, initialProjectId }: { onRequestClose?: () => void, initialMode?: 'list' | 'create' | 'edit', initialProjectId?: string }) {
+  const { projects, getProjectById } = useProjectContext()
   const [error, setError] = useState<string | null>(null)
 
-  const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list')
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')
+  const [editingId, setEditingId] = useState<string | null>(initialProjectId || null)
 
   const [form, setForm] = useState<any>({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [] })
   const [formErrors, setFormErrors] = useState<string[]>([])
@@ -41,28 +43,26 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
   }
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const snap = await projectsService.getSnapshot()
-        if (!cancelled) { setSnapshot(snap); setLoading(false) }
-      } catch (e: any) {
-        if (!cancelled) { setError(String(e?.message || e)); setLoading(false) }
+    // If we were asked to open in edit mode for a specific project, populate form
+    if ((initialMode === 'edit' || mode === 'edit') && (initialProjectId || editingId)) {
+      const id = (initialProjectId || editingId) as string
+      const p = getProjectById(id)
+      if (p) {
+        setForm({ ...p, requirements: Array.isArray(p.requirements) ? p.requirements : [] })
+        setEditingId(id)
+        setMode('edit')
       }
-    })()
-    const unsub = projectsService.onUpdate(setSnapshot)
-    return () => { cancelled = true; unsub() }
-  }, [])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMode, initialProjectId, getProjectById])
 
-  const projects = useMemo(() => {
-    if (!snapshot) return []
-    return snapshot.orderedIds.map((id: string) => snapshot.projectsById[id]).filter(Boolean)
-  }, [snapshot])
+  const projectsList = useMemo(() => projects || [], [projects])
 
   function resetForm() {
     setForm({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [] })
     setFormErrors([])
     setSaving(false)
+    setEditingId(null)
   }
 
   function startCreate() {
@@ -79,7 +79,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
   async function handleDelete(id: string) {
     if (!confirm('Delete this project configuration?')) return
     setSaving(true)
-    const res = await projectsService.remove(id)
+    const res = await projectsService.deleteProjct(id)
     if (!res.ok) {
       alert('Failed to delete: ' + (res.error || 'Unknown error'))
     }
@@ -96,17 +96,21 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     if (!v.valid) { setFormErrors(v.errors); return }
 
     // Additional: unique id on create
-    if (mode === 'create' && snapshot?.projectsById?.[form.id]) {
+    if (mode === 'create' && projectsList.find((p: any) => p.id === form.id)) {
       setFormErrors([`Project id ${form.id} already exists`])
       return
     }
 
     setSaving(true)
     let res
-    if (mode === 'create') {
-      res = await projectsService.create(form)
-    } else if (mode === 'edit' && editingId) {
-      res = await projectsService.update(editingId, form)
+    try {
+      if (mode === 'create') {
+        res = await projectsService.createProject(form)
+      } else if (mode === 'edit' && editingId) {
+        res = await projectsService.updateProject(editingId, form)
+      }
+    } catch (e: any) {
+      res = { ok: false, error: e?.message || String(e) }
     }
     setSaving(false)
     if (!res?.ok) {
@@ -118,27 +122,26 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
 
   return (
     <Modal title="Manage Projects" onClose={doClose} isOpen={true} size="lg" initialFocusRef={titleRef as React.RefObject<HTMLElement>}>
-      {loading && <div>Loading…</div>}
       {error && <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>Error: {error}</div>}
 
-      {mode === 'list' && !loading && !error && (
+      {mode === 'list' && (
         <div className="flex flex-col" style={{ gap: 12 }}>
           <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ color: 'var(--text-secondary)' }}>Projects: {projects.length}</div>
-            <button className="btn" onClick={startCreate}>New Project</button>
+            <div style={{ color: 'var(--text-secondary)' }}>Projects: {projectsList.length}</div>
+            <button className="btn" onClick={startCreate}><IconPlus/></button>
           </div>
           <div>
-            {projects.length === 0 && <div className="empty">No child projects yet.</div>}
+            {projectsList.length === 0 && <div className="empty">No child projects yet.</div>}
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {projects.map((p: any) => (
+              {projectsList.map((p: any) => (
                 <li key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', padding: '8px 0' }}>
                   <div>
                     <div style={{ fontWeight: 600 }}>{p.title}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.id} · {p.path}</div>
                   </div>
                   <div className="flex" style={{ gap: 8 }}>
-                    <button className="btn-secondary" onClick={() => startEdit(p)}>Edit</button>
-                    <button className="btn-secondary" disabled={saving} onClick={() => handleDelete(p.id)}>Delete</button>
+                    <Button className="btn-secondary" onClick={() => startEdit(p)}><IconEdit/></Button>
+                    <Button className="btn-secondary" disabled={saving} variant="danger" onClick={() => handleDelete(p.id)}><IconDelete/></Button>
                   </div>
                 </li>
               ))}

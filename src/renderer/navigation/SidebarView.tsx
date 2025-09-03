@@ -13,6 +13,7 @@ import { useShortcuts } from '../hooks/useShortcuts';
 import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
 import { useAppSettings } from '../hooks/useAppSettings';
+import { IconEdit } from '../components/ui/Icons';
 
 export type SidebarProps = {};
 
@@ -318,16 +319,18 @@ export default function SidebarView({}: SidebarProps) {
             const accent = useAccentClass(p.id, isMain)
             return (
               <li className="nav-li" key={p.id}>
-                <button
-                  className={classNames('nav-item', accent, active && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
-                  aria-current={active ? 'true' : undefined}
-                  onClick={() => setActiveProjectId(p.id)}
-                  title={p.title}
-                >
-                  {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
-                  {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
-                  {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
-                </button>
+                <div className="flex items-center">
+                  <button
+                    className={classNames('nav-item flex-1', accent, active && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
+                    aria-current={active ? 'true' : undefined}
+                    onClick={() => setActiveProjectId(p.id)}
+                    title={p.title}
+                  >
+                    {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
+                    {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
+                    {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+                  </button>
+                </div>
               </li>
             )
           })}
