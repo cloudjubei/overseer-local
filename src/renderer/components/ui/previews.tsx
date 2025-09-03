@@ -15,6 +15,7 @@ import CommandMenu from './CommandMenu';
 import ShortcutsHelp from './ShortcutsHelp';
 import {Alert} from './Alert';
 import {Modal} from './Modal';
+import { IconDelete } from './Icons';
 
 // Notes:
 // - Each export is a small React component (preview) with sensible default props.
@@ -33,7 +34,7 @@ export function Button_Variants() {
       <Button>Default</Button>
       <Button variant="primary">Primary</Button>
       <Button variant="ghost">Ghost</Button>
-      <Button variant="danger">Delete</Button>
+      <Button variant="danger"><IconDelete className="w-4 h-4" /> Delete</Button>
       <Button loading>Loading</Button>
       <Button disabled>Disabled</Button>
     </div>
