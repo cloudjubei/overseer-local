@@ -22,10 +22,11 @@ function projectPath(projectId: string) { return path.join(projectsDir(), `${pro
 
 async function ensureDir(p: string) { await fsp.mkdir(p, { recursive: true }); }
 
-async function getProject(projectId: string): Promise<ProjectSpec> {
+async function getProjectDir(projectId: string): Promise<string> {
   const p = projectPath(projectId);
   const raw = await fsp.readFile(p, 'utf8');
-  return JSON.parse(raw);
+  const project = JSON.parse(raw);
+  return path.join(PROJECT_ROOT, PROJECTS_DIR_NAME, project.path)
 }
 
 async function getTask(taskId: string): Promise<Task> {
@@ -317,7 +318,7 @@ export const taskUtils = {
   deleteTest,
   runTest,
   // orchestrator helpers
-  getProject,
+  getProjectDir,
   findNextAvailableFeature,
   createFeature,
   updateFeaturePlan,

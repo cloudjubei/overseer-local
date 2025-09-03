@@ -527,96 +527,32 @@ export async function runIsolatedOrchestrator(opts: {
   projectId: string; 
   taskId: string;
   featureId?: string; 
-  repoRoot?: string;   // absolute path to repo root to copy from; avoids app.asar in production
   taskTools: TaskUtils,
   fileTools: FileTools,
   gitFactory: (projectRoot: string) => GitManager;  // git bound to projectRoot
   completion: CompletionClient;
   emit?: (e: { type: string; payload?: any }) => void;
 }) {
-  const { model, agentType, projectId, taskId, featureId, repoRoot: repoRootOpt, taskTools, fileTools, gitFactory, completion, emit } = opts;
+  const { model, agentType, projectId, taskId, featureId, taskTools, fileTools, gitFactory, completion, emit } = opts;
 
-  const project = await taskTools.getProject(projectId);
-  const projectDir = project.path
+  const projectDir = await taskTools.getProjectDir(projectId);
     
-  // Determine repo root: prefer explicitly provided repoRoot; otherwise resolve from env/cwd while avoiding asar
-  console.log("runIsolatedOrchestrator projectDir: ", projectDir)
-  let repoRoot = resolveRepoRootHint(repoRootOpt);
-  console.log("runIsolatedOrchestrator repoRoot: ", repoRoot)
-
-  // If projectDir is absolute, treat it as the project root to copy instead of entire repo
-  let sourceRoot = projectDir && path.isAbsolute(projectDir) ? projectDir : repoRoot;
-  console.log("runIsolatedOrchestrator sourceRoot FIRST: ", sourceRoot)
-
-  // If projectDir is relative, verify it exists under repoRoot; if not, try another sensible root
-  if (projectDir && !path.isAbsolute(projectDir)) {
-    const candidate = path.join(repoRoot, projectDir);
-    try {
-      if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
-        sourceRoot = repoRoot; // we copy the whole repo but will chdir to subdir later
-      } else {
-        logger.warn(`Requested projectDir '${projectDir}' not found under repoRoot '${repoRoot}'. Using repoRoot as source.`);
-      }
-    } catch {}
-  }
-
-  console.log("runIsolatedOrchestrator sourceRoot LAST: ", sourceRoot)
-  // Validate sourceRoot isn't inside an asar and exists
-  if (sourceRoot.includes('.asar')) {
-    const stripped = stripAsarSegments(sourceRoot);
-    if (stripped && fs.existsSync(stripped) && fs.statSync(stripped).isDirectory()) {
-      repoRoot = stripped;
-      sourceRoot = stripped;
-    } else {
-      logger.error(`Resolved sourceRoot '${sourceRoot}' points into an asar and no valid fallback found.`);
-      return;
-    }
-  }
-
-  if (!fs.existsSync(sourceRoot)) {
-    logger.error(`FATAL: Source root does not exist: ${sourceRoot}`);
-    return;
-  }
-  if (!fs.statSync(sourceRoot).isDirectory()) {
-    logger.error(`FATAL: Source root is not a directory: ${sourceRoot}`);
-    return;
-  }
-
   // Create temp workspace
   const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'factory-ts-'));
   // Keep a subfolder to host the copied source
   const workspace = path.join(tmpBase, 'workspace');
 
-  logger.info(`Copying repository from '${sourceRoot}' to temporary workspace: '${workspace}'`);
+  logger.info(`Copying repository from '${projectDir}' to temporary workspace: '${workspace}'`);
   try {
-    await copyTree(sourceRoot, workspace);
+    await copyTree(projectDir, workspace);
   } catch (e) {
-    logger.error(`FATAL: Failed to copy repository to temporary directory from '${sourceRoot}' -> '${workspace}': ${e}`);
+    logger.error(`FATAL: Failed to copy repository to temporary directory from '${projectDir}' -> '${workspace}': ${e}`);
     // best-effort cleanup
     try { fs.rmSync(tmpBase, { recursive: true, force: true }); } catch {}
     return;
   }
 
-  // Resolve the project directory inside the workspace
-  let workspaceProjectDir: string;
-  if (projectDir) {
-    if (path.isAbsolute(projectDir)) {
-      // If caller passed an absolute projectDir and we copied that absolute path directly into workspace,
-      // then the project root is exactly workspace.
-      workspaceProjectDir = workspace;
-    } else {
-      workspaceProjectDir = path.join(workspace, projectDir);
-      if (!fs.existsSync(workspaceProjectDir)) {
-        // Fall back to workspace root if subdir doesn't exist after copy
-        logger.warn(`Workspace project subdir not found: ${workspaceProjectDir}. Falling back to workspace root.`);
-        workspaceProjectDir = workspace;
-      }
-    }
-  } else {
-    workspaceProjectDir = workspace;
-  }
-
-  const git = gitFactory(workspaceProjectDir);
+  const git = gitFactory(workspace);
 
   try {
     await runOrchestrator({
@@ -624,7 +560,7 @@ export async function runIsolatedOrchestrator(opts: {
       agentType,
       taskId,
       featureId,
-      projectDir: workspaceProjectDir,
+      projectDir: workspace,
       taskTools,
       fileTools,
       git,
