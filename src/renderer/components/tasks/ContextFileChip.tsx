@@ -11,7 +11,7 @@ export default function ContextFileChip({ path, onRemove }: { path: string; onRe
 
   return (
     <div className="flex items-center gap-2 px-2 py-1 rounded-md border bg-surface-raised border-border">
-      <FileDisplay file={file} density="compact" showPreviewOnHover interactive />
+      <FileDisplay file={file} density="normal" showPreviewOnHover interactive />
       {onRemove && (
         <button type="button" className="btn-ghost text-xs" onClick={onRemove} title="Remove file">
           ✕

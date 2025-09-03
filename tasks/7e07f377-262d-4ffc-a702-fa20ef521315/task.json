@@ -2,13 +2,13 @@
   "id": "7e07f377-262d-4ffc-a702-fa20ef521315",
   "status": "+",
   "title": "Agentic chat interface",
-  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
+  "description": "The electron app developed in `src/` needs extra features. References @README.md, @docs/FILE_ORGANISATION.md. It has the Tasks section (task 2), the documents section (task 3) and we need to have a Chat (this task). Allow communication with an LLM agent (configurable) to discuss the project, the tasks, the documents and any other project related things. All in a chat UI standard, that allows mentioning project docs, uploading new ones etc.",
   "features": [
     {
       "id": "62121502-adc3-4d23-8cb9-f440010a8153",
       "status": "+",
       "title": "Add Chat route and basic UI skeleton",
-      "description": "Update the renderer (e.g., main app.js or index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
+      "description": "Update the renderer (e.g., main @app.js or @index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
       "plan": "",
       "context": [
         "src/renderer/screens/ChatView.tsx"

@@ -23,8 +23,8 @@ function splitMentions(input: string): Array<{ type: 'text' | 'file'; text: stri
   return parts;
 }
 
-export function FileMentions({ text, density = 'compact' }: { text: string; density?: 'compact' | 'normal' }) {
-  const { findFileByPathOrName } = useFiles();
+export function FileMentions({ text }: { text: string;  }) {
+  const { filesByPath } = useFiles();
   const segments = React.useMemo(() => splitMentions(text || ''), [text]);
 
   return (
@@ -35,13 +35,13 @@ export function FileMentions({ text, density = 'compact' }: { text: string; dens
         const token = seg.text;
         let meta: FileMeta | null = null;
         try {
-          const found = findFileByPathOrName(token);
+          const found = filesByPath[token];
           if (found) {
             meta = { name: found.name || token.split('/').pop() || token, path: found.path, size: found.size, mtime: found.mtime, type: found.type };
           } else {
             // Fallback to name-only search
             const short = token.split('/').pop() || token;
-            const alt = findFileByPathOrName(short);
+            const alt = filesByPath[short];
             if (alt) meta = { name: alt.name || short, path: alt.path, size: alt.size, mtime: alt.mtime, type: alt.type };
           }
         } catch (e) {
@@ -57,7 +57,7 @@ export function FileMentions({ text, density = 'compact' }: { text: string; dens
           <span key={idx} className="inline-file-chip">
             <FileDisplay
               file={meta}
-              density={density}
+              density='compact'
               interactive={false}
               showPreviewOnHover={true}
               navigateOnClick={false}

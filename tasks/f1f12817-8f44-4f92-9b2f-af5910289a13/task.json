@@ -28,8 +28,8 @@
     {
       "id": "dcb2019c-6430-49bd-a2a5-f32d33ae52a0",
       "status": "+",
-      "title": "README.md",
-      "description": "A README.md file documenting information and steps to take for developers to launch the app.",
+      "title": "@README.md",
+      "description": "A @README.md file documenting information and steps to take for developers to launch the app.",
       "plan": "",
       "context": [
         "src/",

@@ -2,7 +2,7 @@
   "id": "38477f37-1d05-428f-9045-5400d7508eef",
   "status": "+",
   "title": "Markdown documentation explorer and renderer",
-  "description": "The electron app developed in `src/` needs extra features. References `README.md`, `docs/FILE_ORGANISATION.md`. Implement a docs browser that lists Markdown files under docs/ (including docs/). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Introduce a sidebar that will have the sections of the app - currently Home (Tasks - task 2) and Docs (this feature).",
+  "description": "The electron app developed in `src/` needs extra features. References @README.md, @docs/FILE_ORGANISATION.md. Implement a docs browser that lists Markdown files under docs/ (including docs/). Render Markdown with basic extensions (tables, code highlighting), safe HTML sanitization, and internal link navigation. Introduce a sidebar that will have the sections of the app - currently Home (Tasks - task 2) and Docs (this feature).",
   "features": [
     {
       "id": "c105dc5d-27f3-469a-8e5f-7316ed5d6d52",
@@ -17,7 +17,7 @@
       "id": "69146d70-0cfa-43bf-b28b-11f35ba1db84",
       "status": "+",
       "title": "Implement DocsIndexer for scanning markdown files",
-      "description": "Create a DocsIndexer class in `src/docs/indexer.js`, similar to TaskIndexer (in `src/tasks/indexer.js`). It should scan the docs/ directory (and subdirectories) under the projectRoot for .md files, build an in-memory index (e.g., a tree structure with paths and metadata). Include methods to get the index snapshot, initialize scanning, and watch for file changes to refresh the index.",
+      "description": "Create a DocsIndexer class in @src/docs/indexer.js, similar to TaskIndexer (in @src/tasks/indexer.js). It should scan the docs/ directory (and subdirectories) under the projectRoot for .md files, build an in-memory index (e.g., a tree structure with paths and metadata). Include methods to get the index snapshot, initialize scanning, and watch for file changes to refresh the index.",
       "plan": "",
       "context": [
         "src/docs/indexer.js",
@@ -29,7 +29,7 @@
       "id": "a3883c9e-b7c6-43d8-8b19-869cb52f388e",
       "status": "+",
       "title": "Add IPC channels for Docs index and file content",
-      "description": "In the Electron main process, instantiate DocsIndexer and expose IPC channels: 'docs-index:get' to retrieve the index snapshot, 'docs-index:update' for event-based updates on changes, and 'docs-file:get' to read and return the content of a specific .md file by relative path. In preload.js, expose corresponding methods on window.docsIndex for renderer access.",
+      "description": "In the Electron main process, instantiate DocsIndexer and expose IPC channels: 'docs-index:get' to retrieve the index snapshot, 'docs-index:update' for event-based updates on changes, and 'docs-file:get' to read and return the content of a specific .md file by relative path. In @preload.js, expose corresponding methods on window.docsIndex for renderer access.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -46,7 +46,7 @@
       "id": "c172a9c9-58ea-46c4-a880-95cc58ab1941",
       "status": "+",
       "title": "Implement basic Markdown rendering with extensions",
-      "description": "In the Docs browser view, upon file selection, fetch the file content via IPC and render it using a Markdown parser (e.g., react-markdown or marked). Support basic extensions: tables and code highlighting (integrate highlight.js or similar for syntax highlighting in code blocks). Display the rendered content in a dedicated pane or section of the view.",
+      "description": "In the Docs browser view, upon file selection, fetch the file content via IPC and render it using a Markdown parser (e.g., react-markdown or marked). Support basic extensions: tables and code highlighting (integrate @highlight.js or similar for syntax highlighting in code blocks). Display the rendered content in a dedicated pane or section of the view.",
       "plan": "",
       "context": [
         "src/renderer/screens/DocumentsView.js",

@@ -335,42 +335,41 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
     }
   }
 
+  const isCompact = density === 'compact'
   const cls = [
     'file-display',
-    density === 'compact' ? 'is-compact' : 'is-normal',
+    isCompact ? 'is-compact' : 'is-normal',
     interactive ? 'is-interactive' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
 
-  const content = (
-    <div
-      className={cls}
-      role={role}
-      tabIndex={tabIndex}
-      aria-label={aria}
-      onKeyDown={handleKeyDown}
-      onClick={interactive ? (onClick ? (e) => onClick(file, e) : (navigateOnClick ? handleNavigate : undefined)) : undefined}
-      {...(dataAttrs as Record<string, string>)}
-    >
-      <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
-      <div className="fd-content">
-        <div className="fd-name" title={file.path || file.name}>{file.name}</div>
-        {showMeta && sizeLabel && <div className="fd-size">{sizeLabel}</div>}
-      </div>
-      <div className="fd-right">
-        {showMeta && dateLabel && <div className="fd-date">{dateLabel}</div>}
-        {trailing ? <div className="fd-trailing">{trailing}</div> : null}
-      </div>
-    </div>
-  );
-
-  if (!showPreviewOnHover) return content;
-
   return (
-    <Tooltip content={<FilePreviewCard file={file} />} placement={previewPlacement} delayMs={previewDelayMs}>
-      {content as React.ReactElement}
+    <Tooltip content={<FilePreviewCard file={file} />} placement={previewPlacement} delayMs={previewDelayMs} disabled={!showPreviewOnHover}>
+      {isCompact ? (
+        <span className="badge badge--soft badge--ok">{file.name}</span>
+      ) : (
+        <div
+          className={cls}
+          role={role}
+          tabIndex={tabIndex}
+          aria-label={aria}
+          onKeyDown={handleKeyDown}
+          onClick={interactive ? (onClick ? (e) => onClick(file, e) : (navigateOnClick ? handleNavigate : undefined)) : undefined}
+          {...(dataAttrs as Record<string, string>)}
+        >
+          <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
+          <div className="fd-content">
+            <div className="fd-name" title={file.path || file.name}>{file.name}</div>
+            {showMeta && sizeLabel && <div className="fd-size">{sizeLabel}</div>}
+          </div>
+          <div className="fd-right">
+            {showMeta && dateLabel && <div className="fd-date">{dateLabel}</div>}
+            {trailing ? <div className="fd-trailing">{trailing}</div> : null}
+          </div>
+        </div>
+      )}
     </Tooltip>
   );
 };

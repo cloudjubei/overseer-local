@@ -44,7 +44,7 @@
       "id": "881d359a-31a2-4658-a2c3-2627153b003d",
       "status": "+",
       "title": "Preview tool for agents",
-      "description": "Create the agent-facing tool that allows requesting screenshots of components or the full application. This tool should accept parameters like component path, props override, screenshot dimensions, and preview mode. Integrate this into the existing standardTools.js system so agents can easily call it after making changes to see visual feedback.",
+      "description": "Create the agent-facing tool that allows requesting screenshots of components or the full application. This tool should accept parameters like component path, props override, screenshot dimensions, and preview mode. Integrate this into the existing @standardTools.js system so agents can easily call it after making changes to see visual feedback.",
       "plan": "",
       "context": [],
       "acceptance": []

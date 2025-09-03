@@ -8,7 +8,7 @@
       "id": "831c12f4-7539-4d19-9b08-bb5c20f7920c",
       "status": "+",
       "title": "Task schema definition",
-      "description": "Generate TypeScript interfaces from the schema into `src/types/tasks.ts`",
+      "description": "Generate TypeScript interfaces from the schema into @src/types/tasks.ts",
       "plan": "",
       "context": [
         "src/",

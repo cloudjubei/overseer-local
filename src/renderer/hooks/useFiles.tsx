@@ -56,6 +56,7 @@ export default function useFiles() {
   } = useActiveProject()
   
   const [files, setFiles] = useState<FileMeta[]>([]);
+  const [filesByPath, setFilesByPath] = useState<Record<string,FileMeta>>({});
   const [directoryTree, setDirectoryTree] = useState<DirNode | null>(null)
 
   const update = async () => {
@@ -68,6 +69,11 @@ export default function useFiles() {
     setFiles(files)
     const newTree = buildDirTree(files)
     setDirectoryTree(newTree)
+    let newFilesByPath : Record<string,FileMeta> = {}
+    for(const f of files){
+      newFilesByPath[f.path] = f
+    }
+    setFilesByPath(newFilesByPath)
   }
   
   useEffect(() => {
@@ -95,20 +101,13 @@ export default function useFiles() {
     }
   }
 
-  const getFileByPath = (path: string) : FileMeta | undefined => {
-    for(const f of files){
-      if (f.path == path){
-        return f
-      }
-    }
-  }
   const uploadFile = async (name: string, content: string) : Promise<string | undefined> =>  {
     if (project){
       return await filesService.uploadFile(project.id, name, content)
     }
   }
 
-  return { files, directoryTree, readFile, saveFile, getFileByPath, uploadFile } as const;
+  return { files, directoryTree, readFile, saveFile, filesByPath, uploadFile } as const;
 }
   
 const textExts = new Set([

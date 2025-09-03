@@ -89,7 +89,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
             <div key={file.path} role="option" aria-selected={selected} className="flex items-center">
               <FileDisplay
                 file={file}
-                density="compact"
+                density="normal"
                 interactive
                 showPreviewOnHover
                 onClick={() => toggle(file.path)}

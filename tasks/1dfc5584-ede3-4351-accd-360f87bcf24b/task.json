@@ -98,7 +98,7 @@
       "id": "3c4d2fc5-9efd-4eb1-bc6b-62e1f6d51c9f",
       "status": "+",
       "title": "Feature details view",
-      "description": "This view should be similar to the `src/renderer/tasks/TasksListView.tsx` It should be easy to see where blockers lie. It should be possible to drag features around same as the `src/renderer/tasks/TasksListView.tsx`. Remember - these are react components, using tailwind.",
+      "description": "This view should be similar to the @src/renderer/tasks/TasksListView.tsx It should be easy to see where blockers lie. It should be possible to drag features around same as the @src/renderer/tasks/TasksListView.tsx. Remember - these are react components, using tailwind.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TaskDetailsView.tsx",
@@ -245,8 +245,8 @@
     {
       "id": "8ad954ce-d2be-4a97-b5b0-1c1eff479b91",
       "status": "+",
-      "title": "index.css has grown to be massive",
-      "description": "The file should really contain reusable effects that can be applied to many different components - then those components will have correct classnames set to use them. We need to shrink index.css and make reusable styles - this way everything is cleaner and in general the views and codebase will be more standardized.",
+      "title": "@index.css has grown to be massive",
+      "description": "The file should really contain reusable effects that can be applied to many different components - then those components will have correct classnames set to use them. We need to shrink @index.css and make reusable styles - this way everything is cleaner and in general the views and codebase will be more standardized.",
       "plan": "",
       "context": [
         "src/index.css",
@@ -336,7 +336,7 @@
       "id": "fba81ba7-d9bd-451e-8d2b-d14195984f7d",
       "status": "+",
       "title": "Tasks list dragging error",
-      "description": "When dragging an item in the Tasks list - it results an error of the TaskIndexer when renaming the temp file. `src/renderer/tasks/TaskDetailsView.tsx` follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
+      "description": "When dragging an item in the Tasks list - it results an error of the TaskIndexer when renaming the temp file. @src/renderer/tasks/TaskDetailsView.tsx follows the same pattern (allows dragging) and it has no such error. Also, dragging an item to a slot which would result in no move - shouldn't show the highlight - and thus shouldn't do any reordering. So dragging item 1, to the edge below it, if we're not over item 2 yet, shouldn't cause any reordering.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",

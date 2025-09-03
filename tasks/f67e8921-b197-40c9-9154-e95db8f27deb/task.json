@@ -76,7 +76,7 @@
       "id": "98c76bd6-8c5c-4aaf-a778-54f5f57f679a",
       "status": "+",
       "title": "Agent run costs and times are always empty",
-      "description": "It seems these are either not recorded correctly or not passed, so that they cannot be viewed properly inside `AgentsView.tsx` and `AllAgentsView.tsx`",
+      "description": "It seems these are either not recorded correctly or not passed, so that they cannot be viewed properly inside @AgentsView.tsx and @AllAgentsView.tsx",
       "plan": "",
       "context": [
         "src/renderer/screens/AgentsView.tsx",
@@ -89,7 +89,7 @@
       "id": "c2192f2a-9151-4615-b376-986bb0540042",
       "status": "+",
       "title": "The \"Run Agent\" button should be standardised",
-      "description": "The views that should have it updated are:\n`TasksListView.tsx`, `TaskDetailsView.tsx`.\nIt should be a round play button as is common in music players.",
+      "description": "The views that should have it updated are:\n@TasksListView.tsx, @TaskDetailsView.tsx.\nIt should be a round play button as is common in music players.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TasksListView.tsx",
@@ -115,7 +115,7 @@
       "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
       "status": "+",
       "title": "IconDelete",
-      "description": "`IconDelete` inside `Icons.tsx` needs to actually be a proper delete icon",
+      "description": "`IconDelete` inside @Icons.tsx needs to actually be a proper delete icon",
       "plan": "",
       "context": [
         "src/renderer/components/ui/Icons.tsx"
@@ -127,7 +127,7 @@
       "id": "4df75808-637f-4841-9d31-b8630b1ac8bf",
       "status": "+",
       "title": "running an agent causes an error when it tries to make a local copy of the project",
-      "description": "shouldIgnoreCopy inside orchestrator.ts should ignore all sorts of files and folders specific to typescript, node, electron.",
+      "description": "shouldIgnoreCopy inside @orchestrator.ts should ignore all sorts of files and folders specific to typescript, node, electron.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/orchestrator.ts"
@@ -179,7 +179,7 @@
       "id": "67edb097-edf3-4988-939d-30e3fc3007c1",
       "status": "+",
       "title": "Go over all the tasks in this project and update inline file references",
-      "description": "in a lot of the tasks a file could've been referenced as:\n`TasksListView.tsx` \nor simply\nTasksListView.tsx\n\nMake sure that these are transformed into the format:\n@Filepath\n\nThen inside `TasksListView.tsx` and `TaskDetailsView.tsx`, make sure that titles and descriptions for tasks and features show a nice hoverable ui that shows a tooltip about the file. Inside all forms it should just show @Filename so it's easy to edit.",
+      "description": "in a lot of the tasks a file could've been referenced as:\n@TasksListView.tsx \nor simply\n@TasksListView.tsx\n\nMake sure that these are transformed into the format:\n@Filepath\n\nThen inside @TasksListView.tsx and @TaskDetailsView.tsx, make sure that titles and descriptions for tasks and features show a nice hoverable ui that shows a tooltip about the file. Inside all forms it should just show @Filename so it's easy to edit.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TaskDetailsView.tsx",
@@ -204,7 +204,7 @@
       "id": "75ce3787-2580-46a7-88e2-4b52a8ecba47",
       "status": "+",
       "title": "Error with copying when running Agent",
-      "description": "This error inside the `copyTree` function inside `orchestrator.ts`, the error:\n\n[factory-ts] 2025-09-03T10:05:52.841Z FATAL: Failed to copy repository to temporary directory: Error: ENOENT,  not found in /out/electron-darwin-arm64/electron.app/Contents/Resources/app.asar",
+      "description": "This error inside the `copyTree` function inside @orchestrator.ts, the error:\n\n[factory-ts] 2025-09-03T10:05:52.841Z FATAL: Failed to copy repository to temporary directory: Error: ENOENT,  not found in /out/electron-darwin-arm64/electron.app/Contents/Resources/app.asar",
       "plan": "",
       "context": [
         "packages/factory-ts/src/orchestrator.ts"
@@ -216,7 +216,7 @@
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
       "status": "+",
       "title": "Error with persisting history when running an agent",
-      "description": "This error occurs inside `mainOrchestrator.js` the function is `persistMeta`, the error:\n\n[factory] persistMeta error HISTORY.addOrUpdateRun is not a function",
+      "description": "This error occurs inside @mainOrchestrator.js the function is `persistMeta`, the error:\n\n[factory] persistMeta error HISTORY.addOrUpdateRun is not a function",
       "plan": "",
       "context": [
         "src/tools/factory/mainOrchestrator.js"
@@ -250,10 +250,11 @@
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
       "status": "?",
       "title": "TaskCard missing RunAgent on hover",
-      "description": "`TaskCard.tsx` should have the \"Run Agent\" button in the top right.\nSame as in `TasksListView.tsx` if the task has a running agent - show the status.",
+      "description": "@src/renderer/components/tasks/TaskCard.tsx should have the \"Run Agent\" button in the top right.\nSame as in @src/renderer/tasks/TasksListView.tsx if the task has a running agent - show the status.",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TasksListView.tsx"
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/components/tasks/TaskCard.tsx"
       ],
       "acceptance": [],
       "blockers": []
