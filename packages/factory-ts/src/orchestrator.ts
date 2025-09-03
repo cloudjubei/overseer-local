@@ -340,6 +340,9 @@ export async function runOrchestrator(opts: {
 function shouldIgnoreCopy(relPath: string): boolean {
   // Mirror Python ignore patterns: venv, __pycache__, *.pyc, .idea
   const parts = relPath.split(path.sep);
+  if (parts.includes('node_modules')) return true;
+  if (parts.includes('dist')) return true;
+  if (parts.includes('build')) return true;
   if (parts.includes('venv')) return true;
   if (parts.includes('__pycache__')) return true;
   if (parts.includes('.idea')) return true;
