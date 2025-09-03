@@ -16,7 +16,7 @@
     },
     {
       "id": "8ed1e913-44e2-4321-a631-f1c2c9033177",
-      "status": "-",
+      "status": "+",
       "title": "For standard agent suppliers - discover the latest prices",
       "description": "It must be possible to view the latest prices per model and refresh them via a configurable link to the given supplier's website. Store the latest ones in a local file that is read on app start.\nRight now the costs are always 0 - the tokens are not counted anywhere, they should be.",
       "plan": "",
@@ -29,7 +29,7 @@
     },
     {
       "id": "bec521df-8a4b-41b2-b589-8334100f048f",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts must be added as a project here",
       "description": "A new task must be created for it - to be able to view and edit Agent personas.",
       "plan": "",

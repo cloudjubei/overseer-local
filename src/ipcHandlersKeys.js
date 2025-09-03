@@ -66,5 +66,9 @@ const IPC_HANDLER_KEYS = {
   FACTORY_SUBSCRIBE: "factory:subscribe",
   FACTORY_EVENT: "factory:event",
   FACTORY_LIST_ACTIVE: "factory:list-active",
+
+  // Factory pricing
+  FACTORY_PRICING_GET: "factory:pricing:get",
+  FACTORY_PRICING_REFRESH: "factory:pricing:refresh",
 }
 export default IPC_HANDLER_KEYS

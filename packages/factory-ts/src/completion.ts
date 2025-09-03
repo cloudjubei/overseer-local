@@ -4,6 +4,16 @@ export type CompletionMessage = { role: 'system' | 'user' | 'assistant'; content
 export type CompletionResponse = { message: { role: 'assistant'; content: string }, usage?: { promptTokens?: number; completionTokens?: number; totalTokens?: number; costUSD?: number; provider?: string; model?: string } };
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 
+function estimateTokensFromText(text: string): number {
+  // Very rough heuristic: ~4 chars per token
+  if (!text) return 0;
+  return Math.max(1, Math.round(text.length / 4));
+}
+
+function estimateTokensFromMessages(messages: CompletionMessage[]): number {
+  return messages.reduce((acc, m) => acc + estimateTokensFromText(m.content), 0);
+}
+
 export function createCompletionClient(cfg: { model: string; provider?: string; apiKey?: string; baseURL?: string; [k: string]: any }): CompletionClient {
   // Simple OpenAI-compatible client; supports custom baseURL
   const baseURL = cfg.baseURL || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
@@ -15,7 +25,9 @@ export function createCompletionClient(cfg: { model: string; provider?: string; 
     return async ({ messages, model }) => {
       const last = messages[messages.length - 1]?.content || '{}';
       const content = typeof last === 'string' && last.includes('tool_calls') ? last : '{"thoughts":"mock","tool_calls":[]}';
-      return { message: { role: 'assistant', content }, usage: { provider, model } };
+      const promptTokens = estimateTokensFromMessages(messages);
+      const completionTokens = estimateTokensFromText(content);
+      return { message: { role: 'assistant', content }, usage: { provider, model, promptTokens, completionTokens, totalTokens: promptTokens + completionTokens } };
     };
   }
 
@@ -38,10 +50,19 @@ export function createCompletionClient(cfg: { model: string; provider?: string; 
     const data = await res.json();
     const msg = data.choices?.[0]?.message || { role: 'assistant', content: '{}' };
     const usageRaw = data.usage || {};
+    let promptTokens = usageRaw.prompt_tokens;
+    let completionTokens = usageRaw.completion_tokens;
+    if (promptTokens == null || completionTokens == null) {
+      // Fallback estimate if provider didn't return usage
+      const estPrompt = estimateTokensFromMessages(messages);
+      const estCompletion = estimateTokensFromText(msg?.content || '');
+      promptTokens = promptTokens ?? estPrompt;
+      completionTokens = completionTokens ?? estCompletion;
+    }
     const usage = {
-      promptTokens: usageRaw.prompt_tokens,
-      completionTokens: usageRaw.completion_tokens,
-      totalTokens: usageRaw.total_tokens,
+      promptTokens,
+      completionTokens,
+      totalTokens: (promptTokens || 0) + (completionTokens || 0),
       provider,
       model,
     };
