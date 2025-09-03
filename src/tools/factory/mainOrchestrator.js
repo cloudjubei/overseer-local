@@ -186,7 +186,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { projectId, taskId, llmConfig, budgetUSD, metadata }) => {
     console.log('[factory] START_TASK', maskSecrets({ projectId, taskId, llmConfig, budgetUSD, metadata }));
     try {
-      const run = orchestrator.startTaskRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
+      const run = orchestrator.startRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (task)', run?.id);
       const initMeta = {
         runId: run.id,
@@ -217,7 +217,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { projectId, taskId, featureId, llmConfig, budgetUSD, metadata }) => {
     console.log('[factory] START_FEATURE', maskSecrets({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata }));
     try {
-      const run = orchestrator.startFeatureRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
+      const run = orchestrator.startRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (feature)', run?.id);
       const initMeta = {
         runId: run.id,

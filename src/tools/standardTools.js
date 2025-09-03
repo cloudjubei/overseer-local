@@ -3,6 +3,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 const os = require('os');
 const { Writable } = require('stream');
+const { fileTools } = require('packages/factory-ts/src/fileTools')
 
 // Try to load puppeteer, fall back to puppeteer-core, otherwise null
 let puppeteer = null;
@@ -40,6 +41,28 @@ const standardToolSchemas = [
         files: { type: 'array', items: { type: 'string' } }
       },
       required: ['files']
+    }
+  },
+  {
+    name: 'list_files',
+    description: 'Get content of directory at given path.',
+    parameters: {
+      type: 'object',
+      properties: {
+        path: { type: 'string' } 
+      },
+      required: ['path']
+    }
+  },
+  {
+    name: 'search_files',
+    description: 'Look for keywords inside files and their names.',
+    parameters: {
+      type: 'object',
+      properties: {
+        keywords: { type: 'array', items: { type: 'string' } }
+      },
+      required: ['keywords']
     }
   },
   {
@@ -489,19 +512,19 @@ async function collectFilesFromDir(root, pathsList = [], maxBytes = 1048576) {
 
 const standardToolFunctions = {
   async write_file({ filename, content }) {
-    const fullPath = path.join(process.cwd(), filename);
-    await fs.writeFile(fullPath, content, 'utf8');
-    return 'File written.';
+    return await fileTools.writeFile(filename, content)
   },
   async read_files({ files }) {
-    const contents = [];
-    for (const file of files) {
-      try {
-        const content = await fs.readFile(path.join(process.cwd(), file), 'utf8');
-        contents.push(content);
-      } catch (e) {
-        contents.push(`Error: ${e.message}`);
-      }
+    return await fileTools.readFiles(files)
+  },
+  async list_files({ path }) {
+    return await fileTools.listFiles(path)
+  },
+  async search_files({ keywords }) {
+    const results = new Set();
+    for (const keyword of keywords) {
+        const matches = await fileTools.searchFiles(keyword);
+        matches.forEach(match => results.add(match));
     }
     return contents;
   },
