@@ -87,7 +87,7 @@
     },
     {
       "id": "c2192f2a-9151-4615-b376-986bb0540042",
-      "status": "-",
+      "status": "?",
       "title": "The \"Run Agent\" button should be standardised",
       "description": "It should be a round play button as is common in music players.\nWherever there is a Run Agent button it should be using the new standard one.\nTaskCard should also have it in the top right.\nTasks and Features should only have this button display if they are pending.\nWhen the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
@@ -97,7 +97,8 @@
         "src/renderer/components/tasks/TaskCard.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "dependencies": [],
+      "rejection": "Blocked: Agent loop failed: litellm.Timeout: APITimeoutError - Request timed out. Error_str: Request timed out."
     },
     {
       "id": "0ce98597-907f-4bdf-a5a8-c8e8b253e612",
