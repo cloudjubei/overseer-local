@@ -177,7 +177,7 @@
     },
     {
       "id": "67edb097-edf3-4988-939d-30e3fc3007c1",
-      "status": "-",
+      "status": "+",
       "title": "Go over all the tasks in this project and update inline file references",
       "description": "in a lot of the tasks a file could've been referenced as:\n`TasksListView.tsx` \nor simply\nTasksListView.tsx\n\nMake sure that these are transformed into the format:\n@Filepath\n\nThen inside `TasksListView.tsx` and `TaskDetailsView.tsx`, make sure that titles and descriptions for tasks and features show a nice hoverable ui that shows a tooltip about the file. Inside all forms it should just show @Filename so it's easy to edit.",
       "plan": "",
@@ -226,7 +226,7 @@
     },
     {
       "id": "6e24f575-cf4d-451f-994f-7190d45ebaaa",
-      "status": "-",
+      "status": "+",
       "title": "Toasts should change appearance",
       "description": "Currently when toasts appear, they show in the top right.\nThey should ideally show in the top middle and shouldn't have a transparent background as they then bleed onto other text below.\nIn general they should be smaller - they should feel like an os notification.\nWhen they appear they should have a nice animation sliding in and when disappearing - sliding out.",
       "plan": "",

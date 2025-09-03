@@ -16,6 +16,7 @@ import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import RunAgentButton from '../components/tasks/RunAgentButton'
+import { FileMentions } from '../components/ui/FileMentions'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -86,14 +87,12 @@ export default function TasksListView() {
     }
   }, [sortBy])
   
-  // Keyboard shortcut: Cmd/Ctrl+N for new task
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault()
         openModal({ type: 'task-create' })
       }
-      // Quick toggle between list/board: Ctrl/Cmd+Shift+L or B
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'b')) {
         e.preventDefault()
         setView((v) => (v === 'list' ? 'board' : 'list'))
@@ -158,7 +157,6 @@ export default function TasksListView() {
   const dndEnabled = (sortBy === "index_asc" || sortBy === "index_desc") && !isFiltered && view === 'list'
 
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
-    // Do not show drop indicators when hovering the dragged row itself
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const offsetY = e.clientY - rect.top
     let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
@@ -185,7 +183,6 @@ export default function TasksListView() {
     }
     if (e.key.toLowerCase() === 's') {
       e.preventDefault()
-      // cycle status quickly
       const current = allTasks.find(t => t.id === taskId)?.status
       const order: Status[] = ['-', '~', '+', '=', '?']
       const next = order[(Math.max(0, order.indexOf(current as Status)) + 1) % order.length]
@@ -208,9 +205,9 @@ export default function TasksListView() {
 
   const onListDrop = () => {
     if (project != null && dragTaskId != null && dropIndex != null && dropPosition != null) {
-      const fromIndex = project.taskIdToDisplayIndex[dragTaskId] - 1 //offsetting the display
-      const toTask = sorted[dropIndex] //+ (dropPosition === 'after' ? 1 : 0)
-      const toIndex = project.taskIdToDisplayIndex[toTask.id] - 1 //offsetting the display
+      const fromIndex = project.taskIdToDisplayIndex[dragTaskId] - 1
+      const toTask = sorted[dropIndex]
+      const toIndex = project.taskIdToDisplayIndex[toTask.id] - 1
       
       if (fromIndex !== -1 && toIndex !== fromIndex) {
         handleMoveTask(fromIndex, toIndex)
@@ -369,11 +366,11 @@ export default function TasksListView() {
                         </div>
                         <div className="col col-title">
                           <div className="title-line">
-                            <span className="title-text">{t.title || ''}</span>
+                            <span className="title-text"><FileMentions text={t.title || ''} /></span>
                           </div>
                         </div>
                         <div className="col col-description">
-                          <div className="desc-line" title={t.description || ''}>{t.description || ''}</div>
+                          <div className="desc-line" title={t.description || ''}><FileMentions text={t.description || ''} /></div>
                         </div>
                         <div className="col col-actions" >
                           <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditTask(t.id) }}>

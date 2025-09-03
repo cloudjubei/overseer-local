@@ -12,6 +12,7 @@ import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
 import { IconBack, IconChevron, IconEdit, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
+import { FileMentions } from '../components/ui/FileMentions'
 
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
@@ -20,7 +21,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
-  // DnD state (match Tasks list patterns)
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -172,7 +172,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskBlockers = getBlockers(task.id)
   const taskBlockersOutbound = getBlockersOutbound(task.id)
 
-  // Only one agent can run per task (no featureId)
   const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
   const taskHasActiveRun = !!taskRun
   const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
@@ -196,7 +195,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             />
           </div>
           
-          <h1 id="task-details-heading" className="details-title">{task.title || `Task ${taskDisplayIndex}`}</h1>
+          <h1 id="task-details-heading" className="details-title"><FileMentions text={task.title || `Task ${taskDisplayIndex}`} /></h1>
           
           <div className="flex flex-col gap-2 ml-2" aria-label={`Blockers for Task ${taskDisplayIndex}`}>
             <div className="chips-list">
@@ -252,7 +251,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </div>
           </div>
           <div id="overview-content" className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}>
-            <p className="task-desc">{task.description || 'No description provided.'}</p>
+            <p className="task-desc"><FileMentions text={task.description || 'No description provided.'} /></p>
           </div>
         </section>
 
@@ -326,10 +325,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       </div>
 
                       <div className="col col-title" >
-                        <span className="title-text">{f.title || ''}</span>
+                        <span className="title-text"><FileMentions text={f.title || ''} /></span>
                       </div>
                       <div className="col col-description"  title={f.description || ''}>
-                        {f.description || ''}
+                        <FileMentions text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
                         <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>

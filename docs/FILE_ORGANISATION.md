@@ -7,11 +7,13 @@ This document describes how files and directories are organised in this reposito
 - src/: Application source (Electron main + React renderer + tooling).
   - src/styles/: Shared CSS assets and design tokens, grouped by role (foundations, primitives, components, layout, screens).
     - New: src/styles/components/file-display.css contains layout and visuals for the FileDisplay UI component (icon+metadata grid, density presets, interactive states). Imported via src/index.css.
+    - New: src/styles/components/file-mentions.css contains styling for inline @File mentions rendered as chips.
   - src/types/: Shared TypeScript types.
   - src/renderer/: React renderer (components, screens, hooks, services, navigation, preview runtime).
     - src/renderer/components/: Reusable UI and domain-specific components.
       - src/renderer/components/tasks/: Task-related UI elements (status controls, dependency bullets, etc.).
       - src/renderer/components/agents/: Agent-related UI elements (AgentRunBullet and future agent widgets). Now includes ChatConversation.tsx to render agent run chat with bubbles for thoughts and expandable tool call rows.
+      - src/renderer/components/ui/FileMentions.tsx: Utility component that scans text for @File tokens and renders inline chips with hoverable tooltips using FileDisplay.
     - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, Agents, etc.).
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
     - src/renderer/navigation/: Navigation state and modal host.
@@ -104,8 +106,6 @@ History persistence for agent runs:
 - Conversation messages are saved per-run in .factory/history/runs/<runId>.messages.json based on llm/messages snapshot events.
 - Renderer can load history via preload factory API: listRunHistory() and getRunMessages(runId).
 - agentsService bootstraps runs from both active (in-memory) and persisted history on start.
-
-Also note: orchestratorBridge start functions are async (await preload invoke). Ensure callers handle Promises appropriately.
 
 ### Isolated Orchestrator and Packaged App Environments
 - packages/factory-ts/src/orchestrator.ts: runIsolatedOrchestrator accepts an optional repoRoot absolute path and will avoid copying from Electron's app.asar virtual filesystem. If not provided, it attempts to resolve a real filesystem directory by stripping the .asar segment from cwd. Pass an absolute projectDir to copy only that directory into the temp workspace.
