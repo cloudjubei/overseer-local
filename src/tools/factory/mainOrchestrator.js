@@ -118,7 +118,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   }
 
   console.log('[factory] Creating orchestrator');
-  const orchestrator = createOrchestrator({ projectRoot /*, history: historyStore*/ });
+  const orchestrator = createOrchestrator({ projectRoot , history: historyStore });
   console.log('[factory] Orchestrator ready');
 
   function startHeartbeat(runId) {
