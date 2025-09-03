@@ -388,7 +388,12 @@ function shouldIgnoreCopy(relPath: string): boolean {
 
 async function copyTree(src: string, dest: string) {
   // Recursively copy, respecting ignore patterns and skipping asar/virtual entries
-  const stat = fs.statSync(src);
+  let stat: fs.Stats;
+  try {
+    stat = fs.statSync(src);
+  } catch (e: any) {
+    throw new Error(`Source path does not exist or is not accessible: ${src} (${e?.code || e})`);
+  }
   if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
   fs.mkdirSync(dest, { recursive: true });
 
@@ -396,8 +401,9 @@ async function copyTree(src: string, dest: string) {
     let entries: fs.Dirent[] = [];
     try {
       entries = fs.readdirSync(from, { withFileTypes: true });
-    } catch (e) {
+    } catch (e: any) {
       // Skip unreadable directories (e.g., asar virtuals)
+      logger.warn(`copyTree: Skipping unreadable directory ${from}: ${e?.code || e}`);
       return;
     }
 
@@ -436,6 +442,7 @@ async function copyTree(src: string, dest: string) {
       } catch (e: any) {
         // Skip problematic entries (e.g., ENOENT due to virtualized packaging paths)
         if (e && (e.code === 'ENOENT' || e.code === 'EBUSY' || e.code === 'EPERM')) {
+          logger.warn(`copyTree: Skipping ${srcPath}: ${e.code}`);
           continue;
         }
         throw e;
@@ -446,23 +453,68 @@ async function copyTree(src: string, dest: string) {
   walk(src, dest);
 }
 
+function stripAsarSegments(p: string): string {
+  // Remove any trailing segments that include .asar and return a real FS ancestor
+  const parts = p.split(path.sep);
+  const idx = parts.findIndex(seg => seg.includes('.asar'));
+  if (idx >= 0) {
+    // Try app.asar.unpacked sibling first
+    const prefix = parts.slice(0, idx).join(path.sep);
+    const resourcesDir = prefix; // parent directory of *.asar
+    // If Resources/app.asar.unpacked exists, prefer it as the effective root for reading extra files
+    const unpacked = path.join(resourcesDir, 'app.asar.unpacked');
+    try {
+      const st = fs.statSync(unpacked);
+      if (st.isDirectory()) return unpacked;
+    } catch {}
+    // Otherwise return the resources dir
+    return resourcesDir || path.sep;
+  }
+  return p;
+}
+
+function resolveElectronRealRoot(): string | undefined {
+  // Try to use Electron-specific hints without importing electron here
+  const candidates: (string | undefined)[] = [];
+  // 1) Explicit env override
+  candidates.push(process.env.FACTORY_REPO_ROOT);
+  // 2) process.resourcesPath (exposed in Electron)
+  // @ts-ignore - not typed in Node
+  const resourcesPath = (process as any).resourcesPath as string | undefined;
+  if (resourcesPath) candidates.push(resourcesPath);
+  // 3) PORTABLE_EXECUTABLE_DIR (Windows portable)
+  candidates.push(process.env.PORTABLE_EXECUTABLE_DIR);
+  // 4) app root env usually set by bundlers
+  candidates.push(process.env.APPDIR);
+
+  for (const c of candidates) {
+    if (!c) continue;
+    const real = stripAsarSegments(path.resolve(c));
+    try {
+      const st = fs.statSync(real);
+      if (st.isDirectory()) return real;
+    } catch {}
+  }
+  return undefined;
+}
+
 function resolveRepoRootHint(hint?: string): string {
   if (hint && path.isAbsolute(hint)) return hint;
 
   // If hint is relative, resolve relative to current working dir
   if (hint) return path.resolve(hint);
 
+  // Prefer Electron real root if available
+  const electronRoot = resolveElectronRealRoot();
+  if (electronRoot) return electronRoot;
+
   const cwd = FRAMEWORK_ROOT;
   // If cwd includes an asar, move up to its parent directory to avoid virtual FS
   if (cwd.includes('.asar')) {
-    // Typical packaged Electron path: <App>.app/Contents/Resources/app.asar
-    // Use the Resources dir or its parent as base
-    const asarIndex = cwd.indexOf('.asar');
-    const up = path.dirname(cwd.slice(0, asarIndex));
-    // If that path isn't readable, fallback to OS temp dir
+    const real = stripAsarSegments(cwd);
     try {
-      const st = fs.statSync(up);
-      if (st.isDirectory()) return up;
+      const st = fs.statSync(real);
+      if (st.isDirectory()) return real;
     } catch {}
     return os.tmpdir();
   }
@@ -485,11 +537,44 @@ export async function runIsolatedOrchestrator(opts: {
 }) {
   const { model, agentType, taskId, featureId, projectDir, repoRoot: repoRootOpt, taskTools, fileTools, gitFactory, completion, emit } = opts;
 
-  // Determine repo root: prefer explicitly provided repoRoot; otherwise resolve from cwd while avoiding asar
-  const repoRoot = resolveRepoRootHint(repoRootOpt);
+  // Determine repo root: prefer explicitly provided repoRoot; otherwise resolve from env/cwd while avoiding asar
+  let repoRoot = resolveRepoRootHint(repoRootOpt);
 
   // If projectDir is absolute, treat it as the project root to copy instead of entire repo
-  const sourceRoot = projectDir && path.isAbsolute(projectDir) ? projectDir : repoRoot;
+  let sourceRoot = projectDir && path.isAbsolute(projectDir) ? projectDir : repoRoot;
+
+  // If projectDir is relative, verify it exists under repoRoot; if not, try another sensible root
+  if (projectDir && !path.isAbsolute(projectDir)) {
+    const candidate = path.join(repoRoot, projectDir);
+    try {
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+        sourceRoot = repoRoot; // we copy the whole repo but will chdir to subdir later
+      } else {
+        logger.warn(`Requested projectDir '${projectDir}' not found under repoRoot '${repoRoot}'. Using repoRoot as source.`);
+      }
+    } catch {}
+  }
+
+  // Validate sourceRoot isn't inside an asar and exists
+  if (sourceRoot.includes('.asar')) {
+    const stripped = stripAsarSegments(sourceRoot);
+    if (stripped && fs.existsSync(stripped) && fs.statSync(stripped).isDirectory()) {
+      repoRoot = stripped;
+      sourceRoot = stripped;
+    } else {
+      logger.error(`Resolved sourceRoot '${sourceRoot}' points into an asar and no valid fallback found.`);
+      return;
+    }
+  }
+
+  if (!fs.existsSync(sourceRoot)) {
+    logger.error(`FATAL: Source root does not exist: ${sourceRoot}`);
+    return;
+  }
+  if (!fs.statSync(sourceRoot).isDirectory()) {
+    logger.error(`FATAL: Source root is not a directory: ${sourceRoot}`);
+    return;
+  }
 
   // Create temp workspace
   const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'factory-ts-'));
@@ -500,7 +585,7 @@ export async function runIsolatedOrchestrator(opts: {
   try {
     await copyTree(sourceRoot, workspace);
   } catch (e) {
-    logger.error(`FATAL: Failed to copy repository to temporary directory: ${e}`);
+    logger.error(`FATAL: Failed to copy repository to temporary directory from '${sourceRoot}' -> '${workspace}': ${e}`);
     // best-effort cleanup
     try { fs.rmSync(tmpBase, { recursive: true, force: true }); } catch {}
     return;
@@ -515,6 +600,11 @@ export async function runIsolatedOrchestrator(opts: {
       workspaceProjectDir = workspace;
     } else {
       workspaceProjectDir = path.join(workspace, projectDir);
+      if (!fs.existsSync(workspaceProjectDir)) {
+        // Fall back to workspace root if subdir doesn't exist after copy
+        logger.warn(`Workspace project subdir not found: ${workspaceProjectDir}. Falling back to workspace root.`);
+        workspaceProjectDir = workspace;
+      }
     }
   } else {
     workspaceProjectDir = workspace;
