@@ -214,7 +214,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Error with persisting history when running an agent",
       "description": "This error occurs inside `mainOrchestrator.js` the function is `persistMeta`, the error:\n\n[factory] persistMeta error HISTORY.addOrUpdateRun is not a function",
       "plan": "",
