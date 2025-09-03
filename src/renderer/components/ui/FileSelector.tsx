@@ -25,18 +25,23 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
   const { files } = useFiles();
   const [query, setQuery] = React.useState('');
   const [localSelected, setLocalSelected] = React.useState<string[]>(selected);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     setLocalSelected(selected);
   }, [selected]);
 
+  React.useEffect(() => {
+    // Focus the search input when the selector opens
+    const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
+    return () => clearTimeout(t);
+  }, []);
+
   const filteredFiles = React.useMemo(() => {
-    
     const q = query.trim().toLowerCase();
     const filtered = q
       ? files.filter((p) => p.name.toLowerCase().includes(q))
       : files;
-    // Basic sort: prioritize filename match, then alphabetical
     return filtered.sort((a, b) => {
       if (q) {
         const aScore = a.name.toLowerCase().indexOf(q)
@@ -65,6 +70,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
       <div className="flex items-center justify-between gap-2">
         <div className="flex-1">
           <Input
+            ref={inputRef}
             placeholder="Search files by name or path"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

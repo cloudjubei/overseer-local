@@ -17,59 +17,18 @@ export interface FileMeta {
 
 export interface FileDisplayProps {
   file: FileMeta;
-  /**
-   * Visual density preset.
-   * - normal: larger, used in lists and cards
-   * - compact: smaller padding, used in selectors and inline chips
-   */
   density?: 'normal' | 'compact';
-  /**
-   * Whether to render as an interactive card (hover/press states)
-   */
   interactive?: boolean;
-  /**
-   * Optional leading visual (icon/thumbnail). If not provided, a default icon will be rendered based on file type.
-   */
   leadingVisual?: React.ReactNode;
-  /**
-   * Optional trailing area (e.g., actions, badges)
-   */
   trailing?: React.ReactNode;
-  /**
-   * Whether to show the secondary metadata line (size, date, type)
-   */
   showMeta?: boolean;
-  /**
-   * Override aria-label for accessibility when used as a button/link wrapper
-   */
   ariaLabel?: string;
-  /**
-   * Called when the card is clicked (if interactive)
-   */
   onClick?: (file: FileMeta, event: React.MouseEvent) => void;
-  /**
-   * Class name passthrough for external layout control
-   */
   className?: string;
-  /**
-   * Show a small preview tooltip/card on hover.
-   */
   showPreviewOnHover?: boolean;
-  /**
-   * Placement for the preview tooltip.
-   */
   previewPlacement?: 'top' | 'bottom' | 'left' | 'right';
-  /**
-   * Delay for showing the preview (ms)
-   */
   previewDelayMs?: number;
-  /**
-   * If true (default), clicking an interactive FileDisplay with no onClick handler navigates to the Files screen to view this file.
-   */
   navigateOnClick?: boolean;
-  /**
-   * Data attributes passthrough
-   */
   [dataAttr: `data-${string}`]: unknown;
 }
 
@@ -92,7 +51,6 @@ function formatDate(input?: number | string | Date | null): string | null {
   else if (typeof input === 'number') d = new Date(input);
   else d = new Date(input);
   if (Number.isNaN(d.getTime())) return null;
-  // Use locale but keep concise format
   return d.toLocaleString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -104,7 +62,6 @@ function formatDate(input?: number | string | Date | null): string | null {
 
 function extFromTypeOrName(type?: string | null, name?: string): string | null {
   if (type) {
-    // Try mime like 'text/markdown' -> 'markdown'
     const parts = type.split('/');
     if (parts.length === 2 && parts[1]) return parts[1];
   }
@@ -115,22 +72,156 @@ function extFromTypeOrName(type?: string | null, name?: string): string | null {
   return null;
 }
 
-function defaultIconFor(file: FileMeta): React.ReactNode {
-  const ext = extFromTypeOrName(file.type ?? undefined, file.name);
-  const baseCls = 'fd-icon';
-  const cls = `${baseCls} ${ext ? `${baseCls}--${ext}` : ''}`;
-  // Simple SVG iconography based on ext; keep generic fallback
+function SvgIcon({ path, stroke, fill, size = 20, viewBox = '0 0 24 24' }: { path: React.ReactNode; stroke?: string; fill?: string; size?: number; viewBox?: string }) {
   return (
-    <span className={cls} aria-hidden>
-      <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 1h9l5 5v17a0 0 0 0 1 0 0H3a0 0 0 0 1 0 0V1z" fill="var(--surface-2, #f5f6f8)" stroke="var(--border-subtle, #d9dbe1)"/>
-        <path d="M12 1v5h5" fill="var(--surface-1, #fff)"/>
+    <span className="fd-icon" aria-hidden>
+      <svg width={size} height={size} viewBox={viewBox} fill="none" xmlns="http://www.w3.org/2000/svg">
+        {path}
       </svg>
     </span>
   );
 }
 
-// Small preview card shown inside the tooltip overlay
+function iconForExt(ext: string | null): React.ReactNode {
+  const e = (ext || '').toLowerCase();
+  // Basic set of meaningful icons; keep simple inline SVGs to avoid asset pipeline issues
+  switch (e) {
+    case 'md':
+    case 'markdown': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#e8eefc" stroke="#a7b7f9"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#3b5bdb" fontFamily="monospace">MD</text>
+          </>
+        } />
+      );
+    }
+    case 'json': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#ecf7ff" stroke="#8ed0ff"/>
+            <path d="M9 9c-2 0-2 6 0 6M15 9c2 0 2 6 0 6" stroke="#1c7ed6" strokeWidth="1.5" strokeLinecap="round"/>
+          </>
+        } />
+      );
+    }
+    case 'js':
+    case 'cjs':
+    case 'mjs': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fffbe6" stroke="#ffe58f"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#d4b106" fontFamily="monospace">JS</text>
+          </>
+        } />
+      );
+    }
+    case 'ts':
+    case 'tsx': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#e7f5ff" stroke="#a5d8ff"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#1971c2" fontFamily="monospace">TS</text>
+          </>
+        } />
+      );
+    }
+    case 'css': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#f3f0ff" stroke="#d0bfff"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#7048e8" fontFamily="monospace">CSS</text>
+          </>
+        } />
+      );
+    }
+    case 'html':
+    case 'htm': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff0f0" stroke="#ffc9c9"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#e03131" fontFamily="monospace">HTML</text>
+          </>
+        } />
+      );
+    }
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+    case 'bmp':
+    case 'svg':
+    case 'webp': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#ecfdf5" stroke="#b2f2bb"/>
+            <path d="M6 17l4-5 3 4 2-3 3 4H6z" fill="#40c057"/>
+            <circle cx="9" cy="9" r="1.5" fill="#37b24d"/>
+          </>
+        } />
+      );
+    }
+    case 'pdf': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff5f5" stroke="#ffa8a8"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#c92a2a" fontFamily="monospace">PDF</text>
+          </>
+        } />
+      );
+    }
+    case 'zip':
+    case 'tar':
+    case 'gz':
+    case 'tgz':
+    case 'rar': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff9db" stroke="#ffe8a1"/>
+            <path d="M12 6v12M12 6h2M12 9h2M12 12h2M12 15h2" stroke="#e67700" strokeWidth="1.5"/>
+          </>
+        } />
+      );
+    }
+    case 'txt':
+    case 'log':
+    case 'text': {
+      return (
+        <SvgIcon path={
+          <>
+            <rect x="2" y="3" width="20" height="18" rx="2" fill="#f8f9fa" stroke="#dee2e6"/>
+            <path d="M6 8h10M6 11h10M6 14h8" stroke="#495057" strokeWidth="1.2" strokeLinecap="round"/>
+          </>
+        } />
+      );
+    }
+    default: {
+      return (
+        <span className="fd-icon fd-icon--badge" aria-hidden>
+          <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="3" width="16" height="18" rx="2" fill="var(--surface-2, #f5f6f8)" stroke="var(--border-subtle, #d9dbe1)"/>
+            <path d="M8 8h8M8 12h8M8 16h6" stroke="var(--text-muted)" strokeWidth="1.3" strokeLinecap="round"/>
+          </svg>
+        </span>
+      );
+    }
+  }
+}
+
+function defaultIconFor(file: FileMeta): React.ReactNode {
+  const ext = extFromTypeOrName(file.type ?? undefined, file.name);
+  return iconForExt(ext);
+}
+
 const textLikeTypes = new Set(['markdown', 'text', 'json', 'yaml', 'yml', 'javascript', 'typescript', 'styles', 'css', 'md', 'txt']);
 
 function isTextLike(file: FileMeta): boolean {
@@ -138,14 +229,14 @@ function isTextLike(file: FileMeta): boolean {
   return textLikeTypes.has(t);
 }
 
-const MAX_PREVIEW_CHARS = 1200; // ~ a few paragraphs
+const MAX_PREVIEW_CHARS = 1200;
 
 function useFilePreviewContent(file: FileMeta) {
   const { readFile } = useFiles()
   const [state, setState] = React.useState<{ loading: boolean; error: string | null; text: string | null }>({ loading: false, error: null, text: null });
   React.useEffect(() => {
     let cancelled = false;
-    const relPath = file.path; // convention: FileMeta.path is relPath within project scope
+    const relPath = file.path;
     if (!relPath || !isTextLike(file)) {
       setState((s) => ({ ...s, loading: false, text: null, error: null }));
       return;
@@ -222,18 +313,10 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
 }) => {
   const sizeLabel = formatBytes(file.size ?? null);
   const dateLabel = formatDate(file.mtime ?? null);
-  const ext = extFromTypeOrName(file.type ?? undefined, file.name);
-
-  const metaParts: string[] = [];
-  if (ext) metaParts.push(ext.toUpperCase());
-  if (sizeLabel) metaParts.push(sizeLabel);
-  if (dateLabel) metaParts.push(dateLabel);
-
-  const meta = metaParts.join(' • ');
 
   const role = interactive ? 'button' : undefined;
   const tabIndex = interactive ? 0 : undefined;
-  const aria = ariaLabel || `${file.name}${meta ? `, ${meta}` : ''}`;
+  const aria = ariaLabel || `${file.name}${sizeLabel ? `, ${sizeLabel}` : ''}${dateLabel ? `, modified ${dateLabel}` : ''}`;
 
   async function handleNavigate(e: React.MouseEvent) {
     if (!file.path) return;
@@ -247,7 +330,6 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
       if (onClick) {
         onClick(file, (e as unknown) as React.MouseEvent);
       } else if (navigateOnClick) {
-        // synthesize click navigation
         handleNavigate((e as unknown) as React.MouseEvent);
       }
     }
@@ -274,12 +356,13 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
     >
       <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
       <div className="fd-content">
-        <div className="fd-name" title={file.path || file.name}>
-          {file.name}
-        </div>
-        {showMeta && meta && <div className="fd-meta">{meta}</div>}
+        <div className="fd-name" title={file.path || file.name}>{file.name}</div>
+        {showMeta && sizeLabel && <div className="fd-size">{sizeLabel}</div>}
       </div>
-      {trailing && <div className="fd-trailing">{trailing}</div>}
+      <div className="fd-right">
+        {showMeta && dateLabel && <div className="fd-date">{dateLabel}</div>}
+        {trailing ? <div className="fd-trailing">{trailing}</div> : null}
+      </div>
     </div>
   );
 

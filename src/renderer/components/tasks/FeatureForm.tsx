@@ -132,22 +132,22 @@ export default function FeatureForm({
           <div id="feature-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{error}</div>
         ) : null}
 
-                  <div className="flex flex-col gap-1">
-            <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
-            <textarea
-              id="feature-description"
-              rows={4}
-              placeholder="Optional details or acceptance criteria"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={submitting}
-              className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-              style={{
-                background: 'var(--surface-raised)',
-                borderColor: 'var(--border-default)',
-                color: 'var(--text-primary)'
-              }}
-            />
+        <div className="flex flex-col gap-1">
+          <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+          <textarea
+            id="feature-description"
+            rows={4}
+            placeholder="Optional details or acceptance criteria"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+          />
         </div>
 
         <div className="flex flex-col gap-1">
@@ -171,7 +171,7 @@ export default function FeatureForm({
 
         <div className="flex flex-col gap-1">
           <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Context Files</label>
-          <div className="flex flex-wrap gap-2 border rounded-md min-h-[3rem] p-2" style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}>
+          <div className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2" style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}>
             {context.map((p, idx) => (
               <ContextFileChip key={p} path={p} onRemove={() => removeContextAt(idx)} />
             ))}
@@ -189,7 +189,7 @@ export default function FeatureForm({
             id="feature-dependencies"
             className="chips-list border rounded-md min-h-[3rem] p-2"
             style={{
-              borderColor: 'var(--border-default)', //depError ? 'var(--status-stuck-soft-border)' : 
+              borderColor: 'var(--border-default)',
               background: 'var(--surface-raised)'
             }}
           >

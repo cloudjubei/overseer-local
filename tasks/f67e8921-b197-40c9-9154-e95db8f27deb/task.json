@@ -146,7 +146,7 @@
     },
     {
       "id": "56b114e3-daee-481b-9c33-329c8eace503",
-      "status": "-",
+      "status": "+",
       "title": "Make the Context Files selection better",
       "description": "1) the Add chip becomes huge once there's even just 1 file (it scales in height to match it). That shouldn't be the case.\n2) when the FileSelector opens - it should auto focus into the search input box so a user can start typing right away\n3) in the FileDisplay and FileSelector - instead of showing a generic document icon, let's try to use a meaningful type extension icon - if need be, create a folder with such common icons to use.\n4) The FileDisplay - should show the icon centered to the left. The name in the middle. \nThe file size small at the bottom.\nThe last modification date at the top right.\nAnd the delete button is correct where it is now.",
       "plan": "",

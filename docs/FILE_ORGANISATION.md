@@ -6,6 +6,7 @@ This document describes how files and directories are organised in this reposito
 - docs/: Project documentation and specs (single source of truth for protocols, formats, and guidelines).
 - src/: Application source (Electron main + React renderer + tooling).
   - src/styles/: Shared CSS assets and design tokens, grouped by role (foundations, primitives, components, layout, screens).
+    - New: src/styles/components/file-display.css contains layout and visuals for the FileDisplay UI component (icon+metadata grid, density presets, interactive states). Imported via src/index.css.
   - src/types/: Shared TypeScript types.
   - src/renderer/: React renderer (components, screens, hooks, services, navigation, preview runtime).
     - src/renderer/components/: Reusable UI and domain-specific components.
