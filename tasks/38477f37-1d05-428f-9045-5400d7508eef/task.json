@@ -54,7 +54,7 @@
         "src/renderer/components/MarkdownRenderer.tsx"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "4152e447-4fe4-48e2-9360-3760a4c57cba",

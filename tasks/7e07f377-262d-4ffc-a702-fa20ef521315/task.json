@@ -167,7 +167,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "c3b28472-ea04-4b83-8048-3e389cbe8f12",

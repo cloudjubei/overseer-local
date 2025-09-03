@@ -104,7 +104,8 @@ export default class TasksStorage {
       description: task.description || '',
       features: [],
       rejection: task.rejection,
-      featureIdToDisplayIndex: {}
+      featureIdToDisplayIndex: {},
+      blockers: task.blockers,
     };
 
     const { valid, errors } = validateTask(newTask);
@@ -181,7 +182,7 @@ export default class TasksStorage {
       plan: feature.plan || '',
       context: feature.context || [],
       acceptance: feature.acceptance || [],
-      dependencies: feature.dependencies,
+      blockers: feature.blockers,
       rejection: feature.rejection
     };
     task.features.push(newFeature);

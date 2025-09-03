@@ -23,7 +23,7 @@
         "docs/APP_RELEASE.md"
       ],
       "acceptance": [],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "30523735-4beb-4f5b-a643-d109f2ee5915",

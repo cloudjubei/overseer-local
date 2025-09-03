@@ -19,7 +19,7 @@
         "The file defines Python types for `Task`, `Feature`, and other relevant data structures.",
         "The types cover all fields currently used in `TASKS.md` and `plan.md` files."
       ],
-      "dependencies": []
+      "blockers": []
     },
     {
       "id": "2",
@@ -34,7 +34,7 @@
         "`docs/tasks/task_example.json` exists.",
         "The JSON is valid and conforms to the structure defined in `docs/tasks/task_format.py`."
       ],
-      "dependencies": [
+      "blockers": [
         "13.1"
       ]
     }

@@ -7,7 +7,7 @@ export interface Feature {
   context: string[];
   plan?: string;
   acceptance?: string[];
-  dependencies?: string[];
+  blockers?: string[];
   rejection?: string;
 }
 export interface Task {
@@ -17,7 +17,7 @@ export interface Task {
   status: Status;
   features: Feature[];
   featureIdToDisplayIndex: Record<string, number>;
-  dependencies?: string[];
+  blockers?: string[];
   rejection?: string;
 }
 export interface ProjectRequirement {

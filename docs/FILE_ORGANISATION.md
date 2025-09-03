@@ -17,7 +17,7 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/navigation/: Navigation state and modal host.
     - src/renderer/services/: Frontend services (chat/docs/tasks/projects/files/notifications/user-preferences).
       - src/renderer/services/agentsService.ts: In-memory orchestrator client that starts/monitors agent runs using the local factory-ts bridge. Tracks provider/model, costs, and token usage across runs.
-    - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, dependency resolver, etc.).
+    - src/renderer/hooks/: React hooks (theme, shortcuts, tasks index, blocker resolver, etc.).
       - src/renderer/hooks/useAgents.ts: Hook to subscribe to active agent runs and start/cancel them.
     - src/renderer/preview/: Component preview runtime and provider registry for isolated previews.
   - src/tools/: Developer and agent tooling (preview analysis, formatting, compile checks, docker helpers).
@@ -32,7 +32,7 @@ This document describes how files and directories are organised in this reposito
   - src/tasks/: Tasks manager and per-project storage.
   - src/notifications/: Notifications manager and IPC integration.
   - src/preferences/: Preferences manager and user settings storage (system-wide user preferences such as last active project, task view mode, list sorting, notification settings), with IPC exposure.
-  - src/main.js: Electron main process entry that owns the factory-ts orchestrator and bridges runs/events over IPC.
+  - src/main.js: Electron main process entry that owns the factory-ts orchestrator and exposes IPC handlers for starting runs and streaming events via src/tools/factory/mainOrchestrator.js.
   - src/preload.js: Preload script exposing a minimal window.factory API to the renderer (startTaskRun, startFeatureRun, cancelRun, subscribe).
 - scripts/: Project automation scripts and CLIs (e.g., preview scanning, runAgent.mjs runner for factory-ts).
 - build/: Packaging resources for electron-builder (icons, entitlements, etc.).

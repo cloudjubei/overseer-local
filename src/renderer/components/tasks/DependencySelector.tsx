@@ -52,7 +52,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   }
 
   if (!project) {
-    return <div>Loading dependencies...</div>
+    return <div>Loading blockers...</div>
   }
 
   const renderTaskItem = (project: ProjectSpec, taskId: string) => {
