@@ -242,7 +242,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       const initMeta = {
         runId: run.id,
         projectId,
-        taskId: String(taskId),
+        taskId,
         featureId: undefined,
         state: 'running',
         message: 'Starting agent... ',
@@ -273,8 +273,8 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       const initMeta = {
         runId: run.id,
         projectId,
-        taskId: String(taskId),
-        featureId: String(featureId),
+        taskId,
+        featureId,
         state: 'running',
         message: 'Starting agent... ',
         progress: undefined,

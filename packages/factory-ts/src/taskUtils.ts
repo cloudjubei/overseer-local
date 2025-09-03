@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Status, Feature, Task } from './types.js';
+import type { Status, Feature, Task, ProjectSpec } from './types.js';
 import type { GitManager } from './gitManager.js';
 
 let PROJECT_ROOT = path.resolve(process.cwd());
@@ -16,7 +16,17 @@ function taskDir(taskId: string) { return path.join(tasksDir(), taskId); }
 function taskPath(taskId: string) { return path.join(taskDir(taskId), 'task.json'); }
 function testPath(taskId: string, featureId: string) { return path.join(taskDir(taskId), 'tests', `test_${taskId}_${featureId}.py`); }
 
+const PROJECTS_DIR_NAME = 'projects';
+function projectsDir() { return path.join(PROJECT_ROOT, PROJECTS_DIR_NAME); }
+function projectPath(projectId: string) { return path.join(projectsDir(), `${projectId}.json`); }
+
 async function ensureDir(p: string) { await fsp.mkdir(p, { recursive: true }); }
+
+async function getProject(projectId: string): Promise<ProjectSpec> {
+  const p = projectPath(projectId);
+  const raw = await fsp.readFile(p, 'utf8');
+  return JSON.parse(raw);
+}
 
 async function getTask(taskId: string): Promise<Task> {
   const p = taskPath(taskId);
@@ -307,6 +317,7 @@ export const taskUtils = {
   deleteTest,
   runTest,
   // orchestrator helpers
+  getProject,
   findNextAvailableFeature,
   createFeature,
   updateFeaturePlan,

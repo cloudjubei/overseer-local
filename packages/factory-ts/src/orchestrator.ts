@@ -406,7 +406,6 @@ async function copyTree(src: string, dest: string) {
       logger.warn(`copyTree: Skipping unreadable directory ${from}: ${e?.code || e}`);
       return;
     }
-
     for (const entry of entries) {
       const rel = path.relative(src, path.join(from, entry.name));
       if (shouldIgnoreCopy(rel)) continue;
@@ -525,9 +524,9 @@ function resolveRepoRootHint(hint?: string): string {
 export async function runIsolatedOrchestrator(opts: {
   model: string;
   agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
+  projectId: string; 
   taskId: string;
   featureId?: string; 
-  projectDir?: string; // child project relative to repo root OR absolute path
   repoRoot?: string;   // absolute path to repo root to copy from; avoids app.asar in production
   taskTools: TaskUtils,
   fileTools: FileTools,
@@ -535,13 +534,19 @@ export async function runIsolatedOrchestrator(opts: {
   completion: CompletionClient;
   emit?: (e: { type: string; payload?: any }) => void;
 }) {
-  const { model, agentType, taskId, featureId, projectDir, repoRoot: repoRootOpt, taskTools, fileTools, gitFactory, completion, emit } = opts;
+  const { model, agentType, projectId, taskId, featureId, repoRoot: repoRootOpt, taskTools, fileTools, gitFactory, completion, emit } = opts;
 
+  const project = await taskTools.getProject(projectId);
+  const projectDir = project.path
+    
   // Determine repo root: prefer explicitly provided repoRoot; otherwise resolve from env/cwd while avoiding asar
+  console.log("runIsolatedOrchestrator projectDir: ", projectDir)
   let repoRoot = resolveRepoRootHint(repoRootOpt);
+  console.log("runIsolatedOrchestrator repoRoot: ", repoRoot)
 
   // If projectDir is absolute, treat it as the project root to copy instead of entire repo
   let sourceRoot = projectDir && path.isAbsolute(projectDir) ? projectDir : repoRoot;
+  console.log("runIsolatedOrchestrator sourceRoot FIRST: ", sourceRoot)
 
   // If projectDir is relative, verify it exists under repoRoot; if not, try another sensible root
   if (projectDir && !path.isAbsolute(projectDir)) {
@@ -555,6 +560,7 @@ export async function runIsolatedOrchestrator(opts: {
     } catch {}
   }
 
+  console.log("runIsolatedOrchestrator sourceRoot LAST: ", sourceRoot)
   // Validate sourceRoot isn't inside an asar and exists
   if (sourceRoot.includes('.asar')) {
     const stripped = stripAsarSegments(sourceRoot);

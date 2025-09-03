@@ -63,7 +63,7 @@ export type LLMConfig = {
 export type AgentType = 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
 export type AgentRun = {
   agent: AgentType;
-  projectId?: string;
+  projectId: string;
   taskId: string;
   featureId?: string;
   llmConfig: LLMConfig;

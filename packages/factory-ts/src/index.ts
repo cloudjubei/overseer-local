@@ -225,9 +225,10 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
         const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider, pricing });
         const agentType = getAgentFromArgs(args, 'developer');
 
+        const projectId = args.projectId
         const taskId = args.taskId;
         const featureId = args.featureId;
-        await runIsolatedOrchestrator({ model: args.llmConfig.model, agentType, taskId, featureId, gitFactory: (p) => new GitManager(p), taskTools, fileTools, completion, emit: (e) => ee.emit('event', e) });
+        await runIsolatedOrchestrator({ model: args.llmConfig.model, agentType, projectId, taskId, featureId, gitFactory: (p) => new GitManager(p), taskTools, fileTools, completion, emit: (e) => ee.emit('event', e) });
 
         ee.emit('event', { type: 'run/completed', payload: { ok: true } } satisfies RunEvent);
       } catch (err) {

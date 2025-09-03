@@ -76,7 +76,7 @@ export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ 
   return { handle, events };
 }
 
-export async function startRunGeneric(params: { projectId: string; taskId?: string | number; featureId?: string | number; options?: Record<string, any> }) {
+export async function startRunGeneric(params: { projectId: string; taskId: string; featureId?: string | number; options?: Record<string, any> }) {
   if (params.featureId != null) return startFeatureRun(params as any);
   if (params.taskId != null) return startTaskRun(params as any);
   throw new Error('taskId or featureId required');
