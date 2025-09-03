@@ -173,7 +173,7 @@
     },
     {
       "id": "b2ad0ce4-b71a-40bc-baa7-3550153bef88",
-      "status": "-",
+      "status": "+",
       "title": "When running the orchestrator, finding the next feature for a task should be based on the feature index",
       "description": "the Task.featureIdToDisplayIndex is the means by which the features should be sorted for this.",
       "plan": "",

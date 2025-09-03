@@ -210,8 +210,29 @@ async function runTest(taskId: string, featureId: string) {
 
 // Orchestrator helpers
 function findNextAvailableFeature(task: Task, excludeIds: Set<string> = new Set(), ignoreDependencies = false): Feature | undefined {
-  const completed = new Set((task.features || []).filter(f => f.status === '+').map(f => f.id));
-  for (const f of task.features || []) {
+  const features = (task.features || []).slice();
+  if (features.length === 0) return undefined;
+
+  // Create an index mapping using featureIdToDisplayIndex; fallback to array order
+  const displayIndex: Record<string, number> = {};
+  const map = (task as any).featureIdToDisplayIndex as Record<string, number> | undefined;
+  for (let i = 0; i < features.length; i++) {
+    const f = features[i];
+    const idx = map?.[f.id];
+    displayIndex[f.id] = typeof idx === 'number' ? idx : (i + 1); // 1-based fallback
+  }
+
+  // Sort features by display index ascending
+  features.sort((a, b) => {
+    const ai = displayIndex[a.id] ?? Number.MAX_SAFE_INTEGER;
+    const bi = displayIndex[b.id] ?? Number.MAX_SAFE_INTEGER;
+    if (ai !== bi) return ai - bi;
+    // Stable fallback using original array order if indexes equal/missing
+    return 0;
+  });
+
+  const completed = new Set(features.filter(f => f.status === '+').map(f => f.id));
+  for (const f of features) {
     if (excludeIds.has(f.id)) continue;
     if (f.status === '-') {
       const deps = f.blockers || [];
