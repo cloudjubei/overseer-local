@@ -2,6 +2,10 @@ import React from 'react'
 import type { Task, Status, ProjectSpec } from 'packages/factory-ts/src/types'
 import Tooltip from '../ui/Tooltip'
 import StatusControl from './StatusControl'
+import RunAgentButton from './RunAgentButton'
+import AgentRunBullet from '../agents/AgentRunBullet'
+import { useAgents } from '../../hooks/useAgents'
+import { useNavigator } from '../../navigation/Navigator'
 
 export default function TaskCard({ project, task, onClick, draggable = false, onDragStart, showStatus = true, onStatusChange }: {
   project: ProjectSpec,
@@ -12,6 +16,10 @@ export default function TaskCard({ project, task, onClick, draggable = false, on
   showStatus?: boolean,
   onStatusChange?: (status: Status) => void | Promise<void>
 }) {
+  const { activeRuns, startTaskAgent } = useAgents()
+  const { navigateAgentRun } = useNavigator()
+  const taskRun = activeRuns.find(r => r.taskId === task.id)
+
   return (
     <div
       className="task-card group"
@@ -39,6 +47,19 @@ export default function TaskCard({ project, task, onClick, draggable = false, on
       <div className="task-card__header">
         <span className="id-chip">{project.taskIdToDisplayIndex[task.id]}</span>
         <div className="flex-spacer" />
+        <div className="task-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
+          {taskRun ? (
+            <AgentRunBullet
+              key={taskRun.runId}
+              run={taskRun}
+              onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }}
+            />
+          ) : (
+            <RunAgentButton
+              onClick={(agentType) => { startTaskAgent(agentType, project.id, task.id) }}
+            />
+          )}
+        </div>
       </div>
       <div className="task-card__title" title={task.title}>{task.title}</div>
       {showStatus && <div className="task-card__meta flex items-center justify-between gap-2">
