@@ -13,6 +13,8 @@ This document describes how files and directories are organised in this reposito
     - src/renderer/components/: Reusable UI and domain-specific components.
       - src/renderer/components/tasks/: Task-related UI elements (status controls, dependency bullets, etc.).
       - src/renderer/components/agents/: Agent-related UI elements (AgentRunBullet and future agent widgets). Now includes ChatConversation.tsx to render agent run chat with bubbles for thoughts and expandable tool call rows.
+        - New: StatusChip.tsx renders a chip with a status icon for agent run states (running/completed/cancelled/error).
+        - New: TurnChip.tsx renders a small chip showing the current/total turn number for a run.
       - src/renderer/components/ui/FileMentions.tsx: Utility component that scans text for @File tokens and renders inline chips with hoverable tooltips using FileDisplay.
     - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, Agents, etc.).
     - src/renderer/tasks/: Task/feature create/edit/list/board views.

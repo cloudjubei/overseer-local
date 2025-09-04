@@ -180,7 +180,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Agents - run histories UI improvements",
       "description": "The table should show the following columns\nRun -> the date + time below when it started\nTask -> Can use the @src/renderer/components/tasks/DependencyBubble.tsx as it serves the same exact purpose\nStatus -> create a chip that shows the appropriate StatusIcon inside. These new icons need to be created.\nTurn -> show as a chip.\nCost -> stays the same\nTokens -> stays the same\nMessages -> how many turns it took\nDuration -> a nicely formatted display of the time it took",
       "plan": "",

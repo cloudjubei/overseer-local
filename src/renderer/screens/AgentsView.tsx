@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAgents } from '../hooks/useAgents';
 import { useActiveProject } from '../projects/ProjectContext';
 import type { AgentRun } from '../services/agentsService';
 import ChatConversation from '../components/agents/ChatConversation';
 import { IconChevron, IconDelete } from '../components/ui/Icons';
+import DependencyBullet from '../components/tasks/DependencyBullet';
+import StatusChip from '../components/agents/StatusChip';
+import TurnChip from '../components/agents/TurnChip';
 
 function formatUSD(n?: number) {
   if (n == null) return '\u2014';
@@ -43,6 +46,32 @@ function stateDotColor(state: AgentRun['state']) {
     default:
       return 'bg-neutral-400';
   }
+}
+
+function countTurns(messages: AgentRun['messages']): number {
+  if (!messages || messages.length === 0) return 0;
+  let turns = 0;
+  let hasAssistant = false;
+  for (const m of messages) {
+    if ((m.role || '').toLowerCase() === 'user') turns++;
+    if ((m.role || '').toLowerCase() === 'assistant') hasAssistant = true;
+  }
+  if (turns === 0 && hasAssistant) return 1;
+  return turns;
+}
+
+function formatDuration(ms?: number) {
+  if (ms == null || !isFinite(ms) || ms < 0) return '\u2014';
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  const s = Math.floor(ms / 1000);
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  const parts: string[] = [];
+  if (hrs) parts.push(`${hrs}h`);
+  if (mins) parts.push(`${mins}m`);
+  parts.push(`${secs}s`);
+  return parts.join(' ');
 }
 
 export default function AgentsView() {
@@ -107,7 +136,7 @@ export default function AgentsView() {
                       <button className="btn-secondary" onClick={() => run.runId && cancelRun(run.runId)}>Cancel</button>
                     </div>
                   </div>
-                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
                     <div className="rounded bg-neutral-50 dark:bg-neutral-800 p-2">
                       <div className="text-neutral-500">Progress</div>
                       <div className="font-medium">{run.progress != null ? `${Math.round((run.progress ?? 0) * 100)}%` : '\u2014'}</div>
@@ -121,10 +150,14 @@ export default function AgentsView() {
                       <div className="font-medium">{run.promptTokens ?? 0} / {run.completionTokens ?? 0}</div>
                     </div>
                     <div className="rounded bg-neutral-50 dark:bg-neutral-800 p-2">
-                      <div className="text-neutral-500">Updated</div>
+                      <div className="text-neutral-500">Turn</div>
+                      <div className="font-medium"><TurnChip turn={countTurns(run.messages)} /></div>
+                    </div>
+                    <div className="rounded bg-neutral-50 dark:bg-neutral-800 p-2">
+                      <div className="text-neutral-500">Started</div>
                       <div className="font-medium leading-tight">
-                        <div>{formatDate(run.updatedAt)}</div>
-                        <div className="text-neutral-500">{formatTime(run.updatedAt)}</div>
+                        <div>{formatDate(run.startedAt)}</div>
+                        <div className="text-neutral-500">{formatTime(run.startedAt)}</div>
                       </div>
                     </div>
                   </div>
@@ -146,49 +179,58 @@ export default function AgentsView() {
                 <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
-                    <th className="text-left px-3 py-2">Task/Feature</th>
+                    <th className="text-left px-3 py-2">Task</th>
                     <th className="text-left px-3 py-2">Status</th>
-                    <th className="text-left px-3 py-2">Message</th>
+                    <th className="text-left px-3 py-2">Turn</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
-                    <th className="text-left px-3 py-2">Started</th>
-                    <th className="text-left px-3 py-2">Updated</th>
+                    <th className="text-left px-3 py-2">Messages</th>
+                    <th className="text-left px-3 py-2">Duration</th>
                     <th className="text-right px-3 py-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {projectRuns.map(r => (
-                    <tr id={`run-${r.runId ?? 'unknown'}`} key={r.runId ?? Math.random().toString(36)} className="border-t border-neutral-200 dark:border-neutral-800 group">
-                      <td className="px-3 py-2 font-mono text-xs">{(r.runId ?? '').slice(-8) || ''}</td>
-                      <td className="px-3 py-2">{r.taskId ?? ''}<br/>{r.featureId ?? ''}</td>
-                      <td className="px-3 py-2">
-                        <span className={`inline-block w-2 h-2 rounded-full ${stateDotColor(r.state)}`} aria-label={r.state} title={r.state} />
-                      </td>
-                      <td className="px-3 py-2 truncate max-w-[280px]" title={r.message ?? ''}>{r.message ?? ''}</td>
-                      <td className="px-3 py-2">{formatUSD(r.costUSD)}</td>
-                      <td className="px-3 py-2">{r.promptTokens ?? 0} / {r.completionTokens ?? 0}</td>
-                      <td className="px-3 py-2 leading-tight">
-                        <div>{formatDate(r.startedAt)}</div>
-                        <div className="text-neutral-500">{formatTime(r.startedAt)}</div>
-                      </td>
-                      <td className="px-3 py-2 leading-tight">
-                        <div>{formatDate(r.updatedAt)}</div>
-                        <div className="text-neutral-500">{formatTime(r.updatedAt)}</div>
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="btn-secondary btn-icon" aria-label="View" onClick={() => r.runId && setOpenRunId(r.runId)}>
-                            <IconChevron />
-                          </button>
-                          {r.state === 'running' && r.runId ? (
-                            <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => cancelRun(r.runId!)}>
-                              <IconDelete />
+                  {projectRuns.map(r => {
+                    const turns = countTurns(r.messages);
+                    const started = new Date(r.startedAt || r.updatedAt || Date.now());
+                    const ended = r.state === 'running' ? new Date() : new Date(r.updatedAt || Date.now());
+                    const durationMs = Math.max(0, ended.getTime() - started.getTime());
+                    const dep = r.featureId ? `${r.taskId}.${r.featureId}` : r.taskId;
+
+                    return (
+                      <tr id={`run-${r.runId ?? 'unknown'}`} key={r.runId ?? Math.random().toString(36)} className="border-t border-neutral-200 dark:border-neutral-800 group">
+                        <td className="px-3 py-2 leading-tight">
+                          <div>{formatDate(r.startedAt)}</div>
+                          <div className="text-neutral-500">{formatTime(r.startedAt)}</div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <DependencyBullet dependency={dep} />
+                        </td>
+                        <td className="px-3 py-2">
+                          <StatusChip state={r.state} />
+                        </td>
+                        <td className="px-3 py-2">
+                          <TurnChip turn={turns} />
+                        </td>
+                        <td className="px-3 py-2">{formatUSD(r.costUSD)}</td>
+                        <td className="px-3 py-2">{r.promptTokens ?? 0} / {r.completionTokens ?? 0}</td>
+                        <td className="px-3 py-2">{turns}</td>
+                        <td className="px-3 py-2">{formatDuration(durationMs)}</td>
+                        <td className="px-3 py-2 text-right">
+                          <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button className="btn-secondary btn-icon" aria-label="View" onClick={() => r.runId && setOpenRunId(r.runId)}>
+                              <IconChevron />
                             </button>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            {r.state === 'running' && r.runId ? (
+                              <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => cancelRun(r.runId!)}>
+                                <IconDelete />
+                              </button>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
