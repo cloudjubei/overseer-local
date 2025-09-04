@@ -69,7 +69,6 @@ export default function AgentRunRow({ run, onView, onCancel, showActions = true,
   const started = useMemo(() => new Date(run.startedAt || run.updatedAt || Date.now()), [run.startedAt, run.updatedAt]);
   const ended = useMemo(() => (run.state === 'running' ? new Date() : new Date(run.updatedAt || Date.now())), [run.state, run.updatedAt]);
   const durationMs = Math.max(0, ended.getTime() - started.getTime());
-  const dep = run.featureId ? `${run.taskId}.${run.featureId}` : run.taskId;
 
   return (
     <tr id={`run-${run.runId ?? 'unknown'}`} className="border-t border-neutral-200 dark:border-neutral-800 group">
@@ -81,11 +80,7 @@ export default function AgentRunRow({ run, onView, onCancel, showActions = true,
         <td className="px-3 py-2 text-xs font-mono text-neutral-600 dark:text-neutral-400">{run.projectId ?? '\u2014'}</td>
       ) : null}
       <td className="px-3 py-2">
-        {dep ? (
-          <DependencyBullet className={"max-w-[100px] overflow-clip"} dependency={dep} notFoundDependencyDisplay={"?"} />
-        ) : (
-          <span className="text-xs text-neutral-500">\u2014</span>
-        )}
+        <DependencyBullet className={"max-w-[100px] overflow-clip"} dependency={run.taskId} notFoundDependencyDisplay={"?"} />
       </td>
       <td className="px-3 py-2">
         <StatusChip state={run.state} />
