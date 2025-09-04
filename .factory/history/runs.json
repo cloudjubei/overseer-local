@@ -1,5 +1,65 @@
 [
   {
+    "runId": "task_3dnpyq7c_mf5u27w1",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "error",
+    "message": "Error: ENOENT: no such file or directory, open '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-VOqBSr/workspace/projects/main.json'\n    at async open (node:internal/fs/promises:639:25)\n    at async Object.readFile (node:internal/fs/promises:1243:14)\n    at async Object.getProjectDir (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/taskUtils.js:18:17)\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/orchestrator.js:488:24)\n    at async file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/index.js:197:17",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:02:48.049Z",
+    "updatedAt": "2025-09-04T20:02:48.051Z"
+  },
+  {
+    "runId": "task_1r4hviqv_mf5u1wjv",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "error",
+    "message": "Error: ENOENT: no such file or directory, open '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-VOqBSr/workspace/projects/main.json'\n    at async open (node:internal/fs/promises:639:25)\n    at async Object.readFile (node:internal/fs/promises:1243:14)\n    at async Object.getProjectDir (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/taskUtils.js:18:17)\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/orchestrator.js:488:24)\n    at async file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/index.js:197:17",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:02:33.355Z",
+    "updatedAt": "2025-09-04T20:02:33.356Z"
+  },
+  {
+    "runId": "task_qldev5za_mf5u0zbc",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:01:50.281Z",
+    "updatedAt": "2025-09-04T20:01:55.077Z"
+  },
+  {
+    "runId": "task_k8gjmgzn_mf5u01rb",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "error",
+    "message": "Error: ENOENT: no such file or directory, open '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-HGNSLd/workspace/projects/main.json'\n    at async open (node:internal/fs/promises:639:25)\n    at async Object.readFile (node:internal/fs/promises:1243:14)\n    at async Object.getProjectDir (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/taskUtils.js:18:17)\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/orchestrator.js:488:24)\n    at async file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/index.js:197:17",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:01:06.791Z",
+    "updatedAt": "2025-09-04T20:01:06.793Z"
+  },
+  {
+    "runId": "task_18sffwd1_mf5tyypk",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:00:16.185Z",
+    "updatedAt": "2025-09-04T20:00:20.238Z"
+  },
+  {
     "runId": "task_ccq50tjt_mf5tnz46",
     "projectId": "main",
     "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
