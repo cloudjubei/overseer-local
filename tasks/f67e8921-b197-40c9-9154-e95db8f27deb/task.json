@@ -356,6 +356,57 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "d05e6082-c27c-487f-bacd-837f7f5b7f73",
+      "status": "-",
+      "title": "Cancelled agent runs are not recorded properly",
+      "description": "They don't change any files and are not recorded. They always show as in progress.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "352e49dd-37f2-428c-a85c-da7a2c1bd66a",
+      "status": "-",
+      "title": "Agent runs should show the model",
+      "description": "Create a reusable component - a nice display chip - that shows the provider and model.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "9244467b-e3d1-475a-a1f0-bf35d8482629",
+      "status": "-",
+      "title": "The status display for an Agent run inside TasksView.tsx and TaskDetailsView.tsx should match the display from AgentsView.tsx",
+      "description": "Reuse the StatusChip inside AgentsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/components/agents/StatusChip.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "37730047-f692-48c0-b6e7-9093564596a9",
+      "status": "-",
+      "title": "In TaskDetailsView.tsx next to the play button show the Agent Model control",
+      "description": "This control should show the current active LLM configuration and allow to quickly pick a configuration from the last 5 recent ones + a last option that would take the user to the LLM Configuration settings.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -384,6 +435,10 @@
     "0fea71a8-c0da-48a1-b4ea-c0db2196c902": 23,
     "d5b4852d-df73-4818-8db0-f7d6954c0108": 24,
     "b8d93d1d-5c66-4628-8a85-9da0197e97e2": 25,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 26
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 26,
+    "d05e6082-c27c-487f-bacd-837f7f5b7f73": 27,
+    "352e49dd-37f2-428c-a85c-da7a2c1bd66a": 28,
+    "9244467b-e3d1-475a-a1f0-bf35d8482629": 29,
+    "37730047-f692-48c0-b6e7-9093564596a9": 30
   }
 }
