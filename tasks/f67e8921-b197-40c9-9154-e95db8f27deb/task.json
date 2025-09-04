@@ -309,7 +309,7 @@
     },
     {
       "id": "0fea71a8-c0da-48a1-b4ea-c0db2196c902",
-      "status": "-",
+      "status": "+",
       "title": "When an agent runs - there's a duplicate history run",
       "description": "The Electron app has its own local history run, but when the agent runs on the copy of the project - it also produces a history run. This shouldn't happen - only the original app where the agent was started should create the history run. To avoid this - the agent should simply have an extra line for these files in its .gitignore file. The histories shouldn't be removed (they were as a first fix attempt).",
       "plan": "",
