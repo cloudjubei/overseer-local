@@ -15,7 +15,7 @@
     },
     {
       "id": "f393fa84-4782-4044-aa36-5beff900c05e",
-      "status": "-",
+      "status": "+",
       "title": "Design backend API specification and data models",
       "description": "Create detailed backend API specification document (docs/BACKEND_API_SPEC.md) defining: 1) RESTful endpoints for tasks, documents, projects, files, and user data, 2) Authentication and authorization strategy, 3) Database schema design for centralized storage, 4) Sync API endpoints for offline-first operations (conflict resolution, incremental sync), 5) WebSocket/SSE endpoints for real-time updates, 6) File upload/download endpoints with metadata, 7) Rate limiting and security considerations, 8) API versioning strategy.",
       "plan": "",
