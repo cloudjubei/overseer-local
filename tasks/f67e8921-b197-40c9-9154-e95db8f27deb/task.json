@@ -275,7 +275,7 @@
     },
     {
       "id": "abefc7ba-3098-4aee-a01b-694a5a2a9d43",
-      "status": "-",
+      "status": "+",
       "title": "When running an agent - all the GIT credentials are not found in the @.env",
       "description": "The agent runs, exchanges messages, but no code is committed.",
       "plan": "",

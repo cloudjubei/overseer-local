@@ -46,6 +46,7 @@ This document describes how files and directories are organised in this reposito
     - packages/factory-ts/src/pricing.ts: Pricing manager that loads/saves local model prices, estimates costs per-provider/model, and can refresh from configurable supplier URLs. Stores data under .factory/prices.json.
     - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator, createPricingManager and a file-backed createHistoryStore. HistoryStore persists run metadata under .factory/history/runs.json and per-run messages under .factory/history/runs/<runId>.messages.json.
     - packages/factory-ts/assets/default-prices.json: Built-in default price list used on first run or if local file is missing.
+    - packages/factory-ts/src/gitManager.ts: Git integration improved to load .env from the repo root automatically, accept multiple credential env var names (GIT_PAT/GIT_TOKEN/GITHUB_TOKEN/GH_TOKEN, GIT_USER_NAME/GIT_USERNAME, and GIT_REPO_URL/REPO_URL), fall back to SSH where possible, and provide clearer error messages. This ensures local commits always succeed and pushes use any available credentials or SSH agent.
 
 Also present at repo root:
 - .env, forge.config.js, index.html, preview.html, package.json, postcss.config.js, tailwind.config.js, tsconfig.json, vite.*.config.mjs
