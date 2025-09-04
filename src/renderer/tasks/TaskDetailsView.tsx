@@ -12,6 +12,7 @@ import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../c
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
+import AgentModelQuickSelect from '../components/agents/AgentModelQuickSelect'
 
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
@@ -228,6 +229,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
+            {/* Agent Model selector next to the play button */}
+            <AgentModelQuickSelect />
             {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
@@ -395,8 +398,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                     </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
-                )
-              })}
+                )}
+              )}
             </ul>
           )}
         </section>

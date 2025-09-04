@@ -6,6 +6,7 @@ export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed';
 export class LLMConfigManager {
   private storageKey = 'llmConfigs';
   private activeKey = 'activeLlmConfigId';
+  private recentKey = 'recentLlmConfigIds';
 
   private notify() {
     try {
@@ -20,6 +21,13 @@ export class LLMConfigManager {
 
   saveConfigs(configs: LLMConfig[]): void {
     localStorage.setItem(this.storageKey, JSON.stringify(configs));
+    // Clean recents to only include existing IDs
+    try {
+      const ids = this.getRecentIds();
+      const set = new Set(configs.map(c => c.id));
+      const cleaned = ids.filter(id => set.has(id));
+      localStorage.setItem(this.recentKey, JSON.stringify(cleaned));
+    } catch {}
     this.notify();
   }
 
@@ -29,6 +37,8 @@ export class LLMConfigManager {
 
   setActiveId(id: string): void {
     localStorage.setItem(this.activeKey, id);
+    // bump recents order
+    this.bumpRecent(id);
     this.notify();
   }
 
@@ -66,6 +76,11 @@ export class LLMConfigManager {
     let configs = this.getConfigs();
     configs = configs.filter(c => c.id !== id);
     this.saveConfigs(configs);
+    // remove from recents if present
+    try {
+      const ids = this.getRecentIds().filter(x => x !== id);
+      localStorage.setItem(this.recentKey, JSON.stringify(ids));
+    } catch {}
     if (this.getActiveId() === id) {
       this.setActiveId(configs[0]?.id || '');
     } else {
@@ -75,5 +90,31 @@ export class LLMConfigManager {
 
   isConfigured(): boolean {
     return !!this.getActiveConfig()?.apiKey;
+  }
+
+  getRecentIds(): string[] {
+    try {
+      const raw = localStorage.getItem(this.recentKey);
+      const arr = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(arr)) return [];
+      return arr.filter((x) => typeof x === 'string');
+    } catch {
+      return [];
+    }
+  }
+
+  private saveRecentIds(ids: string[]) {
+    try {
+      localStorage.setItem(this.recentKey, JSON.stringify(ids));
+    } catch {}
+  }
+
+  bumpRecent(id: string) {
+    try {
+      const ids = this.getRecentIds();
+      const next = [id, ...ids.filter(x => x !== id)];
+      // keep a reasonable history
+      this.saveRecentIds(next.slice(0, 10));
+    } catch {}
   }
 }

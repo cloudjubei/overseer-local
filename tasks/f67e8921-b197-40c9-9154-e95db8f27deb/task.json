@@ -309,9 +309,9 @@
     },
     {
       "id": "0fea71a8-c0da-48a1-b4ea-c0db2196c902",
-      "status": "+",
+      "status": "-",
       "title": "When an agent runs - there's a duplicate history run",
-      "description": "The Electron app has its own local history run, but when the agent runs on the copy of the project - it also produces a history run. This shouldn't happen - only the original app where the agent was started should create the history run.",
+      "description": "The Electron app has its own local history run, but when the agent runs on the copy of the project - it also produces a history run. This shouldn't happen - only the original app where the agent was started should create the history run. To avoid this - the agent should simply have an extra line for these files in its .gitignore file. The histories shouldn't be removed (they were as a first fix attempt).",
       "plan": "",
       "context": [
         "src/tools/factory/mainOrchestrator.js",
@@ -366,11 +366,12 @@
         "src/tools/factory/mainOrchestrator.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "This is still not working as it should. When I open the app there are some runs that are showing as running, when I cancel them I see they go into history. But I don't see any changes in the file system, thus nothing gets saved."
     },
     {
       "id": "352e49dd-37f2-428c-a85c-da7a2c1bd66a",
-      "status": "-",
+      "status": "+",
       "title": "Agent runs should show the model",
       "description": "Create a reusable component - a nice display chip - that shows the provider and model.",
       "plan": "",
@@ -380,7 +381,7 @@
     },
     {
       "id": "9244467b-e3d1-475a-a1f0-bf35d8482629",
-      "status": "-",
+      "status": "+",
       "title": "The status display for an Agent run inside TasksView.tsx and TaskDetailsView.tsx should match the display from AgentsView.tsx",
       "description": "Reuse the StatusChip inside AgentsView.tsx",
       "plan": "",
@@ -395,7 +396,7 @@
     },
     {
       "id": "37730047-f692-48c0-b6e7-9093564596a9",
-      "status": "-",
+      "status": "+",
       "title": "In TaskDetailsView.tsx next to the play button show the Agent Model control",
       "description": "This control should show the current active LLM configuration and allow to quickly pick a configuration from the last 5 recent ones + a last option that would take the user to the LLM Configuration settings.",
       "plan": "",
@@ -409,12 +410,14 @@
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
       "status": "-",
-      "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx should have collapsible turns.",
-      "description": "When opened - the last turn should be expanded and scrolled to.",
+      "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display Features or turns correctly",
+      "description": "Each task run comprises of the agent entering a conversation about a task's feature. This might take multiple turns - where a turn is a single message being sent by the LLM and the single response to it. The first system prompt (initial message) is Turn 0. The final message by the agent should be without a response ( it will be the final turn). It seems the orchestrator (inside factory-ts) captures these incorrectly.\nFix this behaviour so it matches the above description.",
       "plan": "",
       "context": [
         "src/renderer/components/agents/ChatConversation.tsx",
-        "src/renderer/screens/AgentsView.tsx"
+        "src/renderer/screens/AgentsView.tsx",
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js"
       ],
       "acceptance": [],
       "blockers": []
@@ -423,7 +426,7 @@
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
       "status": "-",
       "title": "AllAgentsView.tsx improvements",
-      "description": "The Project field in the table should show a reusable project chip that shows a tooltip with the project title + description on hover, and when clicking takes the user to home for that project.\n\nThe Cost field should also be a reusable component - on hover it should show a tooltip with the costs per token for that specifying provider and model.\n\nThe Tokens field should also be a reusable component - on hover it should show a breakdown of how long was each message and how many tokens it ended up being.",
+      "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not connected properly.\n\nThe Tokens field tooltip - this should show the tokens not the characters.\nThe Tokens field chip - should show an arrow icon \"->\" for tokens received from the LLM, and an arrow icon \"<-\" for tokens send to the LLM. These should be on two separate rows.",
       "plan": "",
       "context": [
         "src/renderer/screens/AllAgentsView.tsx"
@@ -455,13 +458,13 @@
     "bbc90ba1-4348-4a17-9921-18b6c0ece863": 20,
     "6e24f575-cf4d-451f-994f-7190d45ebaaa": 21,
     "894453ef-c700-4128-b714-4ec94498498c": 22,
-    "0fea71a8-c0da-48a1-b4ea-c0db2196c902": 23,
-    "d5b4852d-df73-4818-8db0-f7d6954c0108": 24,
-    "b8d93d1d-5c66-4628-8a85-9da0197e97e2": 25,
-    "d05e6082-c27c-487f-bacd-837f7f5b7f73": 26,
-    "9244467b-e3d1-475a-a1f0-bf35d8482629": 27,
-    "352e49dd-37f2-428c-a85c-da7a2c1bd66a": 28,
-    "37730047-f692-48c0-b6e7-9093564596a9": 29,
+    "d5b4852d-df73-4818-8db0-f7d6954c0108": 23,
+    "b8d93d1d-5c66-4628-8a85-9da0197e97e2": 24,
+    "9244467b-e3d1-475a-a1f0-bf35d8482629": 25,
+    "352e49dd-37f2-428c-a85c-da7a2c1bd66a": 26,
+    "37730047-f692-48c0-b6e7-9093564596a9": 27,
+    "0fea71a8-c0da-48a1-b4ea-c0db2196c902": 28,
+    "d05e6082-c27c-487f-bacd-837f7f5b7f73": 29,
     "82b9481c-7129-4bea-8029-0e41a56531fe": 30,
     "ea56a618-78f3-4612-bb73-12d6f7161f01": 31,
     "6a8066ee-230f-4f31-b531-3d8cadff4178": 32

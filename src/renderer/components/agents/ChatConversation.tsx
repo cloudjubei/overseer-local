@@ -34,7 +34,7 @@ function Collapsible({ title, children, defaultOpen = false }: { title: React.Re
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
       <button className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800/50" onClick={() => setOpen(v => !v)}>
-        <span className="text-xs font-medium">{title}</span>
+        <span className="text-xs font-medium truncate pr-2">{title}</span>
         <span className="text-xs text-neutral-500">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
@@ -173,20 +173,25 @@ function ScrollableTextBox({ text, className }: { text: string; className?: stri
 }
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const lastTurnRef = useRef<HTMLLIElement | null>(null);
   const { systemMsgs, turns } = useTurnBundles(run.messages);
 
+  // Scroll to last turn on initial open and whenever turn count changes
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [run?.messages?.length]);
+    if (lastTurnRef.current) {
+      lastTurnRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [turns.length]);
 
   const systemPrompt = useMemo(() => {
     const m = systemMsgs.find(x => x.role === 'user' && (x.content || '').includes('#CURRENT TASK')) || systemMsgs.find(x => x.role === 'system') || systemMsgs[0];
     return m?.content;
   }, [systemMsgs]);
 
+  const lastIndex = turns.length - 1;
+
   return (
-    <div className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
+    <div className="h=[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
       {systemPrompt ? (
         <Collapsible title={<span>System prompt</span>} defaultOpen={false}>
           {isLargeText(systemPrompt) ? (
@@ -200,68 +205,77 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
       {turns.length === 0 ? (
         <div className="text-sm text-neutral-500">No conversation yet.</div>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-3">
           {turns.map(({ index, user, assistant, tools }) => {
             const parsed = assistant ? parseAssistant(assistant.content || '') : null;
             const toolCalls = parsed?.tool_calls || [];
             const results = parseToolResultsMessage(tools);
 
+            // Build a short title for the turn header
+            const titleParts: string[] = [];
+            titleParts.push(`Turn ${index + 1}`);
+            if (assistant?.durationMs) titleParts.push(`${assistant.durationMs}ms`);
+            const title = titleParts.join(' \u00b7 ');
+
+            const isLast = index === lastIndex;
+
             return (
-              <li key={index} className="space-y-2">
-                <div className="text-[11px] text-neutral-500">Turn {index + 1}{assistant?.durationMs ? ` \u00b7 ${assistant.durationMs}ms` : ''}</div>
-
-                {user ? (
-                  <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
-                    <div className="text-[11px] font-medium mb-1">User</div>
-                    {isLargeText(user.content) ? (
-                      <ScrollableTextBox text={user.content || ''} />
-                    ) : (
-                      <div className="text-xs whitespace-pre-wrap break-words"><RichText text={user.content} /></div>
-                    )}
-                  </div>
-                ) : null}
-
-                {parsed?.thoughts ? (
-                  <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
-                    {isLargeText(parsed.thoughts) ? (
-                      <ScrollableTextBox text={parsed.thoughts || ''} />
-                    ) : (
-                      <div className="text-xs whitespace-pre-wrap break-words"><RichText text={parsed.thoughts} /></div>
-                    )}
-                  </div>
-                ) : assistant ? (
-                  <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
-                    <div className="text-[11px] font-medium mb-1">Assistant</div>
-                    {isLargeText(assistant.content) ? (
-                      <ScrollableTextBox text={assistant.content || ''} />
-                    ) : (
-                      <div className="text-xs whitespace-pre-wrap break-words"><RichText text={assistant.content} /></div>
-                    )}
-                  </div>
-                ) : null}
-
-                {toolCalls.length > 0 ? (
+              <li key={index} ref={isLast ? lastTurnRef : undefined}>
+                <Collapsible title={<span className="flex items-center gap-2">{title}</span>} defaultOpen={isLast}>
                   <div className="space-y-2">
-                    {toolCalls.map((call, i) => (
-                      <ToolCallRow key={i} call={call} index={i} resultText={results[i]} />
-                    ))}
-                  </div>
-                ) : null}
-
-                {toolCalls.length === 0 && results.length > 0 ? (
-                  <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
-                    <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
-                    {results.map((r, i) => (
-                      <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-                        <RichText text={r} />
+                    {user ? (
+                      <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
+                        <div className="text-[11px] font-medium mb-1">User</div>
+                        {isLargeText(user.content) ? (
+                          <ScrollableTextBox text={user.content || ''} />
+                        ) : (
+                          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={user.content} /></div>
+                        )}
                       </div>
-                    ))}
+                    ) : null}
+
+                    {parsed?.thoughts ? (
+                      <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
+                        {isLargeText(parsed.thoughts) ? (
+                          <ScrollableTextBox text={parsed.thoughts || ''} />
+                        ) : (
+                          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={parsed.thoughts} /></div>
+                        )}
+                      </div>
+                    ) : assistant ? (
+                      <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
+                        <div className="text-[11px] font-medium mb-1">Assistant</div>
+                        {isLargeText(assistant.content) ? (
+                          <ScrollableTextBox text={assistant.content || ''} />
+                        ) : (
+                          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={assistant.content} /></div>
+                        )}
+                      </div>
+                    ) : null}
+
+                    {toolCalls.length > 0 ? (
+                      <div className="space-y-2">
+                        {toolCalls.map((call, i) => (
+                          <ToolCallRow key={i} call={call} index={i} resultText={results[i]} />
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {toolCalls.length === 0 && results.length > 0 ? (
+                      <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
+                        <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
+                        {results.map((r, i) => (
+                          <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
+                            <RichText text={r} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
+                </Collapsible>
               </li>
             );
           })}
-          <div ref={bottomRef} />
         </ul>
       )}
     </div>

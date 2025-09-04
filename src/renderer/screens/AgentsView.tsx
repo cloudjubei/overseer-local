@@ -4,6 +4,7 @@ import { useActiveProject } from '../projects/ProjectContext';
 import type { AgentRun } from '../services/agentsService';
 import ChatConversation from '../components/agents/ChatConversation';
 import AgentRunRow from '../components/agents/AgentRunRow';
+import ModelChip from '../components/agents/ModelChip';
 
 function formatUSD(n?: number) {
   if (n == null) return '\u2014';
@@ -73,6 +74,7 @@ export default function AgentsView() {
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Task</th>
                     <th className="text-left px-3 py-2">Status</th>
+                    <th className="text-left px-3 py-2">Model</th>
                     <th className="text-left px-3 py-2">Turn</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
@@ -82,7 +84,7 @@ export default function AgentsView() {
                 </thead>
                 <tbody>
                   {activeProjectRuns.map(r => (
-                    <AgentRunRow key={r.runId ?? Math.random().toString(36)} run={r} onView={(id) => setOpenRunId(id)} onCancel={(id) => cancelRun(id)} />
+                    <AgentRunRow key={r.runId ?? Math.random().toString(36)} run={r} onView={(id) => setOpenRunId(id)} onCancel={(id) => cancelRun(id)} showModel />
                   ))}
                 </tbody>
               </table>
@@ -104,6 +106,7 @@ export default function AgentsView() {
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Task</th>
                     <th className="text-left px-3 py-2">Status</th>
+                    <th className="text-left px-3 py-2">Model</th>
                     <th className="text-left px-3 py-2">Turn</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
@@ -113,7 +116,7 @@ export default function AgentsView() {
                 </thead>
                 <tbody>
                   {projectRuns.map(r => (
-                    <AgentRunRow key={r.runId ?? Math.random().toString(36)} run={r} onView={(id) => setOpenRunId(id)} onCancel={(id) => cancelRun(id)} />
+                    <AgentRunRow key={r.runId ?? Math.random().toString(36)} run={r} onView={(id) => setOpenRunId(id)} onCancel={(id) => cancelRun(id)} showModel />
                   ))}
                 </tbody>
               </table>
@@ -129,7 +132,10 @@ export default function AgentsView() {
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
                 <div className="font-semibold text-sm truncate">Run #{selectedRun.runId.slice(0,8)} \u00b7 {selectedRun.taskId ?? 'Task'}{selectedRun.featureId ? ` \u00b7 Feature ${selectedRun.featureId}` : ''}</div>
-                <div className="text-xs text-neutral-500 truncate">{selectedRun.provider ?? '\u2014'}{selectedRun.model ? ` / ${selectedRun.model}` : ''} \u00b7 {selectedRun.state} \u00b7 Updated {formatTime(selectedRun.updatedAt)}</div>
+                <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
+                  <ModelChip provider={selectedRun.provider} model={selectedRun.model} />
+                  <span>\u00b7 {selectedRun.state} \u00b7 Updated {formatTime(selectedRun.updatedAt)}</span>
+                </div>
               </div>
               <button className="btn-secondary" onClick={() => setOpenRunId(null)}>Close</button>
             </div>
