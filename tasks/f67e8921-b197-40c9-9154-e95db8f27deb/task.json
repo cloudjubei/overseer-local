@@ -343,7 +343,7 @@
     },
     {
       "id": "b8d93d1d-5c66-4628-8a85-9da0197e97e2",
-      "status": "-",
+      "status": "+",
       "title": "The main FILE_ORGANISATION.md is bloated",
       "description": "This file is always included and it contains irrelevant information.\nAgents are asked to update this file, but they seem to always add extra unimportant info.\nThis needs to be tightened and made sure that the instructions for editing the file are clear, and all edits are succinct and precise.\nThe file should contain overall pointers to the project - not detailed descriptions of each file.\nIt should not be a log of changes.",
       "plan": "",
