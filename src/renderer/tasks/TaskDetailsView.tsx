@@ -280,10 +280,68 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             )}
             {/* Agent Model selector next to the play button, now using editable ModelChip */}
             <ModelChip editable className="min-w-[160px]" />
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}    
           </div>
         </div>
       </header>
+
+      {/* Top toolbars similar to TasksListView: search/filter/sort and count/add */}
+      <div className="tasks-toolbar shrink-0">
+        <div className="left">
+          <div className="control search-wrapper">
+            <input type="search" placeholder="Search by id, title, or description" aria-label="Search features" value={query} onChange={(e) => setQuery(e.target.value)} />
+          </div>
+          <div className="control">
+            <div
+              ref={statusFilterRef}
+              className="status-filter-btn ui-select gap-2"
+              role="button"
+              aria-haspopup="menu"
+              aria-expanded={openFilter}
+              aria-label="Filter by status"
+              tabIndex={0}
+              onClick={() => setOpenFilter(true)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
+            >
+              <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+              <span className="standard-picker__label">{currentFilterLabel}</span>
+            </div>
+            {openFilter && statusFilterRef.current && (
+              <StatusPicker 
+                anchorEl={statusFilterRef.current} 
+                value={statusFilter}
+                isAllAllowed={true}
+                includeNotDone={true}
+                onSelect={(val) => { setStatusFilter(val as any); setOpenFilter(false); }}
+                onClose={() => setOpenFilter(false)}
+              />
+            )}
+          </div>
+          <div className="control">
+            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as FeatureSort)} aria-label="Sort features by">
+              <option value="index_asc">Ascending</option>
+              <option value="index_desc">Descending</option>
+              <option value="status_asc">Status ^</option>
+              <option value="status_desc">Status \/</option>
+            </select>
+          </div>
+        </div>
+        <div className="right">
+          {/* right side left empty to match layout; count/add in second bar */}
+        </div>
+      </div>
+      <div className="tasks-toolbar shrink-0">
+        <div className="left">
+          <div className="tasks-count shrink-0" aria-live="polite">
+            Showing {featuresFiltered.length} of {task.features.length} features
+          </div>
+        </div>
+        <div className="right">
+          <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
+            <IconPlus />
+          </button>
+        </div>
+      </div>
 
       <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
         <section className="panel shrink-0">
@@ -311,57 +369,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
             <div className="section-actions">
-              <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
-                <IconPlus />
-              </button>
-            </div>
-          </div>
-
-          {/* Features filter/sort toolbar */}
-          <div className="tasks-toolbar shrink-0">
-            <div className="left">
-              <div className="control search-wrapper">
-                <input type="search" placeholder="Search by id, title, or description" aria-label="Search features" value={query} onChange={(e) => setQuery(e.target.value)} />
-              </div>
-              <div className="control">
-                <div
-                  ref={statusFilterRef}
-                  className="status-filter-btn ui-select gap-2"
-                  role="button"
-                  aria-haspopup="menu"
-                  aria-expanded={openFilter}
-                  aria-label="Filter by status"
-                  tabIndex={0}
-                  onClick={() => setOpenFilter(true)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
-                >
-                  <span className={`status-bullet status-bullet--${k}`} aria-hidden />
-                  <span className="standard-picker__label">{currentFilterLabel}</span>
-                </div>
-                {openFilter && statusFilterRef.current && (
-                  <StatusPicker 
-                    anchorEl={statusFilterRef.current} 
-                    value={statusFilter}
-                    isAllAllowed={true}
-                    includeNotDone={true}
-                    onSelect={(val) => { setStatusFilter(val as any); setOpenFilter(false); }}
-                    onClose={() => setOpenFilter(false)}
-                  />
-                )}
-              </div>
-              <div className="control">
-                <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as FeatureSort)} aria-label="Sort features by">
-                  <option value="index_asc">Ascending</option>
-                  <option value="index_desc">Descending</option>
-                  <option value="status_asc">Status ^</option>
-                  <option value="status_desc">Status \/</option>
-                </select>
-              </div>
-            </div>
-            <div className="right">
-              <div className="tasks-count shrink-0" aria-live="polite">
-                Showing {featuresFiltered.length} of {task.features.length} features
-              </div>
+              {/* Add feature button moved to top toolbar to align with TasksView */}
             </div>
           </div>
 

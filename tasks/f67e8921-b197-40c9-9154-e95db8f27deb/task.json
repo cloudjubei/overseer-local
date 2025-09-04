@@ -503,7 +503,7 @@
     },
     {
       "id": "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd",
-      "status": "-",
+      "status": "+",
       "title": "The search and sort bar for features should be placed at the top",
       "description": "TaskDetailsView.tsx should follow TasksView.tsx",
       "plan": "",
