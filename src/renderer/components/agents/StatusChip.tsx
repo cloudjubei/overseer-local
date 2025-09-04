@@ -1,6 +1,7 @@
 import React from 'react';
 import type { AgentRunState } from '../../services/agentsService';
 import { IconCheckCircle, IconLoader, IconStopCircle, IconXCircle } from '../ui/Icons';
+import Tooltip from '../ui/Tooltip';
 
 export function StatusIcon({ state, className }: { state: AgentRunState; className?: string }) {
   switch (state) {
@@ -33,10 +34,15 @@ function bgClasses(state: AgentRunState) {
 }
 
 export default function StatusChip({ state, label }: { state: AgentRunState; label?: string }) {
+  const text = label ?? state;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${bgClasses(state)}`}>
-      <StatusIcon state={state} className="w-3.5 h-3.5" />
-      <span>{label ?? state}</span>
-    </span>
+    <Tooltip content={<span className="text-xs">{text}</span>}>
+      <span
+        className={`inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium ${bgClasses(state)}`}
+        aria-label={typeof text === 'string' ? text : undefined}
+      >
+        <StatusIcon state={state} className="w-3.5 h-3.5" />
+      </span>
+    </Tooltip>
   );
 }

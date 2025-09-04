@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useLayoutEffect } from 'react';
 import type { AgentFeatureRunLog, AgentRun, AgentRunMessage } from '../../services/agentsService';
 import RichText from '../ui/RichText';
 import SafeText from '../ui/SafeText';
@@ -225,10 +225,9 @@ function UserBubble({ title, text }: { title?: string; text: string }) {
 }
 
 function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
-  const { initial, turns } = useMemo(() => buildFeatureTurns(log.messages || []), [log]);
+  // Recompute on every render to reflect in-place mutations of log.messages
+  const { initial, turns } = buildFeatureTurns(log.messages || []);
   const lastTurnRef = useRef<HTMLDivElement | null>(null);
-
-  console.log("log: ", log)
 
   return (
     <div className="space-y-2 p-1">
@@ -290,6 +289,7 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
 }
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
+  // Derive logs (sorted by startDate)
   const logs = useMemo(() => {
     const list = Object.values(run.messagesLog ?? {});
     return list.sort((a, b) => {
@@ -299,8 +299,43 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
     });
   }, [run]);
 
+  // Track a scroll container and auto-scroll behavior
+  const containerRef = useRef<HTMLUListElement | null>(null);
+  const stickToBottomRef = useRef(true);
+
+  // Update stickToBottomRef on user scroll
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const threshold = 40; // px
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
+      stickToBottomRef.current = atBottom;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true } as any);
+    // Initialize state
+    onScroll();
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Compute a simple metric to detect new content
+  const contentSize = useMemo(() => {
+    let count = 0;
+    for (const l of logs) count += (l.messages?.length || 0);
+    return count + ':' + logs.length;
+  }, [logs]);
+
+  // Auto-scroll when new content arrives and user is at bottom
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (stickToBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight });
+    }
+  }, [contentSize]);
+
   return (
-    <ul className="h=[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
+    <ul ref={containerRef} className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3" role="log" aria-live="polite">
       {logs.length === 0 ? (
         <div className="text-sm text-neutral-500">No features messages to display.</div>
       ) : (
