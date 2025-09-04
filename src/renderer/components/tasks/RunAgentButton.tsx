@@ -1,8 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { AgentType } from 'packages/factory-ts/src/types'
+import type { AgentRunState } from '../../services/agentsService'
 import { Button } from '../ui/Button'
 import { IconPlay } from '../ui/Icons'
+import StatusChip from '../agents/StatusChip'
 
 const AGENTS_ORDER: AgentType[] = ['speccer', 'planner', 'contexter', 'tester', 'developer']
 const AGENTS_LABELS: Record<AgentType, string> = {
@@ -167,9 +169,12 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
 export type RunAgentButtonProps = {
   className?: string
   onClick: (next: AgentType) => void
+  // Optional status chip props
+  status?: AgentRunState
+  statusLabel?: string
 }
 
-export default function RunAgentButton({ className = '', onClick }: RunAgentButtonProps) {
+export default function RunAgentButton({ className = '', onClick, status, statusLabel }: RunAgentButtonProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -243,7 +248,7 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
 
   return (
     <>
-      <div ref={containerRef} className={`no-drag ${className}`}>
+      <div ref={containerRef} className={`no-drag ${className} flex items-center gap-2`}>
         <Button
           ref={buttonRef}
           type="button"
@@ -267,6 +272,9 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
         >
           <IconPlay />
         </Button>
+        {status && (
+          <StatusChip state={status} label={statusLabel} />
+        )}
       </div>
       {open && containerRef.current && (
         <AgentTypePicker anchorEl={containerRef.current} onSelect={handleSelect} onClose={handleClose} />)
