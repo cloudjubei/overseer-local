@@ -10,6 +10,7 @@ import DependencyBullet from '../components/tasks/DependencyBullet'
 import FileDisplay from '../components/ui/FileDisplay'
 import useFiles, { inferFileType } from '../../renderer/hooks/useFiles';
 import { Chat, ChatMessage } from '../services/chatsService'
+import RichText from '../components/ui/RichText'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -157,47 +158,6 @@ export default function ChatView() {
     ),
   })), [chatHistories, deleteChat])
 
-  const renderMessageContent = (content: string) => {
-    const uuidPattern = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
-    const regex = new RegExp(`#(${uuidPattern})(?:\.(${uuidPattern}))?`, 'g');
-    const parts: (string | JSX.Element)[] = [];
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(content)) !== null) {
-      const textBefore = content.slice(lastIndex, match.index)
-      if (textBefore) parts.push(textBefore)
-      const token = match[0]
-
-      if (token.startsWith('#')) {
-        const dep = token.slice(1)
-        parts.push(<DependencyBullet key={`${match.index}-dep-${dep}`} dependency={dep} />)
-      } else if (token.startsWith('@')) {
-        const path = token.slice(1)
-        const meta = getFileByPath(path)
-        const name = meta?.name || (path.split('/').pop() || path)
-        const type = meta?.type || inferFileType(path)
-        const size = meta?.size ?? undefined
-        const mtime = meta?.mtime ?? undefined
-        parts.push(
-          <span key={`${match.index}-file-${path}`} className="inline-flex align-middle">
-            <FileDisplay
-              file={{ name, path, type, size, mtime }}
-              density="compact"
-              interactive
-              showPreviewOnHover
-            />
-          </span>
-        )
-      }
-
-      lastIndex = regex.lastIndex
-    }
-
-    const textAfter = content.slice(lastIndex)
-    if (textAfter) parts.push(textAfter)
-    return parts
-  }
-
   return (
     <CollapsibleSidebar
       items={chatItems}
@@ -278,7 +238,7 @@ export default function ChatView() {
                   return (
                     <div key={index} className="flex justify-center">
                       <div className="text-[12px] text-[var(--text-muted)] italic bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-full px-3 py-1">
-                        {renderMessageContent(msg.content)}
+                        <RichText text={msg.content} />
                       </div>
                     </div>
                   )
@@ -321,7 +281,7 @@ export default function ChatView() {
                           msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
                         ].join(' ')}
                       >
-                        {renderMessageContent(msg.content)}
+                        <RichText text={msg.content} />
                       </div>
 
                       {msg.attachments && msg.attachments.length > 0 && (
@@ -397,7 +357,7 @@ export default function ChatView() {
                               ✕
                             </button>
                           </div>
-                        )
+                        )}
                       })}
                     </div>
                   )}

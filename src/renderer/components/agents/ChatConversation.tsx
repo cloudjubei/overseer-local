@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AgentRun, AgentRunMessage } from '../../services/agentsService';
+import RichText from '../ui/RichText';
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
 function parseAssistant(content: string): { thoughts?: string; tool_calls?: { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any }[] } | null {
@@ -22,7 +23,7 @@ function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number 
   const [open, setOpen] = useState(false);
   return (
     <div>
-      <pre className="text-xs whitespace-pre-wrap break-words">{open ? str : str.slice(0, maxChars) + '…'}</pre>
+      <pre className="text-xs whitespace-pre-wrap break-words">{open ? str : str.slice(0, maxChars) + '\u2026'}</pre>
       <button className="btn-link text-xs mt-1" onClick={() => setOpen(v => !v)}>{open ? 'Show less' : 'Show more'}</button>
     </div>
   );
@@ -34,7 +35,7 @@ function Collapsible({ title, children, defaultOpen = false }: { title: React.Re
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
       <button className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800/50" onClick={() => setOpen(v => !v)}>
         <span className="text-xs font-medium">{title}</span>
-        <span className="text-xs text-neutral-500">{open ? '−' : '+'}</span>
+        <span className="text-xs text-neutral-500">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
         <div className="px-3 py-2 border-t border-neutral-200 dark:border-neutral-800">{children}</div>
@@ -72,11 +73,11 @@ function ToolCallRow({ call, resultText, index }: { call: any; resultText?: stri
           <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Result</div>
           {isHeavy ? (
             <Collapsible title={<span>View result</span>}>
-              <pre className="text-xs whitespace-pre-wrap break-words">{resultText}</pre>
+              <div className="text-xs whitespace-pre-wrap break-words"><RichText text={resultText} /></div>
             </Collapsible>
           ) : (
-            <div className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2">
-              <pre className="text-xs whitespace-pre-wrap break-words">{resultText}</pre>
+            <div className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 text-xs whitespace-pre-wrap break-words">
+              <RichText text={resultText} />
             </div>
           )}
         </div>
@@ -178,7 +179,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
     <div className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
       {systemPrompt ? (
         <Collapsible title={<span>System prompt</span>} defaultOpen={false}>
-          <pre className="text-xs whitespace-pre-wrap break-words max-h-64 overflow-auto">{systemPrompt}</pre>
+          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={systemPrompt} /></div>
         </Collapsible>
       ) : null}
 
@@ -193,25 +194,25 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
 
             return (
               <li key={index} className="space-y-2">
-                <div className="text-[11px] text-neutral-500">Turn {index + 1}{assistant?.durationMs ? ` · ${assistant.durationMs}ms` : ''}</div>
+                <div className="text-[11px] text-neutral-500">Turn {index + 1}{assistant?.durationMs ? ` \u00b7 ${assistant.durationMs}ms` : ''}</div>
 
                 {/* User bubble */}
                 {user ? (
                   <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
                     <div className="text-[11px] font-medium mb-1">User</div>
-                    <div className="text-xs whitespace-pre-wrap break-words">{user.content}</div>
+                    <div className="text-xs whitespace-pre-wrap break-words"><RichText text={user.content} /></div>
                   </div>
                 ) : null}
 
                 {/* Thoughts or Assistant bubble */}
                 {parsed?.thoughts ? (
                   <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
-                    <div className="text-xs whitespace-pre-wrap break-words">{parsed.thoughts}</div>
+                    <div className="text-xs whitespace-pre-wrap break-words"><RichText text={parsed.thoughts} /></div>
                   </div>
                 ) : assistant ? (
                   <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
                     <div className="text-[11px] font-medium mb-1">Assistant</div>
-                    <div className="text-xs whitespace-pre-wrap break-words">{assistant.content}</div>
+                    <div className="text-xs whitespace-pre-wrap break-words"><RichText text={assistant.content} /></div>
                   </div>
                 ) : null}
 
@@ -229,8 +230,8 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
                   <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
                     <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
                     {results.map((r, i) => (
-                      <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0">
-                        <pre className="text-xs whitespace-pre-wrap break-words">{r}</pre>
+                      <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words">
+                        <RichText text={r} />
                       </div>
                     ))}
                   </div>

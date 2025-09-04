@@ -276,7 +276,7 @@
     },
     {
       "id": "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce",
-      "status": "-",
+      "status": "+",
       "title": "FileMentions should be renamed RichText",
       "description": "This component should then be used inside Chat and inside agent runs where messages are displayed.",
       "plan": "",
