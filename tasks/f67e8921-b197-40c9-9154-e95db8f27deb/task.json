@@ -424,16 +424,17 @@
     },
     {
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "+",
-      "title": "AllAgentsView.tsx improvements",
-      "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\n\nThe Tokens field tooltip - this doesn't show the tokens per message correctly.",
+      "status": "-",
+      "title": "Costs not displaying",
+      "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\nI don't think the @src/renderer/services/pricingService.ts is correctly connected to the view inside @src/renderer/components/agents/CostChip.tsx or @src/renderer/screens/AllAgentsView.tsx",
       "plan": "",
       "context": [
+        "src/renderer/services/pricingService.ts",
+        "src/renderer/components/agents/CostChip.tsx",
         "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "The prices are still not working at all.\nThe tokens per message are not shown correctly."
+      "blockers": []
     },
     {
       "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
@@ -458,8 +459,7 @@
         "src/renderer/components/tasks/StatusControl.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "This was previously working - somehow it isn't anymore."
+      "blockers": []
     },
     {
       "id": "76ff2065-cd03-4815-b36b-8dfabd278b2b",
@@ -477,7 +477,7 @@
     {
       "id": "46fbca0c-0fd5-4b92-aeae-5e8488cfd192",
       "status": "+",
-      "title": "The ModelChip should be taller and slimmer",
+      "title": "The ModelChip should be slimmer",
       "description": "Have the provider on one row and the modle name on a second row.",
       "plan": "",
       "context": [
@@ -488,18 +488,19 @@
     },
     {
       "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
-      "status": "+",
+      "status": "-",
       "title": "When editing/creating a feature allow quick file lookups",
-      "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\n\nThis feature is curently implemented inside the ChatView.tsx - so it should be turned into a reusable component so it can be used in many of the input boxes.",
+      "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\n\nThis feature is currently implemented seperately inside @src/renderer/screens/ChatView.tsx  and @src/renderer/components/tasks/FeatureForm.tsx \nthe files responsible are:\n@src/renderer/components/ui/FileMentionsTextarea.tsx and @src/renderer/hooks/useFilesAutocomplete.ts   \n\n@src/renderer/screens/ChatView.tsx actually also uses @src/renderer/hooks/useReferencesAutocomplete.ts which allows the text input to display references. Both of these ideas are relevant for @src/renderer/components/tasks/FeatureForm.tsx and @src/renderer/screens/ChatView.tsx . Both should allow the display of references lookup and file lookup - they simply must be able to have callbacks so that they can do extra things with them (FeatureForm needs to add/remove files to/from the context and add/remove blockers to/from the feature - this is missing right now).",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/screens/ChatView.tsx"
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/components/ui/FileMentionsTextarea.tsx",
+        "src/renderer/hooks/useFilesAutocomplete.ts",
+        "src/renderer/hooks/useReferencesAutocomplete.ts",
+        "src/renderer/components/tasks/FeatureForm.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "this currently causes a Warning: Maximum update depth exceeded.\nIt shows the files to select, but they are shown as the display chips - these should just be normal paths to the files.\nInvestigate how ChatView.tsx handles this - it works ok there.\nThis feature is only accepted if the solution from there can be reused as a component."
+      "blockers": []
     },
     {
       "id": "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd",
@@ -516,9 +517,9 @@
     },
     {
       "id": "274eb915-a7b3-4eed-b71d-e7888f1340fb",
-      "status": "-",
+      "status": "?",
       "title": "ChatConversation improvements",
-      "description": "ChatConversation should always display the first user message as Turn 0, then each subsequent turn is a LLM message + response (tool calls).\nThe tool calls are following a standard JSON schema 'ToolResult' defined in types.ts - follow it to make a nice display for it the same as LLM tool calls inside its messages are displayed.",
+      "description": "@src/renderer/components/agents/ChatConversation.tsx  should always display the first user message as Turn 0, then each subsequent turn is a LLM message + response (tool calls).\nThe tool calls are following a standard JSON schema 'ToolResult' defined in @packages/factory-ts/src/types.ts  - follow it to make a nice display for it the same as LLM tool calls inside its messages are displayed.this currently causes a Warning: Maximum update depth exceeded.\nIt shows the files to select, but they are shown as the display chips - these should just be normal paths to the files.\nInvestigate how ChatView.tsx handles this - it works ok there.\nThis feature is only accepted if the solution from there can be reused as a component.\nDo not alter the messages sent directly to the LLMs - they need to stay in the specified format.",
       "plan": "",
       "context": [
         "src/renderer/components/agents/ChatConversation.tsx",
@@ -561,12 +562,12 @@
     "2d607668-7481-4d8f-89cc-5afebb89e67b": 30,
     "5fcbee8a-2734-4fa5-b404-6d9155a01053": 31,
     "76ff2065-cd03-4815-b36b-8dfabd278b2b": 32,
-    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 33,
-    "ea56a618-78f3-4612-bb73-12d6f7161f01": 34,
-    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 35,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 36,
-    "82b9481c-7129-4bea-8029-0e41a56531fe": 37,
-    "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 38,
+    "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 33,
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 34,
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 35,
+    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 36,
+    "ea56a618-78f3-4612-bb73-12d6f7161f01": 37,
+    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 38,
     "274eb915-a7b3-4eed-b71d-e7888f1340fb": 39
   }
 }

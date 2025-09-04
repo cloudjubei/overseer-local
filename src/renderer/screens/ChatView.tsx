@@ -6,7 +6,6 @@ import { useReferencesAutocomplete } from '../hooks/useReferencesAutocomplete'
 import { useLLMConfig } from '../hooks/useLLMConfig'
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
-import DependencyBullet from '../components/tasks/DependencyBullet'
 import FileDisplay from '../components/ui/FileDisplay'
 import useFiles, { inferFileType } from '../../renderer/hooks/useFiles';
 import { Chat, ChatMessage } from '../services/chatsService'

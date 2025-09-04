@@ -327,16 +327,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </div>
         </div>
         <div className="right">
-          {/* right side left empty to match layout; count/add in second bar */}
-        </div>
-      </div>
-      <div className="tasks-toolbar shrink-0">
-        <div className="left">
-          <div className="tasks-count shrink-0" aria-live="polite">
-            Showing {featuresFiltered.length} of {task.features.length} features
-          </div>
-        </div>
-        <div className="right">
           <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
             <IconPlus />
           </button>
