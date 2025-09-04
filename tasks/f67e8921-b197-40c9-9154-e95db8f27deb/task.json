@@ -538,7 +538,7 @@
     },
     {
       "id": "57988106-364d-4e52-8b50-94d18839c319",
-      "status": "-",
+      "status": "+",
       "title": "ChatConversation improvements",
       "description": "@src/renderer/components/agents/ChatConversation.tsx  doesn't update while an agent is running. I have to close the popup and open it to see the latest messages. This shouldn't be the case - it should keep on scrolling down the messages if the user is at the bottom, and if not - keep on adding them.",
       "plan": "",
