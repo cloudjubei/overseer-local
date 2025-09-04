@@ -405,6 +405,31 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
+      "status": "-",
+      "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx should have collapsible turns.",
+      "description": "When opened - the last turn should be expanded and scrolled to.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
+      "status": "-",
+      "title": "AllAgentsView.tsx improvements",
+      "description": "The Project field in the table should show a reusable project chip that shows a tooltip with the project title + description on hover, and when clicking takes the user to home for that project.\n\nThe Cost field should also be a reusable component - on hover it should show a tooltip with the costs per token for that specifying provider and model.\n\nThe Tokens field should also be a reusable component - on hover it should show a breakdown of how long was each message and how many tokens it ended up being.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -437,6 +462,8 @@
     "9244467b-e3d1-475a-a1f0-bf35d8482629": 27,
     "352e49dd-37f2-428c-a85c-da7a2c1bd66a": 28,
     "37730047-f692-48c0-b6e7-9093564596a9": 29,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 30
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 30,
+    "ea56a618-78f3-4612-bb73-12d6f7161f01": 31,
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 32
   }
 }

@@ -1,0 +1,8 @@
+{
+  "id": "0aab94ca-1802-4cd4-a873-5b339a6d20ca",
+  "status": "-",
+  "title": "First online connectivity feature - Agent prices",
+  "description": "factory-ts must have a way of getting latest prices, this project Overseer must have a new Sidebar option -> \"Live Data\".\nInside this new screen, all services that should be updated can be controlled.\nThe first such service will be getting all common provider+model prices, as well as user configured ones (so there must be a way for a user to configure such a service to specify the details of what items it should get).\nWhen entering the screen, it should be possible to see each service, when was it last updated and whether the latest data is up to date. For each service there should be standard update settings available that can specify when data is deemed fresh (daily, weekly, monthly) and whether to do an automated check when this freshness expires (on app launch or at a set time).",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}
