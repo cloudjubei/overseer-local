@@ -463,7 +463,7 @@
     },
     {
       "id": "76ff2065-cd03-4815-b36b-8dfabd278b2b",
-      "status": "-",
+      "status": "+",
       "title": "Use the StatusChip inside AgentRunBullet",
       "description": "We should reuse this nice component that we have.",
       "plan": "",
