@@ -6,7 +6,7 @@ import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { useAgents } from '../hooks/useAgents'
-import AgentRunBullet from '../components/agents/AgentRunBullet'
+import StatusChip from '../components/agents/StatusChip'
 import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
 import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
@@ -225,7 +225,15 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           <div className="flex items-center gap-3">
             {taskRun && (
               <div className="flex items-center gap-2" aria-label={`Active agents for Task ${task.id}`}>
-                <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
+                <button
+                  type="button"
+                  className="no-drag"
+                  onClick={() => navigateAgentRun(taskRun.runId)}
+                  title={`Agent ${taskRun.runId.slice(0,8)} · ${taskRun.state}`}
+                  aria-label={`View agent run ${taskRun.runId}`}
+                >
+                  <StatusChip state={taskRun.state} />
+                </button>
               </div>
             )}
             {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
@@ -387,7 +395,15 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <div className="flex items-center gap-3 pr-2">
                           {featureRun && (
                             <div className="flex items-center gap-2" aria-label={`Active agents for Feature ${f.id}`}>
-                              <AgentRunBullet key={featureRun.runId} run={featureRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(featureRun.runId) }} />
+                              <button
+                                type="button"
+                                className="no-drag"
+                                onClick={(e) => { e.stopPropagation(); navigateAgentRun(featureRun.runId) }}
+                                title={`Agent ${featureRun.runId.slice(0,8)} · ${featureRun.state}`}
+                                aria-label={`View agent run ${featureRun.runId}`}
+                              >
+                                <StatusChip state={featureRun.state} />
+                              </button>
                             </div>
                           )}
                         </div>
@@ -395,8 +411,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                     </div>
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
-                )
-              })}
+                )}
+              )}
             </ul>
           )}
         </section>

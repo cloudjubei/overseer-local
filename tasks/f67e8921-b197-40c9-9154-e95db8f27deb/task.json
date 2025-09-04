@@ -380,7 +380,7 @@
     },
     {
       "id": "9244467b-e3d1-475a-a1f0-bf35d8482629",
-      "status": "-",
+      "status": "+",
       "title": "The status display for an Agent run inside TasksView.tsx and TaskDetailsView.tsx should match the display from AgentsView.tsx",
       "description": "Reuse the StatusChip inside AgentsView.tsx",
       "plan": "",

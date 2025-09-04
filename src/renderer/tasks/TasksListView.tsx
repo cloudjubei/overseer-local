@@ -14,7 +14,7 @@ import { useAgents } from '../hooks/useAgents'
 import { Status, Task } from 'packages/factory-ts/src/types'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
-import AgentRunBullet from '../components/agents/AgentRunBullet'
+import StatusChip from '../components/agents/StatusChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
 
@@ -377,7 +377,15 @@ export default function TasksListView() {
                             <IconEdit />
                           </button>
                           {taskRun ? (
-                            <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }} />
+                            <button
+                              type="button"
+                              className="no-drag"
+                              onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }}
+                              title={`Agent ${taskRun.runId.slice(0,8)} · ${taskRun.state}`}
+                              aria-label={`View agent run ${taskRun.runId}`}
+                            >
+                              <StatusChip state={taskRun.state} />
+                            </button>
                           ) : (
                             <RunAgentButton onClick={(agentType) => {if (!projectId) return; startTaskAgent(agentType, projectId, t.id) }}/>
                           )}
