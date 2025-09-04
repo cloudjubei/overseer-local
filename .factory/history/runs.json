@@ -5,15 +5,15 @@
     "projectId": "main",
     "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
     "state": "running",
-    "message": "Turn 5 tool calls processed",
+    "message": "Turn 6 tool calls processed",
     "provider": "openai",
     "model": "gpt-5",
     "startedAt": "2025-09-04T23:16:03.319Z",
-    "updatedAt": "2025-09-04T23:36:33.693Z",
-    "costUSD": 0.5699875,
-    "promptTokens": 196742,
-    "completionTokens": 32406,
-    "progress": 0.06
+    "updatedAt": "2025-09-04T23:41:18.783Z",
+    "costUSD": 1.12988375,
+    "promptTokens": 457403,
+    "completionTokens": 55813,
+    "progress": 0.07
   },
   {
     "runId": "task_tstc9kee_mf60n4p6",
