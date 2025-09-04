@@ -100,24 +100,16 @@ export default function FileMentionsTextarea({
           role="listbox"
           aria-label="Files suggestions"
         >
-          {fileMatches.map((path, idx) => {
-            const meta = filesByPath[path]
-            const name = meta?.name || (path.split('/').pop() || path)
-            const type = meta?.type || inferFileType(path)
-            const size = meta?.size ?? undefined
-            const mtime = meta?.mtime ?? undefined
-            return (
-              <div key={idx} role="option" className="px-1 py-0.5">
-                <FileDisplay
-                  file={{ name, path, type, size, mtime }}
-                  density="compact"
-                  interactive
-                  showPreviewOnHover
-                  onClick={() => handleFileSelect(path)}
-                />
-              </div>
-            )
-          })}
+          {fileMatches.map((path, idx) => (
+            <div
+              key={idx}
+              role="option"
+              className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)] text-sm"
+              onClick={() => handleFileSelect(path)}
+            >
+              {path}
+            </div>
+          ))}
         </div>
       )}
 

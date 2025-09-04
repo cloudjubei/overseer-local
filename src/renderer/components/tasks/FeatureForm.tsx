@@ -244,7 +244,7 @@ export default function FeatureForm({
           >
             {blockers.map((dep, idx) => {
               return (
-                <DependencyBullet key={`${dep}-${idx}`} dependency={dep} onRemove={() => removeBlockerAt(idx)} />
+                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeBlockerAt(idx)} />
               )
             })}
             <button
