@@ -1,0 +1,8 @@
+{
+  "id": "9b6fcd9f-86b9-4a95-bf03-e3cf51431be4",
+  "status": "-",
+  "title": "Monitor a task/feature as it's running and update information based off of git commits",
+  "description": "The status of the tasks isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's tasks/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the task) with a given featureId specified, it should be possible to see the task.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}
