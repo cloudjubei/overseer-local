@@ -1,23 +1,23 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { AgentType } from'packages/factory-ts/src/types'
+import type { AgentType } from 'packages/factory-ts/src/types'
 import { Button } from '../ui/Button'
 import { IconPlay } from '../ui/Icons'
 
 const AGENTS_ORDER: AgentType[] = ['speccer', 'planner', 'contexter', 'tester', 'developer']
 const AGENTS_LABELS: Record<AgentType, string> = {
-  'speccer': 'Speccer',
-  'planner': 'Planner',
-  'contexter': 'Contexter',
-  'tester': 'Tester',
-  'developer': 'Developer',
+  speccer: 'Speccer',
+  planner: 'Planner',
+  contexter: 'Contexter',
+  tester: 'Tester',
+  developer: 'Developer',
 }
 
 function useOutsideClick(refs: React.RefObject<HTMLElement>[], onOutside: () => void) {
   useEffect(() => {
     function onDoc(e: MouseEvent) {
       const t = e.target as Node
-      const inside = refs.some(r => r.current && r.current.contains(t))
+      const inside = refs.some((r) => r.current && r.current.contains(t))
       if (!inside) onOutside()
     }
     document.addEventListener('mousedown', onDoc)
@@ -25,18 +25,45 @@ function useOutsideClick(refs: React.RefObject<HTMLElement>[], onOutside: () => 
   }, [refs, onOutside])
 }
 
-function positionFor(anchor: HTMLElement, gap = 8) : { top: number, left: number, minWidth: number, side: 'top' | 'bottom'} {
-  const r = anchor.getBoundingClientRect()
-  const threshold = 180 // Approximate picker height
-  const side = (window.innerHeight - r.bottom < threshold) ? 'top' : 'bottom'
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function computePosition(
+  anchor: HTMLElement,
+  panel: HTMLElement | null,
+  gap = 8
+): { top: number; left: number; minWidth: number; side: 'top' | 'bottom' } {
+  const ar = anchor.getBoundingClientRect()
+  const scrollX = window.scrollX || window.pageXOffset
+  const scrollY = window.scrollY || window.pageYOffset
+  const viewportW = window.innerWidth
+  const viewportH = window.innerHeight
+
+  const panelW = panel ? panel.offsetWidth : Math.max(160, ar.width)
+  const panelH = panel ? panel.offsetHeight : 180
+
+  const spaceBelow = viewportH - ar.bottom
+  const side: 'top' | 'bottom' = spaceBelow < panelH + gap ? 'top' : 'bottom'
+
   let top: number
   if (side === 'bottom') {
-    top = r.bottom + window.scrollY + gap
+    top = ar.bottom + scrollY + gap
   } else {
-    top = r.top + window.scrollY - threshold - gap
+    top = ar.top + scrollY - panelH - gap
   }
-  const left = r.left + window.scrollX
-  return { top, left, minWidth: r.width, side }
+
+  let left = ar.left + scrollX
+  const padding = 8
+  const maxLeft = scrollX + viewportW - panelW - padding
+  const minLeft = scrollX + padding
+  left = clamp(left, minLeft, maxLeft)
+
+  const minTop = scrollY + padding
+  const maxTop = scrollY + viewportH - panelH - padding
+  top = clamp(top, minTop, maxTop)
+
+  return { top, left, minWidth: ar.width, side }
 }
 
 type PickerProps = {
@@ -48,10 +75,24 @@ type PickerProps = {
 
 export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClose }: PickerProps) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const [coords, setCoords] = useState<{ top: number; left: number; minWidth: number; side: 'top' | 'bottom' } | null>(null)
+  const [coords, setCoords] = useState<{
+    top: number
+    left: number
+    minWidth: number
+    side: 'top' | 'bottom'
+  } | null>(null)
 
   useLayoutEffect(() => {
-    setCoords(positionFor(anchorEl))
+    const update = () => {
+      setCoords(computePosition(anchorEl, panelRef.current))
+    }
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
   }, [anchorEl])
 
   useOutsideClick([panelRef], onClose)
@@ -62,7 +103,11 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!panelRef.current) return
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); return }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+        return
+      }
       const idx = AGENTS_ORDER.indexOf(active)
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault()
@@ -89,15 +134,25 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
       className={`standard-picker standard-picker--${coords.side}`}
       role="menu"
       aria-label="Select Agent"
-      style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8) }}
+      style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8), position: 'absolute' }}
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+      onMouseDown={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
     >
       {AGENTS_ORDER.map((s) => {
         return (
           <button
             key={s}
             role="menuitemradio"
-            className='standard-picker__item'
-            onClick={(e) => { e.stopPropagation(); onSelect(s) }}
+            className="standard-picker__item"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelect(s)
+            }}
           >
             <span className="standard-picker__label">{AGENTS_LABELS[s]}</span>
           </button>
@@ -116,6 +171,7 @@ export type RunAgentButtonProps = {
 export default function RunAgentButton({ className = '', onClick }: RunAgentButtonProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const pressTimer = useRef<number | null>(null)
   const longPressTriggered = useRef(false)
@@ -136,8 +192,8 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
   }
 
   const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
-    // Only consider primary button or touch
-    if (e.button !== 0 && e.pointerType !== 'touch') return
+    // Only act on primary button or touch/pen
+    if (e.button !== undefined && e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return
     longPressTriggered.current = false
     clearPressTimer()
     pressTimer.current = window.setTimeout(() => {
@@ -146,20 +202,18 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     }, LONG_PRESS_MS)
   }
 
-  const endPress = () => {
+  const handlePointerUpLike: React.PointerEventHandler<HTMLButtonElement> = () => {
     clearPressTimer()
   }
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    // If the long press already opened the picker, suppress the normal action
     if (longPressTriggered.current) {
+      // Suppress normal click after long press opened the picker
       e.preventDefault()
       e.stopPropagation()
       longPressTriggered.current = false
       return
     }
-    // Normal click runs the developer agent
-    e.stopPropagation()
     onClick('developer')
   }
 
@@ -171,22 +225,31 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     <>
       <div ref={containerRef} className={className}>
         <Button
+          ref={buttonRef}
           type="button"
           className="btn btn-icon"
           aria-label="Run Agent"
           title="Run Agent"
+          style={{ touchAction: 'manipulation', userSelect: 'none' }}
           onPointerDown={handlePointerDown}
-          onPointerUp={endPress}
-          onPointerCancel={endPress}
-          onPointerLeave={endPress}
+          onPointerUp={handlePointerUpLike}
+          onPointerCancel={handlePointerUpLike}
+          onPointerLeave={handlePointerUpLike}
           onClick={handleClick}
+          onContextMenu={(e: any) => {
+            if (open) {
+              e.preventDefault()
+              e.stopPropagation()
+            }
+          }}
+          draggable={false}
         >
           <IconPlay />
         </Button>
       </div>
       {open && containerRef.current && (
-        <AgentTypePicker anchorEl={containerRef.current} onSelect={handleSelect} onClose={handleClose} />
-      )}
+        <AgentTypePicker anchorEl={containerRef.current} onSelect={handleSelect} onClose={handleClose} />)
+      }
     </>
   )
 }

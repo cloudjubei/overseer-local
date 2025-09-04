@@ -180,13 +180,15 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "+",
+      "status": "-",
       "title": "Agents - run histories UI improvements",
-      "description": "The runs table:\nThe Status field should be a symbol (not text)\nStarted and Updated should show Date and Time below.\nThe action buttons should be hidden and show on hover (similar to actions in @src/renderer/tasks/TasksListView.tsx ). The action buttons should be icon only - no text.",
+      "description": "The table should show the following columns\nRun -> the date + time below when it started\nTask -> Can use the @src/renderer/components/tasks/DependencyBubble.tsx as it serves the same exact purpose\nStatus -> create a chip that shows the appropriate StatusIcon inside. These new icons need to be created.\nTurn -> show as a chip.\nCost -> stays the same\nTokens -> stays the same\nMessages -> how many turns it took\nDuration -> a nicely formatted display of the time it took",
       "plan": "",
       "context": [
         "src/renderer/screens/AgentsView.tsx",
-        "src/renderer/tasks/TasksListView.tsx"
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/components/tasks/DependencyBullet.tsx",
+        "src/renderer/components/ui/Icons.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -210,11 +212,12 @@
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
       "context": [
-        "src/renderer/components/tasks/RunAgentButton.tsx"
+        "src/renderer/components/tasks/RunAgentButton.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "The long press cannot bleed or propagate onto the parent row drag. It needs to prevent the drag.\nAlso, the popup needs to display away from the sides of the screen - right now when it shows, it can be cut off by the edge of the app window."
+      "rejection": "Now the long press works, but it's still possible to drag the whole feature row (this is inside @src/renderer/tasks/TaskDetailsView.tsx ).\nBecause the button appears on hover and disappears when outside - when selecting a value from the Selector - the button disappears. It shouldn't."
     },
     {
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
@@ -248,14 +251,15 @@
       "id": "abefc7ba-3098-4aee-a01b-694a5a2a9d43",
       "status": "-",
       "title": "When running an agent - all the GIT credentials are not found in the @.env",
-      "description": "The agent runs, exchanges messages, but no code is committed.",
+      "description": "There is a .env file both in this project and in factory-ts.\nJust like in the python counterpart ( the files @packages/factory-ts/blueprint/run_local_agent.py and @packages/factory-ts/blueprint/git_manager.py ) the GIT credentials must be loaded from the workspaces `.env` file in the root of the project.",
       "plan": "",
       "context": [
-        "packages/factory-ts/src/gitManager.ts"
+        "packages/factory-ts/src/gitManager.ts",
+        "packages/factory-ts/blueprint/run_local_agent.py",
+        "packages/factory-ts/blueprint/git_manager.py"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Details: Git command failed: git push -u origin features/f67e8921-b197-40c9-9154-e95db8f27deb\nStderr: remote: Invalid username or token. Password authentication is not supported for Git operations.\nfatal: Authentication failed for 'https://github.com/cloudjubei/overseer-local.git/'"
+      "blockers": []
     },
     {
       "id": "e9e526e8-576a-448b-9359-db97475db485",
@@ -264,19 +268,24 @@
       "description": "When viewing an agent run inside @src/renderer/screens/AgentsView.tsx it doesn't show the whole conversation. Just the last message. This needs to be fixed to show the full conversation.",
       "plan": "",
       "context": [
-        "src/renderer/screens/AllAgentsView.tsx"
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
       ],
       "acceptance": [],
       "blockers": []
     },
     {
-      "id": "e7e1b393-a3d4-4fc4-99c9-e72be7282dcd",
-      "status": "?",
-      "title": "Toasts should take up less space",
-      "description": "",
+      "id": "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce",
+      "status": "-",
+      "title": "FileMentions should be renamed RichText",
+      "description": "This component should then be used inside Chat and inside agent runs where messages are displayed.",
       "plan": "",
       "context": [
-        "src/renderer/components/ui/toast.tsx"
+        "src/renderer/components/ui/FileMentions.tsx",
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -301,9 +310,9 @@
     "d8361748-2f05-4cd4-bb35-80f40db0ff32": 16,
     "e9e526e8-576a-448b-9359-db97475db485": 17,
     "abefc7ba-3098-4aee-a01b-694a5a2a9d43": 18,
-    "e7e1b393-a3d4-4fc4-99c9-e72be7282dcd": 19,
-    "6e24f575-cf4d-451f-994f-7190d45ebaaa": 20,
-    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 21,
+    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 19,
+    "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce": 20,
+    "6e24f575-cf4d-451f-994f-7190d45ebaaa": 21,
     "6a8066ee-230f-4f31-b531-3d8cadff4178": 22
   }
 }
