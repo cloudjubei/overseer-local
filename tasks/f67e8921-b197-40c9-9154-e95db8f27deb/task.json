@@ -296,6 +296,18 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "e7e1b393-a3d4-4fc4-99c9-e72be7282dcd",
+      "status": "-",
+      "title": "Toasts should take up less space",
+      "description": "",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/toast.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -317,10 +329,11 @@
     "d8361748-2f05-4cd4-bb35-80f40db0ff32": 16,
     "e9e526e8-576a-448b-9359-db97475db485": 17,
     "abefc7ba-3098-4aee-a01b-694a5a2a9d43": 18,
-    "6e24f575-cf4d-451f-994f-7190d45ebaaa": 19,
-    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 20,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 21,
-    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 22,
-    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 23
+    "e7e1b393-a3d4-4fc4-99c9-e72be7282dcd": 19,
+    "6e24f575-cf4d-451f-994f-7190d45ebaaa": 20,
+    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 21,
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 22,
+    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 23,
+    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 24
   }
 }
