@@ -234,7 +234,7 @@
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "?",
+      "status": "-",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
@@ -275,15 +275,16 @@
     },
     {
       "id": "abefc7ba-3098-4aee-a01b-694a5a2a9d43",
-      "status": "+",
+      "status": "-",
       "title": "When running an agent - all the GIT credentials are not found in the @.env",
-      "description": "The agent runs, exchanges messages, but no code is committed.\nThe error is emitted from the function `push` inside @packages/factory-ts/src/gitManager.ts\nThe error:\nCould not push: Error: GIT_REPO_URL, GIT_USER_NAME, and GIT_PAT must be set in .env for push operations.",
+      "description": "The agent runs, exchanges messages, but no code is committed.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/gitManager.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Details: Git command failed: git push -u origin features/f67e8921-b197-40c9-9154-e95db8f27deb\nStderr: remote: Invalid username or token. Password authentication is not supported for Git operations.\nfatal: Authentication failed for 'https://github.com/cloudjubei/overseer-local.git/'"
     },
     {
       "id": "e9e526e8-576a-448b-9359-db97475db485",
@@ -299,7 +300,7 @@
     },
     {
       "id": "e7e1b393-a3d4-4fc4-99c9-e72be7282dcd",
-      "status": "-",
+      "status": "?",
       "title": "Toasts should take up less space",
       "description": "",
       "plan": "",
