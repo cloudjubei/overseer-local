@@ -126,6 +126,8 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
       aria-label="Select Agent"
       style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8), position: 'absolute' }}
       onClick={(e) => { e.stopPropagation() }}
+      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); (e.nativeEvent as any).stopImmediatePropagation?.() }}
+      onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); (e.nativeEvent as any).stopImmediatePropagation?.() }}
     >
       {AGENTS_ORDER.map((s) => {
         return (
@@ -152,6 +154,7 @@ export type RunAgentButtonProps = {
 export default function RunAgentButton({ className = '', onClick }: RunAgentButtonProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const pressTimer = useRef<number | null>(null)
   const longPressTriggered = useRef(false)
@@ -171,13 +174,15 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     setOpen(false)
   }
 
-  const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
-    // Prevent propagation to parent drag handlers
+  const startPress = (e: any) => {
+    // Prevent propagation and any default drag/select behavior
     e.stopPropagation()
+    e.preventDefault()
+    e.nativeEvent?.stopImmediatePropagation?.()
     // Capture to the button to avoid drag on parent while holding
     try { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId) } catch {}
     // Only consider primary button or touch
-    if (e.button !== 0 && e.pointerType !== 'touch') return
+    if (e.button !== undefined && e.button !== 0 && e.pointerType !== 'touch') return
     longPressTriggered.current = false
     clearPressTimer()
     pressTimer.current = window.setTimeout(() => {
@@ -186,10 +191,40 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     }, LONG_PRESS_MS)
   }
 
+  const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    startPress(e)
+  }
+  const handlePointerDownCapture: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    // Intercept as early as possible
+    e.stopPropagation()
+    e.preventDefault()
+    ;(e.nativeEvent as any).stopImmediatePropagation?.()
+  }
+  const handleMouseDown: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    startPress(e)
+  }
+  const handleMouseDownCapture: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation(); e.preventDefault(); (e.nativeEvent as any).stopImmediatePropagation?.()
+  }
+  const handleTouchStart: React.TouchEventHandler<HTMLButtonElement> = (e) => {
+    // Touch start also needs to be suppressed
+    e.stopPropagation(); e.preventDefault();
+  }
+
   const handlePointerMove: React.PointerEventHandler<HTMLButtonElement> = (e) => {
     // Prevent drag gestures bubbling to parent while holding
     if (pressTimer.current != null || open || longPressTriggered.current) {
-      e.stopPropagation()
+      e.stopPropagation(); e.preventDefault(); (e.nativeEvent as any).stopImmediatePropagation?.()
+    }
+  }
+  const handleMouseMove: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (pressTimer.current != null || open || longPressTriggered.current) {
+      e.stopPropagation(); e.preventDefault(); (e.nativeEvent as any).stopImmediatePropagation?.()
+    }
+  }
+  const handleTouchMove: React.TouchEventHandler<HTMLButtonElement> = (e) => {
+    if (pressTimer.current != null || open || longPressTriggered.current) {
+      e.stopPropagation(); e.preventDefault()
     }
   }
 
@@ -197,6 +232,8 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     // Release capture and clear timer
     try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId) } catch {}
     clearPressTimer()
+    // Also stop bubbling of the ending event to avoid drag conclusions
+    e.stopPropagation(); (e.nativeEvent as any).stopImmediatePropagation?.()
   }
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -204,6 +241,7 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     if (longPressTriggered.current) {
       e.preventDefault()
       e.stopPropagation()
+      ;(e.nativeEvent as any).stopImmediatePropagation?.()
       longPressTriggered.current = false
       return
     }
@@ -220,17 +258,25 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     <>
       <div ref={containerRef} className={className}>
         <Button
+          ref={buttonRef}
           type="button"
           className="btn btn-icon"
           aria-label="Run Agent"
           title="Run Agent"
+          style={{ touchAction: 'none', userSelect: 'none' }}
+          onPointerDownCapture={handlePointerDownCapture}
           onPointerDown={handlePointerDown}
+          onMouseDownCapture={handleMouseDownCapture}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
           onPointerMove={handlePointerMove}
+          onMouseMove={handleMouseMove}
+          onTouchMove={handleTouchMove}
           onPointerUp={endPress}
           onPointerCancel={endPress}
           onPointerLeave={endPress}
           onClick={handleClick}
-          onDragStart={(e: any) => { e.preventDefault(); e.stopPropagation() }}
+          onDragStart={(e: any) => { e.preventDefault(); e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.() }}
           onContextMenu={(e: any) => { if (open) { e.preventDefault(); e.stopPropagation() } }}
           draggable={false}
         >
