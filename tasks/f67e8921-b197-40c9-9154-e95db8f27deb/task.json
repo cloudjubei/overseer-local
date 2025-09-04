@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "Factory-ts improvements",
   "description": "Various improvements to add to the project and the factory-ts package",
   "features": [
@@ -408,11 +408,13 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "+",
-      "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display turns correctly",
-      "description": "Each task run comprises of the agent entering a conversation about a task's feature - treat each feature run as an AgentRun.",
+      "status": "?",
+      "title": "ChatConversation.tsx improvements",
+      "description": "@src/renderer/components/agents/ChatConversation.tsx has a list of features it displays.",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -521,6 +523,18 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "5f13e562-bbd6-4f67-97c9-00ba79ddb138",
+      "status": "-",
+      "title": "After running a first agent, running any more stalls",
+      "description": "Any consecutive agent after the first never starts.\nCancelling an agent from the @src/renderer/screens/AgentsView.tsx   screen doesn't help either.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -561,7 +575,8 @@
     "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 35,
     "274eb915-a7b3-4eed-b71d-e7888f1340fb": 36,
     "26d01bef-ce79-498a-9cc8-7a6ada530002": 37,
-    "82b9481c-7129-4bea-8029-0e41a56531fe": 38,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 39
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 38,
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 39,
+    "5f13e562-bbd6-4f67-97c9-00ba79ddb138": 40
   }
 }

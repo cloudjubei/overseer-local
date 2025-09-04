@@ -27,16 +27,16 @@ function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number 
   );
 }
 
-function Collapsible({ title, children, defaultOpen = false }: { title: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean }) {
+function Collapsible({ title, children, defaultOpen = false, className, innerClassName }: { title: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean, className?: string, innerClassName?: string }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border rounded-md border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+    <div className={`${className ??''} border rounded-md border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900`}>
       <button className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800/50" onClick={() => setOpen(v => !v)}>
         <span className="text-xs font-medium truncate pr-2">{title}</span>
         <span className="text-xs text-neutral-500">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
-        <div className="px-3 py-2 border-t border-neutral-200 dark:border-neutral-800">{children}</div>
+        <div className={`${innerClassName ??''} border-t border-neutral-200 dark:border-neutral-800`}>{children}</div>
       ) : null}
     </div>
   );
@@ -228,10 +228,18 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
   const { initial, turns } = useMemo(() => buildFeatureTurns(log.messages || []), [log]);
   const lastTurnRef = useRef<HTMLDivElement | null>(null);
 
+  console.log("log: ", log)
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 p-1">
       {initial ? (
-        <UserBubble title="Initial prompt" text={initial.content || ''} />
+        <Collapsible title={<span className="flex items-center1">Initial prompt</span>} defaultOpen>
+          {isLargeText(initial.content || '') ? (
+            <ScrollableTextBox text={initial.content || ''} />
+          ) : (
+            <div className="p-2 text-xs whitespace-pre-wrap break-words"><RichText text={initial.content || ''} /></div>
+          )}
+        </Collapsible>
       ) : (
         <div className="text-sm text-neutral-500">No conversation yet.</div>
       )}
@@ -246,12 +254,10 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
 
         return (
           <div key={idx} ref={idx === turns.length - 1 ? lastTurnRef : undefined}>
-            <Collapsible title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={idx === turns.length - 1}>
+            <Collapsible innerClassName='p-2' title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={idx === turns.length - 1}>
               <div className="space-y-2">
                 {hasThoughts ? (
                   <AssistantBubble text={parsed!.thoughts!} />
-                ) : !isFinal ? (
-                  <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
                 ) : (
                   <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
                 )}
@@ -304,7 +310,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
           const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
           return (
             <li key={log.featureId}>
-              <Collapsible title={<span className="flex items-center gap-2">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px]"> {subtitle}</span> : null}</span>} defaultOpen>
+              <Collapsible title={<span className="flex items-center">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span> : null}</span>} defaultOpen>
                 <FeatureContent log={log} />
               </Collapsible>
             </li>
