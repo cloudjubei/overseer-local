@@ -116,3 +116,20 @@ export function IconLoader({ className }: { className?: string }) {
     </svg>
   );
 }
+
+// Small arrow icons for token chip
+export function IconArrowLeftMini({ className }: { className?: string }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <polyline points="14 18 8 12 14 6" />
+    </svg>
+  );
+}
+
+export function IconArrowRightMini({ className }: { className?: string }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <polyline points="10 6 16 12 10 18" />
+    </svg>
+  );
+}
