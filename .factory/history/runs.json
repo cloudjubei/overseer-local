@@ -1,0 +1,73 @@
+[
+  {
+    "runId": "task_9l45kfj7_mf5mr5dh",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T16:38:14.262Z",
+    "updatedAt": "2025-09-04T16:44:40.666Z",
+    "costUSD": 21.571299999999997,
+    "promptTokens": 65449,
+    "completionTokens": 18783,
+    "progress": 0.03
+  },
+  {
+    "runId": "task_x7icbam9_mf5mibvc",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T16:31:22.777Z",
+    "updatedAt": "2025-09-04T16:31:24.619Z"
+  },
+  {
+    "runId": "task_ioykpwsb_mf5lye47",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "featureId": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T16:15:52.568Z",
+    "updatedAt": "2025-09-04T16:17:39.968Z",
+    "costUSD": 5.8122,
+    "promptTokens": 12802,
+    "completionTokens": 5665
+  },
+  {
+    "runId": "task_pscyv927_mf5llbap",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Turn 0 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T16:05:42.386Z",
+    "updatedAt": "2025-09-04T16:07:42.420Z",
+    "costUSD": 1.715,
+    "promptTokens": 12790,
+    "completionTokens": 545,
+    "progress": 0.01
+  },
+  {
+    "runId": "task_cshax8ha_mf5lizfm",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Turn 1 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T16:03:53.698Z",
+    "updatedAt": "2025-09-04T16:04:14.200Z",
+    "costUSD": 0,
+    "promptTokens": 9331,
+    "completionTokens": 401,
+    "progress": 0.02
+  }
+]
