@@ -563,7 +563,7 @@
     },
     {
       "id": "fd101477-cb98-4d87-90c4-efb87f39c5e6",
-      "status": "-",
+      "status": "+",
       "title": "Allow moving tasks when in 'not-done'",
       "description": "Pay close attention to what the index should be (remember the display index is always +1 due to starting at 1)\n@src/renderer/screens/TasksView.tsx\n\nIt should be also possible to move features in @src/renderer/tasks/TaskDetailsView.tsx also pay attention to the indices.",
       "plan": "",

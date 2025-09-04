@@ -91,7 +91,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     })
   }, [featuresSorted, statusFilter, query])
 
-  const isFiltered = query !== '' || statusFilter !== 'all'
+  const isSearchFiltered = query !== ''
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
@@ -112,7 +112,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     }
   }
 
-  const dndEnabled = sortBy === 'index_asc' && !isFiltered && !saving
+  // Allow DnD for index sorting when only the special 'not-done' filter is active (no search)
+  const dndEnabled = sortBy === 'index_asc' && !isSearchFiltered && (statusFilter === 'all' || statusFilter === 'not-done') && !saving
 
   const handleMoveFeature = async (fromIndex: number, toIndex: number) => {
     if (!task) return
@@ -211,9 +212,17 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   }
 
   const onListDrop = () => {
+    if (!task) { clearDndState(); return }
     if (dragFeatureId != null && draggingIndex != null && dropIndex != null && dropPosition != null) {
-      const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
-      handleMoveFeature(draggingIndex, toIndex)
+      // Map from feature id/display index back to absolute indices within the task
+      const fromIndex = (task.featureIdToDisplayIndex[dragFeatureId] ?? 1) - 1
+      const targetFeature = featuresFiltered[dropIndex]
+      if (!targetFeature) { clearDndState(); return }
+      let toIndex = (task.featureIdToDisplayIndex[targetFeature.id] ?? 1) - 1
+      if (dropPosition === 'after') {
+        toIndex = toIndex + 1
+      }
+      handleMoveFeature(fromIndex, toIndex)
     }
     clearDndState()
   }

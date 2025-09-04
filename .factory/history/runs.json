@@ -1,5 +1,17 @@
 [
   {
+    "runId": "task_hrs3cx5j_mf60yquv",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T23:16:03.319Z",
+    "updatedAt": "2025-09-04T23:16:03.319Z"
+  },
+  {
     "runId": "task_tstc9kee_mf60n4p6",
     "agentType": "developer",
     "projectId": "main",
