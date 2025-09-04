@@ -169,9 +169,10 @@ async function runConversation(opts: {
   const { model, availableTools, systemPrompt, task, feature, agentType, taskTools, git, completion, complete, emit } = opts;
   const doEmit = (e: { type: string; payload?: any }) => { try { emit?.(e); } catch {} };
 
-  const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
-  // Initial snapshot (contains the system/user bootstrap prompt)
-  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice() } });
+  // Initial system prompt is a system message (Turn 0)
+  const messages: CompletionMessage[] = [{ role: 'system', content: systemPrompt }];
+  // Initial snapshot (contains the system bootstrap prompt)
+  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice(), turn: 0 } });
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
     try {
@@ -219,16 +220,19 @@ async function runConversation(opts: {
 
         // Termination tools mirror Python
         if (['finish_feature', 'block_feature', 'finish_spec', 'block_task'].includes(toolName)) {
-          // Final conversation snapshot before termination
+          // Final conversation snapshot before termination (assistant is final; no tool results turn)
           doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), tool: toolName } });
           complete(toolName === 'block_feature' || toolName === 'block_task' ? 'block' : 'finish');
           return;
         }
       }
 
-      const toolResultMsg: CompletionMessage = { role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') };
+      // Append tool results as a dedicated 'tool' role message to avoid confusing with user turns
+      const toolResultMsg: CompletionMessage = { role: 'tool', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') } as any;
+      // Add a source hint for legacy parsers
+      (toolResultMsg as any).source = 'tools';
       messages.push(toolResultMsg);
-      // Emit user/tool results message appended
+      // Emit tool results message appended
       doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
       // progress hint after tools
       doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i + 1} tool calls processed` } });
