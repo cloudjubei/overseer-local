@@ -321,16 +321,35 @@ class AgentsServiceImpl {
     }
   }
 
+  private async coerceAgentTypeForTask(agentType: AgentType, projectId: string, taskId: string): Promise<AgentType> {
+    try {
+      const tasksApi = (window as any).tasksService;
+      if (!tasksApi || typeof tasksApi.getTask !== 'function') return agentType;
+      const task = await tasksApi.getTask(projectId, taskId);
+      const features = Array.isArray(task?.features) ? task!.features : [];
+      // If no features at all, default to speccer when caller sent developer (simple-click default) or any falsy
+      if (features.length === 0 && (agentType === 'developer' || !agentType)) return 'speccer';
+      return agentType;
+    } catch (err) {
+      console.warn('[agentsService] coerceAgentTypeForTask failed; keeping provided agentType', (err as any)?.message || err);
+      return agentType;
+    }
+  }
+
   async startTaskAgent(agentType: AgentType, projectId: string, taskId: string): Promise<AgentRun> {
     const llmConfig = this.getActiveLLMConfig();
     if (!llmConfig){
       throw new Error("NO ACTIVE LLM CONFIG") 
     }
-    console.log('[agentsService] startTaskAgent', { agentType, projectId, taskId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startTaskRun({ agentType, projectId, taskId, llmConfig, options: {  } });
+
+    // Enforce default: when the task has no features, prefer speccer (global behavior)
+    const effectiveAgentType = await this.coerceAgentTypeForTask(agentType, projectId, taskId);
+
+    console.log('[agentsService] startTaskAgent', { agentType: effectiveAgentType, projectId, taskId, llmConfig: redactConfig(llmConfig) });
+    const { handle, events } = await startTaskRun({ agentType: effectiveAgentType, projectId, taskId, llmConfig, options: {  } });
     const run: RunRecord = {
       runId: handle.id,
-      agentType,
+      agentType: effectiveAgentType,
       projectId,
       taskId,
       state: 'running',

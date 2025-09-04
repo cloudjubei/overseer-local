@@ -602,7 +602,7 @@
     },
     {
       "id": "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6",
-      "status": "-",
+      "status": "+",
       "title": "When no features are in a task - the default agent type is \"speccer\"",
       "description": "This should be true no matter where it is run from, right now it's only via @src/renderer/components/tasks/RunAgentButton.tsx",
       "plan": "",

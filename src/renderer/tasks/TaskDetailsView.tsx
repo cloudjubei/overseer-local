@@ -238,6 +238,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const currentFilterLabel = statusFilter === 'all' ? 'All' : (statusFilter === 'not-done' ? 'Not done' : `${STATUS_LABELS[statusFilter as Status]}`)
   const k = statusFilter === 'all' ? 'queued' : (statusFilter === 'not-done' ? 'queued' : statusKey(statusFilter as Status))
 
+  const onRunTaskAgent = (agentType: AgentType) => {
+    if (!projectId || taskHasActiveRun) return;
+    // Default rule: if no features and user clicked default (developer), run speccer instead
+    const next: AgentType = (task.features.length === 0 && agentType === 'developer') ? 'speccer' : agentType;
+    startTaskAgent(next, projectId, task.id);
+  };
+
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
       <header className="details-header shrink-0">
@@ -288,7 +295,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               </div>
             )}
             <ModelChip editable />
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}    
+            {!taskHasActiveRun && <RunAgentButton onClick={onRunTaskAgent}/>}
           </div>
         </div>
       </header>

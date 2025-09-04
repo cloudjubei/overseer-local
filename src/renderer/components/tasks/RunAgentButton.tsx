@@ -218,6 +218,7 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
       longPressTriggered.current = false
       return
     }
+    // Simple click uses a neutral default of 'developer'. Parents may override this to enforce context-specific defaults.
     onClick('developer')
   }
 
