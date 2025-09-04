@@ -325,7 +325,7 @@
     },
     {
       "id": "d5b4852d-df73-4818-8db0-f7d6954c0108",
-      "status": "-",
+      "status": "+",
       "title": "The agent persona markdown files are too bloated.",
       "description": "These files contain the tool specs, but those are yet again repeated in the overall tool spec in the orchestrator.\nThese files shouldn't have the list of tools available, but the tool descriptions provided by the orchestrator should contain extra comments as to what each tool does (similarly to how each agent's markdown persona file has it).",
       "plan": "",

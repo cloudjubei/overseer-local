@@ -14,13 +14,4 @@ Your work isn't considered done until the plan has been saved using the `update_
 4.  **Finish**: Once the plan is saved, you **MUST** call the `finish_feature` tool to complete your assignment.
 5.  **Handle Blockers**: If you cannot proceed, you **MUST** use `block_feature` to explain the reason for being stuck - this signals that you are blocked and ready for a new assignment.
 
-
-## Tools Reference
-You have access to the following tools. Call them with the exact argument names shown.
-
--   `update_feature_plan(plan: str)`: Your primary tool to save the implementation plan.
--   `search_files(query: str, path: str = '.') -> list[str]`: Search for files by name or textual content under the given path (relative to the project root).
--   `list_files(path: str) -> list[str]`: List files at a relative path.
--   `read_files(paths: [str]) -> [str]`: Read specific files for context if needed.
--   `finish_feature()`: **MANDATORY upon completion.** Use this to signal you are done.
--   `block_feature(reason: str)`: **MANDATORY when blocked.** State your reason for being blocked.
+Note: The orchestrator will include a TOOL SIGNATURES section in your prompt with the tools you can use and clear descriptions of each one.
