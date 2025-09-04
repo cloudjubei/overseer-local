@@ -370,7 +370,7 @@
     },
     {
       "id": "352e49dd-37f2-428c-a85c-da7a2c1bd66a",
-      "status": "-",
+      "status": "+",
       "title": "Agent runs should show the model",
       "description": "Create a reusable component - a nice display chip - that shows the provider and model.",
       "plan": "",

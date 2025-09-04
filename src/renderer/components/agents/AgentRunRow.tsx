@@ -3,6 +3,7 @@ import type { AgentRun } from '../../services/agentsService';
 import DependencyBullet from '../tasks/DependencyBullet';
 import StatusChip from './StatusChip';
 import TurnChip from './TurnChip';
+import ModelChip from './ModelChip';
 import { IconChevron, IconDelete } from '../ui/Icons';
 
 function formatUSD(n?: number) {
@@ -62,9 +63,10 @@ export interface AgentRunRowProps {
   onCancel?: (runId: string) => void;
   showActions?: boolean;
   showProject?: boolean;
+  showModel?: boolean;
 }
 
-export default function AgentRunRow({ run, onView, onCancel, showActions = true, showProject = false }: AgentRunRowProps) {
+export default function AgentRunRow({ run, onView, onCancel, showActions = true, showProject = false, showModel = true }: AgentRunRowProps) {
   const turns = countTurns(run.messages);
   const started = useMemo(() => new Date(run.startedAt || run.updatedAt || Date.now()), [run.startedAt, run.updatedAt]);
   const ended = useMemo(() => (run.state === 'running' ? new Date() : new Date(run.updatedAt || Date.now())), [run.state, run.updatedAt]);
@@ -90,6 +92,11 @@ export default function AgentRunRow({ run, onView, onCancel, showActions = true,
       <td className="px-3 py-2">
         <StatusChip state={run.state} />
       </td>
+      {showModel ? (
+        <td className="px-3 py-2">
+          <ModelChip provider={run.provider} model={run.model} />
+        </td>
+      ) : null}
       <td className="px-3 py-2">
         <TurnChip turn={turns} />
       </td>

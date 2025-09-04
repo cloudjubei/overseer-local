@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import type { AgentRun } from '../../services/agentsService';
 
 function stateColor(state: AgentRun['state']) {
@@ -18,7 +18,8 @@ function stateColor(state: AgentRun['state']) {
 
 export default function AgentRunBullet({ run, onClick }: { run: AgentRun; onClick?: (e: any) => void }) {
   const color = stateColor(run.state);
-  const label = `Agent ${run.runId.slice(0, 8)} · ${run.state}${run.progress != null ? ` · ${Math.round((run.progress ?? 0) * 100)}%` : ''}${run.message ? ` · ${run.message}` : ''}`;
+  const providerModel = [run.provider, run.model].filter(Boolean).join(' · ');
+  const label = `Agent ${run.runId.slice(0, 8)} · ${run.state}${run.progress != null ? ` · ${Math.round((run.progress ?? 0) * 100)}%` : ''}${run.message ? ` · ${run.message}` : ''}${providerModel ? ` · ${providerModel}` : ''}`;
 
   // Use the same chip classes as DependencyBullet for visual consistency
   // Default to chip--ok; state is additionally conveyed via the colored dot and accessible label
