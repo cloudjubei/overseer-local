@@ -235,7 +235,7 @@ export default function ModelChip({ provider, model, className, editable = false
     <span
       ref={containerRef}
       className={[
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
+        'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs',
         'bg-neutral-100 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200',
         'border-neutral-200 dark:border-neutral-700',
         editable ? 'cursor-pointer hover:bg-neutral-100/80 dark:hover:bg-neutral-800' : '',
@@ -257,7 +257,16 @@ export default function ModelChip({ provider, model, className, editable = false
       }}
     >
       <span className={["inline-block w-1.5 h-1.5 rounded-full", dot].join(' ')} aria-hidden />
-      <span className="truncate max-w-[18ch]" style={{ lineHeight: 1 }}>{label || (editable ? 'Select model…' : '—')}</span>
+      <span className="flex flex-col leading-tight max-w-[16ch]">
+        <span className="truncate text-[10px] uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
+          {prov || (editable ? 'Select' : '—')}
+        </span>
+        {(displayModel || editable) && (
+          <span className="truncate text-xs font-medium">
+            {displayModel || (editable ? 'model…' : '')}
+          </span>
+        )}
+      </span>
     </span>
   );
 
