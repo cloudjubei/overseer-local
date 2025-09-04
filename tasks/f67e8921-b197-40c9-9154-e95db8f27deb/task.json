@@ -424,7 +424,7 @@
     },
     {
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "-",
+      "status": "+",
       "title": "AllAgentsView.tsx improvements",
       "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not connected properly.\n\nThe Tokens field tooltip - this should show the tokens not the characters.\nThe Tokens field chip - should show an arrow icon \"->\" for tokens received from the LLM, and an arrow icon \"<-\" for tokens send to the LLM. These should be on two separate rows.",
       "plan": "",
