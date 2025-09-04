@@ -31,6 +31,8 @@
 .feature-row .col-blockers { grid-row: 3; grid-column: 2; display:flex; gap: 32px; }
 
 .feature-row:hover .col-actions, .feature-row:focus .col-actions { opacity: 1; pointer-events: auto; }
+/* Force the actions visible while a child control has an open popover (e.g., RunAgentButton long-press picker) */
+.feature-row .col-actions.is-sticky-visible { opacity: 1 !important; pointer-events: auto !important; }
 .empty { padding: 12px; color: var(--text-secondary); }
 
 

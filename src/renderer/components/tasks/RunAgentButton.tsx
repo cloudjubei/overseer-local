@@ -139,6 +139,7 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
         e.stopPropagation()
       }}
       onMouseDown={(e) => {
+        // prevent losing hover/focus and accidental drags
         e.stopPropagation()
         e.preventDefault()
       }}
@@ -194,6 +195,8 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
   const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
     // Only act on primary button or touch/pen
     if (e.button !== undefined && e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return
+    // Stop propagation so parent rows don't react to this press
+    e.stopPropagation()
     longPressTriggered.current = false
     clearPressTimer()
     pressTimer.current = window.setTimeout(() => {
@@ -202,7 +205,8 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     }, LONG_PRESS_MS)
   }
 
-  const handlePointerUpLike: React.PointerEventHandler<HTMLButtonElement> = () => {
+  const handlePointerUpLike: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation()
     clearPressTimer()
   }
 
@@ -217,13 +221,29 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     onClick('developer')
   }
 
+  // Keep actions column visible while picker is open (prevents hover-hide while selecting)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const colActions = el.closest('.col-actions') as HTMLElement | null
+    if (!colActions) return
+    if (open) {
+      colActions.classList.add('is-sticky-visible')
+    } else {
+      colActions.classList.remove('is-sticky-visible')
+    }
+    return () => {
+      colActions.classList.remove('is-sticky-visible')
+    }
+  }, [open])
+
   useEffect(() => {
     return () => clearPressTimer()
   }, [])
 
   return (
     <>
-      <div ref={containerRef} className={className}>
+      <div ref={containerRef} className={`no-drag ${className}`}>
         <Button
           ref={buttonRef}
           type="button"
@@ -243,6 +263,7 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
             }
           }}
           draggable={false}
+          data-picker-open={open ? '1' : '0'}
         >
           <IconPlay />
         </Button>

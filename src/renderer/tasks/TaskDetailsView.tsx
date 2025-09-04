@@ -226,7 +226,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>
           </div>
         </div>
       </header>
@@ -305,6 +305,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       aria-grabbed={isDragSource}
                       onDragStart={(e) => {
                         if (!dndEnabled) return
+                        // Prevent dragging when the original target is inside elements that should not initiate drag (e.g., action buttons)
+                        const target = e.target as HTMLElement | null
+                        if (target && target.closest('.no-drag')) {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          return
+                        }
                         setDragFeatureId(f.id)
                         setDragging(true)
                         setDraggingIndex(idx)
@@ -331,7 +338,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <FileMentions text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
-                        <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
+                        <button type="button" className="btn-secondary btn-icon no-drag" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
                           <IconEdit />
                         </button>
                         {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>}
