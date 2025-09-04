@@ -1,2 +1,17 @@
 [
+  {
+    "runId": "task_ha42u0tl_mf5i1dqk",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T14:26:13.581Z",
+    "updatedAt": "2025-09-04T14:52:53.328Z",
+    "costUSD": 0,
+    "promptTokens": 517647,
+    "completionTokens": 74468,
+    "progress": 0.07
+  }
 ]

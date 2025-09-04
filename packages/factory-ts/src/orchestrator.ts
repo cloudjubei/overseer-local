@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall } from './types.js';
+import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types.js';
 import type { TaskUtils } from './taskUtils.js';
 import type { FileTools } from './fileTools.js';
 import type { GitManager } from './gitManager.js';
@@ -25,7 +25,7 @@ function loadProtocolExample(): string {
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
     return JSON.stringify(data, null, 2);
   } catch (e) {
-    return '{\n  "thoughts": "Your reasoning here...",\n  "tool_calls": [ ... ]\n}';
+    return '{\n"thoughts":"Your reasoning here...",\n"tool_calls":[ ... ]\n}';
   }
 }
 
@@ -37,7 +37,11 @@ const PROTOCOL_INSTRUCTIONS = (() => {
     example,
     '```',
     'The thoughts field is for your reasoning, and tool_calls is a list of actions to execute.',
-    'Your response will be parsed as JSON. Do not include any text outside of this JSON object.'
+    'Your response will be parsed as JSON. Do not include any text outside of this JSON object.',
+    'As responses to the tool calls you will send, you will also receive JSON objects in the form:',
+    '```json',
+    '{\n"name":"tool_name",\n"result":"..."\n}',
+    '```',
   ].join('\n');
 })();
 
@@ -199,7 +203,7 @@ async function runConversation(opts: {
         continue;
       }
 
-      const toolOutputs: string[] = [];
+      const toolOutputs: ToolResult[] = [];
 
       for (const call of toolCalls) {
         const toolName = (call.tool_name || call.tool || call.name || 'unknown_tool');
@@ -211,9 +215,9 @@ async function runConversation(opts: {
           if (feature && !('feature_id' in args)) args.feature_id = feature.id;
 
           const result = await Promise.resolve(availableTools[toolName](args));
-          toolOutputs.push(`Tool ${toolName} returned: ${result}`);
+          toolOutputs.push({name: toolName, result})
         } else {
-          toolOutputs.push(`Error: Tool '${toolName}' not found.`);
+          toolOutputs.push({name: toolName, result: `Error: Tool '${toolName}' not found.`})
         }
 
         // Termination tools mirror Python
@@ -226,7 +230,7 @@ async function runConversation(opts: {
       }
 
       // Append tool results as a dedicated 'tool' role message to avoid confusing with user turns
-      const toolResultMsg: CompletionMessage = { role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') } as any;
+      const toolResultMsg: CompletionMessage = { role: 'user', content: JSON.stringify(toolOutputs) } as any;
       // Add a source hint for legacy parsers
       (toolResultMsg as any).source = 'tools';
       messages.push(toolResultMsg);

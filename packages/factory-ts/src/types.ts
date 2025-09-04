@@ -48,6 +48,7 @@ export type CompletionUsage = {
 export type CompletionResponse = { message: { role: 'assistant'; content: string }; usage?: CompletionUsage };
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 export type ToolCall = { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any };
+export type ToolResult = { name: string; result: string };
 export type AgentResponse = { thoughts?: string; tool_calls?: ToolCall[] };
 
 
