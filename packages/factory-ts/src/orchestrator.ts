@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types.js';
@@ -469,17 +470,17 @@ async function copyTree(src: string, dest: string) {
   // Recursively copy, respecting ignore patterns and skipping asar/virtual entries
   let stat: fs.Stats;
   try {
-    stat = fs.statSync(src);
+    stat = await fsp.stat(src);
   } catch (e: any) {
     throw new Error(`Source path does not exist or is not accessible: ${src} (${e?.code || e})`);
-    }
+  }
   if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
-  fs.mkdirSync(dest, { recursive: true });
+  await fsp.mkdir(dest, { recursive: true });
 
-  const walk = (from: string, to: string) => {
-    let entries: fs.Dirent[] = [];
+  const walk = async (from: string, to: string) => {
+    let entries: fs.Dirent[] = [] as unknown as fs.Dirent[];
     try {
-      entries = fs.readdirSync(from, { withFileTypes: true });
+      entries = await fsp.readdir(from, { withFileTypes: true });
     } catch (e: any) {
       // Skip unreadable directories (e.g., asar virtuals)
       logger.warn(`copyTree: Skipping unreadable directory ${from}: ${e?.code || e}`);
@@ -496,26 +497,26 @@ async function copyTree(src: string, dest: string) {
 
       try {
         if (entry.isDirectory()) {
-          fs.mkdirSync(dstPath, { recursive: true });
-          walk(srcPath, dstPath);
+          await fsp.mkdir(dstPath, { recursive: true });
+          await walk(srcPath, dstPath);
         } else if (entry.isSymbolicLink()) {
           // Resolve symlink target and copy contents (best-effort)
           try {
-            const linkTarget = fs.readlinkSync(srcPath);
+            const linkTarget = await fsp.readlink(srcPath);
             const resolved = path.resolve(path.dirname(srcPath), linkTarget);
-            const st = fs.statSync(resolved);
+            const st = await fsp.stat(resolved);
             if (st.isDirectory()) {
-              fs.mkdirSync(dstPath, { recursive: true });
-              walk(resolved, dstPath);
+              await fsp.mkdir(dstPath, { recursive: true });
+              await walk(resolved, dstPath);
             } else {
-              fs.copyFileSync(resolved, dstPath);
+              await fsp.copyFile(resolved, dstPath);
             }
           } catch {
             // Fallback: copy file bytes of the link itself (as file)
-            try { fs.copyFileSync(srcPath, dstPath); } catch {}
+            try { await fsp.copyFile(srcPath, dstPath); } catch {}
           }
         } else if (entry.isFile()) {
-          fs.copyFileSync(srcPath, dstPath);
+          await fsp.copyFile(srcPath, dstPath);
         }
       } catch (e: any) {
         // Skip problematic entries (e.g., ENOENT due to virtualized packaging paths)
@@ -528,7 +529,7 @@ async function copyTree(src: string, dest: string) {
     }
   };
 
-  walk(src, dest);
+  await walk(src, dest);
 }
 
 export async function runIsolatedOrchestrator(opts: {

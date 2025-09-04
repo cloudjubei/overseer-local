@@ -1,5 +1,17 @@
 [
   {
+    "runId": "task_1d8nb33q_mf5vyyh8",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T20:56:15.117Z",
+    "updatedAt": "2025-09-04T20:56:15.117Z"
+  },
+  {
     "runId": "task_ufk6ljdr_mf5v5ujo",
     "agentType": "speccer",
     "projectId": "main",
