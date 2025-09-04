@@ -75,16 +75,74 @@ function VariantIcon({ variant }: { variant: ToastVariant }) {
 }
 
 export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: string) => void }) {
+  // Gesture state for flick-to-dismiss
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [flickDismiss, setFlickDismiss] = useState(false);
+  const startYRef = useRef(0);
+  const lastYRef = useRef(0);
+  const startTimeRef = useRef(0);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (item.isClosing) return;
+    setDragging(true);
+    startYRef.current = e.clientY;
+    lastYRef.current = e.clientY;
+    startTimeRef.current = performance.now();
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging || item.isClosing) return;
+    const dy = e.clientY - startYRef.current;
+    // Only allow dragging upward (negative). Small downward moves are ignored.
+    const clamped = Math.min(0, dy);
+    lastYRef.current = e.clientY;
+    setDragY(clamped);
+  };
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return;
+    setDragging(false);
+    const totalDy = Math.min(0, lastYRef.current - startYRef.current);
+    const dt = Math.max(1, performance.now() - startTimeRef.current);
+    const velocity = totalDy / dt; // px per ms (negative when upwards)
+
+    const DISMISS_DISTANCE = -48; // px upward
+    const FLICK_VELOCITY = -0.6; // px/ms upward (~600px/s)
+
+    if (totalDy <= DISMISS_DISTANCE || velocity <= FLICK_VELOCITY) {
+      // Keep the dragged position and fade-out while closing
+      setFlickDismiss(true);
+      onClose(item.id);
+    } else {
+      // Bounce back
+      setDragY(0);
+    }
+  };
+
   // iOS-like: rounded pill, subtle translucent background, compact spacing
   const anim = item.isClosing
     ? 'animate-out fade-out-0 slide-out-to-top-2 duration-200 ease-in'
     : 'animate-in fade-in-50 slide-in-from-top-2 duration-200 ease-out';
 
+  const style: React.CSSProperties = {
+    transform: (dragging || flickDismiss) ? `translate3d(0, ${dragY}px, 0)` : undefined,
+    opacity: (dragging || flickDismiss) ? Math.max(0.25, Math.min(1, 1 + dragY / 80)) : undefined,
+    transition: dragging ? 'none' : 'transform 160ms ease-out, opacity 160ms ease-out',
+    touchAction: 'none',
+  };
+
   return (
     <div
-      className={`pointer-events-auto w-[340px] overflow-hidden rounded-2xl shadow-xl ${anim}`}
+      className={`pointer-events-auto w-[340px] overflow-hidden rounded-2xl shadow-xl ${anim} select-none`}
       role="status"
       aria-live="polite"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      style={style}
     >
       <div
         className="group flex items-start gap-3 px-3.5 py-3 rounded-2xl border border-black/5 dark:border-white/5 bg-white/80 dark:bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md"
