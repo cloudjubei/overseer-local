@@ -144,7 +144,7 @@ class AgentsServiceImpl {
             model: m.model,
             startedAt: m.startedAt || new Date().toISOString(),
             updatedAt: m.updatedAt || new Date().toISOString(),
-            messagesByFeature: {},
+            messagesLog: {},
             events: NOOP_EVENTS,
             cancel: () => {},
           } as RunRecord;
@@ -337,7 +337,7 @@ class AgentsServiceImpl {
       updatedAt: new Date().toISOString(),
       provider: llmConfig?.provider,
       model: llmConfig?.model,
-      messagesByFeature: {},
+      messagesLog: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;
@@ -365,7 +365,7 @@ class AgentsServiceImpl {
       updatedAt: new Date().toISOString(),
       provider: llmConfig?.provider,
       model: llmConfig?.model,
-      messagesByFeature: {},
+      messagesLog: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;

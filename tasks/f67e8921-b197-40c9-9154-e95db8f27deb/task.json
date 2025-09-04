@@ -497,7 +497,7 @@
     },
     {
       "id": "274eb915-a7b3-4eed-b71d-e7888f1340fb",
-      "status": "-",
+      "status": "+",
       "title": "ChatConversation improvements",
       "description": "@src/renderer/components/agents/ChatConversation.tsx  is currently broken - there was a new type AgentFeatureRunLog introduced inside AgentRun in the file @src/renderer/services/agentsService.ts . Adapt everything in ChatConversation to make it work. Display a list of features in an AgentRun, each Feature run showing the 'turns'. After the first initial message, each turn is a series of 2 messages - 1 from the LLM and 1 a response with tool calls. The final message is a single one from the LLM. Make sure the orchestrator works correctly too.",
       "plan": "",

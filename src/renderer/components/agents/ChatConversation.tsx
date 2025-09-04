@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import type { AgentFeatureRunLog, AgentRun, AgentRunMessage } from '../../services/agentsService';
 import RichText from '../ui/RichText';
 import SafeText from '../ui/SafeText';
-import { ToolResult } from 'packages/factory-ts/src/types';
+import { ToolResult, AgentResponse, ToolCall } from 'packages/factory-ts/src/types';
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
-function parseAssistant(content: string): { thoughts?: string; tool_calls?: { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any }[] } | null {
+function parseAssistant(content: string): AgentResponse | null {
   try {
     const obj = JSON.parse(content);
-    if (obj && typeof obj === 'object') return obj;
+    if (obj && typeof obj === 'object') return obj as AgentResponse;
     return null;
   } catch {
     return null;
@@ -42,9 +42,9 @@ function Collapsible({ title, children, defaultOpen = false }: { title: React.Re
   );
 }
 
-function ToolCallRow({ call, resultText, index }: { call: any; resultText?: string; index: number }) {
-  const name = call.tool_name || call.tool || call.name || 'tool';
-  const args = call.arguments ?? call.parameters ?? {};
+function ToolCallRow({ call, resultText, index }: { call: ToolCall; resultText?: string; index: number }) {
+  const name = (call as any).tool_name || (call as any).tool || (call as any).name || 'tool';
+  const args = (call as any).arguments ?? (call as any).parameters ?? {};
   const isHeavy = name === 'read_files' || name === 'write_file';
 
   return (
@@ -135,107 +135,6 @@ function parseToolResultsObjects(msg?: AgentRunMessage): ParsedToolResult[] {
   return out;
 }
 
-// Build conversation turns. Prefer grouping by explicit message.turn when present; otherwise fall back to sequential bundling
-function useTurnBundles(messages: AgentRunMessage[] | undefined) {
-  return useMemo(() => {
-    const systemMsgs: AgentRunMessage[] = [];
-
-    type Turn = { index: number; turnNumber?: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage };
-
-    const nonSystem: AgentRunMessage[] = [];
-    for (const m of messages || []) {
-      if ((m.role || '') === 'system') systemMsgs.push(m); else nonSystem.push(m);
-    }
-
-    const hasTurns = nonSystem.some(m => typeof m.turn === 'number' && isFinite(m.turn as any));
-
-    const isToolMsg = (m: AgentRunMessage) => {
-      const content = m.content || '';
-      const hinted = (m as any).source === 'tools';
-      return m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---');
-    };
-
-    let turns: Turn[] = [];
-
-    if (hasTurns) {
-      const byTurn = new Map<number, Turn>();
-      for (const m of nonSystem) {
-        const t = typeof m.turn === 'number' && isFinite(m.turn) ? (m.turn as number) : Number.MAX_SAFE_INTEGER;
-        if (!byTurn.has(t)) byTurn.set(t, { index: 0, turnNumber: t });
-        const turn = byTurn.get(t)!;
-        if (isToolMsg(m)) {
-          turn.tools = m;
-        } else if (m.role === 'user') {
-          turn.user = m;
-        } else if (m.role === 'assistant') {
-          turn.assistant = m;
-        }
-      }
-      // Sort by turn number; put "unassigned" (MAX_SAFE_INTEGER) at the end
-      const sorted = Array.from(byTurn.values()).sort((a, b) => (a.turnNumber! - b.turnNumber!));
-      turns = sorted.map((t, idx) => ({ ...t, index: idx }));
-
-      // If every message ended up with the same turn (degenerate snapshot), fall back to sequential bundling
-      const uniqTurns = new Set(sorted.map(t => t.turnNumber));
-      if (uniqTurns.size <= 1) {
-        turns = [];
-        let current: Turn | null = null;
-        for (const m of nonSystem) {
-          if (isToolMsg(m)) {
-            if (!current) current = { index: turns.length };
-            current.tools = m;
-            turns.push(current);
-            current = null;
-            continue;
-          }
-          if (m.role === 'user') {
-            if (current && (current.user || current.assistant || current.tools)) {
-              turns.push(current);
-              current = null;
-            }
-            current = { index: turns.length, user: m };
-            continue;
-          }
-          if (m.role === 'assistant') {
-            if (!current) current = { index: turns.length };
-            current.assistant = m;
-            continue;
-          }
-        }
-        if (current && (current.user || current.assistant || current.tools)) turns.push(current);
-      }
-    } else {
-      // Sequential bundling
-      let current: Turn | null = null;
-      for (const m of nonSystem) {
-        if (isToolMsg(m)) {
-          if (!current) current = { index: turns.length };
-          current.tools = m;
-          turns.push(current);
-          current = null;
-          continue;
-        }
-        if (m.role === 'user') {
-          if (current && (current.user || current.assistant || current.tools)) {
-            turns.push(current);
-            current = null;
-          }
-          current = { index: turns.length, user: m };
-          continue;
-        }
-        if (m.role === 'assistant') {
-          if (!current) current = { index: turns.length };
-          current.assistant = m;
-          continue;
-        }
-      }
-      if (current && (current.user || current.assistant || current.tools)) turns.push(current);
-    }
-
-    return { systemMsgs, turns } as { systemMsgs: AgentRunMessage[]; turns: { index: number; turnNumber?: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage }[] };
-  }, [messages]);
-}
-
 function isLargeText(text?: string) {
   if (!text) return false;
   const len = text.length;
@@ -253,104 +152,167 @@ function ScrollableTextBox({ text, className }: { text: string; className?: stri
   );
 }
 
-export function AgentFeatureRunView({ log }: { log : AgentFeatureRunLog })
-{
-  const messages = log.messages
+function isToolMsg(m: AgentRunMessage | undefined) {
+  if (!m) return false;
+  const content = m.content || '';
+  const hinted = (m as any).source === 'tools';
+  return m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---');
+}
+
+function buildFeatureTurns(messages: AgentRunMessage[]) {
+  const turns: { assistant: AgentRunMessage; tools?: AgentRunMessage; index: number; isFinal?: boolean }[] = [];
+  if (!messages || messages.length === 0) return { initial: undefined as AgentRunMessage | undefined, turns };
+
+  // Initial message is the first non-tool message (usually user)
+  let idx = 0;
+  while (idx < messages.length && isToolMsg(messages[idx])) idx++;
+  const initial = messages[idx];
+  idx++;
+
+  let tIndex = 0;
+  while (idx < messages.length) {
+    const a = messages[idx];
+    if (!a) break;
+    if (a.role !== 'assistant') {
+      // Skip anything unexpected
+      idx++;
+      continue;
+    }
+    const parsed = parseAssistant(a.content);
+    if (parsed && Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
+      const maybeTools = messages[idx + 1];
+      if (isToolMsg(maybeTools)) {
+        turns.push({ assistant: a, tools: maybeTools, index: tIndex++ });
+        idx += 2;
+        continue;
+      }
+      // No tools message, still push assistant-only
+      turns.push({ assistant: a, index: tIndex++ });
+      idx += 1;
+      continue;
+    }
+    // Final assistant message (no tool_calls)
+    turns.push({ assistant: a, index: tIndex++, isFinal: true });
+    idx += 1;
+  }
+  return { initial, turns };
+}
+
+function AssistantBubble({ title, text }: { title?: string; text: string }) {
+  return (
+    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
+      {title ? <div className="text-[11px] font-medium mb-1">{title}</div> : null}
+      {isLargeText(text) ? (
+        <ScrollableTextBox text={text} />
+      ) : (
+        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={text} /></div>
+      )}
+    </div>
+  );
+}
+
+function UserBubble({ title, text }: { title?: string; text: string }) {
+  return (
+    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
+      {title ? <div className="text-[11px] font-medium mb-1">{title}</div> : null}
+      {isLargeText(text) ? (
+        <ScrollableTextBox text={text} />
+      ) : (
+        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={text} /></div>
+      )}
+    </div>
+  );
+}
+
+function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
+  const { initial, turns } = useMemo(() => buildFeatureTurns(log.messages || []), [log]);
+  const lastTurnRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    {messages.length === 0 ? (
-      <div className="text-sm text-neutral-500">No conversation yet.</div>
-    ) : (
-      <ul className="space-y-3">
-        {messages.entries(({ role, content }, index) => {
-          const isAssistant = role == "assistant"
+    <div className="space-y-3">
+      {initial ? (
+        <UserBubble title="Initial prompt" text={initial.content || ''} />
+      ) : (
+        <div className="text-sm text-neutral-500">No conversation yet.</div>
+      )}
 
-          if (isAssistant){
-            const message = JSON.parse(content) as AgentResponse
-          }else{
-            if (index == 0){ //first message is always an initial text prompt
-              const message : string = content
-            }else{
-              const toolResult = JSON.parse(content) as ToolResult[]
-            }
-          }
+      {turns.map((t, idx) => {
+        const parsed = parseAssistant(t.assistant?.content || '');
+        const toolCalls: ToolCall[] = parsed?.tool_calls || [];
+        const resultsObjs = parseToolResultsObjects(t.tools);
+        const pickResultForCall = (call: ToolCall, i: number) => resultsObjs[i]?.result ?? undefined;
+        const hasThoughts = parsed?.thoughts && parsed.thoughts.trim().length > 0;
+        const isFinal = t.isFinal || (toolCalls.length === 0);
 
-          //TODO: map the new data
+        return (
+          <div key={idx} ref={idx === turns.length - 1 ? lastTurnRef : undefined}>
+            <Collapsible title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={idx === turns.length - 1}>
+              <div className="space-y-2">
+                {hasThoughts ? (
+                  <AssistantBubble text={parsed!.thoughts!} />
+                ) : !isFinal ? (
+                  <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
+                ) : (
+                  <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
+                )}
 
-          return (
-            <li key={index} ref={isLast ? lastTurnRef : undefined}>
-              <Collapsible title={<span className="flex items-center gap-2">{title}</span>} defaultOpen={isLast}>
-                <div className="space-y-2">
-                  {user ? (
-                    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
-                      <div className="text-[11px] font-medium mb-1">User</div>
-                      {isLargeText(user.content) ? (
-                        <ScrollableTextBox text={user.content || ''} />
-                      ) : (
-                        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={user.content} /></div>
-                      )}
-                    </div>
-                  ) : null}
+                {toolCalls.length > 0 ? (
+                  <div className="space-y-2">
+                    {toolCalls.map((call, i) => (
+                      <ToolCallRow key={i} call={call} index={i} resultText={pickResultForCall(call, i)} />
+                    ))}
+                  </div>
+                ) : null}
 
-                  {parsed?.thoughts ? (
-                    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
-                      {isLargeText(parsed.thoughts) ? (
-                        <ScrollableTextBox text={parsed.thoughts || ''} />
-                      ) : (
-                        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={parsed.thoughts} /></div>
-                      )}
-                    </div>
-                  ) : assistant ? (
-                    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
-                      <div className="text-[11px] font-medium mb-1">Assistant</div>
-                      {isLargeText(assistant.content) ? (
-                        <ScrollableTextBox text={assistant.content || ''} />
-                      ) : (
-                        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={assistant.content} /></div>
-                      )}
-                    </div>
-                  ) : null}
-
-                  {toolCalls.length > 0 ? (
-                    <div className="space-y-2">
-                      {toolCalls.map((call, i) => (
-                        <ToolCallRow key={i} call={call} index={i} resultText={pickResultForCall(call, i)} />
-                      ))}
-                    </div>
-                  ) : null}
-
-                  {toolCalls.length === 0 && resultsObjs.length > 0 ? (
-                    <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
-                      <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
-                      {resultsObjs.map((r, i) => (
-                        <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-                          <SafeText text={r.result} />
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </Collapsible>
-            </li>
-          );
-        })}
-      </ul>
-    )}
-  )
+                {toolCalls.length === 0 && !isFinal && resultsObjs.length > 0 ? (
+                  <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
+                    <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
+                    {resultsObjs.map((r, i) => (
+                      <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
+                        <SafeText text={r.result} />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </Collapsible>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
-  const lastFeatureRef = useRef<HTMLLIElement | null>(null);
-
   const logs = useMemo(() => {
-    return Object.values(run.messagesLog ?? {}).sort((a,b) => a.startDate.getTime() - b.startDate.getTime())
+    const list = Object.values(run.messagesLog ?? {});
+    return list.sort((a, b) => {
+      const at = new Date((a as any).startDate).getTime();
+      const bt = new Date((b as any).startDate).getTime();
+      return at - bt;
+    });
   }, [run]);
 
   return (
     <div className="h=[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
-      {logs.map(log => (
-        <AgentFeatureRunView key={log.featureId} log={log} />
-      ))}
+      {logs.length === 0 ? (
+        <div className="text-sm text-neutral-500">No features messages to display.</div>
+      ) : (
+        <ul className="space-y-3">
+          {logs.map((log) => {
+            const start = log.startDate ? new Date(log.startDate as any) : undefined;
+            const end = log.endDate ? new Date(log.endDate as any) : undefined;
+            const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
+            return (
+              <li key={log.featureId}>
+                <Collapsible title={<span className="flex items-center gap-2">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px]"> {subtitle}</span> : null}</span>} defaultOpen>
+                  <FeatureContent log={log} />
+                </Collapsible>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
