@@ -58,15 +58,18 @@ function positionFor(anchor: HTMLElement, gap = 8) : { top: number, left: number
   return { top, left, minWidth: r.width, side }
 }
 
+type PickerValue = Status | 'all' | 'not-done'
+
 type PickerProps = {
   anchorEl: HTMLElement
-  value: Status | 'all'
+  value: PickerValue
   isAllAllowed?: boolean
-  onSelect: (s: Status | 'all') => void
+  includeNotDone?: boolean
+  onSelect: (s: PickerValue) => void
   onClose: () => void
 }
 
-export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, onClose }: PickerProps) {
+export function StatusPicker({ anchorEl, value, isAllAllowed = false, includeNotDone = false, onSelect, onClose }: PickerProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [coords, setCoords] = useState<{ top: number; left: number; minWidth: number; side: 'top' | 'bottom' } | null>(null)
 
@@ -76,14 +79,14 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
 
   useOutsideClick([panelRef], onClose)
 
-  const [active, setActive] = useState<Status | 'all'>(value)
+  const [active, setActive] = useState<PickerValue>(value)
   useEffect(() => setActive(value), [value])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!panelRef.current) return
       if (e.key === 'Escape') { e.preventDefault(); onClose(); return }
-      const idx = active === 'all' ? STATUS_ORDER.length : STATUS_ORDER.indexOf(active)
+      const idx = active === 'all' || active === 'not-done' ? STATUS_ORDER.length : STATUS_ORDER.indexOf(active)
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault()
         const next = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length]
@@ -124,6 +127,20 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, onSelect, 
             {value === 'all' && <span className="standard-picker__check" aria-hidden>✓</span>}
           </button>
         }
+
+      {includeNotDone && (
+        <button
+          key={'not-done'}
+          role="menuitemradio"
+          aria-checked={value === 'not-done'}
+          className={`standard-picker__item ${'not-done' === active ? 'is-active' : ''}`}
+          onClick={(e) => { e.stopPropagation(); onSelect('not-done') }}
+        >
+          <span className={`status-bullet status-bullet--queued`} aria-hidden />
+          <span className="standard-picker__label">Not done</span>
+          {value === 'not-done' && <span className="standard-picker__check" aria-hidden>✓</span>}
+        </button>
+      )}
 
       {STATUS_ORDER.map((s) => {
         const k = statusKey(s)

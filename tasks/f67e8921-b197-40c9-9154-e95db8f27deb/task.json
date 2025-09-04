@@ -449,7 +449,7 @@
     },
     {
       "id": "5fcbee8a-2734-4fa5-b404-6d9155a01053",
-      "status": "-",
+      "status": "+",
       "title": "UI improvements for TasksView.tsx and TaskDetails.tsx",
       "description": "TasksView.tsx should allow the selection of 'not-done' tasks from the status selection.\n\nTaskDetails.tsx should have a similar search and sort functionality as TasksView.tsx . These should simply not be recorded - by default have the status selected to 'not-done' and sort by the display index.",
       "plan": "",
