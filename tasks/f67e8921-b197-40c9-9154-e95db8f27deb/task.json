@@ -635,6 +635,56 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
+      "status": "-",
+      "title": "It must be possible to remove agent runs from history",
+      "description": "The agent runs in @src/renderer/screens/AgentsView.tsx or in @src/renderer/screens/AllAgentsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "583f4582-9495-46cc-bd49-19c957b9b0a3",
+      "status": "-",
+      "title": "There needs to be an edit button next to the button for new task",
+      "description": "This is inside @src/renderer/tasks/TaskDetailsView.tsx - it must be possible to edit a task from within this view. Deleting a task here, would take the user back to Home.",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "065ff2fe-ac0a-4b31-b57f-8918dcb4057c",
+      "status": "-",
+      "title": "Show a summary of running agents per project in the sidebar",
+      "description": "This should also be visible when the sidebar is minimized - it should show the project icon and this new chip that would display the number of agents.\n@src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "3c0c391d-fe56-4add-a756-793dd2dc6246",
+      "status": "-",
+      "title": "It must be possible to select the icon for a given project",
+      "description": "Create a directory of helpful icons and allow a user to pick from one when they create or edit a project @src/renderer/projects/ProjectManagerModal.tsx - this is then shown in the @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/projects/ProjectManagerModal.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -685,6 +735,10 @@
     "306733d4-26cb-49c0-a0ff-c34dc7699baa": 45,
     "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6": 46,
     "f9eef18e-818e-427d-82ab-8d990bb199c4": 47,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 48
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 48,
+    "9b65af17-0a3d-42e4-bcd2-81b65277651c": 49,
+    "583f4582-9495-46cc-bd49-19c957b9b0a3": 50,
+    "065ff2fe-ac0a-4b31-b57f-8918dcb4057c": 51,
+    "3c0c391d-fe56-4add-a756-793dd2dc6246": 52
   }
 }
