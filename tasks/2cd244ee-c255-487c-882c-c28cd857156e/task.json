@@ -1,6 +1,6 @@
 {
   "id": "2cd244ee-c255-487c-882c-c28cd857156e",
-  "status": "-",
+  "status": "+",
   "title": "Preparing for a React web version and React Native mobile version -Backend is needed",
   "description": "Up until now everything was running locally, but once we introduce other clients (mobile and web) we need to be able to have some centralised storage. There needs to be a good workflow for all clients to operate locally and sync with the backend (as much as possible should be achievable in offline mode). \nAnother thing to note is that this app (Electron) should share as much logic with the React web app and React Native mobile apps. So all sorts of common logic should be handled cleanly.\nThe first task created for this should be to make a document outlining the overall plan for this whole undertaking.",
   "features": [
@@ -51,7 +51,7 @@
     },
     {
       "id": "de4cc76f-3e7a-464e-a82b-4a23aac73d33",
-      "status": "-",
+      "status": "+",
       "title": "Create development workflow and tooling strategy",
       "description": "Create development workflow document (docs/MULTI_PLATFORM_WORKFLOW.md) defining: 1) Monorepo vs multi-repo strategy, 2) Shared development environment setup, 3) Cross-platform testing strategy, 4) Code sharing and version management, 5) CI/CD pipeline for all platforms, 6) Local development with backend services, 7) Debugging and profiling across platforms, 8) Documentation and knowledge sharing processes, 9) Team coordination and release management.",
       "plan": "",
