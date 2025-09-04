@@ -1,18 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { AgentRun, AgentRunMessage } from '../../services/agentsService';
 import DependencyBullet from '../tasks/DependencyBullet';
 import StatusChip from './StatusChip';
-import TurnChip from './TurnChip';
 import ModelChip from './ModelChip';
 import { IconChevron, IconDelete } from '../ui/Icons';
 import ProjectChip from './ProjectChip';
 import CostChip from './CostChip';
 import TokensChip from './TokensChip';
-
-function formatUSD(n?: number) {
-  if (n == null) return '\u2014';
-  return `$${n.toFixed(4)}`;
-}
 
 function formatTime(iso?: string) {
   if (!iso) return '';
@@ -34,41 +28,8 @@ function formatDate(iso?: string) {
   }
 }
 
-function countTurnsLegacy(messages: AgentRunMessage[] | undefined): number {
-  if (!messages || messages.length === 0) return 0;
-  let turns = 0;
-  let hasAssistant = false;
-  for (const m of messages) {
-    const role = (m.role || '').toLowerCase();
-    if (role === 'user') turns++;
-    if (role === 'assistant') hasAssistant = true;
-  }
-  if (turns === 0 && hasAssistant) return 1;
-  return turns;
-}
-
-function selectFeatureMessages(run: AgentRun): AgentRunMessage[] {
-  const buckets = run.messagesByFeature || {};
-  // Prefer current feature bucket; else task-level; else first bucket
-  if (run.featureId && buckets[run.featureId]) return buckets[run.featureId] || [];
-  if (buckets['__task__']) return buckets['__task__'] || [];
-  const keys = Object.keys(buckets);
-  if (keys.length > 0) return buckets[keys[0]] || [];
-  return [];
-}
-
-function computeTurnNumber(run: AgentRun): number {
-  const messages = selectFeatureMessages(run);
-  if (!messages || messages.length === 0) return 0;
-  const turns = messages.map(m => (typeof m.turn === 'number' ? m.turn : undefined)).filter((x): x is number => typeof x === 'number' && isFinite(x));
-  if (turns.length > 0) {
-    return Math.max(...turns);
-  }
-  return countTurnsLegacy(messages);
-}
-
 function formatDuration(ms?: number) {
-  if (ms == null || !isFinite(ms) || ms < 0) return '\u2014';
+  if (ms == null || !isFinite(ms) || ms < 0) return '—';
   if (ms < 1000) return `${Math.round(ms)}ms`;
   const s = Math.floor(ms / 1000);
   const hrs = Math.floor(s / 3600);
@@ -81,6 +42,36 @@ function formatDuration(ms?: number) {
   return parts.join(' ');
 }
 
+// Determine features counts from messagesLog
+function useFeatureCounts(run: AgentRun) {
+  return useMemo(() => {
+    const logs = run.messagesLog ? Object.values(run.messagesLog) : [];
+    const total = logs.length;
+    let completed = 0;
+    for (const l of logs) {
+      if ((l as any).endDate) completed++;
+    }
+    return { total, completed };
+  }, [run.messagesLog]);
+}
+
+// Very lightweight thinking timer: for active runs, show time since last update in current turn.
+// As we don't have per-message timestamps, approximate as time since last updatedAt while running.
+function useThinkingTimer(run: AgentRun) {
+  const [now, setNow] = useState<number>(Date.now());
+  useEffect(() => {
+    if (run.state !== 'running') return; 
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [run.state]);
+  const lastUpdate = useMemo(() => {
+    const t = new Date(run.updatedAt || run.startedAt || Date.now()).getTime();
+    return t;
+  }, [run.updatedAt, run.startedAt]);
+  const ms = Math.max(0, now - lastUpdate);
+  return formatDuration(run.state === 'running' ? ms : 0);
+}
+
 export interface AgentRunRowProps {
   run: AgentRun;
   onView?: (runId: string) => void;
@@ -88,13 +79,28 @@ export interface AgentRunRowProps {
   showActions?: boolean;
   showProject?: boolean;
   showModel?: boolean;
+  // New display controls
+  showStatus?: boolean; // default true
+  showFeaturesInsteadOfTurn?: boolean; // default true
+  showThinking?: boolean; // default false
 }
 
-export default function AgentRunRow({ run, onView, onCancel, showActions = true, showProject = false, showModel = true }: AgentRunRowProps) {
-  const turns = computeTurnNumber(run);
+export default function AgentRunRow({
+  run,
+  onView,
+  onCancel,
+  showActions = true,
+  showProject = false,
+  showModel = true,
+  showStatus = true,
+  showFeaturesInsteadOfTurn = true,
+  showThinking = false,
+}: AgentRunRowProps) {
   const started = useMemo(() => new Date(run.startedAt || run.updatedAt || Date.now()), [run.startedAt, run.updatedAt]);
   const ended = useMemo(() => (run.state === 'running' ? new Date() : new Date(run.updatedAt || Date.now())), [run.state, run.updatedAt]);
   const durationMs = Math.max(0, ended.getTime() - started.getTime());
+  const { total, completed } = useFeatureCounts(run);
+  const thinking = useThinkingTimer(run);
 
   return (
     <tr id={`run-${run.runId ?? 'unknown'}`} className="border-t border-neutral-200 dark:border-neutral-800 group">
@@ -108,19 +114,26 @@ export default function AgentRunRow({ run, onView, onCancel, showActions = true,
       <td className="px-3 py-2">
         <DependencyBullet className={"max-w-[100px] overflow-clip"} dependency={run.taskId} notFoundDependencyDisplay={"?"} />
       </td>
-      <td className="px-3 py-2">
-        <StatusChip state={run.state} />
-      </td>
+      {showStatus ? (
+        <td className="px-3 py-2">
+          <StatusChip state={run.state} />
+        </td>
+      ) : null}
       {showModel ? (
         <td className="px-3 py-2">
           <ModelChip provider={run.provider} model={run.model} />
         </td>
       ) : null}
-      <td className="px-3 py-2">
-        <TurnChip turn={turns} />
-      </td>
+      {showFeaturesInsteadOfTurn ? (
+        <td className="px-3 py-2">
+          <span className="text-xs">{completed}/{total}</span>
+        </td>
+      ) : null}
       <td className="px-3 py-2"><CostChip provider={run.provider} model={run.model} costUSD={run.costUSD} /></td>
       <td className="px-3 py-2"><TokensChip run={run} /></td>
+      {showThinking ? (
+        <td className="px-3 py-2">{thinking}</td>
+      ) : null}
       <td className="px-3 py-2">{formatDuration(durationMs)}</td>
       {showActions ? (
         <td className="px-3 py-2 text-right">

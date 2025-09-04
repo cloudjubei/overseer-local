@@ -68,7 +68,7 @@ export default function AllAgentsView() {
                     <th className="text-left px-3 py-2">Task</th>
                     <th className="text-left px-3 py-2">Status</th>
                     <th className="text-left px-3 py-2">Model</th>
-                    <th className="text-left px-3 py-2">Turn</th>
+                    <th className="text-left px-3 py-2">Features</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
                     <th className="text-left px-3 py-2">Duration</th>
@@ -76,7 +76,7 @@ export default function AllAgentsView() {
                 </thead>
                 <tbody>
                   {recentRuns.map((r) => (
-                    <AgentRunRow key={r.runId} run={r} showActions={false} showProject={true} showModel />
+                    <AgentRunRow key={r.runId} run={r} showActions={false} showProject={true} showModel showFeaturesInsteadOfTurn={true} />
                   ))}
                 </tbody>
               </table>

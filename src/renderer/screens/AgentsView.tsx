@@ -6,11 +6,6 @@ import ChatConversation from '../components/agents/ChatConversation';
 import AgentRunRow from '../components/agents/AgentRunRow';
 import ModelChip from '../components/agents/ModelChip';
 
-function formatUSD(n?: number) {
-  if (n == null) return '\u2014';
-  return `$${n.toFixed(4)}`;
-}
-
 function formatTime(iso?: string) {
   if (!iso) return '';
   try {
@@ -26,18 +21,24 @@ export default function AgentsView() {
   const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
-  // Active runs for this project
+  // Active runs for this project, sorted newest first
   const activeProjectRuns = useMemo(
-    () => activeRuns.filter(r => r.projectId === projectId),
+    () => activeRuns
+      .filter(r => r.projectId === projectId)
+      .slice()
+      .sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')),
     [activeRuns, projectId]
   );
 
-  // All runs for this project excluding those currently active
+  // All runs for this project excluding those currently active, sorted newest first
   const projectRuns = useMemo(() => {
     const allProjectRuns = runs.filter(r => r.projectId === projectId);
-    if (activeProjectRuns.length === 0) return allProjectRuns;
-    const activeIds = new Set(activeProjectRuns.map(r => r.runId));
-    return allProjectRuns.filter(r => !activeIds.has(r.runId));
+    let filtered = allProjectRuns;
+    if (activeProjectRuns.length > 0) {
+      const activeIds = new Set(activeProjectRuns.map(r => r.runId));
+      filtered = allProjectRuns.filter(r => !activeIds.has(r.runId));
+    }
+    return filtered.slice().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
   }, [runs, projectId, activeProjectRuns]);
 
   useEffect(() => {
@@ -84,18 +85,27 @@ export default function AgentsView() {
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Task</th>
-                    <th className="text-left px-3 py-2">Status</th>
                     <th className="text-left px-3 py-2">Model</th>
-                    <th className="text-left px-3 py-2">Turn</th>
+                    <th className="text-left px-3 py-2">Features</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
+                    <th className="text-left px-3 py-2">Thinking</th>
                     <th className="text-left px-3 py-2">Duration</th>
                     <th className="text-right px-3 py-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {activeProjectRuns.map(r => (
-                    <AgentRunRow key={r.runId ?? Math.random().toString(36)} run={r} onView={(id) => setOpenRunId(id)} onCancel={(id) => cancelRun(id)} showModel />
+                    <AgentRunRow
+                      key={r.runId ?? Math.random().toString(36)}
+                      run={r}
+                      onView={(id) => setOpenRunId(id)}
+                      onCancel={(id) => cancelRun(id)}
+                      showModel
+                      showStatus={false}
+                      showFeaturesInsteadOfTurn={true}
+                      showThinking={true}
+                    />
                   ))}
                 </tbody>
               </table>
@@ -118,7 +128,7 @@ export default function AgentsView() {
                     <th className="text-left px-3 py-2">Task</th>
                     <th className="text-left px-3 py-2">Status</th>
                     <th className="text-left px-3 py-2">Model</th>
-                    <th className="text-left px-3 py-2">Turn</th>
+                    <th className="text-left px-3 py-2">Features</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
                     <th className="text-left px-3 py-2">Duration</th>
@@ -127,7 +137,16 @@ export default function AgentsView() {
                 </thead>
                 <tbody>
                   {projectRuns.map(r => (
-                    <AgentRunRow key={r.runId ?? Math.random().toString(36)} run={r} onView={(id) => setOpenRunId(id)} onCancel={(id) => cancelRun(id)} showModel />
+                    <AgentRunRow
+                      key={r.runId ?? Math.random().toString(36)}
+                      run={r}
+                      onView={(id) => setOpenRunId(id)}
+                      onCancel={(id) => cancelRun(id)}
+                      showModel
+                      showStatus={true}
+                      showFeaturesInsteadOfTurn={true}
+                      showThinking={false}
+                    />
                   ))}
                 </tbody>
               </table>

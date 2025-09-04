@@ -550,7 +550,7 @@
     },
     {
       "id": "dc067730-dede-40a5-affe-e04410170819",
-      "status": "-",
+      "status": "+",
       "title": "AgentsView and AllAgentsView improvements",
       "description": "In  @src/renderer/screens/AgentsView.tsx  the active and history runs should be sorted by date - the most recent at the top\n\nAlso, both in @src/renderer/screens/AgentsView.tsx and in @src/renderer/screens/AllAgentsView.tsx it shouldn't show the Turn column, but instead show how many features were completed out of how many.\n\nIn @src/renderer/screens/AgentsView.tsx in the active runs, there should be no Status column, but an additional Thinking column before duration that should update with the time the agent is taking to answer the last message.",
       "plan": "",
