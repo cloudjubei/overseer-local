@@ -255,6 +255,16 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     });
   }
 
+  // Helper to proactively mark and persist cancellation, even if the run handle doesn't emit an event
+  function markCancelled(runId, reason) {
+    const meta = RUN_META.get(runId);
+    if (!meta) return;
+    const evt = { type: 'run/cancelled', payload: { reason: reason || 'Cancelled' }, ts: nowIso() };
+    updateMetaFromEvent(runId, evt);
+    broadcastEventToSubscribers(runId, evt);
+    stopHeartbeat(runId);
+  }
+
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { projectId, taskId, llmConfig, budgetUSD, metadata }) => {
     console.log('[factory] START_TASK', maskSecrets({ projectId, taskId, llmConfig, budgetUSD, metadata }));
     try {
@@ -320,6 +330,8 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_CANCEL_RUN, (_evt, { runId, reason }) => {
     console.log('[factory] CANCEL_RUN', { runId, reason });
     const run = RUNS.get(runId);
+    // Proactively mark as cancelled for UI/history even if run handle doesn't emit an event
+    try { markCancelled(runId, reason); } catch {}
     if (run) {
       try { run.cancel(reason); } catch (err) { console.warn('[factory] Error cancelling run', runId, err?.message || err); }
     } else {
