@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "Factory-ts improvements",
   "description": "Various improvements to add to the project and the factory-ts package",
   "features": [
@@ -526,7 +526,7 @@
     },
     {
       "id": "5f13e562-bbd6-4f67-97c9-00ba79ddb138",
-      "status": "-",
+      "status": "+",
       "title": "After running a first agent, running any more stalls",
       "description": "Any consecutive agent after the first never starts.\nCancelling an agent from the @src/renderer/screens/AgentsView.tsx   screen doesn't help either.\n\nThe last message in the log is:\n[factory] SUBSCRIBE\n\nI can see this message in the agent run log:\n\"message\": \"Error: ENOENT: no such file or directory, open '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-A3L8P3/workspace/projects/main.json'\\n    at async open (node:internal/fs/promises:639:25)\\n    at async Object.readFile (node:internal/fs/promises:1243:14)\\n    at async Object.getProjectDir (file:///packages/factory-ts/dist/taskUtils.js:18:17)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/orchestrator.js:489:24)\\n    at async file:///packages/factory-ts/dist/index.js:197:17\",\n\n\nAnd I can see a warning in the console:\nMaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 files:subscribe listeners added.",
       "plan": "",

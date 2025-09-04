@@ -5,10 +5,15 @@ import path from 'node:path';
 import type { Status, Feature, Task } from './types.js';
 import type { GitManager } from './gitManager.js';
 
-let PROJECT_ROOT = path.resolve(process.cwd());
+// Stable framework root (monorepo/app root) captured at module load.
+// This should never be mutated by per-run operations.
+const FRAMEWORK_ROOT = path.resolve(process.cwd());
+
+// Mutable project root used for file tools operating within a specific workspace copy.
+let PROJECT_ROOT = FRAMEWORK_ROOT;
 const TASKS_DIR_NAME = 'tasks';
 
-function setProjectRoot(p: string) { PROJECT_ROOT = path.resolve(p); }
+function setProjectRoot(p: string) { PROJECT_ROOT = path.resolve(p || FRAMEWORK_ROOT); }
 function getProjectRoot() { return PROJECT_ROOT; }
 
 function tasksDir() { return path.join(PROJECT_ROOT, TASKS_DIR_NAME); }
@@ -17,16 +22,19 @@ function taskPath(taskId: string) { return path.join(taskDir(taskId), 'task.json
 function testPath(taskId: string, featureId: string) { return path.join(taskDir(taskId), 'tests', `test_${taskId}_${featureId}.py`); }
 
 const PROJECTS_DIR_NAME = 'projects';
-function projectsDir() { return path.join(PROJECT_ROOT, PROJECTS_DIR_NAME); }
-function projectPath(projectId: string) { return path.join(projectsDir(), `${projectId}.json`); }
+// Project configs must always be read from the stable framework root, not the mutable project root.
+function projectsDirStable() { return path.join(FRAMEWORK_ROOT, PROJECTS_DIR_NAME); }
+function projectPathStable(projectId: string) { return path.join(projectsDirStable(), `${projectId}.json`); }
 
 async function ensureDir(p: string) { await fsp.mkdir(p, { recursive: true }); }
 
 async function getProjectDir(projectId: string): Promise<string> {
-  const p = projectPath(projectId);
+  // Read the project config from the stable framework root so multiple runs do not depend on temporary workspace state.
+  const p = projectPathStable(projectId);
   const raw = await fsp.readFile(p, 'utf8');
   const project = JSON.parse(raw);
-  return path.join(PROJECT_ROOT, PROJECTS_DIR_NAME, project.path)
+  // project.path is assumed to be relative to the projects dir or the repo root; resolve from FRAMEWORK_ROOT
+  return path.join(FRAMEWORK_ROOT, PROJECTS_DIR_NAME, project.path)
 }
 
 async function getTask(taskId: string): Promise<Task> {
