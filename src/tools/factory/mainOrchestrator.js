@@ -416,10 +416,8 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
 
   // Pricing handlers
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_PRICING_GET, () => {
-    console.log("LELELELELE GETTING PRICES: ")
     try {
       const state = PRICING?.listPrices();
-    console.log("LELELELELE GETTING PRICES state: ", state)
       return state || { updatedAt: nowIso(), prices: [] };
     } catch (e) {
       return { updatedAt: nowIso(), prices: [] };
