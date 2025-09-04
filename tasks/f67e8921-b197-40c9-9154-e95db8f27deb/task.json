@@ -409,7 +409,7 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "-",
+      "status": "+",
       "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display Features or turns correctly",
       "description": "Each task run comprises of the agent entering a conversation about a task's feature. This might take multiple turns - where a turn is a single message being sent by the LLM and the single response to it. The first initial message is Turn 0. The final message by the agent should be without a response ( it will be the final turn). It seems the orchestrator (inside factory-ts) captures these incorrectly.\nFix this behaviour so it matches the above description.",
       "plan": "",
@@ -425,7 +425,7 @@
     },
     {
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "-",
+      "status": "+",
       "title": "AllAgentsView.tsx improvements",
       "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\n\nThe Tokens field tooltip - this currently shows all tokens per message wrongly.\nThe Tokens field chip - there should be new small icon images for the \"<-\" and \"->\" arrows.",
       "plan": "",
@@ -437,7 +437,7 @@
     },
     {
       "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
-      "status": "-",
+      "status": "+",
       "title": "An active run should only show inside Active not History",
       "description": "",
       "plan": "",
@@ -449,7 +449,7 @@
     },
     {
       "id": "5fcbee8a-2734-4fa5-b404-6d9155a01053",
-      "status": "-",
+      "status": "+",
       "title": "UI improvements for TasksView.tsx and TaskDetails.tsx",
       "description": "TasksView.tsx should allow the selection of 'not-done' tasks from the status selection.\n\nTaskDetails.tsx should have a similar search and sort functionality as TasksView.tsx . These should simply not be recorded - by default have the status selected to 'not-done' and sort by the display index.",
       "plan": "",
@@ -464,7 +464,7 @@
     },
     {
       "id": "76ff2065-cd03-4815-b36b-8dfabd278b2b",
-      "status": "-",
+      "status": "+",
       "title": "Use the StatusChip inside RunAgentButton",
       "description": "We should reuse this nice component that we have.",
       "plan": "",
@@ -477,7 +477,7 @@
     },
     {
       "id": "46fbca0c-0fd5-4b92-aeae-5e8488cfd192",
-      "status": "-",
+      "status": "+",
       "title": "The AgentModelQuickSelect should be part of ModelChip",
       "description": "The ModelChip should have a parameter to be editable (false by default) that can be used inside TaskDetailsView.tsx to select the most recent models just like AgentModelQuickSelect dos now.\nFollow the design of the selector used for selecting the Agent type inside the RunAgentButton.",
       "plan": "",
@@ -492,7 +492,7 @@
     },
     {
       "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
-      "status": "-",
+      "status": "+",
       "title": "When editing/creating a feature allow quick file lookups",
       "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\nIf a file inside Context Files doesn't have a mention in Title/Description/Rejection then show a warning badge (a similar badge, but yellow, to how rejections show for Tasks/Features - ExclamationChip.tsx ).\n\nThis feature is curently implemented inside the ChatView.tsx - so it should be turned into a reusable component so it can be used in many of the input boxes.",
       "plan": "",

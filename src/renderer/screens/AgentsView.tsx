@@ -26,8 +26,19 @@ export default function AgentsView() {
   const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
-  const projectRuns = useMemo(() => runs.filter(r => r.projectId === projectId), [runs, projectId]);
-  const activeProjectRuns = useMemo(() => activeRuns.filter(r => r.projectId === projectId), [activeRuns, projectId]);
+  // Active runs for this project
+  const activeProjectRuns = useMemo(
+    () => activeRuns.filter(r => r.projectId === projectId),
+    [activeRuns, projectId]
+  );
+
+  // All runs for this project excluding those currently active
+  const projectRuns = useMemo(() => {
+    const allProjectRuns = runs.filter(r => r.projectId === projectId);
+    if (activeProjectRuns.length === 0) return allProjectRuns;
+    const activeIds = new Set(activeProjectRuns.map(r => r.runId));
+    return allProjectRuns.filter(r => !activeIds.has(r.runId));
+  }, [runs, projectId, activeProjectRuns]);
 
   useEffect(() => {
     const hash = (window.location.hash || '').replace(/^#/, '');

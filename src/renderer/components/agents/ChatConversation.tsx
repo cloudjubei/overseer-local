@@ -96,7 +96,7 @@ function parseToolResultsMessage(msg?: AgentRunMessage): string[] {
     if (ln.startsWith('---')) continue; // header line
     if (ln.startsWith('Tool ')) {
       const i = ln.indexOf(' returned: ');
-      if (i > 0) out.push(ln.substring(i + ' returned: '.length + 'Tool '.length + (ln.startsWith('Tool ') ? 0 : 0))); // Keep right side after 'returned: '
+      if (i > 0) out.push(ln.substring(i + ' returned: '.length + 'Tool '.length + (ln.startsWith('Tool ') ? 0 : 0)));
       else out.push(ln);
     } else {
       out.push(ln);
@@ -124,24 +124,20 @@ function useTurnBundles(messages: AgentRunMessage[] | undefined) {
     for (const m of messages || []) {
       const role = m.role || '';
 
-      // Collect first system prompt and any system messages separately
       if (role === 'system') {
         systemMsgs.push(m);
         continue;
       }
 
-      // Tool results should attach to the current turn, not start a new user turn
       if (isToolMsg(m)) {
         if (!current) current = { index: turns.length };
         current.tools = m;
-        // When tools are attached, we close the turn and start a new one next time
         turns.push(current);
         current = null;
         continue;
       }
 
       if (role === 'user') {
-        // Regular user messages begin a new turn (e.g., for task runs without features)
         if (current && (current.user || current.assistant || current.tools)) {
           turns.push(current);
           current = null;
@@ -153,15 +149,12 @@ function useTurnBundles(messages: AgentRunMessage[] | undefined) {
       if (role === 'assistant') {
         if (!current) current = { index: turns.length };
         current.assistant = m;
-        // Do not push yet; we might receive tool results next
         continue;
       }
 
-      // Fallback: if message type doesn't match, keep it as a system info
       systemMsgs.push(m);
     }
 
-    // If there's a dangling turn (e.g., final assistant message requesting finish), push it
     if (current && (current.user || current.assistant || current.tools)) {
       turns.push(current);
     }
@@ -191,7 +184,6 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
   const lastTurnRef = useRef<HTMLLIElement | null>(null);
   const { systemMsgs, turns } = useTurnBundles(run.messages);
 
-  // Scroll to last turn on initial open and whenever turn count changes
   useEffect(() => {
     if (lastTurnRef.current) {
       lastTurnRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -199,7 +191,6 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
   }, [turns.length]);
 
   const systemPrompt = useMemo(() => {
-    // Prefer first system role message; fallback to the bootstrap message containing #CURRENT TASK
     const m = systemMsgs[0];
     return m?.content;
   }, [systemMsgs, run.messages]);
@@ -227,9 +218,8 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
             const toolCalls = parsed?.tool_calls || [];
             const results = parseToolResultsMessage(tools);
 
-            // Build a short title for the turn header
             const titleParts: string[] = [];
-            titleParts.push(`Turn ${index + 1}`);
+            titleParts.push(`Turn ${index}`); // Turn 0 is the initial turn
             if ((assistant as any)?.durationMs) titleParts.push(`${(assistant as any).durationMs}ms`);
             const title = titleParts.join(' \u00b7 ');
 

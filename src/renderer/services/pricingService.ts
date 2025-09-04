@@ -51,17 +51,42 @@ export async function getPricingState(): Promise<PricingState> {
   return fetchPricing();
 }
 
+function normalizeProvider(s: string) {
+  return String(s || '').trim().toLowerCase();
+}
+
+function normalizeModel(s: string) {
+  const raw = String(s || '').trim().toLowerCase();
+  // Drop any namespace/prefix like "openai/" or "openai:" and keep the last segment
+  const seg = raw.split(/[/:]/).pop() || raw;
+  return seg;
+}
+
 export async function getPrice(provider?: string, model?: string): Promise<PricingRecord | undefined> {
   const state = await fetchPricing();
   if (!provider || !model) return undefined;
-  const p = String(provider).toLowerCase();
-  const m = String(model).toLowerCase();
-  // Try exact match first
-  let rec = state.prices.find((r) => r && String(r.provider).toLowerCase() === p && String(r.model).toLowerCase() === m);
+  const p = normalizeProvider(provider);
+  const m = normalizeModel(model);
+
+  const prices = state.prices || [];
+
+  // 1) Exact match on normalized provider+model
+  let rec = prices.find((r) => normalizeProvider(r.provider) === p && normalizeModel(r.model) === m);
   if (rec) return rec;
-  // Try partial matches (models with prefixes or provider aliases)
-  rec = state.prices.find((r) => r && String(r.provider).toLowerCase().includes(p) && String(r.model).toLowerCase() === m);
+
+  // 2) Same provider, model variant (requested model contains known base, e.g., gpt-4o-mini-2024...)
+  rec = prices.find((r) => normalizeProvider(r.provider) === p && (normalizeModel(m).includes(normalizeModel(r.model))));
   if (rec) return rec;
-  rec = state.prices.find((r) => r && String(r.provider).toLowerCase() === p && String(r.model).toLowerCase().includes(m));
+
+  // 3) Same provider, reverse containment (known model contains requested, unlikely but defensive)
+  rec = prices.find((r) => normalizeProvider(r.provider) === p && (normalizeModel(r.model).includes(normalizeModel(m))));
+  if (rec) return rec;
+
+  // 4) Provider fuzzy match (aliases), model variant containment
+  rec = prices.find((r) => normalizeProvider(r.provider).includes(p) && (normalizeModel(m).includes(normalizeModel(r.model))));
+  if (rec) return rec;
+
+  // 5) Last resort: any model that loosely matches
+  rec = prices.find((r) => normalizeModel(m).includes(normalizeModel(r.model)) || normalizeModel(r.model).includes(normalizeModel(m)));
   return rec;
 }

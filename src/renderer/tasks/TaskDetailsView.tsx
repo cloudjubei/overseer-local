@@ -12,7 +12,20 @@ import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../c
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
-import AgentModelQuickSelect from '../components/agents/AgentModelQuickSelect'
+import ModelChip from '../components/agents/ModelChip'
+import { StatusPicker, statusKey } from '../components/tasks/StatusControl'
+
+const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
+
+type FeatureSort = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
+
+function featureMatchesQuery(f: Feature, q: string) {
+  if (!q) return true
+  const s = q.trim().toLowerCase()
+  if (!s) return true
+  const idStr = String(f.id || '')
+  return idStr.includes(s) || (f.title || '').toLowerCase().includes(s) || (f.description || '').toLowerCase().includes(s)
+}
 
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
@@ -33,6 +46,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
   const preventDragFromNoDragRef = useRef(false)
 
+  // Local search/sort/filter state (not persisted)
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'not-done' | Status>('not-done')
+  const [sortBy, setSortBy] = useState<FeatureSort>('index_asc')
+  const [openFilter, setOpenFilter] = useState(false)
+  const statusFilterRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (taskId && tasksById) {
       const t = tasksById[taskId]
@@ -42,10 +62,36 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     }
   }, [taskId, tasksById])
 
-  const sortedFeatures = useMemo(() => {
+  const sortedFeaturesBase = useMemo(() => {
     if (!task) { return []}
-    return task.features.sort((a,b) => task.featureIdToDisplayIndex[a.id] - task.featureIdToDisplayIndex[b.id])
+    return [...task.features].sort((a,b) => task.featureIdToDisplayIndex[a.id] - task.featureIdToDisplayIndex[b.id])
   }, [task, tasksById])
+
+  const featuresSorted = useMemo(() => {
+    let arr = [...sortedFeaturesBase]
+    if (sortBy === 'index_asc') {
+      // already asc
+      return arr
+    } else if (sortBy === 'index_desc') {
+      return arr.slice().reverse()
+    } else if (sortBy === 'status_asc') {
+      const sVal = (f: Feature) => STATUS_ORDER.indexOf(f.status)
+      return arr.sort((a,b) => sVal(a) - sVal(b) || (task ? task.featureIdToDisplayIndex[a.id] - task.featureIdToDisplayIndex[b.id] : 0))
+    } else if (sortBy === 'status_desc') {
+      const sVal = (f: Feature) => STATUS_ORDER.indexOf(f.status)
+      return arr.sort((a,b) => sVal(b) - sVal(a) || (task ? task.featureIdToDisplayIndex[b.id] - task.featureIdToDisplayIndex[a.id] : 0))
+    }
+    return arr
+  }, [sortedFeaturesBase, sortBy, task])
+
+  const featuresFiltered = useMemo(() => {
+    return featuresSorted.filter((f) => {
+      const byStatus = statusFilter === 'all' ? true : (statusFilter === 'not-done' ? f.status !== '+' : f.status === statusFilter)
+      return byStatus && featureMatchesQuery(f, query)
+    })
+  }, [featuresSorted, statusFilter, query])
+
+  const isFiltered = query !== '' || statusFilter !== 'all'
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
@@ -65,6 +111,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       console.error('Failed to update status', e)
     }
   }
+
+  const dndEnabled = sortBy === 'index_asc' && !isFiltered && !saving
 
   const handleMoveFeature = async (fromIndex: number, toIndex: number) => {
     if (!task) return
@@ -162,8 +210,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     )
   }
 
-  const dndEnabled = !saving
-
   const onListDrop = () => {
     if (dragFeatureId != null && draggingIndex != null && dropIndex != null && dropPosition != null) {
       const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
@@ -179,6 +225,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskHasActiveRun = !!taskRun
   const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
   const taskDisplayIndex = project?.taskIdToDisplayIndex[task.id] ?? 0
+
+  const currentFilterLabel = statusFilter === 'all' ? 'All' : (statusFilter === 'not-done' ? 'Not done' : `${STATUS_LABELS[statusFilter as Status]}`)
+  const k = statusFilter === 'all' ? 'queued' : (statusFilter === 'not-done' ? 'queued' : statusKey(statusFilter as Status))
 
   return (
     <div  className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden" role="region" aria-labelledby="task-details-heading">
@@ -229,8 +278,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {/* Agent Model selector next to the play button */}
-            <AgentModelQuickSelect />
+            {/* Agent Model selector next to the play button, now using editable ModelChip */}
+            <ModelChip editable className="min-w-[160px]" />
             {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
@@ -268,8 +317,56 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </div>
           </div>
 
-          {sortedFeatures.length === 0 ? (
-            <div className="flex-1 min-h-0 overflow-y-auto empty">No features defined for this task.</div>
+          {/* Features filter/sort toolbar */}
+          <div className="tasks-toolbar shrink-0">
+            <div className="left">
+              <div className="control search-wrapper">
+                <input type="search" placeholder="Search by id, title, or description" aria-label="Search features" value={query} onChange={(e) => setQuery(e.target.value)} />
+              </div>
+              <div className="control">
+                <div
+                  ref={statusFilterRef}
+                  className="status-filter-btn ui-select gap-2"
+                  role="button"
+                  aria-haspopup="menu"
+                  aria-expanded={openFilter}
+                  aria-label="Filter by status"
+                  tabIndex={0}
+                  onClick={() => setOpenFilter(true)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
+                >
+                  <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+                  <span className="standard-picker__label">{currentFilterLabel}</span>
+                </div>
+                {openFilter && statusFilterRef.current && (
+                  <StatusPicker 
+                    anchorEl={statusFilterRef.current} 
+                    value={statusFilter}
+                    isAllAllowed={true}
+                    includeNotDone={true}
+                    onSelect={(val) => { setStatusFilter(val as any); setOpenFilter(false); }}
+                    onClose={() => setOpenFilter(false)}
+                  />
+                )}
+              </div>
+              <div className="control">
+                <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as FeatureSort)} aria-label="Sort features by">
+                  <option value="index_asc">Ascending</option>
+                  <option value="index_desc">Descending</option>
+                  <option value="status_asc">Status ^</option>
+                  <option value="status_desc">Status \/</option>
+                </select>
+              </div>
+            </div>
+            <div className="right">
+              <div className="tasks-count shrink-0" aria-live="polite">
+                Showing {featuresFiltered.length} of {task.features.length} features
+              </div>
+            </div>
+          </div>
+
+          {featuresFiltered.length === 0 ? (
+            <div className="flex-1 min-h-0 overflow-y-auto empty">No features found.</div>
           ) : (
             <ul
               className={`flex-1 min-h-0 overflow-y-auto features-list ${dragging ? 'dnd-active' : ''}`}
@@ -285,7 +382,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               }}
               onDragEnd={() => { preventDragFromNoDragRef.current = false; clearDndState() }}
             >
-              {sortedFeatures.map((f: Feature, idx: number) => {
+              {featuresFiltered.map((f: Feature, idx: number) => {
                 const blockers = getBlockers(task.id, f.id)
                 const blockersOutbound = getBlockersOutbound(f.id)
 
@@ -361,7 +458,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <RichText text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
-                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>}
+                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }} />}
                       </div>
 
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Blockers and actions for Feature ${f.id}`}>

@@ -199,7 +199,7 @@ async function runConversation(opts: {
         // No tool calls; continue loop. Emit snapshot for completeness
         doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'no_tool_calls' } });
         // progress hint
-        doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i + 1} complete` } });
+        doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i} complete` } });
         continue;
       }
 
@@ -237,7 +237,7 @@ async function runConversation(opts: {
       // Emit tool results message appended
       doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
       // progress hint after tools
-      doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i + 1} tool calls processed` } });
+      doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i} tool calls processed` } });
     } catch (e) {
       // On error: block task/feature, same as Python
       if (feature) {
@@ -259,7 +259,7 @@ async function runConversation(opts: {
   } else {
     await taskTools.blockTask?.(task.id, 'Agent loop exceeded max turns', agentType, git);
   }
-  doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), reason: 'max_turns' } });
+  doEmit({ type: 'llm/messages/final', payload: { messages: [{ role: 'system', content: systemPrompt }] as CompletionMessage[], reason: 'max_turns' } });
   doEmit({ type: 'run/progress/snapshot', payload: { progress: 1, message: 'Max turns reached' } });
   logger.warn('Max turns reached without completion.');
   complete('max_turns');
@@ -356,6 +356,9 @@ async function runOrchestrator(opts: {
 
   const processed = new Set<string>();
 
+  // Aggregate messages across all feature runs so history for this run includes the full sequence
+  let aggregatedMessages: CompletionMessage[] = [];
+
   if (agentType === 'speccer') {
     const freshTask = await taskTools.getTask(currentTask.id);
     await runAgentOnTask(model, agentType, freshTask, taskTools, fileTools, git, completion, emit);
@@ -369,7 +372,32 @@ async function runOrchestrator(opts: {
       logger.debug(`\nNo more available features for task ${freshTask.id}.`);
       break;
     }
-    await runAgentOnFeature(model, agentType, freshTask, next, taskTools, fileTools, git, completion, emit);
+
+    // Wrap emit to merge current feature's messages with the aggregate so far
+    let lastFeatureMessages: CompletionMessage[] = [];
+    const baseEmit = emit;
+    const wrappedEmit = (e: { type: string; payload?: any }) => {
+      const t = e?.type;
+      if ((t === 'llm/messages/init' || t === 'llm/messages/snapshot' || t === 'llm/messages/final') && e?.payload?.messages) {
+        try {
+          const featureMsgs: CompletionMessage[] = e.payload.messages || [];
+          lastFeatureMessages = featureMsgs;
+          const combined = aggregatedMessages.concat(featureMsgs);
+          const payload = { ...e.payload, messages: combined };
+          baseEmit?.({ ...e, payload });
+          return;
+        } catch {}
+      }
+      baseEmit?.(e);
+    };
+
+    await runAgentOnFeature(model, agentType, freshTask, next, taskTools, fileTools, git, completion, wrappedEmit);
+
+    // After the feature completes, fold its messages into the aggregate
+    if (lastFeatureMessages && lastFeatureMessages.length) {
+      aggregatedMessages = aggregatedMessages.concat(lastFeatureMessages);
+    }
+
     processed.add(next.id);
   }
 }

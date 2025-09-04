@@ -35,7 +35,7 @@ function matchesQuery(task: Task, q: string) {
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
-    const byStatus = !status || status === 'all' ? true : t.status === (status as Status)
+    const byStatus = !status || status === 'all' ? true : (status === 'not-done' ? t.status !== '+' : t.status === (status as Status))
     return byStatus && matchesQuery(t, query)
   })
 }
@@ -123,7 +123,7 @@ export default function TasksListView() {
   }, [taskIdToDisplayIndex, allTasks, sortBy])
 
   const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
-  const isFiltered = query !== '' || statusFilter !== 'all'
+  const isFiltered = query !== '' || (statusFilter !== 'all')
 
   const handleAddTask = () => {
     openModal({ type: 'task-create' })
@@ -216,8 +216,8 @@ export default function TasksListView() {
     clearDndState()
   }
 
-  const currentFilterLabel = statusFilter === 'all' ? 'All' : `${STATUS_LABELS[statusFilter as Status]}`
-  const k = statusFilter === 'all' ? 'queued' : statusKey(statusFilter as Status)
+  const currentFilterLabel = statusFilter === 'all' ? 'All' : (statusFilter === 'not-done' ? 'Not done' : `${STATUS_LABELS[statusFilter as Status]}`)
+  const k = statusFilter === 'all' ? 'queued' : (statusFilter === 'not-done' ? 'queued' : statusKey(statusFilter as Status))
 
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
@@ -244,9 +244,10 @@ export default function TasksListView() {
             {openFilter && statusFilterRef.current && (
               <StatusPicker 
                 anchorEl={statusFilterRef.current} 
-                value={statusFilter as Status}
+                value={statusFilter as any}
                 isAllAllowed={true}
-                onSelect={(val) => { setStatusFilter(val); setOpenFilter(false); }}
+                includeNotDone={true}
+                onSelect={(val) => { setStatusFilter(val as string); setOpenFilter(false); }}
                 onClose={() => setOpenFilter(false)}
                 />
             )}

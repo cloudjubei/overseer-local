@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import Tooltip from '../ui/Tooltip';
 import type { AgentRun } from '../../services/agentsService';
+import { IconArrowLeftMini, IconArrowRightMini } from '../ui/Icons';
 
 export default function TokensChip({ run }: { run: AgentRun }) {
   const prompt = run.promptTokens ?? 0; // tokens sent to LLM
@@ -9,8 +10,9 @@ export default function TokensChip({ run }: { run: AgentRun }) {
   const breakdown = useMemo(() => {
     const items = (run.messages || []).map((m, i) => {
       const role = m.role || 'message';
-      const tokens = (m as any).tokenCount ?? (m as any).tokens ?? undefined;
-      return { i: i + 1, role, tokens };
+      // Show a short preview of content for context; avoid misleading per-message token counts
+      const preview = (m.content || '').replace(/\s+/g, ' ').slice(0, 60);
+      return { i: i + 1, role, preview };
     });
     return items;
   }, [run.messages]);
@@ -25,20 +27,20 @@ export default function TokensChip({ run }: { run: AgentRun }) {
         ) : (
           breakdown.map((b, idx) => (
             <div key={idx} className="flex items-center justify-between gap-3">
-              <div className="truncate"><span className="text-neutral-400">#{b.i}</span> {b.role}</div>
-              <div className="text-neutral-300">tokens: {typeof b.tokens === 'number' ? b.tokens : '—'}</div>
+              <div className="truncate"><span className="text-neutral-400">#{b.i}</span> {b.role}{b.preview ? ': ' : ''}<span className="text-neutral-400">{b.preview}</span></div>
             </div>
           ))
         )}
       </div>
+      <div className="mt-1 text-neutral-400">Per-message token data not available.</div>
     </div>
   );
 
   return (
     <Tooltip content={content} placement="top">
       <span className="inline-flex flex-col items-start gap-0.5 rounded-full border px-2 py-0.5 text-xs font-medium bg-neutral-50 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200 border-neutral-200 dark:border-neutral-700 leading-3">
-        <span className="flex items-center gap-1"><span className="text-neutral-400">&lt;-</span><span>{prompt}</span></span>
-        <span className="flex items-center gap-1"><span className="text-neutral-400">-&gt;</span><span>{completion}</span></span>
+        <span className="flex items-center gap-1"><IconArrowLeftMini className="text-neutral-400" /><span>{prompt}</span></span>
+        <span className="flex items-center gap-1"><IconArrowRightMini className="text-neutral-400" /><span>{completion}</span></span>
       </span>
     </Tooltip>
   );
