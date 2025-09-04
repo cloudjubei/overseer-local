@@ -127,10 +127,11 @@ export default function TasksListView() {
       }
     }
     return tasks
-  }, [taskIdToDisplayIndex, allTasks, sortBy])
+  }, [taskIdToDisplayIndex, allTasks, sortBy, project])
 
   const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
-  const isFiltered = query !== '' || (statusFilter !== 'all')
+
+  const isSearchFiltered = query !== ''
 
   const handleAddTask = () => {
     openModal({ type: 'task-create' })
@@ -161,7 +162,7 @@ export default function TasksListView() {
     }
   }
 
-  const dndEnabled = (sortBy === "index_asc" || sortBy === "index_desc") && !isFiltered && view === 'list'
+  const dndEnabled = (sortBy === 'index_asc' || sortBy === 'index_desc') && !isSearchFiltered &&!saving  && view === 'list'
 
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
@@ -213,9 +214,13 @@ export default function TasksListView() {
   const onListDrop = () => {
     if (project != null && dragTaskId != null && dropIndex != null && dropPosition != null) {
       const fromIndex = project.taskIdToDisplayIndex[dragTaskId] - 1
-      const toTask = sorted[dropIndex]
-      const toIndex = project.taskIdToDisplayIndex[toTask.id] - 1
-      
+      // Use the item from the currently rendered list (filtered), not from the full sorted list by index
+      const toTask = filtered[dropIndex]
+      if (!toTask) { clearDndState(); return }
+      let toIndex = (project.taskIdToDisplayIndex[toTask.id] ?? 1) - 1
+      if (dropPosition === 'after') {
+        toIndex = toIndex + 1
+      }
       if (fromIndex !== -1 && toIndex !== fromIndex) {
         handleMoveTask(fromIndex, toIndex)
       }

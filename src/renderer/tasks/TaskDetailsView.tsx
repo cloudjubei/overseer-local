@@ -91,7 +91,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     })
   }, [featuresSorted, statusFilter, query])
 
-  const isFiltered = query !== '' || statusFilter !== 'all'
+  const isSearchFiltered = query !== ''
 
   const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
@@ -112,7 +112,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     }
   }
 
-  const dndEnabled = sortBy === 'index_asc' && !isFiltered && !saving
+  // Allow DnD for index sorting when only the special 'not-done' filter is active (no search)
+  const dndEnabled = (sortBy === 'index_asc' || sortBy === 'index_desc') && !isSearchFiltered &&  !saving
 
   const handleMoveFeature = async (fromIndex: number, toIndex: number) => {
     if (!task) return
@@ -211,9 +212,17 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   }
 
   const onListDrop = () => {
+    if (!task) { clearDndState(); return }
     if (dragFeatureId != null && draggingIndex != null && dropIndex != null && dropPosition != null) {
-      const toIndex = dropIndex + (dropPosition === 'after' ? 1 : 0)
-      handleMoveFeature(draggingIndex, toIndex)
+      // Map from feature id/display index back to absolute indices within the task
+      const fromIndex = (task.featureIdToDisplayIndex[dragFeatureId] ?? 1) - 1
+      const targetFeature = featuresFiltered[dropIndex]
+      if (!targetFeature) { clearDndState(); return }
+      let toIndex = (task.featureIdToDisplayIndex[targetFeature.id] ?? 1) - 1
+      if (dropPosition === 'after') {
+        toIndex = toIndex + 1
+      }
+      handleMoveFeature(fromIndex, toIndex)
     }
     clearDndState()
   }
@@ -221,7 +230,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskBlockers = getBlockers(task.id)
   const taskBlockersOutbound = getBlockersOutbound(task.id)
 
-  const taskRun = activeRuns.find(r => r.taskId === task.id && !r.featureId)
+  const taskRun = activeRuns.find(r => r.taskId === task.id)
   const taskHasActiveRun = !!taskRun
   const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
   const taskDisplayIndex = project?.taskIdToDisplayIndex[task.id] ?? 0
@@ -387,7 +396,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                const featureRun = activeRuns.find(r => r.taskId === task.id && r.featureId === f.id)
+                const featureRun = activeRuns.find(r => r.taskId === task.id) //TODO: the featureId would be stored in the messagesLog
                 const featureHasActiveRun = !!featureRun
 
                 return (

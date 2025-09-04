@@ -563,7 +563,7 @@
     },
     {
       "id": "fd101477-cb98-4d87-90c4-efb87f39c5e6",
-      "status": "-",
+      "status": "+",
       "title": "Allow moving tasks when in 'not-done'",
       "description": "Pay close attention to what the index should be (remember the display index is always +1 due to starting at 1)\n@src/renderer/screens/TasksView.tsx\n\nIt should be also possible to move features in @src/renderer/tasks/TaskDetailsView.tsx also pay attention to the indices.",
       "plan": "",
@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "-",
+      "status": "+",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
       "plan": "",
