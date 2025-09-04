@@ -421,7 +421,7 @@
     },
     {
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "-",
+      "status": "+",
       "title": "AllAgentsView.tsx improvements",
       "description": "The Project field in the table should show a reusable project chip that shows a tooltip with the project title + description on hover, and when clicking takes the user to home for that project.\n\nThe Cost field should also be a reusable component - on hover it should show a tooltip with the costs per token for that specifying provider and model.\n\nThe Tokens field should also be a reusable component - on hover it should show a breakdown of how long was each message and how many tokens it ended up being.",
       "plan": "",

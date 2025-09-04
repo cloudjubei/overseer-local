@@ -5,6 +5,9 @@ import StatusChip from './StatusChip';
 import TurnChip from './TurnChip';
 import ModelChip from './ModelChip';
 import { IconChevron, IconDelete } from '../ui/Icons';
+import ProjectChip from './ProjectChip';
+import CostChip from './CostChip';
+import TokensChip from './TokensChip';
 
 function formatUSD(n?: number) {
   if (n == null) return '\u2014';
@@ -80,7 +83,7 @@ export default function AgentRunRow({ run, onView, onCancel, showActions = true,
         <div className="text-neutral-500">{formatTime(run.startedAt)}</div>
       </td>
       {showProject ? (
-        <td className="px-3 py-2 text-xs font-mono text-neutral-600 dark:text-neutral-400">{run.projectId ?? '\u2014'}</td>
+        <td className="px-3 py-2"><ProjectChip projectId={run.projectId} /></td>
       ) : null}
       <td className="px-3 py-2">
         {dep ? (
@@ -100,8 +103,8 @@ export default function AgentRunRow({ run, onView, onCancel, showActions = true,
       <td className="px-3 py-2">
         <TurnChip turn={turns} />
       </td>
-      <td className="px-3 py-2">{formatUSD(run.costUSD)}</td>
-      <td className="px-3 py-2">{run.promptTokens ?? 0} / {run.completionTokens ?? 0}</td>
+      <td className="px-3 py-2"><CostChip provider={run.provider} model={run.model} costUSD={run.costUSD} /></td>
+      <td className="px-3 py-2"><TokensChip run={run} /></td>
       <td className="px-3 py-2">{formatDuration(durationMs)}</td>
       {showActions ? (
         <td className="px-3 py-2 text-right">

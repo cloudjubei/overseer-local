@@ -15,7 +15,7 @@ Top-Level Layout
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime).
-    - components/agents/: Agent-specific UI (status chips, run bullets, model selectors).
+    - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer.
