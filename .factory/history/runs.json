@@ -1,2 +1,14 @@
 [
+  {
+    "runId": "task_ufk6ljdr_mf5v5ujo",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:33:36.997Z",
+    "updatedAt": "2025-09-04T20:33:36.997Z"
+  }
 ]

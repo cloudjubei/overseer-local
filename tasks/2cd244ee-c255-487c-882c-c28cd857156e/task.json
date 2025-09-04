@@ -57,6 +57,123 @@
       "plan": "",
       "context": [],
       "acceptance": []
+    },
+    {
+      "id": "fedfe471-12d2-4cbe-bf71-3e9c11eff27a",
+      "status": "-",
+      "title": "Introduce Backend Package and Initial Scaffolding",
+      "description": "Create a new package under `packages/backend` for the server-side application. This package will house the backend API and services. Initialize a basic project structure with a web framework (e.g., Express.js or NestJS), including initial configuration, a main entry point file, and a README.md explaining the purpose of the package.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "beff1d94-18ef-4042-ba09-3e316d5fc564",
+      "status": "-",
+      "title": "Define Core API Specification using OpenAPI",
+      "description": "Define the core API contract between the client and backend using the OpenAPI 3.0 specification. This will include schemas for Project, Task, and Feature resources, and define the endpoints for CRUD operations and agent management. The specification file should be placed in the `packages/backend/docs` directory.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "5bde265c-4272-40a4-baa1-a64e5d129497",
+      "status": "-",
+      "title": "Implement Backend Project Management API",
+      "description": "Implement the API endpoints for managing projects. This includes endpoints for listing existing projects, and creating a new project by cloning a remote git repository. The service should manage these repositories on the backend's file system.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "efc367b5-bdcc-4f42-8ece-d5cb68d11412",
+      "status": "-",
+      "title": "Implement Backend Task and Feature Management API",
+      "description": "Implement the API endpoints for listing, creating, updating, and deleting tasks and features within a specific project. These operations will involve reading from and writing to the project files within the checked-out git repository on the backend.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "d30479e5-30f1-483c-bd55-c2914c74b618",
+      "status": "-",
+      "title": "Design and Implement Agent Execution Service",
+      "description": "Create a service responsible for running agents on a given project. This service will check out the correct git branch/commit, execute the agent logic using `factory-ts`, and manage the lifecycle of the agent run. This could be a separate microservice or an integrated component of the main backend.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "2089d212-3603-4099-b84f-404eb8070b10",
+      "status": "-",
+      "title": "Implement Backend API for Agent Execution",
+      "description": "Create API endpoints to trigger agent runs, check the status of a run, and retrieve the results. This API will act as an interface to the Agent Execution Service, handling requests from clients and delegating the actual execution.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "16191bc6-1437-42c7-9034-a4d8a6a0deea",
+      "status": "-",
+      "title": "Introduce Online/Local Mode Functionality in Client",
+      "description": "Refactor the client application to support a switch between 'local' and 'online' modes. This will involve creating a global state or configuration that determines whether the application interacts with the local file system directly or with the remote backend API. Add a UI element to allow the user to switch between these modes.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "db4b350e-f707-4d84-a141-d4d5043a7f9d",
+      "status": "-",
+      "title": "Implement Client-Side API Service",
+      "description": "Create a dedicated service or module within the client application (`src/services/apiClient.js`) to handle all communication with the backend. This service will encapsulate HTTP requests for projects, tasks, features, and agent execution.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "1150ccf8-0ab2-45bc-974c-8deb3e3b276b",
+      "status": "-",
+      "title": "Integrate Client Project Management with Backend API",
+      "description": "Update the client's project management features to use the new API service when in 'online' mode. This includes fetching the list of projects and creating new ones via the backend.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "e95e9ed8-ae54-4812-82bc-6f4eec25d238",
+      "status": "-",
+      "title": "Integrate Client Task/Feature Management with Backend API",
+      "description": "Modify the client's UI and logic for managing tasks and features to use the backend API when in 'online' mode. All CRUD operations should be sent to the backend instead of interacting with the local file system directly.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "14dbbddc-acfc-4849-84de-9a862ab31e3d",
+      "status": "-",
+      "title": "Integrate Client Agent Execution with Backend API",
+      "description": "Adapt the agent execution flow in the client to use the backend API when in 'online' mode. The client will send a request to the backend to start an agent run and will need to periodically poll for status updates or use a real-time communication method like WebSockets.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "773028af-1247-48d9-bb00-978c7be7d086",
+      "status": "-",
+      "title": "Develop Strategy for Blob Data and Indexing",
+      "description": "Design and document the strategy for handling large binary data (blobs) and search indexing, which are not suitable for git. Define how this data is stored and accessed by both the backend and clients, ensuring the local-first mode remains functional. This may involve using a separate storage solution (like S3) and defining how clients can build and use local search indexes.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "600c7cee-a892-42bc-9202-ce15b007140a",
+      "status": "-",
+      "title": "Update Documentation for Online Mode",
+      "description": "Update `docs/FILE_ORGANISATION.md` to include the new `packages/backend` directory. Create a new document in `docs/` that explains the online mode architecture, how to set up and run the backend service for development, and the overall workflow for client-server interaction.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -65,6 +182,19 @@
     "4b19f97b-904e-483a-a418-d2b5eafd47d5": 3,
     "db653afa-6e0a-431b-949d-375c704904f7": 4,
     "51917927-c444-482f-8866-b63bce8f9fb1": 5,
-    "de4cc76f-3e7a-464e-a82b-4a23aac73d33": 6
+    "de4cc76f-3e7a-464e-a82b-4a23aac73d33": 6,
+    "fedfe471-12d2-4cbe-bf71-3e9c11eff27a": 7,
+    "beff1d94-18ef-4042-ba09-3e316d5fc564": 8,
+    "5bde265c-4272-40a4-baa1-a64e5d129497": 9,
+    "efc367b5-bdcc-4f42-8ece-d5cb68d11412": 10,
+    "d30479e5-30f1-483c-bd55-c2914c74b618": 11,
+    "2089d212-3603-4099-b84f-404eb8070b10": 12,
+    "16191bc6-1437-42c7-9034-a4d8a6a0deea": 13,
+    "db4b350e-f707-4d84-a141-d4d5043a7f9d": 14,
+    "1150ccf8-0ab2-45bc-974c-8deb3e3b276b": 15,
+    "e95e9ed8-ae54-4812-82bc-6f4eec25d238": 16,
+    "14dbbddc-acfc-4849-84de-9a862ab31e3d": 17,
+    "773028af-1247-48d9-bb00-978c7be7d086": 18,
+    "600c7cee-a892-42bc-9202-ce15b007140a": 19
   }
 }
