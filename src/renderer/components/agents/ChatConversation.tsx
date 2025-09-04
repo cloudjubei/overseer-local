@@ -138,61 +138,104 @@ function parseToolResultsObjects(msg?: AgentRunMessage): ParsedToolResult[] {
   return out;
 }
 
-// Build conversation turns sequentially to ensure full history renders even if 'turn' is missing
+// Build conversation turns. Prefer grouping by explicit message.turn when present; otherwise fall back to sequential bundling
 function useTurnBundles(messages: AgentRunMessage[] | undefined) {
   return useMemo(() => {
     const systemMsgs: AgentRunMessage[] = [];
 
-    type Turn = { index: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage };
-    const turns: Turn[] = [];
-    let current: Turn | null = null;
+    type Turn = { index: number; turnNumber?: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage };
+
+    const nonSystem: AgentRunMessage[] = [];
+    for (const m of messages || []) {
+      if ((m.role || '') === 'system') systemMsgs.push(m); else nonSystem.push(m);
+    }
+
+    const hasTurns = nonSystem.some(m => typeof m.turn === 'number' && isFinite(m.turn as any));
 
     const isToolMsg = (m: AgentRunMessage) => {
       const content = m.content || '';
-      // Tool messages may be persisted with role 'tool' or with role 'user' but content prefixed
       const hinted = (m as any).source === 'tools';
       return m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---');
     };
 
-    for (const m of messages || []) {
-      const role = m.role || '';
+    let turns: Turn[] = [];
 
-      if (role === 'system') {
-        systemMsgs.push(m);
-        continue;
+    if (hasTurns) {
+      const byTurn = new Map<number, Turn>();
+      for (const m of nonSystem) {
+        const t = typeof m.turn === 'number' && isFinite(m.turn) ? (m.turn as number) : Number.MAX_SAFE_INTEGER;
+        if (!byTurn.has(t)) byTurn.set(t, { index: 0, turnNumber: t });
+        const turn = byTurn.get(t)!;
+        if (isToolMsg(m)) {
+          turn.tools = m;
+        } else if (m.role === 'user') {
+          turn.user = m;
+        } else if (m.role === 'assistant') {
+          turn.assistant = m;
+        }
       }
+      // Sort by turn number; put "unassigned" (MAX_SAFE_INTEGER) at the end
+      const sorted = Array.from(byTurn.values()).sort((a, b) => (a.turnNumber! - b.turnNumber!));
+      turns = sorted.map((t, idx) => ({ ...t, index: idx }));
 
-      if (isToolMsg(m)) {
-        if (!current) current = { index: turns.length };
-        current.tools = m;
-        turns.push(current);
-        current = null;
-        continue;
+      // If every message ended up with the same turn (degenerate snapshot), fall back to sequential bundling
+      const uniqTurns = new Set(sorted.map(t => t.turnNumber));
+      if (uniqTurns.size <= 1) {
+        turns = [];
+        let current: Turn | null = null;
+        for (const m of nonSystem) {
+          if (isToolMsg(m)) {
+            if (!current) current = { index: turns.length };
+            current.tools = m;
+            turns.push(current);
+            current = null;
+            continue;
+          }
+          if (m.role === 'user') {
+            if (current && (current.user || current.assistant || current.tools)) {
+              turns.push(current);
+              current = null;
+            }
+            current = { index: turns.length, user: m };
+            continue;
+          }
+          if (m.role === 'assistant') {
+            if (!current) current = { index: turns.length };
+            current.assistant = m;
+            continue;
+          }
+        }
+        if (current && (current.user || current.assistant || current.tools)) turns.push(current);
       }
-
-      if (role === 'user') {
-        if (current && (current.user || current.assistant || current.tools)) {
+    } else {
+      // Sequential bundling
+      let current: Turn | null = null;
+      for (const m of nonSystem) {
+        if (isToolMsg(m)) {
+          if (!current) current = { index: turns.length };
+          current.tools = m;
           turns.push(current);
           current = null;
+          continue;
         }
-        current = { index: turns.length, user: m };
-        continue;
+        if (m.role === 'user') {
+          if (current && (current.user || current.assistant || current.tools)) {
+            turns.push(current);
+            current = null;
+          }
+          current = { index: turns.length, user: m };
+          continue;
+        }
+        if (m.role === 'assistant') {
+          if (!current) current = { index: turns.length };
+          current.assistant = m;
+          continue;
+        }
       }
-
-      if (role === 'assistant') {
-        if (!current) current = { index: turns.length };
-        current.assistant = m;
-        continue;
-      }
-
-      systemMsgs.push(m);
+      if (current && (current.user || current.assistant || current.tools)) turns.push(current);
     }
 
-    if (current && (current.user || current.assistant || current.tools)) {
-      turns.push(current);
-    }
-
-    return { systemMsgs, turns } as { systemMsgs: AgentRunMessage[]; turns: { index: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage }[] };
+    return { systemMsgs, turns } as { systemMsgs: AgentRunMessage[]; turns: { index: number; turnNumber?: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage }[] };
   }, [messages]);
 }
 
@@ -257,7 +300,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
         <div className="text-sm text-neutral-500">No conversation yet.</div>
       ) : (
         <ul className="space-y-3">
-          {turns.map(({ index, user, assistant, tools }) => {
+          {turns.map(({ index, turnNumber, user, assistant, tools }) => {
             const parsed = assistant ? parseAssistant(assistant.content || '') : null;
             const toolCalls = parsed?.tool_calls || [];
             const resultsObjs = parseToolResultsObjects(tools);
@@ -271,7 +314,8 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
             };
 
             const titleParts: string[] = [];
-            titleParts.push(`Turn ${index}`); // Turn 0 is the initial user turn
+            const labelTurn = typeof turnNumber === 'number' && isFinite(turnNumber) ? turnNumber : index;
+            titleParts.push(`Turn ${labelTurn}`);
             if ((assistant as any)?.durationMs) titleParts.push(`${(assistant as any).durationMs}ms`);
             const title = titleParts.join(' \u00b7 ');
 
