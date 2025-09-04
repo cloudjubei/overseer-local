@@ -58,6 +58,7 @@ const IPC_HANDLER_KEYS = {
   NOTIFICATIONS_MARKALLASREAD: "notifications:mark-all-as-read",
   NOTIFICATIONS_MARKASREAD: "notifications:mark-as-read",
   NOTIFICATIONS_DELETEALL: "notifications:delete-all",
+  NOTIFICATIONS_CREATE: "notifications:create",
 
   // Factory (agent orchestrator)
   FACTORY_START_TASK: "factory:start-task",

@@ -1,6 +1,7 @@
 import { ipcMain, Notification } from 'electron';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 import NotificationsStorage from './storage';
+import { settingsManager } from '../managers';
 
 export class NotificationManager {
 
@@ -20,9 +21,24 @@ export class NotificationManager {
 
   __getStorage(projectId) {
     if (!this.storages[projectId]) {
-      this.storages[projectId] = new NotificationsStorage(projectId);
+      const storage = new NotificationsStorage(projectId);
+      // Broadcast to renderer on any storage changes
+      try {
+        storage.subscribe(() => this._broadcast(projectId));
+      } catch {}
+      this.storages[projectId] = storage;
     }
     return this.storages[projectId];
+  }
+
+  _broadcast(projectId) {
+    try {
+      if (this.window && !this.window.isDestroyed()) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, { projectId });
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   _registerIpcHandlers() {
@@ -35,6 +51,7 @@ export class NotificationManager {
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = ({projectId}) => this.markAllNotificationsAsRead(projectId);
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = ({projectId, id}) => this.markNotificationAsRead(projectId, id);
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL] = ({projectId}) => this.deleteAllNotifications(projectId);
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_CREATE] = ({ projectId, input }) => this.createNotification(projectId, input);
     
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
@@ -50,30 +67,39 @@ export class NotificationManager {
     this._ipcBound = true;
   }
 
-  //TODO: on create call ->
-  // __showOsNotification(notification) {
-  //   const prefs = this.getPreferences();
-  //   if (!prefs.osNotificationsEnabled) return;
-  //   if (prefs.categoriesEnabled && !prefs.categoriesEnabled[notification.category]) return;
+  _getPrefsForProject(projectId) {
+    try {
+      const app = settingsManager?.getAppSettings?.();
+      const project = settingsManager?.getProjectSettings?.(projectId);
+      const sys = app?.notificationSystemSettings || { osNotificationsEnabled: false, soundsEnabled: false, displayDuration: 5 };
+      const categoriesEnabled = project?.notifications?.categoriesEnabled || {};
+      return { sys, categoriesEnabled };
+    } catch (e) {
+      return { sys: { osNotificationsEnabled: false, soundsEnabled: false, displayDuration: 5 }, categoriesEnabled: {} };
+    }
+  }
 
-  //   const data = {
-  //     title: notification.title,
-  //     message: notification.message,
-  //     metadata: {
-  //       ...(notification.metadata || {}),
-  //       projectId: this.currentProjectId,
-  //     },
-  //     soundsEnabled: prefs.soundsEnabled,
-  //     displayDuration: prefs.displayDuration
-  //   };
+  _maybeShowOsNotification(projectId, notification) {
+    try {
+      const { sys, categoriesEnabled } = this._getPrefsForProject(projectId);
+      if (!sys?.osNotificationsEnabled) return;
+      if (categoriesEnabled && categoriesEnabled[notification.category] === false) return;
 
-  //   try {
-  //     //TODO:
-  //     await window.notifications.sendOs(data);
-  //   } catch (error) {
-  //     console.error('Failed to send OS notification:', error);
-  //   }
-  // }
+      const data = {
+        title: notification.title,
+        message: notification.message,
+        metadata: {
+          ...(notification.metadata || {}),
+          projectId,
+        },
+        soundsEnabled: !!sys?.soundsEnabled,
+        displayDuration: Number.isFinite(sys?.displayDuration) ? sys.displayDuration : 5,
+      };
+      this.sendOs(data);
+    } catch (e) {
+      // ignore
+    }
+  }
   
   sendOs(data) {
     if (!Notification.isSupported()) {
@@ -104,6 +130,14 @@ export class NotificationManager {
     } catch (error) {
       return { success: false, error: String(error) };
     }
+  }
+
+  createNotification(projectId, input) {
+    const storage = this.__getStorage(projectId);
+    const created = storage.create(input);
+    // Best-effort OS notification based on preferences
+    this._maybeShowOsNotification(projectId, created);
+    return created;
   }
 
   getRecentNotifications(projectId) {

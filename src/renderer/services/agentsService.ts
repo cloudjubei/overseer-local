@@ -1,6 +1,7 @@
 import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
 import { AgentType, LLMConfig } from 'packages/factory-ts/src/types';
+import { notificationsService } from './notificationsService';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
@@ -244,6 +245,38 @@ class AgentsServiceImpl {
     return `${e?.payload?.featureId || DEFAULT_FEATURE_KEY}`
   }
 
+  private async fireCompletionNotifications(run: RunRecord) {
+    try {
+      const baseTitle = 'Agent finished';
+      const parts: string[] = [];
+      parts.push(`Agent ${run.agentType}`);
+      if (run.featureId) parts.push(`feature ${run.featureId}`);
+      parts.push(`task ${run.taskId}`);
+      const message = parts.join(' • ');
+
+      await notificationsService.create(run.projectId, {
+        type: 'success',
+        category: 'tasks',
+        title: baseTitle,
+        message,
+        metadata: { taskId: run.taskId, featureId: run.featureId },
+      } as any);
+
+      // If a feature run, also emit an Updates category notification to reflect commit completion
+      if (run.featureId) {
+        await notificationsService.create(run.projectId, {
+          type: 'success',
+          category: 'updates',
+          title: 'Feature committed',
+          message: `Changes for feature ${run.featureId} have been committed.`,
+          metadata: { taskId: run.taskId, featureId: run.featureId },
+        } as any);
+      }
+    } catch (err) {
+      console.warn('[agentsService] Failed to create completion notifications', (err as any)?.message || err);
+    }
+  }
+
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
@@ -304,6 +337,8 @@ class AgentsServiceImpl {
       } else if (e.type === 'run/completed' || e.type === 'run/complete') {
         run.state = 'completed';
         run.message = e.payload?.message || e.payload?.summary || 'Completed';
+        // Fire notifications for completion
+        this.fireCompletionNotifications(run);
       }
       this.notify();
       if (run.state !== 'running') {

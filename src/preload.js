@@ -57,8 +57,8 @@ const NOTIFICATIONS_API = {
   },
 
   sendOs: (data) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS, data),
-  subscribe: (callback, notifications) => {
-    const listener = (_event, snapshot) => callback(notifications);
+  subscribe: (callback) => {
+    const listener = (_event, payload) => callback(payload);
     ipcRenderer.on(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, listener);
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, listener);
   },
@@ -66,7 +66,8 @@ const NOTIFICATIONS_API = {
   getUnreadNotificationsCount: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT, { projectId }),
   markAllNotificationsAsRead: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD, { projectId }),
   markNotificationAsRead: (projectId, id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD, { projectId, id }),
-  deleteAllNotifications: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL, { projectId })
+  deleteAllNotifications: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL, { projectId }),
+  create: (projectId, input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_CREATE, { projectId, input }),
 };
 
 const PROJECTS_API = {

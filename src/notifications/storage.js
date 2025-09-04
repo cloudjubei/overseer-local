@@ -42,7 +42,9 @@ export default class NotificationsStorage {
   }
 
   notifyListeners() {
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach(listener => {
+      try { listener(); } catch {}
+    });
   }
 
   create(input) {

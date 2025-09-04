@@ -47,4 +47,9 @@ export class SettingsManager
   updateAppSettings(updates) {
     return this.appSettings.save(updates)
   }
+
+  // Added: public accessor for project settings so other managers (e.g., notifications) can read preferences
+  getProjectSettings(projectId) {
+    return this.__loadProjectSettings(projectId).get();
+  }
 }
