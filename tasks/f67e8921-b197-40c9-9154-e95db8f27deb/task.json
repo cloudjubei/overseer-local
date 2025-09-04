@@ -518,7 +518,7 @@
     },
     {
       "id": "26d01bef-ce79-498a-9cc8-7a6ada530002",
-      "status": "-",
+      "status": "+",
       "title": "Reference and File lookup usability improvements",
       "description": "When the user types # for references and @ for files to be looked up in the @src/renderer/components/ui/FileMentionsTextarea.tsx if the user presses space while the lookup is showing - auto pick the top result.\nAlso, for references - they should always display in the text as #{task_index}.{feature_index} - the user will most likely search for the features by these indices.",
       "plan": "",

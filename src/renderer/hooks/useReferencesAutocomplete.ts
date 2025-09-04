@@ -20,7 +20,9 @@ export function useReferencesAutocomplete(params: {
   const { tasksById } = useTasks();
 
   const references = useMemo<RefItem[]>(() => {
-    if (!project) { return [] }
+    if (!project) {
+      return []
+    }
     const refs: RefItem[] = [];
     Object.values(tasksById).forEach((task) => {
       const taskDisplay = `${project.taskIdToDisplayIndex[task.id]}`
@@ -92,7 +94,7 @@ export function useReferencesAutocomplete(params: {
   }
 
   const isBoundaryChar = (ch: string) => {
-    return /[\s\n\t\(\)\[\]\{\}<>,.!?:;"'`]/.test(ch);
+    return /[\s\n\t\(\)\[\]\{\}<>,.!?:;\"'`]/.test(ch);
   };
 
   const checkForMention = (text: string, pos: number) => {
@@ -124,16 +126,18 @@ export function useReferencesAutocomplete(params: {
     setMentionStart(null);
   };
 
-  const onSelect = (selectedRef: string) => {
+  // selectedRef should be the DISPLAY form (e.g., 3.2) so that the text shows as #3.2
+  const onSelect = (selectedRefDisplay: string) => {
     const textarea = textareaRef.current;
     if (!textarea || mentionStart === null) return;
     const currentText = textarea.value;
     const currentPos = textarea.selectionStart;
     const before = currentText.slice(0, mentionStart);
     const after = currentText.slice(currentPos);
-    const newText = `${before}#${selectedRef}${after}`;
+    // Insert display-based reference and add a trailing space for UX consistency
+    const newText = `${before}#${selectedRefDisplay} ${after}`;
     setInput(newText);
-    const newPos = before.length + 1 + selectedRef.length;
+    const newPos = before.length + 1 + selectedRefDisplay.length + 1; // include space
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(newPos, newPos);
