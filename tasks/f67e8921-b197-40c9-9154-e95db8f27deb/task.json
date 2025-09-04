@@ -503,7 +503,7 @@
     },
     {
       "id": "274eb915-a7b3-4eed-b71d-e7888f1340fb",
-      "status": "-",
+      "status": "+",
       "title": "ChatConversation improvements",
       "description": "@src/renderer/components/agents/ChatConversation.tsx  should always display the first user message as Turn 0, then each subsequent turn is a LLM message + response (tool calls).\nThe tool calls are following a standard JSON schema 'ToolResult' defined in @packages/factory-ts/src/types.ts  - follow it to make a nice display for it the same as LLM tool calls inside its messages are displayed.this currently causes a Warning: Maximum update depth exceeded.\nIt shows the files to select, but they are shown as the display chips - these should just be normal paths to the files.\nInvestigate how @src/renderer/screens/ChatView.tsx  handles this - it works ok there.\nThis feature is only accepted if the solution from there can be reused as a component.\nDo not alter the messages sent directly to the LLMs - they need to stay in the specified format.\n\nFor this feature to be completed the type 'AgentRun' inside @src/renderer/services/agentsService.ts needs to be updated. Instead of a simple message list, it should store a list of messages per feature the agent has worked on. \n\nRemember that the messages between agents only include a simple json of the form \"{role:str,content:str}\" - do not change this, but alter the logging infrastructure around it.",
       "plan": "",
