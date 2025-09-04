@@ -30,6 +30,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const { tasksById, updateTask, updateFeature, reorderFeatures, getBlockers, getBlockersOutbound } = useTasks()
   const { activeRuns, startTaskAgent, startFeatureAgent, cancelRun } = useAgents()
 
+  // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
+  const preventDragFromNoDragRef = useRef(false)
+
   useEffect(() => {
     if (taskId && tasksById) {
       const t = tasksById[taskId]
@@ -277,9 +280,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               onDrop={(e) =>{
                 if (!dndEnabled || !dragging) return
                 e.preventDefault()
+                preventDragFromNoDragRef.current = false
                 onListDrop()
               }}
-              onDragEnd={() => clearDndState()}
+              onDragEnd={() => { preventDragFromNoDragRef.current = false; clearDndState() }}
             >
               {sortedFeatures.map((f: Feature, idx: number) => {
                 const blockers = getBlockers(task.id, f.id)
@@ -303,9 +307,21 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       data-feature-id={f.id}
                       draggable={dndEnabled}
                       aria-grabbed={isDragSource}
+                      onPointerDownCapture={(e) => {
+                        const t = e.target as HTMLElement | null
+                        preventDragFromNoDragRef.current = !!(t && t.closest('.no-drag'))
+                      }}
+                      onPointerUpCapture={() => { preventDragFromNoDragRef.current = false }}
                       onDragStart={(e) => {
+                        // If the initial pointer down started on a non-draggable UI (e.g., action buttons), block row drag
+                        if (preventDragFromNoDragRef.current) {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          preventDragFromNoDragRef.current = false
+                          return
+                        }
                         if (!dndEnabled) return
-                        // Prevent dragging when the original target is inside elements that should not initiate drag (e.g., action buttons)
+                        // Fallback: if somehow target is within .no-drag, block as well
                         const target = e.target as HTMLElement | null
                         if (target && target.closest('.no-drag')) {
                           e.preventDefault()
@@ -341,7 +357,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <button type="button" className="btn-secondary btn-icon no-drag" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
                           <IconEdit />
                         </button>
-                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>}
+                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>
                       </div>
 
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Blockers and actions for Feature ${f.id}`}>
