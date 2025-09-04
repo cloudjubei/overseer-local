@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "Factory-ts improvements",
   "description": "Various improvements to add to the project and the factory-ts package",
   "features": [
@@ -236,7 +236,7 @@
     },
     {
       "id": "6a8066ee-230f-4f31-b531-3d8cadff4178",
-      "status": "-",
+      "status": "+",
       "title": "ChatsManager should not have any agentic tools - everything should be routed through factory-ts",
       "description": "the factory-ts package should be the one place where all agentic tools are placed - currently @src/chat/manager.js has its own functions. Those should be cleaned up and used appropriately from factory-ts - @packages/factory-ts/src/fileTools.ts or @packages/factory-ts/src/taskUtils.ts for instance.",
       "plan": "",
