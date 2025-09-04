@@ -395,7 +395,7 @@
     },
     {
       "id": "37730047-f692-48c0-b6e7-9093564596a9",
-      "status": "-",
+      "status": "+",
       "title": "In TaskDetailsView.tsx next to the play button show the Agent Model control",
       "description": "This control should show the current active LLM configuration and allow to quickly pick a configuration from the last 5 recent ones + a last option that would take the user to the LLM Configuration settings.",
       "plan": "",
