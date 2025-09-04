@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types';
-import type { TaskUtils } from './taskUtils';
-import type { FileTools } from './fileTools';
-import type { GitManager } from './gitManager';
-import { logger, logLLMStep } from './logger';
+import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types.js';
+import type { TaskUtils } from './taskUtils.js';
+import type { FileTools } from './fileTools.js';
+import type { GitManager } from './gitManager.js';
+import { logger, logLLMStep } from './logger.js';
 
 const MAX_TURNS_PER_FEATURE = 100;
 
@@ -49,7 +49,7 @@ const PROTOCOL_INSTRUCTIONS = (() => {
 const TOOL_DESCRIPTIONS: Record<string, string> = {
   // Base tools
   read_files: 'Read the content of one or more files at the given relative paths. Returns an array of strings (one per file).',
-  search_files: 'Search for files by name or textual content under the given path. Returns matching relative paths.',
+  search_files: 'Search for files by name or textual content under the given path. Returns matching relative paths. The query input must be a space separated list of keywords',
   list_files: 'List files and directories at a relative path from the project root.',
   finish_feature: 'Mark the current feature as complete and end the run. Use only when the work fully meets the acceptance criteria.',
   block_feature: 'Stop work on the current feature and report why you are blocked (e.g., missing context, unclear requirements).',
@@ -352,11 +352,6 @@ async function runOrchestrator(opts: {
 
   // Aggregate all messages across features for this run
   let aggregatedMessages: CompletionMessage[] = [];
-
-  // Emit a special system marker that denotes the start of this task run (helps UI)
-  const startMarker: CompletionMessage = { role: 'system', content: `--- BEGIN TASK RUN ${currentTask.id} ---` } as any;
-  aggregatedMessages.push(startMarker);
-  emit?.({ type: 'llm/messages/init', payload: { messages: aggregatedMessages.slice(), turn: 0, note: 'task_run_start' } });
 
   if (agentType === 'speccer') {
     const freshTask = await taskTools.getTask(currentTask.id);

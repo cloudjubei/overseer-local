@@ -32,7 +32,6 @@ const RUN_SUBSCRIBERS = new Map(); // runId -> Set<webContentsId>
 const RUNS = new Map(); // runId -> RunHandle
 const RUN_META = new Map(); // runId -> metadata snapshot
 const RUN_TIMERS = new Map(); // runId -> heartbeat timer
-// Track last known LLM messages per run to persist on cancellation
 const RUN_MESSAGES = new Map(); // runId -> last messages array
 
 let PRICING = null;

@@ -167,16 +167,14 @@ export function StatusPicker({ anchorEl, value, isAllAllowed = false, includeNot
 
 export type StatusControlProps = {
   status: Status | string
-  mode?: 'normal' | 'full'
-  variant?: 'soft' | 'bold'
   className?: string
   title?: string
   onChange?: (next: Status) => void
 }
 
-export default function StatusControl({ status, mode = 'normal', variant = 'soft', className = '', title, onChange }: StatusControlProps) {
+export default function StatusControl({ status, className = '', title, onChange }: StatusControlProps) {
   const { key, label } = mapStatusToSemantic(status)
-  const badgeCls = `badge badge--${variant} badge--${key}`
+  const badgeCls = `badge badge--soft badge--${key}`
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const bulletRef = useRef<HTMLButtonElement>(null)
@@ -205,39 +203,17 @@ export default function StatusControl({ status, mode = 'normal', variant = 'soft
 
   return (
     <>
-      <div ref={containerRef} className={`status-inline ${className} ${isEditable ? 'editable' : ''}`}>
+      <div ref={containerRef} className={`status-inline ${className} ${isEditable ? 'editable' : ''} max-w-[140px]`}>
         <span 
           className={`${badgeCls} ${isEditable ? 'status-badge--editable' : ''}`} 
           aria-label={`${label} status`} 
           title={title || label}
-          onClick={isEditable ? handleOpen : undefined}
+          onClick={(e) => { if (isEditable) { e.stopPropagation(); handleOpen() }}}
           role={isEditable ? 'button' : undefined}
           tabIndex={isEditable ? 0 : undefined}
         >
           {label}
         </span>
-        {mode == "full" && (
-          <button
-            ref={bulletRef}
-            type="button"
-            className="status-bullet-btn u-focus-ring reveal-on-hover"
-            aria-haspopup="menu"
-            aria-expanded={open || undefined}
-            aria-label={`Change status (currently ${label})`}
-            title={title || `Change status: ${label}`}
-            onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseUp={(e) => e.stopPropagation()}
-          >
-            <span className={`status-bullet status-bullet--${k}`} aria-hidden></span>
-            <span className="status-bullet__edit" aria-hidden>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-              </svg>
-            </span>
-          </button>
-        )}
       </div>
       {open && containerRef.current && (
         <StatusPicker anchorEl={containerRef.current} value={status as Status} onSelect={(s) => handleSelect(s as Status)} onClose={handleClose} />
