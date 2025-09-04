@@ -9,9 +9,12 @@ export type CommandMenuApi = {
   isOpen: () => boolean;
 };
 
+const UI_IMPROVEMENTS_TASK_ID = 'f9eef18e-818e-427d-82ab-8d990bb199c4';
+
 const commandsBase = (
   nav: ReturnType<typeof useNavigator>
 ) => [
+  { id: 'add-ui-feature', label: 'Add Feature to UI Improvements', shortcut: 'Cmd/Ctrl+Shift+F', run: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }) },
   { id: 'new-task', label: 'New Task', shortcut: 'Cmd/Ctrl+N', run: () => nav.openModal({ type: 'task-create' }) },
   { id: 'go-home', label: 'Go to Home', run: () => nav.navigateView('Home') },
   { id: 'go-files', label: 'Go to Files', run: () => nav.navigateView('Files') },

@@ -11,6 +11,8 @@ import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
 
+const UI_IMPROVEMENTS_TASK_ID = 'f9eef18e-818e-427d-82ab-8d990bb199c4';
+
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
   const nav = useNavigator();
@@ -18,8 +20,15 @@ function GlobalShortcutsBootstrap() {
   useEffect(() => {
     // Cmd/Ctrl+N: New Task
     const unregisterNew = register({ id: 'new-task', keys: match.modN, handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
-    // Esc closes modals: Navigator handles via hash; here we just allow default unless needed
-    return () => { unregisterNew(); };
+    // Cmd/Ctrl+Shift+F: Add Feature to UI Improvements
+    const unregisterAddUiFeature = register({
+      id: 'add-ui-feature',
+      keys: (e: KeyboardEvent) => (e.key === 'f' || e.key === 'F') && (e.ctrlKey || e.metaKey) && e.shiftKey,
+      handler: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }),
+      description: 'Add feature to UI Improvements',
+      scope: 'global'
+    });
+    return () => { unregisterNew(); unregisterAddUiFeature(); };
   }, [register, nav]);
 
   useEffect(() => {
