@@ -589,7 +589,7 @@
     },
     {
       "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
-      "status": "-",
+      "status": "+",
       "title": "Shortcuts in the app were disabled because they interfered with typing in the \"/\" character",
       "description": "A user must be able to specify which key is the modifier key in settings - @src/renderer/screens/SettingsView.tsx . Bring back the shortcuts - @src/renderer/App.tsx",
       "plan": "",

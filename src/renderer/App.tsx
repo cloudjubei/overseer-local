@@ -23,8 +23,6 @@ function GlobalShortcutsBootstrap() {
   }, [register, nav]);
 
   useEffect(() => {
-    // Example success feedback after navigation changes (visual polish)
-    // Could be triggered after real operations; left as hook for future use
     const onHash = () => {};
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -42,14 +40,11 @@ function NotificationClickHandler() {
         nav.navigateTaskDetails(metadata.taskId, metadata.featureId);
       } else if (metadata.chatId) {
         nav.navigateView('Chat');
-        // TODO: handle specific chat
       } else if (metadata.documentPath) {
         nav.navigateView('Files');
-        // TODO: open specific file
       } else if (metadata.actionUrl) {
         // Handle custom URL if needed
       }
-      // Mark as read? Handled separately
     });
 
     return unsubscribe;
@@ -66,16 +61,16 @@ function App()
     <ToastProvider>
       <ProjectsProvider>
         <NavigatorProvider>
-          {/* <ShortcutsProvider> */}
-            {/* <GlobalShortcutsBootstrap /> */}
+          <ShortcutsProvider>
+            <GlobalShortcutsBootstrap />
             <NotificationClickHandler />
-            {/* <CommandMenu /> */}
-            {/* <ShortcutsHelp /> */}
+            <CommandMenu />
+            <ShortcutsHelp />
             <div className="flex h-full w-full overflow-hidden">
               <SidebarView />
               <ModalHost />
             </div>
-          {/* </ShortcutsProvider> */}
+          </ShortcutsProvider>
         </NavigatorProvider>
       </ProjectsProvider>
     </ToastProvider>

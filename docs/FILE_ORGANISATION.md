@@ -17,6 +17,7 @@ Top-Level Layout
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime).
     - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
     - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC).
+    - hooks/useShortcuts: Keyboard shortcuts provider; respects user-selected modifier and avoids interfering with text input.
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer.

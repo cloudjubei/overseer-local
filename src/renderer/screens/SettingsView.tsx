@@ -10,6 +10,7 @@ import { useAppSettings } from '../hooks/useAppSettings';
 import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
 import { IconEdit, IconDelete, IconPlus } from '../components/ui/Icons';
+import type { ShortcutsModifier } from '../../types/settings';
 
 // Settings Categories
 const CATEGORIES = [
@@ -23,7 +24,7 @@ type CategoryId = typeof CATEGORIES[number]['id'];
 export default function SettingsView() {
   const themes: Theme[] = ['light', 'dark'];
   const { theme, setTheme } = useTheme();
-  const { isAppSettingsLoaded, appSettings, setNotificationSystemSettings } = useAppSettings();
+  const { isAppSettingsLoaded, appSettings, setNotificationSystemSettings, updateAppSettings } = useAppSettings();
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings();
   const { enableNotifications } = useNotifications();
 
@@ -55,6 +56,22 @@ export default function SettingsView() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="space-y-2 mt-6">
+        <label htmlFor="shortcuts-mod" className="block text-sm font-medium">Shortcuts modifier key</label>
+        <select
+          id="shortcuts-mod"
+          value={appSettings.userPreferences.shortcutsModifier}
+          onChange={(e) => updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcutsModifier: e.target.value as ShortcutsModifier } })}
+          className="w-64 p-2 border border-gray-300 rounded-md focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
+        >
+          <option value="meta">Cmd (⌘) / Meta</option>
+          <option value="ctrl">Ctrl</option>
+        </select>
+        <div className="text-[12px] text-[var(--text-secondary)]">
+          This controls which key acts as the modifier for app shortcuts like Cmd/Ctrl+K and +N.
+        </div>
       </div>
     </div>
   );
