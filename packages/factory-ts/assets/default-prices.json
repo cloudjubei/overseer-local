@@ -1,10 +1,9 @@
 {
   "updatedAt": "2024-01-01T00:00:00.000Z",
   "prices": [
-    { "provider": "openai", "model": "gpt-5", "inputPerMTokensUSD": 100, "outputPerMTokensUSD": 800 },
-    { "provider": "openai", "model": "gpt-4o-mini", "inputPerMTokensUSD": 150, "outputPerMTokensUSD": 600 },
-    { "provider": "openai", "model": "gpt-4o", "inputPerMTokensUSD": 5000, "outputPerMTokensUSD": 15000 },
-    { "provider": "openai", "model": "gpt-4o-realtime", "inputPerMTokensUSD": 5000, "outputPerMTokensUSD": 15000 },
-    { "provider": "openai", "model": "gpt-3.5-turbo", "inputPerMTokensUSD": 1500, "outputPerMTokensUSD": 2000 }
+    { "provider": "openai", "model": "gpt-5", "inputPerMTokensUSD": 1.250, "outputPerMTokensUSD": 10, "cachedInputPerMTokensUSD": 0.125 },
+    { "provider": "openai", "model": "gpt-5-mini", "inputPerMTokensUSD": 0.250, "outputPerMTokensUSD": 2, "cachedInputPerMTokensUSD": 0.025 },
+    { "provider": "openai", "model": "gpt-5-nano", "inputPerMTokensUSD": 0.050, "outputPerMTokensUSD": 0.4, "cachedInputPerMTokensUSD": 0.005 },
+    { "provider": "openai", "model": "gpt-4o-mini", "inputPerMTokensUSD": 0.6, "outputPerMTokensUSD": 2.4, "cachedInputPerMTokensUSD": 0.3 }
   ]
 }

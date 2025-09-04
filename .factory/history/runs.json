@@ -1,5 +1,31 @@
 [
   {
+    "runId": "task_uaiet0yp_mf5nk722",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T17:00:49.466Z",
+    "updatedAt": "2025-09-04T17:16:12.279Z",
+    "costUSD": 80.4676,
+    "promptTokens": 459332,
+    "completionTokens": 43168,
+    "progress": 0.13
+  },
+  {
+    "runId": "task_byqqpbq1_mf5nvw3p",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "claude-4-sonnet-20250514",
+    "startedAt": "2025-09-04T17:09:55.141Z",
+    "updatedAt": "2025-09-04T17:09:56.624Z"
+  },
+  {
     "runId": "task_9l45kfj7_mf5mr5dh",
     "projectId": "main",
     "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
