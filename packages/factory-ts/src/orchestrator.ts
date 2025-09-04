@@ -367,7 +367,9 @@ function shouldIgnoreCopy(relPath: string): boolean {
     // Python (from original mirror)
     'venv', '__pycache__',
     // Logs and temp
-    'logs', 'tmp', 'temp'
+    'logs', 'tmp', 'temp',
+    // Factory runtime state: Avoid copying .factory so isolated runs don't produce duplicate history
+    '.factory'
   ]);
 
   // If any path segment matches an ignored dir name
@@ -393,7 +395,7 @@ async function copyTree(src: string, dest: string) {
     stat = fs.statSync(src);
   } catch (e: any) {
     throw new Error(`Source path does not exist or is not accessible: ${src} (${e?.code || e})`);
-  }
+    }
   if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
   fs.mkdirSync(dest, { recursive: true });
 
@@ -536,7 +538,7 @@ export async function runIsolatedOrchestrator(opts: {
   const { model, agentType, projectId, taskId, featureId, taskTools, fileTools, gitFactory, completion, emit } = opts;
 
   const projectDir = await taskTools.getProjectDir(projectId);
-    
+
   // Create temp workspace
   const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'factory-ts-'));
   // Keep a subfolder to host the copied source

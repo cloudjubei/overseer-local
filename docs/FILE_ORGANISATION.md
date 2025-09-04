@@ -46,6 +46,7 @@ This document describes how files and directories are organised in this reposito
   - packages/factory-ts/: Agent orchestration library used by the app and CLI. See packages/factory-ts/FACTORY_TS_OVERVIEW.md.
     - packages/factory-ts/src/taskUtils.ts: TypeScript implementation mirroring Python task_utils.py, used by orchestrator.ts for file/task/feature/test operations and Git commits.
     - packages/factory-ts/src/orchestrator.ts: Orchestrator that mirrors Python run_local_agent.py conversation loop. Also provides runIsolatedOrchestrator which mirrors Python run.py by copying the repository to a temporary workspace, running the orchestrator inside it, and then cleaning up. It preserves .git and ignores venv, __pycache__, .idea, and *.pyc. Update: runIsolatedOrchestrator now accepts an optional repoRoot absolute path and handles packaged Electron (asar) environments by avoiding copying from virtual paths. It resolves a real filesystem directory using process.resourcesPath or stripping app.asar and prefers app.asar.unpacked when present.
+      - Update: The isolated workspace copy intentionally ignores the .factory directory (runtime metadata like history and pricing cache) to prevent duplicate history entries when running the agent against the copied project. Only the originating app persists history.
     - packages/factory-ts/src/completion.ts: Self-contained CompletionClient that supports OpenAI-compatible chat APIs and a mock client.
     - packages/factory-ts/src/pricing.ts: Pricing manager that loads/saves local model prices, estimates costs per-provider/model, and can refresh from configurable supplier URLs. Stores data under .factory/prices.json.
     - packages/factory-ts/src/index.ts: Public entry exporting createOrchestrator, createPricingManager and a file-backed createHistoryStore. HistoryStore persists run metadata under .factory/history/runs.json and per-run messages under .factory/history/runs/<runId>.messages.json.
@@ -114,6 +115,7 @@ History persistence for agent runs:
 
 ### Isolated Orchestrator and Packaged App Environments
 - packages/factory-ts/src/orchestrator.ts: runIsolatedOrchestrator accepts an optional repoRoot absolute path and will avoid copying from Electron's app.asar virtual filesystem. If not provided, it attempts to resolve a real filesystem directory using Electron's process.resourcesPath, or by stripping the .asar segment and preferring app.asar.unpacked when present. Pass an absolute projectDir to copy only that directory into the temp workspace.
+- Update: The isolated copy excludes the .factory directory to prevent duplicate history and cache state. Only the original app instance writes history.
 
 ### Environment Variables and Git Credentials
 - On app start (main process), src/tools/factory/mainOrchestrator.js now loads the workspace .env file from projectRoot/.env. This ensures that GIT credentials (GIT_PAT/GIT_TOKEN/GITHUB_TOKEN/GH_TOKEN, GIT_USER_NAME/GIT_USERNAME, GIT_USER_EMAIL, GIT_REPO_URL/REPO_URL) are available to the factory-ts GitManager.
