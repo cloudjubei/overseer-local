@@ -180,7 +180,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Agents - run histories UI improvements",
       "description": "@src/renderer/components/agents/ChatConversation.tsx used inside @src/renderer/screens/AgentsView.tsx should have overly large message texts put in a scrollable textbox.\n\nThe currently running agents in @src/renderer/screens/AgentsView.tsx should follow a similar format as the history of agent runs.\n\n@src/renderer/screens/AllAgentsView.tsx should follow a similar style to @src/renderer/screens/AgentsView.tsx \nTo make things more manageable - a component for the agent row display should be made so it can be reused.",
       "plan": "",

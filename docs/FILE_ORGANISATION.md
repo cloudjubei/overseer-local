@@ -15,6 +15,7 @@ This document describes how files and directories are organised in this reposito
       - src/renderer/components/agents/: Agent-related UI elements (AgentRunBullet and future agent widgets). Now includes ChatConversation.tsx to render agent run chat with bubbles for thoughts and expandable tool call rows.
         - New: StatusChip.tsx renders a chip with a status icon for agent run states (running/completed/cancelled/error).
         - New: TurnChip.tsx renders a small chip showing the current/total turn number for a run.
+        - New: AgentRunRow.tsx renders a single table row for an agent run (date, task dependency bullet, status, turn, cost, tokens, duration, and optional actions). Used across AgentsView and AllAgentsView to keep a consistent style for run listings.
       - src/renderer/components/ui/RichText.tsx: Utility component that scans text for @File tokens and #Task/Feature references; renders inline chips (FileDisplay) and DependencyBullet.
     - src/renderer/screens/: High-level screens (Tasks, Documents, Chat, Settings, Agents, etc.).
     - src/renderer/tasks/: Task/feature create/edit/list/board views.
