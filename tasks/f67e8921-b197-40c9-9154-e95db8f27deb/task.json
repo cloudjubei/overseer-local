@@ -449,18 +449,17 @@
     },
     {
       "id": "5fcbee8a-2734-4fa5-b404-6d9155a01053",
-      "status": "+",
-      "title": "UI improvements for TasksView.tsx and TaskDetails.tsx",
-      "description": "TasksView.tsx should allow the selection of 'not-done' tasks from the status selection.\n\nTaskDetails.tsx should have a similar search and sort functionality as TasksView.tsx . These should simply not be recorded - by default have the status selected to 'not-done' and sort by the display index.",
+      "status": "-",
+      "title": "Status and sort preferences are not stored",
+      "description": "Whenever the user changes preferences for what to display in the TasksView.tsx in the 'list' mode - it should store that, so at the next session it can be resumed in the same exact state.",
       "plan": "",
       "context": [
         "src/renderer/screens/TasksView.tsx",
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/components/agents/StatusChip.tsx",
         "src/renderer/components/tasks/StatusControl.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "This was previously working - somehow it isn't anymore."
     },
     {
       "id": "76ff2065-cd03-4815-b36b-8dfabd278b2b",
@@ -501,6 +500,19 @@
       "acceptance": [],
       "blockers": [],
       "rejection": "this currently causes a Warning: Maximum update depth exceeded.\nIt shows the files to select, but they are shown as the display chips - these should just be normal paths to the files.\nInvestigate how ChatView.tsx handles this - it works ok there.\nThis feature is only accepted if the solution from there can be reused as a component."
+    },
+    {
+      "id": "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd",
+      "status": "-",
+      "title": "The search and sort bar for features should be placed at the top",
+      "description": "TaskDetailsView.tsx should follow TasksView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -540,6 +552,7 @@
     "ea56a618-78f3-4612-bb73-12d6f7161f01": 34,
     "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 35,
     "6a8066ee-230f-4f31-b531-3d8cadff4178": 36,
-    "82b9481c-7129-4bea-8029-0e41a56531fe": 37
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 37,
+    "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 38
   }
 }
