@@ -1,12 +1,15 @@
 import { NotificationCategory } from "src/types/notifications";
 
+export type ShortcutsModifier = 'meta' | 'ctrl';
+
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   userPreferences: {
     lastActiveProjectId: 'main',
     tasksViewMode: 'list',
     tasksListViewSorting: 'index_desc',
     tasksListViewStatusFilter: 'all',
-    sidebarCollapsed: false
+    sidebarCollapsed: false,
+    shortcutsModifier: navigator.platform.toLowerCase().includes('mac') || navigator.userAgent.toLowerCase().includes('mac') ? 'meta' : 'ctrl',
   },
   notificationSystemSettings: {
     osNotificationsEnabled: true,
@@ -33,6 +36,7 @@ export interface UserPreferences {
   tasksListViewSorting: TaskListViewSorting;
   tasksListViewStatusFilter: TaskListStatusFilter;
   sidebarCollapsed: boolean;
+  shortcutsModifier: ShortcutsModifier;
 }
 export type TaskViewMode = 'list' | 'board'
 export type TaskListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'

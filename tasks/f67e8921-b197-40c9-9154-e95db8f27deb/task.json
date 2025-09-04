@@ -589,7 +589,7 @@
     },
     {
       "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
-      "status": "-",
+      "status": "+",
       "title": "Shortcuts in the app were disabled because they interfered with typing in the \"/\" character",
       "description": "A user must be able to specify which key is the modifier key in settings - @src/renderer/screens/SettingsView.tsx . Bring back the shortcuts - @src/renderer/App.tsx",
       "plan": "",
@@ -602,7 +602,7 @@
     },
     {
       "id": "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6",
-      "status": "-",
+      "status": "+",
       "title": "When no features are in a task - the default agent type is \"speccer\"",
       "description": "This should be true no matter where it is run from, right now it's only via @src/renderer/components/tasks/RunAgentButton.tsx",
       "plan": "",
@@ -614,7 +614,7 @@
     },
     {
       "id": "f9eef18e-818e-427d-82ab-8d990bb199c4",
-      "status": "-",
+      "status": "+",
       "title": "This feature is index 1 - we should have a special quick command wherever in the app for adding a feature to this task only",
       "description": "",
       "plan": "",

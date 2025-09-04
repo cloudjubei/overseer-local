@@ -12,6 +12,23 @@ export default function ShortcutsHelp() {
 
   const shortcuts = list();
 
+  const formatKeys = (id: string) => {
+    switch (id) {
+      case 'cmdk':
+        return 'Cmd/Ctrl+K';
+      case 'new-task':
+        return 'Cmd/Ctrl+N';
+      case 'help':
+        return '?';
+      case 'slash-search':
+        return '/';
+      case 'add-ui-feature':
+        return 'Cmd/Ctrl+Shift+F';
+      default:
+        return '';
+    }
+  };
+
   if (!open) return null;
   return createPortal(
     <div className="help-overlay" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
@@ -25,9 +42,7 @@ export default function ShortcutsHelp() {
             {shortcuts.map((s) => (
               <li key={s.id} className="help__item">
                 <span className="help__desc">{s.description || s.id}</span>
-                <span className="help__keys">{/* Best effort format by id */}
-                  {s.id === 'cmdk' ? 'Cmd/Ctrl+K' : s.id === 'new-task' ? 'Cmd/Ctrl+N' : s.id === 'help' ? '?' : s.id === 'slash-search' ? '/' : ''}
-                </span>
+                <span className="help__keys">{formatKeys(s.id)}</span>
               </li>
             ))}
           </ul>
