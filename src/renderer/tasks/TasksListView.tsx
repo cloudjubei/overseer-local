@@ -261,10 +261,10 @@ export default function TasksListView() {
           </div>
           <div className="control">
             <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by" disabled={!isAppSettingsLoaded}>
-              <option value="index_asc">Ascending</option>
-              <option value="index_desc">Descending</option>
-              <option value="status_asc">Status ^</option>
-              <option value="status_desc">Status \/</option>
+              <option value="index_asc">Ascending ↓</option>
+              <option value="index_desc">Descending ↑</option>
+              <option value="status_asc">Status ↓</option>
+              <option value="status_desc">Status ↑</option>
             </select>
           </div>
         </div>

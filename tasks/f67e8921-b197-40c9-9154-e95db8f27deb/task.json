@@ -236,14 +236,14 @@
     },
     {
       "id": "6a8066ee-230f-4f31-b531-3d8cadff4178",
-      "status": "?",
+      "status": "-",
       "title": "ChatsManager should not have any agentic tools - everything should be routed through factory-ts",
-      "description": "the factory-ts package should be the one place where all agentic tools are placed - currently @src/chat/manager.js has its own functions. Those should be cleaned up and used appropriately from factory-ts.",
+      "description": "the factory-ts package should be the one place where all agentic tools are placed - currently @src/chat/manager.js has its own functions. Those should be cleaned up and used appropriately from factory-ts - @packages/factory-ts/src/fileTools.ts or @packages/factory-ts/src/taskUtils.ts for instance.",
       "plan": "",
       "context": [
         "src/chat/manager.js",
-        "src/chat/storage.js",
-        "packages/factory-ts/src/fileTools.ts"
+        "packages/factory-ts/src/fileTools.ts",
+        "packages/factory-ts/src/taskUtils.ts"
       ],
       "acceptance": [],
       "blockers": []
@@ -408,19 +408,13 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "+",
-      "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display Features or turns correctly",
-      "description": "Each task run comprises of the agent entering a conversation about a task's feature. This might take multiple turns - where a turn is a single message being sent by the LLM and the single response to it. The first initial message is Turn 0. The final message by the agent should be without a response ( it will be the final turn). It seems the orchestrator (inside factory-ts) captures these incorrectly.\nFix this behaviour so it matches the above description.",
+      "status": "-",
+      "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display turns correctly",
+      "description": "Each task run comprises of the agent entering a conversation about a task's feature - treat each feature run as an AgentRun.",
       "plan": "",
-      "context": [
-        "src/renderer/components/agents/ChatConversation.tsx",
-        "src/renderer/screens/AgentsView.tsx",
-        "packages/factory-ts/src/orchestrator.ts",
-        "src/tools/factory/mainOrchestrator.js"
-      ],
+      "context": [],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Still incorrect. Inside orchestrator.ts there's a function runOrchestrator that is the main logic behind running features for a task. The sequence of Feature runs should be stored for a given task run - right now it seems that it's just the last feature that is recorded."
+      "blockers": []
     },
     {
       "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
@@ -563,11 +557,11 @@
     "5fcbee8a-2734-4fa5-b404-6d9155a01053": 31,
     "76ff2065-cd03-4815-b36b-8dfabd278b2b": 32,
     "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 33,
-    "82b9481c-7129-4bea-8029-0e41a56531fe": 34,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 35,
-    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 36,
-    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 37,
-    "274eb915-a7b3-4eed-b71d-e7888f1340fb": 38,
-    "26d01bef-ce79-498a-9cc8-7a6ada530002": 39
+    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 34,
+    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 35,
+    "274eb915-a7b3-4eed-b71d-e7888f1340fb": 36,
+    "26d01bef-ce79-498a-9cc8-7a6ada530002": 37,
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 38,
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 39
   }
 }

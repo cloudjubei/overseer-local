@@ -8,7 +8,7 @@ import { useTasks } from '../hooks/useTasks'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
-import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
+import { IconBack, IconChevron, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -278,8 +278,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {/* Agent Model selector next to the play button, now using editable ModelChip */}
-            <ModelChip editable className="min-w-[160px]" />
+            <ModelChip editable />
             {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}    
           </div>
         </div>
@@ -319,10 +318,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </div>
           <div className="control">
             <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as FeatureSort)} aria-label="Sort features by">
-              <option value="index_asc">Ascending</option>
-              <option value="index_desc">Descending</option>
-              <option value="status_asc">Status ^</option>
-              <option value="status_desc">Status \/</option>
+              <option value="index_asc">Ascending ↓</option>
+              <option value="index_desc">Descending ↑</option>
+              <option value="status_asc">Status ↓</option>
+              <option value="status_desc">Status ↑</option>
             </select>
           </div>
         </div>

@@ -256,8 +256,7 @@ export default function ModelChip({ provider, model, className, editable = false
         e.stopPropagation();
       }}
     >
-      <span className={["inline-block w-1.5 h-1.5 rounded-full", dot].join(' ')} aria-hidden />
-      <span className="flex flex-col leading-tight max-w-[16ch]">
+      <span className="flex flex-col leading-tight max-w-[16ch] items-center pr-1 pl-1">
         <span className="truncate text-[10px] uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
           {prov || (editable ? 'Select' : '—')}
         </span>
