@@ -1,5 +1,29 @@
 [
   {
+    "runId": "task_d7uvrizj_mf5u9bzp",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:08:19.958Z",
+    "updatedAt": "2025-09-04T20:08:21.981Z"
+  },
+  {
+    "runId": "task_9g6uy395_mf5u2vin",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T20:03:18.672Z",
+    "updatedAt": "2025-09-04T20:03:23.312Z"
+  },
+  {
     "runId": "task_3dnpyq7c_mf5u27w1",
     "agentType": "speccer",
     "projectId": "main",

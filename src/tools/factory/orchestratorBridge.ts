@@ -1,6 +1,6 @@
 /* Renderer-side bridge: talks to Electron preload (window.factory) instead of importing Node modules. */
 
-import { AgentType } from "packages/factory-ts/src/types";
+import { AgentType, LLMConfig } from "packages/factory-ts/src/types";
 
 export type EventSourceLike = {
   addEventListener: (type: string, handler: (e: any) => void) => void;
@@ -9,7 +9,7 @@ export type EventSourceLike = {
 
 export type RunHandle = { id: string; cancel: (reason?: string) => void };
 
-export type StartTaskRunParams = { agentType: AgentType, projectId: string; taskId: string; options?: Record<string, any> };
+export type StartTaskRunParams = { agentType: AgentType, projectId: string; taskId: string; llmConfig: LLMConfig; options?: Record<string, any> };
 export type StartFeatureRunParams = StartTaskRunParams & { featureId: string | number };
 
 function makeEventSourceLike(runId: string): EventSourceLike {
@@ -39,13 +39,10 @@ function makeEventSourceLike(runId: string): EventSourceLike {
   };
 }
 
-function redactOptions(options?: Record<string, any>) {
-  if (!options) return {};
+function redactSecrets(llmConfig: LLMConfig) : any {
   try {
-    const o = JSON.parse(JSON.stringify(options));
-    if (o.llmConfig && typeof o.llmConfig === 'object') {
-      if ('apiKey' in o.llmConfig) o.llmConfig.apiKey = '***';
-    }
+    const o = JSON.parse(JSON.stringify(llmConfig));
+    if ('apiKey' in o) o.apiKey = '***';
     return o;
   } catch {
     return {};
@@ -54,9 +51,9 @@ function redactOptions(options?: Record<string, any>) {
 
 export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
-  const { agentType, projectId, taskId, options } = params;
-  console.log('[factory:renderer] Starting task run', { agentType, projectId, taskId, options: redactOptions(options) });
-  const res = await (window as any).factory.startTaskRun(agentType, projectId, taskId, options ?? {});
+  const { agentType, projectId, taskId, llmConfig, options } = params;
+  console.log('[factory:renderer] Starting task run', { agentType, projectId, taskId, llmConfig: redactSecrets(llmConfig), options });
+  const res = await (window as any).factory.startTaskRun(agentType, projectId, taskId, llmConfig, options ?? {});
   const runId: string = res?.runId;
   if (!runId) throw new Error('Failed to start task run: missing runId');
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
@@ -66,9 +63,9 @@ export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle
 
 export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
-  const { agentType, projectId, taskId, featureId, options } = params;
-  console.log('[factory:renderer] Starting feature run', { agentType, projectId, taskId, featureId, options: redactOptions(options) });
-  const res = await (window as any).factory.startFeatureRun(agentType, projectId, taskId, featureId, options ?? {});
+  const { agentType, projectId, taskId, featureId, llmConfig, options } = params;
+  console.log('[factory:renderer] Starting feature run', { agentType, projectId, taskId, featureId, llmConfig: redactSecrets(llmConfig), options });
+  const res = await (window as any).factory.startFeatureRun(agentType, projectId, taskId, featureId, llmConfig, options ?? {});
   const runId: string = res?.runId;
   if (!runId) throw new Error('Failed to start feature run: missing runId');
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
@@ -76,7 +73,7 @@ export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ 
   return { handle, events };
 }
 
-export async function startRunGeneric(params: { agentType: string, projectId: string; taskId: string; featureId?: string; options?: Record<string, any> }) {
+export async function startRunGeneric(params: { agentType: string, projectId: string; taskId: string; featureId?: string; llmConfig: LLMConfig; options?: Record<string, any> }) {
   if (params.featureId != null) return startFeatureRun(params as any);
   if (params.taskId != null) return startTaskRun(params as any);
   throw new Error('taskId or featureId required');

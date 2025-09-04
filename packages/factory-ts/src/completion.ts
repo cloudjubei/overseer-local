@@ -39,7 +39,7 @@ export function createCompletionClient(cfg: { model: string; provider?: string; 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': provider === 'openai' ? `Bearer ${apiKey}` : `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
     });

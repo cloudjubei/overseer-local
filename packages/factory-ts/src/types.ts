@@ -68,7 +68,9 @@ export type AgentRun = {
   taskId: string;
   featureId?: string;
   llmConfig: LLMConfig;
-  budgetUSD?: number;
-  metadata?: Record<string, any>;
+  options?: {
+    budgetUSD?: number;
+    metadata?: Record<string, any>;
+  }
 };
 export type RunEvent = { type: string; payload?: any };
