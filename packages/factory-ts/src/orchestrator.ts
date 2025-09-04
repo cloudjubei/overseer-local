@@ -187,7 +187,7 @@ async function runConversation(opts: {
       const assistant = { role: 'assistant' as const, content: res.message.content };
       messages.push(assistant);
       // Emit assistant message and timing
-      doEmit({ type: 'llm/message', payload: { message: assistant, turn: i, durationMs } });
+      doEmit({ type: 'llm/message', payload: { message: assistant, durationMs } });
 
       // Parse and log succinct info
       let parsed: AgentResponse | undefined;

@@ -142,10 +142,10 @@ export default function AgentsView() {
           <div className="relative bg-white dark:bg-neutral-950 rounded-lg shadow-xl w-[92vw] max-w-5xl max-h-[90vh] border border-neutral-200 dark:border-neutral-800">
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">Run #{selectedRun.runId.slice(0,8)} \u00b7 {selectedRun.taskId ?? 'Task'}{selectedRun.featureId ? ` \u00b7 Feature ${selectedRun.featureId}` : ''}</div>
+                <div className="font-semibold text-sm truncate">Run #{selectedRun.runId.slice(0,8)} {selectedRun.taskId ?? 'Task'}</div>
                 <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
                   <ModelChip provider={selectedRun.provider} model={selectedRun.model} />
-                  <span>\u00b7 {selectedRun.state} \u00b7 Updated {formatTime(selectedRun.updatedAt)}</span>
+                  <span>{selectedRun.state} Updated {formatTime(selectedRun.updatedAt)}</span>
                 </div>
               </div>
               <button className="btn-secondary" onClick={() => setOpenRunId(null)}>Close</button>

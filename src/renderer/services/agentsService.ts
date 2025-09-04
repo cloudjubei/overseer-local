@@ -5,21 +5,16 @@ import { AgentType } from 'packages/factory-ts/src/types';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
-export type AgentRunMessage = {
+export interface AgentRunMessage {
   role: string;
   content: string;
-  turn?: number;
-  source?: string;
-  ts?: string;
-  durationMs?: number;
-};
+}
 
 export type AgentRun = {
   runId: string;
   agentType: AgentType;
   projectId: string;
   taskId: string;
-  featureId?: string;
   state: AgentRunState;
   message?: string;
   progress?: number; // 0..1 (if available)
@@ -30,9 +25,15 @@ export type AgentRun = {
   model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
-  // Group messages per feature the agent worked on. '__task__' is used for task-level messages.
-  messagesByFeature?: Record<string, AgentRunMessage[]>;
+
+  messagesLog?: Record<string,AgentFeatureRunLog>
 };
+export type AgentFeatureRunLog = {
+  startDate: Date;
+  endDate?: Date;
+  featureId: string;
+  messages: AgentRunMessage[];
+}
 
 // Internal structure to keep handle + eventSource
 interface RunRecord extends AgentRun {
@@ -106,26 +107,15 @@ class AgentsServiceImpl {
               model: m.model,
               startedAt: m.startedAt || new Date().toISOString(),
               updatedAt: m.updatedAt || new Date().toISOString(),
-              messagesByFeature: {},
+              messagesLog: {},
               events,
               cancel: (reason?: string) => handle.cancel(reason),
             } as RunRecord;
             this.wireRunEvents(run);
             this.runs.set(run.runId, run);
 
-            // Load any existing messages persisted for this active run (so we don't only show new ones)
             try {
-              if (typeof factory.getRunMessages === 'function') {
-                const msgs = await factory.getRunMessages(run.runId);
-                if (Array.isArray(msgs)) {
-                  const key = run.featureId || DEFAULT_FEATURE_KEY;
-                  run.messagesByFeature![key] = msgs.map((mm: any) => ({
-                    role: String(mm?.role ?? ''),
-                    content: String(mm?.content ?? ''),
-                    turn: mm?.turn,
-                  }));
-                }
-              }
+              run.messagesLog  = await factory.getRunMessages(run.runId);
             } catch (err) {
               console.warn('[agentsService] Failed to load messages for active run', run.runId, (err as any)?.message || err);
             }
@@ -133,44 +123,37 @@ class AgentsServiceImpl {
         }
       }
 
-      // 2) Load history snapshot from disk
-      if (typeof factory.listRunHistory === 'function') {
-        const history = await factory.listRunHistory();
-        if (Array.isArray(history)) {
-          for (const m of history) {
-            if (!m?.runId) continue;
-            if (this.runs.has(m.runId)) continue;
-            const rec: RunRecord = {
-              runId: m.runId,
-              agentType: m.agentType,
-              projectId: m.projectId,
-              taskId: m.taskId,
-              featureId: m.featureId ?? undefined,
-              state: m.state ?? 'completed',
-              message: m.message ?? '',
-              progress: m.progress,
-              costUSD: m.costUSD,
-              promptTokens: m.promptTokens,
-              completionTokens: m.completionTokens,
-              provider: m.provider,
-              model: m.model,
-              startedAt: m.startedAt || new Date().toISOString(),
-              updatedAt: m.updatedAt || new Date().toISOString(),
-              messagesByFeature: {},
-              events: NOOP_EVENTS,
-              cancel: () => {},
-            } as RunRecord;
-            this.runs.set(rec.runId, rec);
-            // Load messages lazily and notify
-            try {
-              if (typeof factory.getRunMessages === 'function') {
-                const msgs = await factory.getRunMessages(rec.runId);
-                if (Array.isArray(msgs)) {
-                  const key = rec.featureId || DEFAULT_FEATURE_KEY;
-                  rec.messagesByFeature![key] = msgs.map((mm: any) => ({ role: String(mm?.role ?? ''), content: String(mm?.content ?? ''), turn: mm?.turn }))
-                }
-              }
-            } catch {}
+      const history = await factory.listRunHistory();
+      if (Array.isArray(history)) {
+        for (const m of history) {
+          if (!m?.runId) continue;
+          if (this.runs.has(m.runId)) continue;
+          const rec: RunRecord = {
+            runId: m.runId,
+            agentType: m.agentType,
+            projectId: m.projectId,
+            taskId: m.taskId,
+            featureId: m.featureId ?? undefined,
+            state: m.state ?? 'completed',
+            message: m.message ?? '',
+            progress: m.progress,
+            costUSD: m.costUSD,
+            promptTokens: m.promptTokens,
+            completionTokens: m.completionTokens,
+            provider: m.provider,
+            model: m.model,
+            startedAt: m.startedAt || new Date().toISOString(),
+            updatedAt: m.updatedAt || new Date().toISOString(),
+            messagesByFeature: {},
+            events: NOOP_EVENTS,
+            cancel: () => {},
+          } as RunRecord;
+          this.runs.set(rec.runId, rec);
+          
+          try {
+            rec.messagesLog  = await factory.getRunMessages(rec.runId);
+          } catch (err) {
+            console.warn('[agentsService] Failed to load messages for history run', rec.runId, (err as any)?.message || err);
           }
         }
       }
@@ -224,62 +207,63 @@ class AgentsServiceImpl {
     }
   }
 
-  private ensureBucket(run: RunRecord, featureKey: string) {
-    if (!run.messagesByFeature) run.messagesByFeature = {};
-    if (!run.messagesByFeature[featureKey]) run.messagesByFeature[featureKey] = [];
-  }
+  private appendMessage(run: RunRecord, msg: any, featureId: string) {
 
-  private appendMessage(run: RunRecord, msg: any, featureKey: string, extra?: Partial<AgentRunMessage>) {
-    this.ensureBucket(run, featureKey);
-    const m: AgentRunMessage = {
-      role: String(msg?.role ?? ''),
-      content: String(msg?.content ?? ''),
-      ...(extra || {}),
-    };
-    run.messagesByFeature![featureKey].push(m);
-  }
-
-  private replaceMessages(run: RunRecord, arr: any[], featureKey: string, turn?: number) {
-    try {
-      this.ensureBucket(run, featureKey);
-      run.messagesByFeature![featureKey] = Array.isArray(arr)
-        ? arr.map((m: any) => ({
-            role: String(m?.role ?? ''),
-            content: String(m?.content ?? ''),
-            // Preserve per-message turn if present; otherwise use provided turn value if any
-            turn: (typeof m?.turn === 'number' ? m.turn : turn),
-          }) )
-        : [];
-    } catch {
-      run.messagesByFeature![featureKey] = [];
+    if (!run.messagesLog){
+      run.messagesLog = {}
     }
+    let existing : AgentFeatureRunLog | undefined = run.messagesLog![featureId]
+    if (!existing){
+      existing = { startDate: new Date(), featureId, messages: [] }
+      run.messagesLog[featureId] = existing
+    }
+
+    existing.messages.push({ ...msg });
   }
 
-  private deriveFeatureKey(run: RunRecord, e?: any): string {
-    const key = e?.payload?.featureId || run.featureId || DEFAULT_FEATURE_KEY;
-    return String(key);
+  private replaceMessages(run: RunRecord, messages: any[], featureId: string, isEnd: boolean = false) {
+    if (!run.messagesLog){
+      run.messagesLog = {}
+    }
+    let existing : AgentFeatureRunLog | undefined = run.messagesLog![featureId]
+    if (!existing){
+      existing = { startDate: new Date(), featureId, messages: [] }
+      run.messagesLog[featureId] = existing
+    }
+    if (isEnd){
+      existing.endDate = new Date()
+    }
+
+    const newMessages = []
+    for(const m of messages){
+      newMessages.push({ ...m})
+    }
+    existing.messages = newMessages
+  }
+
+  private deriveFeatureKey(e?: any): string {
+    return `${e?.payload?.featureId || DEFAULT_FEATURE_KEY}`
   }
 
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
       run.updatedAt = getEventTs(e);
-      const featureKey = this.deriveFeatureKey(run, e);
+      const featureKey = this.deriveFeatureKey(e);
 
       // Conversation handling
       if (e.type === 'llm/messages/init') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey, undefined);
+        this.replaceMessages(run, msgs, featureKey);
       } else if (e.type === 'llm/messages/snapshot') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey, e.payload?.turn);
+        this.replaceMessages(run, msgs, featureKey);
       } else if (e.type === 'llm/message') {
         const msg = e.payload?.message;
-        const extra = { turn: e.payload?.turn, source: e.payload?.source, durationMs: e.payload?.durationMs, ts: getEventTs(e) } as Partial<AgentRunMessage>;
-        if (msg) this.appendMessage(run, msg, featureKey, extra);
+        if (msg) this.appendMessage(run, msg, featureKey);
       } else if (e.type === 'llm/messages/final') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey, undefined);
+        this.replaceMessages(run, msgs, featureKey, true);
       }
 
       // Meta updates

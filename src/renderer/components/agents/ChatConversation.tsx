@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { AgentRun, AgentRunMessage } from '../../services/agentsService';
+import type { AgentFeatureRunLog, AgentRun, AgentRunMessage } from '../../services/agentsService';
 import RichText from '../ui/RichText';
 import SafeText from '../ui/SafeText';
+import { ToolResult } from 'packages/factory-ts/src/types';
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
 function parseAssistant(content: string): { thoughts?: string; tool_calls?: { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any }[] } | null {
@@ -12,10 +13,6 @@ function parseAssistant(content: string): { thoughts?: string; tool_calls?: { to
   } catch {
     return null;
   }
-}
-
-function classNames(...xs: (string | false | null | undefined)[]) {
-  return xs.filter(Boolean).join(' ');
 }
 
 function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number }) {
@@ -256,130 +253,104 @@ function ScrollableTextBox({ text, className }: { text: string; className?: stri
   );
 }
 
+export function AgentFeatureRunView({ log }: { log : AgentFeatureRunLog })
+{
+  const messages = log.messages
+
+  return (
+    {messages.length === 0 ? (
+      <div className="text-sm text-neutral-500">No conversation yet.</div>
+    ) : (
+      <ul className="space-y-3">
+        {messages.entries(({ role, content }, index) => {
+          const isAssistant = role == "assistant"
+
+          if (isAssistant){
+            const message = JSON.parse(content) as AgentResponse
+          }else{
+            if (index == 0){ //first message is always an initial text prompt
+              const message : string = content
+            }else{
+              const toolResult = JSON.parse(content) as ToolResult[]
+            }
+          }
+
+          //TODO: map the new data
+
+          return (
+            <li key={index} ref={isLast ? lastTurnRef : undefined}>
+              <Collapsible title={<span className="flex items-center gap-2">{title}</span>} defaultOpen={isLast}>
+                <div className="space-y-2">
+                  {user ? (
+                    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
+                      <div className="text-[11px] font-medium mb-1">User</div>
+                      {isLargeText(user.content) ? (
+                        <ScrollableTextBox text={user.content || ''} />
+                      ) : (
+                        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={user.content} /></div>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {parsed?.thoughts ? (
+                    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
+                      {isLargeText(parsed.thoughts) ? (
+                        <ScrollableTextBox text={parsed.thoughts || ''} />
+                      ) : (
+                        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={parsed.thoughts} /></div>
+                      )}
+                    </div>
+                  ) : assistant ? (
+                    <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
+                      <div className="text-[11px] font-medium mb-1">Assistant</div>
+                      {isLargeText(assistant.content) ? (
+                        <ScrollableTextBox text={assistant.content || ''} />
+                      ) : (
+                        <div className="text-xs whitespace-pre-wrap break-words"><RichText text={assistant.content} /></div>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {toolCalls.length > 0 ? (
+                    <div className="space-y-2">
+                      {toolCalls.map((call, i) => (
+                        <ToolCallRow key={i} call={call} index={i} resultText={pickResultForCall(call, i)} />
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {toolCalls.length === 0 && resultsObjs.length > 0 ? (
+                    <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
+                      <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
+                      {resultsObjs.map((r, i) => (
+                        <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
+                          <SafeText text={r.result} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </Collapsible>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  )
+}
+
 export default function ChatConversation({ run }: { run: AgentRun }) {
-  const lastTurnRef = useRef<HTMLLIElement | null>(null);
+  const lastFeatureRef = useRef<HTMLLIElement | null>(null);
 
-  // Choose which feature's messages to show: prefer run.featureId; else first available; else legacy run.messages
-  const messages = useMemo(() => {
-    const byFeature = (run as any).messagesByFeature as Record<string, AgentRunMessage[]> | undefined;
-    if (byFeature && Object.keys(byFeature).length > 0) {
-      const key = run.featureId && byFeature[run.featureId] ? run.featureId : Object.keys(byFeature)[0];
-      return byFeature[key] || [];
-    }
-    return (run as any).messages || [];
+  const logs = useMemo(() => {
+    return Object.values(run.messagesLog ?? {}).sort((a,b) => a.startDate.getTime() - b.startDate.getTime())
   }, [run]);
-
-  const { systemMsgs, turns } = useTurnBundles(messages);
-
-  useEffect(() => {
-    if (lastTurnRef.current) {
-      lastTurnRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [turns.length]);
-
-  const systemPrompt = useMemo(() => {
-    const m = systemMsgs[0];
-    return m?.content;
-  }, [systemMsgs, messages]);
-
-  const lastIndex = turns.length - 1;
 
   return (
     <div className="h=[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
-      {systemPrompt ? (
-        <Collapsible title={<span>System prompt</span>} defaultOpen={false}>
-          {isLargeText(systemPrompt) ? (
-            <ScrollableTextBox text={systemPrompt} />
-          ) : (
-            <div className="text-xs whitespace-pre-wrap break-words"><RichText text={systemPrompt} /></div>
-          )}
-        </Collapsible>
-      ) : null}
-
-      {turns.length === 0 ? (
-        <div className="text-sm text-neutral-500">No conversation yet.</div>
-      ) : (
-        <ul className="space-y-3">
-          {turns.map(({ index, turnNumber, user, assistant, tools }) => {
-            const parsed = assistant ? parseAssistant(assistant.content || '') : null;
-            const toolCalls = parsed?.tool_calls || [];
-            const resultsObjs = parseToolResultsObjects(tools);
-            const legacyResultTexts = resultsObjs.length === 0 ? [] : resultsObjs.map(r => r.result);
-
-            const pickResultForCall = (call: any, i: number): string | undefined => {
-              const name = call.tool_name || call.tool || call.name || 'tool';
-              const match = resultsObjs.find(r => r.name === name);
-              if (match) return match.result;
-              return legacyResultTexts[i];
-            };
-
-            const titleParts: string[] = [];
-            const labelTurn = typeof turnNumber === 'number' && isFinite(turnNumber) ? turnNumber : index;
-            titleParts.push(`Turn ${labelTurn}`);
-            if ((assistant as any)?.durationMs) titleParts.push(`${(assistant as any).durationMs}ms`);
-            const title = titleParts.join(' \u00b7 ');
-
-            const isLast = index === lastIndex;
-
-            return (
-              <li key={index} ref={isLast ? lastTurnRef : undefined}>
-                <Collapsible title={<span className="flex items-center gap-2">{title}</span>} defaultOpen={isLast}>
-                  <div className="space-y-2">
-                    {user ? (
-                      <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
-                        <div className="text-[11px] font-medium mb-1">User</div>
-                        {isLargeText(user.content) ? (
-                          <ScrollableTextBox text={user.content || ''} />
-                        ) : (
-                          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={user.content} /></div>
-                        )}
-                      </div>
-                    ) : null}
-
-                    {parsed?.thoughts ? (
-                      <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
-                        {isLargeText(parsed.thoughts) ? (
-                          <ScrollableTextBox text={parsed.thoughts || ''} />
-                        ) : (
-                          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={parsed.thoughts} /></div>
-                        )}
-                      </div>
-                    ) : assistant ? (
-                      <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 shadow-sm">
-                        <div className="text-[11px] font-medium mb-1">Assistant</div>
-                        {isLargeText(assistant.content) ? (
-                          <ScrollableTextBox text={assistant.content || ''} />
-                        ) : (
-                          <div className="text-xs whitespace-pre-wrap break-words"><RichText text={assistant.content} /></div>
-                        )}
-                      </div>
-                    ) : null}
-
-                    {toolCalls.length > 0 ? (
-                      <div className="space-y-2">
-                        {toolCalls.map((call, i) => (
-                          <ToolCallRow key={i} call={call} index={i} resultText={pickResultForCall(call, i)} />
-                        ))}
-                      </div>
-                    ) : null}
-
-                    {toolCalls.length === 0 && resultsObjs.length > 0 ? (
-                      <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
-                        <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
-                        {resultsObjs.map((r, i) => (
-                          <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-                            <SafeText text={r.result} />
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </Collapsible>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {logs.map(log => (
+        <AgentFeatureRunView key={log.featureId} log={log} />
+      ))}
     </div>
   );
 }
