@@ -14,7 +14,6 @@ export function useFilesAutocomplete(params: {
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const [caretPos, setCaretPos] = useState<number>(0);
 
-
   function getCursorCoordinates(textarea: HTMLTextAreaElement, pos: number) {
     const mirror = mirrorRef.current;
     if (!mirror) return { x: 0, y: 0 };
@@ -60,7 +59,6 @@ export function useFilesAutocomplete(params: {
       setMatches(filtered);
       setMentionStart(start);
       if (filtered.length > 0) {
-        // Position the suggestion list ABOVE the textarea, aligned to caret X
         const textarea = textareaRef.current!;
         const coords = getCursorCoordinates(textarea, pos);
         const textareaRect = textarea.getBoundingClientRect();
@@ -109,13 +107,13 @@ export function useFilesAutocomplete(params: {
   }, [textareaRef]);
 
   // Compute suggestions purely from the controlled input and current caret position
+  // Avoid including 'matches' in deps to prevent update loops when matches state updates
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    // Ensure caretPos reflects current state when input changes
     const pos = textarea.selectionStart ?? caretPos;
     checkForMention(input, pos);
-  }, [input, matches, caretPos]);
+  }, [input, caretPos]);
 
   return { isOpen, matches, position, onSelect };
 }

@@ -5,6 +5,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     lastActiveProjectId: 'main',
     tasksViewMode: 'list',
     tasksListViewSorting: 'index_desc',
+    tasksListViewStatusFilter: 'all',
     sidebarCollapsed: false
   },
   notificationSystemSettings: {
@@ -24,10 +25,13 @@ export interface NotificationSystemSettings {
   displayDuration: number;
 }
 
+export type TaskListStatusFilter = 'all' | 'not-done' | '-' | '~' | '+' | '=' | '?'
+
 export interface UserPreferences {
   lastActiveProjectId: string;
   tasksViewMode: TaskViewMode;
   tasksListViewSorting: TaskListViewSorting;
+  tasksListViewStatusFilter: TaskListStatusFilter;
   sidebarCollapsed: boolean;
 }
 export type TaskViewMode = 'list' | 'board'
