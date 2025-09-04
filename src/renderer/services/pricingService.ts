@@ -19,7 +19,7 @@ async function fetchPricing(): Promise<PricingState> {
   if (cache) return cache;
   if (inflight) return inflight;
   const w: any = window as any;
-  const fn = w?.factory?.getPricingState || w?.factory?.pricingGet;
+  const fn = w?.factory?.getPricing;
   inflight = Promise.resolve()
     .then(() => (fn ? fn() : { updatedAt: new Date().toISOString(), prices: [] }))
     .then((state: any) => {
@@ -41,7 +41,7 @@ export async function refreshPricing(provider?: string, url?: string): Promise<P
   try {
     const state = await (fn ? fn(provider, url) : Promise.resolve({ updatedAt: new Date().toISOString(), prices: [] }));
     cache = state || { updatedAt: new Date().toISOString(), prices: [] };
-    return cache;
+    return cache!;
   } catch {
     return cache || { updatedAt: new Date().toISOString(), prices: [] };
   }

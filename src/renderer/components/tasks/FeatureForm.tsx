@@ -103,7 +103,9 @@ export default function FeatureForm({
     setContext((ctx) => ctx.filter((_, i) => i !== idx))
   }
 
+  // Compute mentioned items in current text; we treat a reference as any #word pattern (ids like 1 or 1.2)
   const combinedTextForMentions = `${title}\n${description}\n${rejection}`
+
   const mentionedPaths = useMemo(() => {
     const res = new Set<string>()
     for (const p of context) {
@@ -112,8 +114,43 @@ export default function FeatureForm({
     return res
   }, [combinedTextForMentions, context])
 
+  // Extract references mentioned in text (#ref) and sync with blockers list
+  const mentionedRefs = useMemo(() => {
+    const refs = new Set<string>()
+    // Simple regex to capture #<alnum or dots and dashes>
+    const re = /#([A-Za-z0-9_.-]+)/g
+    let m: RegExpExecArray | null
+    while ((m = re.exec(combinedTextForMentions)) !== null) {
+      if (m[1]) refs.add(m[1])
+    }
+    return refs
+  }, [combinedTextForMentions])
+
+  // Keep blockers in sync with mentioned refs: add missing, remove unmentioned
+  useEffect(() => {
+    setBlockers((prev) => {
+      const next = new Set(prev)
+      // add
+      mentionedRefs.forEach((r) => next.add(r))
+      // remove any that are not mentioned anymore
+      for (const r of Array.from(next)) {
+        if (!mentionedRefs.has(r)) next.delete(r)
+      }
+      return Array.from(next)
+    })
+  }, [mentionedRefs])
+
+  // Keep context in sync with @ mentions: add on select via callback; also remove if no longer mentioned anywhere
+  useEffect(() => {
+    setContext((prev) => prev.filter((p) => combinedTextForMentions.includes(`@${p}`)))
+  }, [combinedTextForMentions])
+
   const handleFileMentionSelected = (path: string) => {
     setContext((prev) => (prev.includes(path) ? prev : [...prev, path]))
+  }
+
+  const handleReferenceSelected = (ref: string) => {
+    setBlockers((prev) => (prev.includes(ref) ? prev : [...prev, ref]))
   }
 
   return (
@@ -152,7 +189,7 @@ export default function FeatureForm({
           <FileMentionsTextarea
             id="feature-description"
             rows={4}
-            placeholder="Optional details or acceptance criteria"
+            placeholder="Optional details or acceptance criteria. Tip: @ to reference files, # to reference tasks/features"
             value={description}
             onChange={setDescription}
             disabled={submitting}
@@ -160,6 +197,7 @@ export default function FeatureForm({
             style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
             ariaLabel="Feature description"
             onFileMentionSelected={handleFileMentionSelected}
+            onReferenceSelected={handleReferenceSelected}
           />
         </div>
 
@@ -168,7 +206,7 @@ export default function FeatureForm({
           <FileMentionsTextarea
             id="feature-rejection"
             rows={3}
-            placeholder="Optional reason for rejection (leave blank to remove)"
+            placeholder="Optional reason for rejection (leave blank to remove). Tip: @ files, # tasks/features"
             value={rejection}
             onChange={setRejection}
             disabled={submitting}
@@ -176,6 +214,7 @@ export default function FeatureForm({
             style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
             ariaLabel="Feature rejection reason"
             onFileMentionSelected={handleFileMentionSelected}
+            onReferenceSelected={handleReferenceSelected}
           />
         </div>
 
@@ -205,7 +244,7 @@ export default function FeatureForm({
           >
             {blockers.map((dep, idx) => {
               return (
-                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeBlockerAt(idx)} />
+                <DependencyBullet key={`${dep}-${idx}`} dependency={dep} onRemove={() => removeBlockerAt(idx)} />
               )
             })}
             <button
@@ -218,6 +257,7 @@ export default function FeatureForm({
               <span>Add</span>
             </button>
           </div>
+          <div className="text-xs text-text-muted">Tip: Type # to quickly reference a task or feature; it will be added as a blocker automatically.</div>
         </div>
       </div>
 

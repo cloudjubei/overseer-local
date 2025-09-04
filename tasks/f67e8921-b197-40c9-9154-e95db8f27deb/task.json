@@ -423,20 +423,6 @@
       "rejection": "Still incorrect. Inside orchestrator.ts there's a function runOrchestrator that is the main logic behind running features for a task. The sequence of Feature runs should be stored for a given task run - right now it seems that it's just the last feature that is recorded."
     },
     {
-      "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "-",
-      "title": "Costs not displaying",
-      "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\nI don't think the @src/renderer/services/pricingService.ts is correctly connected to the view inside @src/renderer/components/agents/CostChip.tsx or @src/renderer/screens/AllAgentsView.tsx",
-      "plan": "",
-      "context": [
-        "src/renderer/services/pricingService.ts",
-        "src/renderer/components/agents/CostChip.tsx",
-        "src/renderer/screens/AllAgentsView.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
       "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
       "status": "+",
       "title": "An active run should only show inside Active not History",
@@ -488,7 +474,7 @@
     },
     {
       "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
-      "status": "-",
+      "status": "+",
       "title": "When editing/creating a feature allow quick file lookups",
       "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\n\nThis feature is currently implemented seperately inside @src/renderer/screens/ChatView.tsx  and @src/renderer/components/tasks/FeatureForm.tsx \nthe files responsible are:\n@src/renderer/components/ui/FileMentionsTextarea.tsx and @src/renderer/hooks/useFilesAutocomplete.ts   \n\n@src/renderer/screens/ChatView.tsx actually also uses @src/renderer/hooks/useReferencesAutocomplete.ts which allows the text input to display references. Both of these ideas are relevant for @src/renderer/components/tasks/FeatureForm.tsx and @src/renderer/screens/ChatView.tsx . Both should allow the display of references lookup and file lookup - they simply must be able to have callbacks so that they can do extra things with them (FeatureForm needs to add/remove files to/from the context and add/remove blockers to/from the feature - this is missing right now).",
       "plan": "",
@@ -566,8 +552,7 @@
     "82b9481c-7129-4bea-8029-0e41a56531fe": 34,
     "6a8066ee-230f-4f31-b531-3d8cadff4178": 35,
     "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 36,
-    "ea56a618-78f3-4612-bb73-12d6f7161f01": 37,
-    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 38,
-    "274eb915-a7b3-4eed-b71d-e7888f1340fb": 39
+    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 37,
+    "274eb915-a7b3-4eed-b71d-e7888f1340fb": 38
   }
 }

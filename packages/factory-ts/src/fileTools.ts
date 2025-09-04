@@ -91,7 +91,7 @@ async function searchFiles(query: string, relPath = '.'): Promise<string[]> {
 
   const ignore = new Set(['.git', 'node_modules', '.venv', 'venv', 'dist', 'build', 'out', '.next', '.cache']);
   const maxBytes = 2 * 1024 * 1024;
-  const q = query.toLowerCase();
+  const queries = query.toLowerCase().split(" ");
   const matches: string[] = [];
   const seen = new Set<string>();
 
@@ -109,21 +109,24 @@ async function searchFiles(query: string, relPath = '.'): Promise<string[]> {
         await walk(full);
       } else if (ent.isFile()) {
         let added = false;
-        if (ent.name.toLowerCase().includes(q)) {
-          if (!seen.has(rel)) { matches.push(rel); seen.add(rel); }
-          added = true;
-        }
-        if (!added) {
-          try {
-            const st = await fsp.stat(full);
-            if (st.size <= maxBytes) {
-              const data = await fsp.readFile(full);
-              const text = data.toString('utf8');
-              if (text.toLowerCase().includes(q)) {
-                if (!seen.has(rel)) { matches.push(rel); seen.add(rel); }
+        for(const q of queries){
+          if (ent.name.toLowerCase().includes(q)) {
+            if (!seen.has(rel)) { matches.push(rel); seen.add(rel); }
+            added = true;
+            break
+          }
+          if (!added) {
+            try {
+              const st = await fsp.stat(full);
+              if (st.size <= maxBytes) {
+                const data = await fsp.readFile(full);
+                const text = data.toString('utf8');
+                if (text.toLowerCase().includes(q)) {
+                  if (!seen.has(rel)) { matches.push(rel); seen.add(rel); }
+                }
               }
-            }
-          } catch {}
+            } catch {}
+          }
         }
         if (matches.length >= 500) return; // cap results
       }
