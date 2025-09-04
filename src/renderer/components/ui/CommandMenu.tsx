@@ -14,8 +14,9 @@ const commandsBase = (
 ) => [
   { id: 'new-task', label: 'New Task', shortcut: 'Cmd/Ctrl+N', run: () => nav.openModal({ type: 'task-create' }) },
   { id: 'go-home', label: 'Go to Home', run: () => nav.navigateView('Home') },
-  { id: 'go-docs', label: 'Go to Documents', run: () => nav.navigateView('Documents') },
+  { id: 'go-files', label: 'Go to Files', run: () => nav.navigateView('Files') },
   { id: 'go-chat', label: 'Go to Chat', run: () => nav.navigateView('Chat') },
+  { id: 'go-agents', label: 'Go to Agents', run: () => nav.navigateView('Agents') },
   { id: 'go-settings', label: 'Go to Settings', run: () => nav.navigateView('Settings') },
 ];
 

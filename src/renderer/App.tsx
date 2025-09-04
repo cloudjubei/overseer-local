@@ -66,16 +66,16 @@ function App()
     <ToastProvider>
       <ProjectsProvider>
         <NavigatorProvider>
-          <ShortcutsProvider>
-            <GlobalShortcutsBootstrap />
+          {/* <ShortcutsProvider> */}
+            {/* <GlobalShortcutsBootstrap /> */}
             <NotificationClickHandler />
-            <CommandMenu />
-            <ShortcutsHelp />
+            {/* <CommandMenu /> */}
+            {/* <ShortcutsHelp /> */}
             <div className="flex h-full w-full overflow-hidden">
               <SidebarView />
               <ModalHost />
             </div>
-          </ShortcutsProvider>
+          {/* </ShortcutsProvider> */}
         </NavigatorProvider>
       </ProjectsProvider>
     </ToastProvider>

@@ -9,11 +9,10 @@ import AllAgentsView from '../screens/AllAgentsView';
 import { useNavigator } from './Navigator';
 import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
-import { useShortcuts } from '../hooks/useShortcuts';
+// import { useShortcuts } from '../hooks/useShortcuts';
 import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
 import { useAppSettings } from '../hooks/useAppSettings';
-import { IconEdit } from '../components/ui/Icons';
 
 export type SidebarProps = {};
 
@@ -74,7 +73,7 @@ function useAccentClass(seed: string, isMain: boolean): string {
 export default function SidebarView({}: SidebarProps) {
   const { currentView, navigateView, openModal } = useNavigator();
   const { unreadCount } = useNotifications();
-  const { register } = useShortcuts();
+  // const { register } = useShortcuts();
   const {
     activeProjectId,
     projects,
@@ -129,17 +128,16 @@ export default function SidebarView({}: SidebarProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [isMobile, mobileOpen]);
 
-  // Register shortcut for notifications (Cmd/Ctrl + Shift + N)
-  useEffect(() => {
-    const unregister = register({
-      id: 'open-notifications',
-      keys: (e) => (e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'n' || e.key === 'N'),
-      handler: () => { navigateView('Notifications'); },
-      description: 'Open Notifications',
-      scope: 'global',
-    });
-    return unregister;
-  }, [register, navigateView]);
+  // useEffect(() => {
+  //   const unregister = register({
+  //     id: 'open-notifications',
+  //     keys: (e) => (e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'n' || e.key === 'N'),
+  //     handler: () => { navigateView('Notifications'); },
+  //     description: 'Open Notifications',
+  //     scope: 'global',
+  //   });
+  //   return unregister;
+  // }, [register, navigateView]);
 
   // Roving tabindex for nav items
   const activeIndex = useMemo(() => {
