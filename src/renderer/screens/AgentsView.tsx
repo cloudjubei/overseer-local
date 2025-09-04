@@ -150,9 +150,7 @@ export default function AgentsView() {
               </div>
               <button className="btn-secondary" onClick={() => setOpenRunId(null)}>Close</button>
             </div>
-            <div className="p-4">
-              <ChatConversation run={selectedRun} />
-            </div>
+            <ChatConversation run={selectedRun} />
           </div>
         </div>
       ) : null}

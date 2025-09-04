@@ -294,25 +294,23 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
   }, [run]);
 
   return (
-    <div className="h=[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
+    <ul className="h=[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3">
       {logs.length === 0 ? (
         <div className="text-sm text-neutral-500">No features messages to display.</div>
       ) : (
-        <ul className="space-y-3">
-          {logs.map((log) => {
-            const start = log.startDate ? new Date(log.startDate as any) : undefined;
-            const end = log.endDate ? new Date(log.endDate as any) : undefined;
-            const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
-            return (
-              <li key={log.featureId}>
-                <Collapsible title={<span className="flex items-center gap-2">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px]"> {subtitle}</span> : null}</span>} defaultOpen>
-                  <FeatureContent log={log} />
-                </Collapsible>
-              </li>
-            );
-          })}
-        </ul>
+        <>{logs.map((log) => {
+          const start = log.startDate ? new Date(log.startDate as any) : undefined;
+          const end = log.endDate ? new Date(log.endDate as any) : undefined;
+          const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
+          return (
+            <li key={log.featureId}>
+              <Collapsible title={<span className="flex items-center gap-2">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px]"> {subtitle}</span> : null}</span>} defaultOpen>
+                <FeatureContent log={log} />
+              </Collapsible>
+            </li>
+          );
+        })}</>
       )}
-    </div>
+    </ul>
   );
 }
