@@ -366,8 +366,7 @@
         "src/tools/factory/mainOrchestrator.js"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "This is still not working as it should. When I open the app there are some runs that are showing as running, when I cancel them I see they go into history. But I don't see any changes in the file system, thus nothing gets saved."
+      "blockers": []
     },
     {
       "id": "352e49dd-37f2-428c-a85c-da7a2c1bd66a",
@@ -409,7 +408,7 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "+",
+      "status": "-",
       "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display Features or turns correctly",
       "description": "Each task run comprises of the agent entering a conversation about a task's feature. This might take multiple turns - where a turn is a single message being sent by the LLM and the single response to it. The first initial message is Turn 0. The final message by the agent should be without a response ( it will be the final turn). It seems the orchestrator (inside factory-ts) captures these incorrectly.\nFix this behaviour so it matches the above description.",
       "plan": "",
@@ -425,15 +424,16 @@
     },
     {
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "+",
+      "status": "-",
       "title": "AllAgentsView.tsx improvements",
-      "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\n\nThe Tokens field tooltip - this currently shows all tokens per message wrongly.\nThe Tokens field chip - there should be new small icon images for the \"<-\" and \"->\" arrows.",
+      "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\n\nThe Tokens field tooltip - this doesn't show the tokens per message correctly.",
       "plan": "",
       "context": [
         "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "The prices are still not working at all.\nThe tokens per message are not shown correctly."
     },
     {
       "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
@@ -464,46 +464,43 @@
     },
     {
       "id": "76ff2065-cd03-4815-b36b-8dfabd278b2b",
-      "status": "+",
-      "title": "Use the StatusChip inside RunAgentButton",
+      "status": "-",
+      "title": "Use the StatusChip inside AgentRunBullet",
       "description": "We should reuse this nice component that we have.",
       "plan": "",
       "context": [
         "src/renderer/components/agents/StatusChip.tsx",
-        "src/renderer/components/tasks/RunAgentButton.tsx"
+        "src/renderer/components/agents/AgentRunBullet.tsx"
       ],
       "acceptance": [],
       "blockers": []
     },
     {
       "id": "46fbca0c-0fd5-4b92-aeae-5e8488cfd192",
-      "status": "+",
-      "title": "The AgentModelQuickSelect should be part of ModelChip",
-      "description": "The ModelChip should have a parameter to be editable (false by default) that can be used inside TaskDetailsView.tsx to select the most recent models just like AgentModelQuickSelect dos now.\nFollow the design of the selector used for selecting the Agent type inside the RunAgentButton.",
+      "status": "-",
+      "title": "The ModelChip should be taller and slimmer",
+      "description": "Have the provider on one row and the modle name on a second row.",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/components/agents/ModelChip.tsx",
-        "src/renderer/components/agents/AgentModelQuickSelect.tsx",
-        "src/renderer/components/tasks/RunAgentButton.tsx"
+        "src/renderer/components/agents/ModelChip.tsx"
       ],
       "acceptance": [],
       "blockers": []
     },
     {
       "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
-      "status": "+",
+      "status": "-",
       "title": "When editing/creating a feature allow quick file lookups",
-      "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\nIf a file inside Context Files doesn't have a mention in Title/Description/Rejection then show a warning badge (a similar badge, but yellow, to how rejections show for Tasks/Features - ExclamationChip.tsx ).\n\nThis feature is curently implemented inside the ChatView.tsx - so it should be turned into a reusable component so it can be used in many of the input boxes.",
+      "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\n\nThis feature is curently implemented inside the ChatView.tsx - so it should be turned into a reusable component so it can be used in many of the input boxes.",
       "plan": "",
       "context": [
         "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/tasks/TaskDetailsView.tsx",
-        "src/renderer/components/tasks/ExclamationChip.tsx",
         "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "this currently causes a Warning: Maximum update depth exceeded.\nIt shows the files to select, but they are shown as the display chips - these should just be normal paths to the files.\nInvestigate how ChatView.tsx handles this - it works ok there.\nThis feature is only accepted if the solution from there can be reused as a component."
     }
   ],
   "featureIdToDisplayIndex": {
@@ -536,13 +533,13 @@
     "37730047-f692-48c0-b6e7-9093564596a9": 27,
     "0fea71a8-c0da-48a1-b4ea-c0db2196c902": 28,
     "d05e6082-c27c-487f-bacd-837f7f5b7f73": 29,
-    "ea56a618-78f3-4612-bb73-12d6f7161f01": 30,
-    "2d607668-7481-4d8f-89cc-5afebb89e67b": 31,
-    "5fcbee8a-2734-4fa5-b404-6d9155a01053": 32,
-    "76ff2065-cd03-4815-b36b-8dfabd278b2b": 33,
-    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 34,
+    "2d607668-7481-4d8f-89cc-5afebb89e67b": 30,
+    "5fcbee8a-2734-4fa5-b404-6d9155a01053": 31,
+    "76ff2065-cd03-4815-b36b-8dfabd278b2b": 32,
+    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 33,
+    "ea56a618-78f3-4612-bb73-12d6f7161f01": 34,
     "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 35,
-    "82b9481c-7129-4bea-8029-0e41a56531fe": 36,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 37
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 36,
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 37
   }
 }

@@ -549,22 +549,6 @@ export async function runIsolatedOrchestrator(opts: {
     return;
   }
 
-  // Ensure the isolated workspace does not create or track local history in VCS.
-  // We do not delete histories; we simply ignore them in the temp workspace.
-  try {
-    const giPath = path.join(workspace, '.gitignore');
-    const ignoreLine = '.factory/';
-    let existing = '';
-    try { existing = fs.readFileSync(giPath, 'utf8'); } catch {}
-    if (!existing.split(/\r?\n/).some(line => line.trim() === ignoreLine)) {
-      const prefix = existing && !existing.endsWith('\n') ? '\n' : '';
-      fs.writeFileSync(giPath, existing + prefix + ignoreLine + '\n', 'utf8');
-      logger.info('Added .factory/ to isolated workspace .gitignore to avoid duplicate history runs.');
-    }
-  } catch (e) {
-    logger.warn(`Failed to update isolated workspace .gitignore: ${e}`);
-  }
-
   const git = gitFactory(workspace);
 
   try {
