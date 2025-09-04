@@ -408,7 +408,7 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "-",
+      "status": "+",
       "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx should have collapsible turns.",
       "description": "When opened - the last turn should be expanded and scrolled to.",
       "plan": "",
