@@ -256,7 +256,7 @@ export default function ModelChip({ provider, model, className, editable = false
         e.stopPropagation();
       }}
     >
-      <span className="flex flex-col leading-tight max-w-[16ch] items-center pr-1 pl-1">
+      <span className="flex flex-col leading-tight max-w-[60px] items-center pr-1 pl-1 overflow-hidden text-ellipsis">
         <span className="truncate text-[10px] uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
           {prov || (editable ? 'Select' : '—')}
         </span>
