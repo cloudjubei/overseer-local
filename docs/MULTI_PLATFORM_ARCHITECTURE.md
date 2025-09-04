@@ -15,7 +15,7 @@ The new architecture will shift from a local-only Electron application to a clie
         | (Local DB & Sync)     | (Local DB & Sync)        | (Local DB & Sync)
         +-----------------------+--------------------------+
                                 |
-                                | HTTP/GraphQL & WebSockets
+                                | REST & WebSockets
                                 |
                       +---------v---------+
                       |   Backend Service   |
@@ -30,7 +30,7 @@ The new architecture will shift from a local-only Electron application to a clie
 
 - **Clients**: Three primary clients will be supported. They will share a common core logic but handle platform-specific UI and capabilities.
 - **Backend Service**: A new, centralized backend service will manage data, authentication, and business logic that cannot reside on the client. It will expose a unified API for all clients.
-- **API Layer**: A GraphQL API will be used for flexible data fetching, tailored to the needs of different clients. WebSockets will be used for real-time data synchronization.
+- **API Layer**: A REST API will be used for data fetching, tailored to the needs of different clients. WebSockets will be used for real-time data synchronization.
 - **Database**: PostgreSQL will serve as the primary database for its robustness and rich feature set.
 - **Authentication**: A centralized authentication system (e.g., JWT-based) will manage user identity across all platforms.
 
@@ -53,7 +53,7 @@ We will use a tool like **Nx** or **Turborepo** to manage dependencies and build
 ├── packages/
 │   ├── core/           # Shared business logic, types, services
 │   ├── ui/             # Shared React components (web & native)
-│   ├── api-client/     # Generated GraphQL client
+│   ├── api-client/     # Generated REST client
 │   └── ...
 └── ...
 ```
@@ -67,7 +67,7 @@ We will use a tool like **Nx** or **Turborepo** to manage dependencies and build
 - **`@acme/ui`**: A shared component library built with React and React Native.
     - We will use a strategy like React Native Web or platform-specific file extensions (`*.web.tsx`, `*.native.tsx`) to maximize code reuse.
     - Storybook will be used for isolated component development and documentation.
-- **`@acme/api-client`**: An auto-generated client for our GraphQL API, providing type-safe ways to interact with the backend.
+- **`@acme/api-client`**: An auto-generated client for our REST API, providing type-safe ways to interact with the backend.
 
 ### Extraction Strategy
 
@@ -131,7 +131,7 @@ The migration will be phased to minimize risk and deliver value incrementally.
     - [ ] Set up the monorepo with Turborepo.
     - [ ] Develop the v1 backend service with user authentication and core data models (e.g., projects, tasks).
     - [ ] Create the `@acme/core` package and begin migrating shared types and services.
-    - [ ] Define the GraphQL schema and set up `@acme/api-client`.
+    - [ ] Define the REST schema and set up `@acme/api-client`, use Open-api to generate an api spec that can be used by clients.
 
 - **Phase 2: Electron App Integration (Next Quarter)**
     - [ ] Integrate the sync engine into the Electron app.
@@ -154,7 +154,7 @@ The migration will be phased to minimize risk and deliver value incrementally.
 
 - **Monorepo**: **Turborepo** (for its speed and simplicity).
 - **Backend**: **Node.js** with **NestJS** (for a structured, scalable architecture) and **TypeScript**.
-- **API**: **GraphQL** with **Apollo Server/Client**.
+- **API**: TBD
 - **Database**: **PostgreSQL**.
 - **Authentication**: **JWT** with **Passport.js**.
 - **Offline Sync**: **WatermelonDB** (for its focus on performance with large datasets and React/React Native integration).

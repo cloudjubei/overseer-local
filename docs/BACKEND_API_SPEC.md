@@ -115,25 +115,18 @@ All endpoints are prefixed with `/api/v1`.
 ### Tasks
 -   `GET /projects/{projectId}/tasks`: List all tasks in a project.
 -   `POST /projects/{projectId}/tasks`: Create a new task in a project.
--   `GET /tasks/{taskId}`: Get details of a specific task.
--   `PUT /tasks/{taskId}`: Update a task.
--   `DELETE /tasks/{taskId}`: Delete a task.
+-   `GET /projects/{projectId}/tasks/{taskId}`: Get details of a specific task.
+-   `PUT /projects/{projectId}/tasks/{taskId}`: Update a task.
+-   `DELETE /projects/{projectId}/tasks/{taskId}`: Delete a task.
 
-### Documents
--   `GET /projects/{projectId}/documents`: List all documents in a project.
--   `POST /projects/{projectId}/documents`: Create a new document.
--   `GET /documents/{documentId}`: Get details of a specific document.
--   `PUT /documents/{documentId}`: Update a document.
--   `DELETE /documents/{documentId}`: Delete a document.
-
-## 5. File Upload/Download
-
-### Endpoints
+### Files
+-   `GET /projects/{projectId}/files`: List all files in a project.
 -   `POST /projects/{projectId}/files`: Upload a file. The request should be `multipart/form-data`.
--   `GET /files/{fileId}`: Get file metadata.
--   `GET /files/{fileId}/download`: Download the file content.
+-   `GET /projects/{projectId}/files/{fileId}`: Get file metadata.
+-   `GET /projects/{projectId}/files/{fileId}/download`: Download the file content.
+-   `DELETE /projects/{projectId}/files/{fileId}`: Delete a document.
 
-## 6. Sync API for Offline-First Operations
+## 5. Sync API for Offline-First Operations
 
 To support offline-first clients, a sync mechanism is required.
 
@@ -151,7 +144,7 @@ To support offline-first clients, a sync mechanism is required.
           "updated": [...],
           "deleted": ["task_uuid_1", "task_uuid_2"]
         },
-        "documents": {
+        "files": {
           "created": [...],
           "updated": [...],
           "deleted": []
