@@ -1,0 +1,8 @@
+{
+  "id": "054f8bb3-1d18-49af-98c3-60b732cbcdcb",
+  "status": "-",
+  "title": "Web Search tool",
+  "description": "Create at least 3 versions of web search tools for the agent (for 3 different standard providers).\nInclude EXA as a tool.\nMake sure to update the README.md",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}

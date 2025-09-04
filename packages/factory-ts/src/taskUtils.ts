@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Status, Feature, Task, ProjectSpec } from './types.js';
+import type { Status, Feature, Task } from './types.js';
 import type { GitManager } from './gitManager.js';
 
 let PROJECT_ROOT = path.resolve(process.cwd());

@@ -1,0 +1,8 @@
+{
+  "id": "0f49487c-1bd3-458f-9d7d-8d4936788435",
+  "status": "-",
+  "title": "Areas of knowledge",
+  "description": "Assuming we have a knowledge graph in place - the user will want to ask questions about certain 'areas'/'contexts'/'scopes'. Imagine a knowledge graph about finance - it contains information about stocks, companies, cryptocurrencies, commodities etc. The user might want to limit the scope of a context when asking about Bitcoin to just cryptocurrencies - but maybe they want to see how Bitcoin affects the other knowledge or what commonalities it has.\n\nAnother example is a code project - knowing how rendering works is one scope. Inside is the knowledge about various little components. Alongside, how navigation works. Apart from rendering, another separate scope would be networking.\n\nThe system for this needs to allow a user to view and edit various scopes and to see what little pieces of information are held there.\nThese scopes would then allow anyone to learn about a given project in a limited way. And the best use case is to pass such a limited scope to an LLM Agent. They could then carry out a task with a hopefully small enough context to limit token usage, improve their speed and comprehension.\nAgentic tools that would help with this need to be taken into consideration.",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}
