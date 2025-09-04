@@ -242,7 +242,14 @@ class AgentsServiceImpl {
   private replaceMessages(run: RunRecord, arr: any[], featureKey: string, turn?: number) {
     try {
       this.ensureBucket(run, featureKey);
-      run.messagesByFeature![featureKey] = Array.isArray(arr) ? arr.map((m: any) => ({ role: String(m?.role ?? ''), content: String(m?.content ?? ''), turn })) : [];
+      run.messagesByFeature![featureKey] = Array.isArray(arr)
+        ? arr.map((m: any) => ({
+            role: String(m?.role ?? ''),
+            content: String(m?.content ?? ''),
+            // Preserve per-message turn if present; otherwise use provided turn value if any
+            turn: (typeof m?.turn === 'number' ? m.turn : turn),
+          }) )
+        : [];
     } catch {
       run.messagesByFeature![featureKey] = [];
     }

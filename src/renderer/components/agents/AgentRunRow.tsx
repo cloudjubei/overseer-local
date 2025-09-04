@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { AgentRun } from '../../services/agentsService';
+import type { AgentRun, AgentRunMessage } from '../../services/agentsService';
 import DependencyBullet from '../tasks/DependencyBullet';
 import StatusChip from './StatusChip';
 import TurnChip from './TurnChip';
@@ -34,16 +34,37 @@ function formatDate(iso?: string) {
   }
 }
 
-function countTurns(messages: AgentRun['messages']): number {
+function countTurnsLegacy(messages: AgentRunMessage[] | undefined): number {
   if (!messages || messages.length === 0) return 0;
   let turns = 0;
   let hasAssistant = false;
   for (const m of messages) {
-    if ((m.role || '').toLowerCase() === 'user') turns++;
-    if ((m.role || '').toLowerCase() === 'assistant') hasAssistant = true;
+    const role = (m.role || '').toLowerCase();
+    if (role === 'user') turns++;
+    if (role === 'assistant') hasAssistant = true;
   }
   if (turns === 0 && hasAssistant) return 1;
   return turns;
+}
+
+function selectFeatureMessages(run: AgentRun): AgentRunMessage[] {
+  const buckets = run.messagesByFeature || {};
+  // Prefer current feature bucket; else task-level; else first bucket
+  if (run.featureId && buckets[run.featureId]) return buckets[run.featureId] || [];
+  if (buckets['__task__']) return buckets['__task__'] || [];
+  const keys = Object.keys(buckets);
+  if (keys.length > 0) return buckets[keys[0]] || [];
+  return [];
+}
+
+function computeTurnNumber(run: AgentRun): number {
+  const messages = selectFeatureMessages(run);
+  if (!messages || messages.length === 0) return 0;
+  const turns = messages.map(m => (typeof m.turn === 'number' ? m.turn : undefined)).filter((x): x is number => typeof x === 'number' && isFinite(x));
+  if (turns.length > 0) {
+    return Math.max(...turns);
+  }
+  return countTurnsLegacy(messages);
 }
 
 function formatDuration(ms?: number) {
@@ -70,7 +91,7 @@ export interface AgentRunRowProps {
 }
 
 export default function AgentRunRow({ run, onView, onCancel, showActions = true, showProject = false, showModel = true }: AgentRunRowProps) {
-  const turns = countTurns(run.messages);
+  const turns = computeTurnNumber(run);
   const started = useMemo(() => new Date(run.startedAt || run.updatedAt || Date.now()), [run.startedAt, run.updatedAt]);
   const ended = useMemo(() => (run.state === 'running' ? new Date() : new Date(run.updatedAt || Date.now())), [run.state, run.updatedAt]);
   const durationMs = Math.max(0, ended.getTime() - started.getTime());
