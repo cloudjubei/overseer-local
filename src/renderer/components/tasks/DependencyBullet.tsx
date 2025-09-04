@@ -5,21 +5,24 @@ import type { Status } from 'packages/factory-ts/src/types'
 import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
 import { useTasks } from '../../../renderer/hooks/useTasks';
+import { IconDelete, IconXCircle } from '../ui/Icons';
 
 export interface DependencyBulletProps {
+  className?: string;
   dependency: string; // format: "taskId" or "featureId" (it's of the format {taskId}.{featureIndex})
   isOutbound?: boolean;
+  notFoundDependencyDisplay?: string;
   onRemove?: () => void;
 }
 
-const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isOutbound = false, onRemove }) => {
+const DependencyBullet: React.FC<DependencyBulletProps> = ({ className, dependency, isOutbound = false, notFoundDependencyDisplay, onRemove }) => {
   const { navigateTaskDetails, tasksRoute } = useNavigator();
   const { resolveDependency } = useTasks()
 
   const resolved = resolveDependency(dependency);
   const isError = 'code' in resolved;
   const isFeatureDependency = !isError && resolved.kind === 'feature';
-  const display = isError ? dependency : resolved.display
+  const display = isError ? notFoundDependencyDisplay ?? dependency : resolved.display
 
   let summary: { title: string; description: string; status: Status; displayId: string } = { title: 'Not found', description: '', status: '-' as Status, displayId: display };
 
@@ -69,7 +72,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isOutbo
   return (
     <Tooltip content={content}>
       <span
-        className={`chip  ${isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isOutbound ? 'chip--blocks' : 'chip--ok')} flex`}
+        className={`${className} chip  ${isError ? '' : isFeatureDependency ? 'feature' : 'task'} ${isError ? 'chip--missing' : (isOutbound ? 'chip--blocks' : 'chip--ok')}`}
         title={`${display}${isOutbound ? ' (requires this)' : ''}`}
         onClick={(e) => {
           e.preventDefault();
@@ -85,12 +88,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({ dependency, isOutbo
         }}
       >
         #{display}
-        {onRemove && (
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="3" x2="9" y2="9" />
-            <line x1="9" y1="3" x2="3" y2="9" />
-          </svg>
-        )}
+        {onRemove && <IconXCircle className="w-3.5 h-3"/>}
       </span>
     </Tooltip>
   );

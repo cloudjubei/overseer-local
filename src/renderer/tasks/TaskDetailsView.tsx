@@ -12,7 +12,7 @@ import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
 import { IconBack, IconChevron, IconEdit, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
-import { FileMentions } from '../components/ui/FileMentions'
+import { RichText } from '../components/ui/RichText'
 
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
@@ -195,7 +195,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             />
           </div>
           
-          <h1 id="task-details-heading" className="details-title"><FileMentions text={task.title || `Task ${taskDisplayIndex}`} /></h1>
+          <h1 id="task-details-heading" className="details-title"><RichText text={task.title || `Task ${taskDisplayIndex}`} /></h1>
           
           <div className="flex flex-col gap-2 ml-2" aria-label={`Blockers for Task ${taskDisplayIndex}`}>
             <div className="chips-list">
@@ -226,7 +226,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
       </header>
@@ -251,7 +251,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </div>
           </div>
           <div id="overview-content" className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}>
-            <p className="task-desc"><FileMentions text={task.description || 'No description provided.'} /></p>
+            <p className="task-desc"><RichText text={task.description || 'No description provided.'} /></p>
           </div>
         </section>
 
@@ -332,10 +332,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       </div>
 
                       <div className="col col-title" >
-                        <span className="title-text"><FileMentions text={f.title || ''} /></span>
+                        <span className="title-text"><RichText text={f.title || ''} /></span>
                       </div>
                       <div className="col col-description"  title={f.description || ''}>
-                        <FileMentions text={f.description || ''} />
+                        <RichText text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
                         <button type="button" className="btn-secondary btn-icon no-drag" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>

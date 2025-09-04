@@ -180,15 +180,17 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "+",
+      "status": "-",
       "title": "Agents - run histories UI improvements",
-      "description": "The table should show the following columns\nRun -> the date + time below when it started\nTask -> Can use the @src/renderer/components/tasks/DependencyBubble.tsx as it serves the same exact purpose\nStatus -> create a chip that shows the appropriate StatusIcon inside. These new icons need to be created.\nTurn -> show as a chip.\nCost -> stays the same\nTokens -> stays the same\nMessages -> how many turns it took\nDuration -> a nicely formatted display of the time it took",
+      "description": "@src/renderer/components/agents/ChatConversation.tsx used inside @src/renderer/screens/AgentsView.tsx should have overly large message texts put in a scrollable textbox.\n\nThe currently running agents in @src/renderer/screens/AgentsView.tsx should follow a similar format as the history of agent runs.\n\n@src/renderer/screens/AllAgentsView.tsx should follow a similar style to @src/renderer/screens/AgentsView.tsx \nTo make things more manageable - a component for the agent row display should be made so it can be reused.",
       "plan": "",
       "context": [
         "src/renderer/screens/AgentsView.tsx",
         "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/components/tasks/DependencyBullet.tsx",
-        "src/renderer/components/ui/Icons.tsx"
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -207,7 +209,7 @@
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "+",
+      "status": "-",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
@@ -217,7 +219,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "Now the long press works, but it's still possible to drag the whole feature row (this is inside @src/renderer/tasks/TaskDetailsView.tsx ).\nBecause the button appears on hover and disappears when outside - when selecting a value from the Selector - the button disappears. It shouldn't."
+      "rejection": "It's still possible to drag the whole feature row (this is inside @src/renderer/tasks/TaskDetailsView.tsx )."
     },
     {
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
@@ -307,11 +309,11 @@
     "f46696d7-3eee-4f9d-8aee-9419dcee20c9": 13,
     "67edb097-edf3-4988-939d-30e3fc3007c1": 14,
     "493c32f2-94ab-4677-8cc4-a776249c91e5": 15,
-    "d8361748-2f05-4cd4-bb35-80f40db0ff32": 16,
-    "e9e526e8-576a-448b-9359-db97475db485": 17,
-    "abefc7ba-3098-4aee-a01b-694a5a2a9d43": 18,
-    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 19,
-    "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce": 20,
+    "e9e526e8-576a-448b-9359-db97475db485": 16,
+    "abefc7ba-3098-4aee-a01b-694a5a2a9d43": 17,
+    "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce": 18,
+    "d8361748-2f05-4cd4-bb35-80f40db0ff32": 19,
+    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 20,
     "6e24f575-cf4d-451f-994f-7190d45ebaaa": 21,
     "6a8066ee-230f-4f31-b531-3d8cadff4178": 22
   }

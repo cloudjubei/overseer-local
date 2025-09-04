@@ -16,7 +16,7 @@ import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import RunAgentButton from '../components/tasks/RunAgentButton'
-import { FileMentions } from '../components/ui/FileMentions'
+import { RichText } from '../components/ui/RichText'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -366,11 +366,11 @@ export default function TasksListView() {
                         </div>
                         <div className="col col-title">
                           <div className="title-line">
-                            <span className="title-text"><FileMentions text={t.title || ''} /></span>
+                            <span className="title-text"><RichText text={t.title || ''} /></span>
                           </div>
                         </div>
                         <div className="col col-description">
-                          <div className="desc-line" title={t.description || ''}><FileMentions text={t.description || ''} /></div>
+                          <div className="desc-line" title={t.description || ''}><RichText text={t.description || ''} /></div>
                         </div>
                         <div className="col col-actions" >
                           <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditTask(t.id) }}>

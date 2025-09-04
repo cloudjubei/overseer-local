@@ -34,7 +34,7 @@
 .chips-list { display:flex; align-items:center; gap: 6px; flex-wrap: wrap; }
 .chips-sub { display:flex; align-items:center; gap: 6px; margin-top: 4px; }
 .chips-sub__label { font-size: var(--fs-xxs, 10px); color: var(--text-muted); padding: 2px 8px; border-radius: var(--radius-round); border: 1px solid var(--border-subtle); }
-.chip { display:inline-flex; align-items:center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-round); font-size: var(--fs-xxs, 10px); border: 1px solid var(--border-default); background: var(--surface-base); color: var(--text-secondary); white-space: nowrap; cursor: pointer; transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease; }
+.chip { display:inline-flex; align-items:center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-round); font-size: var(--fs-xxs, 10px); border: 1px solid var(--border-default); background: var(--surface-base); color: var(--text-secondary); white-space: nowrap; cursor: pointer; transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;  text-overflow: ellipsis; }
 .chip--ok { background: color-mix(in srgb, var(--status-review-soft-bg) 42%, transparent); border-color: var(--status-review-soft-border); color: var(--text-primary); }
 .chip--missing { background: color-mix(in srgb, var(--status-stuck-soft-bg) 42%, transparent); border-color: var(--status-stuck-soft-border); color: var(--text-primary); }
 .chip--blocks { background: color-mix(in srgb, var(--status-working-soft-bg) 36%, transparent); border-color: var(--status-working-soft-border); color: var(--text-primary); }

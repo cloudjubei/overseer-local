@@ -184,7 +184,6 @@ export default function AgentsView() {
                     <th className="text-left px-3 py-2">Turn</th>
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
-                    <th className="text-left px-3 py-2">Messages</th>
                     <th className="text-left px-3 py-2">Duration</th>
                     <th className="text-right px-3 py-2">Actions</th>
                   </tr>
@@ -204,7 +203,7 @@ export default function AgentsView() {
                           <div className="text-neutral-500">{formatTime(r.startedAt)}</div>
                         </td>
                         <td className="px-3 py-2">
-                          <DependencyBullet dependency={dep} />
+                          <DependencyBullet className={"max-w-[80px] overflow-clip"} dependency={dep} notFoundDependencyDisplay={"?"} />
                         </td>
                         <td className="px-3 py-2">
                           <StatusChip state={r.state} />
@@ -214,7 +213,6 @@ export default function AgentsView() {
                         </td>
                         <td className="px-3 py-2">{formatUSD(r.costUSD)}</td>
                         <td className="px-3 py-2">{r.promptTokens ?? 0} / {r.completionTokens ?? 0}</td>
-                        <td className="px-3 py-2">{turns}</td>
                         <td className="px-3 py-2">{formatDuration(durationMs)}</td>
                         <td className="px-3 py-2 text-right">
                           <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">

@@ -26,7 +26,7 @@ export default function ChatView() {
     deleteChat,
     sendMessage
   } = useChats()
-  const { files, getFileByPath, uploadFile } = useFiles()
+  const { files, filesByPath, uploadFile } = useFiles()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
@@ -290,7 +290,7 @@ export default function ChatView() {
                           isUser ? 'justify-end' : 'justify-start'
                         ].join(' ')}>
                           {msg.attachments.map((path, i) => {
-                            const meta = getFileByPath(path)
+                            const meta = filesByPath[path]
                             const name = meta?.name || (path.split('/').pop() || path)
                             const type = meta?.type || inferFileType(path)
                             const size = meta?.size ?? undefined
@@ -335,7 +335,7 @@ export default function ChatView() {
                   {pendingAttachments.length > 0 && (
                     <div className="mb-1 flex flex-wrap gap-1">
                       {pendingAttachments.map((path, idx) => {
-                        const meta = getFileByPath(path)
+                        const meta = filesByPath[path]
                         const name = meta?.name || (path.split('/').pop() || path)
                         const type = meta?.type || inferFileType(path)
                         const size = meta?.size ?? undefined
@@ -358,7 +358,7 @@ export default function ChatView() {
                             </button>
                           </div>
                         )}
-                      })}
+                      )}
                     </div>
                   )}
                   <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
@@ -397,7 +397,7 @@ export default function ChatView() {
                   aria-label="Files suggestions"
                 >
                   {matchingDocs.map((path, idx) => {
-                    const meta = getFileByPath(path)
+                    const meta = filesByPath[path]
                     const name = meta?.name || (path.split('/').pop() || path)
                     const type = meta?.type || inferFileType(path)
                     const size = meta?.size ?? undefined
