@@ -1,5 +1,33 @@
 [
   {
+    "runId": "task_4s4aki18_mf5wiujm",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T21:11:43.139Z",
+    "updatedAt": "2025-09-04T21:12:14.806Z",
+    "costUSD": 0.027365,
+    "promptTokens": 9876,
+    "completionTokens": 1502,
+    "progress": 0.02
+  },
+  {
+    "runId": "task_dlbratu2_mf5wj9ha",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "0aab94ca-1802-4cd4-a873-5b339a6d20ca",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "claude-4-sonnet-20250514",
+    "startedAt": "2025-09-04T21:12:02.494Z",
+    "updatedAt": "2025-09-04T21:12:06.154Z"
+  },
+  {
     "runId": "task_1d8nb33q_mf5vyyh8",
     "agentType": "developer",
     "projectId": "main",
