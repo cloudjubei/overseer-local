@@ -3,7 +3,7 @@
 This document describes how files and directories are organised in this repository to keep the project navigable, consistent, and easy to evolve.
 
 ## Top-Level Directory Layout
-- docs/: Project documentation and specs (single source of truth for protocols, formats, and guidelines).
+- docs/: Project documentation and specs (single source of truth for protocols, formats, and guidelines). A key document is `docs/MULTI_PLATFORM_ARCHITECTURE.md`, which outlines the plan for multi-client support.
 - src/: Application source (Electron main + React renderer + tooling).
   - src/styles/: Shared CSS assets and design tokens, grouped by role (foundations, primitives, components, layout, screens).
     - New: src/styles/components/file-display.css contains layout and visuals for the FileDisplay UI component (icon+metadata grid, density presets, interactive states). Imported via src/index.css.
