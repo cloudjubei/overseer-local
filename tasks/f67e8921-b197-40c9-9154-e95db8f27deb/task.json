@@ -408,7 +408,7 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "-",
+      "status": "+",
       "title": "The Agent ChatConversation.tsx view inside AgentsView.tsx doesn't display Features or turns correctly",
       "description": "Each task run comprises of the agent entering a conversation about a task's feature. This might take multiple turns - where a turn is a single message being sent by the LLM and the single response to it. The first initial message is Turn 0. The final message by the agent should be without a response ( it will be the final turn). It seems the orchestrator (inside factory-ts) captures these incorrectly.\nFix this behaviour so it matches the above description.",
       "plan": "",
