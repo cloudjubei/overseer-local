@@ -526,7 +526,7 @@
     },
     {
       "id": "5f13e562-bbd6-4f67-97c9-00ba79ddb138",
-      "status": "-",
+      "status": "+",
       "title": "After running a first agent, running any more stalls",
       "description": "Any consecutive agent after the first never starts.\nCancelling an agent from the @src/renderer/screens/AgentsView.tsx   screen doesn't help either.",
       "plan": "",
