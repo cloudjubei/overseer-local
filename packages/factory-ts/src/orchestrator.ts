@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types.js';
-import type { TaskUtils } from './taskUtils.js';
-import type { FileTools } from './fileTools.js';
-import type { GitManager } from './gitManager.js';
-import { logger, logLLMStep } from './logger.js';
+import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types';
+import type { TaskUtils } from './taskUtils';
+import type { FileTools } from './fileTools';
+import type { GitManager } from './gitManager';
+import { logger, logLLMStep } from './logger';
 
 const MAX_TURNS_PER_FEATURE = 100;
 

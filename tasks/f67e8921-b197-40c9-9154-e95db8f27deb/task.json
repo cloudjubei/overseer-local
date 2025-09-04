@@ -513,6 +513,19 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "274eb915-a7b3-4eed-b71d-e7888f1340fb",
+      "status": "-",
+      "title": "ChatConversation improvements",
+      "description": "ChatConversation should always display the first user message as Turn 0, then each subsequent turn is a LLM message + response (tool calls).\nThe tool calls are following a standard JSON schema 'ToolResult' defined in types.ts - follow it to make a nice display for it the same as LLM tool calls inside its messages are displayed.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "packages/factory-ts/src/types.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -553,6 +566,7 @@
     "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 35,
     "6a8066ee-230f-4f31-b531-3d8cadff4178": 36,
     "82b9481c-7129-4bea-8029-0e41a56531fe": 37,
-    "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 38
+    "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 38,
+    "274eb915-a7b3-4eed-b71d-e7888f1340fb": 39
   }
 }
