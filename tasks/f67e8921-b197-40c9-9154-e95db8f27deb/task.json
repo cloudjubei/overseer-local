@@ -492,7 +492,7 @@
     },
     {
       "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
-      "status": "-",
+      "status": "+",
       "title": "When editing/creating a feature allow quick file lookups",
       "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\nIf a file inside Context Files doesn't have a mention in Title/Description/Rejection then show a warning badge (a similar badge, but yellow, to how rejections show for Tasks/Features - ExclamationChip.tsx ).\n\nThis feature is curently implemented inside the ChatView.tsx - so it should be turned into a reusable component so it can be used in many of the input boxes.",
       "plan": "",

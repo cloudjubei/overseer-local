@@ -7,6 +7,7 @@ import { FileSelector } from '../ui/FileSelector'
 import ContextFileChip from './ContextFileChip'
 import { Modal } from '../ui/Modal'
 import { IconDelete, IconPlus } from '../ui/Icons'
+import FileMentionsTextarea from '../ui/FileMentionsTextarea'
 
 export type FeatureFormValues = {
   title: string
@@ -102,6 +103,19 @@ export default function FeatureForm({
     setContext((ctx) => ctx.filter((_, i) => i !== idx))
   }
 
+  const combinedTextForMentions = `${title}\n${description}\n${rejection}`
+  const mentionedPaths = useMemo(() => {
+    const res = new Set<string>()
+    for (const p of context) {
+      if (combinedTextForMentions.includes(`@${p}`)) res.add(p)
+    }
+    return res
+  }, [combinedTextForMentions, context])
+
+  const handleFileMentionSelected = (path: string) => {
+    setContext((prev) => (prev.includes(path) ? prev : [...prev, path]))
+  }
+
   return (
     <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}>
       <div className="grid grid-cols-1 gap-3">
@@ -135,38 +149,33 @@ export default function FeatureForm({
 
         <div className="flex flex-col gap-1">
           <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
-          <textarea
+          <FileMentionsTextarea
             id="feature-description"
             rows={4}
             placeholder="Optional details or acceptance criteria"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={setDescription}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-            style={{
-              background: 'var(--surface-raised)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)'
-            }}
+            style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+            ariaLabel="Feature description"
+            onFileMentionSelected={handleFileMentionSelected}
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="feature-rejection" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Reason</label>
-
-          <textarea
+          <FileMentionsTextarea
             id="feature-rejection"
             rows={3}
             placeholder="Optional reason for rejection (leave blank to remove)"
             value={rejection}
-            onChange={(e) => setRejection(e.target.value)}
+            onChange={setRejection}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-            style={{
-              background: 'var(--surface-raised)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)'
-            }}
+            style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+            ariaLabel="Feature rejection reason"
+            onFileMentionSelected={handleFileMentionSelected}
           />
         </div>
 
@@ -174,14 +183,14 @@ export default function FeatureForm({
           <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Context Files</label>
           <div className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2" style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}>
             {context.map((p, idx) => (
-              <ContextFileChip key={p} path={p} onRemove={() => removeContextAt(idx)} />
+              <ContextFileChip key={p} path={p} onRemove={() => removeContextAt(idx)} warn={!mentionedPaths.has(p)} />
             ))}
             <button type="button" onClick={() => setShowFileSelector(true)} className="chip chip--ok" title="Add context files">
               <IconPlus className="w-3 h-3" />
               <span>Add</span>
             </button>
           </div>
-          <div className="text-xs text-text-muted">Select any files across the project that provide useful context for this feature.</div>
+          <div className="text-xs text-text-muted">Select any files across the project that provide useful context for this feature. Tip: type @ in description to quickly reference files.</div>
         </div>
 
         <div className="flex flex-col gap-1">
