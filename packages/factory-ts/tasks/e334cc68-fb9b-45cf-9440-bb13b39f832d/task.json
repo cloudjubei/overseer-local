@@ -1,0 +1,8 @@
+{
+  "id": "e334cc68-fb9b-45cf-9440-bb13b39f832d",
+  "status": "-",
+  "title": "FileTools with local database for data querying.",
+  "description": "We need a local sql database so that we can store all the files for this project in there - their paths, tokenized content and also their content embeddings.\nThe paths, tokenized content and embeddings must be used for the search-files tool.\n\nAn additional use case for this is to be store any content in the database in the future.\nIt should be possible to easily create tables for specific entity types and then have tailor made functions for those entities.\nAll tables should allow keyword search and embedding (semantic) search.",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}

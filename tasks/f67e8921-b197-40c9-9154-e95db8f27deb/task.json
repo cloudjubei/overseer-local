@@ -28,35 +28,6 @@
       "blockers": []
     },
     {
-      "id": "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3",
-      "status": "?",
-      "title": "Local database for file querying",
-      "description": "We need a local sql database so that we can store all the files for this project in there - their paths, tokenized content and also their content embeddings.\nThe paths, tokenized content and embeddings must be used for the search-files tool.",
-      "plan": "",
-      "context": [
-        "packages/factory-ts/src/orchestrator.ts",
-        "src/tools/factory/orchestratorBridge.ts",
-        "src/tools/factory/mainOrchestrator.js",
-        "src/files/manager.js",
-        "src/files/storage.js",
-        "packages/factory-ts/src/fileTools.ts"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4",
-      "status": "?",
-      "title": "Watch file changes and keep the SQL database up to date",
-      "description": "Whenever a file changes, we can directly update the database with everything but the embeddings - for that we need a system to queue up all files that require embeddings - and a user in the app can then launch an agent to trigger them.",
-      "plan": "",
-      "context": [],
-      "acceptance": [],
-      "blockers": [
-        "f67e8921-b197-40c9-9154-e95db8f27deb.48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3"
-      ]
-    },
-    {
       "id": "a480aa54-f697-409d-95a7-1b369c3da9ff",
       "status": "+",
       "title": "the word dependencies in Features and Tasks should be changed to 'blockers'",
@@ -262,8 +233,8 @@
     {
       "id": "6a8066ee-230f-4f31-b531-3d8cadff4178",
       "status": "?",
-      "title": "ChatsManager has tools for agents that should be part of factory-ts",
-      "description": "the factory-ts package should be the one place where all agentic tools are placed - currently @src/chat/manager.js has its own functions. Those should be cleaned up and moved appropriately to factory-ts.\nFollow how @src/fileTools.ts works.",
+      "title": "ChatsManager should not have any agentic tools - everything should be routed through factory-ts",
+      "description": "the factory-ts package should be the one place where all agentic tools are placed - currently @src/chat/manager.js has its own functions. Those should be cleaned up and used appropriately from factory-ts.",
       "plan": "",
       "context": [
         "src/chat/manager.js",
@@ -333,8 +304,6 @@
     "e7e1b393-a3d4-4fc4-99c9-e72be7282dcd": 19,
     "6e24f575-cf4d-451f-994f-7190d45ebaaa": 20,
     "bbc90ba1-4348-4a17-9921-18b6c0ece863": 21,
-    "6a8066ee-230f-4f31-b531-3d8cadff4178": 22,
-    "48da09a8-d2ce-47e0-a0cf-7b0248c6cbb3": 23,
-    "4b978cb8-59d5-4d5a-bfea-10c3c1ad08a4": 24
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 22
   }
 }
