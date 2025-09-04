@@ -234,7 +234,7 @@
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "-",
+      "status": "+",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",

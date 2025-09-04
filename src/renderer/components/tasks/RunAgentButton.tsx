@@ -25,18 +25,43 @@ function useOutsideClick(refs: React.RefObject<HTMLElement>[], onOutside: () => 
   }, [refs, onOutside])
 }
 
-function positionFor(anchor: HTMLElement, gap = 8) : { top: number, left: number, minWidth: number, side: 'top' | 'bottom'} {
-  const r = anchor.getBoundingClientRect()
-  const threshold = 180 // Approximate picker height
-  const side = (window.innerHeight - r.bottom < threshold) ? 'top' : 'bottom'
+function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)) }
+
+function computePosition(anchor: HTMLElement, panel: HTMLElement | null, gap = 8) : { top: number, left: number, minWidth: number, side: 'top' | 'bottom'} {
+  const ar = anchor.getBoundingClientRect()
+  const scrollX = window.scrollX || window.pageXOffset
+  const scrollY = window.scrollY || window.pageYOffset
+  const viewportW = window.innerWidth
+  const viewportH = window.innerHeight
+
+  // Measure panel if available; provide fallbacks
+  const panelW = panel ? panel.offsetWidth : Math.max(160, ar.width)
+  const panelH = panel ? panel.offsetHeight : 180
+
+  // Decide side based on available space
+  const spaceBelow = viewportH - ar.bottom
+  const side: 'top' | 'bottom' = (spaceBelow < panelH + gap) ? 'top' : 'bottom'
+
   let top: number
   if (side === 'bottom') {
-    top = r.bottom + window.scrollY + gap
+    top = ar.bottom + scrollY + gap
   } else {
-    top = r.top + window.scrollY - threshold - gap
+    top = ar.top + scrollY - panelH - gap
   }
-  const left = r.left + window.scrollX
-  return { top, left, minWidth: r.width, side }
+
+  // Prefer left-aligned to anchor, but clamp inside viewport with padding
+  let left = ar.left + scrollX
+  const padding = 8
+  const maxLeft = scrollX + viewportW - panelW - padding
+  const minLeft = scrollX + padding
+  left = clamp(left, minLeft, maxLeft)
+
+  // Also clamp top within viewport
+  const minTop = scrollY + padding
+  const maxTop = scrollY + viewportH - panelH - padding
+  top = clamp(top, minTop, maxTop)
+
+  return { top, left, minWidth: ar.width, side }
 }
 
 type PickerProps = {
@@ -50,8 +75,18 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
   const panelRef = useRef<HTMLDivElement>(null)
   const [coords, setCoords] = useState<{ top: number; left: number; minWidth: number; side: 'top' | 'bottom' } | null>(null)
 
+  // Position after mount and on resize/scroll
   useLayoutEffect(() => {
-    setCoords(positionFor(anchorEl))
+    const update = () => {
+      setCoords(computePosition(anchorEl, panelRef.current))
+    }
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
   }, [anchorEl])
 
   useOutsideClick([panelRef], onClose)
@@ -89,7 +124,8 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
       className={`standard-picker standard-picker--${coords.side}`}
       role="menu"
       aria-label="Select Agent"
-      style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8) }}
+      style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8), position: 'absolute' }}
+      onClick={(e) => { e.stopPropagation() }}
     >
       {AGENTS_ORDER.map((s) => {
         return (
@@ -136,6 +172,10 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
   }
 
   const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    // Prevent propagation to parent drag handlers
+    e.stopPropagation()
+    // Capture to the button to avoid drag on parent while holding
+    try { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId) } catch {}
     // Only consider primary button or touch
     if (e.button !== 0 && e.pointerType !== 'touch') return
     longPressTriggered.current = false
@@ -146,7 +186,16 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
     }, LONG_PRESS_MS)
   }
 
-  const endPress = () => {
+  const handlePointerMove: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    // Prevent drag gestures bubbling to parent while holding
+    if (pressTimer.current != null || open || longPressTriggered.current) {
+      e.stopPropagation()
+    }
+  }
+
+  const endPress: React.PointerEventHandler<HTMLButtonElement> = (e) => {
+    // Release capture and clear timer
+    try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId) } catch {}
     clearPressTimer()
   }
 
@@ -176,10 +225,14 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
           aria-label="Run Agent"
           title="Run Agent"
           onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
           onPointerUp={endPress}
           onPointerCancel={endPress}
           onPointerLeave={endPress}
           onClick={handleClick}
+          onDragStart={(e: any) => { e.preventDefault(); e.stopPropagation() }}
+          onContextMenu={(e: any) => { if (open) { e.preventDefault(); e.stopPropagation() } }}
+          draggable={false}
         >
           <IconPlay />
         </Button>
