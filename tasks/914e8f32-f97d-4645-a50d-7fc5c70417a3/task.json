@@ -8,10 +8,14 @@
       "id": "4ac5df1f-95ef-4580-915b-1ac4fe0d1bcf",
       "status": "-",
       "title": "Implement Dynamic System Prompt for Chat",
-      "description": "Modify `src/chat/manager.js` to dynamically generate the system prompt for chat completions. The prompt should include the current project's name and description, and if an active task is present, its title and description. This provides the LLM with immediate, relevant project context.",
+      "description": "Modify @src/chat/manager.js  to dynamically generate the system prompt for chat completions. The prompt should include the current project's name and description, and if an active task is present, its title and description. This provides the LLM with immediate, relevant project context.\nFor inspiration on how a good prompt works (the one used for you) - it is defined here:\n@packages/factory-ts/src/orchestrator.ts  - function constructSystemPrompt",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/chat/manager.js",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "ef538296-1946-4580-821e-83694aa9764e",
@@ -20,16 +24,8 @@
       "description": "Introduce a new chat tool named `get_project_summary` in `packages/factory-ts/src/chatTools.ts`. This tool will allow the LLM to retrieve detailed high-level information about the current project, such as its full configuration, description, and potentially relevant top-level details, beyond what's included in the initial system prompt.",
       "plan": "",
       "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "5f3aef9b-2956-4753-b289-14c19afa6741",
-      "status": "-",
-      "title": "Add `search_project_files` Chat Tool",
-      "description": "Create a new chat tool named `search_project_files` in `packages/factory-ts/src/chatTools.ts`. This tool will enable the LLM to search for files within the current project's root based on a query string, providing content-based file discovery capabilities similar to an agent's `search_files` tool.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {

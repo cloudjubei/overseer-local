@@ -1,8 +1,8 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
-  "title": "Factory-ts improvements",
-  "description": "Various improvements to add to the project and the factory-ts package",
+  "status": "-",
+  "title": "UI Improvements",
+  "description": "Various UI improvements to the app",
   "features": [
     {
       "id": "27156e19-3aeb-41de-adc2-75b1c7ca9774",
@@ -560,6 +560,81 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "fd101477-cb98-4d87-90c4-efb87f39c5e6",
+      "status": "-",
+      "title": "Allow moving tasks when in 'not-done'",
+      "description": "Pay close attention to what the index should be (remember the display index is always +1 due to starting at 1)\n@src/renderer/screens/TasksView.tsx\n\nIt should be also possible to move features in @src/renderer/tasks/TaskDetailsView.tsx also pay attention to the indices.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
+      "status": "-",
+      "title": "After closing the app and coming back none of the agent run histories show messages properly",
+      "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
+      "status": "-",
+      "title": "Shortcuts in the app were disabled because they interfered with typing in the \"/\" character",
+      "description": "A user must be able to specify which key is the modifier key in settings - @src/renderer/screens/SettingsView.tsx . Bring back the shortcuts - @src/renderer/App.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/App.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6",
+      "status": "-",
+      "title": "When no features are in a task - the default agent type is \"speccer\"",
+      "description": "This should be true no matter where it is run from, right now it's only via @src/renderer/components/tasks/RunAgentButton.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/tasks/RunAgentButton.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "f9eef18e-818e-427d-82ab-8d990bb199c4",
+      "status": "-",
+      "title": "This feature is index 1 - we should have a special quick command wherever in the app for adding a feature to this task only",
+      "description": "",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+      "status": "-",
+      "title": "Notifications should fire when an agent finishes work",
+      "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/services/notificationsService.ts",
+        "src/notifications/manager.js"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -604,6 +679,12 @@
     "57988106-364d-4e52-8b50-94d18839c319": 39,
     "82b9481c-7129-4bea-8029-0e41a56531fe": 40,
     "dc067730-dede-40a5-affe-e04410170819": 41,
-    "5f13e562-bbd6-4f67-97c9-00ba79ddb138": 42
+    "5f13e562-bbd6-4f67-97c9-00ba79ddb138": 42,
+    "fd101477-cb98-4d87-90c4-efb87f39c5e6": 43,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 44,
+    "306733d4-26cb-49c0-a0ff-c34dc7699baa": 45,
+    "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6": 46,
+    "f9eef18e-818e-427d-82ab-8d990bb199c4": 47,
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 48
   }
 }

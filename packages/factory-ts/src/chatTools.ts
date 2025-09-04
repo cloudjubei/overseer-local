@@ -61,6 +61,21 @@ export function buildChatTools(opts: { repoRoot: string; projectId: string }) {
     {
       type: 'function',
       function: {
+        name: 'search_files',
+        description: 'Search for files by name or textual content under the given path. Returns matching relative paths. The query input must be a space separated list of keywords',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Space separated list of keywords to look for.' },
+            path: { type: 'string', description: 'Project-relative path to the directory to start searching at. Defaults to root of the project if not given.' },
+          },
+          required: ['query'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
         name: 'read_file',
         description: 'Read the content of a file by its project-relative path',
         parameters: {
@@ -159,6 +174,11 @@ export function buildChatTools(opts: { repoRoot: string; projectId: string }) {
     const out = await fileTools.readFiles([args.path]);
     try { const map = JSON.parse(out); return map[args.path]; } catch { return out; }
   }
+  async function searchFiles(args: { query: string, path?: string }) {
+    const projectRoot = await getProjectRoot();
+    fileTools.setProjectRoot(projectRoot);
+    return await fileTools.searchFiles(args.query, args.path);
+  }
 
   async function writeFileTool(args: { name: string; content: string }) {
     const projectRoot = await getProjectRoot();
@@ -172,6 +192,7 @@ export function buildChatTools(opts: { repoRoot: string; projectId: string }) {
       case 'get_task_reference': return await getTaskReference(args?.reference);
       case 'list_files': return await listFiles();
       case 'read_file': return await readFile({ path: args?.path });
+      case 'search_files': return await searchFiles({ query: args?.query, path: args?.path });
       case 'write_file': return await writeFileTool({ name: args?.name, content: args?.content });
       default: throw new Error(`Unknown tool: ${name}`);
     }
