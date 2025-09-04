@@ -1,4 +1,4 @@
-# File Organisation (Concise Overview)
+# File Organisation
 
 Purpose
 - Provide a high-level map of the repository so contributors and agents can quickly find the right area.
@@ -7,8 +7,9 @@ Purpose
 Editing Rules (read before updating)
 - Only document major directories and subsystems. Do not list individual files.
 - Keep bullets short (one sentence) and avoid "New:" or historical notes.
-- When adding/removing a major directory or moving a subsystem, update a single bullet here and add details in a local README within that area.
+- When adding/removing a major directory or moving a subsystem, update a single bullet here.
 - Prefer linking or pointing to deeper docs (README/OVERVIEW) rather than describing internals here.
+- Never document build related artifacts.
 
 Top-Level Layout
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
@@ -20,7 +21,6 @@ Top-Level Layout
 - packages/: Local monorepo packages.
   - factory-ts/: Agent orchestration library (orchestrator, pricing, history, completion, git integration).
 - scripts/: Project automation scripts and CLIs.
-- build/: Packaging resources for distribution.
 - Root config files: package.json, tsconfig.json, tailwind/postcss configs, vite configs, forge config, .env.
 
 Where to Learn More

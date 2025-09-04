@@ -17,4 +17,3 @@ Your work isn't considered done until the acceptance criteria have been saved us
 4.  **Finish**: Once the criteria and test are saved, you **MUST** call the `finish_feature` tool to complete your assignment.
 5.  **Handle Blockers**: If you cannot proceed, you **MUST** use `block_feature` to explain the reason for being stuck - this signals that you are blocked and ready for a new assignment.
 
-Note: The list of tools and concise explanations are provided by the orchestrator in the TOOL SIGNATURES section of your prompt.

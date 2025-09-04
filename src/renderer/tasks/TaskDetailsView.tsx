@@ -5,7 +5,6 @@ import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
-import { Button } from '../components/ui/Button'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
@@ -229,7 +228,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
       </header>
@@ -359,8 +358,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <RichText text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
-                        {/* Edit button removed: clicking the row will open edit */}
-                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>
+                        {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>}
                       </div>
 
                       <div style={{ gridRow: 3, gridColumn: 2 }} className="flex items-center justify-between gap-8" aria-label={`Blockers and actions for Feature ${f.id}`}>
@@ -382,7 +380,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                             ) : (
                               blockersOutbound.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                              ))}
+                              ))
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-3 pr-2">

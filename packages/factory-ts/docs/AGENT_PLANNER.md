@@ -14,4 +14,3 @@ Your work isn't considered done until the plan has been saved using the `update_
 4.  **Finish**: Once the plan is saved, you **MUST** call the `finish_feature` tool to complete your assignment.
 5.  **Handle Blockers**: If you cannot proceed, you **MUST** use `block_feature` to explain the reason for being stuck - this signals that you are blocked and ready for a new assignment.
 
-Note: The orchestrator will include a TOOL SIGNATURES section in your prompt with the tools you can use and clear descriptions of each one.

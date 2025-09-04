@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { IconXCircle } from './Icons';
 
 type ToastVariant = 'default' | 'success' | 'error' | 'warning';
 
@@ -200,7 +201,7 @@ export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: st
           onClick={() => onClose(item.id)}
           aria-label="Close"
         >
-          \u00d7
+          <IconXCircle className='w-4 h-4'/>
         </button>
       </div>
     </div>

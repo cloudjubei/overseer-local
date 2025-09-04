@@ -11,4 +11,3 @@ The context is a list of file paths relative to the root directory of the reposi
 5.  **Finish**: After setting the context, you **MUST** call the `finish_feature` tool to complete your assignment.
 6.  **Handle Blockers**: If you cannot proceed, you **MUST** use `block_feature` to explain the reason for being stuck - this signals that you are blocked and ready for a new assignment.
 
-Note: The TOOL SIGNATURES section of your prompt, including tool descriptions, is provided by the orchestrator to keep this persona concise.

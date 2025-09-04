@@ -11,4 +11,3 @@ When you're done implementing then call `finish_feature`.
 2.  **Complete the Feature**: When the feature is complete, you **MUST** call the `finish_feature` tool. This is your final step for a successful implementation.
 3.  **Handle Blockers**: If you cannot proceed, you **MUST** use `block_feature` to explain the reason for being stuck - this signals that you are blocked and ready for a new assignment.
 
-Note: The list of tools you can use, together with clear descriptions of what each does, will be provided by the orchestrator in the TOOL SIGNATURES section of your prompt. This keeps the persona lightweight and avoids duplication.

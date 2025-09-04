@@ -205,8 +205,7 @@
         "src/renderer/components/ui/Toast.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Toasts only seem to animate on the user flick up - they should animate always. The animation needs to be fluid and appealing to the eye."
+      "blockers": []
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
@@ -219,8 +218,7 @@
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "It's still possible to drag the whole feature row (this is inside @src/renderer/tasks/TaskDetailsView.tsx )."
+      "blockers": []
     },
     {
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",

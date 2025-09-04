@@ -11,4 +11,3 @@ For context on the overall project structure, including how tasks and features a
 3.  **Finish**: Once the features are created, you **MUST** call the `finish_spec` tool to complete your assignment.
 4.  **Handle Blockers**: If you cannot proceed, you **MUST** use `block_task` to explain the reason for being stuck - this signals that you are blocked and ready for a new assignment.
 
-Note: The TOOL SIGNATURES section of your prompt is provided by the orchestrator and includes a short description for each available tool to avoid duplication here.
