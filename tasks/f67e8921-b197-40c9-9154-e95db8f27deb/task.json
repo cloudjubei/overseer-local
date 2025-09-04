@@ -408,7 +408,7 @@
     },
     {
       "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
-      "status": "-",
+      "status": "+",
       "title": "StatusChip improvements",
       "description": "@src/renderer/components/agents/StatusChip.tsx should only have the badge with an icon inside displaying. The status text should only show on hover as a small tooltip.",
       "plan": "",
