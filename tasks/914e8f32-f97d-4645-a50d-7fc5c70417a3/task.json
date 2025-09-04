@@ -1,0 +1,8 @@
+{
+  "id": "914e8f32-f97d-4645-a50d-7fc5c70417a3",
+  "status": "-",
+  "title": "Chat needs to have better context about this project",
+  "description": "Currently if we wish to send messages via the chat functionality they don't know about the project or the whole setup. The prompt for the chat needs to be better and if there are any extra tools that could make the functionality better they should be added.",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}

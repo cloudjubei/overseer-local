@@ -165,7 +165,8 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   // Ensure workspace .env is loaded in main process so child processes and libs see credentials
   loadWorkspaceDotenv(projectRoot);
 
-  const { createOrchestrator, createHistoryStore, createPricingManager } = await loadFactory();
+  const factory = await loadFactory();
+  const { createOrchestrator, createHistoryStore, createPricingManager } = factory
 
   try {
     const dbPath = path.join(projectRoot, '.factory', 'history.sqlite');
@@ -440,4 +441,5 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.on('destroyed', () => console.log('[factory] Main window destroyed'));
   }
+  return factory
 }
