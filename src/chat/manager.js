@@ -4,6 +4,7 @@ import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import ChatsStorage from './storage';
 import { LLMProvider } from './LLMProvider'
 import { tasksManager, filesManager, projectsManager } from '../managers';
+import { buildChatTools } from 'factory-ts';
 
 const MESSAGES_TO_SEND = 10
 
@@ -91,75 +92,10 @@ export class ChatsManager {
       // Build provider messages with attachments folded into content for tool discovery
       const providerMessages = this._withAttachmentsAsMentions(messagesHistory);
       let currentMessages = [systemPrompt, ...providerMessages];
-      const tools = [
-        {
-          type: 'function',
-          function: {
-            name: 'list_tasks',
-            description: 'List all tasks in the current project',
-            parameters: { type: 'object', properties: {} },
-          },
-        },
-        {
-          type: 'function',
-          function: {
-            name: 'get_task_reference',
-            description: 'Get a task or feature by its reference in the current project',
-            parameters: {
-              type: 'object',
-              properties: {
-                reference: { type: 'string', description: 'Task or feature reference (e.g., #1 or #1.2)' },
-              },
-              required: ['reference'],
-            },
-          },
-        },
-        {
-          type: 'function',
-          function: {
-            name: 'list_files',
-            description: 'List all files in the current project',
-            parameters: { type: 'object', properties: {} },
-          },
-        },
-        {
-          type: 'function',
-          function: {
-            name: 'read_file',
-            description: 'Read the content of a file by its project-relative path',
-            parameters: {
-              type: 'object',
-              properties: {
-                path: { type: 'string', description: 'Project-relative path to the file' },
-              },
-              required: ['path'],
-            },
-          },
-        },
-        {
-          type: 'function',
-          function: {
-            name: 'write_file',
-            description: 'Writes a new file with the given name and content (relative to project root)',
-            parameters: {
-              type: 'object',
-              properties: {
-                name: { type: 'string', description: 'Project-relative path (include extension, e.g. notes/todo.md)' },
-                content: { type: 'string', description: 'Content of the file' },
-              },
-              required: ['name', 'content'],
-            },
-          },
-        },
-      ];
 
-      const toolsMap = {
-        list_tasks: async (args) => this.tasksManager.listTasks(projectId),
-        get_task_reference: async (args) => this.getTaskReference(projectId, args.reference),
-        list_files: async (args) => this.filesManager.listFiles(projectId),
-        read_file: async (args) => this.filesManager.readFile(projectId, args.path),
-        write_file: async (args) => this.filesManager.writeFile(projectId, args.path, args.name, args.content)
-      };
+      // Build tools via factory-ts
+      const repoRoot = this.projectsManager?.projectRoot || this.projectRoot || process.cwd();
+      const { tools, callTool } = buildChatTools({ repoRoot, projectId });
 
       const provider = new LLMProvider(config);
 
@@ -188,11 +124,7 @@ export class ChatsManager {
         for (const toolCall of message.tool_calls) {
           const functionName = toolCall.function.name;
           const functionArgs = JSON.parse(toolCall.function.arguments || '{}');
-          const functionToCall = toolsMap[functionName];
-          if (!functionToCall) {
-            throw new Error(`Unknown tool: ${functionName}`);
-          }
-          const functionResponse = await functionToCall(functionArgs);
+          const functionResponse = await callTool(functionName, functionArgs);
           currentMessages.push({
             role: 'tool',
             tool_call_id: toolCall.id,
@@ -220,37 +152,5 @@ export class ChatsManager {
     } catch (error) {
       throw error;
     }
-  }
-
-  async getTaskReference(projectId, reference)
-  {
-    const parts = reference.split(".")
-
-    const project = await this.projectsManager.getProject(projectId)
-    if (!project) { throw new Error("project not found") }
-
-    const taskIndex = parts[0]
-    let taskId
-    for(const id of Object.keys(project.taskIdToDisplayIndex)){
-      if (project.taskIdToDisplayIndex[id] == taskIndex){
-        taskId = id
-        break
-      }
-    }
-    if (!taskId) { throw new Error("task not found") }
-
-    const task = await this.tasksManager.getTask(taskId)
-    if (parts.length <= 1){
-      return task
-    }
-    const featureIndex = parts[1]
-    let featureId
-    for(const id of Object.keys(task.featureIdToDisplayIndex)){
-      if (task.featureIdToDisplayIndex[id] == featureIndex){
-        featureId = id
-        break
-      }
-    }
-    return task.features.find(f => f.id === featureId)
   }
 }

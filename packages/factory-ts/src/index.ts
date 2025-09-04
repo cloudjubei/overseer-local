@@ -9,6 +9,7 @@ import { createCompletionClient, type CompletionClient } from './completion.js';
 import { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './logger.js';
 import { createPricingManager, PricingManager, estimateCostUSD } from './pricing.js';
 import { LLMConfig, RunEvent, AgentRun } from './types.js';
+export { buildChatTools } from './chatTools.js';
 
 export type Unsubscribe = () => void;
 
