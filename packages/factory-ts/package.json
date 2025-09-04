@@ -10,9 +10,11 @@
     "clean": "rimraf dist",
     "prepare": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^17.2.2"
+  },
   "devDependencies": {
-    "typescript": "^5.5.4",
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+    "typescript": "^5.5.4"
   }
 }

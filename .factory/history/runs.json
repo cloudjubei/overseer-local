@@ -1,5 +1,32 @@
 [
   {
+    "runId": "task_4jez0lkf_mf4pvxj8",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "featureId": "e9e526e8-576a-448b-9359-db97475db485",
+    "state": "running",
+    "message": "Turn 3 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T01:18:10.053Z",
+    "updatedAt": "2025-09-04T01:18:35.600Z",
+    "costUSD": 0,
+    "promptTokens": 29361,
+    "completionTokens": 538,
+    "progress": 0.03
+  },
+  {
+    "runId": "task_g13kb2rd_mf4puowm",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T01:17:12.215Z",
+    "updatedAt": "2025-09-04T01:17:12.918Z"
+  },
+  {
     "runId": "task_jsqxjaml_mf4pgaes",
     "projectId": "main",
     "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
