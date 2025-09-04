@@ -169,9 +169,7 @@ async function runConversation(opts: {
   const { model, availableTools, systemPrompt, task, feature, agentType, taskTools, git, completion, complete, emit } = opts;
   const doEmit = (e: { type: string; payload?: any }) => { try { emit?.(e); } catch {} };
 
-  // Initial system prompt is a system message (Turn 0)
-  const messages: CompletionMessage[] = [{ role: 'system', content: systemPrompt }];
-  // Initial snapshot (contains the system bootstrap prompt)
+  const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
   doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice(), turn: 0 } });
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
@@ -263,7 +261,7 @@ async function runConversation(opts: {
   complete('max_turns');
 }
 
-export async function runAgentOnTask(model: string, agentType: string, task: Task, taskTools: TaskUtils, fileTools: FileTools, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
+async function runAgentOnTask(model: string, agentType: string, task: Task, taskTools: TaskUtils, fileTools: FileTools, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
   logger.debug(`\n--- Activating Agent ${agentType} for task: [${task.id}] ${task.title} ---`);
   const agentDocs = loadAgentDocs(agentType);
   const contextFiles = ['docs/FILE_ORGANISATION.md'];
@@ -286,7 +284,7 @@ export async function runAgentOnTask(model: string, agentType: string, task: Tas
   });
 }
 
-export async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, taskTools: TaskUtils, fileTools: FileTools, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
+async function runAgentOnFeature(model: string, agentType: string, task: Task, feature: Feature, taskTools: TaskUtils, fileTools: FileTools, git: GitManager, completion: CompletionClient, emit?: (e: { type: string; payload?: any }) => void) {
   logger.debug(`\n--- Activating Agent ${agentType} for Feature: [${feature.id}] ${feature.title} ---`);
 
   if (agentType === 'developer') await taskTools.updateFeatureStatus?.(task.id, feature.id, '~');
@@ -314,7 +312,7 @@ export async function runAgentOnFeature(model: string, agentType: string, task: 
   });
 }
 
-export async function runOrchestrator(opts: {
+async function runOrchestrator(opts: {
   model: string;
   agentType: 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
   taskId: string; 
@@ -486,75 +484,6 @@ async function copyTree(src: string, dest: string) {
   };
 
   walk(src, dest);
-}
-
-function stripAsarSegments(p: string): string {
-  // Remove any trailing segments that include .asar and return a real FS ancestor
-  const parts = p.split(path.sep);
-  const idx = parts.findIndex(seg => seg.includes('.asar'));
-  if (idx >= 0) {
-    // Try app.asar.unpacked sibling first
-    const prefix = parts.slice(0, idx).join(path.sep);
-    const resourcesDir = prefix; // parent directory of *.asar
-    // If Resources/app.asar.unpacked exists, prefer it as the effective root for reading extra files
-    const unpacked = path.join(resourcesDir, 'app.asar.unpacked');
-    try {
-      const st = fs.statSync(unpacked);
-      if (st.isDirectory()) return unpacked;
-    } catch {}
-    // Otherwise return the resources dir
-    return resourcesDir || path.sep;
-  }
-  return p;
-}
-
-function resolveElectronRealRoot(): string | undefined {
-  // Try to use Electron-specific hints without importing electron here
-  const candidates: (string | undefined)[] = [];
-  // 1) Explicit env override
-  candidates.push(process.env.FACTORY_REPO_ROOT);
-  // 2) process.resourcesPath (exposed in Electron)
-  // @ts-ignore - not typed in Node
-  const resourcesPath = (process as any).resourcesPath as string | undefined;
-  if (resourcesPath) candidates.push(resourcesPath);
-  // 3) PORTABLE_EXECUTABLE_DIR (Windows portable)
-  candidates.push(process.env.PORTABLE_EXECUTABLE_DIR);
-  // 4) app root env usually set by bundlers
-  candidates.push(process.env.APPDIR);
-
-  for (const c of candidates) {
-    if (!c) continue;
-    const real = stripAsarSegments(path.resolve(c));
-    try {
-      const st = fs.statSync(real);
-      if (st.isDirectory()) return real;
-    } catch {}
-  }
-  return undefined;
-}
-
-function resolveRepoRootHint(hint?: string): string {
-  if (hint && path.isAbsolute(hint)) return hint;
-
-  // If hint is relative, resolve relative to current working dir
-  if (hint) return path.resolve(hint);
-
-  // Prefer Electron real root if available
-  const electronRoot = resolveElectronRealRoot();
-  if (electronRoot) return electronRoot;
-
-  const cwd = FRAMEWORK_ROOT;
-  // If cwd includes an asar, move up to its parent directory to avoid virtual FS
-  if (cwd.includes('.asar')) {
-    const real = stripAsarSegments(cwd);
-    try {
-      const st = fs.statSync(real);
-      if (st.isDirectory()) return real;
-    } catch {}
-    return os.tmpdir();
-  }
-
-  return cwd;
 }
 
 export async function runIsolatedOrchestrator(opts: {

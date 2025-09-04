@@ -200,7 +200,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
 
   const systemPrompt = useMemo(() => {
     // Prefer first system role message; fallback to the bootstrap message containing #CURRENT TASK
-    const m = systemMsgs.find(x => x.role === 'system') || (run.messages || []).find(x => (x.content || '').includes('#CURRENT TASK')) || systemMsgs[0];
+    const m = systemMsgs[0];
     return m?.content;
   }, [systemMsgs, run.messages]);
 
