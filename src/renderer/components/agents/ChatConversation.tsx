@@ -95,7 +95,7 @@ function parseToolResultsMessage(msg?: AgentRunMessage): string[] {
     if (ln.startsWith('---')) continue; // header line
     if (ln.startsWith('Tool ')) {
       const i = ln.indexOf(' returned: ');
-      if (i > 0) out.push(ln.substring(i + ' returned: '.length + 'Tool '.length + (ln.startsWith('Tool ') ? 0 : 0))); // We'll keep entire right side after 'returned: '
+      if (i > 0) out.push(ln.substring(i + ' returned: '.length + 'Tool '.length + (ln.startsWith('Tool ') ? 0 : 0))); // Keep right side after 'returned: '
       else out.push(ln);
     } else {
       out.push(ln);
@@ -104,23 +104,59 @@ function parseToolResultsMessage(msg?: AgentRunMessage): string[] {
   return out;
 }
 
-// Bundle messages by turn so assistant response and corresponding tool results are shown together
+// Build conversation turns sequentially to ensure full history renders even if 'turn' is missing
 function useTurnBundles(messages: AgentRunMessage[] | undefined) {
   return useMemo(() => {
-    const byTurn = new Map<number, { assistant?: AgentRunMessage; tools?: AgentRunMessage }>();
     const systemMsgs: AgentRunMessage[] = [];
+
+    type Turn = { index: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage };
+    const turns: Turn[] = [];
+    let current: Turn | null = null;
+
+    const isToolMsg = (m: AgentRunMessage) => m.source === 'tools' || (m.content || '').startsWith('--- TOOL RESULTS ---');
+
     for (const m of messages || []) {
-      if (typeof m.turn !== 'number') {
+      const role = m.role || '';
+      if (role === 'system') {
         systemMsgs.push(m);
         continue;
       }
-      const b = byTurn.get(m.turn) || {};
-      if (m.role === 'assistant') b.assistant = m;
-      else if (m.source === 'tools' || (m.content || '').startsWith('--- TOOL RESULTS ---')) b.tools = m;
-      byTurn.set(m.turn, b);
+
+      if (role === 'user') {
+        // If we already have content in current, finalize it first
+        if (current && (current.user || current.assistant || current.tools)) {
+          turns.push(current);
+          current = null;
+        }
+        current = { index: turns.length, user: m };
+        continue;
+      }
+
+      if (role === 'assistant') {
+        if (!current) current = { index: turns.length };
+        current.assistant = m;
+        // Do not push yet; tools might follow. We'll push when a new user/assistant starts or at end.
+        continue;
+      }
+
+      // Tool results or other messages
+      if (isToolMsg(m)) {
+        if (!current) current = { index: turns.length };
+        current.tools = m;
+        continue;
+      }
+
+      // Fallback: unclassified message -> treat as system
+      systemMsgs.push(m);
     }
-    const ordered = Array.from(byTurn.entries()).sort((a, b) => a[0] - b[0]).map(([turn, data]) => ({ turn, ...data }));
-    return { systemMsgs, turns: ordered } as { systemMsgs: AgentRunMessage[]; turns: { turn: number; assistant?: AgentRunMessage; tools?: AgentRunMessage }[] };
+
+    if (current && (current.user || current.assistant || current.tools)) {
+      turns.push(current);
+    }
+
+    // If we have explicit numeric turns present across messages, we can sort by them to ensure order
+    // Otherwise, the sequential order is already preserved via the loop.
+    return { systemMsgs, turns } as { systemMsgs: AgentRunMessage[]; turns: { index: number; user?: AgentRunMessage; assistant?: AgentRunMessage; tools?: AgentRunMessage }[] };
   }, [messages]);
 }
 
@@ -134,7 +170,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
 
   // Try to find the initial system prompt
   const systemPrompt = useMemo(() => {
-    const m = systemMsgs.find(x => x.role === 'user' && (x.content || '').includes('#CURRENT TASK')) || systemMsgs[0];
+    const m = systemMsgs.find(x => x.role === 'user' && (x.content || '').includes('#CURRENT TASK')) || systemMsgs.find(x => x.role === 'system') || systemMsgs[0];
     return m?.content;
   }, [systemMsgs]);
 
@@ -150,15 +186,24 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
         <div className="text-sm text-neutral-500">No conversation yet.</div>
       ) : (
         <ul className="space-y-4">
-          {turns.map(({ turn, assistant, tools }) => {
+          {turns.map(({ index, user, assistant, tools }) => {
             const parsed = assistant ? parseAssistant(assistant.content || '') : null;
             const toolCalls = parsed?.tool_calls || [];
             const results = parseToolResultsMessage(tools);
 
             return (
-              <li key={turn} className="space-y-2">
-                <div className="text-[11px] text-neutral-500">Turn {turn + 1}{assistant?.durationMs ? ` · ${assistant.durationMs}ms` : ''}</div>
-                {/* Thoughts bubble */}
+              <li key={index} className="space-y-2">
+                <div className="text-[11px] text-neutral-500">Turn {index + 1}{assistant?.durationMs ? ` · ${assistant.durationMs}ms` : ''}</div>
+
+                {/* User bubble */}
+                {user ? (
+                  <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50 shadow-sm">
+                    <div className="text-[11px] font-medium mb-1">User</div>
+                    <div className="text-xs whitespace-pre-wrap break-words">{user.content}</div>
+                  </div>
+                ) : null}
+
+                {/* Thoughts or Assistant bubble */}
                 {parsed?.thoughts ? (
                   <div className="max-w-[80%] rounded-2xl px-3 py-2 bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm">
                     <div className="text-xs whitespace-pre-wrap break-words">{parsed.thoughts}</div>

@@ -289,7 +289,7 @@
     },
     {
       "id": "e9e526e8-576a-448b-9359-db97475db485",
-      "status": "-",
+      "status": "+",
       "title": "Agent Run - UI fix",
       "description": "When viewing an agent run inside @src/renderer/screens/AgentsView.tsx it doesn't show the whole conversation. Just the last message. This needs to be fixed to show the full conversation.",
       "plan": "",

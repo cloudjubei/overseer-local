@@ -1,5 +1,16 @@
 [
   {
+    "runId": "task_x50xfgnx_mf4pxn11",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T01:19:29.750Z",
+    "updatedAt": "2025-09-04T01:19:29.750Z"
+  },
+  {
     "runId": "task_4jez0lkf_mf4pvxj8",
     "projectId": "main",
     "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
