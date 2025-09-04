@@ -1,5 +1,33 @@
 [
   {
+    "runId": "task_3fchhkdg_mf5z7aj7",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-04T22:26:42.835Z",
+    "updatedAt": "2025-09-04T22:26:42.835Z"
+  },
+  {
+    "runId": "task_2hvy6v9f_mf5z717o",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "914e8f32-f97d-4645-a50d-7fc5c70417a3",
+    "state": "running",
+    "message": "Turn 2 tool calls processed",
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "startedAt": "2025-09-04T22:26:30.757Z",
+    "updatedAt": "2025-09-04T22:26:42.608Z",
+    "costUSD": 0,
+    "promptTokens": 5673,
+    "completionTokens": 672,
+    "progress": 0.03
+  },
+  {
     "runId": "task_c1gnwubw_mf5wuag3",
     "agentType": "developer",
     "projectId": "main",

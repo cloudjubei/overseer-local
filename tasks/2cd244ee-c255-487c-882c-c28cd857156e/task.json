@@ -4,7 +4,177 @@
   "title": "Preparing for online mode",
   "description": "Up until now everything was running locally, but we would like to introduce other clients to work together on a project. The common ground where all project data would be located is a git repository.\nSo there needs to be a backend that would allow for clients to do everything this app does (manipulate projects/tasks/features) and launch agents on them.\nThis means we also need to have a service for running agents as part of the backend (could be a micro-service that the main backend relays to).\n\nOne important requirement is that a client (like this one) might still want to run everything locally without touching the backend. It must still be possible to do so, which means that all project related data lives in the repository, apart from big blob data. Any indexing or extra storage of this blob data must be handled by the clients and backend as an additional feature - for instance searching files can be handled locally and externally via the backend employing exactly the same methods (i.e. SQL db with embedding search).\n\nWe need to spec out this task so that it contains all the features for the backend to work this way, and this app as the first client to integrate with it.\n\nWe will have to create a project and repository adjacent to this one. Not as a package, because the backend isn't a library. They might have shared code - in which case, we have to create yet another project for the shared library code.\nThe initial backend task will be in this project, and once it's running we will migrate to have a task for further features in its project and another task here for further improving this app's usage of it.",
   "features": [
+    {
+      "id": "7c431bc6-d88f-4e8b-be9e-496e40e2bf08",
+      "status": "-",
+      "title": "Online Mode Architecture and Repository Plan",
+      "description": "Define the high-level architecture for introducing online mode: 1) a new backend service repository (REST+WebSocket), 2) an agent runner micro-service (separate process, same repo or sibling), and 3) a shared library repository for protocol types and reusable logic. Deliverables: an ARCHITECTURE.md in docs/ describing components, data flow, service boundaries, Git-as-source-of-truth model, and offline-first requirements; a plan for repository creation (names, tech stacks, initial scaffolds), and how this app will select between local and backend modes.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "1ff5f4b8-7573-4e00-8cd5-61a4b5572037",
+      "status": "-",
+      "title": "Git-based Storage Conventions and File Layout Spec",
+      "description": "Document the canonical on-repo data model so both backend and clients operate identically offline/online. Specify directories and file formats for projects, tasks, features, and agent runs (e.g., project manifest, tasks directory with JSON/YAML, features directory, run logs/artifacts). Include conventions for big blob data references (e.g., pointers to external storage) and deterministic commit messages/branches used by automated changes. Output: docs/git_storage_conventions.md with schemas and examples.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "c0f98ef2-0a81-4800-b275-4380a219b59c",
+      "status": "-",
+      "title": "API Surface Spec (OpenAPI) for Projects/Tasks/Features and Agent Runs",
+      "description": "Design an OpenAPI 3.1 spec that mirrors local capabilities: CRUD for projects/tasks/features mapped to Git edits/commits; agent run endpoints (enqueue, status, cancel), streaming logs/events (WebSocket or SSE), and search endpoints (optional). Include pagination, filtering, and error models. Define auth headers and repository identification (URL/ID). Place initial openapi.yaml under docs/backend_api and include request/response schemas that map to the Git storage conventions.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "78c2ef49-59e4-4e65-b969-7478d615cbb3",
+      "status": "-",
+      "title": "Auth and Repository Access Strategy",
+      "description": "Specify authentication and repo access for the backend MVP: token-based client auth; per-project Git credentials via deploy keys or token; allow backend to clone/pull/push on behalf of users. Define minimal roles (reader/editor/runner). Document how credentials are stored (securely), rotated, and injected to git processes. Output: docs/backend_auth_and_repo_access.md with sequence diagrams and security considerations.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "7b4799f4-6b2d-4d31-9140-2ffb210444e5",
+      "status": "-",
+      "title": "Shared Protocols and Types Library Plan",
+      "description": "Plan and scaffold a separate shared library repository that exports: 1) TypeScript types for API models (generated from OpenAPI), 2) JSON schema for on-repo file formats, and 3) common utilities (e.g., content hashing, commit metadata helpers). Define publishing strategy (private npm or Git tags), versioning, and integration into both the backend and this app. Output: docs/shared_library_plan.md and initial package structure proposal.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "cf26e479-dbb5-45f1-a03e-ab849e5eb1b4",
+      "status": "-",
+      "title": "Agent Runner Service Design",
+      "description": "Define a dedicated micro-service (or module) responsible for running agents as jobs: queue semantics, concurrency limits, job lifecycle, logging, and artifact handling mapped to Git commits when relevant. Specify how it integrates with factory-ts (or refactored shared library) and how it receives tasks from the main backend via RPC/HTTP or message queue. Output: docs/agent_runner/OVERVIEW.md with API and event contracts.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "bd6fb615-0fee-4724-9393-acb086d4fb17",
+      "status": "-",
+      "title": "Backend MVP Scaffolding and Repository Initialization",
+      "description": "Create a new backend repository structure proposal (Node/Express/Koa/Fastify recommended) with modules for auth, projects (git client), tasks/features (file IO), runs (runner client), and websocket gateway for streaming events. Include config management, logging, and testing setup. Output: docs/backend_repo_structure.md in this project and scripts/notes for bootstrapping the new repo (folder layout, packages, lint/test).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "8ec41328-1bc4-4165-8738-e26bac938f44",
+      "status": "-",
+      "title": "Git Operations Module Spec for Backend",
+      "description": "Specify a backend module that wraps git operations safely: clone/update repo cache, branch strategy, commit/write files, resolve merge conflicts policy for automated changes, and background sync. Include disk layout for repo caches and locking to avoid races. Define interfaces to be used by project/task/feature services. Output: docs/backend_git_module.md with method signatures and retry/timeout policies.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "eea79fc6-197c-4c23-a40f-3b3c07ff347f",
+      "status": "-",
+      "title": "Agent Orchestration Abstraction for Backend",
+      "description": "Define a thin abstraction layer in the backend to initiate and monitor agent runs using the shared factory library. Specify how models, pricing, and history are configured server-side, environment variable handling, and how run results are serialized back to the repo. Output: docs/backend_agent_orchestrator.md with sequence diagrams and config keys.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "0aa48fa5-c3ad-436a-801e-a8f8d920baa4",
+      "status": "-",
+      "title": "Client App Online Mode Toggle and Config",
+      "description": "Add a settings model and UI spec for selecting local-only or backend-connected mode. Define environment variable and persisted settings, validation of backend URL/token, and fallbacks. Describe IPC contract updates (renderer <-> main) to route operations through local or remote adapters. Output: docs/client_online_mode.md and API surface for a BackendAdapter and LocalAdapter with identical methods.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "1ace7bce-e474-4fec-977c-823ab2e7a995",
+      "status": "-",
+      "title": "Client BackendAdapter Integration Plan",
+      "description": "Define the client-side service that talks to the backend API: methods mapping to project/task/feature CRUD, run creation, and event streaming. Include error handling and auth token storage. Specify how results are reconciled with the local git workspace (pull on success, conflict prompts). Output: docs/client_backend_adapter.md with method signatures and event handling patterns.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "f1c8cca9-a634-4dc5-8927-a2dbd6f8a6b4",
+      "status": "-",
+      "title": "Search Capability Parity Plan (Local and Backend)",
+      "description": "Design a pluggable search interface with identical queries supported both locally and via backend (e.g., embeddings + SQL/SQLite). Define schemas for embeddings index stored locally and server-side, and how they reference files/blobs in the repo. Output: docs/search_parity.md with interface spec and minimal MVP plan (keyword search now, embeddings later).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4ba450ff-9730-401e-a3a9-be859563fadc",
+      "status": "-",
+      "title": "Events and Streaming Logs Protocol",
+      "description": "Define a unified event schema for agent run progress, logs, and status updates, delivered via WebSocket or SSE. Specify reconnect behavior, backfill on reconnect, and correlation IDs. Output: docs/events_protocol.md and additions to OpenAPI for upgrade endpoints or SSE endpoints.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "e26e7617-3aa8-43d3-9347-61654003cb10",
+      "status": "-",
+      "title": "Migration Plan for factory-ts to Shared Library",
+      "description": "Outline steps to decouple packages/factory-ts from this repo into the new shared library repo without breaking the app. Include dependency updates, publishing strategy (temporary Git dep), and CI considerations. Output: docs/migration_factory_ts.md with checklist and risk mitigation.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "30106152-88c2-4f0e-b702-892049e80c0a",
+      "status": "-",
+      "title": "Security, Privacy, and Resource Limits",
+      "description": "Document security controls for the backend: sandboxing agent execution, rate limits, request size limits, allowed environment variables, secrets management, and repo isolation. Include DDoS and abuse considerations. Output: docs/backend_security.md with concrete configurations for MVP.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "df317675-b2d6-4532-9216-fe4cd8d64838",
+      "status": "-",
+      "title": "Initial E2E Flow Definition and Smoke Tests",
+      "description": "Define end-to-end flows: create project by repo URL, create task, create features, run agent, see results committed, pull changes locally. Specify smoke test scenarios that can be exercised locally with a mock backend or once the backend skeleton is up. Output: docs/e2e_flows.md and a list of automated test cases to implement in each repo later.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "4d0c8be4-001a-4ae2-93c7-392c6908e5c8",
+      "status": "-",
+      "title": "Update FILE_ORGANISATION with Cross-Repo Pointers",
+      "description": "Update docs/FILE_ORGANISATION.md to include references to the new backend and shared library repositories and where to find their docs, without detailing their internal files. Ensure contributors know the top-level map across repos.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
   ],
   "featureIdToDisplayIndex": {
+    "7c431bc6-d88f-4e8b-be9e-496e40e2bf08": 1,
+    "1ff5f4b8-7573-4e00-8cd5-61a4b5572037": 2,
+    "c0f98ef2-0a81-4800-b275-4380a219b59c": 3,
+    "78c2ef49-59e4-4e65-b969-7478d615cbb3": 4,
+    "7b4799f4-6b2d-4d31-9140-2ffb210444e5": 5,
+    "cf26e479-dbb5-45f1-a03e-ab849e5eb1b4": 6,
+    "bd6fb615-0fee-4724-9393-acb086d4fb17": 7,
+    "8ec41328-1bc4-4165-8738-e26bac938f44": 8,
+    "eea79fc6-197c-4c23-a40f-3b3c07ff347f": 9,
+    "0aa48fa5-c3ad-436a-801e-a8f8d920baa4": 10,
+    "1ace7bce-e474-4fec-977c-823ab2e7a995": 11,
+    "f1c8cca9-a634-4dc5-8927-a2dbd6f8a6b4": 12,
+    "4ba450ff-9730-401e-a3a9-be859563fadc": 13,
+    "e26e7617-3aa8-43d3-9347-61654003cb10": 14,
+    "30106152-88c2-4f0e-b702-892049e80c0a": 15,
+    "df317675-b2d6-4532-9216-fe4cd8d64838": 16,
+    "4d0c8be4-001a-4ae2-93c7-392c6908e5c8": 17
   }
 }
