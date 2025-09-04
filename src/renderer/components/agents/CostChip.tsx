@@ -21,12 +21,19 @@ export default function CostChip({ provider, model, costUSD }: CostChipProps) {
     (async () => {
       try {
         const rec = await getPricingRecord(provider, model);
-        if (mounted) setPrice(rec ? { inputPerMTokensUSD: rec.inputPerMTokensUSD, outputPerMTokensUSD: rec.outputPerMTokensUSD } : undefined);
+        if (mounted)
+          setPrice(
+            rec
+              ? { inputPerMTokensUSD: rec.inputPerMTokensUSD, outputPerMTokensUSD: rec.outputPerMTokensUSD }
+              : undefined
+          );
       } catch {
         if (mounted) setPrice(undefined);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [provider, model]);
 
   const content = (
@@ -34,8 +41,12 @@ export default function CostChip({ provider, model, costUSD }: CostChipProps) {
       <div className="font-semibold mb-1">{provider || 'Unknown'} · {model || 'Unknown'}</div>
       {price ? (
         <div className="space-y-0.5">
-          <div><span className="text-neutral-400">Input:</span> ${price.inputPerMTokensUSD} per 1M tokens</div>
-          <div><span className="text-neutral-400">Output:</span> ${price.outputPerMTokensUSD} per 1M tokens</div>
+          <div>
+            <span className="text-neutral-400">Input:</span> {`$${price.inputPerMTokensUSD}`} per 1M tokens
+          </div>
+          <div>
+            <span className="text-neutral-400">Output:</span> {`$${price.outputPerMTokensUSD}`} per 1M tokens
+          </div>
         </div>
       ) : (
         <div className="text-neutral-400">Pricing unavailable</div>

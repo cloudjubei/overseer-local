@@ -424,7 +424,7 @@
     },
     {
       "id": "ea56a618-78f3-4612-bb73-12d6f7161f01",
-      "status": "-",
+      "status": "+",
       "title": "AllAgentsView.tsx improvements",
       "description": "The Cost field that should show the prices- always shows no prices available. It seems these are not being used correctly.\n\nThe Tokens field tooltip - this doesn't show the tokens per message correctly.",
       "plan": "",

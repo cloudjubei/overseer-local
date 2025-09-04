@@ -10,17 +10,34 @@ export default function TokensChip({ run }: { run: AgentRun }) {
   const breakdown = useMemo(() => {
     const items = (run.messages || []).map((m, i) => {
       const role = m.role || 'message';
-      // Show a short preview of content for context; avoid misleading per-message token counts
       const preview = (m.content || '').replace(/\s+/g, ' ').slice(0, 60);
       return { i: i + 1, role, preview };
     });
     return items;
   }, [run.messages]);
 
+  const { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg } = useMemo(() => {
+    const msgs = run.messages || [];
+    const userCount = msgs.filter(m => (m.role || '').toLowerCase() === 'user').length;
+    const assistantCount = msgs.filter(m => (m.role || '').toLowerCase() === 'assistant').length;
+    const avgPromptPerMsg = userCount > 0 ? Math.round(prompt / userCount) : undefined;
+    const avgCompletionPerMsg = assistantCount > 0 ? Math.round(completion / assistantCount) : undefined;
+    return { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg };
+  }, [run.messages, prompt, completion]);
+
   const content = (
     <div className="text-xs max-w-[360px]">
-      <div className="font-semibold mb-1">Token breakdown</div>
+      <div className="font-semibold mb-1">Token usage</div>
       <div className="mb-1 text-neutral-400">Prompt: {prompt} · Completion: {completion} · Total: {prompt + completion}</div>
+      <div className="mb-2">
+        <div className="text-neutral-600 dark:text-neutral-300">Per-message averages</div>
+        <div className="text-neutral-400">
+          User ({userCount || 0}): {avgPromptPerMsg != null ? `${avgPromptPerMsg} tokens/msg` : '—'} ·
+          {' '}
+          Assistant ({assistantCount || 0}): {avgCompletionPerMsg != null ? `${avgCompletionPerMsg} tokens/msg` : '—'}
+        </div>
+      </div>
+      <div className="font-semibold mb-1">Messages</div>
       <div className="space-y-0.5 max-h-[240px] overflow-auto pr-1">
         {breakdown.length === 0 ? (
           <div className="text-neutral-400">No messages</div>
@@ -32,7 +49,6 @@ export default function TokensChip({ run }: { run: AgentRun }) {
           ))
         )}
       </div>
-      <div className="mt-1 text-neutral-400">Per-message token data not available.</div>
     </div>
   );
 
