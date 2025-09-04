@@ -9,7 +9,7 @@ import { Button } from '../components/ui/Button'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
-import { IconBack, IconChevron, IconEdit, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
+import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -229,7 +229,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>
           </div>
         </div>
       </header>
@@ -248,9 +248,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </button>
             <h2 className="section-title">Overview</h2>
             <div className="section-actions">
-              <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={handleEditTask}>
-                <IconEdit />
-              </button>
+              {/* Edit Task button intentionally removed to keep UI consistent with click-to-open behavior elsewhere */}
             </div>
           </div>
           <div id="overview-content" className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}>
@@ -336,6 +334,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       }}
                       onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
+                      onClick={(e) => {
+                        // Ignore clicks if we were dragging or if clicking on specific action areas
+                        if (dragging) return
+                        const t = e.target as HTMLElement | null
+                        if (t && t.closest('.no-drag')) return
+                        handleEditFeature(f.id)
+                      }}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${blockers.length} items this feature is blocked by, ${blockersOutbound.length} items this feature is blocking.  Press Enter to edit.`}
                     >
                       <div className="col col-id">
@@ -354,9 +359,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <RichText text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
-                        <button type="button" className="btn-secondary btn-icon no-drag" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
-                          <IconEdit />
-                        </button>
+                        {/* Edit button removed: clicking the row will open edit */}
                         {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>
                       </div>
 
@@ -379,8 +382,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                             ) : (
                               blockersOutbound.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                              ))
-                            )}
+                              ))}
                           </div>
                         </div>
                         <div className="flex items-center gap-3 pr-2">

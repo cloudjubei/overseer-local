@@ -295,7 +295,7 @@
     },
     {
       "id": "894453ef-c700-4128-b714-4ec94498498c",
-      "status": "-",
+      "status": "+",
       "title": "No edit button in Tasks and Features",
       "description": "In @src/renderer/tasks/TaskDetailsView.tsx Clicking a feature should open the edit feature form - the edit button shouldn't show.\nIn @src/renderer/screens/TasksView.tsx Tasks already open on click - there should just be no edit button present.",
       "plan": "",
