@@ -474,7 +474,7 @@
     },
     {
       "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
-      "status": "-",
+      "status": "+",
       "title": "When editing/creating a feature allow quick file lookups",
       "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\n\nThis feature is currently implemented seperately inside @src/renderer/screens/ChatView.tsx  and @src/renderer/components/tasks/FeatureForm.tsx \nthe files responsible are:\n@src/renderer/components/ui/FileMentionsTextarea.tsx and @src/renderer/hooks/useFilesAutocomplete.ts   \n\n@src/renderer/screens/ChatView.tsx actually also uses @src/renderer/hooks/useReferencesAutocomplete.ts which allows the text input to display references. Both of these ideas are relevant for @src/renderer/components/tasks/FeatureForm.tsx and @src/renderer/screens/ChatView.tsx . Both should allow the display of references lookup and file lookup - they simply must be able to have callbacks so that they can do extra things with them (FeatureForm needs to add/remove files to/from the context and add/remove blockers to/from the feature - this is missing right now).",
       "plan": "",
