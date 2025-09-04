@@ -1,5 +1,15 @@
 [
   {
+    "runId": "task_blr2r4ud_mf5ukphj",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "running",
+    "message": "Starting agent... ",
+    "startedAt": "2025-09-04T20:17:10.665Z",
+    "updatedAt": "2025-09-04T20:17:25.673Z"
+  },
+  {
     "runId": "task_d7uvrizj_mf5u9bzp",
     "agentType": "speccer",
     "projectId": "main",

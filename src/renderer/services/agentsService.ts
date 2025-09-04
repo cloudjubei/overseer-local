@@ -324,8 +324,11 @@ class AgentsServiceImpl {
 
   async startTaskAgent(agentType: AgentType, projectId: string, taskId: string): Promise<AgentRun> {
     const llmConfig = this.getActiveLLMConfig();
+    if (!llmConfig){
+      throw new Error("NO ACTIVE LLM CONFIG") 
+    }
     console.log('[agentsService] startTaskAgent', { agentType, projectId, taskId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startTaskRun({ agentType, projectId, taskId, options: { llmConfig } });
+    const { handle, events } = await startTaskRun({ agentType, projectId, taskId, llmConfig, options: {  } });
     const run: RunRecord = {
       runId: handle.id,
       agentType,
@@ -351,8 +354,11 @@ class AgentsServiceImpl {
 
   async startFeatureAgent(agentType: AgentType, projectId: string, taskId: string, featureId: string): Promise<AgentRun> {
     const llmConfig = this.getActiveLLMConfig();
+    if (!llmConfig){
+      throw new Error("NO ACTIVE LLM CONFIG") 
+    }
     console.log('[agentsService] startFeatureAgent', { agentType, projectId, taskId, featureId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startFeatureRun({ agentType, projectId, taskId, featureId, options: { llmConfig } });
+    const { handle, events } = await startFeatureRun({ agentType, projectId, taskId, featureId, llmConfig, options: { } });
     const run: RunRecord = {
       runId: handle.id,
       agentType,
