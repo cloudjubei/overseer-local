@@ -3,16 +3,14 @@ import Tooltip from '../ui/Tooltip';
 import type { AgentRun } from '../../services/agentsService';
 
 export default function TokensChip({ run }: { run: AgentRun }) {
-  const prompt = run.promptTokens ?? 0;
-  const completion = run.completionTokens ?? 0;
+  const prompt = run.promptTokens ?? 0; // tokens sent to LLM
+  const completion = run.completionTokens ?? 0; // tokens received from LLM
 
   const breakdown = useMemo(() => {
     const items = (run.messages || []).map((m, i) => {
       const role = m.role || 'message';
-      const content = typeof m.content === 'string' ? m.content : (Array.isArray(m.content) ? m.content.map((x: any) => (typeof x === 'string' ? x : (x?.text || ''))).join(' ') : '')
-      const length = content?.length || 0;
       const tokens = (m as any).tokenCount ?? (m as any).tokens ?? undefined;
-      return { i: i + 1, role, length, tokens };
+      return { i: i + 1, role, tokens };
     });
     return items;
   }, [run.messages]);
@@ -28,7 +26,7 @@ export default function TokensChip({ run }: { run: AgentRun }) {
           breakdown.map((b, idx) => (
             <div key={idx} className="flex items-center justify-between gap-3">
               <div className="truncate"><span className="text-neutral-400">#{b.i}</span> {b.role}</div>
-              <div className="text-neutral-300">chars: {b.length}{typeof b.tokens === 'number' ? ` · tokens: ${b.tokens}` : ''}</div>
+              <div className="text-neutral-300">tokens: {typeof b.tokens === 'number' ? b.tokens : '—'}</div>
             </div>
           ))
         )}
@@ -38,9 +36,9 @@ export default function TokensChip({ run }: { run: AgentRun }) {
 
   return (
     <Tooltip content={content} placement="top">
-      <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium bg-neutral-50 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200 border-neutral-200 dark:border-neutral-700">
-        <span className="w-1.5 h-1.5 rounded-full bg-sky-500" aria-hidden />
-        <span>{prompt} / {completion}</span>
+      <span className="inline-flex flex-col items-start gap-0.5 rounded-full border px-2 py-0.5 text-xs font-medium bg-neutral-50 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200 border-neutral-200 dark:border-neutral-700 leading-3">
+        <span className="flex items-center gap-1"><span className="text-neutral-400">&lt;-</span><span>{prompt}</span></span>
+        <span className="flex items-center gap-1"><span className="text-neutral-400">-&gt;</span><span>{completion}</span></span>
       </span>
     </Tooltip>
   );

@@ -169,9 +169,10 @@ async function runConversation(opts: {
   const { model, availableTools, systemPrompt, task, feature, agentType, taskTools, git, completion, complete, emit } = opts;
   const doEmit = (e: { type: string; payload?: any }) => { try { emit?.(e); } catch {} };
 
-  const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
-  // Initial snapshot (contains the system/user bootstrap prompt)
-  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice() } });
+  // Initial system prompt is a system message (Turn 0)
+  const messages: CompletionMessage[] = [{ role: 'system', content: systemPrompt }];
+  // Initial snapshot (contains the system bootstrap prompt)
+  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice(), turn: 0 } });
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
     try {
@@ -219,16 +220,19 @@ async function runConversation(opts: {
 
         // Termination tools mirror Python
         if (['finish_feature', 'block_feature', 'finish_spec', 'block_task'].includes(toolName)) {
-          // Final conversation snapshot before termination
+          // Final conversation snapshot before termination (assistant is final; no tool results turn)
           doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), tool: toolName } });
           complete(toolName === 'block_feature' || toolName === 'block_task' ? 'block' : 'finish');
           return;
         }
       }
 
-      const toolResultMsg: CompletionMessage = { role: 'user', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') };
+      // Append tool results as a dedicated 'tool' role message to avoid confusing with user turns
+      const toolResultMsg: CompletionMessage = { role: 'tool', content: '--- TOOL RESULTS ---\n' + toolOutputs.join('\n') } as any;
+      // Add a source hint for legacy parsers
+      (toolResultMsg as any).source = 'tools';
       messages.push(toolResultMsg);
-      // Emit user/tool results message appended
+      // Emit tool results message appended
       doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
       // progress hint after tools
       doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i + 1} tool calls processed` } });
@@ -399,9 +403,7 @@ function shouldIgnoreCopy(relPath: string): boolean {
     // Python (from original mirror)
     'venv', '__pycache__',
     // Logs and temp
-    'logs', 'tmp', 'temp',
-    // Factory runtime state: Avoid copying .factory so isolated runs don't produce duplicate history
-    '.factory'
+    'logs', 'tmp', 'temp'
   ]);
 
   // If any path segment matches an ignored dir name
@@ -584,6 +586,22 @@ export async function runIsolatedOrchestrator(opts: {
     // best-effort cleanup
     try { fs.rmSync(tmpBase, { recursive: true, force: true }); } catch {}
     return;
+  }
+
+  // Ensure the isolated workspace does not create or track local history in VCS.
+  // We do not delete histories; we simply ignore them in the temp workspace.
+  try {
+    const giPath = path.join(workspace, '.gitignore');
+    const ignoreLine = '.factory/';
+    let existing = '';
+    try { existing = fs.readFileSync(giPath, 'utf8'); } catch {}
+    if (!existing.split(/\r?\n/).some(line => line.trim() === ignoreLine)) {
+      const prefix = existing && !existing.endsWith('\n') ? '\n' : '';
+      fs.writeFileSync(giPath, existing + prefix + ignoreLine + '\n', 'utf8');
+      logger.info('Added .factory/ to isolated workspace .gitignore to avoid duplicate history runs.');
+    }
+  } catch (e) {
+    logger.warn(`Failed to update isolated workspace .gitignore: ${e}`);
   }
 
   const git = gitFactory(workspace);

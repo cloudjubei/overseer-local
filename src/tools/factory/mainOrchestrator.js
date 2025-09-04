@@ -32,6 +32,8 @@ const RUN_SUBSCRIBERS = new Map(); // runId -> Set<webContentsId>
 const RUNS = new Map(); // runId -> RunHandle
 const RUN_META = new Map(); // runId -> metadata snapshot
 const RUN_TIMERS = new Map(); // runId -> heartbeat timer
+// Track last known LLM messages per run to persist on cancellation
+const RUN_MESSAGES = new Map(); // runId -> last messages array
 
 let PRICING = null;
 let HISTORY = null;
@@ -89,6 +91,20 @@ function persistMeta(runId) {
     }
   } catch (e) {
     console.warn('[factory] persistMeta error', e?.message || e);
+  }
+}
+
+function persistMessages(runId, messages) {
+  try {
+    if (!HISTORY || !messages) return;
+    const h = HISTORY;
+    if (typeof h.writeMessages === 'function') {
+      h.writeMessages(runId, messages);
+    } else if (typeof h.saveMessages === 'function') {
+      h.saveMessages(runId, messages);
+    }
+  } catch (e) {
+    console.warn('[factory] persistMessages error', e?.message || e);
   }
 }
 
@@ -220,15 +236,11 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
         }
       } catch {}
 
-      // Persist message snapshots when provided
+      // Capture and persist messages when provided (init, snapshots, or final)
       try {
-        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final') && e?.payload?.messages && HISTORY) {
-          const h = HISTORY;
-          if (typeof h.writeMessages === 'function') {
-            h.writeMessages(runHandle.id, e.payload.messages);
-          } else if (typeof h.saveMessages === 'function') {
-            h.saveMessages(runHandle.id, e.payload.messages);
-          }
+        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final' || e?.type === 'llm/messages/init') && e?.payload?.messages) {
+          RUN_MESSAGES.set(runHandle.id, e.payload.messages);
+          persistMessages(runHandle.id, e.payload.messages);
         }
       } catch (err) {
         console.warn('[factory] Failed to persist messages for', runHandle.id, err?.message || err);
@@ -236,6 +248,12 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
 
       updateMetaFromEvent(runHandle.id, e);
       broadcastEventToSubscribers(runHandle.id, e);
+
+      // If we receive a run/cancelled event, proactively flush last messages (if any)
+      if (e?.type === 'run/cancelled') {
+        const last = RUN_MESSAGES.get(runHandle.id);
+        if (last) persistMessages(runHandle.id, last);
+      }
     });
 
     const cleanup = () => {
@@ -244,6 +262,7 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       stopHeartbeat(runHandle.id);
       RUNS.delete(runHandle.id);
       RUN_SUBSCRIBERS.delete(runHandle.id);
+      RUN_MESSAGES.delete(runHandle.id);
       // keep RUN_META for a while? Persisted already
       RUN_META.delete(runHandle.id);
     };
@@ -262,6 +281,9 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     const evt = { type: 'run/cancelled', payload: { reason: reason || 'Cancelled' }, ts: nowIso() };
     updateMetaFromEvent(runId, evt);
     broadcastEventToSubscribers(runId, evt);
+    // Persist last known messages if we have any
+    const last = RUN_MESSAGES.get(runId);
+    if (last) persistMessages(runId, last);
     stopHeartbeat(runId);
   }
 

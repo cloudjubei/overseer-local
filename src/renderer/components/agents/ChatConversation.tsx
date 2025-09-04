@@ -114,16 +114,34 @@ function useTurnBundles(messages: AgentRunMessage[] | undefined) {
     const turns: Turn[] = [];
     let current: Turn | null = null;
 
-    const isToolMsg = (m: AgentRunMessage) => m.source === 'tools' || (m.content || '').startsWith('--- TOOL RESULTS ---');
+    const isToolMsg = (m: AgentRunMessage) => {
+      const content = m.content || '';
+      // Tool messages may be persisted with role 'tool' or with role 'user' but content prefixed
+      const hinted = (m as any).source === 'tools';
+      return m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---');
+    };
 
     for (const m of messages || []) {
       const role = m.role || '';
+
+      // Collect first system prompt and any system messages separately
       if (role === 'system') {
         systemMsgs.push(m);
         continue;
       }
 
+      // Tool results should attach to the current turn, not start a new user turn
+      if (isToolMsg(m)) {
+        if (!current) current = { index: turns.length };
+        current.tools = m;
+        // When tools are attached, we close the turn and start a new one next time
+        turns.push(current);
+        current = null;
+        continue;
+      }
+
       if (role === 'user') {
+        // Regular user messages begin a new turn (e.g., for task runs without features)
         if (current && (current.user || current.assistant || current.tools)) {
           turns.push(current);
           current = null;
@@ -135,18 +153,15 @@ function useTurnBundles(messages: AgentRunMessage[] | undefined) {
       if (role === 'assistant') {
         if (!current) current = { index: turns.length };
         current.assistant = m;
+        // Do not push yet; we might receive tool results next
         continue;
       }
 
-      if (isToolMsg(m)) {
-        if (!current) current = { index: turns.length };
-        current.tools = m;
-        continue;
-      }
-
+      // Fallback: if message type doesn't match, keep it as a system info
       systemMsgs.push(m);
     }
 
+    // If there's a dangling turn (e.g., final assistant message requesting finish), push it
     if (current && (current.user || current.assistant || current.tools)) {
       turns.push(current);
     }
@@ -184,9 +199,10 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
   }, [turns.length]);
 
   const systemPrompt = useMemo(() => {
-    const m = systemMsgs.find(x => x.role === 'user' && (x.content || '').includes('#CURRENT TASK')) || systemMsgs.find(x => x.role === 'system') || systemMsgs[0];
+    // Prefer first system role message; fallback to the bootstrap message containing #CURRENT TASK
+    const m = systemMsgs.find(x => x.role === 'system') || (run.messages || []).find(x => (x.content || '').includes('#CURRENT TASK')) || systemMsgs[0];
     return m?.content;
-  }, [systemMsgs]);
+  }, [systemMsgs, run.messages]);
 
   const lastIndex = turns.length - 1;
 
@@ -214,7 +230,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
             // Build a short title for the turn header
             const titleParts: string[] = [];
             titleParts.push(`Turn ${index + 1}`);
-            if (assistant?.durationMs) titleParts.push(`${assistant.durationMs}ms`);
+            if ((assistant as any)?.durationMs) titleParts.push(`${(assistant as any).durationMs}ms`);
             const title = titleParts.join(' \u00b7 ');
 
             const isLast = index === lastIndex;

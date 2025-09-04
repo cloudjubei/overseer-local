@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import Tooltip from '../ui/Tooltip';
+import { getPrice as getPricingRecord } from '../../services/pricingService';
 
 export type CostChipProps = {
   provider?: string;
@@ -13,16 +14,19 @@ function formatUSD(n?: number) {
 }
 
 export default function CostChip({ provider, model, costUSD }: CostChipProps) {
-  // We expect the main process or the factory tools to have populated window.__factoryPricing if available
-  // Fallback: show provider/model and that pricing may be unavailable
-  const price = useMemo(() => {
-    const g: any = (globalThis as any);
-    const pm = g.__factoryPricing as undefined | { getPrice: (prov?: string, mdl?: string) => { inputPerMTokensUSD: number; outputPerMTokensUSD: number } | undefined };
-    try {
-      return pm?.getPrice?.(provider, model);
-    } catch {
-      return undefined;
-    }
+  const [price, setPrice] = useState<{ inputPerMTokensUSD: number; outputPerMTokensUSD: number } | undefined>(undefined);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const rec = await getPricingRecord(provider, model);
+        if (mounted) setPrice(rec ? { inputPerMTokensUSD: rec.inputPerMTokensUSD, outputPerMTokensUSD: rec.outputPerMTokensUSD } : undefined);
+      } catch {
+        if (mounted) setPrice(undefined);
+      }
+    })();
+    return () => { mounted = false; };
   }, [provider, model]);
 
   const content = (
@@ -30,8 +34,8 @@ export default function CostChip({ provider, model, costUSD }: CostChipProps) {
       <div className="font-semibold mb-1">{provider || 'Unknown'} · {model || 'Unknown'}</div>
       {price ? (
         <div className="space-y-0.5">
-          <div><span className="text-neutral-400">Input:</span> ${'{'}price.inputPerMTokensUSD{'}'} per 1M tokens</div>
-          <div><span className="text-neutral-400">Output:</span> ${'{'}price.outputPerMTokensUSD{'}'} per 1M tokens</div>
+          <div><span className="text-neutral-400">Input:</span> ${price.inputPerMTokensUSD} per 1M tokens</div>
+          <div><span className="text-neutral-400">Output:</span> ${price.outputPerMTokensUSD} per 1M tokens</div>
         </div>
       ) : (
         <div className="text-neutral-400">Pricing unavailable</div>

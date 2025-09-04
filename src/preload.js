@@ -133,7 +133,11 @@ const FACTORY_API = {
   },
   getRunMessages: (runId) => {
     return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_HISTORY_MESSAGES, { runId });
-  }
+  },
+  // Pricing
+  getPricingState: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_GET),
+  pricingGet: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_GET),
+  refreshPricing: (provider, url) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 };
 
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
