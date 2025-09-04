@@ -234,7 +234,7 @@
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "-",
+      "status": "+",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
@@ -289,7 +289,7 @@
     },
     {
       "id": "e9e526e8-576a-448b-9359-db97475db485",
-      "status": "-",
+      "status": "+",
       "title": "Agent Run - UI fix",
       "description": "When viewing an agent run inside @src/renderer/screens/AgentsView.tsx it doesn't show the whole conversation. Just the last message. This needs to be fixed to show the full conversation.",
       "plan": "",
