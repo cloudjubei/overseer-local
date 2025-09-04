@@ -437,7 +437,7 @@
     },
     {
       "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
-      "status": "-",
+      "status": "+",
       "title": "An active run should only show inside Active not History",
       "description": "",
       "plan": "",
