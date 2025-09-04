@@ -357,7 +357,7 @@
     },
     {
       "id": "d05e6082-c27c-487f-bacd-837f7f5b7f73",
-      "status": "-",
+      "status": "+",
       "title": "Cancelled agent runs are not recorded properly",
       "description": "They don't change any files and are not recorded. They always show as in progress.",
       "plan": "",
