@@ -110,6 +110,22 @@ class AgentsServiceImpl {
             } as RunRecord;
             this.wireRunEvents(run);
             this.runs.set(run.runId, run);
+
+            // Load any existing messages persisted for this active run (so we don't only show new ones)
+            try {
+              if (typeof factory.getRunMessages === 'function') {
+                const msgs = await factory.getRunMessages(run.runId);
+                if (Array.isArray(msgs)) {
+                  run.messages = msgs.map((mm: any) => ({
+                    role: String(mm?.role ?? ''),
+                    content: String(mm?.content ?? ''),
+                    turn: mm?.turn,
+                  }));
+                }
+              }
+            } catch (err) {
+              console.warn('[agentsService] Failed to load messages for active run', run.runId, (err as any)?.message || err);
+            }
           }
         }
       }

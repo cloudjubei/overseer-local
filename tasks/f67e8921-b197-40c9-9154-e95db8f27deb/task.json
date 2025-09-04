@@ -209,7 +209,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Agents - run histories UI improvements",
       "description": "The runs table:\nThe Status field should be a symbol (not text)\nStarted and Updated should show Date and Time below.\nThe action buttons should be hidden and show on hover (similar to actions in @src/renderer/tasks/TasksListView.tsx ). The action buttons should be icon only - no text.",
       "plan": "",
@@ -275,7 +275,7 @@
     },
     {
       "id": "abefc7ba-3098-4aee-a01b-694a5a2a9d43",
-      "status": "-",
+      "status": "+",
       "title": "When running an agent - all the GIT credentials are not found in the @.env",
       "description": "The agent runs, exchanges messages, but no code is committed.\nThe error is emitted from the function `push` inside @packages/factory-ts/src/gitManager.ts\nThe error:\nCould not push: Error: GIT_REPO_URL, GIT_USER_NAME, and GIT_PAT must be set in .env for push operations.",
       "plan": "",
@@ -287,7 +287,7 @@
     },
     {
       "id": "e9e526e8-576a-448b-9359-db97475db485",
-      "status": "-",
+      "status": "+",
       "title": "Agent Run - UI fix",
       "description": "When viewing an agent run inside @src/renderer/screens/AgentsView.tsx it doesn't show the whole conversation. Just the last message. This needs to be fixed to show the full conversation.",
       "plan": "",
