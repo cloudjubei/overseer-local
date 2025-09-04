@@ -211,8 +211,8 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
     return { id, ee, handle, signalCancelled: () => cancelled };
   }
 
-  function getAgentFromArgs(args: { agent?: any; metadata?: any }, fallback: any = 'developer') {
-    return args.agent || args.metadata?.agent || fallback;
+  function getAgentFromArgs(args: { agentType?: string, agent?: any; metadata?: any }, fallback: any = 'developer') {
+    return args.agentType || args.agent || args.metadata?.agent || fallback;
   }
 
   function startRun(args: AgentRun): RunHandle {

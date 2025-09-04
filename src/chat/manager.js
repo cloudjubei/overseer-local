@@ -4,12 +4,11 @@ import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import ChatsStorage from './storage';
 import { LLMProvider } from './LLMProvider'
 import { tasksManager, filesManager, projectsManager } from '../managers';
-import { buildChatTools } from 'factory-ts';
 
 const MESSAGES_TO_SEND = 10
 
 export class ChatsManager {
-  constructor(projectRoot, window, projectsManager, tasksManager, filesManager) {
+  constructor(projectRoot, window, projectsManager, tasksManager, filesManager, factory) {
     this.projectRoot = projectRoot;
     this.window = window;
     this.storages = {};
@@ -18,6 +17,7 @@ export class ChatsManager {
     this.projectsManager = projectsManager
     this.tasksManager = tasksManager
     this.filesManager = filesManager
+    this.factory = factory
   }
 
   async __getStorage(projectId) {
@@ -93,9 +93,8 @@ export class ChatsManager {
       const providerMessages = this._withAttachmentsAsMentions(messagesHistory);
       let currentMessages = [systemPrompt, ...providerMessages];
 
-      // Build tools via factory-ts
-      const repoRoot = this.projectsManager?.projectRoot || this.projectRoot || process.cwd();
-      const { tools, callTool } = buildChatTools({ repoRoot, projectId });
+      const repoRoot = this.projectRoot
+      const { tools, callTool } = this.factory.buildChatTools({ repoRoot, projectId });
 
       const provider = new LLMProvider(config);
 

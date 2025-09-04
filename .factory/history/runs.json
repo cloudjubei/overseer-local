@@ -1,5 +1,16 @@
 [
   {
+    "runId": "task_ccq50tjt_mf5tnz46",
+    "projectId": "main",
+    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-04T19:51:43.495Z",
+    "updatedAt": "2025-09-04T19:51:45.379Z"
+  },
+  {
     "runId": "task_uaiet0yp_mf5nk722",
     "projectId": "main",
     "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",

@@ -6,7 +6,8 @@ import fs from 'node:fs';
 // Load local package factory-ts from monorepo
 // Use dynamic import to avoid issues with CJS/ESM resolution in Electron
 let factoryTs;
-async function loadFactory() {
+async function loadFactory()
+{
   if (factoryTs) return factoryTs;
   const cwd = process.cwd();
   const distEsm = path.resolve(cwd, 'packages/factory-ts/dist/index.js');
@@ -286,13 +287,14 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     stopHeartbeat(runId);
   }
 
-  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { projectId, taskId, llmConfig, budgetUSD, metadata }) => {
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { agentType, projectId, taskId, llmConfig, budgetUSD, metadata }) => {
     console.log('[factory] START_TASK', maskSecrets({ projectId, taskId, llmConfig, budgetUSD, metadata }));
     try {
-      const run = orchestrator.startRun({ projectId, taskId, llmConfig, budgetUSD, metadata });
+      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (task)', run?.id);
       const initMeta = {
         runId: run.id,
+        agentType,
         projectId,
         taskId,
         featureId: undefined,
@@ -317,13 +319,14 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     }
   });
 
-  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { projectId, taskId, featureId, llmConfig, budgetUSD, metadata }) => {
-    console.log('[factory] START_FEATURE', maskSecrets({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata }));
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { agentType, projectId, taskId, featureId, llmConfig, budgetUSD, metadata }) => {
+    console.log('[factory] START_FEATURE', maskSecrets({ agentType, projectId, taskId, featureId, llmConfig, budgetUSD, metadata }));
     try {
-      const run = orchestrator.startRun({ projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
+      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
       console.log('[factory] Run started (feature)', run?.id);
       const initMeta = {
         runId: run.id,
+        agentType,
         projectId,
         taskId,
         featureId,

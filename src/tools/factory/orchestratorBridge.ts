@@ -54,9 +54,9 @@ function redactOptions(options?: Record<string, any>) {
 
 export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
-  const { projectId, taskId, options } = params;
-  console.log('[factory:renderer] Starting task run', { projectId, taskId: String(taskId), options: redactOptions(options) });
-  const res = await (window as any).factory.startTaskRun(projectId, String(taskId), options ?? {});
+  const { agentType, projectId, taskId, options } = params;
+  console.log('[factory:renderer] Starting task run', { agentType, projectId, taskId, options: redactOptions(options) });
+  const res = await (window as any).factory.startTaskRun(agentType, projectId, taskId, options ?? {});
   const runId: string = res?.runId;
   if (!runId) throw new Error('Failed to start task run: missing runId');
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
@@ -66,9 +66,9 @@ export async function startTaskRun(params: StartTaskRunParams): Promise<{ handle
 
 export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ handle: RunHandle; events: EventSourceLike }> {
   if (!(window as any).factory) throw new Error('Factory preload not available');
-  const { projectId, taskId, featureId, options } = params;
-  console.log('[factory:renderer] Starting feature run', { projectId, taskId: String(taskId), featureId: String(featureId), options: redactOptions(options) });
-  const res = await (window as any).factory.startFeatureRun(projectId, String(taskId), String(featureId), options ?? {});
+  const { agentType, projectId, taskId, featureId, options } = params;
+  console.log('[factory:renderer] Starting feature run', { agentType, projectId, taskId, featureId, options: redactOptions(options) });
+  const res = await (window as any).factory.startFeatureRun(agentType, projectId, taskId, featureId, options ?? {});
   const runId: string = res?.runId;
   if (!runId) throw new Error('Failed to start feature run: missing runId');
   const handle: RunHandle = { id: runId, cancel: (reason?: string) => (window as any).factory.cancelRun(runId, reason) } as any;
@@ -76,7 +76,7 @@ export async function startFeatureRun(params: StartFeatureRunParams): Promise<{ 
   return { handle, events };
 }
 
-export async function startRunGeneric(params: { projectId: string; taskId: string; featureId?: string | number; options?: Record<string, any> }) {
+export async function startRunGeneric(params: { agentType: string, projectId: string; taskId: string; featureId?: string; options?: Record<string, any> }) {
   if (params.featureId != null) return startFeatureRun(params as any);
   if (params.taskId != null) return startTaskRun(params as any);
   throw new Error('taskId or featureId required');

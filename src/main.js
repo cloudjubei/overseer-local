@@ -3,7 +3,6 @@ import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { registerScreenshotService } from './capture/screenshotService';
 import { initManagers, stopManagers } from './managers';
-import { registerFactoryIPC } from './tools/factory/mainOrchestrator.js';
 
 if (started) {
   app.quit();
@@ -38,7 +37,6 @@ app.whenReady().then(async () => {
   const projectRoot = app.getAppPath();
 
   await initManagers(projectRoot, mainWindow);
-  await registerFactoryIPC(mainWindow, projectRoot);
   
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
