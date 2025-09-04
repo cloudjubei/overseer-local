@@ -1,7 +1,6 @@
 import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
-import { LLMConfig } from './chatsService';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
-import { AgentType } from 'packages/factory-ts/src/types';
+import { AgentType, LLMConfig } from 'packages/factory-ts/src/types';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 

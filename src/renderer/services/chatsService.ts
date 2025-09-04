@@ -1,14 +1,7 @@
+import { LLMConfig } from 'packages/factory-ts/src/types';
 import { ServiceResult } from './serviceResult';
 
 export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom';
-export type LLMConfig = {
-  id: string,
-  name: string,
-  provider: LLMProviderType,
-  apiBaseUrl: string,
-  apiKey: string,
-  model: string
-};
 
 export type ChatRole = 'user' | 'assistant' | 'system';
 export type ChatMessage = { role: ChatRole, content: string, model?: string, attachments?: string[] };

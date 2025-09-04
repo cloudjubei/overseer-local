@@ -51,15 +51,16 @@ export type ToolCall = { tool_name?: string; tool?: string; name?: string; argum
 export type ToolResult = { name: string; result: string };
 export type AgentResponse = { thoughts?: string; tool_calls?: ToolCall[] };
 
-
 export type LLMConfig = {
   model: string;
-  provider?: string; // e.g., openai, azure, together, groq, openrouter, ollama, custom
-  apiKey?: string;
-  baseURL?: string;
+  provider: string; // e.g., openai, azure, together, groq, openrouter, ollama, custom
+  apiKey: string;
+  apiBaseUrl: string;
+
   // extra provider fields (azure etc.) tolerated
   [key: string]: any;
 };
+
 
 export type AgentType = 'developer' | 'tester' | 'planner' | 'contexter' | 'speccer';
 export type AgentRun = {

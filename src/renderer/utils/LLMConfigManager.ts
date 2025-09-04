@@ -1,5 +1,5 @@
+import { LLMConfig } from 'packages/factory-ts/src/types';
 import { v4 as uuidv4 } from 'uuid';
-import { LLMConfig } from '../services/chatsService';
 
 export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed';
 
@@ -48,7 +48,7 @@ export class LLMConfigManager {
     return configs.find(c => c.id === activeId) || null;
   }
 
-  addConfig(config: Omit<LLMConfig, 'id'>): LLMConfig {
+  addConfig(config: LLMConfig): LLMConfig {
     const newConfig: LLMConfig = { ...config, id: uuidv4() } as LLMConfig;
     const configs = this.getConfigs();
     configs.push(newConfig);

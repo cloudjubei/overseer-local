@@ -287,10 +287,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     stopHeartbeat(runId);
   }
 
-  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { agentType, projectId, taskId, llmConfig, budgetUSD, metadata }) => {
-    console.log('[factory] START_TASK', maskSecrets({ projectId, taskId, llmConfig, budgetUSD, metadata }));
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { agentType, projectId, taskId, llmConfig, options }) => {
+    console.log('[factory] START_TASK', maskSecrets({ agentType, projectId, taskId, llmConfig, options }));
     try {
-      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, budgetUSD, metadata });
+      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, options });
       console.log('[factory] Run started (task)', run?.id);
       const initMeta = {
         runId: run.id,
@@ -319,10 +319,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     }
   });
 
-  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { agentType, projectId, taskId, featureId, llmConfig, budgetUSD, metadata }) => {
-    console.log('[factory] START_FEATURE', maskSecrets({ agentType, projectId, taskId, featureId, llmConfig, budgetUSD, metadata }));
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { agentType, projectId, taskId, featureId, llmConfig, options }) => {
+    console.log('[factory] START_FEATURE', maskSecrets({ agentType, projectId, taskId, featureId, llmConfig, options }));
     try {
-      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, budgetUSD, metadata });
+      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, options });
       console.log('[factory] Run started (feature)', run?.id);
       const initMeta = {
         runId: run.id,

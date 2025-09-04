@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { LLMConfig } from './types';
 
 export type CompletionMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 export type CompletionResponse = { message: { role: 'assistant'; content: string }, usage?: { promptTokens?: number; completionTokens?: number; totalTokens?: number; costUSD?: number; provider?: string; model?: string } };
@@ -14,11 +15,10 @@ function estimateTokensFromMessages(messages: CompletionMessage[]): number {
   return messages.reduce((acc, m) => acc + estimateTokensFromText(m.content), 0);
 }
 
-export function createCompletionClient(cfg: { model: string; provider?: string; apiKey?: string; baseURL?: string; [k: string]: any }): CompletionClient {
-  // Simple OpenAI-compatible client; supports custom baseURL
-  const baseURL = cfg.baseURL || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
-  const apiKey = cfg.apiKey || process.env.OPENAI_API_KEY || '';
-  const provider = cfg.provider || 'openai';
+export function createCompletionClient(llmConfig: LLMConfig): CompletionClient {
+  const baseURL = llmConfig.apiBaseUrl || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+  const apiKey = llmConfig.apiKey || process.env.OPENAI_API_KEY || '';
+  const provider = llmConfig.provider || 'openai';
 
   // Mock mode if no apiKey
   if (!apiKey && process.env.FACTORY_MOCK_LLM === '1') {
