@@ -121,6 +121,14 @@ function parseToolResultsObjects(msg?: AgentRunMessage): ParsedToolResult[] {
         out.push({ name: String((jo as any).name), result: String((jo as any).result) });
         continue;
       }
+      if (Array.isArray(jo)) {
+        for (const x of jo) {
+          if (x && typeof x === 'object' && 'name' in x && 'result' in x) {
+            out.push({ name: String((x as any).name), result: String((x as any).result) });
+          }
+        }
+        continue;
+      }
     } catch {}
     if (line.startsWith('Tool ')) {
       const nameMatch = /^Tool\s+([^\s:]+)(?::|\s)/.exec(line);
@@ -156,7 +164,21 @@ function isToolMsg(m: AgentRunMessage | undefined) {
   if (!m) return false;
   const content = m.content || '';
   const hinted = (m as any).source === 'tools';
-  return m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---');
+  if (m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---')) return true;
+  // Robust detection: if content is JSON representing tool results, treat as tool message
+  try {
+    const o = JSON.parse(content);
+    if (Array.isArray(o)) {
+      return o.every(x => x && typeof x === 'object' && 'name' in x && 'result' in x);
+    }
+    if (o && typeof o === 'object') {
+      if ('name' in o && 'result' in o) return true;
+      if ('results' in o && Array.isArray((o as any).results)) {
+        return (o as any).results.every((x: any) => x && typeof x === 'object' && 'name' in x && 'result' in x);
+      }
+    }
+  } catch {}
+  return false;
 }
 
 function buildFeatureTurns(messages: AgentRunMessage[]) {
