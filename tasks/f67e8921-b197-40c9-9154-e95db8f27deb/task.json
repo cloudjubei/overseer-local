@@ -249,7 +249,7 @@
     },
     {
       "id": "abefc7ba-3098-4aee-a01b-694a5a2a9d43",
-      "status": "-",
+      "status": "+",
       "title": "When running an agent - all the GIT credentials are not found in the @.env",
       "description": "There is a .env file both in this project and in factory-ts.\nJust like in the python counterpart ( the files @packages/factory-ts/blueprint/run_local_agent.py and @packages/factory-ts/blueprint/git_manager.py ) the GIT credentials must be loaded from the workspaces `.env` file in the root of the project.",
       "plan": "",

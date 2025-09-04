@@ -1,6 +1,7 @@
 import { ipcMain, webContents } from 'electron';
 import IPC_HANDLER_KEYS from '../../ipcHandlersKeys.js';
 import path from 'node:path';
+import fs from 'node:fs';
 
 // Load local package factory-ts from monorepo
 // Use dynamic import to avoid issues with CJS/ESM resolution in Electron
@@ -126,8 +127,28 @@ function updateMetaFromEvent(runId, e) {
   persistMeta(runId);
 }
 
+function loadWorkspaceDotenv(projectRoot) {
+  try {
+    const dotenv = require('dotenv');
+    const envPath = path.join(projectRoot, '.env');
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath });
+      console.log('[factory] Loaded workspace .env from', envPath);
+    } else {
+      console.log('[factory] No .env at', envPath);
+    }
+  } catch (e) {
+    // If dotenv isn't available or fails, ignore silently to avoid crashing Electron main
+    console.warn('[factory] dotenv not loaded in main process (optional):', e?.message || e);
+  }
+}
+
 export async function registerFactoryIPC(mainWindow, projectRoot) {
   console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
+
+  // Ensure workspace .env is loaded in main process so child processes and libs see credentials
+  loadWorkspaceDotenv(projectRoot);
+
   const { createOrchestrator, createHistoryStore, createPricingManager } = await loadFactory();
 
   try {

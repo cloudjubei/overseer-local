@@ -29,6 +29,7 @@ This document describes how files and directories are organised in this reposito
     - src/tools/factory/: Integration layer for the local factory-ts package (orchestrator bridge and helpers).
       - src/tools/factory/orchestratorBridge.ts: Renderer bridge that calls Electron preload API to start runs and receive events from the main process. Avoids importing Node-only modules in the renderer.
       - src/tools/factory/mainOrchestrator.js: Electron main-side IPC handlers that manage factory-ts orchestrator runs and stream events to renderers. Now persists metadata and conversation snapshots for runs via the factory-ts HistoryStore, and exposes IPC endpoints to list history and fetch messages.
+      - Update: mainOrchestrator.js now loads the workspace .env file (projectRoot/.env) on startup so Git credentials and other environment variables are available to the factory orchestrator and GitManager.
   - src/chat/: Chat providers, manager, and storage.
   - src/capture/: Screenshot capture service (main process).
   - src/files/: Files manager and per-project storage.
@@ -111,4 +112,8 @@ History persistence for agent runs:
 - agentsService bootstraps runs from both active (in-memory) and persisted history on start.
 
 ### Isolated Orchestrator and Packaged App Environments
-- packages/factory-ts/src/orchestrator.ts: runIsolatedOrchestrator accepts an optional repoRoot absolute path and will avoid copying from Electron's app.asar virtual filesystem. If not provided, it attempts to resolve a real filesystem directory using Electron's process.resourcesPath, or by stripping the .asar segment and preferring app.asar.unpacked. Pass an absolute projectDir to copy only that directory into the temp workspace.
+- packages/factory-ts/src/orchestrator.ts: runIsolatedOrchestrator accepts an optional repoRoot absolute path and will avoid copying from Electron's app.asar virtual filesystem. If not provided, it attempts to resolve a real filesystem directory using Electron's process.resourcesPath, or by stripping the .asar segment and preferring app.asar.unpacked when present. Pass an absolute projectDir to copy only that directory into the temp workspace.
+
+### Environment Variables and Git Credentials
+- On app start (main process), src/tools/factory/mainOrchestrator.js now loads the workspace .env file from projectRoot/.env. This ensures that GIT credentials (GIT_PAT/GIT_TOKEN/GITHUB_TOKEN/GH_TOKEN, GIT_USER_NAME/GIT_USERNAME, GIT_USER_EMAIL, GIT_REPO_URL/REPO_URL) are available to the factory-ts GitManager.
+- The factory-ts GitManager also attempts to load a .env from the repository root passed to it (and its parent), providing an additional safeguard when running in isolated workspaces.
