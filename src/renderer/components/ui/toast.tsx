@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { IconXCircle } from './Icons';
 
 type ToastVariant = 'default' | 'success' | 'error' | 'warning';
 
@@ -25,9 +26,8 @@ function useToastsState() {
     }
   }, []);
 
-  const startClose = useCallback((id: string, afterMs = 220) => {
+  const startClose = useCallback((id: string, afterMs = 200) => {
     setItems((xs) => xs.map((x) => (x.id === id ? { ...x, isClosing: true } : x)));
-    // remove after the out animation
     const timeout = window.setTimeout(() => remove(id), afterMs);
     closeTimers.current.set(id, timeout);
   }, [remove]);
@@ -57,13 +57,13 @@ function VariantIcon({ variant }: { variant: ToastVariant }) {
   const styles = (() => {
     switch (variant) {
       case 'success':
-        return { wrapper: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400', icon: '✔' };
+        return { wrapper: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400', icon: '\u2714' };
       case 'error':
-        return { wrapper: 'bg-red-500/15 text-red-600 dark:text-red-400', icon: '⚠' };
+        return { wrapper: 'bg-red-500/15 text-red-600 dark:text-red-400', icon: '\u26a0' };
       case 'warning':
         return { wrapper: 'bg-amber-500/20 text-amber-700 dark:text-amber-300', icon: '!' };
       default:
-        return { wrapper: 'bg-gray-500/15 text-gray-600 dark:text-gray-300', icon: '•' };
+        return { wrapper: 'bg-gray-500/15 text-gray-600 dark:text-gray-300', icon: '\u2022' };
     }
   })();
   return (
@@ -83,6 +83,14 @@ export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: st
   const lastYRef = useRef(0);
   const startTimeRef = useRef(0);
 
+  // Enter/exit animation state (ensures animation always occurs, even without flick)
+  const [entered, setEntered] = useState(false);
+  useEffect(() => {
+    // Trigger enter on next frame for transition to run
+    const r = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(r);
+  }, []);
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (item.isClosing) return;
     setDragging(true);
@@ -95,7 +103,6 @@ export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: st
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging || item.isClosing) return;
     const dy = e.clientY - startYRef.current;
-    // Only allow dragging upward (negative). Small downward moves are ignored.
     const clamped = Math.min(0, dy);
     lastYRef.current = e.clientY;
     setDragY(clamped);
@@ -112,30 +119,52 @@ export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: st
     const FLICK_VELOCITY = -0.6; // px/ms upward (~600px/s)
 
     if (totalDy <= DISMISS_DISTANCE || velocity <= FLICK_VELOCITY) {
-      // Keep the dragged position and fade-out while closing
       setFlickDismiss(true);
       onClose(item.id);
     } else {
-      // Bounce back
       setDragY(0);
     }
   };
 
-  // iOS-like: rounded pill, subtle translucent background, compact spacing
-  const anim = item.isClosing
-    ? 'animate-out fade-out-0 slide-out-to-top-2 duration-200 ease-in'
-    : 'animate-in fade-in-50 slide-in-from-top-2 duration-200 ease-out';
+  // Compute style for smooth, snappy transitions
+  const easingEnter = 'cubic-bezier(0.22, 1, 0.36, 1)'; // springy ease-out
+  const easingExit = 'cubic-bezier(0.4, 0, 1, 1)'; // ease-in
+
+  let transform = '';
+  let opacity: number | undefined;
+  let transition = '';
+
+  if (dragging || flickDismiss) {
+    transform = `translate3d(0, ${dragY}px, 0)`;
+    opacity = Math.max(0.25, Math.min(1, 1 + dragY / 80));
+    transition = 'none';
+  } else if (item.isClosing) {
+    // Slide up and fade out
+    transform = 'translate3d(0, -10px, 0)';
+    opacity = 0;
+    transition = `transform 180ms ${easingExit}, opacity 160ms ${easingExit}`;
+  } else if (!entered) {
+    // Initial pre-enter state
+    transform = 'translate3d(0, -10px, 0)';
+    opacity = 0;
+    transition = 'none';
+  } else {
+    // Settled (post-enter)
+    transform = 'translate3d(0, 0, 0)';
+    opacity = 1;
+    transition = `transform 200ms ${easingEnter}, opacity 200ms ${easingEnter}`;
+  }
 
   const style: React.CSSProperties = {
-    transform: (dragging || flickDismiss) ? `translate3d(0, ${dragY}px, 0)` : undefined,
-    opacity: (dragging || flickDismiss) ? Math.max(0.25, Math.min(1, 1 + dragY / 80)) : undefined,
-    transition: dragging ? 'none' : 'transform 160ms ease-out, opacity 160ms ease-out',
+    transform,
+    opacity,
+    transition,
     touchAction: 'none',
   };
 
   return (
     <div
-      className={`pointer-events-auto w-[340px] overflow-hidden rounded-2xl shadow-xl ${anim} select-none`}
+      className={`pointer-events-auto w-[340px] overflow-hidden rounded-2xl shadow-xl select-none`}
       role="status"
       aria-live="polite"
       onPointerDown={onPointerDown}
@@ -172,7 +201,7 @@ export function ToastView({ item, onClose }: { item: ToastItem; onClose: (id: st
           onClick={() => onClose(item.id)}
           aria-label="Close"
         >
-          ×
+          <IconXCircle className='w-4 h-4'/>
         </button>
       </div>
     </div>

@@ -5,11 +5,10 @@ import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
-import { Button } from '../components/ui/Button'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
-import { IconBack, IconChevron, IconEdit, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
+import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -29,6 +28,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const { project, projectId } = useActiveProject()
   const { tasksById, updateTask, updateFeature, reorderFeatures, getBlockers, getBlockersOutbound } = useTasks()
   const { activeRuns, startTaskAgent, startFeatureAgent, cancelRun } = useAgents()
+
+  // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
+  const preventDragFromNoDragRef = useRef(false)
 
   useEffect(() => {
     if (taskId && tasksById) {
@@ -245,9 +247,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             </button>
             <h2 className="section-title">Overview</h2>
             <div className="section-actions">
-              <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={handleEditTask}>
-                <IconEdit />
-              </button>
+              {/* Edit Task button intentionally removed to keep UI consistent with click-to-open behavior elsewhere */}
             </div>
           </div>
           <div id="overview-content" className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}>
@@ -277,9 +277,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               onDrop={(e) =>{
                 if (!dndEnabled || !dragging) return
                 e.preventDefault()
+                preventDragFromNoDragRef.current = false
                 onListDrop()
               }}
-              onDragEnd={() => clearDndState()}
+              onDragEnd={() => { preventDragFromNoDragRef.current = false; clearDndState() }}
             >
               {sortedFeatures.map((f: Feature, idx: number) => {
                 const blockers = getBlockers(task.id, f.id)
@@ -303,9 +304,21 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       data-feature-id={f.id}
                       draggable={dndEnabled}
                       aria-grabbed={isDragSource}
+                      onPointerDownCapture={(e) => {
+                        const t = e.target as HTMLElement | null
+                        preventDragFromNoDragRef.current = !!(t && t.closest('.no-drag'))
+                      }}
+                      onPointerUpCapture={() => { preventDragFromNoDragRef.current = false }}
                       onDragStart={(e) => {
+                        // If the initial pointer down started on a non-draggable UI (e.g., action buttons), block row drag
+                        if (preventDragFromNoDragRef.current) {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          preventDragFromNoDragRef.current = false
+                          return
+                        }
                         if (!dndEnabled) return
-                        // Prevent dragging when the original target is inside elements that should not initiate drag (e.g., action buttons)
+                        // Fallback: if somehow target is within .no-drag, block as well
                         const target = e.target as HTMLElement | null
                         if (target && target.closest('.no-drag')) {
                           e.preventDefault()
@@ -320,6 +333,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                       }}
                       onDragOver={(e) => { if (!dndEnabled) return; e.preventDefault(); computeDropForRow(e, idx) }}
                       onKeyDown={(e) => onRowKeyDown(e, f.id)}
+                      onClick={(e) => {
+                        // Ignore clicks if we were dragging or if clicking on specific action areas
+                        if (dragging) return
+                        const t = e.target as HTMLElement | null
+                        if (t && t.closest('.no-drag')) return
+                        handleEditFeature(f.id)
+                      }}
                       aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${blockers.length} items this feature is blocked by, ${blockersOutbound.length} items this feature is blocking.  Press Enter to edit.`}
                     >
                       <div className="col col-id">
@@ -338,9 +358,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <RichText text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
-                        <button type="button" className="btn-secondary btn-icon no-drag" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditFeature(f.id) }}>
-                          <IconEdit />
-                        </button>
                         {!featureHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || featureHasActiveRun) return; startFeatureAgent(agentType, projectId, task.id, f.id) }}/>}
                       </div>
 

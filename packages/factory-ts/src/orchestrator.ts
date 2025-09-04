@@ -41,6 +41,37 @@ const PROTOCOL_INSTRUCTIONS = (() => {
   ].join('\n');
 })();
 
+// Human-readable descriptions for tools to avoid duplicating them in agent docs
+const TOOL_DESCRIPTIONS: Record<string, string> = {
+  // Base tools
+  read_files: 'Read the content of one or more files at the given relative paths. Returns an array of strings (one per file).',
+  search_files: 'Search for files by name or textual content under the given path. Returns matching relative paths.',
+  list_files: 'List files and directories at a relative path from the project root.',
+  finish_feature: 'Mark the current feature as complete and end the run. Use only when the work fully meets the acceptance criteria.',
+  block_feature: 'Stop work on the current feature and report why you are blocked (e.g., missing context, unclear requirements).',
+
+  // Speccer
+  create_feature: 'Define and add a new, atomic feature to the task. Include a concise title and a clear description.',
+  finish_spec: 'Signal that the feature specification is complete for the current task.',
+  block_task: 'Stop work on the task and report why you are blocked at the task level.',
+
+  // Developer
+  write_file: 'Create or overwrite a file with the given content. Always use this to write code or docs.',
+  rename_file: 'Rename or move a file from one path to another.',
+  delete_file: 'Delete a file. Use with caution and only when necessary.',
+  run_test: 'Run the test for the current feature and return the output. Use to verify implementation.',
+
+  // Planner
+  update_feature_plan: 'Save a concise, step-by-step implementation plan for the assigned feature.',
+
+  // Tester
+  update_acceptance_criteria: 'Save a clear, verifiable list of acceptance criteria for the assigned feature.',
+  update_test: 'Save the Python test script that validates the acceptance criteria for this feature.',
+
+  // Contexter
+  update_feature_context: 'Save the minimal set of file paths (relative to repo root) required to implement the feature.'
+};
+
 function toolSigsForAgent(agent: string, taskTools: TaskUtils, fileTools: FileTools, git: GitManager): [Record<string, (args: any) => Promise<any> | any>, string[]] {
   const base: Record<string, [(args: any) => Promise<any> | any, string]> = {
     read_files: [ (args: { paths: string[] }) => fileTools.readFiles(args.paths), "read_files(paths: list[str]) -> list[str]" ],
@@ -77,7 +108,8 @@ function toolSigsForAgent(agent: string, taskTools: TaskUtils, fileTools: FileTo
   for (const [name, [fn, sig]] of Object.entries(merged)) {
     if (fn) {
       funcs[name] = fn;
-      sigs.push(sig);
+      const desc = TOOL_DESCRIPTIONS[name] ? ` - ${TOOL_DESCRIPTIONS[name]}` : '';
+      sigs.push(`${sig}${desc}`);
     }
   }
   return [funcs, sigs];
@@ -367,7 +399,9 @@ function shouldIgnoreCopy(relPath: string): boolean {
     // Python (from original mirror)
     'venv', '__pycache__',
     // Logs and temp
-    'logs', 'tmp', 'temp'
+    'logs', 'tmp', 'temp',
+    // Factory runtime state: Avoid copying .factory so isolated runs don't produce duplicate history
+    '.factory'
   ]);
 
   // If any path segment matches an ignored dir name
@@ -393,7 +427,7 @@ async function copyTree(src: string, dest: string) {
     stat = fs.statSync(src);
   } catch (e: any) {
     throw new Error(`Source path does not exist or is not accessible: ${src} (${e?.code || e})`);
-  }
+    }
   if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
   fs.mkdirSync(dest, { recursive: true });
 
@@ -536,7 +570,7 @@ export async function runIsolatedOrchestrator(opts: {
   const { model, agentType, projectId, taskId, featureId, taskTools, fileTools, gitFactory, completion, emit } = opts;
 
   const projectDir = await taskTools.getProjectDir(projectId);
-    
+
   // Create temp workspace
   const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'factory-ts-'));
   // Keep a subfolder to host the copied source

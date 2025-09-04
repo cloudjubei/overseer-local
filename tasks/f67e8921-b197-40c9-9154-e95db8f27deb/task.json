@@ -180,7 +180,7 @@
     },
     {
       "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
-      "status": "-",
+      "status": "+",
       "title": "Agents - run histories UI improvements",
       "description": "@src/renderer/components/agents/ChatConversation.tsx used inside @src/renderer/screens/AgentsView.tsx should have overly large message texts put in a scrollable textbox.\n\nThe currently running agents in @src/renderer/screens/AgentsView.tsx should follow a similar format as the history of agent runs.\n\n@src/renderer/screens/AllAgentsView.tsx should follow a similar style to @src/renderer/screens/AgentsView.tsx \nTo make things more manageable - a component for the agent row display should be made so it can be reused.",
       "plan": "",
@@ -197,7 +197,7 @@
     },
     {
       "id": "6e24f575-cf4d-451f-994f-7190d45ebaaa",
-      "status": "-",
+      "status": "+",
       "title": "Toasts should animate",
       "description": "Toasts need to slide down with an animation when appearing and slide up when hiding.\nThey need to be snappy. It should also be possible to flick them up to make them disappear (like notifications on a mobile device).",
       "plan": "",
@@ -205,12 +205,11 @@
         "src/renderer/components/ui/Toast.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Toasts only seem to animate on the user flick up - they should animate always. The animation needs to be fluid and appealing to the eye."
+      "blockers": []
     },
     {
       "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
-      "status": "-",
+      "status": "+",
       "title": "Run agent button long press",
       "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
       "plan": "",
@@ -219,8 +218,7 @@
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "It's still possible to drag the whole feature row (this is inside @src/renderer/tasks/TaskDetailsView.tsx )."
+      "blockers": []
     },
     {
       "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
@@ -295,7 +293,7 @@
     },
     {
       "id": "894453ef-c700-4128-b714-4ec94498498c",
-      "status": "-",
+      "status": "+",
       "title": "No edit button in Tasks and Features",
       "description": "In @src/renderer/tasks/TaskDetailsView.tsx Clicking a feature should open the edit feature form - the edit button shouldn't show.\nIn @src/renderer/screens/TasksView.tsx Tasks already open on click - there should just be no edit button present.",
       "plan": "",
@@ -311,7 +309,7 @@
     },
     {
       "id": "0fea71a8-c0da-48a1-b4ea-c0db2196c902",
-      "status": "-",
+      "status": "+",
       "title": "When an agent runs - there's a duplicate history run",
       "description": "The Electron app has its own local history run, but when the agent runs on the copy of the project - it also produces a history run. This shouldn't happen - only the original app where the agent was started should create the history run.",
       "plan": "",
@@ -325,7 +323,7 @@
     },
     {
       "id": "d5b4852d-df73-4818-8db0-f7d6954c0108",
-      "status": "-",
+      "status": "+",
       "title": "The agent persona markdown files are too bloated.",
       "description": "These files contain the tool specs, but those are yet again repeated in the overall tool spec in the orchestrator.\nThese files shouldn't have the list of tools available, but the tool descriptions provided by the orchestrator should contain extra comments as to what each tool does (similarly to how each agent's markdown persona file has it).",
       "plan": "",
@@ -343,7 +341,7 @@
     },
     {
       "id": "b8d93d1d-5c66-4628-8a85-9da0197e97e2",
-      "status": "-",
+      "status": "+",
       "title": "The main FILE_ORGANISATION.md is bloated",
       "description": "This file is always included and it contains irrelevant information.\nAgents are asked to update this file, but they seem to always add extra unimportant info.\nThis needs to be tightened and made sure that the instructions for editing the file are clear, and all edits are succinct and precise.\nThe file should contain overall pointers to the project - not detailed descriptions of each file.\nIt should not be a log of changes.",
       "plan": "",
