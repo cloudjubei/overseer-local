@@ -3,6 +3,88 @@
   "status": "-",
   "title": "First online connectivity feature - Agent prices",
   "description": "factory-ts must have a way of getting latest prices, this project Overseer must have a new Sidebar option -> \"Live Data\".\nInside this new screen, all services that should be updated can be controlled.\nThe first such service will be getting all common provider+model prices, as well as user configured ones (so there must be a way for a user to configure such a service to specify the details of what items it should get).\nWhen entering the screen, it should be possible to see each service, when was it last updated and whether the latest data is up to date. For each service there should be standard update settings available that can specify when data is deemed fresh (daily, weekly, monthly) and whether to do an automated check when this freshness expires (on app launch or at a set time).",
-  "features": [],
-  "featureIdToDisplayIndex": {}
+  "features": [
+    {
+      "id": "ae580ac2-b3f0-4a7b-a580-9d34e67a31f4",
+      "status": "-",
+      "title": "Add 'Live Data' to Sidebar and Create New Screen",
+      "description": "Create a new sidebar navigation item titled 'Live Data'. This item should navigate to a new, empty screen component that will serve as the container for the live data services management UI.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "168c2aaa-13a9-45d5-873c-b633cb716dfc",
+      "status": "-",
+      "title": "Define Data Structure for Live Data Services",
+      "description": "Define and type the data structure for a generic live data service. This should include fields for service ID, name, description, last updated timestamp, freshness policy (e.g., 'daily', 'weekly', 'monthly'), and auto-update settings (e.g., enabled, trigger).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "80a2e471-25cf-456e-a03a-b37d428dd621",
+      "status": "-",
+      "title": "Implement Price Fetching in factory-ts",
+      "description": "Enhance `factory-ts` with a new module to fetch LLM provider and model prices from a canonical source. The module should be designed to also support user-configurable sources in the future.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "19e53643-537f-4bbf-9ba6-268baeedcb4f",
+      "status": "-",
+      "title": "Create Main Process Service for Live Data Management",
+      "description": "Implement a main process service to manage the lifecycle of live data services. This includes loading configurations from storage, saving them, and exposing methods to the renderer via IPC to get service status and trigger updates.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "2e00148d-cb4c-4c4b-9388-448b171ff42e",
+      "status": "-",
+      "title": "Implement UI to List Live Data Services",
+      "description": "On the 'Live Data' screen, create a UI component that lists all configured live data services. Each item in the list should display the service name, its last updated timestamp, and its freshness status (e.g., 'Up to date', 'Stale').",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "3bb6a463-3ec8-48dc-9a1f-f70e8797da27",
+      "status": "-",
+      "title": "Implement UI for Service Configuration",
+      "description": "For each service in the list, create a UI component that allows the user to configure its settings. This includes setting the freshness policy (daily, weekly, monthly) and toggling automated checks on or off.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "5b140303-e3c9-467f-a26e-2b09919612c4",
+      "status": "-",
+      "title": "Implement Manual Update Trigger",
+      "description": "Add a button to each service in the UI that allows the user to manually trigger an update. This button will use IPC to call the main process service to fetch the latest data for that specific service.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "abcb8eae-c3ab-424a-9853-b5372f04633f",
+      "status": "-",
+      "title": "Implement Automated Update Logic",
+      "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "ae580ac2-b3f0-4a7b-a580-9d34e67a31f4": 1,
+    "168c2aaa-13a9-45d5-873c-b633cb716dfc": 2,
+    "80a2e471-25cf-456e-a03a-b37d428dd621": 3,
+    "19e53643-537f-4bbf-9ba6-268baeedcb4f": 4,
+    "2e00148d-cb4c-4c4b-9388-448b171ff42e": 5,
+    "3bb6a463-3ec8-48dc-9a1f-f70e8797da27": 6,
+    "5b140303-e3c9-467f-a26e-2b09919612c4": 7,
+    "abcb8eae-c3ab-424a-9853-b5372f04633f": 8
+  }
 }
