@@ -477,7 +477,7 @@
     },
     {
       "id": "46fbca0c-0fd5-4b92-aeae-5e8488cfd192",
-      "status": "-",
+      "status": "+",
       "title": "The AgentModelQuickSelect should be part of ModelChip",
       "description": "The ModelChip should have a parameter to be editable (false by default) that can be used inside TaskDetailsView.tsx to select the most recent models just like AgentModelQuickSelect dos now.\nFollow the design of the selector used for selecting the Agent type inside the RunAgentButton.",
       "plan": "",

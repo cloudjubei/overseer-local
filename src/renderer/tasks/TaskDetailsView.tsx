@@ -12,7 +12,7 @@ import { IconBack, IconChevron, IconExclamation, IconPlay, IconPlus } from '../c
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
-import AgentModelQuickSelect from '../components/agents/AgentModelQuickSelect'
+import ModelChip from '../components/agents/ModelChip'
 import { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
@@ -278,8 +278,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
               </div>
             )}
-            {/* Agent Model selector next to the play button */}
-            <AgentModelQuickSelect />
+            {/* Agent Model selector next to the play button, now using editable ModelChip */}
+            <ModelChip editable className="min-w-[160px]" />
             {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
