@@ -9,7 +9,7 @@ import StatusControl, { StatusPicker, statusKey } from '../components/tasks/Stat
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { useAppSettings } from '../hooks/useAppSettings'
-import { TaskListViewSorting, TaskViewMode } from '../../types/settings'
+import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
 import { useAgents } from '../hooks/useAgents'
 import { Status, Task } from 'packages/factory-ts/src/types'
 import ExclamationChip from '../components/tasks/ExclamationChip'
@@ -45,7 +45,7 @@ const STATUS_ORDER = ['-', '~', '+', '=', '?']
 export default function TasksListView() {
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<TaskListStatusFilter>('all')
   const [sortBy, setSortBy] = useState<TaskListViewSorting>('index_desc')
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<TaskViewMode>('list')
@@ -72,6 +72,7 @@ export default function TasksListView() {
     if (isAppSettingsLoaded){
       setView(appSettings.userPreferences.tasksViewMode)
       setSortBy(appSettings.userPreferences.tasksListViewSorting)
+      setStatusFilter(appSettings.userPreferences.tasksListViewStatusFilter)
     }
   }, [isAppSettingsLoaded])
 
@@ -86,6 +87,12 @@ export default function TasksListView() {
       setUserPreferences({ tasksListViewSorting: sortBy })
     }
   }, [sortBy])
+
+  useEffect(() => {
+    if (isAppSettingsLoaded){
+      setUserPreferences({ tasksListViewStatusFilter: statusFilter })
+    }
+  }, [statusFilter])
   
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -247,7 +254,7 @@ export default function TasksListView() {
                 value={statusFilter as any}
                 isAllAllowed={true}
                 includeNotDone={true}
-                onSelect={(val) => { setStatusFilter(val as string); setOpenFilter(false); }}
+                onSelect={(val) => { setStatusFilter(val as TaskListStatusFilter); setOpenFilter(false); }}
                 onClose={() => setOpenFilter(false)}
                 />
             )}

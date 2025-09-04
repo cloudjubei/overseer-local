@@ -449,7 +449,7 @@
     },
     {
       "id": "5fcbee8a-2734-4fa5-b404-6d9155a01053",
-      "status": "-",
+      "status": "+",
       "title": "Status and sort preferences are not stored",
       "description": "Whenever the user changes preferences for what to display in the TasksView.tsx in the 'list' mode - it should store that, so at the next session it can be resumed in the same exact state.",
       "plan": "",
