@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "4ac5df1f-95ef-4580-915b-1ac4fe0d1bcf",
-      "status": "-",
+      "status": "+",
       "title": "Implement Dynamic System Prompt for Chat",
       "description": "Modify @src/chat/manager.js  to dynamically generate the system prompt for chat completions. The prompt should include the current project's name and description, and if an active task is present, its title and description. This provides the LLM with immediate, relevant project context.\nFor inspiration on how a good prompt works (the one used for you) - it is defined here:\n@packages/factory-ts/src/orchestrator.ts  - function constructSystemPrompt",
       "plan": "",

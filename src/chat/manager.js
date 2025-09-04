@@ -78,13 +78,32 @@ export class ChatsManager {
     });
   }
 
+  async _constructSystemPrompt(projectId) {
+    const project = await this.projectsManager.getProject(projectId);
+    
+    const parts = [
+      'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using write_file (use .md if it is a markdown note).'
+    ];
+
+    if (project) {
+      parts.push(`\n#CURRENT PROJECT: ${project.name}`);
+      if (project.description) {
+        parts.push(`##DESCRIPTION:\n${project.description}`);
+      }
+    }
+
+    return parts.join('\n');
+  }
+
   async getCompletion(projectId, chatId, newMessages, config) {
     try {
       const storage = await this.__getStorage(projectId)
       const chat = await storage.getChat(chatId)
       if (!chat) throw new Error(`Couldn't load chat with chatId: ${chatId}`)
 
-      const systemPrompt = { role: 'system', content: 'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using write_file (use .md if it is a markdown note).' };
+      const systemPromptContent = await this._constructSystemPrompt(projectId);
+      const systemPrompt = { role: 'system', content: systemPromptContent };
+
       let messagesHistory = [...chat.messages, ...newMessages];
       if (messagesHistory.length > MESSAGES_TO_SEND){
         messagesHistory.splice(0, messagesHistory.length - MESSAGES_TO_SEND)
