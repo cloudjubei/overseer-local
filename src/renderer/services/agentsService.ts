@@ -30,7 +30,8 @@ export type AgentRun = {
   model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
-  messages?: AgentRunMessage[]; // Running conversation
+  // Group messages per feature the agent worked on. '__task__' is used for task-level messages.
+  messagesByFeature?: Record<string, AgentRunMessage[]>;
 };
 
 // Internal structure to keep handle + eventSource
@@ -57,6 +58,7 @@ function redactConfig(config: LLMConfig | null | undefined) {
 }
 
 const NOOP_EVENTS: EventSourceLike = { addEventListener: (_t: string, _h: (e: any) => void) => {}, close: () => {} };
+const DEFAULT_FEATURE_KEY = '__task__';
 
 class AgentsServiceImpl {
   private runs = new Map<string, RunRecord>();
@@ -104,7 +106,7 @@ class AgentsServiceImpl {
               model: m.model,
               startedAt: m.startedAt || new Date().toISOString(),
               updatedAt: m.updatedAt || new Date().toISOString(),
-              messages: [],
+              messagesByFeature: {},
               events,
               cancel: (reason?: string) => handle.cancel(reason),
             } as RunRecord;
@@ -116,7 +118,8 @@ class AgentsServiceImpl {
               if (typeof factory.getRunMessages === 'function') {
                 const msgs = await factory.getRunMessages(run.runId);
                 if (Array.isArray(msgs)) {
-                  run.messages = msgs.map((mm: any) => ({
+                  const key = run.featureId || DEFAULT_FEATURE_KEY;
+                  run.messagesByFeature![key] = msgs.map((mm: any) => ({
                     role: String(mm?.role ?? ''),
                     content: String(mm?.content ?? ''),
                     turn: mm?.turn,
@@ -153,7 +156,7 @@ class AgentsServiceImpl {
               model: m.model,
               startedAt: m.startedAt || new Date().toISOString(),
               updatedAt: m.updatedAt || new Date().toISOString(),
-              messages: [],
+              messagesByFeature: {},
               events: NOOP_EVENTS,
               cancel: () => {},
             } as RunRecord;
@@ -163,7 +166,8 @@ class AgentsServiceImpl {
               if (typeof factory.getRunMessages === 'function') {
                 const msgs = await factory.getRunMessages(rec.runId);
                 if (Array.isArray(msgs)) {
-                  rec.messages = msgs.map((mm: any) => ({ role: String(mm?.role ?? ''), content: String(mm?.content ?? ''), turn: mm?.turn }))
+                  const key = rec.featureId || DEFAULT_FEATURE_KEY;
+                  rec.messagesByFeature![key] = msgs.map((mm: any) => ({ role: String(mm?.role ?? ''), content: String(mm?.content ?? ''), turn: mm?.turn }))
                 }
               }
             } catch {}
@@ -220,47 +224,55 @@ class AgentsServiceImpl {
     }
   }
 
-  private ensureMessages(run: RunRecord) {
-    if (!run.messages) run.messages = [];
+  private ensureBucket(run: RunRecord, featureKey: string) {
+    if (!run.messagesByFeature) run.messagesByFeature = {};
+    if (!run.messagesByFeature[featureKey]) run.messagesByFeature[featureKey] = [];
   }
 
-  private appendMessage(run: RunRecord, msg: any, extra?: Partial<AgentRunMessage>) {
-    this.ensureMessages(run);
+  private appendMessage(run: RunRecord, msg: any, featureKey: string, extra?: Partial<AgentRunMessage>) {
+    this.ensureBucket(run, featureKey);
     const m: AgentRunMessage = {
       role: String(msg?.role ?? ''),
       content: String(msg?.content ?? ''),
       ...(extra || {}),
     };
-    run.messages!.push(m);
+    run.messagesByFeature![featureKey].push(m);
   }
 
-  private replaceMessages(run: RunRecord, arr: any[], turn?: number) {
+  private replaceMessages(run: RunRecord, arr: any[], featureKey: string, turn?: number) {
     try {
-      run.messages = Array.isArray(arr) ? arr.map((m: any) => ({ role: String(m?.role ?? ''), content: String(m?.content ?? ''), turn })) : [];
+      this.ensureBucket(run, featureKey);
+      run.messagesByFeature![featureKey] = Array.isArray(arr) ? arr.map((m: any) => ({ role: String(m?.role ?? ''), content: String(m?.content ?? ''), turn })) : [];
     } catch {
-      run.messages = [];
+      run.messagesByFeature![featureKey] = [];
     }
+  }
+
+  private deriveFeatureKey(run: RunRecord, e?: any): string {
+    const key = e?.payload?.featureId || run.featureId || DEFAULT_FEATURE_KEY;
+    return String(key);
   }
 
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
       run.updatedAt = getEventTs(e);
+      const featureKey = this.deriveFeatureKey(run, e);
 
       // Conversation handling
       if (e.type === 'llm/messages/init') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, undefined);
+        this.replaceMessages(run, msgs, featureKey, undefined);
       } else if (e.type === 'llm/messages/snapshot') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, e.payload?.turn);
+        this.replaceMessages(run, msgs, featureKey, e.payload?.turn);
       } else if (e.type === 'llm/message') {
         const msg = e.payload?.message;
         const extra = { turn: e.payload?.turn, source: e.payload?.source, durationMs: e.payload?.durationMs, ts: getEventTs(e) } as Partial<AgentRunMessage>;
-        if (msg) this.appendMessage(run, msg, extra);
+        if (msg) this.appendMessage(run, msg, featureKey, extra);
       } else if (e.type === 'llm/messages/final') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, undefined);
+        this.replaceMessages(run, msgs, featureKey, undefined);
       }
 
       // Meta updates
@@ -334,7 +346,7 @@ class AgentsServiceImpl {
       updatedAt: new Date().toISOString(),
       provider: llmConfig?.provider,
       model: llmConfig?.model,
-      messages: [],
+      messagesByFeature: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;
@@ -362,7 +374,7 @@ class AgentsServiceImpl {
       updatedAt: new Date().toISOString(),
       provider: llmConfig?.provider,
       model: llmConfig?.model,
-      messages: [],
+      messagesByFeature: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
     } as RunRecord;

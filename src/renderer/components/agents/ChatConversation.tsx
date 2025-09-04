@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AgentRun, AgentRunMessage } from '../../services/agentsService';
 import RichText from '../ui/RichText';
+import SafeText from '../ui/SafeText';
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
 function parseAssistant(content: string): { thoughts?: string; tool_calls?: { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any }[] } | null {
@@ -73,11 +74,11 @@ function ToolCallRow({ call, resultText, index }: { call: any; resultText?: stri
           <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Result</div>
           {isHeavy ? (
             <Collapsible title={<span>View result</span>}>
-              <div className="text-xs whitespace-pre-wrap break-words"><RichText text={resultText} /></div>
+              <div className="text-xs whitespace-pre-wrap break-words"><SafeText text={resultText} /></div>
             </Collapsible>
           ) : (
             <div className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-              <RichText text={resultText} />
+              <SafeText text={resultText} />
             </div>
           )}
         </div>
@@ -86,20 +87,52 @@ function ToolCallRow({ call, resultText, index }: { call: any; resultText?: stri
   );
 }
 
-function parseToolResultsMessage(msg?: AgentRunMessage): string[] {
-  if (!msg) return [];
-  const s = msg.content || '';
-  const lines = s.split(/\r?\n/);
-  const out: string[] = [];
-  for (const ln of lines) {
-    if (!ln) continue;
-    if (ln.startsWith('---')) continue; // header line
-    if (ln.startsWith('Tool ')) {
-      const i = ln.indexOf(' returned: ');
-      if (i > 0) out.push(ln.substring(i + ' returned: '.length + 'Tool '.length + (ln.startsWith('Tool ') ? 0 : 0)));
-      else out.push(ln);
+// Back-compat: parse tool results from mixed formats (preferred ToolResult JSON, else legacy lines)
+export type ParsedToolResult = { name: string; result: string };
+
+function parseToolResultsObjects(msg?: AgentRunMessage): ParsedToolResult[] {
+  if (!msg?.content) return [];
+  const text = msg.content.trim();
+  // Try full JSON parse (array or object)
+  try {
+    const o = JSON.parse(text);
+    if (Array.isArray(o)) {
+      return o
+        .filter(x => x && typeof x === 'object' && ('name' in x) && ('result' in x))
+        .map(x => ({ name: String((x as any).name), result: String((x as any).result) }));
+    }
+    if (o && typeof o === 'object') {
+      if ('name' in o && 'result' in o) {
+        return [{ name: String((o as any).name), result: String((o as any).result) }];
+      }
+      if ('results' in o && Array.isArray((o as any).results)) {
+        return (o as any).results
+          .filter((x: any) => x && typeof x === 'object' && ('name' in x) && ('result' in x))
+          .map((x: any) => ({ name: String(x.name), result: String(x.result) }));
+      }
+    }
+  } catch {}
+  // Fallback: try per-line JSON or legacy textual format
+  const out: ParsedToolResult[] = [];
+  for (const ln of text.split(/\r?\n/)) {
+    const line = ln.trim();
+    if (!line) continue;
+    if (line.startsWith('---')) continue;
+    try {
+      const jo = JSON.parse(line);
+      if (jo && typeof jo === 'object' && 'name' in jo && 'result' in jo) {
+        out.push({ name: String((jo as any).name), result: String((jo as any).result) });
+        continue;
+      }
+    } catch {}
+    if (line.startsWith('Tool ')) {
+      const nameMatch = /^Tool\s+([^\s:]+)(?::|\s)/.exec(line);
+      const name = nameMatch ? nameMatch[1] : 'tool';
+      const i = line.indexOf(' returned: ');
+      const result = i >= 0 ? line.substring(i + ' returned: '.length) : line;
+      out.push({ name, result });
     } else {
-      out.push(ln);
+      out.push({ name: 'tool', result: line });
     }
   }
   return out;
@@ -182,7 +215,18 @@ function ScrollableTextBox({ text, className }: { text: string; className?: stri
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
   const lastTurnRef = useRef<HTMLLIElement | null>(null);
-  const { systemMsgs, turns } = useTurnBundles(run.messages);
+
+  // Choose which feature's messages to show: prefer run.featureId; else first available; else legacy run.messages
+  const messages = useMemo(() => {
+    const byFeature = (run as any).messagesByFeature as Record<string, AgentRunMessage[]> | undefined;
+    if (byFeature && Object.keys(byFeature).length > 0) {
+      const key = run.featureId && byFeature[run.featureId] ? run.featureId : Object.keys(byFeature)[0];
+      return byFeature[key] || [];
+    }
+    return (run as any).messages || [];
+  }, [run]);
+
+  const { systemMsgs, turns } = useTurnBundles(messages);
 
   useEffect(() => {
     if (lastTurnRef.current) {
@@ -193,7 +237,7 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
   const systemPrompt = useMemo(() => {
     const m = systemMsgs[0];
     return m?.content;
-  }, [systemMsgs, run.messages]);
+  }, [systemMsgs, messages]);
 
   const lastIndex = turns.length - 1;
 
@@ -216,10 +260,18 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
           {turns.map(({ index, user, assistant, tools }) => {
             const parsed = assistant ? parseAssistant(assistant.content || '') : null;
             const toolCalls = parsed?.tool_calls || [];
-            const results = parseToolResultsMessage(tools);
+            const resultsObjs = parseToolResultsObjects(tools);
+            const legacyResultTexts = resultsObjs.length === 0 ? [] : resultsObjs.map(r => r.result);
+
+            const pickResultForCall = (call: any, i: number): string | undefined => {
+              const name = call.tool_name || call.tool || call.name || 'tool';
+              const match = resultsObjs.find(r => r.name === name);
+              if (match) return match.result;
+              return legacyResultTexts[i];
+            };
 
             const titleParts: string[] = [];
-            titleParts.push(`Turn ${index}`); // Turn 0 is the initial turn
+            titleParts.push(`Turn ${index}`); // Turn 0 is the initial user turn
             if ((assistant as any)?.durationMs) titleParts.push(`${(assistant as any).durationMs}ms`);
             const title = titleParts.join(' \u00b7 ');
 
@@ -262,17 +314,17 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
                     {toolCalls.length > 0 ? (
                       <div className="space-y-2">
                         {toolCalls.map((call, i) => (
-                          <ToolCallRow key={i} call={call} index={i} resultText={results[i]} />
+                          <ToolCallRow key={i} call={call} index={i} resultText={pickResultForCall(call, i)} />
                         ))}
                       </div>
                     ) : null}
 
-                    {toolCalls.length === 0 && results.length > 0 ? (
+                    {toolCalls.length === 0 && resultsObjs.length > 0 ? (
                       <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
                         <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
-                        {results.map((r, i) => (
+                        {resultsObjs.map((r, i) => (
                           <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-                            <RichText text={r} />
+                            <SafeText text={r.result} />
                           </div>
                         ))}
                       </div>

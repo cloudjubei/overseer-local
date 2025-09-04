@@ -32,7 +32,7 @@ export default function FileMentionsTextarea({
   onFileMentionSelected,
   onReferenceSelected,
 }: FileMentionsTextareaProps) {
-  const { files, filesByPath } = useFiles()
+  const { files } = useFiles()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
 
@@ -68,9 +68,30 @@ export default function FileMentionsTextarea({
     if (onFileMentionSelected) onFileMentionSelected(path)
   }
 
-  const handleRefSelect = (ref: string) => {
-    onRefSelectInternal(ref)
-    if (onReferenceSelected) onReferenceSelected(ref)
+  // For references, we now insert/display using the display indices (e.g., 3.2)
+  const handleRefSelect = (refDisplay: string) => {
+    onRefSelectInternal(refDisplay)
+    if (onReferenceSelected) onReferenceSelected(refDisplay)
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const key = e.key
+    const isSpace = key === ' ' || key === 'Spacebar' || key === 'Space'
+    if (isSpace) {
+      if (isFilesOpen && fileMatches.length > 0) {
+        e.preventDefault()
+        e.stopPropagation()
+        handleFileSelect(fileMatches[0])
+        return
+      }
+      if (isRefsOpen && refMatches.length > 0) {
+        e.preventDefault()
+        e.stopPropagation()
+        // Pass display index for insertion
+        handleRefSelect(refMatches[0].display)
+        return
+      }
+    }
   }
 
   return (
@@ -85,6 +106,7 @@ export default function FileMentionsTextarea({
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}
@@ -125,7 +147,7 @@ export default function FileMentionsTextarea({
               key={idx}
               className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]"
               role="option"
-              onClick={() => handleRefSelect(item.ref)}
+              onClick={() => handleRefSelect(item.display)}
             >
               #{item.display} - {item.title} ({item.type})
             </div>
