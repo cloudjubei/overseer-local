@@ -93,8 +93,9 @@ export function useReferencesAutocomplete(params: {
     return { x, y };
   }
 
+  // Treat common punctuation and whitespace as boundaries, but allow '.' for display refs like 1.2
   const isBoundaryChar = (ch: string) => {
-    return /[\s\n\t\(\)\[\]\{\}<>,.!?:;\"'`]/.test(ch);
+    return /[\s\n\t\(\)\[\]\{\}<>,!?:;\"'`]/.test(ch); // '.' intentionally excluded
   };
 
   const checkForMention = (text: string, pos: number) => {
