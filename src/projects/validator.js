@@ -20,5 +20,7 @@ export function validateProjectSpec(spec) {
       else if (!r.tasks.every(n => Number.isInteger(n))) errors.push(`requirements[${i}].tasks contains non-integer`);
     }
   }
+  if (spec.metadata && typeof spec.metadata  !== 'object') errors.push('Metadata must be an object')
+
   return { valid: errors.length === 0, errors };
 }

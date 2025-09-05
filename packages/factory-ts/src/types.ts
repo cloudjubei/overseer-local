@@ -34,6 +34,7 @@ export interface ProjectSpec {
   repo_url: string;
   requirements: ProjectRequirement[];
   taskIdToDisplayIndex: Record<string, number>;
+  metadata?: Record<string,any>;
 }
 export type CompletionMessageRole = 'system' | 'user' | 'assistant';
 export type CompletionMessage = { role: CompletionMessageRole; content: string };

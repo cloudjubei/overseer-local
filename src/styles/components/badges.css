@@ -39,6 +39,9 @@
 .chip--missing { background: color-mix(in srgb, var(--status-stuck-soft-bg) 42%, transparent); border-color: var(--status-stuck-soft-border); color: var(--text-primary); }
 .chip--blocks { background: color-mix(in srgb, var(--status-working-soft-bg) 36%, transparent); border-color: var(--status-working-soft-border); color: var(--text-primary); }
 .chip--none { opacity: 0.7; }
+.chip--badge { justify-content: center; aspect-ratio: 1 / 1; height: 20px; padding: 2px;  }
+.chip--badge--red { background: color-mix(in srgb, var(--color-red-400) 22%, transparent); border-color: var(--color-red-800); color: var(--color-red-800); }
+.chip--badge--blue { background: color-mix(in srgb, var(--color-blue-400) 22%, transparent); border-color: var(--color-blue-800); color: var(--color-blue-800);  }
 
 .chip:hover {
   background: var(--surface-hover);

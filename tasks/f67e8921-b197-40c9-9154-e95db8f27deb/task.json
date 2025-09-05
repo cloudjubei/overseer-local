@@ -664,7 +664,7 @@
     },
     {
       "id": "065ff2fe-ac0a-4b31-b57f-8918dcb4057c",
-      "status": "-",
+      "status": "+",
       "title": "Show a summary of running agents per project in the sidebar",
       "description": "This should also be visible when the sidebar is minimized - it should show the project icon and this new chip that would display the number of agents.\n@src/renderer/navigation/SidebarView.tsx",
       "plan": "",
@@ -676,7 +676,7 @@
     },
     {
       "id": "3c0c391d-fe56-4add-a756-793dd2dc6246",
-      "status": "-",
+      "status": "+",
       "title": "It must be possible to select the icon for a given project",
       "description": "Create a directory of helpful icons and allow a user to pick from one when they create or edit a project @src/renderer/projects/ProjectManagerModal.tsx - this is then shown in the @src/renderer/navigation/SidebarView.tsx",
       "plan": "",

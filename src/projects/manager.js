@@ -121,8 +121,8 @@ export class ProjectsManager {
     const handlers = {  }
     handlers[IPC_HANDLER_KEYS.PROJECTS_LIST] = () => this.listProjects()
     handlers[IPC_HANDLER_KEYS.PROJECTS_GET] = (args) => this.getProject(args.id)
-    handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = (args) => this.createProject(args.spec)
-    handlers[IPC_HANDLER_KEYS.PROJECTS_UPDATE] = (args) => this.updateProject(args.id, args.spec)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = (args) => this.createProject(args.project)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_UPDATE] = (args) => this.updateProject(args.id, args.project)
     handlers[IPC_HANDLER_KEYS.PROJECTS_DELETE] = (args) => this.deleteProject(args.id)
     handlers[IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER] = async (args) => this.reorderTask(args.projectId, args.fromIndex, args.toIndex)
 
@@ -175,8 +175,10 @@ export class ProjectsManager {
 
     const target = path.join(dir, `${sanitized.id}.json`);
     await fs.writeFile(target, JSON.stringify(sanitized, null, 2), 'utf8');
-    await this.__rebuildAndNotify('Project created');
-    return { ok: true };
+
+    this.projects.push(sanitized)
+    await this.__notify('Project created')
+    return sanitized
   }
 
   async updateProject(id, spec) {
@@ -195,16 +197,17 @@ export class ProjectsManager {
       try { await fs.unlink(existingPath); } catch {}
     }
 
-    //TODO: update this.projects
-
+    this.projects = this.projects.map(p => p.id === sanitized.id ? sanitized : p)
     await this.__notify('Project updated');
+    return sanitized
   }
 
   async deleteProject(id) {
     const p = this.getProjectConfigPathForId(id);
     if (await pathExists(p)) {
       await fs.unlink(p);
-      await this.__rebuildAndNotify('Project deleted');
+      this.projects = this.projects.filter(p => p.id !== id)
+      await this.__notify('Project deleted');
     }
   }
 
@@ -237,7 +240,6 @@ export class ProjectsManager {
     project.taskIdToDisplayIndex = newIndex;
   
     const writePath = this.getProjectConfigPathForId(projectId);
-    console.log("reorderTask writePath: " ,writePath)
     await fs.writeFile(writePath, JSON.stringify(project, null, 2), 'utf8');
 
     this.projects = this.projects.map(p => p.id === project.id ? project : p)

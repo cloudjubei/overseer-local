@@ -25,8 +25,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   // Load projects and subscribe to updates
   const update = async () => {
-    const files = await projectsService.listProjects()
-    updateCurrentProjects(files)
+    const projects = await projectsService.listProjects()
+    updateCurrentProjects(projects)
   }
   const updateCurrentProjects = (projectsList: ProjectSpec[]) => {
     setProjects(projectsList)
