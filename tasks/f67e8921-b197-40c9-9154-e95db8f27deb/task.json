@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -764,7 +764,7 @@
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
-      "status": "-",
+      "status": "+",
       "title": "The model chip should be visible to the left of the List | Board switch control",
       "description": "This is inside @src/renderer/screens/TasksView.tsx and it should use @src/renderer/components/agents/AgentModelQuickSelect.tsx and @src/renderer/components/agents/ModelChip.tsx",
       "plan": "",
