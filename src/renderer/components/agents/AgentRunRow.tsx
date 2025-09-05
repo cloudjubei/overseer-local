@@ -76,6 +76,7 @@ export interface AgentRunRowProps {
   run: AgentRun;
   onView?: (runId: string) => void;
   onCancel?: (runId: string) => void;
+  onDelete?: (runId: string) => void;
   showActions?: boolean;
   showProject?: boolean;
   showModel?: boolean;
@@ -89,6 +90,7 @@ export default function AgentRunRow({
   run,
   onView,
   onCancel,
+  onDelete,
   showActions = true,
   showProject = false,
   showModel = true,
@@ -145,6 +147,11 @@ export default function AgentRunRow({
             ) : null}
             {run.state === 'running' && onCancel && run.runId ? (
               <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => onCancel(run.runId!)}>
+                <IconDelete />
+              </button>
+            ) : null}
+            {run.state !== 'running' && onDelete && run.runId ? (
+              <button className="btn-secondary btn-icon" aria-label="Delete" onClick={() => onDelete(run.runId!)}>
                 <IconDelete />
               </button>
             ) : null}

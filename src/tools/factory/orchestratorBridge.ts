@@ -89,3 +89,7 @@ export function attachToRun(runId: string): { handle: RunHandle; events: EventSo
 export function streamRunJSONL(_handle: RunHandle) {
   throw new Error('streamRunJSONL is not available in renderer. Use main/CLI.');
 }
+
+export async function deleteHistoryRun(runId: string): Promise<void> {
+  await (window as any).factory?.deleteRun?.(runId);
+}

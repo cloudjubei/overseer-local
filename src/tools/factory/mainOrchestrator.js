@@ -417,6 +417,19 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       return [];
     }
   });
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_HISTORY_DELETE, (_evt, { runId }) => {
+    try {
+      if (HISTORY && typeof HISTORY.deleteRun === 'function') {
+        HISTORY.deleteRun(runId);
+        return { ok: true };
+      }
+      console.warn('[factory] HISTORY.deleteRun not available');
+      return { ok: false };
+    } catch (e) {
+      console.warn('[factory] history:delete error', e?.message || e);
+      return { ok: false, error: e?.message || String(e) };
+    }
+  });
 
   // Pricing handlers
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_PRICING_GET, () => {

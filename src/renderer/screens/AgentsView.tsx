@@ -17,7 +17,7 @@ function formatTime(iso?: string) {
 }
 
 export default function AgentsView() {
-  const { runs, activeRuns, cancelRun } = useAgents();
+  const { runs, activeRuns, cancelRun, removeRun } = useAgents();
   const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
@@ -142,6 +142,7 @@ export default function AgentsView() {
                       run={r}
                       onView={(id) => setOpenRunId(id)}
                       onCancel={(id) => cancelRun(id)}
+                      onDelete={(id) => removeRun(id)}
                       showModel
                       showStatus={true}
                       showFeaturesInsteadOfTurn={true}

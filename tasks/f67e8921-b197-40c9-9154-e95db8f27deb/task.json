@@ -639,7 +639,7 @@
     },
     {
       "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
-      "status": "-",
+      "status": "+",
       "title": "It must be possible to remove agent runs from history",
       "description": "The agent runs in @src/renderer/screens/AgentsView.tsx or in @src/renderer/screens/AllAgentsView.tsx",
       "plan": "",

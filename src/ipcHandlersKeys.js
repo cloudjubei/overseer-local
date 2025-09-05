@@ -71,6 +71,7 @@ const IPC_HANDLER_KEYS = {
   // Factory history
   FACTORY_HISTORY_LIST: "factory:history:list",
   FACTORY_HISTORY_MESSAGES: "factory:history:messages",
+  FACTORY_HISTORY_DELETE: "factory:history:delete",
 
   // Factory pricing
   FACTORY_PRICING_GET: "factory:pricing:get",

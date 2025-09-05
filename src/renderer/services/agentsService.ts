@@ -1,4 +1,4 @@
-import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun } from '../../tools/factory/orchestratorBridge';
+import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun, deleteHistoryRun } from '../../tools/factory/orchestratorBridge';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
 import { AgentType, LLMConfig } from 'packages/factory-ts/src/types';
 import { notificationsService } from './notificationsService';
@@ -187,6 +187,23 @@ class AgentsServiceImpl {
     rec.state = 'cancelled';
     rec.updatedAt = new Date().toISOString();
     this.notify();
+  }
+
+  async removeRun(runId: string) {
+    const rec = this.runs.get(runId);
+    if (!rec) return;
+    if (rec.state === 'running') {
+      console.warn('[agentsService] removeRun ignored for running run', runId);
+      return;
+    }
+    // Optimistic update
+    this.runs.delete(runId);
+    this.notify();
+    try {
+      await deleteHistoryRun(runId);
+    } catch (err) {
+      console.warn('[agentsService] Failed to delete run from history store', (err as any)?.message || err);
+    }
   }
 
   private logEventVerbose(run: RunRecord, e: any) {
