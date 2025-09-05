@@ -323,11 +323,12 @@ export default function SidebarView({}: SidebarProps) {
               </div>
             </li>
           )}
-          {projects.map((p) => {
+          {projects.map((p: any) => {
             const isMain = p.id === MAIN_PROJECT
             const active = activeProjectId === p.id
             const accent = useAccentClass(p.id, isMain)
             const activeCount = activeCountByProject.get(p.id) || 0;
+            const projectIcon = (p && (p as any).icon) ? (p as any).icon : (isMain ? '🗂️' : '📁');
             return (
               <li className="nav-li" key={p.id}>
                 <div className="flex items-center">
@@ -337,8 +338,7 @@ export default function SidebarView({}: SidebarProps) {
                     onClick={() => setActiveProjectId(p.id)}
                     title={p.title}
                   >
-                    {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
-                    {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
+                    <span className="nav-item__icon" aria-hidden>{projectIcon}</span>
                     {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
                     {activeCount > 0 && (
                       <span className="nav-item__badge" aria-label={`${activeCount} running agents`}>

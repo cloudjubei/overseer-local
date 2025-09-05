@@ -5,6 +5,7 @@ import { validateProjectClient } from './validateProject'
 import { useProjectContext } from './ProjectContext'
 import { IconDelete, IconEdit, IconPlay, IconPlus } from '../components/ui/Icons'
 import { Button } from '../components/ui/Button'
+import { PROJECT_ICONS } from './projectIcons'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -26,6 +27,41 @@ function TextArea({ label, value, onChange, placeholder }: any) {
   )
 }
 
+function IconPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
+  return (
+    <div className="form-row">
+      <label>Icon</label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))', gap: 6 }}>
+        {PROJECT_ICONS.map((opt) => {
+          const selected = value === opt.value
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              title={opt.label}
+              onClick={() => onChange(opt.value)}
+              aria-pressed={selected}
+              style={{
+                height: 36,
+                borderRadius: 6,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: selected ? '2px solid var(--accent-primary)' : '1px solid var(--border-default)',
+                background: selected ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)' : 'var(--surface-raised)',
+                cursor: 'pointer',
+                fontSize: 18,
+              }}
+            >
+              <span aria-hidden>{opt.value}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function ProjectManagerModal({ onRequestClose, initialMode, initialProjectId }: { onRequestClose?: () => void, initialMode?: 'list' | 'create' | 'edit', initialProjectId?: string }) {
   const { projects, getProjectById } = useProjectContext()
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +69,7 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')
   const [editingId, setEditingId] = useState<string | null>(initialProjectId || null)
 
-  const [form, setForm] = useState<any>({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [] })
+  const [form, setForm] = useState<any>({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [], icon: '📁' })
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
@@ -46,9 +82,9 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
     // If we were asked to open in edit mode for a specific project, populate form
     if ((initialMode === 'edit' || mode === 'edit') && (initialProjectId || editingId)) {
       const id = (initialProjectId || editingId) as string
-      const p = getProjectById(id)
+      const p: any = getProjectById(id)
       if (p) {
-        setForm({ ...p, requirements: Array.isArray(p.requirements) ? p.requirements : [] })
+        setForm({ ...p, requirements: Array.isArray(p.requirements) ? p.requirements : [], icon: p.icon || '📁' })
         setEditingId(id)
         setMode('edit')
       }
@@ -59,7 +95,7 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
   const projectsList = useMemo(() => projects || [], [projects])
 
   function resetForm() {
-    setForm({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [] })
+    setForm({ id: '', title: '', description: '', path: '', repo_url: '', requirements: [], icon: '📁' })
     setFormErrors([])
     setSaving(false)
     setEditingId(null)
@@ -71,7 +107,7 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
   }
 
   function startEdit(p: any) {
-    setForm({ ...p, requirements: Array.isArray(p.requirements) ? p.requirements : [] })
+    setForm({ ...p, requirements: Array.isArray(p.requirements) ? p.requirements : [], icon: p.icon || '📁' })
     setEditingId(p.id)
     setMode('edit')
   }
@@ -135,9 +171,12 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {projectsList.map((p: any) => (
                 <li key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', padding: '8px 0' }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{p.title}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.id} · {p.path}</div>
+                  <div className="flex" style={{ alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 18 }} aria-hidden>{p.icon || '📁'}</div>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{p.title}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.id} · {p.path}</div>
+                    </div>
                   </div>
                   <div className="flex" style={{ gap: 8 }}>
                     <Button className="btn-secondary" onClick={() => startEdit(p)}><IconEdit/></Button>
@@ -162,6 +201,7 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
           <TextArea label="Description" value={form.description} onChange={(v: string) => setForm((s: any) => ({ ...s, description: v }))} placeholder="Short description" />
           <TextInput label="Path (under projects/)" value={form.path} onChange={(v: string) => setForm((s: any) => ({ ...s, path: v }))} placeholder="my-project" />
           <TextInput label="Repository URL" value={form.repo_url} onChange={(v: string) => setForm((s: any) => ({ ...s, repo_url: v }))} placeholder="https://github.com/org/repo" />
+          <IconPicker value={form.icon} onChange={(v) => setForm((s: any) => ({ ...s, icon: v }))} />
           <div className="form-actions">
             <button type="button" className="btn-secondary" onClick={() => setMode('list')}>Cancel</button>
             <button type="submit" className="btn" disabled={saving}>{mode === 'create' ? 'Create' : 'Save'}</button>

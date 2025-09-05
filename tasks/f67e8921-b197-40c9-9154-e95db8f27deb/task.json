@@ -676,7 +676,7 @@
     },
     {
       "id": "3c0c391d-fe56-4add-a756-793dd2dc6246",
-      "status": "-",
+      "status": "+",
       "title": "It must be possible to select the icon for a given project",
       "description": "Create a directory of helpful icons and allow a user to pick from one when they create or edit a project @src/renderer/projects/ProjectManagerModal.tsx - this is then shown in the @src/renderer/navigation/SidebarView.tsx",
       "plan": "",
