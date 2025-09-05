@@ -702,7 +702,7 @@
     },
     {
       "id": "1e6d13dd-e154-4612-8751-7182a7d660e6",
-      "status": "-",
+      "status": "+",
       "title": "Lookup fix",
       "description": "When using the file lookup when typing in @ in the description of a feature, the user has to type in space twice or more for it to allow to type further. One space should be enough, and it should put the caret one space further than the filename. This logic is in @src/renderer/hooks/useFilesAutocomplete.ts and displayed in @src/renderer/components/ui/RichText.tsx",
       "plan": "",

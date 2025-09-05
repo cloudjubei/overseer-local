@@ -79,9 +79,11 @@ export function useFilesAutocomplete(params: {
     const currentPos = textarea.selectionStart;
     const before = currentText.slice(0, mentionStart);
     const after = currentText.slice(currentPos);
+    // Insert the selected path followed by a single space
     const newText = `${before}@${path} ${after}`;
     setInput(newText);
-    const newPos = before.length + 1 + path.length;
+    // Place caret after the inserted trailing space so typing continues outside the mention
+    const newPos = before.length + 1 + path.length + 1;
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(newPos, newPos);
