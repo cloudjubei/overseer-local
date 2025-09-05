@@ -625,7 +625,7 @@
     },
     {
       "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
-      "status": "+",
+      "status": "-",
       "title": "Notifications should fire when an agent finishes work",
       "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -635,7 +635,8 @@
         "src/notifications/manager.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "The agent run doesn't have a featureId - the information about a feature being completed is inside the messagesLog"
     },
     {
       "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
@@ -775,6 +776,28 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
+      "status": "-",
+      "title": "when a notification is read - don't show the count in the sidebar",
+      "description": "Also, show a nice round badge with the number inside - similar in style to iOS notifications.\nThis is in @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "a45449ab-b745-460c-b065-6e92345ebd39",
+      "status": "-",
+      "title": "clicking a run finished notification takes the user to that agent run",
+      "description": "",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -836,6 +859,8 @@
     "006bc18d-88c6-4257-9d76-69ad87c9c502": 56,
     "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 57,
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58,
-    "55e5be40-2171-4e3d-91d9-db778a329ef1": 59
+    "55e5be40-2171-4e3d-91d9-db778a329ef1": 59,
+    "7b2917b5-67da-437e-b11e-f11989bbae7e": 60,
+    "a45449ab-b745-460c-b065-6e92345ebd39": 61
   }
 }
