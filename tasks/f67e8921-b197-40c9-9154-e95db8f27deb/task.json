@@ -689,7 +689,7 @@
     },
     {
       "id": "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18",
-      "status": "-",
+      "status": "+",
       "title": "AgentsView shows the thinking time incorrectly",
       "description": "When the 'run/heartbeat' event is received from @packages/factory-ts/src/orchestrator.ts it seems to make the display reset the thinking time counter. The counter should be purely based on the time the last message was received and the time now. This is for @src/renderer/components/agents/AgentRunRow.tsx",
       "plan": "",

@@ -25,6 +25,8 @@ export type AgentRun = {
   model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
+  // Timestamp of the last received LLM message (assistant or tool results). Used for thinking timer.
+  lastMessageAt?: string; // ISO
 
   messagesLog?: Record<string,AgentFeatureRunLog>
 };
@@ -107,6 +109,7 @@ class AgentsServiceImpl {
               model: m.model,
               startedAt: m.startedAt || new Date().toISOString(),
               updatedAt: m.updatedAt || new Date().toISOString(),
+              lastMessageAt: undefined,
               messagesLog: {},
               events,
               cancel: (reason?: string) => handle.cancel(reason),
@@ -144,6 +147,7 @@ class AgentsServiceImpl {
             model: m.model,
             startedAt: m.startedAt || new Date().toISOString(),
             updatedAt: m.updatedAt || new Date().toISOString(),
+            lastMessageAt: undefined,
             messagesLog: {},
             events: NOOP_EVENTS,
             cancel: () => {},
@@ -286,7 +290,8 @@ class AgentsServiceImpl {
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
-      run.updatedAt = getEventTs(e);
+      const ts = getEventTs(e);
+      run.updatedAt = ts;
       const featureKey = this.deriveFeatureKey(e);
 
       // Conversation handling
@@ -299,9 +304,13 @@ class AgentsServiceImpl {
       } else if (e.type === 'llm/message') {
         const msg = e.payload?.message;
         if (msg) this.appendMessage(run, msg, featureKey);
+        // Update last message time strictly on actual message events
+        run.lastMessageAt = ts;
       } else if (e.type === 'llm/messages/final') {
         const msgs = e.payload?.messages ?? [];
         this.replaceMessages(run, msgs, featureKey, true);
+        // Finalize last message time at end of conversation
+        run.lastMessageAt = ts;
       }
 
       // Meta updates
@@ -395,6 +404,7 @@ class AgentsServiceImpl {
       message: 'Starting agent... ',
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      lastMessageAt: undefined,
       provider: llmConfig?.provider,
       model: llmConfig?.model,
       messagesLog: {},
@@ -426,6 +436,7 @@ class AgentsServiceImpl {
       message: 'Starting agent... ',
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      lastMessageAt: undefined,
       provider: llmConfig?.provider,
       model: llmConfig?.model,
       messagesLog: {},

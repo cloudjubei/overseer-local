@@ -55,8 +55,7 @@ function useFeatureCounts(run: AgentRun) {
   }, [run.messagesLog]);
 }
 
-// Very lightweight thinking timer: for active runs, show time since last update in current turn.
-// As we don't have per-message timestamps, approximate as time since last updatedAt while running.
+// Thinking timer based on time since last LLM message was received (assistant or tools), independent of heartbeats.
 function useThinkingTimer(run: AgentRun) {
   const [now, setNow] = useState<number>(Date.now());
   useEffect(() => {
@@ -64,10 +63,16 @@ function useThinkingTimer(run: AgentRun) {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [run.state]);
+
+  const lastMsgTs = run.lastMessageAt || run.startedAt || run.updatedAt;
   const lastUpdate = useMemo(() => {
-    const t = new Date(run.updatedAt || run.startedAt || Date.now()).getTime();
-    return t;
-  }, [run.updatedAt, run.startedAt]);
+    try {
+      return new Date(lastMsgTs || Date.now()).getTime();
+    } catch {
+      return Date.now();
+    }
+  }, [lastMsgTs]);
+
   const ms = Math.max(0, now - lastUpdate);
   return formatDuration(run.state === 'running' ? ms : 0);
 }
