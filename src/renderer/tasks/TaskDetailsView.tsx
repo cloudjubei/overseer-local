@@ -8,7 +8,7 @@ import { useTasks } from '../hooks/useTasks'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
-import { IconBack, IconChevron, IconPlus } from '../components/ui/Icons'
+import { IconBack, IconChevron, IconEdit, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -93,7 +93,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
 
   const isSearchFiltered = query !== ''
 
-  const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
+  const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id, onDelete: () => navigateView('Home') }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
   const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
 
@@ -288,7 +288,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               </div>
             )}
             <ModelChip editable />
-            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}    
+            {!taskHasActiveRun && <RunAgentButton onClick={(agentType) => {if (!projectId || taskHasActiveRun) return; startTaskAgent(agentType, projectId, task.id) }}/>}
           </div>
         </div>
       </header>
@@ -335,6 +335,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </div>
         </div>
         <div className="right">
+          <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={handleEditTask}>
+            <IconEdit />
+          </button>
           <button type="button" className="btn btn-icon" aria-label="Add feature" onClick={handleAddFeature}>
             <IconPlus />
           </button>
@@ -354,9 +357,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               <IconChevron className={`icon-chevron ${isOverviewExpanded ? 'expanded' : ''}`} />
             </button>
             <h2 className="section-title">Overview</h2>
-            <div className="section-actions">
-              {/* Edit Task button intentionally removed to keep UI consistent with click-to-open behavior elsewhere */}
-            </div>
           </div>
           <div id="overview-content" className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}>
             <p className="task-desc"><RichText text={task.description || 'No description provided.'} /></p>
@@ -366,9 +366,6 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
         <section className="panel flex flex-col flex-1 min-h-0">
           <div className="section-header shrink-0">
             <h2 className="section-title">Features</h2>
-            <div className="section-actions">
-              {/* Add feature button moved to top toolbar to align with TasksView */}
-            </div>
           </div>
 
           {featuresFiltered.length === 0 ? (

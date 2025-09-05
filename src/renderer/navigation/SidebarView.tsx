@@ -13,6 +13,9 @@ import { useNotifications } from '../hooks/useNotifications';
 import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
 import { useAppSettings } from '../hooks/useAppSettings';
+import { useAgents } from '../hooks/useAgents';
+import NotificationBadge from '../components/tasks/NotificationBadge';
+import { ProjectSpec } from 'packages/factory-ts/src/types';
 
 export type SidebarProps = {};
 
@@ -80,6 +83,7 @@ export default function SidebarView({}: SidebarProps) {
     setActiveProjectId,
   } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
+  const { activeRuns } = useAgents();
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed);
 
@@ -91,6 +95,16 @@ export default function SidebarView({}: SidebarProps) {
   useEffect(() => {
     updateAppSettings({ userPreferences: { ...appSettings.userPreferences, sidebarCollapsed: collapsed }})
   }, [collapsed]);
+
+  // Compute active agent counts per project
+  const activeCountByProject = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of activeRuns) {
+      const k = r.projectId;
+      map.set(k, (map.get(k) || 0) + 1);
+    }
+    return map;
+  }, [activeRuns]);
 
   // Responsive: on small screens, render as overlay drawer
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -236,11 +250,7 @@ export default function SidebarView({}: SidebarProps) {
               >
                 <span className="nav-item__icon">{item.icon}</span>
                 {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-                {showBadge && (
-                  <span className="nav-item__badge">
-                    {unreadCount}
-                  </span>
-                )}
+                {showBadge && <NotificationBadge text={`${unreadCount}`} tooltipLabel={`${unreadCount} unread notifications`}/>}
               </button>
             );
             return (
@@ -311,10 +321,12 @@ export default function SidebarView({}: SidebarProps) {
               </div>
             </li>
           )}
-          {projects.map((p) => {
+          {projects.map((p: ProjectSpec) => {
             const isMain = p.id === MAIN_PROJECT
             const active = activeProjectId === p.id
             const accent = useAccentClass(p.id, isMain)
+            const activeCount = activeCountByProject.get(p.id) || 0;
+            const projectIcon = (p.metadata && p.metadata.icon) ? p.metadata.icon : (isMain ? '🗂️' : '📁');
             return (
               <li className="nav-li" key={p.id}>
                 <div className="flex items-center">
@@ -324,9 +336,9 @@ export default function SidebarView({}: SidebarProps) {
                     onClick={() => setActiveProjectId(p.id)}
                     title={p.title}
                   >
-                    {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
-                    {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
+                    <span className="nav-item__icon" aria-hidden>{projectIcon}</span>
                     {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+                    {activeCount > 0 && <NotificationBadge text={`${activeCount}`} tooltipLabel={`${activeCount} running agents`} isInformative/>}
                   </button>
                 </div>
               </li>

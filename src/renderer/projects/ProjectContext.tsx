@@ -25,8 +25,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   // Load projects and subscribe to updates
   const update = async () => {
-    const files = await projectsService.listProjects()
-    updateCurrentProjects(files)
+    const projects = await projectsService.listProjects()
+    updateCurrentProjects(projects)
   }
   const updateCurrentProjects = (projectsList: ProjectSpec[]) => {
     setProjects(projectsList)
@@ -58,8 +58,9 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   const setActiveProjectId = useCallback((id: string) => {
     setActiveProjectIdState(id)
-    updateAppSettings({ ...appSettings, userPreferences: { ...appSettings.userPreferences, lastActiveProjectId: id }})
-  }, [])
+    // Only update the specific userPreferences sub-tree to avoid clobbering other preferences (like tasksViewMode)
+    updateAppSettings({ userPreferences: { ...appSettings.userPreferences, lastActiveProjectId: id }})
+  }, [appSettings, updateAppSettings])
 
   const getProjectById = useCallback((id: string) => {
     if (projects.length == 0) return undefined

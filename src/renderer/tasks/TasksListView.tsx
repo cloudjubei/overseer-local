@@ -17,6 +17,7 @@ import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
+import ModelChip from '../components/agents/ModelChip'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -274,6 +275,7 @@ export default function TasksListView() {
           </div>
         </div>
         <div className="right">
+          <ModelChip editable className="mr-2" />
           <SegmentedControl
             ariaLabel="Toggle between list and board views"
             options={[
@@ -386,7 +388,7 @@ export default function TasksListView() {
                           <div className="desc-line" title={t.description || ''}><RichText text={t.description || ''} /></div>
                         </div>
                         <div className="col col-actions" >
-                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit feature" onClick={(e) => { e.stopPropagation(); handleEditTask(t.id) }}>
+                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={(e) => { e.stopPropagation(); handleEditTask(t.id) }}>
                             <IconEdit />
                           </button>
                           {taskRun ? (

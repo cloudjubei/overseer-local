@@ -43,6 +43,7 @@ export interface HistoryStore {
   listRuns(): RunMeta[];
   getRun(runId: string): RunMeta | undefined;
   getRunMessages(runId: string): any[];
+  deleteRun?(runId: string): void;
 }
 
 function ensureDir(p: string) {
@@ -111,7 +112,16 @@ export function createHistoryStore(opts: { dbPath: string }): HistoryStore {
   function listRuns(): RunMeta[] { return readIndex(); }
   function getRun(runId: string): RunMeta | undefined { return readIndex().find(r => r.runId === runId); }
 
-  return { addOrUpdateRun, updateRunMeta, writeMessages, listRuns, getRun, getRunMessages } satisfies HistoryStore;
+  function deleteRun(runId: string): void {
+    // Remove from index
+    const list = readIndex();
+    const filtered = list.filter(r => r.runId !== runId);
+    writeIndex(filtered);
+    // Remove messages file
+    try { fs.unlinkSync(messagesFile(runId)); } catch {}
+  }
+
+  return { addOrUpdateRun, updateRunMeta, writeMessages, listRuns, getRun, getRunMessages, deleteRun } satisfies HistoryStore;
 }
 
 function makeId(prefix: string) { return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`; }

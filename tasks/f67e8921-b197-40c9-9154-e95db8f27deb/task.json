@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "-",
+      "status": "+",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
       "plan": "",
@@ -640,7 +640,7 @@
     },
     {
       "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
-      "status": "-",
+      "status": "+",
       "title": "It must be possible to remove agent runs from history",
       "description": "The agent runs in @src/renderer/screens/AgentsView.tsx or in @src/renderer/screens/AllAgentsView.tsx",
       "plan": "",
@@ -653,7 +653,7 @@
     },
     {
       "id": "583f4582-9495-46cc-bd49-19c957b9b0a3",
-      "status": "-",
+      "status": "+",
       "title": "There needs to be an edit button next to the button for new task",
       "description": "This is inside @src/renderer/tasks/TaskDetailsView.tsx - it must be possible to edit a task from within this view. Deleting a task here, would take the user back to Home.",
       "plan": "",
@@ -665,7 +665,7 @@
     },
     {
       "id": "065ff2fe-ac0a-4b31-b57f-8918dcb4057c",
-      "status": "-",
+      "status": "+",
       "title": "Show a summary of running agents per project in the sidebar",
       "description": "This should also be visible when the sidebar is minimized - it should show the project icon and this new chip that would display the number of agents.\n@src/renderer/navigation/SidebarView.tsx",
       "plan": "",
@@ -677,7 +677,7 @@
     },
     {
       "id": "3c0c391d-fe56-4add-a756-793dd2dc6246",
-      "status": "-",
+      "status": "+",
       "title": "It must be possible to select the icon for a given project",
       "description": "Create a directory of helpful icons and allow a user to pick from one when they create or edit a project @src/renderer/projects/ProjectManagerModal.tsx - this is then shown in the @src/renderer/navigation/SidebarView.tsx",
       "plan": "",
@@ -690,7 +690,7 @@
     },
     {
       "id": "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18",
-      "status": "-",
+      "status": "+",
       "title": "AgentsView shows the thinking time incorrectly",
       "description": "When the 'run/heartbeat' event is received from @packages/factory-ts/src/orchestrator.ts it seems to make the display reset the thinking time counter. The counter should be purely based on the time the last message was received and the time now. This is for @src/renderer/components/agents/AgentRunRow.tsx",
       "plan": "",
@@ -703,7 +703,7 @@
     },
     {
       "id": "1e6d13dd-e154-4612-8751-7182a7d660e6",
-      "status": "-",
+      "status": "+",
       "title": "Lookup fix",
       "description": "When using the file lookup when typing in @ in the description of a feature, the user has to type in space twice or more for it to allow to type further. One space should be enough, and it should put the caret one space further than the filename. This logic is in @src/renderer/hooks/useFilesAutocomplete.ts and displayed in @src/renderer/components/ui/RichText.tsx",
       "plan": "",
@@ -716,7 +716,7 @@
     },
     {
       "id": "7cd60fb3-fe0f-478f-ac17-915b824f7f65",
-      "status": "-",
+      "status": "+",
       "title": "Task lookup fix",
       "description": "When using task lookup, it doesn't allow the user to search by typing in \"1.1\" for instance. The moment the user types in the \".\" the dropdown disappears. The logic is in @src/renderer/hooks/useReferencesAutocomplete.ts and used inside @src/renderer/components/ui/RichText.tsx \n\nAlso, when typing in \"#8\" for instance - it incorrectly references the blocker - the user types in the reference, but the blocker should actually hold the proper id information (so reverse lookup must be done).",
       "plan": "",
@@ -729,7 +729,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "@src/renderer/screens/TasksView.tsx .\nMaybe it's some other view disabling it",
       "plan": "",
@@ -741,7 +741,7 @@
     },
     {
       "id": "006bc18d-88c6-4257-9d76-69ad87c9c502",
-      "status": "-",
+      "status": "+",
       "title": "Typing in \"?\" shows the help menu",
       "description": "The user has to click Shift+\"?\" and it shows the help menu - it should do that for Shift+\"H\".\nAll these shortcuts, along the modifier key should be configurable in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -753,7 +753,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "+",
       "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "@src/renderer/components/ui/CommandMenu.tsx",
       "plan": "",
@@ -765,7 +765,7 @@
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
-      "status": "-",
+      "status": "+",
       "title": "The model chip should be visible to the left of the List | Board switch control",
       "description": "This is inside @src/renderer/screens/TasksView.tsx and it should use @src/renderer/components/agents/AgentModelQuickSelect.tsx and @src/renderer/components/agents/ModelChip.tsx",
       "plan": "",

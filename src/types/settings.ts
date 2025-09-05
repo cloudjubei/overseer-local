@@ -2,6 +2,14 @@ import { NotificationCategory } from "src/types/notifications";
 
 export type ShortcutsModifier = 'meta' | 'ctrl';
 
+export type ShortcutsConfig = {
+  commandMenu: string;      // e.g., 'Mod+K'
+  newTask: string;          // e.g., 'Mod+N'
+  help: string;             // e.g., 'Shift+H'
+  slashSearch: string;      // e.g., '/'
+  addUiFeature: string;     // e.g., 'Mod+Shift+F'
+}
+
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   userPreferences: {
     lastActiveProjectId: 'main',
@@ -10,6 +18,13 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     tasksListViewStatusFilter: 'all',
     sidebarCollapsed: false,
     shortcutsModifier: navigator.platform.toLowerCase().includes('mac') || navigator.userAgent.toLowerCase().includes('mac') ? 'meta' : 'ctrl',
+    shortcuts: {
+      commandMenu: 'Mod+K',
+      newTask: 'Mod+N',
+      help: 'Shift+H',
+      slashSearch: '/',
+      addUiFeature: 'Mod+Shift+F',
+    },
   },
   notificationSystemSettings: {
     osNotificationsEnabled: true,
@@ -37,6 +52,7 @@ export interface UserPreferences {
   tasksListViewStatusFilter: TaskListStatusFilter;
   sidebarCollapsed: boolean;
   shortcutsModifier: ShortcutsModifier;
+  shortcuts: ShortcutsConfig;
 }
 export type TaskViewMode = 'list' | 'board'
 export type TaskListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
