@@ -752,7 +752,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "+",
       "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "@src/renderer/components/ui/CommandMenu.tsx",
       "plan": "",
