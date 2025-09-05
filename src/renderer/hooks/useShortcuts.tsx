@@ -85,3 +85,55 @@ export const match = {
   question: (e: KeyboardEvent) => e.key === '?',
   esc: (e: KeyboardEvent) => e.key === 'Escape',
 };
+
+// Parse a human-readable combo string into a matcher
+// Supported tokens: Mod, Ctrl, Meta, Cmd, Shift, Alt, and a base key like 'K', 'N', 'H', '/', '?', 'F'
+export function comboMatcher(combo: string) {
+  const parts = combo.split('+').map(p => p.trim()).filter(Boolean);
+  const need = {
+    mod: false,
+    ctrl: false,
+    meta: false,
+    shift: false,
+    alt: false,
+  };
+  let base: string | null = null;
+
+  for (const p of parts) {
+    const up = p.toLowerCase();
+    if (up === 'mod') need.mod = true;
+    else if (up === 'ctrl' || up === 'control') need.ctrl = true;
+    else if (up === 'meta' || up === 'cmd' || up === 'command') need.meta = true;
+    else if (up === 'shift') need.shift = true;
+    else if (up === 'alt' || up === 'option') need.alt = true;
+    else base = p;
+  }
+
+  // If there was no '+' (e.g., '/'), the base is the original string
+  if (!parts.length && combo) base = combo;
+  if (!base && parts.length === 1) base = parts[0];
+
+  // Normalize base
+  const baseKey = (base || '').length === 1 ? (base as string) : (base || '');
+
+  return (e: KeyboardEvent) => {
+    // Mod resolves to current preference
+    if (need.mod) {
+      if (!isMod(e)) return false;
+    }
+    if (need.ctrl && !e.ctrlKey) return false;
+    if (need.meta && !e.metaKey) return false;
+    if (need.shift && !e.shiftKey) return false;
+    if (need.alt && !e.altKey) return false;
+
+    if (!baseKey) return false;
+
+    const ek = e.key;
+    // Compare letters case-insensitively
+    if (baseKey.length === 1) {
+      return ek.toLowerCase() === baseKey.toLowerCase();
+    }
+    // Fallback exact compare for non-single tokens
+    return ek === baseKey;
+  }
+}

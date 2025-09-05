@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigator } from '../../navigation/Navigator';
-import { useShortcuts, match } from '../../hooks/useShortcuts';
+import { useShortcuts, comboMatcher } from '../../hooks/useShortcuts';
+import { useAppSettings } from '../../hooks/useAppSettings';
 
 export type CommandMenuApi = {
   open: () => void;
@@ -26,17 +27,20 @@ const commandsBase = (
 export default function CommandMenu() {
   const nav = useNavigator();
   const { register } = useShortcuts();
+  const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
   const items = useMemo(() => commandsBase(nav), [nav]);
 
+  const combos = appSettings.userPreferences.shortcuts;
+
   useEffect(() => {
-    return register({ id: 'cmdk', keys: match.modK, handler: () => setOpen(true), description: 'Open command menu', scope: 'global' });
-  }, [register]);
+    return register({ id: 'cmdk', keys: comboMatcher(combos.commandMenu), handler: () => setOpen(true), description: 'Open command menu', scope: 'global' });
+  }, [register, combos.commandMenu]);
   useEffect(() => {
-    return register({ id: 'slash-search', keys: match.slash, handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); } });
-  }, [register]);
+    return register({ id: 'slash-search', keys: comboMatcher(combos.slashSearch), handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); } });
+  }, [register, combos.slashSearch]);
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 0); }, [open]);
 

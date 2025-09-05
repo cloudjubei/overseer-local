@@ -4,32 +4,36 @@ import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
 import { ToastProvider } from './components/ui/Toast';
 import { NavigatorProvider, useNavigator } from './navigation/Navigator';
-import { ShortcutsProvider, useShortcuts, match } from './hooks/useShortcuts';
+import { ShortcutsProvider, useShortcuts, comboMatcher } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
+import { useAppSettings } from './hooks/useAppSettings';
 
 const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
   const nav = useNavigator();
+  const { appSettings } = useAppSettings();
+
+  const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    // Cmd/Ctrl+N: New Task
-    const unregisterNew = register({ id: 'new-task', keys: match.modN, handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
-    // Cmd/Ctrl+Shift+F: Add Feature to UI Improvements
+    // New Task
+    const unregisterNew = register({ id: 'new-task', keys: comboMatcher(combos.newTask), handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
+    // Add Feature to UI Improvements
     const unregisterAddUiFeature = register({
       id: 'add-ui-feature',
-      keys: (e: KeyboardEvent) => (e.key === 'f' || e.key === 'F') && (e.ctrlKey || e.metaKey) && e.shiftKey,
+      keys: comboMatcher(combos.addUiFeature),
       handler: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }),
       description: 'Add feature to UI Improvements',
       scope: 'global'
     });
     return () => { unregisterNew(); unregisterAddUiFeature(); };
-  }, [register, nav]);
+  }, [register, nav, combos.newTask, combos.addUiFeature]);
 
   useEffect(() => {
     const onHash = () => {};

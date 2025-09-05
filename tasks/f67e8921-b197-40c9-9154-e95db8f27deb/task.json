@@ -740,7 +740,7 @@
     },
     {
       "id": "006bc18d-88c6-4257-9d76-69ad87c9c502",
-      "status": "-",
+      "status": "+",
       "title": "Typing in \"?\" shows the help menu",
       "description": "The user has to click Shift+\"?\" and it shows the help menu - it should do that for Shift+\"H\".\nAll these shortcuts, along the modifier key should be configurable in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
