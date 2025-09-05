@@ -22,9 +22,7 @@ function GlobalShortcutsBootstrap() {
   const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    // New Task
     const unregisterNew = register({ id: 'new-task', keys: comboMatcher(combos.newTask), handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
-    // Add Feature to UI Improvements
     const unregisterAddUiFeature = register({
       id: 'add-ui-feature',
       keys: comboMatcher(combos.addUiFeature),

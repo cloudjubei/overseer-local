@@ -76,7 +76,6 @@ function useAccentClass(seed: string, isMain: boolean): string {
 export default function SidebarView({}: SidebarProps) {
   const { currentView, navigateView, openModal } = useNavigator();
   const { unreadCount } = useNotifications();
-  // const { register } = useShortcuts();
   const {
     activeProjectId,
     projects,
@@ -118,42 +117,10 @@ export default function SidebarView({}: SidebarProps) {
 
   useEffect(() => {
     if (mobileOpen) {
-      // Focus the first navigable item when opening
       setTimeout(() => firstItemRef.current?.focus(), 0);
     }
   }, [mobileOpen]);
 
-  // Keyboard shortcut to toggle collapse on desktop (Cmd/Ctrl+B)
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const isMod = e.metaKey || e.ctrlKey;
-      if (isMod && (e.key === 'b' || e.key === 'B')) {
-        e.preventDefault();
-        if (isMobile) setMobileOpen((v) => !v);
-        else setCollapsed((v) => !v);
-      }
-      if (isMobile && e.key === 'Escape' && mobileOpen) {
-        setMobileOpen(false);
-        // restore focus to trigger
-        setTimeout(() => mobileTriggerRef.current?.focus(), 0);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isMobile, mobileOpen]);
-
-  // useEffect(() => {
-  //   const unregister = register({
-  //     id: 'open-notifications',
-  //     keys: (e) => (e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'n' || e.key === 'N'),
-  //     handler: () => { navigateView('Notifications'); },
-  //     description: 'Open Notifications',
-  //     scope: 'global',
-  //   });
-  //   return unregister;
-  // }, [register, navigateView]);
-
-  // Roving tabindex for nav items
   const activeIndex = useMemo(() => {
     const idx = NAV_ITEMS.findIndex((n) => n.view === currentView);
     return idx >= 0 ? idx : 0;

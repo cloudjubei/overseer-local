@@ -10,7 +10,7 @@ import { useAppSettings } from '../hooks/useAppSettings';
 import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
 import { IconEdit, IconDelete, IconPlus } from '../components/ui/Icons';
-import type { ShortcutsModifier, ShortcutsConfig, AppSettings } from '../../types/settings';
+import { type ShortcutsModifier, type ShortcutsConfig, type AppSettings, DEFAULT_APP_SETTINGS } from '../../types/settings';
 
 // Settings Categories
 const CATEGORIES = [
@@ -59,14 +59,7 @@ export default function SettingsView() {
   };
 
   const resetShortcutsToDefault = async () => {
-    const defaults: ShortcutsConfig = {
-      commandMenu: 'Mod+K',
-      newTask: 'Mod+N',
-      help: 'Shift+H',
-      slashSearch: '/',
-      addUiFeature: 'Mod+Shift+F',
-    };
-    await updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcuts: defaults } });
+    await updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcuts: DEFAULT_APP_SETTINGS.userPreferences.shortcuts } });
   };
 
   // Visual Settings content
@@ -145,17 +138,6 @@ export default function SettingsView() {
               onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('help', v); }}
               className="w-full p-2 border border-gray-300 rounded-md"
               placeholder="Press keys..."
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Quick Open (Slash Search)</label>
-            <input
-              type="text"
-              value={appSettings.userPreferences.shortcuts.slashSearch}
-              onChange={() => {}}
-              onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('slashSearch', v); }}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="Press keys... (e.g., /)"
             />
           </div>
           <div>

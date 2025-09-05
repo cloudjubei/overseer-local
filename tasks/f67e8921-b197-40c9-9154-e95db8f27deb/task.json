@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "+",
+      "status": "-",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
       "plan": "",
@@ -586,7 +586,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "This is still not working. It seems the agent runs are not serialised correctly or not read correctly."
+      "rejection": "These now show, but the fix was to reformat the messages on read. They should simply be recorded correctly in the right format in the first place."
     },
     {
       "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
@@ -729,12 +729,13 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "+",
+      "status": "-",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
-      "description": "@src/renderer/screens/TasksView.tsx .\nMaybe it's some other view disabling it",
+      "description": "When switching screens from the @src/renderer/screens/TasksView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
       "plan": "",
       "context": [
-        "src/renderer/screens/TasksView.tsx"
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -753,15 +754,16 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "+",
+      "status": "-",
       "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
-      "description": "@src/renderer/components/ui/CommandMenu.tsx",
+      "description": "@src/renderer/components/ui/CommandMenu.tsx\n\nThe input box should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list.",
       "plan": "",
       "context": [
         "src/renderer/components/ui/CommandMenu.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "This doesn't work"
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
@@ -847,19 +849,19 @@
     "306733d4-26cb-49c0-a0ff-c34dc7699baa": 44,
     "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6": 45,
     "f9eef18e-818e-427d-82ab-8d990bb199c4": 46,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 47,
-    "9b65af17-0a3d-42e4-bcd2-81b65277651c": 48,
-    "583f4582-9495-46cc-bd49-19c957b9b0a3": 49,
-    "065ff2fe-ac0a-4b31-b57f-8918dcb4057c": 50,
-    "3c0c391d-fe56-4add-a756-793dd2dc6246": 51,
-    "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18": 52,
-    "1e6d13dd-e154-4612-8751-7182a7d660e6": 53,
-    "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 54,
-    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 55,
-    "006bc18d-88c6-4257-9d76-69ad87c9c502": 56,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 57,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58,
-    "55e5be40-2171-4e3d-91d9-db778a329ef1": 59,
+    "9b65af17-0a3d-42e4-bcd2-81b65277651c": 47,
+    "583f4582-9495-46cc-bd49-19c957b9b0a3": 48,
+    "065ff2fe-ac0a-4b31-b57f-8918dcb4057c": 49,
+    "3c0c391d-fe56-4add-a756-793dd2dc6246": 50,
+    "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18": 51,
+    "1e6d13dd-e154-4612-8751-7182a7d660e6": 52,
+    "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 53,
+    "006bc18d-88c6-4257-9d76-69ad87c9c502": 54,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 55,
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 56,
+    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 57,
+    "55e5be40-2171-4e3d-91d9-db778a329ef1": 58,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 59,
     "7b2917b5-67da-437e-b11e-f11989bbae7e": 60,
     "a45449ab-b745-460c-b065-6e92345ebd39": 61
   }

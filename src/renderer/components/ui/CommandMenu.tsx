@@ -38,11 +38,8 @@ export default function CommandMenu() {
   const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    return register({ id: 'cmdk', keys: comboMatcher(combos.commandMenu), handler: () => setOpen(true), description: 'Open command menu', scope: 'global' });
+    return register({ id: 'command-menu', keys: comboMatcher(combos.commandMenu), handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); }, description: 'Open command menu', scope: 'global' });
   }, [register, combos.commandMenu]);
-  useEffect(() => {
-    return register({ id: 'slash-search', keys: comboMatcher(combos.slashSearch), handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); } });
-  }, [register, combos.slashSearch]);
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 0); }, [open]);
 

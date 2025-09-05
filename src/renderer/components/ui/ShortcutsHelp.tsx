@@ -8,11 +8,11 @@ export default function ShortcutsHelp() {
   const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
 
-  const helpCombo = appSettings.userPreferences.shortcuts.help || 'Shift+H';
+  const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    return register({ id: 'help', keys: comboMatcher(helpCombo), handler: () => setOpen(true), description: 'Open keyboard shortcuts help', scope: 'global' });
-  }, [register, helpCombo]);
+    return register({ id: 'help', keys: comboMatcher(combos.help), handler: () => setOpen(true), description: 'Open keyboard shortcuts help', scope: 'global' });
+  }, [register, combos.help]);
 
   const shortcuts = list();
 
@@ -35,10 +35,9 @@ export default function ShortcutsHelp() {
   }, []);
 
   const idToCombo: Record<string, string> = {
-    'cmdk': appSettings.userPreferences.shortcuts.commandMenu,
+    'command-menu': appSettings.userPreferences.shortcuts.commandMenu,
     'new-task': appSettings.userPreferences.shortcuts.newTask,
     'help': appSettings.userPreferences.shortcuts.help,
-    'slash-search': appSettings.userPreferences.shortcuts.slashSearch,
     'add-ui-feature': appSettings.userPreferences.shortcuts.addUiFeature,
   };
 
