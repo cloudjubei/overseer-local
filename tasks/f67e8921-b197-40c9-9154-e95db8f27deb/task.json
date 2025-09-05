@@ -728,7 +728,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "@src/renderer/screens/TasksView.tsx .\nMaybe it's some other view disabling it",
       "plan": "",
