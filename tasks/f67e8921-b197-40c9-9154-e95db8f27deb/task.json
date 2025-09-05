@@ -715,7 +715,7 @@
     },
     {
       "id": "7cd60fb3-fe0f-478f-ac17-915b824f7f65",
-      "status": "-",
+      "status": "+",
       "title": "Task lookup fix",
       "description": "When using task lookup, it doesn't allow the user to search by typing in \"1.1\" for instance. The moment the user types in the \".\" the dropdown disappears. The logic is in @src/renderer/hooks/useReferencesAutocomplete.ts and used inside @src/renderer/components/ui/RichText.tsx \n\nAlso, when typing in \"#8\" for instance - it incorrectly references the blocker - the user types in the reference, but the blocker should actually hold the proper id information (so reverse lookup must be done).",
       "plan": "",

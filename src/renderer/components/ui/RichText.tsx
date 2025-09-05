@@ -5,7 +5,7 @@ import DependencyBullet from '../tasks/DependencyBullet';
 
 // Renders text into rich content:
 // - @file/path.ext mentions -> inline File chip with hover preview
-// - #<uuid>(.<uuid>) task/feature references -> DependencyBullet
+// - #<uuid>(.<uuid>) or #<display>(.<display>) task/feature references -> DependencyBullet
 // In forms: keep raw text; use this component only for display contexts.
 
 // UUID pattern used by tasks/features
@@ -17,7 +17,8 @@ function tokenize(input: string): Array<{ type: 'text' | 'file' | 'dep'; value: 
   if (!input) return [{ type: 'text', value: '' }];
 
   const fileRe = /@([A-Za-z0-9_\-./]+\.[A-Za-z0-9]+)/g; // crude heuristic for file-like tokens
-  const depRe = new RegExp(`#(${UUID})(?:\.(${UUID}))?`, 'g');
+  // Match either UUID or numeric display (e.g., 8), optionally with "." and either UUID or numeric
+  const depRe = new RegExp(`#((?:${UUID})|(?:\\d+))(?:\.((?:${UUID})|(?:\\d+)))?`, 'g');
 
   // Merge matches by walking input once with both regexes
   type Match = { index: number; length: number; type: 'file' | 'dep'; value: string };

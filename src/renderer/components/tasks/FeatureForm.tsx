@@ -8,6 +8,7 @@ import ContextFileChip from './ContextFileChip'
 import { Modal } from '../ui/Modal'
 import { IconDelete, IconPlus } from '../ui/Icons'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
+import { useTasks } from '../../hooks/useTasks'
 
 export type FeatureFormValues = {
   title: string
@@ -48,6 +49,8 @@ export default function FeatureForm({
   const [error, setError] = useState<string | null>(null)
   const [showSelector, setShowSelector] = useState(false)
   const [showFileSelector, setShowFileSelector] = useState(false)
+
+  const { normalizeDependency } = useTasks()
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
@@ -126,19 +129,24 @@ export default function FeatureForm({
     return refs
   }, [combinedTextForMentions])
 
-  // Keep blockers in sync with mentioned refs: add missing, remove unmentioned
+  // Keep blockers in sync with mentioned refs: add missing (normalized), remove unmentioned
   useEffect(() => {
     setBlockers((prev) => {
       const next = new Set(prev)
-      // add
-      mentionedRefs.forEach((r) => next.add(r))
-      // remove any that are not mentioned anymore
-      for (const r of Array.from(next)) {
-        if (!mentionedRefs.has(r)) next.delete(r)
+      // add normalized
+      mentionedRefs.forEach((r) => next.add(normalizeDependency(r)))
+      // remove any that are not mentioned anymore (compare against raw or normalized)
+      for (const val of Array.from(next)) {
+        // if this canonicalized blocker is no longer present (either as raw or normalized form), drop it
+        const rawCandidate = val
+        // try to derive a display-like token is not trivial; keep simple: remove only if neither the canonical val nor any raw tokens referencing it exist
+        // We check if the raw mentions contain this exact canonical token; if not, keep it only if there exists a raw that normalizes to it
+        const stillMentioned = Array.from(mentionedRefs).some((r) => normalizeDependency(r) === val)
+        if (!stillMentioned) next.delete(val)
       }
       return Array.from(next)
     })
-  }, [mentionedRefs])
+  }, [mentionedRefs, normalizeDependency])
 
   // Keep context in sync with @ mentions: add on select via callback; also remove if no longer mentioned anywhere
   useEffect(() => {
@@ -150,7 +158,8 @@ export default function FeatureForm({
   }
 
   const handleReferenceSelected = (ref: string) => {
-    setBlockers((prev) => (prev.includes(ref) ? prev : [...prev, ref]))
+    const canonical = normalizeDependency(ref)
+    setBlockers((prev) => (prev.includes(canonical) ? prev : [...prev, canonical]))
   }
 
   return (
@@ -302,7 +311,9 @@ export default function FeatureForm({
         <Modal title="Select Blocker" onClose={() => setShowSelector(false)} isOpen={true} size="md">
           <DependencySelector
             onConfirm={(deps) => {
-              const newDeps = deps.filter((d) => !blockers.includes(d))
+              const newDeps = deps
+                .map((d) => normalizeDependency(d))
+                .filter((d) => !blockers.includes(d))
               setBlockers([...blockers, ...newDeps])
               setShowSelector(false)
             }}
