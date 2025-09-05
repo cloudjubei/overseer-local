@@ -761,6 +761,20 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
+      "status": "-",
+      "title": "The model chip should be visible to the left of the List | Board switch control",
+      "description": "This is inside @src/renderer/screens/TasksView.tsx and it should use @src/renderer/components/agents/AgentModelQuickSelect.tsx and @src/renderer/components/agents/ModelChip.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/components/agents/AgentModelQuickSelect.tsx",
+        "src/renderer/components/agents/ModelChip.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -821,6 +835,7 @@
     "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 55,
     "006bc18d-88c6-4257-9d76-69ad87c9c502": 56,
     "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 57,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58,
+    "55e5be40-2171-4e3d-91d9-db778a329ef1": 59
   }
 }
