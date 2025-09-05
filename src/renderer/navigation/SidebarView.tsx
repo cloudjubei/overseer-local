@@ -13,6 +13,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
 import type { NavigationView } from '../types';
 import { useAppSettings } from '../hooks/useAppSettings';
+import { useAgents } from '../hooks/useAgents';
 
 export type SidebarProps = {};
 
@@ -80,6 +81,7 @@ export default function SidebarView({}: SidebarProps) {
     setActiveProjectId,
   } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
+  const { activeRuns } = useAgents();
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed);
 
@@ -91,6 +93,16 @@ export default function SidebarView({}: SidebarProps) {
   useEffect(() => {
     updateAppSettings({ userPreferences: { ...appSettings.userPreferences, sidebarCollapsed: collapsed }})
   }, [collapsed]);
+
+  // Compute active agent counts per project
+  const activeCountByProject = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of activeRuns) {
+      const k = r.projectId;
+      map.set(k, (map.get(k) || 0) + 1);
+    }
+    return map;
+  }, [activeRuns]);
 
   // Responsive: on small screens, render as overlay drawer
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -315,6 +327,7 @@ export default function SidebarView({}: SidebarProps) {
             const isMain = p.id === MAIN_PROJECT
             const active = activeProjectId === p.id
             const accent = useAccentClass(p.id, isMain)
+            const activeCount = activeCountByProject.get(p.id) || 0;
             return (
               <li className="nav-li" key={p.id}>
                 <div className="flex items-center">
@@ -327,6 +340,11 @@ export default function SidebarView({}: SidebarProps) {
                     {isMain && <span className="nav-item__icon" aria-hidden>🗂️</span>}
                     {!isMain && <span className="nav-item__icon" aria-hidden>📁</span>}
                     {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+                    {activeCount > 0 && (
+                      <span className="nav-item__badge" aria-label={`${activeCount} running agents`}>
+                        {activeCount}
+                      </span>
+                    )}
                   </button>
                 </div>
               </li>

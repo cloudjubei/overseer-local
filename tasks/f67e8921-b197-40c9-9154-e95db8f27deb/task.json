@@ -664,7 +664,7 @@
     },
     {
       "id": "065ff2fe-ac0a-4b31-b57f-8918dcb4057c",
-      "status": "-",
+      "status": "+",
       "title": "Show a summary of running agents per project in the sidebar",
       "description": "This should also be visible when the sidebar is minimized - it should show the project icon and this new chip that would display the number of agents.\n@src/renderer/navigation/SidebarView.tsx",
       "plan": "",
