@@ -250,7 +250,6 @@ class AgentsServiceImpl {
       const baseTitle = 'Agent finished';
       const parts: string[] = [];
       parts.push(`Agent ${run.agentType}`);
-      if (run.featureId) parts.push(`feature ${run.featureId}`);
       parts.push(`task ${run.taskId}`);
       const message = parts.join(' • ');
 
@@ -259,19 +258,9 @@ class AgentsServiceImpl {
         category: 'tasks',
         title: baseTitle,
         message,
-        metadata: { taskId: run.taskId, featureId: run.featureId },
+        metadata: { taskId: run.taskId },
       } as any);
 
-      // If a feature run, also emit an Updates category notification to reflect commit completion
-      if (run.featureId) {
-        await notificationsService.create(run.projectId, {
-          type: 'success',
-          category: 'updates',
-          title: 'Feature committed',
-          message: `Changes for feature ${run.featureId} have been committed.`,
-          metadata: { taskId: run.taskId, featureId: run.featureId },
-        } as any);
-      }
     } catch (err) {
       console.warn('[agentsService] Failed to create completion notifications', (err as any)?.message || err);
     }
@@ -358,11 +347,9 @@ class AgentsServiceImpl {
 
   private async coerceAgentTypeForTask(agentType: AgentType, projectId: string, taskId: string): Promise<AgentType> {
     try {
-      const tasksApi = (window as any).tasksService;
-      if (!tasksApi || typeof tasksApi.getTask !== 'function') return agentType;
-      const task = await tasksApi.getTask(projectId, taskId);
+      const task = await window.tasksService.getTask(projectId, taskId);
+      if (!task) return agentType;
       const features = Array.isArray(task?.features) ? task!.features : [];
-      // If no features at all, default to speccer when caller sent developer (simple-click default) or any falsy
       if (features.length === 0 && (agentType === 'developer' || !agentType)) return 'speccer';
       return agentType;
     } catch (err) {
