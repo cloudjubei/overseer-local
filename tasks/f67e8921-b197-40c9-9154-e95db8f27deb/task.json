@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "-",
+      "status": "+",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
       "plan": "",
@@ -728,7 +728,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "@src/renderer/screens/TasksView.tsx .\nMaybe it's some other view disabling it",
       "plan": "",
@@ -740,7 +740,7 @@
     },
     {
       "id": "006bc18d-88c6-4257-9d76-69ad87c9c502",
-      "status": "-",
+      "status": "+",
       "title": "Typing in \"?\" shows the help menu",
       "description": "The user has to click Shift+\"?\" and it shows the help menu - it should do that for Shift+\"H\".\nAll these shortcuts, along the modifier key should be configurable in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -752,7 +752,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "+",
       "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "@src/renderer/components/ui/CommandMenu.tsx",
       "plan": "",
@@ -764,7 +764,7 @@
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
-      "status": "-",
+      "status": "+",
       "title": "The model chip should be visible to the left of the List | Board switch control",
       "description": "This is inside @src/renderer/screens/TasksView.tsx and it should use @src/renderer/components/agents/AgentModelQuickSelect.tsx and @src/renderer/components/agents/ModelChip.tsx",
       "plan": "",

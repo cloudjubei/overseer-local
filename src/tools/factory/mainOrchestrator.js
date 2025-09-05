@@ -159,6 +159,62 @@ function loadWorkspaceDotenv(projectRoot) {
   }
 }
 
+// --- Normalization: convert persisted messages array into feature-keyed logs ---
+const DEFAULT_FEATURE_KEY = '__task__';
+function parseFeatureMarker(content) {
+  if (!content || typeof content !== 'string') return null;
+  // Matches lines like: --- BEGIN FEATURE <id>: <title> ---
+  const m = /^---\s*BEGIN\s+FEATURE\s+([^:]+)\s*:/.exec(content);
+  return m ? String(m[1]).trim() : null;
+}
+function ensureGroup(map, featureId) {
+  if (!map[featureId]) {
+    map[featureId] = { startDate: new Date().toISOString(), featureId, messages: [] };
+  }
+  return map[featureId];
+}
+function normalizeRunMessagesToFeatureLog(messages) {
+  // If already in the expected shape (object of { featureId: { startDate, messages } }), return as-is
+  if (messages && !Array.isArray(messages) && typeof messages === 'object') {
+    return messages;
+  }
+  const result = {};
+  if (!Array.isArray(messages)) {
+    // Unknown shape -> fallback to empty task bucket
+    result[DEFAULT_FEATURE_KEY] = { startDate: new Date().toISOString(), featureId: DEFAULT_FEATURE_KEY, messages: [] };
+    return result;
+  }
+  let current = DEFAULT_FEATURE_KEY;
+  ensureGroup(result, current);
+  for (const msg of messages) {
+    try {
+      const role = msg?.role;
+      const content = msg?.content;
+      if (role === 'system') {
+        const fid = parseFeatureMarker(content);
+        if (fid) {
+          current = fid;
+          ensureGroup(result, current);
+          // Do not include the marker message in the feature messages
+          continue;
+        }
+      }
+      const grp = ensureGroup(result, current);
+      // Push shallow clone to avoid accidental mutations downstream
+      grp.messages.push({ ...msg });
+    } catch {}
+  }
+  // Assign a simple endDate for groups that have messages
+  const now = new Date().toISOString();
+  for (const fid of Object.keys(result)) {
+    const g = result[fid];
+    if (g && Array.isArray(g.messages) && g.messages.length > 0) {
+      g.endDate = now;
+    }
+  }
+  return result;
+}
+
 export async function registerFactoryIPC(mainWindow, projectRoot) {
   console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
 
@@ -411,10 +467,13 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   });
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_HISTORY_MESSAGES, (_evt, { runId }) => {
     try {
-      return HISTORY?.getRunMessages?.(runId) || [];
+      const raw = HISTORY?.getRunMessages?.(runId) || [];
+      const normalized = normalizeRunMessagesToFeatureLog(raw);
+      return normalized;
     } catch (e) {
       console.warn('[factory] history:messages error', e?.message || e);
-      return [];
+      // Return empty feature log structure to satisfy UI expectations
+      return { [DEFAULT_FEATURE_KEY]: { startDate: nowIso(), featureId: DEFAULT_FEATURE_KEY, messages: [] } };
     }
   });
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_HISTORY_DELETE, (_evt, { runId }) => {

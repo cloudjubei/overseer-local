@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
@@ -10,7 +10,7 @@ import { useAppSettings } from '../hooks/useAppSettings';
 import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
 import { IconEdit, IconDelete, IconPlus } from '../components/ui/Icons';
-import type { ShortcutsModifier } from '../../types/settings';
+import type { ShortcutsModifier, ShortcutsConfig, AppSettings } from '../../types/settings';
 
 // Settings Categories
 const CATEGORIES = [
@@ -33,6 +33,41 @@ export default function SettingsView() {
 
   // Layout state
   const [activeCategory, setActiveCategory] = useState<CategoryId>('visual');
+
+  // Helper: capture a combo from a keydown
+  const captureCombo = useCallback((e: React.KeyboardEvent<HTMLInputElement>): string => {
+    const parts: string[] = [];
+    if (e.metaKey || e.ctrlKey) parts.push('Mod');
+    if (e.shiftKey) parts.push('Shift');
+    if (e.altKey) parts.push('Alt');
+    // Base key
+    const key = e.key;
+    // Ignore modifier-only
+    if (key && key !== 'Shift' && key !== 'Meta' && key !== 'Control' && key !== 'Alt') {
+      if (key.length === 1) {
+        parts.push(key.toUpperCase());
+      } else {
+        parts.push(key);
+      }
+    }
+    return parts.length ? parts.join('+') : '';
+  }, []);
+
+  const onShortcutChange = async (keyName: keyof ShortcutsConfig, combo: string) => {
+    const next: AppSettings = await updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcuts: { ...appSettings.userPreferences.shortcuts, [keyName]: combo } } });
+    return next;
+  };
+
+  const resetShortcutsToDefault = async () => {
+    const defaults: ShortcutsConfig = {
+      commandMenu: 'Mod+K',
+      newTask: 'Mod+N',
+      help: 'Shift+H',
+      slashSearch: '/',
+      addUiFeature: 'Mod+Shift+F',
+    };
+    await updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcuts: defaults } });
+  };
 
   // Visual Settings content
   const renderVisualSection = () => (
@@ -71,6 +106,72 @@ export default function SettingsView() {
         </select>
         <div className="text-[12px] text-[var(--text-secondary)]">
           This controls which key acts as the modifier for app shortcuts like Cmd/Ctrl+K and +N.
+        </div>
+      </div>
+
+      <div className="space-y-2 mt-8">
+        <h3 className="text-lg font-semibold">Keyboard Shortcuts</h3>
+        <p className="text-[12px] text-[var(--text-secondary)]">Click a field and press the desired key combination. Mod maps to your selected modifier (Cmd on macOS, Ctrl on Windows/Linux).</p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Command Menu</label>
+            <input
+              type="text"
+              value={appSettings.userPreferences.shortcuts.commandMenu}
+              onChange={() => {}}
+              onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('commandMenu', v); }}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Press keys..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">New Task</label>
+            <input
+              type="text"
+              value={appSettings.userPreferences.shortcuts.newTask}
+              onChange={() => {}}
+              onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('newTask', v); }}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Press keys..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Help Menu</label>
+            <input
+              type="text"
+              value={appSettings.userPreferences.shortcuts.help}
+              onChange={() => {}}
+              onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('help', v); }}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Press keys..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Quick Open (Slash Search)</label>
+            <input
+              type="text"
+              value={appSettings.userPreferences.shortcuts.slashSearch}
+              onChange={() => {}}
+              onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('slashSearch', v); }}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Press keys... (e.g., /)"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Add Feature to UI Improvements</label>
+            <input
+              type="text"
+              value={appSettings.userPreferences.shortcuts.addUiFeature}
+              onChange={() => {}}
+              onKeyDown={(e) => { e.preventDefault(); const v = captureCombo(e); if (v) onShortcutChange('addUiFeature', v); }}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Press keys..."
+            />
+          </div>
+        </div>
+        <div className="mt-2">
+          <Button onClick={resetShortcutsToDefault} variant="outline">Reset to defaults</Button>
         </div>
       </div>
     </div>
