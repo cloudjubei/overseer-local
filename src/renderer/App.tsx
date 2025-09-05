@@ -11,7 +11,7 @@ import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
 
-const UI_IMPROVEMENTS_TASK_ID = 'f9eef18e-818e-427d-82ab-8d990bb199c4';
+const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();

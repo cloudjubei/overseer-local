@@ -15,4 +15,4 @@ export type NotificationsService = {
   create: (projectId: string, input: NotificationCreateInput) => Promise<Notification>
 }
 
-export const notificationsService: NotificationsService = { ...window.notificationsService as any }
+export const notificationsService: NotificationsService = { ...window.notificationsService }
