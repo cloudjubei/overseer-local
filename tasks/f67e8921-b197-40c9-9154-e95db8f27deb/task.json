@@ -652,7 +652,7 @@
     },
     {
       "id": "583f4582-9495-46cc-bd49-19c957b9b0a3",
-      "status": "-",
+      "status": "+",
       "title": "There needs to be an edit button next to the button for new task",
       "description": "This is inside @src/renderer/tasks/TaskDetailsView.tsx - it must be possible to edit a task from within this view. Deleting a task here, would take the user back to Home.",
       "plan": "",
