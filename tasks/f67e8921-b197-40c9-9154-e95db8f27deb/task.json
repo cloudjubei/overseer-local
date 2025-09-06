@@ -781,7 +781,7 @@
     },
     {
       "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
-      "status": "-",
+      "status": "?",
       "title": "when a notification is read - don't show the count in the sidebar",
       "description": "Right now, when going to the @src/renderer/screens/NotificationsView.tsx if the user clicks a notification it should be read (but the badge in the @src/renderer/navigation/SidebarView.tsx  isn't updated).\nWhen clicking mark all as read- the badge should disappear.\nSame goes for clearing all notifications - there are no notifications, so there should be no badge.",
       "plan": "",
@@ -790,7 +790,8 @@
         "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages.[2].role\",\n    \"code\": null\n  }\n}"
     },
     {
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
