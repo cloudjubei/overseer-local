@@ -9,18 +9,20 @@ function getProjectRoot() { return PROJECT_ROOT; }
 
 async function ensureDir(p: string) { await fsp.mkdir(p, { recursive: true }); }
 
-function isWithinRoot(abs: string) {
-  const root = getProjectRoot();
-  const normRoot = path.resolve(root) + path.sep;
-  const normAbs = path.resolve(abs) + path.sep;
-  return normAbs.startsWith(normRoot) || path.resolve(abs) === path.resolve(root);
+function isWithinRootFactory(rootGetter: () => string) {
+  return function isWithinRoot(abs: string) {
+    const root = rootGetter();
+    const normRoot = path.resolve(root) + path.sep;
+    const normAbs = path.resolve(abs) + path.sep;
+    return normAbs.startsWith(normRoot) || path.resolve(abs) === path.resolve(root);
+  }
 }
 
-async function readFiles(pathsRel: string[]): Promise<string> {
+async function readFilesImpl(rootGetter: () => string, isWithinRoot: (abs: string) => boolean, pathsRel: string[]): Promise<string> {
   const result: Record<string, any> = {};
   for (const rel of pathsRel) {
     try {
-      const abs = path.resolve(getProjectRoot(), rel);
+      const abs = path.resolve(rootGetter(), rel);
       if (!isWithinRoot(abs)) { result[rel] = 'SECURITY ERROR: Cannot access path outside project directory.\n'; continue; }
       const st = await fsp.stat(abs).catch(() => null);
       if (!st) { result[rel] = 'Path not found or is not a regular file/directory.'; continue; }
@@ -39,9 +41,9 @@ async function readFiles(pathsRel: string[]): Promise<string> {
   return JSON.stringify(result, null, 0);
 }
 
-async function listFiles(relPath: string): Promise<string[]> {
+async function listFilesImpl(rootGetter: () => string, isWithinRoot: (abs: string) => boolean, relPath: string): Promise<string[]> {
   try {
-    const abs = path.resolve(getProjectRoot(), relPath);
+    const abs = path.resolve(rootGetter(), relPath);
     if (!isWithinRoot(abs)) return [];
     const st = await fsp.stat(abs).catch(() => null);
     if (!st || !st.isDirectory()) return [];
@@ -52,17 +54,17 @@ async function listFiles(relPath: string): Promise<string[]> {
   }
 }
 
-async function writeFile(relPath: string, content: string) {
-  const abs = path.resolve(getProjectRoot(), relPath);
+async function writeFileImpl(rootGetter: () => string, isWithinRoot: (abs: string) => boolean, relPath: string, content: string) {
+  const abs = path.resolve(rootGetter(), relPath);
   if (!isWithinRoot(abs)) throw new Error(`Security violation: Attempt to write outside of project root: ${relPath}`);
   await ensureDir(path.dirname(abs));
   await fsp.writeFile(abs, content, 'utf8');
   return `File securely written to: ${relPath}`;
 }
 
-async function renameFile(srcRel: string, dstRel: string) {
-  const src = path.resolve(getProjectRoot(), srcRel);
-  const dst = path.resolve(getProjectRoot(), dstRel);
+async function renameFileImpl(rootGetter: () => string, isWithinRoot: (abs: string) => boolean, srcRel: string, dstRel: string) {
+  const src = path.resolve(rootGetter(), srcRel);
+  const dst = path.resolve(rootGetter(), dstRel);
   if (!isWithinRoot(src)) throw new Error(`Security violation: Attempt to read outside of project root: ${srcRel}`);
   if (!isWithinRoot(dst)) throw new Error(`Security violation: Attempt to write outside of project root: ${dstRel}`);
   await ensureDir(path.dirname(dst));
@@ -70,8 +72,8 @@ async function renameFile(srcRel: string, dstRel: string) {
   return `File ${srcRel} securely renamed to: ${dstRel}`;
 }
 
-async function deleteFile(relPath: string) {
-  const abs = path.resolve(getProjectRoot(), relPath);
+async function deleteFileImpl(rootGetter: () => string, isWithinRoot: (abs: string) => boolean, relPath: string) {
+  const abs = path.resolve(rootGetter(), relPath);
   if (!isWithinRoot(abs)) throw new Error(`Security violation: Attempt to delete outside of project root: ${relPath}`);
   const st = await fsp.stat(abs).catch(() => null);
   if (!st) return `File not found: ${relPath}`;
@@ -83,9 +85,9 @@ async function deleteFile(relPath: string) {
   return `File securely deleted: ${relPath}`;
 }
 
-async function searchFiles(query: string, relPath = '.'): Promise<string[]> {
+async function searchFilesImpl(rootGetter: () => string, isWithinRoot: (abs: string) => boolean, query: string, relPath = '.'): Promise<string[]> {
   if (!query) return [];
-  const root = getProjectRoot();
+  const root = rootGetter();
   const start = path.resolve(root, relPath);
   if (!isWithinRoot(start)) return [];
 
@@ -137,6 +139,14 @@ async function searchFiles(query: string, relPath = '.'): Promise<string[]> {
   return matches;
 }
 
+// Default, process-global tools (backwards-compatible)
+const defaultIsWithinRoot = isWithinRootFactory(getProjectRoot);
+async function readFiles(pathsRel: string[]): Promise<string> { return readFilesImpl(getProjectRoot, defaultIsWithinRoot, pathsRel); }
+async function listFiles(relPath: string): Promise<string[]> { return listFilesImpl(getProjectRoot, defaultIsWithinRoot, relPath); }
+async function writeFile(relPath: string, content: string) { return writeFileImpl(getProjectRoot, defaultIsWithinRoot, relPath, content); }
+async function renameFile(srcRel: string, dstRel: string) { return renameFileImpl(getProjectRoot, defaultIsWithinRoot, srcRel, dstRel); }
+async function deleteFile(relPath: string) { return deleteFileImpl(getProjectRoot, defaultIsWithinRoot, relPath); }
+async function searchFiles(query: string, relPath = '.') { return searchFilesImpl(getProjectRoot, defaultIsWithinRoot, query, relPath); }
 
 export const fileTools = {
   setProjectRoot,
@@ -150,3 +160,19 @@ export const fileTools = {
 };
 
 export type FileTools = typeof fileTools;
+
+// New: create per-run, project-root scoped tools (thread-safe)
+export function createFileTools(projectRoot: string) {
+  let ROOT = path.resolve(projectRoot || process.cwd());
+  const getRoot = () => ROOT;
+  const isWithinRoot = isWithinRootFactory(getRoot);
+  return {
+    setProjectRoot: (p: string) => { ROOT = path.resolve(p || ROOT); },
+    readFiles: (pathsRel: string[]) => readFilesImpl(getRoot, isWithinRoot, pathsRel),
+    listFiles: (relPath: string) => listFilesImpl(getRoot, isWithinRoot, relPath),
+    writeFile: (relPath: string, content: string) => writeFileImpl(getRoot, isWithinRoot, relPath, content),
+    renameFile: (srcRel: string, dstRel: string) => renameFileImpl(getRoot, isWithinRoot, srcRel, dstRel),
+    deleteFile: (relPath: string) => deleteFileImpl(getRoot, isWithinRoot, relPath),
+    searchFiles: (query: string, relPath = '.') => searchFilesImpl(getRoot, isWithinRoot, query, relPath),
+  } as FileTools;
+}
