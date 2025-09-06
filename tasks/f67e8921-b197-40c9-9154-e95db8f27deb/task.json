@@ -795,7 +795,7 @@
     },
     {
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
-      "status": "-",
+      "status": "+",
       "title": "clicking a run finished notification takes the user to that agent run",
       "description": "@src/renderer/hooks/useNotifications.ts @src/renderer/services/notificationsService.ts \nclicking a notification should take the appropriate place in @src/renderer/screens/AgentsView.tsx",
       "plan": "",
