@@ -800,6 +800,31 @@
       "context": [],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "f1b430d4-d14d-437b-affb-d326d3227c41",
+      "status": "-",
+      "title": "There's an addition \"_task\" feature log displayed in an agent run",
+      "description": "This shouldn't happen.\nIt's displayed in @src/renderer/components/agents/ChatConversation.tsx and probably originates from:\n@packages/factory-ts/src/orchestrator.ts",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
+      "status": "-",
+      "title": "All agent turn messages should show their thinking time next to the message bubble",
+      "description": "This is inside @src/renderer/components/agents/ChatConversation.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -863,6 +888,8 @@
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58,
     "7b2917b5-67da-437e-b11e-f11989bbae7e": 59,
     "df22d856-9aa3-4c10-9e91-04291697e0b8": 60,
-    "a45449ab-b745-460c-b065-6e92345ebd39": 61
+    "a45449ab-b745-460c-b065-6e92345ebd39": 61,
+    "f1b430d4-d14d-437b-affb-d326d3227c41": 62,
+    "065bac4d-1035-48de-9f17-2bbe2e35a300": 63
   }
 }
