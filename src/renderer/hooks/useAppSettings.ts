@@ -1,8 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { settingsService } from '../services/settingsService'
-import { AppSettings, DEFAULT_APP_SETTINGS, NotificationSystemSettings, TaskListViewSorting, TaskViewMode, UserPreferences } from '../../types/settings';
+import { AppSettings, DEFAULT_APP_SETTINGS, NotificationSystemSettings, UserPreferences } from '../../types/settings';
+import { useAppSettingsContext } from '../contexts/AppSettingsContext';
 
+// Hook now prefers context (from AppSettingsProvider) but falls back to local state if no provider is present
 export function useAppSettings() {
+  const ctx = useAppSettingsContext();
+  if (ctx) {
+    return ctx;
+  }
+
+  // Fallback behavior (should rarely be used if provider is mounted)
   const [isLoaded, setIsLoaded] = useState(false)
   const [appSettings, setAppSettings] = useState<AppSettings>(DEFAULT_APP_SETTINGS)
 

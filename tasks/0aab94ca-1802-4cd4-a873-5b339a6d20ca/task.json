@@ -33,7 +33,7 @@
     },
     {
       "id": "19e53643-537f-4bbf-9ba6-268baeedcb4f",
-      "status": "-",
+      "status": "+",
       "title": "Create Main Process Service for Live Data Management",
       "description": "Implement a main process service to manage the lifecycle of live data services. This includes loading configurations from storage, saving them, and exposing methods to the renderer via IPC to get service status and trigger updates.",
       "plan": "",
@@ -42,7 +42,7 @@
     },
     {
       "id": "2e00148d-cb4c-4c4b-9388-448b171ff42e",
-      "status": "-",
+      "status": "~",
       "title": "Implement UI to List Live Data Services",
       "description": "On the 'Live Data' screen, create a UI component that lists all configured live data services. Each item in the list should display the service name, its last updated timestamp, and its freshness status (e.g., 'Up to date', 'Stale').",
       "plan": "",

@@ -26,7 +26,7 @@ export default function AgentsView() {
     () => activeRuns
       .filter(r => r.projectId === projectId)
       .slice()
-      .sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')),
+      .sort((a,b) => (b.startedAt || '').localeCompare(a.startedAt || '')),
     [activeRuns, projectId]
   );
 

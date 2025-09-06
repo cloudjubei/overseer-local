@@ -11,6 +11,7 @@ import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
 import { useAppSettings } from './hooks/useAppSettings';
+import { AppSettingsProvider } from './contexts/AppSettingsContext';
 
 const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
 
@@ -70,20 +71,22 @@ function App()
 
   return (
     <ToastProvider>
-      <ProjectsProvider>
-        <NavigatorProvider>
-          <ShortcutsProvider>
-            <GlobalShortcutsBootstrap />
-            <NotificationClickHandler />
-            <CommandMenu />
-            <ShortcutsHelp />
-            <div className="flex h-full w-full overflow-hidden">
-              <SidebarView />
-              <ModalHost />
-            </div>
-          </ShortcutsProvider>
-        </NavigatorProvider>
-      </ProjectsProvider>
+      <AppSettingsProvider>
+        <ProjectsProvider>
+          <NavigatorProvider>
+            <ShortcutsProvider>
+              <GlobalShortcutsBootstrap />
+              <NotificationClickHandler />
+              <CommandMenu />
+              <ShortcutsHelp />
+              <div className="flex h-full w-full overflow-hidden">
+                <SidebarView />
+                <ModalHost />
+              </div>
+            </ShortcutsProvider>
+          </NavigatorProvider>
+        </ProjectsProvider>
+      </AppSettingsProvider>
     </ToastProvider>
   );
 }

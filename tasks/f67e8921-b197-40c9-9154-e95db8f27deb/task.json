@@ -729,7 +729,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "When switching screens from the @src/renderer/screens/TasksView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
       "plan": "",
@@ -754,7 +754,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "~",
       "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "@src/renderer/components/ui/CommandMenu.tsx\n\nThe input box should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list.",
       "plan": "",

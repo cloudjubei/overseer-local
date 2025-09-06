@@ -44,12 +44,15 @@ function filterTasks(tasks: Task[], { query, status }: { query: string; status: 
 const STATUS_ORDER = ['-', '~', '+', '=', '?']
 
 export default function TasksListView() {
+  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
+
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<TaskListStatusFilter>('all')
-  const [sortBy, setSortBy] = useState<TaskListViewSorting>('index_desc')
+  // Initialize from app settings to avoid resetting on remount when switching views
+  const [statusFilter, setStatusFilter] = useState<TaskListStatusFilter>(() => appSettings.userPreferences.tasksListViewStatusFilter)
+  const [sortBy, setSortBy] = useState<TaskListViewSorting>(() => appSettings.userPreferences.tasksListViewSorting)
   const [saving, setSaving] = useState(false)
-  const [view, setView] = useState<TaskViewMode>('list')
+  const [view, setView] = useState<TaskViewMode>(() => appSettings.userPreferences.tasksViewMode)
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -61,7 +64,6 @@ export default function TasksListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project, projectId } = useActiveProject()
-  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
   const { tasksById, updateTask, reorderTask, getBlockers, getBlockersOutbound } = useTasks()
   const { activeRuns, startTaskAgent } = useAgents()
 
@@ -69,6 +71,7 @@ export default function TasksListView() {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
 
+  // Hydrate from settings once loaded (initial state uses settings already if available)
   useEffect(() => {
     if (isAppSettingsLoaded){
       setView(appSettings.userPreferences.tasksViewMode)
