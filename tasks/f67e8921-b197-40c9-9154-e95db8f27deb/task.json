@@ -821,7 +821,7 @@
     },
     {
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "-",
+      "status": "+",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
       "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip",
       "plan": "",

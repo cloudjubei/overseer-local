@@ -182,7 +182,7 @@ function isToolMsg(m: AgentRunMessage | undefined) {
 }
 
 function buildFeatureTurns(messages: AgentRunMessage[]) {
-  const turns: { assistant: AgentRunMessage; tools?: AgentRunMessage; index: number; isFinal?: boolean }[] = [];
+  const turns: { assistant: AgentRunMessage; tools?: AgentRunMessage; index: number; isFinal?: boolean; thinkingTime?: number }[] = [];
   if (!messages || messages.length === 0) return { initial: undefined as AgentRunMessage | undefined, turns };
 
   // Initial message is the first non-tool message (usually user)
@@ -190,6 +190,8 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
   while (idx < messages.length && isToolMsg(messages[idx])) idx++;
   const initial = messages[idx];
   idx++;
+
+  let lastMessageForTime: AgentRunMessage | undefined = initial;
 
   let tIndex = 0;
   while (idx < messages.length) {
@@ -200,21 +202,38 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
       idx++;
       continue;
     }
+
+    let thinkingTime: number | undefined;
+    if (lastMessageForTime && (lastMessageForTime as any).createdAt && (a as any).createdAt) {
+      try {
+        const startTime = new Date((lastMessageForTime as any).createdAt).getTime();
+        const endTime = new Date((a as any).createdAt).getTime();
+        if (!isNaN(startTime) && !isNaN(endTime)) {
+          thinkingTime = endTime - startTime;
+        }
+      } catch (e) {
+        // ignore date parsing errors
+      }
+    }
+
     const parsed = parseAssistant(a.content);
     if (parsed && Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
       const maybeTools = messages[idx + 1];
       if (isToolMsg(maybeTools)) {
-        turns.push({ assistant: a, tools: maybeTools, index: tIndex++ });
+        turns.push({ assistant: a, tools: maybeTools, index: tIndex++, thinkingTime });
+        lastMessageForTime = maybeTools;
         idx += 2;
         continue;
       }
       // No tools message, still push assistant-only
-      turns.push({ assistant: a, index: tIndex++ });
+      turns.push({ assistant: a, index: tIndex++, thinkingTime });
+      lastMessageForTime = a;
       idx += 1;
       continue;
     }
     // Final assistant message (no tool_calls)
-    turns.push({ assistant: a, index: tIndex++, isFinal: true });
+    turns.push({ assistant: a, index: tIndex++, isFinal: true, thinkingTime });
+    lastMessageForTime = a;
     idx += 1;
   }
   return { initial, turns };
@@ -277,11 +296,20 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
           <div key={idx} ref={idx === turns.length - 1 ? lastTurnRef : undefined}>
             <Collapsible innerClassName='p-2' title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={idx === turns.length - 1}>
               <div className="space-y-2">
-                {hasThoughts ? (
-                  <AssistantBubble text={parsed!.thoughts!} />
-                ) : (
-                  <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
-                )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    {hasThoughts ? (
+                      <AssistantBubble text={parsed!.thoughts!} />
+                    ) : (
+                      <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
+                    )}
+                  </div>
+                  {t.thinkingTime != null && t.thinkingTime > 50 && (
+                    <div className="flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 rounded-full px-2 py-0.5 text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap mt-1">
+                      {(t.thinkingTime / 1000).toFixed(1)}s
+                    </div>
+                  )}
+                </div>
 
                 {toolCalls.length > 0 ? (
                   <div className="space-y-2">
