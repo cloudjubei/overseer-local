@@ -6,6 +6,7 @@ import ChatView from '../screens/ChatView';
 import NotificationsView from '../screens/NotificationsView';
 import AgentsView from '../screens/AgentsView';
 import AllAgentsView from '../screens/AllAgentsView';
+import LiveDataView from '../screens/LiveDataView';
 import { useNavigator } from './Navigator';
 import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
@@ -36,6 +37,7 @@ const NAV_ITEMS: NavDef[] = [
   { id: 'files', label: 'Files', view: 'Files', icon: <span aria-hidden>📚</span>, accent: 'purple' },
   { id: 'chat', label: 'Chat', view: 'Chat', icon: <span aria-hidden>💬</span>, accent: 'teal' },
   { id: 'agents', label: 'Agents', view: 'Agents', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
+  { id: 'live-data', label: 'Live Data', view: 'LiveData', icon: <span aria-hidden>📡</span>, accent: 'purple' },
   { id: 'notifications', label: 'Notifications', view: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'teal' },
   { id: 'settings', label: 'Settings', view: 'Settings', icon: <span aria-hidden>⚙️</span>, accent: 'gray' },
   { id: 'all-agents', label: 'All Agents', view: 'AllAgents', icon: <span aria-hidden>🗂️</span>, accent: 'teal' },
@@ -160,6 +162,7 @@ export default function SidebarView({}: SidebarProps) {
     if (currentView === 'Chat') return <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition"><ChatView /></div>;
     if (currentView === 'Notifications') return <div key="Notifications" className="flex flex-col flex-1 min-h-0 view-transition"><NotificationsView /></div>;
     if (currentView === 'Agents') return <div key="Agents" className="flex flex-col flex-1 min-h-0 view-transition"><AgentsView /></div>;
+    if (currentView === 'LiveData') return <div key="LiveData" className="flex flex-col flex-1 min-h-0 view-transition"><LiveDataView /></div>;
     return <div key="Home" className="flex flex-col flex-1 min-h-0 view-transition"><TasksView /></div>;
   }, [currentView]);
 

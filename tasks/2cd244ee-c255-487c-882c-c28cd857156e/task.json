@@ -34,7 +34,7 @@
     },
     {
       "id": "7b4799f4-6b2d-4d31-9140-2ffb210444e5",
-      "status": "-",
+      "status": "+",
       "title": "Shared Protocols and Types Library Plan",
       "description": "Plan and scaffold a separate shared library repository that exports: 1) TypeScript types for API models (generated from OpenAPI), 2) JSON schema for on-repo file formats, and 3) common utilities (e.g., content hashing, commit metadata helpers). Define publishing strategy (private npm or Git tags), versioning, and integration into both the backend and this app. Output: docs/shared_library_plan.md and initial package structure proposal.",
       "plan": "",
