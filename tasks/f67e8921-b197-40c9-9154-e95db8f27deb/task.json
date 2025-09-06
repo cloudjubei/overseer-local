@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "?",
+      "status": "-",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx . Remember, the messages that are passed onto the LLM are in a strict format - they have to specify role as 'user'. For history purposes, the serialisation should add appropraite metadata information to make it easier to display later.",
       "plan": "",
@@ -762,7 +762,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "This doesn't work - clicking the up and down arrow keys does nothing. The input box is focused and it's possible to type to filter the commands, but clicking the arrow keys (up/down) doesn't show any highlight."
+      "rejection": "This doesn't work - clicking the up and down arrow keys does nothing. The input box is focused and it's possible to type to filter the commands, but clicking the arrow keys (up/down) doesn't show any highlight.\nThis has been attempted multiple times - please take the time to think about the solution or search the web for hints as to why this might be not working."
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
@@ -789,8 +789,7 @@
         "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages.[2].role\",\n    \"code\": null\n  }\n}"
+      "blockers": []
     },
     {
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
@@ -829,7 +828,8 @@
         "src/renderer/components/agents/ChatConversation.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "All of the bubbles now show 0.0s - clearly the thinkingTime is computed wrongly."
     },
     {
       "id": "86314974-b368-49d5-8137-4b5b0d053adb",
@@ -904,11 +904,11 @@
     "f1b430d4-d14d-437b-affb-d326d3227c41": 56,
     "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 57,
     "a45449ab-b745-460c-b065-6e92345ebd39": 58,
-    "065bac4d-1035-48de-9f17-2bbe2e35a300": 59,
-    "7b2917b5-67da-437e-b11e-f11989bbae7e": 60,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 61,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 62,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 63,
-    "86314974-b368-49d5-8137-4b5b0d053adb": 64
+    "86314974-b368-49d5-8137-4b5b0d053adb": 59,
+    "065bac4d-1035-48de-9f17-2bbe2e35a300": 60,
+    "7b2917b5-67da-437e-b11e-f11989bbae7e": 61,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 62,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 63,
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 64
   }
 }

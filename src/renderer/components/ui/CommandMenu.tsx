@@ -140,27 +140,6 @@ export default function CommandMenu() {
             placeholder="Search commands..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              // Keep input strictly single-line and drive list selection via arrows
-              if (e.key === 'Escape') {
-                setOpen(false);
-                return;
-              }
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                moveSelection(1);
-                return;
-              }
-              if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                moveSelection(-1);
-                return;
-              }
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                runSelected();
-              }
-            }}
             aria-label="Command menu search"
             aria-controls={listboxId}
             aria-activedescendant={selectedIndex >= 0 && selectedIndex < filtered.length ? `${listboxId}-option-${selectedIndex}` : undefined}

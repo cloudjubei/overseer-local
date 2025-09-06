@@ -51,21 +51,24 @@ export function useNotifications() {
     return () => off();
   }, []);
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
     if (activeProject){
-      notificationsService.markNotificationAsRead(activeProject.id, id);
+      await notificationsService.markNotificationAsRead(activeProject.id, id);
+      await updateCurrentProjectNotifications();
     }
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     if (activeProject){
-      notificationsService.markAllNotificationsAsRead(activeProject.id);
+      await notificationsService.markAllNotificationsAsRead(activeProject.id);
+      await updateCurrentProjectNotifications();
     }
   };
 
-  const clearAll = () => {
+  const clearAll = async () => {
     if (activeProject){
-      notificationsService.deleteAllNotifications(activeProject.id);
+      await notificationsService.deleteAllNotifications(activeProject.id);
+      await updateCurrentProjectNotifications();
     }
   };
 
