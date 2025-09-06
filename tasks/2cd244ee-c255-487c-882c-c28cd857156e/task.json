@@ -52,7 +52,7 @@
     },
     {
       "id": "bd6fb615-0fee-4724-9393-acb086d4fb17",
-      "status": "-",
+      "status": "+",
       "title": "Backend MVP Scaffolding and Repository Initialization",
       "description": "Create a new backend repository structure proposal (Node/Express/Koa/Fastify recommended) with modules for auth, projects (git client), tasks/features (file IO), runs (runner client), and websocket gateway for streaming events. Include config management, logging, and testing setup. Output: docs/backend_repo_structure.md in this project and scripts/notes for bootstrapping the new repo (folder layout, packages, lint/test).",
       "plan": "",
