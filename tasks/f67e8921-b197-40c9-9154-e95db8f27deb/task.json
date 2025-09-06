@@ -830,6 +830,19 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "86314974-b368-49d5-8137-4b5b0d053adb",
+      "status": "-",
+      "title": "Running a task from another project, when one is ongoing fails",
+      "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -895,6 +908,7 @@
     "7b2917b5-67da-437e-b11e-f11989bbae7e": 60,
     "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 61,
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 62,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 63
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 63,
+    "86314974-b368-49d5-8137-4b5b0d053adb": 64
   }
 }

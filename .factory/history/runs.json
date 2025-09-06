@@ -4,16 +4,16 @@
     "agentType": "developer",
     "projectId": "main",
     "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
-    "state": "running",
-    "message": "Turn 22 tool calls processed",
+    "state": "completed",
+    "message": "Completed",
     "provider": "gemini",
     "model": "gemini-2.5-pro",
     "startedAt": "2025-09-06T23:06:19.029Z",
-    "updatedAt": "2025-09-06T23:16:39.487Z",
+    "updatedAt": "2025-09-06T23:17:42.851Z",
     "costUSD": 0,
-    "promptTokens": 596300,
-    "completionTokens": 22371,
-    "progress": 0.23
+    "promptTokens": 834335,
+    "completionTokens": 26141,
+    "progress": 0.26
   },
   {
     "runId": "task_u1gbvefb_mf8uuiqf",

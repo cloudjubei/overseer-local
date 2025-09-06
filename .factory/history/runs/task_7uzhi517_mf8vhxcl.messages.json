@@ -149,7 +149,7 @@
     "agentType": "developer",
     "turn": 0,
     "source": "initial",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -157,7 +157,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 0,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -166,7 +166,7 @@
     "agentType": "developer",
     "turn": 0,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -174,7 +174,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 1,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -183,7 +183,7 @@
     "agentType": "developer",
     "turn": 1,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -191,7 +191,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 2,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -200,7 +200,7 @@
     "agentType": "developer",
     "turn": 2,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -208,7 +208,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 3,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -217,7 +217,7 @@
     "agentType": "developer",
     "turn": 3,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -225,7 +225,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 4,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -234,7 +234,7 @@
     "agentType": "developer",
     "turn": 4,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -242,7 +242,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 5,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -251,7 +251,7 @@
     "agentType": "developer",
     "turn": 5,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -259,7 +259,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 6,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -268,7 +268,7 @@
     "agentType": "developer",
     "turn": 6,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -276,7 +276,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 7,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -285,7 +285,7 @@
     "agentType": "developer",
     "turn": 7,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -293,7 +293,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 8,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -302,7 +302,7 @@
     "agentType": "developer",
     "turn": 8,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -310,7 +310,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 9,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -319,7 +319,7 @@
     "agentType": "developer",
     "turn": 9,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -327,7 +327,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 10,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -336,7 +336,7 @@
     "agentType": "developer",
     "turn": 10,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -344,7 +344,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 11,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -353,7 +353,7 @@
     "agentType": "developer",
     "turn": 11,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -361,7 +361,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 12,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -370,7 +370,7 @@
     "agentType": "developer",
     "turn": 12,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -378,7 +378,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 13,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -387,7 +387,7 @@
     "agentType": "developer",
     "turn": 13,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -395,7 +395,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 14,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -404,7 +404,7 @@
     "agentType": "developer",
     "turn": 14,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -412,7 +412,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 15,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -421,7 +421,7 @@
     "agentType": "developer",
     "turn": 15,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -429,7 +429,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 16,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -438,7 +438,7 @@
     "agentType": "developer",
     "turn": 16,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -446,7 +446,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 17,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -455,7 +455,7 @@
     "agentType": "developer",
     "turn": 17,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -463,7 +463,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 18,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -472,7 +472,7 @@
     "agentType": "developer",
     "turn": 18,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -480,7 +480,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 19,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -489,7 +489,7 @@
     "agentType": "developer",
     "turn": 19,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -497,7 +497,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 20,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -506,7 +506,7 @@
     "agentType": "developer",
     "turn": 20,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -514,7 +514,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 21,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -523,7 +523,7 @@
     "agentType": "developer",
     "turn": 21,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "assistant",
@@ -531,7 +531,7 @@
     "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
     "agentType": "developer",
     "turn": 22,
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
   },
   {
     "role": "user",
@@ -540,6 +540,57 @@
     "agentType": "developer",
     "turn": 22,
     "source": "tools",
-    "createdAt": "2025-09-06T23:16:27.555Z"
+    "createdAt": "2025-09-06T23:17:31.251Z"
+  },
+  {
+    "role": "assistant",
+    "content": "{\n  \"thoughts\": \"I've modified `gitManager.ts` to accept an `emit` function and to emit a `git/commit` event. I had to add an import for `RunEvent` from `./types`. I assumed the type is available there as it's used in other files in the same directory.\\n\\nNext, I'll modify `packages/factory-ts/src/index.ts` to pass the `emit` function to the `GitManager` constructor.\",\n  \"tool_calls\": [\n    {\n      \"tool_name\": \"write_file\",\n      \"arguments\": {\n        \"filename\": \"packages/factory-ts/src/index.ts\",\n        \"content\": \"import path from 'node:path';\\nimport fs from 'node:fs';\\nimport { EventEmitter } from 'node:events';\\nimport { taskUtils as defaultTaskUtils } from './taskUtils.js';\\nimport { fileTools as defaultFileTools } from './fileTools.js';\\nimport GitManager from './gitManager.js';\\nimport { runIsolatedOrchestrator } from './orchestrator.js';\\nimport { createCompletionClient, type CompletionClient } from './completion.js';\\nimport { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './logger.js';\\nimport { createPricingManager, PricingManager, estimateCostUSD } from './pricing.js';\\nimport { LLMConfig, RunEvent, AgentRun } from './types.js';\\nexport { buildChatTools } from './chatTools.js';\\n\\nexport type Unsubscribe = () => void;\\n\\nexport interface RunHandle {\\n  id: string;\\n  onEvent(cb: (e: RunEvent) => void): Unsubscribe;\\n  cancel(reason?: string): void;\\n}\\n\\nexport type RunMeta = {\\n  runId: string;\\n  projectId?: string;\\n  taskId?: string;\\n  featureId?: string;\\n  state: 'running' | 'completed' | 'cancelled' | 'error';\\n  message?: string;\\n  progress?: number;\\n  costUSD?: number;\\n  promptTokens?: number;\\n  completionTokens?: number;\\n  provider?: string;\\n  model?: string;\\n  startedAt?: string;\\n  updatedAt?: string;\\n};\\n\\nexport interface HistoryStore {\\n  addOrUpdateRun(meta: RunMeta): void;\\n  updateRunMeta(runId: string, patch: Partial<RunMeta>): void;\\n  writeMessages(runId: string, messages: any[]): void;\\n  listRuns(): RunMeta[];\\n  getRun(runId: string): RunMeta | undefined;\\n  getRunMessages(runId: string): any[];\\n  deleteRun?(runId: string): void;\\n}\\n\\nfunction ensureDir(p: string) {\\n  try { fs.mkdirSync(p, { recursive: true }); } catch {}\\n}\\n\\nexport function createHistoryStore(opts: { dbPath: string }): HistoryStore {\\n  // Use a file-backed store under <dirname(dbPath)>/history\\n  const baseDir = path.join(path.dirname(opts.dbPath || ''), 'history');\\n  const runsDir = path.join(baseDir, 'runs');\\n  const indexFile = path.join(baseDir, 'runs.json');\\n  ensureDir(runsDir);\\n\\n  function readIndex(): RunMeta[] {\\n    try {\\n      const raw = fs.readFileSync(indexFile, 'utf8');\\n      const arr = JSON.parse(raw);\\n      if (Array.isArray(arr)) return arr as RunMeta[];\\n      return [];\\n    } catch {\\n      return [];\\n    }\\n  }\\n  function writeIndex(list: RunMeta[]) {\\n    try { fs.writeFileSync(indexFile, JSON.stringify(list, null, 2), 'utf8'); } catch {}\\n  }\\n\\n  function addOrUpdateRun(meta: RunMeta) {\\n    const list = readIndex();\\n    const idx = list.findIndex(r => r.runId === meta.runId);\\n    const merged = { ...(idx >= 0 ? list[idx] : {}), ...meta } as RunMeta;\\n    if (idx >= 0) list[idx] = merged; else list.push(merged);\\n    // Keep sorted by updatedAt desc if present\\n    list.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));\\n    writeIndex(list);\\n  }\\n\\n  function updateRunMeta(runId: string, patch: Partial<RunMeta>) {\\n    const list = readIndex();\\n    const idx = list.findIndex(r => r.runId === runId);\\n    if (idx >= 0) {\\n      list[idx] = { ...list[idx], ...patch, runId } as RunMeta;\\n      list.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));\\n      writeIndex(list);\\n    } else {\\n      addOrUpdateRun({ runId, state: 'running', ...patch } as RunMeta);\\n    }\\n  }\\n\\n  function messagesFile(runId: string) { return path.join(runsDir, `${runId}.messages.json`); }\\n\\n  function writeMessages(runId: string, messages: any[]) {\\n    try { fs.writeFileSync(messagesFile(runId), JSON.stringify(messages ?? [], null, 2), 'utf8'); } catch {}\\n  }\\n\\n  function getRunMessages(runId: string): any[] {\\n    try {\\n      const raw = fs.readFileSync(messagesFile(runId), 'utf8');\\n      const arr = JSON.parse(raw);\\n      return Array.isArray(arr) ? arr : [];\\n    } catch {\\n      return [];\\n    }\\n  }\\n\\n  function listRuns(): RunMeta[] { return readIndex(); }\\n  function getRun(runId: string): RunMeta | undefined { return readIndex().find(r => r.runId === runId); }\\n\\n  function deleteRun(runId: string): void {\\n    // Remove from index\\n    const list = readIndex();\\n    const filtered = list.filter(r => r.runId !== runId);\\n    writeIndex(filtered);\\n    // Remove messages file\\n    try { fs.unlinkSync(messagesFile(runId)); } catch {}\\n  }\\n\\n  return { addOrUpdateRun, updateRunMeta, writeMessages, listRuns, getRun, getRunMessages, deleteRun } satisfies HistoryStore;\\n}\\n\\nfunction makeId(prefix: string) { return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`; }\\n\\nfunction buildCompletion(llmConfig: LLMConfig): CompletionClient {\\n  // Delegate to completion.ts factory; tolerate missing fields\\n  return createCompletionClient(llmConfig);\\n}\\n\\nfunction attachLLMLogging(comp: CompletionClient, emit: (e: RunEvent) => void, opts?: { provider?: string; pricing?: PricingManager }): CompletionClient {\\n  // Accumulate usage across the run\\n  let totalPrompt = 0;\\n  let totalCompletion = 0;\\n  let totalUSD = 0;\\n\\n  // Wrap the completion client to emit llm events including request messages and timing\\n  const wrapped: CompletionClient = async (req) => {\\n    const startedAt = Date.now();\\n    try {\\n      emit({ type: 'llm/request', payload: { model: req.model, messages: req.messages } });\\n    } catch {}\\n    try {\\n      const res = await comp(req);\\n      const durationMs = Date.now() - startedAt;\\n      emit({ type: 'llm/response', payload: { model: req.model, message: res.message, durationMs } });\\n      // Usage (if provided by client)\\n      const u = res.usage || {};\\n      const pDelta = Number(u.promptTokens || 0);\\n      const cDelta = Number(u.completionTokens || 0);\\n      totalPrompt += pDelta;\\n      totalCompletion += cDelta;\\n\\n      // Compute/accumulate cost incrementally\\n      let lastCostUSD: number | undefined = undefined;\\n      // Prefer provider-reported cost if available\\n      if (u.costUSD != null && isFinite(Number(u.costUSD))) {\\n        lastCostUSD = Number(u.costUSD);\\n      } else if (opts?.pricing) {\\n        const price = opts.pricing.getPrice(u.provider || opts.provider, u.model || req.model);\\n        lastCostUSD = estimateCostUSD(pDelta, cDelta, price);\\n      }\\n      if (lastCostUSD != null) totalUSD += lastCostUSD;\\n\\n      try {\\n        emit({\\n          type: 'run/usage',\\n          payload: {\\n            provider: u.provider || opts?.provider,\\n            model: u.model || req.model,\\n            promptTokens: totalPrompt,\\n            completionTokens: totalCompletion,\\n            totalTokens: (totalPrompt + totalCompletion) || u.totalTokens,\\n            // Emit 0 when no price is available yet, rather than undefined\\n            costUSD: totalUSD,\\n            lastDurationMs: durationMs,\\n          }\\n        } satisfies RunEvent);\\n      } catch {}\\n      return res;\\n    } catch (err) {\\n      const durationMs = Date.now() - startedAt;\\n      emit({ type: 'llm/error', payload: { error: String((err as Error)?.message || err), durationMs } });\\n      throw err;\\n    }\\n  };\\n  return wrapped;\\n}\\n\\nexport function createOrchestrator(opts: { projectRoot?: string; history?: HistoryStore; pricing?: PricingManager }) {\\n  const projectRoot = path.resolve(opts.projectRoot || process.cwd());\\n\\n  // A run registry\\n  const runs = new Map<string, { ee: EventEmitter; cancelled: boolean; cancel: (r?: string) => void }>();\\n\\n  // Pricing manager (load/set defaults from disk on app start)\\n  const pricing = opts.pricing || createPricingManager({ projectRoot });\\n\\n  function newRunHandle(prefix: string): { id: string; ee: EventEmitter; handle: RunHandle; signalCancelled: () => boolean } {\\n    const id = makeId(prefix);\\n    const ee = new EventEmitter();\\n    let cancelled = false;\\n    const handle: RunHandle = {\\n      id,\\n      onEvent: (cb) => {\\n        const fn = (e: RunEvent) => cb(e);\\n        ee.on('event', fn);\\n        return () => { try { ee.off('event', fn); } catch {} };\\n      },\\n      cancel: (reason?: string) => {\\n        if (!cancelled) {\\n          cancelled = true;\\n          ee.emit('event', { type: 'run/cancelled', payload: { reason } } satisfies RunEvent);\\n        }\\n      }\\n    };\\n    runs.set(id, { ee, cancelled, cancel: handle.cancel });\\n    return { id, ee, handle, signalCancelled: () => cancelled };\\n  }\\n\\n  function getAgentFromArgs(args: { agentType?: string, agent?: any; metadata?: any }, fallback: any = 'developer') {\\n    return args.agentType || args.agent || args.metadata?.agent || fallback;\\n  }\\n\\n  function startRun(args: AgentRun): RunHandle {\\n    const { id, ee, handle } = newRunHandle('task');\\n    (async () => {\\n      ee.emit('event', { type: 'run/start', payload: { scope: 'task', id, taskId: args.taskId, llm: { model: args.llmConfig?.model, provider: args.llmConfig?.provider } } } satisfies RunEvent);\\n      try {\\n        const taskTools = { ...defaultTaskUtils };\\n        const fileTools = { ...defaultFileTools };\\n\\n        const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider, pricing });\\n        const agentType = getAgentFromArgs(args, 'developer');\\n\\n        const projectId = args.projectId\\n        const taskId = args.taskId;\\n        const featureId = args.featureId;\\n        await runIsolatedOrchestrator({ model: args.llmConfig.model, agentType, projectId, taskId, featureId, gitFactory: (p) => new GitManager(p, undefined, (e) => ee.emit('event', e)), taskTools, fileTools, completion, emit: (e) => ee.emit('event', e) });\\n\\n        ee.emit('event', { type: 'run/completed', payload: { ok: true } } satisfies RunEvent);\\n      } catch (err) {\\n        ee.emit('event', { type: 'run/error', payload: { error: String((err as Error)?.stack || err) } } satisfies RunEvent);\\n      } finally {\\n        ee.emit('event', { type: 'run/complete' } satisfies RunEvent);\\n      }\\n    })();\\n    return handle;\\n  }\\n\\n  return {\\n    startRun,\\n    pricing, // expose for external IPC if needed\\n  };\\n}\\n\\nexport { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger, createPricingManager };\\n\\nexport default { createOrchestrator, createHistoryStore, setFactoryDebug, setLoggerConfig, getLoggerConfig, logger, createPricingManager };\\n\"\n      }\n    }\n  ]\n}",
+    "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+    "agentType": "developer",
+    "turn": 23,
+    "createdAt": "2025-09-06T23:17:31.251Z"
+  },
+  {
+    "role": "user",
+    "content": "[{\"name\":\"write_file\",\"result\":\"File securely written to: packages/factory-ts/src/index.ts\"}]",
+    "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+    "agentType": "developer",
+    "turn": 23,
+    "source": "tools",
+    "createdAt": "2025-09-06T23:17:31.251Z"
+  },
+  {
+    "role": "assistant",
+    "content": "{\n  \"thoughts\": \"I've updated `packages/factory-ts/src/index.ts` to pass the `emit` function. Now I need to modify `gitManager.ts` to actually use it. I also need to make sure I'm importing the `RunEvent` type correctly. I'll read `packages/factory-ts/src/types.ts` to confirm its structure. Then I will modify `gitManager.ts` to call the emitter on commit.\",\n  \"tool_calls\": [\n    {\n      \"tool_name\": \"read_files\",\n      \"arguments\": {\n        \"paths\": [\n          \"packages/factory-ts/src/types.ts\"\n        ]\n      }\n    }\n  ]\n}",
+    "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+    "agentType": "developer",
+    "turn": 24,
+    "createdAt": "2025-09-06T23:17:31.251Z"
+  },
+  {
+    "role": "user",
+    "content": "[{\"name\":\"read_files\",\"result\":\"{\\\"packages/factory-ts/src/types.ts\\\":\\\"Path not found or is not a regular file/directory.\\\"}\"}]",
+    "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+    "agentType": "developer",
+    "turn": 24,
+    "source": "tools",
+    "createdAt": "2025-09-06T23:17:31.251Z"
+  },
+  {
+    "role": "assistant",
+    "content": "{\n  \"thoughts\": \"I tried to read `packages/factory-ts/src/types.ts` to find the `RunEvent` type definition, but the tool reported the file was not found. This is unexpected, as I've seen this file listed before and other files in `packages/factory-ts/src` import from it. I will re-list the files in that directory to verify the filename and path.\",\n  \"tool_calls\": [\n    {\n      \"tool_name\": \"list_files\",\n      \"arguments\": {\n        \"path\": \"packages/factory-ts/src\"\n      }\n    }\n  ]\n}",
+    "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+    "agentType": "developer",
+    "turn": 25,
+    "createdAt": "2025-09-06T23:17:31.251Z"
+  },
+  {
+    "role": "user",
+    "content": "[{\"name\":\"list_files\",\"result\":[\"index.ts\"]}]",
+    "featureId": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+    "agentType": "developer",
+    "turn": 25,
+    "source": "tools",
+    "createdAt": "2025-09-06T23:17:31.251Z"
   }
 ]
