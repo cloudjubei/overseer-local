@@ -79,7 +79,7 @@
     },
     {
       "id": "0aa48fa5-c3ad-436a-801e-a8f8d920baa4",
-      "status": "-",
+      "status": "+",
       "title": "Client App Online Mode Toggle and Config",
       "description": "Add a settings model and UI spec for selecting local-only or backend-connected mode. Define environment variable and persisted settings, validation of backend URL/token, and fallbacks. Describe IPC contract updates (renderer <-> main) to route operations through local or remote adapters. Output: docs/client_online_mode.md and API surface for a BackendAdapter and LocalAdapter with identical methods.",
       "plan": "",
