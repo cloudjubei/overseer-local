@@ -753,7 +753,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "+",
       "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
       "plan": "",
