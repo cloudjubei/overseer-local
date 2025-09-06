@@ -61,7 +61,7 @@
     },
     {
       "id": "5b140303-e3c9-467f-a26e-2b09919612c4",
-      "status": "~",
+      "status": "+",
       "title": "Implement Manual Update Trigger",
       "description": "Add a button to each service in the UI that allows the user to manually trigger an update. This button will use IPC to call the main process service to fetch the latest data for that specific service.",
       "plan": "",
@@ -70,7 +70,7 @@
     },
     {
       "id": "abcb8eae-c3ab-424a-9853-b5372f04633f",
-      "status": "-",
+      "status": "~",
       "title": "Implement Automated Update Logic",
       "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.",
       "plan": "",

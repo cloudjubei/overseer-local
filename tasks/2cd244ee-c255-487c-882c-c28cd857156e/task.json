@@ -70,7 +70,7 @@
     },
     {
       "id": "eea79fc6-197c-4c23-a40f-3b3c07ff347f",
-      "status": "-",
+      "status": "+",
       "title": "Agent Orchestration Abstraction for Backend",
       "description": "Define a thin abstraction layer in the backend to initiate and monitor agent runs using the shared factory library. Specify how models, pricing, and history are configured server-side, environment variable handling, and how run results are serialized back to the repo. Output: docs/backend_agent_orchestrator.md with sequence diagrams and config keys.",
       "plan": "",
