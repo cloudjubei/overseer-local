@@ -625,7 +625,7 @@
     },
     {
       "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
-      "status": "-",
+      "status": "+",
       "title": "Notifications should fire when an agent finishes work",
       "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
