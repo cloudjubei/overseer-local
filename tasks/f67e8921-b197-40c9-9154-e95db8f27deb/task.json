@@ -793,13 +793,14 @@
     },
     {
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
-      "status": "-",
+      "status": "?",
       "title": "clicking a run finished notification takes the user to that agent run",
       "description": "",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: FetchError: request to https://api.openai.com/v1/chat/completions failed, reason: read ECONNRESET"
     },
     {
       "id": "f1b430d4-d14d-437b-affb-d326d3227c41",
