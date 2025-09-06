@@ -15,7 +15,7 @@
     },
     {
       "id": "168c2aaa-13a9-45d5-873c-b633cb716dfc",
-      "status": "-",
+      "status": "+",
       "title": "Define Data Structure for Live Data Services",
       "description": "Define and type the data structure for a generic live data service. This should include fields for service ID, name, description, last updated timestamp, freshness policy (e.g., 'daily', 'weekly', 'monthly'), and auto-update settings (e.g., enabled, trigger).",
       "plan": "",

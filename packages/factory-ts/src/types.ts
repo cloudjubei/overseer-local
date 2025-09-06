@@ -40,12 +40,7 @@ export type CompletionMessageRole = 'system' | 'user' | 'assistant';
 export type CompletionMessage = { role: CompletionMessageRole; content: string };
 export type CompletionUsage = {
   promptTokens?: number;
-  completionTokens?: number;
-  totalTokens?: number;
-  costUSD?: number;
-  provider?: string;
-  model?: string;
-};
+  completionTokens?: number;\n  totalTokens?: number;\n  costUSD?: number;\n  provider?: string;\n  model?: string;\n};
 export type CompletionResponse = { message: { role: 'assistant'; content: string }; usage?: CompletionUsage };
 export type CompletionClient = (req: { model: string; messages: CompletionMessage[]; response_format?: any }) => Promise<CompletionResponse>;
 export type ToolCall = { tool_name?: string; tool?: string; name?: string; arguments?: any; parameters?: any };
@@ -71,8 +66,24 @@ export type AgentRun = {
   featureId?: string;
   llmConfig: LLMConfig;
   options?: {
-    budgetUSD?: number;
-    metadata?: Record<string, any>;
-  }
-};
+    budgetUSD?: number;\n    metadata?: Record<string, any>;\n  }\n};
 export type RunEvent = { type: string; payload?: any };
+
+// Live Data Service Types
+export type LiveDataServiceFreshnessPolicy = 'daily' | 'weekly' | 'monthly';
+export type LiveDataServiceAutoUpdateTrigger = 'onAppLaunch' | 'scheduled';
+
+export interface LiveDataServiceAutoUpdateSettings {
+  enabled: boolean;
+  trigger: LiveDataServiceAutoUpdateTrigger;
+}
+
+export interface LiveDataService<TConfig = unknown> {
+  id: string;
+  name: string;
+  description: string;
+  lastUpdated: number; // Unix timestamp
+  freshnessPolicy: LiveDataServiceFreshnessPolicy;
+  autoUpdate: LiveDataServiceAutoUpdateSettings;
+  config: TConfig; // Service-specific configuration
+}
