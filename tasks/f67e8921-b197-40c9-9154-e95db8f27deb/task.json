@@ -729,7 +729,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "When switching screens from the @src/renderer/screens/TasksView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
       "plan": "",
