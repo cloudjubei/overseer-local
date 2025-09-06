@@ -25,7 +25,7 @@
     },
     {
       "id": "78c2ef49-59e4-4e65-b969-7478d615cbb3",
-      "status": "-",
+      "status": "+",
       "title": "Auth and Repository Access Strategy",
       "description": "Specify authentication and repo access for the backend MVP: token-based client auth; per-project Git credentials via deploy keys or token; allow backend to clone/pull/push on behalf of users. Define minimal roles (reader/editor/runner). Document how credentials are stored (securely), rotated, and injected to git processes. Output: docs/backend_auth_and_repo_access.md with sequence diagrams and security considerations.",
       "plan": "",
