@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "ae580ac2-b3f0-4a7b-a580-9d34e67a31f4",
-      "status": "-",
+      "status": "+",
       "title": "Add 'Live Data' to Sidebar and Create New Screen",
       "description": "Create a new sidebar navigation item titled 'Live Data'. This item should navigate to a new, empty screen component that will serve as the container for the live data services management UI.",
       "plan": "",

@@ -1,5 +1,33 @@
 [
   {
+    "runId": "task_hylaw8a6_mf7i2j5r",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "0aab94ca-1802-4cd4-a873-5b339a6d20ca",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-06T00:02:39.615Z",
+    "updatedAt": "2025-09-06T00:02:39.615Z"
+  },
+  {
+    "runId": "task_5gy6omvl_mf7i2ciw",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Turn 0 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-06T00:02:31.016Z",
+    "updatedAt": "2025-09-06T00:02:38.858Z",
+    "costUSD": 0.0099675,
+    "promptTokens": 5998,
+    "completionTokens": 247,
+    "progress": 0.01
+  },
+  {
     "runId": "task_31t7beqj_mf62wgt6",
     "agentType": "developer",
     "projectId": "main",
