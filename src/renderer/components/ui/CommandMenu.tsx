@@ -32,6 +32,8 @@ export default function CommandMenu() {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
   const items = useMemo(() => commandsBase(nav), [nav]);
   const listboxId = useId();
 
@@ -60,6 +62,20 @@ export default function CommandMenu() {
     }
   }, [query, filtered.length, open]);
 
+  // Ensure the active item stays in view while navigating
+  useEffect(() => {
+    if (!open) return;
+    if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
+    const el = itemRefs.current[selectedIndex] || null;
+    if (el) {
+      try {
+        el.scrollIntoView({ block: 'nearest' });
+      } catch {
+        // ignore if not supported
+      }
+    }
+  }, [selectedIndex, filtered.length, open]);
+
   const moveSelection = (delta: number) => {
     if (filtered.length === 0) return;
     setSelectedIndex((prev) => {
@@ -80,7 +96,28 @@ export default function CommandMenu() {
   if (!open) return null;
   return createPortal(
     <div className="cmd-overlay" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
-      <div className="cmd" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="cmd"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          // Global handler inside menu to ensure arrows work even when focus isn't on the input
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            setOpen(false);
+            return;
+          }
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            moveSelection(1);
+            return;
+          }
+          if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            moveSelection(-1);
+            return;
+          }
+        }}
+      >
         <div className="cmd__input">
           <input
             ref={inputRef}
@@ -89,6 +126,7 @@ export default function CommandMenu() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
+              // Keep input strictly single-line and drive list selection via arrows
               if (e.key === 'Escape') {
                 setOpen(false);
                 return;
@@ -111,10 +149,14 @@ export default function CommandMenu() {
             aria-label="Command menu search"
             aria-controls={listboxId}
             aria-activedescendant={selectedIndex >= 0 && selectedIndex < filtered.length ? `${listboxId}-option-${selectedIndex}` : undefined}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
           />
           <kbd className="kbd">⌘K</kbd>
         </div>
-        <ul className="cmd__list" role="listbox" id={listboxId}>
+        <ul className="cmd__list" role="listbox" id={listboxId} ref={listRef}>
           {filtered.map((cmd, i) => {
             const active = i === selectedIndex;
             return (
@@ -125,11 +167,12 @@ export default function CommandMenu() {
                 role="option"
                 aria-selected={active}
                 onMouseEnter={() => setSelectedIndex(i)}
+                ref={(el) => (itemRefs.current[i] = el)}
               >
                 <button
                   type="button"
                   onClick={() => { cmd.run(); setOpen(false); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { cmd.run(); setOpen(false); } }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); cmd.run(); setOpen(false); } }}
                 >
                   <span>{cmd.label}</span>
                   {cmd.shortcut ? <span className="cmd__shortcut">{cmd.shortcut}</span> : null}
