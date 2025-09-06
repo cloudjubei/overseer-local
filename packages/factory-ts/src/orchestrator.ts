@@ -226,9 +226,7 @@ async function runConversation(opts: {
         }
       }
 
-      // Append tool results as a dedicated 'tool' role message to avoid confusing with user turns
-      const toolResultMsg: CompletionMessage = { role: 'tool', content: JSON.stringify(toolOutputs) } as any;
-      // Add a source hint for legacy parsers
+      const toolResultMsg: CompletionMessage = { role: 'user', content: JSON.stringify(toolOutputs) } as any;
       (toolResultMsg as any).source = 'tools';
       messages.push(toolResultMsg);
       doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });

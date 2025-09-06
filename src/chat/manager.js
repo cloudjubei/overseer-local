@@ -144,7 +144,7 @@ export class ChatsManager {
           const functionArgs = JSON.parse(toolCall.function.arguments || '{}');
           const functionResponse = await callTool(functionName, functionArgs);
           currentMessages.push({
-            role: 'tool',
+            role: 'user',
             tool_call_id: toolCall.id,
             content: JSON.stringify(functionResponse),
           });
