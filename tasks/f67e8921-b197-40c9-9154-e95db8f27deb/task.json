@@ -804,7 +804,7 @@
     },
     {
       "id": "f1b430d4-d14d-437b-affb-d326d3227c41",
-      "status": "-",
+      "status": "+",
       "title": "There's an addition \"_task\" feature log displayed in an agent run",
       "description": "This shouldn't happen.\nIt's displayed in @src/renderer/components/agents/ChatConversation.tsx and probably originates from:\n@packages/factory-ts/src/orchestrator.ts",
       "plan": "",
