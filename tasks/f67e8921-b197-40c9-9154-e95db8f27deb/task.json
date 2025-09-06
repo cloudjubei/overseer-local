@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "-",
+      "status": "+",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx . Remember, the messages that are passed onto the LLM are in a strict format - they have to specify role as 'user'. For history purposes, the serialisation should add appropraite metadata information to make it easier to display later.",
       "plan": "",
@@ -625,7 +625,7 @@
     },
     {
       "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
-      "status": "-",
+      "status": "?",
       "title": "Notifications should fire when an agent finishes work",
       "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -636,7 +636,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "The agent run doesn't have a featureId - the information about a feature being completed is inside the messagesLog"
+      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages.[2].role\",\n    \"code\": null\n  }\n}"
     },
     {
       "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
@@ -754,7 +754,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "+",
       "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
       "plan": "",
@@ -781,7 +781,7 @@
     },
     {
       "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
-      "status": "-",
+      "status": "?",
       "title": "when a notification is read - don't show the count in the sidebar",
       "description": "Right now, when going to the @src/renderer/screens/NotificationsView.tsx if the user clicks a notification it should be read (but the badge in the @src/renderer/navigation/SidebarView.tsx  isn't updated).\nWhen clicking mark all as read- the badge should disappear.\nSame goes for clearing all notifications - there are no notifications, so there should be no badge.",
       "plan": "",
@@ -790,11 +790,12 @@
         "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages.[2].role\",\n    \"code\": null\n  }\n}"
     },
     {
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
-      "status": "-",
+      "status": "+",
       "title": "clicking a run finished notification takes the user to that agent run",
       "description": "@src/renderer/hooks/useNotifications.ts @src/renderer/services/notificationsService.ts \nclicking a notification should take the appropriate place in @src/renderer/screens/AgentsView.tsx",
       "plan": "",
@@ -821,7 +822,7 @@
     },
     {
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "-",
+      "status": "?",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
       "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip",
       "plan": "",
@@ -829,7 +830,8 @@
         "src/renderer/components/agents/ChatConversation.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages.[2].role\",\n    \"code\": null\n  }\n}"
     }
   ],
   "featureIdToDisplayIndex": {
