@@ -781,7 +781,7 @@
     },
     {
       "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
-      "status": "-",
+      "status": "+",
       "title": "when a notification is read - don't show the count in the sidebar",
       "description": "Also, show a nice round badge with the number inside - similar in style to iOS notifications.\nThis is in @src/renderer/navigation/SidebarView.tsx",
       "plan": "",
