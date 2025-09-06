@@ -158,6 +158,18 @@ function constructSystemPrompt(agent: string, task: Task, feature: Feature | nul
   ].join('\n');
 }
 
+// Attach metadata to messages so history can be reconstructed reliably after persistence
+function annotateMessage<T extends CompletionMessage>(msg: T, meta: { featureId?: string; agentType?: string; turn?: number; source?: string; marker?: string }): T {
+  const anyMsg = msg as any;
+  if (meta.featureId) anyMsg.featureId = meta.featureId;
+  if (meta.agentType) anyMsg.agentType = meta.agentType;
+  if (typeof meta.turn === 'number') anyMsg.turn = meta.turn;
+  if (meta.source) anyMsg.source = meta.source;
+  if (meta.marker) anyMsg.marker = meta.marker;
+  anyMsg.createdAt = new Date().toISOString();
+  return msg;
+}
+
 async function runConversation(opts: {
   model: string;
   availableTools: Record<string, (args: any) => Promise<any> | any>;
@@ -174,7 +186,11 @@ async function runConversation(opts: {
   const { model, availableTools, systemPrompt, task, feature, agentType, taskTools, git, completion, complete, emit } = opts;
   const doEmit = (e: { type: string; payload?: any }) => { try { emit?.(e); } catch {} };
 
-  const messages: CompletionMessage[] = [{ role: 'user', content: systemPrompt }];
+  const initialUser: CompletionMessage = annotateMessage(
+    { role: 'user', content: systemPrompt } as any,
+    { featureId: feature?.id ?? '__task__', agentType, turn: 0, source: 'initial' }
+  );
+  const messages: CompletionMessage[] = [initialUser];
   doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice(), turn: 0 } });
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
@@ -185,14 +201,17 @@ async function runConversation(opts: {
       const res = await completion({ model, messages, response_format: { type: 'json_object' } });
       const durationMs = Date.now() - startedAt;
 
-      const assistant = { role: 'assistant' as const, content: res.message.content };
+      const assistant = annotateMessage(
+        { role: 'assistant' as const, content: res.message.content },
+        { featureId: feature?.id ?? '__task__', agentType, turn: i }
+      );
       messages.push(assistant);
       // Emit assistant message and timing
       doEmit({ type: 'llm/message', payload: { message: assistant, durationMs } });
 
       // Parse and log succinct info
       let parsed: AgentResponse | undefined;
-      try { parsed = JSON.parse(assistant.content) as AgentResponse; } catch {}
+      try { parsed = JSON.parse((assistant as any).content) as AgentResponse; } catch {}
       const toolCalls: ToolCall[] = parsed?.tool_calls ?? [];
       logLLMStep({ turn: i, thoughts: parsed?.thoughts, toolCalls, durationMs, tag: agentType });
 
@@ -227,9 +246,10 @@ async function runConversation(opts: {
       }
 
       // Append tool results as a dedicated 'tool' role message to avoid confusing with user turns
-      const toolResultMsg: CompletionMessage = { role: 'tool', content: JSON.stringify(toolOutputs) } as any;
-      // Add a source hint for legacy parsers
-      (toolResultMsg as any).source = 'tools';
+      const toolResultMsg: CompletionMessage = annotateMessage(
+        { role: 'tool', content: JSON.stringify(toolOutputs) } as any,
+        { featureId: feature?.id ?? '__task__', agentType, turn: i, source: 'tools' }
+      );
       messages.push(toolResultMsg);
       doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
       doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'tools_appended' } });
@@ -360,7 +380,9 @@ async function runOrchestrator(opts: {
       // For task-level runs, forward events as-is and track messages when present
       if (e?.payload?.messages) {
         const msgs = e.payload.messages as CompletionMessage[];
-        aggregatedMessages = msgs.slice();
+        // Ensure metadata on messages for task-level runs
+        const annotated = msgs.map((m, idx) => annotateMessage(m, { featureId: (m as any).featureId ?? '__task__', agentType, turn: (m as any).turn ?? idx }));
+        aggregatedMessages = annotated.slice();
         emit?.({ ...e, payload: { ...e.payload, messages: aggregatedMessages.slice() } });
       } else {
         emit?.(e);
@@ -378,7 +400,10 @@ async function runOrchestrator(opts: {
     }
 
     // Insert a system marker before each feature to clearly separate in UI and history
-    const featureMarker: CompletionMessage = { role: 'system', content: `--- BEGIN FEATURE ${next.id}: ${next.title} ---` } as any;
+    const featureMarker: CompletionMessage = annotateMessage(
+      { role: 'system', content: `--- BEGIN FEATURE ${next.id}: ${next.title} ---` } as any,
+      { featureId: next.id, agentType, marker: 'feature_begin' }
+    );
     aggregatedMessages.push(featureMarker);
     emit?.({ type: 'llm/messages/snapshot', payload: { messages: aggregatedMessages.slice(), note: 'feature_begin', featureId: next.id } });
 
@@ -390,8 +415,10 @@ async function runOrchestrator(opts: {
       if ((t === 'llm/messages/init' || t === 'llm/messages/snapshot' || t === 'llm/messages/final') && e?.payload?.messages) {
         try {
           const featureMsgs: CompletionMessage[] = e.payload.messages || [];
-          lastFeatureMessages = featureMsgs.slice();
-          const combined = aggregatedMessages.concat(featureMsgs);
+          // Ensure every message is tagged with this feature id and agentType for persistence
+          const ensured = featureMsgs.map((m, idx) => annotateMessage(m, { featureId: (m as any).featureId ?? next.id, agentType, turn: (m as any).turn ?? idx }));
+          lastFeatureMessages = ensured.slice();
+          const combined = aggregatedMessages.concat(ensured);
           const payload = { ...e.payload, messages: combined };
           baseEmit?.({ ...e, payload });
           return;
@@ -473,7 +500,7 @@ async function copyTree(src: string, dest: string) {
     stat = await fsp.stat(src);
   } catch (e: any) {
     throw new Error(`Source path does not exist or is not accessible: ${src} (${e?.code || e})`);
-  }
+    }
   if (!stat.isDirectory()) throw new Error(`Source ${src} is not a directory`);
   await fsp.mkdir(dest, { recursive: true });
 
