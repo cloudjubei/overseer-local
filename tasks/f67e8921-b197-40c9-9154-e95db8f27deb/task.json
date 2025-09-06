@@ -625,7 +625,7 @@
     },
     {
       "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
-      "status": "-",
+      "status": "?",
       "title": "Notifications should fire when an agent finishes work",
       "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -636,7 +636,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "The agent run doesn't have a featureId - the information about a feature being completed is inside the messagesLog"
+      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages.[2].role\",\n    \"code\": null\n  }\n}"
     },
     {
       "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
