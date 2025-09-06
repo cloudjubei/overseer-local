@@ -42,7 +42,7 @@
     },
     {
       "id": "2e00148d-cb4c-4c4b-9388-448b171ff42e",
-      "status": "~",
+      "status": "+",
       "title": "Implement UI to List Live Data Services",
       "description": "On the 'Live Data' screen, create a UI component that lists all configured live data services. Each item in the list should display the service name, its last updated timestamp, and its freshness status (e.g., 'Up to date', 'Stale').",
       "plan": "",
@@ -51,16 +51,17 @@
     },
     {
       "id": "3bb6a463-3ec8-48dc-9a1f-f70e8797da27",
-      "status": "-",
+      "status": "?",
       "title": "Implement UI for Service Configuration",
       "description": "For each service in the list, create a UI component that allows the user to configure its settings. This includes setting the freshness policy (daily, weekly, monthly) and toggling automated checks on or off.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: Error: ENOTEMPTY: directory not empty, rmdir '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-MsWnQh/workspace/src/renderer/screens/LiveDataScreen'"
     },
     {
       "id": "5b140303-e3c9-467f-a26e-2b09919612c4",
-      "status": "-",
+      "status": "~",
       "title": "Implement Manual Update Trigger",
       "description": "Add a button to each service in the UI that allows the user to manually trigger an update. This button will use IPC to call the main process service to fetch the latest data for that specific service.",
       "plan": "",

@@ -43,7 +43,7 @@
     },
     {
       "id": "cf26e479-dbb5-45f1-a03e-ab849e5eb1b4",
-      "status": "-",
+      "status": "+",
       "title": "Agent Runner Service Design",
       "description": "Define a dedicated micro-service (or module) responsible for running agents as jobs: queue semantics, concurrency limits, job lifecycle, logging, and artifact handling mapped to Git commits when relevant. Specify how it integrates with factory-ts (or refactored shared library) and how it receives tasks from the main backend via RPC/HTTP or message queue. Output: docs/agent_runner/OVERVIEW.md with API and event contracts.",
       "plan": "",

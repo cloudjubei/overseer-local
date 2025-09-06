@@ -32,6 +32,7 @@ export default function CommandMenu() {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
   const items = useMemo(() => commandsBase(nav), [nav]);
   const listboxId = useId();
 
@@ -60,6 +61,21 @@ export default function CommandMenu() {
     }
   }, [query, filtered.length, open]);
 
+  // Ensure the active item is scrolled into view
+  useEffect(() => {
+    if (!open || selectedIndex < 0) return;
+    const el = document.getElementById(`${listboxId}-option-${selectedIndex}`);
+    if (el && listRef.current) {
+      const parent = listRef.current;
+      const elTop = (el as HTMLElement).offsetTop;
+      const elBottom = elTop + (el as HTMLElement).offsetHeight;
+      const viewTop = parent.scrollTop;
+      const viewBottom = viewTop + parent.clientHeight;
+      if (elTop < viewTop) parent.scrollTop = elTop;
+      else if (elBottom > viewBottom) parent.scrollTop = elBottom - parent.clientHeight;
+    }
+  }, [selectedIndex, open, listboxId]);
+
   const moveSelection = (delta: number) => {
     if (filtered.length === 0) return;
     setSelectedIndex((prev) => {
@@ -77,10 +93,38 @@ export default function CommandMenu() {
     }
   };
 
+  const handleKeyDown: React.KeyboardEventHandler = (e) => {
+    if (!open) return;
+    if ((e as any).isComposing) return; // IME safety
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setOpen(false);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      moveSelection(1);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      moveSelection(-1);
+      return;
+    }
+    if (e.key === 'Enter') {
+      // If focus is inside the input, run the selected command
+      // If focus is on a button, onMouseEnter keeps selectedIndex in sync
+      e.preventDefault();
+      runSelected();
+      return;
+    }
+  };
+
   if (!open) return null;
   return createPortal(
     <div className="cmd-overlay" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
-      <div className="cmd" onClick={(e) => e.stopPropagation()}>
+      <div className="cmd" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
         <div className="cmd__input">
           <input
             ref={inputRef}
@@ -88,33 +132,16 @@ export default function CommandMenu() {
             placeholder="Search commands..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setOpen(false);
-                return;
-              }
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                moveSelection(1);
-                return;
-              }
-              if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                moveSelection(-1);
-                return;
-              }
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                runSelected();
-              }
-            }}
             aria-label="Command menu search"
             aria-controls={listboxId}
             aria-activedescendant={selectedIndex >= 0 && selectedIndex < filtered.length ? `${listboxId}-option-${selectedIndex}` : undefined}
+            role="combobox"
+            aria-expanded={true}
+            aria-autocomplete="list"
           />
           <kbd className="kbd">⌘K</kbd>
         </div>
-        <ul className="cmd__list" role="listbox" id={listboxId}>
+        <ul className="cmd__list" role="listbox" id={listboxId} ref={listRef}>
           {filtered.map((cmd, i) => {
             const active = i === selectedIndex;
             return (
@@ -129,7 +156,7 @@ export default function CommandMenu() {
                 <button
                   type="button"
                   onClick={() => { cmd.run(); setOpen(false); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { cmd.run(); setOpen(false); } }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); cmd.run(); setOpen(false); } }}
                 >
                   <span>{cmd.label}</span>
                   {cmd.shortcut ? <span className="cmd__shortcut">{cmd.shortcut}</span> : null}
