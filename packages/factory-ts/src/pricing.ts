@@ -20,6 +20,9 @@ export type PricingConfig = {
   supplierUrls?: Record<string, string>;
 };
 
+// Canonical source for LLM prices from a trusted community project
+const CANONICAL_PRICES_URL = 'https://raw.githubusercontent.com/e2b-dev/llm-cost/main/static/models.json';
+
 function ensureDir(p: string) {
   try { fs.mkdirSync(p, { recursive: true }); } catch {}
 }
@@ -77,34 +80,80 @@ export class PricingManager {
     return this.state.prices.find(p => `${p.provider}:${p.model}`.toLowerCase() === key);
   }
 
-  async refresh(provider?: string, urlOverride?: string): Promise<PricingState> {
-    const cfg = this.loadConfig();
-    const provs = provider ? [provider] : Object.keys(cfg.supplierUrls || {});
+  private async fetchAndParsePrices(url: string): Promise<ModelPrice[]> {
     const newPrices: ModelPrice[] = [];
-
-    for (const prov of provs) {
-      const url = urlOverride || cfg.supplierUrls?.[prov];
-      if (!url) continue;
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        // Expect either array of ModelPrice or an object { prices: ModelPrice[] }
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      
+      // Handle canonical source format (object of objects)
+      if (url === CANONICAL_PRICES_URL && typeof data === 'object' && data !== null && !Array.isArray(data)) {
+        for (const modelKey in data) {
+            const raw = data[modelKey];
+            if (raw && raw.litellm_provider && raw.model_name && raw.input_cost_per_mtok !== undefined && raw.output_cost_per_mtok !== undefined) {
+                const input = Number(raw.input_cost_per_mtok);
+                const output = Number(raw.output_cost_per_mtok);
+                if (!isFinite(input) || !isFinite(output)) continue;
+                newPrices.push({ provider: String(raw.litellm_provider), model: String(raw.model_name), inputPerMTokensUSD: input, outputPerMTokensUSD: output, currency: 'USD' });
+            }
+        }
+      } else {
+        // Handle user-configured format (array of ModelPrice or { prices: ModelPrice[] })
         const arr = Array.isArray(data) ? data : (Array.isArray(data?.prices) ? data.prices : []);
         for (const raw of arr) {
-          // Best-effort normalization
           if (raw && raw.provider && raw.model) {
-            const input = Number(raw.inputPerMTokensUSD ?? raw.input_per_m_tokens_usd ?? raw.inputPerKTokensUSD * 1000 );
-            const output = Number(raw.outputPerMTokensUSD ?? raw.output_per_m_tokens_usd ?? raw.outputPerKTokensUSD * 1000 );
+            const input = Number(raw.inputPerMTokensUSD ?? raw.input_per_m_tokens_usd ?? (raw.inputPerKTokensUSD ? raw.inputPerKTokensUSD * 1000 : undefined));
+            const output = Number(raw.outputPerMTokensUSD ?? raw.output_per_m_tokens_usd ?? (raw.outputPerKTokensUSD ? raw.outputPerKTokensUSD * 1000 : undefined));
             if (!isFinite(input) || !isFinite(output)) continue;
             newPrices.push({ provider: String(raw.provider), model: String(raw.model), inputPerMTokensUSD: input, outputPerMTokensUSD: output, currency: 'USD' });
           }
         }
-      } catch (e) {
-        // Ignore provider errors; keep previous values
       }
+    } catch (e) {
+      console.error(`Failed to fetch prices from ${url}:`, e);
+      // Ignore source errors; keep previous values
     }
-    if (newPrices.length) this.upsertPrices(newPrices);
+    return newPrices;
+  }
+
+  async refresh(provider?: string, urlOverride?: string): Promise<PricingState> {
+    const cfg = this.loadConfig();
+    const allNewPrices: ModelPrice[] = [];
+
+    if (provider) {
+        // Refresh a specific provider
+        const url = urlOverride || cfg.supplierUrls?.[provider];
+        if (url) {
+            const prices = await this.fetchAndParsePrices(url);
+            allNewPrices.push(...prices);
+        }
+    } else if (urlOverride) {
+        // Refresh from a specific URL without being tied to a provider config
+        const prices = await this.fetchAndParsePrices(urlOverride);
+        allNewPrices.push(...prices);
+    }
+    else {
+        // Full refresh: canonical + all user-configured
+        // 1. Fetch from canonical source
+        const canonicalPrices = await this.fetchAndParsePrices(CANONICAL_PRICES_URL);
+        allNewPrices.push(...canonicalPrices);
+        
+        // 2. Fetch from user-configured sources
+        const supplierUrls = cfg.supplierUrls || {};
+        for (const prov in supplierUrls) {
+            const url = supplierUrls[prov];
+            if (url) {
+                const userPrices = await this.fetchAndParsePrices(url);
+                allNewPrices.push(...userPrices);
+            }
+        }
+    }
+
+    if (allNewPrices.length) {
+      this.upsertPrices(allNewPrices);
+    }
+    
     return this.state;
   }
 
@@ -133,9 +182,9 @@ function loadBuiltInDefaults(): ModelPrice[] {
   } catch {
     // Minimal safe defaults if asset missing
     return [
-      { provider: 'openai', model: 'gpt-4o-mini', inputPerMTokensUSD: 150, outputPerMTokensUSD: 600, currency: 'USD' },
-      { provider: 'openai', model: 'gpt-4o', inputPerMTokensUSD: 5000, outputPerMTokensUSD: 15000, currency: 'USD' },
-      { provider: 'openai', model: 'gpt-3.5-turbo', inputPerMTokensUSD: 1500, outputPerMTokensUSD: 2000, currency: 'USD' },
+      { provider: 'openai', model: 'gpt-4o-mini', inputPerMTokensUSD: 0.15, outputPerMTokensUSD: 0.60, currency: 'USD' },
+      { provider: 'openai', model: 'gpt-4o', inputPerMTokensUSD: 5.0, outputPerMTokensUSD: 15.0, currency: 'USD' },
+      { provider: 'openai', model: 'gpt-3.5-turbo', inputPerMTokensUSD: 0.5, outputPerMTokensUSD: 1.5, currency: 'USD' },
     ];
   }
 }

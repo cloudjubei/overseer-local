@@ -24,7 +24,7 @@
     },
     {
       "id": "80a2e471-25cf-456e-a03a-b37d428dd621",
-      "status": "-",
+      "status": "+",
       "title": "Implement Price Fetching in factory-ts",
       "description": "Enhance `factory-ts` with a new module to fetch LLM provider and model prices from a canonical source. The module should be designed to also support user-configurable sources in the future.",
       "plan": "",
