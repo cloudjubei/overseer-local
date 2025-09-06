@@ -313,7 +313,8 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
 export default function ChatConversation({ run }: { run: AgentRun }) {
   // Derive logs (sorted by startDate)
   const logs = useMemo(() => {
-    const list = Object.values(run.messagesLog ?? {});
+    const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
+    const list = Object.values(run.messagesLog ?? {}).filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId));
     return list.sort((a, b) => {
       const at = new Date((a as any).startDate).getTime();
       const bt = new Date((b as any).startDate).getTime();

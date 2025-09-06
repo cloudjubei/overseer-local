@@ -578,7 +578,7 @@
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
       "status": "-",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
-      "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
+      "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx . Remember, the messages that are passed onto the LLM are in a strict format - they have to specify role as 'user'. For history purposes, the serialisation should add appropraite metadata information to make it easier to display later.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/orchestrator.ts",
@@ -586,7 +586,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "These now show, but the fix was to reformat the messages on read. They should simply be recorded correctly in the right format in the first place."
+      "rejection": "Right now it is \"hack fixed\" as these now show, but the fix was to reformat the messages on reading them. This is not acceptable. They should simply be recorded/written correctly in the right format in the first place."
     },
     {
       "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
@@ -729,7 +729,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "When switching screens from the @src/renderer/screens/TasksView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
       "plan": "",
@@ -755,15 +755,15 @@
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
       "status": "-",
-      "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
-      "description": "@src/renderer/components/ui/CommandMenu.tsx\n\nThe input box should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list.",
+      "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
+      "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
       "plan": "",
       "context": [
         "src/renderer/components/ui/CommandMenu.tsx"
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "This doesn't work"
+      "rejection": "This doesn't work - clicking the up and down arrow keys does nothing."
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
@@ -783,10 +783,11 @@
       "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
       "status": "-",
       "title": "when a notification is read - don't show the count in the sidebar",
-      "description": "Also, show a nice round badge with the number inside - similar in style to iOS notifications.\nThis is in @src/renderer/navigation/SidebarView.tsx",
+      "description": "Right now, when going to the @src/renderer/screens/NotificationsView.tsx if the user clicks a notification it should be read (but the badge in the @src/renderer/navigation/SidebarView.tsx  isn't updated).\nWhen clicking mark all as read- the badge should disappear.\nSame goes for clearing all notifications - there are no notifications, so there should be no badge.",
       "plan": "",
       "context": [
-        "src/renderer/navigation/SidebarView.tsx"
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -795,15 +796,19 @@
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
       "status": "-",
       "title": "clicking a run finished notification takes the user to that agent run",
-      "description": "",
+      "description": "@src/renderer/hooks/useNotifications.ts @src/renderer/services/notificationsService.ts \nclicking a notification should take the appropriate place in @src/renderer/screens/AgentsView.tsx",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/hooks/useNotifications.ts",
+        "src/renderer/services/notificationsService.ts",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
     {
       "id": "f1b430d4-d14d-437b-affb-d326d3227c41",
-      "status": "-",
+      "status": "+",
       "title": "There's an addition \"_task\" feature log displayed in an agent run",
       "description": "This shouldn't happen.\nIt's displayed in @src/renderer/components/agents/ChatConversation.tsx and probably originates from:\n@packages/factory-ts/src/orchestrator.ts",
       "plan": "",
@@ -818,7 +823,7 @@
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
       "status": "-",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
-      "description": "This is inside @src/renderer/components/agents/ChatConversation.tsx",
+      "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip",
       "plan": "",
       "context": [
         "src/renderer/components/agents/ChatConversation.tsx"
@@ -883,13 +888,13 @@
     "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 53,
     "006bc18d-88c6-4257-9d76-69ad87c9c502": 54,
     "55e5be40-2171-4e3d-91d9-db778a329ef1": 55,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 56,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 57,
+    "f1b430d4-d14d-437b-affb-d326d3227c41": 56,
+    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 57,
     "7b2917b5-67da-437e-b11e-f11989bbae7e": 58,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 59,
-    "a45449ab-b745-460c-b065-6e92345ebd39": 60,
-    "f1b430d4-d14d-437b-affb-d326d3227c41": 61,
-    "065bac4d-1035-48de-9f17-2bbe2e35a300": 62,
-    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 63
+    "065bac4d-1035-48de-9f17-2bbe2e35a300": 59,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 60,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 61,
+    "a45449ab-b745-460c-b065-6e92345ebd39": 62,
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 63
   }
 }

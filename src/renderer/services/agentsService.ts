@@ -41,6 +41,8 @@ export type AgentFeatureRunLog = {
 interface RunRecord extends AgentRun {
   events: EventSourceLike;
   cancel: (reason?: string) => void;
+  // Track which featureIds we've already notified as completed for this run
+  __notifiedFeatures?: Set<string>;
 }
 
 type Subscriber = (runs: AgentRun[]) => void;
@@ -75,7 +77,7 @@ class AgentsServiceImpl {
   }
 
   private publicFromRecord(rec: RunRecord): AgentRun {
-    const { events: _ev, cancel: _c, ...pub } = rec as any;
+    const { events: _ev, cancel: _c, __notifiedFeatures: _nf, ...pub } = rec as any;
     return pub as AgentRun;
   }
 
@@ -113,6 +115,7 @@ class AgentsServiceImpl {
               messagesLog: {},
               events,
               cancel: (reason?: string) => handle.cancel(reason),
+              __notifiedFeatures: new Set<string>(),
             } as RunRecord;
             this.wireRunEvents(run);
             this.runs.set(run.runId, run);
@@ -151,6 +154,7 @@ class AgentsServiceImpl {
             messagesLog: {},
             events: NOOP_EVENTS,
             cancel: () => {},
+            __notifiedFeatures: new Set<string>(),
           } as RunRecord;
           this.runs.set(rec.runId, rec);
           
@@ -287,6 +291,69 @@ class AgentsServiceImpl {
     }
   }
 
+  // Detect a feature completion by inspecting normalized messages log for a finish_feature tool call
+  private featureHasFinishTool(messages: any[]): boolean {
+    try {
+      for (const m of messages) {
+        if (!m) continue;
+        const role = (m as any).role;
+        const content = String((m as any).content ?? '');
+        if (role === 'assistant') {
+          // Quick check
+          if (content.includes('finish_feature')) return true;
+          try {
+            const parsed = JSON.parse(content);
+            const calls = (parsed?.tool_calls || parsed?.tool_calls || []);
+            if (Array.isArray(calls)) {
+              for (const c of calls) {
+                const name = c?.tool_name || c?.tool || c?.name;
+                if (name === 'finish_feature') return true;
+              }
+            }
+          } catch {
+            // ignore JSON parse errors; substring check already attempted
+          }
+        }
+      }
+    } catch {}
+    return false;
+  }
+
+  private async checkAndNotifyFeatureCompletions(run: RunRecord) {
+    try {
+      const factory = (window as any).factory;
+      if (!factory?.getRunMessages) return;
+      const normalized: Record<string, { featureId: string; messages: any[] }> = await factory.getRunMessages(run.runId);
+      if (!normalized || typeof normalized !== 'object') return;
+      if (!run.__notifiedFeatures) run.__notifiedFeatures = new Set<string>();
+      for (const key of Object.keys(normalized)) {
+        const group = (normalized as any)[key];
+        const fid = String(group?.featureId || key);
+        if (fid === DEFAULT_FEATURE_KEY) continue; // skip task-level chat
+        if (run.__notifiedFeatures.has(fid)) continue;
+        const msgs = Array.isArray(group?.messages) ? group.messages : [];
+        if (msgs.length === 0) continue;
+        const finished = this.featureHasFinishTool(msgs);
+        if (finished) {
+          try {
+            await notificationsService.create(run.projectId, {
+              type: 'success',
+              category: 'tasks',
+              title: 'Feature completed',
+              message: `Task ${run.taskId} • Feature ${fid} committed`,
+              metadata: { taskId: run.taskId, featureId: fid },
+            } as any);
+          } catch (err) {
+            console.warn('[agentsService] Failed to create feature completion notification', (err as any)?.message || err);
+          }
+          run.__notifiedFeatures.add(fid);
+        }
+      }
+    } catch (err) {
+      console.warn('[agentsService] checkAndNotifyFeatureCompletions failed', (err as any)?.message || err);
+    }
+  }
+
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
@@ -311,6 +378,8 @@ class AgentsServiceImpl {
         this.replaceMessages(run, msgs, featureKey, true);
         // Finalize last message time at end of conversation
         run.lastMessageAt = ts;
+        // On final messages (end of a feature conversation), re-scan normalized messages and emit feature-complete notifications
+        this.checkAndNotifyFeatureCompletions(run);
       }
 
       // Meta updates
@@ -354,6 +423,8 @@ class AgentsServiceImpl {
         run.message = e.payload?.message || e.payload?.summary || 'Completed';
         // Fire notifications for completion
         this.fireCompletionNotifications(run);
+        // One last pass to detect any feature completions not captured earlier
+        this.checkAndNotifyFeatureCompletions(run);
       }
       this.notify();
       if (run.state !== 'running') {
@@ -410,6 +481,7 @@ class AgentsServiceImpl {
       messagesLog: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
+      __notifiedFeatures: new Set<string>(),
     } as RunRecord;
 
     this.wireRunEvents(run);
@@ -442,6 +514,7 @@ class AgentsServiceImpl {
       messagesLog: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
+      __notifiedFeatures: new Set<string>(),
     } as RunRecord;
 
     this.wireRunEvents(run);
