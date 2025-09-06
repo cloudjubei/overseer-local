@@ -16,7 +16,7 @@
     },
     {
       "id": "1ff5f4b8-7573-4e00-8cd5-61a4b5572037",
-      "status": "-",
+      "status": "+",
       "title": "Git-based Storage Conventions and File Layout Spec",
       "description": "Document the canonical on-repo data model so both backend and clients operate identically offline/online. Specify directories and file formats for projects, tasks, features, and agent runs (e.g., project manifest, tasks directory with JSON/YAML, features directory, run logs/artifacts). Include conventions for big blob data references (e.g., pointers to external storage) and deterministic commit messages/branches used by automated changes. Output: docs/git_storage_conventions.md with schemas and examples.",
       "plan": "",
