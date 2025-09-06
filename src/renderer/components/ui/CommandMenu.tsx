@@ -30,7 +30,8 @@ export default function CommandMenu() {
   const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  // Start with no selection so the first Down selects the top and the first Up selects the bottom
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
@@ -57,8 +58,12 @@ export default function CommandMenu() {
     if (filtered.length === 0) {
       setSelectedIndex(-1);
     } else {
-      // Ensure selectedIndex is within range; default to 0 on new query
-      setSelectedIndex((prev) => (prev >= 0 && prev < filtered.length ? prev : 0));
+      // If nothing is selected yet, keep it as none selected.
+      // If an item is selected, clamp it within the new range [0, length-1].
+      setSelectedIndex((prev) => {
+        if (prev < 0) return -1;
+        return Math.min(prev, filtered.length - 1);
+      });
     }
   }, [query, filtered.length, open]);
 
@@ -79,8 +84,13 @@ export default function CommandMenu() {
   const moveSelection = (delta: number) => {
     if (filtered.length === 0) return;
     setSelectedIndex((prev) => {
-      const base = prev < 0 ? 0 : prev;
-      const next = (base + delta + filtered.length) % filtered.length;
+      // First navigation behavior:
+      // - If nothing is selected and pressing Down: select 0 (top)
+      // - If nothing is selected and pressing Up: select last (bottom)
+      if (prev < 0) {
+        return delta > 0 ? 0 : filtered.length - 1;
+      }
+      const next = (prev + delta + filtered.length) % filtered.length;
       return next;
     });
   };
@@ -114,6 +124,11 @@ export default function CommandMenu() {
           if (e.key === 'ArrowUp') {
             e.preventDefault();
             moveSelection(-1);
+            return;
+          }
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            runSelected();
             return;
           }
         }}
