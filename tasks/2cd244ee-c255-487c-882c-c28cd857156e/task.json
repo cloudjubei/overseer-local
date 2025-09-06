@@ -61,7 +61,7 @@
     },
     {
       "id": "8ec41328-1bc4-4165-8738-e26bac938f44",
-      "status": "-",
+      "status": "+",
       "title": "Git Operations Module Spec for Backend",
       "description": "Specify a backend module that wraps git operations safely: clone/update repo cache, branch strategy, commit/write files, resolve merge conflicts policy for automated changes, and background sync. Include disk layout for repo caches and locking to avoid races. Define interfaces to be used by project/task/feature services. Output: docs/backend_git_module.md with method signatures and retry/timeout policies.",
       "plan": "",
