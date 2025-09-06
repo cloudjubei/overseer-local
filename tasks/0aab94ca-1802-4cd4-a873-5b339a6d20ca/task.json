@@ -33,7 +33,7 @@
     },
     {
       "id": "19e53643-537f-4bbf-9ba6-268baeedcb4f",
-      "status": "-",
+      "status": "~",
       "title": "Create Main Process Service for Live Data Management",
       "description": "Implement a main process service to manage the lifecycle of live data services. This includes loading configurations from storage, saving them, and exposing methods to the renderer via IPC to get service status and trigger updates.",
       "plan": "",
