@@ -817,7 +817,7 @@
     },
     {
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "-",
+      "status": "?",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
       "description": "This is inside @src/renderer/components/agents/ChatConversation.tsx",
       "plan": "",
@@ -825,7 +825,8 @@
         "src/renderer/components/agents/ChatConversation.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Per-turn 'thinking time' requires timestamps for individual messages. Currently AgentRunMessage only has { role, content } and agentsService does not persist the event timestamp to each message. While events have ts/time, appendMessage and replaceMessages only push the raw message object and do not annotate it with a timestamp. Therefore ChatConversation.tsx lacks data to compute durations per assistant turn. Please update agentsService to add a timestamp to each message (e.g., msg.ts = getEventTs(e)) or include start/end timestamps for assistant/tool messages so we can compute and display thinking time accurately."
     }
   ],
   "featureIdToDisplayIndex": {
