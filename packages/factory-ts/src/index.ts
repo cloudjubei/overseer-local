@@ -10,6 +10,7 @@ import { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './log
 import { createPricingManager, PricingManager, estimateCostUSD } from './pricing.js';
 import { LLMConfig, RunEvent, AgentRun } from './types.js';
 export { buildChatTools } from './chatTools.js';
+export type { AgentType, LLMConfig as LLMConfig, RunEvent as RunEvent, AgentRun as AgentRun } from './types.js';
 
 export type Unsubscribe = () => void;
 

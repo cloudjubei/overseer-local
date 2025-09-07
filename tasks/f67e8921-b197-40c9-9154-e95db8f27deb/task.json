@@ -905,7 +905,7 @@
     },
     {
       "id": "5b0430ba-fbbc-4103-a11b-223c96270cfb",
-      "status": "-",
+      "status": "+",
       "title": "factory-ts should be loaded as a proper npm-module",
       "description": "Currently there's a lot of relative paths inside this project that reference 'factory-ts' - that shouldn't be the case. It should be loaded into this project as a node package and used the correct way.",
       "plan": "",
