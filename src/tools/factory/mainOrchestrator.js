@@ -33,7 +33,7 @@ const RUN_SUBSCRIBERS = new Map(); // runId -> Set<webContentsId>
 const RUNS = new Map(); // runId -> RunHandle
 const RUN_META = new Map(); // runId -> metadata snapshot
 const RUN_TIMERS = new Map(); // runId -> heartbeat timer
-const RUN_MESSAGES = new Map(); // runId -> last messages array
+const RUN_MESSAGES = new Map(); // runId -> last messages array or grouped object
 
 let PRICING = null;
 let HISTORY = null;
@@ -295,9 +295,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
 
       // Capture and persist messages when provided (init, snapshots, or final)
       try {
-        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final' || e?.type === 'llm/messages/init') && e?.payload?.messages) {
-          RUN_MESSAGES.set(runHandle.id, e.payload.messages);
-          persistMessages(runHandle.id, e.payload.messages);
+        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final' || e?.type === 'llm/messages/init') && (e?.payload?.messages || e?.payload?.messageGroups)) {
+          const toPersist = e?.payload?.messageGroups ?? e?.payload?.messages;
+          RUN_MESSAGES.set(runHandle.id, toPersist);
+          persistMessages(runHandle.id, toPersist);
         }
       } catch (err) {
         console.warn('[factory] Failed to persist messages for', runHandle.id, err?.message || err);
