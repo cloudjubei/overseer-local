@@ -892,7 +892,7 @@
     },
     {
       "id": "22e6034f-027b-4c22-9496-3802c1de783d",
-      "status": "-",
+      "status": "+",
       "title": "the package factory-ts must have proper path",
       "description": "The function 'loadBuiltInDefaults' in @packages/factory-ts/src/pricing.ts  and functions 'loadAgentDocs' and 'loadProtocolExample' in  @packages/factory-ts/src/orchestrator.ts have references to the path pointing to 'packages/factory-ts' - this must be changed to point to a relative path to the root of the factory-ts project, so that it could be moved anywhere",
       "plan": "",
