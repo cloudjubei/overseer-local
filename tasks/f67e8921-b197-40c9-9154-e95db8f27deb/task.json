@@ -833,7 +833,7 @@
     },
     {
       "id": "86314974-b368-49d5-8137-4b5b0d053adb",
-      "status": "-",
+      "status": "+",
       "title": "Running a task from another project, when one is ongoing fails",
       "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\nThe @packages/factory-ts/src/fileTools.ts and @packages/factory-ts/src/taskUtils.ts were storing a projec root field that was conflicting - this was now fixed, but perhaps there's another field that is causing a similar issue? Something inside\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
       "plan": "",
