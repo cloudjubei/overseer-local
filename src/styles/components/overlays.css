@@ -6,6 +6,8 @@
 .cmd__list { max-height: 300px; overflow: auto; }
 .cmd__item { border-bottom: 1px solid var(--border-subtle); }
 .cmd__item button { width: 100%; text-align: left; padding: 10px 12px; background: transparent; border: 0; color: var(--text-primary); }
+/* Active/selected command highlight */
+.cmd__item.is-active button { background: color-mix(in srgb, var(--accent) 14%, transparent); outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: -2px; }
 .cmd__shortcut { float: right; color: var(--text-muted); }
 
 .help { width: 560px; max-width: calc(100vw - 40px); background: var(--surface-overlay); border: 1px solid var(--border-default); border-radius: var(--radius-3); box-shadow: var(--shadow-3); }

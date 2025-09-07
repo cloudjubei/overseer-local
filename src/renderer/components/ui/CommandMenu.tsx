@@ -147,6 +147,12 @@ export default function CommandMenu() {
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); }
+              else if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); }
+              else if (e.key === 'Enter') { e.preventDefault(); runSelected(); }
+              else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
+            }}
           />
           <kbd className="kbd">⌘K</kbd>
         </div>
