@@ -860,7 +860,7 @@
     },
     {
       "id": "8b99905a-e392-4264-abe2-0bb454504281",
-      "status": "-",
+      "status": "+",
       "title": "Only the latest Feature and its latest turn are open by default",
       "description": "When a user opens a @src/renderer/components/agents/ChatConversation.tsx it should have all features but the latest one closed. The latest's features latest turn should be the only one open and scrolled to.",
       "plan": "",
