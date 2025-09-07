@@ -844,6 +844,30 @@
       "acceptance": [],
       "blockers": [],
       "rejection": "Blocked: Agent loop failed: FetchError: request to https://api.openai.com/v1/chat/completions failed, reason: read ECONNRESET"
+    },
+    {
+      "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
+      "status": "-",
+      "title": "When viewing an ongoing run - the current messages are not updating",
+      "description": "This is in @src/renderer/components/agents/ChatConversation.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "8b99905a-e392-4264-abe2-0bb454504281",
+      "status": "-",
+      "title": "Only the latest Feature and its latest turn are open by default",
+      "description": "When a user opens a @src/renderer/components/agents/ChatConversation.tsx it should have all features but the latest one closed. The latest's features latest turn should be the only one open and scrolled to.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -910,6 +934,8 @@
     "7b2917b5-67da-437e-b11e-f11989bbae7e": 61,
     "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 62,
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 63,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 64
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 64,
+    "229130f0-bcb6-49b4-9c5b-fe4bad68356d": 65,
+    "8b99905a-e392-4264-abe2-0bb454504281": 66
   }
 }
