@@ -833,7 +833,7 @@
     },
     {
       "id": "86314974-b368-49d5-8137-4b5b0d053adb",
-      "status": "-",
+      "status": "?",
       "title": "Running a task from another project, when one is ongoing fails",
       "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
       "plan": "",
@@ -842,7 +842,8 @@
         "src/tools/factory/mainOrchestrator.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: FetchError: request to https://api.openai.com/v1/chat/completions failed, reason: read ECONNRESET"
     }
   ],
   "featureIdToDisplayIndex": {

@@ -334,3 +334,205 @@ export const taskUtils = {
 };
 
 export type TaskUtils = typeof taskUtils;
+
+// New: create per-run, project-root scoped task utils (thread-safe)
+export function createTaskUtils(projectRoot: string) {
+  // Instance-local project root
+  let ROOT = path.resolve(projectRoot || FRAMEWORK_ROOT);
+  const tasksDirLocal = () => path.join(ROOT, TASKS_DIR_NAME);
+  const taskDirLocal = (taskId: string) => path.join(tasksDirLocal(), taskId);
+  const taskPathLocal = (taskId: string) => path.join(taskDirLocal(taskId), 'task.json');
+  const testPathLocal = (taskId: string, featureId: string) => path.join(taskDirLocal(taskId), 'tests', `test_${taskId}_${featureId}.py`);
+
+  async function getTaskLocal(taskId: string): Promise<Task> {
+    const p = taskPathLocal(taskId);
+    const raw = await fsp.readFile(p, 'utf8');
+    return JSON.parse(raw);
+  }
+  async function saveTaskLocal(task: Task): Promise<void> {
+    const p = taskPathLocal(task.id);
+    await ensureDir(path.dirname(p));
+    await fsp.writeFile(p, JSON.stringify(task, null, 2), 'utf8');
+  }
+  async function updateTaskStatusLocal(taskId: string, status: Status): Promise<Task> {
+    const t = await getTaskLocal(taskId);
+    t.status = status;
+    await saveTaskLocal(t);
+    return t;
+  }
+  async function updateFeatureStatusLocal(taskId: string, featureId: string, status: Status) {
+    const t = await getTaskLocal(taskId);
+    const feature = t.features.find(f => f.id === featureId);
+    if (feature) {
+      feature.status = status;
+      await saveTaskLocal(t);
+      return feature;
+    }
+    return undefined;
+  }
+  async function blockFeatureLocal(taskId: string, featureId: string, reason: string, agentType: string, git: GitManager) {
+    const t = await getTaskLocal(taskId);
+    const feature = t.features.find(f => f.id === featureId);
+    if (feature) {
+      feature.status = '?';
+      feature.rejection = `Blocked: ${reason}`;
+      await saveTaskLocal(t);
+    }
+    const title = feature?.title ?? '';
+    let msg: string;
+    if (agentType === 'developer') msg = `BLOCKED feat: Complete feature ${featureId} - ${title}`;
+    else if (agentType === 'planner') msg = `BLOCKED plan: Add plan for feature ${featureId} - ${title}`;
+    else if (agentType === 'tester') msg = `BLOCKED test: Add tests for feature ${featureId} - ${title}`;
+    else if (agentType === 'contexter') msg = `BLOCKED context: Set context for feature ${featureId} - ${title}`;
+    else throw new Error(`Unknown agent_type '${agentType}' called block_feature.`);
+
+    try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
+    try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
+    try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
+
+    console.log(`Feature ${featureId} blocked. Reason: ${reason}`);
+    return feature;
+  }
+  async function blockTaskLocal(taskId: string, reason: string, agentType: string, git: GitManager) {
+    const t = await getTaskLocal(taskId);
+    t.status = '?';
+    t.rejection = `Blocked: ${reason}`;
+    await saveTaskLocal(t);
+    const msg = `BLOCKED task: ${t.id} - ${t.title}`;
+    try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
+    try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
+    try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
+    console.log(`Task ${taskId} blocked. Reason: ${reason}`);
+    return t;
+  }
+  async function checkAndUpdateTaskCompletionLocal(taskId: string) {
+    const t = await getTaskLocal(taskId);
+    const allDone = (t.features || []).every(f => f.status === '+');
+    if (allDone) {
+      console.log(`All features for task ${taskId} are complete. Updating task status to '+'.`);
+      await updateTaskStatusLocal(taskId, '+');
+    }
+  }
+  async function finishFeatureLocal(taskId: string, featureId: string, agentType: string, git: GitManager) {
+    const t = await getTaskLocal(taskId);
+    const feature = t.features.find(f => f.id === featureId);
+    const title = feature?.title ?? '';
+    let msg: string;
+    if (agentType === 'developer') {
+      msg = `feat: Complete feature ${featureId} - ${title}`;
+      await updateFeatureStatusLocal(taskId, featureId, '+');
+      await checkAndUpdateTaskCompletionLocal(taskId);
+    } else if (agentType === 'planner') {
+      msg = `plan: Add plan for feature ${featureId} - ${title}`;
+      await updateFeatureStatusLocal(taskId, featureId, '-');
+    } else if (agentType === 'tester') {
+      msg = `test: Add tests for feature ${featureId} - ${title}`;
+      await updateFeatureStatusLocal(taskId, featureId, '-');
+    } else if (agentType === 'contexter') {
+      msg = `context: Set context for feature ${featureId} - ${title}`;
+      await updateFeatureStatusLocal(taskId, featureId, '-');
+    } else {
+      throw new Error(`Unknown agent_type '${agentType}' called finish_feature.`);
+    }
+    try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
+    try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
+    try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
+    return `Feature ${featureId} finished by ${agentType} and changes committed.`;
+  }
+  async function finishSpecLocal(taskId: string, agentType: string, git: GitManager) {
+    if (agentType !== 'speccer') throw new Error(`Unknown agent_type '${agentType}' called finish_spec.`);
+    try { await git.stageAll() } catch (e) { console.warn('Warning: Could not stage files.', e); }
+    const msg = `spec: Added spec for task: ${taskId}`;
+    try { await git.commit(msg); console.log(`Committed changes with message: '${msg}'`); } catch (e) { console.warn('Warning: Git commit failed.', e); }
+    try { await git.push(); } catch (e) { console.warn('Could not push:', e); }
+    return `Task ${taskId} finished spec by ${agentType} and changes committed.`;
+  }
+  async function getTestLocal(taskId: string, featureId: string) {
+    const p = testPathLocal(taskId, featureId);
+    try { return await fsp.readFile(p, 'utf8'); } catch { return `Test file not found at ${p}`; }
+  }
+  async function updateTestLocal(taskId: string, featureId: string, test: string) {
+    const p = testPathLocal(taskId, featureId);
+    await ensureDir(path.dirname(p));
+    await fsp.writeFile(p, test, 'utf8');
+    return `Test file updated at ${p}`;
+  }
+  async function deleteTestLocal(taskId: string, featureId: string) {
+    const p = testPathLocal(taskId, featureId);
+    try { await fsp.unlink(p); return `Test file ${p} deleted.`; } catch { return `Test file ${p} not found.`; }
+  }
+  async function runTestLocal(taskId: string, featureId: string) {
+    const p = testPathLocal(taskId, featureId);
+    if (!fs.existsSync(p)) return 'FAIL: Test file not found.';
+    const { spawn } = await import('node:child_process');
+    return await new Promise<string>((resolve) => {
+      const proc = spawn('python3', [p], { stdio: ['ignore', 'pipe', 'pipe'] });
+      let stdout = '';
+      let stderr = '';
+      const timer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch {} }, 30000);
+      proc.stdout.on('data', (d) => { stdout += d.toString(); });
+      proc.stderr.on('data', (d) => { stderr += d.toString(); });
+      proc.on('close', (code) => {
+        clearTimeout(timer);
+        if (code === 0) resolve(`PASS: Test executed successfully.\nOutput:\n${stdout}`);
+        else resolve(`FAIL: Test failed with exit code ${code}.\nStderr:\n${stderr}\nStdout:\n${stdout}`);
+      });
+      proc.on('error', (e) => {
+        clearTimeout(timer);
+        resolve(`FAIL: An unexpected error occurred while running the test: ${e}`);
+      });
+    });
+  }
+  async function createFeatureLocal(taskId: string, title: string, description: string): Promise<Feature> {
+    const t = await getTaskLocal(taskId);
+    const id = (function uuidv4() {return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {const r = Math.random() * 16 | 0;const v = c === 'x' ? r : (r & 0x3 | 0x8);return v.toString(16);}); })();
+    const newFeature: Feature = { id, status: '-', title, description, plan: '', context: [], acceptance: [], };
+    t.features = t.features || [];
+    t.features.push(newFeature);
+    t.featureIdToDisplayIndex = t.featureIdToDisplayIndex || {};
+    t.featureIdToDisplayIndex[id] = t.features.length;
+    await saveTaskLocal(t);
+    console.log(`New feature '${id}' created in task ${taskId}.`);
+    return newFeature;
+  }
+  async function updateFeaturePlanLocal(taskId: string, featureId: string, plan: any) {
+    const planStr = Array.isArray(plan) ? plan.map(String).join('\n') : (typeof plan === 'string' ? plan : String(plan));
+    const t = await getTaskLocal(taskId);
+    const f = t.features.find(x => x.id === featureId);
+    if (f) { f.plan = planStr; await saveTaskLocal(t); return f; }
+    return undefined;
+  }
+  async function updateFeatureContextLocal(taskId: string, featureId: string, context: string[]) {
+    const t = await getTaskLocal(taskId);
+    const f = t.features.find(x => x.id === featureId);
+    if (f) { f.context = context; await saveTaskLocal(t); return f; }
+    return undefined;
+  }
+
+  return {
+    // instance project root mutator (instance-scoped)
+    setProjectRoot: (p: string) => { ROOT = path.resolve(p || ROOT); },
+    // task io
+    getTask: getTaskLocal,
+    saveTask: saveTaskLocal,
+    updateTaskStatus: updateTaskStatusLocal,
+    // feature status
+    updateFeatureStatus: updateFeatureStatusLocal,
+    blockFeature: blockFeatureLocal,
+    blockTask: blockTaskLocal,
+    finishFeature: finishFeatureLocal,
+    finishSpec: finishSpecLocal,
+    // tester tools
+    getTest: getTestLocal,
+    updateAcceptanceCriteria,
+    updateTest: updateTestLocal,
+    deleteTest: deleteTestLocal,
+    runTest: runTestLocal,
+    // orchestrator helpers
+    getProjectDir, // always from FRAMEWORK_ROOT (shared, safe)
+    findNextAvailableFeature,
+    createFeature: createFeatureLocal,
+    updateFeaturePlan: updateFeaturePlanLocal,
+    updateFeatureContext: updateFeatureContextLocal,
+  } as TaskUtils;
+}
