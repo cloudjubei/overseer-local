@@ -191,8 +191,6 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
   const initial = messages[idx];
   idx++;
 
-  let lastMessageForTime: AgentRunMessage | undefined = initial;
-
   let tIndex = 0;
   while (idx < messages.length) {
     const a = messages[idx];
@@ -204,36 +202,29 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
     }
 
     let thinkingTime: number | undefined;
-    if (lastMessageForTime && (lastMessageForTime as any).createdAt && (a as any).createdAt) {
-      try {
-        const startTime = new Date((lastMessageForTime as any).createdAt).getTime();
-        const endTime = new Date((a as any).createdAt).getTime();
-        if (!isNaN(startTime) && !isNaN(endTime)) {
-          thinkingTime = endTime - startTime;
-        }
-      } catch (e) {
-        // ignore date parsing errors
+    try {
+      const askedAt = a.askedAt ? new Date(a.askedAt).getTime() : NaN;
+      const createdAt = a.createdAt ? new Date(a.createdAt).getTime() : NaN;
+      if (!isNaN(askedAt) && !isNaN(createdAt)) {
+        thinkingTime = Math.max(0, createdAt - askedAt);
       }
-    }
+    } catch {}
 
     const parsed = parseAssistant(a.content);
     if (parsed && Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
       const maybeTools = messages[idx + 1];
       if (isToolMsg(maybeTools)) {
         turns.push({ assistant: a, tools: maybeTools, index: tIndex++, thinkingTime });
-        lastMessageForTime = maybeTools;
         idx += 2;
         continue;
       }
       // No tools message, still push assistant-only
       turns.push({ assistant: a, index: tIndex++, thinkingTime });
-      lastMessageForTime = a;
       idx += 1;
       continue;
     }
     // Final assistant message (no tool_calls)
     turns.push({ assistant: a, index: tIndex++, isFinal: true, thinkingTime });
-    lastMessageForTime = a;
     idx += 1;
   }
   return { initial, turns };

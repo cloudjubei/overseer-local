@@ -8,6 +8,10 @@ export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 export interface AgentRunMessage {
   role: string;
   content: string;
+  // when this message was received (renderer-side) or created upstream
+  createdAt?: string; // ISO
+  // for assistant messages: when the question/prompt was asked to the LLM
+  askedAt?: string; // ISO
 }
 
 export type AgentRun = {
@@ -25,7 +29,7 @@ export type AgentRun = {
   model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
-  // Timestamp of the last received LLM message (assistant or tool results). Used for thinking timer.
+  // Timestamp of the last received LLM message (assistant or tool results). Used to infer askedAt for the next assistant reply.
   lastMessageAt?: string; // ISO
 
   messagesLog?: Record<string,AgentFeatureRunLog>
@@ -232,8 +236,7 @@ class AgentsServiceImpl {
     }
   }
 
-  private appendMessage(run: RunRecord, msg: any, featureId: string) {
-
+  private ensureFeatureLog(run: RunRecord, featureId: string): AgentFeatureRunLog {
     if (!run.messagesLog){
       run.messagesLog = {}
     }
@@ -242,26 +245,50 @@ class AgentsServiceImpl {
       existing = { startDate: new Date(), featureId, messages: [] }
       run.messagesLog[featureId] = existing
     }
-
-    existing.messages.push({ ...msg });
+    return existing;
   }
 
-  private replaceMessages(run: RunRecord, messages: any[], featureId: string, isEnd: boolean = false) {
-    if (!run.messagesLog){
-      run.messagesLog = {}
+  private appendMessage(run: RunRecord, msg: any, featureId: string, ts?: string) {
+    const existing = this.ensureFeatureLog(run, featureId);
+
+    const createdAt = (msg?.createdAt as string) || ts || new Date().toISOString();
+    const role = String(msg?.role || 'assistant');
+
+    // When an assistant message arrives, infer askedAt as the time we last emitted a message before this (e.g., tool results or user question)
+    let askedAt: string | undefined = msg?.askedAt;
+    if (role === 'assistant') {
+      askedAt = askedAt || run.lastMessageAt || createdAt;
     }
-    let existing : AgentFeatureRunLog | undefined = run.messagesLog![featureId]
-    if (!existing){
-      existing = { startDate: new Date(), featureId, messages: [] }
-      run.messagesLog[featureId] = existing
-    }
+
+    const toStore: AgentRunMessage = {
+      role,
+      content: String(msg?.content ?? ''),
+      createdAt,
+      askedAt,
+    };
+
+    existing.messages.push(toStore);
+  }
+
+  private replaceMessages(run: RunRecord, messages: any[], featureId: string, isEnd: boolean = false, ts?: string) {
+    const existing = this.ensureFeatureLog(run, featureId);
     if (isEnd){
       existing.endDate = new Date()
     }
 
-    const newMessages = []
+    const baseTs = ts || new Date().toISOString();
+
+    const newMessages: AgentRunMessage[] = []
     for(const m of messages){
-      newMessages.push({ ...m})
+      const role = String(m?.role || 'assistant');
+      const createdAt = (m?.createdAt as string) || baseTs;
+      let askedAt: string | undefined = (m as any)?.askedAt;
+      if (role === 'assistant') {
+        // best-effort: if askedAt missing in snapshot, approximate with previous message timestamp if available
+        const prev = newMessages.length > 0 ? newMessages[newMessages.length - 1] : undefined;
+        askedAt = askedAt || prev?.createdAt || run.lastMessageAt || createdAt;
+      }
+      newMessages.push({ role, content: String(m?.content ?? ''), createdAt, askedAt });
     }
     existing.messages = newMessages
   }
@@ -364,18 +391,18 @@ class AgentsServiceImpl {
       // Conversation handling
       if (e.type === 'llm/messages/init') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey);
+        this.replaceMessages(run, msgs, featureKey, false, ts);
       } else if (e.type === 'llm/messages/snapshot') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey);
+        this.replaceMessages(run, msgs, featureKey, false, ts);
       } else if (e.type === 'llm/message') {
         const msg = e.payload?.message;
-        if (msg) this.appendMessage(run, msg, featureKey);
+        if (msg) this.appendMessage(run, msg, featureKey, ts);
         // Update last message time strictly on actual message events
         run.lastMessageAt = ts;
       } else if (e.type === 'llm/messages/final') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey, true);
+        this.replaceMessages(run, msgs, featureKey, true, ts);
         // Finalize last message time at end of conversation
         run.lastMessageAt = ts;
         // On final messages (end of a feature conversation), re-scan normalized messages and emit feature-complete notifications
