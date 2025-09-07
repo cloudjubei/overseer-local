@@ -882,7 +882,7 @@
     },
     {
       "id": "ce107cd7-1e54-434d-b642-d7a7bd4f6afd",
-      "status": "-",
+      "status": "?",
       "title": "the package factory-ts has moved",
       "description": "it is now a separate repository located at \"../thefactory-tools\" relative to the current repo path. Your task is to update all files and references in this project to 'factory-ts' to the new package location.\nThere is a local copy of 'factory-ts' under 'packages/factory-ts' - do not delete it, as it's for reference for now.",
       "plan": "",
@@ -900,6 +900,16 @@
         "packages/factory-ts/src/pricing.ts",
         "packages/factory-ts/src/orchestrator.ts"
       ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "5b0430ba-fbbc-4103-a11b-223c96270cfb",
+      "status": "-",
+      "title": "factory-ts should be loaded as a proper npm-module",
+      "description": "Currently there's a lot of relative paths inside this project that reference 'factory-ts' - that shouldn't be the case. It should be loaded into this project as a node package and used the correct way.",
+      "plan": "",
+      "context": [],
       "acceptance": [],
       "blockers": []
     }
@@ -972,7 +982,8 @@
     "a2c93def-ae45-462c-9967-32824f897ee8": 65,
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 66,
     "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67,
-    "ce107cd7-1e54-434d-b642-d7a7bd4f6afd": 68,
-    "22e6034f-027b-4c22-9496-3802c1de783d": 69
+    "22e6034f-027b-4c22-9496-3802c1de783d": 68,
+    "5b0430ba-fbbc-4103-a11b-223c96270cfb": 69,
+    "ce107cd7-1e54-434d-b642-d7a7bd4f6afd": 70
   }
 }
