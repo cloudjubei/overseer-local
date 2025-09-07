@@ -259,6 +259,4 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
   };
 }
 
-export { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger, createPricingManager };
-
 export default { createOrchestrator, createHistoryStore, setFactoryDebug, setLoggerConfig, getLoggerConfig, logger, createPricingManager };
