@@ -1,15 +1,16 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { EventEmitter } from 'node:events';
-import { taskUtils as defaultTaskUtils, createTaskUtils } from './taskUtils.js';
-import { fileTools as defaultFileTools, createFileTools } from './fileTools.js';
+import { createTaskUtils } from './taskUtils.js';
+import { createFileTools } from './fileTools.js';
 import GitManager from './gitManager.js';
 import { runIsolatedOrchestrator } from './orchestrator.js';
 import { createCompletionClient, type CompletionClient } from './completion.js';
 import { setFactoryDebug, setLoggerConfig, getLoggerConfig, logger } from './logger.js';
 import { createPricingManager, PricingManager, estimateCostUSD } from './pricing.js';
-import { LLMConfig, RunEvent, AgentRun } from './types.js';
 export { buildChatTools } from './chatTools.js';
+import { LLMConfig, RunEvent, AgentRun } from './types.js';
+export type { AgentType, LLMConfig, RunEvent, AgentRun } from './types.js';
 
 export type Unsubscribe = () => void;
 

@@ -3,27 +3,18 @@ import IPC_HANDLER_KEYS from '../../ipcHandlersKeys.js';
 import path from 'node:path';
 import fs from 'node:fs';
 
-// Load local package factory-ts from monorepo
-// Use dynamic import to avoid issues with CJS/ESM resolution in Electron
+// Load factory-ts as a proper npm module (workspace dependency)
 let factoryTs;
 async function loadFactory()
 {
   if (factoryTs) return factoryTs;
-  const cwd = process.cwd();
-  const distEsm = path.resolve(cwd, 'packages/factory-ts/dist/index.js');
-  const distCjs = path.resolve(cwd, 'packages/factory-ts/dist/index.cjs');
   try {
-    console.log('[factory] Loading factory-ts from', distEsm);
-    factoryTs = await import(distEsm);
-  } catch (errEsm) {
-    console.warn('[factory] Failed to load ESM build, trying CJS', errEsm?.message || errEsm);
-    try {
-      factoryTs = await import(distCjs);
-    } catch (errCjs) {
-      console.error('[factory] Failed to load factory-ts from dist. Did you build it? npm run factory:build');
-      console.error(errCjs?.stack || String(errCjs));
-      throw errCjs;
-    }
+    console.log('[factory] Loading factory-ts via module resolution');
+    factoryTs = await import('factory-ts');
+  } catch (err) {
+    console.error('[factory] Failed to load factory-ts as a module. Ensure workspaces are installed and the package is built.');
+    console.error(err?.stack || String(err));
+    throw err;
   }
   console.log('[factory] factory-ts loaded successfully');
   return factoryTs;
