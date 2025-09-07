@@ -259,7 +259,6 @@ function UserBubble({ title, text }: { title?: string; text: string }) {
 function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
   // Recompute on every render to reflect in-place mutations of log.messages
   const { initial, turns } = buildFeatureTurns(log.messages || []);
-  const lastTurnRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="space-y-2 p-1">
@@ -284,7 +283,7 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
         const isFinal = t.isFinal || (toolCalls.length === 0);
 
         return (
-          <div key={idx} ref={idx === turns.length - 1 ? lastTurnRef : undefined}>
+          <div key={idx}>
             <Collapsible innerClassName='p-2' title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={idx === turns.length - 1}>
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
@@ -330,16 +329,15 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
 }
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
-  // Derive logs (sorted by startDate)
-  const logs = useMemo(() => {
-    const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
-    const list = Object.values(run.messagesLog ?? {}).filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId));
-    return list.sort((a, b) => {
+  // Derive logs (sorted by startDate). Recompute each render to reflect in-place mutations.
+  const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
+  const logs = Object.values(run.messagesLog ?? {})
+    .filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId))
+    .sort((a, b) => {
       const at = new Date((a as any).startDate).getTime();
       const bt = new Date((b as any).startDate).getTime();
       return at - bt;
     });
-  }, [run]);
 
   // Track a scroll container and auto-scroll behavior
   const containerRef = useRef<HTMLUListElement | null>(null);

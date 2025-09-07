@@ -848,7 +848,7 @@
     },
     {
       "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
-      "status": "-",
+      "status": "+",
       "title": "When viewing an ongoing run - the current messages are not updating",
       "description": "This is in @src/renderer/components/agents/ChatConversation.tsx - also if the user is at the end of the current messages (i.e. displaying the last turn) the view should scroll to the latest message received.",
       "plan": "",
