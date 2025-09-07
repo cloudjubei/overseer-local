@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -879,6 +879,16 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "ce107cd7-1e54-434d-b642-d7a7bd4f6afd",
+      "status": "-",
+      "title": "the package factory-ts has moved",
+      "description": "it is now a separate repository located at \"../thefactory-tools\" relative to the current repo path.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -948,6 +958,7 @@
     "8b99905a-e392-4264-abe2-0bb454504281": 64,
     "a2c93def-ae45-462c-9967-32824f897ee8": 65,
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 66,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67,
+    "ce107cd7-1e54-434d-b642-d7a7bd4f6afd": 68
   }
 }
