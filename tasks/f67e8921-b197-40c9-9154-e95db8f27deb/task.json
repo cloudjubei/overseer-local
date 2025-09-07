@@ -882,11 +882,24 @@
     },
     {
       "id": "ce107cd7-1e54-434d-b642-d7a7bd4f6afd",
-      "status": "-",
+      "status": "?",
       "title": "the package factory-ts has moved",
       "description": "it is now a separate repository located at \"../thefactory-tools\" relative to the current repo path.",
       "plan": "",
       "context": [],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "22e6034f-027b-4c22-9496-3802c1de783d",
+      "status": "+",
+      "title": "the package factory-ts must have proper path",
+      "description": "The function 'loadBuiltInDefaults' in @packages/factory-ts/src/pricing.ts  and functions 'loadAgentDocs' and 'loadProtocolExample' in  @packages/factory-ts/src/orchestrator.ts have references to the path pointing to 'packages/factory-ts' - this must be changed to point to a relative path to the root of the factory-ts project, so that it could be moved anywhere",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/pricing.ts",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
       "acceptance": [],
       "blockers": []
     }
@@ -959,6 +972,7 @@
     "a2c93def-ae45-462c-9967-32824f897ee8": 65,
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 66,
     "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67,
-    "ce107cd7-1e54-434d-b642-d7a7bd4f6afd": 68
+    "ce107cd7-1e54-434d-b642-d7a7bd4f6afd": 68,
+    "22e6034f-027b-4c22-9496-3802c1de783d": 69
   }
 }

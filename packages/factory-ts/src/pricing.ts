@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import fetch from 'node-fetch';
+import { fileURLToPath } from 'node:url';
 
 export type ModelPrice = {
   provider: string; // e.g., openai
@@ -25,6 +26,9 @@ function ensureDir(p: string) {
 }
 
 function nowIso() { return new Date().toISOString(); }
+
+// Resolve the package root relative to this file so the package can be relocated
+const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 export class PricingManager {
   private readonly root: string;
@@ -125,7 +129,7 @@ export class PricingManager {
 
 function loadBuiltInDefaults(): ModelPrice[] {
   try {
-    const p = path.join(process.cwd(), 'packages', 'factory-ts', 'assets', 'default-prices.json');
+    const p = path.join(PACKAGE_ROOT, 'assets', 'default-prices.json');
     const raw = fs.readFileSync(p, 'utf8');
     const data = JSON.parse(raw) as { prices: ModelPrice[] };
     const arr: ModelPrice[] = Array.isArray(data) ? data : (Array.isArray(data?.prices) ? data.prices : []);

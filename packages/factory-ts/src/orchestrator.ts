@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { AgentResponse, CompletionClient, CompletionMessage, Feature, Task, ToolCall, ToolResult } from './types.js';
 import type { TaskUtils } from './taskUtils.js';
 import type { FileTools } from './fileTools.js';
@@ -10,19 +11,19 @@ import { logger, logLLMStep } from './logger.js';
 
 const MAX_TURNS_PER_FEATURE = 100;
 
-// Prefer process.cwd(), but do not assume it points to a real filesystem root when packaged (asar)
-const FRAMEWORK_ROOT = path.resolve(process.cwd());
+// Resolve package root relative to this file to avoid assuming monorepo layout
+const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const NEWLINE = '\n';
 
 function loadAgentDocs(agent: string): string {
-  // Mirror Python: docs live under packages/factory-ts/docs
-  const p = path.join(FRAMEWORK_ROOT, 'packages', 'factory-ts', 'docs', `AGENT_${agent.toUpperCase()}.md`);
+  // Docs live under <package root>/docs
+  const p = path.join(PACKAGE_ROOT, 'docs', `AGENT_${agent.toUpperCase()}.md`);
   return fs.readFileSync(p, 'utf8');
 }
 
 function loadProtocolExample(): string {
   try {
-    const p = path.join(FRAMEWORK_ROOT, 'packages', 'factory-ts', 'docs', 'agent_response_example.json');
+    const p = path.join(PACKAGE_ROOT, 'docs', 'agent_response_example.json');
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
     return JSON.stringify(data, null, 2);
   } catch (e) {
