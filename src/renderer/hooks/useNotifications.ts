@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { notificationsService } from '../services/notificationsService';
 import type { Notification } from '../../types/notifications';
 import { useProjectContext } from '../projects/ProjectContext';
@@ -10,25 +10,33 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
-  const updateCurrentProjectNotifications = async () => {
+  const updateCurrentProjectNotifications = useCallback(async () => {
     if (activeProject){
       setNotifications(await notificationsService.getRecentNotifications(activeProject.id));
       setUnreadCount(await notificationsService.getUnreadNotificationsCount(activeProject.id));
     }
-  }
+  }, [activeProject?.id]);
 
+  // Subscribe to notifications changes; re-subscribe when active project changes
   useEffect(() => {
+    // Initial fetch for current project
     updateCurrentProjectNotifications();
 
-    const unsubscribe = notificationsService.subscribe(updateCurrentProjectNotifications);
+    const unsubscribe = notificationsService.subscribe((payload?: any) => {
+      // Optionally ignore updates for other projects
+      if (activeProject && payload?.projectId && payload.projectId !== activeProject.id) return;
+      updateCurrentProjectNotifications();
+    });
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [activeProject?.id, updateCurrentProjectNotifications]);
+
+  // Also refresh when activeProject changes (covers cases without a broadcast)
   useEffect(() => {
     updateCurrentProjectNotifications();
-  }, [activeProject]);
+  }, [activeProject?.id, updateCurrentProjectNotifications]);
 
   // When a notification is opened/clicked, navigate to the Agents view and focus the run
   useEffect(() => {
