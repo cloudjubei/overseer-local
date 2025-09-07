@@ -780,7 +780,7 @@
     },
     {
       "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
-      "status": "-",
+      "status": "+",
       "title": "when a notification is read - don't show the count in the sidebar",
       "description": "Right now, when going to the @src/renderer/screens/NotificationsView.tsx if the user clicks a notification it should be read (but the badge in the @src/renderer/navigation/SidebarView.tsx  isn't updated).\nWhen clicking mark all as read- the badge should disappear.\nSame goes for clearing all notifications - there are no notifications, so there should be no badge.",
       "plan": "",
@@ -822,28 +822,29 @@
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
       "status": "-",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
-      "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip",
+      "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip. @src/renderer/services/agentsService.ts needs to be updated so that messages stored from llms have the time they were askedAt recorded and then the thinking time is the difference between that and the time the message is received.",
       "plan": "",
       "context": [
-        "src/renderer/components/agents/ChatConversation.tsx"
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/services/agentsService.ts"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "All of the bubbles now show 0.0s - clearly the thinkingTime is computed wrongly."
+      "blockers": []
     },
     {
       "id": "86314974-b368-49d5-8137-4b5b0d053adb",
-      "status": "?",
+      "status": "-",
       "title": "Running a task from another project, when one is ongoing fails",
-      "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
+      "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\nThe @packages/factory-ts/src/fileTools.ts and @packages/factory-ts/src/taskUtils.ts were storing a projec root field that was conflicting - this was now fixed, but perhaps there's another field that is causing a similar issue? Something inside\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
       "plan": "",
       "context": [
         "packages/factory-ts/src/orchestrator.ts",
-        "src/tools/factory/mainOrchestrator.js"
+        "src/tools/factory/mainOrchestrator.js",
+        "packages/factory-ts/src/fileTools.ts",
+        "packages/factory-ts/src/taskUtils.ts"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Blocked: Agent loop failed: FetchError: request to https://api.openai.com/v1/chat/completions failed, reason: read ECONNRESET"
+      "blockers": []
     },
     {
       "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
