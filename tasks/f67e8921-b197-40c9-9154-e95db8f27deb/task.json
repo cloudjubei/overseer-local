@@ -820,7 +820,7 @@
     },
     {
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "-",
+      "status": "?",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
       "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip",
       "plan": "",
@@ -829,7 +829,7 @@
       ],
       "acceptance": [],
       "blockers": [],
-      "rejection": "All of the bubbles now show 0.0s - clearly the thinkingTime is computed wrongly."
+      "rejection": "Blocked: Agent loop failed: Error: LLM request failed (400): {\n  \"error\": {\n    \"message\": \"Input tokens exceed the configured limit of 272000 tokens. Your messages resulted in 836650 tokens. Please reduce the length of the messages.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"messages\",\n    \"code\": \"context_length_exceeded\"\n  }\n}"
     },
     {
       "id": "86314974-b368-49d5-8137-4b5b0d053adb",
