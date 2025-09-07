@@ -850,7 +850,7 @@
       "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
       "status": "-",
       "title": "When viewing an ongoing run - the current messages are not updating",
-      "description": "This is in @src/renderer/components/agents/ChatConversation.tsx",
+      "description": "This is in @src/renderer/components/agents/ChatConversation.tsx - also if the user is at the end of the current messages (i.e. displaying the last turn) the view should scroll to the latest message received.",
       "plan": "",
       "context": [
         "src/renderer/components/agents/ChatConversation.tsx"
@@ -866,6 +866,18 @@
       "plan": "",
       "context": [
         "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "a2c93def-ae45-462c-9967-32824f897ee8",
+      "status": "-",
+      "title": "Showing the wrong Features numbers",
+      "description": "In @src/renderer/screens/AgentsView.tsx a run is displaying the wrong features count - it seems to count the special \"__task__\" as a separate feature.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -937,6 +949,7 @@
     "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 63,
     "df22d856-9aa3-4c10-9e91-04291697e0b8": 64,
     "229130f0-bcb6-49b4-9c5b-fe4bad68356d": 65,
-    "8b99905a-e392-4264-abe2-0bb454504281": 66
+    "8b99905a-e392-4264-abe2-0bb454504281": 66,
+    "a2c93def-ae45-462c-9967-32824f897ee8": 67
   }
 }
