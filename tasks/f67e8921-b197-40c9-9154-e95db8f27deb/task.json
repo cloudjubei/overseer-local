@@ -882,9 +882,9 @@
     },
     {
       "id": "ce107cd7-1e54-434d-b642-d7a7bd4f6afd",
-      "status": "?",
+      "status": "-",
       "title": "the package factory-ts has moved",
-      "description": "it is now a separate repository located at \"../thefactory-tools\" relative to the current repo path.",
+      "description": "it is now a separate repository located at \"../thefactory-tools\" relative to the current repo path. Your task is to update all files and references in this project to 'factory-ts' to the new package location.\nThere is a local copy of 'factory-ts' under 'packages/factory-ts' - do not delete it, as it's for reference for now.",
       "plan": "",
       "context": [],
       "acceptance": [],
