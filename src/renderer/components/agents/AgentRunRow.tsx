@@ -45,10 +45,15 @@ function formatDuration(ms?: number) {
 // Determine features counts from messagesLog
 function useFeatureCounts(run: AgentRun) {
   return useMemo(() => {
-    const logs = run.messagesLog ? Object.values(run.messagesLog) : [];
-    const total = logs.length;
+    const entries = run.messagesLog ? Object.entries(run.messagesLog) : [];
+    // Exclude the special task-level conversation key "__task__" from feature counts
+    const filtered = entries.filter(([key, val]) => {
+      const fid = (val as any)?.featureId || key;
+      return fid !== '__task__';
+    });
+    const total = filtered.length;
     let completed = 0;
-    for (const l of logs) {
+    for (const [, l] of filtered) {
       if ((l as any).endDate) completed++;
     }
     return { total, completed };

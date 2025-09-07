@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -872,7 +872,7 @@
     },
     {
       "id": "a2c93def-ae45-462c-9967-32824f897ee8",
-      "status": "-",
+      "status": "+",
       "title": "Showing the wrong Features numbers",
       "description": "In @src/renderer/screens/AgentsView.tsx a run is displaying the wrong features count - it seems to count the special \"__task__\" as a separate feature.",
       "plan": "",
