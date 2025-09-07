@@ -159,15 +159,26 @@ function constructSystemPrompt(agent: string, task: Task, feature: Feature | nul
 }
 
 // Attach metadata to messages so history can be reconstructed reliably after persistence
-function annotateMessage<T extends CompletionMessage>(msg: T, meta: { featureId?: string; agentType?: string; turn?: number; source?: string; marker?: string }): T {
+function annotateMessage<T extends CompletionMessage>(msg: T, meta: { featureId?: string; agentType?: string; turn?: number; source?: string; marker?: string; askedAt?: string }): T {
   const anyMsg = msg as any;
   if (meta.featureId) anyMsg.featureId = meta.featureId;
   if (meta.agentType) anyMsg.agentType = meta.agentType;
   if (typeof meta.turn === 'number') anyMsg.turn = meta.turn;
   if (meta.source) anyMsg.source = meta.source;
   if (meta.marker) anyMsg.marker = meta.marker;
+  if (meta.askedAt) anyMsg.askedAt = meta.askedAt;
   anyMsg.createdAt = new Date().toISOString();
   return msg;
+}
+
+// Grouped history structure for persistence/readability
+type FeatureMessagesGroup = { startDate: string; endDate?: string; featureId: string; messages: CompletionMessage[] };
+
+function ensureGroup(groups: Record<string, FeatureMessagesGroup>, featureId: string): FeatureMessagesGroup {
+  if (!groups[featureId]) {
+    groups[featureId] = { featureId, startDate: new Date().toISOString(), messages: [] };
+  }
+  return groups[featureId];
 }
 
 async function runConversation(opts: {
@@ -186,28 +197,30 @@ async function runConversation(opts: {
   const { model, availableTools, systemPrompt, task, feature, agentType, taskTools, git, completion, complete, emit } = opts;
   const doEmit = (e: { type: string; payload?: any }) => { try { emit?.(e); } catch {} };
 
+  const featureKey = feature?.id ?? '__task__';
+
   const initialUser: CompletionMessage = annotateMessage(
     { role: 'user', content: systemPrompt } as any,
-    { featureId: feature?.id ?? '__task__', agentType, turn: 0, source: 'initial' }
+    { featureId: featureKey, agentType, turn: 0, source: 'initial' }
   );
   const messages: CompletionMessage[] = [initialUser];
-  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice(), turn: 0 } });
+  doEmit({ type: 'llm/messages/init', payload: { messages: messages.slice(), featureId: featureKey, turn: 0 } });
 
   for (let i = 0; i < MAX_TURNS_PER_FEATURE; i++) {
     try {
       // Emit snapshot of request context before calling the LLM
-      doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i } });
+      doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), featureId: featureKey, turn: i } });
       const startedAt = Date.now();
       const res = await completion({ model, messages, response_format: { type: 'json_object' } });
       const durationMs = Date.now() - startedAt;
 
       const assistant = annotateMessage(
         { role: 'assistant' as const, content: res.message.content },
-        { featureId: feature?.id ?? '__task__', agentType, turn: i }
+        { featureId: featureKey, agentType, turn: i, askedAt: new Date(startedAt).toISOString() }
       );
       messages.push(assistant);
       // Emit assistant message and timing
-      doEmit({ type: 'llm/message', payload: { message: assistant, durationMs } });
+      doEmit({ type: 'llm/message', payload: { message: assistant, featureId: featureKey, durationMs } });
 
       // Parse and log succinct info
       let parsed: AgentResponse | undefined;
@@ -217,7 +230,7 @@ async function runConversation(opts: {
 
       if (!toolCalls.length) {
         // No tool calls; continue loop.
-        doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'no_tool_calls' } });
+        doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), featureId: featureKey, turn: i, note: 'no_tool_calls' } });
         doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i} complete` } });
         continue;
       }
@@ -239,20 +252,20 @@ async function runConversation(opts: {
 
         // Termination tools mirror Python; do not append a tool result turn, final message is assistant
         if (['finish_feature', 'block_feature', 'finish_spec', 'block_task'].includes(toolName)) {
-          doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), tool: toolName } });
+          doEmit({ type: 'llm/messages/final', payload: { messages: messages.slice(), featureId: featureKey, tool: toolName } });
           complete(toolName === 'block_feature' || toolName === 'block_task' ? 'block' : 'finish');
           return;
         }
       }
 
-      // Append tool results as a dedicated 'tool' role message to avoid confusing with user turns
+      // Append tool results as a dedicated 'user' role message to avoid confusing with user turns
       const toolResultMsg: CompletionMessage = annotateMessage(
         { role: 'user', content: JSON.stringify(toolOutputs) } as any,
-        { featureId: feature?.id ?? '__task__', agentType, turn: i, source: 'tools' }
+        { featureId: featureKey, agentType, turn: i, source: 'tools' }
       );
       messages.push(toolResultMsg);
-      doEmit({ type: 'llm/message', payload: { message: toolResultMsg, turn: i, source: 'tools' } });
-      doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), turn: i, note: 'tools_appended' } });
+      doEmit({ type: 'llm/message', payload: { message: toolResultMsg, featureId: featureKey, turn: i, source: 'tools' } });
+      doEmit({ type: 'llm/messages/snapshot', payload: { messages: messages.slice(), featureId: featureKey, turn: i, note: 'tools_appended' } });
       doEmit({ type: 'run/progress/snapshot', payload: { progress: Math.min(0.99, (i + 1) / MAX_TURNS_PER_FEATURE), message: `Turn ${i} tool calls processed` } });
     } catch (e) {
       if (feature) {
@@ -260,7 +273,7 @@ async function runConversation(opts: {
       } else {
         await taskTools.blockTask?.(task.id, `Agent loop failed: ${e}`, agentType, git);
       }
-      doEmit({ type: 'llm/messages/error', payload: { error: String(e), messages: messages.slice() } });
+      doEmit({ type: 'llm/messages/error', payload: { error: String(e), messages: messages.slice(), featureId: featureKey } });
       doEmit({ type: 'run/progress/snapshot', payload: { progress: undefined, message: 'Error encountered' } });
       logger.error('Agent loop error:', e as any);
       complete('block', e);
@@ -274,7 +287,7 @@ async function runConversation(opts: {
   } else {
     await taskTools.blockTask?.(task.id, 'Agent loop exceeded max turns', agentType, git);
   }
-  doEmit({ type: 'llm/messages/final', payload: { messages: [{ role: 'system', content: systemPrompt }] as CompletionMessage[], reason: 'max_turns' } });
+  doEmit({ type: 'llm/messages/final', payload: { messages: [{ role: 'system', content: systemPrompt }] as CompletionMessage[], featureId: featureKey, reason: 'max_turns' } });
   doEmit({ type: 'run/progress/snapshot', payload: { progress: 1, message: 'Max turns reached' } });
   logger.warn('Max turns reached without completion.');
   complete('max_turns');
@@ -288,6 +301,11 @@ async function runAgentOnTask(model: string, agentType: string, task: Task, task
   const context = await Promise.resolve(fileTools.readFiles(contextFiles));
   const systemPrompt = constructSystemPrompt(agentType, task, null, agentDocs, context, sigs);
 
+  // Maintain grouped structure for task-level chat
+  const groups: Record<string, FeatureMessagesGroup> = {};
+  const fid = '__task__';
+  ensureGroup(groups, fid);
+
   await runConversation({
     model,
     availableTools: funcs,
@@ -299,7 +317,20 @@ async function runAgentOnTask(model: string, agentType: string, task: Task, task
     git,
     completion,
     complete: () => {},
-    emit,
+    emit: (e) => {
+      // Pass-through event, but attach grouped messages snapshot when available
+      try {
+        if (e?.payload?.messages && Array.isArray(e.payload.messages)) {
+          // Update group messages with annotated copies
+          const msgs = (e.payload.messages as CompletionMessage[]).map((m, idx) => annotateMessage(m, { featureId: (m as any).featureId ?? fid, agentType, turn: (m as any).turn ?? idx }));
+          groups[fid].messages = msgs;
+          if (e.type === 'llm/messages/final') groups[fid].endDate = new Date().toISOString();
+          emit?.({ ...e, payload: { ...e.payload, messageGroups: { ...groups }, featureId: fid } });
+          return;
+        }
+      } catch {}
+      emit?.(e);
+    },
   });
 }
 
@@ -373,17 +404,21 @@ async function runOrchestrator(opts: {
 
   // Aggregate all messages across features for this run
   let aggregatedMessages: CompletionMessage[] = [];
+  const aggregatedGroups: Record<string, FeatureMessagesGroup> = {};
 
   if (agentType === 'speccer') {
     const freshTask = await taskTools.getTask(currentTask.id);
     await runAgentOnTask(model, agentType, freshTask, taskTools, fileTools, git, completion, (e) => {
-      // For task-level runs, forward events as-is and track messages when present
+      // For task-level runs, forward events and add grouped snapshot for persistence
       if (e?.payload?.messages) {
         const msgs = e.payload.messages as CompletionMessage[];
-        // Ensure metadata on messages for task-level runs
-        const annotated = msgs.map((m, idx) => annotateMessage(m, { featureId: (m as any).featureId ?? '__task__', agentType, turn: (m as any).turn ?? idx }));
+        const fid = '__task__';
+        const annotated = msgs.map((m, idx) => annotateMessage(m, { featureId: (m as any).featureId ?? fid, agentType, turn: (m as any).turn ?? idx }));
         aggregatedMessages = annotated.slice();
-        emit?.({ ...e, payload: { ...e.payload, messages: aggregatedMessages.slice() } });
+        const group = ensureGroup(aggregatedGroups, fid);
+        group.messages = annotated.slice();
+        if (e.type === 'llm/messages/final') group.endDate = new Date().toISOString();
+        emit?.({ ...e, payload: { ...e.payload, featureId: fid, messages: aggregatedMessages.slice(), messageGroups: { ...aggregatedGroups } } });
       } else {
         emit?.(e);
       }
@@ -399,13 +434,16 @@ async function runOrchestrator(opts: {
       break;
     }
 
-    // Insert a system marker before each feature to clearly separate in UI and history
+    // Ensure a group exists for this feature
+    ensureGroup(aggregatedGroups, next.id);
+
+    // Insert a system marker before each feature to clearly separate in UI and history (flat array only)
     const featureMarker: CompletionMessage = annotateMessage(
       { role: 'system', content: `--- BEGIN FEATURE ${next.id}: ${next.title} ---` } as any,
       { featureId: next.id, agentType, marker: 'feature_begin' }
     );
     aggregatedMessages.push(featureMarker);
-    emit?.({ type: 'llm/messages/snapshot', payload: { messages: aggregatedMessages.slice(), note: 'feature_begin', featureId: next.id } });
+    emit?.({ type: 'llm/messages/snapshot', payload: { messages: aggregatedMessages.slice(), messageGroups: { ...aggregatedGroups }, note: 'feature_begin', featureId: next.id } });
 
     // Wrap emit to merge current feature's messages with the aggregate so far
     let lastFeatureMessages: CompletionMessage[] = [];
@@ -418,8 +456,13 @@ async function runOrchestrator(opts: {
           // Ensure every message is tagged with this feature id and agentType for persistence
           const ensured = featureMsgs.map((m, idx) => annotateMessage(m, { featureId: (m as any).featureId ?? next.id, agentType, turn: (m as any).turn ?? idx }));
           lastFeatureMessages = ensured.slice();
+          // Update groups
+          const g = ensureGroup(aggregatedGroups, next.id);
+          g.messages = ensured.slice();
+          if (t === 'llm/messages/final') g.endDate = new Date().toISOString();
+          // Update flat aggregate for readability (kept for backward compatibility)
           const combined = aggregatedMessages.concat(ensured);
-          const payload = { ...e.payload, messages: combined };
+          const payload = { ...e.payload, featureId: next.id, messages: combined, messageGroups: { ...aggregatedGroups } };
           baseEmit?.({ ...e, payload });
           return;
         } catch {}
@@ -433,14 +476,14 @@ async function runOrchestrator(opts: {
     if (lastFeatureMessages && lastFeatureMessages.length) {
       aggregatedMessages = aggregatedMessages.concat(lastFeatureMessages);
       // Emit a snapshot to persist the full sequence after folding
-      emit?.({ type: 'llm/messages/snapshot', payload: { messages: aggregatedMessages.slice(), note: 'feature_folded', featureId: next.id } });
+      emit?.({ type: 'llm/messages/snapshot', payload: { messages: aggregatedMessages.slice(), messageGroups: { ...aggregatedGroups }, note: 'feature_folded', featureId: next.id } });
     }
 
     processed.add(next.id);
   }
 
   // Emit final snapshot at end of task run with complete sequence of feature conversations
-  emit?.({ type: 'llm/messages/final', payload: { messages: aggregatedMessages.slice(), note: 'task_run_complete' } });
+  emit?.({ type: 'llm/messages/final', payload: { messages: aggregatedMessages.slice(), messageGroups: { ...aggregatedGroups }, note: 'task_run_complete' } });
 }
 
 // --- Isolated Runner (mimic Python run.py) ---

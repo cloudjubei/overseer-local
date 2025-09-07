@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -576,7 +576,7 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "-",
+      "status": "+",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
       "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx . Remember, the messages that are passed onto the LLM are in a strict format - they have to specify role as 'user'. For history purposes, the serialisation should add appropraite metadata information to make it easier to display later.",
       "plan": "",
@@ -585,8 +585,7 @@
         "src/renderer/components/agents/ChatConversation.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Right now it is \"hack fixed\" as these now show, but the fix was to reformat the messages on reading them. This is not acceptable. They should simply be recorded/written correctly in the right format in the first place."
+      "blockers": []
     },
     {
       "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
@@ -625,7 +624,7 @@
     },
     {
       "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
-      "status": "-",
+      "status": "+",
       "title": "Notifications should fire when an agent finishes work",
       "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -753,7 +752,7 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
+      "status": "+",
       "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
       "plan": "",
@@ -761,8 +760,7 @@
         "src/renderer/components/ui/CommandMenu.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "This doesn't work - clicking the up and down arrow keys does nothing. The input box is focused and it's possible to type to filter the commands, but clicking the arrow keys (up/down) doesn't show any highlight.\nThis has been attempted multiple times - please take the time to think about the solution or search the web for hints as to why this might be not working."
+      "blockers": []
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
@@ -820,7 +818,7 @@
     },
     {
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "-",
+      "status": "+",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
       "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip. @src/renderer/services/agentsService.ts needs to be updated so that messages stored from llms have the time they were askedAt recorded and then the thinking time is the difference between that and the time the message is received.",
       "plan": "",
@@ -833,7 +831,7 @@
     },
     {
       "id": "86314974-b368-49d5-8137-4b5b0d053adb",
-      "status": "-",
+      "status": "+",
       "title": "Running a task from another project, when one is ongoing fails",
       "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\nThe @packages/factory-ts/src/fileTools.ts and @packages/factory-ts/src/taskUtils.ts were storing a projec root field that was conflicting - this was now fixed, but perhaps there's another field that is causing a similar issue? Something inside\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
       "plan": "",
@@ -848,7 +846,7 @@
     },
     {
       "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
-      "status": "-",
+      "status": "+",
       "title": "When viewing an ongoing run - the current messages are not updating",
       "description": "This is in @src/renderer/components/agents/ChatConversation.tsx - also if the user is at the end of the current messages (i.e. displaying the last turn) the view should scroll to the latest message received.",
       "plan": "",
@@ -860,7 +858,7 @@
     },
     {
       "id": "8b99905a-e392-4264-abe2-0bb454504281",
-      "status": "-",
+      "status": "+",
       "title": "Only the latest Feature and its latest turn are open by default",
       "description": "When a user opens a @src/renderer/components/agents/ChatConversation.tsx it should have all features but the latest one closed. The latest's features latest turn should be the only one open and scrolled to.",
       "plan": "",
@@ -872,7 +870,7 @@
     },
     {
       "id": "a2c93def-ae45-462c-9967-32824f897ee8",
-      "status": "-",
+      "status": "+",
       "title": "Showing the wrong Features numbers",
       "description": "In @src/renderer/screens/AgentsView.tsx a run is displaying the wrong features count - it seems to count the special \"__task__\" as a separate feature.",
       "plan": "",
@@ -945,11 +943,11 @@
     "86314974-b368-49d5-8137-4b5b0d053adb": 59,
     "065bac4d-1035-48de-9f17-2bbe2e35a300": 60,
     "7b2917b5-67da-437e-b11e-f11989bbae7e": 61,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 62,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 63,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 64,
-    "229130f0-bcb6-49b4-9c5b-fe4bad68356d": 65,
-    "8b99905a-e392-4264-abe2-0bb454504281": 66,
-    "a2c93def-ae45-462c-9967-32824f897ee8": 67
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 62,
+    "229130f0-bcb6-49b4-9c5b-fe4bad68356d": 63,
+    "8b99905a-e392-4264-abe2-0bb454504281": 64,
+    "a2c93def-ae45-462c-9967-32824f897ee8": 65,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 66,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67
   }
 }

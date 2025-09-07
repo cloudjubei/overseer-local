@@ -1,8 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { EventEmitter } from 'node:events';
-import { taskUtils as defaultTaskUtils } from './taskUtils.js';
-import { fileTools as defaultFileTools } from './fileTools.js';
+import { taskUtils as defaultTaskUtils, createTaskUtils } from './taskUtils.js';
+import { fileTools as defaultFileTools, createFileTools } from './fileTools.js';
 import GitManager from './gitManager.js';
 import { runIsolatedOrchestrator } from './orchestrator.js';
 import { createCompletionClient, type CompletionClient } from './completion.js';
@@ -230,8 +230,9 @@ export function createOrchestrator(opts: { projectRoot?: string; history?: Histo
     (async () => {
       ee.emit('event', { type: 'run/start', payload: { scope: 'task', id, taskId: args.taskId, llm: { model: args.llmConfig?.model, provider: args.llmConfig?.provider } } } satisfies RunEvent);
       try {
-        const taskTools = { ...defaultTaskUtils };
-        const fileTools = { ...defaultFileTools };
+        // Use instance-scoped tools per run to avoid cross-run global state conflicts
+        const taskTools = createTaskUtils(projectRoot);
+        const fileTools = createFileTools(projectRoot);
 
         const completion = attachLLMLogging(buildCompletion(args.llmConfig), (e) => ee.emit('event', e), { provider: args.llmConfig?.provider, pricing });
         const agentType = getAgentFromArgs(args, 'developer');

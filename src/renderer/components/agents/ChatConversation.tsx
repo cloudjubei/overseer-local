@@ -191,8 +191,6 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
   const initial = messages[idx];
   idx++;
 
-  let lastMessageForTime: AgentRunMessage | undefined = initial;
-
   let tIndex = 0;
   while (idx < messages.length) {
     const a = messages[idx];
@@ -204,36 +202,29 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
     }
 
     let thinkingTime: number | undefined;
-    if (lastMessageForTime && (lastMessageForTime as any).createdAt && (a as any).createdAt) {
-      try {
-        const startTime = new Date((lastMessageForTime as any).createdAt).getTime();
-        const endTime = new Date((a as any).createdAt).getTime();
-        if (!isNaN(startTime) && !isNaN(endTime)) {
-          thinkingTime = endTime - startTime;
-        }
-      } catch (e) {
-        // ignore date parsing errors
+    try {
+      const askedAt = a.askedAt ? new Date(a.askedAt).getTime() : NaN;
+      const createdAt = a.createdAt ? new Date(a.createdAt).getTime() : NaN;
+      if (!isNaN(askedAt) && !isNaN(createdAt)) {
+        thinkingTime = Math.max(0, createdAt - askedAt);
       }
-    }
+    } catch {}
 
     const parsed = parseAssistant(a.content);
     if (parsed && Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
       const maybeTools = messages[idx + 1];
       if (isToolMsg(maybeTools)) {
         turns.push({ assistant: a, tools: maybeTools, index: tIndex++, thinkingTime });
-        lastMessageForTime = maybeTools;
         idx += 2;
         continue;
       }
       // No tools message, still push assistant-only
       turns.push({ assistant: a, index: tIndex++, thinkingTime });
-      lastMessageForTime = a;
       idx += 1;
       continue;
     }
     // Final assistant message (no tool_calls)
     turns.push({ assistant: a, index: tIndex++, isFinal: true, thinkingTime });
-    lastMessageForTime = a;
     idx += 1;
   }
   return { initial, turns };
@@ -265,15 +256,14 @@ function UserBubble({ title, text }: { title?: string; text: string }) {
   );
 }
 
-function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
+function FeatureContent({ log, isLatestFeature, latestTurnRef }: { log: AgentFeatureRunLog; isLatestFeature: boolean; latestTurnRef?: React.RefObject<HTMLDivElement> }) {
   // Recompute on every render to reflect in-place mutations of log.messages
   const { initial, turns } = buildFeatureTurns(log.messages || []);
-  const lastTurnRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="space-y-2 p-1">
       {initial ? (
-        <Collapsible title={<span className="flex items-center1">Initial prompt</span>} defaultOpen>
+        <Collapsible title={<span className="flex items-center1">Initial prompt</span>} defaultOpen={false}>
           {isLargeText(initial.content || '') ? (
             <ScrollableTextBox text={initial.content || ''} />
           ) : (
@@ -292,9 +282,12 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
         const hasThoughts = parsed?.thoughts && parsed.thoughts.trim().length > 0;
         const isFinal = t.isFinal || (toolCalls.length === 0);
 
+        const isLatestTurn = idx === turns.length - 1;
+        const defaultOpen = isLatestFeature && isLatestTurn;
+
         return (
-          <div key={idx} ref={idx === turns.length - 1 ? lastTurnRef : undefined}>
-            <Collapsible innerClassName='p-2' title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={idx === turns.length - 1}>
+          <div key={idx} ref={defaultOpen && latestTurnRef ? latestTurnRef : undefined}>
+            <Collapsible innerClassName='p-2' title={<span className="flex items-center gap-2">{isFinal ? 'Final' : `Turn ${idx + 1}`}</span>} defaultOpen={defaultOpen}>
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -339,20 +332,24 @@ function FeatureContent({ log }: { log: AgentFeatureRunLog }) {
 }
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
-  // Derive logs (sorted by startDate)
-  const logs = useMemo(() => {
-    const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
-    const list = Object.values(run.messagesLog ?? {}).filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId));
-    return list.sort((a, b) => {
+  // Derive logs (sorted by startDate). Recompute each render to reflect in-place mutations.
+  const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
+  const logs = Object.values(run.messagesLog ?? {})
+    .filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId))
+    .sort((a, b) => {
       const at = new Date((a as any).startDate).getTime();
       const bt = new Date((b as any).startDate).getTime();
       return at - bt;
     });
-  }, [run]);
+
+  const latestFeature = logs.length > 0 ? logs[logs.length - 1] : undefined;
+  const latestFeatureId = latestFeature?.featureId;
 
   // Track a scroll container and auto-scroll behavior
   const containerRef = useRef<HTMLUListElement | null>(null);
   const stickToBottomRef = useRef(true);
+  const latestTurnRef = useRef<HTMLDivElement | null>(null);
+  const didInitialScrollRef = useRef(false);
 
   // Update stickToBottomRef on user scroll
   useEffect(() => {
@@ -385,6 +382,18 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
     }
   }, [contentSize]);
 
+  // One-time scroll to the latest feature's latest turn on initial content render
+  useLayoutEffect(() => {
+    if (didInitialScrollRef.current) return;
+    const target = latestTurnRef.current;
+    if (target) {
+      try {
+        target.scrollIntoView({ block: 'nearest' });
+        didInitialScrollRef.current = true;
+      } catch {}
+    }
+  }, [contentSize]);
+
   return (
     <ul ref={containerRef} className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3" role="log" aria-live="polite">
       {logs.length === 0 ? (
@@ -394,10 +403,11 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
           const start = log.startDate ? new Date(log.startDate as any) : undefined;
           const end = log.endDate ? new Date(log.endDate as any) : undefined;
           const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
+          const isLatestFeature = log.featureId === latestFeatureId;
           return (
             <li key={log.featureId}>
-              <Collapsible title={<span className="flex items-center">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span> : null}</span>} defaultOpen>
-                <FeatureContent log={log} />
+              <Collapsible title={<span className="flex items-center">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span> : null}</span>} defaultOpen={isLatestFeature}>
+                <FeatureContent log={log} isLatestFeature={isLatestFeature} latestTurnRef={isLatestFeature ? latestTurnRef : undefined} />
               </Collapsible>
             </li>
           );

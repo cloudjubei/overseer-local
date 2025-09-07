@@ -62,7 +62,7 @@ export default function CommandMenu() {
       // If an item is selected, clamp it within the new range [0, length-1].
       setSelectedIndex((prev) => {
         if (prev < 0) return -1;
-        return Math.min(prev, filtered.length - 1);
+        return Math.max(0, Math.min(prev, filtered.length - 1));
       });
     }
   }, [query, filtered.length, open]);
@@ -109,29 +109,6 @@ export default function CommandMenu() {
       <div
         className="cmd"
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => {
-          // Global handler inside menu to ensure arrows work even when focus isn't on the input
-          if (e.key === 'Escape') {
-            e.preventDefault();
-            setOpen(false);
-            return;
-          }
-          if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            moveSelection(1);
-            return;
-          }
-          if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            moveSelection(-1);
-            return;
-          }
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            runSelected();
-            return;
-          }
-        }}
       >
         <div className="cmd__input">
           <input
@@ -147,6 +124,12 @@ export default function CommandMenu() {
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); }
+              else if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); }
+              else if (e.key === 'Enter') { e.preventDefault(); runSelected(); }
+              else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
+            }}
           />
           <kbd className="kbd">⌘K</kbd>
         </div>
@@ -157,7 +140,7 @@ export default function CommandMenu() {
               <li
                 key={cmd.id}
                 id={`${listboxId}-option-${i}`}
-                className={`cmd__item${active ? ' is-active' : ''}`}
+                className={`cmd__item ${active ? 'is-active' : ''}`}
                 role="option"
                 aria-selected={active}
                 onMouseEnter={() => setSelectedIndex(i)}
@@ -166,7 +149,6 @@ export default function CommandMenu() {
                 <button
                   type="button"
                   onClick={() => { cmd.run(); setOpen(false); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); cmd.run(); setOpen(false); } }}
                 >
                   <span>{cmd.label}</span>
                   {cmd.shortcut ? <span className="cmd__shortcut">{cmd.shortcut}</span> : null}
