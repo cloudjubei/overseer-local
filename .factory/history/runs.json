@@ -1,5 +1,35 @@
 [
   {
+    "runId": "task_0t563x2d_mfa9ipk6",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "featureId": "22e6034f-027b-4c22-9496-3802c1de783d",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-07T22:26:36.390Z",
+    "updatedAt": "2025-09-07T22:28:36.426Z"
+  },
+  {
+    "runId": "task_hfohsvlx_mfa8vbo7",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "featureId": "ce107cd7-1e54-434d-b642-d7a7bd4f6afd",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-07T22:08:25.304Z",
+    "updatedAt": "2025-09-07T22:14:25.830Z",
+    "costUSD": 0.1430275,
+    "promptTokens": 20158,
+    "completionTokens": 11783,
+    "progress": 0.02
+  },
+  {
     "runId": "task_a2ft0pl7_mfa6tsle",
     "agentType": "developer",
     "projectId": "main",
