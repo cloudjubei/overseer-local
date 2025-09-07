@@ -2,23 +2,7 @@ import { ipcMain, webContents } from 'electron';
 import IPC_HANDLER_KEYS from '../../ipcHandlersKeys.js';
 import path from 'node:path';
 import fs from 'node:fs';
-
-// Load factory-ts as a proper npm module (workspace dependency)
-let factoryTs;
-async function loadFactory()
-{
-  if (factoryTs) return factoryTs;
-  try {
-    console.log('[factory] Loading factory-ts via module resolution');
-    factoryTs = await import('factory-ts');
-  } catch (err) {
-    console.error('[factory] Failed to load factory-ts as a module. Ensure workspaces are installed and the package is built.');
-    console.error(err?.stack || String(err));
-    throw err;
-  }
-  console.log('[factory] factory-ts loaded successfully');
-  return factoryTs;
-}
+import { createOrchestrator, createHistoryStore, createPricingManager } from 'thefactory-tools'
 
 const RUN_SUBSCRIBERS = new Map(); // runId -> Set<webContentsId>
 const RUNS = new Map(); // runId -> RunHandle
@@ -212,8 +196,6 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   // Ensure workspace .env is loaded in main process so child processes and libs see credentials
   loadWorkspaceDotenv(projectRoot);
 
-  const factory = await loadFactory();
-  const { createOrchestrator, createHistoryStore, createPricingManager } = factory
 
   try {
     const dbPath = path.join(projectRoot, '.factory', 'history.sqlite');
@@ -505,5 +487,4 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.on('destroyed', () => console.log('[factory] Main window destroyed'));
   }
-  return factory
 }

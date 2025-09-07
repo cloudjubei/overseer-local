@@ -1,6 +1,6 @@
 import React from 'react';
 import StatusControl from './StatusControl';
-import type { Status } from 'packages/factory-ts/src/types'
+import type { Status } from 'thefactory-tools';
 
 export interface TaskSummaryProps {
   title: string;

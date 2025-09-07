@@ -1,4 +1,4 @@
-import { LLMConfig } from 'packages/factory-ts/src/types';
+import { LLMConfig } from 'thefactory-tools';
 import { ServiceResult } from './serviceResult';
 
 export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom';

@@ -7,7 +7,7 @@ import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
-import { AgentType, Feature, Status, Task } from 'packages/factory-ts/src/types'
+import { Feature, Status, Task } from 'thefactory-tools';
 import { IconBack, IconChevron, IconEdit, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import RunAgentButton from '../components/tasks/RunAgentButton'
@@ -93,7 +93,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
 
   const isSearchFiltered = query !== ''
 
-  const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id, onDelete: () => navigateView('Home') }) }
+  const handleEditTask = () => { if (!task) return; openModal({ type: 'task-edit', taskId: task.id }) }
   const handleAddFeature = () => { if (!task) return; openModal({ type: 'feature-create', taskId: task.id }) }
   const handleEditFeature = (featureId: string) => { if (!task) return; openModal({ type: 'feature-edit', taskId: task.id, featureId }) }
 

@@ -15,7 +15,7 @@ import type { NavigationView } from '../types';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { useAgents } from '../hooks/useAgents';
 import NotificationBadge from '../components/tasks/NotificationBadge';
-import { ProjectSpec } from 'packages/factory-ts/src/types';
+import { ProjectSpec } from 'thefactory-tools';
 
 export type SidebarProps = {};
 

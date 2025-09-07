@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { agentsService, AgentRun } from '../services/agentsService';
-import { AgentType } from 'packages/factory-ts/src/types';
+import { AgentType } from 'thefactory-tools';
 
 export function useAgents() {
   const [runs, setRuns] = useState<AgentRun[]>(() => agentsService.list());

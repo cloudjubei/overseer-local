@@ -11,7 +11,7 @@ import { useTasks } from '../hooks/useTasks'
 import { useAppSettings } from '../hooks/useAppSettings'
 import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
 import { useAgents } from '../hooks/useAgents'
-import { Status, Task } from 'packages/factory-ts/src/types'
+import { Status, Task } from 'thefactory-tools';
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'

@@ -1,4 +1,4 @@
-import { LLMConfig } from 'packages/factory-ts/src/types';
+import { LLMConfig } from 'thefactory-tools';
 import { v4 as uuidv4 } from 'uuid';
 
 export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed';

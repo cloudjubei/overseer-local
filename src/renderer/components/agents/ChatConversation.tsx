@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect, useLayoutEffect } from 're
 import type { AgentFeatureRunLog, AgentRun, AgentRunMessage } from '../../services/agentsService';
 import RichText from '../ui/RichText';
 import SafeText from '../ui/SafeText';
-import { ToolResult, AgentResponse, ToolCall } from 'packages/factory-ts/src/types';
+import { ToolResult, AgentResponse, ToolCall } from 'thefactory-tools';
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
 function parseAssistant(content: string): AgentResponse | null {

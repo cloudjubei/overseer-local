@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigator } from '../../navigation/Navigator';
 import Tooltip from '../ui/Tooltip';
-import type { Status } from 'packages/factory-ts/src/types'
+import type { Status } from 'thefactory-tools';
 import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
 import { useTasks } from '../../../renderer/hooks/useTasks';

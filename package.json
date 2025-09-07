@@ -4,11 +4,8 @@
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "start": "npm --prefix packages/factory-ts run build && electron-forge start",
+    "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
@@ -17,7 +14,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky install",
-    "factory:build": "npm --prefix packages/factory-ts run build",
     "run:agent": "node scripts/runAgent.mjs"
   },
   "keywords": [],
@@ -46,8 +42,8 @@
     "remark-gfm": "^4.0.0",
     "remark-slug": "^7.0.1",
     "tailwind-merge": "^2.0.0",
-    "uuid": "^11.1.0",
-    "factory-ts": "workspace:*"
+    "thefactory-tools": "file:../thefactory-tools",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",

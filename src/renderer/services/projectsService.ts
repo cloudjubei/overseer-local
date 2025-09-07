@@ -1,4 +1,4 @@
-import type { ProjectSpec } from '../../../packages/factory-ts/src/types'
+import type { ProjectSpec } from 'thefactory-tools';
 import { ServiceResult } from './serviceResult';
 
 export type ProjectsService = {

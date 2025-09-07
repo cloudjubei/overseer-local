@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { AgentType } from 'packages/factory-ts/src/types'
+import type { AgentType } from 'thefactory-tools';
 import { Button } from '../ui/Button'
 import { IconPlay } from '../ui/Icons'
 
