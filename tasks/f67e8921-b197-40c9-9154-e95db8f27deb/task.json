@@ -801,7 +801,7 @@
     },
     {
       "id": "98cc6216-a675-40cb-b763-5ac3ccc98b65",
-      "status": "-",
+      "status": "+",
       "title": "CollapsibleSidebar semantics: use buttons for actionable items",
       "description": "Improve navigation item semantics for better accessibility.\n\nImplementation details (src/renderer/components/ui/CollapsibleSidebar.tsx):\n- Replace the inner div with role=\"button\" for each clickable nav item with an actual <button> element, preserving current classes and event handlers.\n- Keep roving tabindex behavior and keyboard activation (Enter/Space) intact, but rely on native button semantics.\n- Ensure aria-current or aria-selected is still used appropriately.\n\nAcceptance criteria:\n- Keyboard navigation (ArrowUp/ArrowDown/Home/End + Enter/Space activation) works as before.\n- Screen readers announce items as buttons within navigation; no loss of functionality.\n- No regression in compact/collapsed behavior and badges/actions rendering.",
       "plan": "",
