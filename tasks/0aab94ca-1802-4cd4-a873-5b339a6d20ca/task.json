@@ -77,7 +77,7 @@
     },
     {
       "id": "abcb8eae-c3ab-424a-9853-b5372f04633f",
-      "status": "-",
+      "status": "+",
       "title": "Implement Automated Update Logic",
       "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.\nThe logic for this should use @src/live-data/liveDataService.js or @src/live-data/liveDataManager.js - any renderer side view will use @src/renderer/hooks/useLiveData.tsx so this might need updating too.",
       "plan": "",
