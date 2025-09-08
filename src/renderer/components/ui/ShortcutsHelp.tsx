@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useShortcuts, comboMatcher } from '../../hooks/useShortcuts';
+import { useShortcuts, comboMatcher, getShortcutsModifier } from '../../hooks/useShortcuts';
 import { useAppSettings } from '../../hooks/useAppSettings';
 
 export default function ShortcutsHelp() {
@@ -17,19 +17,21 @@ export default function ShortcutsHelp() {
   const shortcuts = list();
 
   const prettyCombo = useMemo(() => {
-    const isMac = navigator.platform.toLowerCase().includes('mac') || navigator.userAgent.toLowerCase().includes('mac');
+    const mod = getShortcutsModifier();
+    const isMacPref = mod === 'meta';
     const pretty = (combo: string) => {
       if (!combo) return '';
       const parts = combo.split('+').map(p => p.trim()).filter(Boolean);
-      return parts.map(p => {
+      const mapped = parts.map(p => {
         const up = p.toLowerCase();
-        if (up === 'mod') return isMac ? '⌘' : 'Ctrl';
+        if (up === 'mod') return isMacPref ? '⌘' : 'Ctrl';
         if (up === 'cmd' || up === 'meta') return '⌘';
         if (up === 'ctrl' || up === 'control') return 'Ctrl';
         if (up === 'shift') return 'Shift';
-        if (up === 'alt' || up === 'option') return isMac ? '⌥' : 'Alt';
+        if (up === 'alt' || up === 'option') return isMacPref ? '⌥' : 'Alt';
         return p.toUpperCase();
-      }).join('+');
+      });
+      return mapped.join('+');
     };
     return pretty;
   }, []);

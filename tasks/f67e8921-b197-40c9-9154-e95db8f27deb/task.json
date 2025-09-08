@@ -792,7 +792,7 @@
     },
     {
       "id": "27201172-7e31-4e3b-bf06-eb1737ddfadb",
-      "status": "-",
+      "status": "+",
       "title": "Dynamic modifier glyphs in shortcuts UI and command menu",
       "description": "Render keyboard shortcuts using the user-selected modifier (Cmd vs Ctrl) consistently.\n\nImplementation details:\n- Enhance src/renderer/hooks/useShortcuts.tsx to expose a read-only getter for the current modifier (e.g., export function getShortcutsModifier(): 'meta' | 'ctrl').\n- Update src/renderer/components/ui/ShortcutsHelp.tsx and src/renderer/components/ui/CommandMenu.tsx to format displayed shortcuts based on the current modifier, replacing hardcoded 'Cmd/Ctrl' strings (e.g., show '⌘K' on mac modifier and 'Ctrl+K' otherwise).\n\nAcceptance criteria:\n- Changing the shortcuts modifier in app settings (after reload, consistent with current provider behavior) updates the displayed shortcut glyphs in ShortcutsHelp and CommandMenu.\n- All visible shortcut hints reflect the correct modifier (no \"Cmd/Ctrl\" placeholders).",
       "plan": "",

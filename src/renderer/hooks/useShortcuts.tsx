@@ -73,6 +73,9 @@ export function useShortcuts() {
   return ctx;
 }
 
+// Expose a read-only getter for the current shortcuts modifier
+export function getShortcutsModifier(): ShortcutsModifier { return CURRENT_MOD; }
+
 // Helpers
 function isMod(e: KeyboardEvent) {
   return CURRENT_MOD === 'meta' ? e.metaKey : e.ctrlKey;

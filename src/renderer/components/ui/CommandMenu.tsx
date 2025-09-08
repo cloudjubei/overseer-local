@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigator } from '../../navigation/Navigator';
-import { useShortcuts, comboMatcher } from '../../hooks/useShortcuts';
+import { useShortcuts, comboMatcher, getShortcutsModifier } from '../../hooks/useShortcuts';
 import { useAppSettings } from '../../hooks/useAppSettings';
 
 export type CommandMenuApi = {
@@ -15,8 +15,8 @@ const UI_IMPROVEMENTS_TASK_ID = 'f9eef18e-818e-427d-82ab-8d990bb199c4';
 const commandsBase = (
   nav: ReturnType<typeof useNavigator>
 ) => [
-  { id: 'add-ui-feature', label: 'Add Feature to UI Improvements', shortcut: 'Cmd/Ctrl+Shift+F', run: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }) },
-  { id: 'new-task', label: 'New Task', shortcut: 'Cmd/Ctrl+N', run: () => nav.openModal({ type: 'task-create' }) },
+  { id: 'add-ui-feature', label: 'Add Feature to UI Improvements', run: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }) },
+  { id: 'new-task', label: 'New Task', run: () => nav.openModal({ type: 'task-create' }) },
   { id: 'go-home', label: 'Go to Home', run: () => nav.navigateView('Home') },
   { id: 'go-files', label: 'Go to Files', run: () => nav.navigateView('Files') },
   { id: 'go-chat', label: 'Go to Chat', run: () => nav.navigateView('Chat') },
@@ -103,6 +103,40 @@ export default function CommandMenu() {
     }
   };
 
+  // Pretty-printer for combo strings based on current modifier preference
+  const prettyCombo = useMemo(() => {
+    const mod = getShortcutsModifier();
+    const isMacPref = mod === 'meta';
+    const pretty = (combo: string) => {
+      if (!combo) return '';
+      const parts = combo.split('+').map(p => p.trim()).filter(Boolean);
+      const mapped = parts.map(p => {
+        const up = p.toLowerCase();
+        if (up === 'mod') return isMacPref ? '⌘' : 'Ctrl';
+        if (up === 'cmd' || up === 'meta') return '⌘';
+        if (up === 'ctrl' || up === 'control') return 'Ctrl';
+        if (up === 'shift') return 'Shift';
+        if (up === 'alt' || up === 'option') return isMacPref ? '⌥' : 'Alt';
+        return p.toUpperCase();
+      });
+      return mapped.join('+');
+    };
+    return pretty;
+  }, []);
+
+  // Compute kbd hint for the search input
+  const kbdHint = useMemo(() => {
+    const str = prettyCombo(combos.commandMenu);
+    return str.replace('⌘+', '⌘'); // Use compact glyph form on mac preference
+  }, [prettyCombo, combos.commandMenu]);
+
+  // Map command ids to shortcut combos from settings to avoid hardcoded placeholders
+  const idToCombo: Record<string, string> = {
+    'add-ui-feature': combos.addUiFeature,
+    'new-task': combos.newTask,
+    'command-menu': combos.commandMenu,
+  };
+
   if (!open) return null;
   return createPortal(
     <div className="cmd-overlay" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
@@ -131,11 +165,12 @@ export default function CommandMenu() {
               else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
             }}
           />
-          <kbd className="kbd">⌘K</kbd>
+          <kbd className="kbd">{kbdHint}</kbd>
         </div>
         <ul className="cmd__list" role="listbox" id={listboxId} ref={listRef}>
           {filtered.map((cmd, i) => {
             const active = i === selectedIndex;
+            const comboStr = idToCombo[cmd.id as keyof typeof idToCombo];
             return (
               <li
                 key={cmd.id}
@@ -151,7 +186,7 @@ export default function CommandMenu() {
                   onClick={() => { cmd.run(); setOpen(false); }}
                 >
                   <span>{cmd.label}</span>
-                  {cmd.shortcut ? <span className="cmd__shortcut">{cmd.shortcut}</span> : null}
+                  {comboStr ? <span className="cmd__shortcut">{prettyCombo(comboStr)}</span> : null}
                 </button>
               </li>
             );
