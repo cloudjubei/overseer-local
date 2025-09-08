@@ -782,12 +782,13 @@
     },
     {
       "id": "7a9408fc-aa0e-4957-82b5-b9ba58ef81b6",
-      "status": "-",
+      "status": "?",
       "title": "Add 'System' theme option with OS auto-detection",
       "description": "Extend theming to support a 'system' mode that follows the OS preference.\n\nImplementation details:\n- Update src/renderer/hooks/useTheme.ts to support Theme = 'light' | 'dark' | 'system'.\n- When 'system' is selected, resolve the effective theme from window.matchMedia('(prefers-color-scheme: dark)') and subscribe to changes to update live.\n- Persist 'system' in localStorage and ensure initTheme applies the resolved theme before first paint (no theme flash).\n- Update Settings UI (src/renderer/screens/SettingsView.tsx) to offer Light/Dark/System choices and save selection to app settings.\n\nAcceptance criteria:\n- Selecting 'System' switches the app automatically to the OS theme and updates live when the OS theme changes.\n- Selection persists across restarts.\n- Existing light/dark behavior remains unchanged when explicitly chosen.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot use 'in' operator to search for 'task_id' in Repository appears empty; cannot find required files (src/renderer/hooks/useTheme.ts, SettingsView.tsx, initialization to prevent theme flash). Please provide the project files or a minimal reproducible subset including renderer entry, theming hook, settings UI, and storage/persistence utilities so I can implement the 'system' theme with OS auto-detection and persistence."
     },
     {
       "id": "27201172-7e31-4e3b-bf06-eb1737ddfadb",
