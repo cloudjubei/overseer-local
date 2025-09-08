@@ -45,10 +45,8 @@ export default function LiveDataView() {
 
     try {
       let data: any = null;
-      // Temporary: until a generic per-service data retrieval exists in main,
-      // special-case known services.
-      if (s.id === 'agent-prices' && (window as any).factory?.getPricing) {
-        data = await (window as any).factory.getPricing();
+      if ((window as any).liveDataService?.getData) {
+        data = await (window as any).liveDataService.getData(s.id);
       }
       setServiceData(prev => ({ ...prev, [s.id]: data }));
     } catch (e: any) {

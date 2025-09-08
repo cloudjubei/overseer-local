@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import AppStorage from '../settings/appStorage';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
+import { getPricingManager } from '../tools/factory/mainOrchestrator';
 
 const DEFAULT_SERVICES_CONFIG = [
   {
@@ -22,6 +23,32 @@ export class LiveDataManager {
     this.storage = new AppStorage('live-data');
     this.services = this._loadServices();
     this._ipcBound = false;
+
+    // Registry of provider-specific handlers (update/getData)
+    this.providerHandlers = {
+      'agent-prices': {
+        update: async (service) => {
+          try {
+            const pricing = getPricingManager();
+            if (!pricing) throw new Error('Pricing manager not initialized');
+            // Optionally, service.config could include provider or URL overrides in the future
+            await pricing.refresh();
+            return true;
+          } catch (e) {
+            console.error('[live-data] agent-prices update failed:', e?.message || e);
+            return false;
+          }
+        },
+        getData: async () => {
+          try {
+            const pricing = getPricingManager();
+            return pricing?.listPrices?.() || { updatedAt: new Date().toISOString(), prices: [] };
+          } catch (e) {
+            return { updatedAt: new Date().toISOString(), prices: [] };
+          }
+        }
+      }
+    };
   }
 
   _storageKey() {
@@ -86,6 +113,7 @@ export class LiveDataManager {
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_GET_STATUS, () => this.getServicesStatus());
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_TRIGGER_UPDATE, (_event, { serviceId }) => this.triggerUpdate(serviceId));
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_UPDATE_CONFIG, (_event, { serviceId, updates }) => this.updateServiceConfig(serviceId, updates));
+    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, (_event, { serviceId }) => this.getServiceData(serviceId));
 
     this._ipcBound = true;
   }
@@ -138,9 +166,13 @@ export class LiveDataManager {
     this._emitStatus();
 
     try {
-      // TODO: integrate actual data fetcher per serviceId.
-      // For now, simulate network delay.
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const handler = this.providerHandlers?.[serviceId]?.update;
+      if (typeof handler === 'function') {
+        await handler(service);
+      } else {
+        // Default behavior: simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       service.lastUpdated = Date.now();
     } catch (error) {
       console.error(`Error updating live data service ${serviceId}:`, error);
@@ -151,6 +183,19 @@ export class LiveDataManager {
     }
 
     return this.getServicesStatus();
+  }
+
+  async getServiceData(serviceId) {
+    try {
+      const handler = this.providerHandlers?.[serviceId]?.getData;
+      if (typeof handler === 'function') {
+        return await handler();
+      }
+      return null;
+    } catch (e) {
+      console.warn('[live-data] getServiceData failed for', serviceId, e?.message || e);
+      return null;
+    }
   }
 
   _emitStatus() {
