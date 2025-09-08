@@ -1,19 +1,19 @@
 [
   {
-    "runId": "task_b85h0xbz_mfb2jad7",
+    "runId": "task_g173ugp0_mfb2nxfr",
     "agentType": "developer",
     "projectId": "thefactory-tools",
     "taskId": "89257920-d018-41bf-892a-583569d11d53",
-    "state": "cancelled",
-    "message": "User requested",
+    "state": "completed",
+    "message": "Completed",
     "provider": "openai",
     "model": "gpt-5",
-    "startedAt": "2025-09-08T11:58:52.219Z",
-    "updatedAt": "2025-09-08T12:01:52.221Z",
-    "costUSD": 0.035445000000000004,
-    "promptTokens": 20788,
-    "completionTokens": 946,
-    "progress": 0.05
+    "startedAt": "2025-09-08T12:02:28.744Z",
+    "updatedAt": "2025-09-08T12:18:29.329Z",
+    "costUSD": 0.6775962500000001,
+    "promptTokens": 166165,
+    "completionTokens": 46989,
+    "progress": 0.01
   },
   {
     "runId": "task_n5m3772l_mfb1qwzi",
