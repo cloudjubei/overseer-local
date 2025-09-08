@@ -33,7 +33,7 @@
     },
     {
       "id": "19e53643-537f-4bbf-9ba6-268baeedcb4f",
-      "status": "-",
+      "status": "+",
       "title": "Create Main Process Service for Live Data Management",
       "description": "Implement a main process service to manage the lifecycle of live data services. This includes loading configurations from storage, saving them, and exposing methods to the renderer via IPC to get service status and trigger updates.\nCurrently we have @src/live-data/liveDataService.js already in place with some obvious missing functions.\nThe view to render this is @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
@@ -47,7 +47,7 @@
     },
     {
       "id": "2e00148d-cb4c-4c4b-9388-448b171ff42e",
-      "status": "-",
+      "status": "+",
       "title": "Implement UI to List Live Data Services",
       "description": "On the 'Live Data' screen, create a UI component that lists all configured live data services. Each item in the list should display the service name, its last updated timestamp, and its freshness status (e.g., 'Up to date', 'Stale').\n\nThe view to render this is @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
@@ -57,7 +57,7 @@
     },
     {
       "id": "3bb6a463-3ec8-48dc-9a1f-f70e8797da27",
-      "status": "-",
+      "status": "+",
       "title": "Implement UI for Service Configuration",
       "description": "For each service in the list, create a UI component that allows the user to configure its settings. This includes setting the freshness policy (daily, weekly, monthly) and toggling automated checks on or off.\n\nThe view to render this in is somwhere inside @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
@@ -67,7 +67,7 @@
     },
     {
       "id": "5b140303-e3c9-467f-a26e-2b09919612c4",
-      "status": "-",
+      "status": "+",
       "title": "Implement Manual Update Trigger",
       "description": "Add a button to each service in the UI that allows the user to manually trigger an update. This button will use IPC to call the main process service to fetch the latest data for that specific service.\n\nThe view to render this in should be in @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
@@ -79,10 +79,37 @@
       "id": "abcb8eae-c3ab-424a-9853-b5372f04633f",
       "status": "-",
       "title": "Implement Automated Update Logic",
-      "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.\nThe logic for this should use @src/live-data/liveDataService.js",
+      "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.\nThe logic for this should use @src/live-data/liveDataService.js or @src/live-data/liveDataManager.js - any renderer side view will use @src/renderer/hooks/useLiveData.tsx so this might need updating too.",
       "plan": "",
       "context": [
-        "src/live-data/liveDataService.js"
+        "src/live-data/liveDataService.js",
+        "src/live-data/liveDataManager.js",
+        "src/renderer/hooks/useLiveData.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "ef5fc45d-0d09-41ab-9500-0ad2882d1275",
+      "status": "-",
+      "title": "Basic json viewer for current live data",
+      "description": "Inside @src/renderer/screens/LiveDataView.tsx we need a way to view the data that is the latest as a simple json viewer.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/LiveDataView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "6199040d-7927-44fc-a1ad-71782484d82a",
+      "status": "-",
+      "title": "LiveData should integrate with thefactory-tools refresh prices",
+      "description": "Inside the local package thefactory-tools we have exposed functions for updating the prices for the price manager that is used by all agents to determine token prices. Whenever @src/renderer/services/liveDataService.ts or @src/live-data/liveDataManager.js retrieves fresh prices, it has to update thefactory-tools appropriately (via the price manager) so that it has the latest data.\nThis is just the case for this project, but for further livedataservices we need to have an interface by which we can wire up the consumers for the datas of such services.",
+      "plan": "",
+      "context": [
+        "src/renderer/services/liveDataService.ts",
+        "src/live-data/liveDataManager.js"
       ],
       "acceptance": [],
       "blockers": []
@@ -96,6 +123,8 @@
     "2e00148d-cb4c-4c4b-9388-448b171ff42e": 5,
     "3bb6a463-3ec8-48dc-9a1f-f70e8797da27": 6,
     "5b140303-e3c9-467f-a26e-2b09919612c4": 7,
-    "abcb8eae-c3ab-424a-9853-b5372f04633f": 8
+    "abcb8eae-c3ab-424a-9853-b5372f04633f": 8,
+    "ef5fc45d-0d09-41ab-9500-0ad2882d1275": 9,
+    "6199040d-7927-44fc-a1ad-71782484d82a": 10
   }
 }
