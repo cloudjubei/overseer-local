@@ -1,5 +1,21 @@
 [
   {
+    "runId": "task_b85h0xbz_mfb2jad7",
+    "agentType": "developer",
+    "projectId": "thefactory-tools",
+    "taskId": "89257920-d018-41bf-892a-583569d11d53",
+    "state": "running",
+    "message": "Turn 4 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-08T11:58:52.219Z",
+    "updatedAt": "2025-09-08T11:59:22.227Z",
+    "costUSD": 0.035445000000000004,
+    "promptTokens": 20788,
+    "completionTokens": 946,
+    "progress": 0.05
+  },
+  {
     "runId": "task_n5m3772l_mfb1qwzi",
     "agentType": "speccer",
     "projectId": "thefactory-tools",
@@ -16,22 +32,6 @@
     "progress": 0.03
   },
   {
-    "runId": "task_v4l1ls6x_mfb158kl",
-    "agentType": "speccer",
-    "projectId": "main",
-    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
-    "state": "running",
-    "message": "Turn 0 tool calls processed",
-    "provider": "openai",
-    "model": "gpt-5",
-    "startedAt": "2025-09-08T11:19:57.094Z",
-    "updatedAt": "2025-09-08T11:20:12.100Z",
-    "costUSD": 0.0049875,
-    "promptTokens": 1366,
-    "completionTokens": 328,
-    "progress": 0.01
-  },
-  {
     "runId": "task_qvmdlgil_mfb0fkq3",
     "agentType": "speccer",
     "projectId": "thefactory-tools",
@@ -46,22 +46,6 @@
     "promptTokens": 4602,
     "completionTokens": 4750,
     "progress": 0.03
-  },
-  {
-    "runId": "task_2dgq5rxv_mfb0fcte",
-    "agentType": "speccer",
-    "projectId": "main",
-    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "gpt-5",
-    "startedAt": "2025-09-08T10:59:49.539Z",
-    "updatedAt": "2025-09-08T11:00:43.771Z",
-    "costUSD": 0.035541249999999996,
-    "promptTokens": 2849,
-    "completionTokens": 3198,
-    "progress": 0.01
   },
   {
     "runId": "task_efxxgjmd_mfabzu6p",
@@ -222,22 +206,6 @@
     "updatedAt": "2025-09-07T20:58:26.899Z"
   },
   {
-    "runId": "task_7uzhi517_mf8vhxcl",
-    "agentType": "developer",
-    "projectId": "main",
-    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-pro",
-    "startedAt": "2025-09-06T23:06:19.029Z",
-    "updatedAt": "2025-09-06T23:17:42.851Z",
-    "costUSD": 0,
-    "promptTokens": 834335,
-    "completionTokens": 26141,
-    "progress": 0.26
-  },
-  {
     "runId": "task_u1gbvefb_mf8uuiqf",
     "agentType": "developer",
     "projectId": "main",
@@ -284,38 +252,6 @@
     "promptTokens": 256543,
     "completionTokens": 41777,
     "progress": 0.04
-  },
-  {
-    "runId": "task_j10a2h5q_mf7ia87c",
-    "agentType": "developer",
-    "projectId": "main",
-    "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-pro",
-    "startedAt": "2025-09-06T00:08:38.665Z",
-    "updatedAt": "2025-09-06T00:14:22.177Z",
-    "costUSD": 0,
-    "promptTokens": 33028,
-    "completionTokens": 21299,
-    "progress": 0.02
-  },
-  {
-    "runId": "task_hylaw8a6_mf7i2j5r",
-    "agentType": "developer",
-    "projectId": "main",
-    "taskId": "0aab94ca-1802-4cd4-a873-5b339a6d20ca",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-pro",
-    "startedAt": "2025-09-06T00:02:39.615Z",
-    "updatedAt": "2025-09-06T00:14:06.739Z",
-    "costUSD": 0,
-    "promptTokens": 512187,
-    "completionTokens": 33965,
-    "progress": 0.06
   },
   {
     "runId": "task_31t7beqj_mf62wgt6",
@@ -382,22 +318,6 @@
     "progress": 0.02
   },
   {
-    "runId": "task_y727hadg_mf60nckf",
-    "agentType": "developer",
-    "projectId": "main",
-    "taskId": "914e8f32-f97d-4645-a50d-7fc5c70417a3",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-pro",
-    "startedAt": "2025-09-04T23:07:11.583Z",
-    "updatedAt": "2025-09-04T23:08:51.242Z",
-    "costUSD": 0,
-    "promptTokens": 26042,
-    "completionTokens": 5212,
-    "progress": 0.03
-  },
-  {
     "runId": "task_qgk4uadu_mf5zf4zr",
     "agentType": "developer",
     "projectId": "main",
@@ -445,18 +365,6 @@
     "completionTokens": 914
   },
   {
-    "runId": "task_lg0gmwu1_mf5z8zb9",
-    "agentType": "developer",
-    "projectId": "main",
-    "taskId": "0aab94ca-1802-4cd4-a873-5b339a6d20ca",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-pro",
-    "startedAt": "2025-09-04T22:28:01.605Z",
-    "updatedAt": "2025-09-04T22:28:03.644Z"
-  },
-  {
     "runId": "task_3fchhkdg_mf5z7aj7",
     "agentType": "speccer",
     "projectId": "main",
@@ -470,22 +378,6 @@
     "costUSD": 0.03354,
     "promptTokens": 1752,
     "completionTokens": 3135
-  },
-  {
-    "runId": "task_2hvy6v9f_mf5z717o",
-    "agentType": "speccer",
-    "projectId": "main",
-    "taskId": "914e8f32-f97d-4645-a50d-7fc5c70417a3",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-flash",
-    "startedAt": "2025-09-04T22:26:30.757Z",
-    "updatedAt": "2025-09-04T22:26:54.107Z",
-    "costUSD": 0,
-    "promptTokens": 12819,
-    "completionTokens": 1484,
-    "progress": 0.03
   },
   {
     "runId": "task_c1gnwubw_mf5wuag3",
@@ -518,18 +410,6 @@
     "promptTokens": 9876,
     "completionTokens": 1502,
     "progress": 0.02
-  },
-  {
-    "runId": "task_dlbratu2_mf5wj9ha",
-    "agentType": "speccer",
-    "projectId": "main",
-    "taskId": "0aab94ca-1802-4cd4-a873-5b339a6d20ca",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "claude-4-sonnet-20250514",
-    "startedAt": "2025-09-04T21:12:02.494Z",
-    "updatedAt": "2025-09-04T21:12:06.154Z"
   },
   {
     "runId": "task_1d8nb33q_mf5vyyh8",
