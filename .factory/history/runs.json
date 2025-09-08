@@ -1,5 +1,21 @@
 [
   {
+    "runId": "task_y0ieg2q5_mfbr8ezh",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Turn 1 tool calls processed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-08T23:30:15.392Z",
+    "updatedAt": "2025-09-08T23:30:28.550Z",
+    "costUSD": 0.00657375,
+    "promptTokens": 3435,
+    "completionTokens": 228,
+    "progress": 0.02
+  },
+  {
     "runId": "task_w8hkl6bk_mfbqy1j7",
     "agentType": "speccer",
     "projectId": "thefactory-tools",

@@ -763,145 +763,67 @@
       "blockers": []
     },
     {
-      "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
-      "status": "+",
-      "title": "The model chip should be visible to the left of the List | Board switch control",
-      "description": "This is inside @src/renderer/screens/TasksView.tsx and it should use @src/renderer/components/agents/AgentModelQuickSelect.tsx and @src/renderer/components/agents/ModelChip.tsx",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/TasksView.tsx",
-        "src/renderer/components/agents/AgentModelQuickSelect.tsx",
-        "src/renderer/components/agents/ModelChip.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
-      "status": "+",
-      "title": "when a notification is read - don't show the count in the sidebar",
-      "description": "Right now, when going to the @src/renderer/screens/NotificationsView.tsx if the user clicks a notification it should be read (but the badge in the @src/renderer/navigation/SidebarView.tsx  isn't updated).\nWhen clicking mark all as read- the badge should disappear.\nSame goes for clearing all notifications - there are no notifications, so there should be no badge.",
-      "plan": "",
-      "context": [
-        "src/renderer/navigation/SidebarView.tsx",
-        "src/renderer/screens/NotificationsView.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "a45449ab-b745-460c-b065-6e92345ebd39",
-      "status": "+",
-      "title": "clicking a run finished notification takes the user to that agent run",
-      "description": "@src/renderer/hooks/useNotifications.ts @src/renderer/services/notificationsService.ts \nclicking a notification should take the appropriate place in @src/renderer/screens/AgentsView.tsx",
-      "plan": "",
-      "context": [
-        "src/renderer/hooks/useNotifications.ts",
-        "src/renderer/services/notificationsService.ts",
-        "src/renderer/screens/AgentsView.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "f1b430d4-d14d-437b-affb-d326d3227c41",
-      "status": "+",
-      "title": "There's an addition \"_task\" feature log displayed in an agent run",
-      "description": "This shouldn't happen.\nIt's displayed in @src/renderer/components/agents/ChatConversation.tsx and probably originates from:\n@packages/factory-ts/src/orchestrator.ts",
-      "plan": "",
-      "context": [
-        "src/renderer/components/agents/ChatConversation.tsx",
-        "packages/factory-ts/src/orchestrator.ts"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "+",
-      "title": "All agent turn messages should show their thinking time next to the message bubble",
-      "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip. @src/renderer/services/agentsService.ts needs to be updated so that messages stored from llms have the time they were askedAt recorded and then the thinking time is the difference between that and the time the message is received.",
-      "plan": "",
-      "context": [
-        "src/renderer/components/agents/ChatConversation.tsx",
-        "src/renderer/services/agentsService.ts"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "86314974-b368-49d5-8137-4b5b0d053adb",
-      "status": "+",
-      "title": "Running a task from another project, when one is ongoing fails",
-      "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\nThe @packages/factory-ts/src/fileTools.ts and @packages/factory-ts/src/taskUtils.ts were storing a projec root field that was conflicting - this was now fixed, but perhaps there's another field that is causing a similar issue? Something inside\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
-      "plan": "",
-      "context": [
-        "packages/factory-ts/src/orchestrator.ts",
-        "src/tools/factory/mainOrchestrator.js",
-        "packages/factory-ts/src/fileTools.ts",
-        "packages/factory-ts/src/taskUtils.ts"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
-      "status": "+",
-      "title": "When viewing an ongoing run - the current messages are not updating",
-      "description": "This is in @src/renderer/components/agents/ChatConversation.tsx - also if the user is at the end of the current messages (i.e. displaying the last turn) the view should scroll to the latest message received.",
-      "plan": "",
-      "context": [
-        "src/renderer/components/agents/ChatConversation.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "8b99905a-e392-4264-abe2-0bb454504281",
-      "status": "+",
-      "title": "Only the latest Feature and its latest turn are open by default",
-      "description": "When a user opens a @src/renderer/components/agents/ChatConversation.tsx it should have all features but the latest one closed. The latest's features latest turn should be the only one open and scrolled to.",
-      "plan": "",
-      "context": [
-        "src/renderer/components/agents/ChatConversation.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "a2c93def-ae45-462c-9967-32824f897ee8",
-      "status": "+",
-      "title": "Showing the wrong Features numbers",
-      "description": "In @src/renderer/screens/AgentsView.tsx a run is displaying the wrong features count - it seems to count the special \"__task__\" as a separate feature.",
-      "plan": "",
-      "context": [
-        "src/renderer/screens/AgentsView.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "22e6034f-027b-4c22-9496-3802c1de783d",
-      "status": "+",
-      "title": "the package factory-ts must have proper path",
-      "description": "The function 'loadBuiltInDefaults' in @packages/factory-ts/src/pricing.ts  and functions 'loadAgentDocs' and 'loadProtocolExample' in  @packages/factory-ts/src/orchestrator.ts have references to the path pointing to 'packages/factory-ts' - this must be changed to point to a relative path to the root of the factory-ts project, so that it could be moved anywhere",
-      "plan": "",
-      "context": [
-        "packages/factory-ts/src/pricing.ts",
-        "packages/factory-ts/src/orchestrator.ts"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
-      "id": "5b0430ba-fbbc-4103-a11b-223c96270cfb",
-      "status": "+",
-      "title": "factory-ts should be loaded as a proper npm-module",
-      "description": "Currently there's a lot of relative paths inside this project that reference 'factory-ts' - that shouldn't be the case. It should be loaded into this project as a node package and used the correct way.",
+      "id": "35d46d98-8f89-483a-9470-e2e615fd41a9",
+      "status": "-",
+      "title": "Tooltip accessibility and robustness improvements",
+      "description": "Make Tooltip component ARIA-correct and safe for multiple instances.\n\nImplementation details (src/renderer/components/ui/Tooltip.tsx):\n- Generate a unique id per tooltip instance (e.g., useId) and assign it to the tooltip element; set anchor 'aria-describedby' to that id when open.\n- Remove hardcoded 'aria-describedby'='tooltip'.\n- Add Escape key handling to hide when focused on the anchor.\n- Ensure role=tooltip and correct z-index are preserved.\n\nAcceptance criteria:\n- Two adjacent buttons using Tooltip both show their own content and 'aria-describedby' points to their unique tooltip id when open.\n- Pressing Escape while the anchor has focus hides the tooltip.\n- No duplicate id usage across multiple tooltip instances.",
       "plan": "",
       "context": [],
-      "acceptance": [],
-      "blockers": []
+      "acceptance": []
+    },
+    {
+      "id": "e358e778-5d29-492a-8943-e67e31b45833",
+      "status": "-",
+      "title": "Modal accessibility: aria-labelledby/aria-describedby and scroll lock",
+      "description": "Improve Modal semantics and body scroll behavior.\n\nImplementation details (src/renderer/components/ui/Modal.tsx):\n- Give the title element a unique id and wire 'aria-labelledby' on the dialog to that id when title exists.\n- Allow optional description id wiring via 'aria-describedby' (useful from AlertDialog when description is provided).\n- Lock body scrolling while a modal is open (set document.body.style.overflow='hidden') and restore on close/unmount.\n\nAcceptance criteria:\n- Screen readers announce the modal title and description upon opening.\n- While a modal is open, the page behind it cannot scroll; once closed, body scrolling returns to its previous state.\n- Existing focus trapping and Escape behavior remain intact.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "7a9408fc-aa0e-4957-82b5-b9ba58ef81b6",
+      "status": "-",
+      "title": "Add 'System' theme option with OS auto-detection",
+      "description": "Extend theming to support a 'system' mode that follows the OS preference.\n\nImplementation details:\n- Update src/renderer/hooks/useTheme.ts to support Theme = 'light' | 'dark' | 'system'.\n- When 'system' is selected, resolve the effective theme from window.matchMedia('(prefers-color-scheme: dark)') and subscribe to changes to update live.\n- Persist 'system' in localStorage and ensure initTheme applies the resolved theme before first paint (no theme flash).\n- Update Settings UI (src/renderer/screens/SettingsView.tsx) to offer Light/Dark/System choices and save selection to app settings.\n\nAcceptance criteria:\n- Selecting 'System' switches the app automatically to the OS theme and updates live when the OS theme changes.\n- Selection persists across restarts.\n- Existing light/dark behavior remains unchanged when explicitly chosen.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "27201172-7e31-4e3b-bf06-eb1737ddfadb",
+      "status": "-",
+      "title": "Dynamic modifier glyphs in shortcuts UI and command menu",
+      "description": "Render keyboard shortcuts using the user-selected modifier (Cmd vs Ctrl) consistently.\n\nImplementation details:\n- Enhance src/renderer/hooks/useShortcuts.tsx to expose a read-only getter for the current modifier (e.g., export function getShortcutsModifier(): 'meta' | 'ctrl').\n- Update src/renderer/components/ui/ShortcutsHelp.tsx and src/renderer/components/ui/CommandMenu.tsx to format displayed shortcuts based on the current modifier, replacing hardcoded 'Cmd/Ctrl' strings (e.g., show '⌘K' on mac modifier and 'Ctrl+K' otherwise).\n\nAcceptance criteria:\n- Changing the shortcuts modifier in app settings (after reload, consistent with current provider behavior) updates the displayed shortcut glyphs in ShortcutsHelp and CommandMenu.\n- All visible shortcut hints reflect the correct modifier (no \"Cmd/Ctrl\" placeholders).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "98cc6216-a675-40cb-b763-5ac3ccc98b65",
+      "status": "-",
+      "title": "CollapsibleSidebar semantics: use buttons for actionable items",
+      "description": "Improve navigation item semantics for better accessibility.\n\nImplementation details (src/renderer/components/ui/CollapsibleSidebar.tsx):\n- Replace the inner div with role=\"button\" for each clickable nav item with an actual <button> element, preserving current classes and event handlers.\n- Keep roving tabindex behavior and keyboard activation (Enter/Space) intact, but rely on native button semantics.\n- Ensure aria-current or aria-selected is still used appropriately.\n\nAcceptance criteria:\n- Keyboard navigation (ArrowUp/ArrowDown/Home/End + Enter/Space activation) works as before.\n- Screen readers announce items as buttons within navigation; no loss of functionality.\n- No regression in compact/collapsed behavior and badges/actions rendering.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "a940d772-c613-427c-9dd4-88984e9f24ec",
+      "status": "-",
+      "title": "TasksListView: skeletons for initial loading state",
+      "description": "Replace text-only loading state with skeleton placeholders for a smoother UX.\n\nImplementation details (src/renderer/tasks/TasksListView.tsx):\n- When isAppSettingsLoaded is false, render a list of ~6 skeleton rows using src/renderer/components/ui/Skeleton.tsx to approximate task rows' layout (id/status area, title/desc lines, and actions area blocks).\n- Keep current \"Loading settings…\" live region messaging accessible (aria-live politely) in the count area.\n\nAcceptance criteria:\n- Before settings are loaded, task area shows skeleton placeholders instead of a static 'Loading...' string.\n- Once loaded, skeletons disappear and the real content renders.\n- No layout shift beyond expected content replacement.",
+      "plan": "",
+      "context": [],
+      "acceptance": []
+    },
+    {
+      "id": "50188f39-ce56-4087-90fb-70a107a7357f",
+      "status": "-",
+      "title": "Consistent focus-visible styling on interactive elements",
+      "description": "Ensure keyboard users see a consistent focus outline across buttons, nav items, and inputs.\n\nImplementation details:\n- Update CSS (src/index.css) to provide a consistent :focus-visible ring/outline for .btn, .btn-secondary, .btn-icon, .nav-item, .nav-toggle, .nav-trigger, .ui-select trigger, inputs, and other clickable UI controls.\n- Do not override focus when using mouse; rely on :focus-visible.\n\nAcceptance criteria:\n- Tabbing through the UI shows clear, consistent focus outlines on all interactive controls mentioned.\n- Mouse users do not see focus outlines unless they keyboard-focus an element (focus-visible behavior).",
+      "plan": "",
+      "context": [],
+      "acceptance": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -951,28 +873,24 @@
     "306733d4-26cb-49c0-a0ff-c34dc7699baa": 44,
     "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6": 45,
     "f9eef18e-818e-427d-82ab-8d990bb199c4": 46,
-    "9b65af17-0a3d-42e4-bcd2-81b65277651c": 47,
-    "583f4582-9495-46cc-bd49-19c957b9b0a3": 48,
-    "065ff2fe-ac0a-4b31-b57f-8918dcb4057c": 49,
-    "3c0c391d-fe56-4add-a756-793dd2dc6246": 50,
-    "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18": 51,
-    "1e6d13dd-e154-4612-8751-7182a7d660e6": 52,
-    "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 53,
-    "006bc18d-88c6-4257-9d76-69ad87c9c502": 54,
-    "55e5be40-2171-4e3d-91d9-db778a329ef1": 55,
-    "f1b430d4-d14d-437b-affb-d326d3227c41": 56,
-    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 57,
-    "a45449ab-b745-460c-b065-6e92345ebd39": 58,
-    "86314974-b368-49d5-8137-4b5b0d053adb": 59,
-    "065bac4d-1035-48de-9f17-2bbe2e35a300": 60,
-    "7b2917b5-67da-437e-b11e-f11989bbae7e": 61,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 62,
-    "229130f0-bcb6-49b4-9c5b-fe4bad68356d": 63,
-    "8b99905a-e392-4264-abe2-0bb454504281": 64,
-    "a2c93def-ae45-462c-9967-32824f897ee8": 65,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 66,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67,
-    "22e6034f-027b-4c22-9496-3802c1de783d": 68,
-    "5b0430ba-fbbc-4103-a11b-223c96270cfb": 69
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 47,
+    "9b65af17-0a3d-42e4-bcd2-81b65277651c": 48,
+    "583f4582-9495-46cc-bd49-19c957b9b0a3": 49,
+    "065ff2fe-ac0a-4b31-b57f-8918dcb4057c": 50,
+    "3c0c391d-fe56-4add-a756-793dd2dc6246": 51,
+    "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18": 52,
+    "1e6d13dd-e154-4612-8751-7182a7d660e6": 53,
+    "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 54,
+    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 55,
+    "006bc18d-88c6-4257-9d76-69ad87c9c502": 56,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 57,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58,
+    "50188f39-ce56-4087-90fb-70a107a7357f": 59,
+    "35d46d98-8f89-483a-9470-e2e615fd41a9": 60,
+    "e358e778-5d29-492a-8943-e67e31b45833": 61,
+    "7a9408fc-aa0e-4957-82b5-b9ba58ef81b6": 62,
+    "27201172-7e31-4e3b-bf06-eb1737ddfadb": 63,
+    "98cc6216-a675-40cb-b763-5ac3ccc98b65": 64,
+    "a940d772-c613-427c-9dd4-88984e9f24ec": 65
   }
 }
