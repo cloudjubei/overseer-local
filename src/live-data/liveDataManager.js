@@ -68,7 +68,7 @@ export class LiveDataManager {
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_TRIGGER_UPDATE, (_event, { serviceId }) => this.triggerUpdate(serviceId));
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_UPDATE_CONFIG, (_event, { serviceId, updates }) => this.updateServiceConfig(serviceId, updates));
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, (_event, { serviceId }) => this.getServiceData(serviceId));
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_ADD_SERVICE, (_event, service) => this.addService(service));
+    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_ADD_SERVICE, (_event, { service }) => this.addService(service));
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_REMOVE_SERVICE, (_event, { serviceId }) => this.removeService(serviceId));
 
     this._ipcBound = true;
@@ -97,10 +97,11 @@ export class LiveDataManager {
     // If service.type is 'fetch-json' we keep its id unique and will use generic provider.
     // If service.id matches a provider id (like 'agent-prices'), it will use that provider.
 
-    this.services.push(normalizeService(service));
+    const merged = normalizeService(service);
+    this.services.push(merged);
     this._saveServices();
     this._emitStatus();
-    return normalized;
+    return merged;
   }
 
   removeService(serviceId) {
@@ -225,4 +226,3 @@ export function computeIsFresh(service, now = Date.now()) {
       return false;
   }
 }
-

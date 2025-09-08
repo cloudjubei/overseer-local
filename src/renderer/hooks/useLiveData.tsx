@@ -36,6 +36,12 @@ export default function useLiveData() {
   const updateConfig = async (serviceId: string, updates: Partial<Omit<LiveDataProvider,"id">>) : Promise<LiveDataProviderStatus> =>  {
     return liveDataService.updateConfig(serviceId, updates)
   }
+  const addService = async (service: LiveDataProvider) : Promise<LiveDataProviderStatus> => {
+    return await liveDataService.addService(service)
+  }
+  const removeService = async (serviceId: string) : Promise<boolean> => {
+    return await liveDataService.removeService(serviceId)
+  }
 
-  return { services, servicesById, triggerUpdate, updateConfig };
+  return { services, servicesById, triggerUpdate, updateConfig, addService, removeService };
 }
