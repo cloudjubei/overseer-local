@@ -1,5 +1,21 @@
 [
   {
+    "runId": "task_h5bb811q_mfbi0mv4",
+    "agentType": "developer",
+    "projectId": "thefactory-tools",
+    "taskId": "89257920-d018-41bf-892a-583569d11d53",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-08T19:12:15.810Z",
+    "updatedAt": "2025-09-08T19:13:16.682Z",
+    "costUSD": 0.048905,
+    "promptTokens": 13932,
+    "completionTokens": 3149,
+    "progress": 0.04
+  },
+  {
     "runId": "task_g173ugp0_mfb2nxfr",
     "agentType": "developer",
     "projectId": "thefactory-tools",
@@ -46,54 +62,6 @@
     "promptTokens": 4602,
     "completionTokens": 4750,
     "progress": 0.03
-  },
-  {
-    "runId": "task_efxxgjmd_mfabzu6p",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "89257920-d018-41bf-892a-583569d11d53",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "gpt-5",
-    "startedAt": "2025-09-07T23:35:54.770Z",
-    "updatedAt": "2025-09-07T23:35:55.878Z"
-  },
-  {
-    "runId": "task_8qz95cj9_mfabqhu6",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "89257920-d018-41bf-892a-583569d11d53",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "gpt-5",
-    "startedAt": "2025-09-07T23:28:38.863Z",
-    "updatedAt": "2025-09-07T23:28:39.808Z"
-  },
-  {
-    "runId": "task_wdez4xfz_mfabp3ll",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "89257920-d018-41bf-892a-583569d11d53",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "gpt-5",
-    "startedAt": "2025-09-07T23:27:33.753Z",
-    "updatedAt": "2025-09-07T23:27:34.812Z"
-  },
-  {
-    "runId": "task_jsrb9ik7_mfabl2rt",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "89257920-d018-41bf-892a-583569d11d53",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "gpt-5",
-    "startedAt": "2025-09-07T23:24:26.058Z",
-    "updatedAt": "2025-09-07T23:24:26.995Z"
   },
   {
     "runId": "task_gdqk5k4e_mfaaa3sb",
@@ -192,18 +160,6 @@
     "promptTokens": 242519,
     "completionTokens": 10763,
     "progress": 0.06
-  },
-  {
-    "runId": "task_gsmniag0_mfa6dc4i",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "89257920-d018-41bf-892a-583569d11d53",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "gemini",
-    "model": "gemini-2.5-pro",
-    "startedAt": "2025-09-07T20:58:26.851Z",
-    "updatedAt": "2025-09-07T20:58:26.899Z"
   },
   {
     "runId": "task_u1gbvefb_mf8uuiqf",
