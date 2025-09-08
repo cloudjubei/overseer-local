@@ -773,7 +773,7 @@
     },
     {
       "id": "e358e778-5d29-492a-8943-e67e31b45833",
-      "status": "-",
+      "status": "+",
       "title": "Modal accessibility: aria-labelledby/aria-describedby and scroll lock",
       "description": "Improve Modal semantics and body scroll behavior.\n\nImplementation details (src/renderer/components/ui/Modal.tsx):\n- Give the title element a unique id and wire 'aria-labelledby' on the dialog to that id when title exists.\n- Allow optional description id wiring via 'aria-describedby' (useful from AlertDialog when description is provided).\n- Lock body scrolling while a modal is open (set document.body.style.overflow='hidden') and restore on close/unmount.\n\nAcceptance criteria:\n- Screen readers announce the modal title and description upon opening.\n- While a modal is open, the page behind it cannot scroll; once closed, body scrolling returns to its previous state.\n- Existing focus trapping and Escape behavior remain intact.",
       "plan": "",
