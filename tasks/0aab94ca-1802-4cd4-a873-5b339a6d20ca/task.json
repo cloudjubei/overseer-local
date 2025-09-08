@@ -103,27 +103,37 @@
     },
     {
       "id": "6199040d-7927-44fc-a1ad-71782484d82a",
-      "status": "-",
+      "status": "+",
       "title": "LiveData should integrate with thefactory-tools refresh prices",
       "description": "Inside the local package thefactory-tools we have exposed functions for updating the prices for the price manager that is used by all agents to determine token prices. Whenever @src/renderer/services/liveDataService.ts or @src/live-data/liveDataManager.js retrieves fresh prices, it has to update thefactory-tools appropriately (via the price manager) so that it has the latest data.\nThis is just the case for this project, but for further livedataservices we need to have an interface by which we can wire up the consumers for the datas of such services.",
       "plan": "",
       "context": [
         "src/renderer/services/liveDataService.ts",
-        "src/live-data/liveDataManager.js",
-        "src/renderer/screens/LiveDataView.tsx"
+        "src/live-data/liveDataManager.js"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "When in the @src/renderer/screens/LiveDataView.tsx and hitting Update prices, the prices clearly get refreshed, but the current json view doesn't show the updated ones."
+      "blockers": []
     },
     {
       "id": "0638a729-4402-4823-9d04-90b92789e980",
-      "status": "-",
+      "status": "+",
       "title": "Create a future-proof, well architected and clean interface and setup for adding new live data services",
       "description": "Currently it's impossible to add a new live data service - it should be possible to do so, by specifying the url and the same update settings as now. The data should be stored in a easily retrievable place. If at any point any new service or view would like to read this data while the app is running - they should be able to.\nAn internal service like the pricing manager needs to be wired in code for it to work - clean up @src/live-data/liveDataManager.js to make it easy to add future live data providers and the services that consume them.",
       "plan": "",
       "context": [
         "src/live-data/liveDataManager.js"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "f337aa98-ee80-45e9-bb7b-4df74595a342",
+      "status": "-",
+      "title": "Create a way of adding a live data provider",
+      "description": "In @src/renderer/screens/LiveDataView.tsx there has to be a \"+\" button, that allows a user to add a live data provider that will be stored.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/LiveDataView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -140,6 +150,7 @@
     "abcb8eae-c3ab-424a-9853-b5372f04633f": 8,
     "ef5fc45d-0d09-41ab-9500-0ad2882d1275": 9,
     "6199040d-7927-44fc-a1ad-71782484d82a": 10,
-    "0638a729-4402-4823-9d04-90b92789e980": 11
+    "0638a729-4402-4823-9d04-90b92789e980": 11,
+    "f337aa98-ee80-45e9-bb7b-4df74595a342": 12
   }
 }

@@ -78,6 +78,8 @@ const IPC_HANDLER_KEYS = {
   FACTORY_PRICING_REFRESH: "factory:pricing:refresh",  
   
   LIVE_DATA_SUBSCRIBE: 'live-data:subscribe',
+  LIVE_DATA_ADD_SERVICE: 'live-data:add-service',
+  LIVE_DATA_REMOVE_SERVICE: 'live-data:remove-service',
   LIVE_DATA_GET_STATUS: 'live-data:get-status',
   LIVE_DATA_TRIGGER_UPDATE: 'live-data:trigger-update',
   LIVE_DATA_UPDATE_CONFIG: 'live-data:update-config',

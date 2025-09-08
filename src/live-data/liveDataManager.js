@@ -2,17 +2,17 @@ import { ipcMain } from 'electron';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 import { LiveDataStore } from './store';
 import { LiveDataRegistry } from './registry';
-import { normalizeService, computeIsFresh, FreshnessPolicy, AutoUpdateTrigger } from './types';
 import { createAgentPricesProvider } from './providers/agentPricesProvider';
 import { createFetchJsonProvider } from './providers/fetchJsonProvider';
+import { LiveDataProviderStatus } from './liveDataTypes'
 
 const DEFAULT_SERVICES = [
   {
     id: 'agent-prices',
     name: 'Agent Prices',
     description: 'Fetches the latest prices for common AI models from various providers.',
-    freshnessPolicy: FreshnessPolicy.daily,
-    autoUpdate: { enabled: true, trigger: AutoUpdateTrigger.onAppLaunch },
+    freshnessPolicy: 'daily',
+    autoUpdate: { enabled: true, trigger: 'onAppLaunch' },
     lastUpdated: 0,
     config: { url: 'https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json' },
     isUpdating: false,
@@ -97,18 +97,7 @@ export class LiveDataManager {
     // If service.type is 'fetch-json' we keep its id unique and will use generic provider.
     // If service.id matches a provider id (like 'agent-prices'), it will use that provider.
 
-    const normalized = normalizeService({
-      name: service.name || service.id,
-      description: service.description || '',
-      freshnessPolicy: service.freshnessPolicy || FreshnessPolicy.daily,
-      autoUpdate: service.autoUpdate || { enabled: false, trigger: AutoUpdateTrigger.onAppLaunch },
-      lastUpdated: 0,
-      config: service.config || {},
-      isUpdating: false,
-      id: service.id,
-    });
-
-    this.services.push(normalized);
+    this.services.push(normalizeService(service));
     this._saveServices();
     this._emitStatus();
     return normalized;
@@ -184,7 +173,7 @@ export class LiveDataManager {
 
   _maybeTriggerOnLaunchUpdates() {
     for (const svc of this.services) {
-      if (svc.autoUpdate?.enabled && (svc.autoUpdate?.trigger === AutoUpdateTrigger.onAppLaunch)) {
+      if (svc.autoUpdate?.enabled && (svc.autoUpdate?.trigger === 'onAppLaunch')) {
         if (!computeIsFresh(svc)) {
           this.triggerUpdate(svc.id); // fire-and-forget
         }
@@ -196,3 +185,44 @@ export class LiveDataManager {
     // Placeholder for future scheduled triggers
   }
 }
+
+// Normalize shape for service entries read from storage or defaults
+export function normalizeService(service) {
+  return {
+    id: service.id,
+    name: service.name,
+    description: service.description,
+    freshnessPolicy: service.freshnessPolicy || service.freshnessPolicy || 'daily',
+    autoUpdate: typeof service.autoUpdate === 'object'
+      ? { enabled: !!service.autoUpdate.enabled, trigger: service.autoUpdate.trigger || 'onAppLaunch', time: service.autoUpdate.time }
+      : { enabled: !!service.autoUpdate, trigger: 'onAppLaunch' },
+    lastUpdated: typeof service.lastUpdated === 'number'
+      ? service.lastUpdated
+      : (service.lastUpdated ? new Date(service.lastUpdated).getTime() : 0),
+    config: service.config || {}, // free-form; may include url, headers, params, etc.
+    isUpdating: !!service.isUpdating,
+  };
+}
+
+// Interface (documentation) for providers
+// A provider implementation must expose: { id, update(service, deps), getData(service, deps) }
+// - id: string (matches service id for built-ins or a generic provider id for dynamic services)
+// - update: performs network or internal refresh, should persist data via store if applicable
+// - getData: returns current data snapshot for the service
+
+export function computeIsFresh(service, now = Date.now()) {
+  if (!service.lastUpdated) return false;
+  const diffMs = now - service.lastUpdated;
+  const dayMs = 24 * 60 * 60 * 1000;
+  switch (service.freshnessPolicy) {
+    case 'daily':
+      return diffMs < dayMs;
+    case 'weekly':
+      return diffMs < 7 * dayMs;
+    case 'monthly':
+      return diffMs < 30 * dayMs; // Approximate month
+    default:
+      return false;
+  }
+}
+
