@@ -810,7 +810,7 @@
     },
     {
       "id": "a940d772-c613-427c-9dd4-88984e9f24ec",
-      "status": "-",
+      "status": "+",
       "title": "TasksListView: skeletons for initial loading state",
       "description": "Replace text-only loading state with skeleton placeholders for a smoother UX.\n\nImplementation details (src/renderer/tasks/TasksListView.tsx):\n- When isAppSettingsLoaded is false, render a list of ~6 skeleton rows using src/renderer/components/ui/Skeleton.tsx to approximate task rows' layout (id/status area, title/desc lines, and actions area blocks).\n- Keep current \"Loading settings…\" live region messaging accessible (aria-live politely) in the count area.\n\nAcceptance criteria:\n- Before settings are loaded, task area shows skeleton placeholders instead of a static 'Loading...' string.\n- Once loaded, skeletons disappear and the real content renders.\n- No layout shift beyond expected content replacement.",
       "plan": "",
