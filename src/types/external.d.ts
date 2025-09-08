@@ -4,6 +4,7 @@ import type { FilesService } from 'src/renderer/services/filesService'
 import type { TasksService } from 'src/renderer/services/tasksService';
 import type { NotificationsService } from 'src/renderer/services/notificationsService';
 import type { SettingsService } from 'src/renderer/services/settingsService';
+import type { LiveDataService } from 'src/renderer/services/liveDataService';
 
 declare global {
   interface Window {
@@ -13,6 +14,7 @@ declare global {
     chatsService: ChatsService
     notificationsService: NotificationsService
     settingsService: SettingsService
+    liveDataService: LiveDataService
   }
 }
 export {}

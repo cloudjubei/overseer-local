@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { chatsService } from '../services/chatsService';
 import { useActiveProject } from '../projects/ProjectContext';
-import { Chat, ChatMessage, LLMConfig } from '../services/chatsService';
+import { Chat, ChatMessage } from '../services/chatsService';
 import { ServiceResult } from '../services/serviceResult';
+import { LLMConfig } from 'thefactory-tools';
 
 export function useChats() {
   const { project } = useActiveProject();

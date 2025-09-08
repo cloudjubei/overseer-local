@@ -75,6 +75,12 @@ const IPC_HANDLER_KEYS = {
 
   // Factory pricing
   FACTORY_PRICING_GET: "factory:pricing:get",
-  FACTORY_PRICING_REFRESH: "factory:pricing:refresh",
-}
-export default IPC_HANDLER_KEYS
+  FACTORY_PRICING_REFRESH: "factory:pricing:refresh",  
+  
+  LIVE_DATA_SUBSCRIBE: 'live-data:subscribe',
+  LIVE_DATA_GET_STATUS: 'live-data:get-status',
+  LIVE_DATA_TRIGGER_UPDATE: 'live-data:trigger-update',
+  LIVE_DATA_UPDATE_CONFIG: 'live-data:update-config',
+};
+
+export default IPC_HANDLER_KEYS;

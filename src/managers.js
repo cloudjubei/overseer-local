@@ -5,6 +5,7 @@ import { ChatsManager } from './chat/manager';
 import { NotificationManager } from './notifications/manager';
 import { SettingsManager } from './settings/manager';
 import { registerFactoryIPC } from './tools/factory/mainOrchestrator'
+import { LiveDataManager } from './live-data/liveDataManager';
 
 export let tasksManager;
 export let filesManager;
@@ -12,6 +13,7 @@ export let projectsManager;
 export let chatsManager;
 export let notificationManager;
 export let settingsManager;
+export let liveDataManager;
 
 export async function initManagers(projectRoot, mainWindow) {
   await registerFactoryIPC(mainWindow, projectRoot);
@@ -21,6 +23,7 @@ export async function initManagers(projectRoot, mainWindow) {
   chatsManager = new ChatsManager(projectRoot, mainWindow, projectsManager, tasksManager, filesManager);
   notificationManager = new NotificationManager(projectRoot, mainWindow);
   settingsManager = new SettingsManager(projectRoot, mainWindow);
+  liveDataManager = new LiveDataManager(projectRoot, mainWindow);
 
   await projectsManager.init();
   await tasksManager.init();
@@ -28,6 +31,7 @@ export async function initManagers(projectRoot, mainWindow) {
   await chatsManager.init();
   await notificationManager.init();
   await settingsManager.init();
+  await liveDataManager.init();
 }
 export function stopManagers() {
   if (projectsManager) { projectsManager.stopWatching(); }
@@ -36,4 +40,5 @@ export function stopManagers() {
   if (chatsManager) { chatsManager.stopWatching(); }
   if (notificationManager) { notificationManager.stopWatching(); }
   if (settingsManager) { settingsManager.stopWatching(); }
+  if (liveDataManager) { liveDataManager.stopWatching(); }
 }

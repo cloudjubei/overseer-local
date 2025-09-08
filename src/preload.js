@@ -143,6 +143,17 @@ const FACTORY_API = {
   refreshPricing: (provider, url) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 };
 
+const LIVEDATA_API = {
+  subscribe: (callback) => {
+    const listener = (_event, services) => callback(services);
+    ipcRenderer.on(IPC_HANDLER_KEYS.LIVE_DATA_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.LIVE_DATA_SUBSCRIBE, listener);
+  },
+  getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_STATUS),
+  triggerUpdate: (serviceId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_TRIGGER_UPDATE, { serviceId }),
+  updateConfig: (serviceId, updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_UPDATE_CONFIG, { serviceId, updates }),
+};
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('filesService', FILES_API);
@@ -151,3 +162,4 @@ contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API);
 contextBridge.exposeInMainWorld('factory', FACTORY_API);
+contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API);
