@@ -56,6 +56,17 @@ export default function LiveDataView() {
     }
   };
 
+  const handleUpdateNow = async (s: LiveDataProviderStatus) => {
+    try {
+      await triggerUpdate(s.id);
+    } finally {
+      // If the JSON viewer is open for this service, refresh its data preview to reflect latest updates
+      if (openViewer[s.id]) {
+        await fetchLatestForService(s);
+      }
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold">Live Data</h1>
@@ -79,7 +90,7 @@ export default function LiveDataView() {
                   </button>
                   <button
                     disabled={!!s.isUpdating}
-                    onClick={() => triggerUpdate(s.id)}
+                    onClick={() => handleUpdateNow(s)}
                     className={`px-3 py-1 rounded text-white ${s.isUpdating ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
                   >
                     {s.isUpdating ? 'Updating…' : 'Update now'}
