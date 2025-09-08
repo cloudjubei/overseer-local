@@ -1,7 +1,7 @@
 /* Components: Buttons */
 
 /* Base shared styles for button-like controls */
-.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-outline, .btn-danger, .btn-link {
+.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-outline, .btn-danger, .btn-link, .btn-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -23,18 +23,18 @@
 }
 
 /* Focus ring (visible) */
-.btn:focus-visible, .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-ghost:focus-visible, .btn-outline:focus-visible, .btn-danger:focus-visible, .btn-link:focus-visible {
+.btn:focus-visible, .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-ghost:focus-visible, .btn-outline:focus-visible, .btn-danger:focus-visible, .btn-link:focus-visible, .btn-icon:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
 }
 
 /* Press micro-interaction */
-.btn:active, .btn-primary:active, .btn-secondary:active, .btn-ghost:active, .btn-outline:active, .btn-danger:active, .btn-link:active {
+.btn:active, .btn-primary:active, .btn-secondary:active, .btn-ghost:active, .btn-outline:active, .btn-danger:active, .btn-link:active, .btn-icon:active {
   transform: translateY(0.5px);
 }
 
 /* Disabled */
-.btn[disabled], .btn-primary[disabled], .btn-secondary[disabled], .btn-ghost[disabled], .btn-outline[disabled], .btn-danger[disabled], .btn-link[disabled] {
+.btn[disabled], .btn-primary[disabled], .btn-secondary[disabled], .btn-ghost[disabled], .btn-outline[disabled], .btn-danger[disabled], .btn-link[disabled], .btn-icon[disabled] {
   opacity: 0.55;
   cursor: not-allowed;
 }

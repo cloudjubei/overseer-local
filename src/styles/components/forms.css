@@ -21,7 +21,7 @@
   background-size: 16px 16px;
 }
 .ui-select:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
-.ui-select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.ui-select:focus-visible { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
 .ui-select:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Unified Input */
@@ -37,7 +37,7 @@
   transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease);
 }
 .ui-input:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
-.ui-input:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.ui-input:focus-visible { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
 .ui-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Unified Textarea */
@@ -54,7 +54,7 @@
   transition: border-color var(--motion-fast, 120ms) var(--easing-standard, ease), background-color var(--motion-fast, 120ms) var(--easing-standard, ease), box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease);
 }
 .ui-textarea:hover { background-color: color-mix(in srgb, var(--surface-raised) 94%, var(--text-primary) 6%); }
-.ui-textarea:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
+.ui-textarea:focus-visible { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent); }
 .ui-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Switch */
@@ -72,7 +72,7 @@
 .ui-switch[data-state='checked'] {
   background-color: var(--accent-primary);
 }
-.ui-switch:focus {
+.ui-switch:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
 }
