@@ -5,6 +5,7 @@ export type LiveDataService = {
   getStatus: () => Promise<LiveDataProviderStatus[]>
   triggerUpdate: (serviceId: string) => Promise<LiveDataProviderStatus | undefined>
   updateConfig: (serviceId: string, updates: Partial<Omit<LiveDataProvider, "id">>) => Promise<LiveDataProviderStatus>
+  getData: (serviceId: string) => Promise<any>
 }
 
 export const liveDataService: LiveDataService = { ...window.liveDataService }

@@ -13,6 +13,11 @@ const RUN_MESSAGES = new Map(); // runId -> last messages array or grouped objec
 let PRICING = null;
 let HISTORY = null;
 
+// Expose getter for other managers (e.g., LiveData) to access pricing manager
+export function getPricingManager() {
+  return PRICING;
+}
+
 function sendEventToWC(wcId, runId, event) {
   const wc = webContents.fromId(wcId);
   if (wc && !wc.isDestroyed()) {
