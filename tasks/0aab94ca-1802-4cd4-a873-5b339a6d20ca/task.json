@@ -33,48 +33,59 @@
     },
     {
       "id": "19e53643-537f-4bbf-9ba6-268baeedcb4f",
-      "status": "~",
+      "status": "-",
       "title": "Create Main Process Service for Live Data Management",
-      "description": "Implement a main process service to manage the lifecycle of live data services. This includes loading configurations from storage, saving them, and exposing methods to the renderer via IPC to get service status and trigger updates.",
+      "description": "Implement a main process service to manage the lifecycle of live data services. This includes loading configurations from storage, saving them, and exposing methods to the renderer via IPC to get service status and trigger updates.\nCurrently we have @src/live-data/liveDataService.js already in place with some obvious missing functions.\nThe view to render this is @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/live-data/liveDataService.js",
+        "src/renderer/screens/LiveDataView.tsx",
+        "src/live-data/types.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "2e00148d-cb4c-4c4b-9388-448b171ff42e",
       "status": "-",
       "title": "Implement UI to List Live Data Services",
-      "description": "On the 'Live Data' screen, create a UI component that lists all configured live data services. Each item in the list should display the service name, its last updated timestamp, and its freshness status (e.g., 'Up to date', 'Stale').",
+      "description": "On the 'Live Data' screen, create a UI component that lists all configured live data services. Each item in the list should display the service name, its last updated timestamp, and its freshness status (e.g., 'Up to date', 'Stale').\n\nThe view to render this is @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "3bb6a463-3ec8-48dc-9a1f-f70e8797da27",
       "status": "-",
       "title": "Implement UI for Service Configuration",
-      "description": "For each service in the list, create a UI component that allows the user to configure its settings. This includes setting the freshness policy (daily, weekly, monthly) and toggling automated checks on or off.",
+      "description": "For each service in the list, create a UI component that allows the user to configure its settings. This includes setting the freshness policy (daily, weekly, monthly) and toggling automated checks on or off.\n\nThe view to render this in is somwhere inside @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "5b140303-e3c9-467f-a26e-2b09919612c4",
       "status": "-",
       "title": "Implement Manual Update Trigger",
-      "description": "Add a button to each service in the UI that allows the user to manually trigger an update. This button will use IPC to call the main process service to fetch the latest data for that specific service.",
+      "description": "Add a button to each service in the UI that allows the user to manually trigger an update. This button will use IPC to call the main process service to fetch the latest data for that specific service.\n\nThe view to render this in should be in @src/renderer/screens/LiveDataView.tsx \nThe types are defined in @src/live-data/types.ts",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "abcb8eae-c3ab-424a-9853-b5372f04633f",
       "status": "-",
       "title": "Implement Automated Update Logic",
-      "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.",
+      "description": "Implement the logic in the main process to automatically check for updates based on each service's configuration. This should run on application launch and check if any service's data has expired according to its freshness policy.\nThe logic for this should use @src/live-data/liveDataService.js",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/live-data/liveDataService.js"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
