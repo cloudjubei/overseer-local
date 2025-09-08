@@ -11,12 +11,11 @@ import { logger, logLLMStep } from './logger.js';
 
 const MAX_TURNS_PER_FEATURE = 100;
 
-// Resolve package root relative to this file to avoid assuming monorepo layout
-const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const PACKAGE_ROOT = path.join(__dirname, '../../../thefactory-tools')
+// const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const NEWLINE = '\n';
 
 function loadAgentDocs(agent: string): string {
-  // Docs live under <package root>/docs
   const p = path.join(PACKAGE_ROOT, 'docs', `AGENT_${agent.toUpperCase()}.md`);
   return fs.readFileSync(p, 'utf8');
 }

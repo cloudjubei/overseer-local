@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import fetch from 'node-fetch';
-import { fileURLToPath } from 'node:url';
 
 export type ModelPrice = {
   provider: string; // e.g., openai
@@ -27,8 +26,8 @@ function ensureDir(p: string) {
 
 function nowIso() { return new Date().toISOString(); }
 
-// Resolve the package root relative to this file so the package can be relocated
-const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const PACKAGE_ROOT = path.join(__dirname, '../../../thefactory-tools')
+// const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 export class PricingManager {
   private readonly root: string;
