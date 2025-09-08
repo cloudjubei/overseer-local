@@ -43,8 +43,8 @@ function Collapsible({ title, children, defaultOpen = false, className, innerCla
 }
 
 function ToolCallRow({ call, resultText, index }: { call: ToolCall; resultText?: string; index: number }) {
-  const name = (call as any).tool_name || (call as any).tool || (call as any).name || 'tool';
-  const args = (call as any).arguments ?? (call as any).parameters ?? {};
+  const name = call.tool_name;
+  const args = call.arguments ?? {};
   const isHeavy = name === 'read_files' || name === 'write_file';
 
   return (
@@ -332,15 +332,21 @@ function FeatureContent({ log, isLatestFeature, latestTurnRef }: { log: AgentFea
 }
 
 export default function ChatConversation({ run }: { run: AgentRun }) {
-  // Derive logs (sorted by startDate). Recompute each render to reflect in-place mutations.
-  const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
-  const logs = Object.values(run.messagesLog ?? {})
+
+  const preparedLogs = Object.values(run.messagesLog ?? {})
+  let logs
+  if (preparedLogs.length == 1 && preparedLogs[0].featureId === "__task__"){
+    logs = preparedLogs
+  }else{
+    const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
+    logs = Object.values(run.messagesLog ?? {})
     .filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId))
     .sort((a, b) => {
       const at = new Date((a as any).startDate).getTime();
       const bt = new Date((b as any).startDate).getTime();
       return at - bt;
     });
+  }
 
   const latestFeature = logs.length > 0 ? logs[logs.length - 1] : undefined;
   const latestFeatureId = latestFeature?.featureId;

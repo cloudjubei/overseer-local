@@ -46,11 +46,15 @@ function formatDuration(ms?: number) {
 function useFeatureCounts(run: AgentRun) {
   return useMemo(() => {
     const entries = run.messagesLog ? Object.entries(run.messagesLog) : [];
-    // Exclude the special task-level conversation key "__task__" from feature counts
-    const filtered = entries.filter(([key, val]) => {
-      const fid = (val as any)?.featureId || key;
-      return fid !== '__task__';
-    });
+    let filtered
+    if (entries.length == 1 && Object.values(entries)[0][1].featureId === "__task__"){
+      filtered = entries
+    }else{
+      filtered = entries.filter(([key, val]) => {
+        const fid = (val as any)?.featureId || key;
+        return fid !== '__task__';
+      });
+    }
     const total = filtered.length;
     let completed = 0;
     for (const [, l] of filtered) {

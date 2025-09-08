@@ -1,9 +1,0 @@
-{
-  "updatedAt": "2024-01-01T00:00:00.000Z",
-  "prices": [
-    { "provider": "openai", "model": "gpt-5", "inputPerMTokensUSD": 1.250, "outputPerMTokensUSD": 10, "cachedInputPerMTokensUSD": 0.125 },
-    { "provider": "openai", "model": "gpt-5-mini", "inputPerMTokensUSD": 0.250, "outputPerMTokensUSD": 2, "cachedInputPerMTokensUSD": 0.025 },
-    { "provider": "openai", "model": "gpt-5-nano", "inputPerMTokensUSD": 0.050, "outputPerMTokensUSD": 0.4, "cachedInputPerMTokensUSD": 0.005 },
-    { "provider": "openai", "model": "gpt-4o-mini", "inputPerMTokensUSD": 0.6, "outputPerMTokensUSD": 2.4, "cachedInputPerMTokensUSD": 0.3 }
-  ]
-}
