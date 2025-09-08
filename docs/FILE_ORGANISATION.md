@@ -15,6 +15,10 @@ Top-Level Layout
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
   - live-data/: Main process live data service and types for live data services.
+    - providers/: Pluggable provider implementations (e.g., agent-prices bridge, generic fetch-json).
+    - registry.js: Provider registry to map service ids to providers.
+    - store.js: Persistence for service configs and cached snapshots by service id.
+    - types.js: Shared types and helpers (freshness policy, normalization, freshness computation).
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime).
     - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
     - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC).
