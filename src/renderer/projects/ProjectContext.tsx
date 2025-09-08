@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ProjectSpec } from '../../../packages/factory-ts/src/types'
+import type { ProjectSpec } from 'thefactory-tools';
 import { projectsService } from '../services/projectsService'
 import { useAppSettings } from '../hooks/useAppSettings'
 

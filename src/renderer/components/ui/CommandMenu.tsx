@@ -30,8 +30,11 @@ export default function CommandMenu() {
   const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  // Start with no selection so the first Down selects the top and the first Up selects the bottom
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
   const items = useMemo(() => commandsBase(nav), [nav]);
   const listboxId = useId();
 
@@ -55,16 +58,39 @@ export default function CommandMenu() {
     if (filtered.length === 0) {
       setSelectedIndex(-1);
     } else {
-      // Ensure selectedIndex is within range; default to 0 on new query
-      setSelectedIndex((prev) => (prev >= 0 && prev < filtered.length ? prev : 0));
+      // If nothing is selected yet, keep it as none selected.
+      // If an item is selected, clamp it within the new range [0, length-1].
+      setSelectedIndex((prev) => {
+        if (prev < 0) return -1;
+        return Math.max(0, Math.min(prev, filtered.length - 1));
+      });
     }
   }, [query, filtered.length, open]);
+
+  // Ensure the active item stays in view while navigating
+  useEffect(() => {
+    if (!open) return;
+    if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
+    const el = itemRefs.current[selectedIndex] || null;
+    if (el) {
+      try {
+        el.scrollIntoView({ block: 'nearest' });
+      } catch {
+        // ignore if not supported
+      }
+    }
+  }, [selectedIndex, filtered.length, open]);
 
   const moveSelection = (delta: number) => {
     if (filtered.length === 0) return;
     setSelectedIndex((prev) => {
-      const base = prev < 0 ? 0 : prev;
-      const next = (base + delta + filtered.length) % filtered.length;
+      // First navigation behavior:
+      // - If nothing is selected and pressing Down: select 0 (top)
+      // - If nothing is selected and pressing Up: select last (bottom)
+      if (prev < 0) {
+        return delta > 0 ? 0 : filtered.length - 1;
+      }
+      const next = (prev + delta + filtered.length) % filtered.length;
       return next;
     });
   };
@@ -80,7 +106,10 @@ export default function CommandMenu() {
   if (!open) return null;
   return createPortal(
     <div className="cmd-overlay" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
-      <div className="cmd" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="cmd"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="cmd__input">
           <input
             ref={inputRef}
@@ -88,48 +117,38 @@ export default function CommandMenu() {
             placeholder="Search commands..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setOpen(false);
-                return;
-              }
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                moveSelection(1);
-                return;
-              }
-              if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                moveSelection(-1);
-                return;
-              }
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                runSelected();
-              }
-            }}
             aria-label="Command menu search"
             aria-controls={listboxId}
             aria-activedescendant={selectedIndex >= 0 && selectedIndex < filtered.length ? `${listboxId}-option-${selectedIndex}` : undefined}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); }
+              else if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); }
+              else if (e.key === 'Enter') { e.preventDefault(); runSelected(); }
+              else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
+            }}
           />
           <kbd className="kbd">⌘K</kbd>
         </div>
-        <ul className="cmd__list" role="listbox" id={listboxId}>
+        <ul className="cmd__list" role="listbox" id={listboxId} ref={listRef}>
           {filtered.map((cmd, i) => {
             const active = i === selectedIndex;
             return (
               <li
                 key={cmd.id}
                 id={`${listboxId}-option-${i}`}
-                className={`cmd__item${active ? ' is-active' : ''}`}
+                className={`cmd__item ${active ? 'is-active' : ''}`}
                 role="option"
                 aria-selected={active}
                 onMouseEnter={() => setSelectedIndex(i)}
+                ref={(el) => (itemRefs.current[i] = el)}
               >
                 <button
                   type="button"
                   onClick={() => { cmd.run(); setOpen(false); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { cmd.run(); setOpen(false); } }}
                 >
                   <span>{cmd.label}</span>
                   {cmd.shortcut ? <span className="cmd__shortcut">{cmd.shortcut}</span> : null}

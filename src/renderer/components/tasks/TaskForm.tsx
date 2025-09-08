@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Status } from 'packages/factory-ts/src/types'
+import { Status } from 'thefactory-tools';
 import StatusControl from './StatusControl'
 
 export type TaskFormValues = {

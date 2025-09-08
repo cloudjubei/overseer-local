@@ -1,4 +1,4 @@
-import { Feature } from 'packages/factory-ts/src/types'
+import { Feature } from 'thefactory-tools';
 import StatusControl from './StatusControl';
 
 export default function FeatureSummaryCard({ feature, className = '' }: { feature: Feature; className?: string }) {

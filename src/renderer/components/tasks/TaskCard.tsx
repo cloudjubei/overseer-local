@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Task, Status, ProjectSpec } from 'packages/factory-ts/src/types'
+import type { Status, ProjectSpec, Task } from 'thefactory-tools';
 import Tooltip from '../ui/Tooltip'
 import StatusControl from './StatusControl'
 import RunAgentButton from './RunAgentButton'

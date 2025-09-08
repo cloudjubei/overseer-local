@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
-import type { Feature } from 'packages/factory-ts/src/types'
+import type { Feature } from 'thefactory-tools';
 import { useTasks } from '../hooks/useTasks'
 import FeatureForm, { FeatureFormValues } from '../components/tasks/FeatureForm'
 

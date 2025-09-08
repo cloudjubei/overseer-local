@@ -2,38 +2,13 @@ import { ipcMain, webContents } from 'electron';
 import IPC_HANDLER_KEYS from '../../ipcHandlersKeys.js';
 import path from 'node:path';
 import fs from 'node:fs';
-
-// Load local package factory-ts from monorepo
-// Use dynamic import to avoid issues with CJS/ESM resolution in Electron
-let factoryTs;
-async function loadFactory()
-{
-  if (factoryTs) return factoryTs;
-  const cwd = process.cwd();
-  const distEsm = path.resolve(cwd, 'packages/factory-ts/dist/index.js');
-  const distCjs = path.resolve(cwd, 'packages/factory-ts/dist/index.cjs');
-  try {
-    console.log('[factory] Loading factory-ts from', distEsm);
-    factoryTs = await import(distEsm);
-  } catch (errEsm) {
-    console.warn('[factory] Failed to load ESM build, trying CJS', errEsm?.message || errEsm);
-    try {
-      factoryTs = await import(distCjs);
-    } catch (errCjs) {
-      console.error('[factory] Failed to load factory-ts from dist. Did you build it? npm run factory:build');
-      console.error(errCjs?.stack || String(errCjs));
-      throw errCjs;
-    }
-  }
-  console.log('[factory] factory-ts loaded successfully');
-  return factoryTs;
-}
+import { createOrchestrator, createHistoryStore, createPricingManager } from 'thefactory-tools'
 
 const RUN_SUBSCRIBERS = new Map(); // runId -> Set<webContentsId>
 const RUNS = new Map(); // runId -> RunHandle
 const RUN_META = new Map(); // runId -> metadata snapshot
 const RUN_TIMERS = new Map(); // runId -> heartbeat timer
-const RUN_MESSAGES = new Map(); // runId -> last messages array
+const RUN_MESSAGES = new Map(); // runId -> last messages array or grouped object
 
 let PRICING = null;
 let HISTORY = null;
@@ -221,8 +196,6 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   // Ensure workspace .env is loaded in main process so child processes and libs see credentials
   loadWorkspaceDotenv(projectRoot);
 
-  const factory = await loadFactory();
-  const { createOrchestrator, createHistoryStore, createPricingManager } = factory
 
   try {
     const dbPath = path.join(projectRoot, '.factory', 'history.sqlite');
@@ -295,9 +268,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
 
       // Capture and persist messages when provided (init, snapshots, or final)
       try {
-        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final' || e?.type === 'llm/messages/init') && e?.payload?.messages) {
-          RUN_MESSAGES.set(runHandle.id, e.payload.messages);
-          persistMessages(runHandle.id, e.payload.messages);
+        if ((e?.type === 'llm/messages/snapshot' || e?.type === 'llm/messages/final' || e?.type === 'llm/messages/init') && (e?.payload?.messages || e?.payload?.messageGroups)) {
+          const toPersist = e?.payload?.messageGroups ?? e?.payload?.messages;
+          RUN_MESSAGES.set(runHandle.id, toPersist);
+          persistMessages(runHandle.id, toPersist);
         }
       } catch (err) {
         console.warn('[factory] Failed to persist messages for', runHandle.id, err?.message || err);
@@ -513,5 +487,4 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.on('destroyed', () => console.log('[factory] Main window destroyed'));
   }
-  return factory
 }

@@ -1,6 +1,6 @@
 /* Renderer-side bridge: talks to Electron preload (window.factory) instead of importing Node modules. */
 
-import { AgentType, LLMConfig } from "packages/factory-ts/src/types";
+import type { AgentType, LLMConfig } from 'thefactory-tools';
 
 export type EventSourceLike = {
   addEventListener: (type: string, handler: (e: any) => void) => void;

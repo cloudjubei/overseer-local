@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useActiveProject } from '../../../renderer/projects/ProjectContext'
-import type { Feature, ProjectSpec, Task } from 'packages/factory-ts/src/types'
+import type { Feature, ProjectSpec, Task } from 'thefactory-tools';
 import { useTasks } from '../../../renderer/hooks/useTasks'
 
 type DependencySelectorProps = {

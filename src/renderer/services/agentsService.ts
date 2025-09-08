@@ -1,6 +1,6 @@
 import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun, deleteHistoryRun } from '../../tools/factory/orchestratorBridge';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
-import { AgentType, LLMConfig } from 'packages/factory-ts/src/types';
+import { AgentType, LLMConfig } from 'thefactory-tools';
 import { notificationsService } from './notificationsService';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
@@ -8,6 +8,10 @@ export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 export interface AgentRunMessage {
   role: string;
   content: string;
+  // when this message was received (renderer-side) or created upstream
+  createdAt?: string; // ISO
+  // for assistant messages: when the question/prompt was asked to the LLM
+  askedAt?: string; // ISO
 }
 
 export type AgentRun = {
@@ -25,7 +29,7 @@ export type AgentRun = {
   model?: string;
   startedAt: string; // ISO
   updatedAt: string; // ISO
-  // Timestamp of the last received LLM message (assistant or tool results). Used for thinking timer.
+  // Timestamp of the last received LLM message (assistant or tool results). Used to infer askedAt for the next assistant reply.
   lastMessageAt?: string; // ISO
 
   messagesLog?: Record<string,AgentFeatureRunLog>
@@ -41,6 +45,8 @@ export type AgentFeatureRunLog = {
 interface RunRecord extends AgentRun {
   events: EventSourceLike;
   cancel: (reason?: string) => void;
+  // Track which featureIds we've already notified as completed for this run
+  __notifiedFeatures?: Set<string>;
 }
 
 type Subscriber = (runs: AgentRun[]) => void;
@@ -75,7 +81,7 @@ class AgentsServiceImpl {
   }
 
   private publicFromRecord(rec: RunRecord): AgentRun {
-    const { events: _ev, cancel: _c, ...pub } = rec as any;
+    const { events: _ev, cancel: _c, __notifiedFeatures: _nf, ...pub } = rec as any;
     return pub as AgentRun;
   }
 
@@ -113,6 +119,7 @@ class AgentsServiceImpl {
               messagesLog: {},
               events,
               cancel: (reason?: string) => handle.cancel(reason),
+              __notifiedFeatures: new Set<string>(),
             } as RunRecord;
             this.wireRunEvents(run);
             this.runs.set(run.runId, run);
@@ -151,6 +158,7 @@ class AgentsServiceImpl {
             messagesLog: {},
             events: NOOP_EVENTS,
             cancel: () => {},
+            __notifiedFeatures: new Set<string>(),
           } as RunRecord;
           this.runs.set(rec.runId, rec);
           
@@ -228,8 +236,7 @@ class AgentsServiceImpl {
     }
   }
 
-  private appendMessage(run: RunRecord, msg: any, featureId: string) {
-
+  private ensureFeatureLog(run: RunRecord, featureId: string): AgentFeatureRunLog {
     if (!run.messagesLog){
       run.messagesLog = {}
     }
@@ -238,26 +245,50 @@ class AgentsServiceImpl {
       existing = { startDate: new Date(), featureId, messages: [] }
       run.messagesLog[featureId] = existing
     }
-
-    existing.messages.push({ ...msg });
+    return existing;
   }
 
-  private replaceMessages(run: RunRecord, messages: any[], featureId: string, isEnd: boolean = false) {
-    if (!run.messagesLog){
-      run.messagesLog = {}
+  private appendMessage(run: RunRecord, msg: any, featureId: string, ts?: string) {
+    const existing = this.ensureFeatureLog(run, featureId);
+
+    const createdAt = (msg?.createdAt as string) || ts || new Date().toISOString();
+    const role = String(msg?.role || 'assistant');
+
+    // When an assistant message arrives, infer askedAt as the time we last emitted a message before this (e.g., tool results or user question)
+    let askedAt: string | undefined = msg?.askedAt;
+    if (role === 'assistant') {
+      askedAt = askedAt || run.lastMessageAt || createdAt;
     }
-    let existing : AgentFeatureRunLog | undefined = run.messagesLog![featureId]
-    if (!existing){
-      existing = { startDate: new Date(), featureId, messages: [] }
-      run.messagesLog[featureId] = existing
-    }
+
+    const toStore: AgentRunMessage = {
+      role,
+      content: String(msg?.content ?? ''),
+      createdAt,
+      askedAt,
+    };
+
+    existing.messages.push(toStore);
+  }
+
+  private replaceMessages(run: RunRecord, messages: any[], featureId: string, isEnd: boolean = false, ts?: string) {
+    const existing = this.ensureFeatureLog(run, featureId);
     if (isEnd){
       existing.endDate = new Date()
     }
 
-    const newMessages = []
+    const baseTs = ts || new Date().toISOString();
+
+    const newMessages: AgentRunMessage[] = []
     for(const m of messages){
-      newMessages.push({ ...m})
+      const role = String(m?.role || 'assistant');
+      const createdAt = (m?.createdAt as string) || baseTs;
+      let askedAt: string | undefined = (m as any)?.askedAt;
+      if (role === 'assistant') {
+        // best-effort: if askedAt missing in snapshot, approximate with previous message timestamp if available
+        const prev = newMessages.length > 0 ? newMessages[newMessages.length - 1] : undefined;
+        askedAt = askedAt || prev?.createdAt || run.lastMessageAt || createdAt;
+      }
+      newMessages.push({ role, content: String(m?.content ?? ''), createdAt, askedAt });
     }
     existing.messages = newMessages
   }
@@ -287,6 +318,69 @@ class AgentsServiceImpl {
     }
   }
 
+  // Detect a feature completion by inspecting normalized messages log for a finish_feature tool call
+  private featureHasFinishTool(messages: any[]): boolean {
+    try {
+      for (const m of messages) {
+        if (!m) continue;
+        const role = (m as any).role;
+        const content = String((m as any).content ?? '');
+        if (role === 'assistant') {
+          // Quick check
+          if (content.includes('finish_feature')) return true;
+          try {
+            const parsed = JSON.parse(content);
+            const calls = (parsed?.tool_calls || parsed?.tool_calls || []);
+            if (Array.isArray(calls)) {
+              for (const c of calls) {
+                const name = c?.tool_name || c?.tool || c?.name;
+                if (name === 'finish_feature') return true;
+              }
+            }
+          } catch {
+            // ignore JSON parse errors; substring check already attempted
+          }
+        }
+      }
+    } catch {}
+    return false;
+  }
+
+  private async checkAndNotifyFeatureCompletions(run: RunRecord) {
+    try {
+      const factory = (window as any).factory;
+      if (!factory?.getRunMessages) return;
+      const normalized: Record<string, { featureId: string; messages: any[] }> = await factory.getRunMessages(run.runId);
+      if (!normalized || typeof normalized !== 'object') return;
+      if (!run.__notifiedFeatures) run.__notifiedFeatures = new Set<string>();
+      for (const key of Object.keys(normalized)) {
+        const group = (normalized as any)[key];
+        const fid = String(group?.featureId || key);
+        if (fid === DEFAULT_FEATURE_KEY) continue; // skip task-level chat
+        if (run.__notifiedFeatures.has(fid)) continue;
+        const msgs = Array.isArray(group?.messages) ? group.messages : [];
+        if (msgs.length === 0) continue;
+        const finished = this.featureHasFinishTool(msgs);
+        if (finished) {
+          try {
+            await notificationsService.create(run.projectId, {
+              type: 'success',
+              category: 'tasks',
+              title: 'Feature completed',
+              message: `Task ${run.taskId} • Feature ${fid} committed`,
+              metadata: { taskId: run.taskId, featureId: fid },
+            } as any);
+          } catch (err) {
+            console.warn('[agentsService] Failed to create feature completion notification', (err as any)?.message || err);
+          }
+          run.__notifiedFeatures.add(fid);
+        }
+      }
+    } catch (err) {
+      console.warn('[agentsService] checkAndNotifyFeatureCompletions failed', (err as any)?.message || err);
+    }
+  }
+
   private wireRunEvents(run: RunRecord) {
     const onAny = (e: any) => {
       this.logEventVerbose(run, e);
@@ -297,20 +391,22 @@ class AgentsServiceImpl {
       // Conversation handling
       if (e.type === 'llm/messages/init') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey);
+        this.replaceMessages(run, msgs, featureKey, false, ts);
       } else if (e.type === 'llm/messages/snapshot') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey);
+        this.replaceMessages(run, msgs, featureKey, false, ts);
       } else if (e.type === 'llm/message') {
         const msg = e.payload?.message;
-        if (msg) this.appendMessage(run, msg, featureKey);
+        if (msg) this.appendMessage(run, msg, featureKey, ts);
         // Update last message time strictly on actual message events
         run.lastMessageAt = ts;
       } else if (e.type === 'llm/messages/final') {
         const msgs = e.payload?.messages ?? [];
-        this.replaceMessages(run, msgs, featureKey, true);
+        this.replaceMessages(run, msgs, featureKey, true, ts);
         // Finalize last message time at end of conversation
         run.lastMessageAt = ts;
+        // On final messages (end of a feature conversation), re-scan normalized messages and emit feature-complete notifications
+        this.checkAndNotifyFeatureCompletions(run);
       }
 
       // Meta updates
@@ -354,6 +450,8 @@ class AgentsServiceImpl {
         run.message = e.payload?.message || e.payload?.summary || 'Completed';
         // Fire notifications for completion
         this.fireCompletionNotifications(run);
+        // One last pass to detect any feature completions not captured earlier
+        this.checkAndNotifyFeatureCompletions(run);
       }
       this.notify();
       if (run.state !== 'running') {
@@ -410,6 +508,7 @@ class AgentsServiceImpl {
       messagesLog: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
+      __notifiedFeatures: new Set<string>(),
     } as RunRecord;
 
     this.wireRunEvents(run);
@@ -442,6 +541,7 @@ class AgentsServiceImpl {
       messagesLog: {},
       events,
       cancel: (reason?: string) => handle.cancel(reason),
+      __notifiedFeatures: new Set<string>(),
     } as RunRecord;
 
     this.wireRunEvents(run);

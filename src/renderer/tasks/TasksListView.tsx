@@ -11,7 +11,7 @@ import { useTasks } from '../hooks/useTasks'
 import { useAppSettings } from '../hooks/useAppSettings'
 import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
 import { useAgents } from '../hooks/useAgents'
-import { Status, Task } from 'packages/factory-ts/src/types'
+import { Status, Task } from 'thefactory-tools';
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
@@ -65,35 +65,47 @@ export default function TasksListView() {
   const { tasksById, updateTask, reorderTask, getBlockers, getBlockersOutbound } = useTasks()
   const { activeRuns, startTaskAgent } = useAgents()
 
+  // Prevent writing defaults over persisted settings on first mount
+  const [hydratedPrefs, setHydratedPrefs] = useState(false)
+
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
 
+  // Hydrate local state from persisted preferences once settings are loaded
   useEffect(() => {
     if (isAppSettingsLoaded){
       setView(appSettings.userPreferences.tasksViewMode)
       setSortBy(appSettings.userPreferences.tasksListViewSorting)
       setStatusFilter(appSettings.userPreferences.tasksListViewStatusFilter)
+      setHydratedPrefs(true)
     }
   }, [isAppSettingsLoaded])
 
+  // Persist changes only after hydration to avoid clobbering saved prefs with defaults
   useEffect(() => {
-    if (isAppSettingsLoaded){
-      setUserPreferences({ tasksViewMode: view })
+    if (isAppSettingsLoaded && hydratedPrefs){
+      if (appSettings.userPreferences.tasksViewMode !== view) {
+        setUserPreferences({ tasksViewMode: view })
+      }
     }
-  }, [view])
+  }, [view, isAppSettingsLoaded, hydratedPrefs])
   
   useEffect(() => {
-    if (isAppSettingsLoaded){
-      setUserPreferences({ tasksListViewSorting: sortBy })
+    if (isAppSettingsLoaded && hydratedPrefs){
+      if (appSettings.userPreferences.tasksListViewSorting !== sortBy) {
+        setUserPreferences({ tasksListViewSorting: sortBy })
+      }
     }
-  }, [sortBy])
+  }, [sortBy, isAppSettingsLoaded, hydratedPrefs])
 
   useEffect(() => {
-    if (isAppSettingsLoaded){
-      setUserPreferences({ tasksListViewStatusFilter: statusFilter })
+    if (isAppSettingsLoaded && hydratedPrefs){
+      if (appSettings.userPreferences.tasksListViewStatusFilter !== statusFilter) {
+        setUserPreferences({ tasksListViewStatusFilter: statusFilter })
+      }
     }
-  }, [statusFilter])
+  }, [statusFilter, isAppSettingsLoaded, hydratedPrefs])
   
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

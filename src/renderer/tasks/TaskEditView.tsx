@@ -4,7 +4,7 @@ import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useNavigator } from '../navigation/Navigator'
 import { useTasks } from '../hooks/useTasks'
-import { Task } from 'packages/factory-ts/src/types'
+import { Task } from 'thefactory-tools';
 
 export default function TaskEditView({ taskId, onRequestClose }: { taskId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()

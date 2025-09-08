@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { Status } from'packages/factory-ts/src/types'
+import type { Status } from 'thefactory-tools';
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 const STATUS_LABELS: Record<Status, string> = {

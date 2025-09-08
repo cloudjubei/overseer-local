@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Task, Status } from 'packages/factory-ts/src/types'
+import type { Status, Task } from 'thefactory-tools';
 import TaskCard from '../components/tasks/TaskCard'
 import { STATUS_LABELS, tasksService } from '../services/tasksService'
 import { useActiveProject } from '../projects/ProjectContext'

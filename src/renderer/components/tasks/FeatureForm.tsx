@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Status } from 'packages/factory-ts/src/types'
+import type { Status } from 'thefactory-tools';
 import StatusControl from './StatusControl'
 import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'

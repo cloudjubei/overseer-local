@@ -8,25 +8,17 @@
       "id": "7c431bc6-d88f-4e8b-be9e-496e40e2bf08",
       "status": "-",
       "title": "Online Mode Architecture and Repository Plan",
-      "description": "Define the high-level architecture for introducing online mode: 1) a new backend service repository (REST+WebSocket), 2) an agent runner micro-service (separate process, same repo or sibling), and 3) a shared library repository for protocol types and reusable logic. Deliverables: an ARCHITECTURE.md in docs/ describing components, data flow, service boundaries, Git-as-source-of-truth model, and offline-first requirements; a plan for repository creation (names, tech stacks, initial scaffolds), and how this app will select between local and backend modes.",
+      "description": "Define the high-level architecture for introducing online mode: 1) a new backend service repository (a Nest.js project serving REST+WebSocket), 2) an agent runner micro-service (separate process, same repo or sibling), and 3) a shared library repository for protocol types and reusable logic. Deliverables: an ARCHITECTURE.md in docs/ describing components, data flow, service boundaries, Git-as-source-of-truth model, and offline-first requirements; a plan for repository creation (names, tech stacks, initial scaffolds), and how this app will select between local and backend modes.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "1ff5f4b8-7573-4e00-8cd5-61a4b5572037",
       "status": "-",
       "title": "Git-based Storage Conventions and File Layout Spec",
       "description": "Document the canonical on-repo data model so both backend and clients operate identically offline/online. Specify directories and file formats for projects, tasks, features, and agent runs (e.g., project manifest, tasks directory with JSON/YAML, features directory, run logs/artifacts). Include conventions for big blob data references (e.g., pointers to external storage) and deterministic commit messages/branches used by automated changes. Output: docs/git_storage_conventions.md with schemas and examples.",
-      "plan": "",
-      "context": [],
-      "acceptance": []
-    },
-    {
-      "id": "c0f98ef2-0a81-4800-b275-4380a219b59c",
-      "status": "-",
-      "title": "API Surface Spec (OpenAPI) for Projects/Tasks/Features and Agent Runs",
-      "description": "Design an OpenAPI 3.1 spec that mirrors local capabilities: CRUD for projects/tasks/features mapped to Git edits/commits; agent run endpoints (enqueue, status, cancel), streaming logs/events (WebSocket or SSE), and search endpoints (optional). Include pagination, filtering, and error models. Define auth headers and repository identification (URL/ID). Place initial openapi.yaml under docs/backend_api and include request/response schemas that map to the Git storage conventions.",
       "plan": "",
       "context": [],
       "acceptance": []
@@ -161,20 +153,19 @@
   "featureIdToDisplayIndex": {
     "7c431bc6-d88f-4e8b-be9e-496e40e2bf08": 1,
     "1ff5f4b8-7573-4e00-8cd5-61a4b5572037": 2,
-    "c0f98ef2-0a81-4800-b275-4380a219b59c": 3,
-    "78c2ef49-59e4-4e65-b969-7478d615cbb3": 4,
-    "7b4799f4-6b2d-4d31-9140-2ffb210444e5": 5,
-    "cf26e479-dbb5-45f1-a03e-ab849e5eb1b4": 6,
-    "bd6fb615-0fee-4724-9393-acb086d4fb17": 7,
-    "8ec41328-1bc4-4165-8738-e26bac938f44": 8,
-    "eea79fc6-197c-4c23-a40f-3b3c07ff347f": 9,
-    "0aa48fa5-c3ad-436a-801e-a8f8d920baa4": 10,
-    "1ace7bce-e474-4fec-977c-823ab2e7a995": 11,
-    "f1c8cca9-a634-4dc5-8927-a2dbd6f8a6b4": 12,
-    "4ba450ff-9730-401e-a3a9-be859563fadc": 13,
-    "e26e7617-3aa8-43d3-9347-61654003cb10": 14,
-    "30106152-88c2-4f0e-b702-892049e80c0a": 15,
-    "df317675-b2d6-4532-9216-fe4cd8d64838": 16,
-    "4d0c8be4-001a-4ae2-93c7-392c6908e5c8": 17
+    "78c2ef49-59e4-4e65-b969-7478d615cbb3": 3,
+    "7b4799f4-6b2d-4d31-9140-2ffb210444e5": 4,
+    "cf26e479-dbb5-45f1-a03e-ab849e5eb1b4": 5,
+    "bd6fb615-0fee-4724-9393-acb086d4fb17": 6,
+    "8ec41328-1bc4-4165-8738-e26bac938f44": 7,
+    "eea79fc6-197c-4c23-a40f-3b3c07ff347f": 8,
+    "0aa48fa5-c3ad-436a-801e-a8f8d920baa4": 9,
+    "1ace7bce-e474-4fec-977c-823ab2e7a995": 10,
+    "f1c8cca9-a634-4dc5-8927-a2dbd6f8a6b4": 11,
+    "4ba450ff-9730-401e-a3a9-be859563fadc": 12,
+    "e26e7617-3aa8-43d3-9347-61654003cb10": 13,
+    "30106152-88c2-4f0e-b702-892049e80c0a": 14,
+    "df317675-b2d6-4532-9216-fe4cd8d64838": 15,
+    "4d0c8be4-001a-4ae2-93c7-392c6908e5c8": 16
   }
 }

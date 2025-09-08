@@ -1,8 +1,0 @@
-{
-  "id": "89257920-d018-41bf-892a-583569d11d53",
-  "status": "-",
-  "title": "Cleaning up the tools",
-  "description": "Currently there are only fileTools and taskUtils - but all tools should be split by the context they serve.\nThere are test related functions inside taskUtils - those should be placed in a new file.\nThe whole project requires a README.md that will be updated with precise and concise information about each set of tools.",
-  "features": [],
-  "featureIdToDisplayIndex": {}
-}

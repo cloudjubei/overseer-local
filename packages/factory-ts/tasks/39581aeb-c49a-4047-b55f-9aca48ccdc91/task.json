@@ -1,8 +1,0 @@
-{
-  "id": "39581aeb-c49a-4047-b55f-9aca48ccdc91",
-  "status": "-",
-  "title": "Watch file changes and keep the SQL database up to date",
-  "description": "Whenever a file changes, we can directly update the database with everything but the embeddings - for that we need a system to queue up all files that require embeddings - and a user in the app can then launch an agent to trigger them.",
-  "features": [],
-  "featureIdToDisplayIndex": {}
-}

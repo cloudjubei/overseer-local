@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -576,17 +576,16 @@
     },
     {
       "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
-      "status": "-",
+      "status": "+",
       "title": "After closing the app and coming back none of the agent run histories show messages properly",
-      "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx",
+      "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx . Remember, the messages that are passed onto the LLM are in a strict format - they have to specify role as 'user'. For history purposes, the serialisation should add appropraite metadata information to make it easier to display later.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/orchestrator.ts",
         "src/renderer/components/agents/ChatConversation.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "These now show, but the fix was to reformat the messages on read. They should simply be recorded correctly in the right format in the first place."
+      "blockers": []
     },
     {
       "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
@@ -625,7 +624,7 @@
     },
     {
       "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
-      "status": "-",
+      "status": "+",
       "title": "Notifications should fire when an agent finishes work",
       "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
@@ -635,8 +634,7 @@
         "src/notifications/manager.js"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "The agent run doesn't have a featureId - the information about a feature being completed is inside the messagesLog"
+      "blockers": []
     },
     {
       "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
@@ -729,7 +727,7 @@
     },
     {
       "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
-      "status": "-",
+      "status": "+",
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "When switching screens from the @src/renderer/screens/TasksView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
       "plan": "",
@@ -754,16 +752,15 @@
     },
     {
       "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
-      "status": "-",
-      "title": "when searching commands in the command lookup it must be possible to use arrows to go up/down and select the appropriate command",
-      "description": "@src/renderer/components/ui/CommandMenu.tsx\n\nThe input box should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list.",
+      "status": "+",
+      "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
+      "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
       "plan": "",
       "context": [
         "src/renderer/components/ui/CommandMenu.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "This doesn't work"
+      "blockers": []
     },
     {
       "id": "55e5be40-2171-4e3d-91d9-db778a329ef1",
@@ -781,29 +778,34 @@
     },
     {
       "id": "7b2917b5-67da-437e-b11e-f11989bbae7e",
-      "status": "-",
+      "status": "+",
       "title": "when a notification is read - don't show the count in the sidebar",
-      "description": "Also, show a nice round badge with the number inside - similar in style to iOS notifications.\nThis is in @src/renderer/navigation/SidebarView.tsx",
+      "description": "Right now, when going to the @src/renderer/screens/NotificationsView.tsx if the user clicks a notification it should be read (but the badge in the @src/renderer/navigation/SidebarView.tsx  isn't updated).\nWhen clicking mark all as read- the badge should disappear.\nSame goes for clearing all notifications - there are no notifications, so there should be no badge.",
       "plan": "",
       "context": [
-        "src/renderer/navigation/SidebarView.tsx"
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
       "blockers": []
     },
     {
       "id": "a45449ab-b745-460c-b065-6e92345ebd39",
-      "status": "-",
+      "status": "+",
       "title": "clicking a run finished notification takes the user to that agent run",
-      "description": "",
+      "description": "@src/renderer/hooks/useNotifications.ts @src/renderer/services/notificationsService.ts \nclicking a notification should take the appropriate place in @src/renderer/screens/AgentsView.tsx",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/hooks/useNotifications.ts",
+        "src/renderer/services/notificationsService.ts",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
     {
       "id": "f1b430d4-d14d-437b-affb-d326d3227c41",
-      "status": "-",
+      "status": "+",
       "title": "There's an addition \"_task\" feature log displayed in an agent run",
       "description": "This shouldn't happen.\nIt's displayed in @src/renderer/components/agents/ChatConversation.tsx and probably originates from:\n@packages/factory-ts/src/orchestrator.ts",
       "plan": "",
@@ -816,13 +818,88 @@
     },
     {
       "id": "065bac4d-1035-48de-9f17-2bbe2e35a300",
-      "status": "-",
+      "status": "+",
       "title": "All agent turn messages should show their thinking time next to the message bubble",
-      "description": "This is inside @src/renderer/components/agents/ChatConversation.tsx",
+      "description": "Inside @src/renderer/components/agents/ChatConversation.tsx for each turn where an agent sends a message (and the agent's thoughts are shown), next to it (there's space in the right padding area), show a the thinking time as a chip. @src/renderer/services/agentsService.ts needs to be updated so that messages stored from llms have the time they were askedAt recorded and then the thinking time is the difference between that and the time the message is received.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/services/agentsService.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "86314974-b368-49d5-8137-4b5b0d053adb",
+      "status": "+",
+      "title": "Running a task from another project, when one is ongoing fails",
+      "description": "A run is in progress for 1 project, and then a 2nd one is started for a 2nd project - this 2nd one immediately fails.\nThe @packages/factory-ts/src/fileTools.ts and @packages/factory-ts/src/taskUtils.ts were storing a projec root field that was conflicting - this was now fixed, but perhaps there's another field that is causing a similar issue? Something inside\n@packages/factory-ts/src/orchestrator.ts or @src/tools/factory/mainOrchestrator.js should be at fault here",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js",
+        "packages/factory-ts/src/fileTools.ts",
+        "packages/factory-ts/src/taskUtils.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "229130f0-bcb6-49b4-9c5b-fe4bad68356d",
+      "status": "+",
+      "title": "When viewing an ongoing run - the current messages are not updating",
+      "description": "This is in @src/renderer/components/agents/ChatConversation.tsx - also if the user is at the end of the current messages (i.e. displaying the last turn) the view should scroll to the latest message received.",
       "plan": "",
       "context": [
         "src/renderer/components/agents/ChatConversation.tsx"
       ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "8b99905a-e392-4264-abe2-0bb454504281",
+      "status": "+",
+      "title": "Only the latest Feature and its latest turn are open by default",
+      "description": "When a user opens a @src/renderer/components/agents/ChatConversation.tsx it should have all features but the latest one closed. The latest's features latest turn should be the only one open and scrolled to.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "a2c93def-ae45-462c-9967-32824f897ee8",
+      "status": "+",
+      "title": "Showing the wrong Features numbers",
+      "description": "In @src/renderer/screens/AgentsView.tsx a run is displaying the wrong features count - it seems to count the special \"__task__\" as a separate feature.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "22e6034f-027b-4c22-9496-3802c1de783d",
+      "status": "+",
+      "title": "the package factory-ts must have proper path",
+      "description": "The function 'loadBuiltInDefaults' in @packages/factory-ts/src/pricing.ts  and functions 'loadAgentDocs' and 'loadProtocolExample' in  @packages/factory-ts/src/orchestrator.ts have references to the path pointing to 'packages/factory-ts' - this must be changed to point to a relative path to the root of the factory-ts project, so that it could be moved anywhere",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/pricing.ts",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "5b0430ba-fbbc-4103-a11b-223c96270cfb",
+      "status": "+",
+      "title": "factory-ts should be loaded as a proper npm-module",
+      "description": "Currently there's a lot of relative paths inside this project that reference 'factory-ts' - that shouldn't be the case. It should be loaded into this project as a node package and used the correct way.",
+      "plan": "",
+      "context": [],
       "acceptance": [],
       "blockers": []
     }
@@ -883,13 +960,19 @@
     "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 53,
     "006bc18d-88c6-4257-9d76-69ad87c9c502": 54,
     "55e5be40-2171-4e3d-91d9-db778a329ef1": 55,
-    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 56,
-    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 57,
-    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 58,
-    "7b2917b5-67da-437e-b11e-f11989bbae7e": 59,
-    "df22d856-9aa3-4c10-9e91-04291697e0b8": 60,
-    "a45449ab-b745-460c-b065-6e92345ebd39": 61,
-    "f1b430d4-d14d-437b-affb-d326d3227c41": 62,
-    "065bac4d-1035-48de-9f17-2bbe2e35a300": 63
+    "f1b430d4-d14d-437b-affb-d326d3227c41": 56,
+    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 57,
+    "a45449ab-b745-460c-b065-6e92345ebd39": 58,
+    "86314974-b368-49d5-8137-4b5b0d053adb": 59,
+    "065bac4d-1035-48de-9f17-2bbe2e35a300": 60,
+    "7b2917b5-67da-437e-b11e-f11989bbae7e": 61,
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 62,
+    "229130f0-bcb6-49b4-9c5b-fe4bad68356d": 63,
+    "8b99905a-e392-4264-abe2-0bb454504281": 64,
+    "a2c93def-ae45-462c-9967-32824f897ee8": 65,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 66,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 67,
+    "22e6034f-027b-4c22-9496-3802c1de783d": 68,
+    "5b0430ba-fbbc-4103-a11b-223c96270cfb": 69
   }
 }

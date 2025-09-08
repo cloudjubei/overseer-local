@@ -1,4 +1,4 @@
-import { Task } from 'packages/factory-ts/src/types'
+import { Task } from 'thefactory-tools';
 import StatusControl from './StatusControl';
 
 export default function TaskSummaryCard({ task, className = '' }: { task: Task; className?: string }) {
