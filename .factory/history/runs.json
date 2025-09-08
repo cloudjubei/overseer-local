@@ -1,5 +1,17 @@
 [
   {
+    "runId": "task_w8hkl6bk_mfbqy1j7",
+    "agentType": "speccer",
+    "projectId": "thefactory-tools",
+    "taskId": "a04bff77-3c82-43e6-b4bc-3dc669be08dd",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-08T23:22:11.398Z",
+    "updatedAt": "2025-09-08T23:22:26.404Z"
+  },
+  {
     "runId": "task_7btxi72t_mfbqd2gy",
     "agentType": "speccer",
     "projectId": "thefactory-tools",

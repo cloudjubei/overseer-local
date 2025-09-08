@@ -44,12 +44,17 @@ function filterTasks(tasks: Task[], { query, status }: { query: string; status: 
 const STATUS_ORDER = ['-', '~', '+', '=', '?']
 
 export default function TasksListView() {
+  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
+  const view = appSettings.userPreferences.tasksViewMode
+  const setView = (view: TaskViewMode) => setUserPreferences({ tasksViewMode: view })
+  const sortBy = appSettings.userPreferences.tasksListViewSorting
+  const setSortBy = (sortBy: TaskListViewSorting) => setUserPreferences({ tasksListViewSorting: sortBy })
+  const statusFilter = appSettings.userPreferences.tasksListViewStatusFilter
+  const setStatusFilter = (statusFilter: TaskListStatusFilter) => setUserPreferences({ tasksListViewStatusFilter: statusFilter })
+
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<TaskListStatusFilter>('all')
-  const [sortBy, setSortBy] = useState<TaskListViewSorting>('index_desc')
   const [saving, setSaving] = useState(false)
-  const [view, setView] = useState<TaskViewMode>('list')
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
@@ -61,51 +66,12 @@ export default function TasksListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project, projectId } = useActiveProject()
-  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
   const { tasksById, updateTask, reorderTask, getBlockers, getBlockersOutbound } = useTasks()
   const { activeRuns, startTaskAgent } = useAgents()
-
-  // Prevent writing defaults over persisted settings on first mount
-  const [hydratedPrefs, setHydratedPrefs] = useState(false)
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
-
-  // Hydrate local state from persisted preferences once settings are loaded
-  useEffect(() => {
-    if (isAppSettingsLoaded){
-      setView(appSettings.userPreferences.tasksViewMode)
-      setSortBy(appSettings.userPreferences.tasksListViewSorting)
-      setStatusFilter(appSettings.userPreferences.tasksListViewStatusFilter)
-      setHydratedPrefs(true)
-    }
-  }, [isAppSettingsLoaded])
-
-  // Persist changes only after hydration to avoid clobbering saved prefs with defaults
-  useEffect(() => {
-    if (isAppSettingsLoaded && hydratedPrefs){
-      if (appSettings.userPreferences.tasksViewMode !== view) {
-        setUserPreferences({ tasksViewMode: view })
-      }
-    }
-  }, [view, isAppSettingsLoaded, hydratedPrefs])
-  
-  useEffect(() => {
-    if (isAppSettingsLoaded && hydratedPrefs){
-      if (appSettings.userPreferences.tasksListViewSorting !== sortBy) {
-        setUserPreferences({ tasksListViewSorting: sortBy })
-      }
-    }
-  }, [sortBy, isAppSettingsLoaded, hydratedPrefs])
-
-  useEffect(() => {
-    if (isAppSettingsLoaded && hydratedPrefs){
-      if (appSettings.userPreferences.tasksListViewStatusFilter !== statusFilter) {
-        setUserPreferences({ tasksListViewStatusFilter: statusFilter })
-      }
-    }
-  }, [statusFilter, isAppSettingsLoaded, hydratedPrefs])
   
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -115,7 +81,7 @@ export default function TasksListView() {
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'b')) {
         e.preventDefault()
-        setView((v) => (v === 'list' ? 'board' : 'list'))
+        setView(view === 'list' ? 'board' : 'list')
       }
     }
     window.addEventListener('keydown', onKey)
