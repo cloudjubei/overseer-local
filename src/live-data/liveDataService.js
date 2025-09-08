@@ -2,14 +2,20 @@ import { ipcMain } from 'electron';
 import AppStorage from '../settings/appStorage';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
 
+// Types alignment with src/live-data/types.ts
+// freshnessPolicy: 'daily' | 'weekly' | 'monthly'
+// autoUpdate: { enabled: boolean; trigger: 'onAppLaunch' | 'scheduled' }
+// lastUpdated: number (unix timestamp ms)
+
 const DEFAULT_SERVICES_CONFIG = [
   {
     id: 'agent-prices',
     name: 'Agent Prices',
     description: 'Fetches the latest prices for common AI models from various providers.',
-    freshness: 'daily', // 'daily', 'weekly', 'monthly'
-    autoUpdate: true,
-    lastUpdated: null,
+    freshnessPolicy: 'daily',
+    autoUpdate: { enabled: true, trigger: 'onAppLaunch' },
+    lastUpdated: 0,
+    config: {},
     isUpdating: false,
   }
 ];
@@ -27,24 +33,41 @@ export class LiveDataService {
     return 'services-config';
   }
 
+  _normalizeServiceShape(service) {
+    // Ensure persisted services match the latest shape
+    return {
+      id: service.id,
+      name: service.name,
+      description: service.description,
+      freshnessPolicy: service.freshnessPolicy || service.freshness || 'daily',
+      autoUpdate: typeof service.autoUpdate === 'object'
+        ? { enabled: !!service.autoUpdate.enabled, trigger: service.autoUpdate.trigger || 'onAppLaunch' }
+        : { enabled: !!service.autoUpdate, trigger: 'onAppLaunch' },
+      lastUpdated: typeof service.lastUpdated === 'number' ? service.lastUpdated : (service.lastUpdated ? new Date(service.lastUpdated).getTime() : 0),
+      config: service.config || {},
+      isUpdating: !!service.isUpdating,
+    };
+  }
+
   _loadServices() {
     try {
       const stored = this.storage.getItem(this._storageKey());
       if (stored) {
         const parsed = JSON.parse(stored);
-        const serviceIds = new Set(parsed.map(s => s.id));
+        const mapped = Array.isArray(parsed) ? parsed.map(s => this._normalizeServiceShape(s)) : [];
+        const serviceIds = new Set(mapped.map(s => s.id));
         for (const defaultService of DEFAULT_SERVICES_CONFIG) {
           if (!serviceIds.has(defaultService.id)) {
-            parsed.push(defaultService);
+            mapped.push(this._normalizeServiceShape(defaultService));
           }
         }
-        return parsed;
+        return mapped;
       } else {
-        return DEFAULT_SERVICES_CONFIG;
+        return DEFAULT_SERVICES_CONFIG.map(s => this._normalizeServiceShape(s));
       }
     } catch (e) {
       console.error('Error loading live data services config:', e);
-      return DEFAULT_SERVICES_CONFIG;
+      return DEFAULT_SERVICES_CONFIG.map(s => this._normalizeServiceShape(s));
     }
   }
 
@@ -58,6 +81,8 @@ export class LiveDataService {
   
   async init() {
     this._registerIpcHandlers();
+    // Optionally trigger on-app-launch updates if needed
+    this._maybeTriggerOnLaunchUpdates();
   }
 
   _registerIpcHandlers() {
@@ -69,41 +94,41 @@ export class LiveDataService {
 
     this._ipcBound = true;
   }
-  
+
   getServicesStatus() {
     return this.services.map(service => {
-        const isFresh = this._isDataFresh(service);
-        return { ...service, isFresh };
+      const isFresh = this._isDataFresh(service);
+      return { ...service, isFresh };
     });
   }
   
   _isDataFresh(service) {
-      if (!service.lastUpdated) return false;
-
-      const now = new Date();
-      const lastUpdated = new Date(service.lastUpdated);
-      const diff = now.getTime() - lastUpdated.getTime();
-      const diffDays = diff / (1000 * 3600 * 24);
-
-      switch (service.freshness) {
-          case 'daily':
-              return diffDays < 1;
-          case 'weekly':
-              return diffDays < 7;
-          case 'monthly':
-              return diffDays < 30; // Approximation
-          default:
-              return false;
-      }
+    if (!service.lastUpdated) return false;
+    const now = Date.now();
+    const diffMs = now - service.lastUpdated;
+    const dayMs = 24 * 60 * 60 * 1000;
+    switch (service.freshnessPolicy) {
+      case 'daily':
+        return diffMs < dayMs;
+      case 'weekly':
+        return diffMs < 7 * dayMs;
+      case 'monthly':
+        return diffMs < 30 * dayMs; // Approximation
+      default:
+        return false;
+    }
   }
 
   updateServiceConfig(serviceId, updates) {
-    const service = this.services.find(s => s.id === serviceId);
-    if (service) {
-      Object.assign(service, updates);
+    const idx = this.services.findIndex(s => s.id === serviceId);
+    if (idx !== -1) {
+      const before = this.services[idx];
+      // Shallow merge with normalization for known fields
+      const merged = this._normalizeServiceShape({ ...before, ...updates });
+      this.services[idx] = merged;
       this._saveServices();
-      this.window.webContents.send(IPC_HANDLER_KEYS.LIVE_DATA_STATUS_UPDATED, this.getServicesStatus());
-      return service;
+      this._emitStatus();
+      return merged;
     }
     return null;
   }
@@ -111,29 +136,51 @@ export class LiveDataService {
   async triggerUpdate(serviceId) {
     const service = this.services.find(s => s.id === serviceId);
     if (!service || service.isUpdating) {
-      return;
+      return this.getServicesStatus();
     }
 
     service.isUpdating = true;
-    this.window.webContents.send(IPC_HANDLER_KEYS.LIVE_DATA_STATUS_UPDATED, this.getServicesStatus());
+    this._emitStatus();
 
     try {
-      // In a real scenario, we would call a function to fetch the data.
-      // For now, we just simulate it.
-      await new Promise(resolve => setTimeout(resolve, 2000)); // simulate network request
-      
-      service.lastUpdated = new Date().toISOString();
-
+      // TODO: integrate actual data fetcher per serviceId.
+      // For now, simulate network delay.
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      service.lastUpdated = Date.now();
     } catch (error) {
       console.error(`Error updating live data service ${serviceId}:`, error);
     } finally {
       service.isUpdating = false;
       this._saveServices();
+      this._emitStatus();
+    }
+
+    return this.getServicesStatus();
+  }
+
+  _emitStatus() {
+    if (!this.window || this.window.isDestroyed()) return;
+    try {
       this.window.webContents.send(IPC_HANDLER_KEYS.LIVE_DATA_STATUS_UPDATED, this.getServicesStatus());
+    } catch (e) {
+      console.warn('Failed to emit LIVE_DATA_STATUS_UPDATED:', e);
+    }
+  }
+
+  _maybeTriggerOnLaunchUpdates() {
+    // If autoUpdate.enabled && trigger === 'onAppLaunch' and not fresh, trigger update
+    for (const svc of this.services) {
+      if (svc.autoUpdate?.enabled && svc.autoUpdate?.trigger === 'onAppLaunch') {
+        const fresh = this._isDataFresh(svc);
+        if (!fresh) {
+          // Fire and forget; no await to not block app start
+          this.triggerUpdate(svc.id);
+        }
+      }
     }
   }
 
   stopWatching() {
-    // cleanup if needed
+    // no-op for now; placeholder for timers if we add scheduled trigger
   }
 }
