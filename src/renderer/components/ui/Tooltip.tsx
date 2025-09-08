@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 
 export type TooltipProps = {
@@ -15,6 +15,7 @@ export default function Tooltip({ children, content, placement = 'right', delayM
   const timerRef = useRef<number | null>(null);
   const anchorRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const tooltipId = useId();
 
   const child = React.Children.only(children);
 
@@ -117,10 +118,11 @@ export default function Tooltip({ children, content, placement = 'right', delayM
         onMouseLeave: (e: any) => { child.props.onMouseLeave?.(e); hide(); },
         onFocus: (e: any) => { child.props.onFocus?.(e); show(); },
         onBlur: (e: any) => { child.props.onBlur?.(e); hide(); },
-        'aria-describedby': open ? 'tooltip' : undefined,
+        onKeyDown: (e: any) => { child.props.onKeyDown?.(e); if (e.key === 'Escape') { hide(); } },
+        'aria-describedby': open ? tooltipId : undefined,
       })}
       {open && position && createPortal(
-        <div className="ui-tooltip" role="tooltip" ref={tooltipRef} style={{ position: 'absolute', top: position.top, left: position.left }}>
+        <div className="ui-tooltip" role="tooltip" id={tooltipId} ref={tooltipRef} style={{ position: 'absolute', top: position.top, left: position.left }}>
           <div className="ui-tooltip__content">{content}</div>
         </div>,
         document.body

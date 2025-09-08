@@ -764,7 +764,7 @@
     },
     {
       "id": "35d46d98-8f89-483a-9470-e2e615fd41a9",
-      "status": "-",
+      "status": "+",
       "title": "Tooltip accessibility and robustness improvements",
       "description": "Make Tooltip component ARIA-correct and safe for multiple instances.\n\nImplementation details (src/renderer/components/ui/Tooltip.tsx):\n- Generate a unique id per tooltip instance (e.g., useId) and assign it to the tooltip element; set anchor 'aria-describedby' to that id when open.\n- Remove hardcoded 'aria-describedby'='tooltip'.\n- Add Escape key handling to hide when focused on the anchor.\n- Ensure role=tooltip and correct z-index are preserved.\n\nAcceptance criteria:\n- Two adjacent buttons using Tooltip both show their own content and 'aria-describedby' points to their unique tooltip id when open.\n- Pressing Escape while the anchor has focus hides the tooltip.\n- No duplicate id usage across multiple tooltip instances.",
       "plan": "",
