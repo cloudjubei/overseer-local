@@ -1,18 +1,15 @@
-Git Monitor Service
+# Git Monitor Service
 
-Overview
-- Periodically monitors the local git repository for updates.
-- Fetches remotes and detects new commits on local branches.
-- Emits events: started, stopped, branchesUpdated, error.
+This service watches Git repositories for new commits and branch head changes to keep the app in sync with active tasks and features.
 
-Usage
-- Import in the main process and start on app init.
+## Branch naming helper
 
-Example
-```
-import { GitMonitorService } from './main/services/git-monitor/GitMonitorService';
+This folder contains `branchNaming.js`, a small utility that defines the task-to-branch naming convention used by the monitor:
 
-const monitor = new GitMonitorService({ repoPath: projectRoot, intervalMs: 60000 });
-monitor.on('branchesUpdated', (changes) => { /* handle */ });
-await monitor.start();
-```
+- Convention: `features/<taskId>`
+- Exposed helpers:
+  - `toBranchName(taskId)` -> `features/<taskId>`
+  - `isFeatureBranch(branchName)` -> boolean
+  - `parseTaskIdFromBranch(branchName)` -> `<taskId> | null`
+
+Use these helpers anywhere you need to map between tasks and their corresponding Git branches.
