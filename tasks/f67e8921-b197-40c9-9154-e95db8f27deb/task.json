@@ -818,13 +818,14 @@
     },
     {
       "id": "9fb948d2-235d-4322-9462-93a9ca8ce283",
-      "status": "-",
+      "status": "?",
       "title": "New section in settings - configuring WebSearch Api keys for exa, serpapi and tavily",
       "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a key for each of the tools and save it.",
       "context": [
         "src/renderer/screens/SettingsView.tsx"
       ],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot convert undefined or null to object"
     },
     {
       "id": "8acda51f-97c8-4614-8800-cb2d7607bf16",

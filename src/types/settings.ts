@@ -14,6 +14,12 @@ export interface GithubCredentials {
   token: string;
 }
 
+export interface WebSearchApiKeys {
+  exa: string;
+  serpapi: string;
+  tavily: string;
+}
+
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   userPreferences: {
     lastActiveProjectId: 'main',
@@ -38,11 +44,17 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     username: '',
     token: '',
   },
+  webSearchApiKeys: {
+    exa: '',
+    serpapi: '',
+    tavily: '',
+  },
 }
 export interface AppSettings {
   userPreferences: UserPreferences
   notificationSystemSettings: NotificationSystemSettings
   github: GithubCredentials
+  webSearchApiKeys: WebSearchApiKeys
 }
 
 export interface NotificationSystemSettings {
