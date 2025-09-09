@@ -22,8 +22,7 @@ const CATEGORIES = [
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 export default function SettingsView() {
-  const themes: Theme[] = ['light', 'dark'];
-  const { theme, setTheme } = useTheme();
+  const { availableThemes, theme, setTheme } = useTheme();
   const { isAppSettingsLoaded, appSettings, setNotificationSystemSettings, updateAppSettings } = useAppSettings();
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings();
   const { enableNotifications } = useNotifications();
@@ -72,13 +71,11 @@ export default function SettingsView() {
           id="theme"
           value={theme}
           onChange={(e) => {
-            const t = e.target.value as Theme;
-            setTheme(t);
-            try { localStorage.setItem('theme', t); } catch {}
+            setTheme(e.target.value as Theme);
           }}
           className="w-64 p-2 border border-gray-300 rounded-md focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
         >
-          {themes.map((t) => (
+          {availableThemes.map((t) => (
             <option key={t} value={t}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </option>

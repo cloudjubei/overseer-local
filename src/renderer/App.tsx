@@ -7,10 +7,10 @@ import { NavigatorProvider, useNavigator } from './navigation/Navigator';
 import { ShortcutsProvider, useShortcuts } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
-import { initTheme } from './hooks/useTheme';
 import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
 import { useAppSettings } from './hooks/useAppSettings';
+import { useTheme } from './hooks/useTheme';
 
 const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
 
@@ -60,6 +60,8 @@ function NotificationClickHandler() {
 
 function App()
 {
+  const { initTheme } = useTheme();
+  
   useEffect(() => { initTheme() }, [])
 
   return (
