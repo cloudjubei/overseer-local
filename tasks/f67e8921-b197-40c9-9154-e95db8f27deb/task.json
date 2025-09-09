@@ -876,7 +876,7 @@
     },
     {
       "id": "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce",
-      "status": "-",
+      "status": "+",
       "title": "when switching projects - go to the base of a given screen",
       "description": "Right now when viewing a task and switching projects - it shows that task from the new project's perspective which isn't found.\nWe need to make sure that in such cases we go to the main sidebar screen - in the task example - @src/renderer/tasks/TasksListView.tsx .\n@src/renderer/navigation/SidebarView.tsx is where we switch projects.",
       "plan": "",
