@@ -16,7 +16,9 @@ import { type ShortcutsModifier, type ShortcutsConfig, type AppSettings, DEFAULT
 const CATEGORIES = [
   { id: 'visual', label: 'Visual', icon: <span aria-hidden>🎨</span>, accent: 'purple' },
   { id: 'llms', label: 'LLMs', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
-  { id: 'notifications', label: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'brand' }
+  { id: 'notifications', label: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'brand' },
+  { id: 'github', label: 'GitHub', icon: <span aria-hidden>🐙</span>, accent: 'gray' },
+  { id: 'websearch', label: 'Web Search', icon: <span aria-hidden>🔎</span>, accent: 'orange' },
 ];
 
 type CategoryId = typeof CATEGORIES[number]['id'];
@@ -254,6 +256,84 @@ export default function SettingsView() {
     </div>
   );
 
+  const renderGithubSection = () => (
+    <div className="max-w-3xl">
+      <h2 className="text-xl font-semibold mb-3">GitHub Credentials</h2>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="gh-username" className="block text-sm font-medium mb-1">Username</label>
+          <input
+            id="gh-username"
+            type="text"
+            value={appSettings.github?.username ?? ''}
+            onChange={(e) => updateAppSettings({ github: { ...appSettings.github, username: e.target.value } })}
+            className="w-full max-w-md p-2 border border-gray-300 rounded-md"
+            placeholder="your-github-username"
+            autoComplete="username"
+          />
+        </div>
+        <div>
+          <label htmlFor="gh-token" className="block text-sm font-medium mb-1">Personal Access Token</label>
+          <input
+            id="gh-token"
+            type="password"
+            value={appSettings.github?.token ?? ''}
+            onChange={(e) => updateAppSettings({ github: { ...appSettings.github, token: e.target.value } })}
+            className="w-full max-w-md p-2 border border-gray-300 rounded-md"
+            placeholder="ghp_..."
+            autoComplete="new-password"
+          />
+          <p className="text-[12px] text-[var(--text-secondary)] mt-1">Token is stored locally in app settings.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderWebSearchSection = () => (
+    <div className="max-w-3xl">
+      <h2 className="text-xl font-semibold mb-3">Web Search API Keys</h2>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="exa-key" className="block text-sm font-medium mb-1">Exa API Key</label>
+          <input
+            id="exa-key"
+            type="password"
+            value={appSettings.webSearchApiKeys?.exa ?? ''}
+            onChange={(e) => updateAppSettings({ webSearchApiKeys: { ...appSettings.webSearchApiKeys, exa: e.target.value } })}
+            className="w-full max-w-md p-2 border border-gray-300 rounded-md"
+            placeholder="exa_..."
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label htmlFor="serpapi-key" className="block text-sm font-medium mb-1">SerpAPI Key</label>
+          <input
+            id="serpapi-key"
+            type="password"
+            value={appSettings.webSearchApiKeys?.serpapi ?? ''}
+            onChange={(e) => updateAppSettings({ webSearchApiKeys: { ...appSettings.webSearchApiKeys, serpapi: e.target.value } })}
+            className="w-full max-w-md p-2 border border-gray-300 rounded-md"
+            placeholder="your_serpapi_key"
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label htmlFor="tavily-key" className="block text-sm font-medium mb-1">Tavily API Key</label>
+          <input
+            id="tavily-key"
+            type="password"
+            value={appSettings.webSearchApiKeys?.tavily ?? ''}
+            onChange={(e) => updateAppSettings({ webSearchApiKeys: { ...appSettings.webSearchApiKeys, tavily: e.target.value } })}
+            className="w-full max-w-md p-2 border border-gray-300 rounded-md"
+            placeholder="tvly-..."
+            autoComplete="off"
+          />
+        </div>
+        <p className="text-[12px] text-[var(--text-secondary)] mt-1">Keys are stored locally in app settings.</p>
+      </div>
+    </div>
+  );
+
   return (
     <CollapsibleSidebar
       items={CATEGORIES}
@@ -267,6 +347,8 @@ export default function SettingsView() {
       {isAppSettingsLoaded && activeCategory === 'visual' && renderVisualSection()}
       {isAppSettingsLoaded && activeCategory === 'llms' && renderLLMsSection()}
       {isAppSettingsLoaded && activeCategory === 'notifications' && renderNotificationsSection()}
+      {isAppSettingsLoaded && activeCategory === 'github' && renderGithubSection()}
+      {isAppSettingsLoaded && activeCategory === 'websearch' && renderWebSearchSection()}
     </CollapsibleSidebar>
   );
 }

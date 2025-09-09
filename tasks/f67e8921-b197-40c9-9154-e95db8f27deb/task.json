@@ -818,7 +818,7 @@
     },
     {
       "id": "9fb948d2-235d-4322-9462-93a9ca8ce283",
-      "status": "-",
+      "status": "+",
       "title": "New section in settings - configuring WebSearch Api keys for exa, serpapi and tavily",
       "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a key for each of the tools and save it.",
       "context": [
@@ -830,9 +830,11 @@
       "id": "8acda51f-97c8-4614-8800-cb2d7607bf16",
       "status": "-",
       "title": "Use the configuration of WebSearch api keys - exa, serpapi and tavily",
-      "description": "Just like the @src/renderer/utils/LLMConfigManager.ts and @src/settings/SettingsLLMConfigModal.tsx  we need to have configs for WebSearch that can be used via 'thefactory-tools'. \nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js when calling 'orchestrator.startRun' .\nThis must be a new options section in @src/renderer/screens/SettingsView.tsx .",
+      "description": "We are storing the api keys to these inside @src/renderer/screens/SettingsView.tsx - we need to use them in  'thefactory-tools' that has webSearch tooling.\nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js when calling 'orchestrator.startRun' .",
       "plan": "",
-      "context": [],
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
       "acceptance": [],
       "blockers": [
         "f67e8921-b197-40c9-9154-e95db8f27deb.9fb948d2-235d-4322-9462-93a9ca8ce283"
@@ -840,7 +842,7 @@
     },
     {
       "id": "bb3a99c3-4e37-47ae-b3df-4b6f5317faed",
-      "status": "-",
+      "status": "+",
       "title": "New Section in Settings - configuring github credentials",
       "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a username and a personal token.\nIt has to be persisted across sessions.",
       "plan": "",
@@ -858,6 +860,20 @@
         "src/renderer/screens/LiveDataView.tsx",
         "src/renderer/hooks/useLiveData.tsx",
         "src/renderer/services/liveDataService.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "c995b222-0cf9-4150-a6ab-9421d3b00586",
+      "status": "?",
+      "title": "Use the configured github credentials and pass them onto thefactory-tools",
+      "description": "We are storing the github credentials inside @src/renderer/screens/SettingsView.tsx  - we need to use them in  'thefactory-tools' that has github tooling.\nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js  when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js  when calling 'orchestrator.startRun' .",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/chat/ChatsManager.js",
+        "src/tools/factory/mainOrchestrator.js"
       ],
       "acceptance": [],
       "blockers": []
@@ -931,6 +947,7 @@
     "bb3a99c3-4e37-47ae-b3df-4b6f5317faed": 65,
     "9fb948d2-235d-4322-9462-93a9ca8ce283": 66,
     "8acda51f-97c8-4614-8800-cb2d7607bf16": 67,
-    "ada1bb79-e120-493b-b0ba-13d11951b42b": 68
+    "ada1bb79-e120-493b-b0ba-13d11951b42b": 68,
+    "c995b222-0cf9-4150-a6ab-9421d3b00586": 69
   }
 }

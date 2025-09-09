@@ -9,6 +9,17 @@ export type ShortcutsConfig = {
   addUiFeature: string;     // e.g., 'Mod+Shift+F'
 }
 
+export interface GithubCredentials {
+  username: string;
+  token: string;
+}
+
+export interface WebSearchApiKeys {
+  exa: string;
+  serpapi: string;
+  tavily: string;
+}
+
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   userPreferences: {
     lastActiveProjectId: 'main',
@@ -29,10 +40,21 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     soundsEnabled: true,
     displayDuration: 5,
   },
+  github: {
+    username: '',
+    token: '',
+  },
+  webSearchApiKeys: {
+    exa: '',
+    serpapi: '',
+    tavily: '',
+  },
 }
 export interface AppSettings {
   userPreferences: UserPreferences
   notificationSystemSettings: NotificationSystemSettings
+  github: GithubCredentials
+  webSearchApiKeys: WebSearchApiKeys
 }
 
 export interface NotificationSystemSettings {
