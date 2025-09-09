@@ -24,11 +24,12 @@
     },
     {
       "id": "db4124ad-21e9-460b-854c-f4a885688400",
-      "status": "-",
+      "status": "?",
       "title": "Develop Commit Analyzer to Extract Feature Status",
       "description": "Build a module that can inspect a given git commit on a task branch. It will search for a `task.json` file within the commit's file tree. If the file exists, it will parse it to extract the status and details of the features associated with the task. This will use git commands to view file contents at a specific revision without checking out the entire branch.",
       "context": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot convert undefined or null to object"
     },
     {
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
