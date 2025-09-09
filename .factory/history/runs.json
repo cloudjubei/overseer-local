@@ -1,5 +1,17 @@
 [
   {
+    "runId": "task_393mnatz_mfd3fc92",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "running",
+    "message": "Starting agent... ",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-09T21:59:20.006Z",
+    "updatedAt": "2025-09-09T21:59:20.006Z"
+  },
+  {
     "runId": "task_4oidmomb_mfd2kl2a",
     "agentType": "developer",
     "projectId": "thefactory-tools",

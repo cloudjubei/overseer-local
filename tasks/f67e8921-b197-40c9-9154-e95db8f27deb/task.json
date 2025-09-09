@@ -864,7 +864,7 @@
     },
     {
       "id": "270271e3-5a53-45ed-9c31-131e9bb4f36b",
-      "status": "-",
+      "status": "+",
       "title": "Loading screen",
       "description": "We need a loading screen that will show at the beginning of app launch, while all necessary things are being loaded. This needs to be a separate screen - placed under `src/renderer/screens` just like @src/renderer/screens/TasksView.tsx . The app entry is in @src/renderer/App.tsx .\nFor the time being - make sure the loading screen loads the user preferences and app settings - @src/renderer/hooks/useAppSettings.ts",
       "plan": "",
