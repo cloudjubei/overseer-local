@@ -1,5 +1,56 @@
 [
   {
+    "runId": "task_393mnatz_mfd3fc92",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-09T21:59:20.006Z",
+    "updatedAt": "2025-09-09T22:02:53.103Z",
+    "costUSD": 0.12360499999999999,
+    "promptTokens": 10852,
+    "completionTokens": 11004
+  },
+  {
+    "runId": "task_ryasvg91_mfd3j5w1",
+    "agentType": "speccer",
+    "projectId": "thefactory-tools",
+    "taskId": "f7b9f525-a4ca-4296-ba46-6c3a3e7b5d03",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "startedAt": "2025-09-09T22:02:18.386Z",
+    "updatedAt": "2025-09-09T22:02:20.851Z"
+  },
+  {
+    "runId": "task_zsmdsivs_mfd3gx9r",
+    "agentType": "speccer",
+    "projectId": "thefactory-tools",
+    "taskId": "f7b9f525-a4ca-4296-ba46-6c3a3e7b5d03",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "xai",
+    "model": "grok-4",
+    "startedAt": "2025-09-09T22:00:33.904Z",
+    "updatedAt": "2025-09-09T22:00:36.524Z"
+  },
+  {
+    "runId": "task_1l1oanyq_mfd3fx8s",
+    "agentType": "speccer",
+    "projectId": "thefactory-tools",
+    "taskId": "f7b9f525-a4ca-4296-ba46-6c3a3e7b5d03",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "claude-4-sonnet-20250514",
+    "startedAt": "2025-09-09T21:59:47.213Z",
+    "updatedAt": "2025-09-09T21:59:49.913Z"
+  },
+  {
     "runId": "task_4oidmomb_mfd2kl2a",
     "agentType": "developer",
     "projectId": "thefactory-tools",
