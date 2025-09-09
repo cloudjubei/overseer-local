@@ -1,8 +1,6 @@
 import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun, deleteHistoryRun } from '../../tools/factory/orchestratorBridge';
-import { LLMConfigManager } from '../utils/LLMConfigManager';
-import { AgentType, LLMConfig } from 'thefactory-tools';
+import { AgentType, LLMConfig, GithubCredentials, WebSearchApiKeys } from 'thefactory-tools';
 import { notificationsService } from './notificationsService';
-import { GithubCredentials } from 'thefactory-tools/dist/types';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
@@ -73,7 +71,6 @@ const DEFAULT_FEATURE_KEY = '__task__';
 class AgentsServiceImpl {
   private runs = new Map<string, RunRecord>();
   private subscribers = new Set<Subscriber>();
-  private llmManager = new LLMConfigManager();
   private bootstrapped = false;
 
   private notify() {
@@ -462,14 +459,6 @@ class AgentsServiceImpl {
     run.events.addEventListener('*', onAny);
   }
 
-  private getActiveLLMConfig(): LLMConfig | null {
-    try {
-      return this.llmManager.getActiveConfig() as unknown as LLMConfig;
-    } catch {
-      return null;
-    }
-  }
-
   private async coerceAgentTypeForTask(agentType: AgentType, projectId: string, taskId: string): Promise<AgentType> {
     try {
       const task = await window.tasksService.getTask(projectId, taskId);
@@ -483,19 +472,8 @@ class AgentsServiceImpl {
     }
   }
 
-  async startTaskAgent(agentType: AgentType, projectId: string, taskId: string): Promise<AgentRun> {
-    const llmConfig = this.getActiveLLMConfig();
-    if (!llmConfig){
-      throw new Error("NO ACTIVE LLM CONFIG") 
-    }
-    const githubCredentials : GithubCredentials = { 
-      repoUrl: process.env["GIT_REPO_URL"]!,
-      username: process.env["GIT_USER_NAME"]!,
-      email: process.env["GIT_USER_EMAIL"]!,
-      token: process.env["GIT_PAT"]!,
-    }
-    const webSearchApiKeys = undefined
-
+  async startTaskAgent(agentType: AgentType, projectId: string, taskId: string, llmConfig: LLMConfig, githubCredentials: GithubCredentials, webSearchApiKeys?: WebSearchApiKeys): Promise<AgentRun> {
+    
     // Enforce default: when the task has no features, prefer speccer (global behavior)
     const effectiveAgentType = await this.coerceAgentTypeForTask(agentType, projectId, taskId);
 
@@ -526,18 +504,7 @@ class AgentsServiceImpl {
     return this.publicFromRecord(run);
   }
 
-  async startFeatureAgent(agentType: AgentType, projectId: string, taskId: string, featureId: string): Promise<AgentRun> {
-    const llmConfig = this.getActiveLLMConfig();
-    if (!llmConfig){
-      throw new Error("NO ACTIVE LLM CONFIG") 
-    }
-    const githubCredentials : GithubCredentials = { 
-      repoUrl: process.env["GIT_REPO_URL"]!,
-      username: process.env["GIT_USER_NAME"]!,
-      email: process.env["GIT_USER_EMAIL"]!,
-      token: process.env["GIT_PAT"]!,
-    }
-    const webSearchApiKeys = undefined
+  async startFeatureAgent(agentType: AgentType, projectId: string, taskId: string, featureId: string, llmConfig: LLMConfig, githubCredentials : GithubCredentials, webSearchApiKeys? : WebSearchApiKeys): Promise<AgentRun> {
     console.log('[agentsService] startFeatureAgent', { agentType, projectId, taskId, featureId, llmConfig: redactConfig(llmConfig) });
     const { handle, events } = await startFeatureRun({ agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options: { } });
     const run: RunRecord = {

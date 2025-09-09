@@ -9,7 +9,7 @@ import { buildChatTools } from 'thefactory-tools'
 const MESSAGES_TO_SEND = 10
 
 export class ChatsManager {
-  constructor(projectRoot, window, projectsManager, tasksManager, filesManager) {
+  constructor(projectRoot, window, projectsManager, tasksManager, filesManager, settingsManager) {
     this.projectRoot = projectRoot;
     this.window = window;
     this.storages = {};
@@ -18,6 +18,7 @@ export class ChatsManager {
     this.projectsManager = projectsManager
     this.tasksManager = tasksManager
     this.filesManager = filesManager
+    this.settingsManager = settingsManager
   }
 
   async __getStorage(projectId) {
@@ -113,7 +114,10 @@ export class ChatsManager {
       let currentMessages = [systemPrompt, ...providerMessages];
 
       const repoRoot = this.projectRoot
-      const { tools, callTool } = buildChatTools({ repoRoot, projectId });
+      const appSettings = this.settingsManager.getAppSettings();
+      const webSearchApiKeys = appSettings.webSearchApiKeys;
+
+      const { tools, callTool } = buildChatTools({ repoRoot, projectId, webSearchApiKeys });
 
       const provider = new LLMProvider(config);
 

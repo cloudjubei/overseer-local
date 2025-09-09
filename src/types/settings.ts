@@ -1,4 +1,5 @@
 import { NotificationCategory } from "src/types/notifications";
+import { GithubCredentials, WebSearchApiKeys } from "thefactory-tools";
 
 export type ShortcutsModifier = 'meta' | 'ctrl';
 
@@ -7,17 +8,6 @@ export type ShortcutsConfig = {
   newTask: string;          // e.g., 'Mod+N'
   help: string;             // e.g., 'Mod+/'
   addUiFeature: string;     // e.g., 'Mod+Shift+F'
-}
-
-export interface GithubCredentials {
-  username: string;
-  token: string;
-}
-
-export interface WebSearchApiKeys {
-  exa: string;
-  serpapi: string;
-  tavily: string;
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -42,12 +32,10 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   },
   github: {
     username: '',
+    email: '',
     token: '',
   },
   webSearchApiKeys: {
-    exa: '',
-    serpapi: '',
-    tavily: '',
   },
 }
 export interface AppSettings {
