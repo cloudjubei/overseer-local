@@ -18,6 +18,7 @@ import AgentRunBullet from '../components/agents/AgentRunBullet'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
+import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -210,6 +211,55 @@ export default function TasksListView() {
   const currentFilterLabel = statusFilter === 'all' ? 'All' : (statusFilter === 'not-done' ? 'Not done' : `${STATUS_LABELS[statusFilter as Status]}`)
   const k = statusFilter === 'all' ? 'queued' : (statusFilter === 'not-done' ? 'queued' : statusKey(statusFilter as Status))
 
+  const SkeletonRow = () => (
+    <li className="task-item" role="listitem" aria-hidden>
+      <div className="task-row">
+        <div className="task-grid">
+          <div className="col col-id">
+            <Skeleton className="w-8 h-5 rounded-sm mr-2" />
+            <div className="flex items-center gap-2 mt-2">
+              <Skeleton className="w-6 h-6 rounded-full" />
+              <Skeleton className="w-10 h-3 rounded" />
+            </div>
+          </div>
+          <div className="col col-title">
+            <div className="title-line">
+              <Skeleton className="h-4 w-3/4 rounded" />
+            </div>
+          </div>
+          <div className="col col-description">
+            <div className="desc-line">
+              <SkeletonText lines={2} lineClassName="w-[90%]" />
+            </div>
+          </div>
+          <div className="col col-actions">
+            <div className="flex items-center gap-2 justify-end">
+              <Skeleton className="w-8 h-8 rounded" />
+              <Skeleton className="w-20 h-8 rounded" />
+            </div>
+          </div>
+          <div className="col col-blockers">
+            <div className="chips-list">
+              <Skeleton className="w-16 h-3 rounded" />
+              <div className="flex flex-wrap gap-1 mt-2">
+                <Skeleton className="w-12 h-6 rounded-full" />
+                <Skeleton className="w-12 h-6 rounded-full" />
+                <Skeleton className="w-12 h-6 rounded-full" />
+              </div>
+            </div>
+            <div className="chips-list mt-3">
+              <Skeleton className="w-12 h-3 rounded" />
+              <div className="flex flex-wrap gap-1 mt-2">
+                <Skeleton className="w-10 h-6 rounded-full" />
+                <Skeleton className="w-10 h-6 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  )
+
   return (
     <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
       <div className="tasks-toolbar shrink-0">
@@ -286,7 +336,11 @@ export default function TasksListView() {
       ) : (
         <div id="tasks-results" className="flex-1 min-h-0 overflow-y-auto tasks-results" tabIndex={-1}>
           {!isAppSettingsLoaded ? (
-            <div className="empty" aria-live="polite">Loading...</div>
+            <ul className="tasks-list" role="list" aria-label="Loading tasks">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))}
+            </ul>
           ) : filtered.length === 0 ? (
             <div className="empty">No tasks found.</div>
           ) : (

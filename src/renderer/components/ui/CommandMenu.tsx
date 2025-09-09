@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigator } from '../../navigation/Navigator';
-import { useShortcuts, comboMatcher } from '../../hooks/useShortcuts';
+import { useShortcuts } from '../../hooks/useShortcuts';
 import { useAppSettings } from '../../hooks/useAppSettings';
 
 export type CommandMenuApi = {
@@ -15,8 +15,8 @@ const UI_IMPROVEMENTS_TASK_ID = 'f9eef18e-818e-427d-82ab-8d990bb199c4';
 const commandsBase = (
   nav: ReturnType<typeof useNavigator>
 ) => [
-  { id: 'add-ui-feature', label: 'Add Feature to UI Improvements', shortcut: 'Cmd/Ctrl+Shift+F', run: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }) },
-  { id: 'new-task', label: 'New Task', shortcut: 'Cmd/Ctrl+N', run: () => nav.openModal({ type: 'task-create' }) },
+  { id: 'add-ui-feature', label: 'Add Feature to UI Improvements', run: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }) },
+  { id: 'new-task', label: 'New Task', run: () => nav.openModal({ type: 'task-create' }) },
   { id: 'go-home', label: 'Go to Home', run: () => nav.navigateView('Home') },
   { id: 'go-files', label: 'Go to Files', run: () => nav.navigateView('Files') },
   { id: 'go-chat', label: 'Go to Chat', run: () => nav.navigateView('Chat') },
@@ -26,7 +26,7 @@ const commandsBase = (
 
 export default function CommandMenu() {
   const nav = useNavigator();
-  const { register } = useShortcuts();
+  const { register, prettyCombo  } = useShortcuts();
   const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -41,7 +41,7 @@ export default function CommandMenu() {
   const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    return register({ id: 'command-menu', keys: comboMatcher(combos.commandMenu), handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); }, description: 'Open command menu', scope: 'global' });
+    return register({ id: 'command-menu', comboKeys: combos.commandMenu, handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); }, description: 'Open command menu', scope: 'global' });
   }, [register, combos.commandMenu]);
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 0); }, [open]);
@@ -103,6 +103,19 @@ export default function CommandMenu() {
     }
   };
 
+  const kbdHint = useMemo(() => {
+    const str = prettyCombo(combos.commandMenu);
+    return str.replace('⌘+', '⌘'); // Use compact glyph form on mac preference
+  }, [prettyCombo, combos.commandMenu]);
+
+  // Map command ids to shortcut combos from settings to avoid hardcoded placeholders
+  const idToCombo: Record<string, string> = {
+    'command-menu': combos.commandMenu,
+    'help': combos.help,
+    'add-ui-feature': combos.addUiFeature,
+    'new-task': combos.newTask,
+  };
+
   if (!open) return null;
   return createPortal(
     <div className="cmd-overlay" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
@@ -131,11 +144,12 @@ export default function CommandMenu() {
               else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
             }}
           />
-          <kbd className="kbd">⌘K</kbd>
+          <kbd className="kbd">{kbdHint}</kbd>
         </div>
         <ul className="cmd__list" role="listbox" id={listboxId} ref={listRef}>
           {filtered.map((cmd, i) => {
             const active = i === selectedIndex;
+            const comboStr = idToCombo[cmd.id as keyof typeof idToCombo];
             return (
               <li
                 key={cmd.id}
@@ -151,7 +165,7 @@ export default function CommandMenu() {
                   onClick={() => { cmd.run(); setOpen(false); }}
                 >
                   <span>{cmd.label}</span>
-                  {cmd.shortcut ? <span className="cmd__shortcut">{cmd.shortcut}</span> : null}
+                  {comboStr ? <span className="cmd__shortcut">{prettyCombo(comboStr)}</span> : null}
                 </button>
               </li>
             );

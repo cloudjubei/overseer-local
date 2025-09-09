@@ -764,7 +764,7 @@
     },
     {
       "id": "35d46d98-8f89-483a-9470-e2e615fd41a9",
-      "status": "-",
+      "status": "+",
       "title": "Tooltip accessibility and robustness improvements",
       "description": "Make Tooltip component ARIA-correct and safe for multiple instances.\n\nImplementation details (src/renderer/components/ui/Tooltip.tsx):\n- Generate a unique id per tooltip instance (e.g., useId) and assign it to the tooltip element; set anchor 'aria-describedby' to that id when open.\n- Remove hardcoded 'aria-describedby'='tooltip'.\n- Add Escape key handling to hide when focused on the anchor.\n- Ensure role=tooltip and correct z-index are preserved.\n\nAcceptance criteria:\n- Two adjacent buttons using Tooltip both show their own content and 'aria-describedby' points to their unique tooltip id when open.\n- Pressing Escape while the anchor has focus hides the tooltip.\n- No duplicate id usage across multiple tooltip instances.",
       "plan": "",
@@ -773,7 +773,7 @@
     },
     {
       "id": "e358e778-5d29-492a-8943-e67e31b45833",
-      "status": "-",
+      "status": "+",
       "title": "Modal accessibility: aria-labelledby/aria-describedby and scroll lock",
       "description": "Improve Modal semantics and body scroll behavior.\n\nImplementation details (src/renderer/components/ui/Modal.tsx):\n- Give the title element a unique id and wire 'aria-labelledby' on the dialog to that id when title exists.\n- Allow optional description id wiring via 'aria-describedby' (useful from AlertDialog when description is provided).\n- Lock body scrolling while a modal is open (set document.body.style.overflow='hidden') and restore on close/unmount.\n\nAcceptance criteria:\n- Screen readers announce the modal title and description upon opening.\n- While a modal is open, the page behind it cannot scroll; once closed, body scrolling returns to its previous state.\n- Existing focus trapping and Escape behavior remain intact.",
       "plan": "",
@@ -784,14 +784,18 @@
       "id": "7a9408fc-aa0e-4957-82b5-b9ba58ef81b6",
       "status": "-",
       "title": "Add 'System' theme option with OS auto-detection",
-      "description": "Extend theming to support a 'system' mode that follows the OS preference.\n\nImplementation details:\n- Update src/renderer/hooks/useTheme.ts to support Theme = 'light' | 'dark' | 'system'.\n- When 'system' is selected, resolve the effective theme from window.matchMedia('(prefers-color-scheme: dark)') and subscribe to changes to update live.\n- Persist 'system' in localStorage and ensure initTheme applies the resolved theme before first paint (no theme flash).\n- Update Settings UI (src/renderer/screens/SettingsView.tsx) to offer Light/Dark/System choices and save selection to app settings.\n\nAcceptance criteria:\n- Selecting 'System' switches the app automatically to the OS theme and updates live when the OS theme changes.\n- Selection persists across restarts.\n- Existing light/dark behavior remains unchanged when explicitly chosen.",
+      "description": "Extend theming to support a 'system' mode that follows the OS preference.\n\nImplementation details:\n- Update @src/renderer/hooks/useTheme.ts  to support Theme = 'light' | 'dark' | 'system'.\n- When 'system' is selected, resolve the effective theme from window.matchMedia('(prefers-color-scheme: dark)') and subscribe to changes to update live.\n- Persist 'system' in localStorage and ensure initTheme applies the resolved theme before first paint (no theme flash).\n- Update Settings UI @src/renderer/screens/SettingsView.tsx  to offer Light/Dark/System choices and save selection to app settings.\n\nAcceptance criteria:\n- Selecting 'System' switches the app automatically to the OS theme and updates live when the OS theme changes.\n- Selection persists across restarts.\n- Existing light/dark behavior remains unchanged when explicitly chosen.",
       "plan": "",
-      "context": [],
-      "acceptance": []
+      "context": [
+        "src/renderer/hooks/useTheme.ts",
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     },
     {
       "id": "27201172-7e31-4e3b-bf06-eb1737ddfadb",
-      "status": "-",
+      "status": "+",
       "title": "Dynamic modifier glyphs in shortcuts UI and command menu",
       "description": "Render keyboard shortcuts using the user-selected modifier (Cmd vs Ctrl) consistently.\n\nImplementation details:\n- Enhance src/renderer/hooks/useShortcuts.tsx to expose a read-only getter for the current modifier (e.g., export function getShortcutsModifier(): 'meta' | 'ctrl').\n- Update src/renderer/components/ui/ShortcutsHelp.tsx and src/renderer/components/ui/CommandMenu.tsx to format displayed shortcuts based on the current modifier, replacing hardcoded 'Cmd/Ctrl' strings (e.g., show '⌘K' on mac modifier and 'Ctrl+K' otherwise).\n\nAcceptance criteria:\n- Changing the shortcuts modifier in app settings (after reload, consistent with current provider behavior) updates the displayed shortcut glyphs in ShortcutsHelp and CommandMenu.\n- All visible shortcut hints reflect the correct modifier (no \"Cmd/Ctrl\" placeholders).",
       "plan": "",
@@ -800,7 +804,7 @@
     },
     {
       "id": "98cc6216-a675-40cb-b763-5ac3ccc98b65",
-      "status": "-",
+      "status": "+",
       "title": "CollapsibleSidebar semantics: use buttons for actionable items",
       "description": "Improve navigation item semantics for better accessibility.\n\nImplementation details (src/renderer/components/ui/CollapsibleSidebar.tsx):\n- Replace the inner div with role=\"button\" for each clickable nav item with an actual <button> element, preserving current classes and event handlers.\n- Keep roving tabindex behavior and keyboard activation (Enter/Space) intact, but rely on native button semantics.\n- Ensure aria-current or aria-selected is still used appropriately.\n\nAcceptance criteria:\n- Keyboard navigation (ArrowUp/ArrowDown/Home/End + Enter/Space activation) works as before.\n- Screen readers announce items as buttons within navigation; no loss of functionality.\n- No regression in compact/collapsed behavior and badges/actions rendering.",
       "plan": "",
@@ -809,7 +813,7 @@
     },
     {
       "id": "a940d772-c613-427c-9dd4-88984e9f24ec",
-      "status": "-",
+      "status": "+",
       "title": "TasksListView: skeletons for initial loading state",
       "description": "Replace text-only loading state with skeleton placeholders for a smoother UX.\n\nImplementation details (src/renderer/tasks/TasksListView.tsx):\n- When isAppSettingsLoaded is false, render a list of ~6 skeleton rows using src/renderer/components/ui/Skeleton.tsx to approximate task rows' layout (id/status area, title/desc lines, and actions area blocks).\n- Keep current \"Loading settings…\" live region messaging accessible (aria-live politely) in the count area.\n\nAcceptance criteria:\n- Before settings are loaded, task area shows skeleton placeholders instead of a static 'Loading...' string.\n- Once loaded, skeletons disappear and the real content renders.\n- No layout shift beyond expected content replacement.",
       "plan": "",
@@ -818,7 +822,7 @@
     },
     {
       "id": "50188f39-ce56-4087-90fb-70a107a7357f",
-      "status": "-",
+      "status": "+",
       "title": "Consistent focus-visible styling on interactive elements",
       "description": "Ensure keyboard users see a consistent focus outline across buttons, nav items, and inputs.\n\nImplementation details:\n- Update CSS (src/index.css) to provide a consistent :focus-visible ring/outline for .btn, .btn-secondary, .btn-icon, .nav-item, .nav-toggle, .nav-trigger, .ui-select trigger, inputs, and other clickable UI controls.\n- Do not override focus when using mouse; rely on :focus-visible.\n\nAcceptance criteria:\n- Tabbing through the UI shows clear, consistent focus outlines on all interactive controls mentioned.\n- Mouse users do not see focus outlines unless they keyboard-focus an element (focus-visible behavior).",
       "plan": "",
@@ -830,16 +834,13 @@
       "status": "-",
       "title": "thefactory-tools has new webSearch functionality - allow to configure it",
       "description": "Just like the @src/renderer/utils/LLMConfigManager.ts and @src/settings/SettingsLLMConfigModal.tsx  we need to have configs for WebSearch that can be used via 'thefactory-tools'. \nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js when calling 'orchestrator.startRun' .\nThis must be a new options section in @src/renderer/screens/SettingsView.tsx .",
-      "plan": "",
       "context": [
         "src/renderer/utils/LLMConfigManager.ts",
         "src/settings/SettingsLLMConfigModal.tsx",
         "src/renderer/screens/SettingsView.tsx",
         "src/chat/ChatsManager.js",
         "src/tools/factory/mainOrchestrator.js"
-      ],
-      "acceptance": [],
-      "blockers": []
+      ]
     }
   ],
   "featureIdToDisplayIndex": {

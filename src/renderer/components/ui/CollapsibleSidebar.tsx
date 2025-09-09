@@ -125,26 +125,22 @@ export default function CollapsibleSidebar(props: Props) {
                 const isActive = activeId === item.id;
                 return (
                   <li key={item.id} className="nav-li">
-                    <div
-                      className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
-                      role="button"
-                      aria-current={isActive ? 'page' : undefined}
-                      onClick={() => onSelect(item.id)}
-                      title={item.label}
-                      tabIndex={focusIndex === i ? 0 : -1}
-                      onFocus={() => setFocusIndex(i)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelect(item.id);
-                        }
-                      }}
-                    >
-                      {item.icon && <span className="nav-item__icon">{item.icon}</span>}
-                      {!collapsed && <span className="nav-item__label">{item.label}</span>}
-                      {item.badge && item.badge > 0 && (
-                        <span className="nav-item__badge">{item.badge}</span>
-                      )}
+                    <div className="flex items-center nav-row">
+                      <button
+                        type="button"
+                        className={`nav-item ${isActive ? 'nav-item--active' : ''} ${collapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                        aria-current={isActive ? 'page' : undefined}
+                        onClick={() => onSelect(item.id)}
+                        title={item.label}
+                        tabIndex={focusIndex === i ? 0 : -1}
+                        onFocus={() => setFocusIndex(i)}
+                      >
+                        {item.icon && <span className="nav-item__icon">{item.icon}</span>}
+                        {!collapsed && <span className="nav-item__label">{item.label}</span>}
+                        {item.badge && item.badge > 0 && (
+                          <span className="nav-item__badge">{item.badge}</span>
+                        )}
+                      </button>
                       {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
                     </div>
                   </li>

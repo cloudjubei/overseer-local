@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useId } from "react";
 
 export type ModalProps = {
   isOpen: boolean;
@@ -9,6 +9,9 @@ export type ModalProps = {
   size?: "sm" | "md" | "lg" | "xl";
   hideCloseButton?: boolean;
   initialFocusRef?: React.RefObject<HTMLElement>;
+  // Optional id of a description element rendered within the modal content
+  // When provided, the dialog will set aria-describedby to this id
+  descriptionId?: string;
 };
 
 function sizeClass(size?: ModalProps["size"]) {
@@ -36,10 +39,15 @@ function getFocusable(container: HTMLElement | null): HTMLElement[] {
   return nodes.filter(n => !n.hasAttribute('disabled') && !n.getAttribute('aria-hidden'));
 }
 
-export function Modal({ isOpen, onClose, title, children, footer, size, hideCloseButton, initialFocusRef }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, footer, size, hideCloseButton, initialFocusRef, descriptionId }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocusedEl = useRef<HTMLElement | null>(null);
+  const previousOverflowRef = useRef<string>("");
+
+  // Unique title id for aria-labelledby
+  const reactId = useId();
+  const titleId = title ? `modal-title-${reactId}` : undefined;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,6 +57,16 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
+
+  // Lock body scroll while modal is open, restore on close/unmount
+  useEffect(() => {
+    if (!isOpen) return;
+    previousOverflowRef.current = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflowRef.current;
+    };
+  }, [isOpen]);
 
   useLayoutEffect(() => {
     if (!isOpen) return;
@@ -102,10 +120,12 @@ export function Modal({ isOpen, onClose, title, children, footer, size, hideClos
         }
         role="dialog"
         aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-describedby={descriptionId}
         onKeyDown={onKeyDown}
       >
         <div className="flex items-start justify-between gap-4 border-b p-4 shrink-0 border-border">
-          <div className="text-base font-semibold">{title}</div>
+          <div className="text-base font-semibold" id={titleId}>{title}</div>
           {!hideCloseButton && (
             <button
               type="button"
@@ -148,12 +168,17 @@ export function AlertDialog({
   initialFocusRef?: React.RefObject<HTMLElement>;
 }) {
   const confirmRef = initialFocusRef || React.useRef<HTMLButtonElement>(null);
+  // Generate a description id only when a description is provided
+  const descriptionReactId = React.useId();
+  const descId = description ? `modal-description-${descriptionReactId}` : undefined;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
       initialFocusRef={confirmRef as React.RefObject<HTMLElement>}
+      descriptionId={descId}
       footer={
         <div className="flex justify-end gap-2">
           <button
@@ -175,7 +200,7 @@ export function AlertDialog({
         </div>
       }
     >
-      {description ? <p className="text-sm text-text-secondary">{description}</p> : null}
+      {description ? <p id={descId} className="text-sm text-text-secondary">{description}</p> : null}
     </Modal>
   );
 }
