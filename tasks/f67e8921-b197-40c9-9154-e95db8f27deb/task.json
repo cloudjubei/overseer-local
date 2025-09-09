@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "~",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -864,7 +864,7 @@
     },
     {
       "id": "270271e3-5a53-45ed-9c31-131e9bb4f36b",
-      "status": "-",
+      "status": "+",
       "title": "Loading screen",
       "description": "We need a loading screen that will show at the beginning of app launch, while all necessary things are being loaded.\nFor the time being - that's just the user preferences and app settings.\n@src/renderer/App.tsx",
       "plan": "",

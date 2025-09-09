@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import SidebarView from './navigation/SidebarView';
 import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
@@ -69,8 +69,15 @@ function NotificationClickHandler() {
   return null;
 }
 
-function App()
-{
+function LoadingScreen() {
+  return (
+    <div className="flex items-center justify-center h-screen w-screen bg-gray-800 text-gray-100">
+      <div className="text-lg font-medium">Loading Application...</div>
+    </div>
+  );
+}
+
+function AppContent() {
   const { initTheme } = useTheme();
 
   useEffect(() => { initTheme(); }, [])
@@ -93,6 +100,15 @@ function App()
         </NavigatorProvider>
       </ProjectsProvider>
     </ToastProvider>
+  );
+}
+
+function App()
+{
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <AppContent />
+    </Suspense>
   );
 }
 
