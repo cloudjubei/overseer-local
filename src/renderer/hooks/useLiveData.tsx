@@ -1,24 +1,37 @@
-import { useEffect, useState } from 'react';
-import { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
+import { useEffect, useMemo, useState } from 'react';
+import { LiveDataProviderStatus, LiveDataProvider } from '../../live-data/LiveDataTypes';
 import { liveDataService } from '../services/liveDataService';
+import { useActiveProject } from '../projects/ProjectContext';
 
 export default function useLiveData() {
+  const { projectId: activeProjectId } = useActiveProject();
+
+  const [allServices, setAllServices] = useState<LiveDataProviderStatus[]>([]);
   const [services, setServices] = useState<LiveDataProviderStatus[]>([]);
   const [servicesById, setServicesById] = useState<Record<string,LiveDataProviderStatus>>({});
 
+  const filterForProject = (items: LiveDataProviderStatus[], projectId: string) => {
+    return (items || []).filter(s => (s.scope !== 'project') || (s.projectId === projectId));
+  };
+
+  const recomputeVisible = (items: LiveDataProviderStatus[], projectId: string) => {
+    const filtered = filterForProject(items, projectId);
+    setServices(filtered);
+    const map: Record<string, LiveDataProviderStatus> = {};
+    for (const s of filtered) map[s.id] = s;
+    setServicesById(map);
+  };
+
   const update = async () => {
-      const services = await liveDataService.getStatus()
-      updateCurrentServices(services)
-  }
-  const updateCurrentServices = (services: LiveDataProvider[]) => {
-    setServices(services)
-    
-    let newServicesById : Record<string,LiveDataProvider> = {}
-    for(const s of services){
-      newServicesById[s.id] = s
-    }
-    setServicesById(newServicesById)
-  }
+    const statuses = await liveDataService.getStatus();
+    setAllServices(statuses);
+    recomputeVisible(statuses, activeProjectId);
+  };
+
+  const updateCurrentServices = (statuses: LiveDataProviderStatus[]) => {
+    setAllServices(statuses);
+    recomputeVisible(statuses, activeProjectId);
+  };
   
   useEffect(() => {
     update();
@@ -28,7 +41,14 @@ export default function useLiveData() {
     return () => {
       unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // If active project changes, re-filter without refetching
+  useEffect(() => {
+    recomputeVisible(allServices, activeProjectId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProjectId]);
 
   const triggerUpdate = async (serviceId: string) : Promise<LiveDataProviderStatus | undefined> =>  {
     return await liveDataService.triggerUpdate(serviceId)

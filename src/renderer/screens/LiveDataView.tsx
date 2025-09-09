@@ -3,6 +3,7 @@ import type { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/L
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import useLiveData from '../hooks/useLiveData';
+import { useActiveProject } from '../projects/ProjectContext';
 
 function formatLastUpdated(ts: number | undefined | null) {
   if (!ts) return 'never';
@@ -29,9 +30,11 @@ type NewServiceForm = {
   freshnessPolicy: LiveDataProvider['freshnessPolicy'];
   autoEnabled: boolean;
   autoTrigger: 'onAppLaunch' | 'scheduled';
+  scope: 'global' | 'project';
 };
 
 export default function LiveDataView() {
+  const { projectId: activeProjectId } = useActiveProject();
   const { services, servicesById, triggerUpdate, updateConfig, addService } = useLiveData()
   const [openViewer, setOpenViewer] = useState<Record<string, boolean>>({});
   const [loadingData, setLoadingData] = useState<Record<string, boolean>>({});
@@ -49,6 +52,7 @@ export default function LiveDataView() {
     freshnessPolicy: 'daily',
     autoEnabled: true,
     autoTrigger: 'onAppLaunch',
+    scope: 'project',
   });
 
   const toggleViewer = async (s: LiveDataProviderStatus) => {
@@ -91,7 +95,7 @@ export default function LiveDataView() {
   };
 
   const resetAddForm = () => {
-    setNewSvc({ id: '', name: '', description: '', url: '', freshnessPolicy: 'daily', autoEnabled: true, autoTrigger: 'onAppLaunch' });
+    setNewSvc({ id: '', name: '', description: '', url: '', freshnessPolicy: 'daily', autoEnabled: true, autoTrigger: 'onAppLaunch', scope: 'project' });
     setAddError(undefined);
   };
 
@@ -117,6 +121,8 @@ export default function LiveDataView() {
         freshnessPolicy: newSvc.freshnessPolicy,
         autoUpdate: { enabled: !!newSvc.autoEnabled, trigger: newSvc.autoTrigger },
         config: newSvc.url ? { url: newSvc.url.trim() } : {},
+        scope: newSvc.scope,
+        projectId: newSvc.scope === 'project' ? activeProjectId : null,
       };
       await addService(payload);
       setShowAddForm(false);
@@ -208,6 +214,25 @@ export default function LiveDataView() {
               </Select>
             </div>
 
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Visibility</label>
+              <Select
+                value={newSvc.scope}
+                onValueChange={(val: 'global' | 'project') => setNewSvc({ ...newSvc, scope: val })}
+              >
+                <SelectTrigger size="sm">
+                  <SelectValue placeholder="Select scope" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="project">This project only</SelectItem>
+                  <SelectItem value="global">All projects (global)</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-xs text-gray-500">
+                {newSvc.scope === 'project' ? `Will be attached to project: ${activeProjectId}` : 'Visible from every project.'}
+              </span>
+            </div>
+
             <div className="flex flex-col gap-2">
               <Switch
                 checked={!!newSvc.autoEnabled}
@@ -254,14 +279,19 @@ export default function LiveDataView() {
       )}
 
       {services.length === 0 ? (
-        <div className="mt-4 text-gray-700">No live data services are configured.</div>
+        <div className="mt-4 text-gray-700">No live data services are configured for this project.</div>
       ) : (
         <div className="mt-4 space-y-3">
           {services.map((s) => (
             <div key={s.id} className="border rounded p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">{s.name}</div>
+                  <div className="font-semibold flex items-center gap-2">
+                    <span>{s.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${s.scope === 'project' ? 'text-purple-700 border-purple-300 bg-purple-50' : 'text-gray-700 border-gray-300 bg-gray-50'}`}>
+                      {s.scope === 'project' ? 'Project' : 'Global'}
+                    </span>
+                  </div>
                   {s.description && <div className="text-sm text-gray-600">{s.description}</div>}
                 </div>
                 <div className="flex items-center gap-2">

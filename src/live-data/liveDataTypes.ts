@@ -1,5 +1,6 @@
 export type LiveDataProviderFreshnessPolicy = 'daily' | 'weekly' | 'monthly';
 export type LiveDataProviderAutoUpdateTrigger = 'onAppLaunch' | 'scheduled';
+export type LiveDataProviderScope = 'global' | 'project';
 
 export interface LiveDataProviderAutoUpdateSettings {
   enabled: boolean;
@@ -15,6 +16,9 @@ export interface LiveDataProvider {
   freshnessPolicy: LiveDataProviderFreshnessPolicy;
   autoUpdate: LiveDataProviderAutoUpdateSettings;
   config: any; // Service-specific configuration
+  // Scope controls visibility/ownership of this provider
+  scope?: LiveDataProviderScope; // default: 'global'
+  projectId?: string | null; // when scope === 'project'
 }
 
 export interface LiveDataProviderStatus extends LiveDataProvider {

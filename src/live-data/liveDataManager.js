@@ -15,6 +15,8 @@ const DEFAULT_SERVICES = [
     lastUpdated: 0,
     config: { url: 'https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json' },
     isUpdating: false,
+    scope: 'global',
+    projectId: null,
   },
   // Example slot for a dynamic JSON fetch service (user can add more via UI in future)
   // { id: 'my-json-service', name: 'My JSON', description: 'Fetches custom JSON', freshnessPolicy: 'weekly', autoUpdate: { enabled: false }, config: { url: 'https://example.com/data.json' } }
@@ -201,6 +203,8 @@ export function normalizeService(service) {
       : (service.lastUpdated ? new Date(service.lastUpdated).getTime() : 0),
     config: service.config || {}, // free-form; may include url, headers, params, etc.
     isUpdating: !!service.isUpdating,
+    scope: service.scope === 'project' ? 'project' : 'global',
+    projectId: service.scope === 'project' ? (service.projectId || null) : null,
   };
 }
 
