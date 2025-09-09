@@ -9,35 +9,40 @@
       "status": "-",
       "title": "Create a Git Monitoring Service in the Main Process",
       "description": "Implement a service in the Electron main process to periodically monitor the local git repository for changes. This service will be the foundation for tracking task progress. It should be able to fetch updates from remotes and check for new commits on branches. It will be located in a new directory `src/main/services/git-monitor`.",
-      "context": []
+      "context": [],
+      "blockers": []
     },
     {
       "id": "d242f688-3d1d-4d49-b4e4-41f62aec33fd",
       "status": "-",
       "title": "Implement Task-to-Branch Naming Convention Logic",
-      "description": "Create a utility module that maps a task ID to a specific git branch name, following the convention `task/<taskId>`. This will be used by the Git Monitoring Service to identify which branches to watch for updates related to active tasks.",
-      "context": []
+      "description": "Create a utility module that maps a task ID to a specific git branch name, following the convention `features/<taskId>`. This will be used by the Git Monitoring Service to identify which branches to watch for updates related to active tasks.",
+      "context": [],
+      "blockers": []
     },
     {
       "id": "db4124ad-21e9-460b-854c-f4a885688400",
       "status": "-",
       "title": "Develop Commit Analyzer to Extract Feature Status",
       "description": "Build a module that can inspect a given git commit on a task branch. It will search for a `task.json` file within the commit's file tree. If the file exists, it will parse it to extract the status and details of the features associated with the task. This will use git commands to view file contents at a specific revision without checking out the entire branch.",
-      "context": []
+      "context": [],
+      "blockers": []
     },
     {
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
       "status": "-",
       "title": "Implement Logic to Update Local Task State from Commit Data",
       "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.",
-      "context": []
+      "context": [],
+      "blockers": []
     },
     {
       "id": "7a81601a-c0dc-418f-a0f3-a83e8a19919d",
       "status": "-",
       "title": "Expose Git Operations via IPC for UI Interaction",
       "description": "Create an IPC channel in the Electron main process to handle git-related requests from the renderer process. This will include an action to trigger the merge of a task branch. The handler in the main process will execute the necessary git commands safely and provide feedback (success or failure) to the UI.",
-      "context": []
+      "context": [],
+      "blockers": []
     },
     {
       "id": "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2",
