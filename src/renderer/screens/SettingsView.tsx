@@ -273,6 +273,18 @@ export default function SettingsView() {
           />
         </div>
         <div>
+          <label htmlFor="gh-email" className="block text-sm font-medium mb-1">E-mail</label>
+          <input
+            id="gh-email"
+            type="text"
+            value={appSettings.github?.email ?? ''}
+            onChange={(e) => updateAppSettings({ github: { ...appSettings.github, email: e.target.value } })}
+            className="w-full max-w-md p-2 border border-gray-300 rounded-md"
+            placeholder="your-github-email"
+            autoComplete="email"
+          />
+        </div>
+        <div>
           <label htmlFor="gh-token" className="block text-sm font-medium mb-1">Personal Access Token</label>
           <input
             id="gh-token"
