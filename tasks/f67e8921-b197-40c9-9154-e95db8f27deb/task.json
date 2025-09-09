@@ -781,19 +781,6 @@
       "acceptance": []
     },
     {
-      "id": "7a9408fc-aa0e-4957-82b5-b9ba58ef81b6",
-      "status": "-",
-      "title": "Add 'System' theme option with OS auto-detection",
-      "description": "Extend theming to support a 'system' mode that follows the OS preference.\n\nImplementation details:\n- Update @src/renderer/hooks/useTheme.ts  to support Theme = 'light' | 'dark' | 'system'.\n- When 'system' is selected, resolve the effective theme from window.matchMedia('(prefers-color-scheme: dark)') and subscribe to changes to update live.\n- Update Settings UI @src/renderer/screens/SettingsView.tsx  to offer Light/Dark/System choices and save selection to app settings.\n\nAcceptance criteria:\n- Selecting 'System' switches the app automatically to the OS theme and updates live when the OS theme changes.\n- Selection persists across restarts.\n- Existing light/dark behavior remains unchanged when explicitly chosen.",
-      "plan": "",
-      "context": [
-        "src/renderer/hooks/useTheme.ts",
-        "src/renderer/screens/SettingsView.tsx"
-      ],
-      "acceptance": [],
-      "blockers": []
-    },
-    {
       "id": "27201172-7e31-4e3b-bf06-eb1737ddfadb",
       "status": "+",
       "title": "Dynamic modifier glyphs in shortcuts UI and command menu",
@@ -905,10 +892,9 @@
     "50188f39-ce56-4087-90fb-70a107a7357f": 59,
     "35d46d98-8f89-483a-9470-e2e615fd41a9": 60,
     "e358e778-5d29-492a-8943-e67e31b45833": 61,
-    "7a9408fc-aa0e-4957-82b5-b9ba58ef81b6": 62,
-    "27201172-7e31-4e3b-bf06-eb1737ddfadb": 63,
-    "98cc6216-a675-40cb-b763-5ac3ccc98b65": 64,
-    "a940d772-c613-427c-9dd4-88984e9f24ec": 65,
-    "9fb948d2-235d-4322-9462-93a9ca8ce283": 66
+    "27201172-7e31-4e3b-bf06-eb1737ddfadb": 62,
+    "98cc6216-a675-40cb-b763-5ac3ccc98b65": 63,
+    "a940d772-c613-427c-9dd4-88984e9f24ec": 64,
+    "9fb948d2-235d-4322-9462-93a9ca8ce283": 65
   }
 }
