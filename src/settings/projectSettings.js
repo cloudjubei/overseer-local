@@ -1,4 +1,4 @@
-import AppStorage from './appStorage';
+import AppStorage from './AppStorage';
 import { DEFAULT_PROJECT_SETTINGS } from "../types/settings"
 
 

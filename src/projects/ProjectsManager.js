@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import chokidar from 'chokidar';
 import { ipcMain } from 'electron';
-import { validateProjectSpec } from './validator';
+import { validateProjectSpec } from './ProjectsValidator';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys"
 
 async function pathExists(p) { try { await fs.stat(p); return true } catch { return false } }

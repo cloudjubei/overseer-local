@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/liveDataTypes';
+import type { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import useLiveData from '../hooks/useLiveData';

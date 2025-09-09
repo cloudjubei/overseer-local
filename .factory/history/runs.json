@@ -4,16 +4,16 @@
     "agentType": "developer",
     "projectId": "thefactory-tools",
     "taskId": "e334cc68-fb9b-45cf-9440-bb13b39f832d",
-    "state": "running",
-    "message": "Turn 2 tool calls processed",
+    "state": "completed",
+    "message": "Completed",
     "provider": "openai",
     "model": "gpt-5",
     "startedAt": "2025-09-08T23:57:52.175Z",
-    "updatedAt": "2025-09-09T00:01:07.229Z",
-    "costUSD": 0.09281874999999999,
-    "promptTokens": 19679,
-    "completionTokens": 6822,
-    "progress": 0.03
+    "updatedAt": "2025-09-09T00:15:46.577Z",
+    "costUSD": 0.75965625,
+    "promptTokens": 266741,
+    "completionTokens": 42623,
+    "progress": 0.04
   },
   {
     "runId": "task_3grutzv8_mfbs8mwt",
@@ -139,18 +139,6 @@
     "completionTokens": 1592
   },
   {
-    "runId": "task_dl3o18yz_mfbr9ykc",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "0f49487c-1bd3-458f-9d7d-8d4936788435",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "claude-4-sonnet-20250514",
-    "startedAt": "2025-09-08T23:31:27.423Z",
-    "updatedAt": "2025-09-08T23:31:29.910Z"
-  },
-  {
     "runId": "task_w8hkl6bk_mfbqy1j7",
     "agentType": "speccer",
     "projectId": "thefactory-tools",
@@ -195,18 +183,6 @@
     "promptTokens": 7009,
     "completionTokens": 1143,
     "progress": 0.01
-  },
-  {
-    "runId": "task_7zu246ij_mfbqclnt",
-    "agentType": "speccer",
-    "projectId": "thefactory-tools",
-    "taskId": "e334cc68-fb9b-45cf-9440-bb13b39f832d",
-    "state": "completed",
-    "message": "Completed",
-    "provider": "openai",
-    "model": "claude-4-sonnet-20250514",
-    "startedAt": "2025-09-08T23:05:31.050Z",
-    "updatedAt": "2025-09-08T23:05:33.635Z"
   },
   {
     "runId": "task_nk3m7xx3_mfbq3re8",

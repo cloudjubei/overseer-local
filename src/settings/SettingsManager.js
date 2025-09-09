@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
-import ProjectSettings from './projectSettings';
-import AppSettings from './appSettings';
+import ProjectSettings from './ProjectSettings';
+import AppSettings from './AppSettings';
 
 export class SettingsManager
 {

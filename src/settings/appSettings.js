@@ -1,4 +1,4 @@
-import AppStorage from './appStorage';
+import AppStorage from './AppStorage';
 import { DEFAULT_APP_SETTINGS } from "../types/settings"
 
 export default class AppSettings {

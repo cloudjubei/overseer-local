@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/liveDataTypes';
+import { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
 import { liveDataService } from '../services/liveDataService';
 
 export default function useLiveData() {

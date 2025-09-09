@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import path from 'path';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
-import ChatsStorage from './storage';
+import ChatsStorage from './ChatsStorage';
 import { LLMProvider } from './LLMProvider'
 import { tasksManager, filesManager, projectsManager } from '../managers';
 import { buildChatTools } from 'thefactory-tools'

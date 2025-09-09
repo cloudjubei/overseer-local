@@ -1,4 +1,4 @@
-import AppStorage from '../settings/appStorage';
+import AppStorage from '../settings/AppStorage';
 
 export default class NotificationsStorage {
   constructor(projectId) {

@@ -1,9 +1,9 @@
 import { ipcMain, Notification } from 'electron';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
-import NotificationsStorage from './storage';
+import NotificationsStorage from './NotificationsStorage';
 import { settingsManager } from '../managers';
 
-export class NotificationManager {
+export class NotificationsManager {
 
   constructor(projectRoot, window) {
     this.projectRoot = projectRoot;

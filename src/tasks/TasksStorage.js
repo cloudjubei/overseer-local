@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import chokidar from 'chokidar';
-import { validateTask } from './validator';
+import { validateTask } from './TasksValidator';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import { randomUUID } from 'crypto';
 

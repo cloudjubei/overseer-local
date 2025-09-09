@@ -1,10 +1,9 @@
 import { ipcMain } from 'electron';
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys';
-import { LiveDataStore } from './store';
-import { LiveDataRegistry } from './registry';
+import { LiveDataStore } from './LiveDataStore';
+import { LiveDataRegistry } from './LiveDataRegistry';
 import { createAgentPricesProvider } from './providers/agentPricesProvider';
 import { createFetchJsonProvider } from './providers/fetchJsonProvider';
-import { LiveDataProviderStatus } from './liveDataTypes'
 
 const DEFAULT_SERVICES = [
   {

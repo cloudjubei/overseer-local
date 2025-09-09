@@ -1,4 +1,4 @@
-import AppStorage from '../settings/appStorage';
+import AppStorage from '../settings/AppStorage';
 
 // LiveDataStore persists service configs and per-service data cache.
 export class LiveDataStore {

@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import path from 'path';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
-import FilesStorage from './storage';
+import FilesStorage from './FilesStorage';
 import { projectsManager } from '../managers';
 
 function resolveFilesDir(projectRoot) {

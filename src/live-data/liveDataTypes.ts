@@ -7,17 +7,17 @@ export interface LiveDataProviderAutoUpdateSettings {
   time?: number; // Unix timestamp
 }
 
-export interface LiveDataProvider<TConfig = unknown> {
+export interface LiveDataProvider {
   id: string;
   name: string;
   description: string;
   lastUpdated: number; // Unix timestamp
   freshnessPolicy: LiveDataProviderFreshnessPolicy;
   autoUpdate: LiveDataProviderAutoUpdateSettings;
-  config: TConfig; // Service-specific configuration
+  config: any; // Service-specific configuration
 }
 
-export type LiveDataProviderStatus = LiveDataProvider & {
+export interface LiveDataProviderStatus extends LiveDataProvider {
   isUpdating?: boolean;
   isFresh?: boolean;
 };

@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import path from 'path';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
-import TasksStorage from './storage';
+import TasksStorage from './TasksStorage';
 
 function resolveTasksDir(projectRoot) {
   return path.join(projectRoot, 'tasks');
