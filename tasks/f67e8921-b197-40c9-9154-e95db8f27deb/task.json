@@ -847,6 +847,20 @@
       "context": [],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "ada1bb79-e120-493b-b0ba-13d11951b42b",
+      "status": "-",
+      "title": "LiveData providers are project specific or global",
+      "description": "Make it possible to configure a LiveDataProvider as global or targeting  the project it's being made in - the views are in @src/renderer/screens/LiveDataView.tsx .\nCurrently we have the Agent prices provider - this should be global, as it gets the prices that all LLM agent runs use to show the cost per token.\nThere's a 2nd provider currently configured for this project - the BTC price getter - that one should be specific to this project (Overseer Local).\nResponsible classes are:\n@src/renderer/hooks/useLiveData.tsx and @src/renderer/services/liveDataService.ts",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/LiveDataView.tsx",
+        "src/renderer/hooks/useLiveData.tsx",
+        "src/renderer/services/liveDataService.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -916,6 +930,7 @@
     "a940d772-c613-427c-9dd4-88984e9f24ec": 64,
     "bb3a99c3-4e37-47ae-b3df-4b6f5317faed": 65,
     "9fb948d2-235d-4322-9462-93a9ca8ce283": 66,
-    "8acda51f-97c8-4614-8800-cb2d7607bf16": 67
+    "8acda51f-97c8-4614-8800-cb2d7607bf16": 67,
+    "ada1bb79-e120-493b-b0ba-13d11951b42b": 68
   }
 }

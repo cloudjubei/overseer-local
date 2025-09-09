@@ -26,6 +26,7 @@ Top-Level Layout
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer (exposes live data API).
+  - main/services/git-monitor/: Main-process Git monitoring service that fetches remotes and tracks branch head changes.
 - packages/: Local monorepo packages.
   - factory-ts/: Agent orchestration library (orchestrator, pricing, history, completion, git integration).
 - scripts/: Project automation scripts and CLIs.

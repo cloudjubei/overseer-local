@@ -6,6 +6,7 @@ import { ChatsManager } from './chat/ChatsManager';
 import { NotificationsManager } from './notifications/NotificationsManager';
 import { SettingsManager } from './settings/SettingsManager';
 import { LiveDataManager } from './live-data/LiveDataManager';
+import { GitMonitorService } from './main/services/git-monitor/GitMonitorService';
 
 export let tasksManager;
 export let filesManager;
@@ -14,6 +15,7 @@ export let chatsManager;
 export let notificationsManager;
 export let settingsManager;
 export let liveDataManager;
+export let gitMonitorService;
 
 export async function initManagers(projectRoot, mainWindow) {
   await registerFactoryIPC(mainWindow, projectRoot);
@@ -32,6 +34,30 @@ export async function initManagers(projectRoot, mainWindow) {
   await notificationsManager.init();
   await settingsManager.init();
   await liveDataManager.init();
+
+  // Initialize Git monitoring service (main process)
+  try {
+    gitMonitorService = new GitMonitorService({
+      repoPath: projectRoot,
+      intervalMs: 60_000,
+      fetchOnStart: true,
+    });
+
+    // Optional: wire logs to console for now; in future route to UI/notifications
+    gitMonitorService.on('branchesUpdated', (changes) => {
+      // eslint-disable-next-line no-console
+      console.log('[GitMonitor] Branches updated:', changes.map(c => `${c.branch}: ${c.oldSha?.slice(0,7)||'none'} -> ${c.newSha.slice(0,7)} (${c.commits.length} commits)`));
+    });
+    gitMonitorService.on('error', (err) => {
+      // eslint-disable-next-line no-console
+      console.warn('[GitMonitor] Error:', err.message);
+    });
+
+    await gitMonitorService.start();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[GitMonitor] Failed to start:', e?.message || e);
+  }
 }
 export function stopManagers() {
   if (projectsManager) { projectsManager.stopWatching(); }
@@ -41,4 +67,5 @@ export function stopManagers() {
   if (notificationsManager) { notificationsManager.stopWatching(); }
   if (settingsManager) { settingsManager.stopWatching(); }
   if (liveDataManager) { liveDataManager.stopWatching(); }
+  if (gitMonitorService) { gitMonitorService.stop(); }
 }
