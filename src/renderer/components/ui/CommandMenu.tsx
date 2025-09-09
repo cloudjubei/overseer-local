@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigator } from '../../navigation/Navigator';
-import { useShortcuts, comboMatcher, getShortcutsModifier } from '../../hooks/useShortcuts';
+import { useShortcuts } from '../../hooks/useShortcuts';
 import { useAppSettings } from '../../hooks/useAppSettings';
 
 export type CommandMenuApi = {
@@ -26,7 +26,7 @@ const commandsBase = (
 
 export default function CommandMenu() {
   const nav = useNavigator();
-  const { register } = useShortcuts();
+  const { register, prettyCombo  } = useShortcuts();
   const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -41,7 +41,7 @@ export default function CommandMenu() {
   const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    return register({ id: 'command-menu', keys: comboMatcher(combos.commandMenu), handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); }, description: 'Open command menu', scope: 'global' });
+    return register({ id: 'command-menu', comboKeys: combos.commandMenu, handler: () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); }, description: 'Open command menu', scope: 'global' });
   }, [register, combos.commandMenu]);
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 0); }, [open]);
@@ -103,28 +103,6 @@ export default function CommandMenu() {
     }
   };
 
-  // Pretty-printer for combo strings based on current modifier preference
-  const prettyCombo = useMemo(() => {
-    const mod = getShortcutsModifier();
-    const isMacPref = mod === 'meta';
-    const pretty = (combo: string) => {
-      if (!combo) return '';
-      const parts = combo.split('+').map(p => p.trim()).filter(Boolean);
-      const mapped = parts.map(p => {
-        const up = p.toLowerCase();
-        if (up === 'mod') return isMacPref ? '⌘' : 'Ctrl';
-        if (up === 'cmd' || up === 'meta') return '⌘';
-        if (up === 'ctrl' || up === 'control') return 'Ctrl';
-        if (up === 'shift') return 'Shift';
-        if (up === 'alt' || up === 'option') return isMacPref ? '⌥' : 'Alt';
-        return p.toUpperCase();
-      });
-      return mapped.join('+');
-    };
-    return pretty;
-  }, []);
-
-  // Compute kbd hint for the search input
   const kbdHint = useMemo(() => {
     const str = prettyCombo(combos.commandMenu);
     return str.replace('⌘+', '⌘'); // Use compact glyph form on mac preference
@@ -132,9 +110,10 @@ export default function CommandMenu() {
 
   // Map command ids to shortcut combos from settings to avoid hardcoded placeholders
   const idToCombo: Record<string, string> = {
+    'command-menu': combos.commandMenu,
+    'help': combos.help,
     'add-ui-feature': combos.addUiFeature,
     'new-task': combos.newTask,
-    'command-menu': combos.commandMenu,
   };
 
   if (!open) return null;

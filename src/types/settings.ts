@@ -5,7 +5,7 @@ export type ShortcutsModifier = 'meta' | 'ctrl';
 export type ShortcutsConfig = {
   commandMenu: string;      // e.g., 'Mod+K'
   newTask: string;          // e.g., 'Mod+N'
-  help: string;             // e.g., 'Mod+Shift+?'
+  help: string;             // e.g., 'Mod+/'
   addUiFeature: string;     // e.g., 'Mod+Shift+F'
 }
 
@@ -20,7 +20,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     shortcuts: {
       commandMenu: 'Mod+K',
       newTask: 'Mod+N',
-      help: 'Mod+Shift+?',
+      help: 'Mod+/',
       addUiFeature: 'Mod+Shift+F',
     },
   },

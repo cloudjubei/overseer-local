@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
 import { ToastProvider } from './components/ui/Toast';
 import { NavigatorProvider, useNavigator } from './navigation/Navigator';
-import { ShortcutsProvider, useShortcuts, comboMatcher } from './hooks/useShortcuts';
+import { ShortcutsProvider, useShortcuts } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { initTheme } from './hooks/useTheme';
@@ -22,14 +22,8 @@ function GlobalShortcutsBootstrap() {
   const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    const unregisterNew = register({ id: 'new-task', keys: comboMatcher(combos.newTask), handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
-    const unregisterAddUiFeature = register({
-      id: 'add-ui-feature',
-      keys: comboMatcher(combos.addUiFeature),
-      handler: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }),
-      description: 'Add feature to UI Improvements',
-      scope: 'global'
-    });
+    const unregisterNew = register({ id: 'new-task', comboKeys: combos.newTask, handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
+    const unregisterAddUiFeature = register({ id: 'add-ui-feature', comboKeys: combos.addUiFeature, handler: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }), description: 'Add feature to UI Improvements', scope: 'global' });
     return () => { unregisterNew(); unregisterAddUiFeature(); };
   }, [register, nav, combos.newTask, combos.addUiFeature]);
 

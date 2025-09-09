@@ -1,40 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useShortcuts, comboMatcher, getShortcutsModifier } from '../../hooks/useShortcuts';
+import { useShortcuts } from '../../hooks/useShortcuts';
 import { useAppSettings } from '../../hooks/useAppSettings';
 
 export default function ShortcutsHelp() {
-  const { list, register } = useShortcuts();
+  const { list, register, prettyCombo } = useShortcuts();
   const { appSettings } = useAppSettings();
   const [open, setOpen] = useState(false);
 
   const combos = appSettings.userPreferences.shortcuts;
 
   useEffect(() => {
-    return register({ id: 'help', keys: comboMatcher(combos.help), handler: () => setOpen(true), description: 'Open keyboard shortcuts help', scope: 'global' });
+    return register({ id: 'help', comboKeys: combos.help, handler: () => setOpen(true), description: 'Open keyboard shortcuts help', scope: 'global' });
   }, [register, combos.help]);
 
   const shortcuts = list();
-
-  const prettyCombo = useMemo(() => {
-    const mod = getShortcutsModifier();
-    const isMacPref = mod === 'meta';
-    const pretty = (combo: string) => {
-      if (!combo) return '';
-      const parts = combo.split('+').map(p => p.trim()).filter(Boolean);
-      const mapped = parts.map(p => {
-        const up = p.toLowerCase();
-        if (up === 'mod') return isMacPref ? '⌘' : 'Ctrl';
-        if (up === 'cmd' || up === 'meta') return '⌘';
-        if (up === 'ctrl' || up === 'control') return 'Ctrl';
-        if (up === 'shift') return 'Shift';
-        if (up === 'alt' || up === 'option') return isMacPref ? '⌥' : 'Alt';
-        return p.toUpperCase();
-      });
-      return mapped.join('+');
-    };
-    return pretty;
-  }, []);
 
   const idToCombo: Record<string, string> = {
     'command-menu': appSettings.userPreferences.shortcuts.commandMenu,
