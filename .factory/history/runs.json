@@ -1,5 +1,21 @@
 [
   {
+    "runId": "task_2dtksepd_mfcxtjab",
+    "agentType": "speccer",
+    "projectId": "main",
+    "taskId": "18ddab35-6fdd-4316-ae36-e68147787f38",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "startedAt": "2025-09-09T19:22:24.613Z",
+    "updatedAt": "2025-09-09T19:23:06.841Z",
+    "costUSD": 0,
+    "promptTokens": 10801,
+    "completionTokens": 1430,
+    "progress": 0.03
+  },
+  {
     "runId": "task_ghehc1ij_mfcvre5t",
     "agentType": "developer",
     "projectId": "main",
