@@ -306,10 +306,10 @@ export default function TasksListView() {
           <ModelChip editable className="mr-2" />
           <SegmentedControl
             ariaLabel="Toggle between list and board views"
-            options=[
+            options={[
               { value: 'list', label: 'List', icon: <ListIcon /> },
               { value: 'board', label: 'Board', icon: <BoardIcon /> },
-            ]
+            ]}
             value={view}
             onChange={(v) => setView(v as 'list' | 'board')}
             size="sm"
