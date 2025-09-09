@@ -4,15 +4,16 @@ import { Input } from '../renderer/components/ui/Input';
 import { Button } from '../renderer/components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../renderer/components/ui/Select';
 import { useLLMConfig } from '../renderer/hooks/useLLMConfig';
-import { chatsService, LLMConfig, LLMProviderType } from '../renderer/services/chatsService';
+import { chatsService, LLMProviderType } from '../renderer/services/chatsService';
 import { useToast } from '../renderer/components/ui/Toast';
+import { LLMConfig } from 'thefactory-tools';
 
 const PROVIDER_DEFAULT_URL: Record<LLMProviderType, string> = {
-  openai: 'https://api.openai.com/v1',
-  anthropic: 'https://api.anthropic.com',
-  gemini: 'https://generativelanguage.googleapis.com/v1beta',
-  xai: 'https://api.x.ai/v1',
-  local: 'http://localhost:1234/v1',
+  openai: 'https://api.openai.com/v1/chat/completions',
+  anthropic: 'https://api.anthropic.com/v1/messages',
+  gemini: 'https://generativelanguage.googleapis.com/v1beta/chat/completions',
+  xai: 'https://api.x.ai/v1/chat/completions',
+  local: 'http://localhost:1234/v1/chat/completions',
   custom: '',
 };
 

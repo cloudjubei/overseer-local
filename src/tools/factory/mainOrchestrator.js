@@ -43,6 +43,14 @@ function maskSecrets(obj) {
     if (o && o.llmConfig && typeof o.llmConfig === 'object') {
       if ('apiKey' in o.llmConfig) o.llmConfig.apiKey = '***';
     }
+    if (o && o.githubCredentials && typeof o.githubCredentials === 'object') {
+      if ('token' in o.githubCredentials) o.githubCredentials.token = '***';
+    }
+    if (o && o.webSearchApiKeys && typeof o.webSearchApiKeys === 'object') {
+      if ('exa' in o.webSearchApiKeys) o.webSearchApiKeys.exa = '***';
+      if ('serpapi' in o.webSearchApiKeys) o.webSearchApiKeys.serpapi = '***';
+      if ('tavily' in o.webSearchApiKeys) o.webSearchApiKeys.tavily = '***';
+    }
     return o;
   } catch {
     return obj;
