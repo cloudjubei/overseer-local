@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "~",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -840,13 +840,14 @@
     },
     {
       "id": "bb3a99c3-4e37-47ae-b3df-4b6f5317faed",
-      "status": "-",
+      "status": "?",
       "title": "New Section in Settings - configuring github credentials",
       "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a username and a personal token.\nIt has to be persisted across sessions.",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot convert undefined or null to object"
     }
   ],
   "featureIdToDisplayIndex": {
