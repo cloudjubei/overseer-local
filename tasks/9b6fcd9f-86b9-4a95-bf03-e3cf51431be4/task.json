@@ -51,10 +51,11 @@
     },
     {
       "id": "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2",
-      "status": "-",
+      "status": "?",
       "title": "Add 'Merge' Button to Task UI for Completed Features",
       "description": "In the renderer process, add a 'Merge' button to the task view. This button will be enabled when the Git Monitoring Service detects that a task branch has unmerged commits. Clicking the button will trigger an IPC call to the main process to execute a git merge of the task branch into the current main development branch.",
-      "context": []
+      "context": [],
+      "rejection": "Blocked: undefined"
     }
   ],
   "featureIdToDisplayIndex": {
