@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "~",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -864,7 +864,7 @@
     },
     {
       "id": "270271e3-5a53-45ed-9c31-131e9bb4f36b",
-      "status": "-",
+      "status": "+",
       "title": "Loading screen",
       "description": "We need a loading screen that will show at the beginning of app launch, while all necessary things are being loaded.\nFor the time being - that's just the user preferences and app settings.\n@src/renderer/App.tsx",
       "plan": "",
@@ -876,7 +876,7 @@
     },
     {
       "id": "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce",
-      "status": "-",
+      "status": "+",
       "title": "when switching projects - go to the base of a given screen",
       "description": "Right now when viewing a task and switching projects - it shows that task from the new project's perspective which isn't found.\nWe need to make sure that in such cases we go to the main sidebar screen - in the task example - @src/renderer/tasks/TasksListView.tsx .\n@src/renderer/navigation/SidebarView.tsx is where we switch projects.",
       "plan": "",

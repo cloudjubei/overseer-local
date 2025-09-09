@@ -97,6 +97,14 @@ export default function SidebarView({}: SidebarProps) {
     updateAppSettings({ userPreferences: { ...appSettings.userPreferences, sidebarCollapsed: collapsed }})
   }, [collapsed]);
 
+  const handleProjectSwitch = (projectId: string) => {
+    if (projectId === activeProjectId) {
+      return;
+    }
+    setActiveProjectId(projectId);
+    navigateView(currentView);
+  };
+
   // Compute active agent counts per project
   const activeCountByProject = useMemo(() => {
     const map = new Map<string, number>();
@@ -302,7 +310,7 @@ export default function SidebarView({}: SidebarProps) {
                   <button
                     className={classNames('nav-item flex-1', accent, active && 'nav-item--active', effectiveCollapsed && 'nav-item--compact')}
                     aria-current={active ? 'true' : undefined}
-                    onClick={() => setActiveProjectId(p.id)}
+                    onClick={() => handleProjectSwitch(p.id)}
                     title={p.title}
                   >
                     <span className="nav-item__icon" aria-hidden>{projectIcon}</span>
