@@ -828,7 +828,7 @@
     },
     {
       "id": "8acda51f-97c8-4614-8800-cb2d7607bf16",
-      "status": "-",
+      "status": "+",
       "title": "Use the configuration of WebSearch api keys - exa, serpapi and tavily",
       "description": "We are storing the api keys to these inside @src/renderer/screens/SettingsView.tsx - we need to use them in  'thefactory-tools' that has webSearch tooling.\nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js when calling 'orchestrator.startRun' .",
       "plan": "",
@@ -836,9 +836,7 @@
         "src/renderer/screens/SettingsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [
-        "f67e8921-b197-40c9-9154-e95db8f27deb.9fb948d2-235d-4322-9462-93a9ca8ce283"
-      ]
+      "blockers": []
     },
     {
       "id": "bb3a99c3-4e37-47ae-b3df-4b6f5317faed",

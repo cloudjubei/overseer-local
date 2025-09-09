@@ -195,7 +195,7 @@ function normalizeRunMessagesToFeatureLog(messages) {
   return result;
 }
 
-export async function registerFactoryIPC(mainWindow, projectRoot) {
+export async function registerFactoryIPC(mainWindow, projectRoot, settingsManager) {
   console.log('[factory] Registering IPC handlers. projectRoot=', projectRoot);
 
   // Ensure workspace .env is loaded in main process so child processes and libs see credentials
@@ -282,13 +282,13 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
         console.warn('[factory] Failed to persist messages for', runHandle.id, err?.message || err);
       }
 
-      updateMetaFromEvent(runHandle.id, e);
-      broadcastEventToSubscribers(runHandle.id, e);
+      updateMetaFromEvent(runId, e);
+      broadcastEventToSubscribers(runId, e);
 
       // If we receive a run/cancelled event, proactively flush last messages (if any)
       if (e?.type === 'run/cancelled') {
-        const last = RUN_MESSAGES.get(runHandle.id);
-        if (last) persistMessages(runHandle.id, last);
+        const last = RUN_MESSAGES.get(runId);
+        if (last) persistMessages(runId, last);
       }
     });
 
@@ -297,10 +297,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
       try { unsubscribe(); } catch {}
       stopHeartbeat(runHandle.id);
       RUNS.delete(runHandle.id);
-      RUN_SUBSCRIBERS.delete(runHandle.id);
-      RUN_MESSAGES.delete(runHandle.id);
+      RUN_SUBSCRIBERS.delete(runId);
+      RUN_MESSAGES.delete(runId);
       // keep RUN_META for a while? Persisted already
-      RUN_META.delete(runHandle.id);
+      RUN_META.delete(runId);
     };
 
     runHandle.onEvent((e) => {
@@ -326,7 +326,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { agentType, projectId, taskId, llmConfig, options }) => {
     console.log('[factory] START_TASK', maskSecrets({ agentType, projectId, taskId, llmConfig, options }));
     try {
-      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, options });
+      const appSettings = settingsManager.getAppSettings();
+      const webSearchApiKeys = appSettings.webSearchApiKeys;
+
+      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, options, webSearchApiKeys });
       console.log('[factory] Run started (task)', run?.id);
       const initMeta = {
         runId: run.id,
@@ -358,7 +361,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
   ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { agentType, projectId, taskId, featureId, llmConfig, options }) => {
     console.log('[factory] START_FEATURE', maskSecrets({ agentType, projectId, taskId, featureId, llmConfig, options }));
     try {
-      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, options });
+      const appSettings = settingsManager.getAppSettings();
+      const webSearchApiKeys = appSettings.webSearchApiKeys;
+
+      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, options, webSearchApiKeys });
       console.log('[factory] Run started (feature)', run?.id);
       const initMeta = {
         runId: run.id,
