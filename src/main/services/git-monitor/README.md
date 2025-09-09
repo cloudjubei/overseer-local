@@ -37,3 +37,29 @@ if (report.found) {
   }
 }
 ```
+
+## Task State Updater
+
+`TaskStateUpdater.js` provides `updateLocalTaskFromCommit({ projectRoot, commitTask })` to synchronize the local `tasks/<taskId>/task.json` with data extracted from a commit's `task.json`.
+
+Behavior:
+- Updates only existing tasks and features (no implicit creation).
+- Focuses on syncing statuses and key metadata (title, description, context, acceptance, blockers, rejection).
+- Preserves local unknown fields.
+- Respects local display order using `featureIdToDisplayIndex`.
+- Validates the merged task using `TasksValidator` before writing.
+
+Intended usage with CommitAnalyzer results:
+
+```js
+import { CommitAnalyzer } from './CommitAnalyzer';
+import { updateLocalTaskFromCommit } from './TaskStateUpdater';
+
+const analyzer = new CommitAnalyzer({ repoPath: projectRoot });
+const report = await analyzer.analyze('features/<taskId>');
+for (const file of report.files) {
+  if (file.parseOk && file.task?.id) {
+    await updateLocalTaskFromCommit({ projectRoot, commitTask: file.task });
+  }
+}
+```

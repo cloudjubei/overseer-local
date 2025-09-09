@@ -33,11 +33,12 @@
     },
     {
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
-      "status": "-",
+      "status": "?",
       "title": "Implement Logic to Update Local Task State from Commit Data",
       "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.",
       "context": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot convert undefined or null to object"
     },
     {
       "id": "7a81601a-c0dc-418f-a0f3-a83e8a19919d",
