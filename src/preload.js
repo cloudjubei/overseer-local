@@ -102,13 +102,13 @@ const SETTINGS_API = {
 
 // Factory orchestrator API exposed to renderer
 const FACTORY_API = {
-  startTaskRun: (agentType, projectId, taskId, llmConfig, options = {}) => {
+  startTaskRun: (agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options = {}) => {
     console.log('[preload:factory] startTaskRun', { agentType, projectId, taskId, options });
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_TASK, { agentType, projectId, taskId, llmConfig, options });
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_TASK, { agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options });
   },
-  startFeatureRun: (agentType, projectId, taskId, featureId, llmConfig, options = {}) => {
+  startFeatureRun: (agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options = {}) => {
     console.log('[preload:factory] startFeatureRun', { agentType, projectId, taskId, featureId, options });
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, { agentType, projectId, taskId, featureId, llmConfig, options });
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, { agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options });
   },
   cancelRun: (runId, reason) => {
     console.log('[preload:factory] cancelRun', { runId, reason });

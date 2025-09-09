@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "~",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -836,9 +836,7 @@
         "src/renderer/screens/SettingsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [
-        "f67e8921-b197-40c9-9154-e95db8f27deb.9fb948d2-235d-4322-9462-93a9ca8ce283"
-      ]
+      "blockers": []
     },
     {
       "id": "bb3a99c3-4e37-47ae-b3df-4b6f5317faed",

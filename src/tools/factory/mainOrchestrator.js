@@ -323,10 +323,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     stopHeartbeat(runId);
   }
 
-  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { agentType, projectId, taskId, llmConfig, options }) => {
-    console.log('[factory] START_TASK', maskSecrets({ agentType, projectId, taskId, llmConfig, options }));
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_TASK, (_evt, { agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options }) => {
+    console.log('[factory] START_TASK', maskSecrets({ agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options }));
     try {
-      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, options });
+      const run = orchestrator.startRun({ agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options });
       console.log('[factory] Run started (task)', run?.id);
       const initMeta = {
         runId: run.id,
@@ -355,10 +355,10 @@ export async function registerFactoryIPC(mainWindow, projectRoot) {
     }
   });
 
-  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { agentType, projectId, taskId, featureId, llmConfig, options }) => {
-    console.log('[factory] START_FEATURE', maskSecrets({ agentType, projectId, taskId, featureId, llmConfig, options }));
+  ipcMain.handle(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, (_evt, { agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options }) => {
+    console.log('[factory] START_FEATURE', maskSecrets({ agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options }));
     try {
-      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, options });
+      const run = orchestrator.startRun({ agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options });
       console.log('[factory] Run started (feature)', run?.id);
       const initMeta = {
         runId: run.id,

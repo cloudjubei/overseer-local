@@ -2,6 +2,7 @@ import { EventSourceLike, attachToRun, startTaskRun, startFeatureRun, deleteHist
 import { LLMConfigManager } from '../utils/LLMConfigManager';
 import { AgentType, LLMConfig } from 'thefactory-tools';
 import { notificationsService } from './notificationsService';
+import { GithubCredentials } from 'thefactory-tools/dist/types';
 
 export type AgentRunState = 'running' | 'completed' | 'cancelled' | 'error';
 
@@ -487,12 +488,19 @@ class AgentsServiceImpl {
     if (!llmConfig){
       throw new Error("NO ACTIVE LLM CONFIG") 
     }
+    const githubCredentials : GithubCredentials = { 
+      repoUrl: process.env["GIT_REPO_URL"]!,
+      username: process.env["GIT_USER_NAME"]!,
+      email: process.env["GIT_USER_EMAIL"]!,
+      token: process.env["GIT_PAT"]!,
+    }
+    const webSearchApiKeys = undefined
 
     // Enforce default: when the task has no features, prefer speccer (global behavior)
     const effectiveAgentType = await this.coerceAgentTypeForTask(agentType, projectId, taskId);
 
     console.log('[agentsService] startTaskAgent', { agentType: effectiveAgentType, projectId, taskId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startTaskRun({ agentType: effectiveAgentType, projectId, taskId, llmConfig, options: {  } });
+    const { handle, events } = await startTaskRun({ agentType: effectiveAgentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options: {  } });
     const run: RunRecord = {
       runId: handle.id,
       agentType: effectiveAgentType,
@@ -523,8 +531,15 @@ class AgentsServiceImpl {
     if (!llmConfig){
       throw new Error("NO ACTIVE LLM CONFIG") 
     }
+    const githubCredentials : GithubCredentials = { 
+      repoUrl: process.env["GIT_REPO_URL"]!,
+      username: process.env["GIT_USER_NAME"]!,
+      email: process.env["GIT_USER_EMAIL"]!,
+      token: process.env["GIT_PAT"]!,
+    }
+    const webSearchApiKeys = undefined
     console.log('[agentsService] startFeatureAgent', { agentType, projectId, taskId, featureId, llmConfig: redactConfig(llmConfig) });
-    const { handle, events } = await startFeatureRun({ agentType, projectId, taskId, featureId, llmConfig, options: { } });
+    const { handle, events } = await startFeatureRun({ agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options: { } });
     const run: RunRecord = {
       runId: handle.id,
       agentType,
