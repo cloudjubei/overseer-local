@@ -1,8 +1,58 @@
 {
   "id": "18ddab35-6fdd-4316-ae36-e68147787f38",
-  "status": "-",
+  "status": "~",
   "title": "It must be possible to rate an agent's run",
   "description": "Just a simple thumbs up and down, so that we can analyse this further later.",
-  "features": [],
-  "featureIdToDisplayIndex": {}
+  "features": [
+    {
+      "id": "413fc924-f786-44d1-9e55-1158552246e0",
+      "status": "-",
+      "title": "Extend AgentRun data model with rating",
+      "description": "Modify the `AgentRun` type in `packages/factory-ts/src/types.ts` to include an optional `rating` field. The rating can be 'up', 'down', or null/undefined.",
+      "context": []
+    },
+    {
+      "id": "a3e17058-3407-488b-88d5-c465a8d298d8",
+      "status": "-",
+      "title": "Implement persistence for agent run ratings",
+      "description": "Locate where agent runs are stored (likely in `.factory/history/runs/`) and create a function to update a specific run with a new rating. This function will read the run's JSON file, add/update the `rating` field, and write the file back to disk.",
+      "context": []
+    },
+    {
+      "id": "99e991b3-7d04-44f7-9377-67cd101aafdf",
+      "status": "-",
+      "title": "Expose run rating update via IPC",
+      "description": "Create a new IPC channel to allow the renderer process to update an agent run's rating. This involves adding a handler in `src/tools/factory/mainOrchestrator.js` that calls the persistence function, and exposing it through `src/tools/factory/orchestratorBridge.ts` and `src/preload.js`.",
+      "context": []
+    },
+    {
+      "id": "dab8cbea-ef2f-4b33-be29-134ba092bdda",
+      "status": "-",
+      "title": "Implement frontend service for rating an agent run",
+      "description": "In `src/renderer/services/agentsService.ts`, add a new function that takes a run identifier and a rating, and calls the newly created IPC channel to persist the change.",
+      "context": []
+    },
+    {
+      "id": "2f57924b-529d-4c04-96ea-2d85949df561",
+      "status": "-",
+      "title": "Add rating buttons to the agent run UI",
+      "description": "In the component that displays individual agent runs (likely within `src/renderer/screens/AgentsView.tsx`), add thumbs up and thumbs down buttons. The buttons should visually reflect the current rating of the run (if any).",
+      "context": []
+    },
+    {
+      "id": "1ac9c9bb-2c5a-4b37-8bea-2d317b79c3a7",
+      "status": "-",
+      "title": "Connect UI buttons to the rating service",
+      "description": "Wire the onClick handlers for the new thumbs up/down buttons to call the rating function in `agentsService.ts`. Ensure the UI updates optimistically or refetches the data to reflect the new rating state.",
+      "context": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "413fc924-f786-44d1-9e55-1158552246e0": 1,
+    "a3e17058-3407-488b-88d5-c465a8d298d8": 2,
+    "99e991b3-7d04-44f7-9377-67cd101aafdf": 3,
+    "dab8cbea-ef2f-4b33-be29-134ba092bdda": 4,
+    "2f57924b-529d-4c04-96ea-2d85949df561": 5,
+    "1ac9c9bb-2c5a-4b37-8bea-2d317b79c3a7": 6
+  }
 }
