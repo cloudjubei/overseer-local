@@ -11,8 +11,19 @@ import { NotificationMetadata } from '../types/notifications';
 import { ProjectsProvider } from './projects/ProjectContext';
 import { useAppSettings } from './hooks/useAppSettings';
 import { useTheme } from './hooks/useTheme';
+import useLiveData from './hooks/useLiveData';
 
 const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
+
+function ServicesBootstrap() {
+  const { init } = useLiveData();
+
+  useEffect(() => { 
+    init(); 
+  }, [])
+
+  return null;
+}
 
 function GlobalShortcutsBootstrap() {
   const { register } = useShortcuts();
@@ -61,14 +72,15 @@ function NotificationClickHandler() {
 function App()
 {
   const { initTheme } = useTheme();
-  
-  useEffect(() => { initTheme() }, [])
+
+  useEffect(() => { initTheme(); }, [])
 
   return (
     <ToastProvider>
       <ProjectsProvider>
         <NavigatorProvider>
           <ShortcutsProvider>
+            <ServicesBootstrap />
             <GlobalShortcutsBootstrap />
             <NotificationClickHandler />
             <CommandMenu />

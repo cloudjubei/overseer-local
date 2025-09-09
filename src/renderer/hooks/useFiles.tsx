@@ -51,19 +51,15 @@ function buildDirTree(files: FileMeta[]): DirNode {
 }
 
 export default function useFiles() {
-  const {
-    project
-  } = useActiveProject()
+  const { projectId } = useActiveProject()
   
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [filesByPath, setFilesByPath] = useState<Record<string,FileMeta>>({});
   const [directoryTree, setDirectoryTree] = useState<DirNode | null>(null)
 
   const update = async () => {
-    if (project){
-      const files = await filesService.listFiles(project.id)
-      updateCurrentFiles(files)
-    }
+    const files = await filesService.listFiles(projectId)
+    updateCurrentFiles(files)
   }
   const updateCurrentFiles = (files: FileMeta[]) => {
     setFiles(files)
@@ -87,24 +83,17 @@ export default function useFiles() {
   }, []);
   useEffect(() => {
     update();
-  }, [project]);
+  }, [projectId]);
 
   const readFile = async (path: string) : Promise<string | undefined> =>  {
-    if (project){
-      return await filesService.readFile(project.id, path)
-    }
-    return undefined
+    return await filesService.readFile(projectId, path)
   }
   const saveFile = async (path: string, content: string) : Promise<void> =>  {
-    if (project){
-      await filesService.writeFile(project.id, path, content)
-    }
+    await filesService.writeFile(projectId, path, content)
   }
 
   const uploadFile = async (name: string, content: string) : Promise<string | undefined> =>  {
-    if (project){
-      return await filesService.uploadFile(project.id, name, content)
-    }
+    return await filesService.uploadFile(projectId, name, content)
   }
 
   return { files, directoryTree, readFile, saveFile, filesByPath, uploadFile } as const;

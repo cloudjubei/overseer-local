@@ -1,23 +1,39 @@
 import { useEffect, useState } from 'react';
-import { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
+import { LiveDataProviderStatus, LiveDataProvider } from '../../live-data/LiveDataTypes';
 import { liveDataService } from '../services/liveDataService';
+import { useActiveProject } from '../projects/ProjectContext';
 
 export default function useLiveData() {
+  const { projectId } = useActiveProject();
+
+  const [allServices, setAllServices] = useState<LiveDataProviderStatus[]>([]);
   const [services, setServices] = useState<LiveDataProviderStatus[]>([]);
   const [servicesById, setServicesById] = useState<Record<string,LiveDataProviderStatus>>({});
 
+  const filterForProject = (items: LiveDataProviderStatus[], projectId: string) => {
+    return (items || []).filter(s => (s.scope !== 'project') || (s.projectId === projectId));
+  };
+
+  const recomputeVisible = (items: LiveDataProviderStatus[], projectId: string) => {
+    const filtered = filterForProject(items, projectId);
+    setServices(filtered);
+    const map: Record<string, LiveDataProviderStatus> = {};
+    for (const s of filtered) map[s.id] = s;
+    setServicesById(map);
+  };
+
   const update = async () => {
-      const services = await liveDataService.getStatus()
-      updateCurrentServices(services)
-  }
-  const updateCurrentServices = (services: LiveDataProvider[]) => {
-    setServices(services)
-    
-    let newServicesById : Record<string,LiveDataProvider> = {}
-    for(const s of services){
-      newServicesById[s.id] = s
-    }
-    setServicesById(newServicesById)
+    const statuses = await liveDataService.getStatus();
+    updateCurrentServices(statuses)
+  };
+
+  const updateCurrentServices = (statuses: LiveDataProviderStatus[]) => {
+    setAllServices(statuses);
+    recomputeVisible(statuses, projectId);
+  };
+
+  const init = () => {
+    //no op - we just want to trigger services being updated
   }
   
   useEffect(() => {
@@ -29,6 +45,9 @@ export default function useLiveData() {
       unsubscribe();
     };
   }, []);
+  useEffect(() => {
+    recomputeVisible(allServices, projectId);
+  }, [projectId]);
 
   const triggerUpdate = async (serviceId: string) : Promise<LiveDataProviderStatus | undefined> =>  {
     return await liveDataService.triggerUpdate(serviceId)
@@ -43,5 +62,5 @@ export default function useLiveData() {
     return await liveDataService.removeService(serviceId)
   }
 
-  return { services, servicesById, triggerUpdate, updateConfig, addService, removeService };
+  return { init, services, servicesById, triggerUpdate, updateConfig, addService, removeService };
 }
