@@ -864,12 +864,14 @@
     },
     {
       "id": "270271e3-5a53-45ed-9c31-131e9bb4f36b",
-      "status": "+",
+      "status": "-",
       "title": "Loading screen",
-      "description": "We need a loading screen that will show at the beginning of app launch, while all necessary things are being loaded.\nFor the time being - that's just the user preferences and app settings.\n@src/renderer/App.tsx",
+      "description": "We need a loading screen that will show at the beginning of app launch, while all necessary things are being loaded. This needs to be a separate screen - placed under `src/renderer/screens` just like @src/renderer/screens/TasksView.tsx . The app entry is in @src/renderer/App.tsx .\nFor the time being - make sure the loading screen loads the user preferences and app settings - @src/renderer/hooks/useAppSettings.ts",
       "plan": "",
       "context": [
-        "src/renderer/App.tsx"
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/App.tsx",
+        "src/renderer/hooks/useAppSettings.ts"
       ],
       "acceptance": [],
       "blockers": []
@@ -891,11 +893,12 @@
       "id": "943be0ce-0c96-48ab-a820-37b919b9a150",
       "status": "-",
       "title": "when switching screens or projects - the Tasks view and sort get reset to defaults",
-      "description": "This shouldn't be the case. Whenever @src/renderer/tasks/TasksListView.tsx is opened, it should always show the defaults inside user preferences @src/renderer/hooks/useAppSettings.ts as the first thing.\nThere seems to be some sort of race condition where the defaults override the stored preferences.",
+      "description": "This shouldn't be the case. Whenever @src/renderer/tasks/TasksListView.tsx is opened, it should always show the defaults inside user preferences @src/renderer/hooks/useAppSettings.ts as the first thing.\nThere seems to be some sort of race condition where the defaults override the stored preferences.\nIt happens sporadically when switching to the @src/renderer/screens/TasksView.tsx",
       "plan": "",
       "context": [
         "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/hooks/useAppSettings.ts"
+        "src/renderer/hooks/useAppSettings.ts",
+        "src/renderer/screens/TasksView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -970,8 +973,8 @@
     "9fb948d2-235d-4322-9462-93a9ca8ce283": 66,
     "8acda51f-97c8-4614-8800-cb2d7607bf16": 67,
     "ada1bb79-e120-493b-b0ba-13d11951b42b": 68,
-    "270271e3-5a53-45ed-9c31-131e9bb4f36b": 69,
-    "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce": 70,
+    "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce": 69,
+    "270271e3-5a53-45ed-9c31-131e9bb4f36b": 70,
     "943be0ce-0c96-48ab-a820-37b919b9a150": 71
   }
 }
