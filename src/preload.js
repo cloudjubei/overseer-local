@@ -157,6 +157,11 @@ const LIVEDATA_API = {
   getData: (serviceId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, { serviceId }),
 };
 
+const GIT_API = {
+  mergeTaskBranch: (projectId, taskId, options = {}) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MERGE_TASK_BRANCH, { projectId, taskId, options }),
+  listFeatureBranches: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_FEATURE_BRANCHES, { projectId }),
+};
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('filesService', FILES_API);
@@ -166,3 +171,4 @@ contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API);
 contextBridge.exposeInMainWorld('factory', FACTORY_API);
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API);
+contextBridge.exposeInMainWorld('gitService', GIT_API);

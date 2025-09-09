@@ -84,6 +84,10 @@ const IPC_HANDLER_KEYS = {
   LIVE_DATA_TRIGGER_UPDATE: 'live-data:trigger-update',
   LIVE_DATA_UPDATE_CONFIG: 'live-data:update-config',
   LIVE_DATA_GET_DATA: 'live-data:get-data',
+
+  // Git operations
+  GIT_MERGE_TASK_BRANCH: 'git:merge-task-branch',
+  GIT_LIST_FEATURE_BRANCHES: 'git:list-feature-branches',
 };
 
 export default IPC_HANDLER_KEYS;

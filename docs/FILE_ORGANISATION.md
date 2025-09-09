@@ -27,6 +27,7 @@ Top-Level Layout
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer (exposes live data API).
   - main/services/git-monitor/: Main-process Git monitoring service that fetches remotes and tracks branch head changes; includes CommitAnalyzer to parse task.json from commits.
+  - main/services/git-ops/: Main-process Git operations IPC (merge task branches, list feature branches) for UI-triggered actions.
 - packages/: Local monorepo packages.
   - factory-ts/: Agent orchestration library (orchestrator, pricing, history, completion, git integration).
 - scripts/: Project automation scripts and CLIs.

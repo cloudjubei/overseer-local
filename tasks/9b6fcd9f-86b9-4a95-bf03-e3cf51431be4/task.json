@@ -42,11 +42,12 @@
     },
     {
       "id": "7a81601a-c0dc-418f-a0f3-a83e8a19919d",
-      "status": "-",
+      "status": "?",
       "title": "Expose Git Operations via IPC for UI Interaction",
       "description": "Create an IPC channel in the Electron main process to handle git-related requests from the renderer process. This will include an action to trigger the merge of a task branch. The handler in the main process will execute the necessary git commands safely and provide feedback (success or failure) to the UI.",
       "context": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot convert undefined or null to object"
     },
     {
       "id": "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2",

@@ -7,6 +7,7 @@ import { NotificationsManager } from './notifications/NotificationsManager';
 import { SettingsManager } from './settings/SettingsManager';
 import { LiveDataManager } from './live-data/LiveDataManager';
 import { GitMonitorService } from './main/services/git-monitor/GitMonitorService';
+import { GitOperationsManager } from './main/services/git-ops/GitOperationsManager';
 
 export let tasksManager;
 export let filesManager;
@@ -16,6 +17,7 @@ export let notificationsManager;
 export let settingsManager;
 export let liveDataManager;
 export let gitMonitorService;
+export let gitOperationsManager;
 
 export async function initManagers(projectRoot, mainWindow) {
   await registerFactoryIPC(mainWindow, projectRoot);
@@ -26,6 +28,7 @@ export async function initManagers(projectRoot, mainWindow) {
   notificationsManager = new NotificationsManager(projectRoot, mainWindow);
   settingsManager = new SettingsManager(projectRoot, mainWindow);
   liveDataManager = new LiveDataManager(projectRoot, mainWindow);
+  gitOperationsManager = new GitOperationsManager(projectRoot, mainWindow, projectsManager);
 
   await projectsManager.init();
   await tasksManager.init();
@@ -34,6 +37,7 @@ export async function initManagers(projectRoot, mainWindow) {
   await notificationsManager.init();
   await settingsManager.init();
   await liveDataManager.init();
+  await gitOperationsManager.init();
 
   // Initialize Git monitoring service (main process)
   try {
