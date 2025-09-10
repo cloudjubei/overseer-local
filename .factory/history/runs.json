@@ -4,12 +4,15 @@
     "agentType": "speccer",
     "projectId": "main",
     "taskId": "2cd244ee-c255-487c-882c-c28cd857156e",
-    "state": "running",
-    "message": "Starting agent... ",
+    "state": "completed",
+    "message": "Completed",
     "provider": "gemini",
     "model": "gemini-2.5-pro",
     "startedAt": "2025-09-10T14:38:47.644Z",
-    "updatedAt": "2025-09-10T14:39:17.652Z"
+    "updatedAt": "2025-09-10T14:39:29.783Z",
+    "costUSD": 0,
+    "promptTokens": 1292,
+    "completionTokens": 1502
   },
   {
     "runId": "task_wlzhc1cu_mfe2w6dl",
