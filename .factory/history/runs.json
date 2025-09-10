@@ -1,5 +1,32 @@
 [
   {
+    "runId": "task_7s9caa4d_mfdpqxu6",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-10T08:24:12.752Z",
+    "updatedAt": "2025-09-10T08:25:50.531Z",
+    "costUSD": 0.03969625,
+    "promptTokens": 4309,
+    "completionTokens": 3431
+  },
+  {
+    "runId": "task_06sz7ute_mfdpo4y8",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-10T08:22:02.002Z",
+    "updatedAt": "2025-09-10T08:22:07.607Z"
+  },
+  {
     "runId": "task_7apbnycy_mfd67sog",
     "agentType": "speccer",
     "projectId": "thefactory-tools",
