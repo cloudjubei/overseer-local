@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notificationsService } from '../services/notificationsService';
-import type { Notification } from '../../types/notifications';
+import type { Notification, NotificationMetadata } from '../../types/notifications';
 import { useProjectContext } from '../projects/ProjectContext';
+import { useNavigator } from '../navigation/Navigator';
 
 export function useNotifications() {
   const {
@@ -102,4 +103,26 @@ export function useNotifications() {
     markAllAsRead,
     clearAll,
   };
+}
+
+export function NotificationClickHandler() {
+  const nav = useNavigator();
+
+  useEffect(() => {
+    const unsubscribe = window.notificationsService.onOpenNotification((metadata: NotificationMetadata) => {
+      if (metadata.taskId) {
+        nav.navigateTaskDetails(metadata.taskId, metadata.featureId);
+      } else if (metadata.chatId) {
+        nav.navigateView('Chat');
+      } else if (metadata.documentPath) {
+        nav.navigateView('Files');
+      } else if (metadata.actionUrl) {
+        // Handle custom URL if needed
+      }
+    });
+
+    return unsubscribe;
+  }, [nav]);
+
+  return null;
 }

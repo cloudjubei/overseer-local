@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigator } from '../../navigation/Navigator';
 import { useShortcuts } from '../../hooks/useShortcuts';
-import { useAppSettings } from '../../hooks/useAppSettings';
+import { useAppSettings } from '../../settings/AppSettingsContext';
 
 export type CommandMenuApi = {
   open: () => void;
@@ -10,7 +10,7 @@ export type CommandMenuApi = {
   isOpen: () => boolean;
 };
 
-const UI_IMPROVEMENTS_TASK_ID = 'f9eef18e-818e-427d-82ab-8d990bb199c4';
+export const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
 
 const commandsBase = (
   nav: ReturnType<typeof useNavigator>

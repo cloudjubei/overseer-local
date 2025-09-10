@@ -8,7 +8,6 @@ import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
-import { useAppSettings } from '../hooks/useAppSettings'
 import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
 import { useAgents } from '../hooks/useAgents'
 import { Status, Task } from 'thefactory-tools';
@@ -19,6 +18,7 @@ import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
+import { useAppSettings } from '../settings/AppSettingsContext'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []

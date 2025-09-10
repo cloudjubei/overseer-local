@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import { useAppSettings } from './useAppSettings';
+import { useNavigator } from '../navigation/Navigator';
+import { useAppSettings } from '../settings/AppSettingsContext';
+import { UI_IMPROVEMENTS_TASK_ID } from '../components/ui/CommandMenu';
 
 type ShortcutHandler = (e: KeyboardEvent) => boolean | void;
 export type Shortcut = { id: string; comboKeys: string, handler: ShortcutHandler; description?: string; scope?: 'global' | 'list' | 'panel' | 'modal' };
@@ -11,7 +13,6 @@ type ShortcutsApi = {
 };
 
 const Ctx = createContext<ShortcutsApi | null>(null);
-
 
 export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
   const { appSettings } = useAppSettings()
@@ -132,4 +133,26 @@ export function useShortcuts() {
   const ctx = useContext(Ctx);
   if (!ctx) return { register: () => () => {}, list: () => [] as Shortcut[], prettyCombo: (combo) => combo } as ShortcutsApi;
   return ctx;
+}
+
+export function ShortcutsBootstrap() {
+  const { register } = useShortcuts();
+  const nav = useNavigator();
+  const { appSettings } = useAppSettings();
+
+  const combos = appSettings.userPreferences.shortcuts;
+
+  useEffect(() => {
+    const unregisterNew = register({ id: 'new-task', comboKeys: combos.newTask, handler: () => nav.openModal({ type: 'task-create' }), description: 'New task' });
+    const unregisterAddUiFeature = register({ id: 'add-ui-feature', comboKeys: combos.addUiFeature, handler: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }), description: 'Add feature to UI Improvements', scope: 'global' });
+    return () => { unregisterNew(); unregisterAddUiFeature(); };
+  }, [register, nav, combos.newTask, combos.addUiFeature]);
+
+  useEffect(() => {
+    const onHash = () => {};
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  return null;
 }

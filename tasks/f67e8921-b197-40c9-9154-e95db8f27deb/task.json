@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "~",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -891,7 +891,7 @@
     },
     {
       "id": "943be0ce-0c96-48ab-a820-37b919b9a150",
-      "status": "-",
+      "status": "+",
       "title": "AppSettings needs an AppSettingsContext",
       "description": "Same as @src/renderer/projects/ProjectContext.tsx , created in @src/renderer/App.tsx ; and then used in @src/renderer/hooks/useProjectSettings.ts we need the same exact approach for @src/renderer/hooks/useAppSettings.ts . It essentially needs to be a singleton used across the project and this will make sure that's the case.\nAppSettings should be such a context of the first level.",
       "plan": "",

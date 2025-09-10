@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ProjectSpec } from 'thefactory-tools';
 import { projectsService } from '../services/projectsService'
-import { useAppSettings } from '../hooks/useAppSettings'
+import { useAppSettings } from '../settings/AppSettingsContext';
 
 export const MAIN_PROJECT = 'main'
 
@@ -60,7 +60,6 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     if (activeProjectId == id) { return }
     setActiveProjectIdState(id)
     
-    console.log("setActiveProjectId id: ", id)
     if (isAppSettingsLoaded){
       setUserPreferences({ lastActiveProjectId: id })
     }

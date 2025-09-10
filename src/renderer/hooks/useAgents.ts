@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { agentsService, AgentRun } from '../services/agentsService';
 import { AgentType } from 'thefactory-tools';
-import { useAppSettings } from './useAppSettings';
 import { LLMConfigManager } from '../utils/LLMConfigManager';
+import { useAppSettings } from '../settings/AppSettingsContext';
 
 export function useAgents() {
   const { appSettings } = useAppSettings()

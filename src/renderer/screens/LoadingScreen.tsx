@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useAppSettings } from '../hooks/useAppSettings';
+import { useAppSettings } from '../settings/AppSettingsContext';
 
 interface LoadingScreenProps {
-  onLoaded?: () => void;
+  onLoaded: () => void;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
@@ -10,7 +10,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
 
   useEffect(() => {
     if (isAppSettingsLoaded) {
-      onLoaded?.();
+      onLoaded();
     }
   }, [isAppSettingsLoaded, onLoaded]);
 

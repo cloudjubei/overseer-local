@@ -6,11 +6,11 @@ import { useLLMConfig } from '../hooks/useLLMConfig';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
 import { useNavigator } from '../navigation/Navigator';
-import { useAppSettings } from '../hooks/useAppSettings';
 import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
 import { IconEdit, IconDelete, IconPlus } from '../components/ui/Icons';
 import { type ShortcutsModifier, type ShortcutsConfig, type AppSettings, DEFAULT_APP_SETTINGS } from '../../types/settings';
+import { useAppSettings } from '../settings/AppSettingsContext';
 
 // Settings Categories
 const CATEGORIES = [
@@ -25,7 +25,7 @@ type CategoryId = typeof CATEGORIES[number]['id'];
 
 export default function SettingsView() {
   const { availableThemes, theme, setTheme } = useTheme();
-  const { isAppSettingsLoaded, appSettings, setNotificationSystemSettings, updateAppSettings, setUserPreferences } = useAppSettings();
+  const { appSettings, setNotificationSystemSettings, updateAppSettings, setUserPreferences } = useAppSettings();
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings();
   const { enableNotifications } = useNotifications();
 
@@ -354,12 +354,11 @@ export default function SettingsView() {
       headerTitle="Categories"
       headerSubtitle=""
     >
-      {!isAppSettingsLoaded && <div className="empty" aria-live="polite">Loading your preferences…</div>}
-      {isAppSettingsLoaded && activeCategory === 'visual' && renderVisualSection()}
-      {isAppSettingsLoaded && activeCategory === 'llms' && renderLLMsSection()}
-      {isAppSettingsLoaded && activeCategory === 'notifications' && renderNotificationsSection()}
-      {isAppSettingsLoaded && activeCategory === 'github' && renderGithubSection()}
-      {isAppSettingsLoaded && activeCategory === 'websearch' && renderWebSearchSection()}
+      {activeCategory === 'visual' && renderVisualSection()}
+      {activeCategory === 'llms' && renderLLMsSection()}
+      {activeCategory === 'notifications' && renderNotificationsSection()}
+      {activeCategory === 'github' && renderGithubSection()}
+      {activeCategory === 'websearch' && renderWebSearchSection()}
     </CollapsibleSidebar>
   );
 }
