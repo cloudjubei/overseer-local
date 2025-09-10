@@ -13,6 +13,7 @@ import { useAppSettings } from './hooks/useAppSettings';
 import { useTheme } from './hooks/useTheme';
 import useLiveData from './hooks/useLiveData';
 import LoadingScreen from './screens/LoadingScreen';
+import { AppSettingsProvider } from './settings/AppSettingsContext';
 
 const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb';
 
@@ -72,23 +73,25 @@ function NotificationClickHandler() {
 
 function MainAppShell() {
   return (
-    <ToastProvider>
-      <ProjectsProvider>
-        <NavigatorProvider>
-          <ShortcutsProvider>
-            <ServicesBootstrap />
-            <GlobalShortcutsBootstrap />
-            <NotificationClickHandler />
-            <CommandMenu />
-            <ShortcutsHelp />
-            <div className="flex h-full w-full overflow-hidden">
-              <SidebarView />
-              <ModalHost />
-            </div>
-          </ShortcutsProvider>
-        </NavigatorProvider>
-      </ProjectsProvider>
-    </ToastProvider>
+    <AppSettingsProvider>
+      <ToastProvider>
+        <ProjectsProvider>
+          <NavigatorProvider>
+            <ShortcutsProvider>
+              <ServicesBootstrap />
+              <GlobalShortcutsBootstrap />
+              <NotificationClickHandler />
+              <CommandMenu />
+              <ShortcutsHelp />
+              <div className="flex h-full w-full overflow-hidden">
+                <SidebarView />
+                <ModalHost />
+              </div>
+            </ShortcutsProvider>
+          </NavigatorProvider>
+        </ProjectsProvider>
+      </ToastProvider>
+    </AppSettingsProvider>
   );
 }
 
