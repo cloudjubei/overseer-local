@@ -903,6 +903,19 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "c2679a2e-98a3-46d7-9315-2935e54c2f05",
+      "status": "-",
+      "title": "Agent runs in the history don't show any messages",
+      "description": "Somehow the code responsible for reading the data must be wrong.\nIf any changes would have to be made in the 'thefactory-tools' project - outline them all in a document `docs/CHANGES.md`.\nThe runs are viewed inside @src/renderer/screens/AgentsView.tsx and @src/renderer/components/agents/ChatConversation.tsx .",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -976,6 +989,7 @@
     "ada1bb79-e120-493b-b0ba-13d11951b42b": 68,
     "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce": 69,
     "270271e3-5a53-45ed-9c31-131e9bb4f36b": 70,
-    "943be0ce-0c96-48ab-a820-37b919b9a150": 71
+    "943be0ce-0c96-48ab-a820-37b919b9a150": 71,
+    "c2679a2e-98a3-46d7-9315-2935e54c2f05": 72
   }
 }

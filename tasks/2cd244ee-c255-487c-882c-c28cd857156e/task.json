@@ -1,8 +1,98 @@
 {
   "id": "2cd244ee-c255-487c-882c-c28cd857156e",
-  "status": "-",
-  "title": "Overseer backend",
+  "status": "~",
+  "title": "Overseer backend - a Nest.js project",
   "description": "Up until now everything was running locally, but we would like to introduce other clients to work together on a project. The common ground where all project data would be located is a git repository.\nSo there needs to be a backend that would allow for clients to do everything this app does (manipulate projects/tasks/features) and launch agents on them (using thefactory-tools + any other future libraries/packages).\nThis means we also need to have a service for running agents as part of the backend - for the time being we can assume a monorepo for the backend and no external services.\n\nOne important requirement is that a client (like this one) might still want to run everything locally without touching the backend. It must still be possible to do so, which means that all project related data lives in the repository, apart from big blob data. Any indexing or extra storage of this blob data must be handled by the clients and backend as an additional feature - for instance searching files can be handled locally and externally via the backend employing exactly the same methods - i.e. thefactory-db package and thefactory-knowledge.\n\nWe need to spec out this task so that it contains all the features for the backend to work this way, and this app as the first client to integrate with it.\n\nThis is going to be a completely standalone project, not really related to this one (Overseer Local) - other than at some point this project will need to integrate with it via the REST/Websocket API (one of the last features to implement).\n\nFor the time being, all code for this new project can be placed under a new `backend` folder (so that in the future it's easy to create a separate repo for it.\n\nThe whole project must be well documented following the same ideas as in this project (so a `docs/FILE_ORGANISATION.md` and a `README.md` for how to quickly launch the project).\n\nA simple test that must be included as part of this task (the final feature) - would be to have a script that can be launched that will create a new task - and then this project would have to see the changes. Obviously, this means that new UI/UX will have to be introduced in this project - this also needs to be handled as one of the later features in this tak.",
-  "features": [],
-  "featureIdToDisplayIndex": {}
+  "features": [
+    {
+      "id": "ac6b59b2-6893-4d68-8c80-1699b53aa0ce",
+      "status": "-",
+      "title": "Backend: Initialize Nest.js Project and Basic Structure",
+      "description": "Create a new directory named 'backend'. Inside this directory, initialize a new Nest.js project using the Nest CLI. Set up the basic project structure, including initial configuration files, and create placeholder documentation files: 'backend/README.md' and 'backend/docs/FILE_ORGANISATION.md'.",
+      "context": []
+    },
+    {
+      "id": "a65d97c0-5468-4ec9-a143-b2fb2d4b3035",
+      "status": "-",
+      "title": "Backend: Implement Git Service for Project Repository Management",
+      "description": "Create a 'ProjectService' in the Nest.js backend. This service will be responsible for managing git repositories. It should include methods to: 1. Clone a remote git repository to a local directory managed by the backend. 2. Pull the latest changes from the remote repository. 3. Push local changes to the remote repository. Use a library like 'simple-git' for git operations.",
+      "context": []
+    },
+    {
+      "id": "10e76dd2-8a2d-46b1-b06d-64df98ef3e8e",
+      "status": "-",
+      "title": "Backend: Create REST API Endpoints for Project Management",
+      "description": "Develop a 'ProjectController' that exposes the ProjectService functionality via a REST API. The API should support the following endpoints:\n- POST /projects: Add a new project by cloning it from a provided git URL.\n- GET /projects: List all projects managed by the backend.\n- GET /projects/:id: Get details for a specific project.\n- POST /projects/:id/sync: Trigger a 'git pull' for a specific project.",
+      "context": []
+    },
+    {
+      "id": "fe78ea5c-1fa1-4e6c-8d63-ae8c5635d1e8",
+      "status": "-",
+      "title": "Backend: Implement Service for Task and Feature File Operations",
+      "description": "Create services (e.g., 'TaskService', 'FeatureService') to handle file-based operations for tasks and features within the cloned project repositories. These services should be able to:\n- Read the content of task/feature files.\n- Write/update the content of task/feature files.\n- Create new task/feature files.\n- Delete task/feature files.\n- List all tasks/features for a given project by reading the directory structure.",
+      "context": []
+    },
+    {
+      "id": "90333629-31c5-4975-8a20-7a13f607d197",
+      "status": "-",
+      "title": "Backend: Create REST API Endpoints for Tasks and Features",
+      "description": "Develop controllers to expose CRUD operations for tasks and features via the REST API, building upon the file management services. The endpoints should follow a nested structure, for example:\n- GET /projects/:projectId/tasks\n- POST /projects/:projectId/tasks\n- GET /projects/:projectId/tasks/:taskId\n- PUT /projects/:projectId/tasks/:taskId\n- DELETE /projects/:projectId/tasks/:taskId\nImplement similar endpoints for features.",
+      "context": []
+    },
+    {
+      "id": "98a5115c-8d7a-4856-acad-98e7755a5a64",
+      "status": "-",
+      "title": "Backend: Implement Agent Runner Service",
+      "description": "Create an 'AgentService' responsible for running agents. This service will use Node.js 'child_process' to execute agent scripts (e.g., using '@thefactory/tools'). It needs to manage the lifecycle of agent processes, capture their stdout/stderr streams, and track their status (e.g., running, completed, failed).",
+      "context": []
+    },
+    {
+      "id": "24e851ab-6cd1-4dc4-a752-d78ac77bd1fd",
+      "status": "-",
+      "title": "Backend: Expose Agent Service via API and WebSockets",
+      "description": "Create an 'AgentController' with an endpoint to start an agent run (e.g., POST /projects/:projectId/tasks/:taskId/run-agent). Also, implement a Nest.js WebSocket Gateway to provide real-time updates from the agent. When an agent is started, the client should be able to connect to a WebSocket endpoint to stream logs and receive status updates.",
+      "context": []
+    },
+    {
+      "id": "d6af08a5-7be5-43cf-a3f0-7b1ad98c6584",
+      "status": "-",
+      "title": "Client: Implement API Client for Overseer Backend",
+      "description": "In the existing Overseer application, create a new module/service to communicate with the new backend. This API client will encapsulate all HTTP requests (using a library like axios) and WebSocket connections to the backend. It should handle configuration for the backend URL.",
+      "context": []
+    },
+    {
+      "id": "4b0760ca-475f-4ba4-9207-720204ccb82a",
+      "status": "-",
+      "title": "Client: Integrate Backend into UI for Remote Project Management",
+      "description": "Update the Overseer UI to support working with projects through the backend. This includes:\n- A settings/configuration page to set the backend URL.\n- A new view to list, add, and select remote projects from the backend.\n- Modifying existing views (task list, task detail) to fetch data from the backend API when a remote project is active, instead of reading from the local filesystem.",
+      "context": []
+    },
+    {
+      "id": "d4567b5b-6a36-4106-8e4b-e604f1c5fc3d",
+      "status": "-",
+      "title": "Test: Create Script to Test Task Creation via Backend",
+      "description": "Develop a standalone Node.js script that uses the backend's API to create a new task in a test project. After the script runs, verify that the new task is visible in the Overseer client application when it's connected to the backend and viewing that project. This confirms the end-to-end workflow.",
+      "context": []
+    },
+    {
+      "id": "eb6061fd-8405-461b-b554-fffa405b270d",
+      "status": "-",
+      "title": "Backend: Finalize Project Documentation",
+      "description": "Thoroughly document the new backend project. Update the 'backend/README.md' with detailed instructions on setup, configuration, and how to run the project. Populate 'backend/docs/FILE_ORGANISATION.md' to explain the source code structure. Add API documentation for all endpoints.",
+      "context": []
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "ac6b59b2-6893-4d68-8c80-1699b53aa0ce": 1,
+    "a65d97c0-5468-4ec9-a143-b2fb2d4b3035": 2,
+    "10e76dd2-8a2d-46b1-b06d-64df98ef3e8e": 3,
+    "fe78ea5c-1fa1-4e6c-8d63-ae8c5635d1e8": 4,
+    "90333629-31c5-4975-8a20-7a13f607d197": 5,
+    "98a5115c-8d7a-4856-acad-98e7755a5a64": 6,
+    "24e851ab-6cd1-4dc4-a752-d78ac77bd1fd": 7,
+    "d6af08a5-7be5-43cf-a3f0-7b1ad98c6584": 8,
+    "4b0760ca-475f-4ba4-9207-720204ccb82a": 9,
+    "d4567b5b-6a36-4106-8e4b-e604f1c5fc3d": 10,
+    "eb6061fd-8405-461b-b554-fffa405b270d": 11
+  }
 }
