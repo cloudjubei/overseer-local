@@ -1,5 +1,21 @@
 [
   {
+    "runId": "task_0csxltfd_mfe8hx4k",
+    "agentType": "developer",
+    "projectId": "thefactory-knowledge",
+    "taskId": "f72dbcdb-77e7-4d00-bf72-e2cc59271644",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-10T17:09:04.629Z",
+    "updatedAt": "2025-09-10T17:18:06.614Z",
+    "costUSD": 0.2691,
+    "promptTokens": 43752,
+    "completionTokens": 21441,
+    "progress": 0.05
+  },
+  {
     "runId": "task_qa7b16lu_mfe34nkq",
     "agentType": "speccer",
     "projectId": "main",
