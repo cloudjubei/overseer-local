@@ -18,7 +18,7 @@ export type ProjectContextValue = {
 const ProjectContext = createContext<ProjectContextValue | null>(null)
 
 export function ProjectsProvider({ children }: { children: React.ReactNode }) {
-  const { appSettings, updateAppSettings } = useAppSettings()
+  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
   const [initialLoad, setInitialLoad] = useState(true)
   const [activeProjectId, setActiveProjectIdState] = useState<string>(MAIN_PROJECT)
   const [projects, setProjects] = useState<ProjectSpec[]>([])
@@ -57,10 +57,14 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   }, [projects, activeProjectId])
 
   const setActiveProjectId = useCallback((id: string) => {
+    if (activeProjectId == id) { return }
     setActiveProjectIdState(id)
-    // Only update the specific userPreferences sub-tree to avoid clobbering other preferences (like tasksViewMode)
-    updateAppSettings({ userPreferences: { ...appSettings.userPreferences, lastActiveProjectId: id }})
-  }, [appSettings, updateAppSettings])
+    
+    console.log("setActiveProjectId id: ", id)
+    if (isAppSettingsLoaded){
+      setUserPreferences({ lastActiveProjectId: id })
+    }
+  }, [activeProjectId, isAppSettingsLoaded, setUserPreferences])
 
   const getProjectById = useCallback((id: string) => {
     if (projects.length == 0) return undefined

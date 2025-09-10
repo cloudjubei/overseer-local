@@ -14,7 +14,6 @@ export default class AppSettings {
       const stored = this.appStorage.getItem(this.__storageKey());
       if (!stored) return DEFAULT_APP_SETTINGS;
       const parsed = JSON.parse(stored);
-      // Shallow merge with defaults to ensure new fields (like webSearchApiKeys) exist
       return { ...DEFAULT_APP_SETTINGS, ...parsed };
     } catch {
       return DEFAULT_APP_SETTINGS;

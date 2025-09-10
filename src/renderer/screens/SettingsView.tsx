@@ -25,7 +25,7 @@ type CategoryId = typeof CATEGORIES[number]['id'];
 
 export default function SettingsView() {
   const { availableThemes, theme, setTheme } = useTheme();
-  const { isAppSettingsLoaded, appSettings, setNotificationSystemSettings, updateAppSettings } = useAppSettings();
+  const { isAppSettingsLoaded, appSettings, setNotificationSystemSettings, updateAppSettings, setUserPreferences } = useAppSettings();
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings();
   const { enableNotifications } = useNotifications();
 
@@ -55,12 +55,11 @@ export default function SettingsView() {
   }, []);
 
   const onShortcutChange = async (keyName: keyof ShortcutsConfig, combo: string) => {
-    const next: AppSettings = await updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcuts: { ...appSettings.userPreferences.shortcuts, [keyName]: combo } } });
-    return next;
+    return await setUserPreferences({ shortcuts: { ...appSettings.userPreferences.shortcuts, [keyName]: combo } });
   };
 
   const resetShortcutsToDefault = async () => {
-    await updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcuts: DEFAULT_APP_SETTINGS.userPreferences.shortcuts } });
+    await setUserPreferences({ shortcuts: DEFAULT_APP_SETTINGS.userPreferences.shortcuts });
   };
 
   // Visual Settings content
@@ -90,7 +89,7 @@ export default function SettingsView() {
         <select
           id="shortcuts-mod"
           value={appSettings.userPreferences.shortcutsModifier}
-          onChange={(e) => updateAppSettings({ userPreferences: { ...appSettings.userPreferences, shortcutsModifier: e.target.value as ShortcutsModifier } })}
+          onChange={async (e) => await setUserPreferences({ shortcutsModifier: e.target.value as ShortcutsModifier })}
           className="w-64 p-2 border border-gray-300 rounded-md focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
         >
           <option value="meta">Cmd (⌘) / Meta</option>
