@@ -892,13 +892,14 @@
     {
       "id": "943be0ce-0c96-48ab-a820-37b919b9a150",
       "status": "-",
-      "title": "when switching screens or projects - the Tasks view and sort get reset to defaults",
-      "description": "This shouldn't be the case. Whenever @src/renderer/tasks/TasksListView.tsx is opened, it should always show the defaults inside user preferences @src/renderer/hooks/useAppSettings.ts as the first thing.\nThere seems to be some sort of race condition where the defaults override the stored preferences.\nIt happens sporadically when switching to the @src/renderer/screens/TasksView.tsx",
+      "title": "AppSettings needs an AppSettingsContext",
+      "description": "Same as @src/renderer/projects/ProjectContext.tsx , created in @src/renderer/App.tsx ; and then used in @src/renderer/hooks/useProjectSettings.ts we need the same exact approach for @src/renderer/hooks/useAppSettings.ts . It essentially needs to be a singleton used across the project and this will make sure that's the case.\nAppSettings should be such a context of the first level.",
       "plan": "",
       "context": [
-        "src/renderer/tasks/TasksListView.tsx",
-        "src/renderer/hooks/useAppSettings.ts",
-        "src/renderer/screens/TasksView.tsx"
+        "src/renderer/projects/ProjectContext.tsx",
+        "src/renderer/hooks/useProjectSettings.ts",
+        "src/renderer/App.tsx",
+        "src/renderer/hooks/useAppSettings.ts"
       ],
       "acceptance": [],
       "blockers": []
