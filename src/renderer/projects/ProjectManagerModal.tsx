@@ -138,12 +138,11 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
     }
 
     setSaving(true)
-    let res
     try {
       if (mode === 'create') {
-        res = await projectsService.createProject(form)
+        await projectsService.createProject(form)
       } else if (mode === 'edit' && editingId) {
-        res = await projectsService.updateProject(editingId, form)
+        await projectsService.updateProject(editingId, form)
       }
     } catch (e: any) {
       setFormErrors([e?.message || String(e)])
