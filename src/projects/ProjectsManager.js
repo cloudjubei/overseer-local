@@ -152,23 +152,28 @@ export class ProjectsManager {
     return path.join(this.projectsDir, `${id}.json`);
   }
 
-  async listProjects() {
+  listProjects() {
     return this.projects
   }
   
-  async getProject(id) {
+  getProject(id) {
     return this.projects.find(p => p.id === id)
   }
 
   async createProject(spec) {
-    const sanitized = { ...spec };
-    if (!Array.isArray(sanitized.requirements)) sanitized.requirements = [];
+    const sanitized = { 
+      ...spec,
+      requirements: spec.requirements ?? [],
+      taskIdToDisplayIndex: spec.taskIdToDisplayIndex ?? {}
+    };
+
+
     const { valid, errors } = validateProjectSpec(sanitized);
     if (!valid) return { ok: false, error: 'Invalid project spec', details: errors };
 
     const dir = await this.ensureProjectsDirExists();
 
-    const project = this.getProject(sanitized.id)
+    const project = await this.getProject(sanitized.id)
     if (project) {
       return project
     }

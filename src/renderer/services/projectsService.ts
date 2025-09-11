@@ -7,7 +7,7 @@ export type ProjectsService = {
   getProject: (id: string) => Promise<ProjectSpec | undefined>
   createProject: (spec: ProjectSpec) => Promise<ProjectSpec>
   updateProject: (id: string, spec: ProjectSpec) => Promise<ProjectSpec>
-  deleteProjct: (id: string) => Promise<ServiceResult>
+  deleteProject: (id: string) => Promise<ServiceResult>
   reorderTask: (projectId: string, fromIndex: number, toIndex: number) => Promise<ServiceResult>
 }
 

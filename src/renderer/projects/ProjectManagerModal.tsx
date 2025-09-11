@@ -115,7 +115,7 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
   async function handleDelete(id: string) {
     if (!confirm('Delete this project configuration?')) return
     setSaving(true)
-    const res = await projectsService.deleteProjct(id)
+    const res = await projectsService.deleteProject(id)
     if (!res.ok) {
       alert('Failed to delete: ' + (res.error || 'Unknown error'))
     }
