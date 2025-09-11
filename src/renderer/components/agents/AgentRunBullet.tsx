@@ -1,10 +1,9 @@
-import React from 'react';
-import type { AgentRun } from '../../services/agentsService';
+
+import { AgentRunHistory } from 'thefactory-tools';
 import StatusChip from './StatusChip';
 
-export default function AgentRunBullet({ run, onClick }: { run: AgentRun; onClick?: (e: any) => void }) {
-  const providerModel = [run.provider, run.model].filter(Boolean).join(' · ');
-  const label = `Agent ${run.runId.slice(0, 8)} · ${run.state}${run.progress != null ? ` · ${Math.round((run.progress ?? 0) * 100)}%` : ''}${run.message ? ` · ${run.message}` : ''}${providerModel ? ` · ${providerModel}` : ''}`;
+export default function AgentRunBullet({ run, onClick }: { run: AgentRunHistory; onClick?: (e: any) => void }) {
+  const label = `Agent ${run.id.slice(0, 8)} · ${run.state}${run.statusMessage ? ` · ${run.statusMessage}` : ''} · ${run.llmConfig.provider} · ${run.llmConfig.model}`;
 
   return (
     <button

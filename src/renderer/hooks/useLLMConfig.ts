@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LLMConfigManager, LLM_CONFIGS_CHANGED_EVENT } from '../utils/LLMConfigManager';
 import type { LLMConfig } from 'thefactory-tools';
 
-export function useLLMConfig() {
+export function useLLMConfig() { //TODO; transform into Context like AppSettings (after them)
   const managerRef = useRef<LLMConfigManager>(new LLMConfigManager());
   const [configs, setConfigs] = useState<LLMConfig[]>([]);
   const [activeConfigId, setActiveConfigId] = useState<string | null>(null);

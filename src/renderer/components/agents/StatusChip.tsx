@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AgentRunState } from '../../services/agentsService';
+
+import { AgentRunState } from 'thefactory-tools';
 import { IconCheckCircle, IconLoader, IconStopCircle, IconXCircle } from '../ui/Icons';
 import Tooltip from '../ui/Tooltip';
 

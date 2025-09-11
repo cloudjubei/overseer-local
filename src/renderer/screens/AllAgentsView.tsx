@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useAgents } from '../hooks/useAgents';
 import AgentRunRow from '../components/agents/AgentRunRow';
 

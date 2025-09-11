@@ -905,27 +905,31 @@
       "blockers": []
     },
     {
-      "id": "c2679a2e-98a3-46d7-9315-2935e54c2f05",
-      "status": "?",
-      "title": "Agent runs in the history don't show any messages",
-      "description": "Somehow the code responsible for reading the data must be wrong or maybe the messages are not serialised correctly. When the run is active - all messages show correctly (and when it then moves to history). So the fault must be in the process that reads old history.\nIf any changes would have to be made in the 'thefactory-tools' project - outline them all in a document `docs/CHANGES.md`.\nThe runs are viewed inside @src/renderer/screens/AgentsView.tsx and @src/renderer/components/agents/ChatConversation.tsx .",
+      "id": "76a35a14-e633-4f4a-827f-f7521123176d",
+      "status": "-",
+      "title": "useLLMConfig should be an app wide context",
+      "description": "Make @src/renderer/hooks/useLLMConfig.ts follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx and @src/renderer/contexts/ProjectContext.tsx to turn it into a context initialised once in @src/renderer/App.tsx",
       "plan": "",
       "context": [
-        "src/renderer/screens/AgentsView.tsx",
-        "src/renderer/components/agents/ChatConversation.tsx"
+        "src/renderer/hooks/useLLMConfig.ts",
+        "src/renderer/contexts/AppSettingsContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/App.tsx"
       ],
       "acceptance": [],
       "blockers": []
     },
     {
-      "id": "7232c8b6-4a99-4d94-909b-2ba95c8f0e2e",
+      "id": "032e4535-7d44-4654-bc6d-811d395b0285",
       "status": "-",
-      "title": "Creating a new project doesn't work",
-      "description": "When clicking create in @src/renderer/projects/ProjectManagerModal.tsx .js it just closes the form and doesn't do anything.\nSo either the form is wrong or the logic inside @src/projects/ProjectsManager.js",
+      "title": "turn useAgents into a context",
+      "description": "Make @src/renderer/hooks/useAgents.ts .ts follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx  and @src/renderer/contexts/ProjectContext.tsx  to turn it into a context initialised once in @src/renderer/App.tsx",
       "plan": "",
       "context": [
-        "src/projects/ProjectsManager.js",
-        "src/renderer/projects/ProjectManagerModal.tsx"
+        "src/renderer/hooks/useAgents.ts",
+        "src/renderer/contexts/AppSettingsContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/App.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -1003,7 +1007,7 @@
     "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce": 69,
     "270271e3-5a53-45ed-9c31-131e9bb4f36b": 70,
     "943be0ce-0c96-48ab-a820-37b919b9a150": 71,
-    "c2679a2e-98a3-46d7-9315-2935e54c2f05": 72,
-    "7232c8b6-4a99-4d94-909b-2ba95c8f0e2e": 73
+    "76a35a14-e633-4f4a-827f-f7521123176d": 72,
+    "032e4535-7d44-4654-bc6d-811d395b0285": 73
   }
 }

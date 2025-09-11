@@ -22,6 +22,7 @@ export type NotificationCategory =
 
 export interface NotificationMetadata {
   [key: string]: any;
+  runId?: string;
   taskId?: string;
   featureId?: string;
   chatId?: string;

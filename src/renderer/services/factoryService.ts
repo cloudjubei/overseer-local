@@ -8,7 +8,7 @@ export type FactoryService = {
   subscribeRuns: (callback: (updated: AgentRunHistory) => void) => () => void
   startTaskRun: (params: StartTaskRunParams) => AgentRunHistory
   startFeatureRun: (params: StartFeatureRunParams) => AgentRunHistory
-  cancelRun: (runId: string) => void
+  cancelRun: (runId: string) => Promise<void>
   listRunsActive: () => Promise<AgentRunHistory[]>
   listRunHistory: () => Promise<AgentRunHistory[]>
   deleteRunHistory: (runId: string) => Promise<AgentRunHistory | undefined>

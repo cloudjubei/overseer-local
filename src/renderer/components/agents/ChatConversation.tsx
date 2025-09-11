@@ -83,8 +83,7 @@ function ToolCallRow({ call, resultText, index }: { call: ToolCall; resultText?:
   );
 }
 
-// Back-compat: parse tool results from mixed formats (preferred ToolResult JSON, else legacy lines)
-export type ParsedToolResult = { name: string; result: string };
+export type ParsedToolResult = { name: string; result: any };
 
 function parseToolResultsObjects(tools?: AgentRunMessage): ParsedToolResult[]
 {
@@ -239,21 +238,10 @@ function FeatureContent({ conversation, isLatestFeature, latestTurnRef }: { conv
                 {toolCalls.length > 0 && (
                   <div className="space-y-2">
                     {toolCalls.map((call, i) => (
-                      <ToolCallRow key={i} call={call} index={i} resultText={resultsObjs[i]?.result} />
+                      <ToolCallRow key={i} call={call} index={i} resultText={resultsObjs[i]?.result ? JSON.stringify(resultsObjs[i]?.result) : undefined} />
                     ))}
                   </div>
                 )}
-
-                {toolCalls.length === 0 && !isFinal && resultsObjs.length > 0 ? (
-                  <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
-                    <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Tool results</div>
-                    {resultsObjs.map((r, i) => (
-                      <div key={i} className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 mb-2 last:mb-0 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-                        <SafeText text={r.result} />
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
               </div>
             </Collapsible>
           </div>
@@ -325,7 +313,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory })
           const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
           const isLatestFeature = conversation.featureId === latestFeatureId;
           return (
-            <li key={conversation.featureId}>
+            <li key={conversation.id}>
               <Collapsible title={<span className="flex items-center">Feature: {conversation.featureId}{subtitle ? <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span> : null}</span>} defaultOpen={isLatestFeature}>
                 <FeatureContent conversation={conversation} isLatestFeature={isLatestFeature} latestTurnRef={isLatestFeature ? latestTurnRef : undefined} />
               </Collapsible>

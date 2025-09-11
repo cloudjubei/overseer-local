@@ -16,9 +16,9 @@ export default function TaskCard({ project, task, onClick, draggable = false, on
   showStatus?: boolean,
   onStatusChange?: (status: Status) => void | Promise<void>
 }) {
-  const { activeRuns, startTaskAgent } = useAgents()
+  const { runsActive, startTaskAgent } = useAgents()
   const { navigateAgentRun } = useNavigator()
-  const taskRun = activeRuns.find(r => r.taskId === task.id)
+  const taskRun = runsActive.find(r => r.taskId === task.id)
 
   return (
     <div
@@ -50,9 +50,9 @@ export default function TaskCard({ project, task, onClick, draggable = false, on
         <div className="task-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
           {taskRun ? (
             <AgentRunBullet
-              key={taskRun.runId}
+              key={taskRun.id}
               run={taskRun}
-              onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }}
+              onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.id) }}
             />
           ) : (
             <RunAgentButton

@@ -98,7 +98,6 @@ export default class ChatsStorage {
     }
 
     const chatPath = path.join(this.chatsDir,`${chatId}.json`);
-    console.log("createChat in path: ", chatPath)
     await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8');
     this.chats.push(newChat)
     await this.__notify(`New chat ${chatId} added.`)
@@ -107,7 +106,6 @@ export default class ChatsStorage {
 
   async saveChat(chatId, messages, rawResponses) {
     const chatPath = path.join(this.chatsDir,`${chatId}.json`);
-    console.log("saveChat in path: ", chatPath)
     let chatData;
     try {
       const raw = await fs.readFile(chatPath, 'utf-8');

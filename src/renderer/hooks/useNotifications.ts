@@ -41,17 +41,11 @@ export function useNotifications() {
 
   // When a notification is opened/clicked, navigate to the Agents view and focus the run
   useEffect(() => {
-    const off = notificationsService.onOpenNotification?.((metadata) => {
+    const off = notificationsService.onOpenNotification((metadata) => {
       try {
-        const runId = (metadata as any)?.runId || (metadata as any)?.agentRunId || (metadata as any)?.id;
-        const destination = (metadata as any)?.destination || (metadata as any)?.screen;
-        // If this is an agent run notification, set the hash so AgentsView can scroll/highlight
+        const runId = metadata.runId
         if (runId) {
-          // Ensure we navigate to Agents screen; assume hash-based navigation
-          // Preserve any other state but set the agents run target
           window.location.hash = `agents/run/${runId}`;
-        } else if (destination === 'agents') {
-          window.location.hash = 'agents';
         }
       } catch (_) {
         // no-op

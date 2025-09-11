@@ -83,7 +83,7 @@ export default function SidebarView({}: SidebarProps) {
     setActiveProjectId,
   } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
-  const { runsActive } = useAgents();
+  const { runsHistory } = useAgents();
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed);
 
@@ -106,12 +106,13 @@ export default function SidebarView({}: SidebarProps) {
 
   const activeCountByProject = useMemo(() => {
     const map = new Map<string, number>();
-    for (const r of runsActive) {
+    for (const r of runsHistory) {
+      if (r.state !== 'running') continue
       const k = r.projectId;
       map.set(k, (map.get(k) || 0) + 1);
     }
     return map;
-  }, [runsActive]);
+  }, [runsHistory]);
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);

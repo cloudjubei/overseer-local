@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAgents } from '../hooks/useAgents';
 import ChatConversation from '../components/agents/ChatConversation';
 import AgentRunRow from '../components/agents/AgentRunRow';
 import ModelChip from '../components/agents/ModelChip';
 import { useActiveProject } from '../contexts/ProjectContext';
-import { AgentRunHistory } from 'thefactory-tools';
 
 function formatTime(iso?: string) {
   if (!iso) return '';
@@ -17,27 +16,24 @@ function formatTime(iso?: string) {
 }
 
 export default function AgentsView() {
-  const { runsHistory, runsActive, cancelRun, deleteRunHistory } = useAgents();
+  const { runsHistory, cancelRun, deleteRunHistory } = useAgents();
   const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
   const activeProjectRuns = useMemo(
-    () => runsActive
-      .filter(r => r.projectId === projectId)
+    () => runsHistory
+      .filter(r => r.projectId === projectId && r.state === 'running')
       .slice()
       .sort((a,b) => (b.startedAt || '').localeCompare(a.startedAt || '')),
-    [runsActive, projectId]
+    [runsHistory, projectId]
   );
 
-  const projectRuns = useMemo(() => {
-    const allProjectRuns = runsHistory.filter(r => r.projectId === projectId);
-    let filtered = allProjectRuns;
-    if (activeProjectRuns.length > 0) {
-      const activeIds = new Set(activeProjectRuns.map(r => r.id));
-      filtered = allProjectRuns.filter(r => !activeIds.has(r.id));
-    }
-    return filtered.slice().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-  }, [runsHistory, projectId, activeProjectRuns]);
+  const projectRuns = useMemo(
+    () => runsHistory
+    .filter(r => r.projectId === projectId && r.state !== 'running')
+    .slice()
+    .sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')),
+  [runsHistory, projectId]);
 
   useEffect(() => {
     const hash = (window.location.hash || '').replace(/^#/, '');
@@ -55,12 +51,11 @@ export default function AgentsView() {
     }
   }, [projectRuns.length]);
 
-  const findRunById = (id: string | null): AgentRunHistory | undefined => {
-    if (!id) return undefined;
-    return projectRuns.find(r => r.id === id) || activeProjectRuns.find(r => r.id === id);
-  };
 
-  const selectedRun = findRunById(openRunId || '');
+  const selectedRun = useMemo(() => {
+    if (!openRunId) return undefined;
+    return projectRuns.find(r => r.id === openRunId) || activeProjectRuns.find(r => r.id === openRunId);
+  }, [openRunId])
 
   return (
     <div className="flex-1 overflow-auto">

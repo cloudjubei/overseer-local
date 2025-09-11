@@ -17,10 +17,10 @@ export class FactoryToolsManager
     
     const dbPath = path.join(projectRoot, '.factory');
     console.log('[factory] Initializing history store at', dbPath);
-    this.HISTORY = createAgentRunStore({ dbPath });
+    this.runStore = createAgentRunStore({ dbPath });
 
     console.log('[factory] Creating orchestrator');
-    this.orchestrator = createOrchestrator({ projectRoot, history: this.HISTORY, pricing: this.PRICING });
+    this.orchestrator = createOrchestrator({ projectRoot, runStore: this.runStore, pricing: this.PRICING });
     console.log('[factory] Orchestrator ready');
   }
 
@@ -109,11 +109,12 @@ export class FactoryToolsManager
 
   async getHistoryRuns()
   {
-    return await this.HISTORY.listRuns() ?? [];
+    return await this.runStore.listRuns() ?? [];
   }
   async deleteHistoryRun(runId)
   {
-    return await this.HISTORY.deleteRun(runId);
+    console.log("deleteHistoryRun runId: ", runId)
+    return await this.runStore.deleteRun(runId);
   }
 
   async listPrices()
@@ -128,10 +129,13 @@ export class FactoryToolsManager
   _nowIso() { return new Date().toISOString(); }
 
   _attachRunHandle(runHandle) {
+    if (this.runHandles.get(runHandle.id)) { return }
+
     console.log('[factory] Attaching run', runHandle.id);
     this.runHandles.set(runHandle.id, runHandle);
 
     runHandle.onEvent((e) => {
+      console.log('[factory] Event: ', e);
       if (e){
         if (e.type === 'run/cancelled' || e.type === 'run/completed' || e.type === 'run/error') {
           console.log('[factory] Cleaning up run', runHandle.id);

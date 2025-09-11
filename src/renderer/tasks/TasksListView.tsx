@@ -68,7 +68,7 @@ export default function TasksListView() {
 
   const { project, projectId } = useActiveProject()
   const { tasksById, updateTask, reorderTask, getBlockers, getBlockersOutbound } = useTasks()
-  const { runsActive, startTaskAgent } = useAgents()
+  const { runsHistory, startTaskAgent } = useAgents()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
@@ -370,7 +370,7 @@ export default function TasksListView() {
                 const blockers = getBlockers(t.id)
                 const blockersOutbound = getBlockersOutbound(t.id)
                 const hasRejectedFeatures = t.features.filter(f => !!f.rejection).length > 0
-                const taskRun = runsActive.find(r => r.taskId === t.id)
+                const taskRun = runsHistory.find(r => r.state === 'running' && r.taskId === t.id)
 
                 return (
                   <li key={t.id} className="task-item" role="listitem">

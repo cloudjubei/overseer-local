@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import type { AgentRun, AgentRunMessage } from '../../services/agentsService';
+import { useEffect, useMemo, useState } from 'react';
 import DependencyBullet from '../tasks/DependencyBullet';
 import StatusChip from './StatusChip';
 import ModelChip from './ModelChip';
@@ -7,6 +6,7 @@ import { IconChevron, IconDelete } from '../ui/Icons';
 import ProjectChip from './ProjectChip';
 import CostChip from './CostChip';
 import TokensChip from './TokensChip';
+import { AgentRunHistory } from 'thefactory-tools';
 
 function formatTime(iso?: string) {
   if (!iso) return '';
@@ -42,30 +42,18 @@ function formatDuration(ms?: number) {
   return parts.join(' ');
 }
 
-// Determine features counts from messagesLog
-function useFeatureCounts(run: AgentRun) {
+function useConversationCounts(run: AgentRunHistory) {
   return useMemo(() => {
-    const entries = run.messagesLog ? Object.entries(run.messagesLog) : [];
-    let filtered
-    if (entries.length == 1 && Object.values(entries)[0][1].featureId === "__task__"){
-      filtered = entries
-    }else{
-      filtered = entries.filter(([key, val]) => {
-        const fid = (val as any)?.featureId || key;
-        return fid !== '__task__';
-      });
-    }
-    const total = filtered.length;
+    const total = run.conversations.length;
     let completed = 0;
-    for (const [, l] of filtered) {
-      if ((l as any).endDate) completed++;
+    for (const c of run.conversations) {
+      if (c.state === 'completed') completed++;
     }
     return { total, completed };
-  }, [run.messagesLog]);
+  }, [run.conversations]);
 }
 
-// Thinking timer based on time since last LLM message was received (assistant or tools), independent of heartbeats.
-function useThinkingTimer(run: AgentRun) {
+function useDurationTimers(run: AgentRunHistory) {
   const [now, setNow] = useState<number>(Date.now());
   useEffect(() => {
     if (run.state !== 'running') return; 
@@ -73,24 +61,25 @@ function useThinkingTimer(run: AgentRun) {
     return () => clearInterval(id);
   }, [run.state]);
 
-  const lastMsgTs = run.lastMessageAt || run.startedAt || run.updatedAt;
-  const lastUpdate = useMemo(() => {
-    try {
-      return new Date(lastMsgTs || Date.now()).getTime();
-    } catch {
-      return Date.now();
-    }
-  }, [lastMsgTs]);
+  const start = new Date(run.startedAt).getTime();
+  const end = run.finishedAt ? new Date(run.finishedAt).getTime() : now
+  const lastUpdate = new Date(run.updatedAt).getTime();
 
-  const ms = Math.max(0, now - lastUpdate);
-  return formatDuration(run.state === 'running' ? ms : 0);
+  const startMs = Math.max(0, (end - start));
+  const thinkingMs = Math.max(0, now - lastUpdate);
+  return { duration: formatDuration(startMs), thinking: formatDuration(thinkingMs) }
+}
+function useCostUSD(run: AgentRunHistory) {
+  return useMemo(() => {
+    return run.conversations.map(c => c.costUSD ?? 0).reduce((acc, c) => acc + c, 0)
+  }, [run.conversations]);
 }
 
 export interface AgentRunRowProps {
-  run: AgentRun;
-  onView?: (runId: string) => void;
-  onCancel?: (runId: string) => void;
-  onDelete?: (runId: string) => void;
+  run: AgentRunHistory;
+  onView?: (id: string) => void;
+  onCancel?: (id: string) => void;
+  onDelete?: (id: string) => void;
   showActions?: boolean;
   showProject?: boolean;
   showModel?: boolean;
@@ -111,15 +100,13 @@ export default function AgentRunRow({
   showStatus = true,
   showFeaturesInsteadOfTurn = true,
   showThinking = false,
-}: AgentRunRowProps) {
-  const started = useMemo(() => new Date(run.startedAt || run.updatedAt || Date.now()), [run.startedAt, run.updatedAt]);
-  const ended = useMemo(() => (run.state === 'running' ? new Date() : new Date(run.updatedAt || Date.now())), [run.state, run.updatedAt]);
-  const durationMs = Math.max(0, ended.getTime() - started.getTime());
-  const { total, completed } = useFeatureCounts(run);
-  const thinking = useThinkingTimer(run);
+}: AgentRunRowProps) {;
+  const { total, completed } = useConversationCounts(run);
+  const { duration, thinking } = useDurationTimers(run);
+  const costUSD = useCostUSD(run);
 
   return (
-    <tr id={`run-${run.runId ?? 'unknown'}`} className="border-t border-neutral-200 dark:border-neutral-800 group">
+    <tr id={`run-${run.id ?? 'unknown'}`} className="border-t border-neutral-200 dark:border-neutral-800 group">
       <td className="px-3 py-2 leading-tight">
         <div>{formatDate(run.startedAt)}</div>
         <div className="text-neutral-500">{formatTime(run.startedAt)}</div>
@@ -137,7 +124,7 @@ export default function AgentRunRow({
       ) : null}
       {showModel ? (
         <td className="px-3 py-2">
-          <ModelChip provider={run.provider} model={run.model} />
+          <ModelChip provider={run.llmConfig.provider} model={run.llmConfig.model} />
         </td>
       ) : null}
       {showFeaturesInsteadOfTurn ? (
@@ -145,27 +132,27 @@ export default function AgentRunRow({
           <span className="text-xs">{completed}/{total}</span>
         </td>
       ) : null}
-      <td className="px-3 py-2"><CostChip provider={run.provider} model={run.model} costUSD={run.costUSD} /></td>
+      <td className="px-3 py-2"><CostChip provider={run.llmConfig.provider} model={run.llmConfig.model} costUSD={costUSD} /></td>
       <td className="px-3 py-2"><TokensChip run={run} /></td>
       {showThinking ? (
         <td className="px-3 py-2">{thinking}</td>
       ) : null}
-      <td className="px-3 py-2">{formatDuration(durationMs)}</td>
+      <td className="px-3 py-2">{duration}</td>
       {showActions ? (
         <td className="px-3 py-2 text-right">
           <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
             {onView ? (
-              <button className="btn-secondary btn-icon" aria-label="View" onClick={() => run.runId && onView(run.runId!)}>
+              <button className="btn-secondary btn-icon" aria-label="View" onClick={() => run.id && onView(run.id!)}>
                 <IconChevron />
               </button>
             ) : null}
-            {run.state === 'running' && onCancel && run.runId ? (
-              <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => onCancel(run.runId!)}>
+            {run.state === 'running' && onCancel && run.id ? (
+              <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => onCancel(run.id!)}>
                 <IconDelete />
               </button>
             ) : null}
-            {run.state !== 'running' && onDelete && run.runId ? (
-              <button className="btn-secondary btn-icon" aria-label="Delete" onClick={() => onDelete(run.runId!)}>
+            {run.state !== 'running' && onDelete && run.id ? (
+              <button className="btn-secondary btn-icon" aria-label="Delete" onClick={() => onDelete(run.id!)}>
                 <IconDelete />
               </button>
             ) : null}

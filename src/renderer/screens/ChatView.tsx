@@ -109,7 +109,6 @@ export default function ChatView() {
     reader.onload = async (event) => {
       const content = event.target?.result as string
       const newPath = await uploadFile(file.name, content)
-      console.log("newPath: ", newPath)
       if (newPath){
         setPendingAttachments((prev) => Array.from(new Set([...prev, newPath])))
       }
@@ -188,7 +187,7 @@ export default function ChatView() {
               </SelectTrigger>
               <SelectContent>
                 {configs.map((cfg) => (
-                  <SelectItem key={cfg.id} value={cfg.id}>
+                  <SelectItem key={cfg.id} value={cfg.id!}>
                     {cfg.name} ({cfg.model})
                   </SelectItem>
                 ))}

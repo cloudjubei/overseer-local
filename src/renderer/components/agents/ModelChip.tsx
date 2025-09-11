@@ -148,7 +148,7 @@ function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => v
         e.preventDefault();
         if (activeIndex < recentConfigs.length) {
           const cfg = recentConfigs[activeIndex];
-          if (cfg) setActive(cfg.id);
+          if (cfg) setActive(cfg.id!);
           onClose();
         } else {
           navigateView('Settings');
@@ -181,7 +181,7 @@ function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => v
             role="menuitemradio"
             aria-checked={isActive}
             className="standard-picker__item"
-            onClick={(e) => { e.stopPropagation(); setActive(cfg.id); onClose(); }}
+            onClick={(e) => { e.stopPropagation(); setActive(cfg.id!); onClose(); }}
             onMouseEnter={() => setActiveIndex(i)}
           >
             <span className={["inline-block w-1.5 h-1.5 rounded-full mr-2", dot].join(' ')} aria-hidden />

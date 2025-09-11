@@ -41,7 +41,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const { project, projectId } = useActiveProject()
   const { tasksById, updateTask, updateFeature, reorderFeatures, getBlockers, getBlockersOutbound } = useTasks()
-  const { runsActive, startTaskAgent, startFeatureAgent } = useAgents()
+  const { runsHistory, startTaskAgent, startFeatureAgent } = useAgents()
 
   // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
   const preventDragFromNoDragRef = useRef(false)
@@ -230,7 +230,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskBlockers = getBlockers(task.id)
   const taskBlockersOutbound = getBlockersOutbound(task.id)
 
-  const taskRun = runsActive.find(r => r.taskId === task.id)
+  const taskRun = runsHistory.find(r => r.state ==='running' && r.taskId === task.id)
   const taskHasActiveRun = !!taskRun
   const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
   const taskDisplayIndex = project?.taskIdToDisplayIndex[task.id] ?? 0
@@ -393,7 +393,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                const featureTaskRun = runsActive.find(r => r.taskId === task.id)
+                const featureTaskRun = runsHistory.find(r => r.state ==='running' && r.taskId === task.id)
                 const featureConversation = taskRun?.conversations.find(c => c.featureId === f.id)
                 const featureHasActiveRun = !!featureConversation
 
