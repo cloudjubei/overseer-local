@@ -1,5 +1,21 @@
 [
   {
+    "runId": "task_pxsexo8h_mfffia06",
+    "agentType": "developer",
+    "projectId": "main",
+    "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+    "state": "completed",
+    "message": "Completed",
+    "provider": "openai",
+    "model": "gpt-5",
+    "startedAt": "2025-09-11T13:13:04.808Z",
+    "updatedAt": "2025-09-11T13:16:06.115Z",
+    "costUSD": 0.14582375,
+    "promptTokens": 62563,
+    "completionTokens": 6762,
+    "progress": 0.04
+  },
+  {
     "runId": "task_fhpkvrq7_mfeqcx5n",
     "agentType": "developer",
     "projectId": "thefactory-tools",
