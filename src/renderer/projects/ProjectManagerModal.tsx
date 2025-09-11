@@ -115,7 +115,7 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
   async function handleDelete(id: string) {
     if (!confirm('Delete this project configuration?')) return
     setSaving(true)
-    const res = await projectsService.deleteProjct(id)
+    const res = await projectsService.deleteProject(id)
     if (!res.ok) {
       alert('Failed to delete: ' + (res.error || 'Unknown error'))
     }
@@ -138,12 +138,11 @@ export default function ProjectManagerModal({ onRequestClose, initialMode, initi
     }
 
     setSaving(true)
-    let res
     try {
       if (mode === 'create') {
-        res = await projectsService.createProject(form)
+        await projectsService.createProject(form)
       } else if (mode === 'edit' && editingId) {
-        res = await projectsService.updateProject(editingId, form)
+        await projectsService.updateProject(editingId, form)
       }
     } catch (e: any) {
       setFormErrors([e?.message || String(e)])
