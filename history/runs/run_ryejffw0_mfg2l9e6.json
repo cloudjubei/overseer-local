@@ -1,0 +1,14 @@
+{
+  "state": "running",
+  "conversations": [],
+  "startedAt": "2025-09-11T23:59:15.150Z",
+  "updatedAt": "2025-09-11T23:59:15.150Z",
+  "id": "run_ryejffw0_mfg2l9e6",
+  "projectId": "main",
+  "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+  "llmConfig": {
+    "provider": "openai",
+    "model": "gpt-5",
+    "apiBaseUrl": "https://api.openai.com/v1/chat/completions"
+  }
+}

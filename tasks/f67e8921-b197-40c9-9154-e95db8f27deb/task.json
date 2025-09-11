@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "~",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -906,7 +906,7 @@
     },
     {
       "id": "76a35a14-e633-4f4a-827f-f7521123176d",
-      "status": "-",
+      "status": "+",
       "title": "useLLMConfig should be an app wide context",
       "description": "Make @src/renderer/hooks/useLLMConfig.ts follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx and @src/renderer/contexts/ProjectContext.tsx to turn it into a context initialised once in @src/renderer/App.tsx",
       "plan": "",

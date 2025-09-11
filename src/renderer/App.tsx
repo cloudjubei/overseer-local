@@ -13,6 +13,7 @@ import useLiveData from './hooks/useLiveData';
 import LoadingScreen from './screens/LoadingScreen';
 import { AppSettingsProvider } from './contexts/AppSettingsContext';
 import { NotificationClickHandler } from './hooks/useNotifications';
+import { LLMConfigProvider } from './contexts/LLMConfigContext';
 
 function ServicesBootstrap() {
   const { init } = useLiveData();
@@ -31,12 +32,14 @@ function App() {
         <ProjectsProvider>
           <NavigatorProvider>
             <ShortcutsProvider>
-              <ServicesBootstrap />
-              <ShortcutsBootstrap />
-              <NotificationClickHandler />
-              <CommandMenu />
-              <ShortcutsHelp />
-              <MainApp />
+              <LLMConfigProvider>
+                <ServicesBootstrap />
+                <ShortcutsBootstrap />
+                <NotificationClickHandler />
+                <CommandMenu />
+                <ShortcutsHelp />
+                <MainApp />
+              </LLMConfigProvider>
             </ShortcutsProvider>
           </NavigatorProvider>
         </ProjectsProvider>
