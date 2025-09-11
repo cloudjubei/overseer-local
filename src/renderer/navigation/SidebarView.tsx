@@ -10,10 +10,9 @@ import LiveDataView from '../screens/LiveDataView';
 import { useNavigator } from './Navigator';
 import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../hooks/useNotifications';
-// import { useShortcuts } from '../hooks/useShortcuts';
-import { MAIN_PROJECT, useProjectContext } from '../projects/ProjectContext';
+import { MAIN_PROJECT, useProjectContext } from '../contexts/ProjectContext';
 import type { NavigationView } from '../types';
-import { useAppSettings } from '../settings/AppSettingsContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 import { useAgents } from '../hooks/useAgents';
 import NotificationBadge from '../components/tasks/NotificationBadge';
 import { ProjectSpec } from 'thefactory-tools';
@@ -84,7 +83,7 @@ export default function SidebarView({}: SidebarProps) {
     setActiveProjectId,
   } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
-  const { activeRuns } = useAgents();
+  const { runsActive } = useAgents();
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed);
 
@@ -105,17 +104,15 @@ export default function SidebarView({}: SidebarProps) {
     navigateView(currentView);
   };
 
-  // Compute active agent counts per project
   const activeCountByProject = useMemo(() => {
     const map = new Map<string, number>();
-    for (const r of activeRuns) {
+    for (const r of runsActive) {
       const k = r.projectId;
       map.set(k, (map.get(k) || 0) + 1);
     }
     return map;
-  }, [activeRuns]);
+  }, [runsActive]);
 
-  // Responsive: on small screens, render as overlay drawer
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const mobileTriggerRef = useRef<HTMLButtonElement | null>(null);

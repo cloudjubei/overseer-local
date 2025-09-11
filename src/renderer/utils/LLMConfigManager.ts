@@ -1,4 +1,4 @@
-import { LLMConfig } from 'thefactory-tools';
+import type { LLMConfig } from 'thefactory-tools';
 import { v4 as uuidv4 } from 'uuid';
 
 export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed';
@@ -48,13 +48,13 @@ export class LLMConfigManager {
     return configs.find(c => c.id === activeId) || null;
   }
 
-  addConfig(config: LLMConfig): LLMConfig {
-    const newConfig: LLMConfig = { ...config, id: uuidv4() } as LLMConfig;
+  addConfig(config: Omit<LLMConfig, 'id'>): LLMConfig {
+    const newConfig: LLMConfig = { ...config, id: uuidv4() }
     const configs = this.getConfigs();
     configs.push(newConfig);
     this.saveConfigs(configs);
     if (configs.length === 1) {
-      this.setActiveId(newConfig.id);
+      this.setActiveId(newConfig.id!);
     } else {
       this.notify();
     }

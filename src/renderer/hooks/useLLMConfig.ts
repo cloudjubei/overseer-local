@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LLMConfigManager, LLM_CONFIGS_CHANGED_EVENT } from '../utils/LLMConfigManager';
-import { LLMConfig } from '../services/chatsService';
+import type { LLMConfig } from 'thefactory-tools';
 
 export function useLLMConfig() {
   const managerRef = useRef<LLMConfigManager>(new LLMConfigManager());
@@ -23,15 +23,16 @@ export function useLLMConfig() {
     return () => window.removeEventListener(LLM_CONFIGS_CHANGED_EVENT, handler as EventListener);
   }, [refresh]);
 
-  const activeConfig = useMemo(() => 
-    configs.find(c => c.id === activeConfigId) || null,
-  [configs, activeConfigId]);
+  const activeConfig : LLMConfig | undefined = useMemo(() => {
+    if (activeConfigId){
+      return configs.find(c => c.id === activeConfigId)
+    }
+  }, [configs, activeConfigId]);
 
   const isConfigured = useMemo(() => !!activeConfig?.apiKey, [activeConfig]);
 
   const addConfig = useCallback((config: Omit<LLMConfig, 'id'>) => {
     managerRef.current.addConfig(config);
-    // local optimistic refresh (global event also fires)
     refresh();
   }, [refresh]);
 

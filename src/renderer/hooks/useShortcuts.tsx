@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useNavigator } from '../navigation/Navigator';
-import { useAppSettings } from '../settings/AppSettingsContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 import { UI_IMPROVEMENTS_TASK_ID } from '../components/ui/CommandMenu';
 
 type ShortcutHandler = (e: KeyboardEvent) => boolean | void;

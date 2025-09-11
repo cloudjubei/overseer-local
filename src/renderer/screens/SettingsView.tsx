@@ -10,7 +10,7 @@ import { useProjectSettings } from '../hooks/useProjectSettings';
 import { useNotifications } from '../hooks/useNotifications';
 import { IconEdit, IconDelete, IconPlus } from '../components/ui/Icons';
 import { type ShortcutsModifier, type ShortcutsConfig, type AppSettings, DEFAULT_APP_SETTINGS } from '../../types/settings';
-import { useAppSettings } from '../settings/AppSettingsContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 
 // Settings Categories
 const CATEGORIES = [

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status, Task } from 'thefactory-tools';
 import TaskCard from '../components/tasks/TaskCard'
-import { STATUS_LABELS, tasksService } from '../services/tasksService'
-import { useActiveProject } from '../projects/ProjectContext'
+import { STATUS_LABELS } from '../services/tasksService'
+import { useActiveProject } from '../contexts/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { useNavigator } from '../navigation/Navigator'
 import { useTasks } from '../hooks/useTasks'

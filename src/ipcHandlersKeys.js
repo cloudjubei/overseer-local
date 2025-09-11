@@ -60,22 +60,7 @@ const IPC_HANDLER_KEYS = {
   NOTIFICATIONS_DELETEALL: "notifications:delete-all",
   NOTIFICATIONS_CREATE: "notifications:create",
 
-  // Factory (agent orchestrator)
-  FACTORY_START_TASK: "factory:start-task",
-  FACTORY_START_FEATURE: "factory:start-feature",
-  FACTORY_CANCEL_RUN: "factory:cancel",
-
-  FACTORY_EVENT: "factory:event",
-
-  // Factory history
-  FACTORY_HISTORY_LIST: "factory:history:list",
-  FACTORY_HISTORY_LIST_ACTIVE: "factory:history:list-active",
-  FACTORY_HISTORY_DELETE: "factory:history:delete",
-
-  // Factory pricing
-  FACTORY_PRICING_GET: "factory:pricing:get",
-  FACTORY_PRICING_REFRESH: "factory:pricing:refresh",  
-  
+  // LiveData
   LIVE_DATA_SUBSCRIBE: 'live-data:subscribe',
   LIVE_DATA_ADD_SERVICE: 'live-data:add-service',
   LIVE_DATA_REMOVE_SERVICE: 'live-data:remove-service',
@@ -83,6 +68,20 @@ const IPC_HANDLER_KEYS = {
   LIVE_DATA_TRIGGER_UPDATE: 'live-data:trigger-update',
   LIVE_DATA_UPDATE_CONFIG: 'live-data:update-config',
   LIVE_DATA_GET_DATA: 'live-data:get-data',
+
+  // Factory runs
+  FACTORY_RUNS_SUBSCRIBE: "factory:runs:subscribe",
+  FACTORY_RUNS_START_TASK: "factory:runs:start-task",
+  FACTORY_RUNS_START_FEATURE: "factory:runs:start-feature",
+  FACTORY_RUNS_CANCEL: "factory:runs:cancel",
+  FACTORY_RUNS_LIST_ACTIVE: "factory:runs:list-active",
+  FACTORY_RUNS_LIST_HISTORY: "factory:runs:list-history",
+  FACTORY_RUNS_DELETE_HISTORY: "factory:runs:delete-history",
+
+  // Factory pricing
+  FACTORY_PRICING_LIST: "factory:pricing:list",
+  FACTORY_PRICING_REFRESH: "factory:pricing:refresh",  
+  
 };
 
 export default IPC_HANDLER_KEYS;

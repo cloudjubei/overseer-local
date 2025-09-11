@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigator } from '../../navigation/Navigator';
 import { useShortcuts } from '../../hooks/useShortcuts';
-import { useAppSettings } from '../../settings/AppSettingsContext';
+import { useAppSettings } from '../../contexts/AppSettingsContext';
 
 export type CommandMenuApi = {
   open: () => void;

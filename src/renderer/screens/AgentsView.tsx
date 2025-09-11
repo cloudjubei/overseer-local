@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAgents } from '../hooks/useAgents';
-import { useActiveProject } from '../projects/ProjectContext';
-import type { AgentRun } from '../services/agentsService';
 import ChatConversation from '../components/agents/ChatConversation';
 import AgentRunRow from '../components/agents/AgentRunRow';
 import ModelChip from '../components/agents/ModelChip';
+import { useActiveProject } from '../contexts/ProjectContext';
+import { AgentRunHistory } from 'thefactory-tools';
 
 function formatTime(iso?: string) {
   if (!iso) return '';
@@ -17,29 +17,27 @@ function formatTime(iso?: string) {
 }
 
 export default function AgentsView() {
-  const { runs, activeRuns, cancelRun, removeRun } = useAgents();
+  const { runsHistory, runsActive, cancelRun, deleteRunHistory } = useAgents();
   const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
-  // Active runs for this project, sorted newest first
   const activeProjectRuns = useMemo(
-    () => activeRuns
+    () => runsActive
       .filter(r => r.projectId === projectId)
       .slice()
       .sort((a,b) => (b.startedAt || '').localeCompare(a.startedAt || '')),
-    [activeRuns, projectId]
+    [runsActive, projectId]
   );
 
-  // All runs for this project excluding those currently active, sorted newest first
   const projectRuns = useMemo(() => {
-    const allProjectRuns = runs.filter(r => r.projectId === projectId);
+    const allProjectRuns = runsHistory.filter(r => r.projectId === projectId);
     let filtered = allProjectRuns;
     if (activeProjectRuns.length > 0) {
-      const activeIds = new Set(activeProjectRuns.map(r => r.runId));
-      filtered = allProjectRuns.filter(r => !activeIds.has(r.runId));
+      const activeIds = new Set(activeProjectRuns.map(r => r.id));
+      filtered = allProjectRuns.filter(r => !activeIds.has(r.id));
     }
     return filtered.slice().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-  }, [runs, projectId, activeProjectRuns]);
+  }, [runsHistory, projectId, activeProjectRuns]);
 
   useEffect(() => {
     const hash = (window.location.hash || '').replace(/^#/, '');
@@ -57,9 +55,9 @@ export default function AgentsView() {
     }
   }, [projectRuns.length]);
 
-  const findRunById = (id: string | null): AgentRun | undefined => {
+  const findRunById = (id: string | null): AgentRunHistory | undefined => {
     if (!id) return undefined;
-    return projectRuns.find(r => r.runId === id) || activeProjectRuns.find(r => r.runId === id);
+    return projectRuns.find(r => r.id === id) || activeProjectRuns.find(r => r.id === id);
   };
 
   const selectedRun = findRunById(openRunId || '');
@@ -97,7 +95,7 @@ export default function AgentsView() {
                 <tbody>
                   {activeProjectRuns.map(r => (
                     <AgentRunRow
-                      key={r.runId ?? Math.random().toString(36)}
+                      key={r.id}
                       run={r}
                       onView={(id) => setOpenRunId(id)}
                       onCancel={(id) => cancelRun(id)}
@@ -138,11 +136,11 @@ export default function AgentsView() {
                 <tbody>
                   {projectRuns.map(r => (
                     <AgentRunRow
-                      key={r.runId ?? Math.random().toString(36)}
+                      key={r.id}
                       run={r}
                       onView={(id) => setOpenRunId(id)}
                       onCancel={(id) => cancelRun(id)}
-                      onDelete={(id) => removeRun(id)}
+                      onDelete={(id) => deleteRunHistory(id)}
                       showModel
                       showStatus={true}
                       showFeaturesInsteadOfTurn={true}
@@ -162,9 +160,9 @@ export default function AgentsView() {
           <div className="relative bg-white dark:bg-neutral-950 rounded-lg shadow-xl w-[92vw] max-w-5xl max-h-[90vh] border border-neutral-200 dark:border-neutral-800">
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">Run #{selectedRun.runId.slice(0,8)} {selectedRun.taskId ?? 'Task'}</div>
+                <div className="font-semibold text-sm truncate">Run #{selectedRun.id.slice(0,8)} {selectedRun.taskId ?? 'Task'}</div>
                 <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
-                  <ModelChip provider={selectedRun.provider} model={selectedRun.model} />
+                  <ModelChip provider={selectedRun.llmConfig.provider} model={selectedRun.llmConfig.model} />
                   <span>{selectedRun.state} Updated {formatTime(selectedRun.updatedAt)}</span>
                 </div>
               </div>

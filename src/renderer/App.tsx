@@ -7,11 +7,11 @@ import { NavigatorProvider, useNavigator } from './navigation/Navigator';
 import { ShortcutsBootstrap, ShortcutsProvider, useShortcuts } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
-import { ProjectsProvider } from './projects/ProjectContext';
+import { ProjectsProvider } from './contexts/ProjectContext';
 import { useTheme } from './hooks/useTheme';
 import useLiveData from './hooks/useLiveData';
 import LoadingScreen from './screens/LoadingScreen';
-import { AppSettingsProvider } from './settings/AppSettingsContext';
+import { AppSettingsProvider } from './contexts/AppSettingsContext';
 import { NotificationClickHandler } from './hooks/useNotifications';
 
 function ServicesBootstrap() {

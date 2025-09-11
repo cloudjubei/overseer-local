@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notificationsService } from '../services/notificationsService';
 import type { Notification, NotificationMetadata } from '../../types/notifications';
-import { useProjectContext } from '../projects/ProjectContext';
+import { useProjectContext } from '../contexts/ProjectContext';
 import { useNavigator } from '../navigation/Navigator';
 
 export function useNotifications() {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { LiveDataProvider, LiveDataProviderScope, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import useLiveData from '../hooks/useLiveData';
-import { useActiveProject } from '../projects/ProjectContext';
+import { useActiveProject } from '../contexts/ProjectContext';
+import type { LiveDataProvider, LiveDataProviderScope, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
 
 function formatLastUpdated(ts: number | undefined | null) {
   if (!ts) return 'never';

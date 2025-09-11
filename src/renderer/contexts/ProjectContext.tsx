@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ProjectSpec } from 'thefactory-tools';
 import { projectsService } from '../services/projectsService'
-import { useAppSettings } from '../settings/AppSettingsContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 
 export const MAIN_PROJECT = 'main'
 

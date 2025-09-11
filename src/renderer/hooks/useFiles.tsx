@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { filesService, FileMeta } from '../services/filesService';
-import { useActiveProject } from '../projects/ProjectContext';
+import { useActiveProject } from '../contexts/ProjectContext';
 
 export type DirNode = {
   name: string;
-  relPath: string; // '' for docs root
-  // absPath: string;
+  relPath: string; 
   dirs: DirNode[];
   files: FileMeta[];
 };
 
 function buildDirTree(files: FileMeta[]): DirNode {
+  console.log("LELELE buildDirTree")
   const root: DirNode = { name: '', relPath: '', dirs: [], files: [] };
   const dirMap = new Map<string, DirNode>();
   dirMap.set('', root);

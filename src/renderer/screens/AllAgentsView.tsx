@@ -8,22 +8,22 @@ function formatUSD(n?: number) {
 }
 
 export default function AllAgentsView() {
-  const { runs, activeRuns } = useAgents();
+  const { runsHistory, runsActive } = useAgents();
 
   const agentsSummary = useMemo(() => {
-    const totalRuns = runs.length;
-    const active = activeRuns.length;
-    const totals = runs.reduce((acc, r) => {
-      acc.cost += r.costUSD ?? 0;
-      acc.prompt += r.promptTokens ?? 0;
-      acc.completion += r.completionTokens ?? 0;
+    const totalRuns = runsHistory.length;
+    const active = runsActive.length;
+    const totals = runsHistory.reduce((acc, r) => {
+      acc.cost += r.conversations.map(c => c.costUSD ?? 0).reduce((acc, c) => acc + c, 0)
+      acc.prompt += r.conversations.map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0)
+      acc.completion += r.conversations.map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0)
       return acc;
     }, { cost: 0, prompt: 0, completion: 0 });
 
     return { totalRuns, active, totals };
-  }, [runs, activeRuns]);
+  }, [runsHistory, runsActive]);
 
-  const recentRuns = useMemo(() => runs.slice().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 200), [runs]);
+  const recentRuns = useMemo(() => runsHistory.slice().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 200), [runsHistory]);
 
   return (
     <div className="flex-1 overflow-auto">
@@ -76,7 +76,7 @@ export default function AllAgentsView() {
                 </thead>
                 <tbody>
                   {recentRuns.map((r) => (
-                    <AgentRunRow key={r.runId} run={r} showActions={false} showProject={true} showModel showFeaturesInsteadOfTurn={true} />
+                    <AgentRunRow key={r.id} run={r} showActions={false} showProject={true} showModel showFeaturesInsteadOfTurn={true} />
                   ))}
                 </tbody>
               </table>

@@ -23,7 +23,7 @@ const DEFAULT_SERVICES = [
 ];
 
 export class LiveDataManager {
-  constructor(projectRoot, window) {
+  constructor(projectRoot, window, factoryToolsManager) {
     this.projectRoot = projectRoot;
     this.window = window;
 
@@ -31,10 +31,13 @@ export class LiveDataManager {
     this.registry = new LiveDataRegistry();
     this._ipcBound = false;
 
+
+    this.factoryToolsManager = factoryToolsManager
+
     this.services = this._loadServices();
 
     // Register built-in providers
-    this.registry.register(createAgentPricesProvider(this.store));
+    this.registry.register(createAgentPricesProvider(this.store, factoryToolsManager));
     // Generic provider enables future-proof dynamic services by URL
     this.registry.register(createFetchJsonProvider(this.store));
   }

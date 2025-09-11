@@ -5,9 +5,11 @@ import type { TasksService } from 'src/renderer/services/tasksService';
 import type { NotificationsService } from 'src/renderer/services/notificationsService';
 import type { SettingsService } from 'src/renderer/services/settingsService';
 import type { LiveDataService } from 'src/renderer/services/liveDataService';
+import type { FactoryService } from 'src/renderer/services/factoryService';
 
 declare global {
   interface Window {
+    factoryService: FactoryService
     tasksService: TasksService
     projectsService: ProjectsService
     filesService: FilesService
@@ -15,7 +17,6 @@ declare global {
     notificationsService: NotificationsService
     settingsService: SettingsService
     liveDataService: LiveDataService
-    // factory: AgentServ //TODO: add factory
   }
 }
 export {}

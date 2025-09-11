@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useAppSettings } from '../settings/AppSettingsContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 
 interface LoadingScreenProps {
   onLoaded: () => void;

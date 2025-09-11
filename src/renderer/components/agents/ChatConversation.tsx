@@ -1,8 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect, useLayoutEffect } from 'react';
-import type { AgentFeatureRunLog, AgentRun, AgentRunMessage } from '../../services/agentsService';
 import RichText from '../ui/RichText';
 import SafeText from '../ui/SafeText';
-import { ToolResult, AgentResponse, ToolCall } from 'thefactory-tools';
+import type { AgentResponse, ToolCall, AgentRunHistory, AgentRunConversation, AgentRunMessage } from 'thefactory-tools';
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
 function parseAssistant(content: string): AgentResponse | null {
@@ -87,60 +86,13 @@ function ToolCallRow({ call, resultText, index }: { call: ToolCall; resultText?:
 // Back-compat: parse tool results from mixed formats (preferred ToolResult JSON, else legacy lines)
 export type ParsedToolResult = { name: string; result: string };
 
-function parseToolResultsObjects(msg?: AgentRunMessage): ParsedToolResult[] {
-  if (!msg?.content) return [];
-  const text = msg.content.trim();
-  // Try full JSON parse (array or object)
+function parseToolResultsObjects(tools?: AgentRunMessage): ParsedToolResult[]
+{
+  const text = tools?.content.trim() ?? "[]";
   try {
-    const o = JSON.parse(text);
-    if (Array.isArray(o)) {
-      return o
-        .filter(x => x && typeof x === 'object' && ('name' in x) && ('result' in x))
-        .map(x => ({ name: String((x as any).name), result: String((x as any).result) }));
-    }
-    if (o && typeof o === 'object') {
-      if ('name' in o && 'result' in o) {
-        return [{ name: String((o as any).name), result: String((o as any).result) }];
-      }
-      if ('results' in o && Array.isArray((o as any).results)) {
-        return (o as any).results
-          .filter((x: any) => x && typeof x === 'object' && ('name' in x) && ('result' in x))
-          .map((x: any) => ({ name: String(x.name), result: String(x.result) }));
-      }
-    }
+    return JSON.parse(text) as ParsedToolResult[];
   } catch {}
-  // Fallback: try per-line JSON or legacy textual format
-  const out: ParsedToolResult[] = [];
-  for (const ln of text.split(/\r?\n/)) {
-    const line = ln.trim();
-    if (!line) continue;
-    if (line.startsWith('---')) continue;
-    try {
-      const jo = JSON.parse(line);
-      if (jo && typeof jo === 'object' && 'name' in jo && 'result' in jo) {
-        out.push({ name: String((jo as any).name), result: String((jo as any).result) });
-        continue;
-      }
-      if (Array.isArray(jo)) {
-        for (const x of jo) {
-          if (x && typeof x === 'object' && 'name' in x && 'result' in x) {
-            out.push({ name: String((x as any).name), result: String((x as any).result) });
-          }
-        }
-        continue;
-      }
-    } catch {}
-    if (line.startsWith('Tool ')) {
-      const nameMatch = /^Tool\s+([^\s:]+)(?::|\s)/.exec(line);
-      const name = nameMatch ? nameMatch[1] : 'tool';
-      const i = line.indexOf(' returned: ');
-      const result = i >= 0 ? line.substring(i + ' returned: '.length) : line;
-      out.push({ name, result });
-    } else {
-      out.push({ name: 'tool', result: line });
-    }
-  }
-  return out;
+  return []
 }
 
 function isLargeText(text?: string) {
@@ -162,70 +114,50 @@ function ScrollableTextBox({ text, className }: { text: string; className?: stri
 
 function isToolMsg(m: AgentRunMessage | undefined) {
   if (!m) return false;
-  const content = m.content || '';
-  const hinted = (m as any).source === 'tools';
-  if (m.role === 'tool' || hinted || content.startsWith('--- TOOL RESULTS ---')) return true;
-  // Robust detection: if content is JSON representing tool results, treat as tool message
-  try {
-    const o = JSON.parse(content);
-    if (Array.isArray(o)) {
-      return o.every(x => x && typeof x === 'object' && 'name' in x && 'result' in x);
-    }
-    if (o && typeof o === 'object') {
-      if ('name' in o && 'result' in o) return true;
-      if ('results' in o && Array.isArray((o as any).results)) {
-        return (o as any).results.every((x: any) => x && typeof x === 'object' && 'name' in x && 'result' in x);
-      }
-    }
-  } catch {}
+  if (m.source === 'tools') return true;
   return false;
 }
 
+type TurnMessages = { assistant: AgentRunMessage; tools?: AgentRunMessage; index: number; isFinal?: boolean; thinkingTime?: number }
+
 function buildFeatureTurns(messages: AgentRunMessage[]) {
-  const turns: { assistant: AgentRunMessage; tools?: AgentRunMessage; index: number; isFinal?: boolean; thinkingTime?: number }[] = [];
+  const turns: TurnMessages[] = [];
   if (!messages || messages.length === 0) return { initial: undefined as AgentRunMessage | undefined, turns };
 
-  // Initial message is the first non-tool message (usually user)
-  let idx = 0;
-  while (idx < messages.length && isToolMsg(messages[idx])) idx++;
-  const initial = messages[idx];
-  idx++;
+  const initial = messages[0];
 
-  let tIndex = 0;
+  let idx = 1
+  let turn = 1
+  let latestTurn : TurnMessages | undefined = undefined
+
   while (idx < messages.length) {
     const a = messages[idx];
-    if (!a) break;
-    if (a.role !== 'assistant') {
-      // Skip anything unexpected
-      idx++;
-      continue;
-    }
+    idx++;
 
-    let thinkingTime: number | undefined;
-    try {
+    if (a.role === 'assistant') {
+      if (latestTurn){
+        turns.push(latestTurn)
+        turn++
+      }
+
       const askedAt = a.askedAt ? new Date(a.askedAt).getTime() : NaN;
-      const createdAt = a.createdAt ? new Date(a.createdAt).getTime() : NaN;
+      const createdAt = a.completedAt ? new Date(a.completedAt).getTime() : NaN;
+      let thinkingTime : number | undefined = undefined
       if (!isNaN(askedAt) && !isNaN(createdAt)) {
         thinkingTime = Math.max(0, createdAt - askedAt);
       }
-    } catch {}
 
-    const parsed = parseAssistant(a.content);
-    if (parsed && Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0) {
-      const maybeTools = messages[idx + 1];
-      if (isToolMsg(maybeTools)) {
-        turns.push({ assistant: a, tools: maybeTools, index: tIndex++, thinkingTime });
-        idx += 2;
-        continue;
-      }
-      // No tools message, still push assistant-only
-      turns.push({ assistant: a, index: tIndex++, thinkingTime });
-      idx += 1;
-      continue;
+      latestTurn = { assistant: a, index: turn, thinkingTime }
+      continue
     }
-    // Final assistant message (no tool_calls)
-    turns.push({ assistant: a, index: tIndex++, isFinal: true, thinkingTime });
-    idx += 1;
+
+    if (latestTurn && isToolMsg(a)) {
+      latestTurn.tools = a
+    }
+  }
+  if (latestTurn){
+    latestTurn.isFinal = true
+    turns.push(latestTurn)
   }
   return { initial, turns };
 }
@@ -256,9 +188,9 @@ function UserBubble({ title, text }: { title?: string; text: string }) {
   );
 }
 
-function FeatureContent({ log, isLatestFeature, latestTurnRef }: { log: AgentFeatureRunLog; isLatestFeature: boolean; latestTurnRef?: React.RefObject<HTMLDivElement> }) {
+function FeatureContent({ conversation, isLatestFeature, latestTurnRef }: { conversation: AgentRunConversation; isLatestFeature: boolean; latestTurnRef?: React.RefObject<HTMLDivElement> }) {
   // Recompute on every render to reflect in-place mutations of log.messages
-  const { initial, turns } = buildFeatureTurns(log.messages || []);
+  const { initial, turns } = buildFeatureTurns(conversation.messages || []);
 
   return (
     <div className="space-y-2 p-1">
@@ -275,10 +207,10 @@ function FeatureContent({ log, isLatestFeature, latestTurnRef }: { log: AgentFea
       )}
 
       {turns.map((t, idx) => {
-        const parsed = parseAssistant(t.assistant?.content || '');
+        const parsed = parseAssistant(t.assistant.content);
+        //TODO: if parsed is not AgentResponse - show some standard display
         const toolCalls: ToolCall[] = parsed?.tool_calls || [];
         const resultsObjs = parseToolResultsObjects(t.tools);
-        const pickResultForCall = (call: ToolCall, i: number) => resultsObjs[i]?.result ?? undefined;
         const hasThoughts = parsed?.thoughts && parsed.thoughts.trim().length > 0;
         const isFinal = t.isFinal || (toolCalls.length === 0);
 
@@ -304,13 +236,13 @@ function FeatureContent({ log, isLatestFeature, latestTurnRef }: { log: AgentFea
                   )}
                 </div>
 
-                {toolCalls.length > 0 ? (
+                {toolCalls.length > 0 && (
                   <div className="space-y-2">
                     {toolCalls.map((call, i) => (
-                      <ToolCallRow key={i} call={call} index={i} resultText={pickResultForCall(call, i)} />
+                      <ToolCallRow key={i} call={call} index={i} resultText={resultsObjs[i]?.result} />
                     ))}
                   </div>
-                ) : null}
+                )}
 
                 {toolCalls.length === 0 && !isFinal && resultsObjs.length > 0 ? (
                   <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-2">
@@ -331,33 +263,16 @@ function FeatureContent({ log, isLatestFeature, latestTurnRef }: { log: AgentFea
   );
 }
 
-export default function ChatConversation({ run }: { run: AgentRun }) {
-
-  const preparedLogs = Object.values(run.messagesLog ?? {})
-  let logs
-  if (preparedLogs.length == 1 && preparedLogs[0].featureId === "__task__"){
-    logs = preparedLogs
-  }else{
-    const SKIP_FEATURE_KEYS = new Set(['__task__', '_task']);
-    logs = Object.values(run.messagesLog ?? {})
-    .filter((l) => !SKIP_FEATURE_KEYS.has((l as any).featureId))
-    .sort((a, b) => {
-      const at = new Date((a as any).startDate).getTime();
-      const bt = new Date((b as any).startDate).getTime();
-      return at - bt;
-    });
-  }
-
-  const latestFeature = logs.length > 0 ? logs[logs.length - 1] : undefined;
-  const latestFeatureId = latestFeature?.featureId;
-
-  // Track a scroll container and auto-scroll behavior
+export default function ChatConversation({ run }: { run: AgentRunHistory })
+{
   const containerRef = useRef<HTMLUListElement | null>(null);
   const stickToBottomRef = useRef(true);
   const latestTurnRef = useRef<HTMLDivElement | null>(null);
   const didInitialScrollRef = useRef(false);
 
-  // Update stickToBottomRef on user scroll
+  const latestFeature = run.conversations.length > 0 ? run.conversations[run.conversations.length - 1] : undefined;
+  const latestFeatureId = latestFeature?.featureId;
+  
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -367,7 +282,6 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
       stickToBottomRef.current = atBottom;
     };
     el.addEventListener('scroll', onScroll, { passive: true } as any);
-    // Initialize state
     onScroll();
     return () => el.removeEventListener('scroll', onScroll);
   }, []);
@@ -375,9 +289,9 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
   // Compute a simple metric to detect new content
   const contentSize = useMemo(() => {
     let count = 0;
-    for (const l of logs) count += (l.messages?.length || 0);
-    return count + ':' + logs.length;
-  }, [logs]);
+    for (const c of run.conversations) count += c.messages.length;
+    return count + ':' + run.conversations.length;
+  }, [run.conversations]);
 
   // Auto-scroll when new content arrives and user is at bottom
   useLayoutEffect(() => {
@@ -402,18 +316,18 @@ export default function ChatConversation({ run }: { run: AgentRun }) {
 
   return (
     <ul ref={containerRef} className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3" role="log" aria-live="polite">
-      {logs.length === 0 ? (
-        <div className="text-sm text-neutral-500">No features messages to display.</div>
+      {run.conversations.length === 0 ? (
+        <div className="text-sm text-neutral-500">No conversations to display.</div>
       ) : (
-        <>{logs.map((log) => {
-          const start = log.startDate ? new Date(log.startDate as any) : undefined;
-          const end = log.endDate ? new Date(log.endDate as any) : undefined;
+        <>{run.conversations.map((conversation) => {
+          const start = new Date(conversation.startedAt)
+          const end = conversation.finishedAt ? new Date(conversation.finishedAt) : undefined;
           const subtitle = [start ? start.toLocaleString() : null, end ? `→ ${end.toLocaleString()}` : null].filter(Boolean).join(' ');
-          const isLatestFeature = log.featureId === latestFeatureId;
+          const isLatestFeature = conversation.featureId === latestFeatureId;
           return (
-            <li key={log.featureId}>
-              <Collapsible title={<span className="flex items-center">Feature: {log.featureId}{subtitle ? <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span> : null}</span>} defaultOpen={isLatestFeature}>
-                <FeatureContent log={log} isLatestFeature={isLatestFeature} latestTurnRef={isLatestFeature ? latestTurnRef : undefined} />
+            <li key={conversation.featureId}>
+              <Collapsible title={<span className="flex items-center">Feature: {conversation.featureId}{subtitle ? <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span> : null}</span>} defaultOpen={isLatestFeature}>
+                <FeatureContent conversation={conversation} isLatestFeature={isLatestFeature} latestTurnRef={isLatestFeature ? latestTurnRef : undefined} />
               </Collapsible>
             </li>
           );

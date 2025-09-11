@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { InvalidRefError, ResolvedFeatureRef, ResolvedRef, ResolvedTaskRef, TaskCreateInput, tasksService } from '../services/tasksService';
 import { projectsService } from '../services/projectsService';
-import { useActiveProject } from '../projects/ProjectContext';
+import { useActiveProject } from '../contexts/ProjectContext';
 import { Feature, ProjectSpec, Task } from 'thefactory-tools';
 import { ServiceResult } from '../services/serviceResult';
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import Tooltip from '../ui/Tooltip';
-import { useProjectContext } from '../../projects/ProjectContext';
+import { useProjectContext } from '../../contexts//ProjectContext';
 import { useNavigator } from '../../navigation/Navigator';
 
 export default function ProjectChip({ projectId, className }: { projectId?: string | null; className?: string }) {

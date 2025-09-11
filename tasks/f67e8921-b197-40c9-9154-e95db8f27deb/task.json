@@ -893,10 +893,10 @@
       "id": "943be0ce-0c96-48ab-a820-37b919b9a150",
       "status": "+",
       "title": "AppSettings needs an AppSettingsContext",
-      "description": "Same as @src/renderer/projects/ProjectContext.tsx , created in @src/renderer/App.tsx ; and then used in @src/renderer/hooks/useProjectSettings.ts we need the same exact approach for @src/renderer/hooks/useAppSettings.ts . It essentially needs to be a singleton used across the project and this will make sure that's the case.\nAppSettings should be such a context of the first level.",
+      "description": "Same as @src/renderer/contexts/ProjectContext.tsx , created in @src/renderer/App.tsx ; and then used in @src/renderer/hooks/useProjectSettings.ts we need the same exact approach for @src/renderer/hooks/useAppSettings.ts . It essentially needs to be a singleton used across the project and this will make sure that's the case.\nAppSettings should be such a context of the first level.",
       "plan": "",
       "context": [
-        "src/renderer/projects/ProjectContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
         "src/renderer/hooks/useProjectSettings.ts",
         "src/renderer/App.tsx",
         "src/renderer/hooks/useAppSettings.ts"

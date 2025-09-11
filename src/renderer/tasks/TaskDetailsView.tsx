@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '../navigation/Navigator'
 import DependencyBullet from '../components/tasks/DependencyBullet'
-import { useActiveProject } from '../projects/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
+import { useActiveProject } from '../contexts/ProjectContext';
 import { useTasks } from '../hooks/useTasks'
 import { useAgents } from '../hooks/useAgents'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
@@ -41,7 +41,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const { project, projectId } = useActiveProject()
   const { tasksById, updateTask, updateFeature, reorderFeatures, getBlockers, getBlockersOutbound } = useTasks()
-  const { activeRuns, startTaskAgent, startFeatureAgent, cancelRun } = useAgents()
+  const { runsActive, startTaskAgent, startFeatureAgent } = useAgents()
 
   // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
   const preventDragFromNoDragRef = useRef(false)
@@ -230,7 +230,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const taskBlockers = getBlockers(task.id)
   const taskBlockersOutbound = getBlockersOutbound(task.id)
 
-  const taskRun = activeRuns.find(r => r.taskId === task.id)
+  const taskRun = runsActive.find(r => r.taskId === task.id)
   const taskHasActiveRun = !!taskRun
   const hasRejectedFeatures = task.features.filter(f => !!f.rejection).length > 0
   const taskDisplayIndex = project?.taskIdToDisplayIndex[task.id] ?? 0
@@ -284,7 +284,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           <div className="flex items-center gap-3">
             {taskRun && (
               <div className="flex items-center gap-2" aria-label={`Active agents for Task ${task.id}`}>
-                <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={() => navigateAgentRun(taskRun.runId)} />
+                <AgentRunBullet key={taskRun.id} run={taskRun} onClick={() => navigateAgentRun(taskRun.id)} />
               </div>
             )}
             <ModelChip editable />
@@ -393,8 +393,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                const featureRun = activeRuns.find(r => r.taskId === task.id) //TODO: the featureId would be stored in the messagesLog
-                const featureHasActiveRun = !!featureRun
+                const featureTaskRun = runsActive.find(r => r.taskId === task.id)
+                const featureConversation = taskRun?.conversations.find(c => c.featureId === f.id)
+                const featureHasActiveRun = !!featureConversation
 
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
@@ -488,9 +489,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 pr-2">
-                          {featureRun && (
+                          {featureHasActiveRun && featureTaskRun && (
                             <div className="flex items-center gap-2" aria-label={`Active agents for Feature ${f.id}`}>
-                              <AgentRunBullet key={featureRun.runId} run={featureRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(featureRun.runId) }} />
+                              <AgentRunBullet key={featureTaskRun.id} run={featureTaskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(featureTaskRun.id) }} />
                             </div>
                           )}
                         </div>

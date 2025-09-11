@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useShortcuts } from '../../hooks/useShortcuts';
-import { useAppSettings } from '../../settings/AppSettingsContext';
+import { useAppSettings } from '../../contexts/AppSettingsContext';
 
 export default function ShortcutsHelp() {
   const { list, register, prettyCombo } = useShortcuts();

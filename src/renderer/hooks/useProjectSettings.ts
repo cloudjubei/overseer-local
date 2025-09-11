@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { settingsService } from '../services/settingsService'
-import { useProjectContext } from '../projects/ProjectContext'
+import { useProjectContext } from '../contexts/ProjectContext'
 import { DEFAULT_PROJECT_SETTINGS, NotificationProjectSettings, ProjectSettings } from '../../types/settings'
 
 export function useProjectSettings() {

@@ -100,46 +100,6 @@ const SETTINGS_API = {
   updateProjectSettings: (projectId, updates) => ipcRenderer.invoke(IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT, { projectId, updates }),
 };
 
-// Factory orchestrator API exposed to renderer
-const FACTORY_API = {
-  startTaskRun: (agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options = {}) => {
-    console.log('[preload:factory] startTaskRun', { agentType, projectId, taskId, options });
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_TASK, { agentType, projectId, taskId, llmConfig, githubCredentials, webSearchApiKeys, options });
-  },
-  startFeatureRun: (agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options = {}) => {
-    console.log('[preload:factory] startFeatureRun', { agentType, projectId, taskId, featureId, options });
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_START_FEATURE, { agentType, projectId, taskId, featureId, llmConfig, githubCredentials, webSearchApiKeys, options });
-  },
-  cancelRun: (runId, reason) => {
-    console.log('[preload:factory] cancelRun', { runId, reason });
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_CANCEL_RUN, { runId, reason });
-  },
-  subscribe: (runId, callback) => {
-    console.log('[preload:factory] subscribe', { runId });
-    const listener = (_event, data) => {
-      if (data.runId === runId) callback(data.event);
-    };
-    ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
-    ipcRenderer.send(IPC_HANDLER_KEYS.FACTORY_SUBSCRIBE, { runId });
-    return () => {
-      console.log('[preload:factory] unsubscribe', { runId });
-      ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_EVENT, listener);
-    };
-  },
-  listActiveRuns: () => {
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_HISTORY_LIST_ACTIVE);
-  },
-  listRunHistory: () => {
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_HISTORY_LIST);
-  },
-  deleteRun: (runId) => {
-    return ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_HISTORY_DELETE, { runId });
-  },
-  // Pricing
-  getPricing: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_GET),
-  refreshPricing: (provider, url) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
-};
-
 const LIVEDATA_API = {
   subscribe: (callback) => {
     const listener = (_event, services) => callback(services);
@@ -154,6 +114,24 @@ const LIVEDATA_API = {
   getData: (serviceId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, { serviceId }),
 };
 
+// Factory orchestrator API exposed to renderer
+const FACTORY_API = {
+  subscribeRuns: (callback) => {
+    const listener = (_event, run) => callback(run);
+    ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener);
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener);
+  },
+  startTaskRun: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_START_TASK, params),
+  startFeatureRun: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_START_FEATURE, params),
+  cancelRun: (runId, reason) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL, { runId, reason }),
+  listRunsActive: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_ACTIVE),
+  listRunHistory: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_HISTORY),
+  deleteRunHistory: (runId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_DELETE_HISTORY, { runId }),
+  
+  listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
+  refreshPricing: (provider, url) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
+};
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API);
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API);
 contextBridge.exposeInMainWorld('filesService', FILES_API);
@@ -161,5 +139,5 @@ contextBridge.exposeInMainWorld('chatsService', CHATS_API);
 contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API);
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API);
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API);
-contextBridge.exposeInMainWorld('factory', FACTORY_API);
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API);
+contextBridge.exposeInMainWorld('factoryService', FACTORY_API);

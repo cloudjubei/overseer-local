@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { LiveDataProviderStatus, LiveDataProvider } from '../../live-data/LiveDataTypes';
 import { liveDataService } from '../services/liveDataService';
-import { useActiveProject } from '../projects/ProjectContext';
+import { useActiveProject } from '../contexts/ProjectContext';
+import { LiveDataProvider, LiveDataProviderStatus } from '../../live-data/LiveDataTypes';
 
 export default function useLiveData() {
   const { projectId } = useActiveProject();

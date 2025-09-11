@@ -3,7 +3,7 @@ import { Button } from '../components/ui/Button'
 import { useNavigator } from '../navigation/Navigator'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
-import { useActiveProject } from '../projects/ProjectContext'
+import { useActiveProject } from '../contexts/ProjectContext';
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
@@ -18,7 +18,7 @@ import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
-import { useAppSettings } from '../settings/AppSettingsContext'
+import { useAppSettings } from '../contexts/AppSettingsContext'
 
 function countFeatures(task: Task) {
   const features = Array.isArray(task.features) ? task.features : []
@@ -68,7 +68,7 @@ export default function TasksListView() {
 
   const { project, projectId } = useActiveProject()
   const { tasksById, updateTask, reorderTask, getBlockers, getBlockersOutbound } = useTasks()
-  const { activeRuns, startTaskAgent } = useAgents()
+  const { runsActive, startTaskAgent } = useAgents()
 
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
@@ -370,7 +370,7 @@ export default function TasksListView() {
                 const blockers = getBlockers(t.id)
                 const blockersOutbound = getBlockersOutbound(t.id)
                 const hasRejectedFeatures = t.features.filter(f => !!f.rejection).length > 0
-                const taskRun = activeRuns.find(r => r.taskId === t.id)
+                const taskRun = runsActive.find(r => r.taskId === t.id)
 
                 return (
                   <li key={t.id} className="task-item" role="listitem">
@@ -424,7 +424,7 @@ export default function TasksListView() {
                             <IconEdit />
                           </button>
                           {taskRun ? (
-                            <AgentRunBullet key={taskRun.runId} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.runId) }} />
+                            <AgentRunBullet key={taskRun.id} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.id) }} />
                           ) : (
                             <RunAgentButton onClick={(agentType) => {if (!projectId) return; startTaskAgent(agentType, projectId, t.id) }}/>
                           )}

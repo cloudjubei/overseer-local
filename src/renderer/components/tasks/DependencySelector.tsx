@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useActiveProject } from '../../../renderer/projects/ProjectContext'
+import { useActiveProject } from '../../../renderer/contexts/ProjectContext'
 import type { Feature, ProjectSpec, Task } from 'thefactory-tools';
 import { useTasks } from '../../../renderer/hooks/useTasks'
 
