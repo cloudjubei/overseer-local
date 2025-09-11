@@ -64,13 +64,12 @@ const IPC_HANDLER_KEYS = {
   FACTORY_START_TASK: "factory:start-task",
   FACTORY_START_FEATURE: "factory:start-feature",
   FACTORY_CANCEL_RUN: "factory:cancel",
-  FACTORY_SUBSCRIBE: "factory:subscribe",
+
   FACTORY_EVENT: "factory:event",
-  FACTORY_LIST_ACTIVE: "factory:list-active",
 
   // Factory history
   FACTORY_HISTORY_LIST: "factory:history:list",
-  FACTORY_HISTORY_MESSAGES: "factory:history:messages",
+  FACTORY_HISTORY_LIST_ACTIVE: "factory:history:list-active",
   FACTORY_HISTORY_DELETE: "factory:history:delete",
 
   // Factory pricing

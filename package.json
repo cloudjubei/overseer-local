@@ -13,8 +13,7 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky install",
-    "run:agent": "node scripts/runAgent.mjs"
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": {

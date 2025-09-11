@@ -15,6 +15,7 @@ declare global {
     notificationsService: NotificationsService
     settingsService: SettingsService
     liveDataService: LiveDataService
+    // factory: AgentServ //TODO: add factory
   }
 }
 export {}

@@ -1,4 +1,4 @@
-import { getPricingManager } from '../../tools/factory/mainOrchestrator';
+import { getPricingManager } from '../../factory-tools/mainOrchestrator';
 
 // Agent Prices provider bridges to factory-ts pricing manager.
 // It does not persist its own data; instead, it refreshes pricing manager

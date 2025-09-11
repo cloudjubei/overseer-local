@@ -1,4 +1,4 @@
-import { registerFactoryIPC } from './tools/factory/mainOrchestrator'
+import { registerFactoryIPC } from './factory-tools/mainOrchestrator'
 import { TasksManager } from './tasks/TasksManager';
 import { FilesManager } from './files/FilesManager';
 import { ProjectsManager } from './projects/ProjectsManager';
