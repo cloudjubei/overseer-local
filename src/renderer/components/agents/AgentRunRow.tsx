@@ -128,7 +128,7 @@ export default function AgentRunRow({
           <span className="text-xs">{completed}/{total}</span>
         </td>
       ) : null}
-      <td className="px-3 py-2"><CostChip provider={run.llmConfig.provider} model={run.llmConfig.model} costUSD={costUSD} /></td>
+      <td className="px-3 py-2"><CostChip provider={run.llmConfig.provider} model={run.llmConfig.model} price={run.price} costUSD={costUSD} /></td>
       <td className="px-3 py-2"><TokensChip run={run} /></td>
       {showThinking ? (
         <td className="px-3 py-2">{thinking}</td>

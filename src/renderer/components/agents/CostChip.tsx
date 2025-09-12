@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
 import Tooltip from '../ui/Tooltip';
-import { getPrice as getPricingRecord } from '../../services/pricingService';
 
 export type CostChipProps = {
-  provider?: string;
-  model?: string;
+  provider: string;
+  model: string;
+  price?: {
+    inputPerMTokensUSD: number;
+    outputPerMTokensUSD: number;
+  }
   costUSD?: number;
 };
 
@@ -13,28 +15,7 @@ function formatUSD(n?: number) {
   return `$${n.toFixed(4)}`;
 }
 
-export default function CostChip({ provider, model, costUSD }: CostChipProps) {
-  const [price, setPrice] = useState<{ inputPerMTokensUSD: number; outputPerMTokensUSD: number } | undefined>(undefined);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const rec = await getPricingRecord(provider, model);
-        if (mounted)
-          setPrice(
-            rec
-              ? { inputPerMTokensUSD: rec.inputPerMTokensUSD, outputPerMTokensUSD: rec.outputPerMTokensUSD }
-              : undefined
-          );
-      } catch {
-        if (mounted) setPrice(undefined);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [provider, model]);
+export default function CostChip({ provider, model, price, costUSD }: CostChipProps) {
 
   const content = (
     <div className="text-xs">
