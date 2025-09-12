@@ -32,7 +32,7 @@ export default function AgentsView() {
     () => runsHistory
     .filter(r => r.projectId === projectId && r.state !== 'running')
     .slice()
-    .sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')),
+    .sort((a,b) => (b.finishedAt || b.updatedAt || '').localeCompare(a.finishedAt || a.updatedAt || '')),
   [runsHistory, projectId]);
 
   useEffect(() => {

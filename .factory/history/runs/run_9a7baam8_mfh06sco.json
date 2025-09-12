@@ -44,7 +44,7 @@
     }
   ],
   "startedAt": "2025-09-12T15:39:46.824Z",
-  "updatedAt": "2025-09-12T15:41:33.511Z",
+  "updatedAt": "2025-09-12T15:55:42.979Z",
   "id": "run_9a7baam8_mfh06sco",
   "projectId": "main",
   "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
@@ -57,5 +57,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-12T15:41:33.511Z"
+  "finishedAt": "2025-09-12T15:41:33.511Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-12T15:55:42.979Z"
+  }
 }

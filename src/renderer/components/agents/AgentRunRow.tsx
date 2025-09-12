@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import DependencyBullet from '../tasks/DependencyBullet';
 import StatusChip from './StatusChip';
 import ModelChip from './ModelChip';
-import { IconChevron, IconDelete, IconPlus } from '../ui/Icons';
+import { IconChevron, IconDelete, IconPlus, IconThumbDown, IconThumbUp } from '../ui/Icons';
 import ProjectChip from './ProjectChip';
 import CostChip from './CostChip';
 import TokensChip from './TokensChip';
@@ -138,46 +138,50 @@ export default function AgentRunRow({
         <td className="px-3 py-2">{thinking}</td>
       ) : null}
       <td className="px-3 py-2">{duration}</td>
+      
       {showRating && (
-        <td className="px-3 py-2">
-        <div className="flex items-center space-x-1">
+        <td className="w-16">
           {!run.rating ? (
-            <>
+            <div className="flex flex-col items-center gap-1">
               <button
+                className="hover:text-emerald-600 group"
+                title="Thumbs up"
                 onClick={() => onRate?.(run.id, { score: 1 })}
-                className="text-neutral-400 hover:text-green-500"
               >
-                <IconPlus />
-              {/* <IconThumbsUp /> */}
+                <IconThumbUp className="w-5 h-5 transition-colors" />
               </button>
               <button
+                className="hover:text-rose-600 group"
+                title="Thumbs down"
                 onClick={() => onRate?.(run.id, { score: 0 })}
-                className="text-neutral-400 hover:text-red-500"
               >
-                <IconDelete />
-              {/* <IconThumbsDown /> */}
+                <IconThumbDown className="w-5 h-5 mr-1.5 transition-colors" />
               </button>
-            </>
+            </div>
           ) : run.rating.score === 1 ? (
-            <button
-              onClick={() => onRate?.(run.id, undefined)}
-              className="text-green-500"
-            >
-              <IconPlus />
-              {/* <IconThumbsUp size={16} fill="currentColor" /> */}
-            </button>
+            <div className="flex items-center justify-center">
+              <button
+                className=" text-emerald-600 hover:opacity-80"
+                title="Remove rating"
+                onClick={() => onRate?.(run.id, undefined)}
+              >
+                <IconThumbUp className="w-5 h-5" filled />
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={() => onRate?.(run.id, undefined)}
-              className="text-red-500"
-            >
-              <IconDelete />
-              {/* <IconThumbsDown size={16} fill="currentColor" /> */}
-            </button>
+            <div className="flex items-center justify-center">
+              <button
+                className=" text-rose-600 hover:opacity-80"
+                title="Remove rating"
+                onClick={() => onRate?.(run.id, undefined)}
+              >
+                <IconThumbDown className="w-5 h-5 mr-1.5" filled />
+              </button>
+            </div>
           )}
-        </div>
-      </td>
+        </td>
       )}
+
       {showActions ? (
         <td className="px-3 py-2 text-right">
           <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
