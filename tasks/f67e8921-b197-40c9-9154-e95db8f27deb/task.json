@@ -983,10 +983,12 @@
       "context": [
         "src/renderer/screens/AgentsView.tsx",
         "src/renderer/contexts/AgentsContext.tsx",
-        "src/renderer/services/factoryService.ts"
+        "src/renderer/services/factoryService.ts",
+        "src/renderer/components/ui/Icons.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "First - create appropriate icons inside @src/renderer/components/ui/Icons.tsx .\nSecond - when there is no rating yet - the buttons are stacked vertically (thumbs up at the top, thumbs down at the bottom).\nThird - when there is a rating - the button is centered."
     },
     {
       "id": "12e26fae-357e-44cb-b1d6-ac8b9ba2c439",

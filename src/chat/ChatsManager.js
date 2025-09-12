@@ -2,7 +2,6 @@ import { ipcMain } from 'electron';
 import path from 'path';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import ChatsStorage from './ChatsStorage';
-import { LLMProvider } from './LLMProvider'
 import { tasksManager, filesManager, projectsManager } from '../managers';
 import { buildChatTools, createCompletionClient, parseAgentResponse, normalizeTool } from 'thefactory-tools'
 
@@ -162,10 +161,17 @@ export class ChatsManager {
 
   async listModels(config) {
     try {
-      const provider = new LLMProvider(config);
-      if (typeof provider.listModels === 'function') {
-        return await provider.listModels();
-      }
+      //TODO: using fetch do the same as openai.models.list 
+      // try {
+      //   const res = await this.client.models.list();
+      //   // Some third-party APIs may not support /models
+      //   if (!res || !Array.isArray(res.data)) return [];
+      //   return res.data.map((m) => m.id);
+      // } catch (err) {
+      //   // Gracefully degrade when provider doesn't support models.list
+      //   return [];
+      // }
+
       return [];
     } catch (error) {
       throw error;

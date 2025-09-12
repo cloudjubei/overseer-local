@@ -16,7 +16,7 @@ function formatTime(iso?: string) {
 }
 
 export default function AgentsView() {
-  const { runsHistory, cancelRun, deleteRunHistory } = useAgents();
+  const { runsHistory, cancelRun, deleteRunHistory, rateRun } = useAgents();
   const { projectId } = useActiveProject();
   const [openRunId, setOpenRunId] = useState<string | null>(null);
 
@@ -125,6 +125,7 @@ export default function AgentsView() {
                     <th className="text-left px-3 py-2">Cost</th>
                     <th className="text-left px-3 py-2">Tokens</th>
                     <th className="text-left px-3 py-2">Duration</th>
+                    <th className="text-left px-3 py-2">Rating</th>
                     <th className="text-right px-3 py-2">Actions</th>
                   </tr>
                 </thead>
@@ -136,10 +137,12 @@ export default function AgentsView() {
                       onView={(id) => setOpenRunId(id)}
                       onCancel={(id) => cancelRun(id)}
                       onDelete={(id) => deleteRunHistory(id)}
+                      onRate={(id, rating) => rateRun(id, rating)}
                       showModel
                       showStatus={true}
                       showFeaturesInsteadOfTurn={true}
                       showThinking={false}
+                      showRating={true}
                     />
                   ))}
                 </tbody>

@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import DependencyBullet from '../tasks/DependencyBullet';
 import StatusChip from './StatusChip';
 import ModelChip from './ModelChip';
-import { IconChevron, IconDelete } from '../ui/Icons';
+import { IconChevron, IconDelete, IconPlus } from '../ui/Icons';
 import ProjectChip from './ProjectChip';
 import CostChip from './CostChip';
 import TokensChip from './TokensChip';
-import { AgentRunHistory } from 'thefactory-tools';
+import { AgentRunHistory, AgentRunRatingPatch } from 'thefactory-tools';
 
 function formatTime(iso?: string) {
   if (!iso) return '';
@@ -74,6 +74,7 @@ export interface AgentRunRowProps {
   onView?: (id: string) => void;
   onCancel?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onRate?: (id: string, rating?: AgentRunRatingPatch) => void;
   showActions?: boolean;
   showProject?: boolean;
   showModel?: boolean;
@@ -81,6 +82,7 @@ export interface AgentRunRowProps {
   showStatus?: boolean; // default true
   showFeaturesInsteadOfTurn?: boolean; // default true
   showThinking?: boolean; // default false
+  showRating?: boolean; // default false
 }
 
 export default function AgentRunRow({
@@ -88,12 +90,14 @@ export default function AgentRunRow({
   onView,
   onCancel,
   onDelete,
+  onRate,
   showActions = true,
   showProject = false,
   showModel = true,
   showStatus = true,
   showFeaturesInsteadOfTurn = true,
   showThinking = false,
+  showRating = false,
 }: AgentRunRowProps) {;
   const { total, completed } = useConversationCounts(run);
   const { duration, thinking } = useDurationTimers(run);
@@ -134,6 +138,46 @@ export default function AgentRunRow({
         <td className="px-3 py-2">{thinking}</td>
       ) : null}
       <td className="px-3 py-2">{duration}</td>
+      {showRating && (
+        <td className="px-3 py-2">
+        <div className="flex items-center space-x-1">
+          {!run.rating ? (
+            <>
+              <button
+                onClick={() => onRate?.(run.id, { score: 1 })}
+                className="text-neutral-400 hover:text-green-500"
+              >
+                <IconPlus />
+              {/* <IconThumbsUp /> */}
+              </button>
+              <button
+                onClick={() => onRate?.(run.id, { score: 0 })}
+                className="text-neutral-400 hover:text-red-500"
+              >
+                <IconDelete />
+              {/* <IconThumbsDown /> */}
+              </button>
+            </>
+          ) : run.rating.score === 1 ? (
+            <button
+              onClick={() => onRate?.(run.id, undefined)}
+              className="text-green-500"
+            >
+              <IconPlus />
+              {/* <IconThumbsUp size={16} fill="currentColor" /> */}
+            </button>
+          ) : (
+            <button
+              onClick={() => onRate?.(run.id, undefined)}
+              className="text-red-500"
+            >
+              <IconDelete />
+              {/* <IconThumbsDown size={16} fill="currentColor" /> */}
+            </button>
+          )}
+        </div>
+      </td>
+      )}
       {showActions ? (
         <td className="px-3 py-2 text-right">
           <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
