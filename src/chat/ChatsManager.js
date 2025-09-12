@@ -4,7 +4,7 @@ import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
 import ChatsStorage from './ChatsStorage';
 import { LLMProvider } from './LLMProvider'
 import { tasksManager, filesManager, projectsManager } from '../managers';
-import { buildChatTools } from 'thefactory-tools'
+import { buildChatTools, createCompletionClient, parseAgentResponse, normalizeTool } from 'thefactory-tools'
 
 const MESSAGES_TO_SEND = 10
 
@@ -118,41 +118,46 @@ export class ChatsManager {
       const webSearchApiKeys = appSettings.webSearchApiKeys;
 
       const { tools, callTool } = buildChatTools({ repoRoot, projectId, webSearchApiKeys });
+      const completion = createCompletionClient(config)
 
-      const provider = new LLMProvider(config);
+      // const provider = new LLMProvider(config);
 
       let rawResponses = []
       while (true) {
-        const response = await provider.createCompletion({
-          model: config.model,
-          messages: currentMessages,
-          tools: tools.length > 0 ? tools : undefined,
-          tool_choice: tools.length > 0 ? 'auto' : undefined,
-          stream: false,
-        });
+        
+        const startedAt = new Date();
+        const res = await completion({ model, messages, tools });
+        const durationMs = (new Date()).getTime() - startedAt.getTime();
 
-        const message = response?.choices?.[0]?.message;
-        if (!message) {
-          throw new Error('LLM returned an unexpected response format.');
+        const agentResponse = parseAgentResponse(res.message.content)
+
+        // const response = await provider.createCompletion({
+        //   model: config.model,
+        //   messages: currentMessages,
+        //   tools: tools.length > 0 ? tools : undefined,
+        //   tool_choice: tools.length > 0 ? 'auto' : undefined,
+        //   stream: false,
+        // });
+
+        rawResponses.push(JSON.stringify(res.message))
+
+        if (!agentResponse || !agentResponse.tool_calls || agentResponse.tool_calls.length === 0) {
+          return await storage.saveChat(chatId, [...chat.messages, ...newMessages, res.message], [...(chat.rawResponses ?? []), rawResponses])
         }
-        rawResponses.push(JSON.stringify(response))
 
-        if (!message.tool_calls || message.tool_calls.length === 0) {
-          return await storage.saveChat(chatId, [...chat.messages, ...newMessages, message], [...(chat.rawResponses ?? []), rawResponses])
+        currentMessages.push(res.message);
+
+        const toolOutputs = [];
+        for (const toolCall of agentResponse.tool_calls) {
+          const toolName = call.tool_name;
+          let args = normalizeTool(call.arguments, toolName);
+
+          const result = await callTool(toolName, args);
+          toolOutputs.push({ name: toolName, result });
         }
-
-        currentMessages.push(message);
-
-        for (const toolCall of message.tool_calls) {
-          const functionName = toolCall.function.name;
-          const functionArgs = JSON.parse(toolCall.function.arguments || '{}');
-          const functionResponse = await callTool(functionName, functionArgs);
-          currentMessages.push({
-            role: 'user',
-            tool_call_id: toolCall.id,
-            content: JSON.stringify(functionResponse),
-          });
-        }
+        const content = JSON.stringify(toolOutputs)
+        const toolResultMsg = { role: 'user', content };
+        currentMessages.push(toolResultMsg);
       }
     } catch (error) {
       const details = [

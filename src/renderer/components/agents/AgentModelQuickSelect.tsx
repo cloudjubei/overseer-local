@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select';
-import { useLLMConfig } from '../../hooks/useLLMConfig';
 import { useNavigator } from '../../navigation/Navigator';
+import { useLLMConfig } from '../../contexts/LLMConfigContext';
 
 export default function AgentModelQuickSelect({ className = '' }: { className?: string }) {
   const { recentConfigs, activeConfigId, setActive, configs } = useLLMConfig();
@@ -38,7 +38,7 @@ export default function AgentModelQuickSelect({ className = '' }: { className?: 
         </SelectTrigger>
         <SelectContent>
           {recentConfigs.map((cfg) => (
-            <SelectItem key={cfg.id} value={cfg.id}>
+            <SelectItem key={cfg.id} value={cfg.id!}>
               {cfg.name} {cfg.model ? `(${cfg.model})` : ''}
             </SelectItem>
           ))}

@@ -3,7 +3,7 @@ import { Modal } from '../renderer/components/ui/Modal';
 import { Input } from '../renderer/components/ui/Input';
 import { Button } from '../renderer/components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../renderer/components/ui/Select';
-import { useLLMConfig } from '../renderer/hooks/useLLMConfig';
+import { useLLMConfig } from '../renderer/contexts/LLMConfigContext';
 import { chatsService, LLMProviderType } from '../renderer/services/chatsService';
 import { useToast } from '../renderer/components/ui/Toast';
 import { LLMConfig } from 'thefactory-tools';
@@ -127,7 +127,7 @@ export default function SettingsLLMConfigModal({ mode, id, onRequestClose }: { m
       return;
     }
     if (isEdit) {
-      updateConfig(form.id, { ...form });
+      updateConfig(form.id!, { ...form });
     } else {
       const { id: _omit, ...toAdd } = form;
       addConfig(toAdd);

@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useChats } from '../hooks/useChats'
 import { useFilesAutocomplete } from '../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../hooks/useReferencesAutocomplete'
-import { useLLMConfig } from '../hooks/useLLMConfig'
+import { useLLMConfig } from '../contexts/LLMConfigContext';
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import FileDisplay from '../components/ui/FileDisplay'

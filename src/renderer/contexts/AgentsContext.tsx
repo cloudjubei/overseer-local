@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { AgentRunHistory, AgentType } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
-import { useLLMConfig } from '../hooks/useLLMConfig'
+import { useLLMConfig } from '../contexts/LLMConfigContext';
 import { factoryService } from '../services/factoryService'
 import { tasksService } from '../services/tasksService'
 import { notificationsService } from '../services/notificationsService'

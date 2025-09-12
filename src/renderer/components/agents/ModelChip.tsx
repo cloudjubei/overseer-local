@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useLLMConfig } from '../../hooks/useLLMConfig';
+import { useLLMConfig } from '../../contexts/LLMConfigContext';
 import { useNavigator } from '../../navigation/Navigator';
 
 function providerLabel(p?: string) {

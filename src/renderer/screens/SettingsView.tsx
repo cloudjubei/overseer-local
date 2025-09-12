@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Button } from '../components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
-import { useLLMConfig } from '../hooks/useLLMConfig';
+import { useLLMConfig } from '../contexts/LLMConfigContext';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
 import { useNavigator } from '../navigation/Navigator';
@@ -178,12 +178,12 @@ export default function SettingsView() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               {activeConfigId !== cfg.id && (
-                <Button onClick={() => setActive(cfg.id)}>Set Active</Button>
+                <Button onClick={() => setActive(cfg.id!)}>Set Active</Button>
               )}
-              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id })} variant="outline">
+              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id! })} variant="outline">
                 <IconEdit className="w-4 h-4" />
               </Button>
-              <Button onClick={() => removeConfig(cfg.id)} variant="danger">
+              <Button onClick={() => removeConfig(cfg.id!)} variant="danger">
                 <IconDelete className="w-4 h-4" />
               </Button>
             </div>

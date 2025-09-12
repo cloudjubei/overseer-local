@@ -71,7 +71,8 @@ function useDurationTimers(run: AgentRunHistory) {
 }
 function useCostUSD(run: AgentRunHistory) {
   return useMemo(() => {
-    return run.conversations.map(c => c.costUSD ?? 0).reduce((acc, c) => acc + c, 0)
+    return 0
+    // return run.conversations.map(c => c.costUSD ?? 0).reduce((acc, c) => acc + c, 0)
   }, [run.conversations]);
 }
 
