@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -933,6 +933,16 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "fc49d90d-6345-4744-aa82-060d025051d0",
+      "status": "?",
+      "title": "chatsManager improve tool calling",
+      "description": "Improve the whole completion and tool calling on thefactory-tools side.\nRight now we can pass 'tools' as an argument, but then the LLM responds in a completely different format { role, tool_calls } - no content.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1008,6 +1018,7 @@
     "270271e3-5a53-45ed-9c31-131e9bb4f36b": 70,
     "943be0ce-0c96-48ab-a820-37b919b9a150": 71,
     "76a35a14-e633-4f4a-827f-f7521123176d": 72,
-    "032e4535-7d44-4654-bc6d-811d395b0285": 73
+    "032e4535-7d44-4654-bc6d-811d395b0285": 73,
+    "fc49d90d-6345-4744-aa82-060d025051d0": 74
   }
 }

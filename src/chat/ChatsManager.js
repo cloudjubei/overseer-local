@@ -118,26 +118,17 @@ export class ChatsManager {
       const webSearchApiKeys = appSettings.webSearchApiKeys;
 
       const { tools, callTool } = buildChatTools({ repoRoot, projectId, webSearchApiKeys });
+      const model = config.model
       const completion = createCompletionClient(config)
-
-      // const provider = new LLMProvider(config);
 
       let rawResponses = []
       while (true) {
         
         const startedAt = new Date();
-        const res = await completion({ model, messages, tools });
+        const res = await completion({ model, messages: currentMessages, tools });
         const durationMs = (new Date()).getTime() - startedAt.getTime();
 
         const agentResponse = parseAgentResponse(res.message.content)
-
-        // const response = await provider.createCompletion({
-        //   model: config.model,
-        //   messages: currentMessages,
-        //   tools: tools.length > 0 ? tools : undefined,
-        //   tool_choice: tools.length > 0 ? 'auto' : undefined,
-        //   stream: false,
-        // });
 
         rawResponses.push(JSON.stringify(res.message))
 

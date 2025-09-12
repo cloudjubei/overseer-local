@@ -69,13 +69,6 @@ function useDurationTimers(run: AgentRunHistory) {
   const thinkingMs = Math.max(0, now - lastUpdate);
   return { duration: formatDuration(startMs), thinking: formatDuration(thinkingMs) }
 }
-function useCostUSD(run: AgentRunHistory) {
-  return useMemo(() => {
-    return 0
-    // return run.conversations.map(c => c.costUSD ?? 0).reduce((acc, c) => acc + c, 0)
-  }, [run.conversations]);
-}
-
 export interface AgentRunRowProps {
   run: AgentRunHistory;
   onView?: (id: string) => void;
@@ -104,7 +97,9 @@ export default function AgentRunRow({
 }: AgentRunRowProps) {;
   const { total, completed } = useConversationCounts(run);
   const { duration, thinking } = useDurationTimers(run);
-  const costUSD = useCostUSD(run);
+  const prompt = useMemo(() => run.conversations.flatMap(c => c.messages).map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0), [run.conversations])
+  const completion = useMemo(() => run.conversations.flatMap(c => c.messages).map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0), [run.conversations])
+  const costUSD = useMemo(() => (run.price.inputPerMTokensUSD * prompt / 1_000_000) + (run.price.outputPerMTokensUSD * completion / 1_000_000), [run.price, prompt, completion])
 
   return (
     <tr id={`run-${run.id ?? 'unknown'}`} className="border-t border-neutral-200 dark:border-neutral-800 group">
