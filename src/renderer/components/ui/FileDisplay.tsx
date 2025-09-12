@@ -1,7 +1,7 @@
 import React from 'react';
 import Tooltip from './Tooltip';
 import { goToFile } from '../../navigation/filesNavigation';
-import useFiles, { inferFileType } from '../../../renderer/hooks/useFiles';
+import { useFiles, inferFileType } from '../../contexts/FilesContext';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';
 
@@ -74,11 +74,7 @@ function extFromTypeOrName(type?: string | null, name?: string): string | null {
 
 function SvgIcon({ path, stroke, fill, size = 20, viewBox = '0 0 24 24' }: { path: React.ReactNode; stroke?: string; fill?: string; size?: number; viewBox?: string }) {
   return (
-    <span className="fd-icon" aria-hidden>
-      <svg width={size} height={size} viewBox={viewBox} fill="none" xmlns="http://www.w3.org/2000/svg">
-        {path}
-      </svg>
-    </span>
+    <span className=\"fd-icon\" aria-hidden>\n      <svg width={size} height={size} viewBox={viewBox} fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n        {path}\n      </svg>\n    </span>
   );
 }
 
@@ -90,21 +86,13 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'markdown': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#e8eefc" stroke="#a7b7f9"/>
-            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#3b5bdb" fontFamily="monospace">MD</text>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#e8eefc\" stroke=\"#a7b7f9\"/>\n            <text x=\"12\" y=\"16\" textAnchor=\"middle\" fontSize=\"9\" fill=\"#3b5bdb\" fontFamily=\"monospace\">MD</text>\n          </>\n        } />
       );
     }
     case 'json': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#ecf7ff" stroke="#8ed0ff"/>
-            <path d="M9 9c-2 0-2 6 0 6M15 9c2 0 2 6 0 6" stroke="#1c7ed6" strokeWidth="1.5" strokeLinecap="round"/>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#ecf7ff\" stroke=\"#8ed0ff\"/>\n            <path d=\"M9 9c-2 0-2 6 0 6M15 9c2 0 2 6 0 6\" stroke=\"#1c7ed6\" strokeWidth=\"1.5\" strokeLinecap=\"round\"/>\n          </>\n        } />
       );
     }
     case 'js':
@@ -112,43 +100,27 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'mjs': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fffbe6" stroke="#ffe58f"/>
-            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#d4b106" fontFamily="monospace">JS</text>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#fffbe6\" stroke=\"#ffe58f\"/>\n            <text x=\"12\" y=\"16\" textAnchor=\"middle\" fontSize=\"9\" fill=\"#d4b106\" fontFamily=\"monospace\">JS</text>\n          </>\n        } />
       );
     }
     case 'ts':
     case 'tsx': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#e7f5ff" stroke="#a5d8ff"/>
-            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#1971c2" fontFamily="monospace">TS</text>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#e7f5ff\" stroke=\"#a5d8ff\"/>\n            <text x=\"12\" y=\"16\" textAnchor=\"middle\" fontSize=\"9\" fill=\"#1971c2\" fontFamily=\"monospace\">TS</text>\n          </>\n        } />
       );
     }
     case 'css': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#f3f0ff" stroke="#d0bfff"/>
-            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#7048e8" fontFamily="monospace">CSS</text>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#f3f0ff\" stroke=\"#d0bfff\"/>\n            <text x=\"12\" y=\"16\" textAnchor=\"middle\" fontSize=\"9\" fill=\"#7048e8\" fontFamily=\"monospace\">CSS</text>\n          </>\n        } />
       );
     }
     case 'html':
     case 'htm': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff0f0" stroke="#ffc9c9"/>
-            <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#e03131" fontFamily="monospace">HTML</text>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#fff0f0\" stroke=\"#ffc9c9\"/>\n            <text x=\"12\" y=\"16\" textAnchor=\"middle\" fontSize=\"8\" fill=\"#e03131\" fontFamily=\"monospace\">HTML</text>\n          </>\n        } />
       );
     }
     case 'png':
@@ -160,22 +132,13 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'webp': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#ecfdf5" stroke="#b2f2bb"/>
-            <path d="M6 17l4-5 3 4 2-3 3 4H6z" fill="#40c057"/>
-            <circle cx="9" cy="9" r="1.5" fill="#37b24d"/>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#ecfdf5\" stroke=\"#b2f2bb\"/>\n            <path d=\"M6 17l4-5 3 4 2-3 3 4H6z\" fill=\"#40c057\"/>\n            <circle cx=\"9\" cy=\"9\" r=\"1.5\" fill=\"#37b24d\"/>\n          </>\n        } />
       );
     }
     case 'pdf': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff5f5" stroke="#ffa8a8"/>
-            <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#c92a2a" fontFamily="monospace">PDF</text>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#fff5f5\" stroke=\"#ffa8a8\"/>\n            <text x=\"12\" y=\"16\" textAnchor=\"middle\" fontSize=\"9\" fill=\"#c92a2a\" fontFamily=\"monospace\">PDF</text>\n          </>\n        } />
       );
     }
     case 'zip':
@@ -185,11 +148,7 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'rar': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff9db" stroke="#ffe8a1"/>
-            <path d="M12 6v12M12 6h2M12 9h2M12 12h2M12 15h2" stroke="#e67700" strokeWidth="1.5"/>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#fff9db\" stroke=\"#ffe8a1\"/>\n            <path d=\"M12 6v12M12 6h2M12 9h2M12 12h2M12 15h2\" stroke=\"#e67700\" strokeWidth=\"1.5\"/>\n          </>\n        } />
       );
     }
     case 'txt':
@@ -197,25 +156,13 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'text': {
       return (
         <SvgIcon path={
-          <>
-            <rect x="2" y="3" width="20" height="18" rx="2" fill="#f8f9fa" stroke="#dee2e6"/>
-            <path d="M6 8h10M6 11h10M6 14h8" stroke="#495057" strokeWidth="1.2" strokeLinecap="round"/>
-          </>
-        } />
+          <>\n            <rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\" fill=\"#f8f9fa\" stroke=\"#dee2e6\"/>\n            <path d=\"M6 8h10M6 11h10M6 14h8\" stroke=\"#495057\" strokeWidth=\"1.2\" strokeLinecap=\"round\"/>\n          </>\n        } />
       );
     }
     default: {
       return (
-        <span className="fd-icon fd-icon--badge" aria-hidden>
-          <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect x="4" y="3" width="16" height="18" rx="2" fill="var(--surface-2, #f5f6f8)" stroke="var(--border-subtle, #d9dbe1)"/>
-            <path d="M8 8h8M8 12h8M8 16h6" stroke="var(--text-muted)" strokeWidth="1.3" strokeLinecap="round"/>
-          </svg>
-        </span>
-      );
-    }
-  }
-}
+        <span className=\"fd-icon fd-icon--badge\" aria-hidden>\n          <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">\n            <rect x=\"4\" y=\"3\" width=\"16\" height=\"18\" rx=\"2\" fill=\"var(--surface-2, #f5f6f8)\" stroke=\"var(--border-subtle, #d9dbe1)\"/>\n            <path d=\"M8 8h8M8 12h8M8 16h6\" stroke=\"var(--text-muted)\" strokeWidth=\"1.3\" strokeLinecap=\"round\"/>\n          </svg>\n        </span>\n      );
+    }\n  }\n}
 
 function defaultIconFor(file: FileMeta): React.ReactNode {
   const ext = extFromTypeOrName(file.type ?? undefined, file.name);
@@ -271,28 +218,7 @@ function FilePreviewCard({ file }: { file: FileMeta }) {
   const { loading, error, text } = useFilePreviewContent(file);
 
   return (
-    <div className="file-preview-card">
-      <div className="file-preview-card__header">
-        <div className="file-preview-card__title" title={relPath || file.name}>{file.name}</div>
-        <div className="file-preview-card__meta">
-          {typeLabel}{sizeLabel ? ` • ${sizeLabel}` : ''}{dateLabel ? ` • ${dateLabel}` : ''}
-        </div>
-      </div>
-      {relPath && (
-        <div className="file-preview-card__path" title={relPath}>{relPath}</div>
-      )}
-      <div className="file-preview-card__body">
-        {loading && <div className="file-preview-card__loading">Loading preview…</div>}
-        {error && <div className="file-preview-card__error">{error}</div>}
-        {!loading && !error && text && (
-          <pre className="file-preview-card__pre"><code>{text}</code></pre>
-        )}
-        {!loading && !error && !text && (
-          <div className="file-preview-card__empty">No preview available</div>
-        )}
-      </div>
-    </div>
-  );
+    <div className=\"file-preview-card\">\n      <div className=\"file-preview-card__header\">\n        <div className=\"file-preview-card__title\" title={relPath || file.name}>{file.name}</div>\n        <div className=\"file-preview-card__meta\">\n          {typeLabel}{sizeLabel ? ` • ${sizeLabel}` : ''}{dateLabel ? ` • ${dateLabel}` : ''}\n        </div>\n      </div>\n      {relPath && (\n        <div className=\"file-preview-card__path\" title={relPath}>{relPath}</div>\n      )}\n      <div className=\"file-preview-card__body\">\n        {loading && <div className=\"file-preview-card__loading\">Loading preview…</div>}\n        {error && <div className=\"file-preview-card__error\">{error}</div>}\n        {!loading && !error && text && (\n          <pre className=\"file-preview-card__pre\"><code>{text}</code></pre>\n        )}\n        {!loading && !error && !text && (\n          <div className=\"file-preview-card__empty\">No preview available</div>\n        )}\n      </div>\n    </div>\n  );
 }
 
 export const FileDisplay: React.FC<FileDisplayProps> = ({
@@ -346,32 +272,9 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
     .join(' ');
 
   return (
-    <Tooltip content={<FilePreviewCard file={file} />} placement={previewPlacement} delayMs={previewDelayMs} disabled={!showPreviewOnHover}>
-      {isCompact ? (
-        <span className="badge badge--soft badge--ok">{file.name}</span>
+    <Tooltip content={<FilePreviewCard file={file} />} placement={previewPlacement} delayMs={previewDelayMs} disabled={!showPreviewOnHover}>\n      {isCompact ? (
+        <span className=\"badge badge--soft badge--ok\">{file.name}</span>
       ) : (
-        <div
-          className={cls}
-          role={role}
-          tabIndex={tabIndex}
-          aria-label={aria}
-          onKeyDown={handleKeyDown}
-          onClick={interactive ? (onClick ? (e) => onClick(file, e) : (navigateOnClick ? handleNavigate : undefined)) : undefined}
-          {...(dataAttrs as Record<string, string>)}
-        >
-          <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
-          <div className="fd-content">
-            <div className="fd-name" title={file.path || file.name}>{file.name}</div>
-            {showMeta && sizeLabel && <div className="fd-size">{sizeLabel}</div>}
-          </div>
-          <div className="fd-right">
-            {showMeta && dateLabel && <div className="fd-date">{dateLabel}</div>}
-            {trailing ? <div className="fd-trailing">{trailing}</div> : null}
-          </div>
-        </div>
-      )}
-    </Tooltip>
+        <div\n          className={cls}\n          role={role}\n          tabIndex={tabIndex}\n          aria-label={aria}\n          onKeyDown={handleKeyDown}\n          onClick={interactive ? (onClick ? (e) => onClick(file, e) : (navigateOnClick ? handleNavigate : undefined)) : undefined}\n          {...(dataAttrs as Record<string, string>)}\n        >\n          <div className=\"fd-leading\">{leadingVisual ?? defaultIconFor(file)}</div>\n          <div className=\"fd-content\">\n            <div className=\"fd-name\" title={file.path || file.name}>{file.name}</div>\n            {showMeta && sizeLabel && <div className=\"fd-size\">{sizeLabel}</div>}\n          </div>\n          <div className=\"fd-right\">\n            {showMeta && dateLabel && <div className=\"fd-date\">{dateLabel}</div>}\n            {trailing ? <div className=\"fd-trailing\">{trailing}</div> : null}\n          </div>\n        </div>\n      )}\n    </Tooltip>
   );
 };
-
-export default FileDisplay;

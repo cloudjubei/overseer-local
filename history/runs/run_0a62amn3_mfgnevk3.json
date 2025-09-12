@@ -1,0 +1,18 @@
+{
+  "state": "running",
+  "conversations": [],
+  "startedAt": "2025-09-12T09:42:09.220Z",
+  "updatedAt": "2025-09-12T09:42:09.220Z",
+  "id": "run_0a62amn3_mfgnevk3",
+  "projectId": "main",
+  "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+  "llmConfig": {
+    "provider": "gemini",
+    "model": "gemini-2.5-pro",
+    "apiBaseUrl": "https://generativelanguage.googleapis.com/v1beta/chat/completions"
+  },
+  "price": {
+    "inputPerMTokensUSD": 1.25,
+    "outputPerMTokensUSD": 10
+  }
+}

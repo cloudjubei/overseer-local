@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FileMeta } from '../../services/filesService';
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges';
-import useFiles from '../../../renderer/hooks/useFiles';
+import { useFiles } from '../../contexts/FilesContext';
 
 function escapeHtml(str: string) {
   return str
@@ -20,14 +20,14 @@ function basicMarkdownToHtml(md: string) {
   html = html.replace(/^##\s(.+)$/gm, '<h2>$1</h2>');
   html = html.replace(/^#\s(.+)$/gm, '<h1>$1</h1>');
   // fenced code blocks ```
-  html = html.replace(/```([\s\S]*?)```/g, (_, code) => `<pre class="md-code"><code>${code}</code></pre>`);
+  html = html.replace(/```([\s\S]*?)```/g, (_, code) => `<pre class=\"md-code\"><code>${code}</code></pre>`);
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   html = html.replace(/\n\n+/g, '</p><p>');
   html = `<p>${html}</p>`;
   // links [text](url)
-  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href=\"$2\" target=\"_blank\" rel=\"noreferrer\">$1</a>');
   return html;
 }
 
@@ -70,11 +70,11 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
   const previewHtml = useMemo(() => basicMarkdownToHtml(value || ''), [value]);
 
   return (
-    <div className="md-editor" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className=\"md-editor\" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)' }}>
         <strong style={{ flex: 1 }}>{file.name}</strong>
         {saveSupported && (
-          <button className="btn" disabled={!dirty} onClick={handleSave}>
+          <button className=\"btn\" disabled={!dirty} onClick={handleSave}>
             Save
           </button>
         )}
@@ -92,12 +92,10 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
             />
           </div>
           <div style={{ padding: 12, overflow: 'auto' }}>
-            <div className="md-preview" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <div className=\"md-preview\" dangerouslySetInnerHTML={{ __html: previewHtml }} />
           </div>
         </div>
       )}
     </div>
   );
 };
-
-export default MarkdownEditor;

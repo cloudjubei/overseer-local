@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { filesService, FileMeta } from '../services/filesService';
 import { useActiveProject } from '../contexts/ProjectContext';
 
@@ -10,7 +10,6 @@ export type DirNode = {
 };
 
 function buildDirTree(files: FileMeta[]): DirNode {
-  console.log("LELELE buildDirTree")
   const root: DirNode = { name: '', relPath: '', dirs: [], files: [] };
   const dirMap = new Map<string, DirNode>();
   dirMap.set('', root);
@@ -34,12 +33,10 @@ function buildDirTree(files: FileMeta[]): DirNode {
     const fileName = parts.pop() || f.name;
     const dirPath = parts.join('/');
     const dirNode = ensureDir(dirPath);
-    // Normalize name
     const meta: FileMeta = { ...f, name: fileName };
     dirNode.files.push(meta);
   }
 
-  // Sort directories and files
   const sortTree = (node: DirNode) => {
     node.dirs.sort((a, b) => a.name.localeCompare(b.name));
     node.files.sort((a, b) => a.name.localeCompare(b.name));
@@ -50,7 +47,19 @@ function buildDirTree(files: FileMeta[]): DirNode {
   return root;
 }
 
-export default function useFiles() {
+
+export type FilesContextValue = {
+  files: FileMeta[];
+  filesByPath: Record<string, FileMeta>;
+  directoryTree: DirNode | null;
+  readFile: (path: string) => Promise<string | undefined>;
+  saveFile: (path: string, content: string) => Promise<void>;
+  uploadFile: (name: string, content: string) => Promise<string | undefined>;
+}
+
+const FilesContext = createContext<FilesContextValue | null>(null)
+
+export function FilesProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
   
   const [files, setFiles] = useState<FileMeta[]>([]);
@@ -73,16 +82,13 @@ export default function useFiles() {
   }
   
   useEffect(() => {
-    update();
-
-    const unsubscribe = filesService.subscribe(updateCurrentFiles);
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-  useEffect(() => {
-    update();
+    if (projectId) {
+      update();
+      const unsubscribe = filesService.subscribe(updateCurrentFiles);
+      return () => {
+        unsubscribe();
+      };
+    }
   }, [projectId]);
 
   const readFile = async (path: string) : Promise<string | undefined> =>  {
@@ -96,8 +102,24 @@ export default function useFiles() {
     return await filesService.uploadFile(projectId, name, content)
   }
 
-  return { files, directoryTree, readFile, saveFile, filesByPath, uploadFile } as const;
+  const value = useMemo<FilesContextValue>(() => ({
+    files,
+    directoryTree,
+    readFile,
+    saveFile,
+    filesByPath,
+    uploadFile
+  }), [files, directoryTree, readFile, saveFile, filesByPath, uploadFile]);
+
+  return <FilesContext.Provider value={value}>{children}</FilesContext.Provider>
 }
+
+export function useFiles(): FilesContextValue {
+  const ctx = useContext(FilesContext)
+  if (!ctx) throw new Error('useFiles must be used within FilesProvider')
+  return ctx
+}
+
   
 const textExts = new Set([
   'txt','md','mdx','json','js','jsx','ts','tsx','css','scss','less','html','htm','xml','yml','yaml','csv','log','sh','bash','zsh','bat','ps1','py','rb','java','kt','go','rs','c','h','cpp','hpp','m','swift','ini','conf','env'

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from './Input';
 import FileDisplay from './FileDisplay';
-import useFiles, { inferFileType } from '../../../renderer/hooks/useFiles';
+import { useFiles, inferFileType } from '../../contexts/FilesContext';
 
 export type FileSelectorProps = {
   selected?: string[]; // relPaths
@@ -66,66 +66,10 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
   }
 
   return (
-    <div className="file-selector flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex-1">
-          <Input
-            ref={inputRef}
-            placeholder="Search files by name or path"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search files"
-          />
-        </div>
-        <div className="text-xs text-text-muted whitespace-nowrap pl-1">
-          {filteredFiles.length} files
-        </div>
-      </div>
-
-      <div role="listbox" aria-label={title || 'Files'} className="border rounded-md max-h-[50vh] overflow-auto p-1 bg-surface-raised border-border">
-        {filteredFiles.map((file) => {
+    <div className=\"file-selector flex flex-col gap-3\">\n      <div className=\"flex items-center justify-between gap-2\">\n        <div className=\"flex-1\">\n          <Input\n            ref={inputRef}\n            placeholder=\"Search files by name or path\"\n            value={query}\n            onChange={(e) => setQuery(e.target.value)}\n            aria-label=\"Search files\"\n          />\n        </div>\n        <div className=\"text-xs text-text-muted whitespace-nowrap pl-1\">\n          {filteredFiles.length} files\n        </div>\n      </div>\n
+      <div role=\"listbox\" aria-label={title || 'Files'} className=\"border rounded-md max-h-[50vh] overflow-auto p-1 bg-surface-raised border-border\">\n        {filteredFiles.map((file) => {
           const selected = isSelected(file.path);
           return (
-            <div key={file.path} role="option" aria-selected={selected} className="flex items-center">
-              <FileDisplay
-                file={file}
-                density="normal"
-                interactive
-                showPreviewOnHover
-                onClick={() => toggle(file.path)}
-                trailing={
-                  <span
-                    className={
-                      'inline-flex items-center justify-center w-5 h-5 rounded-sm border text-[10px] ' +
-                      (selected
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-transparent text-text-muted border-border')
-                    }
-                    aria-hidden
-                  >
-                    {selected ? '✓' : ''}
-                  </span>
-                }
-                className={selected ? 'bg-blue-50 dark:bg-blue-950/30' : ''}
-              />
-            </div>
-          );
-        })}
-        {filteredFiles.length === 0 && (
-          <div className="p-4 text-sm text-text-muted">No files match your search.</div>
-        )}
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <button type="button" className="btn-secondary" onClick={onCancel}>Cancel</button>
-        )}
-        <button type="button" className="btn" onClick={() => onConfirm(localSelected)} disabled={localSelected.length === 0 && allowMultiple}>
-          Confirm{localSelected.length ? ` (${localSelected.length})` : ''}
-        </button>
-      </div>
-    </div>
-  );
+            <div key={file.path} role=\"option\" aria-selected={selected} className=\"flex items-center\">\n              <FileDisplay\n                file={file}\n                density=\"normal\"\n                interactive\n                showPreviewOnHover\n                onClick={() => toggle(file.path)}\n                trailing={\n                  <span\n                    className={\n                      'inline-flex items-center justify-center w-5 h-5 rounded-sm border text-[10px] ' +\n                      (selected\n                        ? 'bg-blue-600 text-white border-blue-600'\n                        : 'bg-transparent text-text-muted border-border')\n                    }\n                    aria-hidden\n                  >\n                    {selected ? '✓' : ''}\n                  </span>\n                }\n                className={selected ? 'bg-blue-50 dark:bg-blue-950/30' : ''}\n              />\n            </div>\n          );
+        })}\n        {filteredFiles.length === 0 && (\n          <div className=\"p-4 text-sm text-text-muted\">No files match your search.</div>\n        )}\n      </div>\n\n      <div className=\"flex justify-end gap-2\">\n        {onCancel && (\n          <button type=\"button\" className=\"btn-secondary\" onClick={onCancel}>Cancel</button>\n        )}\n        <button type=\"button\" className=\"btn\" onClick={() => onConfirm(localSelected)} disabled={localSelected.length === 0 && allowMultiple}>\n          Confirm{localSelected.length ? ` (${localSelected.length})` : ''}\n        </button>\n      </div>\n    </div>\n  );
 };
-
-export default FileSelector;

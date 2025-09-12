@@ -1,6 +1,6 @@
 import React from 'react';
 import FileDisplay, { FileMeta } from './FileDisplay';
-import useFiles from '../../hooks/useFiles';
+import { useFiles } from '../../contexts/FilesContext';
 import DependencyBullet from '../tasks/DependencyBullet';
 
 // Renders text into rich content:
@@ -16,9 +16,9 @@ function tokenize(input: string): Array<{ type: 'text' | 'file' | 'dep'; value: 
   const parts: Array<{ type: 'text' | 'file' | 'dep'; value: string }> = [];
   if (!input) return [{ type: 'text', value: '' }];
 
-  const fileRe = /@([A-Za-z0-9_\-./]+\.[A-Za-z0-9]+)/g; // crude heuristic for file-like tokens
-  // Match either UUID or numeric display (e.g., 8), optionally with "." and either UUID or numeric
-  const depRe = new RegExp(`#((?:${UUID})|(?:\\d+))(?:\.((?:${UUID})|(?:\\d+)))?`, 'g');
+  const fileRe = /@([A-Za-z0-9_\\-./]+\\.[A-Za-z0-9]+)/g; // crude heuristic for file-like tokens
+  // Match either UUID or numeric display (e.g., 8), optionally with \".\" and either UUID or numeric
+  const depRe = new RegExp(`#((?:${UUID})|(?:\\\\d+))(?:\\.((?:${UUID})|(?:\\\\d+)))?`, 'g');
 
   // Merge matches by walking input once with both regexes
   type Match = { index: number; length: number; type: 'file' | 'dep'; value: string };
@@ -51,8 +51,7 @@ export function RichText({ text }: { text: string | null | undefined }) {
   const segments = React.useMemo(() => tokenize(text || ''), [text]);
 
   return (
-    <>
-      {segments.map((seg, idx) => {
+    <>\n      {segments.map((seg, idx) => {
         if (seg.type === 'text') return <React.Fragment key={idx}>{seg.value}</React.Fragment>;
         if (seg.type === 'dep') {
           return <DependencyBullet key={idx} dependency={seg.value} />;
@@ -74,24 +73,13 @@ export function RichText({ text }: { text: string | null | undefined }) {
         }
         if (!meta) {
           return (
-            <span key={idx} className="file-mention file-mention--unresolved" title={`File not found: ${token}`}>@{token}</span>
+            <span key={idx} className=\"file-mention file-mention--unresolved\" title={`File not found: ${token}`}>@{token}</span>
           );
         }
         return (
-          <span key={idx} className="inline-file-chip">
-            <FileDisplay
-              file={meta}
-              density='compact'
-              interactive={false}
-              showPreviewOnHover={true}
-              navigateOnClick={false}
-              showMeta={false}
-              className="inline"
-            />
-          </span>
+          <span key={idx} className=\"inline-file-chip\">\n            <FileDisplay\n              file={meta}\n              density='compact'\n              interactive={false}\n              showPreviewOnHover={true}\n              navigateOnClick={false}\n              showMeta={false}\n              className=\"inline\"\n            />\n          </span>
         );
-      })}
-    </>
+      })}\n    </>
   );
 }
 

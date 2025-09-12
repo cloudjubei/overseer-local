@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useFiles, { DirNode } from '../hooks/useFiles';
+import { useFiles, DirNode } from '../contexts/FilesContext';
 import { FileMeta } from '../services/filesService';
 import { MarkdownEditor } from '../components/files/MarkdownEditor';
 import BasicFileViewer from '../components/files/BasicFileViewer';
@@ -11,7 +11,7 @@ function isMarkdown(f: FileMeta) {
 
 function Caret({ open }: { open: boolean }) {
   return (
-    <span className="inline-block w-4 text-[10px] text-text-muted" aria-hidden>{open ? '▾' : '▸'}</span>
+    <span className=\"inline-block w-4 text-[10px] text-text-muted\" aria-hidden>{open ? '▾' : '▸'}</span>
   );
 }
 
@@ -107,25 +107,25 @@ export const FilesView: React.FC = () => {
     return (
       <div>
         {!isRoot && (
-          <div className="flex items-center py-1" style={{ paddingLeft: indent }}>
+          <div className=\"flex items-center py-1\" style={{ paddingLeft: indent }}>
             <button
-              type="button"
+              type=\"button\"
               onClick={() => handleToggleOpen(node.relPath)}
-              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
+              className=\"inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]\"
               aria-label={isOpen ? 'Collapse folder' : 'Expand folder'}
               title={isOpen ? 'Collapse' : 'Expand'}
             >
               <Caret open={isOpen} />
             </button>
             <button
-              type="button"
+              type=\"button\"
               onClick={() => handleToggleOpen(node.relPath)}
-              className="group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
+              className=\"group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]\"
               title={node.name}
             >
-              <span className="text-sm" aria-hidden>{isOpen ? '📂' : '📁'}</span>
-              <span className="truncate font-medium text-text-primary">{node.name || 'root'}</span>
-              <span className="ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]">{node.files.length}</span>
+              <span className=\"text-sm\" aria-hidden>{isOpen ? '📂' : '📁'}</span>
+              <span className=\"truncate font-medium text-text-primary\">{node.name || 'root'}</span>
+              <span className=\"ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]\">{node.files.length}</span>
             </button>
           </div>
         )}
@@ -145,10 +145,10 @@ export const FilesView: React.FC = () => {
                   title={f.path}
                   aria-current={isSel ? 'true' : undefined}
                 >
-                  <span className="text-xs opacity-80 mt-[2px]" aria-hidden>📄</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-text-primary">{f.name}</div>
-                    <div className="text-[10px] text-text-muted">{f.mtime ? `Updated ${relTime(f.mtime)}` : ''}</div>
+                  <span className=\"text-xs opacity-80 mt-[2px]\" aria-hidden>📄</span>
+                  <div className=\"min-w-0 flex-1\"> 
+                    <div className=\"truncate text-text-primary\">{f.name}</div>
+                    <div className=\"text-[10px] text-text-muted\">{f.mtime ? `Updated ${relTime(f.mtime)}` : ''}</div>
                   </div>
                 </button>
               );
@@ -174,28 +174,28 @@ export const FilesView: React.FC = () => {
   }
 
   return (
-    <div className="files-view grid h-full" style={{ gridTemplateColumns: '320px 1fr' }}>
-      <aside className="flex-col w-min-[0] overflow-hidden"  style={{ borderRight: '1px solid var(--border-subtle)' }}>
-        <div className="flex p-2 gap-2 items-center" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-          <strong className="flex-1">Files</strong>
+    <div className=\"files-view grid h-full\" style={{ gridTemplateColumns: '320px 1fr' }}>
+      <aside className=\"flex-col w-min-[0] overflow-hidden\"  style={{ borderRight: '1px solid var(--border-subtle)' }}>
+        <div className=\"flex p-2 gap-2 items-center\" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <strong className=\"flex-1\">Files</strong>
           <input
             ref={searchRef}
-            type="search"
-            placeholder="Search files"
+            type=\"search\" 
+            placeholder=\"Search files\"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="ui-input"
+            className=\"ui-input\"
             style={{ width: 160 }}
-            aria-label="Search files"
+            aria-label=\"Search files\"
           />
         </div>
-        <div className="flex-1">
+        <div className=\"flex-1\">
           {!directoryTree ? (
-            <div className="p-3">Loading index...</div>
+            <div className=\"p-3\">Loading index...</div>
           ) : files.length === 0 ? (
-            <div className="p-3" style={{ color: 'var(--text-muted)' }}>No files found.</div>
+            <div className=\"p-3\" style={{ color: 'var(--text-muted)' }}>No files found.</div>
           ) : (
-            <div className="flex-col overflow-auto px-2 py-2">
+            <div className=\"flex-col overflow-auto px-2 py-2\"> 
               <DirTree node={query.trim() ? (filterDir(directoryTree, filterMatch) || { ...directoryTree, dirs: [], files: [] }) : directoryTree} level={0} />
             </div>
           )}

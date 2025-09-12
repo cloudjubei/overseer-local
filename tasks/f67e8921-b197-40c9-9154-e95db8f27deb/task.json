@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "~",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -946,7 +946,7 @@
     },
     {
       "id": "d621c45b-3c4c-4814-81bd-7f1a1e25f6f0",
-      "status": "-",
+      "status": "+",
       "title": "turn useFiles into context",
       "description": "Make @src/renderer/hooks/useFiles.tsx follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx   and @src/renderer/contexts/ProjectContext.tsx   to turn it into a context initialised once in @src/renderer/App.tsx .",
       "plan": "",

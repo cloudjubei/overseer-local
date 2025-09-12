@@ -15,6 +15,7 @@ import { AppSettingsProvider } from './contexts/AppSettingsContext';
 import { NotificationClickHandler } from './hooks/useNotifications';
 import { LLMConfigProvider } from './contexts/LLMConfigContext';
 import { AgentsProvider } from './contexts/AgentsContext';
+import { FilesProvider } from './contexts/FilesContext';
 
 function ServicesBootstrap() {
   const { init } = useLiveData();
@@ -31,20 +32,22 @@ function App() {
     <AppSettingsProvider>
       <ToastProvider>
         <ProjectsProvider>
-          <NavigatorProvider>
-            <ShortcutsProvider>
-              <LLMConfigProvider>
-                <AgentsProvider>
-                  <ServicesBootstrap />
-                  <ShortcutsBootstrap />
-                  <NotificationClickHandler />
-                  <CommandMenu />
-                  <ShortcutsHelp />
-                  <MainApp />
-                </AgentsProvider>
-              </LLMConfigProvider>
-            </ShortcutsProvider>
-          </NavigatorProvider>
+          <FilesProvider>
+            <NavigatorProvider>
+              <ShortcutsProvider>
+                <LLMConfigProvider>
+                  <AgentsProvider>
+                    <ServicesBootstrap />
+                    <ShortcutsBootstrap />
+                    <NotificationClickHandler />
+                    <CommandMenu />
+                    <ShortcutsHelp />
+                    <MainApp />
+                  </AgentsProvider>
+                </LLMConfigProvider>
+              </ShortcutsProvider>
+            </NavigatorProvider>
+          </FilesProvider>
         </ProjectsProvider>
       </ToastProvider>
     </AppSettingsProvider>
