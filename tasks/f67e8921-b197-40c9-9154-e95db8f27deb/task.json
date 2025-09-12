@@ -943,6 +943,36 @@
       "context": [],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "d621c45b-3c4c-4814-81bd-7f1a1e25f6f0",
+      "status": "-",
+      "title": "turn useFiles into context",
+      "description": "Make @src/renderer/hooks/useFiles.tsx follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx   and @src/renderer/contexts/ProjectContext.tsx   to turn it into a context initialised once in @src/renderer/App.tsx .",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useFiles.tsx",
+        "src/renderer/App.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/contexts/AppSettingsContext.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "0f44a2c4-5988-4b86-94d9-38b2ade0a037",
+      "status": "-",
+      "title": "turn useTasks into a context",
+      "description": "Make @src/renderer/hooks/useTasks.tsx follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx    and @src/renderer/contexts/ProjectContext.tsx    to turn it into a context initialised once in @src/renderer/App.tsx  .",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useTasks.tsx",
+        "src/renderer/contexts/AppSettingsContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/App.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1019,6 +1049,8 @@
     "943be0ce-0c96-48ab-a820-37b919b9a150": 71,
     "76a35a14-e633-4f4a-827f-f7521123176d": 72,
     "032e4535-7d44-4654-bc6d-811d395b0285": 73,
-    "fc49d90d-6345-4744-aa82-060d025051d0": 74
+    "fc49d90d-6345-4744-aa82-060d025051d0": 74,
+    "d621c45b-3c4c-4814-81bd-7f1a1e25f6f0": 75,
+    "0f44a2c4-5988-4b86-94d9-38b2ade0a037": 76
   }
 }
