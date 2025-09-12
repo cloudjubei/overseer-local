@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "~",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -921,7 +921,7 @@
     },
     {
       "id": "032e4535-7d44-4654-bc6d-811d395b0285",
-      "status": "-",
+      "status": "+",
       "title": "turn useAgents into a context",
       "description": "Make @src/renderer/hooks/useAgents.ts .ts follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx  and @src/renderer/contexts/ProjectContext.tsx  to turn it into a context initialised once in @src/renderer/App.tsx",
       "plan": "",
