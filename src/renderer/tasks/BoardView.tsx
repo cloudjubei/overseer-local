@@ -5,7 +5,7 @@ import { STATUS_LABELS } from '../services/tasksService'
 import { useActiveProject } from '../contexts/ProjectContext'
 import StatusControl from '../components/tasks/StatusControl'
 import { useNavigator } from '../navigation/Navigator'
-import { useTasks } from '../hooks/useTasks'
+import { useTasks } from '../contexts/TasksContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 

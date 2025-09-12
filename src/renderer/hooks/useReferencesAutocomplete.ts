@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useTasks } from './useTasks';
+import { useTasks } from '../contexts/TasksContext';
 import { useActiveProject } from '../contexts/ProjectContext';
 
 type RefItem = {

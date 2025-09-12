@@ -4,7 +4,7 @@ import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useActiveProject } from '../contexts/ProjectContext';
-import { useTasks } from '../hooks/useTasks'
+import { useTasks } from '../contexts/TasksContext'
 import { useAgents } from '../contexts/AgentsContext';
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { Feature, Status, Task } from 'thefactory-tools';
@@ -186,7 +186,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       const element = document.querySelector('.details-header')
       if (element) {
         element.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        ;(element as HTMLElement).classList.add('highlighted')
+        (element as HTMLElement).classList.add('highlighted')
         setTimeout(() => (element as HTMLElement).classList.remove('highlighted'), 2000)
       }
     }
@@ -247,7 +247,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
           </button>
 
           <div className="col col-id flex flex-col items-center gap-1" style={{ gridRow: '1 / 4', alignSelf: 'center' }}>
-            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip={"Has rejection reason"} />}
+            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip="Has rejection reason" />}
             <span className="id-chip">{taskDisplayIndex}</span>
             <StatusControl
               status={task.status}
@@ -452,7 +452,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                           status={f.status}
                           onChange={(next) => handleFeatureStatusChange(task.id, f.id, next)}
                         />
-                        {f.rejection && <ExclamationChip title={f.rejection} tooltip={"Has rejection reason"} />}
+                        {f.rejection && <ExclamationChip title={f.rejection} tooltip="Has rejection reason" />}
                       </div>
 
                       <div className="col col-title" >

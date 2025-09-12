@@ -7,9 +7,9 @@ import { useLLMConfig } from '../contexts/LLMConfigContext';
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import FileDisplay from '../components/ui/FileDisplay'
-import useFiles, { inferFileType } from '../../renderer/hooks/useFiles';
 import { Chat, ChatMessage } from '../services/chatsService'
 import RichText from '../components/ui/RichText'
+import { inferFileType, useFiles } from '../contexts/FilesContext'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean

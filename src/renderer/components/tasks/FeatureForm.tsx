@@ -8,7 +8,7 @@ import ContextFileChip from './ContextFileChip'
 import { Modal } from '../ui/Modal'
 import { IconDelete, IconPlus } from '../ui/Icons'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
-import { useTasks } from '../../hooks/useTasks'
+import { useTasks } from '../../contexts/TasksContext'
 
 export type FeatureFormValues = {
   title: string

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FileMeta } from '../../services/filesService';
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges';
-import useFiles from '../../../renderer/hooks/useFiles';
+import { useFiles } from '../../contexts/FilesContext';
 
 function escapeHtml(str: string) {
   return str

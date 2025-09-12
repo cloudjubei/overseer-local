@@ -4,7 +4,7 @@ import Tooltip from '../ui/Tooltip';
 import type { Status } from 'thefactory-tools';
 import TaskSummaryCallout from './TaskSummaryCallout';
 import FeatureSummaryCallout from './FeatureSummaryCallout';
-import { useTasks } from '../../../renderer/hooks/useTasks';
+import { useTasks } from '../../contexts/TasksContext';
 import { IconDelete, IconXCircle } from '../ui/Icons';
 
 export interface DependencyBulletProps {

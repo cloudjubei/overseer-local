@@ -1,15 +1,68 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { InvalidRefError, ResolvedFeatureRef, ResolvedRef, ResolvedTaskRef, TaskCreateInput, tasksService } from '../services/tasksService';
 import { projectsService } from '../services/projectsService';
-import { useActiveProject } from '../contexts/ProjectContext';
+import { useActiveProject } from './ProjectContext';
 import { Feature, ProjectSpec, Task } from 'thefactory-tools';
 import { ServiceResult } from '../services/serviceResult';
+
+// Define the context value type based on useTasks return value
+export type TasksContextValue = {
+  tasksById: Record<string, Task>;
+  featuresById: Record<string, Feature>;
+  createTask: (updates: TaskCreateInput) => Promise<ServiceResult>;
+  updateTask: (taskId: string, updates: Partial<Omit<Task, "id">>) => Promise<ServiceResult>;
+  deleteTask: (taskId: string) => Promise<ServiceResult>;
+  addFeature: (taskId: string, updates: Partial<Omit<Feature, "id">>) => Promise<ServiceResult>;
+  updateFeature: (taskId: string, featureId: string, updates: Partial<Omit<Feature, "id">>) => Promise<ServiceResult>;
+  deleteFeature: (taskId: string, featureId: string) => Promise<ServiceResult>;
+  reorderFeatures: (taskId: string, fromIndex: number, toIndex: number) => Promise<ServiceResult>;
+  reorderTask: (fromIndex: number, toIndex: number) => Promise<ServiceResult>;
+  getBlockers: (taskId: string, featureId?: string) => (ResolvedRef | InvalidRefError)[];
+  getBlockersOutbound: (id: string) => ResolvedRef[];
+  resolveDependency: (dependency: string) => ResolvedRef | InvalidRefError;
+  normalizeDependency: (dependency: string) => string;
+};
+
+// Create the context
+const TasksContext = createContext<TasksContextValue | null>(null);
 
 function isUUID(v: string): boolean {
   return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(v)
 }
 
-export function useTasks() {
+function normalizeDependencyInternal(
+  project: ProjectSpec,
+  taskDispToId: Record<string,string>,
+  featureDispToIdByTask: Record<string, Record<string,string>>,
+  tasksIdx: Record<string, Task>,
+  featuresIdx: Record<string, Feature>,
+  dependency: string
+): string {
+  const parts = dependency.split(".")
+  if (parts.length === 1) {
+    const a = parts[0]
+    if (isUUID(a) && tasksIdx[a]) return a
+    const taskId = taskDispToId[a]
+    return taskId || dependency
+  } else if (parts.length > 1) {
+    const a = parts[0]
+    const b = parts.slice(1).join('.') // in case of extra dots, treat rest as feature token
+    let taskId = a
+    if (!isUUID(a)) {
+      taskId = taskDispToId[a] || a
+    }
+    let featureId = b
+    if (!isUUID(b)) {
+      const fmap = featureDispToIdByTask[taskId] || {}
+      featureId = fmap[b] || b
+    }
+    return `${taskId}.${featureId}`
+  }
+  return dependency
+}
+
+// Create the provider component
+export function TasksProvider({ children }: { children: React.ReactNode }) {
   const {
     project
   } = useActiveProject()
@@ -19,14 +72,8 @@ export function useTasks() {
   const [blockersOutboundById, setReferencesById] = useState<Record<string,ResolvedRef[]>>({});
   const [taskDisplayToId, setTaskDisplayToId] = useState<Record<string,string>>({});
   const [featureDisplayToIdByTask, setFeatureDisplayToIdByTask] = useState<Record<string, Record<string,string>>>({});
-
-  const update = async () => {
-    if (project){
-      const tasks = await tasksService.listTasks(project.id)
-      updateCurrentProjectTasks(project, tasks)
-    }
-  }
-  const updateCurrentProjectTasks = (project: ProjectSpec, tasks: Task[]) => {
+  
+  const updateCurrentProjectTasks = useCallback((project: ProjectSpec, tasks: Task[]) => {
     const newTasksById : Record<string,Task> = {}
     const newFeaturesById : Record<string,Feature> = {}
     const taskDisplayMap: Record<string,string> = {}
@@ -76,62 +123,47 @@ export function useTasks() {
       }
     }
     setReferencesById(outbound)
-  }
+  }, [])
 
   useEffect(() => {
-    update();
+    if (!project) {
+      setTasksById({});
+      setFeaturesById({});
+      setReferencesById({});
+      setTaskDisplayToId({});
+      setFeatureDisplayToIdByTask({});
+      return;
+    }
+
+    let isMounted = true;
+
+    const updateForProject = async () => {
+      const tasks = await tasksService.listTasks(project.id);
+      if (isMounted) {
+        updateCurrentProjectTasks(project, tasks);
+      }
+    };
+
+    updateForProject();
 
     const unsubscribe = tasksService.subscribe((tasks) => {
-      if (project){
-        updateCurrentProjectTasks(project, tasks)
+      if (isMounted) {
+        updateCurrentProjectTasks(project, tasks);
       }
     });
 
     return () => {
+      isMounted = false;
       unsubscribe();
     };
-  }, []);
-  useEffect(() => {
-    update();
-  }, [project]);
+  }, [project, updateCurrentProjectTasks]);
 
-  function normalizeDependencyInternal(
-    project: ProjectSpec | undefined,
-    taskDispToId: Record<string,string>,
-    featureDispToIdByTask: Record<string, Record<string,string>>,
-    tasksIdx: Record<string, Task>,
-    featuresIdx: Record<string, Feature>,
-    dependency: string
-  ): string {
-    if (!project) return dependency
-    const parts = dependency.split(".")
-    if (parts.length === 1) {
-      const a = parts[0]
-      if (isUUID(a) && tasksIdx[a]) return a
-      const taskId = taskDispToId[a]
-      return taskId || dependency
-    } else if (parts.length > 1) {
-      const a = parts[0]
-      const b = parts.slice(1).join('.') // in case of extra dots, treat rest as feature token
-      let taskId = a
-      if (!isUUID(a)) {
-        taskId = taskDispToId[a] || a
-      }
-      let featureId = b
-      if (!isUUID(b)) {
-        const fmap = featureDispToIdByTask[taskId] || {}
-        featureId = fmap[b] || b
-      }
-      return `${taskId}.${featureId}`
-    }
-    return dependency
-  }
+  const normalizeDependency = useCallback((dependency: string): string => {
+    if (!project) return dependency;
+    return normalizeDependencyInternal(project, taskDisplayToId, featureDisplayToIdByTask, tasksById, featuresById, dependency)
+  }, [project, taskDisplayToId, featureDisplayToIdByTask, tasksById, featuresById]);
 
-  const normalizeDependency = (dependency: string): string => {
-    return normalizeDependencyInternal(project!, taskDisplayToId, featureDisplayToIdByTask, tasksById, featuresById, dependency)
-  }
-
-  const resolveDependency = (dependency: string) : ResolvedRef | InvalidRefError =>
+  const resolveDependency = useCallback((dependency: string) : ResolvedRef | InvalidRefError =>
   {
     if (!project) { return { id: dependency, code: 'EMPTY', message: "Task wasn't found" }}
 
@@ -150,11 +182,10 @@ export function useTasks() {
       return { kind: "feature", id: normalized, taskId: parts[0], featureId: parts[1], task, feature, display: `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[feature.id]}`} as ResolvedFeatureRef
     }
     return { kind: "task", id: normalized, taskId: parts[0], task, display: `${project.taskIdToDisplayIndex[task.id]}` } as ResolvedTaskRef
-  }
+  }, [project, taskDisplayToId, featureDisplayToIdByTask, tasksById, featuresById]);
 
-  const createTask = async (updates: TaskCreateInput) : Promise<ServiceResult> => {
+  const createTask = useCallback(async (updates: TaskCreateInput) : Promise<ServiceResult> => {
     if (project){
-      // normalize blockers if present
       const normalized: any = { ...updates }
       if (Array.isArray((updates as any).blockers)) {
         normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
@@ -162,8 +193,9 @@ export function useTasks() {
       return await tasksService.createTask(project.id, normalized)
     }
     return { ok: false }
-  }
-  const updateTask = async (taskId: string, updates: Partial<Omit<Task,"id">>) : Promise<ServiceResult> => {
+  }, [project, normalizeDependency]);
+
+  const updateTask = useCallback(async (taskId: string, updates: Partial<Omit<Task,"id">>) : Promise<ServiceResult> => {
     if (project){
       const normalized: any = { ...updates }
       if (Array.isArray((updates as any).blockers)) {
@@ -172,16 +204,16 @@ export function useTasks() {
       return await tasksService.updateTask(project.id, taskId, normalized)
     }
     return { ok: false }
-  }
+  }, [project, normalizeDependency]);
 
-  const deleteTask = async (taskId: string) : Promise<ServiceResult> => {
+  const deleteTask = useCallback(async (taskId: string) : Promise<ServiceResult> => {
     if (project){
       return await tasksService.deleteTask(project.id, taskId)
     }
     return { ok: false }
-  }
+  }, [project]);
 
-  const addFeature = async (taskId: string, updates: Partial<Omit<Feature,"id">>) : Promise<ServiceResult> => {
+  const addFeature = useCallback(async (taskId: string, updates: Partial<Omit<Feature,"id">>) : Promise<ServiceResult> => {
     if (project){
       const normalized: any = { ...updates }
       if (Array.isArray((updates as any).blockers)) {
@@ -190,8 +222,9 @@ export function useTasks() {
       return await tasksService.addFeature(project.id, taskId, normalized)
     }
     return { ok: false }
-  }
-  const updateFeature = async (taskId: string, featureId: string, updates: Partial<Omit<Feature,"id">>) : Promise<ServiceResult> => {
+  }, [project, normalizeDependency]);
+
+  const updateFeature = useCallback(async (taskId: string, featureId: string, updates: Partial<Omit<Feature,"id">>) : Promise<ServiceResult> => {
     if (project){
       const normalized: any = { ...updates }
       if (Array.isArray((updates as any).blockers)) {
@@ -200,39 +233,78 @@ export function useTasks() {
       return await tasksService.updateFeature(project.id, taskId, featureId, normalized)
     }
     return { ok: false }
-  }
+  }, [project, normalizeDependency]);
 
-  const deleteFeature = async (taskId: string, featureId: string) : Promise<ServiceResult> => {
+  const deleteFeature = useCallback(async (taskId: string, featureId: string) : Promise<ServiceResult> => {
     if (project){
       return await tasksService.deleteFeature(project.id, taskId, featureId)
     }
     return { ok: false }
-  }
+  }, [project]);
 
-  const reorderFeatures = async (taskId: string, fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
+  const reorderFeatures = useCallback(async (taskId: string, fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
     if (project){
       return await tasksService.reorderFeatures(project.id, taskId, { fromIndex, toIndex })
     }
     return { ok: false }
-  }
+  }, [project]);
   
-
-  const reorderTask = async (fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
+  const reorderTask = useCallback(async (fromIndex: number, toIndex: number) : Promise<ServiceResult> => {
     if (project){
       return await projectsService.reorderTask(project.id, fromIndex, toIndex)
     }
     return { ok: false }
-  }
+  }, [project]);
 
-  const getBlockers = (taskId: string, featureId?: string) : (ResolvedRef | InvalidRefError)[] => {
+  const getBlockers = useCallback((taskId: string, featureId?: string) : (ResolvedRef | InvalidRefError)[] => {
     if (featureId){
       return featuresById[featureId]?.blockers?.map(d => resolveDependency(d)) ?? []
     }
     return tasksById[taskId]?.blockers?.map(d => resolveDependency(d)) ?? []
-  }
-  const getBlockersOutbound = (id: string) : ResolvedRef[] => {
+  }, [featuresById, tasksById, resolveDependency]);
+  
+  const getBlockersOutbound = useCallback((id: string) : ResolvedRef[] => {
     return blockersOutboundById[id] ?? []
-  }
+  }, [blockersOutboundById]);
 
-  return { tasksById, createTask, updateTask, deleteTask, featuresById, addFeature, updateFeature, deleteFeature, reorderFeatures, reorderTask, getBlockersOutbound, getBlockers, resolveDependency, normalizeDependency };
+  const value = useMemo<TasksContextValue>(() => ({ 
+    tasksById, 
+    featuresById,
+    createTask, 
+    updateTask, 
+    deleteTask, 
+    addFeature, 
+    updateFeature, 
+    deleteFeature, 
+    reorderFeatures, 
+    reorderTask, 
+    getBlockersOutbound, 
+    getBlockers, 
+    resolveDependency, 
+    normalizeDependency 
+  }), [
+    tasksById, 
+    featuresById,
+    createTask, 
+    updateTask, 
+    deleteTask, 
+    addFeature, 
+    updateFeature, 
+    deleteFeature, 
+    reorderFeatures, 
+    reorderTask, 
+    getBlockersOutbound, 
+    getBlockers, 
+    resolveDependency, 
+    normalizeDependency
+  ]);
+
+  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
+}
+
+// Create the consumer hook
+export function useTasks(): TasksContextValue {
+  const ctx = useContext(TasksContext);
+  if (!ctx) throw new Error('useTasks must be used within TasksProvider');
+  return ctx;
 }

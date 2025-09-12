@@ -1,7 +1,7 @@
 import React from 'react'
 import FileDisplay from '../ui/FileDisplay'
-import { inferFileType } from '../../../renderer/hooks/useFiles'
 import WarningChip from './WarningChip'
+import { inferFileType } from '../../contexts/FilesContext';
 
 export default function ContextFileChip({ path, onRemove, warn }: { path: string; onRemove?: () => void; warn?: boolean }) {
   const file = React.useMemo(() => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useFiles, { DirNode } from '../hooks/useFiles';
+import { useFiles, DirNode } from '../contexts/FilesContext';
 import { FileMeta } from '../services/filesService';
 import { MarkdownEditor } from '../components/files/MarkdownEditor';
 import BasicFileViewer from '../components/files/BasicFileViewer';

@@ -1,6 +1,6 @@
 import React from 'react';
 import FileDisplay, { FileMeta } from './FileDisplay';
-import useFiles from '../../hooks/useFiles';
+import { useFiles } from '../../contexts/FilesContext';
 import DependencyBullet from '../tasks/DependencyBullet';
 
 // Renders text into rich content:

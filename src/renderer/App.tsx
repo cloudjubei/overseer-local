@@ -3,8 +3,8 @@ import SidebarView from './navigation/SidebarView';
 import { createRoot } from 'react-dom/client';
 import ModalHost from './navigation/ModalHost';
 import { ToastProvider } from './components/ui/Toast';
-import { NavigatorProvider, useNavigator } from './navigation/Navigator';
-import { ShortcutsBootstrap, ShortcutsProvider, useShortcuts } from './hooks/useShortcuts';
+import { NavigatorProvider } from './navigation/Navigator';
+import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts';
 import CommandMenu from './components/ui/CommandMenu';
 import ShortcutsHelp from './components/ui/ShortcutsHelp';
 import { ProjectsProvider } from './contexts/ProjectContext';
@@ -15,6 +15,8 @@ import { AppSettingsProvider } from './contexts/AppSettingsContext';
 import { NotificationClickHandler } from './hooks/useNotifications';
 import { LLMConfigProvider } from './contexts/LLMConfigContext';
 import { AgentsProvider } from './contexts/AgentsContext';
+import { FilesProvider } from './contexts/FilesContext';
+import { TasksProvider } from './contexts/TasksContext';
 
 function ServicesBootstrap() {
   const { init } = useLiveData();
@@ -31,20 +33,24 @@ function App() {
     <AppSettingsProvider>
       <ToastProvider>
         <ProjectsProvider>
-          <NavigatorProvider>
-            <ShortcutsProvider>
-              <LLMConfigProvider>
-                <AgentsProvider>
-                  <ServicesBootstrap />
-                  <ShortcutsBootstrap />
-                  <NotificationClickHandler />
-                  <CommandMenu />
-                  <ShortcutsHelp />
-                  <MainApp />
-                </AgentsProvider>
-              </LLMConfigProvider>
-            </ShortcutsProvider>
-          </NavigatorProvider>
+          <TasksProvider>
+            <FilesProvider>
+              <NavigatorProvider>
+                <ShortcutsProvider>
+                  <LLMConfigProvider>
+                    <AgentsProvider>
+                      <ServicesBootstrap />
+                      <ShortcutsBootstrap />
+                      <NotificationClickHandler />
+                      <CommandMenu />
+                      <ShortcutsHelp />
+                      <MainApp />
+                    </AgentsProvider>
+                  </LLMConfigProvider>
+                </ShortcutsProvider>
+              </NavigatorProvider>
+            </FilesProvider>
+          </TasksProvider>
         </ProjectsProvider>
       </ToastProvider>
     </AppSettingsProvider>

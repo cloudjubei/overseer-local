@@ -1,9 +1,7 @@
 import React, { useMemo, useRef } from 'react'
-import useFiles from '../../hooks/useFiles'
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
-import FileDisplay from './FileDisplay'
-import { inferFileType } from '../../hooks/useFiles'
+import { useFiles } from '../../contexts/FilesContext'
 
 export type FileMentionsTextareaProps = {
   id?: string

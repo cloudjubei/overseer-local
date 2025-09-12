@@ -1,7 +1,7 @@
 import React from 'react';
 import Tooltip from './Tooltip';
 import { goToFile } from '../../navigation/filesNavigation';
-import useFiles, { inferFileType } from '../../../renderer/hooks/useFiles';
+import { useFiles, inferFileType } from '../../contexts/FilesContext';
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown';
 

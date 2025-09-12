@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import type { Feature } from 'thefactory-tools';
-import { useTasks } from '../hooks/useTasks'
+import { useTasks } from '../contexts/TasksContext'
 import FeatureForm, { FeatureFormValues } from '../components/tasks/FeatureForm'
 
 export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: string; featureId: string; onRequestClose?: () => void }) {

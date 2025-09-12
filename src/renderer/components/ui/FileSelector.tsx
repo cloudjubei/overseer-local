@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from './Input';
 import FileDisplay from './FileDisplay';
-import useFiles, { inferFileType } from '../../../renderer/hooks/useFiles';
+import { useFiles, inferFileType } from '../../contexts/FilesContext';
 
 export type FileSelectorProps = {
   selected?: string[]; // relPaths
