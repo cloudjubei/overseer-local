@@ -8,7 +8,7 @@ import ContextFileChip from './ContextFileChip'
 import { Modal } from '../ui/Modal'
 import { IconDelete, IconPlus } from '../ui/Icons'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
-import { useTasks } from '../../hooks/useTasks'
+import { useTasks } from '../../contexts/TasksContext'
 
 export type FeatureFormValues = {
   title: string
@@ -128,25 +128,6 @@ export default function FeatureForm({
     }
     return refs
   }, [combinedTextForMentions])
-
-  // Keep blockers in sync with mentioned refs: add missing (normalized), remove unmentioned
-  // useEffect(() => {
-  //   setBlockers((prev) => {
-  //     const next = new Set(prev)
-  //     // add normalized
-  //     mentionedRefs.forEach((r) => next.add(normalizeDependency(r)))
-  //     // remove any that are not mentioned anymore (compare against raw or normalized)
-  //     for (const val of Array.from(next)) {
-  //       // if this canonicalized blocker is no longer present (either as raw or normalized form), drop it
-  //       const rawCandidate = val
-  //       // try to derive a display-like token is not trivial; keep simple: remove only if neither the canonical val nor any raw tokens referencing it exist
-  //       // We check if the raw mentions contain this exact canonical token; if not, keep it only if there exists a raw that normalizes to it
-  //       const stillMentioned = Array.from(mentionedRefs).some((r) => normalizeDependency(r) === val)
-  //       if (!stillMentioned) next.delete(val)
-  //     }
-  //     return Array.from(next)
-  //   })
-  // }, [mentionedRefs, normalizeDependency])
 
   // Keep context in sync with @ mentions: add on select via callback; also remove if no longer mentioned anywhere
   useEffect(() => {

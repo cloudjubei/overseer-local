@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { useActiveProject } from '../../../renderer/contexts/ProjectContext'
+import { useActiveProject } from '../../contexts/ProjectContext'
 import type { Feature, ProjectSpec, Task } from 'thefactory-tools';
-import { useTasks } from '../../../renderer/hooks/useTasks'
+import { useTasks } from '../../contexts/TasksContext'
 
 type DependencySelectorProps = {
   onConfirm?: (deps: string[]) => void

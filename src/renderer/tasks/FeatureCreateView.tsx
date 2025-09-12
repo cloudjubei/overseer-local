@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react'
 import FeatureForm, { FeatureFormValues } from '../components/tasks/FeatureForm'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useTasks } from '../hooks/useTasks';
+import { useTasks } from '../contexts/TasksContext';
 
 export default function FeatureCreateView({ taskId, onRequestClose }: { taskId: string; onRequestClose?: () => void }) {
   const { toast } = useToast()

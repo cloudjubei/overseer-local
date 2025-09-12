@@ -7,7 +7,7 @@ import { useActiveProject } from '../contexts/ProjectContext';
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
-import { useTasks } from '../hooks/useTasks'
+import { useTasks } from '../contexts/TasksContext'
 import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
 import { useAgents } from '../contexts/AgentsContext';
 import { Status, Task } from 'thefactory-tools';
@@ -407,7 +407,7 @@ export default function TasksListView() {
                             onChange={(next) => handleStatusChange(t.id, next)}
                           />
                           <div className="flex justify-center gap-1">
-                            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip={"Has rejection reason"} />}
+                            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip="Has rejection reason" />}
                             <span className="chips-sub__label" title="No dependencies">{done}/{total}</span>
                           </div>
                         </div>
@@ -456,7 +456,7 @@ export default function TasksListView() {
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )
-              })}
+              }) }
             </ul>
           )}
         </div>

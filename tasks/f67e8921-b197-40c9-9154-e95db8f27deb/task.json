@@ -961,7 +961,7 @@
     },
     {
       "id": "0f44a2c4-5988-4b86-94d9-38b2ade0a037",
-      "status": "-",
+      "status": "+",
       "title": "turn useTasks into a context",
       "description": "Make @src/renderer/hooks/useTasks.tsx follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx    and @src/renderer/contexts/ProjectContext.tsx    to turn it into a context initialised once in @src/renderer/App.tsx  .",
       "plan": "",
