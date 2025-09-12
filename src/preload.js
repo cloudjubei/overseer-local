@@ -127,7 +127,8 @@ const FACTORY_API = {
   listRunsActive: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_ACTIVE),
   listRunHistory: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_HISTORY),
   deleteRunHistory: (runId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_DELETE_HISTORY, { runId }),
-  
+  rateRun: (runId, rating) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_RATE, { runId, rating }),
+
   listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
   refreshPricing: (provider, url) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 };

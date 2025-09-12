@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
-import { createOrchestrator, createAgentRunStore, createPricingManager } from 'thefactory-tools'
+import { createOrchestrator, createAgentRunStore, createPricingManager, rateRun } from 'thefactory-tools'
 
 export class FactoryToolsManager
 {
@@ -40,6 +40,7 @@ export class FactoryToolsManager
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_ACTIVE] = async () => await this.listActiveRuns();
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_HISTORY] = async () => await this.getHistoryRuns();
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_DELETE_HISTORY] = async ({ runId }) => await this.deleteHistoryRun(runId);
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = async ({ runId, rating }) => await this.rateRun(runId, rating);
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = async () => await this.listPrices();
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = async ({ provider, url }) => await this.refreshPrices(provider, url);
 
@@ -113,8 +114,11 @@ export class FactoryToolsManager
   }
   async deleteHistoryRun(runId)
   {
-    console.log("deleteHistoryRun runId: ", runId)
     return await this.runStore.deleteRun(runId);
+  }
+  async rateRun(runId, rating)
+  {
+    return await this.runStore.rateRun(runId, rating);
   }
 
   async listPrices()

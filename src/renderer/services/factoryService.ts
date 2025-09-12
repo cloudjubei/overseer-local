@@ -1,3 +1,4 @@
+import { AgentRunRatingPatch } from "thefactory-tools/dist/agentRunStore";
 import { PricingState } from "./pricingService"
 import { AgentRunHistory, AgentType, GithubCredentials, LLMConfig, WebSearchApiKeys } from "thefactory-tools"
 
@@ -12,6 +13,7 @@ export type FactoryService = {
   listRunsActive: () => Promise<AgentRunHistory[]>
   listRunHistory: () => Promise<AgentRunHistory[]>
   deleteRunHistory: (runId: string) => Promise<AgentRunHistory | undefined>
+  rateRun: (runId: string, rating?: AgentRunRatingPatch) => Promise<AgentRunHistory | undefined>
 
   listPrices: () => Promise<PricingState>
   refreshPricing: (provider: string, url: string) => Promise<PricingState>

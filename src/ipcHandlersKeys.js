@@ -77,6 +77,7 @@ const IPC_HANDLER_KEYS = {
   FACTORY_RUNS_LIST_ACTIVE: "factory:runs:list-active",
   FACTORY_RUNS_LIST_HISTORY: "factory:runs:list-history",
   FACTORY_RUNS_DELETE_HISTORY: "factory:runs:delete-history",
+  FACTORY_RUNS_RATE: "factory:runs:rate",
 
   // Factory pricing
   FACTORY_PRICING_LIST: "factory:pricing:list",
