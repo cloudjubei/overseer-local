@@ -128,7 +128,7 @@
     }
   ],
   "startedAt": "2025-09-12T15:12:50.588Z",
-  "updatedAt": "2025-09-12T15:28:14.195Z",
+  "updatedAt": "2025-09-12T15:40:42.391Z",
   "id": "run_ygurpmoe_mfgz8598",
   "projectId": "main",
   "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
@@ -141,5 +141,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-12T15:14:47.371Z"
+  "finishedAt": "2025-09-12T15:14:47.371Z",
+  "rating": {
+    "score": 0,
+    "createdAt": "2025-09-12T15:40:42.391Z"
+  }
 }
