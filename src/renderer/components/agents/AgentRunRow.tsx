@@ -1,89 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import DependencyBullet from '../tasks/DependencyBullet';
-import StatusChip from './StatusChip';
-import ModelChip from './ModelChip';
-import { IconChevron, IconDelete, IconPlus } from '../ui/Icons';
-import ProjectChip from './ProjectChip';
-import CostChip from './CostChip';
-import TokensChip from './TokensChip';
-import { AgentRunHistory, AgentRunRatingPatch } from 'thefactory-tools';
-
-function formatTime(iso?: string) {
-  if (!iso) return '';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString();
-  } catch {
-    return iso ?? '';
-  }
-}
-
-function formatDate(iso?: string) {
-  if (!iso) return '';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString();
-  } catch {
-    return iso ?? '';
-  }
-}
-
-function formatDuration(ms?: number) {
-  if (ms == null || !isFinite(ms) || ms < 0) return '—';
-  if (ms < 1000) return `${Math.round(ms)}ms`;
-  const s = Math.floor(ms / 1000);
-  const hrs = Math.floor(s / 3600);
-  const mins = Math.floor((s % 3600) / 60);
-  const secs = s % 60;
-  const parts: string[] = [];
-  if (hrs) parts.push(`${hrs}h`);
-  if (mins) parts.push(`${mins}m`);
-  parts.push(`${secs}s`);
-  return parts.join(' ');
-}
-
-function useConversationCounts(run: AgentRunHistory) {
-  return useMemo(() => {
-    const total = run.conversations.length;
-    let completed = 0;
-    for (const c of run.conversations) {
-      if (c.state === 'completed') completed++;
-    }
-    return { total, completed };
-  }, [run.conversations]);
-}
-
-function useDurationTimers(run: AgentRunHistory) {
-  const [now, setNow] = useState<number>(Date.now());
-  useEffect(() => {
-    if (run.state !== 'running') return; 
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [run.state]);
-
-  const start = new Date(run.startedAt).getTime();
-  const end = run.finishedAt ? new Date(run.finishedAt).getTime() : now
-  const lastUpdate = new Date(run.updatedAt).getTime();
-
-  const startMs = Math.max(0, (end - start));
-  const thinkingMs = Math.max(0, now - lastUpdate);
-  return { duration: formatDuration(startMs), thinking: formatDuration(thinkingMs) }
-}
-export interface AgentRunRowProps {
-  run: AgentRunHistory;
-  onView?: (id: string) => void;
-  onCancel?: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onRate?: (id: string, rating?: AgentRunRatingPatch) => void;
-  showActions?: boolean;
-  showProject?: boolean;
-  showModel?: boolean;
-  // New display controls
-  showStatus?: boolean; // default true
-  showFeaturesInsteadOfTurn?: boolean; // default true
-  showThinking?: boolean; // default false
-  showRating?: boolean; // default false
-}
+import React, { useMemo } from 'react'
+import ModelChip from './ModelChip'
+import { AgentRunHistory } from 'thefactory-tools'
+import { IconCheckCircle, IconDelete, IconLoader, IconStopCircle, IconThumbDown, IconThumbUp, IconXCircle } from '../ui/Icons'
 
 export default function AgentRunRow({
   run,
@@ -91,114 +9,154 @@ export default function AgentRunRow({
   onCancel,
   onDelete,
   onRate,
-  showActions = true,
-  showProject = false,
-  showModel = true,
-  showStatus = true,
-  showFeaturesInsteadOfTurn = true,
-  showThinking = false,
-  showRating = false,
-}: AgentRunRowProps) {;
-  const { total, completed } = useConversationCounts(run);
-  const { duration, thinking } = useDurationTimers(run);
-  const prompt = useMemo(() => run.conversations.flatMap(c => c.messages).map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0), [run.conversations])
-  const completion = useMemo(() => run.conversations.flatMap(c => c.messages).map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0), [run.conversations])
-  const costUSD = useMemo(() => (run.price.inputPerMTokensUSD * prompt / 1_000_000) + (run.price.outputPerMTokensUSD * completion / 1_000_000), [run.price, prompt, completion])
+  showModel,
+  showStatus,
+  showFeaturesInsteadOfTurn,
+  showThinking,
+  showRating,
+}: {
+  run: AgentRunHistory
+  onView?: (id: string) => void
+  onCancel?: (id: string) => void
+  onDelete?: (id: string) => void
+  onRate?: (id: string, rating?: 0 | 1) => void
+  showModel?: boolean
+  showStatus?: boolean
+  showFeaturesInsteadOfTurn?: boolean
+  showThinking?: boolean
+  showRating?: boolean
+}) {
+  const isRunning = run.state === 'running'
+
+  const duration = useMemo(() => {
+    const start = run.startedAt ? new Date(run.startedAt).getTime() : undefined
+    const end = (run.completedAt || run.updatedAt) ? new Date(run.completedAt || run.updatedAt!).getTime() : Date.now()
+    if (!start) return ''
+    const ms = Math.max(0, end - start)
+    const s = Math.floor(ms / 1000)
+    const mm = Math.floor(s / 60).toString().padStart(2, '0')
+    const ss = (s % 60).toString().padStart(2, '0')
+    return `${mm}:${ss}`
+  }, [run.startedAt, run.updatedAt, run.completedAt])
+
+  const costStr = useMemo(() => run.costUsd != null ? `$${run.costUsd.toFixed(4)}` : '-', [run.costUsd])
+  const tokensStr = useMemo(() => {
+    const inT = run.tokens?.input ?? 0
+    const outT = run.tokens?.output ?? 0
+    const tot = inT + outT
+    return tot ? `${tot.toLocaleString()} (${inT.toLocaleString()} in, ${outT.toLocaleString()} out)` : '-'
+  }, [run.tokens])
+
+  const rating: 0 | 1 | undefined = (run as any).rating
+
+  const handleRate = (val?: 0 | 1) => {
+    if (!onRate) return
+    onRate(run.id, val)
+  }
 
   return (
-    <tr id={`run-${run.id ?? 'unknown'}`} className="border-t border-neutral-200 dark:border-neutral-800 group">
-      <td className="px-3 py-2 leading-tight">
-        <div>{formatDate(run.startedAt)}</div>
-        <div className="text-neutral-500">{formatTime(run.startedAt)}</div>
-      </td>
-      {showProject ? (
-        <td className="px-3 py-2"><ProjectChip projectId={run.projectId} /></td>
-      ) : null}
+    <tr id={`run-${run.id}`} className="border-t border-neutral-200 dark:border-neutral-800">
       <td className="px-3 py-2">
-        <DependencyBullet className={"max-w-[100px] overflow-clip"} dependency={run.taskId} notFoundDependencyDisplay={"?"} />
+        <div className="font-medium">#{run.id.slice(0,8)}</div>
+        <div className="text-xs text-neutral-500">{run.taskId ?? 'Task'}</div>
+      </td>
+      <td className="px-3 py-2">
+        <div className="truncate max-w-[260px]" title={run.description || ''}>{run.description || '-'}</div>
       </td>
       {showStatus ? (
         <td className="px-3 py-2">
-          <StatusChip state={run.state} />
+          {isRunning ? (
+            <span className="inline-flex items-center gap-1 text-amber-600"><IconLoader className="w-4 h-4 animate-spin" />Running</span>
+          ) : run.state === 'completed' ? (
+            <span className="inline-flex items-center gap-1 text-emerald-600"><IconCheckCircle className="w-4 h-4" />Completed</span>
+          ) : run.state === 'failed' ? (
+            <span className="inline-flex items-center gap-1 text-rose-600"><IconXCircle className="w-4 h-4" />Failed</span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-neutral-600">{run.state}</span>
+          )}
         </td>
       ) : null}
       {showModel ? (
-        <td className="px-3 py-2">
-          <ModelChip provider={run.llmConfig.provider} model={run.llmConfig.model} />
-        </td>
+        <td className="px-3 py-2"><ModelChip provider={run.llmConfig.provider} model={run.llmConfig.model} /></td>
       ) : null}
-      {showFeaturesInsteadOfTurn ? (
-        <td className="px-3 py-2">
-          <span className="text-xs">{completed}/{total}</span>
-        </td>
-      ) : null}
-      <td className="px-3 py-2"><CostChip provider={run.llmConfig.provider} model={run.llmConfig.model} price={run.price} costUSD={costUSD} /></td>
-      <td className="px-3 py-2"><TokensChip run={run} /></td>
-      {showThinking ? (
-        <td className="px-3 py-2">{thinking}</td>
-      ) : null}
-      <td className="px-3 py-2">{duration}</td>
-      {showRating && (
-        <td className="px-3 py-2">
-        <div className="flex items-center space-x-1">
-          {!run.rating ? (
-            <>
-              <button
-                onClick={() => onRate?.(run.id, { score: 1 })}
-                className="text-neutral-400 hover:text-green-500"
-              >
-                <IconPlus />
-              {/* <IconThumbsUp /> */}
-              </button>
-              <button
-                onClick={() => onRate?.(run.id, { score: 0 })}
-                className="text-neutral-400 hover:text-red-500"
-              >
-                <IconDelete />
-              {/* <IconThumbsDown /> */}
-              </button>
-            </>
-          ) : run.rating.score === 1 ? (
-            <button
-              onClick={() => onRate?.(run.id, undefined)}
-              className="text-green-500"
-            >
-              <IconPlus />
-              {/* <IconThumbsUp size={16} fill="currentColor" /> */}
-            </button>
+      <td className="px-3 py-2">
+        <div className="text-xs text-neutral-600 dark:text-neutral-400">
+          {showFeaturesInsteadOfTurn ? (
+            run.features?.length ? `${run.features.length} features` : '0 features'
           ) : (
-            <button
-              onClick={() => onRate?.(run.id, undefined)}
-              className="text-red-500"
-            >
-              <IconDelete />
-              {/* <IconThumbsDown size={16} fill="currentColor" /> */}
-            </button>
+            run.turns != null ? `${run.turns} turns` : '-'
           )}
         </div>
       </td>
-      )}
-      {showActions ? (
-        <td className="px-3 py-2 text-right">
-          <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-            {onView ? (
-              <button className="btn-secondary btn-icon" aria-label="View" onClick={() => run.id && onView(run.id!)}>
-                <IconChevron />
-              </button>
-            ) : null}
-            {run.state === 'running' && onCancel && run.id ? (
-              <button className="btn-secondary btn-icon" aria-label="Cancel" onClick={() => onCancel(run.id!)}>
-                <IconDelete />
-              </button>
-            ) : null}
-            {run.state !== 'running' && onDelete && run.id ? (
-              <button className="btn-secondary btn-icon" aria-label="Delete" onClick={() => onDelete(run.id!)}>
-                <IconDelete />
-              </button>
-            ) : null}
-          </div>
+      <td className="px-3 py-2">{costStr}</td>
+      <td className="px-3 py-2">{tokensStr}</td>
+      {showThinking ? (
+        <td className="px-3 py-2">
+          <div className="text-xs text-neutral-600 dark:text-neutral-400">{run.thinkingTimeSec ? `${Math.round(run.thinkingTimeSec)}s` : '-'}</div>
         </td>
       ) : null}
+      <td className="px-3 py-2">{duration}</td>
+
+      {showRating ? (
+        <td className="px-3 py-2 w-16">
+          {rating === undefined ? (
+            <div className="flex flex-col items-center gap-1">
+              <button
+                className="p-1 rounded hover:text-emerald-600 group"
+                title="Thumbs up"
+                onClick={() => handleRate(1)}
+              >
+                <IconThumbUp className="w-5 h-5 transition-colors" />
+              </button>
+              <button
+                className="p-1 rounded hover:text-rose-600 group"
+                title="Thumbs down"
+                onClick={() => handleRate(0)}
+              >
+                <IconThumbDown className="w-5 h-5 transition-colors" />
+              </button>
+            </div>
+          ) : rating === 1 ? (
+            <div className="flex items-center justify-center">
+              <button
+                className="p-1 rounded text-emerald-600 hover:opacity-80"
+                title="Remove rating"
+                onClick={() => handleRate(undefined)}
+              >
+                <IconThumbUp className="w-5 h-5" filled />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center">
+              <button
+                className="p-1 rounded text-rose-600 hover:opacity-80"
+                title="Remove rating"
+                onClick={() => handleRate(undefined)}
+              >
+                <IconThumbDown className="w-5 h-5" filled />
+              </button>
+            </div>
+          )}
+        </td>
+      ) : null}
+
+      <td className="px-3 py-2 text-right">
+        <div className="inline-flex items-center gap-2">
+          <button className="btn-secondary btn-xs" onClick={() => onView?.(run.id)}>View</button>
+          {isRunning ? (
+            <button className="btn-danger btn-xs inline-flex items-center gap-1" onClick={() => onCancel?.(run.id)}>
+              <IconStopCircle className="w-4 h-4" />
+              Cancel
+            </button>
+          ) : null}
+          {!isRunning && onDelete ? (
+            <button className="btn-danger btn-xs inline-flex items-center gap-1" onClick={() => onDelete?.(run.id)}>
+              <IconDelete className="w-4 h-4" />
+              Delete
+            </button>
+          ) : null}
+        </div>
+      </td>
     </tr>
-  );
+  )
 }
