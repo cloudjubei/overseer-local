@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import IPC_HANDLER_KEYS from "../ipcHandlersKeys";
-import { createOrchestrator, createAgentRunStore, createPricingManager, rateRun } from 'thefactory-tools'
+import { createOrchestrator, createAgentRunStore, createPricingManager } from 'thefactory-tools'
 
 export class FactoryToolsManager
 {
