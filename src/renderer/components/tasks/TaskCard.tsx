@@ -4,7 +4,7 @@ import Tooltip from '../ui/Tooltip'
 import StatusControl from './StatusControl'
 import RunAgentButton from './RunAgentButton'
 import AgentRunBullet from '../agents/AgentRunBullet'
-import { useAgents } from '../../hooks/useAgents'
+import { useAgents } from '../../contexts/AgentsContext';
 import { useNavigator } from '../../navigation/Navigator'
 
 export default function TaskCard({ project, task, onClick, draggable = false, onDragStart, showStatus = true, onStatusChange }: {
@@ -16,9 +16,9 @@ export default function TaskCard({ project, task, onClick, draggable = false, on
   showStatus?: boolean,
   onStatusChange?: (status: Status) => void | Promise<void>
 }) {
-  const { runsActive, startTaskAgent } = useAgents()
+  const { runsHistory, startTaskAgent } = useAgents()
   const { navigateAgentRun } = useNavigator()
-  const taskRun = runsActive.find(r => r.taskId === task.id)
+  const taskRun = runsHistory.find(r => r.state === 'running' && r.taskId === task.id)
 
   return (
     <div

@@ -13,7 +13,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { MAIN_PROJECT, useProjectContext } from '../contexts/ProjectContext';
 import type { NavigationView } from '../types';
 import { useAppSettings } from '../contexts/AppSettingsContext';
-import { useAgents } from '../hooks/useAgents';
+import { useAgents } from '../contexts/AgentsContext';
 import NotificationBadge from '../components/tasks/NotificationBadge';
 import { ProjectSpec } from 'thefactory-tools';
 

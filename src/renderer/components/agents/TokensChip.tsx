@@ -4,8 +4,8 @@ import { IconArrowLeftMini, IconArrowRightMini } from '../ui/Icons';
 import { AgentRunHistory } from 'thefactory-tools';
 
 export default function TokensChip({ run }: { run: AgentRunHistory }) {
-  const prompt = run.conversations.map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0)
-  const completion = run.conversations.map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0)
+  const prompt = run.conversations.flatMap(c => c.messages).map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0)
+  const completion = run.conversations.flatMap(c => c.messages).map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0)
 
   const { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg } = useMemo(() => {
     const messages = run.conversations.flatMap(c => c.messages)

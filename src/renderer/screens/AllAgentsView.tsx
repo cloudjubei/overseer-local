@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAgents } from '../hooks/useAgents';
+import { useAgents } from '../contexts/AgentsContext';
 import AgentRunRow from '../components/agents/AgentRunRow';
 
 function formatUSD(n?: number) {
@@ -8,20 +8,20 @@ function formatUSD(n?: number) {
 }
 
 export default function AllAgentsView() {
-  const { runsHistory, runsActive } = useAgents();
+  const { runsHistory } = useAgents();
 
   const agentsSummary = useMemo(() => {
     const totalRuns = runsHistory.length;
-    const active = runsActive.length;
+    const active = runsHistory.filter(r => r.state === 'running').length;
     const totals = runsHistory.reduce((acc, r) => {
-      acc.cost += r.conversations.map(c => c.costUSD ?? 0).reduce((acc, c) => acc + c, 0)
-      acc.prompt += r.conversations.map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0)
-      acc.completion += r.conversations.map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0)
+      acc.prompt += r.conversations.flatMap(c => c.messages).map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0)
+      acc.completion += r.conversations.flatMap(c => c.messages).map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0)
       return acc;
-    }, { cost: 0, prompt: 0, completion: 0 });
+    }, { prompt: 0, completion: 0 });
+    const cost = 0
 
-    return { totalRuns, active, totals };
-  }, [runsHistory, runsActive]);
+    return { totalRuns, active, totals, cost };
+  }, [runsHistory]);
 
   const recentRuns = useMemo(() => runsHistory.slice().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 200), [runsHistory]);
 
@@ -45,11 +45,11 @@ export default function AllAgentsView() {
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Total Cost</div>
-            <div className="text-lg font-semibold">{formatUSD(agentsSummary.totals.cost)}</div>
+            <div className="text-lg font-semibold">{formatUSD(agentsSummary.cost)}</div>
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Avg Cost/Run</div>
-            <div className="text-lg font-semibold">{formatUSD(agentsSummary.totalRuns ? agentsSummary.totals.cost / agentsSummary.totalRuns : 0)}</div>
+            <div className="text-lg font-semibold">{formatUSD(agentsSummary.totalRuns ? agentsSummary.cost / agentsSummary.totalRuns : 0)}</div>
           </div>
         </div>
 

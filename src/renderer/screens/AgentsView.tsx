@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useAgents } from '../hooks/useAgents';
+import { useAgents } from '../contexts/AgentsContext';
 import ChatConversation from '../components/agents/ChatConversation';
 import AgentRunRow from '../components/agents/AgentRunRow';
 import ModelChip from '../components/agents/ModelChip';

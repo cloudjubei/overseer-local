@@ -5,7 +5,7 @@ import StatusControl from '../components/tasks/StatusControl'
 import { STATUS_LABELS } from '../services/tasksService';
 import { useActiveProject } from '../contexts/ProjectContext';
 import { useTasks } from '../hooks/useTasks'
-import { useAgents } from '../hooks/useAgents'
+import { useAgents } from '../contexts/AgentsContext';
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { Feature, Status, Task } from 'thefactory-tools';
 import { IconBack, IconChevron, IconEdit, IconPlus } from '../components/ui/Icons'

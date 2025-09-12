@@ -9,7 +9,7 @@ import StatusControl, { StatusPicker, statusKey } from '../components/tasks/Stat
 import { STATUS_LABELS } from '../services/tasksService';
 import { useTasks } from '../hooks/useTasks'
 import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
-import { useAgents } from '../hooks/useAgents'
+import { useAgents } from '../contexts/AgentsContext';
 import { Status, Task } from 'thefactory-tools';
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
