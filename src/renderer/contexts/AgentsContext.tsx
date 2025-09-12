@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { AgentRunHistory, AgentType } from 'thefactory-tools'
+import { AgentRunHistory, AgentType, AgentRunRatingPatch } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext';
 import { factoryService } from '../services/factoryService'
@@ -12,6 +12,7 @@ export type AgentsContextValue = {
   startFeatureAgent: (agentType: AgentType, projectId: string, taskId: string, featureId: string) => Promise<void>
   cancelRun: (runId: string) => Promise<void>
   deleteRunHistory: (runId: string) => Promise<void>
+  rateRun: (runId: string, rating?: AgentRunRatingPatch) => Promise<void>
 }
 
 const AgentsContext = createContext<AgentsContextValue | null>(null)
@@ -90,6 +91,13 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     setRunsHistory(prev => [...prev.filter(p => p.id !== runId)])
   }, [])
 
+  const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
+    const updatedRun = await factoryService.rateRun(runId, rating)
+    if (updatedRun) {
+      setRunsHistory(prev => prev.map(r => r.id === runId ? updatedRun : r))
+    }
+  }, [])
+
   const fireCompletionNotification = async (run: AgentRunHistory) => {
     try {
       const baseTitle = 'Agent finished'
@@ -116,7 +124,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     startFeatureAgent,
     cancelRun,
     deleteRunHistory,
-  }), [runsHistory, startTaskAgent, startFeatureAgent, cancelRun, deleteRunHistory])
+    rateRun,
+  }), [runsHistory, startTaskAgent, startFeatureAgent, cancelRun, deleteRunHistory, rateRun])
 
   return (
     <AgentsContext.Provider value={value}>

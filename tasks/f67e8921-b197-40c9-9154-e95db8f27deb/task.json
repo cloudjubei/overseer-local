@@ -976,7 +976,7 @@
     },
     {
       "id": "f8dbb257-f348-48ec-8af2-bbb92fc6a1e0",
-      "status": "-",
+      "status": "+",
       "title": "Allow rating of runs",
       "description": "In @src/renderer/screens/AgentsView.tsx there needs to be a new column 'rating' left to the actions buttons.\nIf an 'AgentRunHistory' doesn't have a rating, it shows two buttons (vertically stacked) - a thumbs up and a thumbs down - that are hollow icons. On hover, they are filled with color (green for up and red for down). When clicking, it needs to call via @src/renderer/contexts/AgentsContext.tsx the 'rateRun' functions from @src/renderer/services/factoryService.ts . Once a run has a rating (1 for up, 0 for down), it should only show the filled in button displaying the rating. If a user clicks a rating that was done - it will remove the rating.",
       "plan": "",
