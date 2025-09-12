@@ -1,29 +1,20 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import Tooltip from '../ui/Tooltip';
-import type { AgentRun } from '../../services/agentsService';
 import { IconArrowLeftMini, IconArrowRightMini } from '../ui/Icons';
+import { AgentRunHistory } from 'thefactory-tools';
 
-export default function TokensChip({ run }: { run: AgentRun }) {
-  const prompt = run.promptTokens ?? 0; // tokens sent to LLM
-  const completion = run.completionTokens ?? 0; // tokens received from LLM
-
-  const breakdown = useMemo(() => {
-    const items = (run.messages || []).map((m, i) => {
-      const role = m.role || 'message';
-      const preview = (m.content || '').replace(/\s+/g, ' ').slice(0, 60);
-      return { i: i + 1, role, preview };
-    });
-    return items;
-  }, [run.messages]);
+export default function TokensChip({ run }: { run: AgentRunHistory }) {
+  const prompt = run.conversations.map(c => c.promptTokens ?? 0).reduce((acc, c) => acc + c, 0)
+  const completion = run.conversations.map(c => c.completionTokens ?? 0).reduce((acc, c) => acc + c, 0)
 
   const { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg } = useMemo(() => {
-    const msgs = run.messages || [];
-    const userCount = msgs.filter(m => (m.role || '').toLowerCase() === 'user').length;
-    const assistantCount = msgs.filter(m => (m.role || '').toLowerCase() === 'assistant').length;
+    const messages = run.conversations.flatMap(c => c.messages)
+    const userCount = messages.filter(m => (m.role || '').toLowerCase() === 'user').length;
+    const assistantCount = messages.filter(m => (m.role || '').toLowerCase() === 'assistant').length;
     const avgPromptPerMsg = userCount > 0 ? Math.round(prompt / userCount) : undefined;
     const avgCompletionPerMsg = assistantCount > 0 ? Math.round(completion / assistantCount) : undefined;
     return { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg };
-  }, [run.messages, prompt, completion]);
+  }, [run.conversations, prompt, completion]);
 
   const content = (
     <div className="text-xs max-w-[360px]">
@@ -36,18 +27,6 @@ export default function TokensChip({ run }: { run: AgentRun }) {
           {' '}
           Assistant ({assistantCount || 0}): {avgCompletionPerMsg != null ? `${avgCompletionPerMsg} tokens/msg` : '—'}
         </div>
-      </div>
-      <div className="font-semibold mb-1">Messages</div>
-      <div className="space-y-0.5 max-h-[240px] overflow-auto pr-1">
-        {breakdown.length === 0 ? (
-          <div className="text-neutral-400">No messages</div>
-        ) : (
-          breakdown.map((b, idx) => (
-            <div key={idx} className="flex items-center justify-between gap-3">
-              <div className="truncate"><span className="text-neutral-400">#{b.i}</span> {b.role}{b.preview ? ': ' : ''}<span className="text-neutral-400">{b.preview}</span></div>
-            </div>
-          ))
-        )}
       </div>
     </div>
   );
