@@ -76,6 +76,10 @@ typings/
 # Serverless directories
 .serverless/
 
+# IDE
+.idea/
+.vscode/
+
 # FuseBox cache
 .fusebox/
 
