@@ -9,3 +9,5 @@ coverage
 .cache
 .turbo
 .vite
+types
+docs
