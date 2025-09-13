@@ -1025,7 +1025,7 @@
     },
     {
       "id": "af06b354-ef07-4764-8be3-2f731e9aad33",
-      "status": "-",
+      "status": "+",
       "title": "AllAgents statistics rework",
       "description": "In @src/renderer/screens/AllAgentsView.tsx there needs to be a few improvements:\n1) the overall section should be the top row of the \"Projects statistics\" section. It should have a blueish background to make it stand out from the project ones.\n2) Move the \"Projects statistics\" above \"Model statistics\"\n3) Make the \"Model statistics\" match \"Projects statistics in terms of columns as much as possible\n4) Add a section \"Agents statistics\" that similarly to per project stats will have the same breakdown but per agentType.\n5) Replace the active runs item from the top with a total time spent by agents.",
       "plan": "",
