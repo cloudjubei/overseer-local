@@ -939,7 +939,7 @@
     },
     {
       "id": "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb",
-      "status": "-",
+      "status": "+",
       "title": "Apply formatter on git commit",
       "description": "Whenever a commit happens - it needs to have a formatter be applied before the code ends up being pushed or seen by other users.",
       "plan": "",
@@ -959,7 +959,7 @@
     },
     {
       "id": "34c83d4f-078d-45c3-b85a-e701f1d82f3a",
-      "status": "-",
+      "status": "+",
       "title": "AllAgentsView rework",
       "description": "In @src/renderer/screens/AllAgentsView.tsx we need to rework the following:\n1) remove the Overall highlights\n2) the projects statistics:\n- the Overall row (the 1st one) needs to have a light blue background.\n3) all sections:\n - Fastest (per feature), Slowest (per feature) columns, should have the text on 2 lines. The second line saying \"(pre feature)\"\n- The values for columns showing a model chip + cost should have them vertically stacked, so the model chip first and below it the cost.\n4) at the top, remove the avg cost per run - add instead a total tasks/features worked on",
       "plan": "",

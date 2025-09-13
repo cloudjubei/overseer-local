@@ -10,10 +10,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-    "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "format:check": "prettier --check ."
   },
   "keywords": [],
   "author": {
@@ -70,7 +68,6 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.2.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "postcss": "^8.4.31",
     "prettier": "^3.6.2",

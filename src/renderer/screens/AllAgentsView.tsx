@@ -86,6 +86,7 @@ export default function AllAgentsView() {
     const totalCompletion = runCalcs.reduce((a, b) => a + (b.completion || 0), 0)
     const totalCost = runCalcs.reduce((a, b) => a + (b.costUSD || 0), 0)
     const totalDurationMs = runCalcs.reduce((a, b) => a + (b.durationMs || 0), 0)
+    const totalFeaturesSum = runCalcs.reduce((a, b) => a + (b.totalFeatures || 0), 0)
 
     // Group by model
     const byModel = new Map<ModelKey, ReturnType<typeof makeModelAgg>>()
@@ -343,6 +344,7 @@ export default function AllAgentsView() {
         totals: { prompt: totalPrompt, completion: totalCompletion },
         cost: totalCost,
         totalDurationMs,
+        featuresTotal: totalFeaturesSum,
       },
       modelsList,
       extremes: {
@@ -385,10 +387,8 @@ export default function AllAgentsView() {
             <div className="text-lg font-semibold">{formatUSD(stats.kpis.cost)}</div>
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-            <div className="text-xs text-neutral-500">Avg Cost/Run</div>
-            <div className="text-lg font-semibold">
-              {formatUSD(stats.kpis.totalRuns ? stats.kpis.cost / stats.kpis.totalRuns : 0)}
-            </div>
+            <div className="text-xs text-neutral-500">Total Features Worked On</div>
+            <div className="text-lg font-semibold">{formatInteger(stats.kpis.featuresTotal)}</div>
           </div>
         </div>
 
@@ -408,8 +408,18 @@ export default function AllAgentsView() {
                     <th className="text-left px-3 py-2">Avg Cost/Run</th>
                     <th className="text-left px-3 py-2">Cheapest Model</th>
                     <th className="text-left px-3 py-2">Most Expensive</th>
-                    <th className="text-left px-3 py-2">Fastest (per-feature)</th>
-                    <th className="text-left px-3 py-2">Slowest (per-feature)</th>
+                    <th className="text-left px-3 py-2">
+                      <div className="leading-tight">
+                        <div>Fastest</div>
+                        <div className="text-[10px] text-neutral-500">(per feature)</div>
+                      </div>
+                    </th>
+                    <th className="text-left px-3 py-2">
+                      <div className="leading-tight">
+                        <div>Slowest</div>
+                        <div className="text-[10px] text-neutral-500">(per feature)</div>
+                      </div>
+                    </th>
                     <th className="text-left px-3 py-2">Highest Rated</th>
                     <th className="text-left px-3 py-2">Lowest Rated</th>
                   </tr>
@@ -427,86 +437,86 @@ export default function AllAgentsView() {
                     </td>
                     <td className="px-3 py-2">
                       {stats.extremes.cheapestModel ? (
-                        <span className="inline-flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={stats.extremes.cheapestModel.provider}
                             model={stats.extremes.cheapestModel.model}
-                          />{' '}
-                          <span className="text-neutral-500">
+                          />
+                          <span className="text-neutral-500 text-xs">
                             {formatUSD(stats.extremes.cheapestModel.avgCost)}
                           </span>
-                        </span>
+                        </div>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="px-3 py-2">
                       {stats.extremes.mostExpensiveModel ? (
-                        <span className="inline-flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={stats.extremes.mostExpensiveModel.provider}
                             model={stats.extremes.mostExpensiveModel.model}
-                          />{' '}
-                          <span className="text-neutral-500">
+                          />
+                          <span className="text-neutral-500 text-xs">
                             {formatUSD(stats.extremes.mostExpensiveModel.avgCost)}
                           </span>
-                        </span>
+                        </div>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="px-3 py-2">
                       {stats.extremes.fastestModel ? (
-                        <span className="inline-flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={stats.extremes.fastestModel.provider}
                             model={stats.extremes.fastestModel.model}
-                          />{' '}
-                          <span className="text-neutral-500">
+                          />
+                          <span className="text-neutral-500 text-xs">
                             {formatDuration(stats.extremes.fastestModel.avgPerFeatureDurationMs)}
                           </span>
-                        </span>
+                        </div>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="px-3 py-2">
                       {stats.extremes.slowestModel ? (
-                        <span className="inline-flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={stats.extremes.slowestModel.provider}
                             model={stats.extremes.slowestModel.model}
-                          />{' '}
-                          <span className="text-neutral-500">
+                          />
+                          <span className="text-neutral-500 text-xs">
                             {formatDuration(stats.extremes.slowestModel.avgPerFeatureDurationMs)}
                           </span>
-                        </span>
+                        </div>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="px-3 py-2">
                       {stats.extremes.highestRatedModel ? (
-                        <span className="inline-flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={stats.extremes.highestRatedModel.provider}
                             model={stats.extremes.highestRatedModel.model}
-                          />{' '}
-                          <span className="text-neutral-500">{`${(stats.extremes.highestRatedModel.avgRating! * 100).toFixed(0)}%`}</span>
-                        </span>
+                          />
+                          <span className="text-neutral-500 text-xs">{`${(stats.extremes.highestRatedModel.avgRating! * 100).toFixed(0)}%`}</span>
+                        </div>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="px-3 py-2">
                       {stats.extremes.lowestRatedModel ? (
-                        <span className="inline-flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={stats.extremes.lowestRatedModel.provider}
                             model={stats.extremes.lowestRatedModel.model}
-                          />{' '}
-                          <span className="text-neutral-500">{`${(stats.extremes.lowestRatedModel.avgRating! * 100).toFixed(0)}%`}</span>
-                        </span>
+                          />
+                          <span className="text-neutral-500 text-xs">{`${(stats.extremes.lowestRatedModel.avgRating! * 100).toFixed(0)}%`}</span>
+                        </div>
                       ) : (
                         '—'
                       )}
@@ -526,77 +536,77 @@ export default function AllAgentsView() {
                       <td className="px-3 py-2">{formatUSD(p.avgCost)}</td>
                       <td className="px-3 py-2">
                         {p.cheapest ? (
-                          <span className="inline-flex items-center gap-2">
-                            <ModelChip provider={p.cheapest.provider} model={p.cheapest.model} />{' '}
-                            <span className="text-neutral-500">
+                          <div className="flex flex-col items-start gap-1">
+                            <ModelChip provider={p.cheapest.provider} model={p.cheapest.model} />
+                            <span className="text-neutral-500 text-xs">
                               {formatUSD(p.cheapest.avgCost)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {p.mostExpensive ? (
-                          <span className="inline-flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-1">
                             <ModelChip
                               provider={p.mostExpensive.provider}
                               model={p.mostExpensive.model}
-                            />{' '}
-                            <span className="text-neutral-500">
+                            />
+                            <span className="text-neutral-500 text-xs">
                               {formatUSD(p.mostExpensive.avgCost)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {p.fastest ? (
-                          <span className="inline-flex items-center gap-2">
-                            <ModelChip provider={p.fastest.provider} model={p.fastest.model} />{' '}
-                            <span className="text-neutral-500">
+                          <div className="flex flex-col items-start gap-1">
+                            <ModelChip provider={p.fastest.provider} model={p.fastest.model} />
+                            <span className="text-neutral-500 text-xs">
                               {formatDuration(p.fastest.avgPerFeatureDurationMs)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {p.slowest ? (
-                          <span className="inline-flex items-center gap-2">
-                            <ModelChip provider={p.slowest.provider} model={p.slowest.model} />{' '}
-                            <span className="text-neutral-500">
+                          <div className="flex flex-col items-start gap-1">
+                            <ModelChip provider={p.slowest.provider} model={p.slowest.model} />
+                            <span className="text-neutral-500 text-xs">
                               {formatDuration(p.slowest.avgPerFeatureDurationMs)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {p.highestRated ? (
-                          <span className="inline-flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-1">
                             <ModelChip
                               provider={p.highestRated.provider}
                               model={p.highestRated.model}
-                            />{' '}
-                            <span className="text-neutral-500">{`${(p.highestRated.avgRating! * 100).toFixed(0)}%`}</span>
-                          </span>
+                            />
+                            <span className="text-neutral-500 text-xs">{`${(p.highestRated.avgRating! * 100).toFixed(0)}%`}</span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {p.lowestRated ? (
-                          <span className="inline-flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-1">
                             <ModelChip
                               provider={p.lowestRated.provider}
                               model={p.lowestRated.model}
-                            />{' '}
-                            <span className="text-neutral-500">{`${(p.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
-                          </span>
+                            />
+                            <span className="text-neutral-500 text-xs">{`${(p.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
+                          </div>
                         ) : (
                           '—'
                         )}
@@ -625,8 +635,18 @@ export default function AllAgentsView() {
                     <th className="text-left px-3 py-2">Avg Cost/Run</th>
                     <th className="text-left px-3 py-2">Cheapest Model</th>
                     <th className="text-left px-3 py-2">Most Expensive</th>
-                    <th className="text-left px-3 py-2">Fastest (per-feature)</th>
-                    <th className="text-left px-3 py-2">Slowest (per-feature)</th>
+                    <th className="text-left px-3 py-2">
+                      <div className="leading-tight">
+                        <div>Fastest</div>
+                        <div className="text-[10px] text-neutral-500">(per feature)</div>
+                      </div>
+                    </th>
+                    <th className="text-left px-3 py-2">
+                      <div className="leading-tight">
+                        <div>Slowest</div>
+                        <div className="text-[10px] text-neutral-500">(per feature)</div>
+                      </div>
+                    </th>
                     <th className="text-left px-3 py-2">Highest Rated</th>
                     <th className="text-left px-3 py-2">Lowest Rated</th>
                   </tr>
@@ -643,77 +663,77 @@ export default function AllAgentsView() {
                       <td className="px-3 py-2">{formatUSD(a.avgCost)}</td>
                       <td className="px-3 py-2">
                         {a.cheapest ? (
-                          <span className="inline-flex items-center gap-2">
-                            <ModelChip provider={a.cheapest.provider} model={a.cheapest.model} />{' '}
-                            <span className="text-neutral-500">
+                          <div className="flex flex-col items-start gap-1">
+                            <ModelChip provider={a.cheapest.provider} model={a.cheapest.model} />
+                            <span className="text-neutral-500 text-xs">
                               {formatUSD(a.cheapest.avgCost)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {a.mostExpensive ? (
-                          <span className="inline-flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-1">
                             <ModelChip
                               provider={a.mostExpensive.provider}
                               model={a.mostExpensive.model}
-                            />{' '}
-                            <span className="text-neutral-500">
+                            />
+                            <span className="text-neutral-500 text-xs">
                               {formatUSD(a.mostExpensive.avgCost)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {a.fastest ? (
-                          <span className="inline-flex items-center gap-2">
-                            <ModelChip provider={a.fastest.provider} model={a.fastest.model} />{' '}
-                            <span className="text-neutral-500">
+                          <div className="flex flex-col items-start gap-1">
+                            <ModelChip provider={a.fastest.provider} model={a.fastest.model} />
+                            <span className="text-neutral-500 text-xs">
                               {formatDuration(a.fastest.avgPerFeatureDurationMs)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {a.slowest ? (
-                          <span className="inline-flex items-center gap-2">
-                            <ModelChip provider={a.slowest.provider} model={a.slowest.model} />{' '}
-                            <span className="text-neutral-500">
+                          <div className="flex flex-col items-start gap-1">
+                            <ModelChip provider={a.slowest.provider} model={a.slowest.model} />
+                            <span className="text-neutral-500 text-xs">
                               {formatDuration(a.slowest.avgPerFeatureDurationMs)}
                             </span>
-                          </span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {a.highestRated ? (
-                          <span className="inline-flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-1">
                             <ModelChip
                               provider={a.highestRated.provider}
                               model={a.highestRated.model}
-                            />{' '}
-                            <span className="text-neutral-500">{`${(a.highestRated.avgRating! * 100).toFixed(0)}%`}</span>
-                          </span>
+                            />
+                            <span className="text-neutral-500 text-xs">{`${(a.highestRated.avgRating! * 100).toFixed(0)}%`}</span>
+                          </div>
                         ) : (
                           '—'
                         )}
                       </td>
                       <td className="px-3 py-2">
                         {a.lowestRated ? (
-                          <span className="inline-flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-1">
                             <ModelChip
                               provider={a.lowestRated.provider}
                               model={a.lowestRated.model}
-                            />{' '}
-                            <span className="text-neutral-500">{`${(a.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
-                          </span>
+                            />
+                            <span className="text-neutral-500 text-xs">{`${(a.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
+                          </div>
                         ) : (
                           '—'
                         )}
@@ -724,134 +744,6 @@ export default function AllAgentsView() {
               </table>
             </div>
           )}
-        </div>
-
-        {/* Overall extremes */}
-        <div>
-          <h3 className="text-base font-semibold mb-2">Overall Model Highlights</h3>
-          <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
-            <table className="min-w-full text-sm">
-              <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
-                <tr>
-                  <th className="text-left px-3 py-2">Category</th>
-                  <th className="text-left px-3 py-2">Model</th>
-                  <th className="text-left px-3 py-2">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="px-3 py-2">Cheapest (avg cost)</td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.cheapestModel ? (
-                      <ModelChip
-                        provider={stats.extremes.cheapestModel.provider}
-                        model={stats.extremes.cheapestModel.model}
-                      />
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.cheapestModel
-                      ? formatUSD(stats.extremes.cheapestModel.avgCost)
-                      : '—'}
-                  </td>
-                </tr>
-                <tr className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="px-3 py-2">Most Expensive (avg cost)</td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.mostExpensiveModel ? (
-                      <ModelChip
-                        provider={stats.extremes.mostExpensiveModel.provider}
-                        model={stats.extremes.mostExpensiveModel.model}
-                      />
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.mostExpensiveModel
-                      ? formatUSD(stats.extremes.mostExpensiveModel.avgCost)
-                      : '—'}
-                  </td>
-                </tr>
-                <tr className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="px-3 py-2">Fastest (avg per-feature)</td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.fastestModel ? (
-                      <ModelChip
-                        provider={stats.extremes.fastestModel.provider}
-                        model={stats.extremes.fastestModel.model}
-                      />
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.fastestModel
-                      ? formatDuration(stats.extremes.fastestModel.avgPerFeatureDurationMs)
-                      : '—'}
-                  </td>
-                </tr>
-                <tr className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="px-3 py-2">Slowest (avg per-feature)</td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.slowestModel ? (
-                      <ModelChip
-                        provider={stats.extremes.slowestModel.provider}
-                        model={stats.extremes.slowestModel.model}
-                      />
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.slowestModel
-                      ? formatDuration(stats.extremes.slowestModel.avgPerFeatureDurationMs)
-                      : '—'}
-                  </td>
-                </tr>
-                <tr className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="px-3 py-2">Highest Avg Rating</td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.highestRatedModel ? (
-                      <ModelChip
-                        provider={stats.extremes.highestRatedModel.provider}
-                        model={stats.extremes.highestRatedModel.model}
-                      />
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.highestRatedModel != null &&
-                    stats.extremes.highestRatedModel.avgRating != null
-                      ? `${(stats.extremes.highestRatedModel.avgRating * 100).toFixed(0)}%`
-                      : '—'}
-                  </td>
-                </tr>
-                <tr className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="px-3 py-2">Lowest Avg Rating</td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.lowestRatedModel ? (
-                      <ModelChip
-                        provider={stats.extremes.lowestRatedModel.provider}
-                        model={stats.extremes.lowestRatedModel.model}
-                      />
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {stats.extremes.lowestRatedModel != null &&
-                    stats.extremes.lowestRatedModel.avgRating != null
-                      ? `${(stats.extremes.lowestRatedModel.avgRating * 100).toFixed(0)}%`
-                      : '—'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
 
         {/* Per-Model stats table (moved below projects and updated columns) */}

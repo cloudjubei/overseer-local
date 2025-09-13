@@ -80,6 +80,7 @@ export default function ExampleView() {
 // const { data, isLoading, error } = useExample()
 
 return (
+
 <div className="flex flex-col min-h-0 w-full">
 <header className="shrink-0 px-4 py-2 border-b">
 <h1 className="text-lg font-semibold">Example</h1>
@@ -125,6 +126,7 @@ type Props = { onRequestClose?: () => void }
 export default function ExampleCreateView({ onRequestClose }: Props) {
 return (
 <Modal title="Create Example" onClose={onRequestClose}>
+
 <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); /_ submit _/ onRequestClose?.() }}>
 {/_ Form fields _/}
 <div className="flex justify-end gap-2 pt-2">
