@@ -1,0 +1,19 @@
+{
+  "state": "running",
+  "conversations": [],
+  "startedAt": "2025-09-13T18:32:05.869Z",
+  "updatedAt": "2025-09-13T18:32:05.869Z",
+  "id": "run_xcw15qxv_mfils8od",
+  "agentType": "developer",
+  "projectId": "main",
+  "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+  "llmConfig": {
+    "provider": "openai",
+    "model": "gpt-5",
+    "apiBaseUrl": "https://api.openai.com/v1/chat/completions"
+  },
+  "price": {
+    "inputPerMTokensUSD": 1.25,
+    "outputPerMTokensUSD": 10
+  }
+}
