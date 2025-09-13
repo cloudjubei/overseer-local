@@ -960,7 +960,7 @@
     }
   ],
   "startedAt": "2025-09-13T19:45:33.952Z",
-  "updatedAt": "2025-09-13T20:16:44.679Z",
+  "updatedAt": "2025-09-13T23:18:18.730Z",
   "id": "run_f1w0fsn2_mfioepz4",
   "agentType": "developer",
   "projectId": "thefactory-knowledge",
@@ -974,5 +974,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-13T20:16:44.679Z"
+  "finishedAt": "2025-09-13T20:16:44.679Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-13T23:18:18.730Z"
+  }
 }
