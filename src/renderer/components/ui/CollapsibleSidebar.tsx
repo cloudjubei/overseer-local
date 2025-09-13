@@ -1,89 +1,114 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Tooltip from './Tooltip';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Tooltip from './Tooltip'
 
 export type CollapsibleSidebarItem = {
-  id: string;
-  label: string;
-  icon?: React.ReactNode;
-  accent?: string;
-  badge?: number;
-  action?: React.ReactNode;
-};
+  id: string
+  label: string
+  icon?: React.ReactNode
+  accent?: string
+  badge?: number
+  action?: React.ReactNode
+}
 
 type Props = {
-  items: CollapsibleSidebarItem[];
-  activeId: string;
-  onSelect: (id: string) => void;
-  storageKey?: string;
-  headerTitle?: string;
-  headerSubtitle?: string;
-  headerAction?: React.ReactNode;
-  emptyMessage?: string;
-  children?: React.ReactNode;
-  sidebarClassName?: string;
-  navContent?: React.ReactNode;
-};
+  items: CollapsibleSidebarItem[]
+  activeId: string
+  onSelect: (id: string) => void
+  storageKey?: string
+  headerTitle?: string
+  headerSubtitle?: string
+  headerAction?: React.ReactNode
+  emptyMessage?: string
+  children?: React.ReactNode
+  sidebarClassName?: string
+  navContent?: React.ReactNode
+}
 
 function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState<boolean>(() => typeof window !== 'undefined' ? window.matchMedia(query).matches : false);
+  const [matches, setMatches] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
+  )
   useEffect(() => {
-    const m = window.matchMedia(query);
-    const onChange = () => setMatches(m.matches);
-    if (m.addEventListener) m.addEventListener('change', onChange);
-    else m.addListener(onChange);
-    setMatches(m.matches);
+    const m = window.matchMedia(query)
+    const onChange = () => setMatches(m.matches)
+    if (m.addEventListener) m.addEventListener('change', onChange)
+    else m.addListener(onChange)
+    setMatches(m.matches)
     return () => {
-      if (m.removeEventListener) m.removeEventListener('change', onChange);
-      else m.removeListener(onChange);
-    };
-  }, [query]);
-  return matches;
+      if (m.removeEventListener) m.removeEventListener('change', onChange)
+      else m.removeListener(onChange)
+    }
+  }, [query])
+  return matches
 }
 
 export default function CollapsibleSidebar(props: Props) {
-  const { items, activeId, onSelect, storageKey, headerTitle, headerSubtitle, headerAction, emptyMessage, children, sidebarClassName, navContent } = props;
+  const {
+    items,
+    activeId,
+    onSelect,
+    storageKey,
+    headerTitle,
+    headerSubtitle,
+    headerAction,
+    emptyMessage,
+    children,
+    sidebarClassName,
+    navContent,
+  } = props
   const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (!storageKey) return false;
+    if (!storageKey) return false
     try {
-      return localStorage.getItem(storageKey) === '1';
+      return localStorage.getItem(storageKey) === '1'
     } catch {
-      return false;
+      return false
     }
-  });
+  })
 
-  const SidebarContent = ({ collapsed, setCollapsed, className = '' }: { collapsed: boolean; setCollapsed: (v: boolean) => void; className?: string }) => {
+  const SidebarContent = ({
+    collapsed,
+    setCollapsed,
+    className = '',
+  }: {
+    collapsed: boolean
+    setCollapsed: (v: boolean) => void
+    className?: string
+  }) => {
     useEffect(() => {
-      if (!storageKey) return;
+      if (!storageKey) return
       try {
-        localStorage.setItem(storageKey, collapsed ? '1' : '0');
+        localStorage.setItem(storageKey, collapsed ? '1' : '0')
       } catch {}
-    }, [collapsed]);
+    }, [collapsed])
 
     const activeIndex = useMemo(() => {
-      const idx = items.findIndex((n) => n.id === activeId);
-      return idx >= 0 ? idx : 0;
-    }, [items, activeId]);
+      const idx = items.findIndex((n) => n.id === activeId)
+      return idx >= 0 ? idx : 0
+    }, [items, activeId])
 
-    const [focusIndex, setFocusIndex] = useState<number>(activeIndex);
+    const [focusIndex, setFocusIndex] = useState<number>(activeIndex)
 
-    useEffect(() => setFocusIndex(activeIndex), [activeIndex]);
+    useEffect(() => setFocusIndex(activeIndex), [activeIndex])
 
-    const onKeyDownList = useCallback((e: React.KeyboardEvent) => {
-      const max = items.length - 1;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setFocusIndex((i) => (i >= max ? 0 : i + 1));
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setFocusIndex((i) => (i <= 0 ? max : i - 1));
-      } else if (e.key === 'Home') {
-        e.preventDefault();
-        setFocusIndex(0);
-      } else if (e.key === 'End') {
-        e.preventDefault();
-        setFocusIndex(max);
-      }
-    }, [items.length]);
+    const onKeyDownList = useCallback(
+      (e: React.KeyboardEvent) => {
+        const max = items.length - 1
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          setFocusIndex((i) => (i >= max ? 0 : i + 1))
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          setFocusIndex((i) => (i <= 0 ? max : i - 1))
+        } else if (e.key === 'Home') {
+          e.preventDefault()
+          setFocusIndex(0)
+        } else if (e.key === 'End') {
+          e.preventDefault()
+          setFocusIndex(max)
+        }
+      },
+      [items.length],
+    )
 
     return (
       <aside
@@ -91,11 +116,17 @@ export default function CollapsibleSidebar(props: Props) {
         aria-label="Navigation"
         data-collapsed={collapsed ? 'true' : 'false'}
       >
-        <div className={`mb-2 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}>
+        <div
+          className={`mb-2 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}
+        >
           {!collapsed && (
             <div className="px-1">
-              <div className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{headerTitle ?? 'Sections'}</div>
-              <div className="text-[11px] text-neutral-500 dark:text-neutral-400">{headerSubtitle ?? ''}</div>
+              <div className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                {headerTitle ?? 'Sections'}
+              </div>
+              <div className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                {headerSubtitle ?? ''}
+              </div>
             </div>
           )}
           <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
@@ -118,11 +149,13 @@ export default function CollapsibleSidebar(props: Props) {
             <ul className="nav-list" role="list">
               {items.length === 0 && emptyMessage && (
                 <li key="empty" className="nav-li">
-                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 px-2 py-1.5">{emptyMessage}</div>
+                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 px-2 py-1.5">
+                    {emptyMessage}
+                  </div>
                 </li>
               )}
               {items.map((item, i) => {
-                const isActive = activeId === item.id;
+                const isActive = activeId === item.id
                 return (
                   <li key={item.id} className="nav-li">
                     <div className="flex items-center nav-row">
@@ -141,40 +174,48 @@ export default function CollapsibleSidebar(props: Props) {
                           <span className="nav-item__badge">{item.badge}</span>
                         )}
                       </button>
-                      {!collapsed && item.action && <span className="nav-item__action ml-auto">{item.action}</span>}
+                      {!collapsed && item.action && (
+                        <span className="nav-item__action ml-auto">{item.action}</span>
+                      )}
                     </div>
                   </li>
-                );
+                )
               })}
             </ul>
           )}
         </nav>
       </aside>
-    );
-  };
-
-  if (!children) {
-    return <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} className={sidebarClassName} />;
+    )
   }
 
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const mobileTriggerRef = useRef<HTMLButtonElement | null>(null);
+  if (!children) {
+    return (
+      <SidebarContent
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        className={sidebarClassName}
+      />
+    )
+  }
+
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const mobileTriggerRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
-    if (!isMobile) setMobileOpen(false);
-  }, [isMobile]);
+    if (!isMobile) setMobileOpen(false)
+  }, [isMobile])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && mobileOpen) {
-        setMobileOpen(false);
-        setTimeout(() => mobileTriggerRef.current?.focus(), 0);
+        setMobileOpen(false)
+        setTimeout(() => mobileTriggerRef.current?.focus(), 0)
       }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [mobileOpen]);
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mobileOpen])
 
   if (isMobile) {
     return (
@@ -199,23 +240,27 @@ export default function CollapsibleSidebar(props: Props) {
               aria-hidden
             />
             <div className="fixed inset-y-0 left-0 z-30" style={{ width: 260 }}>
-              <SidebarContent collapsed={false} setCollapsed={() => setMobileOpen(false)} className={sidebarClassName} />
+              <SidebarContent
+                collapsed={false}
+                setCollapsed={() => setMobileOpen(false)}
+                className={sidebarClassName}
+              />
             </div>
           </>
         )}
-        <div className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
-          {children}
-        </div>
+        <div className="flex-1 min-w-0 min-h-0 overflow-auto p-4">{children}</div>
       </div>
-    );
+    )
   } else {
     return (
       <div className="flex h-full w-full min-w-0">
-        <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} className={sidebarClassName} />
-        <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">
-          {children}
-        </main>
+        <SidebarContent
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          className={sidebarClassName}
+        />
+        <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">{children}</main>
       </div>
-    );
+    )
   }
 }

@@ -19,10 +19,7 @@
       "title": "Implement DocsIndexer for scanning markdown files",
       "description": "Create a DocsIndexer class in @src/docs/indexer.js, similar to TaskIndexer (in @src/tasks/indexer.js). It should scan the docs/ directory (and subdirectories) under the projectRoot for .md files, build an in-memory index (e.g., a tree structure with paths and metadata). Include methods to get the index snapshot, initialize scanning, and watch for file changes to refresh the index.",
       "plan": "",
-      "context": [
-        "src/docs/indexer.js",
-        "src/tasks/indexer.js"
-      ],
+      "context": ["src/docs/indexer.js", "src/tasks/indexer.js"],
       "acceptance": []
     },
     {

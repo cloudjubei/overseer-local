@@ -4,9 +4,15 @@ import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useNavigator } from '../navigation/Navigator'
 import { useTasks } from '../contexts/TasksContext'
-import { Task } from 'thefactory-tools';
+import { Task } from 'thefactory-tools'
 
-export default function TaskEditView({ taskId, onRequestClose }: { taskId: string; onRequestClose?: () => void }) {
+export default function TaskEditView({
+  taskId,
+  onRequestClose,
+}: {
+  taskId: string
+  onRequestClose?: () => void
+}) {
   const { toast } = useToast()
   const navigator = useNavigator()
   const [initialValues, setInitialValues] = useState<Task | null>(null)
@@ -68,7 +74,11 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: strin
         {initialValues ? (
           <TaskForm
             id={`${initialValues.id}`}
-            initialValues={{ status: initialValues.status, title: initialValues.title, description: initialValues.description }}
+            initialValues={{
+              status: initialValues.status,
+              title: initialValues.title,
+              description: initialValues.description,
+            }}
             onSubmit={onSubmit}
             onCancel={doClose}
             submitting={submitting || deleting}
@@ -76,10 +86,16 @@ export default function TaskEditView({ taskId, onRequestClose }: { taskId: strin
             onDelete={() => setShowDeleteConfirm(true)}
           />
         ) : (
-          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading task…</div>
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
+            Loading task…
+          </div>
         )}
       </Modal>
-      <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
+      <AlertDialog
+        isOpen={showAlert}
+        onClose={() => setShowAlert(false)}
+        description={alertMessage}
+      />
       <AlertDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}

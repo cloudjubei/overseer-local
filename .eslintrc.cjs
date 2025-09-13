@@ -12,7 +12,7 @@ module.exports = {
     'unused-imports',
     'prettier',
     'n',
-    'vitest'
+    'vitest',
   ],
   extends: [
     'eslint:recommended',
@@ -23,7 +23,7 @@ module.exports = {
     'plugin:n/recommended',
     'plugin:vitest/recommended',
     'plugin:prettier/recommended',
-    'prettier'
+    'prettier',
   ],
   settings: { react: { version: 'detect' } },
   rules: {
@@ -33,16 +33,19 @@ module.exports = {
     'unused-imports/no-unused-imports': 'error',
     '@typescript-eslint/no-unused-vars': [
       'warn',
-      { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true }
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
     ],
     'simple-import-sort/imports': 'warn',
     'simple-import-sort/exports': 'warn',
-    'react/react-in-jsx-scope': 'off'
+    'react/react-in-jsx-scope': 'off',
   },
   overrides: [
     { files: ['src/renderer/**/*.{ts,tsx,js,jsx}'], env: { browser: true } },
-    { files: ['src/main/**/*.{ts,js}', 'src/preload/**/*.{ts,js}', '*.config.{ts,js,mjs,cjs}'], env: { node: true } },
-    { files: ['**/*.{test,spec}.{ts,tsx,js,jsx}'], env: { 'vitest/globals': true } }
+    {
+      files: ['src/main/**/*.{ts,js}', 'src/preload/**/*.{ts,js}', '*.config.{ts,js,mjs,cjs}'],
+      env: { node: true },
+    },
+    { files: ['**/*.{test,spec}.{ts,tsx,js,jsx}'], env: { 'vitest/globals': true } },
   ],
-  ignorePatterns: ['dist', 'build', 'out', 'node_modules', '.husky']
-};
+  ignorePatterns: ['dist', 'build', 'out', 'node_modules', '.husky'],
+}

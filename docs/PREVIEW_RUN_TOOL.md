@@ -1,10 +1,12 @@
 # Agent Preview Run Tool
 
 Overview
+
 - The preview_run tool loads a component (via preview.html) or any app URL in a headless browser, performs scripted interactions, and evaluates DOM assertions or custom scripts to verify outcomes.
 - It reuses the Preview Host runtime and Puppeteer, providing an isolated environment to self-check new code changes.
 
 Prerequisites
+
 - Dev server running and serving preview.html (e.g., Vite via electron-forge start).
 - Provide base URL:
   - Pass base_url (e.g., http://localhost:5173),
@@ -15,6 +17,7 @@ Prerequisites
   - Or puppeteer-core with PUPPETEER_EXECUTABLE_PATH/CHROME_PATH.
 
 Parameters
+
 - mode: 'component' | 'url' (default 'component')
 - id: component module path under src/ with optional #ExportName (component mode)
 - props, props_b64, needs, theme, variant: preview parameters
@@ -31,6 +34,7 @@ Parameters
 
 Assertions
 Supported assert types (each object should include type and relevant fields):
+
 - dom_text: { type: 'dom_text', selector, equals?: string, contains?: string, regex?: string, regex_flags?: string }
 - exists: { type: 'exists', selector, present?: boolean } // default present=true
 - count: { type: 'count', selector, op?: 'eq'|'gte'|'lte'|'gt'|'lt', value: number }
@@ -40,69 +44,71 @@ Supported assert types (each object should include type and relevant fields):
 
 Return Value
 {
-  ok: boolean,                  // true if all assertions passed
-  url: string,                  // resolved URL used
-  results: Array<{             // one result per assertion
-    ok: boolean,               // evaluation succeeded (no execution error)
-    type: string,
-    pass?: boolean,            // assertion pass/fail (true if condition met)
-    expected?: any,
-    actual?: any,
-    message?: string,
-    error?: string
-  }>,
-  failures_count: number,      // number of failed assertions
-  console_logs: Array<{ type?: string, text?: string }>,
-  page_errors: string[],
-  script_result?: any,         // result of custom script (if provided)
-  html?: string,               // outerHTML if html_selector provided
-  width: number,
-  height: number
+ok: boolean, // true if all assertions passed
+url: string, // resolved URL used
+results: Array<{ // one result per assertion
+ok: boolean, // evaluation succeeded (no execution error)
+type: string,
+pass?: boolean, // assertion pass/fail (true if condition met)
+expected?: any,
+actual?: any,
+message?: string,
+error?: string
+}>,
+failures_count: number, // number of failed assertions
+console_logs: Array<{ type?: string, text?: string }>,
+page_errors: string[],
+script_result?: any, // result of custom script (if provided)
+html?: string, // outerHTML if html_selector provided
+width: number,
+height: number
 }
 
 Examples
-1) Verify button renders text
-{
-  name: 'preview_run',
-  arguments: {
-    mode: 'component',
-    id: 'renderer/components/ui/Button.tsx#default',
-    props: { children: 'Run' },
-    asserts: [
-      { type: 'dom_text', selector: '#preview-stage button', contains: 'Run' },
-      { type: 'exists', selector: '#preview-stage button' }
-    ]
-  }
-}
 
-2) Interact then assert
-{
-  name: 'preview_run',
-  arguments: {
-    mode: 'component',
-    id: 'renderer/components/ui/Button.tsx#default',
-    interactions: [
-      { type: 'click', selector: '#preview-stage button' },
-      { type: 'wait', ms: 200 }
-    ],
-    asserts: [
-      { type: 'has_class', selector: '#preview-stage button', class: 'active', present: true }
-    ]
-  }
-}
+1. Verify button renders text
+   {
+   name: 'preview_run',
+   arguments: {
+   mode: 'component',
+   id: 'renderer/components/ui/Button.tsx#default',
+   props: { children: 'Run' },
+   asserts: [
+   { type: 'dom_text', selector: '#preview-stage button', contains: 'Run' },
+   { type: 'exists', selector: '#preview-stage button' }
+   ]
+   }
+   }
 
-3) Custom evaluation
-{
-  name: 'preview_run',
-  arguments: {
-    mode: 'url',
-    url: '/preview.html?id=renderer/screens/TasksView.tsx',
-    script: 'return document.querySelectorAll("[data-task]").length;'
-  }
-}
+2. Interact then assert
+   {
+   name: 'preview_run',
+   arguments: {
+   mode: 'component',
+   id: 'renderer/components/ui/Button.tsx#default',
+   interactions: [
+   { type: 'click', selector: '#preview-stage button' },
+   { type: 'wait', ms: 200 }
+   ],
+   asserts: [
+   { type: 'has_class', selector: '#preview-stage button', class: 'active', present: true }
+   ]
+   }
+   }
+
+3. Custom evaluation
+   {
+   name: 'preview_run',
+   arguments: {
+   mode: 'url',
+   url: '/preview.html?id=renderer/screens/TasksView.tsx',
+   script: 'return document.querySelectorAll("[data-task]").length;'
+   }
+   }
 
 Notes
-- The preview runtime exposes window.__PREVIEW_READY and renders content inside #preview-stage.
+
+- The preview runtime exposes window.\_\_PREVIEW_READY and renders content inside #preview-stage.
 - For reliability, use #preview-stage-scoped selectors.
 - Avoid non-serializable values from script.
 - If you also need a screenshot for visual confirmation, combine with preview_screenshot.

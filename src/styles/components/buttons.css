@@ -1,7 +1,14 @@
 /* Components: Buttons */
 
 /* Base shared styles for button-like controls */
-.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-outline, .btn-danger, .btn-link, .btn-icon {
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-outline,
+.btn-danger,
+.btn-link,
+.btn-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -23,29 +30,57 @@
 }
 
 /* Focus ring (visible) */
-.btn:focus-visible, .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-ghost:focus-visible, .btn-outline:focus-visible, .btn-danger:focus-visible, .btn-link:focus-visible, .btn-icon:focus-visible {
+.btn:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-ghost:focus-visible,
+.btn-outline:focus-visible,
+.btn-danger:focus-visible,
+.btn-link:focus-visible,
+.btn-icon:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
 }
 
 /* Press micro-interaction */
-.btn:active, .btn-primary:active, .btn-secondary:active, .btn-ghost:active, .btn-outline:active, .btn-danger:active, .btn-link:active, .btn-icon:active {
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-ghost:active,
+.btn-outline:active,
+.btn-danger:active,
+.btn-link:active,
+.btn-icon:active {
   transform: translateY(0.5px);
 }
 
 /* Disabled */
-.btn[disabled], .btn-primary[disabled], .btn-secondary[disabled], .btn-ghost[disabled], .btn-outline[disabled], .btn-danger[disabled], .btn-link[disabled], .btn-icon[disabled] {
+.btn[disabled],
+.btn-primary[disabled],
+.btn-secondary[disabled],
+.btn-ghost[disabled],
+.btn-outline[disabled],
+.btn-danger[disabled],
+.btn-link[disabled],
+.btn-icon[disabled] {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
 /* Primary (default) */
-.btn, .btn-primary {
+.btn,
+.btn-primary {
   background: var(--accent-primary);
   color: var(--text-inverted);
 }
-.btn:hover, .btn-primary:hover { background: var(--accent-primary-hover); }
-.btn:active, .btn-primary:active { background: var(--accent-primary-active); }
+.btn:hover,
+.btn-primary:hover {
+  background: var(--accent-primary-hover);
+}
+.btn:active,
+.btn-primary:active {
+  background: var(--accent-primary-active);
+}
 
 /* Secondary: surface with border */
 .btn-secondary {
@@ -53,7 +88,9 @@
   color: var(--text-primary);
   border-color: var(--border-default);
 }
-.btn-secondary:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%);
+}
 
 /* Outline */
 .btn-outline {
@@ -61,33 +98,73 @@
   color: var(--text-primary);
   border-color: var(--border-default);
 }
-.btn-outline:hover { background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%); }
+.btn-outline:hover {
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%);
+}
 
 /* Ghost */
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
 }
-.btn-ghost:hover { background: color-mix(in srgb, var(--surface-raised) 90%, var(--text-primary) 10%); }
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--surface-raised) 90%, var(--text-primary) 10%);
+}
 
 /* Danger */
-.btn-danger { background: var(--color-red-600); color: #fff; }
-.btn-danger:hover { background: var(--color-red-700); }
-.btn-danger:active { background: var(--color-red-800); }
+.btn-danger {
+  background: var(--color-red-600);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: var(--color-red-700);
+}
+.btn-danger:active {
+  background: var(--color-red-800);
+}
 
 /* Link */
-.btn-link { background: transparent; color: var(--accent-primary); border: none; text-decoration: underline; text-underline-offset: 3px; }
-.btn-link:hover { filter: brightness(1.05); }
+.btn-link {
+  background: transparent;
+  color: var(--accent-primary);
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-link:hover {
+  filter: brightness(1.05);
+}
 
 /* Sizes */
-.btn-sm, .btn-primary.btn-sm, .btn-secondary.btn-sm, .btn-outline.btn-sm, .btn-ghost.btn-sm, .btn-danger.btn-sm, .btn-link.btn-sm {
+.btn-sm,
+.btn-primary.btn-sm,
+.btn-secondary.btn-sm,
+.btn-outline.btn-sm,
+.btn-ghost.btn-sm,
+.btn-danger.btn-sm,
+.btn-link.btn-sm {
   height: var(--control-h-sm);
   padding: 0 10px;
   font-size: var(--fs-sm, 14px);
 }
-.btn-lg, .btn-primary.btn-lg, .btn-secondary.btn-lg, .btn-outline.btn-lg, .btn-ghost.btn-lg, .btn-danger.btn-lg, .btn-link.btn-lg {
+.btn-lg,
+.btn-primary.btn-lg,
+.btn-secondary.btn-lg,
+.btn-outline.btn-lg,
+.btn-ghost.btn-lg,
+.btn-danger.btn-lg,
+.btn-link.btn-lg {
   height: var(--control-h-lg);
   padding: 0 14px;
   font-size: var(--fs-md, 16px);
 }
-.btn-icon, .btn-primary.btn-icon, .btn-secondary.btn-icon, .btn-outline.btn-icon, .btn-ghost.btn-icon, .btn-danger.btn-icon, .btn-link.btn-icon { width: var(--control-h-md); padding: 0; }
+.btn-icon,
+.btn-primary.btn-icon,
+.btn-secondary.btn-icon,
+.btn-outline.btn-icon,
+.btn-ghost.btn-icon,
+.btn-danger.btn-icon,
+.btn-link.btn-icon {
+  width: var(--control-h-md);
+  padding: 0;
+}

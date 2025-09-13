@@ -1,31 +1,31 @@
-import { useEffect, useState, useCallback } from 'react';
-import SidebarView from './navigation/SidebarView';
-import { createRoot } from 'react-dom/client';
-import ModalHost from './navigation/ModalHost';
-import { ToastProvider } from './components/ui/Toast';
-import { NavigatorProvider } from './navigation/Navigator';
-import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts';
-import CommandMenu from './components/ui/CommandMenu';
-import ShortcutsHelp from './components/ui/ShortcutsHelp';
-import { ProjectsProvider } from './contexts/ProjectContext';
-import { useTheme } from './hooks/useTheme';
-import useLiveData from './hooks/useLiveData';
-import LoadingScreen from './screens/LoadingScreen';
-import { AppSettingsProvider } from './contexts/AppSettingsContext';
-import { NotificationClickHandler } from './hooks/useNotifications';
-import { LLMConfigProvider } from './contexts/LLMConfigContext';
-import { AgentsProvider } from './contexts/AgentsContext';
-import { FilesProvider } from './contexts/FilesContext';
-import { TasksProvider } from './contexts/TasksContext';
+import { useEffect, useState, useCallback } from 'react'
+import SidebarView from './navigation/SidebarView'
+import { createRoot } from 'react-dom/client'
+import ModalHost from './navigation/ModalHost'
+import { ToastProvider } from './components/ui/Toast'
+import { NavigatorProvider } from './navigation/Navigator'
+import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts'
+import CommandMenu from './components/ui/CommandMenu'
+import ShortcutsHelp from './components/ui/ShortcutsHelp'
+import { ProjectsProvider } from './contexts/ProjectContext'
+import { useTheme } from './hooks/useTheme'
+import useLiveData from './hooks/useLiveData'
+import LoadingScreen from './screens/LoadingScreen'
+import { AppSettingsProvider } from './contexts/AppSettingsContext'
+import { NotificationClickHandler } from './hooks/useNotifications'
+import { LLMConfigProvider } from './contexts/LLMConfigContext'
+import { AgentsProvider } from './contexts/AgentsContext'
+import { FilesProvider } from './contexts/FilesContext'
+import { TasksProvider } from './contexts/TasksContext'
 
 function ServicesBootstrap() {
-  const { init } = useLiveData();
+  const { init } = useLiveData()
 
-  useEffect(() => { 
-    init(); 
+  useEffect(() => {
+    init()
   }, [])
 
-  return null;
+  return null
 }
 
 function App() {
@@ -58,18 +58,20 @@ function App() {
 }
 
 function MainApp() {
-  const { initTheme } = useTheme();
-  const [bootComplete, setBootComplete] = useState(false);
+  const { initTheme } = useTheme()
+  const [bootComplete, setBootComplete] = useState(false)
 
-  useEffect(() => { initTheme(); }, [])
+  useEffect(() => {
+    initTheme()
+  }, [])
 
   const handleLoaded = useCallback(() => {
-    setBootComplete(true);
-  }, []);
+    setBootComplete(true)
+  }, [])
 
   if (!bootComplete) {
     // Show loading screen first; it will load app settings and preferences via useAppSettings
-    return <LoadingScreen onLoaded={handleLoaded} />;
+    return <LoadingScreen onLoaded={handleLoaded} />
   }
 
   return (
@@ -80,8 +82,8 @@ function MainApp() {
   )
 }
 
-const container = document.getElementById('root');
+const container = document.getElementById('root')
 if (container) {
-  const root = createRoot(container);
-  root.render(<App />  );
+  const root = createRoot(container)
+  root.render(<App />)
 }

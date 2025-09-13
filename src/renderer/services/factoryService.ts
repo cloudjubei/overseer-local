@@ -1,9 +1,23 @@
-import { AgentRunRatingPatch } from "thefactory-tools/dist/agentRunStore";
-import { PricingState } from "./pricingService"
-import { AgentRunHistory, AgentType, GithubCredentials, LLMConfig, WebSearchApiKeys } from "thefactory-tools"
+import { AgentRunRatingPatch } from 'thefactory-tools/dist/agentRunStore'
+import { PricingState } from './pricingService'
+import {
+  AgentRunHistory,
+  AgentType,
+  GithubCredentials,
+  LLMConfig,
+  WebSearchApiKeys,
+} from 'thefactory-tools'
 
-export type StartTaskRunParams = { agentType: AgentType, projectId: string; taskId: string; llmConfig: LLMConfig; githubCredentials: GithubCredentials; webSearchApiKeys?: WebSearchApiKeys; options?: Record<string, any> };
-export type StartFeatureRunParams = StartTaskRunParams & { featureId: string };
+export type StartTaskRunParams = {
+  agentType: AgentType
+  projectId: string
+  taskId: string
+  llmConfig: LLMConfig
+  githubCredentials: GithubCredentials
+  webSearchApiKeys?: WebSearchApiKeys
+  options?: Record<string, any>
+}
+export type StartFeatureRunParams = StartTaskRunParams & { featureId: string }
 
 export type FactoryService = {
   subscribeRuns: (callback: (updated: AgentRunHistory) => void) => () => void

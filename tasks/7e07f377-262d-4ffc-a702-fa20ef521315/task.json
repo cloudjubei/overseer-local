@@ -10,9 +10,7 @@
       "title": "Add Chat route and basic UI skeleton",
       "description": "Update the renderer (e.g., main @app.js or @index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
       "plan": "",
-      "context": [
-        "src/renderer/screens/ChatView.tsx"
-      ],
+      "context": ["src/renderer/screens/ChatView.tsx"],
       "acceptance": []
     },
     {
@@ -21,9 +19,7 @@
       "title": "Manage chat state and render messages",
       "description": "In ChatView, use React state (or equivalent) for a messages array of objects {role: 'user'|'assistant', content: string}. Render the messages in the message div, with user messages on the right, assistant on the left, styled as chat bubbles. Handle empty state with a message like 'Start chatting about the project'.",
       "plan": "",
-      "context": [
-        "src/renderer/screens/ChatView.tsx"
-      ],
+      "context": ["src/renderer/screens/ChatView.tsx"],
       "acceptance": []
     },
     {
@@ -71,11 +67,7 @@
       "title": "Integrate basic LLM call in ChatView",
       "description": "Update send handler in ChatView: Allow a user to send a message. Show loading indicator while waiting. Handle errors with a message.",
       "plan": "",
-      "context": [
-        "src/main.js",
-        "src/preload.js",
-        "src/renderer/screens/ChatView.tsx"
-      ],
+      "context": ["src/main.js", "src/preload.js", "src/renderer/screens/ChatView.tsx"],
       "acceptance": []
     },
     {

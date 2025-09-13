@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Status } from 'thefactory-tools';
+import type { Status } from 'thefactory-tools'
 import StatusControl from './StatusControl'
 import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'
@@ -163,14 +163,22 @@ export default function FeatureForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}>
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={onKeyDown}
+      className="space-y-4"
+      aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}
+    >
       <div className="grid grid-cols-1 gap-3">
-        <StatusControl
-          status={status}
-          onChange={setStatus}
-        />
+        <StatusControl status={status} onChange={setStatus} />
         <div className="flex items-center gap-3">
-          <label htmlFor="feature-title" className="text-xs flex-1" style={{ color: 'var(--text-secondary)' }}>Title</label>
+          <label
+            htmlFor="feature-title"
+            className="text-xs flex-1"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Title
+          </label>
         </div>
         <input
           id="feature-title"
@@ -184,17 +192,29 @@ export default function FeatureForm({
           style={{
             background: 'var(--surface-raised)',
             borderColor: error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
-            color: 'var(--text-primary)'
+            color: 'var(--text-primary)',
           }}
           aria-invalid={!!error}
           aria-describedby={error ? 'feature-title-error' : undefined}
         />
         {error ? (
-          <div id="feature-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{error}</div>
+          <div
+            id="feature-title-error"
+            className="text-xs"
+            style={{ color: 'var(--status-stuck-fg)' }}
+          >
+            {error}
+          </div>
         ) : null}
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="feature-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+          <label
+            htmlFor="feature-description"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Description
+          </label>
           <FileMentionsTextarea
             id="feature-description"
             rows={4}
@@ -203,7 +223,11 @@ export default function FeatureForm({
             onChange={setDescription}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-            style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)',
+            }}
             ariaLabel="Feature description"
             onFileMentionSelected={handleFileMentionSelected}
             onReferenceSelected={handleReferenceSelected}
@@ -211,7 +235,13 @@ export default function FeatureForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="feature-rejection" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Reason</label>
+          <label
+            htmlFor="feature-rejection"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Rejection Reason
+          </label>
           <FileMentionsTextarea
             id="feature-rejection"
             rows={3}
@@ -220,7 +250,11 @@ export default function FeatureForm({
             onChange={setRejection}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-            style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)',
+            }}
             ariaLabel="Feature rejection reason"
             onFileMentionSelected={handleFileMentionSelected}
             onReferenceSelected={handleReferenceSelected}
@@ -228,32 +262,60 @@ export default function FeatureForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Context Files</label>
-          <div className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2" style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}>
+          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            Context Files
+          </label>
+          <div
+            className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2"
+            style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
+          >
             {context.map((p, idx) => (
-              <ContextFileChip key={p} path={p} onRemove={() => removeContextAt(idx)} warn={!mentionedPaths.has(p)} />
+              <ContextFileChip
+                key={p}
+                path={p}
+                onRemove={() => removeContextAt(idx)}
+                warn={!mentionedPaths.has(p)}
+              />
             ))}
-            <button type="button" onClick={() => setShowFileSelector(true)} className="chip chip--ok" title="Add context files">
+            <button
+              type="button"
+              onClick={() => setShowFileSelector(true)}
+              className="chip chip--ok"
+              title="Add context files"
+            >
               <IconPlus className="w-3 h-3" />
               <span>Add</span>
             </button>
           </div>
-          <div className="text-xs text-text-muted">Select any files across the project that provide useful context for this feature. Tip: type @ in description to quickly reference files.</div>
+          <div className="text-xs text-text-muted">
+            Select any files across the project that provide useful context for this feature. Tip:
+            type @ in description to quickly reference files.
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="feature-blockers" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Blockers</label>
+          <label
+            htmlFor="feature-blockers"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Blockers
+          </label>
           <div
             id="feature-blockers"
             className="chips-list border rounded-md min-h-[3rem] p-2"
             style={{
               borderColor: 'var(--border-default)',
-              background: 'var(--surface-raised)'
+              background: 'var(--surface-raised)',
             }}
           >
             {blockers.map((dep, idx) => {
               return (
-                <DependencyBullet key={dep} dependency={dep} onRemove={() => removeBlockerAt(idx)} />
+                <DependencyBullet
+                  key={dep}
+                  dependency={dep}
+                  onRemove={() => removeBlockerAt(idx)}
+                />
               )
             })}
             <button
@@ -266,7 +328,10 @@ export default function FeatureForm({
               <span>Add</span>
             </button>
           </div>
-          <div className="text-xs text-text-muted">Tip: Type # to quickly reference a task or feature; it will be added as a blocker automatically.</div>
+          <div className="text-xs text-text-muted">
+            Tip: Type # to quickly reference a task or feature; it will be added as a blocker
+            automatically.
+          </div>
         </div>
       </div>
 
@@ -279,7 +344,7 @@ export default function FeatureForm({
             className="btn"
             style={{
               background: 'var(--status-stuck-bg)',
-              color: 'var(--status-stuck-fg)'
+              color: 'var(--status-stuck-fg)',
             }}
           >
             <IconDelete className="w-4 h-4" />
@@ -308,7 +373,12 @@ export default function FeatureForm({
       </div>
 
       {showSelector && (
-        <Modal title="Select Blocker" onClose={() => setShowSelector(false)} isOpen={true} size="md">
+        <Modal
+          title="Select Blocker"
+          onClose={() => setShowSelector(false)}
+          isOpen={true}
+          size="md"
+        >
           <DependencySelector
             onConfirm={(deps) => {
               const newDeps = deps
@@ -325,7 +395,12 @@ export default function FeatureForm({
       )}
 
       {showFileSelector && (
-        <Modal title="Select Context Files" onClose={() => setShowFileSelector(false)} isOpen={true} size="lg">
+        <Modal
+          title="Select Context Files"
+          onClose={() => setShowFileSelector(false)}
+          isOpen={true}
+          size="lg"
+        >
           <FileSelector
             selected={context}
             onCancel={() => setShowFileSelector(false)}

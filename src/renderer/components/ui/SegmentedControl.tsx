@@ -21,8 +21,18 @@ type Props = {
   className?: string
 }
 
-export default function SegmentedControl({ options, value, onChange, size = 'md', ariaLabel = 'View switch', className }: Props) {
-  const selectedIndex = Math.max(0, options.findIndex((o) => o.value === value))
+export default function SegmentedControl({
+  options,
+  value,
+  onChange,
+  size = 'md',
+  ariaLabel = 'View switch',
+  className,
+}: Props) {
+  const selectedIndex = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  )
   const groupRef = React.useRef<HTMLDivElement>(null)
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -77,7 +87,11 @@ export default function SegmentedControl({ options, value, onChange, size = 'md'
             onClick={() => onChange(opt.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
           >
-            {opt.icon && <span className="segmented__icon" aria-hidden="true">{opt.icon}</span>}
+            {opt.icon && (
+              <span className="segmented__icon" aria-hidden="true">
+                {opt.icon}
+              </span>
+            )}
             <span className="segmented__label">{opt.label}</span>
           </button>
         )

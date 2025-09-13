@@ -1,15 +1,15 @@
-import React from 'react';
-import { Input } from './Input';
-import FileDisplay from './FileDisplay';
-import { useFiles, inferFileType } from '../../contexts/FilesContext';
+import React from 'react'
+import { Input } from './Input'
+import FileDisplay from './FileDisplay'
+import { useFiles, inferFileType } from '../../contexts/FilesContext'
 
 export type FileSelectorProps = {
-  selected?: string[]; // relPaths
-  onConfirm: (selected: string[]) => void;
-  onCancel?: () => void;
-  allowMultiple?: boolean;
-  title?: string;
-};
+  selected?: string[] // relPaths
+  onConfirm: (selected: string[]) => void
+  onCancel?: () => void
+  allowMultiple?: boolean
+  title?: string
+}
 
 function pathToMeta(path: string) {
   const parts = path.split('/')
@@ -18,51 +18,55 @@ function pathToMeta(path: string) {
     name,
     path,
     type: inferFileType(path),
-  };
+  }
 }
 
-export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onConfirm, onCancel, allowMultiple = true, title }) => {
-  const { files } = useFiles();
-  const [query, setQuery] = React.useState('');
-  const [localSelected, setLocalSelected] = React.useState<string[]>(selected);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+export const FileSelector: React.FC<FileSelectorProps> = ({
+  selected = [],
+  onConfirm,
+  onCancel,
+  allowMultiple = true,
+  title,
+}) => {
+  const { files } = useFiles()
+  const [query, setQuery] = React.useState('')
+  const [localSelected, setLocalSelected] = React.useState<string[]>(selected)
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
-    setLocalSelected(selected);
-  }, [selected]);
+    setLocalSelected(selected)
+  }, [selected])
 
   React.useEffect(() => {
     // Focus the search input when the selector opens
-    const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
-    return () => clearTimeout(t);
-  }, []);
+    const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0)
+    return () => clearTimeout(t)
+  }, [])
 
   const filteredFiles = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = q
-      ? files.filter((p) => p.name.toLowerCase().includes(q))
-      : files;
+    const q = query.trim().toLowerCase()
+    const filtered = q ? files.filter((p) => p.name.toLowerCase().includes(q)) : files
     return filtered.sort((a, b) => {
       if (q) {
         const aScore = a.name.toLowerCase().indexOf(q)
         const bScore = b.name.toLowerCase().indexOf(q)
-        if (aScore !== bScore) return aScore - bScore;
+        if (aScore !== bScore) return aScore - bScore
       }
-      return a.name.localeCompare(b.name);
-    });
-  }, [files, query]);
+      return a.name.localeCompare(b.name)
+    })
+  }, [files, query])
 
   function toggle(path: string) {
     setLocalSelected((prev) => {
-      const has = prev.includes(path);
-      if (has) return prev.filter((p) => p !== path);
-      if (!allowMultiple) return [path];
-      return [...prev, path];
-    });
+      const has = prev.includes(path)
+      if (has) return prev.filter((p) => p !== path)
+      if (!allowMultiple) return [path]
+      return [...prev, path]
+    })
   }
 
   function isSelected(path: string) {
-    return localSelected.includes(path);
+    return localSelected.includes(path)
   }
 
   return (
@@ -82,11 +86,20 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
         </div>
       </div>
 
-      <div role="listbox" aria-label={title || 'Files'} className="border rounded-md max-h-[50vh] overflow-auto p-1 bg-surface-raised border-border">
+      <div
+        role="listbox"
+        aria-label={title || 'Files'}
+        className="border rounded-md max-h-[50vh] overflow-auto p-1 bg-surface-raised border-border"
+      >
         {filteredFiles.map((file) => {
-          const selected = isSelected(file.path);
+          const selected = isSelected(file.path)
           return (
-            <div key={file.path} role="option" aria-selected={selected} className="flex items-center">
+            <div
+              key={file.path}
+              role="option"
+              aria-selected={selected}
+              className="flex items-center"
+            >
               <FileDisplay
                 file={file}
                 density="normal"
@@ -109,7 +122,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
                 className={selected ? 'bg-blue-50 dark:bg-blue-950/30' : ''}
               />
             </div>
-          );
+          )
         })}
         {filteredFiles.length === 0 && (
           <div className="p-4 text-sm text-text-muted">No files match your search.</div>
@@ -118,14 +131,21 @@ export const FileSelector: React.FC<FileSelectorProps> = ({ selected = [], onCon
 
       <div className="flex justify-end gap-2">
         {onCancel && (
-          <button type="button" className="btn-secondary" onClick={onCancel}>Cancel</button>
+          <button type="button" className="btn-secondary" onClick={onCancel}>
+            Cancel
+          </button>
         )}
-        <button type="button" className="btn" onClick={() => onConfirm(localSelected)} disabled={localSelected.length === 0 && allowMultiple}>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => onConfirm(localSelected)}
+          disabled={localSelected.length === 0 && allowMultiple}
+        >
           Confirm{localSelected.length ? ` (${localSelected.length})` : ''}
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FileSelector;
+export default FileSelector

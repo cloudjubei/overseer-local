@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { AgentType } from 'thefactory-tools';
+import type { AgentType } from 'thefactory-tools'
 import { Button } from '../ui/Button'
 import { IconPlay } from '../ui/Icons'
 
@@ -32,7 +32,7 @@ function clamp(n: number, min: number, max: number) {
 function computePosition(
   anchor: HTMLElement,
   panel: HTMLElement | null,
-  gap = 8
+  gap = 8,
 ): { top: number; left: number; minWidth: number; side: 'top' | 'bottom' } {
   const ar = anchor.getBoundingClientRect()
   const scrollX = window.scrollX || window.pageXOffset
@@ -134,7 +134,12 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
       className={`standard-picker standard-picker--${coords.side}`}
       role="menu"
       aria-label="Select Agent"
-      style={{ top: coords.top, left: coords.left, minWidth: Math.max(120, coords.minWidth + 8), position: 'absolute' }}
+      style={{
+        top: coords.top,
+        left: coords.left,
+        minWidth: Math.max(120, coords.minWidth + 8),
+        position: 'absolute',
+      }}
       onClick={(e) => {
         e.stopPropagation()
       }}
@@ -160,7 +165,7 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
         )
       })}
     </div>,
-    document.body
+    document.body,
   )
 }
 
@@ -194,7 +199,13 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
 
   const handlePointerDown: React.PointerEventHandler<HTMLButtonElement> = (e) => {
     // Only act on primary button or touch/pen
-    if (e.button !== undefined && e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return
+    if (
+      e.button !== undefined &&
+      e.button !== 0 &&
+      e.pointerType !== 'touch' &&
+      e.pointerType !== 'pen'
+    )
+      return
     // Stop propagation so parent rows don't react to this press
     e.stopPropagation()
     longPressTriggered.current = false
@@ -269,8 +280,12 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
         </Button>
       </div>
       {open && containerRef.current && (
-        <AgentTypePicker anchorEl={containerRef.current} onSelect={handleSelect} onClose={handleClose} />)
-      }
+        <AgentTypePicker
+          anchorEl={containerRef.current}
+          onSelect={handleSelect}
+          onClose={handleClose}
+        />
+      )}
     </>
   )
 }

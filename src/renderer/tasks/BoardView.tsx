@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import type { Status, Task } from 'thefactory-tools';
+import type { Status, Task } from 'thefactory-tools'
 import TaskCard from '../components/tasks/TaskCard'
 import { STATUS_LABELS } from '../services/tasksService'
 import { useActiveProject } from '../contexts/ProjectContext'
@@ -16,7 +16,13 @@ type Props = {
 export default function BoardView({ tasks }: Props) {
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState<Status | null>(null)
-  const colRefs = useRef<Record<Status, HTMLDivElement | null>>({ '+': null, '~': null, '-': null, '?': null, '=': null })
+  const colRefs = useRef<Record<Status, HTMLDivElement | null>>({
+    '+': null,
+    '~': null,
+    '-': null,
+    '?': null,
+    '=': null,
+  })
 
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -27,9 +33,14 @@ export default function BoardView({ tasks }: Props) {
 
   const grouped = useMemo(() => {
     const map: Record<Status, Task[]> = { '+': [], '~': [], '-': [], '?': [], '=': [] }
-    for (const t of tasks) { map[t.status].push(t) }
+    for (const t of tasks) {
+      map[t.status].push(t)
+    }
     for (const k of Object.keys(map) as Status[]) {
-      map[k].sort((a, b) => (project?.taskIdToDisplayIndex[a.id] || 0) - (project?.taskIdToDisplayIndex[b.id] || 0))
+      map[k].sort(
+        (a, b) =>
+          (project?.taskIdToDisplayIndex[a.id] || 0) - (project?.taskIdToDisplayIndex[b.id] || 0),
+      )
     }
     return map
   }, [tasks, project])
@@ -60,7 +71,7 @@ export default function BoardView({ tasks }: Props) {
     setDragId(null)
     if (!fromId) return
     // Update task status when moved between columns
-    const task = tasks.find(t => t.id === fromId)
+    const task = tasks.find((t) => t.id === fromId)
     if (!task || task.status === status) return
     try {
       await updateTask(fromId, { status })
@@ -109,8 +120,14 @@ export default function BoardView({ tasks }: Props) {
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); scrollByCols(-1) }
-    if (e.key === 'ArrowRight') { e.preventDefault(); scrollByCols(1) }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      scrollByCols(-1)
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      scrollByCols(1)
+    }
   }
 
   const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -123,22 +140,46 @@ export default function BoardView({ tasks }: Props) {
     }
   }
 
-  if (!project){
-    return  <div className="empty" aria-live="polite">Loading...</div>
+  if (!project) {
+    return (
+      <div className="empty" aria-live="polite">
+        Loading...
+      </div>
+    )
   }
 
   const viewportClass = `board-viewport${canScrollLeft ? ' is-scroll-left' : ''}${canScrollRight ? ' is-scroll-right' : ''}`
 
   return (
-    <div className={viewportClass} ref={viewportRef} onKeyDown={onKeyDown} onWheel={onWheel} tabIndex={0} role="region" aria-label="Board columns">
+    <div
+      className={viewportClass}
+      ref={viewportRef}
+      onKeyDown={onKeyDown}
+      onWheel={onWheel}
+      tabIndex={0}
+      role="region"
+      aria-label="Board columns"
+    >
       {canScrollLeft && (
-        <button className="board-nav board-nav--left" aria-label="Scroll left" onClick={() => scrollByCols(-1)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        <button
+          className="board-nav board-nav--left"
+          aria-label="Scroll left"
+          onClick={() => scrollByCols(-1)}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+          </svg>
         </button>
       )}
       {canScrollRight && (
-        <button className="board-nav board-nav--right" aria-label="Scroll right" onClick={() => scrollByCols(1)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+        <button
+          className="board-nav board-nav--right"
+          aria-label="Scroll right"
+          onClick={() => scrollByCols(1)}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z" />
+          </svg>
         </button>
       )}
 
@@ -146,17 +187,37 @@ export default function BoardView({ tasks }: Props) {
         {STATUS_ORDER.map((s) => (
           <div
             key={s}
-            ref={(el) => { colRefs.current[s] = el }}
+            ref={(el) => {
+              colRefs.current[s] = el
+            }}
             className={`board-col ${dragOver === s ? 'drag-over' : ''} ${
-              s === '+' ? 'board-col--status-done' : s === '~' ? 'board-col--status-inprogress' : s === '-' ? 'board-col--status-pending' : s === '?' ? 'board-col--status-blocked' : 'board-col--status-deferred'
+              s === '+'
+                ? 'board-col--status-done'
+                : s === '~'
+                  ? 'board-col--status-inprogress'
+                  : s === '-'
+                    ? 'board-col--status-pending'
+                    : s === '?'
+                      ? 'board-col--status-blocked'
+                      : 'board-col--status-deferred'
             }`}
             onDragOver={(e) => onDragOverCol(e, s)}
             onDrop={(e) => onDropCol(e, s)}
             aria-label={`${STATUS_LABELS[s]} column`}
           >
-            <div className={`board-col__header ${
-              s === '+' ? 'header-done' : s === '~' ? 'header-inprogress' : s === '-' ? 'header-pending' : s === '?' ? 'header-blocked' : 'header-deferred'
-            }`}>
+            <div
+              className={`board-col__header ${
+                s === '+'
+                  ? 'header-done'
+                  : s === '~'
+                    ? 'header-inprogress'
+                    : s === '-'
+                      ? 'header-pending'
+                      : s === '?'
+                        ? 'header-blocked'
+                        : 'header-deferred'
+              }`}
+            >
               <div className="board-col__title">
                 <StatusControl status={s} />
               </div>
@@ -167,7 +228,7 @@ export default function BoardView({ tasks }: Props) {
                 <div className="empty">No tasks</div>
               ) : (
                 grouped[s].map((t) => (
-                  <TaskCard 
+                  <TaskCard
                     key={t.id}
                     project={project}
                     task={t}

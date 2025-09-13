@@ -61,12 +61,12 @@ We will use a tool like **Nx** or **Turborepo** to manage dependencies and build
 ### Shared Packages
 
 - **`@acme/core`**: This package will contain all platform-agnostic logic:
-    - TypeScript types and interfaces for all data models.
-    - Business logic and services (e.g., task management, project logic).
-    - Validation schemas.
+  - TypeScript types and interfaces for all data models.
+  - Business logic and services (e.g., task management, project logic).
+  - Validation schemas.
 - **`@acme/ui`**: A shared component library built with React and React Native.
-    - We will use a strategy like React Native Web or platform-specific file extensions (`*.web.tsx`, `*.native.tsx`) to maximize code reuse.
-    - Storybook will be used for isolated component development and documentation.
+  - We will use a strategy like React Native Web or platform-specific file extensions (`*.web.tsx`, `*.native.tsx`) to maximize code reuse.
+  - Storybook will be used for isolated component development and documentation.
 - **`@acme/api-client`**: An auto-generated client for our REST API, providing type-safe ways to interact with the backend.
 
 ### Extraction Strategy
@@ -84,13 +84,13 @@ The application must be highly functional in offline mode. This will be achieved
 ### Core Concepts
 
 - **Local Database**: Each client will have its own local database.
-    - **Web**: IndexedDB
-    - **Mobile**: SQLite
-    - **Electron**: SQLite or the existing file-based system initially.
+  - **Web**: IndexedDB
+  - **Mobile**: SQLite
+  - **Electron**: SQLite or the existing file-based system initially.
 - **Abstraction Layer**: A library like **WatermelonDB** or **RxDB** will be used. These libraries provide a reactive data layer that abstracts over the underlying database and comes with built-in sync protocols.
 - **Sync Engine**: The engine will run in the background, observing changes in the local database and synchronizing them with the backend.
-    - **Push**: Local changes are queued and sent to the backend as mutations.
-    - **Pull**: The client subscribes to backend changes (via WebSockets or periodic polling) and applies them to the local database.
+  - **Push**: Local changes are queued and sent to the backend as mutations.
+  - **Pull**: The client subscribes to backend changes (via WebSockets or periodic polling) and applies them to the local database.
 - **Conflict Resolution**: We will favor a CRDT (Conflict-free Replicated Data Type) based approach where possible to automatically handle merge conflicts from concurrent edits. For more complex conflicts, a "last-write-wins" policy or user-driven resolution might be implemented.
 
 ### Data Flow
@@ -107,19 +107,19 @@ The application must be highly functional in offline mode. This will be achieved
 ## 4. Client-Specific Adaptation Plans
 
 - **Electron App**:
-    - The primary focus will be on refactoring the renderer process to use the shared `@acme/core` and `@acme/ui` packages.
-    - The main process logic will be reviewed to determine what should be moved to the backend versus what is inherently desktop-specific (e.g., deep OS integrations, file system access).
-    - It will be the first client to integrate the new sync engine, serving as a pilot for the architecture.
+  - The primary focus will be on refactoring the renderer process to use the shared `@acme/core` and `@acme/ui` packages.
+  - The main process logic will be reviewed to determine what should be moved to the backend versus what is inherently desktop-specific (e.g., deep OS integrations, file system access).
+  - It will be the first client to integrate the new sync engine, serving as a pilot for the architecture.
 
 - **React Web App**:
-    - A new single-page application (SPA) built with React.
-    - It will be composed primarily from the shared packages.
-    - Will require its own routing, build configuration, and deployment pipeline.
+  - A new single-page application (SPA) built with React.
+  - It will be composed primarily from the shared packages.
+  - Will require its own routing, build configuration, and deployment pipeline.
 
 - **React Native Mobile App**:
-    - A new application for iOS and Android.
-    - Will reuse `@acme/core` and `@acme/api-client` directly.
-    - The `@acme/ui` package will provide the foundation for the UI, with platform-specific adjustments and components created as needed.
+  - A new application for iOS and Android.
+  - Will reuse `@acme/core` and `@acme/api-client` directly.
+  - The `@acme/ui` package will provide the foundation for the UI, with platform-specific adjustments and components created as needed.
 
 ---
 
@@ -128,25 +128,25 @@ The application must be highly functional in offline mode. This will be achieved
 The migration will be phased to minimize risk and deliver value incrementally.
 
 - **Phase 1: Foundation (Current Quarter)**
-    - [ ] Set up the monorepo with Turborepo.
-    - [ ] Develop the v1 backend service with user authentication and core data models (e.g., projects, tasks).
-    - [ ] Create the `@acme/core` package and begin migrating shared types and services.
-    - [ ] Define the REST schema and set up `@acme/api-client`, use Open-api to generate an api spec that can be used by clients.
+  - [ ] Set up the monorepo with Turborepo.
+  - [ ] Develop the v1 backend service with user authentication and core data models (e.g., projects, tasks).
+  - [ ] Create the `@acme/core` package and begin migrating shared types and services.
+  - [ ] Define the REST schema and set up `@acme/api-client`, use Open-api to generate an api spec that can be used by clients.
 
 - **Phase 2: Electron App Integration (Next Quarter)**
-    - [ ] Integrate the sync engine into the Electron app.
-    - [ ] Refactor the app to use the backend as its source of truth, mediated by the local database.
-    - [ ] Deprecate the old local storage mechanism in favor of the new sync-based persistence.
+  - [ ] Integrate the sync engine into the Electron app.
+  - [ ] Refactor the app to use the backend as its source of truth, mediated by the local database.
+  - [ ] Deprecate the old local storage mechanism in favor of the new sync-based persistence.
 
 - **Phase 3: Web App Launch (Following Quarter)**
-    - [ ] Develop the React web application, reusing all shared packages.
-    - [ ] Achieve feature-parity for core functionalities.
-    - [ ] Set up hosting and a CI/CD pipeline for the web app.
+  - [ ] Develop the React web application, reusing all shared packages.
+  - [ ] Achieve feature-parity for core functionalities.
+  - [ ] Set up hosting and a CI/CD pipeline for the web app.
 
 - **Phase 4: Mobile App Launch (TBD)**
-    - [ ] Develop the React Native mobile application.
-    - [ ] Extend the `@acme/ui` package for mobile-specific needs.
-    - [ ] Publish to App Store and Google Play.
+  - [ ] Develop the React Native mobile application.
+  - [ ] Extend the `@acme/ui` package for mobile-specific needs.
+  - [ ] Publish to App Store and Google Play.
 
 ---
 
@@ -168,9 +168,9 @@ The migration will be phased to minimize risk and deliver value incrementally.
 - **UI Subscriptions**: React components will subscribe directly to queries on the local database. The UI will re-render automatically when data changes, whether from a user action or a background sync.
 - **Client UI State**: For non-persistent UI state (e.g., form state, modal visibility), a lightweight state manager like **Zustand** or **Jotai** will be used.
 - **Separation of Concerns**: This approach creates a clean separation:
-    - **Domain Data**: Handled by the reactive database layer.
-    - **Remote State**: Managed implicitly by the sync engine.
-    - **Local UI State**: Managed by a minimal state manager.
+  - **Domain Data**: Handled by the reactive database layer.
+  - **Remote State**: Managed implicitly by the sync engine.
+  - **Local UI State**: Managed by a minimal state manager.
 
 ---
 
@@ -178,8 +178,8 @@ The migration will be phased to minimize risk and deliver value incrementally.
 
 - **Centralized Scripts**: The monorepo root `package.json` will contain scripts to build, test, and lint the entire project or individual apps/packages.
 - **CI/CD**: GitHub Actions will be configured to:
-    - Run linting and unit tests on every pull request.
-    - Run integration tests against a test backend.
-    - Deploy the backend and client applications on merge to the main branch.
+  - Run linting and unit tests on every pull request.
+  - Run integration tests against a test backend.
+  - Deploy the backend and client applications on merge to the main branch.
 - **Component Development**: `@acme/ui` components will be developed in isolation using Storybook, with visual regression testing to prevent unintended changes.
 - **Type Safety**: End-to-end type safety will be a priority, from the database schema to the API layer (via GraphQL Code Generator) to the UI components.

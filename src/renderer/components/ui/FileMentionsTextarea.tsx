@@ -116,7 +116,11 @@ export default function FileMentionsTextarea({
       {isFilesOpen && filesPosition && (
         <div
           className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
-          style={{ left: `${filesPosition.left}px`, top: `${filesPosition.top}px`, transform: 'translateY(-100%)' }}
+          style={{
+            left: `${filesPosition.left}px`,
+            top: `${filesPosition.top}px`,
+            transform: 'translateY(-100%)',
+          }}
           role="listbox"
           aria-label="Files suggestions"
         >
@@ -136,7 +140,11 @@ export default function FileMentionsTextarea({
       {isRefsOpen && refsPosition && (
         <div
           className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
-          style={{ left: `${refsPosition.left}px`, top: `${refsPosition.top}px`, transform: 'translateY(-100%)' }}
+          style={{
+            left: `${refsPosition.left}px`,
+            top: `${refsPosition.top}px`,
+            transform: 'translateY(-100%)',
+          }}
           role="listbox"
           aria-label="References suggestions"
         >

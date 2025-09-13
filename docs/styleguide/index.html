@@ -1,296 +1,568 @@
 <!doctype html>
 <html lang="en" data-theme="light">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Design System Style Guide</title>
-  <link rel="stylesheet" href="../../src/styles/design-tokens.css" />
-  <link rel="stylesheet" href="../../src/index.css" />
-  <style>
-    :root { --sgw: 1080px; }
-    body { font-family: var(--font-sans); }
-    .sg { max-width: var(--sgw); margin: 24px auto; padding: 0 16px 60px; }
-    .sg-header { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin-bottom: 20px; }
-    .sg-title { margin: 0; font-size: var(--fs-2xl); line-height: var(--lh-tight); }
-    .sg-controls { display:flex; gap: 8px; align-items:center; }
-    .sg-section { margin: 28px 0; }
-    .sg-section h2 { font-size: var(--fs-xl); margin: 0 0 10px; }
-    .grid { display:grid; grid-template-columns: repeat(6, minmax(120px,1fr)); gap: 10px; }
-    .swatch { border:1px solid var(--border-default); border-radius: 10px; overflow: hidden; }
-    .swatch__color { height: 56px; }
-    .swatch__meta { padding: 8px; font-size: 12px; color: var(--text-secondary); }
-    .typescale { display:flex; flex-direction:column; gap: 8px; }
-    .typescale p { margin: 0; }
-    .spacing-row { display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
-    .box { background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: 10px; padding: 10px; }
-    .shadow-grid { display:grid; grid-template-columns: repeat(4, minmax(140px,1fr)); gap: 12px; }
-    .shadow-item { height: 80px; border-radius: 12px; background: var(--surface-overlay); display:flex; align-items:center; justify-content:center; border: 1px solid var(--border-subtle); }
-    .radii-grid { display:grid; grid-template-columns: repeat(6, minmax(120px,1fr)); gap: 12px; }
-    .radii-item { height: 64px; background: var(--surface-raised); border:1px solid var(--border-default); display:flex; align-items:center; justify-content:center; }
-    .comp-row { display:flex; align-items:center; gap: 12px; flex-wrap: wrap; }
-    .kbd { background: transparent; }
-    .pill { display:inline-flex; align-items:center; gap:6px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border-default); font-size: 12px; }
-    .demo-card { width: 280px; }
-    .sg-note { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
-    .mute { color: var(--text-muted); }
-    .divider { height: 1px; background: var(--border-subtle); margin: 16px 0; }
-  </style>
-</head>
-<body>
-  <div class="sg">
-    <div class="sg-header">
-      <h1 class="sg-title">Design System Style Guide</h1>
-      <div class="sg-controls">
-        <label class="pill"><input type="checkbox" id="themeToggle"> Dark mode</label>
-        <label class="pill"><input type="checkbox" id="densityToggle"> Compact density</label>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Design System Style Guide</title>
+    <link rel="stylesheet" href="../../src/styles/design-tokens.css" />
+    <link rel="stylesheet" href="../../src/index.css" />
+    <style>
+      :root {
+        --sgw: 1080px;
+      }
+      body {
+        font-family: var(--font-sans);
+      }
+      .sg {
+        max-width: var(--sgw);
+        margin: 24px auto;
+        padding: 0 16px 60px;
+      }
+      .sg-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .sg-title {
+        margin: 0;
+        font-size: var(--fs-2xl);
+        line-height: var(--lh-tight);
+      }
+      .sg-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .sg-section {
+        margin: 28px 0;
+      }
+      .sg-section h2 {
+        font-size: var(--fs-xl);
+        margin: 0 0 10px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 10px;
+      }
+      .swatch {
+        border: 1px solid var(--border-default);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .swatch__color {
+        height: 56px;
+      }
+      .swatch__meta {
+        padding: 8px;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+      .typescale {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .typescale p {
+        margin: 0;
+      }
+      .spacing-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .box {
+        background: var(--surface-raised);
+        border: 1px solid var(--border-default);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .shadow-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
+        gap: 12px;
+      }
+      .shadow-item {
+        height: 80px;
+        border-radius: 12px;
+        background: var(--surface-overlay);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-subtle);
+      }
+      .radii-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 12px;
+      }
+      .radii-item {
+        height: 64px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border-default);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .comp-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .kbd {
+        background: transparent;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border-default);
+        font-size: 12px;
+      }
+      .demo-card {
+        width: 280px;
+      }
+      .sg-note {
+        color: var(--text-secondary);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .mute {
+        color: var(--text-muted);
+      }
+      .divider {
+        height: 1px;
+        background: var(--border-subtle);
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sg">
+      <div class="sg-header">
+        <h1 class="sg-title">Design System Style Guide</h1>
+        <div class="sg-controls">
+          <label class="pill"><input type="checkbox" id="themeToggle" /> Dark mode</label>
+          <label class="pill"><input type="checkbox" id="densityToggle" /> Compact density</label>
+        </div>
       </div>
-    </div>
-    <p class="mute">Monday-style vibrant palette with Linear-grade UX. This page uses the same CSS variable tokens as the app.</p>
+      <p class="mute">
+        Monday-style vibrant palette with Linear-grade UX. This page uses the same CSS variable
+        tokens as the app.
+      </p>
 
-    <div class="sg-section" id="colors">
-      <h2>Color Palette and Semantics</h2>
-      <div class="grid">
-        <div class="swatch"><div class="swatch__color" style="background:var(--color-brand-600)"></div><div class="swatch__meta">brand-600 #0073EA
-          <div class="sg-note">accent.primary</div></div></div>
-        <div class="swatch"><div class="swatch__color" style="background:var(--color-green-600)"></div><div class="swatch__meta">green-600 (Done)</div></div>
-        <div class="swatch"><div class="swatch__color" style="background:var(--color-orange-650)"></div><div class="swatch__meta">orange-650 (Working)</div></div>
-        <div class="swatch"><div class="swatch__color" style="background:var(--color-red-600)"></div><div class="swatch__meta">red-600 (Stuck)</div></div>
-        <div class="swatch"><div class="swatch__color" style="background:var(--color-purple-650)"></div><div class="swatch__meta">purple-650 (On Hold)</div></div>
-        <div class="swatch"><div class="swatch__color" style="background:var(--color-blue-650)"></div><div class="swatch__meta">blue-650 (Review)</div></div>
-      </div>
-      <div class="divider"></div>
-      <div class="comp-row">
-        <span class="badge badge--soft badge--done">Done</span>
-        <span class="badge badge--soft badge--working">Working</span>
-        <span class="badge badge--soft badge--stuck">Stuck</span>
-        <span class="badge badge--soft badge--onhold">On Hold</span>
-        <span class="badge badge--soft badge--review">Review</span>
-        <span class="badge badge--soft badge--queued">Queued</span>
-        <span class="badge badge--soft badge--blocked">Blocked</span>
-      </div>
-      <div class="sg-note">Soft badges are recommended for dense lists; bold variants for emphasis.</div>
-    </div>
-
-    <div class="sg-section" id="typography">
-      <h2>Typography</h2>
-      <div class="typescale">
-        <p style="font-size:var(--fs-3xl); line-height:var(--lh-tight); font-weight:var(--fw-bold)">Page Title — fs-3xl</p>
-        <p style="font-size:var(--fs-2xl); line-height:var(--lh-tight); font-weight:var(--fw-semibold)">Section Title — fs-2xl</p>
-        <p style="font-size:var(--fs-xl); line-height:var(--lh-snug); font-weight:var(--fw-semibold)">Headline — fs-xl</p>
-        <p style="font-size:var(--fs-lg); line-height:var(--lh-normal); font-weight:var(--fw-medium)">Subhead — fs-lg</p>
-        <p style="font-size:var(--fs-md); line-height:var(--lh-normal)">Body Large — fs-md</p>
-        <p style="font-size:var(--fs-sm); line-height:var(--lh-relaxed)">Body — fs-sm</p>
-        <p style="font-size:var(--fs-xs); line-height:var(--lh-relaxed); color:var(--text-secondary)">Meta — fs-xs</p>
-      </div>
-    </div>
-
-    <div class="sg-section" id="spacing">
-      <h2>Spacing</h2>
-      <div class="spacing-row">
-        <div class="box" style="padding:var(--space-4)">space-4</div>
-        <div class="box" style="padding:var(--space-6)">space-6</div>
-        <div class="box" style="padding:var(--space-8)">space-8</div>
-        <div class="box" style="padding:var(--space-12)">space-12</div>
-        <div class="box" style="padding:var(--space-16)">space-16</div>
-        <div class="box" style="padding:var(--space-24)">space-24</div>
-      </div>
-    </div>
-
-    <div class="sg-section" id="elevation">
-      <h2>Elevation and Radii</h2>
-      <div class="shadow-grid">
-        <div class="shadow-item" style="box-shadow:var(--shadow-0)">shadow-0</div>
-        <div class="shadow-item" style="box-shadow:var(--shadow-1)">shadow-1</div>
-        <div class="shadow-item" style="box-shadow:var(--shadow-2)">shadow-2</div>
-        <div class="shadow-item" style="box-shadow:var(--shadow-3)">shadow-3</div>
-      </div>
-      <div class="divider"></div>
-      <div class="radii-grid">
-        <div class="radii-item" style="border-radius:var(--radius-1)">radius-1</div>
-        <div class="radii-item" style="border-radius:var(--radius-2)">radius-2</div>
-        <div class="radii-item" style="border-radius:var(--radius-3)">radius-3</div>
-        <div class="radii-item" style="border-radius:var(--radius-4)">radius-4</div>
-        <div class="radii-item" style="border-radius:var(--radius-5)">radius-5</div>
-        <div class="radii-item" style="border-radius:var(--radius-round)">round</div>
-      </div>
-    </div>
-
-    <div class="sg-section" id="components">
-      <h2>Components</h2>
-      <h3>Buttons</h3>
-      <div class="comp-row">
-        <button class="btn">Primary</button>
-        <button class="btn" disabled>Primary Disabled</button>
-        <button class="btn-secondary">Secondary</button>
-        <button class="btn-secondary" disabled>Secondary Disabled</button>
-        <button class="btn" id="btnLoading">
-          <span>Loading</span>
-          <svg class="ui-spinner" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="margin-left:8px; vertical-align:middle">
-            <circle class="ui-spinner__track" cx="12" cy="12" r="8" stroke-width="3" fill="none"></circle>
-            <circle class="ui-spinner__indicator" cx="12" cy="12" r="8" stroke-width="3" fill="none"></circle>
-          </svg>
-        </button>
-      </div>
-      <div class="sg-note">Primary buttons use accent.primary tokens and visible focus rings.</div>
-
-      <h3>Inputs</h3>
-      <div class="comp-row">
-        <input type="text" placeholder="Text input" style="height:var(--control-h-md); padding: 0 var(--control-pad-x); background:var(--surface-raised); border:1px solid var(--border-default); border-radius:var(--radius-2); color:var(--text-primary)" />
-        <select class="ui-select">
-          <option>Option A</option>
-          <option>Option B</option>
-        </select>
-        <select class="ui-select ui-select--sm">
-          <option>Small</option>
-          <option>Compact</option>
-        </select>
-      </div>
-
-      <h3>Badges and Priority</h3>
-      <div class="comp-row">
-        <span class="badge badge--soft badge--done">Done</span>
-        <span class="badge badge--bold badge--working">Working</span>
-        <span class="priority-tag priority--p0">P0</span>
-        <span class="priority-tag priority--p1">P1</span>
-        <span class="priority-tag priority--p2">P2</span>
-        <span class="priority-tag priority--p3">P3</span>
-      </div>
-
-      <h3>Tooltip</h3>
-      <div class="comp-row" style="position:relative; gap:24px; align-items:flex-start;">
-        <button class="btn-secondary" id="tooltipTrigger" style="position:relative">Hover me</button>
-        <div class="ui-tooltip" id="tooltipDemo" style="left:0; top:0; display:none">
-          <div class="ui-tooltip__content">Contextual info about this control goes here.</div>
+      <div class="sg-section" id="colors">
+        <h2>Color Palette and Semantics</h2>
+        <div class="grid">
+          <div class="swatch">
+            <div class="swatch__color" style="background: var(--color-brand-600)"></div>
+            <div class="swatch__meta">
+              brand-600 #0073EA
+              <div class="sg-note">accent.primary</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background: var(--color-green-600)"></div>
+            <div class="swatch__meta">green-600 (Done)</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background: var(--color-orange-650)"></div>
+            <div class="swatch__meta">orange-650 (Working)</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background: var(--color-red-600)"></div>
+            <div class="swatch__meta">red-600 (Stuck)</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background: var(--color-purple-650)"></div>
+            <div class="swatch__meta">purple-650 (On Hold)</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch__color" style="background: var(--color-blue-650)"></div>
+            <div class="swatch__meta">blue-650 (Review)</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="comp-row">
+          <span class="badge badge--soft badge--done">Done</span>
+          <span class="badge badge--soft badge--working">Working</span>
+          <span class="badge badge--soft badge--stuck">Stuck</span>
+          <span class="badge badge--soft badge--onhold">On Hold</span>
+          <span class="badge badge--soft badge--review">Review</span>
+          <span class="badge badge--soft badge--queued">Queued</span>
+          <span class="badge badge--soft badge--blocked">Blocked</span>
+        </div>
+        <div class="sg-note">
+          Soft badges are recommended for dense lists; bold variants for emphasis.
         </div>
       </div>
 
-      <h3>Spinner & Skeleton</h3>
-      <div class="comp-row">
-        <svg class="ui-spinner" width="24" height="24" viewBox="0 0 24 24" aria-label="Loading">
-          <circle class="ui-spinner__track" cx="12" cy="12" r="8" stroke-width="3" fill="none"></circle>
-          <circle class="ui-spinner__indicator" cx="12" cy="12" r="8" stroke-width="3" fill="none"></circle>
-        </svg>
-        <div class="ui-skeleton" style="width:160px"></div>
-        <div class="ui-skeleton" style="width:80px"></div>
+      <div class="sg-section" id="typography">
+        <h2>Typography</h2>
+        <div class="typescale">
+          <p
+            style="
+              font-size: var(--fs-3xl);
+              line-height: var(--lh-tight);
+              font-weight: var(--fw-bold);
+            "
+          >
+            Page Title — fs-3xl
+          </p>
+          <p
+            style="
+              font-size: var(--fs-2xl);
+              line-height: var(--lh-tight);
+              font-weight: var(--fw-semibold);
+            "
+          >
+            Section Title — fs-2xl
+          </p>
+          <p
+            style="
+              font-size: var(--fs-xl);
+              line-height: var(--lh-snug);
+              font-weight: var(--fw-semibold);
+            "
+          >
+            Headline — fs-xl
+          </p>
+          <p
+            style="
+              font-size: var(--fs-lg);
+              line-height: var(--lh-normal);
+              font-weight: var(--fw-medium);
+            "
+          >
+            Subhead — fs-lg
+          </p>
+          <p style="font-size: var(--fs-md); line-height: var(--lh-normal)">Body Large — fs-md</p>
+          <p style="font-size: var(--fs-sm); line-height: var(--lh-relaxed)">Body — fs-sm</p>
+          <p
+            style="
+              font-size: var(--fs-xs);
+              line-height: var(--lh-relaxed);
+              color: var(--text-secondary);
+            "
+          >
+            Meta — fs-xs
+          </p>
+        </div>
       </div>
 
-      <h3>Card</h3>
-      <div class="task-card demo-card">
-        <div class="task-card__header">
-          <span class="task-card__id">T-102</span>
-          <span class="badge badge--soft badge--review">In Review</span>
+      <div class="sg-section" id="spacing">
+        <h2>Spacing</h2>
+        <div class="spacing-row">
+          <div class="box" style="padding: var(--space-4)">space-4</div>
+          <div class="box" style="padding: var(--space-6)">space-6</div>
+          <div class="box" style="padding: var(--space-8)">space-8</div>
+          <div class="box" style="padding: var(--space-12)">space-12</div>
+          <div class="box" style="padding: var(--space-16)">space-16</div>
+          <div class="box" style="padding: var(--space-24)">space-24</div>
         </div>
-        <div class="task-card__title">Add new onboarding checklist</div>
-        <div class="task-card__meta">
+      </div>
+
+      <div class="sg-section" id="elevation">
+        <h2>Elevation and Radii</h2>
+        <div class="shadow-grid">
+          <div class="shadow-item" style="box-shadow: var(--shadow-0)">shadow-0</div>
+          <div class="shadow-item" style="box-shadow: var(--shadow-1)">shadow-1</div>
+          <div class="shadow-item" style="box-shadow: var(--shadow-2)">shadow-2</div>
+          <div class="shadow-item" style="box-shadow: var(--shadow-3)">shadow-3</div>
+        </div>
+        <div class="divider"></div>
+        <div class="radii-grid">
+          <div class="radii-item" style="border-radius: var(--radius-1)">radius-1</div>
+          <div class="radii-item" style="border-radius: var(--radius-2)">radius-2</div>
+          <div class="radii-item" style="border-radius: var(--radius-3)">radius-3</div>
+          <div class="radii-item" style="border-radius: var(--radius-4)">radius-4</div>
+          <div class="radii-item" style="border-radius: var(--radius-5)">radius-5</div>
+          <div class="radii-item" style="border-radius: var(--radius-round)">round</div>
+        </div>
+      </div>
+
+      <div class="sg-section" id="components">
+        <h2>Components</h2>
+        <h3>Buttons</h3>
+        <div class="comp-row">
+          <button class="btn">Primary</button>
+          <button class="btn" disabled>Primary Disabled</button>
+          <button class="btn-secondary">Secondary</button>
+          <button class="btn-secondary" disabled>Secondary Disabled</button>
+          <button class="btn" id="btnLoading">
+            <span>Loading</span>
+            <svg
+              class="ui-spinner"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style="margin-left: 8px; vertical-align: middle"
+            >
+              <circle
+                class="ui-spinner__track"
+                cx="12"
+                cy="12"
+                r="8"
+                stroke-width="3"
+                fill="none"
+              ></circle>
+              <circle
+                class="ui-spinner__indicator"
+                cx="12"
+                cy="12"
+                r="8"
+                stroke-width="3"
+                fill="none"
+              ></circle>
+            </svg>
+          </button>
+        </div>
+        <div class="sg-note">
+          Primary buttons use accent.primary tokens and visible focus rings.
+        </div>
+
+        <h3>Inputs</h3>
+        <div class="comp-row">
+          <input
+            type="text"
+            placeholder="Text input"
+            style="
+              height: var(--control-h-md);
+              padding: 0 var(--control-pad-x);
+              background: var(--surface-raised);
+              border: 1px solid var(--border-default);
+              border-radius: var(--radius-2);
+              color: var(--text-primary);
+            "
+          />
+          <select class="ui-select">
+            <option>Option A</option>
+            <option>Option B</option>
+          </select>
+          <select class="ui-select ui-select--sm">
+            <option>Small</option>
+            <option>Compact</option>
+          </select>
+        </div>
+
+        <h3>Badges and Priority</h3>
+        <div class="comp-row">
+          <span class="badge badge--soft badge--done">Done</span>
+          <span class="badge badge--bold badge--working">Working</span>
+          <span class="priority-tag priority--p0">P0</span>
           <span class="priority-tag priority--p1">P1</span>
+          <span class="priority-tag priority--p2">P2</span>
+          <span class="priority-tag priority--p3">P3</span>
+        </div>
+
+        <h3>Tooltip</h3>
+        <div class="comp-row" style="position: relative; gap: 24px; align-items: flex-start">
+          <button class="btn-secondary" id="tooltipTrigger" style="position: relative">
+            Hover me
+          </button>
+          <div class="ui-tooltip" id="tooltipDemo" style="left: 0; top: 0; display: none">
+            <div class="ui-tooltip__content">Contextual info about this control goes here.</div>
+          </div>
+        </div>
+
+        <h3>Spinner & Skeleton</h3>
+        <div class="comp-row">
+          <svg class="ui-spinner" width="24" height="24" viewBox="0 0 24 24" aria-label="Loading">
+            <circle
+              class="ui-spinner__track"
+              cx="12"
+              cy="12"
+              r="8"
+              stroke-width="3"
+              fill="none"
+            ></circle>
+            <circle
+              class="ui-spinner__indicator"
+              cx="12"
+              cy="12"
+              r="8"
+              stroke-width="3"
+              fill="none"
+            ></circle>
+          </svg>
+          <div class="ui-skeleton" style="width: 160px"></div>
+          <div class="ui-skeleton" style="width: 80px"></div>
+        </div>
+
+        <h3>Card</h3>
+        <div class="task-card demo-card">
+          <div class="task-card__header">
+            <span class="task-card__id">T-102</span>
+            <span class="badge badge--soft badge--review">In Review</span>
+          </div>
+          <div class="task-card__title">Add new onboarding checklist</div>
+          <div class="task-card__meta">
+            <span class="priority-tag priority--p1">P1</span>
+          </div>
+        </div>
+
+        <h3>Overlays (Command Menu, Help, Modal, Toast)</h3>
+        <div class="comp-row">
+          <button class="btn-secondary" id="openCmd">Open Command Menu (Cmd/Ctrl+K)</button>
+          <button class="btn-secondary" id="openHelp">Open Shortcuts Help (?)</button>
+          <button class="btn-secondary" id="openToast">Show Toast</button>
+        </div>
+        <div class="cmd-overlay" id="cmdOverlay" style="display: none">
+          <div class="cmd" role="dialog" aria-label="Command Menu">
+            <div class="cmd__input">
+              <input placeholder="Type a command or search..." autofocus />
+            </div>
+            <div class="cmd__list">
+              <div class="cmd__item">
+                <button>New Task <span class="cmd__shortcut">Cmd/Ctrl+N</span></button>
+              </div>
+              <div class="cmd__item"><button>Go to My Tasks</button></div>
+              <div class="cmd__item"><button>Toggle Theme</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="help-overlay" id="helpOverlay" style="display: none">
+          <div class="help" role="dialog" aria-label="Keyboard Shortcuts">
+            <div class="help__header">
+              <h4 class="help__title">Keyboard Shortcuts</h4>
+              <button class="help__close" id="closeHelp">×</button>
+            </div>
+            <div class="help__body">
+              <ul class="help__list">
+                <li class="help__item">
+                  <span class="help__desc">Open Command Menu</span
+                  ><span class="help__keys">Cmd/Ctrl+K</span>
+                </li>
+                <li class="help__item">
+                  <span class="help__desc">Focus Search</span><span class="help__keys">/</span>
+                </li>
+                <li class="help__item">
+                  <span class="help__desc">Open Shortcuts Help</span
+                  ><span class="help__keys">?</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div
+          id="toast"
+          class="box"
+          style="
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            display: none;
+            box-shadow: var(--shadow-2);
+          "
+        >
+          Task created — Undo
         </div>
       </div>
 
-      <h3>Overlays (Command Menu, Help, Modal, Toast)</h3>
-      <div class="comp-row">
-        <button class="btn-secondary" id="openCmd">Open Command Menu (Cmd/Ctrl+K)</button>
-        <button class="btn-secondary" id="openHelp">Open Shortcuts Help (?)</button>
-        <button class="btn-secondary" id="openToast">Show Toast</button>
+      <div class="sg-section">
+        <h2>Improvements over References</h2>
+        <ul>
+          <li>Contrast-correct foregrounds for orange/yellow ensure WCAG compliance.</li>
+          <li>Unified soft/bold status tokens across light/dark themes.</li>
+          <li>Density toggle for compact boards without sacrificing readability.</li>
+          <li>Motion tokens standardize micro-interaction timings and easing.</li>
+          <li>Consistent select styling (.ui-select) across app and docs.</li>
+        </ul>
       </div>
-      <div class="cmd-overlay" id="cmdOverlay" style="display:none">
-        <div class="cmd" role="dialog" aria-label="Command Menu">
-          <div class="cmd__input"><input placeholder="Type a command or search..." autofocus /></div>
-          <div class="cmd__list">
-            <div class="cmd__item"><button>New Task <span class="cmd__shortcut">Cmd/Ctrl+N</span></button></div>
-            <div class="cmd__item"><button>Go to My Tasks</button></div>
-            <div class="cmd__item"><button>Toggle Theme</button></div>
-          </div>
-        </div>
-      </div>
-      <div class="help-overlay" id="helpOverlay" style="display:none">
-        <div class="help" role="dialog" aria-label="Keyboard Shortcuts">
-          <div class="help__header">
-            <h4 class="help__title">Keyboard Shortcuts</h4>
-            <button class="help__close" id="closeHelp">×</button>
-          </div>
-          <div class="help__body">
-            <ul class="help__list">
-              <li class="help__item"><span class="help__desc">Open Command Menu</span><span class="help__keys">Cmd/Ctrl+K</span></li>
-              <li class="help__item"><span class="help__desc">Focus Search</span><span class="help__keys">/</span></li>
-              <li class="help__item"><span class="help__desc">Open Shortcuts Help</span><span class="help__keys">?</span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div id="toast" class="box" style="position:fixed; right:16px; bottom:16px; display:none; box-shadow:var(--shadow-2)">Task created — Undo</div>
     </div>
 
-    <div class="sg-section">
-      <h2>Improvements over References</h2>
-      <ul>
-        <li>Contrast-correct foregrounds for orange/yellow ensure WCAG compliance.</li>
-        <li>Unified soft/bold status tokens across light/dark themes.</li>
-        <li>Density toggle for compact boards without sacrificing readability.</li>
-        <li>Motion tokens standardize micro-interaction timings and easing.</li>
-        <li>Consistent select styling (.ui-select) across app and docs.</li>
-      </ul>
-    </div>
-  </div>
+    <script>
+      const html = document.documentElement
+      const themeToggle = document.getElementById('themeToggle')
+      const densityToggle = document.getElementById('densityToggle')
+      const cmdOverlay = document.getElementById('cmdOverlay')
+      const helpOverlay = document.getElementById('helpOverlay')
+      const openCmd = document.getElementById('openCmd')
+      const openHelp = document.getElementById('openHelp')
+      const closeHelp = document.getElementById('closeHelp')
+      const openToast = document.getElementById('openToast')
+      const toast = document.getElementById('toast')
+      const tooltipTrigger = document.getElementById('tooltipTrigger')
+      const tooltipDemo = document.getElementById('tooltipDemo')
 
-  <script>
-    const html = document.documentElement;
-    const themeToggle = document.getElementById('themeToggle');
-    const densityToggle = document.getElementById('densityToggle');
-    const cmdOverlay = document.getElementById('cmdOverlay');
-    const helpOverlay = document.getElementById('helpOverlay');
-    const openCmd = document.getElementById('openCmd');
-    const openHelp = document.getElementById('openHelp');
-    const closeHelp = document.getElementById('closeHelp');
-    const openToast = document.getElementById('openToast');
-    const toast = document.getElementById('toast');
-    const tooltipTrigger = document.getElementById('tooltipTrigger');
-    const tooltipDemo = document.getElementById('tooltipDemo');
+      // Theme toggle
+      function setTheme(dark) {
+        html.setAttribute('data-theme', dark ? 'dark' : 'light')
+        themeToggle.checked = !!dark
+      }
+      themeToggle.addEventListener('change', (e) => setTheme(e.target.checked))
 
-    // Theme toggle
-    function setTheme(dark) { html.setAttribute('data-theme', dark ? 'dark' : 'light'); themeToggle.checked = !!dark; }
-    themeToggle.addEventListener('change', e => setTheme(e.target.checked));
+      // Density toggle: adjust root font size and spacing subtly
+      function setDensity(compact) {
+        document.body.style.setProperty('--control-h-md', compact ? '30px' : '34px')
+        document.body.style.setProperty('--space-6', compact ? '10px' : '12px')
+        document.body.style.setProperty('--space-8', compact ? '14px' : '16px')
+        densityToggle.checked = !!compact
+      }
+      densityToggle.addEventListener('change', (e) => setDensity(e.target.checked))
 
-    // Density toggle: adjust root font size and spacing subtly
-    function setDensity(compact) {
-      document.body.style.setProperty('--control-h-md', compact ? '30px' : '34px');
-      document.body.style.setProperty('--space-6', compact ? '10px' : '12px');
-      document.body.style.setProperty('--space-8', compact ? '14px' : '16px');
-      densityToggle.checked = !!compact;
-    }
-    densityToggle.addEventListener('change', e => setDensity(e.target.checked));
+      // Overlays
+      openCmd.addEventListener('click', () => {
+        cmdOverlay.style.display = 'flex'
+      })
+      openHelp.addEventListener('click', () => {
+        helpOverlay.style.display = 'flex'
+      })
+      closeHelp.addEventListener('click', () => {
+        helpOverlay.style.display = 'none'
+      })
+      cmdOverlay.addEventListener('click', (e) => {
+        if (e.target === cmdOverlay) cmdOverlay.style.display = 'none'
+      })
+      helpOverlay.addEventListener('click', (e) => {
+        if (e.target === helpOverlay) helpOverlay.style.display = 'none'
+      })
 
-    // Overlays
-    openCmd.addEventListener('click', () => { cmdOverlay.style.display = 'flex'; });
-    openHelp.addEventListener('click', () => { helpOverlay.style.display = 'flex'; });
-    closeHelp.addEventListener('click', () => { helpOverlay.style.display = 'none'; });
-    cmdOverlay.addEventListener('click', (e) => { if (e.target === cmdOverlay) cmdOverlay.style.display = 'none'; });
-    helpOverlay.addEventListener('click', (e) => { if (e.target === helpOverlay) helpOverlay.style.display = 'none'; });
+      // Toast demo
+      openToast.addEventListener('click', () => {
+        toast.style.display = 'block'
+        setTimeout(() => {
+          toast.style.display = 'none'
+        }, 2500)
+      })
 
-    // Toast demo
-    openToast.addEventListener('click', () => {
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2500);
-    });
+      // Tooltip demo: naive positioning
+      tooltipTrigger.addEventListener('mouseenter', () => {
+        const r = tooltipTrigger.getBoundingClientRect()
+        tooltipDemo.style.display = 'block'
+        tooltipDemo.style.left = r.left + window.scrollX + 'px'
+        tooltipDemo.style.top = r.bottom + window.scrollY + 6 + 'px'
+      })
+      tooltipTrigger.addEventListener('mouseleave', () => {
+        tooltipDemo.style.display = 'none'
+      })
 
-    // Tooltip demo: naive positioning
-    tooltipTrigger.addEventListener('mouseenter', () => {
-      const r = tooltipTrigger.getBoundingClientRect();
-      tooltipDemo.style.display = 'block';
-      tooltipDemo.style.left = (r.left + window.scrollX) + 'px';
-      tooltipDemo.style.top = (r.bottom + window.scrollY + 6) + 'px';
-    });
-    tooltipTrigger.addEventListener('mouseleave', () => { tooltipDemo.style.display = 'none'; });
+      // Keyboard shortcuts for demo
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault()
+          cmdOverlay.style.display = 'flex'
+        }
+        if (e.key === '?') {
+          e.preventDefault()
+          helpOverlay.style.display = 'flex'
+        }
+        if (e.key === 'Escape') {
+          cmdOverlay.style.display = 'none'
+          helpOverlay.style.display = 'none'
+        }
+      })
 
-    // Keyboard shortcuts for demo
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdOverlay.style.display = 'flex'; }
-      if (e.key === '?') { e.preventDefault(); helpOverlay.style.display = 'flex'; }
-      if (e.key === 'Escape') { cmdOverlay.style.display = 'none'; helpOverlay.style.display = 'none'; }
-    });
-
-    // Initialize
-    setTheme(false);
-    setDensity(false);
-  </script>
-</body>
+      // Initialize
+      setTheme(false)
+      setDensity(false)
+    </script>
+  </body>
 </html>

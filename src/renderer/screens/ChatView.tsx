@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
 import { useChats } from '../hooks/useChats'
 import { useFilesAutocomplete } from '../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../hooks/useReferencesAutocomplete'
-import { useLLMConfig } from '../contexts/LLMConfigContext';
+import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import FileDisplay from '../components/ui/FileDisplay'
@@ -17,14 +23,8 @@ interface EnhancedMessage extends ChatMessage {
 }
 
 export default function ChatView() {
-  const {
-    currentChatId,
-    setCurrentChatId,
-    chatsById,
-    createChat,
-    deleteChat,
-    sendMessage
-  } = useChats()
+  const { currentChatId, setCurrentChatId, chatsById, createChat, deleteChat, sendMessage } =
+    useChats()
   const { files, filesByPath, uploadFile } = useFiles()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
@@ -43,7 +43,13 @@ export default function ChatView() {
     matches: matchingDocs,
     position: autocompletePosition,
     onSelect: onAutocompleteSelect,
-  } = useFilesAutocomplete({ filesList: files.map(f => f.path), input, setInput, textareaRef, mirrorRef })
+  } = useFilesAutocomplete({
+    filesList: files.map((f) => f.path),
+    input,
+    setInput,
+    textareaRef,
+    mirrorRef,
+  })
 
   const {
     isOpen: isRefsOpen,
@@ -59,21 +65,22 @@ export default function ChatView() {
   }, [chatsById])
 
   useEffect(() => {
-    if (currentChatId){
+    if (currentChatId) {
       const chat = chatsById[currentChatId]
       setCurrentChat(chat)
     }
   }, [currentChatId, chatsById])
 
   useEffect(() => {
-    if (currentChat){
+    if (currentChat) {
       setMessages(currentChat.messages)
     }
   }, [currentChat])
 
-  
   const chatHistories = useMemo(() => {
-    return Object.values(chatsById).sort((a,b) => new Date(a.updateDate).getTime() - new Date(b.updateDate).getTime())
+    return Object.values(chatsById).sort(
+      (a, b) => new Date(a.updateDate).getTime() - new Date(b.updateDate).getTime(),
+    )
   }, [chatsById])
 
   const autoSizeTextarea = () => {
@@ -109,7 +116,7 @@ export default function ChatView() {
     reader.onload = async (event) => {
       const content = event.target?.result as string
       const newPath = await uploadFile(file.name, content)
-      if (newPath){
+      if (newPath) {
         setPendingAttachments((prev) => Array.from(new Set([...prev, newPath])))
       }
     }
@@ -128,7 +135,9 @@ export default function ChatView() {
     return messages.map((msg, index) => {
       let showModel = false
       if (msg.role === 'assistant' && msg.model) {
-        const prevAssistant = [...messages.slice(0, index)].reverse().find((m) => m.role === 'assistant')
+        const prevAssistant = [...messages.slice(0, index)]
+          .reverse()
+          .find((m) => m.role === 'assistant')
         showModel = !prevAssistant || prevAssistant.model !== msg.model
       }
       const prev = messages[index - 1]
@@ -139,22 +148,26 @@ export default function ChatView() {
 
   const canSend = Boolean(input.trim() && activeConfig && isConfigured)
 
-  const chatItems = useMemo(() => chatHistories.map((chat) => ({
-    id: chat.id,
-    label: `Chat ${new Date(chat.creationDate)}`,
-    icon: <span aria-hidden>💬</span>,
-    accent: 'gray',
-    action: (
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          deleteChat(chat.id)
-        }}
-      >
-        Delete
-      </button>
-    ),
-  })), [chatHistories, deleteChat])
+  const chatItems = useMemo(
+    () =>
+      chatHistories.map((chat) => ({
+        id: chat.id,
+        label: `Chat ${new Date(chat.creationDate)}`,
+        icon: <span aria-hidden>💬</span>,
+        accent: 'gray',
+        action: (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              deleteChat(chat.id)
+            }}
+          >
+            Delete
+          </button>
+        ),
+      })),
+    [chatHistories, deleteChat],
+  )
 
   return (
     <CollapsibleSidebar
@@ -164,7 +177,11 @@ export default function ChatView() {
       storageKey="chat-sidebar-collapsed"
       headerTitle="History"
       headerSubtitle=""
-      headerAction={<button className="btn" onClick={createChat} aria-label="Create new chat">New</button>}
+      headerAction={
+        <button className="btn" onClick={createChat} aria-label="Create new chat">
+          New
+        </button>
+      }
       emptyMessage="No chats yet"
     >
       <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
@@ -177,7 +194,8 @@ export default function ChatView() {
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-              Project Chat {currentChat ? `(${new Date(currentChat.updateDate).toLocaleString()})` : ''}
+              Project Chat{' '}
+              {currentChat ? `(${new Date(currentChat.updateDate).toLocaleString()})` : ''}
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -212,8 +230,12 @@ export default function ChatView() {
             }}
             role="status"
           >
-            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
-            <button className="btn" onClick={() => navigateView('Settings')}>Configure</button>
+            <span>
+              LLM not configured. Set your API key in Settings to enable sending messages.
+            </span>
+            <button className="btn" onClick={() => navigateView('Settings')}>
+              Configure
+            </button>
           </div>
         )}
 
@@ -221,9 +243,12 @@ export default function ChatView() {
           {enhancedMessages.length === 0 ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
-              <div className="text-[13px] mt-2">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
+              <div className="text-[13px] mt-2">
+                Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline
+              </div>
               <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
-                Attach markdown or text files to give context. Mention files with @, and reference tasks/features with #.
+                Attach markdown or text files to give context. Mention files with @, and reference
+                tasks/features with #.
               </div>
             </div>
           ) : (
@@ -262,7 +287,12 @@ export default function ChatView() {
                       {isUser ? 'You' : 'AI'}
                     </div>
 
-                    <div className={['max-w-[72%] min-w-[80px] flex flex-col', isUser ? 'items-end' : 'items-start'].join(' ')}>
+                    <div
+                      className={[
+                        'max-w-[72%] min-w-[80px] flex flex-col',
+                        isUser ? 'items-end' : 'items-start',
+                      ].join(' ')}
+                    >
                       {!isUser && msg.showModel && msg.model && (
                         <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
@@ -283,13 +313,15 @@ export default function ChatView() {
                       </div>
 
                       {msg.attachments && msg.attachments.length > 0 && (
-                        <div className={[
-                          'mt-1 flex flex-wrap gap-1',
-                          isUser ? 'justify-end' : 'justify-start'
-                        ].join(' ')}>
+                        <div
+                          className={[
+                            'mt-1 flex flex-wrap gap-1',
+                            isUser ? 'justify-end' : 'justify-start',
+                          ].join(' ')}
+                        >
                           {msg.attachments.map((path, i) => {
                             const meta = filesByPath[path]
-                            const name = meta?.name || (path.split('/').pop() || path)
+                            const name = meta?.name || path.split('/').pop() || path
                             const type = meta?.type || inferFileType(path)
                             const size = meta?.size ?? undefined
                             const mtime = meta?.mtime ?? undefined
@@ -324,7 +356,11 @@ export default function ChatView() {
                   onInput={autoSizeTextarea}
                   onKeyDown={handleTextareaKeyDown}
                   className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
-                  placeholder={isConfigured ? 'Type your message…' : 'You can compose a message and reference files (@) and tasks/features (#) even before configuring. Configure LLM to send.'}
+                  placeholder={
+                    isConfigured
+                      ? 'Type your message…'
+                      : 'You can compose a message and reference files (@) and tasks/features (#) even before configuring. Configure LLM to send.'
+                  }
                   rows={1}
                   aria-label="Message input"
                   style={{ maxHeight: 200, overflowY: 'auto' }}
@@ -334,7 +370,7 @@ export default function ChatView() {
                     <div className="mb-1 flex flex-wrap gap-1">
                       {pendingAttachments.map((path, idx) => {
                         const meta = filesByPath[path]
-                        const name = meta?.name || (path.split('/').pop() || path)
+                        const name = meta?.name || path.split('/').pop() || path
                         const type = meta?.type || inferFileType(path)
                         const size = meta?.size ?? undefined
                         const mtime = meta?.mtime ?? undefined
@@ -350,13 +386,15 @@ export default function ChatView() {
                               type="button"
                               className="btn-secondary"
                               aria-label={`Remove ${name}`}
-                              onClick={() => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
+                              onClick={() =>
+                                setPendingAttachments((prev) => prev.filter((p) => p !== path))
+                              }
                             >
                               ✕
                             </button>
                           </div>
-                        )}
-                      )}
+                        )
+                      })}
                     </div>
                   )}
                   <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
@@ -376,27 +414,38 @@ export default function ChatView() {
                         style={{ display: 'none' }}
                         onChange={handleFileUpload}
                       />
-                      <span className="hidden sm:inline">Tip: Use @ for files • Use # for tasks and features</span>
+                      <span className="hidden sm:inline">
+                        Tip: Use @ for files • Use # for tasks and features
+                      </span>
                     </div>
                     <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
                   </div>
                 </div>
               </div>
 
-              <button onClick={handleSend} className="btn" disabled={!canSend} aria-label="Send message">
+              <button
+                onClick={handleSend}
+                className="btn"
+                disabled={!canSend}
+                aria-label="Send message"
+              >
                 Send
               </button>
 
               {isAutocompleteOpen && autocompletePosition && (
                 <div
                   className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
-                  style={{ left: `${autocompletePosition.left}px`, top: `${autocompletePosition.top}px`, transform: 'translateY(-100%)' }}
+                  style={{
+                    left: `${autocompletePosition.left}px`,
+                    top: `${autocompletePosition.top}px`,
+                    transform: 'translateY(-100%)',
+                  }}
                   role="listbox"
                   aria-label="Files suggestions"
                 >
                   {matchingDocs.map((path, idx) => {
                     const meta = filesByPath[path]
-                    const name = meta?.name || (path.split('/').pop() || path)
+                    const name = meta?.name || path.split('/').pop() || path
                     const type = meta?.type || inferFileType(path)
                     const size = meta?.size ?? undefined
                     const mtime = meta?.mtime ?? undefined
@@ -418,7 +467,11 @@ export default function ChatView() {
               {isRefsOpen && refsPosition && (
                 <div
                   className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
-                  style={{ left: `${refsPosition.left}px`, top: `${refsPosition.top}px`, transform: 'translateY(-100%)' }}
+                  style={{
+                    left: `${refsPosition.left}px`,
+                    top: `${refsPosition.top}px`,
+                    transform: 'translateY(-100%)',
+                  }}
                   role="listbox"
                   aria-label="References suggestions"
                 >

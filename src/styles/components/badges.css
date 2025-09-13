@@ -1,47 +1,211 @@
 /* Components: Badges and Priority Tags */
-.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--radius-round); font-size: var(--fs-xs, 12px); line-height: 1; border: 1px solid transparent; }
-.badge--soft.badge--empty { background: var(--status-empty-soft-bg); color: var(--status-empty-soft-fg); border-color: var(--status-empty-soft-border); }
-.badge--soft.badge--done { background: var(--status-done-soft-bg); color: var(--status-done-soft-fg); border-color: var(--status-done-soft-border); }
-.badge--soft.badge--working { background: var(--status-working-soft-bg); color: var(--status-working-soft-fg); border-color: var(--status-working-soft-border); }
-.badge--soft.badge--stuck { background: var(--status-stuck-soft-bg); color: var(--status-stuck-soft-fg); border-color: var(--status-stuck-soft-border); }
-.badge--soft.badge--onhold { background: var(--status-on_hold-soft-bg); color: var(--status-on_hold-soft-fg); border-color: var(--status-on_hold-soft-border); }
-.badge--soft.badge--review { background: var(--status-review-soft-bg); color: var(--status-review-soft-fg); border-color: var(--status-review-soft-border); }
-.badge--soft.badge--queued { background: var(--status-queued-soft-bg); color: var(--status-queued-soft-fg); border-color: var(--status-queued-soft-border); }
-.badge--soft.badge--blocked { background: color-mix(in srgb, var(--status-blocked-bg) 14%, transparent); color: var(--status-blocked-fg); border-color: color-mix(in srgb, var(--status-blocked-bg) 55%, transparent); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--radius-round);
+  font-size: var(--fs-xs, 12px);
+  line-height: 1;
+  border: 1px solid transparent;
+}
+.badge--soft.badge--empty {
+  background: var(--status-empty-soft-bg);
+  color: var(--status-empty-soft-fg);
+  border-color: var(--status-empty-soft-border);
+}
+.badge--soft.badge--done {
+  background: var(--status-done-soft-bg);
+  color: var(--status-done-soft-fg);
+  border-color: var(--status-done-soft-border);
+}
+.badge--soft.badge--working {
+  background: var(--status-working-soft-bg);
+  color: var(--status-working-soft-fg);
+  border-color: var(--status-working-soft-border);
+}
+.badge--soft.badge--stuck {
+  background: var(--status-stuck-soft-bg);
+  color: var(--status-stuck-soft-fg);
+  border-color: var(--status-stuck-soft-border);
+}
+.badge--soft.badge--onhold {
+  background: var(--status-on_hold-soft-bg);
+  color: var(--status-on_hold-soft-fg);
+  border-color: var(--status-on_hold-soft-border);
+}
+.badge--soft.badge--review {
+  background: var(--status-review-soft-bg);
+  color: var(--status-review-soft-fg);
+  border-color: var(--status-review-soft-border);
+}
+.badge--soft.badge--queued {
+  background: var(--status-queued-soft-bg);
+  color: var(--status-queued-soft-fg);
+  border-color: var(--status-queued-soft-border);
+}
+.badge--soft.badge--blocked {
+  background: color-mix(in srgb, var(--status-blocked-bg) 14%, transparent);
+  color: var(--status-blocked-fg);
+  border-color: color-mix(in srgb, var(--status-blocked-bg) 55%, transparent);
+}
 
 /* Bold variant */
-.badge--bold.badge--empty{ background: var(--status-empty-bg); color: var(--status-empty-fg); }
-.badge--bold.badge--done { background: var(--status-done-bg); color: var(--status-done-fg); }
-.badge--bold.badge--working { background: var(--status-working-bg); color: var(--status-working-fg); }
-.badge--bold.badge--stuck { background: var(--status-stuck-bg); color: var(--status-stuck-fg); }
-.badge--bold.badge--onhold { background: var(--status-on_hold-bg); color: var(--status-on_hold-fg); }
-.badge--bold.badge--review { background: var(--status-review-bg); color: var(--status-review-fg); }
-.badge--bold.badge--queued { background: var(--status-queued-bg); color: var(--status-queued-fg); }
-.badge--bold.badge--blocked { background: var(--status-blocked-bg); color: var(--status-blocked-fg); }
+.badge--bold.badge--empty {
+  background: var(--status-empty-bg);
+  color: var(--status-empty-fg);
+}
+.badge--bold.badge--done {
+  background: var(--status-done-bg);
+  color: var(--status-done-fg);
+}
+.badge--bold.badge--working {
+  background: var(--status-working-bg);
+  color: var(--status-working-fg);
+}
+.badge--bold.badge--stuck {
+  background: var(--status-stuck-bg);
+  color: var(--status-stuck-fg);
+}
+.badge--bold.badge--onhold {
+  background: var(--status-on_hold-bg);
+  color: var(--status-on_hold-fg);
+}
+.badge--bold.badge--review {
+  background: var(--status-review-bg);
+  color: var(--status-review-fg);
+}
+.badge--bold.badge--queued {
+  background: var(--status-queued-bg);
+  color: var(--status-queued-fg);
+}
+.badge--bold.badge--blocked {
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked-fg);
+}
 
 /* Priority tags */
-.priority-tag { display:inline-flex; align-items:center; height: 18px; padding: 0 6px; font-size: var(--fs-xxs, 10px); border-radius: var(--radius-round); border: 1px solid var(--border-default); color: var(--text-secondary); background: var(--surface-raised); }
-.priority--p0 { background: color-mix(in srgb, var(--color-red-600) 10%, transparent); color: var(--color-red-800); border-color: var(--color-red-400); }
-.priority--p1 { background: color-mix(in srgb, var(--color-orange-650) 12%, transparent); color: var(--color-orange-800); border-color: var(--color-orange-400); }
-.priority--p2 { background: color-mix(in srgb, var(--color-blue-650) 10%, transparent); color: var(--color-blue-800); border-color: var(--color-blue-400); }
-.priority--p3 { background: color-mix(in srgb, var(--color-gray-400) 14%, transparent); color: var(--color-gray-800); border-color: var(--color-gray-400); }
+.priority-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  font-size: var(--fs-xxs, 10px);
+  border-radius: var(--radius-round);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  background: var(--surface-raised);
+}
+.priority--p0 {
+  background: color-mix(in srgb, var(--color-red-600) 10%, transparent);
+  color: var(--color-red-800);
+  border-color: var(--color-red-400);
+}
+.priority--p1 {
+  background: color-mix(in srgb, var(--color-orange-650) 12%, transparent);
+  color: var(--color-orange-800);
+  border-color: var(--color-orange-400);
+}
+.priority--p2 {
+  background: color-mix(in srgb, var(--color-blue-650) 10%, transparent);
+  color: var(--color-blue-800);
+  border-color: var(--color-blue-400);
+}
+.priority--p3 {
+  background: color-mix(in srgb, var(--color-gray-400) 14%, transparent);
+  color: var(--color-gray-800);
+  border-color: var(--color-gray-400);
+}
 
 /* ID chip: compact bubble for IDs (tasks/features), similar to dependency chips */
-.id-chip { display:inline-flex; align-items:center; justify-content:center; padding: 4px 6px; border-radius: var(--radius-round); border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-secondary); font-size: var(--fs-xxs, 10px); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.id-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 6px;
+  border-radius: var(--radius-round);
+  border: 1px solid var(--border-default);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: var(--fs-xxs, 10px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 
 /* Dependency bullets (clickable chips for task/feature refs) */
 
-.chips-list { display:flex; align-items:center; gap: 6px; flex-wrap: wrap; }
-.chips-sub { display:flex; align-items:center; gap: 6px; margin-top: 4px; }
-.chips-sub__label { font-size: var(--fs-xxs, 10px); color: var(--text-muted); padding: 2px 8px; border-radius: var(--radius-round); border: 1px solid var(--border-subtle); }
-.chip { display:inline-flex; align-items:center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-round); font-size: var(--fs-xxs, 10px); border: 1px solid var(--border-default); background: var(--surface-base); color: var(--text-secondary); white-space: nowrap; cursor: pointer; transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;  text-overflow: ellipsis; }
-.chip--ok { background: color-mix(in srgb, var(--status-review-soft-bg) 42%, transparent); border-color: var(--status-review-soft-border); color: var(--text-primary); }
-.chip--missing { background: color-mix(in srgb, var(--status-stuck-soft-bg) 42%, transparent); border-color: var(--status-stuck-soft-border); color: var(--text-primary); }
-.chip--blocks { background: color-mix(in srgb, var(--status-working-soft-bg) 36%, transparent); border-color: var(--status-working-soft-border); color: var(--text-primary); }
-.chip--none { opacity: 0.7; }
-.chip--badge { justify-content: center; aspect-ratio: 1 / 1; height: 20px; padding: 2px;  }
-.chip--badge--red { background: color-mix(in srgb, var(--color-red-400) 22%, transparent); border-color: var(--color-red-800); color: var(--color-red-800); }
-.chip--badge--blue { background: color-mix(in srgb, var(--color-blue-400) 22%, transparent); border-color: var(--color-blue-800); color: var(--color-blue-800);  }
+.chips-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chips-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.chips-sub__label {
+  font-size: var(--fs-xxs, 10px);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: var(--radius-round);
+  border: 1px solid var(--border-subtle);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-round);
+  font-size: var(--fs-xxs, 10px);
+  border: 1px solid var(--border-default);
+  background: var(--surface-base);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+  text-overflow: ellipsis;
+}
+.chip--ok {
+  background: color-mix(in srgb, var(--status-review-soft-bg) 42%, transparent);
+  border-color: var(--status-review-soft-border);
+  color: var(--text-primary);
+}
+.chip--missing {
+  background: color-mix(in srgb, var(--status-stuck-soft-bg) 42%, transparent);
+  border-color: var(--status-stuck-soft-border);
+  color: var(--text-primary);
+}
+.chip--blocks {
+  background: color-mix(in srgb, var(--status-working-soft-bg) 36%, transparent);
+  border-color: var(--status-working-soft-border);
+  color: var(--text-primary);
+}
+.chip--none {
+  opacity: 0.7;
+}
+.chip--badge {
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  height: 20px;
+  padding: 2px;
+}
+.chip--badge--red {
+  background: color-mix(in srgb, var(--color-red-400) 22%, transparent);
+  border-color: var(--color-red-800);
+  color: var(--color-red-800);
+}
+.chip--badge--blue {
+  background: color-mix(in srgb, var(--color-blue-400) 22%, transparent);
+  border-color: var(--color-blue-800);
+  color: var(--color-blue-800);
+}
 
 .chip:hover {
   background: var(--surface-hover);
@@ -70,6 +234,25 @@
 }
 
 /* Close button for inline-removable chips */
-.chip__close { margin-left: 6px; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; }
-.chip__close:hover { background: var(--surface-hover); opacity: 1; }
-.chip__close:focus-visible { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring); }
+.chip__close {
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.chip__close:hover {
+  background: var(--surface-hover);
+  opacity: 1;
+}
+.chip__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring);
+}

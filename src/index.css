@@ -31,8 +31,16 @@
 @tailwind utilities;
 
 /* Root layout: make the app fill the window and avoid unexpected margins */
-html, body, #root { height: 100%; }
-html, body { margin: 0; padding: 0; }
+html,
+body,
+#root {
+  height: 100%;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
 
 /* Base body colors using semantic tokens */
 body {
@@ -41,7 +49,14 @@ body {
   background: var(--surface-base);
 }
 
-h1, h2, h3 { color: var(--accent-primary); }
+h1,
+h2,
+h3 {
+  color: var(--accent-primary);
+}
 
 /* Misc small helpers */
-.empty { padding: 12px; color: var(--text-secondary); }
+.empty {
+  padding: 12px;
+  color: var(--text-secondary);
+}

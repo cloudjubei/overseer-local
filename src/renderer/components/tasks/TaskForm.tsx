@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Status } from 'thefactory-tools';
+import { Status } from 'thefactory-tools'
 import StatusControl from './StatusControl'
 
 export type TaskFormValues = {
@@ -19,7 +19,16 @@ type Props = {
   onDelete?: () => void
 }
 
-export default function TaskForm({ id, initialValues, onSubmit, onCancel, submitting = false, isCreate = false, titleRef, onDelete }: Props) {
+export default function TaskForm({
+  id,
+  initialValues,
+  onSubmit,
+  onCancel,
+  submitting = false,
+  isCreate = false,
+  titleRef,
+  onDelete,
+}: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -66,14 +75,22 @@ export default function TaskForm({ id, initialValues, onSubmit, onCancel, submit
   }
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4" aria-label={isCreate ? 'Create Task' : 'Edit Task'}>
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={onKeyDown}
+      className="space-y-4"
+      aria-label={isCreate ? 'Create Task' : 'Edit Task'}
+    >
       <div className="grid grid-cols-1 gap-3">
-        <StatusControl
-          status={status}
-          onChange={setStatus}
-        />
+        <StatusControl status={status} onChange={setStatus} />
         <div className="flex flex-col gap-1">
-          <label htmlFor="task-title" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Title</label>
+          <label
+            htmlFor="task-title"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Title
+          </label>
           <input
             id="task-title"
             ref={combinedTitleRef}
@@ -85,18 +102,32 @@ export default function TaskForm({ id, initialValues, onSubmit, onCancel, submit
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
             style={{
               background: 'var(--surface-raised)',
-              borderColor: errors.title ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
-              color: 'var(--text-primary)'
+              borderColor: errors.title
+                ? 'var(--status-stuck-soft-border)'
+                : 'var(--border-default)',
+              color: 'var(--text-primary)',
             }}
             aria-invalid={!!errors.title}
             aria-describedby={errors.title ? 'task-title-error' : undefined}
           />
           {errors.title ? (
-            <div id="task-title-error" className="text-xs" style={{ color: 'var(--status-stuck-fg)' }}>{errors.title}</div>
+            <div
+              id="task-title-error"
+              className="text-xs"
+              style={{ color: 'var(--status-stuck-fg)' }}
+            >
+              {errors.title}
+            </div>
           ) : null}
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="task-description" className="text-xs" style={{ color: 'var(--text-secondary)' }}>Description</label>
+          <label
+            htmlFor="task-description"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Description
+          </label>
           <textarea
             id="task-description"
             rows={4}
@@ -108,7 +139,7 @@ export default function TaskForm({ id, initialValues, onSubmit, onCancel, submit
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)'
+              color: 'var(--text-primary)',
             }}
           />
         </div>
@@ -122,7 +153,7 @@ export default function TaskForm({ id, initialValues, onSubmit, onCancel, submit
             className="btn"
             style={{
               background: 'var(--status-stuck-bg)',
-              color: 'var(--status-stuck-fg)'
+              color: 'var(--status-stuck-fg)',
             }}
           >
             Delete

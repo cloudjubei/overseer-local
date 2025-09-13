@@ -18,7 +18,7 @@ The web app will provide accessibility from any modern browser, sharing a signif
 - **Progressive Web App (PWA)**: We will implement PWA features, including:
   - **Service Workers**: For offline caching of application assets and data, providing a baseline offline experience.
   - **Web App Manifest**: To allow users to "install" the app to their home screen on desktop and mobile devices.
-- **Browser Limitations**: 
+- **Browser Limitations**:
   - **Storage**: We will use `IndexedDB` for storing structured data, being mindful of browser-specific storage quotas.
   - **File System**: Access to the file system will be limited to user-initiated actions via the File System Access API where available, or standard file input elements otherwise.
 - **Responsive Design**: The UI will be fully responsive, adapting from mobile browser viewports to large desktop screens. This will be a primary consideration in component design, likely using a utility-first CSS framework like Tailwind CSS.
@@ -35,7 +35,7 @@ The mobile app will provide a truly native experience for iOS and Android users.
 ## 4. Platform-Specific File Handling and Storage
 
 - **Electron**: Full local file system access. A dedicated local cache directory will store files for offline use, synced with the backend.
-- **Web**: Uses `IndexedDB` for structured data and the `Cache API` for file blobs. File uploads and downloads will be handled via the backend API. 
+- **Web**: Uses `IndexedDB` for structured data and the `Cache API` for file blobs. File uploads and downloads will be handled via the backend API.
 - **React Native**: Uses a local database (e.g., WatermelonDB, Realm, or SQLite) for data. Files will be stored in the app's sandboxed file system using libraries like `react-native-fs`.
 
 ## 5. Authentication Flows

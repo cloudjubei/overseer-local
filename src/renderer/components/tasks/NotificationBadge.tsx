@@ -1,10 +1,10 @@
-import React from 'react';
+import React from 'react'
 
 export interface NotificationBadgeProps {
-  className?: string;
-  text: string;
-  tooltipLabel?: string;
-  isInformative?: boolean;
+  className?: string
+  text: string
+  tooltipLabel?: string
+  isInformative?: boolean
 }
 
 /*
@@ -14,9 +14,14 @@ export interface NotificationBadgeProps {
   - White text, centered
   - Small ring to separate from background
 */
-const NotificationBadge: React.FC<NotificationBadgeProps> = ({ className = '', text, tooltipLabel, isInformative = false }) => {
-  const bg = isInformative ? 'bg-blue-500' : 'bg-red-500';
-  const title = tooltipLabel || text;
+const NotificationBadge: React.FC<NotificationBadgeProps> = ({
+  className = '',
+  text,
+  tooltipLabel,
+  isInformative = false,
+}) => {
+  const bg = isInformative ? 'bg-blue-500' : 'bg-red-500'
+  const title = tooltipLabel || text
 
   return (
     <span
@@ -40,7 +45,7 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({ className = '', t
     >
       {text}
     </span>
-  );
-};
+  )
+}
 
-export default NotificationBadge;
+export default NotificationBadge

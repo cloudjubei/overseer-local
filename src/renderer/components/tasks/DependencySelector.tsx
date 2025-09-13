@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useActiveProject } from '../../contexts/ProjectContext'
-import type { Feature, ProjectSpec, Task } from 'thefactory-tools';
+import type { Feature, ProjectSpec, Task } from 'thefactory-tools'
 import { useTasks } from '../../contexts/TasksContext'
 
 type DependencySelectorProps = {
@@ -10,7 +10,12 @@ type DependencySelectorProps = {
   existingDeps?: string[]
 }
 
-function doesTaskMatch(project: ProjectSpec, selected: Set<string>, task: Task, q: string): boolean {
+function doesTaskMatch(
+  project: ProjectSpec,
+  selected: Set<string>,
+  task: Task,
+  q: string,
+): boolean {
   const display = `${project.taskIdToDisplayIndex[task.id]}`
   return (
     display.toLowerCase().includes(q) ||
@@ -19,7 +24,13 @@ function doesTaskMatch(project: ProjectSpec, selected: Set<string>, task: Task, 
   )
 }
 
-function doesFeatureMatch(project: ProjectSpec, selected: Set<string>, task: Task, f: Feature, q: string): boolean {
+function doesFeatureMatch(
+  project: ProjectSpec,
+  selected: Set<string>,
+  task: Task,
+  f: Feature,
+  q: string,
+): boolean {
   const display = `${project.taskIdToDisplayIndex[task.id]}.${task.featureIdToDisplayIndex[f.id]}`
   return (
     display.toLowerCase().includes(q) ||
@@ -61,7 +72,9 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     const taskDep = `${taskId}`
     const isDisabled = existingDeps.includes(taskDep)
     const taskMatches = !q || doesTaskMatch(project, selected, task, q)
-    const matchingFeatures = task.features.filter((f) => !q || doesFeatureMatch(project, selected, task, f, q))
+    const matchingFeatures = task.features.filter(
+      (f) => !q || doesFeatureMatch(project, selected, task, f, q),
+    )
     if (!taskMatches && matchingFeatures.length === 0) return null
 
     const display = `${project.taskIdToDisplayIndex[taskId]}`
@@ -105,7 +118,9 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     )
   }
 
-  const taskIds = Object.keys(tasksById).sort((a,b) => project.taskIdToDisplayIndex[a] - project.taskIdToDisplayIndex[b])
+  const taskIds = Object.keys(tasksById).sort(
+    (a, b) => project.taskIdToDisplayIndex[a] - project.taskIdToDisplayIndex[b],
+  )
 
   return (
     <div className="dependency-selector">
@@ -121,9 +136,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
           <h3 className="text-lg font-semibold">{project.title}</h3>
         </div>
         {taskIds.length > 0 && (
-          <ul className="space-y-2">
-            {taskIds.map((taskId) => renderTaskItem(project, taskId))}
-          </ul>
+          <ul className="space-y-2">{taskIds.map((taskId) => renderTaskItem(project, taskId))}</ul>
         )}
       </div>
       <button

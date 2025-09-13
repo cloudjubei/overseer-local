@@ -32,15 +32,21 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
         setSubmitting(false)
       }
     },
-    [toast, createTask]
+    [toast, createTask],
   )
 
   return (
     <>
-      <Modal title="Create New Task" onClose={doClose} isOpen={true} size="md" initialFocusRef={titleRef as React.RefObject<HTMLElement>}>
+      <Modal
+        title="Create New Task"
+        onClose={doClose}
+        isOpen={true}
+        size="md"
+        initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+      >
         <TaskForm
           id="-1"
-          initialValues={{ }}
+          initialValues={{}}
           onSubmit={onSubmit}
           onCancel={doClose}
           submitting={submitting}
@@ -48,7 +54,11 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
           titleRef={titleRef}
         />
       </Modal>
-      <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
+      <AlertDialog
+        isOpen={showAlert}
+        onClose={() => setShowAlert(false)}
+        description={alertMessage}
+      />
     </>
   )
 }

@@ -1,11 +1,11 @@
-import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select';
-import { useNavigator } from '../../navigation/Navigator';
-import { useLLMConfig } from '../../contexts/LLMConfigContext';
+import React from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
+import { useNavigator } from '../../navigation/Navigator'
+import { useLLMConfig } from '../../contexts/LLMConfigContext'
 
 export default function AgentModelQuickSelect({ className = '' }: { className?: string }) {
-  const { recentConfigs, activeConfigId, setActive, configs } = useLLMConfig();
-  const { navigateView } = useNavigator();
+  const { recentConfigs, activeConfigId, setActive, configs } = useLLMConfig()
+  const { navigateView } = useNavigator()
 
   if (!configs || configs.length === 0) {
     return (
@@ -18,7 +18,7 @@ export default function AgentModelQuickSelect({ className = '' }: { className?: 
       >
         Configure LLM…
       </button>
-    );
+    )
   }
 
   return (
@@ -27,10 +27,10 @@ export default function AgentModelQuickSelect({ className = '' }: { className?: 
         value={activeConfigId || ''}
         onValueChange={(v) => {
           if (v === '__open_settings') {
-            navigateView('Settings');
-            return;
+            navigateView('Settings')
+            return
           }
-          setActive(v);
+          setActive(v)
         }}
       >
         <SelectTrigger className="ui-select w-[220px]" aria-label="Agent Model">
@@ -46,5 +46,5 @@ export default function AgentModelQuickSelect({ className = '' }: { className?: 
         </SelectContent>
       </Select>
     </div>
-  );
+  )
 }

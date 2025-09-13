@@ -1,50 +1,58 @@
-import AppStorage from '../settings/AppStorage';
+import AppStorage from '../settings/AppStorage'
 
 export default class NotificationsStorage {
   constructor(projectId) {
-    this.projectId = projectId;
-    this.appStorage = new AppStorage("notifications");
-    this.notifications = new Map();
-    this.listeners = new Set();
+    this.projectId = projectId
+    this.appStorage = new AppStorage('notifications')
+    this.notifications = new Map()
+    this.listeners = new Set()
 
-    this.__loadFromStorage();
+    this.__loadFromStorage()
   }
 
-  storageKey() { return `app_notifications__${this.projectId}`; }
-  prefsKey() { return `notification_preferences__${this.projectId}`; }
-  generateId() { return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; }
+  storageKey() {
+    return `app_notifications__${this.projectId}`
+  }
+  prefsKey() {
+    return `notification_preferences__${this.projectId}`
+  }
+  generateId() {
+    return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  }
 
   __loadFromStorage() {
     try {
-      const stored = this.appStorage.getItem(this.storageKey());
+      const stored = this.appStorage.getItem(this.storageKey())
       if (stored) {
-        const data = JSON.parse(stored);
-        this.notifications = new Map();
-        data.forEach(notification => {
-          this.notifications.set(notification.id, notification);
-        });
+        const data = JSON.parse(stored)
+        this.notifications = new Map()
+        data.forEach((notification) => {
+          this.notifications.set(notification.id, notification)
+        })
       } else {
-        this.notifications = new Map();
+        this.notifications = new Map()
       }
     } catch (error) {
-      console.error('Failed to load notifications from storage:', error);
-      this.notifications = new Map();
+      console.error('Failed to load notifications from storage:', error)
+      this.notifications = new Map()
     }
   }
 
   saveToStorage() {
     try {
-      const data = Array.from(this.notifications.values());
-      this.appStorage.setItem(this.storageKey(), JSON.stringify(data));
+      const data = Array.from(this.notifications.values())
+      this.appStorage.setItem(this.storageKey(), JSON.stringify(data))
     } catch (error) {
-      console.error('Failed to save notifications to storage:', error);
+      console.error('Failed to save notifications to storage:', error)
     }
   }
 
   notifyListeners() {
-    this.listeners.forEach(listener => {
-      try { listener(); } catch {}
-    });
+    this.listeners.forEach((listener) => {
+      try {
+        listener()
+      } catch {}
+    })
   }
 
   create(input) {
@@ -56,182 +64,184 @@ export default class NotificationsStorage {
       title: input.title,
       message: input.message,
       read: false,
-      metadata: { ...(input.metadata || {}), projectId: this.projectId }
-    };
+      metadata: { ...(input.metadata || {}), projectId: this.projectId },
+    }
 
-    this.notifications.set(notification.id, notification);
-    this.saveToStorage();
-    this.notifyListeners();
+    this.notifications.set(notification.id, notification)
+    this.saveToStorage()
+    this.notifyListeners()
 
-    return notification;
+    return notification
   }
 
   getById(id) {
-    return this.notifications.get(id) || null;
+    return this.notifications.get(id) || null
   }
 
   update(id, updates) {
-    const notification = this.notifications.get(id);
+    const notification = this.notifications.get(id)
     if (!notification) {
-      return null;
+      return null
     }
 
     const updatedNotification = {
       ...notification,
       ...updates,
-      metadata: updates.metadata ? { ...notification.metadata, ...updates.metadata } : notification.metadata
-    };
+      metadata: updates.metadata
+        ? { ...notification.metadata, ...updates.metadata }
+        : notification.metadata,
+    }
 
-    this.notifications.set(id, updatedNotification);
-    this.saveToStorage();
-    this.notifyListeners();
+    this.notifications.set(id, updatedNotification)
+    this.saveToStorage()
+    this.notifyListeners()
 
-    return updatedNotification;
+    return updatedNotification
   }
 
   delete(id) {
-    const existed = this.notifications.has(id);
+    const existed = this.notifications.has(id)
     if (existed) {
-      this.notifications.delete(id);
-      this.saveToStorage();
-      this.notifyListeners();
+      this.notifications.delete(id)
+      this.saveToStorage()
+      this.notifyListeners()
     }
-    return existed;
+    return existed
   }
 
   markAsRead(id) {
-    return this.update(id, { read: true });
+    return this.update(id, { read: true })
   }
 
   markAsUnread(id) {
-    return this.update(id, { read: false });
+    return this.update(id, { read: false })
   }
 
   markAllAsRead() {
-    let hasChanges = false;
+    let hasChanges = false
     this.notifications.forEach((notification, id) => {
       if (!notification.read) {
-        this.notifications.set(id, { ...notification, read: true });
-        hasChanges = true;
+        this.notifications.set(id, { ...notification, read: true })
+        hasChanges = true
       }
-    });
+    })
 
     if (hasChanges) {
-      this.saveToStorage();
-      this.notifyListeners();
+      this.saveToStorage()
+      this.notifyListeners()
     }
   }
 
   deleteAll() {
     if (this.notifications.size > 0) {
-      this.notifications = new Map();
-      this.saveToStorage();
-      this.notifyListeners();
+      this.notifications = new Map()
+      this.saveToStorage()
+      this.notifyListeners()
     }
   }
 
   __matchesFilter(notification, filter) {
     if (filter.type && notification.type !== filter.type) {
-      return false;
+      return false
     }
     if (filter.category && notification.category !== filter.category) {
-      return false;
+      return false
     }
     if (filter.read !== undefined && notification.read !== filter.read) {
-      return false;
+      return false
     }
     if (filter.since && notification.timestamp < filter.since) {
-      return false;
+      return false
     }
     if (filter.until && notification.timestamp > filter.until) {
-      return false;
+      return false
     }
-    return true;
+    return true
   }
 
   __sortNotifications(notifications, sort) {
     return notifications.sort((a, b) => {
-      let valueA;
-      let valueB;
+      let valueA
+      let valueB
 
       switch (sort.field) {
         case 'timestamp':
-          valueA = a.timestamp;
-          valueB = b.timestamp;
-          break;
+          valueA = a.timestamp
+          valueB = b.timestamp
+          break
         case 'type':
-          valueA = a.type;
-          valueB = b.type;
-          break;
+          valueA = a.type
+          valueB = b.type
+          break
         case 'category':
-          valueA = a.category;
-          valueB = b.category;
-          break;
+          valueA = a.category
+          valueB = b.category
+          break
         case 'read':
-          valueA = a.read;
-          valueB = b.read;
-          break;
+          valueA = a.read
+          valueB = b.read
+          break
         default:
-          valueA = a.timestamp;
-          valueB = b.timestamp;
+          valueA = a.timestamp
+          valueB = b.timestamp
       }
 
       if (valueA < valueB) {
-        return sort.order === 'asc' ? -1 : 1;
+        return sort.order === 'asc' ? -1 : 1
       }
       if (valueA > valueB) {
-        return sort.order === 'asc' ? 1 : -1;
+        return sort.order === 'asc' ? 1 : -1
       }
-      return 0;
-    });
+      return 0
+    })
   }
 
   query(query = {}) {
-    let results = Array.from(this.notifications.values());
+    let results = Array.from(this.notifications.values())
 
     if (query.filter) {
-      results = results.filter(notification => this.__matchesFilter(notification, query.filter));
+      results = results.filter((notification) => this.__matchesFilter(notification, query.filter))
     }
 
-    results = this.__sortNotifications(results, query.sort || { field: 'timestamp', order: 'desc' });
+    results = this.__sortNotifications(results, query.sort || { field: 'timestamp', order: 'desc' })
 
-    const offset = query.offset || 0;
-    const limit = query.limit;
-    
+    const offset = query.offset || 0
+    const limit = query.limit
+
     if (limit !== undefined) {
-      results = results.slice(offset, offset + limit);
+      results = results.slice(offset, offset + limit)
     } else if (offset > 0) {
-      results = results.slice(offset);
+      results = results.slice(offset)
     }
 
-    return results;
+    return results
   }
 
   getAll() {
-    return this.query();
+    return this.query()
   }
 
   getUnread() {
-    return this.query({ filter: { read: false } });
+    return this.query({ filter: { read: false } })
   }
 
   getByCategory(category) {
-    return this.query({ filter: { category } });
+    return this.query({ filter: { category } })
   }
 
   getByType(type) {
-    return this.query({ filter: { type } });
+    return this.query({ filter: { type } })
   }
 
   getRecent(hoursBack = 24) {
-    const since = Date.now() - (hoursBack * 60 * 60 * 1000);
-    return this.query({ filter: { since } });
+    const since = Date.now() - hoursBack * 60 * 60 * 1000
+    return this.query({ filter: { since } })
   }
 
   getStats() {
-    const notifications = Array.from(this.notifications.values());
-    const total = notifications.length;
-    const unread = notifications.filter(n => !n.read).length;
+    const notifications = Array.from(this.notifications.values())
+    const total = notifications.length
+    const unread = notifications.filter((n) => !n.read).length
 
     const byCategory = {
       general: 0,
@@ -239,8 +249,8 @@ export default class NotificationsStorage {
       chat: 0,
       documents: 0,
       system: 0,
-      updates: 0
-    };
+      updates: 0,
+    }
 
     const byType = {
       info: 0,
@@ -250,49 +260,49 @@ export default class NotificationsStorage {
       task: 0,
       system: 0,
       chat: 0,
-      docs: 0
-    };
+      docs: 0,
+    }
 
-    notifications.forEach(notification => {
-      byCategory[notification.category] = (byCategory[notification.category] || 0) + 1;
-      byType[notification.type] = (byType[notification.type] || 0) + 1;
-    });
+    notifications.forEach((notification) => {
+      byCategory[notification.category] = (byCategory[notification.category] || 0) + 1
+      byType[notification.type] = (byType[notification.type] || 0) + 1
+    })
 
     return {
       total,
       unread,
       byCategory,
-      byType
-    };
+      byType,
+    }
   }
 
   subscribe(listener) {
-    this.listeners.add(listener);
+    this.listeners.add(listener)
     return () => {
-      this.listeners.delete(listener);
-    };
+      this.listeners.delete(listener)
+    }
   }
 
   getUnreadCount() {
-    return Array.from(this.notifications.values()).filter(n => !n.read).length;
+    return Array.from(this.notifications.values()).filter((n) => !n.read).length
   }
 
   cleanup(olderThanDays = 30) {
-    const cutoff = Date.now() - (olderThanDays * 24 * 60 * 60 * 1000);
-    let deletedCount = 0;
+    const cutoff = Date.now() - olderThanDays * 24 * 60 * 60 * 1000
+    let deletedCount = 0
 
     this.notifications.forEach((notification, id) => {
       if (notification.timestamp < cutoff) {
-        this.notifications.delete(id);
-        deletedCount++;
+        this.notifications.delete(id)
+        deletedCount++
       }
-    });
+    })
 
     if (deletedCount > 0) {
-      this.saveToStorage();
-      this.notifyListeners();
+      this.saveToStorage()
+      this.notifyListeners()
     }
 
-    return deletedCount;
+    return deletedCount
   }
 }

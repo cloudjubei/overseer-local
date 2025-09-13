@@ -1,10 +1,12 @@
 # File Organisation
 
 Purpose
+
 - Provide a high-level map of the repository so contributors and agents can quickly find the right area.
 - This is not a change log and not a per-file inventory.
 
 Editing Rules (read before updating)
+
 - Only document major directories and subsystems. Do not list individual files.
 - Keep bullets short (one sentence) and avoid "New:" or historical notes.
 - When adding/removing a major directory or moving a subsystem, update a single bullet here.
@@ -12,6 +14,7 @@ Editing Rules (read before updating)
 - Never document build related artifacts.
 
 Top-Level Layout
+
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
   - live-data/: Main process live data service and types for live data services.
@@ -33,17 +36,21 @@ Top-Level Layout
 - Root config files: package.json, tsconfig.json, tailwind/postcss configs, vite configs, forge config, .env.
 
 Where to Learn More
-- Agents and roles: packages/factory-ts/docs (AGENT_*.md).
+
+- Agents and roles: packages/factory-ts/docs (AGENT\_\*.md).
 - Factory TS overview and APIs: packages/factory-ts (see README/OVERVIEW files in that package).
 - Preview system: see src/renderer/preview and related docs in docs/ (preview usage and analyzer).
 - IPC and factory integration: src/tools/factory (renderer bridge and main process handlers).
 
 Conventions (brief)
+
 - Keep cross-cutting documentation in docs/; place domain-specific or area-specific READMEs next to the code they describe.
 - Use descriptive directory names and keep responsibilities separated by area (renderer vs main vs tools vs packages).
 
 Environment & Credentials
+
 - .env at the repo root is used for local development (e.g., credentials consumed by tooling and factory-ts).
 
 Notes
+
 - If you are unsure whether something belongs here, it probably belongs in a local README under its directory, with this file providing only a one-line pointer to that area.

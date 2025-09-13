@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain } from 'electron'
 
 /**
  * Register the screenshot capture IPC service.
@@ -16,39 +16,48 @@ import { BrowserWindow, ipcMain } from 'electron';
 export function registerScreenshotService(getWindow) {
   async function getTargetWindow(windowId) {
     if (typeof windowId === 'number') {
-      const w = BrowserWindow.fromId(windowId);
-      if (w) return w;
+      const w = BrowserWindow.fromId(windowId)
+      if (w) return w
     }
     if (typeof getWindow === 'function') {
-      const w = getWindow();
-      if (w) return w;
+      const w = getWindow()
+      if (w) return w
     }
-    return BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+    return BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
   }
 
   ipcMain.handle('screenshot:capture', async (_event, options = {}) => {
     try {
-      const { windowId, rect, format: fmt, quality: q } = options || {};
-      const target = await getTargetWindow(windowId);
-      if (!target) return { ok: false, error: 'No target window to capture' };
+      const { windowId, rect, format: fmt, quality: q } = options || {}
+      const target = await getTargetWindow(windowId)
+      if (!target) return { ok: false, error: 'No target window to capture' }
 
-      const image = await target.webContents.capturePage(rect && typeof rect === 'object' ? rect : undefined);
-      const format = (fmt || 'png').toString().toLowerCase();
-      const quality = typeof q === 'number' && !Number.isNaN(q) ? Math.max(0, Math.min(100, q)) : 80;
+      const image = await target.webContents.capturePage(
+        rect && typeof rect === 'object' ? rect : undefined,
+      )
+      const format = (fmt || 'png').toString().toLowerCase()
+      const quality = typeof q === 'number' && !Number.isNaN(q) ? Math.max(0, Math.min(100, q)) : 80
 
-      let buffer;
+      let buffer
       if (format === 'jpeg' || format === 'jpg') {
-        buffer = image.toJPEG(quality);
+        buffer = image.toJPEG(quality)
       } else {
-        buffer = image.toPNG();
+        buffer = image.toPNG()
       }
-      const base64 = buffer.toString('base64');
-      const dataUrl = `data:image/${format === 'jpg' ? 'jpeg' : format};base64,${base64}`;
-      const { width, height } = image.getSize();
+      const base64 = buffer.toString('base64')
+      const dataUrl = `data:image/${format === 'jpg' ? 'jpeg' : format};base64,${base64}`
+      const { width, height } = image.getSize()
 
-      return { ok: true, dataUrl, width, height, format: format === 'jpg' ? 'jpeg' : format, windowId: target.id };
+      return {
+        ok: true,
+        dataUrl,
+        width,
+        height,
+        format: format === 'jpg' ? 'jpeg' : format,
+        windowId: target.id,
+      }
     } catch (error) {
-      return { ok: false, error: String(error?.message || error) };
+      return { ok: false, error: String(error?.message || error) }
     }
-  });
+  })
 }

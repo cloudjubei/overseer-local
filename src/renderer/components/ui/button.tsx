@@ -33,7 +33,19 @@ const sizeClass: Record<ButtonSize, string> = {
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, asChild = false, variant = 'primary', size = 'md', loading = false, disabled, children, ...props }, ref) => {
+  (
+    {
+      className,
+      asChild = false,
+      variant = 'primary',
+      size = 'md',
+      loading = false,
+      disabled,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : 'button'
     const isDisabled = disabled || loading
 
@@ -53,7 +65,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <span className={loading ? 'opacity-0' : undefined}>{children}</span>
       </Comp>
     )
-  }
+  },
 )
 Button.displayName = 'Button'
 

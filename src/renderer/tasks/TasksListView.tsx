@@ -3,14 +3,14 @@ import { Button } from '../components/ui/Button'
 import { useNavigator } from '../navigation/Navigator'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
-import { useActiveProject } from '../contexts/ProjectContext';
+import { useActiveProject } from '../contexts/ProjectContext'
 import DependencyBullet from '../components/tasks/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/tasks/StatusControl'
-import { STATUS_LABELS } from '../services/tasksService';
+import { STATUS_LABELS } from '../services/tasksService'
 import { useTasks } from '../contexts/TasksContext'
 import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../types/settings'
-import { useAgents } from '../contexts/AgentsContext';
-import { Status, Task } from 'thefactory-tools';
+import { useAgents } from '../contexts/AgentsContext'
+import { Status, Task } from 'thefactory-tools'
 import ExclamationChip from '../components/tasks/ExclamationChip'
 import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
@@ -32,12 +32,21 @@ function matchesQuery(task: Task, q: string) {
   const s = q.trim().toLowerCase()
   if (!s) return true
   const idStr = String(task.id || '')
-  return idStr.includes(s) || task.title?.toLowerCase().includes(s) || task.description?.toLowerCase().includes(s)
+  return (
+    idStr.includes(s) ||
+    task.title?.toLowerCase().includes(s) ||
+    task.description?.toLowerCase().includes(s)
+  )
 }
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
-    const byStatus = !status || status === 'all' ? true : (status === 'not-done' ? t.status !== '+' : t.status === (status as Status))
+    const byStatus =
+      !status || status === 'all'
+        ? true
+        : status === 'not-done'
+          ? t.status !== '+'
+          : t.status === (status as Status)
     return byStatus && matchesQuery(t, query)
   })
 }
@@ -49,9 +58,11 @@ export default function TasksListView() {
   const view = appSettings.userPreferences.tasksViewMode
   const setView = (view: TaskViewMode) => setUserPreferences({ tasksViewMode: view })
   const sortBy = appSettings.userPreferences.tasksListViewSorting
-  const setSortBy = (sortBy: TaskListViewSorting) => setUserPreferences({ tasksListViewSorting: sortBy })
+  const setSortBy = (sortBy: TaskListViewSorting) =>
+    setUserPreferences({ tasksListViewSorting: sortBy })
   const statusFilter = appSettings.userPreferences.tasksListViewStatusFilter
-  const setStatusFilter = (statusFilter: TaskListStatusFilter) => setUserPreferences({ tasksListViewStatusFilter: statusFilter })
+  const setStatusFilter = (statusFilter: TaskListStatusFilter) =>
+    setUserPreferences({ tasksListViewStatusFilter: statusFilter })
 
   const [allTasks, setAllTasks] = useState<Task[]>([])
   const [query, setQuery] = useState('')
@@ -73,14 +84,18 @@ export default function TasksListView() {
   useEffect(() => {
     setAllTasks(Object.values(tasksById))
   }, [tasksById])
-  
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault()
         openModal({ type: 'task-create' })
       }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'b')) {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'b')
+      ) {
         e.preventDefault()
         setView(view === 'list' ? 'board' : 'list')
       }
@@ -89,7 +104,9 @@ export default function TasksListView() {
     return () => window.removeEventListener('keydown', onKey)
   }, [openModal])
 
-  const taskIdToDisplayIndex : Record<string, number> = useMemo(() => { return project?.taskIdToDisplayIndex ?? {} }, [project])
+  const taskIdToDisplayIndex: Record<string, number> = useMemo(() => {
+    return project?.taskIdToDisplayIndex ?? {}
+  }, [project])
 
   const sorted = useMemo(() => {
     let tasks = [...allTasks]
@@ -100,16 +117,23 @@ export default function TasksListView() {
         tasks.sort((a, b) => taskIdToDisplayIndex[b.id] - taskIdToDisplayIndex[a.id])
       } else if (sortBy === 'status_asc') {
         const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
-        tasks.sort((a, b) => sVal(a) - sVal(b) || taskIdToDisplayIndex[a.id] - taskIdToDisplayIndex[b.id])
+        tasks.sort(
+          (a, b) => sVal(a) - sVal(b) || taskIdToDisplayIndex[a.id] - taskIdToDisplayIndex[b.id],
+        )
       } else if (sortBy === 'status_desc') {
         const sVal = (t: Task) => STATUS_ORDER.indexOf(t.status)
-        tasks.sort((a, b) => sVal(b) - sVal(a) || taskIdToDisplayIndex[b.id] - taskIdToDisplayIndex[a.id])
+        tasks.sort(
+          (a, b) => sVal(b) - sVal(a) || taskIdToDisplayIndex[b.id] - taskIdToDisplayIndex[a.id],
+        )
       }
     }
     return tasks
   }, [taskIdToDisplayIndex, allTasks, sortBy, project])
 
-  const filtered = useMemo(() => filterTasks(sorted, { query, status: statusFilter }), [sorted, query, statusFilter])
+  const filtered = useMemo(
+    () => filterTasks(sorted, { query, status: statusFilter }),
+    [sorted, query, statusFilter],
+  )
 
   const isSearchFiltered = query !== ''
 
@@ -117,7 +141,7 @@ export default function TasksListView() {
     openModal({ type: 'task-create' })
   }
 
-  const handleEditTask = (taskId: string) => { 
+  const handleEditTask = (taskId: string) => {
     openModal({ type: 'task-edit', taskId })
   }
 
@@ -142,13 +166,22 @@ export default function TasksListView() {
     }
   }
 
-  const dndEnabled = (sortBy === 'index_asc' || sortBy === 'index_desc') && !isSearchFiltered &&!saving  && view === 'list'
+  const dndEnabled =
+    (sortBy === 'index_asc' || sortBy === 'index_desc') &&
+    !isSearchFiltered &&
+    !saving &&
+    view === 'list'
 
   const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const offsetY = e.clientY - rect.top
     let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
-    if (draggingIndex != null && (idx == draggingIndex || (idx == draggingIndex-1 && pos == 'after') || (idx == draggingIndex+1 && pos == 'before'))){
+    if (
+      draggingIndex != null &&
+      (idx == draggingIndex ||
+        (idx == draggingIndex - 1 && pos == 'after') ||
+        (idx == draggingIndex + 1 && pos == 'before'))
+    ) {
       pos = null
     }
     setDropIndex(idx)
@@ -165,13 +198,13 @@ export default function TasksListView() {
 
   const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, taskId: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
+      e.preventDefault()
       navigateTaskDetails(taskId)
       return
     }
     if (e.key.toLowerCase() === 's') {
       e.preventDefault()
-      const current = allTasks.find(t => t.id === taskId)?.status
+      const current = allTasks.find((t) => t.id === taskId)?.status
       const order: Status[] = ['-', '~', '+', '=', '?']
       const next = order[(Math.max(0, order.indexOf(current as Status)) + 1) % order.length]
       handleStatusChange(taskId, next)
@@ -196,7 +229,10 @@ export default function TasksListView() {
       const fromIndex = project.taskIdToDisplayIndex[dragTaskId] - 1
       // Use the item from the currently rendered list (filtered), not from the full sorted list by index
       const toTask = filtered[dropIndex]
-      if (!toTask) { clearDndState(); return }
+      if (!toTask) {
+        clearDndState()
+        return
+      }
       let toIndex = (project.taskIdToDisplayIndex[toTask.id] ?? 1) - 1
       if (dropPosition === 'after') {
         toIndex = toIndex + 1
@@ -208,8 +244,18 @@ export default function TasksListView() {
     clearDndState()
   }
 
-  const currentFilterLabel = statusFilter === 'all' ? 'All' : (statusFilter === 'not-done' ? 'Not done' : `${STATUS_LABELS[statusFilter as Status]}`)
-  const k = statusFilter === 'all' ? 'queued' : (statusFilter === 'not-done' ? 'queued' : statusKey(statusFilter as Status))
+  const currentFilterLabel =
+    statusFilter === 'all'
+      ? 'All'
+      : statusFilter === 'not-done'
+        ? 'Not done'
+        : `${STATUS_LABELS[statusFilter as Status]}`
+  const k =
+    statusFilter === 'all'
+      ? 'queued'
+      : statusFilter === 'not-done'
+        ? 'queued'
+        : statusKey(statusFilter as Status)
 
   const SkeletonRow = () => (
     <li className="task-item" role="listitem" aria-hidden>
@@ -261,11 +307,23 @@ export default function TasksListView() {
   )
 
   return (
-    <section className="flex flex-col flex-1 min-h-0 overflow-hidden" id="tasks-view" role="region" aria-labelledby="tasks-view-heading">
+    <section
+      className="flex flex-col flex-1 min-h-0 overflow-hidden"
+      id="tasks-view"
+      role="region"
+      aria-labelledby="tasks-view-heading"
+    >
       <div className="tasks-toolbar shrink-0">
         <div className="left">
           <div className="control search-wrapper">
-            <input id="tasks-search-input" type="search" placeholder="Search by id, title, or description" aria-label="Search tasks" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <input
+              id="tasks-search-input"
+              type="search"
+              placeholder="Search by id, title, or description"
+              aria-label="Search tasks"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </div>
           <div className="control">
             <div
@@ -277,24 +335,35 @@ export default function TasksListView() {
               aria-label="Filter by status"
               tabIndex={0}
               onClick={() => setOpenFilter(true)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true) }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
+              }}
             >
               <span className={`status-bullet status-bullet--${k}`} aria-hidden />
               <span className="standard-picker__label">{currentFilterLabel}</span>
             </div>
             {openFilter && statusFilterRef.current && (
-              <StatusPicker 
-                anchorEl={statusFilterRef.current} 
+              <StatusPicker
+                anchorEl={statusFilterRef.current}
                 value={statusFilter as any}
                 isAllAllowed={true}
                 includeNotDone={true}
-                onSelect={(val) => { setStatusFilter(val as TaskListStatusFilter); setOpenFilter(false); }}
+                onSelect={(val) => {
+                  setStatusFilter(val as TaskListStatusFilter)
+                  setOpenFilter(false)
+                }}
                 onClose={() => setOpenFilter(false)}
-                />
+              />
             )}
           </div>
           <div className="control">
-            <select className="ui-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort by" disabled={!isAppSettingsLoaded}>
+            <select
+              className="ui-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              aria-label="Sort by"
+              disabled={!isAppSettingsLoaded}
+            >
               <option value="index_asc">Ascending ↓</option>
               <option value="index_desc">Descending ↑</option>
               <option value="status_asc">Status ↓</option>
@@ -319,11 +388,17 @@ export default function TasksListView() {
       <div className="tasks-toolbar shrink-0">
         <div className="left">
           <div id="tasks-count" className="tasks-count shrink-0" aria-live="polite">
-            Showing {filtered.length} of {allTasks.length} tasks{!isAppSettingsLoaded ? ' • Loading settings…' : ''}
+            Showing {filtered.length} of {allTasks.length} tasks
+            {!isAppSettingsLoaded ? ' • Loading settings…' : ''}
           </div>
         </div>
         <div className="right">
-          <button type="button" className="btn btn-icon" aria-label="Add Task" onClick={handleAddTask}>
+          <button
+            type="button"
+            className="btn btn-icon"
+            aria-label="Add Task"
+            onClick={handleAddTask}
+          >
             <IconPlus />
           </button>
         </div>
@@ -334,7 +409,11 @@ export default function TasksListView() {
           <BoardView tasks={filtered} />
         </div>
       ) : (
-        <div id="tasks-results" className="flex-1 min-h-0 overflow-y-auto tasks-results" tabIndex={-1}>
+        <div
+          id="tasks-results"
+          className="flex-1 min-h-0 overflow-y-auto tasks-results"
+          tabIndex={-1}
+        >
           {!isAppSettingsLoaded ? (
             <ul className="tasks-list" role="list" aria-label="Loading tasks">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -351,11 +430,11 @@ export default function TasksListView() {
               ref={ulRef}
               onDragOver={(e) => {
                 if (dndEnabled) {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = 'move';
+                  e.preventDefault()
+                  e.dataTransfer.dropEffect = 'move'
                 }
               }}
-              onDrop={(e) =>{
+              onDrop={(e) => {
                 if (!dndEnabled || !dragging) return
                 e.preventDefault()
                 onListDrop()
@@ -369,8 +448,8 @@ export default function TasksListView() {
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
                 const blockers = getBlockers(t.id)
                 const blockersOutbound = getBlockersOutbound(t.id)
-                const hasRejectedFeatures = t.features.filter(f => !!f.rejection).length > 0
-                const taskRun = runsHistory.find(r => r.state === 'running' && r.taskId === t.id)
+                const hasRejectedFeatures = t.features.filter((f) => !!f.rejection).length > 0
+                const taskRun = runsHistory.find((r) => r.state === 'running' && r.taskId === t.id)
 
                 return (
                   <li key={t.id} className="task-item" role="listitem">
@@ -383,67 +462,100 @@ export default function TasksListView() {
                       draggable={dndEnabled}
                       aria-grabbed={isDragSource}
                       onDragStart={(e) => {
-                        if (!dndEnabled) return;
-                        setDragTaskId(t.id);
-                        setDragging(true);
-                        setDraggingIndex(idx);
-                        e.dataTransfer.setData('text/plain', String(t.id));
+                        if (!dndEnabled) return
+                        setDragTaskId(t.id)
+                        setDragging(true)
+                        setDraggingIndex(idx)
+                        e.dataTransfer.setData('text/plain', String(t.id))
                         e.dataTransfer.effectAllowed = 'move'
                       }}
                       onDragOver={(e) => {
-                        if (!dndEnabled) return; 
-                        e.preventDefault();
-                        computeDropForRow(e, idx);
+                        if (!dndEnabled) return
+                        e.preventDefault()
+                        computeDropForRow(e, idx)
                       }}
                       onClick={() => navigateTaskDetails(t.id)}
                       onKeyDown={(e) => onRowKeyDown(e, t.id)}
                       aria-label={`Task ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${blockers.length} items this task is blocked by, ${blockersOutbound.length} items this task is blocking. Press Enter to view details.`}
                     >
                       <div className="task-grid">
-                        <div className="col col-id" >
+                        <div className="col col-id">
                           <span className="id-chip">{taskIdToDisplayIndex[t.id]}</span>
                           <StatusControl
                             status={t.status}
                             onChange={(next) => handleStatusChange(t.id, next)}
                           />
                           <div className="flex justify-center gap-1">
-                            {hasRejectedFeatures && <ExclamationChip title={'One or more features were rejected'} tooltip="Has rejection reason" />}
-                            <span className="chips-sub__label" title="No dependencies">{done}/{total}</span>
+                            {hasRejectedFeatures && (
+                              <ExclamationChip
+                                title={'One or more features were rejected'}
+                                tooltip="Has rejection reason"
+                              />
+                            )}
+                            <span className="chips-sub__label" title="No dependencies">
+                              {done}/{total}
+                            </span>
                           </div>
                         </div>
                         <div className="col col-title">
                           <div className="title-line">
-                            <span className="title-text"><RichText text={t.title || ''} /></span>
+                            <span className="title-text">
+                              <RichText text={t.title || ''} />
+                            </span>
                           </div>
                         </div>
                         <div className="col col-description">
-                          <div className="desc-line" title={t.description || ''}><RichText text={t.description || ''} /></div>
+                          <div className="desc-line" title={t.description || ''}>
+                            <RichText text={t.description || ''} />
+                          </div>
                         </div>
-                        <div className="col col-actions" >
-                          <button type="button" className="btn-secondary btn-icon" aria-label="Edit task" onClick={(e) => { e.stopPropagation(); handleEditTask(t.id) }}>
+                        <div className="col col-actions">
+                          <button
+                            type="button"
+                            className="btn-secondary btn-icon"
+                            aria-label="Edit task"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditTask(t.id)
+                            }}
+                          >
                             <IconEdit />
                           </button>
                           {taskRun ? (
-                            <AgentRunBullet key={taskRun.id} run={taskRun} onClick={(e) => { e.stopPropagation(); navigateAgentRun(taskRun.id) }} />
+                            <AgentRunBullet
+                              key={taskRun.id}
+                              run={taskRun}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigateAgentRun(taskRun.id)
+                              }}
+                            />
                           ) : (
-                            <RunAgentButton onClick={(agentType) => {if (!projectId) return; startTaskAgent(agentType, projectId, t.id) }}/>
+                            <RunAgentButton
+                              onClick={(agentType) => {
+                                if (!projectId) return
+                                startTaskAgent(agentType, projectId, t.id)
+                              }}
+                            />
                           )}
                         </div>
                         <div className="col col-blockers" aria-label={`Blockers for Task ${t.id}`}>
                           <div className="chips-list">
                             <span className="chips-sub__label">References</span>
                             {blockers.length === 0 ? (
-                              <span className="chips-sub__label" title="No dependencies">None</span>
+                              <span className="chips-sub__label" title="No dependencies">
+                                None
+                              </span>
                             ) : (
-                              blockers.map((d) => (
-                                <DependencyBullet key={d.id} dependency={d.id} />
-                              ))
+                              blockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
                             )}
                           </div>
                           <div className="chips-list">
                             <span className="chips-sub__label">Blocks</span>
                             {blockersOutbound.length === 0 ? (
-                              <span className="chips-sub__label" title="No dependents">None</span>
+                              <span className="chips-sub__label" title="No dependents">
+                                None
+                              </span>
                             ) : (
                               blockersOutbound.map((d) => (
                                 <DependencyBullet key={d.id} dependency={d.id} isOutbound />
@@ -456,13 +568,21 @@ export default function TasksListView() {
                     {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
                   </li>
                 )
-              }) }
+              })}
             </ul>
           )}
         </div>
       )}
 
-      {saving && <div className="saving-indicator" aria-live="polite" style={{ position: 'fixed', bottom: 12, right: 16 }}>Reordering…</div>}
+      {saving && (
+        <div
+          className="saving-indicator"
+          aria-live="polite"
+          style={{ position: 'fixed', bottom: 12, right: 16 }}
+        >
+          Reordering…
+        </div>
+      )}
     </section>
   )
 }

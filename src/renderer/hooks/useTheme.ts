@@ -24,7 +24,7 @@ function applyTheme(theme: Theme) {
 export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(() => getSavedTheme())
 
-  const availableThemes: Theme[] = ['light', 'dark'];
+  const availableThemes: Theme[] = ['light', 'dark']
 
   const initTheme = () => {
     const theme = getSavedTheme()

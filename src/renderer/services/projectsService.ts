@@ -1,5 +1,5 @@
-import type { ProjectSpec } from 'thefactory-tools';
-import { ServiceResult } from './serviceResult';
+import type { ProjectSpec } from 'thefactory-tools'
+import { ServiceResult } from './serviceResult'
 
 export type ProjectsService = {
   subscribe: (callback: (projects: ProjectSpec[]) => void) => () => void

@@ -1,11 +1,13 @@
 # Linear.app-inspired UX Guidelines
 
 Purpose
+
 - Capture best-in-class UX patterns inspired by Linear.app and adapt them to our task management app.
 - Define interaction models, controls, and behaviors to achieve speed, clarity, and power-user efficiency.
 - Align with our Renderer-driven navigation (Navigator + ModalHost) and existing UI components and design tokens.
 
 Guiding Principles
+
 - Keyboard-first: every primary action should be executable via shortcuts and the command menu.
 - Minimal chrome, maximal focus: keep the interface clean and emphasize the content (tasks) over UI furniture.
 - Instant feedback: optimistic updates, subtle animations, and undo affordances.
@@ -15,6 +17,7 @@ Guiding Principles
 - Accessibility as table stakes: ensure full keyboard navigation and screen reader support.
 
 Core Navigation Patterns
+
 - Global command menu: a universal entry point (Cmd/Ctrl+K) to search and execute actions; type-to-filter.
 - Left sidebar navigation: high-level areas (Inbox/My Tasks, All Tasks, Boards, Projects, Docs, Chat), collapsible groups.
 - Contextual panels: task details open in a right-side panel/sheet over list or board; never lose context.
@@ -23,6 +26,7 @@ Core Navigation Patterns
 
 Keyboard Shortcuts (Recommended Mapping)
 Note: Provide consistent shortcut semantics; do not rely on platform-specific nonstandard keys. Ensure shortcut discoverability via a Help overlay.
+
 - Global
   - Cmd/Ctrl+K: Open command menu
   - /: Focus search
@@ -51,6 +55,7 @@ Note: Provide consistent shortcut semantics; do not rely on platform-specific no
   - Esc: Cancel/close (respect unsaved changes confirmation)
 
 Task Lifecycle Flows
+
 - Create Task
   - Quick create
     - Trigger via Cmd/Ctrl+N or a prominent New Task button.
@@ -82,6 +87,7 @@ Task Lifecycle Flows
   - Relations (blocks/blocked-by, duplicates, relates-to) via a relation picker; display chips in details.
 
 Modals and Panels Behavior
+
 - Modals
   - Lightweight and non-blocking where possible; small quick-create modal preferred to heavy forms.
   - Focus trapping, Esc to close, Cmd/Ctrl+Enter to save, consistent primary/secondary button order.
@@ -92,24 +98,28 @@ Modals and Panels Behavior
   - Support deep-linking via URL state (Navigator route) for shareable links.
 
 Forms and Inline Editing
+
 - Inline fields use a single-click or Enter to edit; Esc cancels.
 - Editable tokens for status, assignee, labels; type-ahead pickers with keyboard navigation.
 - Description editor supports markdown shortcuts and slash-commands (e.g., /date, /checklist).
 - Validate on submit; keep inline validation concise and next to fields.
 
 Micro-interactions
+
 - Subtle hover reveals: show quick affordances (assign, status change) on hover, but keep layout stable.
 - Animated transitions under 150ms; no large motion; use ease-out for entrance, ease-in for exit.
 - Toasters for successes and errors; include Undo when applicable; disappear after 3–5 seconds.
 - Optimistic updates with rollback on failure; never block the UI on network unless required.
 
 Performance and Perceived Speed
+
 - Virtualize long lists and board columns.
 - Debounced network writes for inline edits; coalesce updates.
 - Preload likely-needed data (assignees, statuses, labels) for instant pickers.
 - Cache recent searches and command menu results.
 
 Accessibility
+
 - Full keyboard reachability with visible focus rings.
 - Roving tabindex for lists and grids; ARIA roles: listbox, grid, dialog, toolbar as appropriate.
 - Command menu announced as a dialog with search input labeled; results list with role=listbox and option.
@@ -117,6 +127,7 @@ Accessibility
 - Ensure color contrast meets WCAG AA; do not rely on color alone to convey status.
 
 Implementation Guidelines for Our App
+
 - Navigation and Structure
   - Use src/renderer/navigation/Navigator for all route changes and to open/close modals and panels.
   - Use ModalHost for rendering all modals and side-panels via portals; keep a single host at app root.
@@ -142,4 +153,5 @@ Implementation Guidelines for Our App
   - Provide ARIA live region for toasts and async statuses.
 
 Notes and References
+
 - See docs/STANDARDS.md for app-wide UI conventions, and docs/design/ for color and token references.

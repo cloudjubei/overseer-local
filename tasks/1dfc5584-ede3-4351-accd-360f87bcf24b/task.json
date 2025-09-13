@@ -164,10 +164,7 @@
       "title": "Chats screen - each section allows scrolling",
       "description": "The whole screen doesn't scroll - just the list of items inside the chats list and the chat messages itself (ONLY THE MESSAGES, the top settings and bottom message composer are stuck)",
       "plan": "",
-      "context": [
-        "src/renderer/screens/SidebarView.tsx",
-        "src/renderer/screens/ChatView.tsx"
-      ],
+      "context": ["src/renderer/screens/SidebarView.tsx", "src/renderer/screens/ChatView.tsx"],
       "acceptance": []
     },
     {
@@ -358,10 +355,7 @@
       "title": "Creating a task is broken",
       "description": "The status fields don't match the Task specification",
       "plan": "",
-      "context": [
-        "src/renderer/components/TaskForm.tsx",
-        "src/renderer/tasks/TasksListView.tsx"
-      ],
+      "context": ["src/renderer/components/TaskForm.tsx", "src/renderer/tasks/TasksListView.tsx"],
       "acceptance": [],
       "blockers": []
     },
@@ -387,10 +381,7 @@
       "title": "Task deletion",
       "description": "It should be possible to delete a task from the edit screen (after extra alert confirmation).\nThe user should be then taken to the TasksList screen.",
       "plan": "",
-      "context": [
-        "src/renderer/components/TaskForm.tsx",
-        "src/renderer/tasks/TasksListView.tsx"
-      ],
+      "context": ["src/renderer/components/TaskForm.tsx", "src/renderer/tasks/TasksListView.tsx"],
       "acceptance": [],
       "blockers": []
     },
@@ -419,9 +410,7 @@
         "src/renderer/screens/DocumentsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [
-        "fbc0b91a-8722-4321-af49-5c1625b74b77"
-      ]
+      "blockers": ["fbc0b91a-8722-4321-af49-5c1625b74b77"]
     },
     {
       "id": "b902122f-7c2e-4144-a52e-7fe40b2fddad",
@@ -435,9 +424,7 @@
         "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
-      "blockers": [
-        "fbc0b91a-8722-4321-af49-5c1625b74b77"
-      ]
+      "blockers": ["fbc0b91a-8722-4321-af49-5c1625b74b77"]
     },
     {
       "id": "06743509-2393-4b11-8728-e400e874af78",
@@ -451,9 +438,7 @@
         "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [],
-      "blockers": [
-        "fbc0b91a-8722-4321-af49-5c1625b74b77"
-      ]
+      "blockers": ["fbc0b91a-8722-4321-af49-5c1625b74b77"]
     },
     {
       "id": "7de1829b-c85a-4426-bb39-381753902526",
@@ -515,9 +500,7 @@
       "title": "TaskDetailsView",
       "description": "Overview needs to be collapsible. When expanded, it can be scrolled and should be fitting at most 4 lines of text.",
       "plan": "",
-      "context": [
-        "src/renderer/tasks/TaskDetailsView.tsx"
-      ],
+      "context": ["src/renderer/tasks/TaskDetailsView.tsx"],
       "acceptance": [],
       "blockers": []
     },
@@ -557,9 +540,7 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "blockers": [
-        "4095a67b-2e97-495c-b0c1-fac51d568c6c"
-      ]
+      "blockers": ["4095a67b-2e97-495c-b0c1-fac51d568c6c"]
     }
   ],
   "featureIdToDisplayIndex": {

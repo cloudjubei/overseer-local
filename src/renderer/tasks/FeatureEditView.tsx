@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
-import type { Feature } from 'thefactory-tools';
+import type { Feature } from 'thefactory-tools'
 import { useTasks } from '../contexts/TasksContext'
 import FeatureForm, { FeatureFormValues } from '../components/tasks/FeatureForm'
 
-export default function FeatureEditView({ taskId, featureId, onRequestClose }: { taskId: string; featureId: string; onRequestClose?: () => void }) {
+export default function FeatureEditView({
+  taskId,
+  featureId,
+  onRequestClose,
+}: {
+  taskId: string
+  featureId: string
+  onRequestClose?: () => void
+}) {
   const { toast } = useToast()
   const [initialValues, setInitialValues] = useState<Feature | null>(null)
   const [showAlert, setShowAlert] = useState(false)
@@ -42,7 +50,7 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
         setSubmitting(false)
       }
     },
-    [taskId, featureId, toast, updateFeature]
+    [taskId, featureId, toast, updateFeature],
   )
 
   const handleDelete = async () => {
@@ -75,10 +83,16 @@ export default function FeatureEditView({ taskId, featureId, onRequestClose }: {
             featureId={featureId}
           />
         ) : (
-          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">Loading feature…</div>
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
+            Loading feature…
+          </div>
         )}
       </Modal>
-      <AlertDialog isOpen={showAlert} onClose={() => setShowAlert(false)} description={alertMessage} />
+      <AlertDialog
+        isOpen={showAlert}
+        onClose={() => setShowAlert(false)}
+        description={alertMessage}
+      />
       <AlertDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}

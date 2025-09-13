@@ -1,59 +1,67 @@
 import { useEffect, useState } from 'react'
 import { settingsService } from '../services/settingsService'
 import { useProjectContext } from '../contexts/ProjectContext'
-import { DEFAULT_PROJECT_SETTINGS, NotificationProjectSettings, ProjectSettings } from '../../types/settings'
+import {
+  DEFAULT_PROJECT_SETTINGS,
+  NotificationProjectSettings,
+  ProjectSettings,
+} from '../../types/settings'
 
 export function useProjectSettings() {
-  const {
-    activeProject
-  } = useProjectContext()
+  const { activeProject } = useProjectContext()
   const [projectSettings, setProjectSettings] = useState<ProjectSettings>(DEFAULT_PROJECT_SETTINGS)
-
 
   const update = async () => {
     if (activeProject) {
-      const projectSettings = await settingsService.getProjectSettings(activeProject.id);
-      updateCurrentProjectSettings(projectSettings);
+      const projectSettings = await settingsService.getProjectSettings(activeProject.id)
+      updateCurrentProjectSettings(projectSettings)
     }
-  };
+  }
 
   const updateCurrentProjectSettings = (projectSettings: ProjectSettings) => {
-    setProjectSettings(projectSettings);
-  };
+    setProjectSettings(projectSettings)
+  }
 
   useEffect(() => {
-    update();
+    update()
 
-    const unsubscribe = settingsService.subscribe(updateCurrentProjectSettings);
+    const unsubscribe = settingsService.subscribe(updateCurrentProjectSettings)
 
     return () => {
-      unsubscribe();
-    };
-  }, []);
+      unsubscribe()
+    }
+  }, [])
 
   useEffect(() => {
-    update();
-  }, [activeProject]);
+    update()
+  }, [activeProject])
 
-  const updateProjectSettings = async (updates: Partial<ProjectSettings>) : Promise<ProjectSettings | undefined> => {
-    if (activeProject){
-      const newProjectSettings = await settingsService.updateProjectSettings(activeProject.id, updates)
+  const updateProjectSettings = async (
+    updates: Partial<ProjectSettings>,
+  ): Promise<ProjectSettings | undefined> => {
+    if (activeProject) {
+      const newProjectSettings = await settingsService.updateProjectSettings(
+        activeProject.id,
+        updates,
+      )
       setProjectSettings(newProjectSettings)
       return newProjectSettings
     }
   }
 
-    const setNotificationProjectSettings = async (updates: Partial<NotificationProjectSettings>): Promise<ProjectSettings | undefined> => {
-      const next = {
-        ...projectSettings.notifications,
-        ...updates
-      }
-      return updateProjectSettings({ notifications: next })
+  const setNotificationProjectSettings = async (
+    updates: Partial<NotificationProjectSettings>,
+  ): Promise<ProjectSettings | undefined> => {
+    const next = {
+      ...projectSettings.notifications,
+      ...updates,
     }
+    return updateProjectSettings({ notifications: next })
+  }
 
   return {
     projectSettings,
     updateProjectSettings,
-    setNotificationProjectSettings
+    setNotificationProjectSettings,
   }
 }

@@ -1,53 +1,53 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'node:path';
-import started from 'electron-squirrel-startup';
-import { registerScreenshotService } from './capture/screenshotService';
-import { initManagers, stopManagers } from './managers';
+import { app, BrowserWindow } from 'electron'
+import path from 'node:path'
+import started from 'electron-squirrel-startup'
+import { registerScreenshotService } from './capture/screenshotService'
+import { initManagers, stopManagers } from './managers'
 
 if (started) {
-  app.quit();
+  app.quit()
 }
-let mainWindow;
+let mainWindow
 
-const IS_DEV =true
+const IS_DEV = true
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: IS_DEV ? 1600 : 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }, 
-  });
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  })
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
   } else {
-    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
   }
 
-  mainWindow.webContents.openDevTools();
-};
+  mainWindow.webContents.openDevTools()
+}
 
 app.whenReady().then(async () => {
-  createWindow();
+  createWindow()
 
-  registerScreenshotService(() => mainWindow);
+  registerScreenshotService(() => mainWindow)
 
-  const projectRoot = app.getAppPath();
+  const projectRoot = app.getAppPath()
 
-  await initManagers(projectRoot, mainWindow);
-  
+  await initManagers(projectRoot, mainWindow)
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createWindow()
     }
-  });
-});
+  })
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit();
+    app.quit()
   }
   stopManagers()
-});
+})

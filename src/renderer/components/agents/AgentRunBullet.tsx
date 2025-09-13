@@ -1,9 +1,14 @@
+import { AgentRunHistory } from 'thefactory-tools'
+import StatusChip from './StatusChip'
 
-import { AgentRunHistory } from 'thefactory-tools';
-import StatusChip from './StatusChip';
-
-export default function AgentRunBullet({ run, onClick }: { run: AgentRunHistory; onClick?: (e: any) => void }) {
-  const label = `Agent ${run.id.slice(0, 8)} · ${run.state}${run.statusMessage ? ` · ${run.statusMessage}` : ''} · ${run.llmConfig.provider} · ${run.llmConfig.model}`;
+export default function AgentRunBullet({
+  run,
+  onClick,
+}: {
+  run: AgentRunHistory
+  onClick?: (e: any) => void
+}) {
+  const label = `Agent ${run.id.slice(0, 8)} · ${run.state}${run.statusMessage ? ` · ${run.statusMessage}` : ''} · ${run.llmConfig.provider} · ${run.llmConfig.model}`
 
   return (
     <button
@@ -16,5 +21,5 @@ export default function AgentRunBullet({ run, onClick }: { run: AgentRunHistory;
     >
       <StatusChip state={run.state} />
     </button>
-  );
+  )
 }

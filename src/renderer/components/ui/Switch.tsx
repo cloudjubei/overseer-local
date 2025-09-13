@@ -1,9 +1,9 @@
-import React from 'react';
+import React from 'react'
 
 export interface SwitchProps {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  label?: string;
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  label?: string
 }
 
 export function Switch({ checked, onCheckedChange, label }: SwitchProps) {
@@ -21,5 +21,5 @@ export function Switch({ checked, onCheckedChange, label }: SwitchProps) {
       </button>
       {label && <span className="text-sm font-medium text-[var(--text-primary)]">{label}</span>}
     </div>
-  );
+  )
 }

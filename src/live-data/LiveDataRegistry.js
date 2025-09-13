@@ -5,15 +5,15 @@ Live Data Provider Registry
 
 export class LiveDataRegistry {
   constructor() {
-    this.providers = new Map();
+    this.providers = new Map()
   }
 
   register(provider) {
-    if (!provider || !provider.id) throw new Error('Provider must have an id');
-    this.providers.set(provider.id, provider);
+    if (!provider || !provider.id) throw new Error('Provider must have an id')
+    this.providers.set(provider.id, provider)
   }
 
   get(serviceId) {
-    return this.providers.get(serviceId);
+    return this.providers.get(serviceId)
   }
 }

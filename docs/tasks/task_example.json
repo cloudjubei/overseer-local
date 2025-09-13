@@ -10,9 +10,7 @@
       "status": "+",
       "description": "Create `docs/tasks/task_format.py` to define the new task structure using Python's `TypedDict` or similar data classes. This will serve as the canonical schema for tasks, features, and related objects.",
       "plan": "1. Create the file `docs/tasks/task_format.py`. 2. Define a TypedDict for `Task`. 3. Define a TypedDict for `Feature`. 4. Include all required and optional fields as specified in the project's guidance.",
-      "context": [
-        "docs/tasks/TASKS_GUIDANCE.md"
-      ],
+      "context": ["docs/tasks/TASKS_GUIDANCE.md"],
       "acceptance": [
         "`docs/tasks/task_format.py` exists.",
         "The file defines Python types for `Task`, `Feature`, and other relevant data structures.",
@@ -26,16 +24,12 @@
       "status": "-",
       "action": "Create `docs/tasks/task_example.json` that demonstrates a complete task in the new format, adhering to the schema defined in `task_format.py`.",
       "plan": "1. Create the file `docs/tasks/task_example.json`. 2. Populate it with a sample task that includes at least two features. 3. Ensure the structure strictly follows the `Task` and `Feature` schemas from `task_format.py`.",
-      "context": [
-        "docs/tasks/task_format.py"
-      ],
+      "context": ["docs/tasks/task_format.py"],
       "acceptance": [
         "`docs/tasks/task_example.json` exists.",
         "The JSON is valid and conforms to the structure defined in `docs/tasks/task_format.py`."
       ],
-      "blockers": [
-        "13.1"
-      ]
+      "blockers": ["13.1"]
     }
   ]
 }

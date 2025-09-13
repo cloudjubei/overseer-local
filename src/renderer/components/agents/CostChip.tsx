@@ -1,39 +1,42 @@
-import Tooltip from '../ui/Tooltip';
+import Tooltip from '../ui/Tooltip'
 
 export type CostChipProps = {
-  provider: string;
-  model: string;
+  provider: string
+  model: string
   price?: {
-    inputPerMTokensUSD: number;
-    outputPerMTokensUSD: number;
+    inputPerMTokensUSD: number
+    outputPerMTokensUSD: number
   }
-  costUSD?: number;
-};
+  costUSD?: number
+}
 
 function formatUSD(n?: number) {
-  if (n == null) return '—';
-  return `$${n.toFixed(4)}`;
+  if (n == null) return '—'
+  return `$${n.toFixed(4)}`
 }
 
 export default function CostChip({ provider, model, price, costUSD }: CostChipProps) {
-
   const content = (
     <div className="text-xs">
-      <div className="font-semibold mb-1">{provider || 'Unknown'} · {model || 'Unknown'}</div>
+      <div className="font-semibold mb-1">
+        {provider || 'Unknown'} · {model || 'Unknown'}
+      </div>
       {price ? (
         <div className="space-y-0.5">
           <div>
-            <span className="text-neutral-400">Input:</span> {`$${price.inputPerMTokensUSD}`} per 1M tokens
+            <span className="text-neutral-400">Input:</span> {`$${price.inputPerMTokensUSD}`} per 1M
+            tokens
           </div>
           <div>
-            <span className="text-neutral-400">Output:</span> {`$${price.outputPerMTokensUSD}`} per 1M tokens
+            <span className="text-neutral-400">Output:</span> {`$${price.outputPerMTokensUSD}`} per
+            1M tokens
           </div>
         </div>
       ) : (
         <div className="text-neutral-400">Pricing unavailable</div>
       )}
     </div>
-  );
+  )
 
   return (
     <Tooltip content={content} placement="top">
@@ -42,5 +45,5 @@ export default function CostChip({ provider, model, price, costUSD }: CostChipPr
         <span>{formatUSD(costUSD)}</span>
       </span>
     </Tooltip>
-  );
+  )
 }

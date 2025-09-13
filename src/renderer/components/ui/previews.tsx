@@ -1,21 +1,21 @@
-import React from 'react';
+import React from 'react'
 
 // Import UI components
-import {Button} from './Button';
-import Spinner from './Spinner';
-import {Input} from './Input';
-import Tooltip from './Tooltip';
-import {Select, SelectContent, SelectItem} from './Select';
-import {Switch} from './Switch';
-import Skeleton from './Skeleton';
-import SegmentedControl from './SegmentedControl';
-import CollapsibleSidebar from './CollapsibleSidebar';
-import { ToastView } from './Toast';
-import CommandMenu from './CommandMenu';
-import ShortcutsHelp from './ShortcutsHelp';
-import {Alert} from './Alert';
-import {Modal} from './Modal';
-import { IconDelete } from './Icons';
+import { Button } from './Button'
+import Spinner from './Spinner'
+import { Input } from './Input'
+import Tooltip from './Tooltip'
+import { Select, SelectContent, SelectItem } from './Select'
+import { Switch } from './Switch'
+import Skeleton from './Skeleton'
+import SegmentedControl from './SegmentedControl'
+import CollapsibleSidebar from './CollapsibleSidebar'
+import { ToastView } from './Toast'
+import CommandMenu from './CommandMenu'
+import ShortcutsHelp from './ShortcutsHelp'
+import { Alert } from './Alert'
+import { Modal } from './Modal'
+import { IconDelete } from './Icons'
 
 // Notes:
 // - Each export is a small React component (preview) with sensible default props.
@@ -25,7 +25,7 @@ import { IconDelete } from './Icons';
 
 // Button
 export function Button_Default(props: React.ComponentProps<typeof Button>) {
-  return <Button {...props}>Click me</Button>;
+  return <Button {...props}>Click me</Button>
 }
 
 export function Button_Variants() {
@@ -34,11 +34,13 @@ export function Button_Variants() {
       <Button>Default</Button>
       <Button variant="primary">Primary</Button>
       <Button variant="ghost">Ghost</Button>
-      <Button variant="danger"><IconDelete className="w-4 h-4" /> Delete</Button>
+      <Button variant="danger">
+        <IconDelete className="w-4 h-4" /> Delete
+      </Button>
       <Button loading>Loading</Button>
       <Button disabled>Disabled</Button>
     </div>
-  );
+  )
 }
 
 // Spinner
@@ -47,7 +49,7 @@ export function Spinner_Default(props: React.ComponentProps<typeof Spinner>) {
     <div style={{ padding: 24 }}>
       <Spinner {...props} />
     </div>
-  );
+  )
 }
 
 // Input
@@ -58,7 +60,7 @@ export function Input_Default(props: React.ComponentProps<typeof Input>) {
       <Input prefix="search" placeholder="Search" />
       <Input placeholder="Due date" />
     </div>
-  );
+  )
 }
 
 // Tooltip
@@ -69,7 +71,7 @@ export function Tooltip_Default() {
         <Button>Hover me</Button>
       </Tooltip>
     </div>
-  );
+  )
 }
 
 // Select
@@ -78,41 +80,43 @@ export function Select_Default(props: any) {
     { label: 'Option A', value: 'a' },
     { label: 'Option B', value: 'b' },
     { label: 'Option C', value: 'c' },
-  ];
+  ]
   return (
     <div style={{ padding: 16 }}>
-      <Select value={props.value ?? 'a'}  onValueChange={() => {}}>
+      <Select value={props.value ?? 'a'} onValueChange={() => {}}>
         <SelectContent>
-          {options.map(m => (
-            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+          {options.map((m) => (
+            <SelectItem key={m.value} value={m.value}>
+              {m.label}
+            </SelectItem>
           ))}
           <SelectItem value="custom">Custom</SelectItem>
         </SelectContent>
       </Select>
     </div>
-  );
+  )
 }
 
 // Switch
 export function Switch_Default(props: React.ComponentProps<typeof Switch>) {
   return (
     <div style={{ padding: 16, display: 'flex', gap: 16, alignItems: 'center' }}>
-      <Switch {...props} checked/>
+      <Switch {...props} checked />
       <Switch {...props} />
     </div>
-  );
+  )
 }
 
 // Skeleton
 export function Skeleton_Default() {
   return (
     <div style={{ padding: 16, width: 360, display: 'grid', gap: 8 }}>
-      <Skeleton style={{ height:16, width:"70%"}} />
-      <Skeleton style={{ height:16, width:"80%"}} />
-      <Skeleton style={{ height:16, width:"90%"}} />
-      <Skeleton style={{ height:200}} />
+      <Skeleton style={{ height: 16, width: '70%' }} />
+      <Skeleton style={{ height: 16, width: '80%' }} />
+      <Skeleton style={{ height: 16, width: '90%' }} />
+      <Skeleton style={{ height: 200 }} />
     </div>
-  );
+  )
 }
 
 // SegmentedControl
@@ -120,12 +124,12 @@ export function SegmentedControl_Default() {
   const segments = [
     { value: 'list', label: 'List' },
     { value: 'board', label: 'Board' },
-  ];
+  ]
   return (
     <div style={{ padding: 16 }}>
       <SegmentedControl value={'list'} onChange={() => {}} options={segments} />
     </div>
-  );
+  )
 }
 
 // CollapsibleSidebar
@@ -144,41 +148,44 @@ export function CollapsibleSidebar_Default() {
       />
       <div style={{ padding: 16, flex: 1 }}>Content area</div>
     </div>
-  );
+  )
 }
 
 // Toast
 export function Toast_Default() {
-  const message = {id:"1",title:"Saved", description:"Your changes have been saved.", variant:'success', durationMs:100,
+  const message = {
+    id: '1',
+    title: 'Saved',
+    description: 'Your changes have been saved.',
+    variant: 'success',
+    durationMs: 100,
     action: {
-      label: ""
-    }
-   }
+      label: '',
+    },
+  }
   return (
     <div style={{ padding: 16 }}>
-      <ToastView item={message} onClose={(id)=>{}} />
+      <ToastView item={message} onClose={(id) => {}} />
     </div>
-  );
+  )
 }
 
 // CommandMenu
 export function CommandMenu_Default() {
   return (
     <div style={{ padding: 16 }}>
-      <CommandMenu
-      />
+      <CommandMenu />
     </div>
-  );
+  )
 }
 
 // ShortcutsHelp
 export function ShortcutsHelp_Default() {
   return (
     <div style={{ padding: 16 }}>
-      <ShortcutsHelp
-      />
+      <ShortcutsHelp />
     </div>
-  );
+  )
 }
 
 // Alert
@@ -190,7 +197,7 @@ export function Alert_Default() {
       <Alert variant="destructive" title="Error" description="Something went wrong." />
       <Alert variant="success" title="Success" description="All good!" />
     </div>
-  );
+  )
 }
 
 // Modal
@@ -207,23 +214,23 @@ export function Modal_Default() {
         </div>
       </Modal>
     </div>
-  );
+  )
 }
 
 // Named default mappings for convenience
-export const ButtonPreview = Button_Default;
-export const SpinnerPreview = Spinner_Default;
-export const InputPreview = Input_Default;
-export const TooltipPreview = Tooltip_Default;
-export const SelectPreview = Select_Default;
-export const SwitchPreview = Switch_Default;
-export const SkeletonPreview = Skeleton_Default;
-export const SegmentedControlPreview = SegmentedControl_Default;
-export const CollapsibleSidebarPreview = CollapsibleSidebar_Default;
-export const ToastPreview = Toast_Default;
-export const CommandMenuPreview = CommandMenu_Default;
-export const ShortcutsHelpPreview = ShortcutsHelp_Default;
-export const AlertPreview = Alert_Default;
-export const ModalPreview = Modal_Default;
+export const ButtonPreview = Button_Default
+export const SpinnerPreview = Spinner_Default
+export const InputPreview = Input_Default
+export const TooltipPreview = Tooltip_Default
+export const SelectPreview = Select_Default
+export const SwitchPreview = Switch_Default
+export const SkeletonPreview = Skeleton_Default
+export const SegmentedControlPreview = SegmentedControl_Default
+export const CollapsibleSidebarPreview = CollapsibleSidebar_Default
+export const ToastPreview = Toast_Default
+export const CommandMenuPreview = CommandMenu_Default
+export const ShortcutsHelpPreview = ShortcutsHelp_Default
+export const AlertPreview = Alert_Default
+export const ModalPreview = Modal_Default
 
 // export default Button_Default;

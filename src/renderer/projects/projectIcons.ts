@@ -1,7 +1,7 @@
 export type ProjectIcon = {
-  value: string;
-  label: string;
-};
+  value: string
+  label: string
+}
 
 // A curated set of helpful icons for projects (emoji-based for simplicity)
 export const PROJECT_ICONS: ProjectIcon[] = [
@@ -28,5 +28,5 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: '🧩', label: 'Components' },
   { value: '🗃️', label: 'Archive' },
   { value: '🧱', label: 'Foundation' },
-  { value: '🗜️', label: 'Compression' }
-];
+  { value: '🗜️', label: 'Compression' },
+]

@@ -24,9 +24,7 @@
       "title": "Add display index tracking to ProjectSpec and Task types",
       "description": "Extend the ProjectSpec type to include a mapping of task UUIDs to their display indices (position in the main task list). Add display index fields to track feature positions within tasks. This enables fast lookup of user-friendly indices for UI display.",
       "plan": "",
-      "context": [
-        "src/types/tasks.ts"
-      ],
+      "context": ["src/types/tasks.ts"],
       "acceptance": []
     },
     {
@@ -94,10 +92,7 @@
       "title": "Update the migration script",
       "description": "Use the current version and extend it so it can be run via command line passing in a path to project's @config.json (i.e. in this project there's 'thefactory.json' - referenced here).",
       "plan": "",
-      "context": [
-        "scripts/migrate-uuids.ts",
-        "projects/thefactory.json"
-      ],
+      "context": ["scripts/migrate-uuids.ts", "projects/thefactory.json"],
       "acceptance": []
     }
   ],

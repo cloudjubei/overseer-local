@@ -31,9 +31,7 @@
         "tests/tasks/test_task_schema.py"
       ],
       "acceptance": [],
-      "blockers": [
-        "831c12f4-7539-4d19-9b08-bb5c20f7920c"
-      ]
+      "blockers": ["831c12f4-7539-4d19-9b08-bb5c20f7920c"]
     },
     {
       "id": "5d36db7c-d4b0-41be-adbc-e677b275f532",
@@ -41,15 +39,9 @@
       "title": "Tasks list UI with filtering and search - view only",
       "description": "Build a React view listing tasks with id, title, status, and counts of features (done/total). Provide text search and filters (e.g., status). Filtering/search applied client-side; empty states handled; accessibility basics (labels, keyboard nav) covered.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "84c2e0e5-d2cc-4f62-be80-d2133fef2c60"
-      ]
+      "blockers": ["84c2e0e5-d2cc-4f62-be80-d2133fef2c60"]
     },
     {
       "id": "86a09709-f809-4df5-bc85-319040884346",
@@ -57,15 +49,9 @@
       "title": "Task details view with feature list - view only",
       "description": "Create a detail page showing the task metadata and its features with statuses.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "5d36db7c-d4b0-41be-adbc-e677b275f532"
-      ]
+      "blockers": ["5d36db7c-d4b0-41be-adbc-e677b275f532"]
     },
     {
       "id": "635fb525-fc57-4d89-986e-0ba7a09c66e9",
@@ -73,15 +59,9 @@
       "title": "Edit mode - feature details",
       "description": "Allow editing of a feature's parameters. The status dropdown defaults to the current status. The string list edits show rows of editable strings. Blockers allow matching features by name and working out the id from it.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "86a09709-f809-4df5-bc85-319040884346"
-      ]
+      "blockers": ["86a09709-f809-4df5-bc85-319040884346"]
     },
     {
       "id": "92f72aa1-5855-4c69-b67e-84adbbe454e7",
@@ -89,15 +69,9 @@
       "title": "Create mode - new feature",
       "description": "Allow adding a new feature to a task in a new popup window - make this the same pattern as edit mode.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "635fb525-fc57-4d89-986e-0ba7a09c66e9"
-      ]
+      "blockers": ["635fb525-fc57-4d89-986e-0ba7a09c66e9"]
     },
     {
       "id": "ce8bfbac-c934-45cd-ab9d-2990f61d4a84",
@@ -105,15 +79,9 @@
       "title": "Edit mode - task details",
       "description": "Allow editing of a task's title and description.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "86a09709-f809-4df5-bc85-319040884346"
-      ]
+      "blockers": ["86a09709-f809-4df5-bc85-319040884346"]
     },
     {
       "id": "ca12d5f7-ff91-4fd0-924f-30cb349be4ce",
@@ -121,15 +89,9 @@
       "title": "Create mode - new task",
       "description": "Allow adding a new task in a new popup window - make this the same pattern as task edit mode and create feature.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "ce8bfbac-c934-45cd-ab9d-2990f61d4a84"
-      ]
+      "blockers": ["ce8bfbac-c934-45cd-ab9d-2990f61d4a84"]
     },
     {
       "id": "b5e79f3e-efe0-4ad5-9e32-6067666ddb19",
@@ -137,15 +99,9 @@
       "title": "Common functions and libraries",
       "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit task popups should stem from a common popup component.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "ca12d5f7-ff91-4fd0-924f-30cb349be4ce"
-      ]
+      "blockers": ["ca12d5f7-ff91-4fd0-924f-30cb349be4ce"]
     },
     {
       "id": "4b91ec2d-66ad-4b58-b253-f7b6ae7e7921",
@@ -153,15 +109,9 @@
       "title": "Use shadcn and tailwind",
       "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen (an item in the sidebar) where it must be possible to change themes.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "b5e79f3e-efe0-4ad5-9e32-6067666ddb19"
-      ]
+      "blockers": ["b5e79f3e-efe0-4ad5-9e32-6067666ddb19"]
     },
     {
       "id": "3c8f0eb1-cfcd-4daa-98a8-c6c76a1f984a",
@@ -169,16 +119,9 @@
       "title": "Edit mode - moving features around",
       "description": "Allow editing the order of features for a task - thus changing the underlying id everywhere where it's referenced. Pay attention to blockers.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "86a09709-f809-4df5-bc85-319040884346",
-        "4b91ec2d-66ad-4b58-b253-f7b6ae7e7921"
-      ]
+      "blockers": ["86a09709-f809-4df5-bc85-319040884346", "4b91ec2d-66ad-4b58-b253-f7b6ae7e7921"]
     },
     {
       "id": "d5b9599d-f7da-4e3f-b018-6bcb03684255",
@@ -186,16 +129,9 @@
       "title": "Edit mode - moving tasks around",
       "description": "Allow editing the order of tasks - thus changing the underlying id everywhere where it's referenced. Pay attention to blockers of features.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "86a09709-f809-4df5-bc85-319040884346",
-        "3c8f0eb1-cfcd-4daa-98a8-c6c76a1f984a"
-      ]
+      "blockers": ["86a09709-f809-4df5-bc85-319040884346", "3c8f0eb1-cfcd-4daa-98a8-c6c76a1f984a"]
     },
     {
       "id": "7ff88ed2-214e-4732-9426-60d28915c3fc",
@@ -203,16 +139,9 @@
       "title": "Delete mode - delete feature",
       "description": "Allow deleting a feature from a task.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "86a09709-f809-4df5-bc85-319040884346",
-        "d5b9599d-f7da-4e3f-b018-6bcb03684255"
-      ]
+      "blockers": ["86a09709-f809-4df5-bc85-319040884346", "d5b9599d-f7da-4e3f-b018-6bcb03684255"]
     },
     {
       "id": "8f086bff-fa83-4409-91de-9d05c3f63c3c",
@@ -220,16 +149,9 @@
       "title": "Delete mode - delete task",
       "description": "Allow deleting a task.",
       "plan": "",
-      "context": [
-        "src/",
-        "docs/tasks/task_format.py",
-        "tests/tasks/test_task_schema.py"
-      ],
+      "context": ["src/", "docs/tasks/task_format.py", "tests/tasks/test_task_schema.py"],
       "acceptance": [],
-      "blockers": [
-        "86a09709-f809-4df5-bc85-319040884346",
-        "7ff88ed2-214e-4732-9426-60d28915c3fc"
-      ]
+      "blockers": ["86a09709-f809-4df5-bc85-319040884346", "7ff88ed2-214e-4732-9426-60d28915c3fc"]
     }
   ],
   "featureIdToDisplayIndex": {

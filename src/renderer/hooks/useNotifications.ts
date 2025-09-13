@@ -1,79 +1,78 @@
-import { useState, useEffect, useCallback } from 'react';
-import { notificationsService } from '../services/notificationsService';
-import type { Notification, NotificationMetadata } from '../../types/notifications';
-import { useProjectContext } from '../contexts/ProjectContext';
-import { useNavigator } from '../navigation/Navigator';
+import { useState, useEffect, useCallback } from 'react'
+import { notificationsService } from '../services/notificationsService'
+import type { Notification, NotificationMetadata } from '../../types/notifications'
+import { useProjectContext } from '../contexts/ProjectContext'
+import { useNavigator } from '../navigation/Navigator'
 
 export function useNotifications() {
-  const {
-    activeProject
-  } = useProjectContext()
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const { activeProject } = useProjectContext()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unreadCount, setUnreadCount] = useState<number>(0)
 
   const updateCurrentProjectNotifications = useCallback(async () => {
-    if (activeProject){
-      setNotifications(await notificationsService.getRecentNotifications(activeProject.id));
-      setUnreadCount(await notificationsService.getUnreadNotificationsCount(activeProject.id));
+    if (activeProject) {
+      setNotifications(await notificationsService.getRecentNotifications(activeProject.id))
+      setUnreadCount(await notificationsService.getUnreadNotificationsCount(activeProject.id))
     }
-  }, [activeProject?.id]);
+  }, [activeProject?.id])
 
   // Subscribe to notifications changes; re-subscribe when active project changes
   useEffect(() => {
     // Initial fetch for current project
-    updateCurrentProjectNotifications();
+    updateCurrentProjectNotifications()
 
     const unsubscribe = notificationsService.subscribe((payload?: any) => {
       // Optionally ignore updates for other projects
-      if (activeProject && payload?.projectId && payload.projectId !== activeProject.id) return;
-      updateCurrentProjectNotifications();
-    });
+      if (activeProject && payload?.projectId && payload.projectId !== activeProject.id) return
+      updateCurrentProjectNotifications()
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [activeProject?.id, updateCurrentProjectNotifications]);
+      unsubscribe()
+    }
+  }, [activeProject?.id, updateCurrentProjectNotifications])
 
   // Also refresh when activeProject changes (covers cases without a broadcast)
   useEffect(() => {
-    updateCurrentProjectNotifications();
-  }, [activeProject?.id, updateCurrentProjectNotifications]);
+    updateCurrentProjectNotifications()
+  }, [activeProject?.id, updateCurrentProjectNotifications])
 
   // When a notification is opened/clicked, navigate to the Agents view and focus the run
   useEffect(() => {
-    const off = notificationsService.onOpenNotification((metadata) => {
-      try {
-        const runId = metadata.runId
-        if (runId) {
-          window.location.hash = `agents/run/${runId}`;
+    const off =
+      notificationsService.onOpenNotification((metadata) => {
+        try {
+          const runId = metadata.runId
+          if (runId) {
+            window.location.hash = `agents/run/${runId}`
+          }
+        } catch (_) {
+          // no-op
         }
-      } catch (_) {
-        // no-op
-      }
-    }) ?? (() => {});
-    return () => off();
-  }, []);
+      }) ?? (() => {})
+    return () => off()
+  }, [])
 
   const markAsRead = async (id: string) => {
-    if (activeProject){
-      await notificationsService.markNotificationAsRead(activeProject.id, id);
-      await updateCurrentProjectNotifications();
+    if (activeProject) {
+      await notificationsService.markNotificationAsRead(activeProject.id, id)
+      await updateCurrentProjectNotifications()
     }
-  };
+  }
 
   const markAllAsRead = async () => {
-    if (activeProject){
-      await notificationsService.markAllNotificationsAsRead(activeProject.id);
-      await updateCurrentProjectNotifications();
+    if (activeProject) {
+      await notificationsService.markAllNotificationsAsRead(activeProject.id)
+      await updateCurrentProjectNotifications()
     }
-  };
+  }
 
   const clearAll = async () => {
-    if (activeProject){
-      await notificationsService.deleteAllNotifications(activeProject.id);
-      await updateCurrentProjectNotifications();
+    if (activeProject) {
+      await notificationsService.deleteAllNotifications(activeProject.id)
+      await updateCurrentProjectNotifications()
     }
-  };
+  }
 
   const enableNotifications = async () => {
     try {
@@ -96,27 +95,29 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     clearAll,
-  };
+  }
 }
 
 export function NotificationClickHandler() {
-  const nav = useNavigator();
+  const nav = useNavigator()
 
   useEffect(() => {
-    const unsubscribe = window.notificationsService.onOpenNotification((metadata: NotificationMetadata) => {
-      if (metadata.taskId) {
-        nav.navigateTaskDetails(metadata.taskId, metadata.featureId);
-      } else if (metadata.chatId) {
-        nav.navigateView('Chat');
-      } else if (metadata.documentPath) {
-        nav.navigateView('Files');
-      } else if (metadata.actionUrl) {
-        // Handle custom URL if needed
-      }
-    });
+    const unsubscribe = window.notificationsService.onOpenNotification(
+      (metadata: NotificationMetadata) => {
+        if (metadata.taskId) {
+          nav.navigateTaskDetails(metadata.taskId, metadata.featureId)
+        } else if (metadata.chatId) {
+          nav.navigateView('Chat')
+        } else if (metadata.documentPath) {
+          nav.navigateView('Files')
+        } else if (metadata.actionUrl) {
+          // Handle custom URL if needed
+        }
+      },
+    )
 
-    return unsubscribe;
-  }, [nav]);
+    return unsubscribe
+  }, [nav])
 
-  return null;
+  return null
 }

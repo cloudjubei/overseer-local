@@ -66,10 +66,7 @@
       "title": "factory-ts is the source of truth when it comes to types for ProjectSpec, Feature and Task",
       "description": "Integrate the relevant types inside @types.ts from factory-ts , meaning that 'src/types/tasks.ts' is no longer needed. All places where they were used must be updated.",
       "plan": "",
-      "context": [
-        "src/types/tasks.ts",
-        "packages/factory-ts/src/types.ts"
-      ],
+      "context": ["src/types/tasks.ts", "packages/factory-ts/src/types.ts"],
       "acceptance": [],
       "blockers": []
     },
@@ -149,10 +146,7 @@
       "title": "When looking at an agent inside @AgentsView.tsx it must be possible to view the whole conversation",
       "description": "Whether for historical runs or a current run - a given agent's run view must display the running conversation.",
       "plan": "",
-      "context": [
-        "src/renderer/screens/AgentsView.tsx",
-        "packages/factory-ts/src/orchestrator.ts"
-      ],
+      "context": ["src/renderer/screens/AgentsView.tsx", "packages/factory-ts/src/orchestrator.ts"],
       "acceptance": [],
       "blockers": []
     }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export default function TurnChip({ turn }: { turn: number }) {
   return (
@@ -6,5 +6,5 @@ export default function TurnChip({ turn }: { turn: number }) {
       <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500" aria-hidden />
       <span>T{turn}</span>
     </span>
-  );
+  )
 }

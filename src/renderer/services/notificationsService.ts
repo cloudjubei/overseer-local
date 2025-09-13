@@ -1,5 +1,9 @@
-import { Notification, NotificationMetadata, NotificationCreateInput } from "src/types/notifications"
-import { ServiceResult } from "./serviceResult"
+import {
+  Notification,
+  NotificationMetadata,
+  NotificationCreateInput,
+} from 'src/types/notifications'
+import { ServiceResult } from './serviceResult'
 
 export type NotificationsService = {
   // outbound call

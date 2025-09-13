@@ -1,7 +1,39 @@
 /* Components: Spinner and Skeleton */
-.ui-spinner__track { stroke: var(--border-default); opacity: 0.5; }
-.ui-spinner__indicator { stroke: var(--accent-primary); stroke-linecap: round; stroke-dasharray: 60; stroke-dashoffset: 40; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.ui-spinner__track {
+  stroke: var(--border-default);
+  opacity: 0.5;
+}
+.ui-spinner__indicator {
+  stroke: var(--accent-primary);
+  stroke-linecap: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 40;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-.ui-skeleton { height: 14px; border-radius: var(--radius-2); background: linear-gradient(90deg, color-mix(in srgb, var(--surface-raised) 92%, #000 8%), color-mix(in srgb, var(--surface-raised) 98%, #000 2%), color-mix(in srgb, var(--surface-raised) 92%, #000 8%)); background-size: 200% 100%; animation: shimmer 1.2s ease-in-out infinite; border: 1px solid var(--border-subtle); }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.ui-skeleton {
+  height: 14px;
+  border-radius: var(--radius-2);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--surface-raised) 92%, #000 8%),
+    color-mix(in srgb, var(--surface-raised) 98%, #000 2%),
+    color-mix(in srgb, var(--surface-raised) 92%, #000 8%)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  border: 1px solid var(--border-subtle);
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
