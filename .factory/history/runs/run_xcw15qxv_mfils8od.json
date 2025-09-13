@@ -127,7 +127,7 @@
     }
   ],
   "startedAt": "2025-09-13T18:32:05.869Z",
-  "updatedAt": "2025-09-13T18:35:46.806Z",
+  "updatedAt": "2025-09-13T19:33:01.003Z",
   "id": "run_xcw15qxv_mfils8od",
   "agentType": "developer",
   "projectId": "main",
@@ -141,5 +141,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-13T18:35:46.806Z"
+  "finishedAt": "2025-09-13T18:35:46.806Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-13T19:33:01.003Z"
+  }
 }

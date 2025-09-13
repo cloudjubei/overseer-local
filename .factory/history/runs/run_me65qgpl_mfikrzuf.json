@@ -210,7 +210,7 @@
     }
   ],
   "startedAt": "2025-09-13T18:03:54.807Z",
-  "updatedAt": "2025-09-13T18:07:49.718Z",
+  "updatedAt": "2025-09-13T19:32:59.921Z",
   "id": "run_me65qgpl_mfikrzuf",
   "agentType": "developer",
   "projectId": "main",
@@ -224,5 +224,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-13T18:07:49.718Z"
+  "finishedAt": "2025-09-13T18:07:49.718Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-13T19:32:59.921Z"
+  }
 }
