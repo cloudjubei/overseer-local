@@ -1002,6 +1002,26 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "60237404-0b90-4663-9ed3-de9db2d77354",
+      "status": "-",
+      "title": "Apply formatter on save",
+      "description": "When using VSCode and saving a file the project needs to auto apply a formatter so that all code is always in the same style.\nWe also need to have a script under /scripts that can be run on all files to make sure they have the format applied.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb",
+      "status": "-",
+      "title": "Apply formatter on git commit",
+      "description": "Whenever a commit happens - it needs to have a formatter be applied before the code ends up being pushed or seen by other users.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1082,6 +1102,8 @@
     "0f44a2c4-5988-4b86-94d9-38b2ade0a037": 75,
     "f8dbb257-f348-48ec-8af2-bbb92fc6a1e0": 76,
     "12e26fae-357e-44cb-b1d6-ac8b9ba2c439": 77,
-    "fc49d90d-6345-4744-aa82-060d025051d0": 78
+    "60237404-0b90-4663-9ed3-de9db2d77354": 78,
+    "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb": 79,
+    "fc49d90d-6345-4744-aa82-060d025051d0": 80
   }
 }
