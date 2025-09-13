@@ -1005,7 +1005,7 @@
     },
     {
       "id": "60237404-0b90-4663-9ed3-de9db2d77354",
-      "status": "-",
+      "status": "+",
       "title": "Apply formatter on save",
       "description": "When using VSCode and saving a file the project needs to auto apply a formatter so that all code is always in the same style.\nWe also need to have a script under /scripts that can be run on all files to make sure they have the format applied.",
       "plan": "",
