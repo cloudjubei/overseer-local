@@ -992,12 +992,13 @@
     },
     {
       "id": "12e26fae-357e-44cb-b1d6-ac8b9ba2c439",
-      "status": "?",
+      "status": "-",
       "title": "Model statistics",
-      "description": "In @src/renderer/screens/AllAgentsView.tsx we need to display statistics per model and per project as an additional.",
+      "description": "In @src/renderer/screens/AllAgentsView.tsx we need to display statistics per model and per project. We don't need to display all the runs like it is showing right now - that's already shown in each project's individual @src/renderer/screens/AgentsView.tsx .\n\nStatistics we require - overall average costs that are shown now.\n\nOverall cheapest model on average, overall most expensive model on average, overall fastest model on average (per feature duration), overall slowest model on average (per feature duration), overall model with highest average rating, overall model with lowest average rating.\n\nJust the same as all these overall stats - we want to display the same per project.\n\nAll in a nice scrollable table similar to what's already shown right now.",
       "plan": "",
       "context": [
-        "src/renderer/screens/AllAgentsView.tsx"
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
       ],
       "acceptance": [],
       "blockers": []

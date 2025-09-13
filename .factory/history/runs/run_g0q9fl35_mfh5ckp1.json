@@ -86,7 +86,7 @@
     }
   ],
   "startedAt": "2025-09-12T18:04:14.917Z",
-  "updatedAt": "2025-09-12T18:05:37.163Z",
+  "updatedAt": "2025-09-13T17:16:59.593Z",
   "id": "run_g0q9fl35_mfh5ckp1",
   "projectId": "thefactory-knowledge",
   "taskId": "f72dbcdb-77e7-4d00-bf72-e2cc59271644",
@@ -99,5 +99,9 @@
     "inputPerMTokensUSD": 3,
     "outputPerMTokensUSD": 15
   },
-  "finishedAt": "2025-09-12T18:05:37.163Z"
+  "finishedAt": "2025-09-12T18:05:37.163Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-13T17:16:59.593Z"
+  }
 }
