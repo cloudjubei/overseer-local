@@ -44,7 +44,7 @@
     }
   ],
   "startedAt": "2025-09-14T23:14:17.739Z",
-  "updatedAt": "2025-09-14T23:15:06.306Z",
+  "updatedAt": "2025-09-14T23:17:14.493Z",
   "id": "run_o2knd9yo_mfkbb022",
   "agentType": "speccer",
   "projectId": "main",
@@ -58,5 +58,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-14T23:15:06.306Z"
+  "finishedAt": "2025-09-14T23:15:06.306Z",
+  "rating": {
+    "score": 0,
+    "createdAt": "2025-09-14T23:17:14.493Z"
+  }
 }
