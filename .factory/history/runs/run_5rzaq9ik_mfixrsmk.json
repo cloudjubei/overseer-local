@@ -1,0 +1,20 @@
+{
+  "state": "completed",
+  "conversations": [],
+  "startedAt": "2025-09-14T00:07:40.460Z",
+  "updatedAt": "2025-09-14T00:07:43.364Z",
+  "id": "run_5rzaq9ik_mfixrsmk",
+  "agentType": "developer",
+  "projectId": "thefactory-knowledge",
+  "taskId": "15a2115a-b435-43f7-a8bc-3346a8868753",
+  "llmConfig": {
+    "provider": "openai",
+    "model": "gpt-5",
+    "apiBaseUrl": "https://api.openai.com/v1/chat/completions"
+  },
+  "price": {
+    "inputPerMTokensUSD": 1.25,
+    "outputPerMTokensUSD": 10
+  },
+  "finishedAt": "2025-09-14T00:07:43.364Z"
+}

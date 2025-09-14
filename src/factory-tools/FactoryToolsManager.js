@@ -190,7 +190,7 @@ export class FactoryToolsManager {
 
   async cancelRun(runId, reason) {
     console.log('[factory] CANCEL_RUN', { runId, reason })
-    const run = RUN_HANDLES.get(runId)
+    const run = this.runHandles.get(runId)
     if (run) {
       try {
         run.cancel(reason)
