@@ -38,6 +38,7 @@
     "remark-slug": "^7.0.1",
     "tailwind-merge": "^2.0.0",
     "thefactory-tools": "file:../thefactory-tools",
+    "thefactory-db": "file:../thefactory-db",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

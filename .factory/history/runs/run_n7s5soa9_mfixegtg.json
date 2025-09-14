@@ -197,7 +197,7 @@
     }
   ],
   "startedAt": "2025-09-13T23:57:18.628Z",
-  "updatedAt": "2025-09-13T23:59:56.734Z",
+  "updatedAt": "2025-09-14T00:26:35.661Z",
   "id": "run_n7s5soa9_mfixegtg",
   "agentType": "developer",
   "projectId": "thefactory-knowledge",
@@ -211,5 +211,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-13T23:59:56.734Z"
+  "finishedAt": "2025-09-13T23:59:56.734Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-14T00:26:35.661Z"
+  }
 }
