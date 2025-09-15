@@ -92,11 +92,12 @@
     },
     {
       "id": "7d59b560-086e-4879-a1a6-9e051db6434f",
-      "status": "-",
+      "status": "?",
       "title": "Add unit/integration scaffolding for ingestion service",
       "description": "Introduce a simple script or dev command to run a one-off sync (e.g., scripts/sync-docs.js) using the same services, useful for testing. Optionally add a basic test (if testing infra exists) to validate classification and upsert logic using a temp directory and an in-memory or temp DB.",
       "context": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: Cannot read properties of undefined (reading 'length')"
     },
     {
       "id": "6d115a0f-2c64-4e6a-bbbc-51ef9a2eed84",
