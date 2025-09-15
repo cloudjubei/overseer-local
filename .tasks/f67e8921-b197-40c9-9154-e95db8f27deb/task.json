@@ -1111,7 +1111,7 @@
     },
     {
       "id": "53ab6181-9034-47f0-a6a9-a8b8eca0e504",
-      "status": "-",
+      "status": "+",
       "title": "All the domain managers could be typed",
       "description": "All of the managers could be typed and extend the base defined in @src/managers.ts . The managers:\n@src/chat/ChatsManager.js  , @src/db/DatabaseManager.js  , @src/document_ingestion/DocumentIngestionManager.js  , @src/factory-tools/FactoryToolsManager.js  , @src/files/FilesManager.js  , @src/git-monitor/GitMonitorManager.js  , @src/live-data/liveDataManager.js  , @src/notifications/NotificationsManager.js  , @src/tasks/TasksManager.js   , @src/projects/ProjectsManager.js   , @src/settings/SettingsManager.js",
       "plan": "",

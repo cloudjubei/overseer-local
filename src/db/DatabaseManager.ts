@@ -1,10 +1,18 @@
 import { ipcMain } from 'electron'
-import AppSettings from '../settings/AppSettings'
+import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { openDatabase } from 'thefactory-db'
+import type { BaseManager } from '../managers'
 
-export class DatabaseManager {
-  constructor(projectRoot, window, projectsManager) {
+export class DatabaseManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+  private _dbClient: any | undefined
+  private _connectionString: string | undefined
+  private _status: { connected: boolean; lastError?: string }
+  private _ipcBound: boolean
+
+  constructor(projectRoot: string, window: BrowserWindow, _projectsManager?: any) {
     this.projectRoot = projectRoot
     this.window = window
 
@@ -14,16 +22,17 @@ export class DatabaseManager {
       connected: false,
       lastError: undefined,
     }
+    this._ipcBound = false
   }
 
-  async init() {
+  async init(): Promise<void> {
     this._registerIpcHandlers()
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.DB_CONNECT] = async ({ connectionString }) =>
       await this.connect(connectionString)
     handlers[IPC_HANDLER_KEYS.DB_GET_STATUS] = async () => await this.getStatus()
@@ -57,10 +66,10 @@ export class DatabaseManager {
       await this.clearDocuments(projectIds)
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -70,13 +79,13 @@ export class DatabaseManager {
     this._ipcBound = true
   }
 
-  async connect(connectionString) {
+  async connect(connectionString: string): Promise<{ connected: boolean; lastError?: string }> {
     try {
       this._dbClient = await openDatabase({ connectionString })
       this._connectionString = connectionString
       this._setConnected(true)
       console.log('[db] thefactory-db client initialized')
-    } catch (err) {
+    } catch (err: any) {
       this._status.lastError = err?.message || String(err)
       this._setConnected(false)
       console.error('[db] Failed to initialize thefactory-db:', err?.message || err)
@@ -84,15 +93,15 @@ export class DatabaseManager {
     return this.getStatus()
   }
 
-  getConnectionString() {
+  getConnectionString(): string | undefined {
     return this._connectionString
   }
 
-  getStatus() {
+  getStatus(): { connected: boolean; lastError?: string } {
     return { ...this._status }
   }
 
-  async close() {
+  async close(): Promise<void> {
     if (!this.isConnected()) {
       return
     }
@@ -100,7 +109,7 @@ export class DatabaseManager {
     try {
       await this._dbClient.close()
       console.log('[db] thefactory-db client closed')
-    } catch (e) {
+    } catch (e: any) {
       console.warn('[db] Error closing thefactory-db client:', e?.message || e)
     } finally {
       this._dbClient = null
@@ -108,45 +117,45 @@ export class DatabaseManager {
     }
   }
 
-  isConnected() {
+  isConnected(): boolean {
     return this._status.connected
   }
 
-  async stopWatching() {
+  async stopWatching(): Promise<void> {
     await this.close()
   }
 
-  async addDocument(input) {
+  async addDocument(input: any): Promise<any> {
     return await this._dbClient?.addDocument(input)
   }
-  async getDocumentById(id) {
+  async getDocumentById(id: string): Promise<any> {
     return await this._dbClient?.getDocumentById(id)
   }
-  async getDocumentBySrc(src) {
+  async getDocumentBySrc(src: string): Promise<any> {
     return await this._dbClient?.getDocumentBySrc(src)
   }
-  async updateDocument(id, patch) {
+  async updateDocument(id: string, patch: any): Promise<any> {
     return await this._dbClient?.updateDocument(id, patch)
   }
-  async deleteDocument(id) {
-    return await this._dbClient?.deleteDocument(src)
+  async deleteDocument(id: string): Promise<any> {
+    return await this._dbClient?.deleteDocument(id)
   }
-  async searchDocuments(params) {
+  async searchDocuments(params: any): Promise<any> {
     return await this._dbClient?.searchDocuments(params)
   }
-  async matchDocuments(criteria, options) {
+  async matchDocuments(criteria: any, options?: any): Promise<any> {
     return await this._dbClient?.matchDocuments(criteria, options)
   }
-  async clearDocuments(projectIds) {
+  async clearDocuments(projectIds?: string[]): Promise<any> {
     return await this._dbClient?.clearDocuments(projectIds)
   }
 
-  _setConnected(connected) {
+  private _setConnected(connected: boolean): void {
     this._status.connected = !!connected
     this._emitStatus()
   }
 
-  _emitStatus() {
+  private _emitStatus(): void {
     try {
       if (this.window && !this.window.isDestroyed()) {
         this.window.webContents.send(IPC_HANDLER_KEYS.DB_SUBSCRIBE, this.getStatus())

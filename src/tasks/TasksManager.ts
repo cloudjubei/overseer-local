@@ -1,14 +1,24 @@
 import { ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import TasksStorage from './TasksStorage'
+import type { BaseManager } from '../managers'
+import type { ProjectsManager } from '../projects/ProjectsManager'
 
-function resolveTasksDir(projectRoot) {
+function resolveTasksDir(projectRoot: string) {
   return path.join(projectRoot, '.tasks')
 }
 
-export class TasksManager {
-  constructor(projectRoot, window, projectsManager) {
+export class TasksManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+  private storages: Record<string, TasksStorage>
+  private _ipcBound: boolean
+
+  private projectsManager: ProjectsManager
+
+  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
     this.projectRoot = projectRoot
     this.window = window
     this.storages = {}
@@ -17,9 +27,9 @@ export class TasksManager {
     this.projectsManager = projectsManager
   }
 
-  async __getStorage(projectId) {
+  private async __getStorage(projectId: string): Promise<TasksStorage | undefined> {
     if (!this.storages[projectId]) {
-      const project = await this.projectsManager.getProject(projectId)
+      const project: any = await this.projectsManager.getProject(projectId as any)
       if (!project) {
         return
       }
@@ -32,16 +42,16 @@ export class TasksManager {
     return this.storages[projectId]
   }
 
-  async init() {
+  async init(): Promise<void> {
     await this.__getStorage('main')
 
     this._registerIpcHandlers()
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => await this.listTasks(projectId)
     handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, id }) =>
       await this.getTask(projectId, id)
@@ -67,10 +77,10 @@ export class TasksManager {
       (await this.__getStorage(projectId))?.reorderFeatures(taskId, payload)
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -80,17 +90,17 @@ export class TasksManager {
     this._ipcBound = true
   }
 
-  async listTasks(projectId) {
+  async listTasks(projectId: string): Promise<any> {
     const s = await this.__getStorage(projectId)
     return await s?.listTasks()
   }
-  async getTask(projectId, id) {
+  async getTask(projectId: string, id: string): Promise<any> {
     const s = await this.__getStorage(projectId)
     return await s?.getTask(id)
   }
 
-  async createTask(projectId, taskData) {
-    const project = await this.projectsManager.getProject(projectId)
+  async createTask(projectId: string, taskData: any): Promise<any> {
+    const project: any = await this.projectsManager.getProject(projectId as any)
     if (!project) {
       return { ok: false, error: "project couldn't be found" }
     }
@@ -104,12 +114,12 @@ export class TasksManager {
     const newProject = { ...project }
     newProject.taskIdToDisplayIndex[newTask.id] =
       Object.keys(newProject.taskIdToDisplayIndex).length + 1
-    await this.projectsManager.updateProject(project.id, newProject)
+    await (this.projectsManager as any).updateProject(project.id, newProject)
     return { ok: true }
   }
 
-  async deleteTask(projectId, taskId) {
-    const project = await this.projectsManager.getProject(projectId)
+  async deleteTask(projectId: string, taskId: string): Promise<any> {
+    const project: any = await this.projectsManager.getProject(projectId as any)
     if (!project) {
       return { ok: false, error: "project couldn't be found" }
     }
@@ -125,11 +135,13 @@ export class TasksManager {
         newProject.taskIdToDisplayIndex[key] = newProject.taskIdToDisplayIndex[key] - 1
       }
     }
-    await this.projectsManager.updateProject(projectId, newProject)
+    await (this.projectsManager as any).updateProject(projectId, newProject)
     return { ok: true }
   }
-  async getFeature(projectId, taskId, featureId) {
+  async getFeature(projectId: string, taskId: string, featureId: string): Promise<any> {
     const s = await this.__getStorage(projectId)
     return await s?.getFeature(taskId, featureId)
   }
 }
+
+export default TasksManager

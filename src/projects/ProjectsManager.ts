@@ -2,10 +2,12 @@ import fs from 'fs/promises'
 import path from 'path'
 import chokidar from 'chokidar'
 import { ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import { validateProjectSpec } from './ProjectsValidator'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
+import type { BaseManager } from '../managers'
 
-async function pathExists(p) {
+async function pathExists(p: string) {
   try {
     await fs.stat(p)
     return true
@@ -14,8 +16,16 @@ async function pathExists(p) {
   }
 }
 
-export class ProjectsManager {
-  constructor(projectRoot, window) {
+export class ProjectsManager implements BaseManager {
+  projectRoot: string
+  projectsDir: string
+  window: BrowserWindow
+  watcher: chokidar.FSWatcher | null
+  private _ipcBound: boolean
+
+  private projects: any[]
+
+  constructor(projectRoot: string, window: BrowserWindow) {
     this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot)
     this.projectsDir = path.join(this.projectRoot, '.projects')
     this.window = window
@@ -25,7 +35,7 @@ export class ProjectsManager {
     this.projects = []
   }
 
-  async init() {
+  async init(): Promise<void> {
     await this.__buildIndex()
     if (await pathExists(this.projectsDir)) {
       this.watcher = chokidar.watch(path.join(this.projectsDir, '/*.json'), {
@@ -34,52 +44,50 @@ export class ProjectsManager {
         ignoreInitial: true,
       })
       this.watcher
-        .on('add', (p) => this.__rebuildAndNotify(`Project config added: ${p}`))
-        .on('change', (p) => this.__rebuildAndNotify(`Project config changed: ${p}`))
-        .on('unlink', (p) => this.__rebuildAndNotify(`Project config removed: ${p}`))
-        .on('addDir', (p) => this.__rebuildAndNotify(`Dir added: ${p}`))
-        .on('unlinkDir', (p) => this.__rebuildAndNotify(`Dir removed: ${p}`))
+        .on('add', (_p) => this.__rebuildAndNotify())
+        .on('change', (_p) => this.__rebuildAndNotify())
+        .on('unlink', (_p) => this.__rebuildAndNotify())
+        .on('addDir', (_p) => this.__rebuildAndNotify())
+        .on('unlinkDir', (_p) => this.__rebuildAndNotify())
     }
     this._registerIpcHandlers()
   }
 
-  stopWatching() {
+  stopWatching(): void {
     if (this.watcher) {
       this.watcher.close()
       this.watcher = null
     }
   }
 
-  __notify(msg) {
-    if (msg) console.log(msg)
+  private __notify(): void {
     if (this.window) {
-      this.window.webContents.send(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, this.projects)
+      try {
+        this.window.webContents.send(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, this.projects)
+      } catch {}
     }
   }
-  async __rebuildAndNotify(msg) {
+  private async __rebuildAndNotify(): Promise<void> {
     await this.__buildIndex()
-    this.__notify(msg)
+    this.__notify()
   }
 
-  async __buildIndex() {
+  private async __buildIndex(): Promise<void> {
     const projectsDirAbs = path.resolve(this.projectsDir)
-    const rootAbs = path.resolve(this.projectRoot)
-
-    const projects = []
+    const projects: any[] = []
 
     if (await pathExists(projectsDirAbs)) {
-      let entries = []
+      let entries: any[] = []
       try {
         entries = await fs.readdir(projectsDirAbs, { withFileTypes: true })
-      } catch (e) {
-        if (e && e.code !== 'ENOENT')
-          next.errors.push({ type: 'readdir', dir, message: e.message || String(e) })
+      } catch (e: any) {
+        // ignore readdir errors other than ENOENT
         return
       }
       for (const entry of entries) {
         const abs = path.join(projectsDirAbs, entry.name)
         if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
-          const project = await this._tryLoadProjectConfig(abs, projectsDirAbs, rootAbs)
+          const project = await this._tryLoadProjectConfig(abs)
           if (project) {
             projects.push(project)
           }
@@ -90,45 +98,33 @@ export class ProjectsManager {
     this.projects = projects
   }
 
-  async _tryLoadProjectConfig(configAbsPath, projectsDirAbs, rootAbs) {
-    let raw
+  private async _tryLoadProjectConfig(configAbsPath: string): Promise<any | undefined> {
+    let raw: string | undefined
     try {
       raw = await fs.readFile(configAbsPath, 'utf8')
     } catch (e) {
       return
     }
 
-    let json
+    let json: any
     try {
       json = JSON.parse(raw)
     } catch (e) {
       return
     }
 
-    const { valid, errors } = validateProjectSpec(json)
+    const { valid } = validateProjectSpec(json)
     if (!valid) {
       return
     }
 
-    // Normalize and security-check path field to stay within projects directory
-    // const declaredPath = json.path;
-    // const resolved = path.isAbsolute(declaredPath)
-    //   ? path.resolve(declaredPath)
-    //   : path.resolve(projectsDirAbs, declaredPath);
-
-    // const normalizedProjects = projectsDirAbs;
-    // if (!(resolved + path.sep).startsWith(normalizedProjects + path.sep) && resolved !== normalizedProjects) {
-    //   next.errors.push({ type: 'security', file: configAbsPath, message: `Project path escapes projects directory: ${resolved}` });
-    //   return;
-    // }
-
     return json
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.PROJECTS_LIST] = () => this.listProjects()
     handlers[IPC_HANDLER_KEYS.PROJECTS_GET] = (args) => this.getProject(args.id)
     handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = (args) => this.createProject(args.project)
@@ -138,10 +134,10 @@ export class ProjectsManager {
       this.reorderTask(args.projectId, args.fromIndex, args.toIndex)
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -151,7 +147,7 @@ export class ProjectsManager {
     this._ipcBound = true
   }
 
-  async ensureProjectsDirExists() {
+  async ensureProjectsDirExists(): Promise<string> {
     const dir = this.projectsDir
     try {
       await fs.mkdir(dir, { recursive: true })
@@ -159,23 +155,23 @@ export class ProjectsManager {
     return dir
   }
 
-  getProjectConfigPathForId(id) {
+  getProjectConfigPathForId(id: string): string {
     return path.join(this.projectsDir, `${id}.json`)
   }
 
-  listProjects() {
+  listProjects(): any[] {
     return this.projects
   }
 
-  getProject(id) {
+  getProject(id: string): any | undefined {
     return this.projects.find((p) => p.id === id)
   }
 
-  async createProject(spec) {
+  async createProject(spec: any): Promise<any> {
     const sanitized = {
       ...spec,
-      requirements: spec.requirements ?? [],
-      taskIdToDisplayIndex: spec.taskIdToDisplayIndex ?? {},
+      requirements: spec?.requirements ?? [],
+      taskIdToDisplayIndex: spec?.taskIdToDisplayIndex ?? {},
     }
 
     const { valid, errors } = validateProjectSpec(sanitized)
@@ -192,11 +188,11 @@ export class ProjectsManager {
     await fs.writeFile(target, JSON.stringify(sanitized, null, 2), 'utf8')
 
     this.projects.push(sanitized)
-    await this.__notify('Project created')
+    await this.__notify()
     return sanitized
   }
 
-  async updateProject(id, spec) {
+  async updateProject(id: string, spec: any): Promise<any> {
     const sanitized = { ...spec }
     if (!Array.isArray(sanitized.requirements)) sanitized.requirements = []
     if (!sanitized.id) sanitized.id = id
@@ -208,31 +204,28 @@ export class ProjectsManager {
     const writePath = this.getProjectConfigPathForId(sanitized.id)
 
     await fs.writeFile(writePath, JSON.stringify(sanitized, null, 2), 'utf8')
-    if (
-      (await pathExists(existingPath)) &&
-      path.resolve(existingPath) !== path.resolve(writePath)
-    ) {
-      try {
+    try {
+      if ((await pathExists(existingPath)) && path.resolve(existingPath) !== path.resolve(writePath)) {
         await fs.unlink(existingPath)
-      } catch {}
-    }
+      }
+    } catch {}
 
     this.projects = this.projects.map((p) => (p.id === sanitized.id ? sanitized : p))
-    await this.__notify('Project updated')
+    await this.__notify()
     return sanitized
   }
 
-  async deleteProject(id) {
+  async deleteProject(id: string): Promise<void> {
     const p = this.getProjectConfigPathForId(id)
     if (await pathExists(p)) {
       await fs.unlink(p)
       this.projects = this.projects.filter((p) => p.id !== id)
-      await this.__notify('Project deleted')
+      await this.__notify()
     }
   }
 
-  async reorderTask(projectId, fromIndex, toIndex) {
-    const project = await this.getProject(projectId)
+  async reorderTask(projectId: string, fromIndex: number, toIndex: number): Promise<{ ok: true }> {
+    const project: any = await this.getProject(projectId)
     if (!project) {
       throw new Error(`Project with id: ${projectId} not found`)
     }
@@ -241,7 +234,7 @@ export class ProjectsManager {
       (a, b) => project.taskIdToDisplayIndex[a] - project.taskIdToDisplayIndex[b],
     )
 
-    let newOrder
+    let newOrder: string[]
     if (fromIndex !== undefined && toIndex !== undefined) {
       if (fromIndex < 0 || fromIndex >= currentOrder.length) throw new Error('Invalid source index')
       if (toIndex < 0 || toIndex > currentOrder.length) throw new Error('Invalid target index')
@@ -256,7 +249,7 @@ export class ProjectsManager {
       return { ok: true }
     }
 
-    const newIndex = {}
+    const newIndex: Record<string, number> = {}
     newOrder.forEach((id, i) => {
       newIndex[id] = i + 1
     })
@@ -267,7 +260,9 @@ export class ProjectsManager {
 
     this.projects = this.projects.map((p) => (p.id === project.id ? project : p))
 
-    await this.__notify('Task reordered')
+    await this.__notify()
     return { ok: true }
   }
 }
+
+export default ProjectsManager

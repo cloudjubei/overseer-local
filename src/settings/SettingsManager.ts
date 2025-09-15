@@ -1,10 +1,20 @@
 import { ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import ProjectSettings from './ProjectSettings'
 import AppSettings from './AppSettings'
+import type { BaseManager } from '../managers'
 
-export class SettingsManager {
-  constructor(projectRoot, window) {
+export class SettingsManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+
+  private appSettings: AppSettings
+  private projectSettings: Record<string, ProjectSettings>
+
+  private _ipcBound: boolean
+
+  constructor(projectRoot: string, window: BrowserWindow) {
     this.projectRoot = projectRoot
     this.window = window
 
@@ -14,17 +24,16 @@ export class SettingsManager {
     this._ipcBound = false
   }
 
-  async init() {
+  async init(): Promise<void> {
     await this.__loadProjectSettings('main')
 
     this._registerIpcHandlers()
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    // Note: ipcMain.handle signature is (event, args). We must read payload from the second param.
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_APP, (_event) => this.getAppSettings())
+    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_APP, () => this.getAppSettings())
     ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_APP, (_event, { updates }) =>
       this.updateAppSettings(updates),
     )
@@ -38,21 +47,23 @@ export class SettingsManager {
     this._ipcBound = true
   }
 
-  __loadProjectSettings(projectId) {
+  private __loadProjectSettings(projectId: string): ProjectSettings {
     if (!this.projectSettings[projectId]) {
       this.projectSettings[projectId] = new ProjectSettings(projectId)
     }
     return this.projectSettings[projectId]
   }
 
-  getAppSettings() {
+  getAppSettings(): any {
     return this.appSettings.get()
   }
 
-  updateAppSettings(updates) {
+  updateAppSettings(updates: any): any {
     return this.appSettings.save(updates)
   }
-  getProjectSettings(projectId) {
+  getProjectSettings(projectId: string): any {
     return this.__loadProjectSettings(projectId).get()
   }
 }
+
+export default SettingsManager

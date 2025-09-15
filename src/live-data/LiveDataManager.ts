@@ -1,11 +1,26 @@
 import { ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { LiveDataStore } from './LiveDataStore'
 import { LiveDataRegistry } from './LiveDataRegistry'
 import { createAgentPricesProvider } from './providers/agentPricesProvider'
 import { createFetchJsonProvider } from './providers/fetchJsonProvider'
+import type { BaseManager } from '../managers'
 
-const DEFAULT_SERVICES = [
+export type LiveService = {
+  id: string
+  name: string
+  description?: string
+  freshnessPolicy: 'daily' | 'weekly' | 'monthly'
+  autoUpdate: { enabled: boolean; trigger?: 'onAppLaunch' | 'manual'; time?: string }
+  lastUpdated: number
+  config: Record<string, any>
+  isUpdating: boolean
+  scope: 'global' | 'project'
+  projectId: string | null
+}
+
+const DEFAULT_SERVICES: LiveService[] = [
   {
     id: 'agent-prices',
     name: 'Agent Prices',
@@ -20,12 +35,21 @@ const DEFAULT_SERVICES = [
     scope: 'global',
     projectId: null,
   },
-  // Example slot for a dynamic JSON fetch service (user can add more via UI in future)
-  // { id: 'my-json-service', name: 'My JSON', description: 'Fetches custom JSON', freshnessPolicy: 'weekly', autoUpdate: { enabled: false }, config: { url: 'https://example.com/data.json' } }
 ]
 
-export class LiveDataManager {
-  constructor(projectRoot, window, factoryToolsManager) {
+export class LiveDataManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+
+  private store: LiveDataStore
+  private registry: LiveDataRegistry
+  private _ipcBound: boolean
+
+  private factoryToolsManager: any
+
+  private services: LiveService[]
+
+  constructor(projectRoot: string, window: BrowserWindow, factoryToolsManager: any) {
     this.projectRoot = projectRoot
     this.window = window
 
@@ -43,12 +67,12 @@ export class LiveDataManager {
     this.registry.register(createFetchJsonProvider(this.store))
   }
 
-  _loadServices() {
-    const stored = this.store.getServices()
+  private _loadServices(): LiveService[] {
+    const stored = this.store.getServices() as any
     if (stored && Array.isArray(stored)) {
-      const normalized = stored.map((s) => normalizeService(s))
+      const normalized = stored.map((s: any) => normalizeService(s))
       // Ensure defaults exist
-      const ids = new Set(normalized.map((s) => s.id))
+      const ids = new Set(normalized.map((s: any) => s.id))
       for (const def of DEFAULT_SERVICES) {
         if (!ids.has(def.id)) normalized.push(normalizeService(def))
       }
@@ -57,16 +81,16 @@ export class LiveDataManager {
     return DEFAULT_SERVICES.map((s) => normalizeService(s))
   }
 
-  _saveServices() {
+  private _saveServices(): void {
     this.store.setServices(this.services)
   }
 
-  async init() {
+  async init(): Promise<void> {
     this._registerIpcHandlers()
     this._maybeTriggerOnLaunchUpdates()
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
     ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_GET_STATUS, () => this.getServicesStatus())
@@ -89,11 +113,11 @@ export class LiveDataManager {
     this._ipcBound = true
   }
 
-  getServicesStatus() {
+  getServicesStatus(): (LiveService & { isFresh: boolean })[] {
     return this.services.map((svc) => ({ ...svc, isFresh: computeIsFresh(svc) }))
   }
 
-  updateServiceConfig(serviceId, updates) {
+  updateServiceConfig(serviceId: string, updates: Partial<LiveService>): LiveService | null {
     const idx = this.services.findIndex((s) => s.id === serviceId)
     if (idx === -1) return null
     const merged = normalizeService({ ...this.services[idx], ...updates })
@@ -103,23 +127,19 @@ export class LiveDataManager {
     return merged
   }
 
-  addService(service) {
-    // Allows users to add new services by specifying id, name, url, and update settings.
+  addService(service: Partial<LiveService> & { id: string; name?: string }): LiveService {
     if (!service?.id) throw new Error('Service id is required')
     const exists = this.services.some((s) => s.id === service.id)
     if (exists) throw new Error('Service with this id already exists')
 
-    // If service.type is 'fetch-json' we keep its id unique and will use generic provider.
-    // If service.id matches a provider id (like 'agent-prices'), it will use that provider.
-
-    const merged = normalizeService(service)
+    const merged = normalizeService(service as any)
     this.services.push(merged)
     this._saveServices()
     this._emitStatus()
     return merged
   }
 
-  removeService(serviceId) {
+  removeService(serviceId: string): boolean {
     const idx = this.services.findIndex((s) => s.id === serviceId)
     if (idx === -1) return false
     this.services.splice(idx, 1)
@@ -128,7 +148,7 @@ export class LiveDataManager {
     return true
   }
 
-  async triggerUpdate(serviceId) {
+  async triggerUpdate(serviceId: string): Promise<any> {
     const svc = this.services.find((s) => s.id === serviceId)
     if (!svc || svc.isUpdating) return this.getServicesStatus()
 
@@ -138,19 +158,18 @@ export class LiveDataManager {
     try {
       // Select provider by most specific: service.id, or fall back to generic fetch-json
       let provider = this.registry.get(svc.id)
-      if (!provider && svc.config?.url) {
+      if (!provider && (svc as any).config?.url) {
         provider = this.registry.get('fetch-json')
       }
 
-      if (provider && typeof provider.update === 'function') {
-        await provider.update(svc)
+      if (provider && typeof (provider as any).update === 'function') {
+        await (provider as any).update(svc)
       } else {
-        // No provider registered; do nothing but simulate delay
         await new Promise((r) => setTimeout(r, 500))
       }
 
       svc.lastUpdated = Date.now()
-    } catch (e) {
+    } catch (e: any) {
       console.error(`[live-data] update failed for ${serviceId}:`, e?.message || e)
     } finally {
       svc.isUpdating = false
@@ -161,33 +180,33 @@ export class LiveDataManager {
     return this.getServicesStatus()
   }
 
-  async getServiceData(serviceId) {
+  async getServiceData(serviceId: string): Promise<any> {
     const svc = this.services.find((s) => s.id === serviceId)
     if (!svc) return null
 
     try {
       let provider = this.registry.get(svc.id)
-      if (!provider && svc.config?.url) provider = this.registry.get('fetch-json')
-      if (provider && typeof provider.getData === 'function') {
-        return await provider.getData(svc)
+      if (!provider && (svc as any).config?.url) provider = this.registry.get('fetch-json')
+      if (provider && typeof (provider as any).getData === 'function') {
+        return await (provider as any).getData(svc)
       }
       return this.store.getServiceData(serviceId)
-    } catch (e) {
+    } catch (e: any) {
       console.warn('[live-data] getServiceData error for', serviceId, e?.message || e)
       return this.store.getServiceData(serviceId) || null
     }
   }
 
-  _emitStatus() {
+  private _emitStatus(): void {
     if (!this.window || this.window.isDestroyed()) return
     try {
       this.window.webContents.send(IPC_HANDLER_KEYS.LIVE_DATA_SUBSCRIBE, this.getServicesStatus())
-    } catch (e) {
+    } catch (e: any) {
       console.warn('Failed to emit LIVE_DATA_SUBSCRIBE:', e)
     }
   }
 
-  _maybeTriggerOnLaunchUpdates() {
+  private _maybeTriggerOnLaunchUpdates(): void {
     for (const svc of this.services) {
       if (svc.autoUpdate?.enabled && svc.autoUpdate?.trigger === 'onAppLaunch') {
         if (!computeIsFresh(svc)) {
@@ -197,18 +216,17 @@ export class LiveDataManager {
     }
   }
 
-  stopWatching() {
+  stopWatching(): void {
     // Placeholder for future scheduled triggers
   }
 }
 
-// Normalize shape for service entries read from storage or defaults
-export function normalizeService(service) {
+export function normalizeService(service: any): LiveService {
   return {
     id: service.id,
     name: service.name,
     description: service.description,
-    freshnessPolicy: service.freshnessPolicy || service.freshnessPolicy || 'daily',
+    freshnessPolicy: service.freshnessPolicy || 'daily',
     autoUpdate:
       typeof service.autoUpdate === 'object'
         ? {
@@ -223,20 +241,14 @@ export function normalizeService(service) {
         : service.lastUpdated
           ? new Date(service.lastUpdated).getTime()
           : 0,
-    config: service.config || {}, // free-form; may include url, headers, params, etc.
+    config: service.config || {},
     isUpdating: !!service.isUpdating,
     scope: service.scope === 'project' ? 'project' : 'global',
     projectId: service.scope === 'project' ? service.projectId || null : null,
   }
 }
 
-// Interface (documentation) for providers
-// A provider implementation must expose: { id, update(service, deps), getData(service, deps) }
-// - id: string (matches service id for built-ins or a generic provider id for dynamic services)
-// - update: performs network or internal refresh, should persist data via store if applicable
-// - getData: returns current data snapshot for the service
-
-export function computeIsFresh(service, now = Date.now()) {
+export function computeIsFresh(service: LiveService, now = Date.now()): boolean {
   if (!service.lastUpdated) return false
   const diffMs = now - service.lastUpdated
   const dayMs = 24 * 60 * 60 * 1000
@@ -246,8 +258,10 @@ export function computeIsFresh(service, now = Date.now()) {
     case 'weekly':
       return diffMs < 7 * dayMs
     case 'monthly':
-      return diffMs < 30 * dayMs // Approximate month
+      return diffMs < 30 * dayMs
     default:
       return false
   }
 }
+
+export default LiveDataManager

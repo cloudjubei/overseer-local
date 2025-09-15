@@ -1,8 +1,13 @@
 import { ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import ChatsStorage from './ChatsStorage'
-import { tasksManager, filesManager, projectsManager } from '../managers'
+import type { BaseManager } from '../managers'
+import type { ProjectsManager } from '../projects/ProjectsManager'
+import type { TasksManager } from '../tasks/TasksManager'
+import type { FilesManager } from '../files/FilesManager'
+import type { SettingsManager } from '../settings/SettingsManager'
 import {
   buildChatTools,
   createCompletionClient,
@@ -12,8 +17,31 @@ import {
 
 const MESSAGES_TO_SEND = 10
 
-export class ChatsManager {
-  constructor(projectRoot, window, projectsManager, tasksManager, filesManager, settingsManager) {
+type ChatMessage = { role: string; content: string; attachments?: string[] }
+
+type ChatConfig = any
+
+type ToolCall = { tool_name: string; arguments: any }
+
+export class ChatsManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+  private storages: Record<string, ChatsStorage>
+  private _ipcBound: boolean
+
+  private projectsManager: ProjectsManager
+  private tasksManager: TasksManager
+  private filesManager: FilesManager
+  private settingsManager: SettingsManager
+
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    projectsManager: ProjectsManager,
+    tasksManager: TasksManager,
+    filesManager: FilesManager,
+    settingsManager: SettingsManager,
+  ) {
     this.projectRoot = projectRoot
     this.window = window
     this.storages = {}
@@ -25,9 +53,9 @@ export class ChatsManager {
     this.settingsManager = settingsManager
   }
 
-  async __getStorage(projectId) {
+  private async __getStorage(projectId: string): Promise<ChatsStorage | undefined> {
     if (!this.storages[projectId]) {
-      const project = await this.projectsManager.getProject(projectId)
+      const project = await this.projectsManager.getProject(projectId as any)
       if (!project) {
         return
       }
@@ -39,16 +67,15 @@ export class ChatsManager {
     return this.storages[projectId]
   }
 
-  async init() {
+  async init(): Promise<void> {
     await this.__getStorage('main')
-
     this._registerIpcHandlers()
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async ({ config }) => this.listModels(config)
     handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) =>
       (await this.__getStorage(projectId))?.listChats()
@@ -66,10 +93,10 @@ export class ChatsManager {
     }) => this.getCompletion(projectId, chatId, newMessages, config)
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -79,7 +106,7 @@ export class ChatsManager {
     this._ipcBound = true
   }
 
-  _withAttachmentsAsMentions(messages) {
+  private _withAttachmentsAsMentions(messages: ChatMessage[]): ChatMessage[] {
     // Transform messages with attachments into content that includes @path mentions
     return (messages || []).map((m) => {
       try {
@@ -94,8 +121,8 @@ export class ChatsManager {
     })
   }
 
-  async _constructSystemPrompt(projectId) {
-    const project = await this.projectsManager.getProject(projectId)
+  private async _constructSystemPrompt(projectId: string): Promise<string> {
+    const project: any = await this.projectsManager.getProject(projectId as any)
 
     const parts = [
       'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using write_file (use .md if it is a markdown note).',
@@ -111,70 +138,75 @@ export class ChatsManager {
     return parts.join('\n')
   }
 
-  async getCompletion(projectId, chatId, newMessages, config) {
+  async getCompletion(
+    projectId: string,
+    chatId: string,
+    newMessages: ChatMessage[],
+    config: ChatConfig,
+  ): Promise<any> {
     try {
       const storage = await this.__getStorage(projectId)
-      const chat = await storage.getChat(chatId)
+      const chat: any = await storage?.getChat(chatId)
       if (!chat) throw new Error(`Couldn't load chat with chatId: ${chatId}`)
 
       const systemPromptContent = await this._constructSystemPrompt(projectId)
-      const systemPrompt = { role: 'system', content: systemPromptContent }
+      const systemPrompt: ChatMessage = { role: 'system', content: systemPromptContent }
 
-      let messagesHistory = [...chat.messages, ...newMessages]
+      let messagesHistory: ChatMessage[] = [...(chat.messages || []), ...(newMessages || [])]
       if (messagesHistory.length > MESSAGES_TO_SEND) {
         messagesHistory.splice(0, messagesHistory.length - MESSAGES_TO_SEND)
       }
       // Build provider messages with attachments folded into content for tool discovery
       const providerMessages = this._withAttachmentsAsMentions(messagesHistory)
-      let currentMessages = [systemPrompt, ...providerMessages]
+      let currentMessages: ChatMessage[] = [systemPrompt, ...providerMessages]
 
       const repoRoot = this.projectRoot
-      const appSettings = this.settingsManager.getAppSettings()
-      const webSearchApiKeys = appSettings.webSearchApiKeys
-      const connectionString = appSettings.database.connectionString
+      const appSettings: any = this.settingsManager.getAppSettings()
+      const webSearchApiKeys = appSettings?.webSearchApiKeys
+      const dbConnectionString = appSettings?.database?.connectionString
 
       const { tools, callTool } = buildChatTools({
         repoRoot,
         projectId,
         webSearchApiKeys,
         dbConnectionString,
-      })
-      const model = config.model
-      const completion = createCompletionClient(config)
+      } as any)
+      const model = (config as any).model
+      const completion = createCompletionClient(config as any)
 
-      let rawResponses = []
+      let rawResponses: string[] = []
       while (true) {
         const startedAt = new Date()
-        const res = await completion({ model, messages: currentMessages, tools })
-        const durationMs = new Date().getTime() - startedAt.getTime()
+        const res: any = await completion({ model, messages: currentMessages, tools })
+        const _durationMs = new Date().getTime() - startedAt.getTime()
 
-        const agentResponse = parseAgentResponse(res.message.content)
+        const agentResponse = parseAgentResponse(res.message.content) as any
 
         rawResponses.push(JSON.stringify(res.message))
 
         if (!agentResponse || !agentResponse.tool_calls || agentResponse.tool_calls.length === 0) {
-          return await storage.saveChat(
+          return await storage?.saveChat(
             chatId,
-            [...chat.messages, ...newMessages, res.message],
+            [...(chat.messages || []), ...(newMessages || []), res.message],
             [...(chat.rawResponses ?? []), rawResponses],
           )
         }
 
         currentMessages.push(res.message)
 
-        const toolOutputs = []
-        for (const toolCall of agentResponse.tool_calls) {
-          const toolName = call.tool_name
-          let args = normalizeTool(call.arguments, toolName)
+        const toolOutputs: any[] = []
+        for (const toolCall of agentResponse.tool_calls as ToolCall[]) {
+          const toolName = toolCall.tool_name
+          const args = normalizeTool(toolCall.arguments, toolName)
 
           const result = await callTool(toolName, args)
           toolOutputs.push({ name: toolName, result })
         }
         const content = JSON.stringify(toolOutputs)
-        const toolResultMsg = { role: 'user', content }
+        const toolResultMsg: ChatMessage = { role: 'user', content }
         currentMessages.push(toolResultMsg)
       }
-    } catch (error) {
+    } catch (error: any) {
       const details = [
         error?.message,
         error?.response?.data ? JSON.stringify(error.response.data) : null,
@@ -186,22 +218,13 @@ export class ChatsManager {
     }
   }
 
-  async listModels(config) {
+  async listModels(_config?: ChatConfig): Promise<string[]> {
     try {
-      //TODO: using fetch do the same as openai.models.list
-      // try {
-      //   const res = await this.client.models.list();
-      //   // Some third-party APIs may not support /models
-      //   if (!res || !Array.isArray(res.data)) return [];
-      //   return res.data.map((m) => m.id);
-      // } catch (err) {
-      //   // Gracefully degrade when provider doesn't support models.list
-      //   return [];
-      // }
-
       return []
     } catch (error) {
       throw error
     }
   }
 }
+
+export default ChatsManager

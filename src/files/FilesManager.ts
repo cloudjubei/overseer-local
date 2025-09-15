@@ -1,15 +1,18 @@
 import { ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import FilesStorage from './FilesStorage'
-import { projectsManager } from '../managers'
+import type { BaseManager } from '../managers'
+import type { ProjectsManager } from '../projects/ProjectsManager'
 
-function resolveFilesDir(projectRoot) {
-  return projectRoot
-}
+export class FilesManager implements BaseManager {
+  private window: BrowserWindow
+  private storages: Record<string, FilesStorage>
+  private _ipcBound: boolean
+  private projectsManager: ProjectsManager
 
-export class FilesManager {
-  constructor(projectRoot, window, projectsManager) {
+  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
     this.window = window
     this.storages = {}
     this._ipcBound = false
@@ -17,20 +20,20 @@ export class FilesManager {
     this.projectsManager = projectsManager
   }
 
-  async init() {
+  async init(): Promise<void> {
     await this.__getStorage('main')
 
     this._registerIpcHandlers()
   }
 
-  async __getStorage(projectId) {
+  private async __getStorage(projectId: string): Promise<FilesStorage | undefined> {
     if (!this.storages[projectId]) {
-      const project = await this.projectsManager.getProject(projectId)
+      const project: any = await this.projectsManager.getProject(projectId as any)
       if (!project) {
         return
       }
       const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path)
-      const filesDir = resolveFilesDir(projectRoot)
+      const filesDir = projectRoot
       const storage = new FilesStorage(projectId, filesDir, this.window)
       await storage.init()
       this.storages[projectId] = storage
@@ -38,10 +41,10 @@ export class FilesManager {
     return this.storages[projectId]
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.FILES_LIST] = async ({ projectId }) =>
       (await this.__getStorage(projectId))?.listFiles()
     handlers[IPC_HANDLER_KEYS.FILES_READ] = async ({ projectId, relPath, encoding }) =>
@@ -60,10 +63,10 @@ export class FilesManager {
       (await this.__getStorage(projectId))?.uploadFile(name, content)
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -73,30 +76,36 @@ export class FilesManager {
     this._ipcBound = true
   }
 
-  async getAbsoluteFilePath(projectId, relativePath) {
+  async getAbsoluteFilePath(projectId: string, relativePath: string): Promise<string> {
     const s = await this.__getStorage(projectId)
-    return s.getAbsolutePath(relativePath)
+    return s!.getAbsolutePath(relativePath)
   }
-  async listFiles(projectId) {
+  async listFiles(projectId: string): Promise<any> {
     const s = await this.__getStorage(projectId)
     return await s?.listFiles()
   }
-  async readFile(projectId, path, encoding = 'utf8') {
+  async readFile(projectId: string, relPath: string, encoding: BufferEncoding | 'utf8' = 'utf8') {
     const s = await this.__getStorage(projectId)
-    return await s?.readFile(path, encoding)
+    return await s?.readFile(relPath, encoding)
   }
-  async getFileStats(projectId, path) {
+  async getFileStats(projectId: string, relPath: string): Promise<any> {
     const s = await this.__getStorage(projectId)
-    const absolutePath = s?.getAbsolutePath(relativePath)
-    return await s?.getFileStats(absolutePath)
+    return await s?.getFileStats(relPath)
   }
-  async writeFile(projectId, path, content, encoding = 'utf8') {
+  async writeFile(
+    projectId: string,
+    relPath: string,
+    content: string | Buffer,
+    encoding: BufferEncoding | 'utf8' = 'utf8',
+  ) {
     const s = await this.__getStorage(projectId)
-    return await s?.writeFile(path, content, encoding)
+    return await s?.writeFile(relPath, content, encoding)
   }
 
-  async addChangeHandler(projectId, handler) {
+  async addChangeHandler(projectId: string, handler: any): Promise<void> {
     const s = await this.__getStorage(projectId)
-    s.addChangeHandler(handler)
+    s?.addChangeHandler(handler)
   }
 }
+
+export default FilesManager

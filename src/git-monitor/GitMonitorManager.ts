@@ -1,12 +1,12 @@
 import { ipcMain } from 'electron'
-import path from 'node:path'
-import fs from 'node:fs'
+import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 
 import gitHelper from './gitHelper'
 import { analyzeBranchHeadForTask } from './CommitAnalyzer'
 import { updateLocalTaskStateFromCommit } from './updateLocalTaskStateFromCommit'
 import { isFeatureBranchName, branchNameToTaskId } from './taskBranchNaming'
+import type { BaseManager } from '../managers'
 
 /**
  * GitMonitorManager
@@ -15,8 +15,18 @@ import { isFeatureBranchName, branchNameToTaskId } from './taskBranchNaming'
  * - Emits updates to renderer over IPC subscribe channel.
  * - Uses CommitAnalyzer to detect task.json in feature branches and updates local tasks.
  */
-export class GitMonitorManager {
-  constructor(projectRoot, window) {
+export class GitMonitorManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+  private _ipcBound: boolean
+
+  private _interval: any
+  private _pollMs: number
+  private _lastSnapshot: any
+
+  private _branchAnalysis: Map<string, string>
+
+  constructor(projectRoot: string, window: BrowserWindow) {
     this.projectRoot = projectRoot
     this.window = window
     this._ipcBound = false
@@ -29,17 +39,17 @@ export class GitMonitorManager {
     this._branchAnalysis = new Map() // branchName -> commitSha
   }
 
-  async init() {
+  async init(): Promise<void> {
     this._registerIpcHandlers()
     this.__startWatching()
   }
 
-  stopWatching() {
+  stopWatching(): void {
     if (this._interval) clearInterval(this._interval)
     this._interval = null
   }
 
-  __startWatching() {
+  private __startWatching(): void {
     this.stopWatching()
     this._tick().catch((e) => console.warn('[git-monitor] initial tick failed', e?.message || e))
     this._interval = setInterval(() => {
@@ -47,7 +57,7 @@ export class GitMonitorManager {
     }, this._pollMs)
   }
 
-  async _tick() {
+  private async _tick(): Promise<any> {
     try {
       const status = await this.getStatus()
 
@@ -60,16 +70,16 @@ export class GitMonitorManager {
         this._lastSnapshot = status
         this._emitUpdate(status)
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn('[git-monitor] tick error', e?.message || e)
     }
     return this._lastSnapshot
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
 
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS] = async () => await this.getStatus()
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL] = async () => await this._tick()
@@ -90,10 +100,10 @@ export class GitMonitorManager {
     }
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -103,18 +113,18 @@ export class GitMonitorManager {
     this._ipcBound = true
   }
 
-  async setPollInterval(ms) {
+  async setPollInterval(ms: number): Promise<void> {
     if (typeof ms === 'number' && ms >= 5_000 && ms <= 10 * 60_000) {
       this._pollMs = ms
       this.__startWatching()
     }
   }
 
-  async getStatus() {
+  async getStatus(): Promise<any> {
     return await gitHelper.getStatus(this.projectRoot)
   }
 
-  async _analyzeFeatureBranches(repoPath, branches) {
+  private async _analyzeFeatureBranches(_repoPath: string, branches: any[]): Promise<void> {
     // Filter feature branches only
     const featureBranches = branches.filter((b) => isFeatureBranchName(b?.name))
 
@@ -129,18 +139,18 @@ export class GitMonitorManager {
       if (last && last === headCommit) continue
 
       try {
-        const analysis = await analyzeBranchHeadForTask(repoPath, branchName)
+        const analysis = await analyzeBranchHeadForTask(this.projectRoot, branchName)
         if (analysis?.ok && analysis?.found) {
           const taskId = branchNameToTaskId(branchName) || analysis?.extracted?.summary?.id || null
 
-          const commitTaskData = analysis.taskRaw || analysis.extracted || null
+          const commitTaskData = (analysis as any).taskRaw || (analysis as any).extracted || null
           if (commitTaskData && taskId) {
             await updateLocalTaskStateFromCommit(this.projectRoot, commitTaskData, {
               taskId,
               gitMeta: {
                 commit: analysis.commit,
                 branch: branchName,
-                taskJsonPath: analysis.taskJsonPath || null,
+                taskJsonPath: (analysis as any).taskJsonPath || null,
               },
             })
           }
@@ -148,17 +158,17 @@ export class GitMonitorManager {
 
         // Mark as analyzed for this commit regardless of found or not, to avoid rework
         this._branchAnalysis.set(branchName, headCommit)
-      } catch (e) {
+      } catch (e: any) {
         console.warn('[git-monitor] analyze branch failed', branchName, e?.message || e)
       }
     }
   }
 
-  _emitUpdate(payload) {
+  private _emitUpdate(payload: any): void {
     if (!this.window || this.window.isDestroyed()) return
     try {
       this.window.webContents.send(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, payload)
-    } catch (e) {
+    } catch (e: any) {
       console.warn('[git-monitor] emit failed', e?.message || e)
     }
   }

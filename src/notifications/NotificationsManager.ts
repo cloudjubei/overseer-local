@@ -1,10 +1,18 @@
 import { ipcMain, Notification } from 'electron'
+import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import NotificationsStorage from './NotificationsStorage'
 import { settingsManager } from '../managers'
+import type { BaseManager } from '../managers'
 
-export class NotificationsManager {
-  constructor(projectRoot, window) {
+export class NotificationsManager implements BaseManager {
+  private projectRoot: string
+  private window: BrowserWindow
+  private _ipcBound: boolean
+
+  private storages: Record<string, NotificationsStorage>
+
+  constructor(projectRoot: string, window: BrowserWindow) {
     this.projectRoot = projectRoot
     this.window = window
     this._ipcBound = false
@@ -12,13 +20,13 @@ export class NotificationsManager {
     this.storages = {}
   }
 
-  async init() {
+  async init(): Promise<void> {
     await this.__getStorage('main')
 
     this._registerIpcHandlers()
   }
 
-  __getStorage(projectId) {
+  private __getStorage(projectId: string): NotificationsStorage {
     if (!this.storages[projectId]) {
       const storage = new NotificationsStorage(projectId)
       // Broadcast to renderer on any storage changes
@@ -30,7 +38,7 @@ export class NotificationsManager {
     return this.storages[projectId]
   }
 
-  _broadcast(projectId) {
+  private _broadcast(projectId: string): void {
     try {
       if (this.window && !this.window.isDestroyed()) {
         this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, { projectId })
@@ -40,10 +48,10 @@ export class NotificationsManager {
     }
   }
 
-  _registerIpcHandlers() {
+  private _registerIpcHandlers(): void {
     if (this._ipcBound) return
 
-    const handlers = {}
+    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = ({ args }) => this.sendOs(args)
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = ({ projectId }) =>
       this.getRecentNotifications(projectId)
@@ -59,10 +67,10 @@ export class NotificationsManager {
       this.createNotification(projectId, input)
 
     for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (event, args) => {
+      ipcMain.handle(handler, async (_event, args) => {
         try {
           return await handlers[handler](args)
-        } catch (e) {
+        } catch (e: any) {
           console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
@@ -72,10 +80,10 @@ export class NotificationsManager {
     this._ipcBound = true
   }
 
-  _getPrefsForProject(projectId) {
+  private _getPrefsForProject(projectId: string): any {
     try {
-      const app = settingsManager?.getAppSettings?.()
-      const project = settingsManager?.getProjectSettings?.(projectId)
+      const app = (settingsManager as any)?.getAppSettings?.()
+      const project = (settingsManager as any)?.getProjectSettings?.(projectId)
       const sys = app?.notificationSystemSettings || {
         osNotificationsEnabled: false,
         soundsEnabled: false,
@@ -91,7 +99,7 @@ export class NotificationsManager {
     }
   }
 
-  _maybeShowOsNotification(projectId, notification) {
+  private _maybeShowOsNotification(projectId: string, notification: any): void {
     try {
       const { sys, categoriesEnabled } = this._getPrefsForProject(projectId)
       if (!sys?.osNotificationsEnabled) return
@@ -113,7 +121,7 @@ export class NotificationsManager {
     }
   }
 
-  sendOs(data) {
+  sendOs(data: any): { success: boolean; error?: string } {
     if (!Notification.isSupported()) {
       return { success: false, error: 'Notifications not supported' }
     }
@@ -139,12 +147,12 @@ export class NotificationsManager {
 
       notification.show()
       return { success: true }
-    } catch (error) {
+    } catch (error: any) {
       return { success: false, error: String(error) }
     }
   }
 
-  createNotification(projectId, input) {
+  createNotification(projectId: string, input: any): any {
     const storage = this.__getStorage(projectId)
     const created = storage.create(input)
     // Best-effort OS notification based on preferences
@@ -152,24 +160,26 @@ export class NotificationsManager {
     return created
   }
 
-  getRecentNotifications(projectId) {
+  getRecentNotifications(projectId: string): any[] {
     const storage = this.__getStorage(projectId)
     return storage.getRecent()
   }
-  getUnreadNotificationsCount(projectId) {
+  getUnreadNotificationsCount(projectId: string): number {
     const storage = this.__getStorage(projectId)
     return storage.getUnread().length
   }
-  markAllNotificationsAsRead(projectId) {
+  markAllNotificationsAsRead(projectId: string): void {
     const storage = this.__getStorage(projectId)
     storage.markAllAsRead()
   }
-  markNotificationAsRead(projectId, id) {
+  markNotificationAsRead(projectId: string, id: string): void {
     const storage = this.__getStorage(projectId)
     storage.markAsRead(id)
   }
-  deleteAllNotifications(projectId) {
+  deleteAllNotifications(projectId: string): void {
     const storage = this.__getStorage(projectId)
     storage.deleteAll()
   }
 }
+
+export default NotificationsManager
