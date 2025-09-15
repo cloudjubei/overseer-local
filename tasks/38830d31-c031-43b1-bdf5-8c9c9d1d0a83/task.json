@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "68c1c5f0-de5d-4975-bcaa-c6a8acb9c972",
-      "status": "-",
+      "status": "+",
       "title": "Create `docs/PACKAGES.md` to document project packages",
       "description": "Create a new file `docs/PACKAGES.md`. This file will serve as a central registry for all internal and external packages used in the project. For each package, it should describe its purpose and main interfaces. To start, add an entry for the local `factory-ts` package, explaining its role in agent orchestration.",
       "context": []
