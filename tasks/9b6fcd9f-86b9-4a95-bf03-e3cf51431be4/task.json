@@ -2,21 +2,28 @@
   "id": "9b6fcd9f-86b9-4a95-bf03-e3cf51431be4",
   "status": "~",
   "title": "Monitor a task/feature as it's running and update information based off of git commits",
-  "description": "The status of the tasks isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's tasks/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the task) with a given featureId specified, it should be possible to see the task.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.",
+  "description": "The status of the tasks isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's tasks/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the task) with a given featureId specified, it should be possible to see the task.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.\nThe non-renderer code should be placed under src/git-monitor whereas renderer related things under src/renderer/services/getService.ts and in appropriate screens/components",
   "features": [
     {
       "id": "9de723a2-db03-4ff0-aab8-8615b9473664",
       "status": "-",
-      "title": "Create a Git Monitoring Service in the Main Process",
-      "description": "Implement a service in the Electron main process to periodically monitor the local git repository for changes. This service will be the foundation for tracking task progress. It should be able to fetch updates from remotes and check for new commits on branches. It will be located in a new directory `src/main/services/git-monitor`.",
-      "context": [],
+      "title": "Create a Git Monitoring Manager in the Main Process",
+      "description": "Implement a service in the Electron main process to periodically monitor the local git repository for changes. This service will be the foundation for tracking task progress. It should be able to fetch updates from remotes and check for new commits on branches. Following other managers, such as @src/factory-tools/FactoryToolsManager.js and its renderer counterpart @src/renderer/services/factoryService.ts  - create a file @src/git-monitor/GitMonitorManager.js and @src/renderer/services/gitMonitorService.ts . Make sure to update @src/ipcHandlersKeys.js , @src/managers.js , @src/preload.js and @src/types/external.d.ts - following the same exact pattern that other Managers and their renderer Services take.",
+      "context": [
+        "src/factory-tools/FactoryToolsManager.js",
+        "src/ipcHandlersKeys.js",
+        "src/managers.js",
+        "src/preload.js",
+        "src/types/external.d.ts",
+        "src/renderer/services/factoryService.ts"
+      ],
       "blockers": []
     },
     {
       "id": "d242f688-3d1d-4d49-b4e4-41f62aec33fd",
       "status": "-",
       "title": "Implement Task-to-Branch Naming Convention Logic",
-      "description": "Create a utility module that maps a task ID to a specific git branch name, following the convention `features/<taskId>`. This will be used by the Git Monitoring Service to identify which branches to watch for updates related to active tasks.",
+      "description": "Create a utility module that maps a task ID to a specific git branch name, following the convention `features/<taskId>`. This will be used by the Git Monitoring Service to identify which branches to watch for updates related to active tasks.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
       "blockers": []
     },
@@ -24,7 +31,7 @@
       "id": "db4124ad-21e9-460b-854c-f4a885688400",
       "status": "-",
       "title": "Develop Commit Analyzer to Extract Feature Status",
-      "description": "Build a module that can inspect a given git commit on a task branch. It will search for a `task.json` file within the commit's file tree. If the file exists, it will parse it to extract the status and details of the features associated with the task. This will use git commands to view file contents at a specific revision without checking out the entire branch.",
+      "description": "Build a module that can inspect a given git commit on a task branch. It will search for a `task.json` file within the commit's file tree. If the file exists, it will parse it to extract the status and details of the features associated with the task. This will use git commands to view file contents at a specific revision without checking out the entire branch.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
       "blockers": []
     },
@@ -32,15 +39,7 @@
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
       "status": "-",
       "title": "Implement Logic to Update Local Task State from Commit Data",
-      "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.",
-      "context": [],
-      "blockers": []
-    },
-    {
-      "id": "7a81601a-c0dc-418f-a0f3-a83e8a19919d",
-      "status": "-",
-      "title": "Expose Git Operations via IPC for UI Interaction",
-      "description": "Create an IPC channel in the Electron main process to handle git-related requests from the renderer process. This will include an action to trigger the merge of a task branch. The handler in the main process will execute the necessary git commands safely and provide feedback (success or failure) to the UI.",
+      "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
       "blockers": []
     },
@@ -49,7 +48,8 @@
       "status": "-",
       "title": "Add 'Merge' Button to Task UI for Completed Features",
       "description": "In the renderer process, add a 'Merge' button to the task view. This button will be enabled when the Git Monitoring Service detects that a task branch has unmerged commits. Clicking the button will trigger an IPC call to the main process to execute a git merge of the task branch into the current main development branch.",
-      "context": []
+      "context": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -57,7 +57,6 @@
     "d242f688-3d1d-4d49-b4e4-41f62aec33fd": 2,
     "db4124ad-21e9-460b-854c-f4a885688400": 3,
     "7b9c8ad9-05ec-4281-bbc4-11354a121ecb": 4,
-    "7a81601a-c0dc-418f-a0f3-a83e8a19919d": 5,
-    "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2": 6
+    "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2": 5
   }
 }
