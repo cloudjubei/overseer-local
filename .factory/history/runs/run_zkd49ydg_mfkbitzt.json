@@ -283,7 +283,7 @@
     }
   ],
   "startedAt": "2025-09-14T23:20:23.130Z",
-  "updatedAt": "2025-09-14T23:24:03.867Z",
+  "updatedAt": "2025-09-15T12:26:42.044Z",
   "id": "run_zkd49ydg_mfkbitzt",
   "agentType": "developer",
   "projectId": "thefactory-db",
@@ -297,5 +297,9 @@
     "inputPerMTokensUSD": 1.25,
     "outputPerMTokensUSD": 10
   },
-  "finishedAt": "2025-09-14T23:24:03.867Z"
+  "finishedAt": "2025-09-14T23:24:03.867Z",
+  "rating": {
+    "score": 1,
+    "createdAt": "2025-09-15T12:26:42.044Z"
+  }
 }
