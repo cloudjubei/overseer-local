@@ -85,4 +85,9 @@ export class FilesManager {
     const s = await this.__getStorage(projectId)
     return await s?.writeFile(path, content, encoding)
   }
+
+  async addChangeHandler(projectId, handler) {
+    const s = await this.__getStorage(projectId)
+    s.addChangeHandler(handler)
+  }
 }

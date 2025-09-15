@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import AppSettings from '../settings/AppSettings'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
+import { openDatabase } from 'thefactory-db'
 
 export class DatabaseManager {
   constructor(projectRoot, window, projectsManager) {
@@ -49,6 +50,8 @@ export class DatabaseManager {
       await this._dbClient?.deleteDocument(id)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH] = async ({ params }) =>
       await this._dbClient?.searchDocuments(params)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH] = async ({ criteria, options }) =>
+      await this._dbClient?.matchDocuments(criteria, options)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR] = async () =>
       await this._dbClient?.clearDocuments()
 
@@ -68,8 +71,7 @@ export class DatabaseManager {
 
   async connect(connectionString) {
     try {
-      const db = await import('thefactory-db')
-      this._dbClient = await db.openDatabase({ connectionString })
+      this._dbClient = await openDatabase({ connectionString })
       this._connectionString = connectionString
       this._setConnected(true)
       console.log('[db] thefactory-db client initialized')

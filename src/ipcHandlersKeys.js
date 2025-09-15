@@ -98,6 +98,7 @@ const IPC_HANDLER_KEYS = {
   DB_DOCUMENTS_UPDATE: 'db:documents-update',
   DB_DOCUMENTS_DELETE: 'db:documents-delete',
   DB_DOCUMENTS_SEARCH: 'db:documents-search',
+  DB_DOCUMENTS_MATCH: 'db:documents-match',
   DB_DOCUMENTS_CLEAR: 'db:documents-clear',
 
   // Document ingestion

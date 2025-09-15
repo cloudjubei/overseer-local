@@ -3,31 +3,29 @@ import path from 'path'
 import chokidar from 'chokidar'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 
+export const IGNORED_FILES = [
+  /(^|[\/\\])\../, // dotfiles/folders
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/out/**',
+  '**/build/**',
+  '**/.git/**',
+  '**/.cache/**',
+  '**/coverage/**',
+  '**/.next/**',
+  '**/.vite/**',
+  '**/tmp/**',
+]
+
 export default class FilesStorage {
-  constructor(projectId, filesDir, window, changeHandlers = {}) {
+  constructor(projectId, filesDir, window) {
     this.projectId = projectId
     this.filesDir = filesDir
     this.window = window
     this.watcher = null
 
     this.files = []
-
-    // callbacks for external listeners (e.g., DocumentIngestionService)
-    this.changeHandlers = {
-      onAdd: changeHandlers.onAdd || null,
-      onChange: changeHandlers.onChange || null,
-      onUnlink: changeHandlers.onUnlink || null,
-      onRename: changeHandlers.onRename || null,
-    }
-  }
-
-  setChangeHandlers(handlers = {}) {
-    this.changeHandlers = {
-      onAdd: handlers.onAdd || this.changeHandlers.onAdd,
-      onChange: handlers.onChange || this.changeHandlers.onChange,
-      onUnlink: handlers.onUnlink || this.changeHandlers.onUnlink,
-      onRename: handlers.onRename || this.changeHandlers.onRename,
-    }
+    this.changeHandlers = []
   }
 
   async init() {
@@ -35,16 +33,8 @@ export default class FilesStorage {
     await this.__startWatcher()
   }
 
-  __emit(type, payload) {
-    const h = this.changeHandlers
-    try {
-      if (type === 'add' && typeof h.onAdd === 'function') h.onAdd(payload)
-      else if (type === 'change' && typeof h.onChange === 'function') h.onChange(payload)
-      else if (type === 'unlink' && typeof h.onUnlink === 'function') h.onUnlink(payload)
-      else if (type === 'rename' && typeof h.onRename === 'function') h.onRename(payload)
-    } catch (e) {
-      console.warn('[FilesStorage] change handler error:', e?.message || e)
-    }
+  addChangeHandler(handler) {
+    this.changeHandlers.push(handler)
   }
 
   async __startWatcher() {
@@ -55,27 +45,14 @@ export default class FilesStorage {
       this.watcher = null
     }
 
-    const ignored = [
-      /(^|[\/\\])\../, // dotfiles/folders
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/out/**',
-      '**/build/**',
-      '**/.git/**',
-      '**/.cache/**',
-      '**/coverage/**',
-      '**/.next/**',
-      '**/.vite/**',
-      '**/tmp/**',
-    ]
-
     this.watcher = chokidar.watch(path.join(this.filesDir, '**/*'), {
-      ignored,
+      IGNORED_FILES,
       persistent: true,
       ignoreInitial: true,
     })
 
-    const toRel = (p) => p ? path.relative(this.filesDir, p).replace(/\\\\/g, '/').replace(/\\\\/g, '/') : p
+    const toRel = (p) =>
+      p ? path.relative(this.filesDir, p).replace(/\\\\/g, '/').replace(/\\\\/g, '/') : p
 
     this.watcher
       .on('add', (p) => {
@@ -112,6 +89,18 @@ export default class FilesStorage {
       this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, this.files)
     }
   }
+
+  __emit(type, payload) {
+    try {
+      if (type === 'add') this.changeHandlers.forEach((h) => h.onAdd?.(payload))
+      else if (type === 'change') this.changeHandlers.forEach((h) => h.onChange?.(payload))
+      else if (type === 'unlink') this.changeHandlers.forEach((h) => h.onUnlink?.(payload))
+      else if (type === 'rename') this.changeHandlers.forEach((h) => h.onRename?.(payload))
+    } catch (e) {
+      console.warn('[FilesStorage] change handler error:', e?.message || e)
+    }
+  }
+
   async __rebuildAndNotify(logMessage) {
     await this.__buildIndex()
     this.__notify(logMessage)

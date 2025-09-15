@@ -27,9 +27,9 @@
     },
     {
       "id": "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356",
-      "status": "?",
+      "status": "-",
       "title": "Implement DocumentIngestionService for project files",
-      "description": "Create @src/renderer/services/documentIngestionService.ts as a renderer interface and the corresponding @src/document_ingestion/DocumentIngestionManager.js that actually handles the ingestion. The manger handles scanning the repository files and upserting them into thefactory-db 'documents' table using addDocument(). Determine document type: 'project_code' for code files (js, ts, tsx, jsx, json, md, css, etc. configurable), 'project_file' for other internal files, 'external_file' reserved for future. For each project (from @src/projects/ProjectsManager.js ), resolve its root directory and iterate via @src/files/FilesManager.js  or a direct file walk (reuse ignore patterns from @src/files/FilesStorage.js). For each file, compute a stable document identifier (e.g., projectId + relative path), content hash, metadata (path, projectId, ext, size, mtime, type). Upsert if missing or if hash/mtime changed; delete or mark archived on file removal. Expose methods: ingestAllProjects(), ingestProject(projectId).\nMake sure to dynamically handle files Added/Changed/Deleted(projectId, relPath).",
+      "description": "Create @src/renderer/services/documentIngestionService.ts as a renderer interface and the corresponding @src/document_ingestion/DocumentIngestionManager.js that actually handles the ingestion. The manger handles scanning the repository files and adding them into thefactory-db 'documents' table using addDocument(). Determine document type: 'project_code' for code files (js, ts, tsx, jsx, json, md, css, etc. configurable), 'project_file' for other internal files, 'external_file' reserved for future. For each project (from @src/projects/ProjectsManager.js ), resolve its root directory and iterate via @src/files/FilesManager.js  or a direct file walk (reuse ignore patterns from @src/files/FilesStorage.js). For each file, compute the file patch and metadata (content hash, ext, size, mtime, type). Upsert if missing or if hash/mtime changed; delete or mark archived on file removal. Expose methods: ingestAllProjects(), ingestProject(projectId).\nMake sure to dynamically handle files Added/Changed/Deleted(projectId, relPath).",
       "context": [
         "src/projects/ProjectsManager.js",
         "src/files/FilesStorage.js",
@@ -37,8 +37,7 @@
         "src/renderer/services/documentIngestionService.ts",
         "src/document_ingestion/DocumentIngestionManager.js"
       ],
-      "blockers": [],
-      "rejection": "Blocked: Agent loop failed: TypeError: query.toLowerCase is not a function"
+      "blockers": []
     },
     {
       "id": "a47c5301-d7b0-4b61-af16-722819909733",
@@ -72,22 +71,24 @@
     },
     {
       "id": "3535faff-05d1-4ae0-9b32-7192685536da",
-      "status": "+",
+      "status": "-",
       "title": "Update FILE_ORGANISATION.md with db subsystem",
-      "description": "Document new src/db/ directory and its responsibilities: DatabaseManager (connection lifecycle), DocumentIngestionService (project file sync to thefactory-db), and fileTyping utility. Keep bullets concise and aligned with the existing documentation conventions.",
-      "context": [],
+      "description": "Document new directories and their responsibilities: @src/db/DatabaseManager.js  (db connection lifecycle), and @src/document_ingestion/DocumentIngestionManager.js  (project file sync to thefactory-db). Keep aligned with the existing documentation conventions.",
+      "context": [
+        "src/db/DatabaseManager.js",
+        "src/document_ingestion/DocumentIngestionManager.js"
+      ],
       "blockers": []
     },
     {
       "id": "7d59b560-086e-4879-a1a6-9e051db6434f",
-      "status": "?",
+      "status": "-",
       "title": "Add unit/integration scaffolding for ingestion service",
       "description": "Introduce a simple script or dev command to run a one-off sync @scripts/sync-docs.js  using the same services, useful for testing. Optionally add a basic test (if testing infra exists) to validate classification and upsert logic using a temp directory and an in-memory or temp DB.",
       "context": [
         "scripts/sync-docs.js"
       ],
-      "blockers": [],
-      "rejection": "Blocked: Agent loop failed: TypeError: query.toLowerCase is not a function"
+      "blockers": []
     },
     {
       "id": "6d115a0f-2c64-4e6a-bbbc-51ef9a2eed84",

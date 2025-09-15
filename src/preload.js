@@ -206,11 +206,9 @@ const DB_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE, { id, patch }),
   deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
+  matchDocuments: (criteria, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { criteria, options }),
   clearDocuments: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR),
-  // Ingestion
-  ingestAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_ALL),
-  ingestProject: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_PROJECT, { projectId }),
 }
 const DOCUMENT_INGESTION_API = {
   ingestAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_ALL),

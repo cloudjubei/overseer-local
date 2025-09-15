@@ -17,11 +17,7 @@ Top-Level Layout
 
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
-  - db/: Main process database integration with thefactory-db (connection and project document sync).
-    - DatabaseManager: Connection lifecycle (connect, health, teardown) and credentials; exposes DB status via IPC/preload (dbService).
-    - DocumentIngestionService: Scans and syncs project files into the documents table; runs on startup and on-demand.
-    - fileTyping: Maps repo files to document types (project_code, project_file, external_file).
-    - IPC: Renderer triggers for ingestion and status queries; minimal surface exposed via preload.
+  - db/: Main process database integration (thefactory-db connection manager and document ingestion service for project files). Exposes DB status via IPC and preload (dbService). Includes IPC endpoints to trigger full-project ingestion from the renderer (DB_INGEST_ALL / DB_INGEST_PROJECT).
   - live-data/: Main process live data service and types for live data services.
     - providers/: Pluggable provider implementations (e.g., agent-prices bridge, generic fetch-json).
     - registry.js: Provider registry to map service ids to providers.

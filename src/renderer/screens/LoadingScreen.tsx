@@ -50,8 +50,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
 
   useEffect(() => {
     if (isAppSettingsLoaded) {
-      const conn = appSettings.database?.connectionString
-      startDatabaseAndIngestion(conn)
+      startDatabaseAndIngestion(appSettings.database.connectionString)
     }
   }, [isAppSettingsLoaded])
 
