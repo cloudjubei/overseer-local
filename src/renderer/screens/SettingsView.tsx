@@ -22,6 +22,7 @@ import {
   DEFAULT_APP_SETTINGS,
 } from '../../types/settings'
 import { useAppSettings } from '../contexts/AppSettingsContext'
+import { dbService } from '../services/dbService'
 
 // Settings Categories
 const CATEGORIES = [
@@ -52,6 +53,18 @@ export default function SettingsView() {
 
   // Layout state
   const [activeCategory, setActiveCategory] = useState<CategoryId>('visual')
+  const [dbIngesting, setDbIngesting] = useState(false)
+  const [dbIngestionMsg, setDbIngestionMsg] = useState<string | null>(null)
+
+  // Subscribe to ingestion progress
+  useState(() => {
+    return dbService.onIngestionStatus((p) => {
+      setDbIngesting(p.status === 'running')
+      if (p.message) setDbIngestionMsg(p.message)
+      if (p.status === 'done') setDbIngestionMsg('Indexing complete')
+      if (p.status === 'error') setDbIngestionMsg(p.error || 'Indexing error')
+    })
+  })
 
   // Helper: capture a combo from a keydown
   const captureCombo = useCallback((e: React.KeyboardEvent<HTMLInputElement>): string => {
@@ -461,32 +474,58 @@ export default function SettingsView() {
     </div>
   )
 
-  const renderDatabaseSection = () => (
-    <div className="max-w-3xl">
-      <h2 className="text-xl font-semibold mb-3">Database</h2>
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="db-conn" className="block text-sm font-medium mb-1">
-            thefactory-db Postgres connection string
-          </label>
-          <input
-            id="db-conn"
-            type="text"
-            value={appSettings.database?.connectionString ?? ''}
-            onChange={(e) =>
-              updateAppSettings({ database: { ...appSettings.database, connectionString: e.target.value } })
-            }
-            className="w-full max-w-xl p-2 border border-gray-300 rounded-md"
-            placeholder="postgres://user:pass@host:5432/dbname"
-            autoComplete="off"
-          />
-          <p className="text-[12px] text-[var(--text-secondary)] mt-1">
-            Stored locally. Leave empty to use default environment configuration.
-          </p>
+  const renderDatabaseSection = () => {
+    const currentConn = appSettings.database?.connectionString?.trim() || ''
+    return (
+      <div className="max-w-3xl">
+        <h2 className="text-xl font-semibold mb-3">Database</h2>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="db-conn" className="block text-sm font-medium mb-1">
+              thefactory-db Postgres connection string
+            </label>
+            <input
+              id="db-conn"
+              type="text"
+              value={currentConn}
+              onChange={(e) =>
+                updateAppSettings({ database: { ...appSettings.database, connectionString: e.target.value } })
+              }
+              className="w-full max-w-xl p-2 border border-gray-300 rounded-md"
+              placeholder="postgres://user:pass@host:5432/dbname"
+              autoComplete="off"
+            />
+            <p className="text-[12px] text-[var(--text-secondary)] mt-1">
+              Stored locally. Leave empty to use default environment configuration.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={async () => {
+                setDbIngestionMsg(null)
+                setDbIngesting(true)
+                try {
+                  await dbService.startIngestion()
+                } finally {
+                  // actual running state will be updated by status listener
+                }
+              }}
+              disabled={!currentConn || dbIngesting}
+            >
+              {dbIngesting ? 'Starting…' : 'Start ingestion'}
+            </Button>
+            <span className="text-[12px] text-[var(--text-secondary)]">
+              After setting or changing the connection string, click "Start ingestion" to index or re-index project files.
+            </span>
+          </div>
+          {dbIngestionMsg ? (
+            <div className="text-[12px] text-[var(--text-secondary)]">{dbIngestionMsg}</div>
+          ) : null}
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <CollapsibleSidebar
