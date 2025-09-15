@@ -13,7 +13,7 @@
     },
     {
       "id": "3d7afe9b-18e4-4e12-9153-8c9eb5105ebc",
-      "status": "-",
+      "status": "+",
       "title": "Document the 'Manager' architectural pattern in `docs/PATTERNS.md`",
       "description": "Create a new file `docs/PATTERNS.md`. In this file, document the \"Manager\" pattern used for creating main-process services. The documentation should detail the full lifecycle and integration points of a manager, including:\n1. Location of manager source files (e.g., `src/tasks/TasksManager.js`).\n2. Initialization in `src/managers.js`.\n3. Definition of IPC keys in `src/ipcHandlersKeys.js`.\n4. Exposure to the renderer via `src/preload.js`.\n5. Consumption on the renderer side (e.g., `src/renderer/services/tasksService.ts`).\n6. Associated type definitions in `src/types/external.d.ts`.",
       "context": []
