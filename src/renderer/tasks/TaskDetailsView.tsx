@@ -14,6 +14,7 @@ import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
 import { StatusPicker, statusKey } from '../components/tasks/StatusControl'
+import { gitMonitorService } from '../services/gitMonitorService'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -64,6 +65,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
+  // Git merge UI state
+  const [gitBaseBranch, setGitBaseBranch] = useState<string | null>(null)
+  const [hasUnmerged, setHasUnmerged] = useState<boolean>(false)
+  const [checkingMerge, setCheckingMerge] = useState<boolean>(false)
+  const [merging, setMerging] = useState<boolean>(false)
+  const [mergeError, setMergeError] = useState<string | null>(null)
+
   useEffect(() => {
     if (taskId && tasksById) {
       const t = tasksById[taskId]
@@ -72,6 +80,47 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       setTask(null)
     }
   }, [taskId, tasksById])
+
+  // Subscribe to git monitor and compute merge availability for this task's feature branch
+  useEffect(() => {
+    let disposed = false
+
+    async function check() {
+      if (!task) {
+        setHasUnmerged(false)
+        return
+      }
+      setCheckingMerge(true)
+      try {
+        const status = await gitMonitorService.getStatus()
+        const base = status.currentBranch || null
+        setGitBaseBranch(base)
+        const branchName = `features/${task.id}`
+        if (!base) {
+          setHasUnmerged(false)
+          return
+        }
+        const res = await gitMonitorService.hasUnmerged(branchName, base)
+        if (!disposed) {
+          setHasUnmerged(!!res.ok && !!res.hasUnmerged)
+        }
+      } catch (e) {
+        if (!disposed) setHasUnmerged(false)
+      } finally {
+        if (!disposed) setCheckingMerge(false)
+      }
+    }
+
+    check()
+    const unsubscribe = gitMonitorService.subscribe((_s) => {
+      // Re-check on git status updates
+      check()
+    })
+    return () => {
+      disposed = true
+      unsubscribe?.()
+    }
+  }, [task])
 
   const sortedFeaturesBase = useMemo(() => {
     if (!task) {
@@ -241,6 +290,28 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     }
   }, [highlightTaskFlag])
 
+  const onClickMerge = async () => {
+    if (!task) return
+    setMergeError(null)
+    setMerging(true)
+    try {
+      const status = await gitMonitorService.getStatus()
+      const base = status.currentBranch
+      const branchName = `features/${task.id}`
+      if (!base) throw new Error('No base branch detected')
+      const res = await gitMonitorService.mergeBranch(branchName, base)
+      if (!res.ok) throw new Error(res.error || 'Merge failed')
+      // Refresh and update button state
+      await gitMonitorService.triggerPoll()
+      const check = await gitMonitorService.hasUnmerged(branchName, base)
+      setHasUnmerged(!!check.ok && !!check.hasUnmerged)
+    } catch (e: any) {
+      setMergeError(e?.message || String(e))
+    } finally {
+      setMerging(false)
+    }
+  }
+
   if (!task) {
     return (
       <div className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
@@ -397,6 +468,24 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               </div>
             )}
             <ModelChip editable />
+            {/* Merge button: enabled when git monitor says feature branch has unmerged commits */}
+            <button
+              type="button"
+              className={`btn ${(!hasUnmerged || merging || checkingMerge) ? 'btn-disabled' : ''}`}
+              disabled={!hasUnmerged || merging || checkingMerge}
+              title={
+                mergeError
+                  ? `Merge failed: ${mergeError}`
+                  : hasUnmerged
+                    ? `Merge features/${task.id} into ${gitBaseBranch || 'current branch'}`
+                    : checkingMerge
+                      ? 'Checking merge status...'
+                      : 'No commits to merge'
+              }
+              onClick={onClickMerge}
+            >
+              {merging ? 'Merging…' : 'Merge'}
+            </button>
             {!taskHasActiveRun && (
               <RunAgentButton
                 onClick={(agentType) => {

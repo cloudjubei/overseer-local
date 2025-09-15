@@ -1,6 +1,6 @@
 {
   "id": "9b6fcd9f-86b9-4a95-bf03-e3cf51431be4",
-  "status": "~",
+  "status": "+",
   "title": "Monitor a task/feature as it's running and update information based off of git commits",
   "description": "The status of the tasks isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's tasks/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the task) with a given featureId specified, it should be possible to see the task.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.\nThe non-renderer code should be placed under src/git-monitor whereas renderer related things under src/renderer/services/getService.ts and in appropriate screens/components",
   "features": [
@@ -29,7 +29,7 @@
     },
     {
       "id": "db4124ad-21e9-460b-854c-f4a885688400",
-      "status": "-",
+      "status": "+",
       "title": "Develop Commit Analyzer to Extract Feature Status",
       "description": "Build a module that can inspect a given git commit on a task branch. It will search for a `task.json` file within the commit's file tree. If the file exists, it will parse it to extract the status and details of the features associated with the task. This will use git commands to view file contents at a specific revision without checking out the entire branch.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
@@ -37,7 +37,7 @@
     },
     {
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
-      "status": "-",
+      "status": "+",
       "title": "Implement Logic to Update Local Task State from Commit Data",
       "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `.tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
@@ -45,7 +45,7 @@
     },
     {
       "id": "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2",
-      "status": "-",
+      "status": "+",
       "title": "Add 'Merge' Button to Task UI for Completed Features",
       "description": "In the renderer process, add a 'Merge' button to the task view. This button will be enabled when the Git Monitoring Service detects that a task branch has unmerged commits. Clicking the button will trigger an IPC call to the main process to execute a git merge of the task branch into the current main development branch.",
       "context": [],

@@ -68,6 +68,13 @@ export class GitMonitorManager {
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL] = async ({ ms }) =>
       await this.setPollInterval(ms)
 
+    // New: branch unmerged check and merge
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_HAS_UNMERGED] = async ({ branchName, baseBranch }) =>
+      await this.hasUnmergedCommits(branchName, baseBranch)
+
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH] = async ({ branchName, baseBranch }) =>
+      await this.mergeBranchIntoBase(branchName, baseBranch)
+
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
         try {
@@ -167,12 +174,126 @@ export class GitMonitorManager {
     }
   }
 
+  async _exec(cmd, args, options) {
+    // Strict exec: throws on error
+    return await execFileAsync(cmd, args, { timeout: 60_000, ...options })
+  }
+
   _emitUpdate(payload) {
     if (!this.window || this.window.isDestroyed()) return
     try {
       this.window.webContents.send(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, payload)
     } catch (e) {
       console.warn('[git-monitor] emit failed', e?.message || e)
+    }
+  }
+
+  async _ensureRepo() {
+    const repoPath = this._resolveRepoRoot()
+    if (!repoPath) return { ok: false, error: 'No git repository detected' }
+    return { ok: true, repoPath }
+  }
+
+  async _currentBranch(repoPath) {
+    const res = await this._safeExec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: repoPath })
+    return res.stdout.trim()
+  }
+
+  async _branchExists(repoPath, branchName) {
+    const res = await this._safeExec('git', ['rev-parse', '--verify', '--quiet', branchName], { cwd: repoPath })
+    return !!res.stdout.trim()
+  }
+
+  async hasUnmergedCommits(branchName, baseBranch) {
+    try {
+      const ensured = await this._ensureRepo()
+      if (!ensured.ok) return ensured
+      const { repoPath } = ensured
+
+      if (!branchName || typeof branchName !== 'string') {
+        return { ok: false, error: 'branchName is required' }
+      }
+
+      await this._safeExec('git', ['fetch', '--all', '--prune'], { cwd: repoPath })
+      const base = baseBranch || (await this._currentBranch(repoPath))
+
+      if (base === branchName) {
+        return { ok: true, hasUnmerged: false, reason: 'base equals branch' }
+      }
+
+      const exists = await this._branchExists(repoPath, branchName)
+      if (!exists) {
+        return { ok: true, hasUnmerged: false, notFound: true }
+      }
+
+      const countRes = await this._safeExec('git', ['rev-list', '--count', `${base}..${branchName}`], {
+        cwd: repoPath,
+      })
+      const count = parseInt((countRes.stdout || '0').trim(), 10)
+      const hasUnmerged = Number.isFinite(count) && count > 0
+      return { ok: true, hasUnmerged, aheadCount: Number.isFinite(count) ? count : 0, base, branch: branchName }
+    } catch (e) {
+      return { ok: false, error: String(e?.message || e) }
+    }
+  }
+
+  async mergeBranchIntoBase(branchName, baseBranch) {
+    try {
+      const ensured = await this._ensureRepo()
+      if (!ensured.ok) return ensured
+      const { repoPath } = ensured
+
+      if (!branchName || typeof branchName !== 'string') {
+        return { ok: false, error: 'branchName is required' }
+      }
+
+      await this._exec('git', ['fetch', '--all', '--prune'], { cwd: repoPath })
+
+      const base = baseBranch || (await this._currentBranch(repoPath))
+      if (base === branchName) {
+        return { ok: false, error: 'Refusing to merge a branch into itself' }
+      }
+
+      // Clean working tree check
+      const status = await this._exec('git', ['status', '--porcelain'], { cwd: repoPath })
+      if (status.stdout.trim().length > 0) {
+        return { ok: false, error: 'Working tree not clean. Commit or stash changes before merging.' }
+      }
+
+      // Ensure both branches exist
+      const featureExists = await this._branchExists(repoPath, branchName)
+      if (!featureExists) return { ok: false, error: `Branch not found: ${branchName}` }
+
+      // Checkout base branch
+      await this._exec('git', ['checkout', base], { cwd: repoPath })
+      // Pull latest (fast-forward only for safety)
+      await this._exec('git', ['pull', '--ff-only'], { cwd: repoPath })
+
+      // Check if there are unmerged commits; if none, exit early
+      const pre = await this.hasUnmergedCommits(branchName, base)
+      if (pre.ok && !pre.hasUnmerged) {
+        return { ok: true, merged: false, reason: 'No commits to merge' }
+      }
+
+      // Perform merge (no-ff for explicit merge commit; auto message)
+      try {
+        await this._exec('git', ['merge', '--no-ff', '--no-edit', branchName], { cwd: repoPath })
+      } catch (mergeErr) {
+        // Try to abort merge to clean state
+        await this._safeExec('git', ['merge', '--abort'], { cwd: repoPath })
+        return { ok: false, error: `Merge failed: ${mergeErr?.message || mergeErr}` }
+      }
+
+      // Get new head sha
+      const head = await this._exec('git', ['rev-parse', 'HEAD'], { cwd: repoPath })
+      const newSha = head.stdout.trim()
+
+      // Emit update
+      await this._tick()
+
+      return { ok: true, merged: true, base, branch: branchName, commit: newSha }
+    } catch (e) {
+      return { ok: false, error: String(e?.message || e) }
     }
   }
 }
