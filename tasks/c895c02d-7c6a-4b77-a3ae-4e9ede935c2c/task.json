@@ -40,7 +40,7 @@
     },
     {
       "id": "9834258a-c115-4554-9a3f-3209c6b66686",
-      "status": "-",
+      "status": "?",
       "title": "LoadingScreen is the place where all managers get started.",
       "description": "Right now, in @src/managers.js , after all the managers get created they also get initialised. The code to initialise them should be triggered by the @src/renderer/screens/LoadingScreen.tsx -  passing in all the necessary information, such as @src/renderer/contexts/AppSettingsContext.tsx into the appropriate managers - as now the new DatabaseManager will require this new databaseConnectionString.\nSet this up in a nice clean way.",
       "context": [
@@ -48,7 +48,8 @@
         "src/renderer/screens/LoadingScreen.tsx",
         "src/renderer/contexts/AppSettingsContext.tsx"
       ],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: The feature requires triggering main-process managers initialization from the renderer LoadingScreen and passing AppSettings (including databaseConnectionString). However, there is no exposed IPC or preload API to call a main function with the settings, and we cannot modify main/preload/services without their files. Current repository view lacks src/main.js and src/preload.js wiring for a method like initManagersWithSettings, and there is no DatabaseManager or thefactory-db integration code to receive the settings. Please provide or expose an IPC/preload endpoint to initialize managers with settings (or provide main/preload files), and confirm where databaseConnectionString lives in AppSettings so we can forward it appropriately."
     },
     {
       "id": "a47c5301-d7b0-4b61-af16-722819909733",
