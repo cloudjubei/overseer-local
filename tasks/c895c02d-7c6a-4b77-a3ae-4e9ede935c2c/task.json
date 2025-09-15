@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "ab20c3bb-f4d7-46be-84be-da04e14019ac",
-      "status": "-",
+      "status": "+",
       "title": "Add thefactory-db initialization service in main process",
       "description": "Create @src/db/DatabaseManager.js to encapsulate initializing and managing a thefactory-db connection. It should read connection settings from the user supplied connection string in @src/renderer/contexts/AppSettingsContext.tsx . \nProvide async init(), getClient(), and stopWatching()/close() methods. Export and wire it in @src/managers.js  (add dbManager export), instantiate before @src/factory-tools/FactoryToolsManager.js , call init() during startup, and close on app shutdown in stopManagers().",
       "context": [

@@ -6,7 +6,9 @@ import { ChatsManager } from './chat/ChatsManager'
 import { NotificationsManager } from './notifications/NotificationsManager'
 import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
+import { DatabaseManager } from './db/DatabaseManager'
 
+export let dbManager
 export let factoryToolsManager
 export let tasksManager
 export let filesManager
@@ -17,6 +19,10 @@ export let settingsManager
 export let liveDataManager
 
 export async function initManagers(projectRoot, mainWindow) {
+  // Initialize thefactory-db connection first so downstream managers can rely on it if needed
+  dbManager = new DatabaseManager(projectRoot, mainWindow)
+  await dbManager.init()
+
   factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
@@ -66,5 +72,8 @@ export function stopManagers() {
   }
   if (liveDataManager) {
     liveDataManager.stopWatching()
+  }
+  if (dbManager) {
+    dbManager.stopWatching()
   }
 }

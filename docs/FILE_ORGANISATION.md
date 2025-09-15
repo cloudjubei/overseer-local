@@ -17,6 +17,7 @@ Top-Level Layout
 
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
+  - db/: Main process database integration (thefactory-db connection manager).
   - live-data/: Main process live data service and types for live data services.
     - providers/: Pluggable provider implementations (e.g., agent-prices bridge, generic fetch-json).
     - registry.js: Provider registry to map service ids to providers.
@@ -37,7 +38,7 @@ Top-Level Layout
 
 Where to Learn More
 
-- Agents and roles: packages/factory-ts/docs (AGENT\_\*.md).
+- Agents and roles: packages/factory-ts/docs (AGENT_*.md).
 - Factory TS overview and APIs: packages/factory-ts (see README/OVERVIEW files in that package).
 - Preview system: see src/renderer/preview and related docs in docs/ (preview usage and analyzer).
 - IPC and factory integration: src/tools/factory (renderer bridge and main process handlers).
