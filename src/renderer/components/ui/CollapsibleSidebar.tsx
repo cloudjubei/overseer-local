@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Tooltip from './Tooltip'
+import { IconMenu, IconChevron } from './Icons'
 
 export type CollapsibleSidebarItem = {
   id: string
@@ -139,7 +140,9 @@ export default function CollapsibleSidebar(props: Props) {
               aria-expanded={!collapsed}
               title={collapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
             >
-              <span aria-hidden>{collapsed ? '»' : '«'}</span>
+              <span aria-hidden>
+                <IconChevron style={{ transform: collapsed ? 'none' : 'rotate(180deg)' }} />
+              </span>
             </button>
           </div>
         </div>
@@ -179,7 +182,7 @@ export default function CollapsibleSidebar(props: Props) {
                       )}
                     </div>
                   </li>
-                )
+                )}
               })}
             </ul>
           )}
@@ -228,7 +231,7 @@ export default function CollapsibleSidebar(props: Props) {
             onClick={() => setMobileOpen(true)}
             aria-label="Open sidebar"
           >
-            ☰
+            <IconMenu />
           </button>
           <div className="text-sm font-semibold">{headerTitle ?? 'Sections'}</div>
         </div>

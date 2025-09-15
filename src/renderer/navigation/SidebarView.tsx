@@ -16,6 +16,20 @@ import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useAgents } from '../contexts/AgentsContext'
 import NotificationBadge from '../components/tasks/NotificationBadge'
 import { ProjectSpec } from 'thefactory-tools'
+import {
+  IconHome,
+  IconFiles,
+  IconChat,
+  IconRobot,
+  IconAntenna,
+  IconBell,
+  IconSettings,
+  IconCollection,
+  IconFolder,
+  IconWarningTriangle,
+  IconMenu,
+  IconChevron,
+} from '../components/ui/Icons'
 
 export type SidebarProps = {}
 
@@ -32,48 +46,48 @@ type NavDef = {
 }
 
 const NAV_ITEMS: NavDef[] = [
-  { id: 'home', label: 'Home', view: 'Home', icon: <span aria-hidden>🏠</span>, accent: 'brand' },
+  { id: 'home', label: 'Home', view: 'Home', icon: <IconHome />, accent: 'brand' },
   {
     id: 'files',
     label: 'Files',
     view: 'Files',
-    icon: <span aria-hidden>📚</span>,
+    icon: <IconFiles />,
     accent: 'purple',
   },
-  { id: 'chat', label: 'Chat', view: 'Chat', icon: <span aria-hidden>💬</span>, accent: 'teal' },
+  { id: 'chat', label: 'Chat', view: 'Chat', icon: <IconChat />, accent: 'teal' },
   {
     id: 'agents',
     label: 'Agents',
     view: 'Agents',
-    icon: <span aria-hidden>🤖</span>,
+    icon: <IconRobot />,
     accent: 'teal',
   },
   {
     id: 'live-data',
     label: 'Live Data',
     view: 'LiveData',
-    icon: <span aria-hidden>📡</span>,
+    icon: <IconAntenna />,
     accent: 'brand',
   },
   {
     id: 'notifications',
     label: 'Notifications',
     view: 'Notifications',
-    icon: <span aria-hidden>🔔</span>,
+    icon: <IconBell />,
     accent: 'teal',
   },
   {
     id: 'settings',
     label: 'Settings',
     view: 'Settings',
-    icon: <span aria-hidden>⚙️</span>,
+    icon: <IconSettings />,
     accent: 'gray',
   },
   {
     id: 'all-agents',
     label: 'All Agents',
     view: 'AllAgents',
-    icon: <span aria-hidden>🗂️</span>,
+    icon: <IconCollection />,
     accent: 'teal',
   },
 ]
@@ -281,7 +295,9 @@ export default function SidebarView({}: SidebarProps) {
           aria-expanded={!effectiveCollapsed}
           title={effectiveCollapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
         >
-          <span aria-hidden>{effectiveCollapsed ? '»' : '«'}</span>
+          <span aria-hidden>
+            <IconChevron style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }} />
+          </span>
         </button>
       </div>
 
@@ -409,7 +425,7 @@ export default function SidebarView({}: SidebarProps) {
                 role="status"
               >
                 <span className="nav-item__icon" aria-hidden>
-                  ⚠️
+                  <IconWarningTriangle />
                 </span>
                 {!effectiveCollapsed && <span className="nav-item__label">Failed to load</span>}
               </div>
@@ -420,8 +436,7 @@ export default function SidebarView({}: SidebarProps) {
             const active = activeProjectId === p.id
             const accent = useAccentClass(p.id, isMain)
             const activeCount = activeCountByProject.get(p.id) || 0
-            const projectIcon =
-              p.metadata && p.metadata.icon ? p.metadata.icon : isMain ? '🗂️' : '📁'
+            const projectIcon = isMain ? <IconCollection /> : <IconFolder />
             return (
               <li className="nav-li" key={p.id}>
                 <div className="flex items-center">
@@ -490,7 +505,7 @@ export default function SidebarView({}: SidebarProps) {
             onClick={() => setMobileOpen(true)}
             aria-label="Open sidebar"
           >
-            ☰
+            <IconMenu />
           </button>
           <div className="text-sm font-semibold">{currentView}</div>
         </div>

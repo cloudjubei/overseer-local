@@ -1092,7 +1092,7 @@
     },
     {
       "id": "74d5f63b-8797-43f5-b571-fd5bebf56550",
-      "status": "-",
+      "status": "+",
       "title": "Replace all the emoji icons in the Sidebar with icons specific to this project",
       "description": "They should all reside alongside other icons in @src/renderer/components/ui/Icons.tsx .\nUpdate @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx .\nKeep it according to style defined in @docs/styleguide/README.md  and @docs/design/DESIGN_SYSTEM.md , @docs/design/DESIGN_TOKENS.md , @docs/design/MONDAY_PALETTE_REFERENCE.md  and @docs/ux/LINEAR_UX_GUIDELINES.md",
       "plan": "",
