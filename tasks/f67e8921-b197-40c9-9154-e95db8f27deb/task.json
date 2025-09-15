@@ -1055,6 +1055,18 @@
       "acceptance": [],
       "blockers": [],
       "rejection": "When running via 'npm run start' the app icon doesn't show"
+    },
+    {
+      "id": "ea8dc9a0-203e-42c6-ab4d-70db372c0003",
+      "status": "-",
+      "title": "Cleanup the SettingsView",
+      "description": "The @src/renderer/screens/SettingsView.tsx is currently overloaded by its sub views.\nEach subview should be in its own separate folder as it serves as a separate main view. Refactor it cleanly.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1140,6 +1152,7 @@
     "34c83d4f-078d-45c3-b85a-e701f1d82f3a": 80,
     "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb": 81,
     "fc49d90d-6345-4744-aa82-060d025051d0": 82,
-    "05393210-77ab-4301-8243-accf0edac8d5": 83
+    "05393210-77ab-4301-8243-accf0edac8d5": 83,
+    "ea8dc9a0-203e-42c6-ab4d-70db372c0003": 84
   }
 }
