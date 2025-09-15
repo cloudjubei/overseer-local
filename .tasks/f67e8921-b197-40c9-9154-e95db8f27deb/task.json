@@ -1070,7 +1070,7 @@
     },
     {
       "id": "85914410-3864-43fa-8317-b90dedc12ce0",
-      "status": "-",
+      "status": "+",
       "title": "Managers.js could be typed",
       "description": "@src/managers.js could be turned into a typescript file so that we can use all the typing niceties also in all of the managers:\n@src/chat/ChatsManager.js , @src/db/DatabaseManager.js , @src/document_ingestion/DocumentIngestionManager.js , @src/factory-tools/FactoryToolsManager.js , @src/files/FilesManager.js , @src/git-monitor/GitMonitorManager.js , @src/live-data/liveDataManager.js , @src/notifications/NotificationsManager.js , @src/tasks/TasksManager.js  , @src/projects/ProjectsManager.js  , @src/settings/SettingsManager.js",
       "plan": "",

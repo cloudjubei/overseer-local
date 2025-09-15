@@ -1,3 +1,5 @@
+import type { BrowserWindow } from 'electron'
+
 import { FactoryToolsManager } from './factory-tools/FactoryToolsManager'
 import { TasksManager } from './tasks/TasksManager'
 import { FilesManager } from './files/FilesManager'
@@ -10,19 +12,25 @@ import { DatabaseManager } from './db/DatabaseManager'
 import { DocumentIngestionManager } from './document_ingestion/DocumentIngestionManager'
 import { GitMonitorManager } from './git-monitor/GitMonitorManager'
 
-export let dbManager
-export let factoryToolsManager
-export let tasksManager
-export let filesManager
-export let projectsManager
-export let chatsManager
-export let notificationsManager
-export let settingsManager
-export let liveDataManager
-export let documentIngestionManager
-export let gitMonitorManager
+// Minimal common interface for managers used here
+interface BaseManager {
+  init(): Promise<any>
+  stopWatching?: () => void | Promise<void>
+}
 
-export async function initManagers(projectRoot, mainWindow) {
+export let dbManager: DatabaseManager | undefined
+export let factoryToolsManager: FactoryToolsManager | undefined
+export let tasksManager: TasksManager | undefined
+export let filesManager: FilesManager | undefined
+export let projectsManager: ProjectsManager | undefined
+export let chatsManager: ChatsManager | undefined
+export let notificationsManager: NotificationsManager | undefined
+export let settingsManager: SettingsManager | undefined
+export let liveDataManager: LiveDataManager | undefined
+export let documentIngestionManager: DocumentIngestionManager | undefined
+export let gitMonitorManager: GitMonitorManager | undefined
+
+export async function initManagers(projectRoot: string, mainWindow: BrowserWindow): Promise<void> {
   dbManager = new DatabaseManager(projectRoot, mainWindow)
   factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, dbManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
@@ -60,38 +68,27 @@ export async function initManagers(projectRoot, mainWindow) {
   await documentIngestionManager.init()
   await gitMonitorManager.init()
 }
-export function stopManagers() {
-  if (dbManager) {
-    dbManager.stopWatching()
-  }
-  if (factoryToolsManager) {
-    factoryToolsManager.stopWatching()
-  }
-  if (projectsManager) {
-    projectsManager.stopWatching()
-  }
-  if (tasksManager) {
-    tasksManager.stopWatching()
-  }
-  if (filesManager) {
-    filesManager.stopWatching()
-  }
-  if (chatsManager) {
-    chatsManager.stopWatching()
-  }
-  if (notificationsManager) {
-    notificationsManager.stopWatching()
-  }
-  if (settingsManager) {
-    settingsManager.stopWatching()
-  }
-  if (liveDataManager) {
-    liveDataManager.stopWatching()
-  }
-  if (documentIngestionManager) {
-    documentIngestionManager.stopWatching()
-  }
-  if (gitMonitorManager) {
-    gitMonitorManager.stopWatching()
+
+export function stopManagers(): void {
+  const list: (BaseManager | undefined)[] = [
+    dbManager,
+    factoryToolsManager,
+    projectsManager,
+    tasksManager,
+    filesManager,
+    chatsManager,
+    notificationsManager,
+    settingsManager,
+    liveDataManager,
+    documentIngestionManager,
+    gitMonitorManager,
+  ]
+
+  for (const m of list) {
+    try {
+      m?.stopWatching?.()
+    } catch (_) {
+      // noop
+    }
   }
 }
