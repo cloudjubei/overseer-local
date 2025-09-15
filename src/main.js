@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, nativeImage } from 'electron'
 import path from 'node:path'
 import started from 'electron-squirrel-startup'
 import { registerScreenshotService } from './capture/screenshotService'
@@ -9,12 +9,29 @@ if (started) {
 }
 let mainWindow
 
-const IS_DEV = true
+// Use Electron's app.isPackaged to determine dev vs prod
+const IS_DEV = !app.isPackaged
+
+const resolveDevIcon = () => {
+  // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
+  const iconPath = path.join(process.cwd(), 'icon.jpeg')
+  const image = nativeImage.createFromPath(iconPath)
+  return image
+}
+
+const getAppIcon = () => {
+  // For this feature we focus on dev start; use root icon.jpeg
+  // nativeImage can read JPEG and will be accepted for BrowserWindow (Linux/Win) and dock (macOS)
+  return resolveDevIcon()
+}
 
 const createWindow = () => {
+  const iconImage = getAppIcon()
+
   mainWindow = new BrowserWindow({
     width: IS_DEV ? 1600 : 1200,
     height: 800,
+    icon: iconImage, // used on Windows/Linux; ignored on macOS (dock icon set below)
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -30,6 +47,14 @@ const createWindow = () => {
 }
 
 app.whenReady().then(async () => {
+  // Set dock icon on macOS explicitly
+  if (process.platform === 'darwin') {
+    const iconImage = getAppIcon()
+    if (!iconImage.isEmpty()) {
+      app.dock.setIcon(iconImage)
+    }
+  }
+
   createWindow()
 
   registerScreenshotService(() => mainWindow)
