@@ -103,7 +103,7 @@
     },
     {
       "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
-      "status": "-",
+      "status": "+",
       "title": "Document ingestion inside LoadingScreen",
       "description": "Trigger @src/renderer/services/documentIngestionService.ts   ingestAllProjects: () => Promise<any>\n(), after initing the database connection inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start.  @src/renderer/screens/LoadingScreen.tsx has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
       "plan": "",

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { dbService } from '../services/dbService'
+import { documentIngestionService } from '../services/documentIngestionService'
 
 interface LoadingScreenProps {
   onLoaded: () => void
@@ -10,31 +11,47 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
   const { isAppSettingsLoaded, appSettings } = useAppSettings()
   const [statusText, setStatusText] = useState<string>('Loading your settings…')
   const [isDBSetup, setIsDBSetup] = useState(false)
+  const [isIngestionComplete, setIsIngestionComplete] = useState(false)
   const doneRef = useRef(false)
 
   const isReadyToExit = useMemo(() => {
-    return isAppSettingsLoaded && isDBSetup
-  }, [isAppSettingsLoaded, isDBSetup])
+    return isAppSettingsLoaded && isDBSetup && isIngestionComplete
+  }, [isAppSettingsLoaded, isDBSetup, isIngestionComplete])
 
-  const startDatabase = async (connectionString?: string) => {
-    if (!connectionString) {
-      //no user provided connection string - proceed anyway
-      setIsDBSetup(true)
-      return
-    }
-    const dbStatus = await dbService.connect(connectionString)
-    if (!dbStatus.connected) {
-      //bad connection - proceed anyway
-      setIsDBSetup(true)
-      return
+  const startDatabaseAndIngestion = async (connectionString?: string) => {
+    // Connect to DB (if connection string provided)
+    if (connectionString) {
+      setStatusText('Connecting to database…')
+      const dbStatus = await dbService.connect(connectionString)
+      if (!dbStatus.connected) {
+        // proceed without DB
+        setIsDBSetup(true)
+        setStatusText('Database unavailable. Continuing…')
+        setIsIngestionComplete(true)
+        return
+      }
     }
 
     setIsDBSetup(true)
-    //TODO: ingestion of all docs
+
+    // Trigger ingestion of all projects and wait for completion
+    try {
+      setStatusText('Indexing project files…')
+      await documentIngestionService.ingestAllProjects()
+      setIsIngestionComplete(true)
+      setStatusText('Ready')
+    } catch (e) {
+      // If ingestion fails, continue boot to not block the app
+      console.warn('[LoadingScreen] Ingestion failed:', (e as any)?.message || e)
+      setIsIngestionComplete(true)
+      setStatusText('Indexing failed. You can continue using the app.')
+    }
   }
+
   useEffect(() => {
     if (isAppSettingsLoaded) {
-      startDatabase(appSettings.database.connectionString)
+      const conn = appSettings.database?.connectionString
+      startDatabaseAndIngestion(conn)
     }
   }, [isAppSettingsLoaded])
 
