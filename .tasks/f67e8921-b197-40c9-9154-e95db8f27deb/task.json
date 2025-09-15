@@ -1090,6 +1090,23 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "74d5f63b-8797-43f5-b571-fd5bebf56550",
+      "status": "-",
+      "title": "Replace all the emoji icons in the Sidebar with icons specific to this project",
+      "description": "They should all reside alongside other icons in @src/renderer/components/ui/Icons.tsx .\nKeep it according to style defined in @docs/styleguide/README.md  and @docs/design/DESIGN_SYSTEM.md , @docs/design/DESIGN_TOKENS.md , @docs/design/MONDAY_PALETTE_REFERENCE.md  and @docs/ux/LINEAR_UX_GUIDELINES.md",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "docs/styleguide/README.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/ux/LINEAR_UX_GUIDELINES.md"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1177,6 +1194,7 @@
     "fc49d90d-6345-4744-aa82-060d025051d0": 82,
     "05393210-77ab-4301-8243-accf0edac8d5": 83,
     "ea8dc9a0-203e-42c6-ab4d-70db372c0003": 84,
-    "85914410-3864-43fa-8317-b90dedc12ce0": 85
+    "85914410-3864-43fa-8317-b90dedc12ce0": 85,
+    "74d5f63b-8797-43f5-b571-fd5bebf56550": 86
   }
 }
