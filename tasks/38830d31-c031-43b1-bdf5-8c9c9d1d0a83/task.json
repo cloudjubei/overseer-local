@@ -34,7 +34,7 @@
     },
     {
       "id": "4e603939-15a8-49bf-aa53-5240a849cd7a",
-      "status": "-",
+      "status": "+",
       "title": "Create a central UI development guide at `docs/ui/README.md`",
       "description": "Create a new file `docs/ui/README.md`. This file will act as the primary guide for any agent or developer working on UI components. It should summarize the core principles from the existing documentation in `docs/ux`, `docs/styleguide`, and `docs/design`. It must also provide links to these more specific documents for developers who need more detail on a particular component or pattern. This consolidates the entry point for UI-related work.",
       "context": []

@@ -16,6 +16,7 @@ Editing Rules (read before updating)
 Top-Level Layout
 
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
+  - ui/: Central UI development guide (entry point for UI work; links to UX/styleguide/design docs).
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
   - db/: Main process database integration (thefactory-db connection lifecycle and IPC handlers for status and CRUD/search of entities/documents). Exposes DB status via IPC and preload (dbService).
   - document_ingestion/: Project file-to-DB ingestion and sync pipeline. Listens to FilesManager changes (add/change/delete/rename) and upserts/archives documents in thefactory-db; supports full-project ingestion via IPC (DOCUMENT_INGESTION_ALL / DOCUMENT_INGESTION_PROJECT).
@@ -41,6 +42,7 @@ Top-Level Layout
 Where to Learn More
 
 - Architecture overview: docs/ARCHITECTURE.md
+- UI development (start here): docs/ui/README.md
 - Agents and roles: packages/factory-ts/docs (AGENT_*.md).
 - Factory TS overview and APIs: packages/factory-ts (see README/OVERVIEW files in that package).
 - Preview system: see src/renderer/preview and related docs in docs/ (preview usage and analyzer).
