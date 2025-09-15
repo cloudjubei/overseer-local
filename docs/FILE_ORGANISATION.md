@@ -40,6 +40,7 @@ Top-Level Layout
 
 Where to Learn More
 
+- Architecture overview: docs/ARCHITECTURE.md
 - Agents and roles: packages/factory-ts/docs (AGENT_*.md).
 - Factory TS overview and APIs: packages/factory-ts (see README/OVERVIEW files in that package).
 - Preview system: see src/renderer/preview and related docs in docs/ (preview usage and analyzer).

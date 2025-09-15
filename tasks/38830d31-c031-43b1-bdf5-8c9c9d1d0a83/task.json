@@ -20,7 +20,7 @@
     },
     {
       "id": "6468048f-5fb3-4a0a-bb9b-84d450e778eb",
-      "status": "-",
+      "status": "+",
       "title": "Create `docs/ARCHITECTURE.md` for high-level architecture",
       "description": "Create a new file `docs/ARCHITECTURE.md`. This document should provide a high-level overview of the project's architecture. It needs to explain the relationship and data flow between the main application, `thefactory-tools`, and `thefactory-db`. Specifically, describe how `thefactory-tools` is used to run agents within the project and how both systems utilize `thefactory-db` for data storage.",
       "context": []
