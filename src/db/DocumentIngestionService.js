@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
+import { isCodeFile, classifyDocumentType } from './fileTyping'
 
 // Lazy import to avoid hard dependency at module load time; caller should ensure thefactory-db is installed
 let addDocumentFn = null
@@ -26,17 +27,6 @@ function hashContent(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex')
 }
 
-const DEFAULT_CODE_EXTS = [
-  // scripts and code
-  'js', 'jsx', 'ts', 'tsx', 'mjs', 'cjs', 'json',
-  // markup and docs
-  'md', 'mdx', 'txt', 'html', 'htm',
-  // styles
-  'css', 'scss', 'sass', 'less',
-  // config-like
-  'yml', 'yaml', 'toml', 'ini', 'env',
-]
-
 // Files/dirs to ignore (kept in sync with FilesStorage)
 const DEFAULT_IGNORES = [
   /^\./, // dot files
@@ -44,13 +34,7 @@ const DEFAULT_IGNORES = [
 ]
 
 function isIgnoredDirName(name) {
-  return DEFAULT_IGNORES.some((p) => typeof p === 'string' ? p === name : p.test(name))
-}
-
-function isCodeFileByExt(ext) {
-  if (!ext) return false
-  const e = ext.toLowerCase().replace(/^\./, '')
-  return DEFAULT_CODE_EXTS.includes(e)
+  return DEFAULT_IGNORES.some((p) => (typeof p === 'string' ? p === name : p.test(name)))
 }
 
 export default class DocumentIngestionService {
@@ -71,9 +55,8 @@ export default class DocumentIngestionService {
     return path.resolve(this.projectsManager.projectsDir, project.path)
   }
 
-  getDocumentType(ext) {
-    if (isCodeFileByExt(ext)) return 'project_code'
-    return 'project_file' // external_file reserved for future
+  getDocumentType(ext, relPath) {
+    return isCodeFile(ext, relPath) ? 'project_code' : 'project_file'
   }
 
   async readFileEntry(absPath) {
@@ -144,7 +127,7 @@ export default class DocumentIngestionService {
     }
     const hash = hashContent(buf)
 
-    const type = this.getDocumentType(ext)
+    const type = this.getDocumentType(ext, rel)
     const metadata = this.buildMetadata({ projectId, rel, ext, size, mtime, type })
 
     // Convert to text safely; if binary, produce empty string to avoid noise
