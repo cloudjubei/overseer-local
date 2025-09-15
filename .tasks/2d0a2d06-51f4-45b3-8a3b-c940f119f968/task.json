@@ -1,0 +1,8 @@
+{
+  "id": "2d0a2d06-51f4-45b3-8a3b-c940f119f968",
+  "status": "-",
+  "title": "When talking to the agent - explain dependencies/modules better",
+  "description": "Issue - a new package needs to be added, but the agents don't know about it (what it does and what the interfaces are). In fact even if there already is a package, its interfaces are not known and the purpose of the package isn't obvious. \nTherefore there must be a scheme, probably creating a file called PACKAGES.md - that will keep up to date information about what each package does and what are the most important interfaces.",
+  "features": [],
+  "featureIdToDisplayIndex": {}
+}
