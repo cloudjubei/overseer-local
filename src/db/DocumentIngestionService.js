@@ -33,13 +33,15 @@ export default class DocumentIngestionService {
    * @param {object} opts.db A thefactory-db client exposing addDocument(doc)
    * @param {object} [opts.logger] Optional logger with .info/.warn/.error
    * @param {Set<string>} [opts.codeExts]
+   * @param {import('./DatabaseManager').DatabaseManager} [opts.dbManager]
    */
-  constructor({ projectsManager, filesManager, db, logger, codeExts } = {}) {
+  constructor({ projectsManager, filesManager, db, logger, codeExts, dbManager } = {}) {
     this.projectsManager = projectsManager
     this.filesManager = filesManager
     this.db = db
     this.logger = logger || console
     this.codeExts = codeExts || DEFAULT_CODE_EXTS
+    this.dbManager = dbManager
   }
 
   // Determine document type based on extension
@@ -191,6 +193,11 @@ export default class DocumentIngestionService {
       await this._upsertFile(projectId, projectRoot, relPath)
     }
 
+    // mark sync time on DatabaseManager for status
+    try {
+      this.dbManager?.markProjectSynced?.(projectId, new Date())
+    } catch {}
+
     return { ok: true, count: relPaths.length }
   }
 
@@ -200,6 +207,7 @@ export default class DocumentIngestionService {
     if (!project) return
     const projectRoot = this._resolveProjectRoot(project)
     await this._upsertFile(projectId, projectRoot, relPath)
+    try { this.dbManager?.markProjectSynced?.(projectId, new Date()) } catch {}
   }
 
   // Public: react to a single file changed
@@ -208,10 +216,12 @@ export default class DocumentIngestionService {
     if (!project) return
     const projectRoot = this._resolveProjectRoot(project)
     await this._upsertFile(projectId, projectRoot, relPath)
+    try { this.dbManager?.markProjectSynced?.(projectId, new Date()) } catch {}
   }
 
   // Public: react to a single file deleted
   async handleFileDeleted(projectId, relPath) {
     await this._archiveDoc(projectId, relPath)
+    try { this.dbManager?.markProjectSynced?.(projectId, new Date()) } catch {}
   }
 }

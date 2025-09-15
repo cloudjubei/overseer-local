@@ -3,7 +3,7 @@
 Purpose
 
 - Provide a high-level map of the repository so contributors and agents can quickly find the right area.
-- This is not a change log and not a per-file inventory.
+- This is not a change log and is not a per-file inventory.
 
 Editing Rules (read before updating)
 
@@ -17,7 +17,7 @@ Top-Level Layout
 
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
-  - db/: Main process database integration (thefactory-db connection manager and document ingestion service for project files).
+  - db/: Main process database integration (thefactory-db connection manager and document ingestion service for project files). Exposes DB status via IPC and preload (dbService).
   - live-data/: Main process live data service and types for live data services.
     - providers/: Pluggable provider implementations (e.g., agent-prices bridge, generic fetch-json).
     - registry.js: Provider registry to map service ids to providers.
@@ -25,12 +25,12 @@ Top-Level Layout
     - types.js: Shared types and helpers (freshness policy, normalization, freshness computation).
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime).
     - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
-    - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC).
+    - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status).
     - hooks/useShortcuts: Keyboard shortcuts provider; respects user-selected modifier and avoids interfering with text input.
     - settings/: AppSettings React context provider used app-wide (singleton).
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - main.js: Electron main process entry.
-  - preload.js: Safe IPC surface exposed to the renderer (exposes live data API).
+  - preload.js: Safe IPC surface exposed to the renderer (exposes live data API, db API).
 - packages/: Local monorepo packages.
   - factory-ts/: Agent orchestration library (orchestrator, pricing, history, completion, git integration).
 - scripts/: Project automation scripts and CLIs.
@@ -50,7 +50,7 @@ Conventions (brief)
 
 Environment & Credentials
 
-- .env at the repo root is used for local development (e.g., credentials consumed by tooling and factory-ts).
+- .env at the repo root is used for local development (e.g., credentials consumed by tooling and factory-ts). For DB, THEFACTORY_DB_URL can be used if no app setting is provided.
 
 Notes
 

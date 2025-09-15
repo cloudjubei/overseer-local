@@ -182,6 +182,16 @@ const FACTORY_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 }
 
+// Database service: status + subscription
+const DB_API = {
+  getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_GET_STATUS),
+  onStatus: (callback) => {
+    const listener = (_event, status) => callback(status)
+    ipcRenderer.on(IPC_HANDLER_KEYS.DB_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.DB_SUBSCRIBE, listener)
+  },
+}
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API)
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
 contextBridge.exposeInMainWorld('filesService', FILES_API)
@@ -191,3 +201,4 @@ contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API)
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
 contextBridge.exposeInMainWorld('factoryService', FACTORY_API)
+contextBridge.exposeInMainWorld('dbService', DB_API)

@@ -8,6 +8,8 @@ import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
 import { DatabaseManager } from './db/DatabaseManager'
 import DocumentIngestionService from './db/DocumentIngestionService'
+import IPC_HANDLER_KEYS from './ipcHandlersKeys'
+import { ipcMain } from 'electron'
 
 export let dbManager
 export let factoryToolsManager
@@ -35,6 +37,7 @@ export async function initManagers(projectRoot, mainWindow) {
     filesManager: undefined, // will be set later if needed
     db: dbClient,
     logger: console,
+    dbManager,
   })
 
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
@@ -50,6 +53,9 @@ export async function initManagers(projectRoot, mainWindow) {
     filesManager,
     settingsManager,
   )
+
+  // Expose DB status IPC
+  ipcMain.handle(IPC_HANDLER_KEYS.DB_GET_STATUS, async () => dbManager.getStatus())
 
   await factoryToolsManager.init()
   await projectsManager.init()

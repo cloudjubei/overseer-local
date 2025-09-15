@@ -81,6 +81,10 @@ const IPC_HANDLER_KEYS = {
   // Factory pricing
   FACTORY_PRICING_LIST: 'factory:pricing:list',
   FACTORY_PRICING_REFRESH: 'factory:pricing:refresh',
+
+  // Database status
+  DB_SUBSCRIBE: 'db:subscribe',
+  DB_GET_STATUS: 'db:get-status',
 }
 
 export default IPC_HANDLER_KEYS

@@ -73,7 +73,7 @@
     },
     {
       "id": "d172d15d-98ca-434e-8fc7-4ea476821f51",
-      "status": "-",
+      "status": "+",
       "title": "Expose minimal DB/search config to renderer and settings",
       "description": "Add optional app settings (in @src/settings/SettingsManager.js  schema if present) to configure DB location or connection string. Expose methods over IPC to read current DB status and last sync time. Update preload to include a dbService with getStatus() and onStatus(callback) if needed by the @src/renderer/screens/LoadingScreen.tsx .",
       "context": [
