@@ -35,6 +35,7 @@ const CATEGORIES = [
   },
   { id: 'github', label: 'GitHub', icon: <span aria-hidden>🐙</span>, accent: 'gray' },
   { id: 'websearch', label: 'Web Search', icon: <span aria-hidden>🔎</span>, accent: 'orange' },
+  { id: 'database', label: 'Database', icon: <span aria-hidden>🗄️</span>, accent: 'indigo' },
 ]
 
 type CategoryId = (typeof CATEGORIES)[number]['id']
@@ -460,6 +461,33 @@ export default function SettingsView() {
     </div>
   )
 
+  const renderDatabaseSection = () => (
+    <div className="max-w-3xl">
+      <h2 className="text-xl font-semibold mb-3">Database</h2>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="db-conn" className="block text-sm font-medium mb-1">
+            thefactory-db Postgres connection string
+          </label>
+          <input
+            id="db-conn"
+            type="text"
+            value={appSettings.database?.connectionString ?? ''}
+            onChange={(e) =>
+              updateAppSettings({ database: { ...appSettings.database, connectionString: e.target.value } })
+            }
+            className="w-full max-w-xl p-2 border border-gray-300 rounded-md"
+            placeholder="postgres://user:pass@host:5432/dbname"
+            autoComplete="off"
+          />
+          <p className="text-[12px] text-[var(--text-secondary)] mt-1">
+            Stored locally. Leave empty to use default environment configuration.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <CollapsibleSidebar
       items={CATEGORIES}
@@ -476,6 +504,7 @@ export default function SettingsView() {
       {activeCategory === 'notifications' && renderNotificationsSection()}
       {activeCategory === 'github' && renderGithubSection()}
       {activeCategory === 'websearch' && renderWebSearchSection()}
+      {activeCategory === 'database' && renderDatabaseSection()}
     </CollapsibleSidebar>
   )
 }
