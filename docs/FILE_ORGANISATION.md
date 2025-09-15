@@ -29,8 +29,8 @@ Top-Level Layout
     - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status and ingestion triggers).
     - hooks/useShortcuts: Keyboard shortcuts provider; respects user-selected modifier and avoids interfering with text input.
     - settings/: AppSettings React context provider used app-wide (singleton).
-    - screens/settings/: Settings main view with subviews; each category (visual, llms, notifications, github, websearch, database) is a separate component folder.
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
+  - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer (exposes live data API, db API).
 - packages/: Local monorepo packages.

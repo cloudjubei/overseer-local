@@ -68,7 +68,7 @@ const CHATS_API = {
   getChat: (projectId, chatId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { projectId, chatId }),
   deleteChat: (projectId, chatId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { projectId, chatId }),
+    ipcRenderer.invoke(IPC_HANDLER_KEYS_CHATS_DELETE, { projectId, chatId }),
   getCompletion: (projectId, chatId, newMessages, config) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, {
       projectId,
@@ -219,6 +219,17 @@ const DOCUMENT_INGESTION_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_PROJECT, { projectId }),
 }
 
+const GIT_MONITOR_API = {
+  subscribe: (callback) => {
+    const listener = (_event, payload) => callback(payload)
+    ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, listener)
+  },
+  getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS),
+  triggerPoll: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL),
+  setPollInterval: (ms) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL, { ms }),
+}
+
 contextBridge.exposeInMainWorld('tasksService', TASKS_API)
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
 contextBridge.exposeInMainWorld('filesService', FILES_API)
@@ -230,3 +241,4 @@ contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
 contextBridge.exposeInMainWorld('factoryService', FACTORY_API)
 contextBridge.exposeInMainWorld('dbService', DB_API)
 contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
+contextBridge.exposeInMainWorld('gitMonitorService', GIT_MONITOR_API)

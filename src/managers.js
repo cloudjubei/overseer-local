@@ -8,6 +8,7 @@ import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
 import { DatabaseManager } from './db/DatabaseManager'
 import { DocumentIngestionManager } from './document_ingestion/DocumentIngestionManager'
+import { GitMonitorManager } from './git-monitor/GitMonitorManager'
 
 export let dbManager
 export let factoryToolsManager
@@ -19,6 +20,7 @@ export let notificationsManager
 export let settingsManager
 export let liveDataManager
 export let documentIngestionManager
+export let gitMonitorManager
 
 export async function initManagers(projectRoot, mainWindow) {
   dbManager = new DatabaseManager(projectRoot, mainWindow)
@@ -44,6 +46,7 @@ export async function initManagers(projectRoot, mainWindow) {
     projectsManager,
     filesManager,
   )
+  gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
 
   await dbManager.init()
   await factoryToolsManager.init()
@@ -55,6 +58,7 @@ export async function initManagers(projectRoot, mainWindow) {
   await settingsManager.init()
   await liveDataManager.init()
   await documentIngestionManager.init()
+  await gitMonitorManager.init()
 }
 export function stopManagers() {
   if (dbManager) {
@@ -86,5 +90,8 @@ export function stopManagers() {
   }
   if (documentIngestionManager) {
     documentIngestionManager.stopWatching()
+  }
+  if (gitMonitorManager) {
+    gitMonitorManager.stopWatching()
   }
 }

@@ -105,6 +105,12 @@ const IPC_HANDLER_KEYS = {
   // Document ingestion
   DOCUMENT_INGESTION_ALL: 'document-ingestion:all-projects',
   DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',
+
+  // Git monitor
+  GIT_MONITOR_SUBSCRIBE: 'git-monitor:subscribe',
+  GIT_MONITOR_GET_STATUS: 'git-monitor:get-status',
+  GIT_MONITOR_TRIGGER_POLL: 'git-monitor:trigger-poll',
+  GIT_MONITOR_SET_POLL_INTERVAL: 'git-monitor:set-poll-interval',
 }
 
 export default IPC_HANDLER_KEYS

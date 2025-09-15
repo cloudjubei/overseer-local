@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "9de723a2-db03-4ff0-aab8-8615b9473664",
-      "status": "-",
+      "status": "+",
       "title": "Create a Git Monitoring Manager in the Main Process",
       "description": "Implement a service in the Electron main process to periodically monitor the local git repository for changes. This service will be the foundation for tracking task progress. It should be able to fetch updates from remotes and check for new commits on branches. Following other managers, such as @src/factory-tools/FactoryToolsManager.js and its renderer counterpart @src/renderer/services/factoryService.ts  - create a file @src/git-monitor/GitMonitorManager.js and @src/renderer/services/gitMonitorService.ts . Make sure to update @src/ipcHandlersKeys.js , @src/managers.js , @src/preload.js and @src/types/external.d.ts - following the same exact pattern that other Managers and their renderer Services take.",
       "context": [
