@@ -64,11 +64,12 @@
     },
     {
       "id": "d744a0cb-1b0b-4669-a692-7a9751e2eb9e",
-      "status": "-",
+      "status": "?",
       "title": "Define document typing and code file detection utility",
       "description": "Add @src/db/fileTyping.js with helpers: isCodeFile(ext, relPath) returning true for typical code/config/docs; classifyDocumentType(relPath) returning 'project_code' or 'project_file'. Use a central list of extensions and allow future configuration via settings. Reuse in DocumentIngestionService and watcher handlers to ensure consistent type assignment.",
       "context": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: query.toLowerCase is not a function"
     },
     {
       "id": "d172d15d-98ca-434e-8fc7-4ea476821f51",
