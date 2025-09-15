@@ -1,8 +1,14 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/Select'
-import { Switch } from '../../components/ui/Switch'
-import { useNotifications } from '../../hooks/useNotifications'
-import { useProjectSettings } from '../../hooks/useProjectSettings'
-import { useAppSettings } from '../../contexts/AppSettingsContext'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../components/ui/Select'
+import { Switch } from '../../../components/ui/Switch'
+import { useNotifications } from '../../../hooks/useNotifications'
+import { useProjectSettings } from '../../../hooks/useProjectSettings'
+import { useAppSettings } from '../../../contexts/AppSettingsContext'
 
 export default function NotificationSettings() {
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings()
@@ -32,21 +38,23 @@ export default function NotificationSettings() {
         <div>
           <h3 className="font-medium mb-2">Notification Categories</h3>
           <div className="space-y-2">
-            {Object.entries(projectSettings.notifications.categoriesEnabled).map(([category, enabled]) => (
-              <Switch
-                key={category}
-                checked={enabled ?? true}
-                onCheckedChange={(checked) =>
-                  setNotificationProjectSettings({
-                    categoriesEnabled: {
-                      ...projectSettings.notifications.categoriesEnabled,
-                      [category]: checked,
-                    },
-                  })
-                }
-                label={category.charAt(0).toUpperCase() + category.slice(1)}
-              />
-            ))}
+            {Object.entries(projectSettings.notifications.categoriesEnabled).map(
+              ([category, enabled]) => (
+                <Switch
+                  key={category}
+                  checked={enabled ?? true}
+                  onCheckedChange={(checked) =>
+                    setNotificationProjectSettings({
+                      categoriesEnabled: {
+                        ...projectSettings.notifications.categoriesEnabled,
+                        [category]: checked,
+                      },
+                    })
+                  }
+                  label={category.charAt(0).toUpperCase() + category.slice(1)}
+                />
+              ),
+            )}
           </div>
         </div>
         <Switch

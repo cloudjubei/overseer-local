@@ -1,8 +1,12 @@
 import { useCallback } from 'react'
-import { Button } from '../../components/ui/Button'
-import { useTheme, type Theme } from '../../hooks/useTheme'
-import { useAppSettings } from '../../contexts/AppSettingsContext'
-import { type ShortcutsModifier, type ShortcutsConfig, DEFAULT_APP_SETTINGS } from '../../../types/settings'
+import { Button } from '../../../components/ui/Button'
+import { useTheme, type Theme } from '../../../hooks/useTheme'
+import { useAppSettings } from '../../../contexts/AppSettingsContext'
+import {
+  type ShortcutsModifier,
+  type ShortcutsConfig,
+  DEFAULT_APP_SETTINGS,
+} from '../../../../types/settings'
 
 export default function VisualSettings() {
   const { availableThemes, theme, setTheme } = useTheme()
@@ -38,7 +42,9 @@ export default function VisualSettings() {
     <div className="max-w-3xl">
       <h2 className="text-xl font-semibold mb-3">Appearance</h2>
       <div className="space-y-2">
-        <label htmlFor="theme" className="block text-sm font-medium">Theme</label>
+        <label htmlFor="theme" className="block text-sm font-medium">
+          Theme
+        </label>
         <select
           id="theme"
           value={theme}
@@ -54,11 +60,15 @@ export default function VisualSettings() {
       </div>
 
       <div className="space-y-2 mt-6">
-        <label htmlFor="shortcuts-mod" className="block text-sm font-medium">Shortcuts modifier key</label>
+        <label htmlFor="shortcuts-mod" className="block text-sm font-medium">
+          Shortcuts modifier key
+        </label>
         <select
           id="shortcuts-mod"
           value={appSettings.userPreferences.shortcutsModifier}
-          onChange={async (e) => await setUserPreferences({ shortcutsModifier: e.target.value as ShortcutsModifier })}
+          onChange={async (e) =>
+            await setUserPreferences({ shortcutsModifier: e.target.value as ShortcutsModifier })
+          }
           className="w-64 p-2 border border-gray-300 rounded-md focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
         >
           <option value="meta">Cmd (⌘) / Meta</option>
@@ -72,7 +82,8 @@ export default function VisualSettings() {
       <div className="space-y-2 mt-8">
         <h3 className="text-lg font-semibold">Keyboard Shortcuts</h3>
         <p className="text-[12px] text-[var(--text-secondary)]">
-          Click a field and press the desired key combination. Mod maps to your selected modifier (Cmd on macOS, Ctrl on Windows/Linux).
+          Click a field and press the desired key combination. Mod maps to your selected modifier
+          (Cmd on macOS, Ctrl on Windows/Linux).
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
@@ -138,7 +149,9 @@ export default function VisualSettings() {
           </div>
         </div>
         <div className="mt-2">
-          <Button onClick={resetShortcutsToDefault} variant="outline">Reset to defaults</Button>
+          <Button onClick={resetShortcutsToDefault} variant="outline">
+            Reset to defaults
+          </Button>
         </div>
       </div>
     </div>

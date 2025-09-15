@@ -1,7 +1,7 @@
-import { Button } from '../../components/ui/Button'
-import { IconEdit, IconDelete, IconPlus } from '../../components/ui/Icons'
-import { useLLMConfig } from '../../contexts/LLMConfigContext'
-import { useNavigator } from '../../navigation/Navigator'
+import { Button } from '../../../components/ui/Button'
+import { IconEdit, IconDelete, IconPlus } from '../../../components/ui/Icons'
+import { useLLMConfig } from '../../../contexts/LLMConfigContext'
+import { useNavigator } from '../../../navigation/Navigator'
 
 export default function LLMSettings() {
   const { configs, activeConfigId, removeConfig, setActive } = useLLMConfig()
@@ -22,7 +22,10 @@ export default function LLMSettings() {
           </div>
         )}
         {configs.map((cfg) => (
-          <div key={cfg.id} className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between">
+          <div
+            key={cfg.id}
+            className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between"
+          >
             <div className="min-w-0">
               <div className="font-medium truncate">
                 {cfg.name}{' '}
@@ -38,7 +41,10 @@ export default function LLMSettings() {
               {activeConfigId !== cfg.id && (
                 <Button onClick={() => setActive(cfg.id!)}>Set Active</Button>
               )}
-              <Button onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id! })} variant="outline">
+              <Button
+                onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id! })}
+                variant="outline"
+              >
                 <IconEdit className="w-4 h-4" />
               </Button>
               <Button onClick={() => removeConfig(cfg.id!)} variant="danger">
