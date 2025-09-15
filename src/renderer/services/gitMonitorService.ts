@@ -17,7 +17,7 @@ export type GitMonitorService = {
   subscribe: (callback: (status: GitMonitorStatus) => void) => () => void
   getStatus: () => Promise<GitMonitorStatus>
   triggerPoll: () => Promise<GitMonitorStatus>
-  setPollInterval: (ms: number) => Promise<{ ok: boolean; ms: number }>
+  setPollInterval: (ms: number) => Promise<void>
 }
 
 export const gitMonitorService: GitMonitorService = { ...window.gitMonitorService }

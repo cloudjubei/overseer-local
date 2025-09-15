@@ -23,14 +23,12 @@ export class GitMonitorManager {
 
     this._interval = null
     this._pollMs = 30_000 // 30 seconds default
-
     this._lastSnapshot = null
   }
 
   async init() {
     this._registerIpcHandlers()
-    // Start polling automatically
-    this.startWatching()
+    this.__startWatching()
   }
 
   stopWatching() {
@@ -38,7 +36,7 @@ export class GitMonitorManager {
     this._interval = null
   }
 
-  startWatching() {
+  __startWatching() {
     this.stopWatching()
     // Immediate tick then interval
     this._tick().catch((e) => console.warn('[git-monitor] initial tick failed', e?.message || e))
@@ -57,6 +55,7 @@ export class GitMonitorManager {
     } catch (e) {
       console.warn('[git-monitor] tick error', e?.message || e)
     }
+    return this._lastSnapshot
   }
 
   _registerIpcHandlers() {
@@ -65,30 +64,29 @@ export class GitMonitorManager {
     const handlers = {}
 
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS] = async () => await this.getStatus()
-    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL] = async () => {
-      await this._tick()
-      return this._lastSnapshot
-    }
-    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL] = async ({ ms }) => {
-      if (typeof ms === 'number' && ms >= 5_000 && ms <= 10 * 60_000) {
-        this._pollMs = ms
-        this.startWatching()
-      }
-      return { ok: true, ms: this._pollMs }
-    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL] = async () => await this._tick()
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL] = async ({ ms }) =>
+      await this.setPollInterval(ms)
 
-    for (const key of Object.keys(handlers)) {
-      ipcMain.handle(key, async (_event, args) => {
+    for (const handler of Object.keys(handlers)) {
+      ipcMain.handle(handler, async (event, args) => {
         try {
-          return await handlers[key](args)
+          return await handlers[handler](args)
         } catch (e) {
-          console.error(`[git-monitor] ${key} failed`, e)
+          console.error(`${handler} failed`, e)
           return { ok: false, error: String(e?.message || e) }
         }
       })
     }
 
     this._ipcBound = true
+  }
+
+  async setPollInterval(ms) {
+    if (typeof ms === 'number' && ms >= 5_000 && ms <= 10 * 60_000) {
+      this._pollMs = ms
+      this.__startWatching()
+    }
   }
 
   async getStatus() {
@@ -109,11 +107,21 @@ export class GitMonitorManager {
     // fetch with a timeout safeguard
     await this._safeExec('git', ['fetch', '--all', '--prune'], { cwd: repoPath })
 
-    const currentBranch = (await this._safeExec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: repoPath }))
-      .stdout.trim()
+    const currentBranch = (
+      await this._safeExec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: repoPath })
+    ).stdout.trim()
 
-    const branchListRaw = (await this._safeExec('git', ['for-each-ref', '--format=%(refname:short):::%(objectname):::%(committerdate:iso8601)', 'refs/heads/'], { cwd: repoPath }))
-      .stdout
+    const branchListRaw = (
+      await this._safeExec(
+        'git',
+        [
+          'for-each-ref',
+          '--format=%(refname:short):::%(objectname):::%(committerdate:iso8601)',
+          'refs/heads/',
+        ],
+        { cwd: repoPath },
+      )
+    ).stdout
 
     const branches = branchListRaw
       .split('\n')
