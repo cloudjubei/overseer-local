@@ -27,7 +27,7 @@
     },
     {
       "id": "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356",
-      "status": "-",
+      "status": "?",
       "title": "Implement DocumentIngestionService for project files",
       "description": "Create @src/renderer/services/documentIngestionService.ts as a renderer interface and the corresponding @src/document_ingestion/DocumentIngestionManager.js that actually handles the ingestion. The manger handles scanning the repository files and upserting them into thefactory-db 'documents' table using addDocument(). Determine document type: 'project_code' for code files (js, ts, tsx, jsx, json, md, css, etc. configurable), 'project_file' for other internal files, 'external_file' reserved for future. For each project (from @src/projects/ProjectsManager.js ), resolve its root directory and iterate via @src/files/FilesManager.js  or a direct file walk (reuse ignore patterns from @src/files/FilesStorage.js). For each file, compute a stable document identifier (e.g., projectId + relative path), content hash, metadata (path, projectId, ext, size, mtime, type). Upsert if missing or if hash/mtime changed; delete or mark archived on file removal. Expose methods: ingestAllProjects(), ingestProject(projectId).\nMake sure to dynamically handle files Added/Changed/Deleted(projectId, relPath).",
       "context": [
@@ -37,7 +37,8 @@
         "src/renderer/services/documentIngestionService.ts",
         "src/document_ingestion/DocumentIngestionManager.js"
       ],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: TypeError: query.toLowerCase is not a function"
     },
     {
       "id": "a47c5301-d7b0-4b61-af16-722819909733",
