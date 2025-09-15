@@ -105,3 +105,66 @@ Related Docs and Pointers
 - Package registry and interfaces: docs/PACKAGES.md
 - Patterns and conventions: docs/PATTERNS.md
 - Multi-platform roadmap: docs/MULTI_PLATFORM_ARCHITECTURE.md
+
+
+Agent Prompting Strategy
+
+Goal
+- Ensure agents receive the minimum sufficient context about architecture, packages, and patterns at the right time without exceeding the model context window.
+
+Current injection point
+- The system prompt is built in thefactory-tools/src/orchestrator.ts within constructSystemPrompt(...).
+- Suggested approach: add a ContextAssembler that selects, summarizes, and injects small, targeted doc slices from this repository (e.g., docs/ARCHITECTURE.md, docs/PATTERNS.md, docs/FILE_ORGANISATION.md, docs/PACKAGES.md) based on the task type and target area.
+
+What to inject and when
+- Always include
+  - Project mission and top-level layout: a 10–20 line digest derived from docs/FILE_ORGANISATION.md.
+  - Architectural core: a short summary from docs/ARCHITECTURE.md (Main process vs Preload vs Renderer, DB, agents).
+  - A DocIndex: a compact list of available deep-dive docs with one-line descriptions and paths (ARCHITECTURE.md, PATTERNS.md, PACKAGES.md, design/styleguide/ux pointers).
+- Conditional, by task area (heuristics)
+  - Main-process manager or IPC changes: include the Managers pattern from docs/PATTERNS.md (anatomy, IPC keys, preload exposure, renderer service, typings).
+  - UI components/screens: include a short “GO TO UI” summary (if present under docs/ux) and links to docs/styleguide and docs/design; do not inline full style guides.
+  - DB or ingestion work: include the DB and ingestion sections of this file plus a brief reminder of the IPC contract and data flow.
+  - Agents/orchestrator features: include a paragraph on how the orchestrator integrates, how dbConnectionString is passed, and how runs and pricing are stored.
+  - Packages/new dependencies: include the relevant excerpt from docs/PACKAGES.md describing purpose and primary interfaces.
+- On-demand expansion
+  - Instruct agents explicitly: “If you need more detail, request specific sections by path and heading (e.g., docs/PATTERNS.md#Preload-Exposure).” This avoids preloading entire documents.
+
+Token budgeting policy
+- Reserve a fixed budget for documentation context (e.g., 800–1500 tokens depending on model).
+- Prioritize in this order: Task-specific pattern snippet > Architecture digest > DocIndex.
+- If the budget is exceeded, drop long examples and keep only rules, headings, and API names.
+
+Implementation outline in constructSystemPrompt
+- Introduce a ContextAssembler module with utilities
+  - getDocDigest(path, maxTokens): load, strip examples, summarize key headers and bullet points.
+  - pickDocs(task): map from task classification to required docs (see heuristics above).
+  - buildDocIndex(): 6–12 bullets listing key docs with 1-liners and paths.
+  - cacheDigestsByHash(): compute and cache content hashes for docs to avoid recomputation.
+- Extend constructSystemPrompt(...)
+  - Accept options such as featureArea, changedPaths, uiWork, mainProcessWork, dbWork to guide doc selection.
+  - Compose the final system prompt sections in order: Role and guardrails -> Architecture digest -> Pattern snippet(s) -> DocIndex -> Task-specific instructions.
+  - Append a short instruction telling the agent how to request additional sections by file path and heading if needed.
+
+Classification signals for doc selection
+- changedPaths contain src/<domain>/<Domain>Manager.js or src/ipcHandlersKeys.js -> include PATTERNS Manager section.
+- changedPaths touch src/preload.js or src/renderer/services -> include Preload Exposure and Renderer Consumption from PATTERNS.md.
+- changedPaths under src/renderer or docs/ux/styleguide/design -> include UI “GO TO” summary and styleguide links.
+- task title/description mentions DB, entities, documents, ingestion -> include DB/ingestion digest from this file.
+- mentions orchestrator, pricing, runs -> include orchestrator integration digest.
+- mentions packages or dependencies -> include PACKAGES.md excerpt.
+
+Safety and scope
+- Only inject public project documentation. Never include secrets or runtime environment values from .env.
+- Prefer summaries over raw code; include concrete IPC keys and API names only when necessary.
+
+Agent-facing prompt tips (to include verbatim in the system prompt)
+- “Follow the Managers pattern documented in docs/PATTERNS.md when touching main-process services.”
+- “Use the IPC keys from src/ipcHandlersKeys.js; expose APIs via src/preload.js and update src/types/external.d.ts.”
+- “For UI, follow docs/ux ‘GO TO UI’ and docs/styleguide; ask for specific components or tokens if needed.”
+- “If additional details are required, request the exact doc section by path and heading.”
+
+Maintenance
+- Keep docs/ARCHITECTURE.md, docs/PATTERNS.md, docs/PACKAGES.md, and docs/FILE_ORGANISATION.md current.
+- When adding significant UI guidance, place a concise ‘GO TO UI’ entry point under docs/ux and link it from FILE_ORGANISATION.md and the DocIndex.
+- Recompute cached digests when file hashes change.

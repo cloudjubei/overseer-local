@@ -27,7 +27,7 @@
     },
     {
       "id": "8132a2b7-6d5d-4f33-a314-f8b445fae5ef",
-      "status": "-",
+      "status": "+",
       "title": "Document a strategy for injecting context into agent prompts",
       "description": "Add a new section called \"Agent Prompting Strategy\" to `docs/ARCHITECTURE.md`. This section should outline a strategy for how and when to inject architectural and pattern documentation into agent prompts. It should reference the `constructSystemPrompt` function in `thefactory-tools/src/orchestrator.ts` as the current implementation point and suggest how it could be modified to include context from `ARCHITECTURE.md`, `PATTERNS.md`, and other relevant documents without overloading the context window. The goal is to make agents aware of the project's structure and conventions.",
       "context": []
