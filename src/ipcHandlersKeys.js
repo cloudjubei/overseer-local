@@ -111,6 +111,8 @@ const IPC_HANDLER_KEYS = {
   GIT_MONITOR_GET_STATUS: 'git-monitor:get-status',
   GIT_MONITOR_TRIGGER_POLL: 'git-monitor:trigger-poll',
   GIT_MONITOR_SET_POLL_INTERVAL: 'git-monitor:set-poll-interval',
+  GIT_MONITOR_HAS_UNMERGED: 'git-monitor:has-unmerged',
+  GIT_MONITOR_MERGE_BRANCH: 'git-monitor:merge-branch',
 }
 
 export default IPC_HANDLER_KEYS

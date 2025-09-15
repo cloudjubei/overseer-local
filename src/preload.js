@@ -228,6 +228,10 @@ const GIT_MONITOR_API = {
   getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS),
   triggerPoll: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL),
   setPollInterval: (ms) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL, { ms }),
+  hasUnmerged: (branchName, baseBranch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_HAS_UNMERGED, { branchName, baseBranch }),
+  mergeBranch: (branchName, baseBranch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH, { branchName, baseBranch }),
 }
 
 contextBridge.exposeInMainWorld('tasksService', TASKS_API)
