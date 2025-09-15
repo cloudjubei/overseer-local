@@ -114,7 +114,7 @@
     },
     {
       "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
-      "status": "-",
+      "status": "+",
       "title": "Document ingestion happens after all managers are loaded",
       "description": "Trigger DocumentIngestionService.syncAllProjects(), after initing the managers inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start. Add a simple IPC channel (e.g., db:ingestion:status) to report progress to the @src/renderer/screens/LoadingScreen.tsx , it has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
       "plan": "",

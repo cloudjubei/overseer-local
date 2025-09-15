@@ -1,18 +1,20 @@
-export type ProjectSyncStatus = {
-  lastSyncAt: string | null
+export type IngestionProgress = {
+  status: 'idle' | 'running' | 'done' | 'error'
+  message?: string
+  total?: number
+  processed?: number
+  error?: string
 }
 
-export type DbStatus = {
-  connected: boolean
-  connectionString: string
-  lastError: string | null
-  lastSyncAt: string | null
-  projects: Record<string, ProjectSyncStatus>
+// Renderer-side thin wrapper over preload-exposed API
+export const dbService = {
+  startIngestion: async (): Promise<void> => {
+    // @ts-ignore
+    if (window.db?.startIngestion) await window.db.startIngestion()
+  },
+  onIngestionStatus: (cb: (p: IngestionProgress) => void): (() => void) => {
+    // @ts-ignore
+    if (window.db?.onIngestionStatus) return window.db.onIngestionStatus(cb)
+    return () => {}
+  },
 }
-
-export type DbService = {
-  getStatus: () => Promise<DbStatus>
-  onStatus: (callback: (status: DbStatus) => void) => () => void
-}
-
-export const dbService: DbService = { ...(window as any).dbService }
