@@ -1,4 +1,5 @@
 import {
+  Document as FactoryDocument,
   DocumentInput,
   DocumentWithScore,
   Entity,
@@ -22,6 +23,10 @@ export type DBService = {
   connect: (connectionString: string) => Promise<DbStatus>
   getStatus: () => Promise<DbStatus>
 
+  // ingestion helpers
+  ingestAllProjects: () => Promise<any>
+  ingestProject: (projectId: string) => Promise<any>
+
   //exposing all 'thefactory-db' methods
   addEntity(e: EntityInput): Promise<Entity>
   getEntityById(id: string): Promise<Entity | undefined>
@@ -33,12 +38,12 @@ export type DBService = {
     options?: { types?: string[]; ids?: string[]; limit?: number },
   ): Promise<Entity[]>
   clearEntities(): Promise<void>
-  addDocument(d: DocumentInput): Promise<Document>
-  getDocumentById(id: string): Promise<Document | undefined>
-  updateDocument(id: string, patch: Partial<DocumentInput>): Promise<Document | undefined>
+  addDocument(d: DocumentInput): Promise<FactoryDocument>
+  getDocumentById(id: string): Promise<FactoryDocument | undefined>
+  updateDocument(id: string, patch: Partial<DocumentInput>): Promise<FactoryDocument | undefined>
   deleteDocument(id: string): Promise<boolean>
   searchDocuments(params: SearchParams): Promise<DocumentWithScore[]>
   clearDocuments(): Promise<void>
 }
 
-export const dbService: DBService = { ...window.dbService }
+export const dbService: DBService = { ...(window as any).dbService }

@@ -54,6 +54,11 @@ export default function SettingsView() {
   // Layout state
   const [activeCategory, setActiveCategory] = useState<CategoryId>('visual')
 
+  // DB local UI state
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [isIngesting, setIsIngesting] = useState(false)
+  const [dbMsg, setDbMsg] = useState<string | null>(null)
+
   // Helper: capture a combo from a keydown
   const captureCombo = useCallback((e: React.KeyboardEvent<HTMLInputElement>): string => {
     const parts: string[] = []
@@ -464,6 +469,29 @@ export default function SettingsView() {
 
   const renderDatabaseSection = () => {
     const currentConn = appSettings.database?.connectionString?.trim() || ''
+
+    const onConnectAndIngest = async () => {
+      if (!currentConn) return
+      setDbMsg(null)
+      setIsConnecting(true)
+      try {
+        const dbStatus = await dbService.connect(currentConn)
+        if (!dbStatus?.connected) {
+          setDbMsg('Failed to connect. Check your connection string and try again.')
+          return
+        }
+        setDbMsg('Connected. Starting ingestion…')
+        setIsIngesting(true)
+        const res = await dbService.ingestAllProjects()
+        setDbMsg('Ingestion complete.')
+      } catch (e: any) {
+        setDbMsg(String(e?.message || e))
+      } finally {
+        setIsConnecting(false)
+        setIsIngesting(false)
+      }
+    }
+
     return (
       <div className="max-w-3xl">
         <h2 className="text-xl font-semibold mb-3">Database</h2>
@@ -487,6 +515,17 @@ export default function SettingsView() {
             />
             <p className="text-[12px] text-[var(--text-secondary)] mt-1">
               Stored locally. Leave empty to use default environment configuration.
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <Button onClick={onConnectAndIngest} disabled={!currentConn || isConnecting || isIngesting}>
+                {isConnecting ? 'Connecting…' : isIngesting ? 'Ingesting…' : 'Connect & Ingest Now'}
+              </Button>
+              {dbMsg && (
+                <span className="text-sm text-gray-600 dark:text-gray-300">{dbMsg}</span>
+              )}
+            </div>
+            <p className="text-[12px] text-[var(--text-secondary)] mt-2">
+              If you change the connection string later, run ingestion again to repopulate the database.
             </p>
           </div>
         </div>

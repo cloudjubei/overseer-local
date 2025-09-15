@@ -7,6 +7,7 @@ import { NotificationsManager } from './notifications/NotificationsManager'
 import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
 import { DatabaseManager } from './db/DatabaseManager'
+import DocumentIngestionService from './db/DocumentIngestionService'
 
 export let dbManager
 export let factoryToolsManager
@@ -35,6 +36,10 @@ export async function initManagers(projectRoot, mainWindow) {
     filesManager,
     settingsManager,
   )
+
+  // Create ingestion service using projects manager; register it on db manager for IPC
+  const ingestionService = new DocumentIngestionService({ projectsManager, logger: console })
+  dbManager.setIngestionService(ingestionService)
 
   await dbManager.init()
   await factoryToolsManager.init()

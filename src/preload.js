@@ -207,6 +207,9 @@ const DB_API = {
   deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
   clearDocuments: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR),
+  // Ingestion
+  ingestAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_ALL),
+  ingestProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_PROJECT, { projectId }),
 }
 
 contextBridge.exposeInMainWorld('tasksService', TASKS_API)

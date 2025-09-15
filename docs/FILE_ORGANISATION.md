@@ -17,7 +17,7 @@ Top-Level Layout
 
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
-  - db/: Main process database integration (thefactory-db connection manager and document ingestion service for project files). Exposes DB status via IPC and preload (dbService).
+  - db/: Main process database integration (thefactory-db connection manager and document ingestion service for project files). Exposes DB status via IPC and preload (dbService). Includes IPC endpoints to trigger full-project ingestion from the renderer (DB_INGEST_ALL / DB_INGEST_PROJECT).
   - live-data/: Main process live data service and types for live data services.
     - providers/: Pluggable provider implementations (e.g., agent-prices bridge, generic fetch-json).
     - registry.js: Provider registry to map service ids to providers.
@@ -25,7 +25,7 @@ Top-Level Layout
     - types.js: Shared types and helpers (freshness policy, normalization, freshness computation).
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime).
     - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
-    - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status).
+    - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status and ingestion triggers).
     - hooks/useShortcuts: Keyboard shortcuts provider; respects user-selected modifier and avoids interfering with text input.
     - settings/: AppSettings React context provider used app-wide (singleton).
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
