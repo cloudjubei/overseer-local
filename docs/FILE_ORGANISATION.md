@@ -21,10 +21,6 @@ Top-Level Layout
   - db/: Main process database integration (thefactory-db connection lifecycle and IPC handlers for status and CRUD/search of entities/documents). Exposes DB status via IPC and preload (dbService).
   - document_ingestion/: Project file-to-DB ingestion and sync pipeline. Listens to FilesManager changes (add/change/delete/rename) and upserts/archives documents in thefactory-db; supports full-project ingestion via IPC (DOCUMENT_INGESTION_ALL / DOCUMENT_INGESTION_PROJECT).
   - live-data/: Main process live data service and types for live data services.
-    - providers/: Pluggable provider implementations (e.g., agent-prices bridge, generic fetch-json).
-    - registry.js: Provider registry to map service ids to providers.
-    - store.js: Persistence for service configs and cached snapshots by service id.
-    - types.js: Shared types and helpers (freshness policy, normalization, freshness computation).
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime).
     - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
     - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status and ingestion triggers).
@@ -34,30 +30,18 @@ Top-Level Layout
   - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer (exposes live data API, db API).
-- packages/: Local monorepo packages.
-  - factory-ts/: Agent orchestration library (orchestrator, pricing, history, completion, git integration).
-- scripts/: Project automation scripts and CLIs.
 - Root config files: package.json, tsconfig.json, tailwind/postcss configs, vite configs, forge config, .env.
 
 Where to Learn More
 
 - Architecture overview: docs/ARCHITECTURE.md
 - Engineering patterns and project conventions: docs/PATTERNS.md
-- Package catalog (purpose and key interfaces): docs/PACKAGES.md
 - UI development (start here): docs/ui/README.md
-- Agents and roles: packages/factory-ts/docs (AGENT_*.md).
-- Factory TS overview and APIs: packages/factory-ts (see README/OVERVIEW files in that package).
-- Preview system: see src/renderer/preview and related docs in docs/ (preview usage and analyzer).
-- IPC and factory integration: src/tools/factory (renderer bridge and main process handlers).
 
 Conventions (brief)
 
 - Keep cross-cutting documentation in docs/; place domain-specific or area-specific READMEs next to the code they describe.
 - Use descriptive directory names and keep responsibilities separated by area (renderer vs main vs tools vs packages).
-
-Environment & Credentials
-
-- .env at the repo root is used for local development (e.g., credentials consumed by tooling and factory-ts). For DB, THEFACTORY_DB_URL can be used if no app setting is provided.
 
 Notes
 
