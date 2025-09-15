@@ -7,7 +7,7 @@ import { NotificationsManager } from './notifications/NotificationsManager'
 import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
 import { DatabaseManager } from './db/DatabaseManager'
-import DocumentIngestionService from './db/DocumentIngestionService'
+import { DocumentIngestionManager } from './document_ingestion/DocumentIngestionManager'
 
 export let dbManager
 export let factoryToolsManager
@@ -18,6 +18,7 @@ export let chatsManager
 export let notificationsManager
 export let settingsManager
 export let liveDataManager
+export let documentIngestionManager
 
 export async function initManagers(projectRoot, mainWindow) {
   dbManager = new DatabaseManager(projectRoot, mainWindow)
@@ -36,10 +37,13 @@ export async function initManagers(projectRoot, mainWindow) {
     filesManager,
     settingsManager,
   )
-
-  // Create ingestion service using projects manager; register it on db manager for IPC
-  const ingestionService = new DocumentIngestionService({ projectsManager, logger: console })
-  dbManager.setIngestionService(ingestionService)
+  documentIngestionManager = new DocumentIngestionManager(
+    projectRoot,
+    mainWindow,
+    dbManager,
+    projectsManager,
+    filesManager,
+  )
 
   await dbManager.init()
   await factoryToolsManager.init()
@@ -50,6 +54,7 @@ export async function initManagers(projectRoot, mainWindow) {
   await notificationsManager.init()
   await settingsManager.init()
   await liveDataManager.init()
+  await documentIngestionManager.init()
 }
 export function stopManagers() {
   if (dbManager) {
@@ -78,5 +83,8 @@ export function stopManagers() {
   }
   if (liveDataManager) {
     liveDataManager.stopWatching()
+  }
+  if (documentIngestionManager) {
+    documentIngestionManager.stopWatching()
   }
 }

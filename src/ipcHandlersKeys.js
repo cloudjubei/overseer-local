@@ -100,9 +100,9 @@ const IPC_HANDLER_KEYS = {
   DB_DOCUMENTS_SEARCH: 'db:documents-search',
   DB_DOCUMENTS_CLEAR: 'db:documents-clear',
 
-  // Database ingestion
-  DB_INGEST_ALL: 'db:ingest-all-projects',
-  DB_INGEST_PROJECT: 'db:ingest-project',
+  // Document ingestion
+  DOCUMENT_INGESTION_ALL: 'document-ingestion:all-projects',
+  DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',
 }
 
 export default IPC_HANDLER_KEYS

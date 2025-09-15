@@ -27,13 +27,15 @@
     },
     {
       "id": "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356",
-      "status": "+",
+      "status": "-",
       "title": "Implement DocumentIngestionService for project files",
-      "description": "Create @src/db/DocumentIngestionService.js to handle scanning the repository files and upserting them into thefactory-db 'documents' table using addDocument(). Determine document type: 'project_code' for code files (js, ts, tsx, jsx, json, md, css, etc. configurable), 'project_file' for other internal files, 'external_file' reserved for future. For each project (from @src/projects/ProjectsManager.js ), resolve its root directory and iterate via @src/files/FilesManager.js  or a direct file walk (reuse ignore patterns from @src/files/FilesStorage.js). For each file, compute a stable document identifier (e.g., projectId + relative path), content hash, metadata (path, projectId, ext, size, mtime, type). Upsert if missing or if hash/mtime changed; delete or mark archived on file removal. Expose methods: syncAllProjects(), syncProject(projectId), handleFileAdded/Changed/Deleted(projectId, relPath).",
+      "description": "Create @src/renderer/services/documentIngestionService.ts as a renderer interface and the corresponding @src/document_ingestion/DocumentIngestionManager.js that actually handles the ingestion. The manger handles scanning the repository files and upserting them into thefactory-db 'documents' table using addDocument(). Determine document type: 'project_code' for code files (js, ts, tsx, jsx, json, md, css, etc. configurable), 'project_file' for other internal files, 'external_file' reserved for future. For each project (from @src/projects/ProjectsManager.js ), resolve its root directory and iterate via @src/files/FilesManager.js  or a direct file walk (reuse ignore patterns from @src/files/FilesStorage.js). For each file, compute a stable document identifier (e.g., projectId + relative path), content hash, metadata (path, projectId, ext, size, mtime, type). Upsert if missing or if hash/mtime changed; delete or mark archived on file removal. Expose methods: ingestAllProjects(), ingestProject(projectId).\nMake sure to dynamically handle files Added/Changed/Deleted(projectId, relPath).",
       "context": [
         "src/projects/ProjectsManager.js",
         "src/files/FilesStorage.js",
-        "src/files/FilesManager.js"
+        "src/files/FilesManager.js",
+        "src/renderer/services/documentIngestionService.ts",
+        "src/document_ingestion/DocumentIngestionManager.js"
       ],
       "blockers": []
     },
@@ -69,7 +71,7 @@
     },
     {
       "id": "3535faff-05d1-4ae0-9b32-7192685536da",
-      "status": "+",
+      "status": "-",
       "title": "Update FILE_ORGANISATION.md with db subsystem",
       "description": "Document new src/db/ directory and its responsibilities: DatabaseManager (connection lifecycle), DocumentIngestionService (project file sync to thefactory-db), and fileTyping utility. Keep bullets concise and aligned with the existing documentation conventions.",
       "context": [],
@@ -77,10 +79,12 @@
     },
     {
       "id": "7d59b560-086e-4879-a1a6-9e051db6434f",
-      "status": "+",
+      "status": "-",
       "title": "Add unit/integration scaffolding for ingestion service",
-      "description": "Introduce a simple script or dev command to run a one-off sync (e.g., scripts/sync-docs.js) using the same services, useful for testing. Optionally add a basic test (if testing infra exists) to validate classification and upsert logic using a temp directory and an in-memory or temp DB.",
-      "context": [],
+      "description": "Introduce a simple script or dev command to run a one-off sync @scripts/sync-docs.js  using the same services, useful for testing. Optionally add a basic test (if testing infra exists) to validate classification and upsert logic using a temp directory and an in-memory or temp DB.",
+      "context": [
+        "scripts/sync-docs.js"
+      ],
       "blockers": []
     },
     {
@@ -99,25 +103,26 @@
     },
     {
       "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
-      "status": "?",
+      "status": "-",
       "title": "Document ingestion inside LoadingScreen",
-      "description": "Trigger DocumentIngestionService.syncAllProjects(), after initing the database connection inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start.  @src/renderer/screens/LoadingScreen.tsx has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
+      "description": "Trigger @src/renderer/services/documentIngestionService.ts   ingestAllProjects: () => Promise<any>\n(), after initing the database connection inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start.  @src/renderer/screens/LoadingScreen.tsx has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
       "plan": "",
       "context": [
-        "src/renderer/screens/LoadingScreen.tsx"
+        "src/renderer/screens/LoadingScreen.tsx",
+        "src/renderer/services/documentIngestionService.ts"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "Blocked: Missing IPC/API to trigger DocumentIngestionService.syncAllProjects() from the renderer. DocumentIngestionService exists in src/db/DocumentIngestionService.js (main process) but there are no ipcMain handlers or preload exposure for ingestion or progress updates. To implement the feature, we need to: 1) create a main-process ingestion manager that constructs DocumentIngestionService with access to ProjectsManager, 2) register IPC handlers (e.g., INGESTION_SYNC_ALL, INGESTION_PROGRESS) and 3) expose a renderer-side ingestionService in preload. Please provide or approve the IPC contract so I can wire LoadingScreen to call syncAllProjects and listen for progress, or allow me to add these new IPC handlers and a minimal ProjectsManager reference to complete the flow."
+      "blockers": []
     },
     {
       "id": "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0",
-      "status": "+",
+      "status": "-",
       "title": "First time db connection string configuration allows ingestion start",
-      "description": "When a user configures the db connection string inside @src/renderer/screens/SettingsView.tsx - there should be a button to be able to rigger the ingestion when they do so.\nIt should also be made obvious to the user that if they change the connection string - a new ingestion process should be triggered.",
+      "description": "When a user configures the db connection string inside @src/renderer/screens/SettingsView.tsx - there should be a button to be able to rigger the ingestion when they do so using @src/renderer/services/documentIngestionService.ts .\nIt should also be made obvious to the user that if they change the connection string - a new ingestion process should be triggered.",
       "plan": "",
       "context": [
-        "src/renderer/screens/SettingsView.tsx"
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/services/documentIngestionService.ts"
       ],
       "acceptance": [],
       "blockers": []
@@ -129,10 +134,10 @@
     "4de17e9f-a521-4bb0-8e4e-a82476c5ed35": 3,
     "d172d15d-98ca-434e-8fc7-4ea476821f51": 4,
     "a47c5301-d7b0-4b61-af16-722819909733": 5,
-    "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 6,
+    "d744a0cb-1b0b-4669-a692-7a9751e2eb9e": 6,
     "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5": 7,
-    "d744a0cb-1b0b-4669-a692-7a9751e2eb9e": 8,
-    "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0": 9,
+    "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0": 8,
+    "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 9,
     "7d59b560-086e-4879-a1a6-9e051db6434f": 10,
     "3535faff-05d1-4ae0-9b32-7192685536da": 11
   }

@@ -209,7 +209,13 @@ const DB_API = {
   clearDocuments: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR),
   // Ingestion
   ingestAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_ALL),
-  ingestProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_PROJECT, { projectId }),
+  ingestProject: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_INGEST_PROJECT, { projectId }),
+}
+const DOCUMENT_INGESTION_API = {
+  ingestAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_ALL),
+  ingestProject: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_PROJECT, { projectId }),
 }
 
 contextBridge.exposeInMainWorld('tasksService', TASKS_API)
@@ -222,3 +228,4 @@ contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
 contextBridge.exposeInMainWorld('factoryService', FACTORY_API)
 contextBridge.exposeInMainWorld('dbService', DB_API)
+contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)

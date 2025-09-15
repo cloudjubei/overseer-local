@@ -7,6 +7,7 @@ import type { SettingsService } from 'src/renderer/services/settingsService'
 import type { LiveDataService } from 'src/renderer/services/liveDataService'
 import type { FactoryService } from 'src/renderer/services/factoryService'
 import type { DBService } from 'src/renderer/services/dbService'
+import type { DocumentIngestionService } from 'src/renderer/services/documentIngestionService'
 
 declare global {
   interface Window {
@@ -19,6 +20,7 @@ declare global {
     notificationsService: NotificationsService
     settingsService: SettingsService
     liveDataService: LiveDataService
+    documentIngestionService: DocumentIngestionService
   }
 }
 export {}

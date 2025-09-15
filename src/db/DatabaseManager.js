@@ -3,7 +3,7 @@ import AppSettings from '../settings/AppSettings'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 
 export class DatabaseManager {
-  constructor(projectRoot, window) {
+  constructor(projectRoot, window, projectsManager) {
     this.projectRoot = projectRoot
     this.window = window
 
@@ -13,16 +13,10 @@ export class DatabaseManager {
       connected: false,
       lastError: undefined,
     }
-
-    this._ingestionService = undefined
   }
 
   async init() {
     this._registerIpcHandlers()
-  }
-
-  setIngestionService(ingestionService) {
-    this._ingestionService = ingestionService
   }
 
   _registerIpcHandlers() {
@@ -57,16 +51,6 @@ export class DatabaseManager {
       await this._dbClient?.searchDocuments(params)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR] = async () =>
       await this._dbClient?.clearDocuments()
-
-    // Ingestion triggers
-    handlers[IPC_HANDLER_KEYS.DB_INGEST_ALL] = async () => {
-      if (!this._ingestionService) throw new Error('Ingestion service not available')
-      return await this._ingestionService.syncAllProjects()
-    }
-    handlers[IPC_HANDLER_KEYS.DB_INGEST_PROJECT] = async ({ projectId }) => {
-      if (!this._ingestionService) throw new Error('Ingestion service not available')
-      return await this._ingestionService.syncProject(projectId)
-    }
 
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {

@@ -1,23 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
-import { isCodeFile, classifyDocumentType } from './fileTyping'
-
-// Lazy import to avoid hard dependency at module load time; caller should ensure thefactory-db is installed
-let addDocumentFn = null
-async function getAddDocument() {
-  if (addDocumentFn) return addDocumentFn
-  try {
-    const mod = await import('thefactory-db')
-    // Expecting addDocument exported from thefactory-db
-    addDocumentFn = mod.addDocument || mod.default?.addDocument || null
-    if (!addDocumentFn) throw new Error('addDocument not found in thefactory-db')
-    return addDocumentFn
-  } catch (e) {
-    console.error('[DocumentIngestionService] Failed to import thefactory-db:', e?.message || e)
-    throw e
-  }
-}
+import { isCodeFile, classifyDocumentType } from '../db/fileTyping'
+import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 
 function stableId(projectId, relPath) {
   return `${projectId}::${relPath.replace(/\\/g, '/')}`
@@ -30,23 +15,46 @@ function hashContent(buf) {
 // Files/dirs to ignore (kept in sync with FilesStorage)
 const DEFAULT_IGNORES = [
   /^\./, // dot files
-  'node_modules', 'dist', 'out', 'build', '.git', '.cache', 'coverage', '.next', '.vite', 'tmp', '.DS_STORE',
+  'node_modules',
+  'dist',
+  'out',
+  'build',
+  '.git',
+  '.cache',
+  'coverage',
+  '.next',
+  '.vite',
+  'tmp',
+  '.DS_STORE',
 ]
 
 function isIgnoredDirName(name) {
   return DEFAULT_IGNORES.some((p) => (typeof p === 'string' ? p === name : p.test(name)))
 }
 
-export default class DocumentIngestionService {
-  constructor({ projectsManager, filesRootResolver, logger } = {}) {
-    // projectsManager: src/projects/ProjectsManager.js instance
-    // filesRootResolver: function(project) -> absolute path to project root (defaults to projectsManager.projectsDir + project.path)
-    this.projectsManager = projectsManager
-    this.filesRootResolver = filesRootResolver
-    this.logger = logger || console
+export class DocumentIngestionManager {
+  constructor(projectRoot, window, dbManager, projectsManager, filesManager) {
+    this.projectRoot = projectRoot
+    this.window = window
 
-    // Cache of known documents metadata per docId to avoid redundant upserts during a single run
+    this.dbManager = dbManager
+    this.projectsManager = projectsManager
+    this.filesManager
+
     this.docCache = new Map()
+  }
+
+  async init() {
+    this._registerIpcHandlers()
+  }
+
+  _registerIpcHandlers() {
+    if (this._ipcBound) return
+
+    const handlers = {}
+    handlers[IPC_HANDLER_KEYS.DOCUMENT_INGESTION_PROJECT] = async ({ id }) =>
+      await this.ingestProject(id)
+    handlers[IPC_HANDLER_KEYS.DOCUMENT_INGESTION_ALL] = async () => await this.ingestAll()
   }
 
   resolveProjectRoot(project) {
@@ -122,7 +130,11 @@ export default class DocumentIngestionService {
     try {
       buf = await this.readFileEntry(abs)
     } catch (e) {
-      this.logger.warn('[DocumentIngestionService] Failed reading file for upsert:', abs, e?.message || e)
+      this.logger.warn(
+        '[DocumentIngestionService] Failed reading file for upsert:',
+        abs,
+        e?.message || e,
+      )
       return { ok: false, skipped: true }
     }
     const hash = hashContent(buf)
@@ -192,9 +204,17 @@ export default class DocumentIngestionService {
     }
     const root = this.resolveProjectRoot(project)
     const files = await this.walkProjectFiles(root)
-    let ok = 0, fail = 0
+    let ok = 0,
+      fail = 0
     for (const f of files) {
-      const res = await this.upsertDocument({ projectId, rel: f.rel, abs: f.abs, ext: f.ext, size: f.size, mtime: f.mtime })
+      const res = await this.upsertDocument({
+        projectId,
+        rel: f.rel,
+        abs: f.abs,
+        ext: f.ext,
+        size: f.size,
+        mtime: f.mtime,
+      })
       if (res?.ok) ok++
       else fail++
     }
@@ -228,7 +248,14 @@ export default class DocumentIngestionService {
     const name = path.basename(relPath)
     const i = name.lastIndexOf('.')
     const ext = i >= 0 ? name.slice(i + 1).toLowerCase() : undefined
-    return await this.upsertDocument({ projectId, rel: relPath.replace(/\\/g, '/'), abs, ext, size: st.size, mtime: st.mtimeMs })
+    return await this.upsertDocument({
+      projectId,
+      rel: relPath.replace(/\\/g, '/'),
+      abs,
+      ext,
+      size: st.size,
+      mtime: st.mtimeMs,
+    })
   }
 
   async handleFileDeleted({ projectId, relPath }) {
