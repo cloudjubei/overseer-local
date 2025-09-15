@@ -22,7 +22,7 @@
       "id": "84c2e0e5-d2cc-4f62-be80-d2133fef2c60",
       "status": "+",
       "title": "Logical Tasks indexer and file watcher",
-      "description": "Scan tasks/{id}/ directories under the selected project root to build an in-memory index of tasks and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ tasks; watcher reliably updates on file changes; performance measured and documented;.",
+      "description": "Scan `.tasks/{id}/` directories under the selected project root to build an in-memory index of tasks and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ tasks; watcher reliably updates on file changes; performance measured and documented;.",
       "plan": "",
       "context": [
         "src/",

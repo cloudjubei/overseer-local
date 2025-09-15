@@ -4,7 +4,7 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import TasksStorage from './TasksStorage'
 
 function resolveTasksDir(projectRoot) {
-  return path.join(projectRoot, 'tasks')
+  return path.join(projectRoot, '.tasks')
 }
 
 export class TasksManager {

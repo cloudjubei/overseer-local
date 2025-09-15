@@ -17,7 +17,7 @@ async function pathExists(p) {
 export class ProjectsManager {
   constructor(projectRoot, window) {
     this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot)
-    this.projectsDir = path.join(this.projectRoot, 'projects')
+    this.projectsDir = path.join(this.projectRoot, '.projects')
     this.window = window
     this.watcher = null
     this._ipcBound = false

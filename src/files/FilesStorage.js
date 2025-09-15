@@ -22,12 +22,12 @@ export const IGNORED_FILES = [
   '**/.vscode/**',
   '**/.DS_STORE/**',
   //project related
-  '**/.factory/**',
-  '**/tasks/**',
-  '**/projects/**',
+  '.factory/**',
+  '.tasks/**',
+  '.projects/**',
 ]
 export const IGNORED_DIRS_REGEX =
-  /^(node_modules|dist|out|build|\.git|\.cache|\.pytest_cache|__pycache__|coverage|\.next|\.vite|tmp|\.venv|\.husky|\.DS_STORE|\.factory|tasks|projects)$/i
+  /^(node_modules|dist|out|build|\.git|\.cache|\.pytest_cache|__pycache__|coverage|\.next|\.vite|tmp|\.venv|\.husky|\.DS_STORE|\.factory|\.tasks|\.projects)$/i
 export const IGNORED_FILES_REGEX = /^(\.DS_STORE|__init__.py|.*\.env|.*\.(jpg|jpeg|png|gif))$/i
 
 export default class FilesStorage {

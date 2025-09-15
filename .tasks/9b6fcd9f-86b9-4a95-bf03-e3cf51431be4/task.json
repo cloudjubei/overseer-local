@@ -39,7 +39,7 @@
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
       "status": "-",
       "title": "Implement Logic to Update Local Task State from Commit Data",
-      "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
+      "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `.tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
       "blockers": []
     },
@@ -50,6 +50,16 @@
       "description": "In the renderer process, add a 'Merge' button to the task view. This button will be enabled when the Git Monitoring Service detects that a task branch has unmerged commits. Clicking the button will trigger an IPC call to the main process to execute a git merge of the task branch into the current main development branch.",
       "context": [],
       "blockers": []
+    },
+    {
+      "id": "2e442f2c-e7db-445a-8cfd-755260749820",
+      "status": "-",
+      "title": "Use the commitAnalyzer and updateLocalTaskStateFromCommit inside GitMonitorManager",
+      "description": "@src/git-monitor/GitMonitorManager.js needs to be updated to use the two files that serve as huge utils.\nAdditionaly, all git related logic should moved to a file @src/git-monitor/gitHelper.js . If @src/git-monitor/taskBranchNaming.js is not useful then get rid off it or make use of it. Perhaps all three files should be simply moved to a file @src/git-monitor/gitMonitorUtils.js",
+      "plan": "",
+      "context": ["src/git-monitor/GitMonitorManager.js", "src/git-monitor/taskBranchNaming.js"],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -57,6 +67,7 @@
     "d242f688-3d1d-4d49-b4e4-41f62aec33fd": 2,
     "db4124ad-21e9-460b-854c-f4a885688400": 3,
     "7b9c8ad9-05ec-4281-bbc4-11354a121ecb": 4,
-    "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2": 5
+    "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2": 5,
+    "2e442f2c-e7db-445a-8cfd-755260749820": 6
   }
 }

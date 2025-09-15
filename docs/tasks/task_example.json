@@ -2,7 +2,7 @@
   "id": "13",
   "title": "JSON-based tasks format",
   "status": "-",
-  "description": "Define and implement a new JSON-based format for tasks to replace `tasks/TASKS.md`. This involves defining the schema, creating necessary tooling for interaction, migrating existing tasks, and finally deprecating the old format.",
+  "description": "Define and implement a new JSON-based format for tasks to replace `docs/TASKS.md`. This involves defining the schema, creating necessary tooling for interaction, migrating existing tasks, and finally deprecating the old format.",
   "features": [
     {
       "id": "13.1",

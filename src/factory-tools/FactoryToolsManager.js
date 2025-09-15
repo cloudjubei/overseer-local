@@ -245,7 +245,7 @@ export class FactoryToolsManager {
     this.runHandles.set(runHandle.id, runHandle)
 
     runHandle.onEvent((e) => {
-      console.log('[factory] Event: ', e)
+      console.log('[factory] Event: ', e.type)
       if (e) {
         if (e.type === 'run/cancelled' || e.type === 'run/completed' || e.type === 'run/error') {
           console.log('[factory] Cleaning up run', runHandle.id)

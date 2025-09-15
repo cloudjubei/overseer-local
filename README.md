@@ -44,7 +44,7 @@ This is an Electron desktop application built with React and TypeScript using th
 
 - `src/`: Main application source code (Electron, React, TypeScript).
 - `docs/`: Documentation files.
-- `tasks/`: Task-related metadata and tests.
+- `.tasks/`: Task-related metadata and tests.
 - `scripts/`: Automation scripts.
 
 For more details on file organization, see `docs/FILE_ORGANISATION.md`.
