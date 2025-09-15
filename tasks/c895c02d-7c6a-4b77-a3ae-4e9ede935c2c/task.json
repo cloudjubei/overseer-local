@@ -99,7 +99,7 @@
     },
     {
       "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
-      "status": "-",
+      "status": "?",
       "title": "Document ingestion inside LoadingScreen",
       "description": "Trigger DocumentIngestionService.syncAllProjects(), after initing the database connection inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start.  @src/renderer/screens/LoadingScreen.tsx has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
       "plan": "",
@@ -107,7 +107,8 @@
         "src/renderer/screens/LoadingScreen.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "Blocked: Missing IPC/API to trigger DocumentIngestionService.syncAllProjects() from the renderer. DocumentIngestionService exists in src/db/DocumentIngestionService.js (main process) but there are no ipcMain handlers or preload exposure for ingestion or progress updates. To implement the feature, we need to: 1) create a main-process ingestion manager that constructs DocumentIngestionService with access to ProjectsManager, 2) register IPC handlers (e.g., INGESTION_SYNC_ALL, INGESTION_PROGRESS) and 3) expose a renderer-side ingestionService in preload. Please provide or approve the IPC contract so I can wire LoadingScreen to call syncAllProjects and listen for progress, or allow me to add these new IPC handlers and a minimal ProjectsManager reference to complete the flow."
     },
     {
       "id": "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0",
