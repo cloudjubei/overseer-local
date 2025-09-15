@@ -21,9 +21,7 @@
       "status": "-",
       "title": "Pass DB connection to thefactory-tools orchestrator",
       "description": "Update @src/factory-tools/FactoryToolsManager.js s to accept a db connection/info. Modify constructor to receive the DatabaseManager (or its connection parameters) from initManagers. When calling createOrchestrator from thefactory-tools, include a new option db (or dbConfig) per the updated thefactory-tools API. If the API expects env vars, set them before initializing the orchestrator. Ensure search_files tool used by the orchestrator can leverage the same DB instance.",
-      "context": [
-        "src/factory-tools/FactoryToolsManager.js"
-      ],
+      "context": ["src/factory-tools/FactoryToolsManager.js"],
       "blockers": []
     },
     {
@@ -43,10 +41,7 @@
       "status": "-",
       "title": "Wire ingestion at app startup during loading flow",
       "description": "In @src/managers.js , after projectsManager.init() and before exposing UI as fully loaded, trigger DocumentIngestionService.syncAllProjects() so the database is populated on app start. Optionally add a simple IPC channel (e.g., db:ingestion:status) to report progress to the LoadingScreen. Update @src/renderer/screens/LoadingScreen.tsx  to wait not only for settings but also ingestion to complete (e.g., via a preload API that reports when startup sync is done) and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
-      "context": [
-        "src/managers.js",
-        "src/renderer/screens/LoadingScreen.tsx"
-      ],
+      "context": ["src/managers.js", "src/renderer/screens/LoadingScreen.tsx"],
       "blockers": []
     },
     {
@@ -54,10 +49,7 @@
       "status": "-",
       "title": "Hook file watcher events to update thefactory-db",
       "description": "Extend @src/files/FilesStorage.js  to emit file change events via an event emitter or callbacks (add onChange hook). In \n@src/files/FilesManager.js '__getStorage' pass handlers from DocumentIngestionService so that on 'add', 'change', 'unlink', 'rename' the corresponding handleFileAdded/Changed/Deleted is called, updating the 'documents' table accordingly. Ensure ignore patterns match FilesStorage. For rename, implement a two-step (delete old + add new) or dedicated move update if thefactory-db supports it.",
-      "context": [
-        "src/files/FilesStorage.js",
-        "src/files/FilesManager.js"
-      ],
+      "context": ["src/files/FilesStorage.js", "src/files/FilesManager.js"],
       "blockers": []
     },
     {
@@ -73,10 +65,7 @@
       "status": "-",
       "title": "Expose minimal DB/search config to renderer and settings",
       "description": "Add optional app settings (in @src/settings/SettingsManager.js  schema if present) to configure DB location or connection string. Expose methods over IPC to read current DB status and last sync time. Update preload to include a dbService with getStatus() and onStatus(callback) if needed by the @src/renderer/screens/LoadingScreen.tsx .",
-      "context": [
-        "src/settings/SettingsManager.js",
-        "src/renderer/screens/LoadingScreen.tsx"
-      ],
+      "context": ["src/settings/SettingsManager.js", "src/renderer/screens/LoadingScreen.tsx"],
       "blockers": []
     },
     {
