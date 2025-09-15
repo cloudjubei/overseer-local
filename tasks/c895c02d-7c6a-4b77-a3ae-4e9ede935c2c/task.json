@@ -72,7 +72,7 @@
     },
     {
       "id": "3535faff-05d1-4ae0-9b32-7192685536da",
-      "status": "-",
+      "status": "+",
       "title": "Update FILE_ORGANISATION.md with db subsystem",
       "description": "Document new src/db/ directory and its responsibilities: DatabaseManager (connection lifecycle), DocumentIngestionService (project file sync to thefactory-db), and fileTyping utility. Keep bullets concise and aligned with the existing documentation conventions.",
       "context": [],
