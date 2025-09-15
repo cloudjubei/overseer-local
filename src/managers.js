@@ -7,6 +7,7 @@ import { NotificationsManager } from './notifications/NotificationsManager'
 import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
 import { DatabaseManager } from './db/DatabaseManager'
+import DocumentIngestionService from './db/DocumentIngestionService'
 
 export let dbManager
 export let factoryToolsManager
@@ -17,6 +18,7 @@ export let chatsManager
 export let notificationsManager
 export let settingsManager
 export let liveDataManager
+export let documentIngestionService
 
 export async function initManagers(projectRoot, mainWindow) {
   // Initialize thefactory-db connection first so downstream managers can rely on it if needed
@@ -25,6 +27,16 @@ export async function initManagers(projectRoot, mainWindow) {
 
   factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, dbManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
+
+  // Initialize ingestion service to be used by FilesManager and elsewhere
+  const dbClient = dbManager?.getClient?.()
+  documentIngestionService = new DocumentIngestionService({
+    projectsManager,
+    filesManager: undefined, // will be set later if needed
+    db: dbClient,
+    logger: console,
+  })
+
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow)

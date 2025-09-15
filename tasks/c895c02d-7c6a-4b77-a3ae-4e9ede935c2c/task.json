@@ -53,7 +53,7 @@
     },
     {
       "id": "a47c5301-d7b0-4b61-af16-722819909733",
-      "status": "-",
+      "status": "+",
       "title": "Hook file watcher events to update thefactory-db",
       "description": "Extend @src/files/FilesStorage.js  to emit file change events via an event emitter or callbacks (add onChange hook). In \n@src/files/FilesManager.js '__getStorage' pass handlers from DocumentIngestionService so that on 'add', 'change', 'unlink', 'rename' the corresponding handleFileAdded/Changed/Deleted is called, updating the 'documents' table accordingly. Ensure ignore patterns match FilesStorage. For rename, implement a two-step (delete old + add new) or dedicated move update if thefactory-db supports it.",
       "context": [
