@@ -1,26 +1,18 @@
-import type { ProjectsService } from 'src/renderer/services/projectsService'
-import type { ChatsService } from 'src/renderer/services/chatsService'
-import type { FilesService } from 'src/renderer/services/filesService'
-import type { TasksService } from 'src/renderer/services/tasksService'
-import type { NotificationsService } from 'src/renderer/services/notificationsService'
-import type { SettingsService } from 'src/renderer/services/settingsService'
-import type { LiveDataService } from 'src/renderer/services/liveDataService'
-import type { FactoryService } from 'src/renderer/services/factoryService'
-import type { DBService } from 'src/renderer/services/dbService'
-import type { DocumentIngestionService } from 'src/renderer/services/documentIngestionService'
+declare module 'thefactory-db' {
+  export type DocumentInput = {
+    id?: string;
+    projectId?: string;
+    type?: string;
+    path?: string;
+    content: string;
+    contentHash?: string;
+    metadata?: any;
+  };
 
-declare global {
-  interface Window {
-    dbService: DBService
-    factoryService: FactoryService
-    tasksService: TasksService
-    projectsService: ProjectsService
-    filesService: FilesService
-    chatsService: ChatsService
-    notificationsService: NotificationsService
-    settingsService: SettingsService
-    liveDataService: LiveDataService
-    documentIngestionService: DocumentIngestionService
-  }
+  export type Document = DocumentInput & { id: string };
+
+  export function openDatabase(opts: { connectionString: string }): Promise<any>;
+  export function addDocument(input: DocumentInput): Promise<Document>;
+  export function updateDocument(id: string, patch: Partial<DocumentInput>): Promise<Document>;
+  export function getDocumentById(id: string): Promise<Document>;
 }
-export {}
