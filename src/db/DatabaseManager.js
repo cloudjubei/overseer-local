@@ -87,6 +87,10 @@ export class DatabaseManager {
     return this._connectionString
   }
 
+  getClient() {
+    return this._dbClient
+  }
+
   getStatus() {
     return { ...this._status }
   }
