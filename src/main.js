@@ -14,14 +14,12 @@ const IS_DEV = !app.isPackaged
 
 const resolveDevIcon = () => {
   // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
-  const iconPath = path.join(process.cwd(), 'icon.jpeg')
+  const iconPath = path.join(process.cwd(), 'icon.png')
   const image = nativeImage.createFromPath(iconPath)
   return image
 }
 
 const getAppIcon = () => {
-  // For this feature we focus on dev start; use root icon.jpeg
-  // nativeImage can read JPEG and will be accepted for BrowserWindow (Linux/Win) and dock (macOS)
   return resolveDevIcon()
 }
 
