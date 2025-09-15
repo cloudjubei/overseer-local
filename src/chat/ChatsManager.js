@@ -131,8 +131,14 @@ export class ChatsManager {
       const repoRoot = this.projectRoot
       const appSettings = this.settingsManager.getAppSettings()
       const webSearchApiKeys = appSettings.webSearchApiKeys
+      const connectionString = appSettings.database.connectionString
 
-      const { tools, callTool } = buildChatTools({ repoRoot, projectId, webSearchApiKeys })
+      const { tools, callTool } = buildChatTools({
+        repoRoot,
+        projectId,
+        webSearchApiKeys,
+        dbConnectionString,
+      })
       const model = config.model
       const completion = createCompletionClient(config)
 
