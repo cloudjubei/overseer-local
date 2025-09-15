@@ -23,6 +23,7 @@ import {
 } from '../../types/settings'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { dbService } from '../services/dbService'
+import { documentIngestionService } from '../services/documentIngestionService'
 
 // Settings Categories
 const CATEGORIES = [
@@ -482,7 +483,7 @@ export default function SettingsView() {
         }
         setDbMsg('Connected. Starting ingestion…')
         setIsIngesting(true)
-        const res = await dbService.ingestAllProjects()
+        await documentIngestionService.ingestAllProjects()
         setDbMsg('Ingestion complete.')
       } catch (e: any) {
         setDbMsg(String(e?.message || e))

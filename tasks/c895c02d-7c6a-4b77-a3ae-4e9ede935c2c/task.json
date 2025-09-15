@@ -116,7 +116,7 @@
     },
     {
       "id": "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0",
-      "status": "-",
+      "status": "+",
       "title": "First time db connection string configuration allows ingestion start",
       "description": "When a user configures the db connection string inside @src/renderer/screens/SettingsView.tsx - there should be a button to be able to rigger the ingestion when they do so using @src/renderer/services/documentIngestionService.ts .\nIt should also be made obvious to the user that if they change the connection string - a new ingestion process should be triggered.",
       "plan": "",
