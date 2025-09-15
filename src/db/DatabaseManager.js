@@ -17,6 +17,7 @@ export class DatabaseManager {
     this.window = window
     this._client = null
     this._started = false
+    this._connectionString = ''
   }
 
   async init() {
@@ -27,6 +28,8 @@ export class DatabaseManager {
     const appSettings = new AppSettings().get()
     const connectionString =
       appSettings?.database?.connectionString || process.env.THEFACTORY_DB_URL || ''
+
+    this._connectionString = connectionString || ''
 
     try {
       // lazy require to avoid renderer bundling warnings
@@ -68,6 +71,10 @@ export class DatabaseManager {
     return this._client
   }
 
+  getConnectionString() {
+    return this._connectionString
+  }
+
   async close() {
     if (!this._client) return
     try {
@@ -84,6 +91,7 @@ export class DatabaseManager {
     } finally {
       this._client = null
       this._started = false
+      this._connectionString = ''
     }
   }
 

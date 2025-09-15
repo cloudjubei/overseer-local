@@ -5,9 +5,10 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { createOrchestrator, createAgentRunStore, createPricingManager } from 'thefactory-tools'
 
 export class FactoryToolsManager {
-  constructor(projectRoot, window) {
+  constructor(projectRoot, window, dbManager) {
     this.projectRoot = projectRoot
     this.window = window
+    this.dbManager = dbManager
     this._ipcBound = false
 
     this.runHandles = new Map()
@@ -18,12 +19,34 @@ export class FactoryToolsManager {
     console.log('[factory] Initializing history store at', dbPath)
     this.runStore = createAgentRunStore({ dbPath })
 
+    // Prepare DB integration for thefactory-tools orchestrator
+    const dbClient = this.dbManager?.getClient?.()
+    const connectionString = this.dbManager?.getConnectionString?.()
+
+    // If thefactory-tools expects env vars for DB, set them before creating the orchestrator
+    if (connectionString && !process.env.THEFACTORY_DB_URL) {
+      process.env.THEFACTORY_DB_URL = connectionString
+    }
+
     console.log('[factory] Creating orchestrator')
-    this.orchestrator = createOrchestrator({
+    const orchestratorOptions = {
       projectRoot,
       runStore: this.runStore,
       pricing: this.PRICING,
-    })
+    }
+
+    // Provide multiple shapes to be compatible across thefactory-tools versions
+    if (dbClient) {
+      // direct client
+      orchestratorOptions.db = dbClient
+      // alternative shapes that may be recognized by downstream API
+      orchestratorOptions.dbClient = dbClient
+      orchestratorOptions.dbConfig = { client: dbClient, connectionString }
+    } else if (connectionString) {
+      orchestratorOptions.dbConfig = { connectionString }
+    }
+
+    this.orchestrator = createOrchestrator(orchestratorOptions)
     console.log('[factory] Orchestrator ready')
   }
 

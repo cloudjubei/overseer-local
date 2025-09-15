@@ -18,7 +18,7 @@
     },
     {
       "id": "4de17e9f-a521-4bb0-8e4e-a82476c5ed35",
-      "status": "-",
+      "status": "+",
       "title": "Pass DB connection to thefactory-tools orchestrator",
       "description": "Update @src/factory-tools/FactoryToolsManager.js s to accept a db connection/info. Modify constructor to receive the DatabaseManager (or its connection parameters) from initManagers. When calling createOrchestrator from thefactory-tools, include a new option db (or dbConfig) per the updated thefactory-tools API. If the API expects env vars, set them before initializing the orchestrator. Ensure search_files tool used by the orchestrator can leverage the same DB instance.",
       "context": [

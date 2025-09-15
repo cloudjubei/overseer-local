@@ -23,7 +23,7 @@ export async function initManagers(projectRoot, mainWindow) {
   dbManager = new DatabaseManager(projectRoot, mainWindow)
   await dbManager.init()
 
-  factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow)
+  factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, dbManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager)
