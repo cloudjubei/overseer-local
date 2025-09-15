@@ -1,6 +1,6 @@
 {
   "id": "c895c02d-7c6a-4b77-a3ae-4e9ede935c2c",
-  "status": "+",
+  "status": "-",
   "title": "Integrate `thefactory-db`",
   "description": "A new project has been added to this one 'thefactory-db' . It allows storing documents and entities into a database and performing hybrid search on them (tokenized + embedding search). 'thefactory-tools' is already updated to use it - mainly for the 'search_files' tool that this projects 'FilesManager' uses.\n\nThis project needs to be the one that initiates the connection with 'thefactory-db'. It will then pass the appropriate connection info to 'thefactory-tools'.\nApart from integrating with both of the packages well - this project also needs to make sure that all the files within this project's repo are added to 'thefactory-db' and its \"documents\" table (there's a \"addDocument\" function exposed). Documents are text conten. For code files within this project, we should assign a \"project_code\" type to them. For any other project related file - \"project_file\", and for any external files in the future \"external_file\". \nOn app start - during the loading screen - each project needs to be checked to see if all the relevant documents are in the database - and if not, they need to be added. While the app is working and there are changes to the project's files - they should be appropriately updated.",
   "features": [
@@ -81,16 +81,6 @@
       "blockers": []
     },
     {
-      "id": "7d59b560-086e-4879-a1a6-9e051db6434f",
-      "status": "+",
-      "title": "Add unit/integration scaffolding for ingestion service",
-      "description": "Introduce a simple script or dev command to run a one-off sync @scripts/sync-docs.js  using the same services, useful for testing. Optionally add a basic test (if testing infra exists) to validate classification and upsert logic using a temp directory and an in-memory or temp DB.",
-      "context": [
-        "scripts/sync-docs.js"
-      ],
-      "blockers": []
-    },
-    {
       "id": "6d115a0f-2c64-4e6a-bbbc-51ef9a2eed84",
       "status": "+",
       "title": "It's possible to configure the 'thefactory-db' postgresql connection string",
@@ -129,6 +119,19 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "fc82da3e-6f8c-4c9a-81b0-ef961e45bf31",
+      "status": "-",
+      "title": "Correctly match types from 'thefactory-db' inside the managers",
+      "description": "Match the types correctly in @src/document_ingestion/DocumentIngestionManager.js and @src/db/DatabaseManager.js",
+      "plan": "",
+      "context": [
+        "src/document_ingestion/DocumentIngestionManager.js",
+        "src/db/DatabaseManager.js"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -141,7 +144,7 @@
     "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5": 7,
     "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0": 8,
     "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 9,
-    "7d59b560-086e-4879-a1a6-9e051db6434f": 10,
-    "3535faff-05d1-4ae0-9b32-7192685536da": 11
+    "3535faff-05d1-4ae0-9b32-7192685536da": 10,
+    "fc82da3e-6f8c-4c9a-81b0-ef961e45bf31": 11
   }
 }
