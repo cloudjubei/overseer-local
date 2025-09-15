@@ -42,6 +42,8 @@ Top-Level Layout
 Where to Learn More
 
 - Architecture overview: docs/ARCHITECTURE.md
+- Engineering patterns and project conventions: docs/PATTERNS.md
+- Package catalog (purpose and key interfaces): docs/PACKAGES.md
 - UI development (start here): docs/ui/README.md
 - Agents and roles: packages/factory-ts/docs (AGENT_*.md).
 - Factory TS overview and APIs: packages/factory-ts (see README/OVERVIEW files in that package).
