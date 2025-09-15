@@ -41,11 +41,12 @@
     {
       "id": "9834258a-c115-4554-9a3f-3209c6b66686",
       "status": "-",
-      "title": "Wire ingestion at app startup during loading flow",
-      "description": "In @src/managers.js , after projectsManager.init() and before exposing UI as fully loaded, trigger DocumentIngestionService.syncAllProjects() so the database is populated on app start. Optionally add a simple IPC channel (e.g., db:ingestion:status) to report progress to the LoadingScreen. Update @src/renderer/screens/LoadingScreen.tsx  to wait not only for settings but also ingestion to complete (e.g., via a preload API that reports when startup sync is done) and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
+      "title": "LoadingScreen is the place where all managers get started.",
+      "description": "Right now, in @src/managers.js , after all the managers get created they also get initialised. The code to initialise them should be triggered by the @src/renderer/screens/LoadingScreen.tsx -  passing in all the necessary information, such as @src/renderer/contexts/AppSettingsContext.tsx into the appropriate managers - as now the new DatabaseManager will require this new databaseConnectionString.\nSet this up in a nice clean way.",
       "context": [
         "src/managers.js",
-        "src/renderer/screens/LoadingScreen.tsx"
+        "src/renderer/screens/LoadingScreen.tsx",
+        "src/renderer/contexts/AppSettingsContext.tsx"
       ],
       "blockers": []
     },
@@ -108,18 +109,44 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
+      "status": "-",
+      "title": "Document ingestion happens after all managers are loaded",
+      "description": "Trigger DocumentIngestionService.syncAllProjects(), after initing the managers inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start. Add a simple IPC channel (e.g., db:ingestion:status) to report progress to the @src/renderer/screens/LoadingScreen.tsx , it has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/LoadingScreen.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0",
+      "status": "-",
+      "title": "First time db connection string configuration allows ingestion start",
+      "description": "When a user configures the db connection string inside @src/renderer/screens/SettingsView.tsx - there should be a button to be able to rigger the ingestion when they do so.\nIt should also be made obvious to the user that if they change the connection string - a new ingestion process should be triggered.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
     "6d115a0f-2c64-4e6a-bbbc-51ef9a2eed84": 1,
-    "ab20c3bb-f4d7-46be-84be-da04e14019ac": 2,
-    "4de17e9f-a521-4bb0-8e4e-a82476c5ed35": 3,
-    "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 4,
-    "9834258a-c115-4554-9a3f-3209c6b66686": 5,
+    "9834258a-c115-4554-9a3f-3209c6b66686": 2,
+    "ab20c3bb-f4d7-46be-84be-da04e14019ac": 3,
+    "4de17e9f-a521-4bb0-8e4e-a82476c5ed35": 4,
+    "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 5,
     "a47c5301-d7b0-4b61-af16-722819909733": 6,
     "d744a0cb-1b0b-4669-a692-7a9751e2eb9e": 7,
     "d172d15d-98ca-434e-8fc7-4ea476821f51": 8,
-    "3535faff-05d1-4ae0-9b32-7192685536da": 9,
-    "7d59b560-086e-4879-a1a6-9e051db6434f": 10
+    "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5": 9,
+    "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0": 10,
+    "3535faff-05d1-4ae0-9b32-7192685536da": 11,
+    "7d59b560-086e-4879-a1a6-9e051db6434f": 12
   }
 }

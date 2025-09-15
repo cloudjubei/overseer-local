@@ -16,30 +16,7 @@ export default class AppSettings {
       const stored = this.appStorage.getItem(this.__storageKey())
       if (!stored) return DEFAULT_APP_SETTINGS
       const parsed = JSON.parse(stored)
-      // Deep merge for nested objects we know about to preserve defaults when adding new fields
-      const merged = {
-        ...DEFAULT_APP_SETTINGS,
-        ...parsed,
-        userPreferences: {
-          ...DEFAULT_APP_SETTINGS.userPreferences,
-          ...(parsed.userPreferences || {}),
-          shortcuts: {
-            ...DEFAULT_APP_SETTINGS.userPreferences.shortcuts,
-            ...((parsed.userPreferences && parsed.userPreferences.shortcuts) || {}),
-          },
-        },
-        notificationSystemSettings: {
-          ...DEFAULT_APP_SETTINGS.notificationSystemSettings,
-          ...(parsed.notificationSystemSettings || {}),
-        },
-        github: parsed.github ?? DEFAULT_APP_SETTINGS.github,
-        webSearchApiKeys: parsed.webSearchApiKeys ?? DEFAULT_APP_SETTINGS.webSearchApiKeys,
-        database: {
-          ...DEFAULT_APP_SETTINGS.database,
-          ...(parsed.database || {}),
-        },
-      }
-      return merged
+      return { ...DEFAULT_APP_SETTINGS, ...parsed }
     } catch {
       return DEFAULT_APP_SETTINGS
     }
