@@ -37,7 +37,7 @@
     },
     {
       "id": "7b9c8ad9-05ec-4281-bbc4-11354a121ecb",
-      "status": "-",
+      "status": "+",
       "title": "Implement Logic to Update Local Task State from Commit Data",
       "description": "Create a function that takes the data extracted from a commit's `task.json` and updates the corresponding local `tasks/<taskId>/task.json` file. The update should focus on syncing feature statuses and any other relevant metadata from the agent's work-in-progress commit.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
