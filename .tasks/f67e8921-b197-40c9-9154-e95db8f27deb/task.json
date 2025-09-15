@@ -1053,8 +1053,7 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "When running via 'npm run start' the app icon doesn't show"
+      "blockers": []
     },
     {
       "id": "ea8dc9a0-203e-42c6-ab4d-70db372c0003",
@@ -1104,6 +1103,29 @@
         "docs/design/DESIGN_TOKENS.md",
         "docs/design/MONDAY_PALETTE_REFERENCE.md",
         "docs/ux/LINEAR_UX_GUIDELINES.md"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "53ab6181-9034-47f0-a6a9-a8b8eca0e504",
+      "status": "-",
+      "title": "All the domain managers could be typed",
+      "description": "All of the managers could be typed and extend the base defined in @src/managers.ts . The managers:\n@src/chat/ChatsManager.js  , @src/db/DatabaseManager.js  , @src/document_ingestion/DocumentIngestionManager.js  , @src/factory-tools/FactoryToolsManager.js  , @src/files/FilesManager.js  , @src/git-monitor/GitMonitorManager.js  , @src/live-data/liveDataManager.js  , @src/notifications/NotificationsManager.js  , @src/tasks/TasksManager.js   , @src/projects/ProjectsManager.js   , @src/settings/SettingsManager.js",
+      "plan": "",
+      "context": [
+        "src/managers.ts",
+        "src/chat/ChatsManager.js",
+        "src/db/DatabaseManager.js",
+        "src/document_ingestion/DocumentIngestionManager.js",
+        "src/factory-tools/FactoryToolsManager.js",
+        "src/files/FilesManager.js",
+        "src/git-monitor/GitMonitorManager.js",
+        "src/live-data/liveDataManager.js",
+        "src/notifications/NotificationsManager.js",
+        "src/tasks/TasksManager.js",
+        "src/projects/ProjectsManager.js",
+        "src/settings/SettingsManager.js"
       ],
       "acceptance": [],
       "blockers": []
@@ -1195,6 +1217,7 @@
     "05393210-77ab-4301-8243-accf0edac8d5": 83,
     "ea8dc9a0-203e-42c6-ab4d-70db372c0003": 84,
     "85914410-3864-43fa-8317-b90dedc12ce0": 85,
-    "74d5f63b-8797-43f5-b571-fd5bebf56550": 86
+    "74d5f63b-8797-43f5-b571-fd5bebf56550": 86,
+    "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 87
   }
 }

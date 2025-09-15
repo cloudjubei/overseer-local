@@ -81,46 +81,46 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     }
   }, [taskId, tasksById])
 
-  // Subscribe to git monitor and compute merge availability for this task's feature branch
-  useEffect(() => {
-    let disposed = false
+  //TODO: logic needs to be cleand up
+  // useEffect(() => {
+  //   let disposed = false
 
-    async function check() {
-      if (!task) {
-        setHasUnmerged(false)
-        return
-      }
-      setCheckingMerge(true)
-      try {
-        const status = await gitMonitorService.getStatus()
-        const base = status.currentBranch || null
-        setGitBaseBranch(base)
-        const branchName = `features/${task.id}`
-        if (!base) {
-          setHasUnmerged(false)
-          return
-        }
-        const res = await gitMonitorService.hasUnmerged(branchName, base)
-        if (!disposed) {
-          setHasUnmerged(!!res.ok && !!res.hasUnmerged)
-        }
-      } catch (e) {
-        if (!disposed) setHasUnmerged(false)
-      } finally {
-        if (!disposed) setCheckingMerge(false)
-      }
-    }
+  //   async function check() {
+  //     if (!task) {
+  //       setHasUnmerged(false)
+  //       return
+  //     }
+  //     setCheckingMerge(true)
+  //     try {
+  //       const status = await gitMonitorService.getStatus()
+  //       const base = status.currentBranch || null
+  //       setGitBaseBranch(base)
+  //       const branchName = `features/${task.id}`
+  //       if (!base) {
+  //         setHasUnmerged(false)
+  //         return
+  //       }
+  //       const res = await gitMonitorService.hasUnmerged(branchName, base)
+  //       if (!disposed) {
+  //         setHasUnmerged(!!res.ok && !!res.hasUnmerged)
+  //       }
+  //     } catch (e) {
+  //       if (!disposed) setHasUnmerged(false)
+  //     } finally {
+  //       if (!disposed) setCheckingMerge(false)
+  //     }
+  //   }
 
-    check()
-    const unsubscribe = gitMonitorService.subscribe((_s) => {
-      // Re-check on git status updates
-      check()
-    })
-    return () => {
-      disposed = true
-      unsubscribe?.()
-    }
-  }, [task])
+  //   check()
+  //   const unsubscribe = gitMonitorService.subscribe((_s) => {
+  //     // Re-check on git status updates
+  //     check()
+  //   })
+  //   return () => {
+  //     disposed = true
+  //     unsubscribe?.()
+  //   }
+  // }, [task])
 
   const sortedFeaturesBase = useMemo(() => {
     if (!task) {
@@ -468,10 +468,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               </div>
             )}
             <ModelChip editable />
-            {/* Merge button: enabled when git monitor says feature branch has unmerged commits */}
-            <button
+
+            {/* <button
               type="button"
-              className={`btn ${(!hasUnmerged || merging || checkingMerge) ? 'btn-disabled' : ''}`}
+              className={`btn ${!hasUnmerged || merging || checkingMerge ? 'btn-disabled' : ''}`}
               disabled={!hasUnmerged || merging || checkingMerge}
               title={
                 mergeError
@@ -485,7 +485,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               onClick={onClickMerge}
             >
               {merging ? 'Merging…' : 'Merge'}
-            </button>
+            </button> */}
             {!taskHasActiveRun && (
               <RunAgentButton
                 onClick={(agentType) => {

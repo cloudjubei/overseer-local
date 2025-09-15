@@ -1,6 +1,6 @@
 {
   "id": "9b6fcd9f-86b9-4a95-bf03-e3cf51431be4",
-  "status": "+",
+  "status": "?",
   "title": "Monitor a task/feature as it's running and update information based off of git commits",
   "description": "The status of the tasks isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's tasks/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the task) with a given featureId specified, it should be possible to see the task.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.\nThe non-renderer code should be placed under src/git-monitor whereas renderer related things under src/renderer/services/getService.ts and in appropriate screens/components",
   "features": [
@@ -65,6 +65,16 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "dca334a0-9739-4026-9980-765ec6423b79",
+      "status": "?",
+      "title": "Use the GitMonitor in UI",
+      "description": "Work out how to use the git merger etc",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -73,6 +83,7 @@
     "db4124ad-21e9-460b-854c-f4a885688400": 3,
     "7b9c8ad9-05ec-4281-bbc4-11354a121ecb": 4,
     "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2": 5,
-    "2e442f2c-e7db-445a-8cfd-755260749820": 6
+    "2e442f2c-e7db-445a-8cfd-755260749820": 6,
+    "dca334a0-9739-4026-9980-765ec6423b79": 7
   }
 }
