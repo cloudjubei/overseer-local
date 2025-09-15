@@ -1,5 +1,4 @@
 import type { BrowserWindow } from 'electron'
-
 import { FactoryToolsManager } from './factory-tools/FactoryToolsManager'
 import { TasksManager } from './tasks/TasksManager'
 import { FilesManager } from './files/FilesManager'
@@ -12,8 +11,7 @@ import { DatabaseManager } from './db/DatabaseManager'
 import { DocumentIngestionManager } from './document_ingestion/DocumentIngestionManager'
 import { GitMonitorManager } from './git-monitor/GitMonitorManager'
 
-// Minimal common interface for managers used here
-interface BaseManager {
+export interface BaseManager {
   init(): Promise<any>
   stopWatching?: () => void | Promise<void>
 }
@@ -29,6 +27,8 @@ export let settingsManager: SettingsManager | undefined
 export let liveDataManager: LiveDataManager | undefined
 export let documentIngestionManager: DocumentIngestionManager | undefined
 export let gitMonitorManager: GitMonitorManager | undefined
+
+let managers: BaseManager[] = []
 
 export async function initManagers(projectRoot: string, mainWindow: BrowserWindow): Promise<void> {
   dbManager = new DatabaseManager(projectRoot, mainWindow)
@@ -56,21 +56,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   )
   gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
 
-  await dbManager.init()
-  await factoryToolsManager.init()
-  await projectsManager.init()
-  await tasksManager.init()
-  await filesManager.init()
-  await chatsManager.init()
-  await notificationsManager.init()
-  await settingsManager.init()
-  await liveDataManager.init()
-  await documentIngestionManager.init()
-  await gitMonitorManager.init()
-}
-
-export function stopManagers(): void {
-  const list: (BaseManager | undefined)[] = [
+  managers = [
     dbManager,
     factoryToolsManager,
     projectsManager,
@@ -84,11 +70,15 @@ export function stopManagers(): void {
     gitMonitorManager,
   ]
 
-  for (const m of list) {
+  for (const manager of managers) {
+    await manager.init()
+  }
+}
+
+export function stopManagers(): void {
+  for (const manager of managers) {
     try {
-      m?.stopWatching?.()
-    } catch (_) {
-      // noop
-    }
+      manager.stopWatching?.()
+    } catch (_) {}
   }
 }
