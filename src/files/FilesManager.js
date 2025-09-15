@@ -85,6 +85,11 @@ export class FilesManager {
     const s = await this.__getStorage(projectId)
     return await s?.readFile(path, encoding)
   }
+  async getFileStats(projectId, path) {
+    const s = await this.__getStorage(projectId)
+    const absolutePath = s?.getAbsolutePath(relativePath)
+    return await s?.getFileStats(absolutePath)
+  }
   async writeFile(projectId, path, content, encoding = 'utf8') {
     const s = await this.__getStorage(projectId)
     return await s?.writeFile(path, content, encoding)

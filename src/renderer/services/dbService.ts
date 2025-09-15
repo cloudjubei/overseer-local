@@ -4,6 +4,7 @@ import {
   Entity,
   EntityInput,
   EntityWithScore,
+  MatchParams,
   SearchParams,
 } from 'thefactory-db/dist/types'
 
@@ -24,17 +25,15 @@ export type DBService = {
   updateEntity(id: string, patch: Partial<EntityInput>): Promise<Entity | undefined>
   deleteEntity(id: string): Promise<boolean>
   searchEntities(params: SearchParams): Promise<EntityWithScore[]>
-  matchEntities(
-    criteria: any,
-    options?: { types?: string[]; ids?: string[]; limit?: number },
-  ): Promise<Entity[]>
-  clearEntities(): Promise<void>
+  matchEntities(criteria: any, options?: MatchParams): Promise<Entity[]>
+  clearEntities(projectIds?: string[]): Promise<void>
   addDocument(d: DocumentInput): Promise<Document>
   getDocumentById(id: string): Promise<Document | undefined>
   updateDocument(id: string, patch: Partial<DocumentInput>): Promise<Document | undefined>
   deleteDocument(id: string): Promise<boolean>
   searchDocuments(params: SearchParams): Promise<DocumentWithScore[]>
-  clearDocuments(): Promise<void>
+  matchDocuments(options: MatchParams): Promise<Entity[]>
+  clearDocuments(projectIds?: string[]): Promise<void>
 }
 
 export const dbService: DBService = { ...window.dbService }

@@ -11,11 +11,23 @@ export const IGNORED_FILES = [
   '**/build/**',
   '**/.git/**',
   '**/.cache/**',
+  '**/.pytest_cache/**',
+  '**/__pycache__/**',
   '**/coverage/**',
   '**/.next/**',
   '**/.vite/**',
   '**/tmp/**',
+  '**/.venv/**',
+  '**/.husky/**',
+  '**/.vscode/**',
+  '**/.DS_STORE/**',
+  //project related
+  '**/.factory/**',
+  '**/tasks/**',
 ]
+export const IGNORED_DIRS_REGEX =
+  /^(node_modules|dist|out|build|\.git|\.cache|\.pytest_cache|__pycache__|coverage|\.next|\.vite|tmp|\.venv|\.husky|\.DS_STORE|\.factory|tasks)$/i
+export const IGNORED_FILES_REGEX = /^(\.DS_STORE|__init__.py|.*\.env|.*\.(jpg|jpeg|png|gif))$/i
 
 export default class FilesStorage {
   constructor(projectId, filesDir, window) {
@@ -137,34 +149,25 @@ export default class FilesStorage {
 
       // Skip ignored folders similar to watcher
       if (entry.isDirectory()) {
-        if (
-          /^(node_modules|dist|out|build|\.git|\.cache|coverage|\.next|\.vite|tmp|\.DS_STORE)$/i.test(
-            entry.name,
-          )
-        ) {
+        if (IGNORED_DIRS_REGEX.test(entry.name)) {
           continue
         }
         await this._walkAndIndex(entryRel, filesAcc)
       } else if (entry.isFile()) {
-        if (/^(\.DS_STORE)$/i.test(entry.name)) {
+        if (IGNORED_FILES_REGEX.test(entry.name)) {
           continue
         }
         let stats
         try {
-          stats = await fs.stat(entryAbs)
+          const stats = await this.getFileStats(entryAbs)
+          filesAcc.push({
+            ...stats,
+            path: entryRel.replace(/\\/g, '/'),
+            absolutePath: entryAbs,
+          })
         } catch (e) {
           continue
         }
-        const name = path.basename(entryRel)
-        const i = name.lastIndexOf('.')
-        const ext = i >= 0 ? name.slice(i + 1).toLowerCase() : undefined
-        filesAcc.push({
-          path: entryRel.replace(/\\/g, '/'),
-          name,
-          ext,
-          size: stats.size,
-          mtime: stats.mtimeMs,
-        })
       }
     }
   }
@@ -187,6 +190,20 @@ export default class FilesStorage {
     return await fs.readFile(abs)
   }
 
+  async getFileStats(absolutePath) {
+    const stats = await fs.stat(absolutePath)
+    const name = path.basename(absolutePath)
+    const i = name.lastIndexOf('.')
+    const ext = i >= 0 ? name.slice(i + 1).toLowerCase() : undefined
+    return {
+      name,
+      ext,
+      size: stats.size,
+      mtime: stats.mtimeMs,
+      ctime: stats.birthtimeMs,
+    }
+  }
+
   async readDirectory(relPath) {
     const abs = this.getAbsolutePath(relPath)
     return await fs.readdir(abs, { withFileTypes: true })
@@ -202,7 +219,7 @@ export default class FilesStorage {
       await fs.writeFile(abs, content, { encoding })
     }
     // Emit change for ingestion
-    this.__emit('change', { projectId: this.projectId, relPath })
+    this.__emit('change', { projectId: this.projectId, relPath, content })
     await this.__rebuildAndNotify('File written: ' + relPath)
   }
 
@@ -225,10 +242,6 @@ export default class FilesStorage {
     const targetDir = path.dirname(absTarget)
     await fs.mkdir(targetDir, { recursive: true })
     await fs.rename(absSource, absTarget)
-    // Emit as two-step for ingestion (delete old + add new)
-    this.__emit('unlink', { projectId: this.projectId, relPath: relPathSource })
-    this.__emit('add', { projectId: this.projectId, relPath: relPathTarget })
-    // Also emit a rename hint if listener supports it
     this.__emit('rename', {
       projectId: this.projectId,
       relPathSource,
@@ -248,7 +261,7 @@ export default class FilesStorage {
     }
     const rel = path.join('uploads', name).replace(/\\/g, '/')
     // Emit add for ingestion
-    this.__emit('add', { projectId: this.projectId, relPath: rel })
+    this.__emit('add', { projectId: this.projectId, relPath: rel, content })
     await this.__rebuildAndNotify('File uploaded: ' + name)
     return rel
   }

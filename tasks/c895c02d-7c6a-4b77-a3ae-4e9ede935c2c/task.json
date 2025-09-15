@@ -1,6 +1,6 @@
 {
   "id": "c895c02d-7c6a-4b77-a3ae-4e9ede935c2c",
-  "status": "-",
+  "status": "+",
   "title": "Integrate `thefactory-db`",
   "description": "A new project has been added to this one 'thefactory-db' . It allows storing documents and entities into a database and performing hybrid search on them (tokenized + embedding search). 'thefactory-tools' is already updated to use it - mainly for the 'search_files' tool that this projects 'FilesManager' uses.\n\nThis project needs to be the one that initiates the connection with 'thefactory-db'. It will then pass the appropriate connection info to 'thefactory-tools'.\nApart from integrating with both of the packages well - this project also needs to make sure that all the files within this project's repo are added to 'thefactory-db' and its \"documents\" table (there's a \"addDocument\" function exposed). Documents are text conten. For code files within this project, we should assign a \"project_code\" type to them. For any other project related file - \"project_file\", and for any external files in the future \"external_file\". \nOn app start - during the loading screen - each project needs to be checked to see if all the relevant documents are in the database - and if not, they need to be added. While the app is working and there are changes to the project's files - they should be appropriately updated.",
   "features": [
@@ -122,7 +122,7 @@
     },
     {
       "id": "fc82da3e-6f8c-4c9a-81b0-ef961e45bf31",
-      "status": "-",
+      "status": "+",
       "title": "Correctly match types from 'thefactory-db' inside the managers",
       "description": "Match the types correctly in @src/document_ingestion/DocumentIngestionManager.js and @src/db/DatabaseManager.js",
       "plan": "",

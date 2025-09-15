@@ -199,7 +199,8 @@ const DB_API = {
   searchEntities: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_SEARCH, { params }),
   matchEntities: (criteria, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_MATCH, { criteria, options }),
-  clearEntities: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_CLEAR),
+  clearEntities: (projectIds) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_CLEAR, { projectIds }),
   addDocument: (id, input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_ADD, { id, input }),
   getDocumentById: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_ID, { id }),
   getDocumentBySrc: (src) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC, { src }),
@@ -209,7 +210,8 @@ const DB_API = {
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
   matchDocuments: (criteria, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { criteria, options }),
-  clearDocuments: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR),
+  clearDocuments: (projectIds) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR, { projectIds }),
 }
 const DOCUMENT_INGESTION_API = {
   ingestAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_ALL),

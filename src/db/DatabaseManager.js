@@ -39,23 +39,22 @@ export class DatabaseManager {
       await this._dbClient?.searchEntities(params)
     handlers[IPC_HANDLER_KEYS.DB_ENTITIES_MATCH] = async ({ criteria, options }) =>
       await this._dbClient?.matchEntities(criteria, options)
-    handlers[IPC_HANDLER_KEYS.DB_ENTITIES_CLEAR] = async () => await this._dbClient?.clearEntities()
-    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_ADD] = async ({ input }) =>
-      await this._dbClient?.addDocument(input)
+    handlers[IPC_HANDLER_KEYS.DB_ENTITIES_CLEAR] = async ({ projectIds }) =>
+      await this._dbClient?.clearEntities(projectIds)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_ADD] = async ({ input }) => await this.addDocument(input)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_ID] = async ({ id }) =>
-      await this._dbClient?.getDocumentById(id)
+      await this.getDocumentById(id)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC] = async ({ src }) =>
-      await this._dbClient?.getDocumentBySrc(src)
+      await this.getDocumentBySrc(src)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE] = async ({ id, patch }) =>
-      await this._dbClient?.updateDocument(id, patch)
-    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE] = async ({ id }) =>
-      await this._dbClient?.deleteDocument(id)
+      await this.updateDocument(id, patch)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE] = async ({ id }) => await this.deleteDocument(id)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH] = async ({ params }) =>
-      await this._dbClient?.searchDocuments(params)
+      await this.searchDocuments(params)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH] = async ({ criteria, options }) =>
-      await this._dbClient?.matchDocuments(criteria, options)
-    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR] = async () =>
-      await this._dbClient?.clearDocuments()
+      await this.matchDocuments(criteria, options)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR] = async ({ projectIds }) =>
+      await this.clearDocuments(projectIds)
 
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (event, args) => {
@@ -89,10 +88,6 @@ export class DatabaseManager {
     return this._connectionString
   }
 
-  getClient() {
-    return this._dbClient
-  }
-
   getStatus() {
     return { ...this._status }
   }
@@ -119,6 +114,31 @@ export class DatabaseManager {
 
   async stopWatching() {
     await this.close()
+  }
+
+  async addDocument(input) {
+    return await this._dbClient?.addDocument(input)
+  }
+  async getDocumentById(id) {
+    return await this._dbClient?.getDocumentById(id)
+  }
+  async getDocumentBySrc(src) {
+    return await this._dbClient?.getDocumentBySrc(src)
+  }
+  async updateDocument(id, patch) {
+    return await this._dbClient?.updateDocument(id, patch)
+  }
+  async deleteDocument(id) {
+    return await this._dbClient?.deleteDocument(src)
+  }
+  async searchDocuments(params) {
+    return await this._dbClient?.searchDocuments(params)
+  }
+  async matchDocuments(criteria, options) {
+    return await this._dbClient?.matchDocuments(criteria, options)
+  }
+  async clearDocuments(projectIds) {
+    return await this._dbClient?.clearDocuments(projectIds)
   }
 
   _setConnected(connected) {
