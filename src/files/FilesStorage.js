@@ -45,7 +45,7 @@ export default class FilesStorage {
       this.watcher = null
     }
 
-    this.watcher = chokidar.watch(path.join(this.filesDir, '**/*'), {
+    this.watcher = chokidar.watch(this.getAbsolutePath('**/*'), {
       IGNORED_FILES,
       persistent: true,
       ignoreInitial: true,
@@ -122,7 +122,7 @@ export default class FilesStorage {
   }
 
   async _walkAndIndex(relDir, filesAcc) {
-    const absDir = path.join(this.filesDir, relDir)
+    const absDir = this.getAbsolutePath(relDir)
     let entries
     try {
       entries = await fs.readdir(absDir, { withFileTypes: true })
@@ -133,7 +133,7 @@ export default class FilesStorage {
 
     for (const entry of entries) {
       const entryRel = relDir ? path.join(relDir, entry.name) : entry.name
-      const entryAbs = path.join(this.filesDir, entryRel)
+      const entryAbs = this.getAbsolutePath(entryRel)
 
       // Skip ignored folders similar to watcher
       if (entry.isDirectory()) {
@@ -169,6 +169,10 @@ export default class FilesStorage {
     }
   }
 
+  getAbsolutePath(relPath) {
+    return path.join(this.filesDir, relPath)
+  }
+
   async listFiles() {
     return this.files
   }
@@ -179,17 +183,17 @@ export default class FilesStorage {
   }
 
   async readFileBinary(relPath) {
-    const abs = path.join(this.filesDir, relPath)
+    const abs = this.getAbsolutePath(relPath)
     return await fs.readFile(abs)
   }
 
   async readDirectory(relPath) {
-    const abs = path.join(this.filesDir, relPath)
+    const abs = this.getAbsolutePath(relPath)
     return await fs.readdir(abs, { withFileTypes: true })
   }
 
   async writeFile(relPath, content, encoding) {
-    const abs = path.join(this.filesDir, relPath)
+    const abs = this.getAbsolutePath(relPath)
     const dir = path.dirname(abs)
     await fs.mkdir(dir, { recursive: true })
     if (content instanceof Uint8Array || Buffer.isBuffer(content)) {
@@ -203,7 +207,7 @@ export default class FilesStorage {
   }
 
   async deleteFile(relPath) {
-    const abs = path.join(this.filesDir, relPath)
+    const abs = this.getAbsolutePath(relPath)
     const st = await fs.lstat(abs)
     if (st.isDirectory()) {
       await fs.rm(abs, { recursive: true, force: true })
@@ -216,8 +220,8 @@ export default class FilesStorage {
   }
 
   async renameFile(relPathSource, relPathTarget) {
-    const absSource = path.join(this.filesDir, relPathSource)
-    const absTarget = path.join(this.filesDir, relPathTarget)
+    const absSource = this.getAbsolutePath(relPathSource)
+    const absTarget = this.getAbsolutePath(relPathTarget)
     const targetDir = path.dirname(absTarget)
     await fs.mkdir(targetDir, { recursive: true })
     await fs.rename(absSource, absTarget)
@@ -234,7 +238,7 @@ export default class FilesStorage {
   }
 
   async uploadFile(name, content) {
-    const uploadsDir = path.join(this.filesDir, 'uploads')
+    const uploadsDir = this.getAbsolutePath('uploads')
     await fs.mkdir(uploadsDir, { recursive: true })
     const filePath = path.join(uploadsDir, name)
     if (content instanceof Uint8Array || Buffer.isBuffer(content)) {

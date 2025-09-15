@@ -201,7 +201,8 @@ const DB_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_MATCH, { criteria, options }),
   clearEntities: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_CLEAR),
   addDocument: (id, input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_ADD, { id, input }),
-  getDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET, { id }),
+  getDocumentById: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_ID, { id }),
+  getDocumentBySrc: (src) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC, { src }),
   updateDocument: (id, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE, { id, patch }),
   deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),

@@ -42,8 +42,10 @@ export class DatabaseManager {
     handlers[IPC_HANDLER_KEYS.DB_ENTITIES_CLEAR] = async () => await this._dbClient?.clearEntities()
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_ADD] = async ({ input }) =>
       await this._dbClient?.addDocument(input)
-    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET] = async ({ id }) =>
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_ID] = async ({ id }) =>
       await this._dbClient?.getDocumentById(id)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC] = async ({ src }) =>
+      await this._dbClient?.getDocumentBySrc(src)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE] = async ({ id, patch }) =>
       await this._dbClient?.updateDocument(id, patch)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE] = async ({ id }) =>
@@ -85,6 +87,10 @@ export class DatabaseManager {
 
   getConnectionString() {
     return this._connectionString
+  }
+
+  getClient() {
+    return this._dbClient
   }
 
   getStatus() {

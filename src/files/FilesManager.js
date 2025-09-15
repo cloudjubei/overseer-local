@@ -73,6 +73,10 @@ export class FilesManager {
     this._ipcBound = true
   }
 
+  async getAbsoluteFilePath(projectId, relativePath) {
+    const s = await this.__getStorage(projectId)
+    return s.getAbsolutePath(relativePath)
+  }
   async listFiles(projectId) {
     const s = await this.__getStorage(projectId)
     return await s?.listFiles()
