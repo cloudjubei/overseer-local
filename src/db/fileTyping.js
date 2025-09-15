@@ -1,7 +1,61 @@
 // Utilities to classify file types for document ingestion
 
 const DEFAULT_CODE_EXTS = new Set([
-  'js','jsx','ts','tsx','mjs','cjs','json','md','mdx','yml','yaml','toml','ini','xml','html','css','scss','less','sass','pcss','csv','tsv','txt','env','gitignore','gitattributes','eslintignore','prettierignore','editorconfig','sh','bash','zsh','ps1','bat','Dockerfile','dockerignore','make','mk','cmake','gradle','pom','java','kt','go','rs','py','rb','php','cs','cpp','c','h','hpp','vue','svelte'
+  'js',
+  'jsx',
+  'ts',
+  'tsx',
+  'mjs',
+  'cjs',
+  'json',
+  'md',
+  'mdx',
+  'yml',
+  'yaml',
+  'toml',
+  'ini',
+  'xml',
+  'html',
+  'css',
+  'scss',
+  'less',
+  'sass',
+  'pcss',
+  'csv',
+  'tsv',
+  'txt',
+  'env',
+  'gitignore',
+  'gitattributes',
+  'eslintignore',
+  'prettierignore',
+  'editorconfig',
+  'sh',
+  'bash',
+  'zsh',
+  'ps1',
+  'bat',
+  'Dockerfile',
+  'dockerignore',
+  'make',
+  'mk',
+  'cmake',
+  'gradle',
+  'pom',
+  'java',
+  'kt',
+  'go',
+  'rs',
+  'py',
+  'rb',
+  'php',
+  'cs',
+  'cpp',
+  'c',
+  'h',
+  'hpp',
+  'vue',
+  'svelte',
 ])
 
 export function isCodeFile(ext, relPath) {
@@ -15,7 +69,7 @@ export function isCodeFile(ext, relPath) {
   // Special names without extension treated as code/config
   const base = relPath?.split('/').pop()
   if (!base) return false
-  const special = ['Dockerfile','Makefile']
+  const special = ['Dockerfile', 'Makefile']
   return special.includes(base)
 }
 

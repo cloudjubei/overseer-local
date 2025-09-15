@@ -13,7 +13,12 @@ import DatabaseSettings from './settings/database/DatabaseSettings'
 const CATEGORIES = [
   { id: 'visual', label: 'Visual', icon: <span aria-hidden>🎨</span>, accent: 'purple' },
   { id: 'llms', label: 'LLMs', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
-  { id: 'notifications', label: 'Notifications', icon: <span aria-hidden>🔔</span>, accent: 'brand' },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    icon: <span aria-hidden>🔔</span>,
+    accent: 'brand',
+  },
   { id: 'github', label: 'GitHub', icon: <span aria-hidden>🐙</span>, accent: 'gray' },
   { id: 'websearch', label: 'Web Search', icon: <span aria-hidden>🔎</span>, accent: 'orange' },
   { id: 'database', label: 'Database', icon: <span aria-hidden>🗄️</span>, accent: 'indigo' },

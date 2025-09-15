@@ -9,10 +9,7 @@
       "status": "+",
       "title": "Add thefactory-db initialization service in main process",
       "description": "Create @src/db/DatabaseManager.js to encapsulate initializing and managing a thefactory-db connection.\nProvide async close() methods. Export and wire it in @src/managers.js  (add dbManager export), instantiate before @src/factory-tools/FactoryToolsManager.js , call init() during startup, and close on app shutdown in stopManagers().",
-      "context": [
-        "src/factory-tools/FactoryToolsManager.js",
-        "src/managers.js"
-      ],
+      "context": ["src/factory-tools/FactoryToolsManager.js", "src/managers.js"],
       "blockers": []
     },
     {
@@ -20,9 +17,7 @@
       "status": "+",
       "title": "Pass DB connection to thefactory-tools orchestrator",
       "description": "Update @src/factory-tools/FactoryToolsManager.js s to accept a db connection/info. Modify constructor to receive the DatabaseManager (or its connection parameters) from initManagers. When calling createOrchestrator from thefactory-tools, include a new option db (or dbConfig) per the updated thefactory-tools API. If the API expects env vars, set them before initializing the orchestrator. Ensure search_files tool used by the orchestrator can leverage the same DB instance.",
-      "context": [
-        "src/factory-tools/FactoryToolsManager.js"
-      ],
+      "context": ["src/factory-tools/FactoryToolsManager.js"],
       "blockers": []
     },
     {
@@ -44,10 +39,7 @@
       "status": "+",
       "title": "Hook file watcher events to update thefactory-db",
       "description": "Extend @src/files/FilesStorage.js  to emit file change events via an event emitter or callbacks (add onChange hook). In \n@src/files/FilesManager.js '__getStorage' pass handlers from DocumentIngestionService so that on 'add', 'change', 'unlink', 'rename' the corresponding handleFileAdded/Changed/Deleted is called, updating the 'documents' table accordingly. Ensure ignore patterns match FilesStorage. For rename, implement a two-step (delete old + add new) or dedicated move update if thefactory-db supports it.",
-      "context": [
-        "src/files/FilesStorage.js",
-        "src/files/FilesManager.js"
-      ],
+      "context": ["src/files/FilesStorage.js", "src/files/FilesManager.js"],
       "blockers": []
     },
     {
@@ -63,10 +55,7 @@
       "status": "+",
       "title": "Expose minimal DB config to renderer and settings",
       "description": "Add optional app settings (in @src/settings/SettingsManager.js  schema if present) to configure DB location or connection string. Expose methods over IPC to read current DB status and last sync time. Update preload to include a dbService with getStatus() and onStatus(callback) if needed by the @src/renderer/screens/LoadingScreen.tsx .",
-      "context": [
-        "src/settings/SettingsManager.js",
-        "src/renderer/screens/LoadingScreen.tsx"
-      ],
+      "context": ["src/settings/SettingsManager.js", "src/renderer/screens/LoadingScreen.tsx"],
       "blockers": []
     },
     {
