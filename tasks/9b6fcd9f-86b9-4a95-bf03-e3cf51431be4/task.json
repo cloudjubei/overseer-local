@@ -21,7 +21,7 @@
     },
     {
       "id": "d242f688-3d1d-4d49-b4e4-41f62aec33fd",
-      "status": "-",
+      "status": "+",
       "title": "Implement Task-to-Branch Naming Convention Logic",
       "description": "Create a utility module that maps a task ID to a specific git branch name, following the convention `features/<taskId>`. This will be used by the Git Monitoring Service to identify which branches to watch for updates related to active tasks.\nThis should live close to the new manager in @src/git-monitor/GitMonitorManager.js",
       "context": [],
