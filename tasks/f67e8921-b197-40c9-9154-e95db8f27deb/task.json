@@ -43,7 +43,10 @@
       "title": "Make an Agent run chat display prettier",
       "description": "make the thoughts as a bubble, and then the tool calls as expandable rows to view the details (mainly for read_files & write_file - the rest of the tools are short enough that they can always display).\nSame goes for the responses to the LLM - apply a similar view as above.",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx", "src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -53,7 +56,10 @@
       "title": "Agent run costs and times are always empty",
       "description": "It seems these are either not recorded correctly or not passed, so that they cannot be viewed properly inside @AgentsView.tsx and @AllAgentsView.tsx",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx", "src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -63,7 +69,10 @@
       "title": "The \"Run Agent\" button should be standardised",
       "description": "The views that should have it updated are:\n@TasksListView.tsx, @TaskDetailsView.tsx.\nIt should be a round play button as is common in music players.",
       "plan": "",
-      "context": ["src/renderer/tasks/TasksListView.tsx", "src/renderer/tasks/TaskDetailsView.tsx"],
+      "context": [
+        "src/renderer/tasks/TasksListView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -73,7 +82,10 @@
       "title": "Persist locally agent runs",
       "description": "Make sure the history of agent runs is persisted and read when app is started",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx", "src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -83,7 +95,9 @@
       "title": "IconDelete",
       "description": "`IconDelete` inside @Icons.tsx needs to actually be a proper delete icon",
       "plan": "",
-      "context": ["src/renderer/components/ui/Icons.tsx"],
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -93,7 +107,9 @@
       "title": "running an agent causes an error when it tries to make a local copy of the project",
       "description": "shouldIgnoreCopy inside @orchestrator.ts should ignore all sorts of files and folders specific to typescript, node, electron.",
       "plan": "",
-      "context": ["packages/factory-ts/src/orchestrator.ts"],
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -117,7 +133,10 @@
       "title": "If any of a task's features are rejected (showing the exclamation circle) so should the task",
       "description": "The way this displays should follow exactly how Features are displayed inside TaskDetailsView",
       "plan": "",
-      "context": ["src/renderer/tasks/TaskDetailsView.tsx", "src/renderer/tasks/TasksListView.tsx"],
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -140,7 +159,10 @@
       "title": "Go over all the tasks in this project and update inline file references",
       "description": "in a lot of the tasks a file could've been referenced as:\n@TasksListView.tsx \nor simply\n@TasksListView.tsx\n\nMake sure that these are transformed into the format:\n@Filepath\n\nThen inside @TasksListView.tsx and @TaskDetailsView.tsx, make sure that titles and descriptions for tasks and features show a nice hoverable ui that shows a tooltip about the file. Inside all forms it should just show @Filename so it's easy to edit.",
       "plan": "",
-      "context": ["src/renderer/tasks/TaskDetailsView.tsx", "src/renderer/tasks/TasksListView.tsx"],
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -150,7 +172,9 @@
       "title": "Standardise the Delete, Edit, Add, Create buttons",
       "description": "wherever there's a button that just says Delete we should have it use the standard `DeleteIcon`\nwherever there's a button that just says Add or Create we should have it use the standard `PlusIcon`\nwherever there's a button that just says Edit we should have it use the standard `EditIcon`",
       "plan": "",
-      "context": ["src/renderer/components/ui/Icons.tsx"],
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -177,7 +201,9 @@
       "title": "Toasts should animate",
       "description": "Toasts need to slide down with an animation when appearing and slide up when hiding.\nThey need to be snappy. It should also be possible to flick them up to make them disappear (like notifications on a mobile device).",
       "plan": "",
-      "context": ["src/renderer/components/ui/Toast.tsx"],
+      "context": [
+        "src/renderer/components/ui/Toast.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -242,7 +268,10 @@
       "title": "Agent Run - UI fix",
       "description": "When viewing an agent run inside @src/renderer/screens/AgentsView.tsx it doesn't show the whole conversation. Just the last message. This needs to be fixed to show the full conversation.",
       "plan": "",
-      "context": ["src/renderer/screens/AllAgentsView.tsx", "src/renderer/screens/AgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -383,7 +412,9 @@
       "title": "StatusChip improvements",
       "description": "@src/renderer/components/agents/StatusChip.tsx should only have the badge with an icon inside displaying. The status text should only show on hover as a small tooltip.",
       "plan": "",
-      "context": ["src/renderer/components/agents/StatusChip.tsx"],
+      "context": [
+        "src/renderer/components/agents/StatusChip.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -393,7 +424,9 @@
       "title": "An active run should only show inside Active not History",
       "description": "",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -429,7 +462,9 @@
       "title": "The ModelChip should be slimmer",
       "description": "Have the provider on one row and the modle name on a second row.",
       "plan": "",
-      "context": ["src/renderer/components/agents/ModelChip.tsx"],
+      "context": [
+        "src/renderer/components/agents/ModelChip.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -455,7 +490,10 @@
       "title": "The search and sort bar for features should be placed at the top",
       "description": "TaskDetailsView.tsx should follow TasksView.tsx",
       "plan": "",
-      "context": ["src/renderer/screens/TasksView.tsx", "src/renderer/tasks/TaskDetailsView.tsx"],
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -480,7 +518,9 @@
       "title": "Reference and File lookup usability improvements",
       "description": "When the user types # for references and @ for files to be looked up in the @src/renderer/components/ui/FileMentionsTextarea.tsx if the user presses space while the lookup is showing - auto pick the top result.\nAlso, for references - they should always display in the text as #{task_index}.{feature_index} - the user will most likely search for the features by these indices.",
       "plan": "",
-      "context": ["src/renderer/components/ui/FileMentionsTextarea.tsx"],
+      "context": [
+        "src/renderer/components/ui/FileMentionsTextarea.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -490,7 +530,9 @@
       "title": "After running a first agent, running any more stalls",
       "description": "Any consecutive agent after the first never starts.\nCancelling an agent from the @src/renderer/screens/AgentsView.tsx   screen doesn't help either.\n\nThe last message in the log is:\n[factory] SUBSCRIBE\n\nI can see this message in the agent run log:\n\"message\": \"Error: ENOENT: no such file or directory, open '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-A3L8P3/workspace/projects/main.json'\\n    at async open (node:internal/fs/promises:639:25)\\n    at async Object.readFile (node:internal/fs/promises:1243:14)\\n    at async Object.getProjectDir (file:///packages/factory-ts/dist/taskUtils.js:18:17)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/orchestrator.js:489:24)\\n    at async file:///packages/factory-ts/dist/index.js:197:17\",\n\n\nAnd I can see a warning in the console:\nMaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 files:subscribe listeners added.",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -500,7 +542,9 @@
       "title": "ChatConversation improvements",
       "description": "@src/renderer/components/agents/ChatConversation.tsx  doesn't update while an agent is running. I have to close the popup and open it to see the latest messages. This shouldn't be the case - it should keep on scrolling down the messages if the user is at the bottom, and if not - keep on adding them.",
       "plan": "",
-      "context": ["src/renderer/components/agents/ChatConversation.tsx"],
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -510,7 +554,10 @@
       "title": "AgentsView and AllAgentsView improvements",
       "description": "In  @src/renderer/screens/AgentsView.tsx  the active and history runs should be sorted by date - the most recent at the top\n\nAlso, both in @src/renderer/screens/AgentsView.tsx and in @src/renderer/screens/AllAgentsView.tsx it shouldn't show the Turn column, but instead show how many features were completed out of how many.\n\nIn @src/renderer/screens/AgentsView.tsx in the active runs, there should be no Status column, but an additional Thinking column before duration that should update with the time the agent is taking to answer the last message.",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx", "src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -520,7 +567,10 @@
       "title": "Allow moving tasks when in 'not-done'",
       "description": "Pay close attention to what the index should be (remember the display index is always +1 due to starting at 1)\n@src/renderer/screens/TasksView.tsx\n\nIt should be also possible to move features in @src/renderer/tasks/TaskDetailsView.tsx also pay attention to the indices.",
       "plan": "",
-      "context": ["src/renderer/screens/TasksView.tsx", "src/renderer/tasks/TaskDetailsView.tsx"],
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -543,7 +593,10 @@
       "title": "Shortcuts in the app were disabled because they interfered with typing in the \"/\" character",
       "description": "A user must be able to specify which key is the modifier key in settings - @src/renderer/screens/SettingsView.tsx . Bring back the shortcuts - @src/renderer/App.tsx",
       "plan": "",
-      "context": ["src/renderer/screens/SettingsView.tsx", "src/renderer/App.tsx"],
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/App.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -553,7 +606,9 @@
       "title": "When no features are in a task - the default agent type is \"speccer\"",
       "description": "This should be true no matter where it is run from, right now it's only via @src/renderer/components/tasks/RunAgentButton.tsx",
       "plan": "",
-      "context": ["src/renderer/components/tasks/RunAgentButton.tsx"],
+      "context": [
+        "src/renderer/components/tasks/RunAgentButton.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -587,7 +642,10 @@
       "title": "It must be possible to remove agent runs from history",
       "description": "The agent runs in @src/renderer/screens/AgentsView.tsx or in @src/renderer/screens/AllAgentsView.tsx",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx", "src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -597,7 +655,9 @@
       "title": "There needs to be an edit button next to the button for new task",
       "description": "This is inside @src/renderer/tasks/TaskDetailsView.tsx - it must be possible to edit a task from within this view. Deleting a task here, would take the user back to Home.",
       "plan": "",
-      "context": ["src/renderer/tasks/TaskDetailsView.tsx"],
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -607,7 +667,9 @@
       "title": "Show a summary of running agents per project in the sidebar",
       "description": "This should also be visible when the sidebar is minimized - it should show the project icon and this new chip that would display the number of agents.\n@src/renderer/navigation/SidebarView.tsx",
       "plan": "",
-      "context": ["src/renderer/navigation/SidebarView.tsx"],
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -669,7 +731,10 @@
       "title": "when switching views - the prefs for which view is stored in TasksView is lost",
       "description": "When switching screens from the @src/renderer/screens/TasksView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
       "plan": "",
-      "context": ["src/renderer/screens/TasksView.tsx", "src/renderer/navigation/SidebarView.tsx"],
+      "context": [
+        "src/renderer/screens/TasksView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -679,7 +744,9 @@
       "title": "Typing in \"?\" shows the help menu",
       "description": "The user has to click Shift+\"?\" and it shows the help menu - it should do that for Shift+\"H\".\nAll these shortcuts, along the modifier key should be configurable in @src/renderer/screens/SettingsView.tsx",
       "plan": "",
-      "context": ["src/renderer/screens/SettingsView.tsx"],
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -689,7 +756,9 @@
       "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
       "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
       "plan": "",
-      "context": ["src/renderer/components/ui/CommandMenu.tsx"],
+      "context": [
+        "src/renderer/components/ui/CommandMenu.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -752,7 +821,9 @@
       "status": "+",
       "title": "New section in settings - configuring WebSearch Api keys for exa, serpapi and tavily",
       "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a key for each of the tools and save it.",
-      "context": ["src/renderer/screens/SettingsView.tsx"],
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
       "blockers": []
     },
     {
@@ -761,7 +832,9 @@
       "title": "Use the configuration of WebSearch api keys - exa, serpapi and tavily",
       "description": "We are storing the api keys to these inside @src/renderer/screens/SettingsView.tsx - we need to use them in  'thefactory-tools' that has webSearch tooling.\nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js when calling 'orchestrator.startRun' .",
       "plan": "",
-      "context": ["src/renderer/screens/SettingsView.tsx"],
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -921,7 +994,10 @@
       "title": "Model statistics",
       "description": "In @src/renderer/screens/AllAgentsView.tsx we need to display statistics per model and per project. We don't need to display all the runs like it is showing right now - that's already shown in each project's individual @src/renderer/screens/AgentsView.tsx .\n\nStatistics we require - overall average costs that are shown now.\n\nOverall cheapest model on average, overall most expensive model on average, overall fastest model on average (per feature duration), overall slowest model on average (per feature duration), overall model with highest average rating, overall model with lowest average rating.\n\nJust the same as all these overall stats - we want to display the same per project.\n\nAll in a nice scrollable table similar to what's already shown right now.",
       "plan": "",
-      "context": ["src/renderer/screens/AllAgentsView.tsx", "src/renderer/screens/AgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -951,7 +1027,9 @@
       "title": "AllAgents statistics rework",
       "description": "In @src/renderer/screens/AllAgentsView.tsx there needs to be a few improvements:\n1) the overall section should be the top row of the \"Projects statistics\" section. It should have a blueish background to make it stand out from the project ones.\n2) Move the \"Projects statistics\" above \"Model statistics\"\n3) Make the \"Model statistics\" match \"Projects statistics in terms of columns as much as possible\n4) Add a section \"Agents statistics\" that similarly to per project stats will have the same breakdown but per agentType.\n5) Replace the active runs item from the top with a total time spent by agents.",
       "plan": "",
-      "context": ["src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
       "acceptance": [],
       "blockers": []
     },
@@ -961,7 +1039,19 @@
       "title": "AllAgentsView rework",
       "description": "In @src/renderer/screens/AllAgentsView.tsx we need to rework the following:\n1) remove the Overall highlights\n2) the projects statistics:\n- the Overall row (the 1st one) needs to have a light blue background.\n3) all sections:\n - Fastest (per feature), Slowest (per feature) columns, should have the text on 2 lines. The second line saying \"(pre feature)\"\n- The values for columns showing a model chip + cost should have them vertically stacked, so the model chip first and below it the cost.\n4) at the top, remove the avg cost per run - add instead a total tasks/features worked on",
       "plan": "",
-      "context": ["src/renderer/screens/AllAgentsView.tsx"],
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "05393210-77ab-4301-8243-accf0edac8d5",
+      "status": "-",
+      "title": "Make the app icon work",
+      "description": "There's an icon included 'icon.jpeg' in the root of this project.\nMake it work as the app's icon.",
+      "plan": "",
+      "context": [],
       "acceptance": [],
       "blockers": []
     }
@@ -1048,6 +1138,7 @@
     "60237404-0b90-4663-9ed3-de9db2d77354": 79,
     "34c83d4f-078d-45c3-b85a-e701f1d82f3a": 80,
     "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb": 81,
-    "fc49d90d-6345-4744-aa82-060d025051d0": 82
+    "fc49d90d-6345-4744-aa82-060d025051d0": 82,
+    "05393210-77ab-4301-8243-accf0edac8d5": 83
   }
 }
