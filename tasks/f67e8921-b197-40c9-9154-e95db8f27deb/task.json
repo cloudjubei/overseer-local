@@ -1058,7 +1058,7 @@
     },
     {
       "id": "ea8dc9a0-203e-42c6-ab4d-70db372c0003",
-      "status": "-",
+      "status": "+",
       "title": "Cleanup the SettingsView",
       "description": "The @src/renderer/screens/SettingsView.tsx is currently overloaded by its sub views.\nEach subview should be in its own separate folder as it serves as a separate main view. Refactor it cleanly.",
       "plan": "",
