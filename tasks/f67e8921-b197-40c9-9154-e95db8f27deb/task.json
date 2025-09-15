@@ -1047,13 +1047,14 @@
     },
     {
       "id": "05393210-77ab-4301-8243-accf0edac8d5",
-      "status": "+",
+      "status": "-",
       "title": "Make the app icon work",
       "description": "There's an icon included 'icon.jpeg' in the root of this project.\nMake it work as the app's icon.",
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "rejection": "When running via 'npm run start' the app icon doesn't show"
     }
   ],
   "featureIdToDisplayIndex": {
