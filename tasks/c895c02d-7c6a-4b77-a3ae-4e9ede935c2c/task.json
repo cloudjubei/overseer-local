@@ -8,9 +8,8 @@
       "id": "ab20c3bb-f4d7-46be-84be-da04e14019ac",
       "status": "+",
       "title": "Add thefactory-db initialization service in main process",
-      "description": "Create @src/db/DatabaseManager.js to encapsulate initializing and managing a thefactory-db connection. It should read connection settings from the user supplied connection string in @src/renderer/contexts/AppSettingsContext.tsx . \nProvide async init(), getClient(), and stopWatching()/close() methods. Export and wire it in @src/managers.js  (add dbManager export), instantiate before @src/factory-tools/FactoryToolsManager.js , call init() during startup, and close on app shutdown in stopManagers().",
+      "description": "Create @src/db/DatabaseManager.js to encapsulate initializing and managing a thefactory-db connection.\nProvide async close() methods. Export and wire it in @src/managers.js  (add dbManager export), instantiate before @src/factory-tools/FactoryToolsManager.js , call init() during startup, and close on app shutdown in stopManagers().",
       "context": [
-        "src/renderer/contexts/AppSettingsContext.tsx",
         "src/factory-tools/FactoryToolsManager.js",
         "src/managers.js"
       ],
@@ -28,7 +27,7 @@
     },
     {
       "id": "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356",
-      "status": "+",
+      "status": "-",
       "title": "Implement DocumentIngestionService for project files",
       "description": "Create @src/db/DocumentIngestionService.js to handle scanning the repository files and upserting them into thefactory-db 'documents' table using addDocument(). Determine document type: 'project_code' for code files (js, ts, tsx, jsx, json, md, css, etc. configurable), 'project_file' for other internal files, 'external_file' reserved for future. For each project (from @src/projects/ProjectsManager.js ), resolve its root directory and iterate via @src/files/FilesManager.js  or a direct file walk (reuse ignore patterns from @src/files/FilesStorage.js). For each file, compute a stable document identifier (e.g., projectId + relative path), content hash, metadata (path, projectId, ext, size, mtime, type). Upsert if missing or if hash/mtime changed; delete or mark archived on file removal. Expose methods: syncAllProjects(), syncProject(projectId), handleFileAdded/Changed/Deleted(projectId, relPath).",
       "context": [
@@ -37,19 +36,6 @@
         "src/files/FilesManager.js"
       ],
       "blockers": []
-    },
-    {
-      "id": "9834258a-c115-4554-9a3f-3209c6b66686",
-      "status": "?",
-      "title": "LoadingScreen is the place where all managers get started.",
-      "description": "Right now, in @src/managers.js , after all the managers get created they also get initialised. The code to initialise them should be triggered by the @src/renderer/screens/LoadingScreen.tsx -  passing in all the necessary information, such as @src/renderer/contexts/AppSettingsContext.tsx into the appropriate managers - as now the new DatabaseManager will require this new databaseConnectionString.\nSet this up in a nice clean way.",
-      "context": [
-        "src/managers.js",
-        "src/renderer/screens/LoadingScreen.tsx",
-        "src/renderer/contexts/AppSettingsContext.tsx"
-      ],
-      "blockers": [],
-      "rejection": "Blocked: The feature requires triggering main-process managers initialization from the renderer LoadingScreen and passing AppSettings (including databaseConnectionString). However, there is no exposed IPC or preload API to call a main function with the settings, and we cannot modify main/preload/services without their files. Current repository view lacks src/main.js and src/preload.js wiring for a method like initManagersWithSettings, and there is no DatabaseManager or thefactory-db integration code to receive the settings. Please provide or expose an IPC/preload endpoint to initialize managers with settings (or provide main/preload files), and confirm where databaseConnectionString lives in AppSettings so we can forward it appropriately."
     },
     {
       "id": "a47c5301-d7b0-4b61-af16-722819909733",
@@ -64,17 +50,16 @@
     },
     {
       "id": "d744a0cb-1b0b-4669-a692-7a9751e2eb9e",
-      "status": "?",
+      "status": "-",
       "title": "Define document typing and code file detection utility",
-      "description": "Add @src/db/fileTyping.js with helpers: isCodeFile(ext, relPath) returning true for typical code/config/docs; classifyDocumentType(relPath) returning 'project_code' or 'project_file'. Use a central list of extensions and allow future configuration via settings. Reuse in DocumentIngestionService and watcher handlers to ensure consistent type assignment.",
+      "description": "Add @src/db/fileTyping.js with helpers: isCodeFile(ext, relPath) returning true for typical code/config/docs; classifyDocumentType(relPath) returning 'project_code' or 'project_file'. Use a central list of extensions and allow future configuration via settings. Reuse in DocumentIngestionService.",
       "context": [],
-      "blockers": [],
-      "rejection": "Blocked: Agent loop failed: TypeError: query.toLowerCase is not a function"
+      "blockers": []
     },
     {
       "id": "d172d15d-98ca-434e-8fc7-4ea476821f51",
       "status": "+",
-      "title": "Expose minimal DB/search config to renderer and settings",
+      "title": "Expose minimal DB config to renderer and settings",
       "description": "Add optional app settings (in @src/settings/SettingsManager.js  schema if present) to configure DB location or connection string. Expose methods over IPC to read current DB status and last sync time. Update preload to include a dbService with getStatus() and onStatus(callback) if needed by the @src/renderer/screens/LoadingScreen.tsx .",
       "context": [
         "src/settings/SettingsManager.js",
@@ -84,7 +69,7 @@
     },
     {
       "id": "3535faff-05d1-4ae0-9b32-7192685536da",
-      "status": "+",
+      "status": "-",
       "title": "Update FILE_ORGANISATION.md with db subsystem",
       "description": "Document new src/db/ directory and its responsibilities: DatabaseManager (connection lifecycle), DocumentIngestionService (project file sync to thefactory-db), and fileTyping utility. Keep bullets concise and aligned with the existing documentation conventions.",
       "context": [],
@@ -115,8 +100,8 @@
     {
       "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
       "status": "-",
-      "title": "Document ingestion happens after all managers are loaded",
-      "description": "Trigger DocumentIngestionService.syncAllProjects(), after initing the managers inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start. Add a simple IPC channel (e.g., db:ingestion:status) to report progress to the @src/renderer/screens/LoadingScreen.tsx , it has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
+      "title": "Document ingestion inside LoadingScreen",
+      "description": "Trigger DocumentIngestionService.syncAllProjects(), after initing the database connection inside @src/renderer/screens/LoadingScreen.tsx . We need to have the database populated on app start.  @src/renderer/screens/LoadingScreen.tsx has to wait for the ingestion to complete and show a message like 'Indexing project files…'. Keep the UI responsive if sync takes long by enabling progress updates.",
       "plan": "",
       "context": [
         "src/renderer/screens/LoadingScreen.tsx"
@@ -126,7 +111,7 @@
     },
     {
       "id": "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0",
-      "status": "+",
+      "status": "-",
       "title": "First time db connection string configuration allows ingestion start",
       "description": "When a user configures the db connection string inside @src/renderer/screens/SettingsView.tsx - there should be a button to be able to rigger the ingestion when they do so.\nIt should also be made obvious to the user that if they change the connection string - a new ingestion process should be triggered.",
       "plan": "",
@@ -139,16 +124,15 @@
   ],
   "featureIdToDisplayIndex": {
     "6d115a0f-2c64-4e6a-bbbc-51ef9a2eed84": 1,
-    "9834258a-c115-4554-9a3f-3209c6b66686": 2,
-    "ab20c3bb-f4d7-46be-84be-da04e14019ac": 3,
-    "4de17e9f-a521-4bb0-8e4e-a82476c5ed35": 4,
-    "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 5,
-    "a47c5301-d7b0-4b61-af16-722819909733": 6,
-    "d744a0cb-1b0b-4669-a692-7a9751e2eb9e": 7,
-    "d172d15d-98ca-434e-8fc7-4ea476821f51": 8,
-    "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5": 9,
-    "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0": 10,
-    "3535faff-05d1-4ae0-9b32-7192685536da": 11,
-    "7d59b560-086e-4879-a1a6-9e051db6434f": 12
+    "ab20c3bb-f4d7-46be-84be-da04e14019ac": 2,
+    "4de17e9f-a521-4bb0-8e4e-a82476c5ed35": 3,
+    "d172d15d-98ca-434e-8fc7-4ea476821f51": 4,
+    "a47c5301-d7b0-4b61-af16-722819909733": 5,
+    "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 6,
+    "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5": 7,
+    "d744a0cb-1b0b-4669-a692-7a9751e2eb9e": 8,
+    "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0": 9,
+    "7d59b560-086e-4879-a1a6-9e051db6434f": 10,
+    "3535faff-05d1-4ae0-9b32-7192685536da": 11
   }
 }

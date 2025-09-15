@@ -7,11 +7,11 @@ export class DatabaseManager {
     this.projectRoot = projectRoot
     this.window = window
 
-    this._dbClient = null
-    this._connectionString = ''
+    this._dbClient = undefined
+    this._connectionString = undefined
     this._status = {
       connected: false,
-      lastError: null,
+      lastError: undefined,
     }
   }
 
@@ -70,6 +70,7 @@ export class DatabaseManager {
     try {
       const db = await import('thefactory-db')
       this._dbClient = await db.openDatabase({ connectionString })
+      this._connectionString = connectionString
       this._setConnected(true)
       console.log('[db] thefactory-db client initialized')
     } catch (err) {
@@ -78,6 +79,10 @@ export class DatabaseManager {
       console.error('[db] Failed to initialize thefactory-db:', err?.message || err)
     }
     return this.getStatus()
+  }
+
+  getConnectionString() {
+    return this._connectionString
   }
 
   getStatus() {

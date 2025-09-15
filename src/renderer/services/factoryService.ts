@@ -15,7 +15,6 @@ export type StartTaskRunParams = {
   llmConfig: LLMConfig
   githubCredentials: GithubCredentials
   webSearchApiKeys?: WebSearchApiKeys
-  options?: Record<string, any>
 }
 export type StartFeatureRunParams = StartTaskRunParams & { featureId: string }
 
