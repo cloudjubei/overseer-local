@@ -1,44 +1,70 @@
-const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron')
-const path = require('path')
-const isDev = !app.isPackaged
+import { app, BrowserWindow, nativeImage } from 'electron'
+import path from 'node:path'
+import started from 'electron-squirrel-startup'
+import { registerScreenshotService } from './capture/screenshotService'
+import { initManagers, stopManagers } from './managers'
 
-// DB IPC setup
-const { setupDbIpc, bindDbIngestionBroadcast } = require('./db/ipc')
-
+if (started) {
+  app.quit()
+}
 let mainWindow
 
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
-  })
+// Use Electron's app.isPackaged to determine dev vs prod
+const IS_DEV = !app.isPackaged
 
-  const url = isDev
-    ? 'http://localhost:5173'
-    : `file://${path.join(__dirname, '../renderer/index.html')}`
-
-  mainWindow.loadURL(url)
-
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+const getAppIcon = () => {
+  // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
+  const iconPath = path.join(process.cwd(), 'icon.png')
+  const image = nativeImage.createFromPath(iconPath)
+  return image
 }
 
-app.on('ready', () => {
-  setupDbIpc()
-  bindDbIngestionBroadcast(() => BrowserWindow.getAllWindows().map(w => w.webContents))
+const createWindow = () => {
+  const iconImage = (mainWindow = new BrowserWindow({
+    width: IS_DEV ? 1600 : 1200,
+    height: 800,
+    icon: getAppIcon(), // used on Windows/Linux; ignored on macOS (dock icon set below)
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  }))
+
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
+  } else {
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
+  }
+
+  mainWindow.webContents.openDevTools()
+}
+
+app.whenReady().then(async () => {
+  // Set dock icon on macOS explicitly
+  if (process.platform === 'darwin') {
+    const iconImage = getAppIcon()
+    if (!iconImage.isEmpty()) {
+      app.dock.setIcon(iconImage)
+    }
+  }
+
   createWindow()
+
+  registerScreenshotService(() => mainWindow)
+
+  const projectRoot = app.getAppPath()
+
+  await initManagers(projectRoot, mainWindow)
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    }
+  })
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+  stopManagers()
 })

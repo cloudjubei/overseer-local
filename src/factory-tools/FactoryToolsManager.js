@@ -8,54 +8,39 @@ export class FactoryToolsManager {
   constructor(projectRoot, window, dbManager) {
     this.projectRoot = projectRoot
     this.window = window
-    this.dbManager = dbManager
     this._ipcBound = false
 
     this.runHandles = new Map()
+    this.pricingManager = null
+    this.runStore = null
+    this.orchestrator = null
 
-    this.PRICING = createPricingManager({ projectRoot })
+    this.dbManager = dbManager
+  }
 
-    const dbPath = path.join(projectRoot, '.factory')
+  async init() {
+    console.log('[factory] Creating pricingManager')
+    this.pricingManager = createPricingManager({ projectRoot: this.projectRoot })
+
+    const dbPath = path.join(this.projectRoot, '.factory')
     console.log('[factory] Initializing history store at', dbPath)
     this.runStore = createAgentRunStore({ dbPath })
 
-    // Prepare DB integration for thefactory-tools orchestrator
-    const dbClient = this.dbManager?.getClient?.()
-    const connectionString = this.dbManager?.getConnectionString?.()
-
-    // If thefactory-tools expects env vars for DB, set them before creating the orchestrator
-    if (connectionString && !process.env.THEFACTORY_DB_URL) {
-      process.env.THEFACTORY_DB_URL = connectionString
-    }
-
     console.log('[factory] Creating orchestrator')
     const orchestratorOptions = {
-      projectRoot,
+      projectRoot: this.projectRoot,
       runStore: this.runStore,
-      pricing: this.PRICING,
-    }
-
-    // Provide multiple shapes to be compatible across thefactory-tools versions
-    if (dbClient) {
-      // direct client
-      orchestratorOptions.db = dbClient
-      // alternative shapes that may be recognized by downstream API
-      orchestratorOptions.dbClient = dbClient
-      orchestratorOptions.dbConfig = { client: dbClient, connectionString }
-    } else if (connectionString) {
-      orchestratorOptions.dbConfig = { connectionString }
+      pricing: this.pricingManager,
     }
 
     this.orchestrator = createOrchestrator(orchestratorOptions)
     console.log('[factory] Orchestrator ready')
-  }
 
-  async init() {
     this._registerIpcHandlers()
 
     console.log(
       '[factory] Pricing manager initialized. Loaded',
-      this.PRICING?.listPrices()?.prices?.length || 0,
+      this.pricingManager?.listPrices()?.prices?.length || 0,
       'prices.',
     )
   }
@@ -71,7 +56,6 @@ export class FactoryToolsManager {
       llmConfig,
       githubCredentials,
       webSearchApiKeys,
-      options,
     }) =>
       this.startTaskRun(
         agentType,
@@ -80,7 +64,6 @@ export class FactoryToolsManager {
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
-        options,
       )
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_FEATURE] = async ({
       agentType,
@@ -90,7 +73,6 @@ export class FactoryToolsManager {
       llmConfig,
       githubCredentials,
       webSearchApiKeys,
-      options,
     }) =>
       this.startFeatureRun(
         agentType,
@@ -100,7 +82,6 @@ export class FactoryToolsManager {
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
-        options,
       )
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL] = async ({ runId, reason }) =>
       await this.cancelRun(runId, reason)
@@ -135,7 +116,7 @@ export class FactoryToolsManager {
     llmConfig,
     githubCredentials,
     webSearchApiKeys,
-    options,
+    dbConnectionString,
   ) {
     console.log(
       '[factory] START_TASK',
@@ -146,10 +127,10 @@ export class FactoryToolsManager {
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
-        options,
       }),
     )
     try {
+      const dbConnectionString = this.dbManager.getConnectionString()
       const { runHistory, runHandle } = this.orchestrator.startRun({
         agentType,
         projectId,
@@ -157,7 +138,7 @@ export class FactoryToolsManager {
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
-        options,
+        dbConnectionString,
       })
       console.log('[factory] Run started (task)', runHandle.id)
       this._attachRunHandle(runHandle)
@@ -176,7 +157,6 @@ export class FactoryToolsManager {
     llmConfig,
     githubCredentials,
     webSearchApiKeys,
-    options,
   ) {
     console.log(
       '[factory] START_FEATURE',
@@ -188,10 +168,10 @@ export class FactoryToolsManager {
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
-        options,
       }),
     )
     try {
+      const dbConnectionString = this.dbManager.getConnectionString()
       const { runHistory, runHandle } = this.orchestrator.startRun({
         agentType,
         projectId,
@@ -200,7 +180,7 @@ export class FactoryToolsManager {
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
-        options,
+        dbConnectionString,
       })
       console.log('[factory] Run started (feature)', runHandle.id)
       this._attachRunHandle(runHandle)
@@ -246,10 +226,10 @@ export class FactoryToolsManager {
   }
 
   async listPrices() {
-    return await this.PRICING.listPrices()
+    return await this.pricingManager.listPrices()
   }
   async refreshPrices(provider, url) {
-    return await this.PRICING.refresh(provider, url)
+    return await this.pricingManager.refresh(provider, url)
   }
 
   _nowIso() {

@@ -6,9 +6,11 @@ import type { NotificationsService } from 'src/renderer/services/notificationsSe
 import type { SettingsService } from 'src/renderer/services/settingsService'
 import type { LiveDataService } from 'src/renderer/services/liveDataService'
 import type { FactoryService } from 'src/renderer/services/factoryService'
+import type { DBService } from 'src/renderer/services/dbService'
 
 declare global {
   interface Window {
+    dbService: DBService
     factoryService: FactoryService
     tasksService: TasksService
     projectsService: ProjectsService

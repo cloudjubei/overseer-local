@@ -7,9 +7,6 @@ import { NotificationsManager } from './notifications/NotificationsManager'
 import { SettingsManager } from './settings/SettingsManager'
 import { LiveDataManager } from './live-data/LiveDataManager'
 import { DatabaseManager } from './db/DatabaseManager'
-import DocumentIngestionService from './db/DocumentIngestionService'
-import IPC_HANDLER_KEYS from './ipcHandlersKeys'
-import { ipcMain } from 'electron'
 
 export let dbManager
 export let factoryToolsManager
@@ -20,26 +17,11 @@ export let chatsManager
 export let notificationsManager
 export let settingsManager
 export let liveDataManager
-export let documentIngestionService
 
 export async function initManagers(projectRoot, mainWindow) {
-  // Initialize thefactory-db connection first so downstream managers can rely on it if needed
   dbManager = new DatabaseManager(projectRoot, mainWindow)
-  await dbManager.init()
-
   factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, dbManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
-
-  // Initialize ingestion service to be used by FilesManager and elsewhere
-  const dbClient = dbManager?.getClient?.()
-  documentIngestionService = new DocumentIngestionService({
-    projectsManager,
-    filesManager: undefined, // will be set later if needed
-    db: dbClient,
-    logger: console,
-    dbManager,
-  })
-
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow)
@@ -54,9 +36,7 @@ export async function initManagers(projectRoot, mainWindow) {
     settingsManager,
   )
 
-  // Expose DB status IPC
-  ipcMain.handle(IPC_HANDLER_KEYS.DB_GET_STATUS, async () => dbManager.getStatus())
-
+  await dbManager.init()
   await factoryToolsManager.init()
   await projectsManager.init()
   await tasksManager.init()
@@ -67,6 +47,9 @@ export async function initManagers(projectRoot, mainWindow) {
   await liveDataManager.init()
 }
 export function stopManagers() {
+  if (dbManager) {
+    dbManager.stopWatching()
+  }
   if (factoryToolsManager) {
     factoryToolsManager.stopWatching()
   }
@@ -90,8 +73,5 @@ export function stopManagers() {
   }
   if (liveDataManager) {
     liveDataManager.stopWatching()
-  }
-  if (dbManager) {
-    dbManager.stopWatching()
   }
 }

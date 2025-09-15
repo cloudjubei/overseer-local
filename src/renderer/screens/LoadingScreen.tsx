@@ -1,56 +1,49 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import { dbService, type IngestionProgress } from '../services/dbService'
+import { dbService } from '../services/dbService'
 
 interface LoadingScreenProps {
   onLoaded: () => void
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
-  const { isAppSettingsLoaded } = useAppSettings()
+  const { isAppSettingsLoaded, appSettings } = useAppSettings()
   const [statusText, setStatusText] = useState<string>('Loading your settings…')
+  const [isDBSetup, setIsDBSetup] = useState(false)
   const doneRef = useRef(false)
 
+  const isReadyToExit = useMemo(() => {
+    return isAppSettingsLoaded && isDBSetup
+  }, [isAppSettingsLoaded, isDBSetup])
+
+  const startDatabase = async (connectionString?: string) => {
+    if (!connectionString) {
+      //no user provided connection string - proceed anyway
+      setIsDBSetup(true)
+      return
+    }
+    const dbStatus = await dbService.connect(connectionString)
+    if (!dbStatus.connected) {
+      //bad connection - proceed anyway
+      setIsDBSetup(true)
+      return
+    }
+
+    setIsDBSetup(true)
+    //TODO: ingestion of all docs
+  }
   useEffect(() => {
-    if (!isAppSettingsLoaded || doneRef.current) return
-
-    let unsubscribe: (() => void) | undefined
-    let readyToExit = false
-
-    const maybeFinish = () => {
-      if (readyToExit && !doneRef.current) {
-        doneRef.current = true
-        onLoaded()
-      }
+    if (isAppSettingsLoaded) {
+      startDatabase(appSettings.database.connectionString)
     }
+  }, [isAppSettingsLoaded])
 
-    const start = async () => {
-      // Listen for ingestion progress
-      unsubscribe = dbService.onIngestionStatus((p: IngestionProgress) => {
-        if (p.status === 'running') {
-          setStatusText(p.message || 'Indexing project files…')
-        } else if (p.status === 'done') {
-          setStatusText('Indexing complete')
-          readyToExit = true
-          maybeFinish()
-        } else if (p.status === 'error') {
-          setStatusText('Indexing failed, continuing…')
-          readyToExit = true
-          maybeFinish()
-        }
-      })
-
-      // Trigger ingestion sync after managers/settings are ready
-      await dbService.startIngestion()
+  useEffect(() => {
+    if (isReadyToExit && !doneRef.current) {
+      doneRef.current = true
+      onLoaded()
     }
-
-    setStatusText('Loading your settings…')
-    start()
-
-    return () => {
-      if (unsubscribe) unsubscribe()
-    }
-  }, [isAppSettingsLoaded, onLoaded])
+  }, [isReadyToExit, doneRef])
 
   return (
     <div

@@ -84,7 +84,21 @@ const IPC_HANDLER_KEYS = {
 
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',
+  DB_CONNECT: 'db:connect',
   DB_GET_STATUS: 'db:get-status',
+  DB_ENTITIES_ADD: 'db:entities-add',
+  DB_ENTITIES_GET: 'db:entities-get',
+  DB_ENTITIES_UPDATE: 'db:entities-update',
+  DB_ENTITIES_DELETE: 'db:entities-delete',
+  DB_ENTITIES_SEARCH: 'db:entities-search',
+  DB_ENTITIES_MATCH: 'db:entities-match',
+  DB_ENTITIES_CLEAR: 'db:entities-clear',
+  DB_DOCUMENTS_ADD: 'db:documents-add',
+  DB_DOCUMENTS_GET: 'db:documents-get',
+  DB_DOCUMENTS_UPDATE: 'db:documents-update',
+  DB_DOCUMENTS_DELETE: 'db:documents-delete',
+  DB_DOCUMENTS_SEARCH: 'db:documents-search',
+  DB_DOCUMENTS_CLEAR: 'db:documents-clear',
 }
 
 export default IPC_HANDLER_KEYS

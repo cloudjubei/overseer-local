@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import FilesStorage from './FilesStorage'
-import { projectsManager, documentIngestionService } from '../managers'
+import { projectsManager } from '../managers'
 
 function resolveFilesDir(projectRoot) {
   return projectRoot
@@ -31,30 +31,7 @@ export class FilesManager {
       }
       const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path)
       const filesDir = resolveFilesDir(projectRoot)
-
-      // Hook into DocumentIngestionService if available
-      const handlers = documentIngestionService
-        ? {
-            onAdd: async ({ projectId: pid, relPath }) => {
-              try { await documentIngestionService.handleFileAdded(pid, relPath) } catch (e) { console.warn('[files] onAdd handler failed', e) }
-            },
-            onChange: async ({ projectId: pid, relPath }) => {
-              try { await documentIngestionService.handleFileChanged(pid, relPath) } catch (e) { console.warn('[files] onChange handler failed', e) }
-            },
-            onUnlink: async ({ projectId: pid, relPath }) => {
-              try { await documentIngestionService.handleFileDeleted(pid, relPath) } catch (e) { console.warn('[files] onUnlink handler failed', e) }
-            },
-            onRename: async ({ projectId: pid, relPathSource, relPathTarget }) => {
-              // Two-step: archive old then upsert new
-              try {
-                await documentIngestionService.handleFileDeleted(pid, relPathSource)
-                await documentIngestionService.handleFileAdded(pid, relPathTarget)
-              } catch (e) { console.warn('[files] onRename handler failed', e) }
-            },
-          }
-        : {}
-
-      const storage = new FilesStorage(projectId, filesDir, this.window, handlers)
+      const storage = new FilesStorage(projectId, filesDir, this.window)
       await storage.init()
       this.storages[projectId] = storage
     }

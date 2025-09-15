@@ -1,20 +1,44 @@
-export type IngestionProgress = {
-  status: 'idle' | 'running' | 'done' | 'error'
-  message?: string
-  total?: number
-  processed?: number
-  error?: string
+import {
+  DocumentInput,
+  DocumentWithScore,
+  Entity,
+  EntityInput,
+  EntityWithScore,
+  SearchParams,
+} from 'thefactory-db/dist/types'
+
+export type ProjectSyncStatus = {
+  lastSyncAt: string | null
 }
 
-// Renderer-side thin wrapper over preload-exposed API
-export const dbService = {
-  startIngestion: async (): Promise<void> => {
-    // @ts-ignore
-    if (window.db?.startIngestion) await window.db.startIngestion()
-  },
-  onIngestionStatus: (cb: (p: IngestionProgress) => void): (() => void) => {
-    // @ts-ignore
-    if (window.db?.onIngestionStatus) return window.db.onIngestionStatus(cb)
-    return () => {}
-  },
+export type DbStatus = {
+  connected: boolean
+  lastError: string | null
 }
+
+export type DBService = {
+  subscribe: (callback: (status: DbStatus) => void) => () => void
+
+  connect: (connectionString: string) => Promise<DbStatus>
+  getStatus: () => Promise<DbStatus>
+
+  //exposing all 'thefactory-db' methods
+  addEntity(e: EntityInput): Promise<Entity>
+  getEntityById(id: string): Promise<Entity | undefined>
+  updateEntity(id: string, patch: Partial<EntityInput>): Promise<Entity | undefined>
+  deleteEntity(id: string): Promise<boolean>
+  searchEntities(params: SearchParams): Promise<EntityWithScore[]>
+  matchEntities(
+    criteria: any,
+    options?: { types?: string[]; ids?: string[]; limit?: number },
+  ): Promise<Entity[]>
+  clearEntities(): Promise<void>
+  addDocument(d: DocumentInput): Promise<Document>
+  getDocumentById(id: string): Promise<Document | undefined>
+  updateDocument(id: string, patch: Partial<DocumentInput>): Promise<Document | undefined>
+  deleteDocument(id: string): Promise<boolean>
+  searchDocuments(params: SearchParams): Promise<DocumentWithScore[]>
+  clearDocuments(): Promise<void>
+}
+
+export const dbService: DBService = { ...window.dbService }
