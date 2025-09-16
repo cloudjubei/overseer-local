@@ -1519,6 +1519,18 @@
       "createdAt": "2025-09-16T13:05:37.984Z",
       "completedAt": "2025-09-16T13:05:37.984Z",
       "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "d0647493-d214-40cd-bb93-c12a7a99ef36",
+      "status": "-",
+      "title": "When a feature is modified or added to a task the task status should update",
+      "description": "In @src/renderer/tasks/TaskDetailsView.tsx when a new feature is added, the Task's status might still be \"Done\" even though the underlying Task data has changed - the view should update accordingly (by getting the latest task data).",
+      "plan": "",
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1616,7 +1628,8 @@
     "4673bd96-c874-4b92-8779-d81af432c032": 92,
     "fac00d4a-01a5-4012-8481-bb920ac502db": 93,
     "f3b465a1-09be-45e9-80b2-70c84145ce5f": 94,
-    "e2ac9811-94ae-4088-b00b-546f358b370e": 95
+    "e2ac9811-94ae-4088-b00b-546f358b370e": 95,
+    "d0647493-d214-40cd-bb93-c12a7a99ef36": 96
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T13:05:37.984Z"
