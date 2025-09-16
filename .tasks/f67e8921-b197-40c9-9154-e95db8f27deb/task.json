@@ -1226,7 +1226,7 @@
     },
     {
       "id": "e2ac9811-94ae-4088-b00b-546f358b370e",
-      "status": "-",
+      "status": "+",
       "title": "In all modals - the footer/bottom section is sticky just like the top/header section",
       "description": "Right now, for instance in @src/renderer/components/tasks/FeatureForm.tsx there are buttons at the bottom that get hidden if the form is too big - these need to be sticky at the bottom so they always show (just like the top section).\nThis needs to be true for all modals - so that any place using a modal can define the bottom sticky section. Then only the middle section scrolls.\n@src/renderer/projects/ProjectManagerModal.tsx also should have the sticky bottom buttons.\nThe interface for doing so should be clean and consistent.",
       "plan": "",
