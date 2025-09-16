@@ -1210,6 +1210,18 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "f3b465a1-09be-45e9-80b2-70c84145ce5f",
+      "status": "-",
+      "title": "Show the notifications badge in the Sidebar",
+      "description": "Right now, next to the project in the @src/renderer/navigation/SidebarView.tsx it only shows a running agent badge. It must also show the notifications badge next to it.\nWhen the Sidebar is collapsed - it should shrink both badges and show them vertically stacked - making sure that the project icon is still clearly visible.",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1305,6 +1317,7 @@
     "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 90,
     "c20fbc93-7910-4612-a275-95a3d722955c": 91,
     "4673bd96-c874-4b92-8779-d81af432c032": 92,
-    "fac00d4a-01a5-4012-8481-bb920ac502db": 93
+    "fac00d4a-01a5-4012-8481-bb920ac502db": 93,
+    "f3b465a1-09be-45e9-80b2-70c84145ce5f": 94
   }
 }
