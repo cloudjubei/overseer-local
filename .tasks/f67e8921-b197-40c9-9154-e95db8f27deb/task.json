@@ -1162,7 +1162,7 @@
     },
     {
       "id": "06c24df0-01ba-4d83-b7ad-f4a5f40175d1",
-      "status": "-",
+      "status": "+",
       "title": "We need more project icons",
       "description": "There should be at least 20 various icons in @src/renderer/projects/projectIcons.ts . Also, when a project's icon is set - it should be reflected in @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx",
       "plan": "",

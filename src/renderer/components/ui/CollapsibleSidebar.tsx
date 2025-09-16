@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Tooltip from './Tooltip'
 import { IconMenu, IconChevron } from './Icons'
+import { renderProjectIcon } from '../../projects/projectIcons'
 
 export type CollapsibleSidebarItem = {
   id: string
   label: string
   icon?: React.ReactNode
+  // Optional icon key mapped via projects/projectIcons renderProjectIcon
+  iconKey?: string
   accent?: string
   badge?: number
   action?: React.ReactNode
@@ -159,6 +162,7 @@ export default function CollapsibleSidebar(props: Props) {
               )}
               {items.map((item, i) => {
                 const isActive = activeId === item.id
+                const iconNode = item.icon ?? (item.iconKey ? renderProjectIcon(item.iconKey) : null)
                 return (
                   <li key={item.id} className="nav-li">
                     <div className="flex items-center nav-row">
@@ -171,7 +175,7 @@ export default function CollapsibleSidebar(props: Props) {
                         tabIndex={focusIndex === i ? 0 : -1}
                         onFocus={() => setFocusIndex(i)}
                       >
-                        {item.icon && <span className="nav-item__icon">{item.icon}</span>}
+                        {iconNode && <span className="nav-item__icon">{iconNode}</span>}
                         {!collapsed && <span className="nav-item__label">{item.label}</span>}
                         {item.badge && item.badge > 0 && (
                           <span className="nav-item__badge">{item.badge}</span>

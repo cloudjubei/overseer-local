@@ -3,9 +3,8 @@ import { Modal } from '../components/ui/Modal'
 import { projectsService } from '../services/projectsService'
 import { validateProjectClient } from './validateProject'
 import { useProjectContext } from '../contexts/ProjectContext'
-import { IconDelete, IconEdit, IconPlus, IconFolder, IconCollection, IconWorkspace } from '../components/ui/Icons'
 import { Button } from '../components/ui/Button'
-import { PROJECT_ICONS } from './projectIcons'
+import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -38,18 +37,6 @@ function TextArea({ label, value, onChange, placeholder }: any) {
       />
     </div>
   )
-}
-
-function renderProjectIcon(key?: string, className?: string) {
-  switch (key) {
-    case 'collection':
-      return <IconCollection className={className} />
-    case 'workspace':
-      return <IconWorkspace className={className} />
-    case 'folder':
-    default:
-      return <IconFolder className={className} />
-  }
 }
 
 function IconPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
@@ -136,8 +123,8 @@ export default function ProjectManagerModal({
       const p: any = getProjectById(id)
       if (p) {
         const existingIcon = p.metadata?.icon
-        // migrate old emoji values to new keys (fallback to folder)
-        const normalizedIcon = ['folder', 'collection', 'workspace'].includes(existingIcon)
+        // normalize to a supported key (fallback to folder)
+        const normalizedIcon = PROJECT_ICONS.some((opt) => opt.value === existingIcon)
           ? existingIcon
           : 'folder'
         setForm({
@@ -176,7 +163,7 @@ export default function ProjectManagerModal({
 
   function startEdit(p: any) {
     const existingIcon = p.metadata?.icon
-    const normalizedIcon = ['folder', 'collection', 'workspace'].includes(existingIcon)
+    const normalizedIcon = PROJECT_ICONS.some((opt) => opt.value === existingIcon)
       ? existingIcon
       : 'folder'
     setForm({
@@ -251,7 +238,7 @@ export default function ProjectManagerModal({
           <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ color: 'var(--text-secondary)' }}>Projects: {projectsList.length}</div>
             <button className="btn" onClick={startCreate}>
-              <IconPlus />
+              +
             </button>
           </div>
           <div>
@@ -281,7 +268,7 @@ export default function ProjectManagerModal({
                   </div>
                   <div className="flex" style={{ gap: 8 }}>
                     <Button className="btn-secondary" onClick={() => startEdit(p)}>
-                      <IconEdit />
+                      Edit
                     </Button>
                     <Button
                       className="btn-secondary"
@@ -289,7 +276,7 @@ export default function ProjectManagerModal({
                       variant="danger"
                       onClick={() => handleDelete(p.id)}
                     >
-                      <IconDelete />
+                      Delete
                     </Button>
                   </div>
                 </li>

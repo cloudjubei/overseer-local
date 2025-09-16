@@ -30,6 +30,7 @@ import {
   IconMenu,
   IconChevron,
 } from '../components/ui/Icons'
+import { renderProjectIcon } from '../projects/projectIcons'
 
 export type SidebarProps = {}
 
@@ -436,7 +437,8 @@ export default function SidebarView({}: SidebarProps) {
             const active = activeProjectId === p.id
             const accent = useAccentClass(p.id, isMain)
             const activeCount = activeCountByProject.get(p.id) || 0
-            const projectIcon = isMain ? <IconCollection /> : <IconFolder />
+            const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
+            const projectIcon = renderProjectIcon(iconKey)
             return (
               <li className="nav-li" key={p.id}>
                 <div className="flex items-center">
