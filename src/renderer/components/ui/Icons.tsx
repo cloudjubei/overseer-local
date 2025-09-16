@@ -551,7 +551,11 @@ export function IconFolderOpen({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M3 8a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1" stroke="#F59E0B" strokeWidth="2" />
-      <path d="M3 10h17a2 2 0 0 1 1.94 2.47l-1.2 4.2A2 2 0 0 1 18.8 18H6.2a2 2 0 0 1-1.94-1.33L2.5 12.5A2 2 0 0 1 3 10z" stroke="#FB923C" strokeWidth="2" />
+      <path
+        d="M3 10h17a2 2 0 0 1 1.94 2.47l-1.2 4.2A2 2 0 0 1 18.8 18H6.2a2 2 0 0 1-1.94-1.33L2.5 12.5A2 2 0 0 1 3 10z"
+        stroke="#FB923C"
+        strokeWidth="2"
+      />
     </svg>
   )
 }
@@ -636,7 +640,7 @@ export function IconCollection({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <rect x="3" y="6" width="1=" height="13" rx="2" stroke="#06B6D4" strokeWidth="2" />
+      <rect x="3" y="6" width="13" height="13" rx="2" stroke="#06B6D4" strokeWidth="2" />
       <path d="M7 3h10a2 2 0 0 1 2 2v10" stroke="#93C5FD" strokeWidth="2" />
     </svg>
   )
