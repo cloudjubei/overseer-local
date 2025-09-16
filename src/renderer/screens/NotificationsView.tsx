@@ -3,10 +3,11 @@ import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { useNotifications } from '../hooks/useNotifications'
 import type { Notification } from '../../types/notifications'
 import { Button } from '../components/ui/Button'
+import { IconBell, IconChat } from '../components/ui/Icons'
 
 const SECTIONS = [
-  { id: 'general', label: 'General', icon: <span aria-hidden>🔔</span>, accent: 'brand' },
-  { id: 'messages', label: 'Messages', icon: <span aria-hidden>💬</span>, accent: 'teal' },
+  { id: 'general', label: 'General', icon: <IconBell />, accent: 'brand' },
+  { id: 'messages', label: 'Messages', icon: <IconChat />, accent: 'teal' },
 ]
 function formatTimestamp(timestamp: number): string {
   return new Date(timestamp).toLocaleString()

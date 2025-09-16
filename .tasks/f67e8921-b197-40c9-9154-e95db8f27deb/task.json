@@ -1550,7 +1550,7 @@
     },
     {
       "id": "f8eb8466-4457-49ca-8c65-9b812aec8a26",
-      "status": "-",
+      "status": "+",
       "title": "Settings inner sidebar needs to have icons updated",
       "description": "Just like everywhere else - we are using icons from @src/renderer/components/ui/Icons.tsx or @src/renderer/projects/projectIcons.tsx . Make sure the icons used for categories or anywhere else in @src/renderer/screens/SettingsView.tsx are used from @src/renderer/components/ui/Icons.tsx  (if they don't exist - create one).",
       "context": [
@@ -1560,11 +1560,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T15:31:13.926Z",
-      "updatedAt": "2025-09-16T15:31:13.926Z"
+      "updatedAt": "2025-09-16T15:48:43.902Z",
+      "completedAt": "2025-09-16T15:48:43.902Z"
     },
     {
       "id": "8ea2946d-0305-4f96-8e42-0f9d9a684de0",
-      "status": "-",
+      "status": "+",
       "title": "Notifications need to update their icons",
       "description": "The inner sidebar in @src/renderer/screens/NotificationsView.tsx need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx . If an icon doesn't exist - it should be created according to design.",
       "context": [
@@ -1573,7 +1574,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T15:32:02.314Z",
-      "updatedAt": "2025-09-16T15:32:02.314Z"
+      "updatedAt": "2025-09-16T15:49:29.864Z",
+      "completedAt": "2025-09-16T15:49:29.864Z"
     },
     {
       "id": "c4236f01-9f8d-4a9a-bd8a-3489a23316d5",
@@ -1706,5 +1708,5 @@
     "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-16T15:32:48.254Z"
+  "updatedAt": "2025-09-16T15:49:29.864Z"
 }
