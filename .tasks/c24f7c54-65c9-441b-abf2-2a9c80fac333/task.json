@@ -82,7 +82,7 @@
     },
     {
       "id": "cb90c00d-4376-432d-bbb6-66d2995d24bd",
-      "status": "-",
+      "status": "+",
       "title": "Adding a label to the calendar errors",
       "description": "When trying to add a user label to the @src/renderer/screens/ProjectTimelineView.tsx it errors.",
       "context": [
@@ -90,8 +90,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T16:29:32.078Z",
-      "updatedAt": "2025-09-16T16:30:49.832Z",
-      "rejection": "addEntity { projectId: 'main', type: undefined }\ndb:timeline-labels-add failed error: null value in column \"type\" of relation \"entities\" violates not-null constraint\n    at /Users/cloud/Documents/Work/overseer-local/node_modules/pg/lib/client.js:545:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.addEntity (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:2165:17)\n    at async DatabaseManager.addTimelineLabel (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:14037:12)\n    at async handlers.<computed> [as db:timeline-labels-add] (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:13944:78)\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:13954:18\n    at async Session.<anonymous> (node:electron/js2c/browser_init:2:107024) {\n  length: 391,\n  severity: 'ERROR',\n  code: '23502',\n  detail: 'Failing row contains (ceb03329-7901-43f9-8836-1eb577e5656d, main, null, null, , null, [-0.09368993,0.037654385,0.005246423,0.000880191,0.042941976,0.0..., null, 2025-09-16 16:30:32.204063+00, 2025-09-16 16:30:32.204063+00).',\n  hint: undefined,\n  position: undefined,\n  internalPosition: undefined,\n  internalQuery: undefined,\n  where: undefined,\n  schema: 'public',\n  table: 'entities',\n  column: 'type',\n  dataType: undefined,\n  constraint: undefined,\n  file: 'execMain.c',\n  line: '2005',\n  routine: 'ExecConstraints'\n}"
+      "updatedAt": "2025-09-16T16:36:30.045Z",
+      "rejection": "addEntity { projectId: 'main', type: undefined }\ndb:timeline-labels-add failed error: null value in column \"type\" of relation \"entities\" violates not-null constraint\n    at /Users/cloud/Documents/Work/overseer-local/node_modules/pg/lib/client.js:545:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.addEntity (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:2165:17)\n    at async DatabaseManager.addTimelineLabel (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:14037:12)\n    at async handlers.<computed> [as db:timeline-labels-add] (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:13944:78)\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-BtiXIc5R.js:13954:18\n    at async Session.<anonymous> (node:electron/js2c/browser_init:2:107024) {\n  length: 391,\n  severity: 'ERROR',\n  code: '23502',\n  detail: 'Failing row contains (ceb03329-7901-43f9-8836-1eb577e5656d, main, null, null, , null, [-0.09368993,0.037654385,0.005246423,0.000880191,0.042941976,0.0..., null, 2025-09-16 16:30:32.204063+00, 2025-09-16 16:30:32.204063+00).',\n  hint: undefined,\n  position: undefined,\n  internalPosition: undefined,\n  internalQuery: undefined,\n  where: undefined,\n  schema: 'public',\n  table: 'entities',\n  column: 'type',\n  dataType: undefined,\n  constraint: undefined,\n  file: 'execMain.c',\n  line: '2005',\n  routine: 'ExecConstraints'\n}",
+      "completedAt": "2025-09-16T16:36:30.045Z"
     },
     {
       "id": "dd66ff2a-a01e-4def-9269-059f5f581b3d",
@@ -118,5 +119,5 @@
     "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 8
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T16:34:19.770Z"
+  "updatedAt": "2025-09-16T16:36:30.045Z"
 }

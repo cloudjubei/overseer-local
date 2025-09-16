@@ -169,7 +169,8 @@ export default class DatabaseManager implements BaseManager {
 
   // Timeline Label operations
   async addTimelineLabel(input: TimelineLabel): Promise<TimelineLabel> {
-    return await this._dbClient?.addEntity({ ...input, entityType: 'TimelineLabel' })
+    // thefactory-db expects an 'type' discriminator on entities
+    return await this._dbClient?.addEntity({ ...input, type: 'TimelineLabel' })
   }
 
   async getTimelineLabelById(id: string): Promise<TimelineLabel | undefined> {
@@ -185,17 +186,16 @@ export default class DatabaseManager implements BaseManager {
   }
 
   async searchTimelineLabels(params: any): Promise<TimelineLabel[]> {
-    return await this._dbClient?.searchEntities({ ...params, entityType: 'TimelineLabel' })
+    // ensure type filter is applied
+    return await this._dbClient?.searchEntities({ ...params, type: 'TimelineLabel' })
   }
 
   async matchTimelineLabels(criteria: any, options?: any): Promise<TimelineLabel[]> {
-    const matchCriteria = { ...criteria, entityType: 'TimelineLabel' };
-    if (criteria.projectId === null) {
-      matchCriteria.projectId = null; // Explicitly search for global labels
-    } else if (criteria.projectId !== undefined) {
-      matchCriteria.projectId = criteria.projectId; // Search for project-specific labels
-    } // If projectId is not specified in criteria, it will search across all (project and global) labels
-
+    // ensure type filter is applied
+    const matchCriteria: any = { ...criteria, type: 'TimelineLabel' }
+    if (criteria && Object.prototype.hasOwnProperty.call(criteria, 'projectId')) {
+      matchCriteria.projectId = criteria.projectId
+    }
     return await this._dbClient?.matchEntities(matchCriteria, options)
   }
 
