@@ -5,13 +5,6 @@
   "description": "For each project, based on the tasks and features that were completed - it must be possible to view a timeline of features when they were done in a scrollable timeline view.\nThe user must be able to also define their own labels/nodes to the timeline as extra rows - these need to be stored.\nIt must be also possible to view an overall timeline - that will show all projects and their tasks (rather than features) - so a higher level view.",
   "features": [
     {
-      "id": "47f19e2b-629b-46a4-b805-0fbe4c059822",
-      "status": "-",
-      "title": "Enhance Task and Feature Data Model with Completion Timestamp",
-      "description": "Modify or extend the `Task` and `Feature` data models to include a `completedAt: Date | undefined` field. This field should be automatically populated with the current timestamp when the `status` of a Task or Feature changes to '+' (Done). If the status changes from '+' to anything else, `completedAt` should be unset (set to `undefined`). This requires updates in `src/renderer/services/tasksService.ts` and potentially the underlying data storage logic which uses `thefactory-db`'s `updateEntity`.",
-      "context": []
-    },
-    {
       "id": "ce6b03da-c050-49c5-b2f0-41410d9e15cb",
       "status": "-",
       "title": "Implement Data Model and Storage for User-Defined Timeline Labels",
@@ -27,16 +20,16 @@
     },
     {
       "id": "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6",
-      "status": "-",
+      "status": "?",
       "title": "Implement Overall Task Timeline View",
-      "description": "Develop the front-end components and backend data fetching logic for an overall timeline view. This feature should:\n1.  Create new IPC handlers (or extend existing ones) in the main process to fetch all completed `Task` entities across *all* projects, ordered by their `completedAt` timestamp.\n2.  Extend the IPC handlers for user-defined timeline labels to fetch only global labels (where `projectId` is `null`).\n3.  Implement a `timelineService` in `src/renderer/services/` to consolidate calls for all completed tasks and global user-defined labels.\n4.  Develop a new React UI component (e.g., `OverallTimelineView.tsx` in `src/renderer/screens/` or `src/renderer/components/`) that consumes the `timelineService` data and displays a scrollable timeline of all completed tasks and global user-defined labels. Each task should indicate its originating project.",
-      "context": []
+      "description": "TODO",
+      "context": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
-    "47f19e2b-629b-46a4-b805-0fbe4c059822": 1,
-    "ce6b03da-c050-49c5-b2f0-41410d9e15cb": 2,
-    "1760db6f-b604-4835-af0d-c5fa83630a4c": 3,
-    "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 4
+    "ce6b03da-c050-49c5-b2f0-41410d9e15cb": 1,
+    "1760db6f-b604-4835-af0d-c5fa83630a4c": 2,
+    "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 3
   }
 }
