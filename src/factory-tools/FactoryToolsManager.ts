@@ -1,9 +1,18 @@
 import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import { createOrchestrator, createAgentRunStore, createPricingManager } from 'thefactory-tools'
+import {
+  createOrchestrator,
+  createAgentRunStore,
+  createPricingManager,
+  AgentRunStore,
+  PricingManager,
+  AgentRunRatingPatch,
+  AgentRunHistory,
+} from 'thefactory-tools'
 import type { BaseManager } from '../managers'
 import type DatabaseManager from '../db/DatabaseManager'
+import { PricingState } from 'thefactory-tools/dist/pricing'
 
 export default class FactoryToolsManager implements BaseManager {
   private projectRoot: string
@@ -11,8 +20,8 @@ export default class FactoryToolsManager implements BaseManager {
   private _ipcBound: boolean
 
   private runHandles: Map<string, any>
-  private pricingManager: any | null
-  private runStore: any | null
+  private pricingManager: PricingManager | null
+  private runStore: AgentRunStore | null
   private orchestrator: any | null
 
   private dbManager: DatabaseManager
@@ -207,12 +216,13 @@ export default class FactoryToolsManager implements BaseManager {
     const run = this.runHandles.get(runId)
     if (run) {
       try {
-        run.cancel(reason)
+        await run.cancel(reason)
       } catch (err: any) {
         console.warn('[factory] Error cancelling run', runId, err?.message || err)
       }
     } else {
       console.warn('[factory] Cancel requested for unknown run', runId)
+      await this.deleteHistoryRun(runId)
     }
   }
 
@@ -226,21 +236,21 @@ export default class FactoryToolsManager implements BaseManager {
     return out
   }
 
-  async getHistoryRuns(): Promise<any[]> {
-    return (await (this.runStore as any).listRuns()) ?? []
+  async getHistoryRuns(): Promise<AgentRunHistory[]> {
+    return (await this.runStore?.listRuns()) ?? []
   }
-  async deleteHistoryRun(runId: string): Promise<any> {
-    return await (this.runStore as any).deleteRun(runId)
+  async deleteHistoryRun(runId: string): Promise<AgentRunHistory | undefined> {
+    return await this.runStore?.deleteRun(runId)
   }
-  async rateRun(runId: string, rating: number): Promise<any> {
-    return await (this.runStore as any).rateRun(runId, rating)
+  async rateRun(runId: string, rating: AgentRunRatingPatch): Promise<AgentRunHistory | undefined> {
+    return await this.runStore?.rateRun(runId, rating)
   }
 
-  async listPrices(): Promise<any> {
-    return await (this.pricingManager as any).listPrices()
+  async listPrices(): Promise<PricingState | undefined> {
+    return await this.pricingManager?.listPrices()
   }
-  async refreshPrices(provider?: string, url?: string): Promise<any> {
-    return await (this.pricingManager as any).refresh(provider, url)
+  async refreshPrices(provider?: string, url?: string): Promise<PricingState | undefined> {
+    return await this.pricingManager?.refresh(provider, url)
   }
 
   private _attachRunHandle(runHandle: any): void {
@@ -285,7 +295,7 @@ export default class FactoryToolsManager implements BaseManager {
     }
   }
 
-  private _emitUpdate(updated: any): void {
+  private _emitUpdate(updated: AgentRunHistory): void {
     if (!this.window || this.window.isDestroyed()) return
     try {
       this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, updated)

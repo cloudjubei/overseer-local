@@ -1,5 +1,27 @@
 import { CSSProperties } from 'react'
 
+// { value: '🧪', label: 'Testing' },
+// { value: '🔧', label: 'Tools' },
+// { value: '🛠️', label: 'Build' },
+// { value: '🚀', label: 'Launch' },
+// { value: '🧰', label: 'Toolkit' },
+// { value: '🏗️', label: 'Infrastructure' },
+// { value: '🧠', label: 'AI/ML' },
+// { value: '📝', label: 'Docs' },
+// { value: '🎯', label: 'Goals' },
+// { value: '🔬', label: 'Research' },
+// { value: '🐞', label: 'Bugs' },
+// { value: '📦', label: 'Package' },
+// { value: '🔍', label: 'Search' },
+// { value: '💡', label: 'Ideas' },
+// { value: '🌐', label: 'Web' },
+// { value: '🖥️', label: 'Desktop' },
+// { value: '📱', label: 'Mobile' },
+// { value: '🧩', label: 'Components' },
+// { value: '🗃️', label: 'Archive' },
+// { value: '🧱', label: 'Foundation' },
+// { value: '🗜️', label: 'Compression' },
+
 export function IconBack({ className }: { className?: string }) {
   return (
     <svg
@@ -372,7 +394,11 @@ export function IconFiles({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <path d="M14 2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7z" stroke="#6366F1" strokeWidth="2" />
+      <path
+        d="M14 2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7z"
+        stroke="#6366F1"
+        strokeWidth="2"
+      />
       <path d="M14 2v5h5" stroke="#93C5FD" strokeWidth="2" />
       <path d="M8 13h6" stroke="#60A5FA" strokeWidth="2" />
       <path d="M8 17h6" stroke="#60A5FA" strokeWidth="2" />
@@ -392,7 +418,11 @@ export function IconChat({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" stroke="#14B8A6" strokeWidth="2" />
+      <path
+        d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"
+        stroke="#14B8A6"
+        strokeWidth="2"
+      />
       <path d="M8 9h8" stroke="#22D3EE" strokeWidth="2" />
       <path d="M8 13h5" stroke="#22D3EE" strokeWidth="2" />
     </svg>
@@ -492,7 +522,11 @@ export function IconFolder({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#F59E0B" strokeWidth="2" />
+      <path
+        d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+        stroke="#F59E0B"
+        strokeWidth="2"
+      />
     </svg>
   )
 }
@@ -531,7 +565,11 @@ export function IconWarningTriangle({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="#F59E0B" strokeWidth="2" />
+      <path
+        d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+        stroke="#F59E0B"
+        strokeWidth="2"
+      />
       <line x1="12" y1="9" x2="12" y2="13" stroke="#EF4444" strokeWidth="2" />
       <line x1="12" y1="17" x2="12.01" y2="17" stroke="#EF4444" strokeWidth="2" />
     </svg>

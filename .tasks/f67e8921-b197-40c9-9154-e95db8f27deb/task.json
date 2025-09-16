@@ -1173,6 +1173,19 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "c20fbc93-7910-4612-a275-95a3d722955c",
+      "status": "-",
+      "title": "Emoji icons",
+      "description": "There are old emojis inside @src/renderer/components/ui/Icons.tsx - they need to be translated into the svg icons in that file, and then used in the list for project icons inside @src/renderer/projects/projectIcons.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/projects/projectIcons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1265,6 +1278,7 @@
     "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 87,
     "40322d85-bc35-4b45-89db-b5e3a393a8e9": 88,
     "32ec2d90-3244-40a0-a74b-d120f6d512e0": 89,
-    "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 90
+    "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 90,
+    "c20fbc93-7910-4612-a275-95a3d722955c": 91
   }
 }

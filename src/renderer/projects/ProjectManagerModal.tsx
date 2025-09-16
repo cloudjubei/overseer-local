@@ -5,6 +5,7 @@ import { validateProjectClient } from './validateProject'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { Button } from '../components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
+import { IconDelete, IconEdit, IconPlus } from '../components/ui/Icons'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -238,7 +239,7 @@ export default function ProjectManagerModal({
           <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ color: 'var(--text-secondary)' }}>Projects: {projectsList.length}</div>
             <button className="btn" onClick={startCreate}>
-              +
+              <IconPlus />
             </button>
           </div>
           <div>
@@ -256,9 +257,7 @@ export default function ProjectManagerModal({
                   }}
                 >
                   <div className="flex" style={{ alignItems: 'center', gap: 8 }}>
-                    <div aria-hidden>
-                      {renderProjectIcon(p.metadata?.icon)}
-                    </div>
+                    <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
                     <div>
                       <div style={{ fontWeight: 600 }}>{p.title}</div>
                       <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
@@ -268,7 +267,7 @@ export default function ProjectManagerModal({
                   </div>
                   <div className="flex" style={{ gap: 8 }}>
                     <Button className="btn-secondary" onClick={() => startEdit(p)}>
-                      Edit
+                      <IconEdit />
                     </Button>
                     <Button
                       className="btn-secondary"
@@ -276,7 +275,7 @@ export default function ProjectManagerModal({
                       variant="danger"
                       onClick={() => handleDelete(p.id)}
                     >
-                      Delete
+                      <IconDelete />
                     </Button>
                   </div>
                 </li>

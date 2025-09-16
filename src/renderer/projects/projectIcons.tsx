@@ -1,32 +1,31 @@
-import React from 'react'
 import {
-  IconFolder,
-  IconCollection,
-  IconWorkspace,
-  IconHome,
-  IconFiles,
-  IconChat,
-  IconRobot,
-  IconAntenna,
-  IconBell,
-  IconSettings,
-  IconWarningTriangle,
-  IconEdit,
-  IconDelete,
-  IconPlus,
-  IconExclamation,
-  IconCheckCircle,
-  IconXCircle,
-  IconStopCircle,
-  IconLoader,
-  ListIcon,
   BoardIcon,
-  IconMenu,
+  IconAntenna,
   IconBack,
+  IconBell,
+  IconChat,
+  IconCheckCircle,
   IconChevron,
+  IconCollection,
+  IconDelete,
+  IconEdit,
+  IconExclamation,
+  IconFiles,
+  IconFolder,
+  IconHome,
+  IconLoader,
+  IconMenu,
   IconPlay,
-  IconThumbUp,
+  IconPlus,
+  IconRobot,
+  IconSettings,
+  IconStopCircle,
   IconThumbDown,
+  IconThumbUp,
+  IconWarningTriangle,
+  IconWorkspace,
+  IconXCircle,
+  ListIcon,
 } from '../components/ui/Icons'
 
 export type ProjectIcon = {
@@ -67,7 +66,7 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: 'thumb-down', label: 'Thumb Down' },
 ]
 
-export function renderProjectIcon(key?: string, className?: string): React.ReactNode {
+export function renderProjectIcon(key?: string, className?: string) {
   switch (key) {
     case 'collection':
       return <IconCollection className={className} />
