@@ -7,14 +7,12 @@ export function IconBack({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <polyline points="15 18 9 12 15 6"></polyline>
+      <polyline points="15 18 9 12 15 6" stroke="#6366F1" strokeWidth="2"></polyline>
     </svg>
   )
 }
@@ -26,15 +24,13 @@ export function IconEdit({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+      <path d="M12 20h9" stroke="#93C5FD" strokeWidth="2" />
+      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="#A855F7" strokeWidth="2" />
     </svg>
   )
 }
@@ -45,18 +41,16 @@ export function IconDelete({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      <polyline points="3 6 5 6 21 6" stroke="#6366F1" strokeWidth="2" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="#EF4444" strokeWidth="2" />
+      <path d="M10 11v6" stroke="#A855F7" strokeWidth="2" />
+      <path d="M14 11v6" stroke="#A855F7" strokeWidth="2" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="#F59E0B" strokeWidth="2" />
     </svg>
   )
 }
@@ -68,15 +62,13 @@ export function IconPlus({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <line x1="12" y1="5" x2="12" y2="19" stroke="#3B82F6" strokeWidth="2"></line>
+      <line x1="5" y1="12" x2="19" y2="12" stroke="#10B981" strokeWidth="2"></line>
     </svg>
   )
 }
@@ -88,16 +80,14 @@ export function IconExclamation({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
+      <circle cx="12" cy="12" r="10" stroke="#F59E0B" strokeWidth="2" />
+      <line x1="12" y1="8" x2="12" y2="12" stroke="#EF4444" strokeWidth="2" />
+      <line x1="12" y1="16" x2="12.01" y2="16" stroke="#EF4444" strokeWidth="2" />
     </svg>
   )
 }
@@ -126,11 +116,11 @@ export function IconPlay({ className }: { className?: string }) {
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill="currentColor"
+      fill="none"
       aria-hidden="true"
       className={className}
     >
-      <polygon points="8,5 19,12 8,19" />
+      <polygon points="8,5 19,12 8,19" fill="#10B981" />
     </svg>
   )
 }
@@ -184,15 +174,13 @@ export function IconCheckCircle({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M8 12l3 3 5-5" />
+      <circle cx="12" cy="12" r="10" stroke="#10B981" strokeWidth="2" />
+      <path d="M8 12l3 3 5-5" stroke="#10B981" strokeWidth="2" />
     </svg>
   )
 }
@@ -204,16 +192,14 @@ export function IconXCircle({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="9" y1="9" x2="15" y2="15" />
-      <line x1="15" y1="9" x2="9" y2="15" />
+      <circle cx="12" cy="12" r="10" stroke="#EF4444" strokeWidth="2" />
+      <line x1="9" y1="9" x2="15" y2="15" stroke="#EF4444" strokeWidth="2" />
+      <line x1="15" y1="9" x2="9" y2="15" stroke="#EF4444" strokeWidth="2" />
     </svg>
   )
 }
@@ -225,15 +211,13 @@ export function IconStopCircle({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" />
-      <rect x="9" y="9" width="6" height="6" rx="1" />
+      <circle cx="12" cy="12" r="10" stroke="#A855F7" strokeWidth="2" />
+      <rect x="9" y="9" width="6" height="6" rx="1" stroke="#F59E0B" strokeWidth="2" />
     </svg>
   )
 }
@@ -245,15 +229,13 @@ export function IconLoader({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" opacity="0.25" />
-      <path d="M22 12a10 10 0 0 0-10-10" />
+      <circle cx="12" cy="12" r="10" stroke="#93C5FD" strokeWidth="2" opacity="0.35" />
+      <path d="M22 12a10 10 0 0 0-10-10" stroke="#6366F1" strokeWidth="2" />
     </svg>
   )
 }
@@ -271,15 +253,13 @@ export function IconArrowLeftMini({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <polyline points="14 18 8 12 14 6" />
+      <polyline points="14 18 8 12 14 6" stroke="#6366F1" strokeWidth="2" />
     </svg>
   )
 }
@@ -296,15 +276,13 @@ export function IconArrowRightMini({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <polyline points="10 6 16 12 10 18" />
+      <polyline points="10 6 16 12 10 18" stroke="#6366F1" strokeWidth="2" />
     </svg>
   )
 }
@@ -322,16 +300,14 @@ export function IconThumbUp({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M14 9V5a3 3 0 0 0-3-3l-1 5-4 5v8h9a3 3 0 0 0 3-3v-6a2 2 0 0 0-2-2h-2z" />
-      <path d="M7 21H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+      <path d="M14 9V5a3 3 0 0 0-3-3l-1 5-4 5v8h9a3 3 0 0 0 3-3v-6a2 2 0 0 0-2-2h-2z" stroke="#10B981" strokeWidth="2" fill={filled ? '#10B981' : 'none'} />
+      <path d="M7 21H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
 }
@@ -348,16 +324,14 @@ export function IconThumbDown({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M10 15v4a3 3 0 0 0 3 3l1-5 4-5V4H9A3 3 0 0 0 6 7v6a2 2 0 0 0 2 2h2z" />
-      <path d="M17 3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
+      <path d="M10 15v4a3 3 0 0 0 3 3l1-5 4-5V4H9A3 3 0 0 0 6 7v6a2 2 0 0 0 2 2h2z" stroke="#EF4444" strokeWidth="2" fill={filled ? '#EF4444' : 'none'} />
+      <path d="M17 3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
 }
@@ -542,18 +516,16 @@ export function IconWorkspace({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <rect x="3" y="3" width="8" height="8" rx="2" />
-      <rect x="13" y="3" width="8" height="5" rx="2" />
-      <rect x="3" y="13" width="6" height="8" rx="2" />
-      <rect x="11" y="13" width="10" height="8" rx="2" />
+      <rect x="3" y="3" width="8" height="8" rx="2" stroke="#6366F1" strokeWidth="2" />
+      <rect x="13" y="3" width="8" height="5" rx="2" stroke="#93C5FD" strokeWidth="2" />
+      <rect x="3" y="13" width="6" height="8" rx="2" stroke="#10B981" strokeWidth="2" />
+      <rect x="11" y="13" width="10" height="8" rx="2" stroke="#F59E0B" strokeWidth="2" />
     </svg>
   )
 }
@@ -734,19 +706,17 @@ export function IconToolbox({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="3" y="8" width="18" height="11" rx="2" />
-      <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-      <path d="M3 13h18" />
-      <path d="M10 13v3" />
-      <path d="M14 13v3" />
+      <rect x="3" y="8" width="18" height="11" rx="2" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" stroke="#A855F7" strokeWidth="2" />
+      <path d="M3 13h18" stroke="#10B981" strokeWidth="2" />
+      <path d="M10 13v3" stroke="#F59E0B" strokeWidth="2" />
+      <path d="M14 13v3" stroke="#F59E0B" strokeWidth="2" />
     </svg>
   )
 }
@@ -812,18 +782,16 @@ export function IconDocument({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" />
-      <path d="M9 13h6" />
-      <path d="M9 17h6" />
+      <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" stroke="#93C5FD" strokeWidth="2" />
+      <path d="M14 2v6h6" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M9 13h6" stroke="#22D3EE" strokeWidth="2" />
+      <path d="M9 17h6" stroke="#22D3EE" strokeWidth="2" />
     </svg>
   )
 }
@@ -919,17 +887,15 @@ export function IconPackage({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z" />
-      <path d="M3 8l9 5 9-5" />
-      <path d="M12 13v9" />
+      <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z" stroke="#F59E0B" strokeWidth="2" />
+      <path d="M3 8l9 5 9-5" stroke="#A855F7" strokeWidth="2" />
+      <path d="M12 13v9" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
 }
@@ -946,16 +912,14 @@ export function IconSearch({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <circle cx="11" cy="11" r="7" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      <circle cx="11" cy="11" r="7" stroke="#3B82F6" strokeWidth="2" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#A855F7" strokeWidth="2" />
     </svg>
   )
 }
@@ -972,17 +936,15 @@ export function IconLightbulb({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M9 18h6" />
-      <path d="M10 22h4" />
-      <path d="M12 2a7 7 0 0 0-4 13c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-13z" />
+      <path d="M9 18h6" stroke="#FB923C" strokeWidth="2" />
+      <path d="M10 22h4" stroke="#FB923C" strokeWidth="2" />
+      <path d="M12 2a7 7 0 0 0-4 13c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-13z" stroke="#F59E0B" strokeWidth="2" />
     </svg>
   )
 }
@@ -993,17 +955,15 @@ export function IconGlobe({ className, filled = false }: { className?: string; f
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18" />
-      <path d="M12 3a15 15 0 0 0 0 18a15 15 0 0 0 0-18z" />
+      <circle cx="12" cy="12" r="9" stroke="#22D3EE" strokeWidth="2" />
+      <path d="M3 12h18" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M12 3a15 15 0 0 0 0 18a15 15 0 0 0 0-18z" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
 }
@@ -1020,17 +980,15 @@ export function IconMonitor({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="3" y="4" width="18" height="12" rx="2" />
-      <path d="M8 20h8" />
-      <path d="M12 16v4" />
+      <rect x="3" y="4" width="18" height="12" rx="2" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M8 20h8" stroke="#A855F7" strokeWidth="2" />
+      <path d="M12 16v4" stroke="#A855F7" strokeWidth="2" />
     </svg>
   )
 }
@@ -1047,16 +1005,14 @@ export function IconMobile({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="7" y="2" width="10" height="20" rx="2" />
-      <circle cx="12" cy="18" r="1" />
+      <rect x="7" y="2" width="10" height="20" rx="2" stroke="#3B82F6" strokeWidth="2" />
+      <circle cx="12" cy="18" r="1" fill="#10B981" stroke="#10B981" />
     </svg>
   )
 }
@@ -1098,17 +1054,15 @@ export function IconArchive({
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="3" y="3" width="18" height="4" rx="1" />
-      <rect x="5" y="7" width="14" height="14" rx="2" />
-      <path d="M9 12h6" />
+      <rect x="3" y="3" width="18" height="4" rx="1" stroke="#A855F7" strokeWidth="2" />
+      <rect x="5" y="7" width="14" height="14" rx="2" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M9 12h6" stroke="#10B981" strokeWidth="2" />
     </svg>
   )
 }
