@@ -366,7 +366,6 @@ export function IconThumbDown({
   )
 }
 
-// Sidebar-specific icons (project-specific, SVG-based)
 export function IconHome({ className }: { className?: string }) {
   return (
     <svg

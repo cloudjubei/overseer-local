@@ -1198,6 +1198,18 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "fac00d4a-01a5-4012-8481-bb920ac502db",
+      "status": "-",
+      "title": "Icons need to be more colorful",
+      "description": "Some Icons in @src/renderer/components/ui/Icons.tsx have a \"TODO\" comment - those need to follow it and be worked.\nAll icons that are black and white - like \"IconBoard\" or \"IconList\" need to be reworked to be colorful like the sidebar icons \"IconHome\", \"IconFiles\" or \"IconChat\" for example.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1292,6 +1304,7 @@
     "32ec2d90-3244-40a0-a74b-d120f6d512e0": 89,
     "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 90,
     "c20fbc93-7910-4612-a275-95a3d722955c": 91,
-    "4673bd96-c874-4b92-8779-d81af432c032": 92
+    "4673bd96-c874-4b92-8779-d81af432c032": 92,
+    "fac00d4a-01a5-4012-8481-bb920ac502db": 93
   }
 }
