@@ -2,11 +2,19 @@ import { useEffect, useMemo, useState } from 'react'
 import DependencyBullet from '../tasks/DependencyBullet'
 import StatusChip from './StatusChip'
 import ModelChip from './ModelChip'
-import { IconChevron, IconDelete, IconPlus, IconThumbDown, IconThumbUp } from '../ui/Icons'
+import {
+  IconChevron,
+  IconDelete,
+  IconPlus,
+  IconStopCircle,
+  IconThumbDown,
+  IconThumbUp,
+} from '../ui/Icons'
 import ProjectChip from './ProjectChip'
 import CostChip from './CostChip'
 import TokensChip from './TokensChip'
 import { AgentRunHistory, AgentRunRatingPatch } from 'thefactory-tools'
+import { Button } from '../ui/Button'
 
 function formatTime(iso?: string) {
   if (!iso) return ''
@@ -223,31 +231,33 @@ export default function AgentRunRow({
         <td className="px-3 py-2 text-right">
           <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
             {onView ? (
-              <button
-                className="btn-secondary btn-icon"
+              <Button
+                className="btn-secondary w-[34px]"
                 aria-label="View"
                 onClick={() => run.id && onView(run.id!)}
               >
                 <IconChevron />
-              </button>
+              </Button>
             ) : null}
             {run.state === 'running' && onCancel && run.id ? (
-              <button
-                className="btn-secondary btn-icon"
+              <Button
+                className="btn-secondary w-[34px]"
+                variant="danger"
                 aria-label="Cancel"
                 onClick={() => onCancel(run.id!)}
               >
-                <IconDelete />
-              </button>
+                <IconStopCircle />
+              </Button>
             ) : null}
             {run.state !== 'running' && onDelete && run.id ? (
-              <button
-                className="btn-secondary btn-icon"
+              <Button
+                className="btn-secondary w-[34px]"
+                variant="danger"
                 aria-label="Delete"
                 onClick={() => onDelete(run.id!)}
               >
                 <IconDelete />
-              </button>
+              </Button>
             ) : null}
           </div>
         </td>
