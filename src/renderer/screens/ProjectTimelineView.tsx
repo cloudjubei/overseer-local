@@ -5,6 +5,9 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import { Entity } from 'thefactory-db'
 import { EntityInput } from 'thefactory-db/dist/types'
+import TaskSummaryCallout from '../components/tasks/TaskSummaryCallout'
+import FeatureSummaryCallout from '../components/tasks/FeatureSummaryCallout'
+import { useNavigator } from '../navigation/Navigator'
 
 function startOfDay(d: Date) {
   const x = new Date(d)
@@ -179,9 +182,25 @@ interface RowItem {
   scope?: 'project' | '__global__' // for label coloring
 }
 
+// Hover callout state
+type HoverInfo =
+  | null
+  | {
+      kind: 'task'
+      taskId: string
+      rect: DOMRect
+    }
+  | {
+      kind: 'feature'
+      taskId: string
+      featureId: string
+      rect: DOMRect
+    }
+
 export default function ProjectTimelineView() {
-  const { projectId } = useActiveProject()
+  const { projectId, project } = useActiveProject()
   const { tasksById } = useTasks()
+  const { navigateTaskDetails } = useNavigator()
 
   const [features, setFeatures] = useState<Feature[]>([])
   const [labels, setLabels] = useState<TimelineLabel[]>([])
@@ -207,6 +226,9 @@ export default function ProjectTimelineView() {
 
   // Zoom state (Notion/Airtable-like)
   const [zoom, setZoom] = useState<Zoom>('day')
+
+  // Hover state for callout
+  const [hover, setHover] = useState<HoverInfo>(null)
 
   useEffect(() => {
     if (!projectId) {
@@ -578,6 +600,17 @@ export default function ProjectTimelineView() {
     container.scrollTo({ left: todayIdx * approxCell, behavior: 'smooth' })
   }
 
+  // Clear hover on scroll/resize to avoid stale positioning
+  useEffect(() => {
+    const onScrollOrResize = () => setHover(null)
+    window.addEventListener('scroll', onScrollOrResize, true)
+    window.addEventListener('resize', onScrollOrResize)
+    return () => {
+      window.removeEventListener('scroll', onScrollOrResize, true)
+      window.removeEventListener('resize', onScrollOrResize)
+    }
+  }, [])
+
   if (loading) {
     return <div className="p-4 text-secondary">Loading timeline...</div>
   }
@@ -799,12 +832,37 @@ export default function ProjectTimelineView() {
                             ? taskColorStyles(isFeature ? it.taskId : it.id)
                             : undefined
 
+                          const onMouseEnter: React.MouseEventHandler<HTMLDivElement> = (e) => {
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                            if (kind === 'task') {
+                              setHover({ kind: 'task', taskId: it.id, rect })
+                            } else if (kind === 'feature') {
+                              setHover({ kind: 'feature', taskId: (it as any).taskId!, featureId: it.id, rect })
+                            } else {
+                              setHover(null)
+                            }
+                          }
+                          const onMouseLeave: React.MouseEventHandler<HTMLDivElement> = () => {
+                            setHover((prev) => (prev ? null : prev))
+                          }
+
+                          const onClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+                            if (kind === 'task') {
+                              navigateTaskDetails(it.id, undefined, true)
+                            } else if (kind === 'feature') {
+                              navigateTaskDetails((it as any).taskId!, it.id)
+                            }
+                          }
+
                           return (
                             <div
                               key={it.id}
                               className={className}
                               style={style}
                               title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
+                              onMouseEnter={onMouseEnter}
+                              onMouseLeave={onMouseLeave}
+                              onClick={onClick}
                             >
                               {/* Hover edit button for user labels */}
                               {isLabel && (
@@ -863,6 +921,51 @@ export default function ProjectTimelineView() {
           </div>
         </div>
       </div>
+
+      {/* Hover callout (fixed-position, pointer-events: none) */}
+      {hover && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            top: Math.max(8, hover.rect.top + window.scrollY - 4),
+            left: Math.min(
+              window.scrollX + window.innerWidth - 320,
+              hover.rect.left + window.scrollX + hover.rect.width + 8,
+            ),
+          }}
+        >
+          {hover.kind === 'task' ? (
+            (() => {
+              const t = tasksById[hover.taskId]
+              if (!t) return null
+              const displayId = String(project?.taskIdToDisplayIndex?.[t.id] ?? t.id)
+              return (
+                <TaskSummaryCallout
+                  title={t.title}
+                  description={(t as any)?.description || ''}
+                  status={t.status}
+                  displayId={displayId}
+                />
+              )
+            })()
+          ) : hover.kind === 'feature' ? (
+            (() => {
+              const t = tasksById[hover.taskId]
+              const f = t?.features.find((x) => x.id === hover.featureId)
+              if (!t || !f) return null
+              const displayId = String(t.featureIdToDisplayIndex?.[f.id] ?? f.id)
+              return (
+                <FeatureSummaryCallout
+                  title={f.title}
+                  description={f.description || ''}
+                  status={f.status}
+                  displayId={displayId}
+                />
+              )
+            })()
+          ) : null}
+        </div>
+      )}
 
       {/* Edit popup modal */}
       {editingId && (

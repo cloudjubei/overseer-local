@@ -1,6 +1,6 @@
 {
   "id": "c24f7c54-65c9-441b-abf2-2a9c80fac333",
-  "status": "-",
+  "status": "+",
   "title": "Calendar view",
   "description": "For each project, based on the tasks and features that were completed - it must be possible to view a timeline of features when they were done in a scrollable timeline view.\nThe user must be able to also define their own labels/nodes to the timeline as extra rows - these need to be stored.\nIt must be also possible to view an overall timeline - that will show all projects and their tasks (rather than features) - so a higher level view.",
   "features": [
@@ -150,7 +150,7 @@
     },
     {
       "id": "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9",
-      "status": "-",
+      "status": "+",
       "title": "Show Task/Feature cards on hover",
       "description": "In @src/renderer/screens/ProjectTimelineView.tsx when hovering a task or feature - show the @src/renderer/components/tasks/TaskSummaryCallout.tsx  and @src/renderer/components/tasks/FeatureSummaryCallout.tsx respectively. Clicking on a given Task/Feature takes the user to that Task's detail view - @src/renderer/tasks/TaskDetailsView.tsx",
       "context": [
@@ -161,7 +161,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T18:00:22.978Z",
-      "updatedAt": "2025-09-16T18:02:01.483Z"
+      "updatedAt": "2025-09-16T18:30:46.720Z",
+      "completedAt": "2025-09-16T18:30:46.720Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -179,5 +180,6 @@
     "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9": 12
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T16:36:30.045Z"
+  "updatedAt": "2025-09-16T16:36:30.045Z",
+  "completedAt": "2025-09-16T18:30:46.720Z"
 }
