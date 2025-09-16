@@ -4,6 +4,8 @@ import { useToast } from '../components/ui/Toast'
 import type { Feature } from 'thefactory-tools'
 import { useTasks } from '../contexts/TasksContext'
 import FeatureForm, { FeatureFormValues } from '../components/tasks/FeatureForm'
+import { Button } from '../components/ui/Button'
+import { IconDelete } from '../components/ui/Icons'
 
 export default function FeatureEditView({
   taskId,
@@ -69,9 +71,49 @@ export default function FeatureEditView({
     }
   }
 
+  const formId = 'feature-form-edit'
+
   return (
     <>
-      <Modal title="Edit Feature" onClose={doClose} isOpen={true}>
+      <Modal
+        title="Edit Feature"
+        onClose={doClose}
+        isOpen={true}
+        footer={
+          <div className="flex justify-between gap-2">
+            {!initialValues ? (
+              <span />
+            ) : (
+              <Button
+                className="btn-secondary"
+                variant="danger"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={submitting}
+              >
+                <div className="flex items-center gap-2">
+                  <IconDelete />
+                  Delete
+                </div>
+              </Button>
+            )}
+            <div className="flex justify-end gap-2">
+              <button type="button" className="btn-secondary" onClick={doClose} disabled={submitting}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn"
+                form={formId}
+                disabled={submitting}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                title="Cmd/Ctrl+Enter to submit"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        }
+      >
         {initialValues ? (
           <FeatureForm
             initialValues={initialValues}
@@ -81,6 +123,8 @@ export default function FeatureEditView({
             submitting={submitting}
             taskId={taskId}
             featureId={featureId}
+            hideActions
+            formId={formId}
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">

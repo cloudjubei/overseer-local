@@ -29,6 +29,11 @@ type Props = {
   titleRef?: React.RefObject<HTMLInputElement>
   taskId: string
   featureId?: string
+  // When true, the form will not render inline action buttons at the bottom.
+  // Use this when placing actions in a parent Modal footer to keep them sticky.
+  hideActions?: boolean
+  // Optional id to bind external submit buttons using the `form` attribute
+  formId?: string
 }
 
 export default function FeatureForm({
@@ -40,6 +45,8 @@ export default function FeatureForm({
   titleRef,
   taskId,
   featureId = undefined,
+  hideActions = false,
+  formId,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -130,25 +137,6 @@ export default function FeatureForm({
     return refs
   }, [combinedTextForMentions])
 
-  // Keep blockers in sync with mentioned refs: add missing (normalized), remove unmentioned
-  // useEffect(() => {
-  //   setBlockers((prev) => {
-  //     const next = new Set(prev)
-  //     // add normalized
-  //     mentionedRefs.forEach((r) => next.add(normalizeDependency(r)))
-  //     // remove any that are not mentioned anymore (compare against raw or normalized)
-  //     for (const val of Array.from(next)) {
-  //       // if this canonicalized blocker is no longer present (either as raw or normalized form), drop it
-  //       const rawCandidate = val
-  //       // try to derive a display-like token is not trivial; keep simple: remove only if neither the canonical val nor any raw tokens referencing it exist
-  //       // We check if the raw mentions contain this exact canonical token; if not, keep it only if there exists a raw that normalizes to it
-  //       const stillMentioned = Array.from(mentionedRefs).some((r) => normalizeDependency(r) === val)
-  //       if (!stillMentioned) next.delete(val)
-  //     }
-  //     return Array.from(next)
-  //   })
-  // }, [mentionedRefs, normalizeDependency])
-
   // Keep context in sync with @ mentions: add on select via callback; also remove if no longer mentioned anywhere
   useEffect(() => {
     setContext((prev) => prev.filter((p) => combinedTextForMentions.includes(`@${p}`)))
@@ -165,6 +153,7 @@ export default function FeatureForm({
 
   return (
     <form
+      id={formId}
       onSubmit={handleSubmit}
       onKeyDown={onKeyDown}
       className="space-y-4"
@@ -336,40 +325,42 @@ export default function FeatureForm({
         </div>
       </div>
 
-      <div className="flex justify-between gap-2 pt-2">
-        {onDelete && !isCreate ? (
-          <Button
-            className="btn-secondary"
-            variant="danger"
-            onClick={onDelete}
-            disabled={submitting}
-          >
-            <div className="flex items-center gap-2">
-              <IconDelete />
-              Delete
-            </div>
-          </Button>
-        ) : null}
-        <div className="flex justify-end gap-2 flex-1">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => onCancel()}
-            disabled={submitting}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="btn"
-            disabled={!canSubmit}
-            aria-keyshortcuts="Control+Enter Meta+Enter"
-            title="Cmd/Ctrl+Enter to submit"
-          >
-            {isCreate ? 'Create Feature' : 'Save Changes'}
-          </button>
+      {!hideActions && (
+        <div className="flex justify-between gap-2 pt-2">
+          {onDelete && !isCreate ? (
+            <Button
+              className="btn-secondary"
+              variant="danger"
+              onClick={onDelete}
+              disabled={submitting}
+            >
+              <div className="flex items-center gap-2">
+                <IconDelete />
+                Delete
+              </div>
+            </Button>
+          ) : null}
+          <div className="flex justify-end gap-2 flex-1">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => onCancel()}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn"
+              disabled={!canSubmit}
+              aria-keyshortcuts="Control+Enter Meta+Enter"
+              title="Cmd/Ctrl+Enter to submit"
+            >
+              {isCreate ? 'Create Feature' : 'Save Changes'}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {showSelector && (
         <Modal
