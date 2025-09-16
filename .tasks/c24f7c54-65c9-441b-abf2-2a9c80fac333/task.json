@@ -1,6 +1,6 @@
 {
   "id": "c24f7c54-65c9-441b-abf2-2a9c80fac333",
-  "status": "+",
+  "status": "-",
   "title": "Calendar view",
   "description": "For each project, based on the tasks and features that were completed - it must be possible to view a timeline of features when they were done in a scrollable timeline view.\nThe user must be able to also define their own labels/nodes to the timeline as extra rows - these need to be stored.\nIt must be also possible to view an overall timeline - that will show all projects and their tasks (rather than features) - so a higher level view.",
   "features": [
@@ -108,6 +108,18 @@
       "createdAt": "2025-09-16T17:24:43.752Z",
       "updatedAt": "2025-09-16T17:33:17.591Z",
       "completedAt": "2025-09-16T17:33:17.591Z"
+    },
+    {
+      "id": "f07b6313-732c-471f-ad22-031e50a25613",
+      "status": "-",
+      "title": "Must be possible to edit and delete user created timeline labels",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx - create a little edit button that shows on label hover. When clicked, it opens a similar popup to the one that is used for Label creation. There needs to be a delete option.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:43:36.272Z",
+      "updatedAt": "2025-09-16T17:43:36.272Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -118,9 +130,9 @@
     "0619e80f-d523-4842-810b-ba5be81fcbe6": 5,
     "dd66ff2a-a01e-4def-9269-059f5f581b3d": 6,
     "cb90c00d-4376-432d-bbb6-66d2995d24bd": 7,
-    "7f5ba22e-7e22-4a04-994f-25af10c138a7": 8
+    "7f5ba22e-7e22-4a04-994f-25af10c138a7": 8,
+    "f07b6313-732c-471f-ad22-031e50a25613": 9
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T16:36:30.045Z",
-  "completedAt": "2025-09-16T17:33:17.591Z"
+  "updatedAt": "2025-09-16T16:36:30.045Z"
 }
