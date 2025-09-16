@@ -53,8 +53,8 @@ export default class TasksManager implements BaseManager {
 
     const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => await this.listTasks(projectId)
-    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, id }) =>
-      await this.getTask(projectId, id)
+    handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, taskId }) =>
+      await this.getTask(projectId, taskId)
     handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ projectId, task }) =>
       await this.createTask(projectId, task)
     handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ projectId, taskId, data }) =>

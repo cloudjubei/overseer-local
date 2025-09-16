@@ -1547,6 +1547,59 @@
       "blockers": [],
       "updatedAt": "2025-09-16T15:15:43.576Z",
       "completedAt": "2025-09-16T15:15:43.576Z"
+    },
+    {
+      "id": "f8eb8466-4457-49ca-8c65-9b812aec8a26",
+      "status": "-",
+      "title": "Settings inner sidebar needs to have icons updated",
+      "description": "Just like everywhere else - we are using icons from @src/renderer/components/ui/Icons.tsx or @src/renderer/projects/projectIcons.tsx . Make sure the icons used for categories or anywhere else in @src/renderer/screens/SettingsView.tsx are used from @src/renderer/components/ui/Icons.tsx  (if they don't exist - create one).",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/projects/projectIcons.tsx",
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:31:13.926Z",
+      "updatedAt": "2025-09-16T15:31:13.926Z"
+    },
+    {
+      "id": "8ea2946d-0305-4f96-8e42-0f9d9a684de0",
+      "status": "-",
+      "title": "Notifications need to update their icons",
+      "description": "The inner sidebar in @src/renderer/screens/NotificationsView.tsx need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx . If an icon doesn't exist - it should be created according to design.",
+      "context": [
+        "src/renderer/screens/NotificationsView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:32:02.314Z",
+      "updatedAt": "2025-09-16T15:32:02.314Z"
+    },
+    {
+      "id": "c4236f01-9f8d-4a9a-bd8a-3489a23316d5",
+      "status": "-",
+      "title": "ChatsView needs to have icons updated",
+      "description": "The inner sidebar in @src/renderer/screens/ChatView.tsx need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx  . If an icon doesn't exist - it should be created according to design.",
+      "context": [
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:32:32.903Z",
+      "updatedAt": "2025-09-16T15:32:32.903Z"
+    },
+    {
+      "id": "b7716b85-8e3d-4a91-9729-4fca7aab51e9",
+      "status": "-",
+      "title": "Update icons in FilesView",
+      "description": "The inner sidebar in @src/renderer/screens/FilesView.tsx  need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx   . If an icon doesn't exist - it should be created according to design.",
+      "context": [
+        "src/renderer/screens/FilesView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:32:48.254Z",
+      "updatedAt": "2025-09-16T15:32:48.254Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1646,8 +1699,12 @@
     "f3b465a1-09be-45e9-80b2-70c84145ce5f": 94,
     "e2ac9811-94ae-4088-b00b-546f358b370e": 95,
     "d0647493-d214-40cd-bb93-c12a7a99ef36": 96,
-    "7520ce51-621d-4dfc-8686-1b7806b53aca": 97
+    "7520ce51-621d-4dfc-8686-1b7806b53aca": 97,
+    "f8eb8466-4457-49ca-8c65-9b812aec8a26": 98,
+    "8ea2946d-0305-4f96-8e42-0f9d9a684de0": 99,
+    "c4236f01-9f8d-4a9a-bd8a-3489a23316d5": 100,
+    "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-16T15:15:43.576Z"
+  "updatedAt": "2025-09-16T15:32:48.254Z"
 }
