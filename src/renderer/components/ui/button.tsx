@@ -19,7 +19,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const variantClass: Record<ButtonVariant, string> = {
   primary: 'btn btn-primary',
   secondary: 'btn btn-secondary',
-  outline: 'btn btn-outline',
+  outline: 'btn btn-primary',
   ghost: 'btn btn-ghost',
   danger: 'btn btn-danger',
   link: 'btn btn-link',

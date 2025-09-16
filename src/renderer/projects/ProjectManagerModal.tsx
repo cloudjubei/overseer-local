@@ -238,9 +238,9 @@ export default function ProjectManagerModal({
         <div className="flex flex-col" style={{ gap: 12 }}>
           <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ color: 'var(--text-secondary)' }}>Projects: {projectsList.length}</div>
-            <button className="btn" onClick={startCreate}>
+            <Button className="btn-primary" onClick={() => startCreate()}>
               <IconPlus />
-            </button>
+            </Button>
           </div>
           <div>
             {projectsList.length === 0 && <div className="empty">No child projects yet.</div>}

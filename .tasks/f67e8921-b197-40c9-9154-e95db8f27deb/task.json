@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "~",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1201,7 +1201,7 @@
     },
     {
       "id": "fac00d4a-01a5-4012-8481-bb920ac502db",
-      "status": "+",
+      "status": "-",
       "title": "Icons need to be more colorful",
       "description": "All icons in @src/renderer/components/ui/Icons.tsx that are black and white - i.e. ones that don't have 'stroke'/'fill' directly set in their svg lines/circles/rects need to be reworked to be colorful like the sidebar icons \"IconHome\", \"IconFiles\" or \"IconChat\" for example.",
       "plan": "",
@@ -1219,6 +1219,18 @@
       "plan": "",
       "context": [
         "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
+    },
+    {
+      "id": "e2ac9811-94ae-4088-b00b-546f358b370e",
+      "status": "-",
+      "title": "In all modals - the footer/bottom section is sticky just like the top/header section",
+      "description": "Right now, for instance in @src/renderer/components/tasks/FeatureForm.tsx there are buttons at the bottom that get hidden if the form is too big - these need to be sticky at the bottom so they always show (just like the top section).\nThis needs to be true for all modals - so that any place using a modal can define the bottom sticky section. Then only the middle section scrolls.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/tasks/FeatureForm.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -1318,6 +1330,7 @@
     "c20fbc93-7910-4612-a275-95a3d722955c": 91,
     "4673bd96-c874-4b92-8779-d81af432c032": 92,
     "fac00d4a-01a5-4012-8481-bb920ac502db": 93,
-    "f3b465a1-09be-45e9-80b2-70c84145ce5f": 94
+    "f3b465a1-09be-45e9-80b2-70c84145ce5f": 94,
+    "e2ac9811-94ae-4088-b00b-546f358b370e": 95
   }
 }

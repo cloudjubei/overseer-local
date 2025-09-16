@@ -9,6 +9,7 @@ import { Modal } from '../ui/Modal'
 import { IconDelete, IconPlus } from '../ui/Icons'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
 import { useTasks } from '../../contexts/TasksContext'
+import { Button } from '../ui/Button'
 
 export type FeatureFormValues = {
   title: string
@@ -337,19 +338,17 @@ export default function FeatureForm({
 
       <div className="flex justify-between gap-2 pt-2">
         {onDelete && !isCreate ? (
-          <button
-            type="button"
+          <Button
+            className="btn-secondary"
+            variant="danger"
             onClick={onDelete}
             disabled={submitting}
-            className="btn"
-            style={{
-              background: 'var(--status-stuck-bg)',
-              color: 'var(--status-stuck-fg)',
-            }}
           >
-            <IconDelete className="w-4 h-4" />
-            Delete
-          </button>
+            <div className="flex items-center gap-2">
+              <IconDelete />
+              Delete
+            </div>
+          </Button>
         ) : null}
         <div className="flex justify-end gap-2 flex-1">
           <button

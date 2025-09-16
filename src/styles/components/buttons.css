@@ -5,7 +5,6 @@
 .btn-primary,
 .btn-secondary,
 .btn-ghost,
-.btn-outline,
 .btn-danger,
 .btn-link,
 .btn-icon {
@@ -34,7 +33,6 @@
 .btn-primary:focus-visible,
 .btn-secondary:focus-visible,
 .btn-ghost:focus-visible,
-.btn-outline:focus-visible,
 .btn-danger:focus-visible,
 .btn-link:focus-visible,
 .btn-icon:focus-visible {
@@ -47,7 +45,6 @@
 .btn-primary:active,
 .btn-secondary:active,
 .btn-ghost:active,
-.btn-outline:active,
 .btn-danger:active,
 .btn-link:active,
 .btn-icon:active {
@@ -59,7 +56,6 @@
 .btn-primary[disabled],
 .btn-secondary[disabled],
 .btn-ghost[disabled],
-.btn-outline[disabled],
 .btn-danger[disabled],
 .btn-link[disabled],
 .btn-icon[disabled] {
@@ -70,16 +66,16 @@
 /* Primary (default) */
 .btn,
 .btn-primary {
-  background: var(--accent-primary);
-  color: var(--text-inverted);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+  border-width: 2px;
 }
 .btn:hover,
-.btn-primary:hover {
-  background: var(--accent-primary-hover);
-}
+.btn-primary:hover,
 .btn:active,
 .btn-primary:active {
-  background: var(--accent-primary-active);
+  background: color-mix(in srgb, var(--accent-primary-active) 20%, transparent);
 }
 
 /* Secondary: surface with border */
@@ -87,19 +83,11 @@
   background: var(--surface-raised);
   color: var(--text-primary);
   border-color: var(--border-default);
+  border-width: 2px;
 }
-.btn-secondary:hover {
-  background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%);
-}
-
-/* Outline */
-.btn-outline {
-  background: transparent;
-  color: var(--text-primary);
-  border-color: var(--border-default);
-}
-.btn-outline:hover {
-  background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%);
+.btn-secondary:hover,
+.btn-secondary:active {
+  background: color-mix(in srgb, var(--border-default) 20%, transparent);
 }
 
 /* Ghost */
@@ -113,14 +101,20 @@
 
 /* Danger */
 .btn-danger {
-  background: var(--color-red-600);
-  color: #fff;
+  border-color: var(--color-red-600);
+  background: color-mix(in srgb, var(--color-red-600) 10%, transparent);
+  color: var(--color-red-600);
+  border-width: 2px;
 }
 .btn-danger:hover {
-  background: var(--color-red-700);
+  border-color: var(--color-red-700);
+  background: color-mix(in srgb, var(--color-red-700) 20%, transparent);
+  color: var(--color-red-700);
 }
 .btn-danger:active {
-  background: var(--color-red-800);
+  border-color: var(--color-red-800);
+  background: color-mix(in srgb, var(--color-red-800) 20%, transparent);
+  color: var(--color-red-800);
 }
 
 /* Link */
@@ -139,7 +133,6 @@
 .btn-sm,
 .btn-primary.btn-sm,
 .btn-secondary.btn-sm,
-.btn-outline.btn-sm,
 .btn-ghost.btn-sm,
 .btn-danger.btn-sm,
 .btn-link.btn-sm {
@@ -150,7 +143,6 @@
 .btn-lg,
 .btn-primary.btn-lg,
 .btn-secondary.btn-lg,
-.btn-outline.btn-lg,
 .btn-ghost.btn-lg,
 .btn-danger.btn-lg,
 .btn-link.btn-lg {
@@ -161,7 +153,6 @@
 .btn-icon,
 .btn-primary.btn-icon,
 .btn-secondary.btn-icon,
-.btn-outline.btn-icon,
 .btn-ghost.btn-icon,
 .btn-danger.btn-icon,
 .btn-link.btn-icon {
