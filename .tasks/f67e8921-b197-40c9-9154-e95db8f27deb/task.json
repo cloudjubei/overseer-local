@@ -1215,15 +1215,13 @@
       "id": "f3b465a1-09be-45e9-80b2-70c84145ce5f",
       "status": "-",
       "title": "Show the notifications badge in the Sidebar",
-      "description": "Right now, next to the project in the @src/renderer/navigation/SidebarView.tsx it only shows a running agent badge. It must also show the notifications badge next to it.\nWhen the Sidebar is collapsed - it should shrink both badges and show them vertically stacked - making sure that the project icon is still clearly visible.",
+      "description": "Right now, next to the project in the @src/renderer/navigation/SidebarView.tsx it only shows a running agent badge. It must also show the notifications badge next to it.\nWhen the Sidebar is collapsed - it should shrink both badges and show them vertically stacked - making sure that the project icon is still clearly visible.\n\nThe Notifications button also has a NotificationBadge but it's wrapped in a Tooltip - @src/renderer/components/ui/Tooltip.tsx and it doesn't get centred correctly like the project buttons do.\n\nAll the project buttons should also be wrapped in this Tooltip when collapsed and display the project name in the tooltip.",
       "plan": "",
       "context": [
-        "src/renderer/navigation/SidebarView.tsx",
-        "src/renderer/components/ui/Tooltip.tsx"
+        "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "blockers": [],
-      "rejection": "The Notifications button also has a NotificationBadge but it's wrapped in a Tooltip - @src/renderer/components/ui/Tooltip.tsx and it doesn't get centred correctly like the project buttons do.\n\nAll the project buttons should also be wrapped in this Tooltip when collapsed and display the project name in the tooltip."
+      "blockers": []
     },
     {
       "id": "e2ac9811-94ae-4088-b00b-546f358b370e",
