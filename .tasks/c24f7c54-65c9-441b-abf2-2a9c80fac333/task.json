@@ -111,7 +111,7 @@
     },
     {
       "id": "f07b6313-732c-471f-ad22-031e50a25613",
-      "status": "-",
+      "status": "+",
       "title": "Must be possible to edit and delete user created timeline labels",
       "description": "In @src/renderer/screens/ProjectTimelineView.tsx - create a little edit button that shows on label hover. When clicked, it opens a similar popup to the one that is used for Label creation. There needs to be a delete option.",
       "context": [
@@ -119,7 +119,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T17:43:36.272Z",
-      "updatedAt": "2025-09-16T17:43:36.272Z"
+      "updatedAt": "2025-09-16T18:09:31.091Z",
+      "completedAt": "2025-09-16T18:09:31.091Z"
     },
     {
       "id": "671d02a9-29b7-4273-bfa8-fb7101de95af",

@@ -108,6 +108,15 @@ function mapFeatureToTimelineLabel(projectId: string, feature: Feature): Timelin
   }
 }
 
+function tsToInput(ts: string) {
+  // Expect ISO string; keep yyyy-MM-ddTHH:mm
+  try {
+    return new Date(ts).toISOString().slice(0, 16)
+  } catch {
+    return ts.slice(0, 16)
+  }
+}
+
 export default function ProjectTimelineView() {
   const { projectId } = useActiveProject()
   const { tasksById } = useTasks()
@@ -125,6 +134,14 @@ export default function ProjectTimelineView() {
     new Date().toISOString().slice(0, 16),
   ) // yyyy-MM-ddTHH:mm
   const [scope, setScope] = useState<'project' | '__global__'>('project')
+
+  // Edit-label popup state
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editLabel, setEditLabel] = useState<string>('')
+  const [editDescription, setEditDescription] = useState<string>('')
+  const [editTimestamp, setEditTimestamp] = useState<string>('')
+  const [editScope, setEditScope] = useState<'project' | '__global__'>('project')
+  const [savingEdit, setSavingEdit] = useState(false)
 
   // Zoom state (Notion/Airtable-like)
   const [zoom, setZoom] = useState<Zoom>('day')
@@ -395,6 +412,63 @@ export default function ProjectTimelineView() {
     }
   }
 
+  const openEditFor = (id: string) => {
+    const lbl = labels.find((l) => l.id === id)
+    if (!lbl) return
+    setEditingId(id)
+    setEditLabel(lbl.content.label || '')
+    setEditDescription(lbl.content.description || '')
+    setEditTimestamp(tsToInput(lbl.content.timestamp))
+    setEditScope(lbl.projectId === projectId ? 'project' : '__global__')
+  }
+
+  const closeEdit = () => {
+    setEditingId(null)
+    setSavingEdit(false)
+  }
+
+  const onSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingId) return
+    setSavingEdit(true)
+    try {
+      const patch: Partial<EntityInput> = {
+        projectId: editScope === 'project' ? projectId : '__global__',
+        content: {
+          label: editLabel.trim() || 'Label',
+          description: editDescription.trim() || undefined,
+          timestamp: editTimestamp,
+        } as TimestampContent,
+      }
+      const updated = await dbService.updateEntity(editingId, patch)
+      if (updated) {
+        const norm = normalizeLabels([updated])[0]
+        setLabels((prev) => prev.map((l) => (l.id === norm.id ? norm : l)))
+      }
+      closeEdit()
+    } catch (err: any) {
+      console.error('Failed to update label', err)
+      setError(err?.message || 'Failed to update label')
+      setSavingEdit(false)
+    }
+  }
+
+  const onDeleteEdit = async () => {
+    if (!editingId) return
+    const lbl = labels.find((l) => l.id === editingId)
+    const name = lbl?.content.label || 'this label'
+    const ok = window.confirm(`Delete ${name}? This cannot be undone.`)
+    if (!ok) return
+    try {
+      const success = await dbService.deleteEntity(editingId)
+      if (success) setLabels((prev) => prev.filter((l) => l.id !== editingId))
+      closeEdit()
+    } catch (err: any) {
+      console.error('Failed to delete label', err)
+      setError(err?.message || 'Failed to delete label')
+    }
+  }
+
   const scrollToToday = () => {
     const container = document.getElementById('project-timeline-scroll')
     if (!container) return
@@ -615,7 +689,7 @@ export default function ProjectTimelineView() {
                     const isFeature = (it as any).kind === 'feature'
 
                     const pillBase =
-                      'pointer-events-auto mx-1 rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem]'
+                      'pointer-events-auto mx-1 rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem] relative group'
                     const featureStyles =
                       'bg-status-done-soft-bg text-status-done-soft-fg border-status-done-soft-border'
                     const labelProjectStyles =
@@ -642,7 +716,18 @@ export default function ProjectTimelineView() {
                         }}
                         title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
                       >
-                        <div className="truncate font-medium">{it.title}</div>
+                        {/* Hover edit button for user labels */}
+                        {!isFeature && (
+                          <button
+                            type="button"
+                            onClick={() => openEditFor(it.id)}
+                            className="absolute -top-1.5 -right-1.5 hidden group-hover:flex items-center justify-center h-5 w-5 rounded-full bg-base border border-subtle text-secondary hover:text-primary shadow-sm"
+                            title="Edit label"
+                          >
+                            ✎
+                          </button>
+                        )}
+                        <div className="truncate font-medium pr-4">{it.title}</div>
                         <div className="opacity-80 text-[10px]">
                           {new Date(it.timestamp).toLocaleDateString()}
                         </div>
@@ -685,6 +770,87 @@ export default function ProjectTimelineView() {
           </div>
         </div>
       </div>
+
+      {/* Edit popup modal */}
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={closeEdit} />
+          <form
+            onSubmit={onSaveEdit}
+            className="relative z-10 w-[520px] max-w-[95vw] rounded-md border border-default bg-base shadow-lg p-4 space-y-3"
+          >
+            <div className="text-sm font-medium text-primary">Edit timeline label</div>
+            <div className="grid gap-2 sm:grid-cols-5 items-end">
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-xs text-muted">Row label</label>
+                <input
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  placeholder="e.g. Milestone A"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-3">
+                <label className="text-xs text-muted">Description (optional)</label>
+                <input
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Short note"
+                />
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-xs text-muted">When</label>
+                <input
+                  type="datetime-local"
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editTimestamp}
+                  onChange={(e) => setEditTimestamp(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-xs text-muted">Scope</label>
+                <select
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editScope}
+                  onChange={(e) => setEditScope(e.target.value as any)}
+                >
+                  <option value="project">This project</option>
+                  <option value="__global__">All projects (global)</option>
+                </select>
+              </div>
+              <div className="sm:col-span-1 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={onDeleteEdit}
+                  className="h-9 px-3 text-sm rounded border border-subtle bg-raised text-red-600 hover:bg-base"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={closeEdit}
+                className="px-3 py-1.5 text-sm rounded border border-subtle bg-raised hover:bg-base text-primary"
+                disabled={savingEdit}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-3 py-1.5 text-sm rounded bg-accent-primary text-inverted hover:bg-accent-hover focus:outline-none focus-visible:ring-2 ring-offset-1 disabled:opacity-60"
+                disabled={savingEdit}
+              >
+                {savingEdit ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
