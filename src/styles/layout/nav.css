@@ -117,6 +117,7 @@
     background var(--motion-fast, 120ms) var(--easing-standard, ease),
     border-color var(--motion-fast, 120ms) var(--easing-standard, ease),
     box-shadow var(--motion-fast, 120ms) var(--easing-standard, ease);
+  position: relative; /* allow absolute-positioned badges in compact mode */
 }
 .nav-item:hover {
   background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%);
@@ -148,6 +149,25 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Badges container at the end of nav item */
+.nav-item__badges {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Compact mode: stack badges vertically and float to right so the icon stays centered */
+.nav-item--compact .nav-item__badges,
+.nav-item__badges--compact {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 .nav-sep {

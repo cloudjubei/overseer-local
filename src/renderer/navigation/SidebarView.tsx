@@ -31,6 +31,7 @@ import {
   IconChevron,
 } from '../components/ui/Icons'
 import { renderProjectIcon } from '../projects/projectIcons'
+import { notificationsService } from '../services/notificationsService'
 
 export type SidebarProps = {}
 
@@ -166,6 +167,45 @@ export default function SidebarView({}: SidebarProps) {
     }
     return map
   }, [runsHistory])
+
+  // Track unread notifications per project for badges in the Projects list.
+  const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
+
+  const refreshUnreadFor = useCallback(async (projectId: string) => {
+    try {
+      const count = await notificationsService.getUnreadNotificationsCount(projectId)
+      setUnreadByProject((prev) => {
+        const next = new Map(prev)
+        next.set(projectId, count)
+        return next
+      })
+    } catch (_) {
+      // ignore errors; keep previous
+    }
+  }, [])
+
+  const refreshAllUnread = useCallback(async (projectIds: string[]) => {
+    await Promise.all(projectIds.map((id) => refreshUnreadFor(id)))
+  }, [refreshUnreadFor])
+
+  useEffect(() => {
+    const ids = projects.map((p) => p.id)
+    if (ids.length) refreshAllUnread(ids)
+  }, [projects.map((p) => p.id).join('|'), refreshAllUnread])
+
+  useEffect(() => {
+    // Subscribe to notification changes; update affected project only
+    const unsubscribe = notificationsService.subscribe((payload?: any) => {
+      const pid = payload?.projectId
+      if (pid) refreshUnreadFor(pid)
+      else {
+        // Unknown project; refresh all to be safe
+        const ids = projects.map((p) => p.id)
+        if (ids.length) refreshAllUnread(ids)
+      }
+    })
+    return () => unsubscribe()
+  }, [projects.map((p) => p.id).join('|'), refreshAllUnread, refreshUnreadFor])
 
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
@@ -437,8 +477,10 @@ export default function SidebarView({}: SidebarProps) {
             const active = activeProjectId === p.id
             const accent = useAccentClass(p.id, isMain)
             const activeCount = activeCountByProject.get(p.id) || 0
+            const unread = unreadByProject.get(p.id) || 0
             const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
             const projectIcon = renderProjectIcon(iconKey)
+            const hasAnyBadge = activeCount > 0 || unread > 0
             return (
               <li className="nav-li" key={p.id}>
                 <div className="flex items-center">
@@ -457,12 +499,31 @@ export default function SidebarView({}: SidebarProps) {
                       {projectIcon}
                     </span>
                     {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
-                    {activeCount > 0 && (
-                      <NotificationBadge
-                        text={`${activeCount}`}
-                        tooltipLabel={`${activeCount} running agents`}
-                        isInformative
-                      />
+
+                    {hasAnyBadge && (
+                      <span
+                        className={classNames(
+                          'nav-item__badges',
+                          effectiveCollapsed && 'nav-item__badges--compact',
+                        )}
+                        aria-hidden
+                      >
+                        {activeCount > 0 && (
+                          <NotificationBadge
+                            className={effectiveCollapsed ? 'h-4 min-w-4 px-1 text-[10px]' : ''}
+                            text={`${activeCount}`}
+                            tooltipLabel={`${activeCount} running agents`}
+                            isInformative
+                          />
+                        )}
+                        {unread > 0 && (
+                          <NotificationBadge
+                            className={effectiveCollapsed ? 'h-4 min-w-4 px-1 text-[10px]' : ''}
+                            text={`${unread}`}
+                            tooltipLabel={`${unread} unread notifications`}
+                          />
+                        )}
+                      </span>
                     )}
                   </button>
                 </div>
