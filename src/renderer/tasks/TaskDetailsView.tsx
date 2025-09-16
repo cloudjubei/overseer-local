@@ -162,7 +162,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
         statusFilter === 'all'
           ? true
           : statusFilter === 'not-done'
-            ? f.status !== '+'
+            ? f.status !== '+' || f.rejection
             : f.status === statusFilter
       return byStatus && featureMatchesQuery(f, query)
     })
