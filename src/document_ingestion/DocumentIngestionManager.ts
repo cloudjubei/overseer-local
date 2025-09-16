@@ -111,7 +111,7 @@ export default class DocumentIngestionManager implements BaseManager {
         ingested++
       } catch (e) {
         failed++
-        console.warn('[DocumentIngestion] file ingest failed: ', e)
+        console.warn('[DocumentIngestion] file ingest failed for: ', f, ' error: ', e)
       }
     }
     console.info(
