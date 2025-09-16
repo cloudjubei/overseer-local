@@ -8,20 +8,21 @@ import NotificationSettings from './settings/notifications/NotificationSettings'
 import GitHubSettings from './settings/github/GitHubSettings'
 import WebSearchSettings from './settings/websearch/WebSearchSettings'
 import DatabaseSettings from './settings/database/DatabaseSettings'
+import { IconPalette, IconRobot, IconBell, IconGitHub, IconSearch, IconDatabase } from '../components/ui/Icons'
 
 // Settings Categories
 const CATEGORIES = [
-  { id: 'visual', label: 'Visual', icon: <span aria-hidden>🎨</span>, accent: 'purple' },
-  { id: 'llms', label: 'LLMs', icon: <span aria-hidden>🤖</span>, accent: 'teal' },
+  { id: 'visual', label: 'Visual', icon: <IconPalette className="h-4 w-4" />, accent: 'purple' },
+  { id: 'llms', label: 'LLMs', icon: <IconRobot className="h-4 w-4" />, accent: 'teal' },
   {
     id: 'notifications',
     label: 'Notifications',
-    icon: <span aria-hidden>🔔</span>,
+    icon: <IconBell className="h-4 w-4" />,
     accent: 'brand',
   },
-  { id: 'github', label: 'GitHub', icon: <span aria-hidden>🐙</span>, accent: 'gray' },
-  { id: 'websearch', label: 'Web Search', icon: <span aria-hidden>🔎</span>, accent: 'orange' },
-  { id: 'database', label: 'Database', icon: <span aria-hidden>🗄️</span>, accent: 'indigo' },
+  { id: 'github', label: 'GitHub', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
+  { id: 'websearch', label: 'Web Search', icon: <IconSearch className="h-4 w-4" />, accent: 'orange' },
+  { id: 'database', label: 'Database', icon: <IconDatabase className="h-4 w-4" />, accent: 'indigo' },
 ]
 
 type CategoryId = (typeof CATEGORIES)[number]['id']

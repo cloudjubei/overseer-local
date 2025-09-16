@@ -1114,3 +1114,61 @@ export function IconClamp({ className, filled = false }: { className?: string; f
     </svg>
   )
 }
+
+// Added: Palette (Visual settings)
+export function IconPalette({ className }: { className?: string }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3a9 9 0 1 0 0 18h2a3 3 0 0 0 0-6h-1a2 2 0 0 1-2-2v-1a9 9 0 0 0 1-9z" stroke="#A855F7" strokeWidth="2" />
+      <circle cx="7.5" cy="10" r="1.2" fill="#F59E0B" />
+      <circle cx="9.5" cy="6.5" r="1.2" fill="#22D3EE" />
+      <circle cx="12.5" cy="5.5" r="1.2" fill="#3B82F6" />
+      <circle cx="15" cy="7.5" r="1.2" fill="#10B981" />
+    </svg>
+  )
+}
+
+// Added: GitHub logo
+export function IconGitHub({ className }: { className?: string }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 .5C5.73.5.98 5.24.98 11.5c0 4.85 3.15 8.96 7.51 10.41.55.1.76-.24.76-.54 0-.27-.01-1.16-.02-2.11-3.06.66-3.71-1.3-3.71-1.3-.5-1.26-1.22-1.6-1.22-1.6-1-.68.08-.67.08-.67 1.12.08 1.71 1.15 1.71 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.71-1.49-2.44-.28-5-1.22-5-5.42 0-1.2.43-2.18 1.14-2.95-.11-.28-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.13.89-.25 1.85-.37 2.8-.38.95.01 1.91.13 2.8.38 2.14-1.43 3.07-1.13 3.07-1.13.61 1.54.22 2.68.11 2.96.71.77 1.14 1.75 1.14 2.95 0 4.21-2.56 5.13-5.01 5.4.4.35.76 1.04.76 2.11 0 1.52-.01 2.74-.01 3.12 0 .3.2.65.76.54 4.36-1.45 7.51-5.56 7.51-10.41C23.02 5.24 18.27.5 12 .5z" />
+    </svg>
+  )
+}
+
+// Added: Database/storage icon
+export function IconDatabase({ className }: { className?: string }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <ellipse cx="12" cy="5" rx="8" ry="3" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5" stroke="#93C5FD" strokeWidth="2" />
+      <path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" stroke="#22D3EE" strokeWidth="2" />
+    </svg>
+  )
+}
