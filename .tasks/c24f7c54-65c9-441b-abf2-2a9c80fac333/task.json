@@ -1,6 +1,6 @@
 {
   "id": "c24f7c54-65c9-441b-abf2-2a9c80fac333",
-  "status": "?",
+  "status": "+",
   "title": "Calendar view",
   "description": "For each project, based on the tasks and features that were completed - it must be possible to view a timeline of features when they were done in a scrollable timeline view.\nThe user must be able to also define their own labels/nodes to the timeline as extra rows - these need to be stored.\nIt must be also possible to view an overall timeline - that will show all projects and their tasks (rather than features) - so a higher level view.",
   "features": [
@@ -98,7 +98,7 @@
     },
     {
       "id": "7f5ba22e-7e22-4a04-994f-25af10c138a7",
-      "status": "-",
+      "status": "+",
       "title": "User labels should be always at the top and the feature ones below",
       "description": "In @src/renderer/screens/ProjectTimelineView.tsx .\nGlobal labels should also be above the current project ones.",
       "context": [
@@ -106,7 +106,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T17:24:43.752Z",
-      "updatedAt": "2025-09-16T17:27:26.124Z"
+      "updatedAt": "2025-09-16T17:33:17.591Z",
+      "completedAt": "2025-09-16T17:33:17.591Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -120,5 +121,6 @@
     "7f5ba22e-7e22-4a04-994f-25af10c138a7": 8
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T16:36:30.045Z"
+  "updatedAt": "2025-09-16T16:36:30.045Z",
+  "completedAt": "2025-09-16T17:33:17.591Z"
 }

@@ -176,7 +176,7 @@ export default function ProjectTimelineView() {
     return [...fs, ...labels].sort(
       (a, b) => new Date(a.content.timestamp).getTime() - new Date(b.content.timestamp).getTime(),
     )
-  }, [features, labels])
+  }, [features, labels, projectId])
 
   // Determine raw min/max
   const { rawStartDate, rawEndDate } = useMemo(() => {
@@ -338,25 +338,34 @@ export default function ProjectTimelineView() {
           scope: 'project' | '__global__'
           kind: 'label'
         }[]
+        rowScope: 'project' | '__global__'
       }
     >()
     for (const l of labels) {
       const title = l.content.label
       const k = title
-      if (!groups.has(k)) groups.set(k, { key: k, title: k, items: [] })
-      groups.get(k)!.items.push({
+      if (!groups.has(k)) groups.set(k, { key: k, title: k, items: [], rowScope: 'project' })
+      const scopeOfItem: 'project' | '__global__' = l.projectId === projectId ? 'project' : '__global__'
+      const grp = groups.get(k)!
+      grp.items.push({
         id: l.id,
         title,
         timestamp: l.content.timestamp,
-        scope: l.projectId ? 'project' : '__global__',
+        scope: scopeOfItem,
         kind: 'label',
       })
+      if (scopeOfItem === '__global__') grp.rowScope = '__global__'
     }
-    return Array.from(groups.values()).sort((a, b) => a.title.localeCompare(b.title))
-  }, [labels])
+    // Sort: Global rows first, then by title
+    return Array.from(groups.values()).sort((a, b) => {
+      if (a.rowScope !== b.rowScope) return a.rowScope === '__global__' ? -1 : 1
+      return a.title.localeCompare(b.title)
+    })
+  }, [labels, projectId])
 
   const allRows = useMemo(() => {
-    return [...featureRows, ...labelRows]
+    // User label rows at the top; features row below
+    return [...labelRows, ...featureRows]
   }, [featureRows, labelRows])
 
   const onAddLabel = async (e: React.FormEvent) => {
