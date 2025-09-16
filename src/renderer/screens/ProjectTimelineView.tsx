@@ -5,6 +5,9 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import { Entity } from 'thefactory-db'
 import { EntityInput } from 'thefactory-db/dist/types'
+import TaskSummaryCallout from '../components/tasks/TaskSummaryCallout'
+import FeatureSummaryCallout from '../components/tasks/FeatureSummaryCallout'
+import { useNavigator } from '../navigation/Navigator'
 
 function startOfDay(d: Date) {
   const x = new Date(d)
@@ -108,9 +111,96 @@ function mapFeatureToTimelineLabel(projectId: string, feature: Feature): Timelin
   }
 }
 
+function getTaskCompletedAt(task: Task): string | null {
+  const anyTask: any = task as any
+  if (anyTask?.completedAt) return anyTask.completedAt as string
+  // Fallback: latest completed feature timestamp
+  const times = (task.features || [])
+    .map((f: any) => f?.completedAt)
+    .filter((ts: any): ts is string => !!ts)
+  if (!times.length) return null
+  return times.reduce((max, ts) => (new Date(ts) > new Date(max) ? ts : max), times[0])
+}
+
+function mapTaskToTimelineLabel(projectId: string, task: Task): TimelineLabel | null {
+  const ts = getTaskCompletedAt(task)
+  if (!ts) return null
+  return {
+    id: `task-${task.id}`,
+    projectId,
+    type: ENTITY_TYPE,
+    content: {
+      timestamp: ts,
+      label: task.title,
+      description: (task as any)?.description,
+    },
+    createdAt: (task as any)?.createdAt,
+    updatedAt: (task as any)?.updatedAt,
+    metadata: task,
+  }
+}
+
+function tsToInput(ts: string) {
+  // Expect ISO string; keep yyyy-MM-ddTHH:mm
+  try {
+    return new Date(ts).toISOString().slice(0, 16)
+  } catch {
+    return ts.slice(0, 16)
+  }
+}
+
+// Helper for consistent color-coding by task
+function hashToHue(str: string): number {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0
+  h = Math.abs(h)
+  return h % 360
+}
+function taskColorStyles(taskId: string | undefined): React.CSSProperties {
+  const base = taskId || 'default'
+  const hue = hashToHue(base)
+  const bg = `hsl(${hue}, 85%, 92%)`
+  const border = `hsl(${hue}, 60%, 70%)`
+  const text = `hsl(${hue}, 35%, 24%)`
+  return { backgroundColor: bg, borderColor: border, color: text }
+}
+
+function getUnitIndex(zoom: Zoom, startAligned: Date, unitCount: number, ts: string): number {
+  const d = new Date(ts)
+  if (zoom === 'day') return clamp(diffInDays(startAligned, d), 0, unitCount - 1)
+  if (zoom === 'week') return clamp(diffInWeeks(startAligned, d), 0, unitCount - 1)
+  return clamp(diffInMonths(startAligned, d), 0, unitCount - 1)
+}
+
+// Row item type used internally for rendering
+interface RowItem {
+  id: string
+  title: string
+  timestamp: string
+  kind: 'feature' | 'task' | 'label'
+  taskId?: string // for feature coloring
+  scope?: 'project' | '__global__' // for label coloring
+}
+
+// Hover callout state
+type HoverInfo =
+  | null
+  | {
+      kind: 'task'
+      taskId: string
+      rect: DOMRect
+    }
+  | {
+      kind: 'feature'
+      taskId: string
+      featureId: string
+      rect: DOMRect
+    }
+
 export default function ProjectTimelineView() {
-  const { projectId } = useActiveProject()
+  const { projectId, project } = useActiveProject()
   const { tasksById } = useTasks()
+  const { navigateTaskDetails } = useNavigator()
 
   const [features, setFeatures] = useState<Feature[]>([])
   const [labels, setLabels] = useState<TimelineLabel[]>([])
@@ -126,8 +216,19 @@ export default function ProjectTimelineView() {
   ) // yyyy-MM-ddTHH:mm
   const [scope, setScope] = useState<'project' | '__global__'>('project')
 
+  // Edit-label popup state
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editLabel, setEditLabel] = useState<string>('')
+  const [editDescription, setEditDescription] = useState<string>('')
+  const [editTimestamp, setEditTimestamp] = useState<string>('')
+  const [editScope, setEditScope] = useState<'project' | '__global__'>('project')
+  const [savingEdit, setSavingEdit] = useState(false)
+
   // Zoom state (Notion/Airtable-like)
   const [zoom, setZoom] = useState<Zoom>('day')
+
+  // Hover state for callout
+  const [hover, setHover] = useState<HoverInfo>(null)
 
   useEffect(() => {
     if (!projectId) {
@@ -173,10 +274,19 @@ export default function ProjectTimelineView() {
     const fs = features
       .filter((f) => f.completedAt)
       .map((f) => mapFeatureToTimelineLabel(projectId, f))
-    return [...fs, ...labels].sort(
+
+    // Include tasks for week/month so the range reflects tasks when those views are active
+    let ts: TimelineLabel[] = []
+    if (zoom !== 'day') {
+      ts = Object.values(tasksById)
+        .map((t) => mapTaskToTimelineLabel(projectId, t))
+        .filter((x): x is TimelineLabel => !!x)
+    }
+
+    return [...fs, ...ts, ...labels].sort(
       (a, b) => new Date(a.content.timestamp).getTime() - new Date(b.content.timestamp).getTime(),
     )
-  }, [features, labels, projectId])
+  }, [features, labels, projectId, zoom, tasksById])
 
   // Determine raw min/max
   const { rawStartDate, rawEndDate } = useMemo(() => {
@@ -307,23 +417,53 @@ export default function ProjectTimelineView() {
     [unitCount, cellMinWidth],
   )
 
-  // Build rows for features and user-defined label rows
+  // Build rows for features (day) or tasks (week/month) and user-defined label rows
   const featureRows = useMemo(() => {
+    // build from tasks to capture taskId for color coding
+    const items: RowItem[] = []
+    for (const t of Object.values(tasksById)) {
+      for (const f of t.features || []) {
+        if (!f?.completedAt) continue
+        items.push({
+          id: f.id,
+          title: f.title,
+          timestamp: f.completedAt ?? new Date().toISOString(),
+          kind: 'feature',
+          taskId: t.id,
+        })
+      }
+    }
     return [
       {
         key: 'features',
         title: 'Features (completed)',
-        items: features
-          .filter((f) => f.completedAt)
-          .map((f) => ({
-            id: f.id,
-            title: f.title,
-            timestamp: f.completedAt ?? new Date().toISOString(),
-            kind: 'feature' as const,
-          })),
+        items,
       },
     ]
-  }, [features])
+  }, [tasksById])
+
+  const taskRows = useMemo(() => {
+    const items = Object.values(tasksById)
+      .map((t) => {
+        const ts = getTaskCompletedAt(t)
+        if (!ts) return null
+        return {
+          id: t.id,
+          title: t.title,
+          timestamp: ts,
+          kind: 'task' as const,
+        } as RowItem
+      })
+      .filter((x): x is RowItem => !!x)
+
+    return [
+      {
+        key: 'tasks',
+        title: 'Tasks (completed)',
+        items,
+      },
+    ]
+  }, [tasksById])
 
   const labelRows = useMemo(() => {
     const groups = new Map<
@@ -331,13 +471,7 @@ export default function ProjectTimelineView() {
       {
         key: string
         title: string
-        items: {
-          id: string
-          title: string
-          timestamp: string
-          scope: 'project' | '__global__'
-          kind: 'label'
-        }[]
+        items: RowItem[]
         rowScope: 'project' | '__global__'
       }
     >()
@@ -363,10 +497,12 @@ export default function ProjectTimelineView() {
     })
   }, [labels, projectId])
 
+  const dataRows = useMemo(() => (zoom === 'day' ? featureRows : taskRows), [featureRows, taskRows, zoom])
+
   const allRows = useMemo(() => {
-    // User label rows at the top; features row below
-    return [...labelRows, ...featureRows]
-  }, [featureRows, labelRows])
+    // User label rows at the top; features or tasks row below depending on zoom
+    return [...labelRows, ...dataRows]
+  }, [dataRows, labelRows])
 
   const onAddLabel = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -395,6 +531,63 @@ export default function ProjectTimelineView() {
     }
   }
 
+  const openEditFor = (id: string) => {
+    const lbl = labels.find((l) => l.id === id)
+    if (!lbl) return
+    setEditingId(id)
+    setEditLabel(lbl.content.label || '')
+    setEditDescription(lbl.content.description || '')
+    setEditTimestamp(tsToInput(lbl.content.timestamp))
+    setEditScope(lbl.projectId === projectId ? 'project' : '__global__')
+  }
+
+  const closeEdit = () => {
+    setEditingId(null)
+    setSavingEdit(false)
+  }
+
+  const onSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingId) return
+    setSavingEdit(true)
+    try {
+      const patch: Partial<EntityInput> = {
+        projectId: editScope === 'project' ? projectId : '__global__',
+        content: {
+          label: editLabel.trim() || 'Label',
+          description: editDescription.trim() || undefined,
+          timestamp: editTimestamp,
+        } as TimestampContent,
+      }
+      const updated = await dbService.updateEntity(editingId, patch)
+      if (updated) {
+        const norm = normalizeLabels([updated])[0]
+        setLabels((prev) => prev.map((l) => (l.id === norm.id ? norm : l)))
+      }
+      closeEdit()
+    } catch (err: any) {
+      console.error('Failed to update label', err)
+      setError(err?.message || 'Failed to update label')
+      setSavingEdit(false)
+    }
+  }
+
+  const onDeleteEdit = async () => {
+    if (!editingId) return
+    const lbl = labels.find((l) => l.id === editingId)
+    const name = lbl?.content.label || 'this label'
+    const ok = window.confirm(`Delete ${name}? This cannot be undone.`)
+    if (!ok) return
+    try {
+      const success = await dbService.deleteEntity(editingId)
+      if (success) setLabels((prev) => prev.filter((l) => l.id !== editingId))
+      closeEdit()
+    } catch (err: any) {
+      console.error('Failed to delete label', err)
+      setError(err?.message || 'Failed to delete label')
+    }
+  }
+
   const scrollToToday = () => {
     const container = document.getElementById('project-timeline-scroll')
     if (!container) return
@@ -406,6 +599,17 @@ export default function ProjectTimelineView() {
     const approxCell = cellMinWidth
     container.scrollTo({ left: todayIdx * approxCell, behavior: 'smooth' })
   }
+
+  // Clear hover on scroll/resize to avoid stale positioning
+  useEffect(() => {
+    const onScrollOrResize = () => setHover(null)
+    window.addEventListener('scroll', onScrollOrResize, true)
+    window.addEventListener('resize', onScrollOrResize)
+    return () => {
+      window.removeEventListener('scroll', onScrollOrResize, true)
+      window.removeEventListener('resize', onScrollOrResize)
+    }
+  }, [])
 
   if (loading) {
     return <div className="p-4 text-secondary">Loading timeline...</div>
@@ -574,81 +778,113 @@ export default function ProjectTimelineView() {
             {allRows.map((row) => (
               <div key={row.key} className="relative">
                 <div
-                  className="grid relative items-center"
+                  className="grid relative"
                   style={{ gridTemplateColumns: gridTemplate }}
                 >
                   {/* Row label */}
-                  <div className="sticky left-0 z-10 h-12 bg-base px-3 text-sm font-medium text-primary flex items-center border-b border-subtle">
+                  <div className="sticky left-0 z-10 bg-base px-3 py-2 text-sm font-medium text-primary flex items-start border-b border-subtle">
                     {row.title}
                   </div>
-                  {/* Grid cells background */}
-                  {Array.from({ length: unitCount }).map((_, i) => (
-                    <div
-                      key={`c-${row.key}-${i}`}
-                      className="h-12 border-l border-b border-subtle"
-                    />
-                  ))}
 
-                  {/* Items */}
-                  {row.items.map((it) => {
-                    let idx = 0
-                    if (zoom === 'day')
-                      idx = clamp(
-                        diffInDays(startAligned, new Date(it.timestamp)),
-                        0,
-                        unitCount - 1,
+                  {/* Build buckets per unit for this row so items can stack from top */}
+                  {(() => {
+                    const buckets: RowItem[][] = Array.from({ length: unitCount }, () => [])
+                    for (const it of row.items as RowItem[]) {
+                      const idx = getUnitIndex(zoom, startAligned, unitCount, it.timestamp)
+                      if (idx < 0 || idx >= unitCount) continue
+                      buckets[idx].push(it)
+                    }
+                    // sort each bucket by timestamp ascending
+                    for (let i = 0; i < buckets.length; i++) {
+                      buckets[i].sort(
+                        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
                       )
-                    else if (zoom === 'week')
-                      idx = clamp(
-                        diffInWeeks(startAligned, new Date(it.timestamp)),
-                        0,
-                        unitCount - 1,
-                      )
-                    else
-                      idx = clamp(
-                        diffInMonths(startAligned, new Date(it.timestamp)),
-                        0,
-                        unitCount - 1,
-                      )
+                    }
 
-                    const colStart = 2 + idx
-                    const isFeature = (it as any).kind === 'feature'
-
-                    const pillBase =
-                      'pointer-events-auto mx-1 rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem]'
-                    const featureStyles =
-                      'bg-status-done-soft-bg text-status-done-soft-fg border-status-done-soft-border'
-                    const labelProjectStyles =
-                      'bg-status-review-soft-bg text-status-review-soft-fg border-status-review-soft-border'
-                    const labelGlobalStyles =
-                      'bg-status-on_hold-soft-bg text-status-on_hold-soft-fg border-status-on_hold-soft-border'
-
-                    const className = `${pillBase} ${
-                      isFeature
-                        ? featureStyles
-                        : (it as any).scope === 'project'
-                          ? labelProjectStyles
-                          : labelGlobalStyles
-                    }`
-
-                    return (
+                    // Render one cell per unit with items stacked from the top
+                    return buckets.map((itemsInCell, i) => (
                       <div
-                        key={it.id}
-                        className={className}
-                        style={{
-                          gridColumnStart: colStart,
-                          gridColumnEnd: `span 1`,
-                          alignSelf: 'center' as any,
-                        }}
-                        title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
+                        key={`c-${row.key}-${i}`}
+                        className="border-l border-b border-subtle px-1 py-1 flex flex-col items-stretch gap-1"
                       >
-                        <div className="truncate font-medium">{it.title}</div>
-                        <div className="opacity-80 text-[10px]">
-                          {new Date(it.timestamp).toLocaleDateString()}
-                        </div>
+                        {itemsInCell.map((it) => {
+                          const kind = it.kind
+                          const isLabel = kind === 'label'
+                          const isFeature = kind === 'feature'
+
+                          const pillBase =
+                            'pointer-events-auto rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem] relative group truncate'
+
+                          const labelProjectStyles =
+                            'bg-status-review-soft-bg text-status-review-soft-fg border-status-review-soft-border'
+                          const labelGlobalStyles =
+                            'bg-status-on_hold-soft-bg text-status-on_hold-soft-fg border-status-on_hold-soft-border'
+
+                          const className = `${pillBase} ${
+                            isLabel
+                              ? (it as any).scope === 'project'
+                                ? labelProjectStyles
+                                : labelGlobalStyles
+                              : ''
+                          }`
+
+                          const style = !isLabel
+                            ? taskColorStyles(isFeature ? it.taskId : it.id)
+                            : undefined
+
+                          const onMouseEnter: React.MouseEventHandler<HTMLDivElement> = (e) => {
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                            if (kind === 'task') {
+                              setHover({ kind: 'task', taskId: it.id, rect })
+                            } else if (kind === 'feature') {
+                              setHover({ kind: 'feature', taskId: (it as any).taskId!, featureId: it.id, rect })
+                            } else {
+                              setHover(null)
+                            }
+                          }
+                          const onMouseLeave: React.MouseEventHandler<HTMLDivElement> = () => {
+                            setHover((prev) => (prev ? null : prev))
+                          }
+
+                          const onClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+                            if (kind === 'task') {
+                              navigateTaskDetails(it.id, undefined, true)
+                            } else if (kind === 'feature') {
+                              navigateTaskDetails((it as any).taskId!, it.id)
+                            }
+                          }
+
+                          return (
+                            <div
+                              key={it.id}
+                              className={className}
+                              style={style}
+                              title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
+                              onMouseEnter={onMouseEnter}
+                              onMouseLeave={onMouseLeave}
+                              onClick={onClick}
+                            >
+                              {/* Hover edit button for user labels */}
+                              {isLabel && (
+                                <button
+                                  type="button"
+                                  onClick={() => openEditFor(it.id)}
+                                  className="absolute -top-1.5 -right-1.5 hidden group-hover:flex items-center justify-center h-5 w-5 rounded-full bg-base border border-subtle text-secondary hover:text-primary shadow-sm"
+                                  title="Edit label"
+                                >
+                                  ✎
+                                </button>
+                              )}
+                              <div className="truncate font-medium pr-4">{it.title}</div>
+                              <div className="opacity-80 text-[10px]">
+                                {new Date(it.timestamp).toLocaleDateString()}
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                    )
-                  })}
+                    ))
+                  })()}
                 </div>
 
                 {/* Today marker line */}
@@ -685,6 +921,132 @@ export default function ProjectTimelineView() {
           </div>
         </div>
       </div>
+
+      {/* Hover callout (fixed-position, pointer-events: none) */}
+      {hover && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            top: Math.max(8, hover.rect.top + window.scrollY - 4),
+            left: Math.min(
+              window.scrollX + window.innerWidth - 320,
+              hover.rect.left + window.scrollX + hover.rect.width + 8,
+            ),
+          }}
+        >
+          {hover.kind === 'task' ? (
+            (() => {
+              const t = tasksById[hover.taskId]
+              if (!t) return null
+              const displayId = String(project?.taskIdToDisplayIndex?.[t.id] ?? t.id)
+              return (
+                <TaskSummaryCallout
+                  title={t.title}
+                  description={(t as any)?.description || ''}
+                  status={t.status}
+                  displayId={displayId}
+                />
+              )
+            })()
+          ) : hover.kind === 'feature' ? (
+            (() => {
+              const t = tasksById[hover.taskId]
+              const f = t?.features.find((x) => x.id === hover.featureId)
+              if (!t || !f) return null
+              const displayId = String(t.featureIdToDisplayIndex?.[f.id] ?? f.id)
+              return (
+                <FeatureSummaryCallout
+                  title={f.title}
+                  description={f.description || ''}
+                  status={f.status}
+                  displayId={displayId}
+                />
+              )
+            })()
+          ) : null}
+        </div>
+      )}
+
+      {/* Edit popup modal */}
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={closeEdit} />
+          <form
+            onSubmit={onSaveEdit}
+            className="relative z-10 w-[520px] max-w-[95vw] rounded-md border border-default bg-base shadow-lg p-4 space-y-3"
+          >
+            <div className="text-sm font-medium text-primary">Edit timeline label</div>
+            <div className="grid gap-2 sm:grid-cols-5 items-end">
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-xs text-muted">Row label</label>
+                <input
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  placeholder="e.g. Milestone A"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-3">
+                <label className="text-xs text-muted">Description (optional)</label>
+                <input
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Short note"
+                />
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-xs text-muted">When</label>
+                <input
+                  type="datetime-local"
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editTimestamp}
+                  onChange={(e) => setEditTimestamp(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-xs text-muted">Scope</label>
+                <select
+                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  value={editScope}
+                  onChange={(e) => setEditScope(e.target.value as any)}
+                >
+                  <option value="project">This project</option>
+                  <option value="__global__">All projects (global)</option>
+                </select>
+              </div>
+              <div className="sm:col-span-1 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={onDeleteEdit}
+                  className="h-9 px-3 text-sm rounded border border-subtle bg-raised text-red-600 hover:bg-base"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={closeEdit}
+                className="px-3 py-1.5 text-sm rounded border border-subtle bg-raised hover:bg-base text-primary"
+                disabled={savingEdit}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-3 py-1.5 text-sm rounded bg-accent-primary text-inverted hover:bg-accent-hover focus:outline-none focus-visible:ring-2 ring-offset-1 disabled:opacity-60"
+                disabled={savingEdit}
+              >
+                {savingEdit ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
