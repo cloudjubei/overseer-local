@@ -35,7 +35,7 @@ function featureMatchesQuery(f: Feature, q: string) {
 export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const [task, setTask] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
-  const { openModal, navigateView, tasksRoute, navigateAgentRun } = useNavigator()
+  const { openModal, navigateView, tasksRoute, navigateAgentRun, subscribeModalState } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
 
@@ -52,6 +52,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     reorderFeatures,
     getBlockers,
     getBlockersOutbound,
+    refreshTaskById,
   } = useTasks()
   const { runsHistory, startTaskAgent, startFeatureAgent } = useAgents()
 
@@ -80,6 +81,35 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       setTask(null)
     }
   }, [taskId, tasksById])
+
+  // When feature modals close or features change, ensure latest task data is fetched
+  useEffect(() => {
+    if (!taskId) return
+
+    // Subscribe to modal lifecycle to refresh after add/edit feature dialogs close
+    const unsubModal = subscribeModalState?.((state) => {
+      // When any modal closes, refresh to get latest computed task status
+      if (!state.isOpen) {
+        refreshTaskById?.(taskId)
+      }
+    })
+
+    // Also refresh when features array length changes for this task (defensive)
+    const currentFeaturesCount = tasksById?.[taskId]?.features?.length
+    let prevCount = currentFeaturesCount
+    const interval = window.setInterval(() => {
+      const nextCount = tasksById?.[taskId]?.features?.length
+      if (typeof nextCount === 'number' && typeof prevCount === 'number' && nextCount !== prevCount) {
+        prevCount = nextCount
+        refreshTaskById?.(taskId)
+      }
+    }, 1000)
+
+    return () => {
+      unsubModal?.()
+      window.clearInterval(interval)
+    }
+  }, [taskId, tasksById, refreshTaskById, subscribeModalState])
 
   //TODO: logic needs to be cleand up
   // useEffect(() => {
@@ -186,6 +216,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const handleTaskStatusChange = async (taskId: string, status: Status) => {
     try {
       await updateTask(taskId, { status })
+      // Ensure latest task data after manual status change
+      await refreshTaskById?.(taskId)
     } catch (e) {
       console.error('Failed to update status', e)
     }
@@ -193,6 +225,8 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
   const handleFeatureStatusChange = async (taskId: string, featureId: string, status: Status) => {
     try {
       await updateFeature(taskId, featureId, { status })
+      // Status of task may depend on feature statuses; refresh
+      await refreshTaskById?.(taskId)
     } catch (e) {
       console.error('Failed to update status', e)
     }
@@ -208,6 +242,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     try {
       const res = await reorderFeatures(task.id, fromIndex, toIndex)
       if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      await refreshTaskById?.(task.id)
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)
     } finally {

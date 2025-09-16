@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1522,12 +1522,26 @@
     },
     {
       "id": "d0647493-d214-40cd-bb93-c12a7a99ef36",
-      "status": "-",
+      "status": "+",
       "title": "When a feature is modified or added to a task the task status should update",
       "description": "In @src/renderer/tasks/TaskDetailsView.tsx when a new feature is added, the Task's status might still be \"Done\" even though the underlying Task data has changed - the view should update accordingly (by getting the latest task data).",
       "plan": "",
       "context": [
         "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "updatedAt": "2025-09-16T13:57:09.140Z",
+      "completedAt": "2025-09-16T13:57:09.140Z"
+    },
+    {
+      "id": "7520ce51-621d-4dfc-8686-1b7806b53aca",
+      "status": "-",
+      "title": "Error when opening AllAgentsView when an agent is running",
+      "description": "When opening @src/renderer/screens/AllAgentsView.tsx  while an agent is running this error occurs:\n\nAllAgentsView.tsx:42 Uncaught TypeError: Cannot read properties of undefined (reading 'flatMap')\n    at AllAgentsView.tsx:42:10\n    at Array.map (<anonymous>)\n    at AllAgentsView.tsx:40:30\n    at AllAgentsView (AllAgentsView.tsx:37:17)\n(anonymous)\t@\tAllAgentsView.tsx:42\n(anonymous)\t@\tAllAgentsView.tsx:40\nAllAgentsView\t@\tAllAgentsView.tsx:37\nhashchange\t\t\n(anonymous)\t@\tNavigator.tsx:133\n(anonymous)\t@\tSidebarView.tsx:211\nonClick\t@\tSidebarView.tsx:365",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
       "blockers": []
@@ -1629,8 +1643,9 @@
     "fac00d4a-01a5-4012-8481-bb920ac502db": 93,
     "f3b465a1-09be-45e9-80b2-70c84145ce5f": 94,
     "e2ac9811-94ae-4088-b00b-546f358b370e": 95,
-    "d0647493-d214-40cd-bb93-c12a7a99ef36": 96
+    "d0647493-d214-40cd-bb93-c12a7a99ef36": 96,
+    "7520ce51-621d-4dfc-8686-1b7806b53aca": 97
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-16T13:05:37.984Z"
+  "updatedAt": "2025-09-16T13:57:09.141Z"
 }

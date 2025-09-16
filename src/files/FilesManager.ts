@@ -90,7 +90,8 @@ export default class FilesManager implements BaseManager {
   }
   async getFileStats(projectId: string, relPath: string): Promise<any> {
     const s = await this.__getStorage(projectId)
-    return await s?.getFileStats(relPath)
+    const absolutePath = s?.getAbsolutePath(relPath)
+    return await s?.getFileStats(absolutePath)
   }
   async writeFile(
     projectId: string,
