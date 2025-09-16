@@ -38,17 +38,15 @@ export default function AllAgentsView() {
     const allRuns = runsHistory.slice()
 
     const runCalcs = allRuns.map((r) => {
-      const prompt = r.conversations
-        .flatMap((c) => c.messages)
-        .map((m) => m.promptTokens ?? 0)
-        .reduce((a, b) => a + b, 0)
-      const completion = r.conversations
-        .flatMap((c) => c.messages)
+      const conversations = r.conversations ?? []
+      const messages = conversations.flatMap((c) => c.messages ?? [])
+      const prompt = messages.map((m) => m.promptTokens ?? 0).reduce((a, b) => a + b, 0)
+      const completion = messages
         .map((m) => m.completionTokens ?? 0)
         .reduce((a, b) => a + b, 0)
-      const costUSD =
-        (r.price.inputPerMTokensUSD * prompt) / 1_000_000 +
-        (r.price.outputPerMTokensUSD * completion) / 1_000_000
+      const inputPerM = r.price?.inputPerMTokensUSD ?? 0
+      const outputPerM = r.price?.outputPerMTokensUSD ?? 0
+      const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
       const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
       const finishedMs = r.finishedAt
         ? new Date(r.finishedAt).getTime()
@@ -56,12 +54,10 @@ export default function AllAgentsView() {
           ? new Date(r.updatedAt).getTime()
           : Date.now()
       const durationMs =
-        isFinite(startedMs) && isFinite(finishedMs)
-          ? Math.max(0, finishedMs - startedMs)
-          : undefined
-      const completedFeatures = r.conversations.filter((c) => c.state === 'completed').length
-      const totalFeatures = r.conversations.length
-      const modelKey: ModelKey = `${r.llmConfig.provider || 'unknown'}::${r.llmConfig.model || 'unknown'}`
+        isFinite(startedMs) && isFinite(finishedMs) ? Math.max(0, finishedMs - startedMs) : undefined
+      const completedFeatures = conversations.filter((c) => c.state === 'completed').length
+      const totalFeatures = conversations.length
+      const modelKey: ModelKey = `${r.llmConfig?.provider || 'unknown'}::${r.llmConfig?.model || 'unknown'}`
       const projectKey: ProjectKey = r.projectId || 'unknown'
       const agentTypeKey: AgentTypeKey = (r.agentType as string) || 'unknown'
       const rating = r.rating?.score // 0 or 1
