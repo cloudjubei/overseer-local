@@ -64,7 +64,7 @@
     },
     {
       "id": "0619e80f-d523-4842-810b-ba5be81fcbe6",
-      "status": "-",
+      "status": "+",
       "title": "ProjectTimelineView needs a design update",
       "description": "The @src/renderer/screens/ProjectTimelineView.tsx doesn't look great.\nTake inspiration from Notion's Timeline view as explained here:\nhttps://www.notion.com/help/guides/timeline-view-unlocks-high-output-planning-for-your-team\nAs well as Airtable's :\nhttps://blog.airtable.com/introducing-airtables-new-timeline-view/\n\nThese are two standard looking Timeline views that we want to emulate here.\nMak sure you maintain our design principles and colors as defined in @docs/design/MONDAY_PALETTE_REFERENCE.md , @docs/design/DESIGN_TOKENS.md , @docs/design/DESIGN_SYSTEM.md , @docs/design/COMPONENTS.md , @docs/ux/LINEAR_UX_GUIDELINES.md",
       "context": [
@@ -77,7 +77,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T16:18:10.138Z",
-      "updatedAt": "2025-09-16T16:18:10.138Z"
+      "updatedAt": "2025-09-16T16:22:27.595Z",
+      "completedAt": "2025-09-16T16:22:27.595Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -89,5 +90,5 @@
     "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 6
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T16:18:11.491Z"
+  "updatedAt": "2025-09-16T16:22:27.595Z"
 }
