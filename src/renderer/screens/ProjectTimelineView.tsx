@@ -108,6 +108,35 @@ function mapFeatureToTimelineLabel(projectId: string, feature: Feature): Timelin
   }
 }
 
+function getTaskCompletedAt(task: Task): string | null {
+  const anyTask: any = task as any
+  if (anyTask?.completedAt) return anyTask.completedAt as string
+  // Fallback: latest completed feature timestamp
+  const times = (task.features || [])
+    .map((f: any) => f?.completedAt)
+    .filter((ts: any): ts is string => !!ts)
+  if (!times.length) return null
+  return times.reduce((max, ts) => (new Date(ts) > new Date(max) ? ts : max), times[0])
+}
+
+function mapTaskToTimelineLabel(projectId: string, task: Task): TimelineLabel | null {
+  const ts = getTaskCompletedAt(task)
+  if (!ts) return null
+  return {
+    id: `task-${task.id}`,
+    projectId,
+    type: ENTITY_TYPE,
+    content: {
+      timestamp: ts,
+      label: task.title,
+      description: (task as any)?.description,
+    },
+    createdAt: (task as any)?.createdAt,
+    updatedAt: (task as any)?.updatedAt,
+    metadata: task,
+  }
+}
+
 function tsToInput(ts: string) {
   // Expect ISO string; keep yyyy-MM-ddTHH:mm
   try {
@@ -190,10 +219,19 @@ export default function ProjectTimelineView() {
     const fs = features
       .filter((f) => f.completedAt)
       .map((f) => mapFeatureToTimelineLabel(projectId, f))
-    return [...fs, ...labels].sort(
+
+    // Include tasks for week/month so the range reflects tasks when those views are active
+    let ts: TimelineLabel[] = []
+    if (zoom !== 'day') {
+      ts = Object.values(tasksById)
+        .map((t) => mapTaskToTimelineLabel(projectId, t))
+        .filter((x): x is TimelineLabel => !!x)
+    }
+
+    return [...fs, ...ts, ...labels].sort(
       (a, b) => new Date(a.content.timestamp).getTime() - new Date(b.content.timestamp).getTime(),
     )
-  }, [features, labels, projectId])
+  }, [features, labels, projectId, zoom, tasksById])
 
   // Determine raw min/max
   const { rawStartDate, rawEndDate } = useMemo(() => {
@@ -324,7 +362,7 @@ export default function ProjectTimelineView() {
     [unitCount, cellMinWidth],
   )
 
-  // Build rows for features and user-defined label rows
+  // Build rows for features (day) or tasks (week/month) and user-defined label rows
   const featureRows = useMemo(() => {
     return [
       {
@@ -341,6 +379,29 @@ export default function ProjectTimelineView() {
       },
     ]
   }, [features])
+
+  const taskRows = useMemo(() => {
+    const items = Object.values(tasksById)
+      .map((t) => {
+        const ts = getTaskCompletedAt(t)
+        if (!ts) return null
+        return {
+          id: t.id,
+          title: t.title,
+          timestamp: ts,
+          kind: 'task' as const,
+        }
+      })
+      .filter((x): x is { id: string; title: string; timestamp: string; kind: 'task' } => !!x)
+
+    return [
+      {
+        key: 'tasks',
+        title: 'Tasks (completed)',
+        items,
+      },
+    ]
+  }, [tasksById])
 
   const labelRows = useMemo(() => {
     const groups = new Map<
@@ -380,10 +441,12 @@ export default function ProjectTimelineView() {
     })
   }, [labels, projectId])
 
+  const dataRows = useMemo(() => (zoom === 'day' ? featureRows : taskRows), [featureRows, taskRows, zoom])
+
   const allRows = useMemo(() => {
-    // User label rows at the top; features row below
-    return [...labelRows, ...featureRows]
-  }, [featureRows, labelRows])
+    // User label rows at the top; features or tasks row below depending on zoom
+    return [...labelRows, ...dataRows]
+  }, [dataRows, labelRows])
 
   const onAddLabel = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -686,11 +749,15 @@ export default function ProjectTimelineView() {
                       )
 
                     const colStart = 2 + idx
-                    const isFeature = (it as any).kind === 'feature'
+                    const kind = (it as any).kind
+                    const isFeature = kind === 'feature'
+                    const isLabel = kind === 'label'
 
                     const pillBase =
                       'pointer-events-auto mx-1 rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem] relative group'
                     const featureStyles =
+                      'bg-status-done-soft-bg text-status-done-soft-fg border-status-done-soft-border'
+                    const taskStyles =
                       'bg-status-done-soft-bg text-status-done-soft-fg border-status-done-soft-border'
                     const labelProjectStyles =
                       'bg-status-review-soft-bg text-status-review-soft-fg border-status-review-soft-border'
@@ -700,9 +767,11 @@ export default function ProjectTimelineView() {
                     const className = `${pillBase} ${
                       isFeature
                         ? featureStyles
-                        : (it as any).scope === 'project'
-                          ? labelProjectStyles
-                          : labelGlobalStyles
+                        : isLabel
+                          ? (it as any).scope === 'project'
+                            ? labelProjectStyles
+                            : labelGlobalStyles
+                          : taskStyles
                     }`
 
                     return (
@@ -717,7 +786,7 @@ export default function ProjectTimelineView() {
                         title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
                       >
                         {/* Hover edit button for user labels */}
-                        {!isFeature && (
+                        {isLabel && (
                           <button
                             type="button"
                             onClick={() => openEditFor(it.id)}
