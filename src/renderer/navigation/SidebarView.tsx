@@ -372,10 +372,21 @@ export default function SidebarView({}: SidebarProps) {
                   <span className="nav-item__icon">{item.icon}</span>
                   {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
                   {showBadge && (
-                    <NotificationBadge
-                      text={`${unreadCount}`}
-                      tooltipLabel={`${unreadCount} unread notifications`}
-                    />
+                    <span
+                      className={classNames(
+                        'nav-item__badges',
+                        effectiveCollapsed && 'nav-item__badges--compact',
+                      )}
+                      aria-hidden
+                    >
+                      <NotificationBadge
+                        className={
+                          effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                        }
+                        text={`${unreadCount}`}
+                        tooltipLabel={`${unreadCount} unread notifications`}
+                      />
+                    </span>
                   )}
                 </button>
               )
@@ -484,56 +495,64 @@ export default function SidebarView({}: SidebarProps) {
             const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
             const projectIcon = renderProjectIcon(iconKey)
             const hasAnyBadge = activeCount > 0 || unread > 0
+            const Btn = (
+              <button
+                className={classNames(
+                  'nav-item flex-1',
+                  accent,
+                  active && 'nav-item--active',
+                  effectiveCollapsed && 'nav-item--compact',
+                )}
+                aria-current={active ? 'true' : undefined}
+                onClick={() => handleProjectSwitch(p.id)}
+                title={p.title}
+              >
+                <span className="nav-item__icon" aria-hidden>
+                  {projectIcon}
+                </span>
+                {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+
+                {hasAnyBadge && (
+                  <span
+                    className={classNames(
+                      'nav-item__badges',
+                      effectiveCollapsed && 'nav-item__badges--compact',
+                    )}
+                    aria-hidden
+                  >
+                    {activeCount > 0 && (
+                      <NotificationBadge
+                        className={
+                          effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                        }
+                        text={`${activeCount}`}
+                        tooltipLabel={`${activeCount} running agents`}
+                        isInformative
+                      />
+                    )}
+                    {unread > 0 && (
+                      <NotificationBadge
+                        className={
+                          effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                        }
+                        text={`${unread}`}
+                        tooltipLabel={`${unread} unread notifications`}
+                      />
+                    )}
+                  </span>
+                )}
+              </button>
+            )
+
             return (
               <li className="nav-li" key={p.id}>
-                <div className="flex items-center">
-                  <button
-                    className={classNames(
-                      'nav-item flex-1',
-                      accent,
-                      active && 'nav-item--active',
-                      effectiveCollapsed && 'nav-item--compact',
-                    )}
-                    aria-current={active ? 'true' : undefined}
-                    onClick={() => handleProjectSwitch(p.id)}
-                    title={p.title}
-                  >
-                    <span className="nav-item__icon" aria-hidden>
-                      {projectIcon}
-                    </span>
-                    {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
-
-                    {hasAnyBadge && (
-                      <span
-                        className={classNames(
-                          'nav-item__badges',
-                          effectiveCollapsed && 'nav-item__badges--compact',
-                        )}
-                        aria-hidden
-                      >
-                        {activeCount > 0 && (
-                          <NotificationBadge
-                            className={
-                              effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                            }
-                            text={`${activeCount}`}
-                            tooltipLabel={`${activeCount} running agents`}
-                            isInformative
-                          />
-                        )}
-                        {unread > 0 && (
-                          <NotificationBadge
-                            className={
-                              effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                            }
-                            text={`${unread}`}
-                            tooltipLabel={`${unread} unread notifications`}
-                          />
-                        )}
-                      </span>
-                    )}
-                  </button>
-                </div>
+                {effectiveCollapsed ? (
+                  <Tooltip content={p.title} placement="right">
+                    {Btn}
+                  </Tooltip>
+                ) : (
+                  Btn
+                )}
               </li>
             )
           })}
