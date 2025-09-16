@@ -102,6 +102,18 @@ const IPC_HANDLER_KEYS = {
   DB_DOCUMENTS_MATCH: 'db:documents-match',
   DB_DOCUMENTS_CLEAR: 'db:documents-clear',
 
+  // Timeline Labels
+  DB_TIMELINE_LABELS_ADD: 'db:timeline-labels-add',
+  DB_TIMELINE_LABELS_GET: 'db:timeline-labels-get',
+  DB_TIMELINE_LABELS_UPDATE: 'db:timeline-labels-update',
+  DB_TIMELINE_LABELS_DELETE: 'db:timeline-labels-delete',
+  DB_TIMELINE_LABELS_SEARCH: 'db:timeline-labels-search',
+  DB_TIMELINE_LABELS_MATCH: 'db:timeline-labels-match',
+  DB_TIMELINE_LABELS_CLEAR: 'db:timeline-labels-clear',
+
+  // Features
+  DB_FEATURES_GET_COMPLETED_BY_PROJECT: 'db:features-get-completed-by-project',
+
   // Document ingestion
   DOCUMENT_INGESTION_ALL: 'document-ingestion:all-projects',
   DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',
