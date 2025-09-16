@@ -142,19 +142,17 @@ export function IconList({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <line x1="8" y1="6" x2="20" y2="6" />
-      <line x1="8" y1="12" x2="20" y2="12" />
-      <line x1="8" y1="18" x2="20" y2="18" />
-      <circle cx="4" cy="6" r="1.5" />
-      <circle cx="4" cy="12" r="1.5" />
-      <circle cx="4" cy="18" r="1.5" />
+      <line x1="8" y1="6" x2="20" y2="6" stroke="#60A5FA" strokeWidth="2" />
+      <line x1="8" y1="12" x2="20" y2="12" stroke="#A855F7" strokeWidth="2" />
+      <line x1="8" y1="18" x2="20" y2="18" stroke="#10B981" strokeWidth="2" />
+      <circle cx="4" cy="6" r="1.5" fill="#F59E0B" />
+      <circle cx="4" cy="12" r="1.5" fill="#EF4444" />
+      <circle cx="4" cy="18" r="1.5" fill="#22D3EE" />
     </svg>
   )
 }
@@ -166,17 +164,15 @@ export function IconBoard({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="10" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-      <rect x="14" y="15" width="7" height="6" rx="1.5" />
+      <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#A855F7" strokeWidth="2" />
+      <rect x="14" y="3" width="7" height="10" rx="1.5" stroke="#3B82F6" strokeWidth="2" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#10B981" strokeWidth="2" />
+      <rect x="14" y="15" width="7" height="6" rx="1.5" stroke="#F59E0B" strokeWidth="2" />
     </svg>
   )
 }
@@ -629,24 +625,23 @@ export function IconTestTube({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference - 🧪 - Testing - Needs to be green/blue colored - neon like
-
+  // Reworked: Neon green/blue testing tube
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M9 3h6" />
-      <path d="M10 3v8a6 6 0 1 0 4 0V3" />
-      <path d="M8 11h8" />
+      <path d="M9 3h6" stroke="#22D3EE" strokeWidth="2" />
+      <path d="M10 3v8a6 6 0 1 0 4 0V3" stroke="#10B981" strokeWidth="2" />
+      <path d="M8 11h8" stroke="#60A5FA" strokeWidth="2" />
+      <circle cx="12" cy="15" r="1" fill="#22D3EE" />
+      <circle cx="14.5" cy="18" r="1.2" fill="#10B981" />
     </svg>
   )
 }
@@ -658,44 +653,43 @@ export function IconWrench({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference - 🔧 - Tools - preferrable this should actually be a pink/red monkey wrench
+  // Reworked: Pink/Red monkey wrench
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M21 3a7 7 0 0 1-9.9 9.9L7 17l-3 3 3-7 4.1-4.1A7 7 0 0 1 21 3z" />
-      <circle cx="7" cy="17" r="0.5" />
+      <path d="M21 3a7 7 0 0 1-9.9 9.9L7 17l-3 3 3-7 4.1-4.1A7 7 0 0 1 21 3z" stroke="#EF4444" strokeWidth="2" />
+      <circle cx="7" cy="17" r="0.5" fill="#A855F7" stroke="#A855F7" />
     </svg>
   )
 }
 
 export function IconBuild({ className, filled = false }: { className?: string; filled?: boolean }) {
-  //TODO: needs to be reworked to match reference - 🛠️ - Build - the hammer should be one color, the wrench the other
+  // Reworked: Hammer and wrench with distinct colors
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M14.7 6.3l3 3L7 20H4v-3z" />
-      <path d="M13 5l6 6" />
-      <path d="M2 22l2-5 3 3-5 2z" />
+      {/* Wrench */}
+      <path d="M14.7 6.3l3 3L7 20H4v-3z" stroke="#3B82F6" strokeWidth="2" />
+      {/* Hammer handle */}
+      <path d="M13 5l6 6" stroke="#F59E0B" strokeWidth="2" />
+      {/* Hammer head / accent */}
+      <path d="M2 22l2-5 3 3-5 2z" stroke="#A855F7" strokeWidth="2" />
     </svg>
   )
 }
@@ -707,25 +701,23 @@ export function IconRocket({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference - 🚀 - Launch - needs to be colorful like reference
+  // Reworked: Colorful rocket with flame
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M14 3l7 7-6 6-7-7z" />
-      <path d="M14 3s-4 1-7 4-4 7-4 7l6-2 7-7z" />
-      <path d="M5 19l3-3" />
-      <path d="M8 22l3-3" />
-      <circle cx="15" cy="9" r="1.5" />
+      <path d="M14 3l7 7-6 6-7-7z" stroke="#6366F1" strokeWidth="2" />
+      <path d="M14 3s-4 1-7 4-4 7-4 7l6-2 7-7z" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M5 19l3-3" stroke="#FB923C" strokeWidth="2" />
+      <path d="M8 22l3-3" stroke="#F59E0B" strokeWidth="2" />
+      <circle cx="15" cy="9" r="1.5" stroke="#22D3EE" strokeWidth="2" />
     </svg>
   )
 }
@@ -766,48 +758,44 @@ export function IconInfrastructure({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference - 🏗️ - Infrastructure
+  // Reworked: Construction/infrastructure with colorful columns
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="3" y="10" width="6" height="10" />
-      <rect x="10.5" y="6" width="6" height="14" />
-      <rect x="18" y="3" width="3" height="17" />
-      <path d="M3 10l6-4 7-3 5-1" />
+      <rect x="3" y="10" width="6" height="10" stroke="#F59E0B" strokeWidth="2" />
+      <rect x="10.5" y="6" width="6" height="14" stroke="#3B82F6" strokeWidth="2" />
+      <rect x="18" y="3" width="3" height="17" stroke="#A855F7" strokeWidth="2" />
+      <path d="M3 10l6-4 7-3 5-1" stroke="#60A5FA" strokeWidth="2" />
     </svg>
   )
 }
 
 export function IconBrain({ className, filled = false }: { className?: string; filled?: boolean }) {
-  //TODO: needs to be reworked to match reference -  🧠 - AI/ML
+  // Reworked: AI/ML brain with gradient-like palette
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M8 6a3 3 0 0 0-3 3v6a3 3 0 1 0 3 3" />
-      <path d="M8 6a3 3 0 1 0 0 6" />
-      <path d="M16 6a3 3 0 0 1 3 3v6a3 3 0 1 1-3 3" />
-      <path d="M16 6a3 3 0 1 1 0 6" />
-      <path d="M12 4v16" />
+      <path d="M8 6a3 3 0 0 0-3 3v6a3 3 0 1 0 3 3" stroke="#A855F7" strokeWidth="2" />
+      <path d="M8 6a3 3 0 1 0 0 6" stroke="#6366F1" strokeWidth="2" />
+      <path d="M16 6a3 3 0 0 1 3 3v6a3 3 0 1 1-3 3" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M16 6a3 3 0 1 1 0 6" stroke="#22D3EE" strokeWidth="2" />
+      <path d="M12 4v16" stroke="#10B981" strokeWidth="2" />
     </svg>
   )
 }
@@ -847,24 +835,21 @@ export function IconTarget({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference -  🎯 - Goals - NEEDS TO BE WHITE AND RED like reference
-
+  // Reworked: Red and white target
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="5" />
-      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="12" r="9" stroke="#EF4444" strokeWidth="2" />
+      <circle cx="12" cy="12" r="5" stroke="#FFFFFF" strokeWidth="2" />
+      <circle cx="12" cy="12" r="2" fill="#EF4444" stroke="#EF4444" strokeWidth="2" />
     </svg>
   )
 }
@@ -876,52 +861,48 @@ export function IconMicroscope({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference -  🔬 - Research
+  // Reworked: Research microscope with cool tones
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M6 19h12" />
-      <path d="M9 19a5 5 0 1 1 10 0" />
-      <rect x="4" y="3" width="6" height="3" rx="1" />
-      <path d="M7 6v5a4 4 0 0 0 4 4h3" />
-      <path d="M14 11h4" />
+      <path d="M6 19h12" stroke="#6366F1" strokeWidth="2" />
+      <path d="M9 19a5 5 0 1 1 10 0" stroke="#22D3EE" strokeWidth="2" />
+      <rect x="4" y="3" width="6" height="3" rx="1" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M7 6v5a4 4 0 0 0 4 4h3" stroke="#06B6D4" strokeWidth="2" />
+      <path d="M14 11h4" stroke="#60A5FA" strokeWidth="2" />
     </svg>
   )
 }
 
 export function IconBug({ className, filled = false }: { className?: string; filled?: boolean }) {
-  //TODO: needs to be reworked to match reference -  🐞 - Bug
+  // Reworked: Bug with red body and blue legs
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="7" y="8" width="10" height="8" rx="4" />
-      <path d="M12 8V4" />
-      <path d="M4 12h4" />
-      <path d="M16 12h4" />
-      <path d="M5 9l3 2" />
-      <path d="M19 9l-3 2" />
-      <path d="M5 15l3-2" />
-      <path d="M19 15l-3-2" />
+      <rect x="7" y="8" width="10" height="8" rx="4" stroke="#EF4444" strokeWidth="2" />
+      <path d="M12 8V4" stroke="#A855F7" strokeWidth="2" />
+      <path d="M4 12h4" stroke="#22D3EE" strokeWidth="2" />
+      <path d="M16 12h4" stroke="#22D3EE" strokeWidth="2" />
+      <path d="M5 9l3 2" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M19 9l-3 2" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M5 15l3-2" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M19 15l-3-2" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
 }
@@ -1087,22 +1068,20 @@ export function IconPuzzle({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference -  🧩 - Components
+  // Reworked: Components puzzle outline with accent
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <path d="M10 3h4a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v4h-3a2 2 0 0 0-2 2v3h-4a2 2 0 0 1-2-2v-3H5a2 2 0 0 1-2-2v-4h3a2 2 0 0 0 2-2z" />
-      <path d="M12 6a2 2 0 1 0 0 4" />
+      <path d="M10 3h4a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v4h-3a2 2 0 0 0-2 2v3h-4a2 2 0 0 1-2-2v-3H5a2 2 0 0 1-2-2v-4h3a2 2 0 0 0 2-2z" stroke="#6366F1" strokeWidth="2" />
+      <path d="M12 6a2 2 0 1 0 0 4" stroke="#22D3EE" strokeWidth="2" />
     </svg>
   )
 }
@@ -1141,49 +1120,43 @@ export function IconBricks({
   className?: string
   filled?: boolean
 }) {
-  //TODO: needs to be reworked to match reference -  🧱 - Foundation
-
+  // Reworked: Foundation bricks with warm palette
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="3" y="7" width="6" height="4" />
-      <rect x="9" y="7" width="6" height="4" />
-      <rect x="15" y="7" width="6" height="4" />
-      <rect x="6" y="13" width="6" height="4" />
-      <rect x="12" y="13" width="6" height="4" />
+      <rect x="3" y="7" width="6" height="4" stroke="#F59E0B" strokeWidth="2" />
+      <rect x="9" y="7" width="6" height="4" stroke="#FB923C" strokeWidth="2" />
+      <rect x="15" y="7" width="6" height="4" stroke="#EF4444" strokeWidth="2" />
+      <rect x="6" y="13" width="6" height="4" stroke="#A855F7" strokeWidth="2" />
+      <rect x="12" y="13" width="6" height="4" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
 }
 
 export function IconClamp({ className, filled = false }: { className?: string; filled?: boolean }) {
-  //TODO: needs to be reworked to match reference -  🗜️ - Compression
-
+  // Reworked: Compression clamp with distinct colors
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
     >
-      <rect x="5" y="2" width="14" height="4" rx="1" />
-      <path d="M7 6v6a3 3 0 0 0 3 3h4v4H9" />
-      <path d="M17 10H10" />
+      <rect x="5" y="2" width="14" height="4" rx="1" stroke="#A855F7" strokeWidth="2" />
+      <path d="M7 6v6a3 3 0 0 0 3 3h4v4H9" stroke="#3B82F6" strokeWidth="2" />
+      <path d="M17 10H10" stroke="#10B981" strokeWidth="2" />
     </svg>
   )
 }
