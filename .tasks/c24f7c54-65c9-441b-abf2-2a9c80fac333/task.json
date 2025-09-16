@@ -47,14 +47,28 @@
       "createdAt": "2025-09-16T15:44:40.413Z",
       "updatedAt": "2025-09-16T15:47:52.270Z",
       "completedAt": "2025-09-16T15:47:52.270Z"
+    },
+    {
+      "id": "b9d641d0-1306-412f-ab7a-60b120cb29ba",
+      "status": "-",
+      "title": "ProjectTimelineView shows nothing",
+      "description": "Currently when accessing the @src/renderer/screens/ProjectTimelineView.tsx from the @src/renderer/navigation/SidebarView.tsx - it displays blank - nothing.\nIt should show a calendar view that a user can add their labels to and all the features that were completed for this project should be added to it as tiles across the timeline.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:01:19.427Z",
+      "updatedAt": "2025-09-16T16:01:19.427Z"
     }
   ],
   "featureIdToDisplayIndex": {
     "ce6b03da-c050-49c5-b2f0-41410d9e15cb": 1,
     "1760db6f-b604-4835-af0d-c5fa83630a4c": 2,
     "db5e244f-b362-438d-9912-4577fa507ef3": 3,
-    "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 4
+    "b9d641d0-1306-412f-ab7a-60b120cb29ba": 4,
+    "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 5
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T15:47:52.270Z"
+  "updatedAt": "2025-09-16T16:01:20.611Z"
 }
