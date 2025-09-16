@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "~",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1201,9 +1201,9 @@
     },
     {
       "id": "fac00d4a-01a5-4012-8481-bb920ac502db",
-      "status": "+",
+      "status": "-",
       "title": "Icons need to be more colorful",
-      "description": "Some Icons in @src/renderer/components/ui/Icons.tsx have a \"TODO\" comment - those need to follow it and be worked.\nAll icons that are black and white - like \"IconBoard\" or \"IconList\" need to be reworked to be colorful like the sidebar icons \"IconHome\", \"IconFiles\" or \"IconChat\" for example.",
+      "description": "All icons in @src/renderer/components/ui/Icons.tsx that are black and white - i.e. ones that don't have 'stroke'/'fill' directly set in their svg lines/circles/rects need to be reworked to be colorful like the sidebar icons \"IconHome\", \"IconFiles\" or \"IconChat\" for example.",
       "plan": "",
       "context": [
         "src/renderer/components/ui/Icons.tsx"
