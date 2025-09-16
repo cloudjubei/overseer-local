@@ -1189,7 +1189,7 @@
     },
     {
       "id": "4673bd96-c874-4b92-8779-d81af432c032",
-      "status": "-",
+      "status": "+",
       "title": "When a feature has a rejection then a task is not-done",
       "description": "No matter what the status of the Task, if there's any feature with a rejection - the Task should also show in the @src/renderer/screens/TasksView.tsx when \"not-done\" is selected",
       "plan": "",

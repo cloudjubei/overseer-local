@@ -41,11 +41,12 @@ function matchesQuery(task: Task, q: string) {
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
+    const hasRejectedFeatures = Array.isArray(t.features) && t.features.some((f: any) => !!f.rejection)
     const byStatus =
       !status || status === 'all'
         ? true
         : status === 'not-done'
-          ? t.status !== '+'
+          ? t.status !== '+' || hasRejectedFeatures
           : t.status === (status as Status)
     return byStatus && matchesQuery(t, query)
   })
