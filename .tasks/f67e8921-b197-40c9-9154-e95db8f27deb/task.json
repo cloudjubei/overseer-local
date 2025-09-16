@@ -1186,6 +1186,18 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "4673bd96-c874-4b92-8779-d81af432c032",
+      "status": "-",
+      "title": "When a feature has a rejection then a task is not-done",
+      "description": "No matter what the status of the Task, if there's any feature with a rejection - the Task should also show in the @src/renderer/screens/TasksView.tsx when \"not-done\" is selected",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/TasksView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1279,6 +1291,7 @@
     "40322d85-bc35-4b45-89db-b5e3a393a8e9": 88,
     "32ec2d90-3244-40a0-a74b-d120f6d512e0": 89,
     "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 90,
-    "c20fbc93-7910-4612-a275-95a3d722955c": 91
+    "c20fbc93-7910-4612-a275-95a3d722955c": 91,
+    "4673bd96-c874-4b92-8779-d81af432c032": 92
   }
 }
