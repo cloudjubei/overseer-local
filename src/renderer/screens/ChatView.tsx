@@ -16,6 +16,7 @@ import FileDisplay from '../components/ui/FileDisplay'
 import { Chat, ChatMessage } from '../services/chatsService'
 import RichText from '../components/ui/RichText'
 import { inferFileType, useFiles } from '../contexts/FilesContext'
+import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -153,7 +154,7 @@ export default function ChatView() {
       chatHistories.map((chat) => ({
         id: chat.id,
         label: `Chat ${new Date(chat.creationDate)}`,
-        icon: <span aria-hidden>💬</span>,
+        icon: <IconChat className="w-4 h-4" />,
         accent: 'gray',
         action: (
           <button
@@ -161,8 +162,10 @@ export default function ChatView() {
               e.stopPropagation()
               deleteChat(chat.id)
             }}
+            aria-label="Delete chat"
+            title="Delete chat"
           >
-            Delete
+            <IconDelete className="w-4 h-4" />
           </button>
         ),
       })),
@@ -178,8 +181,11 @@ export default function ChatView() {
       headerTitle="History"
       headerSubtitle=""
       headerAction={
-        <button className="btn" onClick={createChat} aria-label="Create new chat">
-          New
+        <button className="btn" onClick={createChat} aria-label="Create new chat" title="Create new chat">
+          <span className="inline-flex items-center gap-1">
+            <IconPlus className="w-4 h-4" />
+            <span>New</span>
+          </span>
         </button>
       }
       emptyMessage="No chats yet"
