@@ -1,21 +1,22 @@
 import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import { openDatabase } from 'thefactory-db'
 import type { BaseManager } from '../managers'
-import type { TimelineLabel } from '../types/timeline'
+import { openDatabase, TheFactoryDb } from 'thefactory-db'
+import { MatchParams } from 'thefactory-db/dist/types'
 
 export default class DatabaseManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
-  private _dbClient: any | undefined
+  private _ipcBound: boolean
+  private _dbClient: TheFactoryDb | undefined
   private _connectionString: string | undefined
   private _status: { connected: boolean; lastError?: string }
-  private _ipcBound: boolean
 
-  constructor(projectRoot: string, window: BrowserWindow, _projectsManager?: any) {
+  constructor(projectRoot: string, window: BrowserWindow) {
     this.projectRoot = projectRoot
     this.window = window
+    this._ipcBound = false
 
     this._dbClient = undefined
     this._connectionString = undefined
@@ -23,7 +24,6 @@ export default class DatabaseManager implements BaseManager {
       connected: false,
       lastError: undefined,
     }
-    this._ipcBound = false
   }
 
   async init(): Promise<void> {
@@ -61,26 +61,10 @@ export default class DatabaseManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE] = async ({ id }) => await this.deleteDocument(id)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH] = async ({ params }) =>
       await this.searchDocuments(params)
-    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH] = async ({ criteria, options }) =>
-      await this.matchDocuments(criteria, options)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH] = async ({ options }) =>
+      await this.matchDocuments(options)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR] = async ({ projectIds }) =>
       await this.clearDocuments(projectIds)
-
-    // Timeline Label Handlers
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_ADD] = async ({ input }) =>
-      await this.addTimelineLabel(input)
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_GET] = async ({ id }) =>
-      await this.getTimelineLabelById(id)
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_UPDATE] = async ({ id, patch }) =>
-      await this.updateTimelineLabel(id, patch)
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_DELETE] = async ({ id }) =>
-      await this.deleteTimelineLabel(id)
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_SEARCH] = async ({ params }) =>
-      await this.searchTimelineLabels(params)
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_MATCH] = async ({ criteria, options }) =>
-      await this.matchTimelineLabels(criteria, options)
-    handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_CLEAR] = async ({ projectIds }) =>
-      await this.clearTimelineLabels(projectIds)
 
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (_event, args) => {
@@ -124,12 +108,12 @@ export default class DatabaseManager implements BaseManager {
     }
 
     try {
-      await this._dbClient.close()
+      await this._dbClient?.close()
       console.log('[db] thefactory-db client closed')
     } catch (e: any) {
       console.warn('[db] Error closing thefactory-db client:', e?.message || e)
     } finally {
-      this._dbClient = null
+      this._dbClient = undefined
       this._setConnected(false)
     }
   }
@@ -160,49 +144,12 @@ export default class DatabaseManager implements BaseManager {
   async searchDocuments(params: any): Promise<any> {
     return await this._dbClient?.searchDocuments(params)
   }
-  async matchDocuments(criteria: any, options?: any): Promise<any> {
-    return await this._dbClient?.matchDocuments(criteria, options)
+  async matchDocuments(options: MatchParams): Promise<any> {
+    return await this._dbClient?.matchDocuments(options)
   }
   async clearDocuments(projectIds?: string[]): Promise<any> {
     return await this._dbClient?.clearDocuments(projectIds)
   }
-
-  // Timeline Label operations
-  async addTimelineLabel(input: TimelineLabel): Promise<TimelineLabel> {
-    return await this._dbClient?.addEntity({ ...input, entityType: 'TimelineLabel' })
-  }
-
-  async getTimelineLabelById(id: string): Promise<TimelineLabel | undefined> {
-    return await this._dbClient?.getEntityById(id, 'TimelineLabel')
-  }
-
-  async updateTimelineLabel(id: string, patch: Partial<TimelineLabel>): Promise<TimelineLabel> {
-    return await this._dbClient?.updateEntity(id, patch, 'TimelineLabel')
-  }
-
-  async deleteTimelineLabel(id: string): Promise<void> {
-    return await this._dbClient?.deleteEntity(id, 'TimelineLabel')
-  }
-
-  async searchTimelineLabels(params: any): Promise<TimelineLabel[]> {
-    return await this._dbClient?.searchEntities({ ...params, entityType: 'TimelineLabel' })
-  }
-
-  async matchTimelineLabels(criteria: any, options?: any): Promise<TimelineLabel[]> {
-    const matchCriteria = { ...criteria, entityType: 'TimelineLabel' };
-    if (criteria.projectId === null) {
-      matchCriteria.projectId = null; // Explicitly search for global labels
-    } else if (criteria.projectId !== undefined) {
-      matchCriteria.projectId = criteria.projectId; // Search for project-specific labels
-    } // If projectId is not specified in criteria, it will search across all (project and global) labels
-
-    return await this._dbClient?.matchEntities(matchCriteria, options)
-  }
-
-  async clearTimelineLabels(projectIds?: string[]): Promise<void> {
-    return await this._dbClient?.clearEntities(projectIds, 'TimelineLabel')
-  }
-
   private _setConnected(connected: boolean): void {
     this._status.connected = !!connected
     this._emitStatus()

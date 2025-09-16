@@ -208,8 +208,7 @@ const DB_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE, { id, patch }),
   deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
-  matchDocuments: (criteria, options) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { criteria, options }),
+  matchDocuments: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { options }),
   clearDocuments: (projectIds) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR, { projectIds }),
 }
@@ -235,21 +234,6 @@ const GIT_MONITOR_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH, { branchName, baseBranch }),
 }
 
-const TIMELINE_API = {
-  addTimelineLabel: (input) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_ADD, { input }),
-  getTimelineLabelById: (id) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_GET, { id }),
-  updateTimelineLabel: (id, patch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_UPDATE, { id, patch }),
-  deleteTimelineLabel: (id) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_DELETE, { id }),
-  searchTimelineLabels: (params) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_SEARCH, { params }),
-  matchTimelineLabels: (criteria, options) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_MATCH, { criteria, options }),
-}
-
 contextBridge.exposeInMainWorld('tasksService', TASKS_API)
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
 contextBridge.exposeInMainWorld('filesService', FILES_API)
@@ -262,4 +246,3 @@ contextBridge.exposeInMainWorld('factoryService', FACTORY_API)
 contextBridge.exposeInMainWorld('dbService', DB_API)
 contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
 contextBridge.exposeInMainWorld('gitMonitorService', GIT_MONITOR_API)
-contextBridge.exposeInMainWorld('timelineService', TIMELINE_API)
