@@ -1,27 +1,5 @@
 import { CSSProperties } from 'react'
 
-// { value: '🧪', label: 'Testing' },
-// { value: '🔧', label: 'Tools' },
-// { value: '🛠️', label: 'Build' },
-// { value: '🚀', label: 'Launch' },
-// { value: '🧰', label: 'Toolkit' },
-// { value: '🏗️', label: 'Infrastructure' },
-// { value: '🧠', label: 'AI/ML' },
-// { value: '📝', label: 'Docs' },
-// { value: '🎯', label: 'Goals' },
-// { value: '🔬', label: 'Research' },
-// { value: '🐞', label: 'Bugs' },
-// { value: '📦', label: 'Package' },
-// { value: '🔍', label: 'Search' },
-// { value: '💡', label: 'Ideas' },
-// { value: '🌐', label: 'Web' },
-// { value: '🖥️', label: 'Desktop' },
-// { value: '📱', label: 'Mobile' },
-// { value: '🧩', label: 'Components' },
-// { value: '🗃️', label: 'Archive' },
-// { value: '🧱', label: 'Foundation' },
-// { value: '🗜️', label: 'Compression' },
-
 export function IconBack({ className }: { className?: string }) {
   return (
     <svg
@@ -149,17 +127,19 @@ export function IconPlay({ className }: { className?: string }) {
       height="16"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className={className}
       aria-hidden="true"
+      className={className}
     >
       <polygon points="8,5 19,12 8,19" />
     </svg>
   )
 }
 
-export function ListIcon() {
+export function IconList({ className }: { className?: string }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -167,6 +147,7 @@ export function ListIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      className={className}
     >
       <line x1="8" y1="6" x2="20" y2="6" />
       <line x1="8" y1="12" x2="20" y2="12" />
@@ -178,9 +159,11 @@ export function ListIcon() {
   )
 }
 
-export function BoardIcon() {
+export function IconBoard({ className }: { className?: string }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -188,6 +171,7 @@ export function BoardIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      className={className}
     >
       <rect x="3" y="3" width="7" height="7" rx="1.5" />
       <rect x="14" y="3" width="7" height="10" rx="1.5" />
@@ -200,6 +184,8 @@ export function BoardIcon() {
 export function IconCheckCircle({ className }: { className?: string }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -218,6 +204,8 @@ export function IconCheckCircle({ className }: { className?: string }) {
 export function IconXCircle({ className }: { className?: string }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -237,6 +225,8 @@ export function IconXCircle({ className }: { className?: string }) {
 export function IconStopCircle({ className }: { className?: string }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -255,6 +245,8 @@ export function IconStopCircle({ className }: { className?: string }) {
 export function IconLoader({ className }: { className?: string }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -271,14 +263,20 @@ export function IconLoader({ className }: { className?: string }) {
 }
 
 // Small arrow icons for token chip
-export function IconArrowLeftMini({ className }: { className?: string }) {
+export function IconArrowLeftMini({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
     <svg
-      width="10"
-      height="10"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -290,14 +288,20 @@ export function IconArrowLeftMini({ className }: { className?: string }) {
   )
 }
 
-export function IconArrowRightMini({ className }: { className?: string }) {
+export function IconArrowRightMini({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
     <svg
-      width="10"
-      height="10"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -319,16 +323,16 @@ export function IconThumbUp({
 }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
-      className={className}
-      aria-hidden="true"
       fill={filled ? 'currentColor' : 'none'}
       stroke={filled ? 'none' : 'currentColor'}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      width="16"
-      height="16"
+      aria-hidden="true"
+      className={className}
     >
       <path d="M14 9V5a3 3 0 0 0-3-3l-1 5-4 5v8h9a3 3 0 0 0 3-3v-6a2 2 0 0 0-2-2h-2z" />
       <path d="M7 21H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
@@ -345,16 +349,16 @@ export function IconThumbDown({
 }) {
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
-      className={className}
-      aria-hidden="true"
       fill={filled ? 'currentColor' : 'none'}
       stroke={filled ? 'none' : 'currentColor'}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      width="16"
-      height="16"
+      aria-hidden="true"
+      className={className}
     >
       <path d="M10 15v4a3 3 0 0 0 3 3l1-5 4-5V4H9A3 3 0 0 0 6 7v6a2 2 0 0 0 2 2h2z" />
       <path d="M17 3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
@@ -531,14 +535,20 @@ export function IconFolder({ className }: { className?: string }) {
   )
 }
 
-export function IconWorkspace({ className }: { className?: string }) {
+export function IconWorkspace({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
     <svg
       width="16"
       height="16"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -613,18 +623,27 @@ export function IconCollection({ className }: { className?: string }) {
   )
 }
 
-// New: Emoji-translated SVG icons for project categories
-export function IconTestTube({ className }: { className?: string }) {
+export function IconTestTube({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference - 🧪 - Testing - Needs to be green/blue colored - neon like
+
   return (
     <svg
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      className={className}
     >
       <path d="M9 3h6" />
       <path d="M10 3v8a6 6 0 1 0 4 0V3" />
@@ -633,18 +652,48 @@ export function IconTestTube({ className }: { className?: string }) {
   )
 }
 
-export function IconWrench({ className }: { className?: string }) {
+export function IconWrench({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference - 🔧 - Tools - preferrable this should actually be a pink/red monkey wrench
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M21 3a7 7 0 0 1-9.9 9.9L7 17l-3 3 3-7 4.1-4.1A7 7 0 0 1 21 3z" />
       <circle cx="7" cy="17" r="0.5" />
     </svg>
   )
 }
 
-export function IconBuild({ className }: { className?: string }) {
+export function IconBuild({ className, filled = false }: { className?: string; filled?: boolean }) {
+  //TODO: needs to be reworked to match reference - 🛠️ - Build - the hammer should be one color, the wrench the other
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M14.7 6.3l3 3L7 20H4v-3z" />
       <path d="M13 5l6 6" />
       <path d="M2 22l2-5 3 3-5 2z" />
@@ -652,9 +701,27 @@ export function IconBuild({ className }: { className?: string }) {
   )
 }
 
-export function IconRocket({ className }: { className?: string }) {
+export function IconRocket({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference - 🚀 - Launch - needs to be colorful like reference
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M14 3l7 7-6 6-7-7z" />
       <path d="M14 3s-4 1-7 4-4 7-4 7l6-2 7-7z" />
       <path d="M5 19l3-3" />
@@ -664,9 +731,26 @@ export function IconRocket({ className }: { className?: string }) {
   )
 }
 
-export function IconToolbox({ className }: { className?: string }) {
+export function IconToolbox({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="3" y="8" width="18" height="11" rx="2" />
       <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
       <path d="M3 13h18" />
@@ -676,9 +760,27 @@ export function IconToolbox({ className }: { className?: string }) {
   )
 }
 
-export function IconInfrastructure({ className }: { className?: string }) {
+export function IconInfrastructure({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference - 🏗️ - Infrastructure
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="3" y="10" width="6" height="10" />
       <rect x="10.5" y="6" width="6" height="14" />
       <rect x="18" y="3" width="3" height="17" />
@@ -687,9 +789,21 @@ export function IconInfrastructure({ className }: { className?: string }) {
   )
 }
 
-export function IconBrain({ className }: { className?: string }) {
+export function IconBrain({ className, filled = false }: { className?: string; filled?: boolean }) {
+  //TODO: needs to be reworked to match reference -  🧠 - AI/ML
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M8 6a3 3 0 0 0-3 3v6a3 3 0 1 0 3 3" />
       <path d="M8 6a3 3 0 1 0 0 6" />
       <path d="M16 6a3 3 0 0 1 3 3v6a3 3 0 1 1-3 3" />
@@ -699,9 +813,26 @@ export function IconBrain({ className }: { className?: string }) {
   )
 }
 
-export function IconDocument({ className }: { className?: string }) {
+export function IconDocument({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
       <path d="M14 2v6h6" />
       <path d="M9 13h6" />
@@ -710,9 +841,28 @@ export function IconDocument({ className }: { className?: string }) {
   )
 }
 
-export function IconTarget({ className }: { className?: string }) {
+export function IconTarget({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference -  🎯 - Goals - NEEDS TO BE WHITE AND RED like reference
+
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <circle cx="12" cy="12" r="9" />
       <circle cx="12" cy="12" r="5" />
       <circle cx="12" cy="12" r="2" />
@@ -720,9 +870,27 @@ export function IconTarget({ className }: { className?: string }) {
   )
 }
 
-export function IconMicroscope({ className }: { className?: string }) {
+export function IconMicroscope({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference -  🔬 - Research
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M6 19h12" />
       <path d="M9 19a5 5 0 1 1 10 0" />
       <rect x="4" y="3" width="6" height="3" rx="1" />
@@ -732,9 +900,21 @@ export function IconMicroscope({ className }: { className?: string }) {
   )
 }
 
-export function IconBug({ className }: { className?: string }) {
+export function IconBug({ className, filled = false }: { className?: string; filled?: boolean }) {
+  //TODO: needs to be reworked to match reference -  🐞 - Bug
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="7" y="8" width="10" height="8" rx="4" />
       <path d="M12 8V4" />
       <path d="M4 12h4" />
@@ -747,9 +927,26 @@ export function IconBug({ className }: { className?: string }) {
   )
 }
 
-export function IconPackage({ className }: { className?: string }) {
+export function IconPackage({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z" />
       <path d="M3 8l9 5 9-5" />
       <path d="M12 13v9" />
@@ -757,18 +954,52 @@ export function IconPackage({ className }: { className?: string }) {
   )
 }
 
-export function IconSearch({ className }: { className?: string }) {
+export function IconSearch({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <circle cx="11" cy="11" r="7" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   )
 }
 
-export function IconLightbulb({ className }: { className?: string }) {
+export function IconLightbulb({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M9 18h6" />
       <path d="M10 22h4" />
       <path d="M12 2a7 7 0 0 0-4 13c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-13z" />
@@ -776,9 +1007,20 @@ export function IconLightbulb({ className }: { className?: string }) {
   )
 }
 
-export function IconGlobe({ className }: { className?: string }) {
+export function IconGlobe({ className, filled = false }: { className?: string; filled?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <circle cx="12" cy="12" r="9" />
       <path d="M3 12h18" />
       <path d="M12 3a15 15 0 0 0 0 18a15 15 0 0 0 0-18z" />
@@ -786,9 +1028,26 @@ export function IconGlobe({ className }: { className?: string }) {
   )
 }
 
-export function IconMonitor({ className }: { className?: string }) {
+export function IconMonitor({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="3" y="4" width="18" height="12" rx="2" />
       <path d="M8 20h8" />
       <path d="M12 16v4" />
@@ -796,27 +1055,79 @@ export function IconMonitor({ className }: { className?: string }) {
   )
 }
 
-export function IconMobile({ className }: { className?: string }) {
+export function IconMobile({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="7" y="2" width="10" height="20" rx="2" />
       <circle cx="12" cy="18" r="1" />
     </svg>
   )
 }
 
-export function IconPuzzle({ className }: { className?: string }) {
+export function IconPuzzle({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference -  🧩 - Components
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M10 3h4a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v4h-3a2 2 0 0 0-2 2v3h-4a2 2 0 0 1-2-2v-3H5a2 2 0 0 1-2-2v-4h3a2 2 0 0 0 2-2z" />
       <path d="M12 6a2 2 0 1 0 0 4" />
     </svg>
   )
 }
 
-export function IconArchive({ className }: { className?: string }) {
+export function IconArchive({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="3" y="3" width="18" height="4" rx="1" />
       <rect x="5" y="7" width="14" height="14" rx="2" />
       <path d="M9 12h6" />
@@ -824,9 +1135,28 @@ export function IconArchive({ className }: { className?: string }) {
   )
 }
 
-export function IconBricks({ className }: { className?: string }) {
+export function IconBricks({
+  className,
+  filled = false,
+}: {
+  className?: string
+  filled?: boolean
+}) {
+  //TODO: needs to be reworked to match reference -  🧱 - Foundation
+
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="3" y="7" width="6" height="4" />
       <rect x="9" y="7" width="6" height="4" />
       <rect x="15" y="7" width="6" height="4" />
@@ -836,9 +1166,22 @@ export function IconBricks({ className }: { className?: string }) {
   )
 }
 
-export function IconClamp({ className }: { className?: string }) {
+export function IconClamp({ className, filled = false }: { className?: string; filled?: boolean }) {
+  //TODO: needs to be reworked to match reference -  🗜️ - Compression
+
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
       <rect x="5" y="2" width="14" height="4" rx="1" />
       <path d="M7 6v6a3 3 0 0 0 3 3h4v4H9" />
       <path d="M17 10H10" />

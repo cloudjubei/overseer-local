@@ -1,5 +1,5 @@
 import {
-  BoardIcon,
+  IconBoard,
   IconAntenna,
   IconBack,
   IconBell,
@@ -25,7 +25,7 @@ import {
   IconWarningTriangle,
   IconWorkspace,
   IconXCircle,
-  ListIcon,
+  IconList,
   IconTestTube,
   IconWrench,
   IconBuild,
@@ -73,19 +73,21 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: 'delete', label: 'Delete' },
   { value: 'plus', label: 'Plus' },
   { value: 'exclamation', label: 'Exclamation' },
+
   { value: 'check-circle', label: 'Check Circle' },
   { value: 'x-circle', label: 'X Circle' },
   { value: 'stop-circle', label: 'Stop Circle' },
   { value: 'loader', label: 'Loader' },
   { value: 'list', label: 'List' },
   { value: 'board', label: 'Board' },
+
   { value: 'menu', label: 'Menu' },
   { value: 'back', label: 'Back' },
   { value: 'chevron', label: 'Chevron' },
   { value: 'play', label: 'Play' },
   { value: 'thumb-up', label: 'Thumb Up' },
   { value: 'thumb-down', label: 'Thumb Down' },
-  // Emoji-translated project icons
+
   { value: 'testing', label: 'Testing' },
   { value: 'tools', label: 'Tools' },
   { value: 'build', label: 'Build' },
@@ -148,9 +150,9 @@ export function renderProjectIcon(key?: string, className?: string) {
     case 'loader':
       return <IconLoader className={className} />
     case 'list':
-      return <ListIcon />
+      return <IconList className={className} />
     case 'board':
-      return <BoardIcon />
+      return <IconBoard className={className} />
     case 'menu':
       return <IconMenu className={className} />
     case 'back':
@@ -163,7 +165,6 @@ export function renderProjectIcon(key?: string, className?: string) {
       return <IconThumbUp className={className} />
     case 'thumb-down':
       return <IconThumbDown className={className} />
-    // Emoji-translated icons
     case 'testing':
       return <IconTestTube className={className} />
     case 'tools':

@@ -12,7 +12,7 @@ import { TaskListViewSorting, TaskViewMode, TaskListStatusFilter } from '../../t
 import { useAgents } from '../contexts/AgentsContext'
 import { Status, Task } from 'thefactory-tools'
 import ExclamationChip from '../components/tasks/ExclamationChip'
-import { BoardIcon, IconEdit, IconPlay, IconPlus, ListIcon } from '../components/ui/Icons'
+import { IconBoard, IconEdit, IconPlay, IconPlus, IconList } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import RunAgentButton from '../components/tasks/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -41,7 +41,8 @@ function matchesQuery(task: Task, q: string) {
 
 function filterTasks(tasks: Task[], { query, status }: { query: string; status: string }) {
   return tasks.filter((t) => {
-    const hasRejectedFeatures = Array.isArray(t.features) && t.features.some((f: any) => !!f.rejection)
+    const hasRejectedFeatures =
+      Array.isArray(t.features) && t.features.some((f: any) => !!f.rejection)
     const byStatus =
       !status || status === 'all'
         ? true
@@ -377,8 +378,8 @@ export default function TasksListView() {
           <SegmentedControl
             ariaLabel="Toggle between list and board views"
             options={[
-              { value: 'list', label: 'List', icon: <ListIcon /> },
-              { value: 'board', label: 'Board', icon: <BoardIcon /> },
+              { value: 'list', label: 'List', icon: <IconList /> },
+              { value: 'board', label: 'Board', icon: <IconBoard /> },
             ]}
             value={view}
             onChange={(v) => setView(v as 'list' | 'board')}
