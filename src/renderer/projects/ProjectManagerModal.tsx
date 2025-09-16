@@ -230,7 +230,7 @@ export default function ProjectManagerModal({
       size="lg"
       initialFocusRef={titleRef as React.RefObject<HTMLElement>}
       footer={
-        (mode === 'create' || mode === 'edit') ? (
+        mode === 'create' || mode === 'edit' ? (
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-secondary" onClick={() => setMode('list')}>
               Cancel
@@ -253,7 +253,7 @@ export default function ProjectManagerModal({
           <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ color: 'var(--text-secondary)' }}>Projects: {projectsList.length}</div>
             <Button className="btn-primary" onClick={() => startCreate()}>
-              <IconPlus />
+              <IconPlus className="w-4 h-4" />
             </Button>
           </div>
           <div>
@@ -281,7 +281,7 @@ export default function ProjectManagerModal({
                   </div>
                   <div className="flex" style={{ gap: 8 }}>
                     <Button className="btn-secondary" onClick={() => startEdit(p)}>
-                      <IconEdit />
+                      <IconEdit className="w-4 h-4" />
                     </Button>
                     <Button
                       className="btn-secondary"
@@ -289,7 +289,7 @@ export default function ProjectManagerModal({
                       variant="danger"
                       onClick={() => handleDelete(p.id)}
                     >
-                      <IconDelete />
+                      <IconDelete className="w-4 h-4" />
                     </Button>
                   </div>
                 </li>

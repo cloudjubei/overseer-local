@@ -355,7 +355,10 @@ export default function SidebarView({}: SidebarProps) {
           title={effectiveCollapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
         >
           <span aria-hidden>
-            <IconChevron style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }} />
+            <IconChevron
+              className="w-4 h-4"
+              style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }}
+            />
           </span>
         </button>
       </div>

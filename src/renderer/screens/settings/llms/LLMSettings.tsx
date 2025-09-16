@@ -12,7 +12,7 @@ export default function LLMSettings() {
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold">LLM Configurations</h2>
         <Button onClick={() => openModal({ type: 'llm-config-add' })}>
-          <IconPlus />
+          <IconPlus className="h-[20px] w-[20px]" />
         </Button>
       </div>
       <div className="border rounded-md divide-y">

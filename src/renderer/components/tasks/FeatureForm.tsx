@@ -335,7 +335,7 @@ export default function FeatureForm({
               disabled={submitting}
             >
               <div className="flex items-center gap-2">
-                <IconDelete />
+                <IconDelete className="w-3 h-3" />
                 Delete
               </div>
             </Button>

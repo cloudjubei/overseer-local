@@ -236,7 +236,7 @@ export default function AgentRunRow({
                 aria-label="View"
                 onClick={() => run.id && onView(run.id!)}
               >
-                <IconChevron />
+                <IconChevron className="w-4 h-4" />
               </Button>
             ) : null}
             {run.state === 'running' && onCancel && run.id ? (
@@ -246,7 +246,7 @@ export default function AgentRunRow({
                 aria-label="Cancel"
                 onClick={() => onCancel(run.id!)}
               >
-                <IconStopCircle />
+                <IconStopCircle className="w-4 h-4" />
               </Button>
             ) : null}
             {run.state !== 'running' && onDelete && run.id ? (
@@ -256,7 +256,7 @@ export default function AgentRunRow({
                 aria-label="Delete"
                 onClick={() => onDelete(run.id!)}
               >
-                <IconDelete />
+                <IconDelete className="w-4 h-4" />
               </Button>
             ) : null}
           </div>

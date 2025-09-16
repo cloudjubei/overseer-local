@@ -15,6 +15,7 @@ import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
 import { StatusPicker, statusKey } from '../components/tasks/StatusControl'
 import { gitMonitorService } from '../services/gitMonitorService'
+import { Button } from '../components/ui/Button'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -317,16 +318,15 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
       <div className="task-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
         <header className="details-header shrink-0">
           <div className="details-header__bar">
-            <button
-              type="button"
+            <Button
               className="btn-secondary"
               onClick={() => {
                 navigateView('Home')
               }}
             >
-              <IconBack />
+              <IconBack className="w-4 h-4" />
               <span className="sr-only">Back to Tasks</span>
-            </button>
+            </Button>
             <h1 className="details-title">Task {taskId}</h1>
           </div>
         </header>
@@ -393,16 +393,15 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     >
       <header className="details-header shrink-0">
         <div className="details-header__bar">
-          <button
-            type="button"
-            className="btn-secondary"
+          <Button
+            className="btn-secondary w-9 "
             onClick={() => {
               navigateView('Home')
             }}
             aria-label="Back to Tasks"
           >
-            <IconBack />
-          </button>
+            <IconBack className="w-4 h-4" />
+          </Button>
 
           <div
             className="col col-id flex flex-col items-center gap-1"
@@ -562,7 +561,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             aria-label="Edit task"
             onClick={handleEditTask}
           >
-            <IconEdit />
+            <IconEdit className="w-4 h-4" />
           </button>
           <button
             type="button"
@@ -570,7 +569,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
             aria-label="Add feature"
             onClick={handleAddFeature}
           >
-            <IconPlus />
+            <IconPlus className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -585,7 +584,9 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
               aria-controls="overview-content"
               onClick={() => setIsOverviewExpanded((prev) => !prev)}
             >
-              <IconChevron className={`icon-chevron ${isOverviewExpanded ? 'expanded' : ''}`} />
+              <IconChevron
+                className={`w-4 h-4 icon-chevron ${isOverviewExpanded ? 'expanded' : ''}`}
+              />
             </button>
             <h2 className="section-title">Overview</h2>
           </div>

@@ -3,8 +3,8 @@ import { CSSProperties } from 'react'
 export function IconBack({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -20,8 +20,8 @@ export function IconBack({ className }: { className?: string }) {
 export function IconEdit({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -41,8 +41,8 @@ export function IconEdit({ className }: { className?: string }) {
 export function IconDelete({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -62,8 +62,8 @@ export function IconDelete({ className }: { className?: string }) {
 export function IconPlus({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -80,8 +80,8 @@ export function IconPlus({ className }: { className?: string }) {
 export function IconExclamation({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -99,8 +99,8 @@ export function IconExclamation({ className }: { className?: string }) {
 export function IconChevron({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -117,8 +117,8 @@ export function IconChevron({ className, style }: { className?: string; style?: 
 export function IconPlay({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
@@ -132,8 +132,8 @@ export function IconPlay({ className }: { className?: string }) {
 export function IconList({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -154,8 +154,8 @@ export function IconList({ className }: { className?: string }) {
 export function IconBoard({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -174,8 +174,8 @@ export function IconBoard({ className }: { className?: string }) {
 export function IconCheckCircle({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -192,8 +192,8 @@ export function IconCheckCircle({ className }: { className?: string }) {
 export function IconXCircle({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -211,8 +211,8 @@ export function IconXCircle({ className }: { className?: string }) {
 export function IconStopCircle({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -221,7 +221,7 @@ export function IconStopCircle({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="10" stroke="#A855F7" strokeWidth="2" />
-      <rect x="9" y="9" width="6" height="6" rx="1" stroke="#F59E0B" strokeWidth="2" />
+      <rect x="9" y="9" width="6" height="6" rx="1" stroke="#F5000B" strokeWidth="2" />
     </svg>
   )
 }
@@ -229,8 +229,8 @@ export function IconStopCircle({ className }: { className?: string }) {
 export function IconLoader({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -254,8 +254,8 @@ export function IconArrowLeftMini({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -277,8 +277,8 @@ export function IconArrowRightMini({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -301,8 +301,8 @@ export function IconThumbUp({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -330,8 +330,8 @@ export function IconThumbDown({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -353,8 +353,8 @@ export function IconThumbDown({
 export function IconHome({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -372,8 +372,8 @@ export function IconHome({ className }: { className?: string }) {
 export function IconFiles({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -382,13 +382,13 @@ export function IconFiles({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path
-        d="M14 2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7z"
+        d="M14 2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 4 2h8a2 2 0 0 0 2-2V7z"
         stroke="#6366F1"
         strokeWidth="2"
       />
-      <path d="M14 2v5h5" stroke="#93C5FD" strokeWidth="2" />
-      <path d="M8 13h6" stroke="#60A5FA" strokeWidth="2" />
-      <path d="M8 17h6" stroke="#60A5FA" strokeWidth="2" />
+      <path d="M12 2v5h5" stroke="#93C5FD" strokeWidth="2" />
+      <path d="M8 12h6" stroke="#60A5FA" strokeWidth="2" />
+      <path d="M8 16h6" stroke="#60A5FA" strokeWidth="2" />
     </svg>
   )
 }
@@ -396,8 +396,8 @@ export function IconFiles({ className }: { className?: string }) {
 export function IconChat({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -419,8 +419,8 @@ export function IconChat({ className }: { className?: string }) {
 export function IconRobot({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -440,8 +440,8 @@ export function IconRobot({ className }: { className?: string }) {
 export function IconTimeline({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -459,8 +459,8 @@ export function IconTimeline({ className }: { className?: string }) {
 export function IconAntenna({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -479,8 +479,8 @@ export function IconAntenna({ className }: { className?: string }) {
 export function IconBell({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -497,8 +497,8 @@ export function IconBell({ className }: { className?: string }) {
 export function IconSettings({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -519,8 +519,8 @@ export function IconSettings({ className }: { className?: string }) {
 export function IconFolder({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -541,8 +541,8 @@ export function IconFolder({ className }: { className?: string }) {
 export function IconFolderOpen({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -569,8 +569,8 @@ export function IconWorkspace({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -589,8 +589,8 @@ export function IconWorkspace({
 export function IconWarningTriangle({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -612,8 +612,8 @@ export function IconWarningTriangle({ className }: { className?: string }) {
 export function IconMenu({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -631,8 +631,8 @@ export function IconMenu({ className }: { className?: string }) {
 export function IconCollection({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -656,8 +656,8 @@ export function IconTestTube({
   // Reworked: Neon green/blue testing tube
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -684,8 +684,8 @@ export function IconWrench({
   // Reworked: Pink/Red monkey wrench
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -707,8 +707,8 @@ export function IconBuild({ className, filled = false }: { className?: string; f
   // Reworked: Hammer and wrench with distinct colors
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -736,8 +736,8 @@ export function IconRocket({
   // Reworked: Colorful rocket with flame
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -763,8 +763,8 @@ export function IconToolbox({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -791,8 +791,8 @@ export function IconInfrastructure({
   // Reworked: Construction/infrastructure with colorful columns
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -812,8 +812,8 @@ export function IconBrain({ className, filled = false }: { className?: string; f
   // Reworked: AI/ML brain with gradient-like palette
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -839,8 +839,8 @@ export function IconDocument({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -860,18 +860,11 @@ export function IconDocument({
   )
 }
 
-export function IconTarget({
-  className,
-  filled = false,
-}: {
-  className?: string
-  filled?: boolean
-}) {
-  // Reworked: Red and white target
+export function IconTarget({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -879,9 +872,13 @@ export function IconTarget({
       aria-hidden="true"
       className={className}
     >
-      <circle cx="12" cy="12" r="9" stroke="#EF4444" strokeWidth="2" />
-      <circle cx="12" cy="12" r="5" stroke="#FFFFFF" strokeWidth="2" />
-      <circle cx="12" cy="12" r="2" fill="#EF4444" stroke="#EF4444" strokeWidth="2" />
+      <circle cx="12" cy="12" r="11" stroke="#EF4444" strokeWidth="2" />
+      <circle cx="12" cy="12" r="10" stroke="#FFFFFF" strokeWidth="1" />
+      <circle cx="12" cy="12" r="8" stroke="#EF4444" strokeWidth="2" />
+      <circle cx="12" cy="12" r="7" stroke="#FFFFFF" strokeWidth="1" />
+      <circle cx="12" cy="12" r="5" stroke="#EF4444" strokeWidth="2" />
+      <circle cx="12" cy="12" r="3" stroke="#FFFFFF" strokeWidth="2" />
+      <circle cx="12" cy="12" r="1" fill="#EF4444" stroke="#EF4444" strokeWidth="2" />
     </svg>
   )
 }
@@ -896,8 +893,8 @@ export function IconMicroscope({
   // Reworked: Research microscope with cool tones
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -918,8 +915,8 @@ export function IconBug({ className, filled = false }: { className?: string; fil
   // Reworked: Bug with red body and blue legs
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -948,8 +945,8 @@ export function IconPackage({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -973,8 +970,8 @@ export function IconSearch({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -997,8 +994,8 @@ export function IconLightbulb({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1020,8 +1017,8 @@ export function IconLightbulb({
 export function IconGlobe({ className, filled = false }: { className?: string; filled?: boolean }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1045,8 +1042,8 @@ export function IconMonitor({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1070,8 +1067,8 @@ export function IconMobile({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1095,8 +1092,8 @@ export function IconPuzzle({
   // Reworked: Components puzzle outline with accent
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1123,8 +1120,8 @@ export function IconArchive({
 }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1149,8 +1146,8 @@ export function IconBricks({
   // Reworked: Foundation bricks with warm palette
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1171,8 +1168,8 @@ export function IconClamp({ className, filled = false }: { className?: string; f
   // Reworked: Compression clamp with distinct colors
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       strokeLinecap="round"
@@ -1190,8 +1187,8 @@ export function IconClamp({ className, filled = false }: { className?: string; f
 export function IconPalette({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       className={className}
@@ -1216,8 +1213,8 @@ export function IconPalette({ className }: { className?: string }) {
 export function IconGitHub({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="currentColor"
       className={className}
@@ -1235,8 +1232,8 @@ export function IconGitHub({ className }: { className?: string }) {
 export function IconDatabase({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       className={className}

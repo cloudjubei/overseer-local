@@ -54,11 +54,11 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
     <Tooltip content={content} placement="top">
       <span className="inline-flex flex-col items-start gap-0.5 rounded-full border px-2 py-0.5 text-xs font-medium bg-neutral-50 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200 border-neutral-200 dark:border-neutral-700 leading-3">
         <span className="flex items-center gap-1">
-          <IconArrowLeftMini className="text-neutral-400" />
+          <IconArrowLeftMini className="text-neutral-400 h-[16px] w-[16px]" />
           <span>{prompt}</span>
         </span>
         <span className="flex items-center gap-1">
-          <IconArrowRightMini className="text-neutral-400" />
+          <IconArrowRightMini className="text-neutral-400 h-[16px] w-[16px]" />
           <span>{completion}</span>
         </span>
       </span>

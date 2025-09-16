@@ -144,7 +144,10 @@ export default function CollapsibleSidebar(props: Props) {
               title={collapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
             >
               <span aria-hidden>
-                <IconChevron style={{ transform: collapsed ? 'none' : 'rotate(180deg)' }} />
+                <IconChevron
+                  className="w-4 h-4"
+                  style={{ transform: collapsed ? 'none' : 'rotate(180deg)' }}
+                />
               </span>
             </button>
           </div>
@@ -162,7 +165,8 @@ export default function CollapsibleSidebar(props: Props) {
               )}
               {items.map((item, i) => {
                 const isActive = activeId === item.id
-                const iconNode = item.icon ?? (item.iconKey ? renderProjectIcon(item.iconKey) : null)
+                const iconNode =
+                  item.icon ?? (item.iconKey ? renderProjectIcon(item.iconKey) : null)
                 return (
                   <li key={item.id} className="nav-li">
                     <div className="flex items-center nav-row">

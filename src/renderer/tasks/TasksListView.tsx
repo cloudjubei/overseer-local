@@ -401,7 +401,7 @@ export default function TasksListView() {
             aria-label="Add Task"
             onClick={handleAddTask}
           >
-            <IconPlus />
+            <IconPlus className="h-[20px] w-[20px]" />
           </button>
         </div>
       </div>
@@ -521,7 +521,7 @@ export default function TasksListView() {
                               handleEditTask(t.id)
                             }}
                           >
-                            <IconEdit />
+                            <IconEdit className="h-[16px] w-[16px]" />
                           </button>
                           {taskRun ? (
                             <AgentRunBullet

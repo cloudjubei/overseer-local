@@ -91,13 +91,18 @@ export default function FeatureEditView({
                 disabled={submitting}
               >
                 <div className="flex items-center gap-2">
-                  <IconDelete />
+                  <IconDelete className="w-4 h-4" />
                   Delete
                 </div>
               </Button>
             )}
             <div className="flex justify-end gap-2">
-              <button type="button" className="btn-secondary" onClick={doClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={doClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
               <button
