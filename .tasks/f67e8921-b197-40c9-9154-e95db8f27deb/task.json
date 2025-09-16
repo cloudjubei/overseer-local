@@ -1176,7 +1176,7 @@
     },
     {
       "id": "c20fbc93-7910-4612-a275-95a3d722955c",
-      "status": "-",
+      "status": "+",
       "title": "Emoji icons",
       "description": "There are old emojis inside @src/renderer/components/ui/Icons.tsx - they need to be translated into the svg icons in that file, and then used in the list for project icons inside @src/renderer/projects/projectIcons.tsx",
       "plan": "",

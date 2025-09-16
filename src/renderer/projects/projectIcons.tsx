@@ -26,6 +26,27 @@ import {
   IconWorkspace,
   IconXCircle,
   ListIcon,
+  IconTestTube,
+  IconWrench,
+  IconBuild,
+  IconRocket,
+  IconToolbox,
+  IconInfrastructure,
+  IconBrain,
+  IconDocument,
+  IconTarget,
+  IconMicroscope,
+  IconBug,
+  IconPackage,
+  IconSearch,
+  IconLightbulb,
+  IconGlobe,
+  IconMonitor,
+  IconMobile,
+  IconPuzzle,
+  IconArchive,
+  IconBricks,
+  IconClamp,
 } from '../components/ui/Icons'
 
 export type ProjectIcon = {
@@ -64,6 +85,28 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: 'play', label: 'Play' },
   { value: 'thumb-up', label: 'Thumb Up' },
   { value: 'thumb-down', label: 'Thumb Down' },
+  // Emoji-translated project icons
+  { value: 'testing', label: 'Testing' },
+  { value: 'tools', label: 'Tools' },
+  { value: 'build', label: 'Build' },
+  { value: 'launch', label: 'Launch' },
+  { value: 'toolkit', label: 'Toolkit' },
+  { value: 'infrastructure', label: 'Infrastructure' },
+  { value: 'ai-ml', label: 'AI/ML' },
+  { value: 'docs', label: 'Docs' },
+  { value: 'goals', label: 'Goals' },
+  { value: 'research', label: 'Research' },
+  { value: 'bugs', label: 'Bugs' },
+  { value: 'package', label: 'Package' },
+  { value: 'search', label: 'Search' },
+  { value: 'ideas', label: 'Ideas' },
+  { value: 'web', label: 'Web' },
+  { value: 'desktop', label: 'Desktop' },
+  { value: 'mobile', label: 'Mobile' },
+  { value: 'components', label: 'Components' },
+  { value: 'archive', label: 'Archive' },
+  { value: 'foundation', label: 'Foundation' },
+  { value: 'compression', label: 'Compression' },
 ]
 
 export function renderProjectIcon(key?: string, className?: string) {
@@ -120,6 +163,49 @@ export function renderProjectIcon(key?: string, className?: string) {
       return <IconThumbUp className={className} />
     case 'thumb-down':
       return <IconThumbDown className={className} />
+    // Emoji-translated icons
+    case 'testing':
+      return <IconTestTube className={className} />
+    case 'tools':
+      return <IconWrench className={className} />
+    case 'build':
+      return <IconBuild className={className} />
+    case 'launch':
+      return <IconRocket className={className} />
+    case 'toolkit':
+      return <IconToolbox className={className} />
+    case 'infrastructure':
+      return <IconInfrastructure className={className} />
+    case 'ai-ml':
+      return <IconBrain className={className} />
+    case 'docs':
+      return <IconDocument className={className} />
+    case 'goals':
+      return <IconTarget className={className} />
+    case 'research':
+      return <IconMicroscope className={className} />
+    case 'bugs':
+      return <IconBug className={className} />
+    case 'package':
+      return <IconPackage className={className} />
+    case 'search':
+      return <IconSearch className={className} />
+    case 'ideas':
+      return <IconLightbulb className={className} />
+    case 'web':
+      return <IconGlobe className={className} />
+    case 'desktop':
+      return <IconMonitor className={className} />
+    case 'mobile':
+      return <IconMobile className={className} />
+    case 'components':
+      return <IconPuzzle className={className} />
+    case 'archive':
+      return <IconArchive className={className} />
+    case 'foundation':
+      return <IconBricks className={className} />
+    case 'compression':
+      return <IconClamp className={className} />
     case 'folder':
     default:
       return <IconFolder className={className} />
