@@ -1145,6 +1145,20 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "32ec2d90-3244-40a0-a74b-d120f6d512e0",
+      "status": "-",
+      "title": "ProjectsModal must match icon style of new icons",
+      "description": "The icons for projects inside @src/projects/ProjectsManager.ts that are set per project must match the new icons in @src/renderer/components/ui/Icons.tsx that are used in @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/projects/ProjectsManager.ts"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1235,6 +1249,7 @@
     "74d5f63b-8797-43f5-b571-fd5bebf56550": 85,
     "27156e19-3aeb-41de-adc2-75b1c7ca9774": 86,
     "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 87,
-    "40322d85-bc35-4b45-89db-b5e3a393a8e9": 88
+    "40322d85-bc35-4b45-89db-b5e3a393a8e9": 88,
+    "32ec2d90-3244-40a0-a74b-d120f6d512e0": 89
   }
 }
