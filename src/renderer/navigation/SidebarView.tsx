@@ -184,9 +184,12 @@ export default function SidebarView({}: SidebarProps) {
     }
   }, [])
 
-  const refreshAllUnread = useCallback(async (projectIds: string[]) => {
-    await Promise.all(projectIds.map((id) => refreshUnreadFor(id)))
-  }, [refreshUnreadFor])
+  const refreshAllUnread = useCallback(
+    async (projectIds: string[]) => {
+      await Promise.all(projectIds.map((id) => refreshUnreadFor(id)))
+    },
+    [refreshUnreadFor],
+  )
 
   useEffect(() => {
     const ids = projects.map((p) => p.id)
@@ -510,7 +513,9 @@ export default function SidebarView({}: SidebarProps) {
                       >
                         {activeCount > 0 && (
                           <NotificationBadge
-                            className={effectiveCollapsed ? 'h-3 min-w-3 px-0.5 text-[9px]' : ''}
+                            className={
+                              effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                            }
                             text={`${activeCount}`}
                             tooltipLabel={`${activeCount} running agents`}
                             isInformative
@@ -518,7 +523,9 @@ export default function SidebarView({}: SidebarProps) {
                         )}
                         {unread > 0 && (
                           <NotificationBadge
-                            className={effectiveCollapsed ? 'h-3 min-w-3 px-0.5 text-[9px]' : ''}
+                            className={
+                              effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                            }
                             text={`${unread}`}
                             tooltipLabel={`${unread} unread notifications`}
                           />
