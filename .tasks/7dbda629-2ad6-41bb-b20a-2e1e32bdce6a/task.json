@@ -12,7 +12,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "3ea0f62c-5068-40c6-87b4-747e85959718",
@@ -22,7 +25,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "7a5efff9-125d-481f-bb73-51dc3991bdae",
@@ -32,7 +38,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "916bebdb-a2c4-429f-a559-dff03aed4eef",
@@ -42,7 +51,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "06680296-05e8-434c-868c-b07a44f86570",
@@ -58,7 +70,10 @@
         "src/tasks/indexer.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe",
@@ -73,7 +88,10 @@
         "src/ipcHandlersKeys.js",
         "src/renderer/services/chatsService.ts",
         "src/renderer/hooks/useChats.tsx"
-      ]
+      ],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
@@ -82,7 +100,10 @@
       "description": "only folders need describing and only up to a certain level where it still remains significant",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -93,5 +114,8 @@
     "06680296-05e8-434c-868c-b07a44f86570": 5,
     "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 6,
     "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.978Z",
+  "completedAt": "2025-09-16T13:05:37.978Z",
+  "updatedAt": "2025-09-16T13:05:37.978Z"
 }

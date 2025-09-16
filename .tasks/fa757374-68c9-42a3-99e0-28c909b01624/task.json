@@ -11,7 +11,10 @@
       "description": "Transform the existing document indexer to become a file indexer that can handle any file type within the project scope as defined by @config.json under /projects. Update the @docsService.ts to become a @fileService.ts that indexes all files (not just documents) and provides file metadata like name, size, last modification date, and file type. Update the useDocsIndex hook to become useFilesIndex.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "8560d88d-e4b3-45f4-bdb0-db7eea4bda46",
@@ -20,7 +23,10 @@
       "description": "Create a new reusable FileDisplay component that shows file information (name, size, last modification date, file type) in a consistent format. This component should be flexible enough to be used in different contexts like file selectors, chat references, and file listings. Place it in src/renderer/components/ui/ and style it appropriately.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "818dd587-aaef-41fc-ac96-e451ab4b52f4",
@@ -29,7 +35,10 @@
       "description": "Add hover functionality to the FileDisplay component that shows a small preview card when hovering over a file. The preview should show additional file details and a small content preview when possible. Implement this using a tooltip-like overlay that appears on hover.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "266c7aab-d35f-4a37-be83-9a06b79332cf",
@@ -38,7 +47,10 @@
       "description": "Build a FileSelector component that can be used in Feature create/edit forms to select files for the context field. This should show a searchable/filterable list of all files in the project using the FileDisplay component. Integrate this into the FeatureCreateView and FeatureEditView forms.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "d8d01c33-19e5-4809-8e95-9878bc527a12",
@@ -47,7 +59,10 @@
       "description": "Rename the DocumentsView to FilesView and update all related navigation, routing, and references. Update the sidebar navigation to show 'Files' instead of 'Documents'. Ensure all existing functionality is preserved during the rename.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "bf3f3627-6833-47c8-a782-738f6b5bd035",
@@ -56,7 +71,10 @@
       "description": "Update the Files screen to show all files but provide different viewing experiences: keep the nice editor for Markdown files, and implement a basic file viewer for other file types. The viewer should display file content when possible (text files, code files) or show file information when content viewing isn't feasible.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "8365b984-4ac2-48fc-baf1-b1aad5f65407",
@@ -65,7 +83,10 @@
       "description": "Implement navigation from FileDisplay components to the full File view in the Files screen. Add logic to detect when a user has unsaved changes (in edit/create modes) and show an alert before navigating away. This should work from file selectors, chat references, and any other places where files are displayed.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "1b5838ed-7e8b-41df-840b-7a8b456a7047",
@@ -74,7 +95,10 @@
       "description": "Update the chat system to use the new FileDisplay component whenever a document/file is mentioned in chat messages. This ensures consistent file representation across the application and provides the same hover preview and click navigation functionality.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     },
     {
       "id": "5eb2653c-d98b-4bd0-9a5f-7db79512c746",
@@ -83,7 +107,10 @@
       "description": "Add functionality to the chat input where typing '@' opens a file browser/selector. The user should be able to continue typing to filter files by name. Implement this as a dropdown/overlay that shows filtered files using the FileDisplay component. Allow users to select files to reference in their chat messages.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.985Z",
+      "completedAt": "2025-09-16T13:05:37.985Z",
+      "updatedAt": "2025-09-16T13:05:37.985Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -96,5 +123,8 @@
     "8365b984-4ac2-48fc-baf1-b1aad5f65407": 7,
     "1b5838ed-7e8b-41df-840b-7a8b456a7047": 8,
     "5eb2653c-d98b-4bd0-9a5f-7db79512c746": 9
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.985Z",
+  "completedAt": "2025-09-16T13:05:37.985Z",
+  "updatedAt": "2025-09-16T13:05:37.985Z"
 }

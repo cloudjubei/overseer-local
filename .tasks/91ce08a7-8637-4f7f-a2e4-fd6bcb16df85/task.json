@@ -11,7 +11,10 @@
       "description": "Implement the foundational screenshot capture functionality using Electron's native capabilities. Create a service in the main process that can capture screenshots of the current renderer window or specific regions. This should handle different screenshot formats (PNG, JPEG) and quality settings. The service should expose IPC methods that can be called from the renderer process.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "b618b560-d3fc-4051-ad90-f13fb598b7d4",
@@ -20,7 +23,10 @@
       "description": "Create a preview system that can render React components in isolation, similar to Storybook. This should include a dedicated preview renderer that can mount individual components with mock props and context providers. Implement a preview window or iframe that can be used to render components separately from the main application for clean screenshot capture.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "e89d60a0-78f6-433f-bd29-f9a29ca2b68c",
@@ -29,7 +35,10 @@
       "description": "Develop a system for providing stubs and mock data for component previews. Create a methodology for components to declare their preview requirements (props, context, blockers). Build a registry system that can automatically provide sensible defaults and mocks for common component blockers like services, hooks, and external data.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "d347020b-d15b-4298-a719-1fbd2e91c531",
@@ -38,7 +47,10 @@
       "description": "Implement a system that can analyze components and determine if they can be previewed. This should scan component files to detect blockers, required props, and external requirements. Create metadata that indicates preview compatibility and any special requirements. Provide clear feedback when components cannot be previewed and why.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "881d359a-31a2-4658-a2c3-2627153b003d",
@@ -47,7 +59,10 @@
       "description": "Create the agent-facing tool that allows requesting screenshots of components or the full application. This tool should accept parameters like component path, props override, screenshot dimensions, and preview mode. Integrate this into the existing @standardTools.js system so agents can easily call it after making changes to see visual feedback.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "ee83f432-e326-4e88-aa53-1e4e6c05e84f",
@@ -56,7 +71,10 @@
       "description": "Implement basic interaction support within component previews, similar to XCode SwiftUI previews. This should allow simple interactions like clicking buttons, typing in inputs, and state changes to be captured in screenshots. Provide a way to capture before/after states of interactions to show component behavior.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "34219d8f-10ef-42fe-8b35-9edc6795bf70",
@@ -71,7 +89,10 @@
         "/docs/COMPONENT_PREVIEWS.md"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -82,5 +103,8 @@
     "881d359a-31a2-4658-a2c3-2627153b003d": 5,
     "ee83f432-e326-4e88-aa53-1e4e6c05e84f": 6,
     "34219d8f-10ef-42fe-8b35-9edc6795bf70": 7
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.979Z",
+  "completedAt": "2025-09-16T13:05:37.979Z",
+  "updatedAt": "2025-09-16T13:05:37.979Z"
 }

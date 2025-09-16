@@ -16,7 +16,10 @@
         "packages/factory-ts/CONFIGURATION.md"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "dbf85f17-a547-46fd-b4ce-12bb9e006ccb",
@@ -31,7 +34,10 @@
         "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "20b01258-fc70-4a0a-913d-74ff1ca24dc6",
@@ -45,7 +51,10 @@
         "packages/factory-ts/blueprint/run_local_agent.py"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "a46e12c6-1d72-4ab3-8301-b278b56b5814",
@@ -58,7 +67,10 @@
         "packages/factory-ts/src/orchestrator.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "bce3592f-e8e3-440c-9675-acff8965f3d8",
@@ -66,9 +78,15 @@
       "title": "factory-ts is the source of truth when it comes to types for ProjectSpec, Feature and Task",
       "description": "Integrate the relevant types inside @types.ts from factory-ts , meaning that 'src/types/tasks.ts' is no longer needed. All places where they were used must be updated.",
       "plan": "",
-      "context": ["src/types/tasks.ts", "packages/factory-ts/src/types.ts"],
+      "context": [
+        "src/types/tasks.ts",
+        "packages/factory-ts/src/types.ts"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "89144d73-7cdd-4984-9422-2341c2ed77b5",
@@ -84,7 +102,10 @@
         "packages/factory-ts/src/git/gitManager.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "2f441c51-532f-494b-b29b-ae9920a75750",
@@ -99,7 +120,10 @@
         "src/renderer/screens/AllAgentsView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
@@ -114,7 +138,10 @@
         "packages/factory-ts/src/logger.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "94a8ab44-a4d9-4165-bd1e-fe2c3c2217e2",
@@ -124,7 +151,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "8eec6280-97ff-443c-a7a9-fcbb58eeb119",
@@ -138,7 +168,10 @@
         "packages/factory-ts/blueprint/run_local_agent.py"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     },
     {
       "id": "0c4a2db2-adcf-4778-bc92-c943664ce450",
@@ -146,9 +179,15 @@
       "title": "When looking at an agent inside @AgentsView.tsx it must be possible to view the whole conversation",
       "description": "Whether for historical runs or a current run - a given agent's run view must display the running conversation.",
       "plan": "",
-      "context": ["src/renderer/screens/AgentsView.tsx", "packages/factory-ts/src/orchestrator.ts"],
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.986Z",
+      "completedAt": "2025-09-16T13:05:37.986Z",
+      "updatedAt": "2025-09-16T13:05:37.986Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -163,5 +202,8 @@
     "94a8ab44-a4d9-4165-bd1e-fe2c3c2217e2": 9,
     "8eec6280-97ff-443c-a7a9-fcbb58eeb119": 10,
     "0c4a2db2-adcf-4778-bc92-c943664ce450": 11
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.986Z",
+  "completedAt": "2025-09-16T13:05:37.986Z",
+  "updatedAt": "2025-09-16T13:05:37.986Z"
 }

@@ -20,7 +20,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "54624aa7-8688-4151-845f-7720a0bf58fd",
@@ -38,7 +41,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "c4a2b954-f445-4ec5-b147-9ad0be8b9d0d",
@@ -56,7 +62,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "4c0a014b-72df-434e-8269-0a58d3634c1b",
@@ -74,7 +83,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "462d3ce9-d7fa-4810-a070-056c4d3f06d4",
@@ -92,7 +104,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "95398841-dbd8-4490-a6e6-796fa7e86350",
@@ -110,7 +125,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "f492c0ef-f790-483e-910c-d528a17ed898",
@@ -128,7 +146,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     },
     {
       "id": "f2940727-9c68-488c-934c-52b5b39d8de9",
@@ -146,7 +167,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.965Z",
+      "completedAt": "2025-09-16T13:05:37.965Z",
+      "updatedAt": "2025-09-16T13:05:37.965Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -158,5 +182,8 @@
     "95398841-dbd8-4490-a6e6-796fa7e86350": 5,
     "f492c0ef-f790-483e-910c-d528a17ed898": 6,
     "f2940727-9c68-488c-934c-52b5b39d8de9": 7
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.965Z",
+  "completedAt": "2025-09-16T13:05:37.965Z",
+  "updatedAt": "2025-09-16T13:05:37.965Z"
 }

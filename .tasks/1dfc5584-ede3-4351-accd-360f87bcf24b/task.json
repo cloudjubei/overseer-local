@@ -11,7 +11,10 @@
       "description": "Analyze Monday.com's colorful design system and document their color palette, including primary colors, secondary colors, status colors, and semantic color usage. Create a comprehensive color token system that captures their vibrant aesthetic while considering accessibility and contrast ratios. Document findings in a design tokens specification that can be implemented in CSS/Tailwind.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "564eb06f-5273-4428-a4dc-730c95b86ca3",
@@ -20,7 +23,10 @@
       "description": "Study Linear.app's user experience patterns, focusing on their clean interface design, keyboard shortcuts, task management flows, navigation patterns, modal behaviors, form controls, and micro-interactions. Document best practices for task creation, editing, status changes, and overall workflow efficiency. Create UX guidelines that can be applied to our task management application.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "5566fb47-2c85-4655-87f9-4bc52090ab4d",
@@ -29,7 +35,10 @@
       "description": "Create a comprehensive theming system based on Monday.com's colorful palette but with improvements. Update Tailwind configuration with custom color variables, implement CSS custom properties for dynamic theming, and create color utility classes. Ensure the color system supports light/dark modes and maintains accessibility standards while capturing Monday's vibrant aesthetic.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "a50102d6-d92b-4a6d-94bc-95c25c155359",
@@ -38,7 +47,10 @@
       "description": "Refactor existing UI components (buttons, modals, forms, inputs, dropdowns) to follow Linear.app's clean and efficient interaction patterns. Implement consistent spacing, typography hierarchy, subtle animations, and intuitive keyboard navigation. Focus on reducing visual clutter while maintaining functionality and improving user efficiency.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "f277d42e-9c88-450a-9d52-8ac41ab39de2",
@@ -47,7 +59,10 @@
       "description": "Redesign the main task management interface combining Monday's colorful status indicators and visual hierarchy with Linear's clean layout and efficient workflows. Implement color-coded task statuses, priority indicators, drag-and-drop functionality, and streamlined task creation/editing flows. Ensure the interface feels both visually engaging and highly functional.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "df20aaee-c187-4356-b606-4abd8bed9f23",
@@ -56,7 +71,10 @@
       "description": "Redesign the application navigation and sidebar to match Linear's clean, collapsible sidebar design with clear hierarchy and efficient space usage. Implement smooth animations for expand/collapse states, keyboard navigation, and proper responsive behavior. Maintain Monday's colorful accent touches while achieving Linear's organizational clarity.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "2529f35a-0fb5-4014-b065-59b01cfafe81",
@@ -65,7 +83,10 @@
       "description": "Add sophisticated interaction patterns inspired by both platforms including hover states, loading animations, success/error feedback, smooth transitions between states, and contextual tooltips. Implement Linear-style keyboard shortcuts and Monday-style visual feedback for user actions. Focus on creating a polished, professional feel that exceeds both reference applications.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "827db036-9c40-45f4-9dc5-9289238db732",
@@ -74,7 +95,10 @@
       "description": "Document the complete design system including color palette, typography scales, spacing system, component usage guidelines, and interaction patterns. Create a living style guide that demonstrates all UI components and their variants. Ensure the design system is maintainable and extensible for future development while clearly showing improvements over the reference applications.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "16a00de8-3df8-4151-a94d-1338c7e59277",
@@ -92,7 +116,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "3c4d2fc5-9efd-4eb1-bc6b-62e1f6d51c9f",
@@ -110,7 +137,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "fb625722-957a-4324-8aa2-0cbe7eed1610",
@@ -129,7 +159,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "dcf61f83-e5a4-4c5f-8e45-1367fba9d0b7",
@@ -143,7 +176,10 @@
         "src/renderer/tasks/TaskDetailsView.tsx",
         "src/renderer/tasks/TasksListView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "94e5e319-b1f5-4c16-bac3-a192c273b17d",
@@ -156,7 +192,10 @@
         "src/renderer/screens/DocumentsView.tsx",
         "src/renderer/docs/DocumentsBrowserView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "d6d6a791-57e1-4698-86b0-3afd66ffe412",
@@ -164,8 +203,14 @@
       "title": "Chats screen - each section allows scrolling",
       "description": "The whole screen doesn't scroll - just the list of items inside the chats list and the chat messages itself (ONLY THE MESSAGES, the top settings and bottom message composer are stuck)",
       "plan": "",
-      "context": ["src/renderer/screens/SidebarView.tsx", "src/renderer/screens/ChatView.tsx"],
-      "acceptance": []
+      "context": [
+        "src/renderer/screens/SidebarView.tsx",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "16cecd70-5f3c-4c7b-ba5b-ef5d3dd9546d",
@@ -183,7 +228,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "6977845f-5145-4646-b801-e1c3fe0de5ff",
@@ -201,7 +249,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "9b970029-6a4e-45f5-9f1d-1c991acbecd3",
@@ -219,7 +270,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "fd9e5a98-49fd-4b20-a22a-caf851e84d03",
@@ -237,7 +291,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "8ad954ce-d2be-4a97-b5b0-1c1eff479b91",
@@ -255,7 +312,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "95c60b20-cf41-4891-810d-40660900dafb",
@@ -274,7 +334,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "1532cce2-94dd-4a08-95ca-6b762a5b597e",
@@ -292,7 +355,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "2423693e-56b2-40f5-8ac1-3cc6e6c1d058",
@@ -304,7 +370,10 @@
         "src/renderer/screens/TasksDetailView.tsx",
         "src/renderer/screens/FeatureCreateView.tsx",
         "src/renderer/screens/FeatureEditView.tsx"
-      ]
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "5cfbded4-9668-4456-8339-0651236253f8",
@@ -315,7 +384,10 @@
       "context": [
         "src/renderer/screens/TasksDetailView.tsx",
         "src/renderer/screens/FeatureEditView.tsx"
-      ]
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "a0321906-ff87-4677-b67b-6d8cd346012b",
@@ -327,7 +399,10 @@
         "src/renderer/screens/TasksDetailView.tsx",
         "src/renderer/screens/FeatureCreateView.tsx",
         "src/renderer/screens/FeatureEditView.tsx"
-      ]
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "fba81ba7-d9bd-451e-8d2b-d14195984f7d",
@@ -347,7 +422,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "15cff978-e138-4bfc-abc2-3cd848334c70",
@@ -355,9 +433,15 @@
       "title": "Creating a task is broken",
       "description": "The status fields don't match the Task specification",
       "plan": "",
-      "context": ["src/renderer/components/TaskForm.tsx", "src/renderer/tasks/TasksListView.tsx"],
+      "context": [
+        "src/renderer/components/TaskForm.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "fbc0b91a-8722-4321-af49-5c1625b74b77",
@@ -373,7 +457,10 @@
         "docs/ux/LINEAR_UX_GUIDELINES.md",
         "docs/STANDARDS.md"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "b0bd5b09-c838-4826-863e-7d70a236e65b",
@@ -381,9 +468,15 @@
       "title": "Task deletion",
       "description": "It should be possible to delete a task from the edit screen (after extra alert confirmation).\nThe user should be then taken to the TasksList screen.",
       "plan": "",
-      "context": ["src/renderer/components/TaskForm.tsx", "src/renderer/tasks/TasksListView.tsx"],
+      "context": [
+        "src/renderer/components/TaskForm.tsx",
+        "src/renderer/tasks/TasksListView.tsx"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "814f68ef-150e-4738-8659-fdbfdbdbb869",
@@ -396,7 +489,10 @@
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "be9c6340-9409-431f-b7ce-4634be6e5fe4",
@@ -410,7 +506,12 @@
         "src/renderer/screens/DocumentsView.tsx"
       ],
       "acceptance": [],
-      "blockers": ["fbc0b91a-8722-4321-af49-5c1625b74b77"]
+      "blockers": [
+        "fbc0b91a-8722-4321-af49-5c1625b74b77"
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "b902122f-7c2e-4144-a52e-7fe40b2fddad",
@@ -424,7 +525,12 @@
         "src/renderer/screens/NotificationsView.tsx"
       ],
       "acceptance": [],
-      "blockers": ["fbc0b91a-8722-4321-af49-5c1625b74b77"]
+      "blockers": [
+        "fbc0b91a-8722-4321-af49-5c1625b74b77"
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "06743509-2393-4b11-8728-e400e874af78",
@@ -438,7 +544,12 @@
         "src/renderer/screens/ChatView.tsx"
       ],
       "acceptance": [],
-      "blockers": ["fbc0b91a-8722-4321-af49-5c1625b74b77"]
+      "blockers": [
+        "fbc0b91a-8722-4321-af49-5c1625b74b77"
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "7de1829b-c85a-4426-bb39-381753902526",
@@ -451,7 +562,10 @@
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "2432fd5d-3ebf-4190-9652-5f5563e8fd9e",
@@ -464,7 +578,10 @@
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "33cfe746-7a21-4a2b-97b4-b99746d7a8c5",
@@ -478,7 +595,10 @@
         "src/renderer/components/TaskForm.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "244fad46-c4a4-4718-8c0b-b42ac49dea7f",
@@ -492,7 +612,10 @@
         "src/renderer/components/FeatureForm.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "4c489806-ac2d-4c5b-a6af-d1e8aa3c455f",
@@ -500,9 +623,14 @@
       "title": "TaskDetailsView",
       "description": "Overview needs to be collapsible. When expanded, it can be scrolled and should be fitting at most 4 lines of text.",
       "plan": "",
-      "context": ["src/renderer/tasks/TaskDetailsView.tsx"],
+      "context": [
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "6e8417be-2501-4b61-acc8-8f8cafaf6add",
@@ -516,7 +644,10 @@
         "src/renderer/components/TaskForm.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "4095a67b-2e97-495c-b0c1-fac51d568c6c",
@@ -526,7 +657,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     },
     {
       "id": "ff934b3d-7ff8-41ae-96cd-fbfa71b8b7b5",
@@ -540,7 +674,12 @@
         "src/renderer/tasks/TasksListView.tsx"
       ],
       "acceptance": [],
-      "blockers": ["4095a67b-2e97-495c-b0c1-fac51d568c6c"]
+      "blockers": [
+        "4095a67b-2e97-495c-b0c1-fac51d568c6c"
+      ],
+      "createdAt": "2025-09-16T13:05:37.973Z",
+      "completedAt": "2025-09-16T13:05:37.973Z",
+      "updatedAt": "2025-09-16T13:05:37.973Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -584,5 +723,8 @@
     "6e8417be-2501-4b61-acc8-8f8cafaf6add": 37,
     "4095a67b-2e97-495c-b0c1-fac51d568c6c": 38,
     "ff934b3d-7ff8-41ae-96cd-fbfa71b8b7b5": 39
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.973Z",
+  "completedAt": "2025-09-16T13:05:37.973Z",
+  "updatedAt": "2025-09-16T13:05:37.973Z"
 }

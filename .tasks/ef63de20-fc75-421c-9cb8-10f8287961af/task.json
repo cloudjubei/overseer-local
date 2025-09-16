@@ -16,7 +16,10 @@
         "src/renderer/services/dependencyResolver.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "a10c08b8-86dd-4afb-b9c9-3ef4c5c0e529",
@@ -24,8 +27,13 @@
       "title": "Add display index tracking to ProjectSpec and Task types",
       "description": "Extend the ProjectSpec type to include a mapping of task UUIDs to their display indices (position in the main task list). Add display index fields to track feature positions within tasks. This enables fast lookup of user-friendly indices for UI display.",
       "plan": "",
-      "context": ["src/types/tasks.ts"],
-      "acceptance": []
+      "context": [
+        "src/types/tasks.ts"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "0aa6d826-fb70-476a-b5fb-200d3c546a98",
@@ -39,7 +47,10 @@
         "src/renderer/services/dependencyResolver.ts",
         "scripts/migrate-uuids.ts"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "4822c949-26fd-417e-9598-8b82816bcd97",
@@ -48,7 +59,10 @@
       "description": "Modify the dependencyResolver service to handle UUID-based task and feature references instead of numeric IDs. Update dependency resolution, validation, cycle detection, and reverse dependency tracking to work with UUID strings while maintaining the same API surface.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "bf41dff7-c0c8-4d42-8084-c7e864449b90",
@@ -57,7 +71,10 @@
       "description": "Create utility functions that can quickly resolve UUID-based blockers back to user-friendly display indices (e.g., '3.2' for the 2nd feature of the 3rd task). These utilities should use the display index mappings for fast lookups when rendering dependency references in the UI.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "604fdd8b-8b73-44a8-88f1-d2feca69a8f7",
@@ -66,7 +83,10 @@
       "description": "Modify DependencyBullet, TaskSummaryCallout, FeatureSummaryCallout and other components that display dependency references to show user-friendly display indices ('3.2') instead of UUIDs, while maintaining UUID-based navigation and resolution internally.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "1a9969ff-4fb8-469e-9d79-7b2c091fcf70",
@@ -75,7 +95,10 @@
       "description": "Modify useReferencesAutocomplete hook and ChatView components to work with UUID-based blockers while still showing display indices to users. Ensure # references are properly resolved and inserted as UUID-based tokens that display as friendly indices.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "80b08887-d107-47a8-9ae9-a59f8ecdda6e",
@@ -84,7 +107,10 @@
       "description": "Modify taskService, useTasksIndex, and related data management hooks to work with UUID-based task and feature identification while maintaining display index tracking and providing backwards compatibility during the transition.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "ea14cf4b-1450-48ed-ac7d-60bc96056e11",
@@ -92,8 +118,14 @@
       "title": "Update the migration script",
       "description": "Use the current version and extend it so it can be run via command line passing in a path to project's @config.json (i.e. in this project there's 'thefactory.json' - referenced here).",
       "plan": "",
-      "context": ["scripts/migrate-uuids.ts", "projects/thefactory.json"],
-      "acceptance": []
+      "context": [
+        "scripts/migrate-uuids.ts",
+        "projects/thefactory.json"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -106,5 +138,8 @@
     "1a9969ff-4fb8-469e-9d79-7b2c091fcf70": 6,
     "80b08887-d107-47a8-9ae9-a59f8ecdda6e": 7,
     "ea14cf4b-1450-48ed-ac7d-60bc96056e11": 8
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.983Z",
+  "completedAt": "2025-09-16T13:05:37.983Z",
+  "updatedAt": "2025-09-16T13:05:37.983Z"
 }

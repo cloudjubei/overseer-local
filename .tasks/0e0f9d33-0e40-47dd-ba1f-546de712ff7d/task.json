@@ -4,5 +4,7 @@
   "title": "Web version",
   "description": "Reuse as much code of this project as possible to make a complete web version using React and Typescript. A mobile version should already be in place - so make sure this project respects the dependency. There needs to be clear documentation as to how to launch/manage this etc.",
   "features": [],
-  "featureIdToDisplayIndex": {}
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-16T13:05:37.972Z",
+  "updatedAt": "2025-09-16T13:05:37.972Z"
 }

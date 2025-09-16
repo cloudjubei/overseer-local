@@ -11,7 +11,10 @@
       "description": "Create a new sidebar navigation item titled 'Live Data'. This item should navigate to a new, empty screen component that will serve as the container for the live data services management UI.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "168c2aaa-13a9-45d5-873c-b633cb716dfc",
@@ -20,7 +23,10 @@
       "description": "Define and type the data structure for a generic live data service. This should include fields for service ID, name, description, last updated timestamp, freshness policy (e.g., 'daily', 'weekly', 'monthly'), and auto-update settings (e.g., enabled, trigger).",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "80a2e471-25cf-456e-a03a-b37d428dd621",
@@ -29,7 +35,10 @@
       "description": "Enhance `factory-ts` with a new module to fetch LLM provider and model prices from a canonical source. The module should be designed to also support user-configurable sources in the future.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "19e53643-537f-4bbf-9ba6-268baeedcb4f",
@@ -43,7 +52,10 @@
         "src/live-data/types.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "2e00148d-cb4c-4c4b-9388-448b171ff42e",
@@ -53,7 +65,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "3bb6a463-3ec8-48dc-9a1f-f70e8797da27",
@@ -63,7 +78,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "5b140303-e3c9-467f-a26e-2b09919612c4",
@@ -73,7 +91,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "abcb8eae-c3ab-424a-9853-b5372f04633f",
@@ -87,7 +108,10 @@
         "src/renderer/hooks/useLiveData.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "ef5fc45d-0d09-41ab-9500-0ad2882d1275",
@@ -95,9 +119,14 @@
       "title": "Basic json viewer for current live data",
       "description": "Inside @src/renderer/screens/LiveDataView.tsx we need a way to view the data that is the latest as a simple json viewer.",
       "plan": "",
-      "context": ["src/renderer/screens/LiveDataView.tsx"],
+      "context": [
+        "src/renderer/screens/LiveDataView.tsx"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "6199040d-7927-44fc-a1ad-71782484d82a",
@@ -105,9 +134,15 @@
       "title": "LiveData should integrate with thefactory-tools refresh prices",
       "description": "Inside the local package thefactory-tools we have exposed functions for updating the prices for the price manager that is used by all agents to determine token prices. Whenever @src/renderer/services/liveDataService.ts or @src/live-data/liveDataManager.js retrieves fresh prices, it has to update thefactory-tools appropriately (via the price manager) so that it has the latest data.\nThis is just the case for this project, but for further livedataservices we need to have an interface by which we can wire up the consumers for the datas of such services.",
       "plan": "",
-      "context": ["src/renderer/services/liveDataService.ts", "src/live-data/liveDataManager.js"],
+      "context": [
+        "src/renderer/services/liveDataService.ts",
+        "src/live-data/liveDataManager.js"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "0638a729-4402-4823-9d04-90b92789e980",
@@ -115,9 +150,14 @@
       "title": "Create a future-proof, well architected and clean interface and setup for adding new live data services",
       "description": "Currently it's impossible to add a new live data service - it should be possible to do so, by specifying the url and the same update settings as now. The data should be stored in a easily retrievable place. If at any point any new service or view would like to read this data while the app is running - they should be able to.\nAn internal service like the pricing manager needs to be wired in code for it to work - clean up @src/live-data/liveDataManager.js to make it easy to add future live data providers and the services that consume them.",
       "plan": "",
-      "context": ["src/live-data/liveDataManager.js"],
+      "context": [
+        "src/live-data/liveDataManager.js"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "completedAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     },
     {
       "id": "f337aa98-ee80-45e9-bb7b-4df74595a342",
@@ -125,9 +165,13 @@
       "title": "Create a way of adding a live data provider",
       "description": "In @src/renderer/screens/LiveDataView.tsx there has to be a \"+\" button, that allows a user to add a live data provider that will be stored.",
       "plan": "",
-      "context": ["src/renderer/screens/LiveDataView.tsx"],
+      "context": [
+        "src/renderer/screens/LiveDataView.tsx"
+      ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.972Z",
+      "updatedAt": "2025-09-16T13:05:37.972Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -143,5 +187,8 @@
     "6199040d-7927-44fc-a1ad-71782484d82a": 10,
     "0638a729-4402-4823-9d04-90b92789e980": 11,
     "f337aa98-ee80-45e9-bb7b-4df74595a342": 12
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.972Z",
+  "completedAt": "2025-09-16T13:05:37.972Z",
+  "updatedAt": "2025-09-16T13:05:37.972Z"
 }

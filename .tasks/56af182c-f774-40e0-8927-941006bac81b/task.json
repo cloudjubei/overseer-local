@@ -11,7 +11,9 @@
       "description": "Implement an `AttachmentService` in the Electron main process. This service will handle file operations for attachments. It should expose methods via IPC to:\n1.  Accept a file path from the renderer.\n2.  Generate a unique ID for the file.\n3.  Copy the file to a dedicated project-specific directory (e.g., `.speccer/attachments`).\n4.  Return a reference (e.g., the unique ID or a content URI) to the newly stored file.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "361a8d89-363b-4a40-a88b-a390da74b5b1",
@@ -20,7 +22,9 @@
       "description": "Locate the TypeScript interfaces or types for Features and Chat Messages. Add a new optional field, `attachments: Attachment[]`, to both models. Define the `Attachment` type, which should include fields like `id`, `fileName`, `path`, and `mimeType`.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "a205c270-82a7-460f-8517-7d4f6d48c3eb",
@@ -29,7 +33,9 @@
       "description": "In the feature creation/editing component, add a new UI element (e.g., a button with a paperclip icon) that allows users to select files from their local system. When a file is selected, use the `AttachmentService` via IPC to store the file and update the feature's data model with the attachment reference.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "0fa06a0c-8608-4950-b33b-a772316f4de4",
@@ -38,7 +44,9 @@
       "description": "Create a new React component to display a list of attachments for a feature. For image files, it should render a thumbnail. For other file types, it should display a generic file icon and the filename. Clicking an attachment should open it using the system's default application.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "4709c57c-22d9-4321-8a68-3c8ea1ac0823",
@@ -47,7 +55,9 @@
       "description": "In the chat input component, add a button that allows users to select and attach files to their messages. The selected file should be processed by the `AttachmentService`, and the attachment reference should be included with the chat message data when it's sent.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "b11a84a8-6d7c-4ef4-9485-960d859d26b4",
@@ -56,7 +66,9 @@
       "description": "Modify the chat message component to display any attachments. Similar to feature attachments, it should show image thumbnails or file icons. The display should be integrated cleanly within the chat bubble UI.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -66,5 +78,7 @@
     "0fa06a0c-8608-4950-b33b-a772316f4de4": 4,
     "4709c57c-22d9-4321-8a68-3c8ea1ac0823": 5,
     "b11a84a8-6d7c-4ef4-9485-960d859d26b4": 6
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.978Z",
+  "updatedAt": "2025-09-16T13:05:37.978Z"
 }

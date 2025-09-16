@@ -11,7 +11,10 @@
       "description": "Create the Electron + React + TypeScript scaffolding so that dev work can begin",
       "plan": "Run `npx create-electron-app@latest overseer-local` inside the project root",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "d00b39cc-32dd-4694-942c-0bbd3bd606cd",
@@ -21,7 +24,12 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": ["f1f12817-8f44-4f92-9b2f-af5910289a13.aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7"]
+      "blockers": [
+        "f1f12817-8f44-4f92-9b2f-af5910289a13.aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7"
+      ],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     },
     {
       "id": "dcb2019c-6430-49bd-a2a5-f32d33ae52a0",
@@ -29,17 +37,27 @@
       "title": "@README.md",
       "description": "A @README.md file documenting information and steps to take for developers to launch the app.",
       "plan": "",
-      "context": ["src/", "README.md", "docs/FILE_ORGANISATION.md"],
+      "context": [
+        "src/",
+        "README.md",
+        "docs/FILE_ORGANISATION.md"
+      ],
       "acceptance": [],
       "blockers": [
         "f1f12817-8f44-4f92-9b2f-af5910289a13.aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7",
         "f1f12817-8f44-4f92-9b2f-af5910289a13.d00b39cc-32dd-4694-942c-0bbd3bd606cd"
-      ]
+      ],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-16T13:05:37.983Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
     }
   ],
   "featureIdToDisplayIndex": {
     "aa708fc0-b1d1-484c-a5e8-f04dcc4b9bb7": 0,
     "d00b39cc-32dd-4694-942c-0bbd3bd606cd": 1,
     "dcb2019c-6430-49bd-a2a5-f32d33ae52a0": 2
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.983Z",
+  "completedAt": "2025-09-16T13:05:37.983Z",
+  "updatedAt": "2025-09-16T13:05:37.983Z"
 }

@@ -4,5 +4,7 @@
   "title": "User generated custom views",
   "description": "The user might have agents create or themselves import custom views from external sources. There must be a standardised procedure and interface so such views could be used to display things inside projects. The use case is that a user will have a chat conversation with an LLM and ask it to display certain information using these new views - it must be possible to do that.",
   "features": [],
-  "featureIdToDisplayIndex": {}
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-16T13:05:37.983Z",
+  "updatedAt": "2025-09-16T13:05:37.983Z"
 }

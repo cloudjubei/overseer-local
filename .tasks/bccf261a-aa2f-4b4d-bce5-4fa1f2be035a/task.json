@@ -10,8 +10,14 @@
       "title": "Add dependency types and data structures",
       "description": "Extend the TypeScript types to support blockers between features and tasks. Add blocker arrays to Feature and Task types, and create supporting types for blocker references that can point to features or tasks across the entire project scope. Update the data structures to store and validate these cross-references.",
       "plan": "",
-      "context": ["/docs/tasks/task_format.py", "/src/types/tasks.ts"],
-      "acceptance": []
+      "context": [
+        "/docs/tasks/task_format.py",
+        "/src/types/tasks.ts"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "7e9dfa0f-d700-4c75-ba3f-1a54c2642c93",
@@ -24,7 +30,10 @@
         "/src/types/tasks.ts",
         "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "77cbec31-1f74-44b2-826d-2a98fae3f9ba",
@@ -37,7 +46,10 @@
         "/src/types/tasks.ts",
         "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "73caec53-eec1-4266-9ec9-54b83e43bd41",
@@ -52,7 +64,10 @@
         "src/renderer/tasks/FeatureEditView.tsx",
         "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "8db22861-ea13-4d23-b4a6-9990f9d5a565",
@@ -67,7 +82,10 @@
         "src/renderer/tasks/FeatureEditView.tsx",
         "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "82914e76-685b-4a71-94d5-b211123f0ef7",
@@ -80,7 +98,10 @@
         "src/renderer/tasks/TasksListView.tsx",
         "src/renderer/components/tasks/DependencyBullet.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "441fa016-262b-4bb5-93bb-3c7999868afc",
@@ -98,7 +119,10 @@
         "src/renderer/hooks/useTasksIndex.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "d2f19809-fd04-4d34-b136-85b2081b409d",
@@ -114,7 +138,10 @@
         "src/renderer/services/taskService.ts",
         "src/renderer/hooks/useTasksIndex.ts"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "fa2dd209-a2ab-47b6-bded-48ab0c1cb6ea",
@@ -134,7 +161,10 @@
         "src/main.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "041d42bb-0156-4e04-bc58-58c6b16bce9a",
@@ -149,7 +179,10 @@
         "src/renderer/hooks/useReferencesAutocomplete.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "ddfb39dd-d250-4fc8-ac53-c1534aa3b0b7",
@@ -163,7 +196,10 @@
         "src/renderer/components/FeatureForm.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     },
     {
       "id": "4131dd1a-3f9f-4ad1-95c8-02f7eea251f7",
@@ -178,7 +214,10 @@
         "src/styles/components/badges.css"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-16T13:05:37.981Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -194,5 +233,8 @@
     "041d42bb-0156-4e04-bc58-58c6b16bce9a": 9,
     "ddfb39dd-d250-4fc8-ac53-c1534aa3b0b7": 10,
     "4131dd1a-3f9f-4ad1-95c8-02f7eea251f7": 11
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.981Z",
+  "completedAt": "2025-09-16T13:05:37.981Z",
+  "updatedAt": "2025-09-16T13:05:37.981Z"
 }

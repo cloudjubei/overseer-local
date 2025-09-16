@@ -9,16 +9,27 @@
       "status": "+",
       "title": "Add thefactory-db initialization service in main process",
       "description": "Create @src/db/DatabaseManager.js to encapsulate initializing and managing a thefactory-db connection.\nProvide async close() methods. Export and wire it in @src/managers.js  (add dbManager export), instantiate before @src/factory-tools/FactoryToolsManager.js , call init() during startup, and close on app shutdown in stopManagers().",
-      "context": ["src/factory-tools/FactoryToolsManager.js", "src/managers.js"],
-      "blockers": []
+      "context": [
+        "src/factory-tools/FactoryToolsManager.js",
+        "src/managers.js"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "4de17e9f-a521-4bb0-8e4e-a82476c5ed35",
       "status": "+",
       "title": "Pass DB connection to thefactory-tools orchestrator",
       "description": "Update @src/factory-tools/FactoryToolsManager.js s to accept a db connection/info. Modify constructor to receive the DatabaseManager (or its connection parameters) from initManagers. When calling createOrchestrator from thefactory-tools, include a new option db (or dbConfig) per the updated thefactory-tools API. If the API expects env vars, set them before initializing the orchestrator. Ensure search_files tool used by the orchestrator can leverage the same DB instance.",
-      "context": ["src/factory-tools/FactoryToolsManager.js"],
-      "blockers": []
+      "context": [
+        "src/factory-tools/FactoryToolsManager.js"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356",
@@ -32,15 +43,24 @@
         "src/renderer/services/documentIngestionService.ts",
         "src/document_ingestion/DocumentIngestionManager.js"
       ],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "a47c5301-d7b0-4b61-af16-722819909733",
       "status": "+",
       "title": "Hook file watcher events to update thefactory-db",
       "description": "Extend @src/files/FilesStorage.js  to emit file change events via an event emitter or callbacks (add onChange hook). In \n@src/files/FilesManager.js '__getStorage' pass handlers from DocumentIngestionService so that on 'add', 'change', 'unlink', 'rename' the corresponding handleFileAdded/Changed/Deleted is called, updating the 'documents' table accordingly. Ensure ignore patterns match FilesStorage. For rename, implement a two-step (delete old + add new) or dedicated move update if thefactory-db supports it.",
-      "context": ["src/files/FilesStorage.js", "src/files/FilesManager.js"],
-      "blockers": []
+      "context": [
+        "src/files/FilesStorage.js",
+        "src/files/FilesManager.js"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "d744a0cb-1b0b-4669-a692-7a9751e2eb9e",
@@ -48,15 +68,24 @@
       "title": "Define document typing and code file detection utility",
       "description": "Add @src/db/fileTyping.js with helpers: isCodeFile(ext, relPath) returning true for typical code/config/docs; classifyDocumentType(relPath) returning 'project_code' or 'project_file'. Use a central list of extensions and allow future configuration via settings. Reuse in DocumentIngestionService.",
       "context": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "d172d15d-98ca-434e-8fc7-4ea476821f51",
       "status": "+",
       "title": "Expose minimal DB config to renderer and settings",
       "description": "Add optional app settings (in @src/settings/SettingsManager.js  schema if present) to configure DB location or connection string. Expose methods over IPC to read current DB status and last sync time. Update preload to include a dbService with getStatus() and onStatus(callback) if needed by the @src/renderer/screens/LoadingScreen.tsx .",
-      "context": ["src/settings/SettingsManager.js", "src/renderer/screens/LoadingScreen.tsx"],
-      "blockers": []
+      "context": [
+        "src/settings/SettingsManager.js",
+        "src/renderer/screens/LoadingScreen.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "3535faff-05d1-4ae0-9b32-7192685536da",
@@ -67,7 +96,10 @@
         "src/db/DatabaseManager.js",
         "src/document_ingestion/DocumentIngestionManager.js"
       ],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "6d115a0f-2c64-4e6a-bbbc-51ef9a2eed84",
@@ -81,7 +113,10 @@
         "src/settings/appSettings.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "b3a6c9fb-f1d0-47b1-bbea-08ebeb14edd5",
@@ -94,7 +129,10 @@
         "src/renderer/services/documentIngestionService.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "d2fd11e1-2ebc-46e5-9be1-553a51c1d0e0",
@@ -107,7 +145,10 @@
         "src/renderer/services/documentIngestionService.ts"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     },
     {
       "id": "fc82da3e-6f8c-4c9a-81b0-ef961e45bf31",
@@ -120,7 +161,10 @@
         "src/db/DatabaseManager.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "completedAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T13:05:37.982Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -135,5 +179,8 @@
     "e8eb3ac3-1b01-4ffd-80ce-6b40efdb0356": 9,
     "3535faff-05d1-4ae0-9b32-7192685536da": 10,
     "fc82da3e-6f8c-4c9a-81b0-ef961e45bf31": 11
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.982Z",
+  "completedAt": "2025-09-16T13:05:37.982Z",
+  "updatedAt": "2025-09-16T13:05:37.982Z"
 }

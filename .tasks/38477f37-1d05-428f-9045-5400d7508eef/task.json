@@ -11,7 +11,10 @@
       "description": "Modify the main application layout in src/renderer/ to include a sidebar component. The sidebar should display links for 'Home' (linking to the Tasks view from task 2) and 'Docs' (linking to the new Docs browser view). Use React state management or simple routing to switch between views when a link is clicked. Ensure the sidebar is always visible and styled consistently with the app.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "69146d70-0cfa-43bf-b28b-11f35ba1db84",
@@ -19,8 +22,14 @@
       "title": "Implement DocsIndexer for scanning markdown files",
       "description": "Create a DocsIndexer class in @src/docs/indexer.js, similar to TaskIndexer (in @src/tasks/indexer.js). It should scan the docs/ directory (and subdirectories) under the projectRoot for .md files, build an in-memory index (e.g., a tree structure with paths and metadata). Include methods to get the index snapshot, initialize scanning, and watch for file changes to refresh the index.",
       "plan": "",
-      "context": ["src/docs/indexer.js", "src/tasks/indexer.js"],
-      "acceptance": []
+      "context": [
+        "src/docs/indexer.js",
+        "src/tasks/indexer.js"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "a3883c9e-b7c6-43d8-8b19-869cb52f388e",
@@ -29,7 +38,10 @@
       "description": "In the Electron main process, instantiate DocsIndexer and expose IPC channels: 'docs-index:get' to retrieve the index snapshot, 'docs-index:update' for event-based updates on changes, and 'docs-file:get' to read and return the content of a specific .md file by relative path. In @preload.js, expose corresponding methods on window.docsIndex for renderer access.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "d4765260-4872-4def-a1f8-e7fe61929dcc",
@@ -37,7 +49,10 @@
       "title": "Create Docs browser view component with file listing",
       "description": "Create a React component that fetches the docs index via IPC, renders a tree or collapsible list of markdown files and directories under docs/. Handle selection of a file to display its content (to be rendered in later features). Subscribe to index updates for real-time refreshes and handle empty states or errors.",
       "plan": "",
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "c172a9c9-58ea-46c4-a880-95cc58ab1941",
@@ -51,7 +66,10 @@
         "src/renderer/components/MarkdownRenderer.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "4152e447-4fe4-48e2-9360-3760a4c57cba",
@@ -60,7 +78,10 @@
       "description": "Enhance the Markdown rendering to include safe HTML sanitization using a library like dompurify. Sanitize the generated HTML before rendering to prevent XSS vulnerabilities, ensuring only safe tags and attributes are allowed while preserving the formatting from Markdown extensions.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "c6e1a5ab-3f2d-493d-b57d-26a544fed0a5",
@@ -69,7 +90,10 @@
       "description": "In the rendered Markdown content, intercept clicks on internal links (relative paths to other .md files or anchors within the same file). For relative .md links, navigate to the corresponding file in the Docs browser view by updating the selection. Handle anchor links (#fragment) by scrolling to the section within the current rendered content.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
       "id": "42afe580-cad3-4a43-936e-43eeb89cea17",
@@ -78,7 +102,10 @@
       "description": "When clicking edit in a viewer, the user can go to a Markdown editor where they can change the text in a WYSIWYG style and save it.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-16T13:05:37.976Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -90,5 +117,8 @@
     "4152e447-4fe4-48e2-9360-3760a4c57cba": 5,
     "c6e1a5ab-3f2d-493d-b57d-26a544fed0a5": 6,
     "42afe580-cad3-4a43-936e-43eeb89cea17": 7
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.976Z",
+  "completedAt": "2025-09-16T13:05:37.976Z",
+  "updatedAt": "2025-09-16T13:05:37.976Z"
 }

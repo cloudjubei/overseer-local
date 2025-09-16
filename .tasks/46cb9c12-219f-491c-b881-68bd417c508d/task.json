@@ -19,7 +19,10 @@
         "src/managers.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.977Z",
+      "completedAt": "2025-09-16T13:05:37.977Z",
+      "updatedAt": "2025-09-16T13:05:37.977Z"
     },
     {
       "id": "632d7c0e-6caa-4f11-85a1-73cc4ad378bd",
@@ -33,7 +36,10 @@
         "src/renderer/tasks/BoardView.tsx"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.977Z",
+      "completedAt": "2025-09-16T13:05:37.977Z",
+      "updatedAt": "2025-09-16T13:05:37.977Z"
     },
     {
       "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
@@ -48,7 +54,10 @@
         "src/settings/appSettings.js"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.977Z",
+      "completedAt": "2025-09-16T13:05:37.977Z",
+      "updatedAt": "2025-09-16T13:05:37.977Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -56,5 +65,8 @@
     "d877642c-9e5d-44ca-b100-dbe5a7ad119c": 2,
     "632d7c0e-6caa-4f11-85a1-73cc4ad378bd": 3,
     "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1": 4
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.977Z",
+  "completedAt": "2025-09-16T13:05:37.977Z",
+  "updatedAt": "2025-09-16T13:05:37.977Z"
 }

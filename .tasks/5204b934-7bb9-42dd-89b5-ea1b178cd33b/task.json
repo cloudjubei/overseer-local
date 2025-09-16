@@ -11,7 +11,10 @@
       "description": "Define TypeScript types for notifications in src/types/, create a notifications service in src/renderer/services/ that handles storing, retrieving, and managing notification data. Include notification structure with id, timestamp, type/category, title, message, read status, and metadata. Implement basic CRUD operations and persistence.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "af3ee2b4-3e30-4400-a5e5-f2fa21f86369",
@@ -20,7 +23,10 @@
       "description": "Create a NotificationsView component in src/renderer/screens/ that displays a list of recent notifications. Include notification items with timestamps, icons, titles, descriptions, and read/unread states. Add mark as read functionality, clear all notifications, and basic styling consistent with the app's design system.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "cafd3b45-6b89-44a6-80dd-427d33cc4c7c",
@@ -30,7 +36,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "324f16b0-68bb-4ee7-b15a-f2cbf7623a9b",
@@ -50,7 +59,10 @@
         "docs/STANDARDS.md"
       ],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
       "id": "e5e46ae9-7d25-42ae-967f-028d6e70b5b0",
@@ -59,7 +71,10 @@
       "description": "Add notifications panel access to the sidebar or main navigation. Include a notifications icon/button with unread count badge. Integrate with the existing Navigator system for modal/screen navigation. Add keyboard shortcuts and ensure the notifications center follows the app's navigation patterns defined in STANDARDS.md.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-16T13:05:37.978Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -68,5 +83,8 @@
     "cafd3b45-6b89-44a6-80dd-427d33cc4c7c": 2,
     "324f16b0-68bb-4ee7-b15a-f2cbf7623a9b": 3,
     "e5e46ae9-7d25-42ae-967f-028d6e70b5b0": 4
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.978Z",
+  "completedAt": "2025-09-16T13:05:37.978Z",
+  "updatedAt": "2025-09-16T13:05:37.978Z"
 }

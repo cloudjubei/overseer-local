@@ -10,8 +10,13 @@
       "title": "Add Chat route and basic UI skeleton",
       "description": "Update the renderer (e.g., main @app.js or @index.js) to handle window.location.hash === '#chat' by rendering a new ChatView component (in src/renderer/chatView.js). The ChatView should include a header 'Project Chat', a div for message list, a textarea for input, and a send button. Ensure consistent styling and navigation with existing views like tasksListView and docsBrowserView. Add a link or tab in the main UI to navigate to #chat.",
       "plan": "",
-      "context": ["src/renderer/screens/ChatView.tsx"],
-      "acceptance": []
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "fdd45a08-3010-4b1a-8457-f1bc52bb4319",
@@ -19,8 +24,13 @@
       "title": "Manage chat state and render messages",
       "description": "In ChatView, use React state (or equivalent) for a messages array of objects {role: 'user'|'assistant', content: string}. Render the messages in the message div, with user messages on the right, assistant on the left, styled as chat bubbles. Handle empty state with a message like 'Start chatting about the project'.",
       "plan": "",
-      "context": ["src/renderer/screens/ChatView.tsx"],
-      "acceptance": []
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "874d74fe-a402-4ca4-8a73-b6fb9ea849d9",
@@ -29,7 +39,10 @@
       "description": "In ChatView, add event handler for send button click or Enter key in textarea. Get input value, append {role: 'user', content} to messages state, clear input, then append a dummy {role: 'assistant', content: 'Echo: ' + content} to simulate response. Scroll to bottom after updates.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "a56509a7-ba64-49fd-99f5-022a9f6ceef5",
@@ -44,7 +57,10 @@
         "src/tasks/indexer.js",
         "src/renderer/screens/ChatView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "77bdff96-024d-41e9-97a9-479588e9aedc",
@@ -59,7 +75,10 @@
         "src/tasks/indexer.js",
         "src/renderer/screens/ChatView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "c127465a-2a0f-4a61-86fc-3c699103a7ae",
@@ -67,8 +86,15 @@
       "title": "Integrate basic LLM call in ChatView",
       "description": "Update send handler in ChatView: Allow a user to send a message. Show loading indicator while waiting. Handle errors with a message.",
       "plan": "",
-      "context": ["src/main.js", "src/preload.js", "src/renderer/screens/ChatView.tsx"],
-      "acceptance": []
+      "context": [
+        "src/main.js",
+        "src/preload.js",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "1f09ca05-7dba-441b-a720-06f35478c1c8",
@@ -77,7 +103,10 @@
       "description": "Update 'chat:completion' handler to support tools. Define an empty tools array for now. In the handler, implement a loop: call completions.create with tools, if response has tool_calls, execute each (call function and get result), append {role: 'tool', content: result, tool_call_id} to messages, repeat until no tool_calls, then return the final content message.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "b164f116-bb80-46a3-be0e-008e6204ad8c",
@@ -86,7 +115,10 @@
       "description": "In the tools array of the completion handler, add: 1. list_tasks (no params, returns JSON.stringify(taskIndexer.getIndex().tasksById)), 2. list_docs (no params, returns JSON.stringify(docsIndexer.getIndex().docsTree)), 3. read_doc (param: path, returns fs.readFileSync(docsIndexer.getIndex().docsDir + '/' + path, 'utf8') or error). Update system prompt: 'Use tools to query project info. If user mentions @path, use read_doc.'",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "e5d333bf-5051-46b3-a52b-8599733720c2",
@@ -95,7 +127,10 @@
       "description": "Add to tools: create_doc (params: name, content)",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "3b4b4a78-0904-4dde-90bc-c9be16ae80b9",
@@ -104,7 +139,10 @@
       "description": "In ChatView input textarea, detect typing starting with '@', show a dropdown autocomplete list of matching paths from docsIndex. On select, insert the full '@path' into the input. Subscribe to docs updates to refresh list.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "12de1129-006b-440c-a178-a2672f67e5ce",
@@ -113,7 +151,10 @@
       "description": "In ChatView, add an attach button next to input, with hidden file input.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "37558f81-cc33-4249-9423-91e55ca6ff41",
@@ -122,7 +163,10 @@
       "description": "After successful upload via IPC, append a user message to state: 'Uploaded document to @' + returnedPath. This allows mentioning it immediately and triggers LLM awareness via tools.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "f5adab71-5f64-4303-8c57-b4f78760d867",
@@ -131,7 +175,10 @@
       "description": "",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "7951b9cf-c483-4a02-9717-ca3742d62b00",
@@ -140,7 +187,10 @@
       "description": "",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "9fa712c1-649f-433a-a5f5-bfa482e3b6db",
@@ -149,7 +199,10 @@
       "description": "Design an abstraction for chat providers. Implement connectors for: (1) LiteLLM-compatible HTTP endpoint, (2) OpenAI-compatible custom base URL to support LM Studio / Ollama. Configurable API key, base URL, model name, timeouts.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "14edaedd-8dfe-4047-965a-3130ec458140",
@@ -159,7 +212,10 @@
       "plan": "",
       "context": [],
       "acceptance": [],
-      "blockers": []
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "c3b28472-ea04-4b83-8048-3e389cbe8f12",
@@ -168,7 +224,10 @@
       "description": "User can switch between different models that were configured directly in the chat. There's a dropdown with all the options that were previously configured and the user can choose which chat to use. If there was a switch in a conversation it is shown which LLM replied.",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "0dfdfd09-d878-4eb9-a5af-b8ca5326bd08",
@@ -177,7 +236,10 @@
       "description": "Allow using LM Studio's API server that lists models at http://localhost:1234/v1/models - there should be a check to see that it's running and then all the available models can be listed. To post messages to: http://localhost:1234/v1/chat/completions",
       "plan": "",
       "context": [],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "1612a80e-2948-477e-8bf4-dc7ffa5bbc36",
@@ -191,7 +253,10 @@
         "src/renderer/screens/TasksView.tsx",
         "src/renderer/tasks/TaskDetailsView.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     },
     {
       "id": "815c3f72-9c23-44e8-b8f3-0dea0e869fe0",
@@ -205,7 +270,10 @@
         "src/renderer/navigation/ModalHost.tsx",
         "src/renderer/navigation/Navigator.tsx"
       ],
-      "acceptance": []
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.979Z",
+      "completedAt": "2025-09-16T13:05:37.979Z",
+      "updatedAt": "2025-09-16T13:05:37.979Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -229,5 +297,8 @@
     "0dfdfd09-d878-4eb9-a5af-b8ca5326bd08": 17,
     "1612a80e-2948-477e-8bf4-dc7ffa5bbc36": 18,
     "815c3f72-9c23-44e8-b8f3-0dea0e869fe0": 19
-  }
+  },
+  "createdAt": "2025-09-16T13:05:37.979Z",
+  "completedAt": "2025-09-16T13:05:37.979Z",
+  "updatedAt": "2025-09-16T13:05:37.979Z"
 }
