@@ -61,6 +61,23 @@
       "createdAt": "2025-09-16T16:01:19.427Z",
       "updatedAt": "2025-09-16T16:04:44.133Z",
       "completedAt": "2025-09-16T16:04:44.133Z"
+    },
+    {
+      "id": "0619e80f-d523-4842-810b-ba5be81fcbe6",
+      "status": "-",
+      "title": "ProjectTimelineView needs a design update",
+      "description": "The @src/renderer/screens/ProjectTimelineView.tsx doesn't look great.\nTake inspiration from Notion's Timeline view as explained here:\nhttps://www.notion.com/help/guides/timeline-view-unlocks-high-output-planning-for-your-team\nAs well as Airtable's :\nhttps://blog.airtable.com/introducing-airtables-new-timeline-view/\n\nThese are two standard looking Timeline views that we want to emulate here.\nMak sure you maintain our design principles and colors as defined in @docs/design/MONDAY_PALETTE_REFERENCE.md , @docs/design/DESIGN_TOKENS.md , @docs/design/DESIGN_SYSTEM.md , @docs/design/COMPONENTS.md , @docs/ux/LINEAR_UX_GUIDELINES.md",
+      "context": [
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/COMPONENTS.md",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:18:10.138Z",
+      "updatedAt": "2025-09-16T16:18:10.138Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -68,8 +85,9 @@
     "1760db6f-b604-4835-af0d-c5fa83630a4c": 2,
     "db5e244f-b362-438d-9912-4577fa507ef3": 3,
     "b9d641d0-1306-412f-ab7a-60b120cb29ba": 4,
-    "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 5
+    "0619e80f-d523-4842-810b-ba5be81fcbe6": 5,
+    "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 6
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T16:04:44.134Z"
+  "updatedAt": "2025-09-16T16:18:11.491Z"
 }
