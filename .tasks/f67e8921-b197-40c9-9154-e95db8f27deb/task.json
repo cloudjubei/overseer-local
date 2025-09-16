@@ -1148,7 +1148,7 @@
     },
     {
       "id": "32ec2d90-3244-40a0-a74b-d120f6d512e0",
-      "status": "-",
+      "status": "+",
       "title": "ProjectsModal must match icon style of new icons",
       "description": "The icons for projects inside @src/projects/ProjectsManager.ts that are set per project must match the new icons in @src/renderer/components/ui/Icons.tsx that are used in @src/renderer/navigation/SidebarView.tsx",
       "plan": "",

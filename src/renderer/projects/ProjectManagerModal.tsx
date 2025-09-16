@@ -3,7 +3,7 @@ import { Modal } from '../components/ui/Modal'
 import { projectsService } from '../services/projectsService'
 import { validateProjectClient } from './validateProject'
 import { useProjectContext } from '../contexts/ProjectContext'
-import { IconDelete, IconEdit, IconPlay, IconPlus } from '../components/ui/Icons'
+import { IconDelete, IconEdit, IconPlus, IconFolder, IconCollection, IconWorkspace } from '../components/ui/Icons'
 import { Button } from '../components/ui/Button'
 import { PROJECT_ICONS } from './projectIcons'
 
@@ -40,6 +40,18 @@ function TextArea({ label, value, onChange, placeholder }: any) {
   )
 }
 
+function renderProjectIcon(key?: string, className?: string) {
+  switch (key) {
+    case 'collection':
+      return <IconCollection className={className} />
+    case 'workspace':
+      return <IconWorkspace className={className} />
+    case 'folder':
+    default:
+      return <IconFolder className={className} />
+  }
+}
+
 function IconPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
   return (
     <div className="form-row">
@@ -73,10 +85,10 @@ function IconPicker({ value, onChange }: { value?: string; onChange: (v: string)
                   ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)'
                   : 'var(--surface-raised)',
                 cursor: 'pointer',
-                fontSize: 18,
+                padding: 4,
               }}
             >
-              <span aria-hidden>{opt.value}</span>
+              <span aria-hidden>{renderProjectIcon(opt.value)}</span>
             </button>
           )
         })}
@@ -107,7 +119,7 @@ export default function ProjectManagerModal({
     path: '',
     repo_url: '',
     requirements: [],
-    metadata: { icon: '📁' },
+    metadata: { icon: 'folder' },
   })
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
@@ -123,10 +135,15 @@ export default function ProjectManagerModal({
       const id = (initialProjectId || editingId) as string
       const p: any = getProjectById(id)
       if (p) {
+        const existingIcon = p.metadata?.icon
+        // migrate old emoji values to new keys (fallback to folder)
+        const normalizedIcon = ['folder', 'collection', 'workspace'].includes(existingIcon)
+          ? existingIcon
+          : 'folder'
         setForm({
           ...p,
           requirements: Array.isArray(p.requirements) ? p.requirements : [],
-          metadata: { ...(p.metadata ?? {}), icon: p.metadata?.icon || '📁' },
+          metadata: { ...(p.metadata ?? {}), icon: normalizedIcon },
         })
         setEditingId(id)
         setMode('edit')
@@ -145,7 +162,7 @@ export default function ProjectManagerModal({
       path: '',
       repo_url: '',
       requirements: [],
-      metadata: { icon: '📁' },
+      metadata: { icon: 'folder' },
     })
     setFormErrors([])
     setSaving(false)
@@ -158,10 +175,14 @@ export default function ProjectManagerModal({
   }
 
   function startEdit(p: any) {
+    const existingIcon = p.metadata?.icon
+    const normalizedIcon = ['folder', 'collection', 'workspace'].includes(existingIcon)
+      ? existingIcon
+      : 'folder'
     setForm({
       ...p,
       requirements: Array.isArray(p.requirements) ? p.requirements : [],
-      metadata: { ...(p.metadata ?? {}), icon: p.metadata?.icon || '📁' },
+      metadata: { ...(p.metadata ?? {}), icon: normalizedIcon },
     })
     setEditingId(p.id)
     setMode('edit')
@@ -248,8 +269,8 @@ export default function ProjectManagerModal({
                   }}
                 >
                   <div className="flex" style={{ alignItems: 'center', gap: 8 }}>
-                    <div style={{ fontSize: 18 }} aria-hidden>
-                      {p.metadata?.icon || '📁'}
+                    <div aria-hidden>
+                      {renderProjectIcon(p.metadata?.icon)}
                     </div>
                     <div>
                       <div style={{ fontWeight: 600 }}>{p.title}</div>
