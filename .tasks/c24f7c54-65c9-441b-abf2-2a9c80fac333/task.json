@@ -36,7 +36,7 @@
     },
     {
       "id": "db5e244f-b362-438d-9912-4577fa507ef3",
-      "status": "-",
+      "status": "+",
       "title": "Add TimeLineView to the sidebar",
       "description": "@src/renderer/screens/ProjectTimelineView.tsx should be added to the @src/renderer/navigation/SidebarView.tsx between LiveData and Notifications.",
       "context": [
@@ -45,7 +45,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T15:44:40.413Z",
-      "updatedAt": "2025-09-16T15:44:40.413Z"
+      "updatedAt": "2025-09-16T15:47:52.270Z",
+      "completedAt": "2025-09-16T15:47:52.270Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -55,5 +56,5 @@
     "1bdd0798-1a1d-4e77-ac25-ecc6c4d202f6": 4
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
-  "updatedAt": "2025-09-16T15:44:42.196Z"
+  "updatedAt": "2025-09-16T15:47:52.270Z"
 }
