@@ -220,6 +220,8 @@ export default function ProjectManagerModal({
     setMode('list')
   }
 
+  const formId = 'project-manager-form'
+
   return (
     <Modal
       title="Manage Projects"
@@ -227,6 +229,18 @@ export default function ProjectManagerModal({
       isOpen={true}
       size="lg"
       initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+      footer={
+        (mode === 'create' || mode === 'edit') ? (
+          <div className="flex justify-end gap-2">
+            <button type="button" className="btn-secondary" onClick={() => setMode('list')}>
+              Cancel
+            </button>
+            <button type="submit" className="btn" form={formId} disabled={saving}>
+              {mode === 'create' ? 'Create' : 'Save'}
+            </button>
+          </div>
+        ) : null
+      }
     >
       {error && (
         <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
@@ -286,7 +300,7 @@ export default function ProjectManagerModal({
       )}
 
       {(mode === 'create' || mode === 'edit') && (
-        <form className="task-form" onSubmit={handleSubmit}>
+        <form id={formId} className="task-form" onSubmit={handleSubmit}>
           {formErrors.length > 0 && (
             <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
               {formErrors.map((e, i) => (
@@ -329,14 +343,6 @@ export default function ProjectManagerModal({
             value={form.metadata.icon}
             onChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, icon: v } }))}
           />
-          <div className="form-actions">
-            <button type="button" className="btn-secondary" onClick={() => setMode('list')}>
-              Cancel
-            </button>
-            <button type="submit" className="btn" disabled={saving}>
-              {mode === 'create' ? 'Create' : 'Save'}
-            </button>
-          </div>
         </form>
       )}
     </Modal>
