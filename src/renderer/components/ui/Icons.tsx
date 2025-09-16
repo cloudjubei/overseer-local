@@ -30,7 +30,11 @@ export function IconEdit({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M12 20h9" stroke="#93C5FD" strokeWidth="2" />
-      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="#A855F7" strokeWidth="2" />
+      <path
+        d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+        stroke="#A855F7"
+        strokeWidth="2"
+      />
     </svg>
   )
 }
@@ -306,7 +310,12 @@ export function IconThumbUp({
       aria-hidden="true"
       className={className}
     >
-      <path d="M14 9V5a3 3 0 0 0-3-3l-1 5-4 5v8h9a3 3 0 0 0 3-3v-6a2 2 0 0 0-2-2h-2z" stroke="#10B981" strokeWidth="2" fill={filled ? '#10B981' : 'none'} />
+      <path
+        d="M14 9V5a3 3 0 0 0-3-3l-1 5-4 5v8h9a3 3 0 0 0 3-3v-6a2 2 0 0 0-2-2h-2z"
+        stroke="#10B981"
+        strokeWidth="2"
+        fill={filled ? '#10B981' : 'none'}
+      />
       <path d="M7 21H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
@@ -330,7 +339,12 @@ export function IconThumbDown({
       aria-hidden="true"
       className={className}
     >
-      <path d="M10 15v4a3 3 0 0 0 3 3l1-5 4-5V4H9A3 3 0 0 0 6 7v6a2 2 0 0 0 2 2h2z" stroke="#EF4444" strokeWidth="2" fill={filled ? '#EF4444' : 'none'} />
+      <path
+        d="M10 15v4a3 3 0 0 0 3 3l1-5 4-5V4H9A3 3 0 0 0 6 7v6a2 2 0 0 0 2 2h2z"
+        stroke="#EF4444"
+        strokeWidth="2"
+        fill={filled ? '#EF4444' : 'none'}
+      />
       <path d="M17 3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" stroke="#3B82F6" strokeWidth="2" />
     </svg>
   )
@@ -423,6 +437,23 @@ export function IconRobot({ className }: { className?: string }) {
   )
 }
 
+export function IconTimeline({ className }: { className?: string }) {
+  //TODO: fix
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="7" r="2" stroke="#F59E0B" strokeWidth="2" />
+    </svg>
+  )
+}
 export function IconAntenna({ className }: { className?: string }) {
   return (
     <svg
@@ -637,7 +668,11 @@ export function IconWrench({
       aria-hidden="true"
       className={className}
     >
-      <path d="M21 3a7 7 0 0 1-9.9 9.9L7 17l-3 3 3-7 4.1-4.1A7 7 0 0 1 21 3z" stroke="#EF4444" strokeWidth="2" />
+      <path
+        d="M21 3a7 7 0 0 1-9.9 9.9L7 17l-3 3 3-7 4.1-4.1A7 7 0 0 1 21 3z"
+        stroke="#EF4444"
+        strokeWidth="2"
+      />
       <circle cx="7" cy="17" r="0.5" fill="#A855F7" stroke="#A855F7" />
     </svg>
   )
@@ -788,7 +823,11 @@ export function IconDocument({
       aria-hidden="true"
       className={className}
     >
-      <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" stroke="#93C5FD" strokeWidth="2" />
+      <path
+        d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"
+        stroke="#93C5FD"
+        strokeWidth="2"
+      />
       <path d="M14 2v6h6" stroke="#3B82F6" strokeWidth="2" />
       <path d="M9 13h6" stroke="#22D3EE" strokeWidth="2" />
       <path d="M9 17h6" stroke="#22D3EE" strokeWidth="2" />
@@ -944,7 +983,11 @@ export function IconLightbulb({
     >
       <path d="M9 18h6" stroke="#FB923C" strokeWidth="2" />
       <path d="M10 22h4" stroke="#FB923C" strokeWidth="2" />
-      <path d="M12 2a7 7 0 0 0-4 13c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-13z" stroke="#F59E0B" strokeWidth="2" />
+      <path
+        d="M12 2a7 7 0 0 0-4 13c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-13z"
+        stroke="#F59E0B"
+        strokeWidth="2"
+      />
     </svg>
   )
 }
@@ -1036,7 +1079,11 @@ export function IconPuzzle({
       aria-hidden="true"
       className={className}
     >
-      <path d="M10 3h4a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v4h-3a2 2 0 0 0-2 2v3h-4a2 2 0 0 1-2-2v-3H5a2 2 0 0 1-2-2v-4h3a2 2 0 0 0 2-2z" stroke="#6366F1" strokeWidth="2" />
+      <path
+        d="M10 3h4a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v4h-3a2 2 0 0 0-2 2v3h-4a2 2 0 0 1-2-2v-3H5a2 2 0 0 1-2-2v-4h3a2 2 0 0 0 2-2z"
+        stroke="#6366F1"
+        strokeWidth="2"
+      />
       <path d="M12 6a2 2 0 1 0 0 4" stroke="#22D3EE" strokeWidth="2" />
     </svg>
   )
@@ -1115,7 +1162,6 @@ export function IconClamp({ className, filled = false }: { className?: string; f
   )
 }
 
-// Added: Palette (Visual settings)
 export function IconPalette({ className }: { className?: string }) {
   return (
     <svg
@@ -1128,7 +1174,11 @@ export function IconPalette({ className }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M12 3a9 9 0 1 0 0 18h2a3 3 0 0 0 0-6h-1a2 2 0 0 1-2-2v-1a9 9 0 0 0 1-9z" stroke="#A855F7" strokeWidth="2" />
+      <path
+        d="M12 3a9 9 0 1 0 0 18h2a3 3 0 0 0 0-6h-1a2 2 0 0 1-2-2v-1a9 9 0 0 0 1-9z"
+        stroke="#A855F7"
+        strokeWidth="2"
+      />
       <circle cx="7.5" cy="10" r="1.2" fill="#F59E0B" />
       <circle cx="9.5" cy="6.5" r="1.2" fill="#22D3EE" />
       <circle cx="12.5" cy="5.5" r="1.2" fill="#3B82F6" />
@@ -1148,12 +1198,15 @@ export function IconGitHub({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <path fillRule="evenodd" clipRule="evenodd" d="M12 .5C5.73.5.98 5.24.98 11.5c0 4.85 3.15 8.96 7.51 10.41.55.1.76-.24.76-.54 0-.27-.01-1.16-.02-2.11-3.06.66-3.71-1.3-3.71-1.3-.5-1.26-1.22-1.6-1.22-1.6-1-.68.08-.67.08-.67 1.12.08 1.71 1.15 1.71 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.71-1.49-2.44-.28-5-1.22-5-5.42 0-1.2.43-2.18 1.14-2.95-.11-.28-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.13.89-.25 1.85-.37 2.8-.38.95.01 1.91.13 2.8.38 2.14-1.43 3.07-1.13 3.07-1.13.61 1.54.22 2.68.11 2.96.71.77 1.14 1.75 1.14 2.95 0 4.21-2.56 5.13-5.01 5.4.4.35.76 1.04.76 2.11 0 1.52-.01 2.74-.01 3.12 0 .3.2.65.76.54 4.36-1.45 7.51-5.56 7.51-10.41C23.02 5.24 18.27.5 12 .5z" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 .5C5.73.5.98 5.24.98 11.5c0 4.85 3.15 8.96 7.51 10.41.55.1.76-.24.76-.54 0-.27-.01-1.16-.02-2.11-3.06.66-3.71-1.3-3.71-1.3-.5-1.26-1.22-1.6-1.22-1.6-1-.68.08-.67.08-.67 1.12.08 1.71 1.15 1.71 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.71-1.49-2.44-.28-5-1.22-5-5.42 0-1.2.43-2.18 1.14-2.95-.11-.28-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.13.89-.25 1.85-.37 2.8-.38.95.01 1.91.13 2.8.38 2.14-1.43 3.07-1.13 3.07-1.13.61 1.54.22 2.68.11 2.96.71.77 1.14 1.75 1.14 2.95 0 4.21-2.56 5.13-5.01 5.4.4.35.76 1.04.76 2.11 0 1.52-.01 2.74-.01 3.12 0 .3.2.65.76.54 4.36-1.45 7.51-5.56 7.51-10.41C23.02 5.24 18.27.5 12 .5z"
+      />
     </svg>
   )
 }
 
-// Added: Database/storage icon
 export function IconDatabase({ className }: { className?: string }) {
   return (
     <svg

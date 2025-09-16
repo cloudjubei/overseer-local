@@ -47,6 +47,8 @@ import {
   IconArchive,
   IconBricks,
   IconClamp,
+  IconDatabase,
+  IconPalette,
 } from '../components/ui/Icons'
 
 export type ProjectIcon = {
@@ -109,6 +111,8 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: 'archive', label: 'Archive' },
   { value: 'foundation', label: 'Foundation' },
   { value: 'compression', label: 'Compression' },
+  { value: 'database', label: 'Database' },
+  { value: 'palette', label: 'Palette' },
 ]
 
 export function renderProjectIcon(key?: string, className?: string) {
@@ -207,6 +211,10 @@ export function renderProjectIcon(key?: string, className?: string) {
       return <IconBricks className={className} />
     case 'compression':
       return <IconClamp className={className} />
+    case 'database':
+      return <IconDatabase className={className} />
+    case 'palette':
+      return <IconPalette className={className} />
     case 'folder':
     default:
       return <IconFolder className={className} />

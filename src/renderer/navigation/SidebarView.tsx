@@ -74,7 +74,7 @@ const NAV_ITEMS: NavDef[] = [
     accent: 'brand',
   },
   {
-    id: 'timeline',
+    id: 'project-timeline',
     label: 'Timeline',
     view: 'ProjectTimeline',
     icon: <IconTimeline />,

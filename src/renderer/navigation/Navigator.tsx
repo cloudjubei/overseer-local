@@ -51,6 +51,8 @@ function viewPrefixToView(prefix: string): NavigationView {
       return 'AllAgents'
     case 'live-data':
       return 'LiveData'
+    case 'project-timeline':
+      return 'ProjectTimeline'
     case 'home':
     default:
       return 'Home'
@@ -134,6 +136,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break
       case 'LiveData':
         window.location.hash = '#live-data'
+        break
+      case 'ProjectTimeline':
+        window.location.hash = '#project-timeline'
         break
     }
   }, [])
