@@ -1593,7 +1593,7 @@
     },
     {
       "id": "b7716b85-8e3d-4a91-9729-4fca7aab51e9",
-      "status": "-",
+      "status": "+",
       "title": "Update icons in FilesView",
       "description": "The inner sidebar in @src/renderer/screens/FilesView.tsx  need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx   . If an icon doesn't exist - it should be created according to design.",
       "context": [
@@ -1602,7 +1602,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T15:32:48.254Z",
-      "updatedAt": "2025-09-16T15:32:48.254Z"
+      "updatedAt": "2025-09-16T15:58:09.300Z",
+      "completedAt": "2025-09-16T15:58:09.300Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1709,5 +1710,5 @@
     "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-16T15:52:09.662Z"
+  "updatedAt": "2025-09-16T15:58:09.300Z"
 }

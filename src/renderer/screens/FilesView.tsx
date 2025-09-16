@@ -4,6 +4,7 @@ import { FileMeta } from '../services/filesService'
 import { MarkdownEditor } from '../components/files/MarkdownEditor'
 import BasicFileViewer from '../components/files/BasicFileViewer'
 import { goToFile, parseFileFromHash } from '../navigation/filesNavigation'
+import { IconChevron, IconDocument, IconFolder, IconFolderOpen } from '../components/ui/Icons'
 
 function isMarkdown(f: FileMeta) {
   return f.ext === 'md' || f.ext === 'mdx'
@@ -11,9 +12,10 @@ function isMarkdown(f: FileMeta) {
 
 function Caret({ open }: { open: boolean }) {
   return (
-    <span className="inline-block w-4 text-[10px] text-text-muted" aria-hidden>
-      {open ? '▾' : '▸'}
-    </span>
+    <IconChevron
+      className="inline-block w-4 h-4 text-text-muted transition-transform"
+      style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+    />
   )
 }
 
@@ -129,9 +131,11 @@ export const FilesView: React.FC = () => {
               className="group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
               title={node.name}
             >
-              <span className="text-sm" aria-hidden>
-                {isOpen ? '📂' : '📁'}
-              </span>
+              {isOpen ? (
+                <IconFolderOpen className="w-4 h-4" />
+              ) : (
+                <IconFolder className="w-4 h-4" />
+              )}
               <span className="truncate font-medium text-text-primary">{node.name || 'root'}</span>
               <span className="ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]">
                 {node.files.length}
@@ -155,9 +159,7 @@ export const FilesView: React.FC = () => {
                   title={f.path}
                   aria-current={isSel ? 'true' : undefined}
                 >
-                  <span className="text-xs opacity-80 mt-[2px]" aria-hidden>
-                    📄
-                  </span>
+                  <IconDocument className="w-4 h-4 opacity-80 mt-[2px]" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-text-primary">{f.name}</div>
                     <div className="text-[10px] text-text-muted">
