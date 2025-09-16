@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "~",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1201,7 +1201,7 @@
     },
     {
       "id": "fac00d4a-01a5-4012-8481-bb920ac502db",
-      "status": "-",
+      "status": "+",
       "title": "Icons need to be more colorful",
       "description": "All icons in @src/renderer/components/ui/Icons.tsx that are black and white - i.e. ones that don't have 'stroke'/'fill' directly set in their svg lines/circles/rects need to be reworked to be colorful like the sidebar icons \"IconHome\", \"IconFiles\" or \"IconChat\" for example.",
       "plan": "",
@@ -1213,7 +1213,7 @@
     },
     {
       "id": "f3b465a1-09be-45e9-80b2-70c84145ce5f",
-      "status": "-",
+      "status": "+",
       "title": "Show the notifications badge in the Sidebar",
       "description": "Right now, next to the project in the @src/renderer/navigation/SidebarView.tsx it only shows a running agent badge. It must also show the notifications badge next to it.\nWhen the Sidebar is collapsed - it should shrink both badges and show them vertically stacked - making sure that the project icon is still clearly visible.",
       "plan": "",
