@@ -230,9 +230,9 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: var(--radius-round);
-  background: var(--status-stuck-bg);
-  color: var(--status-stuck-fg);
+  border-color: var(transparent);
+  background: var(transparent);
+  color: var(transparent);
 }
 
 /* Collapsible Overview */
