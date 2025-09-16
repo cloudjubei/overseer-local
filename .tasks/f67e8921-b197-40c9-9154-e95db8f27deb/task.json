@@ -1134,7 +1134,7 @@
     },
     {
       "id": "40322d85-bc35-4b45-89db-b5e3a393a8e9",
-      "status": "-",
+      "status": "+",
       "title": "Icons need to be more colorful",
       "description": "All the icons used in the @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx from @src/renderer/components/ui/Icons.tsx need to be more colorful.",
       "plan": "",
