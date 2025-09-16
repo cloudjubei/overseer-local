@@ -1159,6 +1159,20 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "06c24df0-01ba-4d83-b7ad-f4a5f40175d1",
+      "status": "-",
+      "title": "We need more project icons",
+      "description": "There should be at least 20 various icons in @src/renderer/projects/projectIcons.ts . Also, when a project's icon is set - it should be reflected in @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/projects/projectIcons.ts",
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1250,6 +1264,7 @@
     "27156e19-3aeb-41de-adc2-75b1c7ca9774": 86,
     "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 87,
     "40322d85-bc35-4b45-89db-b5e3a393a8e9": 88,
-    "32ec2d90-3244-40a0-a74b-d120f6d512e0": 89
+    "32ec2d90-3244-40a0-a74b-d120f6d512e0": 89,
+    "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 90
   }
 }
