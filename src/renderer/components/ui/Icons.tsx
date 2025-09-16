@@ -438,7 +438,6 @@ export function IconRobot({ className }: { className?: string }) {
 }
 
 export function IconTimeline({ className }: { className?: string }) {
-  //TODO: fix
   return (
     <svg
       width="16"
@@ -450,7 +449,10 @@ export function IconTimeline({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="7" r="2" stroke="#F59E0B" strokeWidth="2" />
+      <line x1="12" y1="3" x2="12" y2="21" stroke="#6366F1" strokeWidth="2" />
+      <circle cx="12" cy="6" r="2" stroke="#F59E0B" strokeWidth="2" />
+      <circle cx="12" cy="12" r="2" stroke="#3B82F6" strokeWidth="2" />
+      <circle cx="12" cy="18" r="2" stroke="#10B981" strokeWidth="2" />
     </svg>
   )
 }
@@ -634,7 +636,7 @@ export function IconCollection({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <rect x="3" y="6" width="13" height="13" rx="2" stroke="#06B6D4" strokeWidth="2" />
+      <rect x="3" y="6" width="1=" height="13" rx="2" stroke="#06B6D4" strokeWidth="2" />
       <path d="M7 3h10a2 2 0 0 1 2 2v10" stroke="#93C5FD" strokeWidth="2" />
     </svg>
   )
