@@ -182,7 +182,7 @@ export default function CollapsibleSidebar(props: Props) {
                       )}
                     </div>
                   </li>
-                )}
+                )
               })}
             </ul>
           )}
