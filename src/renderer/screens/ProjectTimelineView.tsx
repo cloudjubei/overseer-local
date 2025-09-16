@@ -146,6 +146,39 @@ function tsToInput(ts: string) {
   }
 }
 
+// Helper for consistent color-coding by task
+function hashToHue(str: string): number {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0
+  h = Math.abs(h)
+  return h % 360
+}
+function taskColorStyles(taskId: string | undefined): React.CSSProperties {
+  const base = taskId || 'default'
+  const hue = hashToHue(base)
+  const bg = `hsl(${hue}, 85%, 92%)`
+  const border = `hsl(${hue}, 60%, 70%)`
+  const text = `hsl(${hue}, 35%, 24%)`
+  return { backgroundColor: bg, borderColor: border, color: text }
+}
+
+function getUnitIndex(zoom: Zoom, startAligned: Date, unitCount: number, ts: string): number {
+  const d = new Date(ts)
+  if (zoom === 'day') return clamp(diffInDays(startAligned, d), 0, unitCount - 1)
+  if (zoom === 'week') return clamp(diffInWeeks(startAligned, d), 0, unitCount - 1)
+  return clamp(diffInMonths(startAligned, d), 0, unitCount - 1)
+}
+
+// Row item type used internally for rendering
+interface RowItem {
+  id: string
+  title: string
+  timestamp: string
+  kind: 'feature' | 'task' | 'label'
+  taskId?: string // for feature coloring
+  scope?: 'project' | '__global__' // for label coloring
+}
+
 export default function ProjectTimelineView() {
   const { projectId } = useActiveProject()
   const { tasksById } = useTasks()
@@ -364,21 +397,28 @@ export default function ProjectTimelineView() {
 
   // Build rows for features (day) or tasks (week/month) and user-defined label rows
   const featureRows = useMemo(() => {
+    // build from tasks to capture taskId for color coding
+    const items: RowItem[] = []
+    for (const t of Object.values(tasksById)) {
+      for (const f of t.features || []) {
+        if (!f?.completedAt) continue
+        items.push({
+          id: f.id,
+          title: f.title,
+          timestamp: f.completedAt ?? new Date().toISOString(),
+          kind: 'feature',
+          taskId: t.id,
+        })
+      }
+    }
     return [
       {
         key: 'features',
         title: 'Features (completed)',
-        items: features
-          .filter((f) => f.completedAt)
-          .map((f) => ({
-            id: f.id,
-            title: f.title,
-            timestamp: f.completedAt ?? new Date().toISOString(),
-            kind: 'feature' as const,
-          })),
+        items,
       },
     ]
-  }, [features])
+  }, [tasksById])
 
   const taskRows = useMemo(() => {
     const items = Object.values(tasksById)
@@ -390,9 +430,9 @@ export default function ProjectTimelineView() {
           title: t.title,
           timestamp: ts,
           kind: 'task' as const,
-        }
+        } as RowItem
       })
-      .filter((x): x is { id: string; title: string; timestamp: string; kind: 'task' } => !!x)
+      .filter((x): x is RowItem => !!x)
 
     return [
       {
@@ -409,13 +449,7 @@ export default function ProjectTimelineView() {
       {
         key: string
         title: string
-        items: {
-          id: string
-          title: string
-          timestamp: string
-          scope: 'project' | '__global__'
-          kind: 'label'
-        }[]
+        items: RowItem[]
         rowScope: 'project' | '__global__'
       }
     >()
@@ -711,98 +745,88 @@ export default function ProjectTimelineView() {
             {allRows.map((row) => (
               <div key={row.key} className="relative">
                 <div
-                  className="grid relative items-center"
+                  className="grid relative"
                   style={{ gridTemplateColumns: gridTemplate }}
                 >
                   {/* Row label */}
-                  <div className="sticky left-0 z-10 h-12 bg-base px-3 text-sm font-medium text-primary flex items-center border-b border-subtle">
+                  <div className="sticky left-0 z-10 bg-base px-3 py-2 text-sm font-medium text-primary flex items-start border-b border-subtle">
                     {row.title}
                   </div>
-                  {/* Grid cells background */}
-                  {Array.from({ length: unitCount }).map((_, i) => (
-                    <div
-                      key={`c-${row.key}-${i}`}
-                      className="h-12 border-l border-b border-subtle"
-                    />
-                  ))}
 
-                  {/* Items */}
-                  {row.items.map((it) => {
-                    let idx = 0
-                    if (zoom === 'day')
-                      idx = clamp(
-                        diffInDays(startAligned, new Date(it.timestamp)),
-                        0,
-                        unitCount - 1,
+                  {/* Build buckets per unit for this row so items can stack from top */}
+                  {(() => {
+                    const buckets: RowItem[][] = Array.from({ length: unitCount }, () => [])
+                    for (const it of row.items as RowItem[]) {
+                      const idx = getUnitIndex(zoom, startAligned, unitCount, it.timestamp)
+                      if (idx < 0 || idx >= unitCount) continue
+                      buckets[idx].push(it)
+                    }
+                    // sort each bucket by timestamp ascending
+                    for (let i = 0; i < buckets.length; i++) {
+                      buckets[i].sort(
+                        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
                       )
-                    else if (zoom === 'week')
-                      idx = clamp(
-                        diffInWeeks(startAligned, new Date(it.timestamp)),
-                        0,
-                        unitCount - 1,
-                      )
-                    else
-                      idx = clamp(
-                        diffInMonths(startAligned, new Date(it.timestamp)),
-                        0,
-                        unitCount - 1,
-                      )
+                    }
 
-                    const colStart = 2 + idx
-                    const kind = (it as any).kind
-                    const isFeature = kind === 'feature'
-                    const isLabel = kind === 'label'
-
-                    const pillBase =
-                      'pointer-events-auto mx-1 rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem] relative group'
-                    const featureStyles =
-                      'bg-status-done-soft-bg text-status-done-soft-fg border-status-done-soft-border'
-                    const taskStyles =
-                      'bg-status-done-soft-bg text-status-done-soft-fg border-status-done-soft-border'
-                    const labelProjectStyles =
-                      'bg-status-review-soft-bg text-status-review-soft-fg border-status-review-soft-border'
-                    const labelGlobalStyles =
-                      'bg-status-on_hold-soft-bg text-status-on_hold-soft-fg border-status-on_hold-soft-border'
-
-                    const className = `${pillBase} ${
-                      isFeature
-                        ? featureStyles
-                        : isLabel
-                          ? (it as any).scope === 'project'
-                            ? labelProjectStyles
-                            : labelGlobalStyles
-                          : taskStyles
-                    }`
-
-                    return (
+                    // Render one cell per unit with items stacked from the top
+                    return buckets.map((itemsInCell, i) => (
                       <div
-                        key={it.id}
-                        className={className}
-                        style={{
-                          gridColumnStart: colStart,
-                          gridColumnEnd: `span 1`,
-                          alignSelf: 'center' as any,
-                        }}
-                        title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
+                        key={`c-${row.key}-${i}`}
+                        className="border-l border-b border-subtle px-1 py-1 flex flex-col items-stretch gap-1"
                       >
-                        {/* Hover edit button for user labels */}
-                        {isLabel && (
-                          <button
-                            type="button"
-                            onClick={() => openEditFor(it.id)}
-                            className="absolute -top-1.5 -right-1.5 hidden group-hover:flex items-center justify-center h-5 w-5 rounded-full bg-base border border-subtle text-secondary hover:text-primary shadow-sm"
-                            title="Edit label"
-                          >
-                            ✎
-                          </button>
-                        )}
-                        <div className="truncate font-medium pr-4">{it.title}</div>
-                        <div className="opacity-80 text-[10px]">
-                          {new Date(it.timestamp).toLocaleDateString()}
-                        </div>
+                        {itemsInCell.map((it) => {
+                          const kind = it.kind
+                          const isLabel = kind === 'label'
+                          const isFeature = kind === 'feature'
+
+                          const pillBase =
+                            'pointer-events-auto rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem] relative group truncate'
+
+                          const labelProjectStyles =
+                            'bg-status-review-soft-bg text-status-review-soft-fg border-status-review-soft-border'
+                          const labelGlobalStyles =
+                            'bg-status-on_hold-soft-bg text-status-on_hold-soft-fg border-status-on_hold-soft-border'
+
+                          const className = `${pillBase} ${
+                            isLabel
+                              ? (it as any).scope === 'project'
+                                ? labelProjectStyles
+                                : labelGlobalStyles
+                              : ''
+                          }`
+
+                          const style = !isLabel
+                            ? taskColorStyles(isFeature ? it.taskId : it.id)
+                            : undefined
+
+                          return (
+                            <div
+                              key={it.id}
+                              className={className}
+                              style={style}
+                              title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
+                            >
+                              {/* Hover edit button for user labels */}
+                              {isLabel && (
+                                <button
+                                  type="button"
+                                  onClick={() => openEditFor(it.id)}
+                                  className="absolute -top-1.5 -right-1.5 hidden group-hover:flex items-center justify-center h-5 w-5 rounded-full bg-base border border-subtle text-secondary hover:text-primary shadow-sm"
+                                  title="Edit label"
+                                >
+                                  ✎
+                                </button>
+                              )}
+                              <div className="truncate font-medium pr-4">{it.title}</div>
+                              <div className="opacity-80 text-[10px]">
+                                {new Date(it.timestamp).toLocaleDateString()}
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                    )
-                  })}
+                    ))
+                  })()}
                 </div>
 
                 {/* Today marker line */}

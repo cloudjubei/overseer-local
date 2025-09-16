@@ -137,7 +137,7 @@
     },
     {
       "id": "edfb3fca-07a2-4e6d-b4d9-30dd1178afe9",
-      "status": "-",
+      "status": "+",
       "title": "Color code features/tasks - always start showing them from the topmost point",
       "description": "In @src/renderer/screens/ProjectTimelineView.tsx make sure that all features/tasks show starting at the top and then go down for a given day/week/month . As long as they are color coded (by task) then they will be distinguishable from one another. Otherwise they take up too much vertical space.\nEach day/week/month should simply order all features/tasks in a column by the timestamp.",
       "context": [
@@ -145,7 +145,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-16T17:59:48.328Z",
-      "updatedAt": "2025-09-16T17:59:48.328Z"
+      "updatedAt": "2025-09-16T18:24:25.271Z",
+      "completedAt": "2025-09-16T18:24:25.271Z"
     },
     {
       "id": "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9",
