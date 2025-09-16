@@ -4,7 +4,6 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { openDatabase } from 'thefactory-db'
 import type { BaseManager } from '../managers'
 import type { TimelineLabel } from '../types/timeline'
-import type { Feature } from 'thefactory-db/dist/types' // Assuming Feature type is available from thefactory-db
 
 export default class DatabaseManager implements BaseManager {
   private projectRoot: string
@@ -82,10 +81,6 @@ export default class DatabaseManager implements BaseManager {
       await this.matchTimelineLabels(criteria, options)
     handlers[IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_CLEAR] = async ({ projectIds }) =>
       await this.clearTimelineLabels(projectIds)
-
-    // Features Handlers
-    handlers[IPC_HANDLER_KEYS.DB_FEATURES_GET_COMPLETED_BY_PROJECT] = async ({ projectId }) =>
-      await this.getCompletedFeaturesByProjectId(projectId)
 
     for (const handler of Object.keys(handlers)) {
       ipcMain.handle(handler, async (_event, args) => {
@@ -206,23 +201,6 @@ export default class DatabaseManager implements BaseManager {
 
   async clearTimelineLabels(projectIds?: string[]): Promise<void> {
     return await this._dbClient?.clearEntities(projectIds, 'TimelineLabel')
-  }
-
-  async getCompletedFeaturesByProjectId(projectId: string): Promise<Feature[]> {
-    if (!projectId) {
-      return []
-    }
-    const features = await this._dbClient?.matchEntities(
-      {
-        entityType: 'Feature',
-        projectId: projectId,
-        completedAt: { $ne: null }, // Features must have a completedAt timestamp
-      },
-      {
-        sortBy: [['completedAt', 'asc']], // Order by completion timestamp ascending
-      },
-    )
-    return features || []
   }
 
   private _setConnected(connected: boolean): void {

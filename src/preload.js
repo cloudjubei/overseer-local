@@ -41,12 +41,8 @@ const TASKS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_DELETE, { projectId, taskId }),
   getFeature: (projectId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_GET, { projectId, featureId }),
-  addFeature: (projectId, taskId, feature) =>{
-    // @TODO: `taskId` is not being used here.
-    // Once the feature is created, the parent `taskId` is usually assigned to it.
-    // We're leaving it here for backward compatibility for now but it's not ideal.
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { projectId, taskId, feature })
-  },
+  addFeature: (projectId, taskId, feature) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { projectId, taskId, feature }),
   updateFeature: (projectId, taskId, featureId, data) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE, {
       projectId,
@@ -101,12 +97,8 @@ const NOTIFICATIONS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT, { projectId }),
   markAllNotificationsAsRead: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD, { projectId }),
-  markNotificationAsRead: (projectId, id) =>{
-    // @TODO: `projectId` is not being used here.
-    // Once the notification is read, the parent `projectId` is usually assigned to it.
-    // We're leaving it here for backward compatibility for now but it's not ideal.
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD, { projectId, id })
-  },
+  markNotificationAsRead: (projectId, id) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD, { projectId, id }),
   deleteAllNotifications: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_DELETEALL, { projectId }),
   create: (projectId, input) =>
@@ -157,12 +149,8 @@ const LIVEDATA_API = {
   },
   getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_STATUS),
   addService: (service) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_ADD_SERVICE, { service }),
-  removeService: (serviceId) =>{
-    // @TODO: `serviceId` is not being used here.
-    // Once the service is removed, the parent `serviceId` is usually assigned to it.
-    // We're leaving it here for backward compatibility for now but it's not ideal.
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_REMOVE_SERVICE, { serviceId })
-  },
+  removeService: (serviceId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_REMOVE_SERVICE, { serviceId }),
   triggerUpdate: (serviceId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_TRIGGER_UPDATE, { serviceId }),
   updateConfig: (serviceId, updates) =>
@@ -248,8 +236,6 @@ const GIT_MONITOR_API = {
 }
 
 const TIMELINE_API = {
-  getCompletedFeaturesByProjectId: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_FEATURES_GET_COMPLETED_BY_PROJECT, { projectId }),
   addTimelineLabel: (input) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_TIMELINE_LABELS_ADD, { input }),
   getTimelineLabelById: (id) =>

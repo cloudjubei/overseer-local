@@ -111,9 +111,6 @@ const IPC_HANDLER_KEYS = {
   DB_TIMELINE_LABELS_MATCH: 'db:timeline-labels-match',
   DB_TIMELINE_LABELS_CLEAR: 'db:timeline-labels-clear',
 
-  // Features
-  DB_FEATURES_GET_COMPLETED_BY_PROJECT: 'db:features-get-completed-by-project',
-
   // Document ingestion
   DOCUMENT_INGESTION_ALL: 'document-ingestion:all-projects',
   DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',

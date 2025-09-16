@@ -9,6 +9,7 @@ import type { FactoryService } from 'src/renderer/services/factoryService'
 import type { DBService } from 'src/renderer/services/dbService'
 import type { DocumentIngestionService } from 'src/renderer/services/documentIngestionService'
 import type { GitMonitorService } from 'src/renderer/services/gitMonitorService'
+import type { TimelineService } from 'src/renderer/services/timelineService'
 
 declare global {
   interface Window {
@@ -23,6 +24,7 @@ declare global {
     liveDataService: LiveDataService
     documentIngestionService: DocumentIngestionService
     gitMonitorService: GitMonitorService
+    timelineService: TimelineService
   }
 }
 export {}
