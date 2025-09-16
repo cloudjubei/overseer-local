@@ -14,7 +14,7 @@
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T22:30:39.296Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
@@ -27,7 +27,7 @@
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-14T02:32:23.513Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
@@ -40,7 +40,7 @@
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-14T00:52:47.644Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
@@ -53,7 +53,7 @@
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T23:06:44.999Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
@@ -72,7 +72,7 @@
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-14T04:07:08.097Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
@@ -90,7 +90,7 @@
         "src/renderer/hooks/useChats.tsx"
       ],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T21:00:02.425Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     },
     {
@@ -102,7 +102,7 @@
       "context": [],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.978Z",
-      "completedAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T19:21:39.248Z",
       "updatedAt": "2025-09-16T13:05:37.978Z"
     }
   ],
@@ -116,6 +116,6 @@
     "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7
   },
   "createdAt": "2025-09-16T13:05:37.978Z",
-  "completedAt": "2025-09-16T13:05:37.978Z",
+  "completedAt": "2025-09-14T04:07:08.097Z",
   "updatedAt": "2025-09-16T13:05:37.978Z"
 }

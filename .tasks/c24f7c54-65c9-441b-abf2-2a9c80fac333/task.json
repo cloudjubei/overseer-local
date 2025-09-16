@@ -12,7 +12,7 @@
       "context": [],
       "createdAt": "2025-09-16T13:05:37.982Z",
       "updatedAt": "2025-09-16T15:24:08.476Z",
-      "completedAt": "2025-09-16T15:24:08.476Z"
+      "completedAt": "2025-09-15T21:40:48.525Z"
     },
     {
       "id": "1760db6f-b604-4835-af0d-c5fa83630a4c",
@@ -22,7 +22,7 @@
       "context": [],
       "createdAt": "2025-09-16T13:05:37.982Z",
       "updatedAt": "2025-09-16T15:29:43.292Z",
-      "completedAt": "2025-09-16T15:29:43.292Z"
+      "completedAt": "2025-09-15T21:57:57.488Z"
     },
     {
       "id": "db5e244f-b362-438d-9912-4577fa507ef3",
@@ -36,7 +36,7 @@
       "blockers": [],
       "createdAt": "2025-09-16T15:44:40.413Z",
       "updatedAt": "2025-09-16T15:47:52.270Z",
-      "completedAt": "2025-09-16T15:47:52.270Z"
+      "completedAt": "2025-09-15T22:23:27.389Z"
     },
     {
       "id": "b9d641d0-1306-412f-ab7a-60b120cb29ba",
@@ -50,7 +50,7 @@
       "blockers": [],
       "createdAt": "2025-09-16T16:01:19.427Z",
       "updatedAt": "2025-09-16T16:04:44.133Z",
-      "completedAt": "2025-09-16T16:04:44.133Z"
+      "completedAt": "2025-09-15T22:35:31.586Z"
     },
     {
       "id": "0619e80f-d523-4842-810b-ba5be81fcbe6",
@@ -68,7 +68,7 @@
       "blockers": [],
       "createdAt": "2025-09-16T16:18:10.138Z",
       "updatedAt": "2025-09-16T16:22:27.595Z",
-      "completedAt": "2025-09-16T16:22:27.595Z"
+      "completedAt": "2025-09-15T23:39:23.188Z"
     },
     {
       "id": "cb90c00d-4376-432d-bbb6-66d2995d24bd",
@@ -81,7 +81,7 @@
       "blockers": [],
       "createdAt": "2025-09-16T16:29:32.078Z",
       "updatedAt": "2025-09-16T17:24:24.243Z",
-      "completedAt": "2025-09-16T16:36:30.045Z"
+      "completedAt": "2025-09-16T01:19:03.247Z"
     },
     {
       "id": "dd66ff2a-a01e-4def-9269-059f5f581b3d",
@@ -94,7 +94,7 @@
       "blockers": [],
       "createdAt": "2025-09-16T16:30:02.117Z",
       "updatedAt": "2025-09-16T16:34:19.770Z",
-      "completedAt": "2025-09-16T16:34:19.770Z"
+      "completedAt": "2025-09-16T01:00:51.301Z"
     },
     {
       "id": "7f5ba22e-7e22-4a04-994f-25af10c138a7",
@@ -107,7 +107,7 @@
       "blockers": [],
       "createdAt": "2025-09-16T17:24:43.752Z",
       "updatedAt": "2025-09-16T17:33:17.591Z",
-      "completedAt": "2025-09-16T17:33:17.591Z"
+      "completedAt": "2025-09-16T01:50:55.010Z"
     },
     {
       "id": "f07b6313-732c-471f-ad22-031e50a25613",
@@ -120,6 +120,45 @@
       "blockers": [],
       "createdAt": "2025-09-16T17:43:36.272Z",
       "updatedAt": "2025-09-16T17:43:36.272Z"
+    },
+    {
+      "id": "671d02a9-29b7-4273-bfa8-fb7101de95af",
+      "status": "-",
+      "title": "For week and monthly views show tasks not features",
+      "description": "Only show features in the Day view in @src/renderer/screens/ProjectTimelineView.tsx",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:57:05.367Z",
+      "updatedAt": "2025-09-16T17:57:05.367Z"
+    },
+    {
+      "id": "edfb3fca-07a2-4e6d-b4d9-30dd1178afe9",
+      "status": "-",
+      "title": "Color code features/tasks - always start showing them from the topmost point",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx make sure that all features/tasks show starting at the top and then go down for a given day/week/month . As long as they are color coded (by task) then they will be distinguishable from one another. Otherwise they take up too much vertical space.\nEach day/week/month should simply order all features/tasks in a column by the timestamp.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:59:48.328Z",
+      "updatedAt": "2025-09-16T17:59:48.328Z"
+    },
+    {
+      "id": "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9",
+      "status": "-",
+      "title": "Show Task/Feature cards on hover",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx when hovering a task or feature - show the @src/renderer/components/tasks/TaskSummaryCallout.tsx  and @src/renderer/components/tasks/FeatureSummaryCallout.tsx respectively. Clicking on a given Task/Feature takes the user to that Task's detail view - @src/renderer/tasks/TaskDetailsView.tsx",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx",
+        "src/renderer/components/tasks/FeatureSummaryCallout.tsx",
+        "src/renderer/components/tasks/TaskSummaryCallout.tsx",
+        "src/renderer/tasks/TaskDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T18:00:22.978Z",
+      "updatedAt": "2025-09-16T18:02:01.483Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -131,7 +170,10 @@
     "dd66ff2a-a01e-4def-9269-059f5f581b3d": 6,
     "cb90c00d-4376-432d-bbb6-66d2995d24bd": 7,
     "7f5ba22e-7e22-4a04-994f-25af10c138a7": 8,
-    "f07b6313-732c-471f-ad22-031e50a25613": 9
+    "f07b6313-732c-471f-ad22-031e50a25613": 9,
+    "671d02a9-29b7-4273-bfa8-fb7101de95af": 10,
+    "edfb3fca-07a2-4e6d-b4d9-30dd1178afe9": 11,
+    "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9": 12
   },
   "createdAt": "2025-09-16T13:05:37.982Z",
   "updatedAt": "2025-09-16T16:36:30.045Z"

@@ -11,7 +11,7 @@
       "description": "Create a new file `docs/PACKAGES.md`. This file will serve as a central registry for all internal and external packages used in the project. For each package, it should describe its purpose and main interfaces. To start, add an entry for the local `factory-ts` package, explaining its role in agent orchestration.",
       "context": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T14:25:07.000Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -21,7 +21,7 @@
       "description": "Create a new file `docs/PATTERNS.md`. In this file, document the \"Manager\" pattern used for creating main-process services. The documentation should detail the full lifecycle and integration points of a manager, including:\n1. Location of manager source files (e.g., `src/tasks/TasksManager.js`).\n2. Initialization in `src/managers.js`.\n3. Definition of IPC keys in `src/ipcHandlersKeys.js`.\n4. Exposure to the renderer via `src/preload.js`.\n5. Consumption on the renderer side (e.g., `src/renderer/services/tasksService.ts`).\n6. Associated type definitions in `src/types/external.d.ts`.",
       "context": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T20:18:27.576Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -31,7 +31,7 @@
       "description": "Create a new file `docs/ARCHITECTURE.md`. This document should provide a high-level overview of the project's architecture. It needs to explain the relationship and data flow between the main application, `thefactory-tools`, and `thefactory-db`. Specifically, describe how `thefactory-tools` is used to run agents within the project and how both systems utilize `thefactory-db` for data storage.",
       "context": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T15:38:06.503Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -41,7 +41,7 @@
       "description": "Add a new section called \"Agent Prompting Strategy\" to `docs/ARCHITECTURE.md`. This section should outline a strategy for how and when to inject architectural and pattern documentation into agent prompts. It should reference the `constructSystemPrompt` function in `thefactory-tools/src/orchestrator.ts` as the current implementation point and suggest how it could be modified to include context from `ARCHITECTURE.md`, `PATTERNS.md`, and other relevant documents without overloading the context window. The goal is to make agents aware of the project's structure and conventions.",
       "context": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T13:40:33.434Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -51,7 +51,7 @@
       "description": "Create a new file `docs/ui/README.md`. This file will act as the primary guide for any agent or developer working on UI components. It should summarize the core principles from the existing documentation in `docs/ux`, `docs/styleguide`, and `docs/design`. It must also provide links to these more specific documents for developers who need more detail on a particular component or pattern. This consolidates the entry point for UI-related work.",
       "context": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T17:30:06.216Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -61,7 +61,7 @@
       "description": "Modify `docs/FILE_ORGANISATION.md` to make the new documentation discoverable. Add references and links to the newly created files: `docs/ARCHITECTURE.md`, `docs/PATTERNS.md`, `docs/PACKAGES.md`, and `docs/ui/README.md`. Place these links in a relevant section, such as under \"Where to Learn More\" or by updating the \"docs/\" description, to ensure they are easily found by developers and agents.",
       "context": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T18:44:40.346Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     }
   ],
@@ -74,6 +74,6 @@
     "4c7d8e3f-7969-46b8-8605-3e9c46eb47c6": 6
   },
   "createdAt": "2025-09-16T13:05:37.976Z",
-  "completedAt": "2025-09-16T13:05:37.976Z",
+  "completedAt": "2025-09-15T20:18:27.576Z",
   "updatedAt": "2025-09-16T13:05:37.976Z"
 }

@@ -13,7 +13,7 @@
       "context": [],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T04:36:46.724Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -28,7 +28,7 @@
       ],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T06:29:33.003Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -40,7 +40,7 @@
       "context": [],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T05:45:39.524Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -51,7 +51,7 @@
       "plan": "",
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T00:52:53.177Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -68,7 +68,7 @@
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T03:21:49.824Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -80,7 +80,7 @@
       "context": [],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T07:36:05.881Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -92,7 +92,7 @@
       "context": [],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T02:06:03.973Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     },
     {
@@ -104,7 +104,7 @@
       "context": [],
       "acceptance": [],
       "createdAt": "2025-09-16T13:05:37.976Z",
-      "completedAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-11T07:17:50.035Z",
       "updatedAt": "2025-09-16T13:05:37.976Z"
     }
   ],
@@ -119,6 +119,6 @@
     "42afe580-cad3-4a43-936e-43eeb89cea17": 7
   },
   "createdAt": "2025-09-16T13:05:37.976Z",
-  "completedAt": "2025-09-16T13:05:37.976Z",
+  "completedAt": "2025-09-11T07:36:05.881Z",
   "updatedAt": "2025-09-16T13:05:37.976Z"
 }
