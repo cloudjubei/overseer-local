@@ -34,8 +34,7 @@ export default class TasksManager implements BaseManager {
         return
       }
       const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path)
-      const tasksDir = resolveTasksDir(projectRoot)
-      const storage = new TasksStorage(projectId, tasksDir, this.window)
+      const storage = new TasksStorage(projectRoot, this.window)
       await storage.init()
       this.storages[projectId] = storage
     }
