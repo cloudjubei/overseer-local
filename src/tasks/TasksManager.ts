@@ -4,13 +4,13 @@ import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import TasksStorage from './TasksStorage'
 import type { BaseManager } from '../managers'
-import type { ProjectsManager } from '../projects/ProjectsManager'
+import type ProjectsManager from '../projects/ProjectsManager'
 
 function resolveTasksDir(projectRoot: string) {
   return path.join(projectRoot, '.tasks')
 }
 
-export class TasksManager implements BaseManager {
+export default class TasksManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
   private storages: Record<string, TasksStorage>
@@ -143,5 +143,3 @@ export class TasksManager implements BaseManager {
     return await s?.getFeature(taskId, featureId)
   }
 }
-
-export default TasksManager

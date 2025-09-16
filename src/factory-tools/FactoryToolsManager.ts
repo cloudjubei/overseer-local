@@ -3,9 +3,9 @@ import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { createOrchestrator, createAgentRunStore, createPricingManager } from 'thefactory-tools'
 import type { BaseManager } from '../managers'
-import type { DatabaseManager } from '../db/DatabaseManager'
+import type DatabaseManager from '../db/DatabaseManager'
 
-export class FactoryToolsManager implements BaseManager {
+export default class FactoryToolsManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
   private _ipcBound: boolean
@@ -294,5 +294,3 @@ export class FactoryToolsManager implements BaseManager {
     }
   }
 }
-
-export default FactoryToolsManager

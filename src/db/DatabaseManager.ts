@@ -4,7 +4,7 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { openDatabase } from 'thefactory-db'
 import type { BaseManager } from '../managers'
 
-export class DatabaseManager implements BaseManager {
+export default class DatabaseManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
   private _dbClient: any | undefined
@@ -165,5 +165,3 @@ export class DatabaseManager implements BaseManager {
     }
   }
 }
-
-export default DatabaseManager

@@ -1,3 +1,5 @@
+import { CSSProperties } from 'react'
+
 export function IconBack({ className }: { className?: string }) {
   return (
     <svg
@@ -100,7 +102,7 @@ export function IconExclamation({ className }: { className?: string }) {
   )
 }
 
-export function IconChevron({ className }: { className?: string }) {
+export function IconChevron({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
     <svg
       width="16"
@@ -112,6 +114,7 @@ export function IconChevron({ className }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <polyline points="9 18 15 12 9 6"></polyline>

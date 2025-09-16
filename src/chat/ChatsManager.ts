@@ -4,26 +4,34 @@ import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import ChatsStorage from './ChatsStorage'
 import type { BaseManager } from '../managers'
-import type { ProjectsManager } from '../projects/ProjectsManager'
-import type { TasksManager } from '../tasks/TasksManager'
-import type { FilesManager } from '../files/FilesManager'
-import type { SettingsManager } from '../settings/SettingsManager'
+import type ProjectsManager from '../projects/ProjectsManager'
+import type TasksManager from '../tasks/TasksManager'
+import type FilesManager from '../files/FilesManager'
+import type SettingsManager from '../settings/SettingsManager'
 import {
   buildChatTools,
   createCompletionClient,
   parseAgentResponse,
   normalizeTool,
+  ToolCall,
 } from 'thefactory-tools'
 
 const MESSAGES_TO_SEND = 10
 
-type ChatMessage = { role: string; content: string; attachments?: string[] }
-
 type ChatConfig = any
 
-type ToolCall = { tool_name: string; arguments: any }
+export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom'
 
-export class ChatsManager implements BaseManager {
+export type ChatRole = 'user' | 'assistant' | 'system'
+export type ChatMessage = {
+  role: ChatRole
+  content: string
+  model?: string
+  attachments?: string[]
+}
+export type Chat = { id: string; messages: ChatMessage[]; creationDate: string; updateDate: string }
+
+export default class ChatsManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
   private storages: Record<string, ChatsStorage>
@@ -226,5 +234,3 @@ export class ChatsManager implements BaseManager {
     }
   }
 }
-
-export default ChatsManager

@@ -6,6 +6,7 @@ import { LiveDataRegistry } from './LiveDataRegistry'
 import { createAgentPricesProvider } from './providers/agentPricesProvider'
 import { createFetchJsonProvider } from './providers/fetchJsonProvider'
 import type { BaseManager } from '../managers'
+import FactoryToolsManager from 'src/factory-tools/FactoryToolsManager'
 
 export type LiveService = {
   id: string
@@ -37,7 +38,7 @@ const DEFAULT_SERVICES: LiveService[] = [
   },
 ]
 
-export class LiveDataManager implements BaseManager {
+export default class LiveDataManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
 
@@ -45,11 +46,15 @@ export class LiveDataManager implements BaseManager {
   private registry: LiveDataRegistry
   private _ipcBound: boolean
 
-  private factoryToolsManager: any
+  private factoryToolsManager: FactoryToolsManager
 
   private services: LiveService[]
 
-  constructor(projectRoot: string, window: BrowserWindow, factoryToolsManager: any) {
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    factoryToolsManager: FactoryToolsManager,
+  ) {
     this.projectRoot = projectRoot
     this.window = window
 
@@ -263,5 +268,3 @@ export function computeIsFresh(service: LiveService, now = Date.now()): boolean 
       return false
   }
 }
-
-export default LiveDataManager

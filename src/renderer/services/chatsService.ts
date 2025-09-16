@@ -1,16 +1,6 @@
 import { LLMConfig } from 'thefactory-tools'
 import { ServiceResult } from './serviceResult'
-
-export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom'
-
-export type ChatRole = 'user' | 'assistant' | 'system'
-export type ChatMessage = {
-  role: ChatRole
-  content: string
-  model?: string
-  attachments?: string[]
-}
-export type Chat = { id: string; messages: ChatMessage[]; creationDate: string; updateDate: string }
+import { Chat, ChatMessage } from '../../chat/ChatsManager'
 
 export type ChatsService = {
   listModels: (config: LLMConfig) => Promise<string[]>

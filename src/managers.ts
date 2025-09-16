@@ -1,18 +1,18 @@
 import type { BrowserWindow } from 'electron'
-import { FactoryToolsManager } from './factory-tools/FactoryToolsManager'
-import { TasksManager } from './tasks/TasksManager'
-import { FilesManager } from './files/FilesManager'
-import { ProjectsManager } from './projects/ProjectsManager'
-import { ChatsManager } from './chat/ChatsManager'
-import { NotificationsManager } from './notifications/NotificationsManager'
-import { SettingsManager } from './settings/SettingsManager'
-import { LiveDataManager } from './live-data/LiveDataManager'
-import { DatabaseManager } from './db/DatabaseManager'
-import { DocumentIngestionManager } from './document_ingestion/DocumentIngestionManager'
-import { GitMonitorManager } from './git-monitor/GitMonitorManager'
+import FactoryToolsManager from './factory-tools/FactoryToolsManager'
+import TasksManager from './tasks/TasksManager'
+import FilesManager from './files/FilesManager'
+import ProjectsManager from './projects/ProjectsManager'
+import ChatsManager from './chat/ChatsManager'
+import NotificationsManager from './notifications/NotificationsManager'
+import SettingsManager from './settings/SettingsManager'
+import LiveDataManager from './live-data/LiveDataManager'
+import DatabaseManager from './db/DatabaseManager'
+import DocumentIngestionManager from './document_ingestion/DocumentIngestionManager'
+import GitMonitorManager from './git-monitor/GitMonitorManager'
 
 export interface BaseManager {
-  init(): Promise<any>
+  init(): Promise<void>
   stopWatching?: () => void | Promise<void>
 }
 
@@ -36,8 +36,8 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager)
-  notificationsManager = new NotificationsManager(projectRoot, mainWindow)
   settingsManager = new SettingsManager(projectRoot, mainWindow)
+  notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryToolsManager)
   chatsManager = new ChatsManager(
     projectRoot,

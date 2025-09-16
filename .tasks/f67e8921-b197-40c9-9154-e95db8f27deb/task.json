@@ -1131,6 +1131,20 @@
       ],
       "acceptance": [],
       "blockers": []
+    },
+    {
+      "id": "40322d85-bc35-4b45-89db-b5e3a393a8e9",
+      "status": "-",
+      "title": "Icons need to be more colorful",
+      "description": "All the icons used in the @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx from @src/renderer/components/ui/Icons.tsx need to be more colorful.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1220,6 +1234,7 @@
     "85914410-3864-43fa-8317-b90dedc12ce0": 84,
     "74d5f63b-8797-43f5-b571-fd5bebf56550": 85,
     "27156e19-3aeb-41de-adc2-75b1c7ca9774": 86,
-    "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 87
+    "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 87,
+    "40322d85-bc35-4b45-89db-b5e3a393a8e9": 88
   }
 }

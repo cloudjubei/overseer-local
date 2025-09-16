@@ -1,11 +1,12 @@
 import fs from 'fs/promises'
 import path from 'path'
-import chokidar from 'chokidar'
+import chokidar, { FSWatcher } from 'chokidar'
 import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { validateProjectSpec } from './ProjectsValidator'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import type { BaseManager } from '../managers'
+import { ProjectSpec } from 'thefactory-tools'
 
 async function pathExists(p: string) {
   try {
@@ -16,11 +17,11 @@ async function pathExists(p: string) {
   }
 }
 
-export class ProjectsManager implements BaseManager {
+export default class ProjectsManager implements BaseManager {
   projectRoot: string
   projectsDir: string
   window: BrowserWindow
-  watcher: chokidar.FSWatcher | null
+  watcher: FSWatcher | null
   private _ipcBound: boolean
 
   private projects: any[]
@@ -159,15 +160,15 @@ export class ProjectsManager implements BaseManager {
     return path.join(this.projectsDir, `${id}.json`)
   }
 
-  listProjects(): any[] {
+  listProjects(): ProjectSpec[] {
     return this.projects
   }
 
-  getProject(id: string): any | undefined {
+  getProject(id: string): ProjectSpec | undefined {
     return this.projects.find((p) => p.id === id)
   }
 
-  async createProject(spec: any): Promise<any> {
+  async createProject(spec: ProjectSpec): Promise<any> {
     const sanitized = {
       ...spec,
       requirements: spec?.requirements ?? [],
@@ -205,7 +206,10 @@ export class ProjectsManager implements BaseManager {
 
     await fs.writeFile(writePath, JSON.stringify(sanitized, null, 2), 'utf8')
     try {
-      if ((await pathExists(existingPath)) && path.resolve(existingPath) !== path.resolve(writePath)) {
+      if (
+        (await pathExists(existingPath)) &&
+        path.resolve(existingPath) !== path.resolve(writePath)
+      ) {
         await fs.unlink(existingPath)
       }
     } catch {}
@@ -264,5 +268,3 @@ export class ProjectsManager implements BaseManager {
     return { ok: true }
   }
 }
-
-export default ProjectsManager

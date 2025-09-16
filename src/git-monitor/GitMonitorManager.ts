@@ -15,7 +15,7 @@ import type { BaseManager } from '../managers'
  * - Emits updates to renderer over IPC subscribe channel.
  * - Uses CommitAnalyzer to detect task.json in feature branches and updates local tasks.
  */
-export class GitMonitorManager implements BaseManager {
+export default class GitMonitorManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
   private _ipcBound: boolean
@@ -141,7 +141,8 @@ export class GitMonitorManager implements BaseManager {
       try {
         const analysis = await analyzeBranchHeadForTask(this.projectRoot, branchName)
         if (analysis?.ok && analysis?.found) {
-          const taskId = branchNameToTaskId(branchName) || analysis?.extracted?.summary?.id || null
+          const taskId =
+            branchNameToTaskId(branchName) || (analysis as any)?.extracted?.summary?.id || null
 
           const commitTaskData = (analysis as any).taskRaw || (analysis as any).extracted || null
           if (commitTaskData && taskId) {

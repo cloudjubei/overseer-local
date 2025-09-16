@@ -4,9 +4,9 @@ import crypto from 'crypto'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { classifyDocumentType } from '../db/fileTyping'
 import type { BaseManager } from '../managers'
-import type { DatabaseManager } from '../db/DatabaseManager'
-import type { ProjectsManager } from '../projects/ProjectsManager'
-import type { FilesManager } from '../files/FilesManager'
+import type DatabaseManager from '../db/DatabaseManager'
+import type ProjectsManager from '../projects/ProjectsManager'
+import type FilesManager from '../files/FilesManager'
 
 function sha1(buf: Buffer): string {
   return crypto.createHash('sha1').update(buf).digest('hex')
@@ -16,7 +16,7 @@ function toRelUnix(p: string): string {
   return (p || '').replace(/\\/g, '/')
 }
 
-export class DocumentIngestionManager implements BaseManager {
+export default class DocumentIngestionManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
 
@@ -75,16 +75,14 @@ export class DocumentIngestionManager implements BaseManager {
     this._ipcBound = true
   }
 
-  async ingestAll(): Promise<any> {
+  async ingestAll(): Promise<void> {
     const projects = await this.projectsManager.listProjects()
-    const results: Record<string, any> = {}
     for (const p of projects) {
-      results[(p as any).id] = await this.ingestProject((p as any).id)
+      await this.ingestProject(p.id)
     }
-    return { ok: true, results }
   }
 
-  async ingestProject(projectId: string): Promise<any> {
+  async ingestProject(projectId: string): Promise<void> {
     console.info('[DocumentIngestion] ingestProject:', projectId)
     await this._ensureHandling(projectId)
 
@@ -106,9 +104,9 @@ export class DocumentIngestionManager implements BaseManager {
 
     for (const f of files) {
       try {
-        const relPath: string = f.path || f.relPath
-        const content: string = await this.filesManager.readFile(projectId, relPath)
-        const stats: any = await this.filesManager.getFileStats(projectId, relPath)
+        const relPath: string = f.path
+        const content = (await this.filesManager.readFile(projectId, relPath)) as string
+        const stats = await this.filesManager.getFileStats(projectId, relPath)
         await this.__handleFileAdded({ projectId, relPath, content, stats })
         ingested++
       } catch (e) {
@@ -124,11 +122,17 @@ export class DocumentIngestionManager implements BaseManager {
       ' failed: ',
       failed,
     )
-
-    return { ok: true, ingested, failed }
   }
 
-  handleFileAdded = async ({ projectId, relPath, content }: { projectId: string; relPath: string; content: string }) => {
+  handleFileAdded = async ({
+    projectId,
+    relPath,
+    content,
+  }: {
+    projectId: string
+    relPath: string
+    content: string
+  }) => {
     try {
       const stats = await this.filesManager.getFileStats(projectId, relPath)
       await this.__handleFileAdded({ projectId, relPath, content, stats })
@@ -137,7 +141,15 @@ export class DocumentIngestionManager implements BaseManager {
     }
   }
 
-  handleFileChanged = async ({ projectId, relPath, content }: { projectId: string; relPath: string; content: string }) => {
+  handleFileChanged = async ({
+    projectId,
+    relPath,
+    content,
+  }: {
+    projectId: string
+    relPath: string
+    content: string
+  }) => {
     this.handleFileAdded({ projectId, relPath, content })
   }
 
@@ -190,7 +202,10 @@ export class DocumentIngestionManager implements BaseManager {
       if (d.metadata?.contentHash === contentHash && d.metadata?.mtime === stats.mtime) {
         return d
       }
-      return await this.dbManager.updateDocument(d.id, { content, metadata: { ...(d.metadata || {}), contentHash, mtime: stats.mtime } })
+      return await this.dbManager.updateDocument(d.id, {
+        content,
+        metadata: { ...(d.metadata || {}), contentHash, mtime: stats.mtime },
+      })
     }
 
     const input = {
@@ -221,5 +236,3 @@ export class DocumentIngestionManager implements BaseManager {
     }
   }
 }
-
-export default DocumentIngestionManager

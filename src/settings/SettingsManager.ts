@@ -1,11 +1,11 @@
 import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import ProjectSettings from './ProjectSettings'
-import AppSettings from './AppSettings'
 import type { BaseManager } from '../managers'
+import ProjectSettings from './projectSettings'
+import AppSettings from './appSettings'
 
-export class SettingsManager implements BaseManager {
+export default class SettingsManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
 
@@ -54,16 +54,14 @@ export class SettingsManager implements BaseManager {
     return this.projectSettings[projectId]
   }
 
-  getAppSettings(): any {
+  getAppSettings(): AppSettings {
     return this.appSettings.get()
   }
 
-  updateAppSettings(updates: any): any {
+  updateAppSettings(updates: any): AppSettings {
     return this.appSettings.save(updates)
   }
-  getProjectSettings(projectId: string): any {
+  getProjectSettings(projectId: string): ProjectSettings {
     return this.__loadProjectSettings(projectId).get()
   }
 }
-
-export default SettingsManager

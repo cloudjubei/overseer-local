@@ -2,22 +2,24 @@ import { ipcMain, Notification } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import NotificationsStorage from './NotificationsStorage'
-import { settingsManager } from '../managers'
 import type { BaseManager } from '../managers'
+import SettingsManager from '../settings/SettingsManager'
 
-export class NotificationsManager implements BaseManager {
+export default class NotificationsManager implements BaseManager {
   private projectRoot: string
   private window: BrowserWindow
   private _ipcBound: boolean
 
   private storages: Record<string, NotificationsStorage>
+  private settingsManager: SettingsManager
 
-  constructor(projectRoot: string, window: BrowserWindow) {
+  constructor(projectRoot: string, window: BrowserWindow, settingsManager: SettingsManager) {
     this.projectRoot = projectRoot
     this.window = window
     this._ipcBound = false
 
     this.storages = {}
+    this.settingsManager = settingsManager
   }
 
   async init(): Promise<void> {
@@ -82,8 +84,8 @@ export class NotificationsManager implements BaseManager {
 
   private _getPrefsForProject(projectId: string): any {
     try {
-      const app = (settingsManager as any)?.getAppSettings?.()
-      const project = (settingsManager as any)?.getProjectSettings?.(projectId)
+      const app = this.settingsManager.getAppSettings?.()
+      const project = this.settingsManager.getProjectSettings?.(projectId)
       const sys = app?.notificationSystemSettings || {
         osNotificationsEnabled: false,
         soundsEnabled: false,
@@ -181,5 +183,3 @@ export class NotificationsManager implements BaseManager {
     storage.deleteAll()
   }
 }
-
-export default NotificationsManager

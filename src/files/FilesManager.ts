@@ -4,9 +4,9 @@ import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import FilesStorage from './FilesStorage'
 import type { BaseManager } from '../managers'
-import type { ProjectsManager } from '../projects/ProjectsManager'
+import type ProjectsManager from '../projects/ProjectsManager'
 
-export class FilesManager implements BaseManager {
+export default class FilesManager implements BaseManager {
   private window: BrowserWindow
   private storages: Record<string, FilesStorage>
   private _ipcBound: boolean
@@ -107,5 +107,3 @@ export class FilesManager implements BaseManager {
     s?.addChangeHandler(handler)
   }
 }
-
-export default FilesManager
