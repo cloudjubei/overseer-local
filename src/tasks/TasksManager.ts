@@ -5,6 +5,7 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import TasksStorage from './TasksStorage'
 import type { BaseManager } from '../managers'
 import type ProjectsManager from '../projects/ProjectsManager'
+import { Task } from 'thefactory-tools'
 
 function resolveTasksDir(projectRoot: string) {
   return path.join(projectRoot, '.tasks')
@@ -89,11 +90,11 @@ export default class TasksManager implements BaseManager {
     this._ipcBound = true
   }
 
-  async listTasks(projectId: string): Promise<any> {
+  async listTasks(projectId: string): Promise<Task[]> {
     const s = await this.__getStorage(projectId)
-    return await s?.listTasks()
+    return (await s?.listTasks()) ?? []
   }
-  async getTask(projectId: string, id: string): Promise<any> {
+  async getTask(projectId: string, id: string): Promise<Task | undefined> {
     const s = await this.__getStorage(projectId)
     return await s?.getTask(id)
   }
