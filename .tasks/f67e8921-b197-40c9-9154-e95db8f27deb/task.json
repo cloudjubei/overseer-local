@@ -1604,6 +1604,16 @@
       "createdAt": "2025-09-16T15:32:48.254Z",
       "updatedAt": "2025-09-16T15:58:09.300Z",
       "completedAt": "2025-09-16T15:58:09.300Z"
+    },
+    {
+      "id": "cb7d825c-b1ad-4a3f-a164-7e036765b93c",
+      "status": "-",
+      "title": "Write a script under /scripts that will alter the dates of tasks/features",
+      "description": "We need a scripts @scripts/alter_dates.ts that will accept two paths as a parameter - first for the tasks folder and second for the project.json. When run, will get all the task.json files from  that folder. Put all the features that are completed (have a completedAt) in an array - sort them by task display id (from the project.json - that is a ProjectSpec ) and starting from the one with the highest id, start offsetting each next feature's completedAt by a random amount between 10min and 2hr back in time. Then go over all the task files and update the features by their new completedAt - and also the task should have its completedAt set to value that is the highest amongst its features (if all the features are completed).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:36:04.090Z",
+      "updatedAt": "2025-09-16T17:36:04.090Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1707,7 +1717,8 @@
     "f8eb8466-4457-49ca-8c65-9b812aec8a26": 98,
     "8ea2946d-0305-4f96-8e42-0f9d9a684de0": 99,
     "c4236f01-9f8d-4a9a-bd8a-3489a23316d5": 100,
-    "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101
+    "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101,
+    "cb7d825c-b1ad-4a3f-a164-7e036765b93c": 102
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
