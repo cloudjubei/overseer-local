@@ -162,8 +162,8 @@
 .nav-item--compact .nav-item__badges,
 .nav-item__badges--compact {
   position: absolute;
-  right: 6px;
-  top: 2px; /* reduce overlap with centered icon */
+  right: 4px; /* move closer to the edge to avoid covering the centered icon */
+  top: 4px;   /* keep some breathing room from the top border */
   display: flex;
   flex-direction: column;
   align-items: flex-end;

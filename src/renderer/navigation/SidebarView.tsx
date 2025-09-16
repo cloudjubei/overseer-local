@@ -510,7 +510,7 @@ export default function SidebarView({}: SidebarProps) {
                       >
                         {activeCount > 0 && (
                           <NotificationBadge
-                            className={effectiveCollapsed ? 'h-4 min-w-4 px-1 text-[10px]' : ''}
+                            className={effectiveCollapsed ? 'h-3 min-w-3 px-0.5 text-[9px]' : ''}
                             text={`${activeCount}`}
                             tooltipLabel={`${activeCount} running agents`}
                             isInformative
@@ -518,7 +518,7 @@ export default function SidebarView({}: SidebarProps) {
                         )}
                         {unread > 0 && (
                           <NotificationBadge
-                            className={effectiveCollapsed ? 'h-4 min-w-4 px-1 text-[10px]' : ''}
+                            className={effectiveCollapsed ? 'h-3 min-w-3 px-0.5 text-[9px]' : ''}
                             text={`${unread}`}
                             tooltipLabel={`${unread} unread notifications`}
                           />
