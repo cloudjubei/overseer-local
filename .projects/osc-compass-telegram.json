@@ -1,0 +1,12 @@
+{
+  "id": "osc-compass-telegram",
+  "title": "OSC Compass Telegram",
+  "description": "TODO",
+  "path": "../../compass-telegram",
+  "repo_url": "https://github.com/OSCGROUPLTD/compass-telegram.git",
+  "requirements": [],
+  "metadata": {
+    "icon": "mobile"
+  },
+  "taskIdToDisplayIndex": {}
+}

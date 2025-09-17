@@ -1,0 +1,12 @@
+{
+  "id": "osc-compass-be",
+  "title": "OSC Compass BE",
+  "description": "todo",
+  "path": "../../compass-be",
+  "repo_url": "https://github.com/OSCGROUPLTD/compass-be.git",
+  "requirements": [],
+  "metadata": {
+    "icon": "web"
+  },
+  "taskIdToDisplayIndex": {}
+}
