@@ -34,7 +34,6 @@ export default class TasksStorage {
   }
 
   async createTask(input: TaskInput) {
-    console.log('createTask input: ', input)
     const task = this.taskTools.createTask(input)
 
     await this.__notify(`New task ${task.id} added.`)
@@ -42,10 +41,10 @@ export default class TasksStorage {
   }
 
   async updateTask(taskId: string, data: Partial<Task>) {
-    const next = await this.taskTools.updateTask(taskId, data)
+    const next = this.taskTools.updateTask(taskId, data)
 
     await this.__notify(`Task ${taskId} updated.`)
-    return { ok: true }
+    return next
   }
 
   async deleteTask(taskId: string) {
