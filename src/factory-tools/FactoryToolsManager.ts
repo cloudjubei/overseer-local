@@ -9,6 +9,10 @@ import {
   PricingManager,
   AgentRunRatingPatch,
   AgentRunHistory,
+  WebSearchApiKeys,
+  GithubCredentials,
+  RunOrchestrator,
+  AgentType,
 } from 'thefactory-tools'
 import type { BaseManager } from '../managers'
 import type DatabaseManager from '../db/DatabaseManager'
@@ -20,9 +24,9 @@ export default class FactoryToolsManager implements BaseManager {
   private _ipcBound: boolean
 
   private runHandles: Map<string, any>
-  private pricingManager: PricingManager | null
-  private runStore: AgentRunStore | null
-  private orchestrator: any | null
+  private pricingManager?: PricingManager
+  private runStore?: AgentRunStore
+  private orchestrator?: RunOrchestrator
 
   private dbManager: DatabaseManager
 
@@ -32,9 +36,9 @@ export default class FactoryToolsManager implements BaseManager {
     this._ipcBound = false
 
     this.runHandles = new Map()
-    this.pricingManager = null
-    this.runStore = null
-    this.orchestrator = null
+    this.pricingManager = undefined
+    this.runStore = undefined
+    this.orchestrator = undefined
 
     this.dbManager = dbManager
   }
@@ -131,12 +135,12 @@ export default class FactoryToolsManager implements BaseManager {
   }
 
   startTaskRun(
-    agentType: string,
+    agentType: AgentType,
     projectId: string,
     taskId: string,
     llmConfig: any,
-    githubCredentials: any,
-    webSearchApiKeys: any,
+    githubCredentials: GithubCredentials,
+    webSearchApiKeys?: WebSearchApiKeys,
   ): any {
     console.log(
       '[factory] START_TASK',
@@ -151,7 +155,7 @@ export default class FactoryToolsManager implements BaseManager {
     )
     try {
       const dbConnectionString = this.dbManager.getConnectionString()
-      const { runHistory, runHandle } = (this.orchestrator as any).startRun({
+      const { runHistory, runHandle } = this.orchestrator!.startRun({
         agentType,
         projectId,
         taskId,
@@ -170,7 +174,7 @@ export default class FactoryToolsManager implements BaseManager {
   }
 
   startFeatureRun(
-    agentType: string,
+    agentType: AgentType,
     projectId: string,
     taskId: string,
     featureId: string,
@@ -192,7 +196,7 @@ export default class FactoryToolsManager implements BaseManager {
     )
     try {
       const dbConnectionString = this.dbManager.getConnectionString()
-      const { runHistory, runHandle } = (this.orchestrator as any).startRun({
+      const { runHistory, runHandle } = this.orchestrator!.startRun({
         agentType,
         projectId,
         taskId,
@@ -228,7 +232,7 @@ export default class FactoryToolsManager implements BaseManager {
 
   async listActiveRuns(): Promise<any[]> {
     let out: any[] = []
-    const runs = await (this.orchestrator as any).listActiveRuns()
+    const runs = this.orchestrator!.listActiveRuns()
     for (const { runHistory, runHandle } of runs) {
       this._attachRunHandle(runHandle)
       out.push(runHistory)
@@ -237,20 +241,20 @@ export default class FactoryToolsManager implements BaseManager {
   }
 
   async getHistoryRuns(): Promise<AgentRunHistory[]> {
-    return (await this.runStore?.listRuns()) ?? []
+    return this.runStore?.listRuns() ?? []
   }
   async deleteHistoryRun(runId: string): Promise<AgentRunHistory | undefined> {
-    return await this.runStore?.deleteRun(runId)
+    return this.runStore?.deleteRun(runId)
   }
   async rateRun(runId: string, rating: AgentRunRatingPatch): Promise<AgentRunHistory | undefined> {
-    return await this.runStore?.rateRun(runId, rating)
+    return this.runStore?.rateRun(runId, rating)
   }
 
   async listPrices(): Promise<PricingState | undefined> {
-    return await this.pricingManager?.listPrices()
+    return this.pricingManager?.listPrices()
   }
   async refreshPrices(provider?: string, url?: string): Promise<PricingState | undefined> {
-    return await this.pricingManager?.refresh(provider, url)
+    return this.pricingManager?.refresh(provider, url)
   }
 
   private _attachRunHandle(runHandle: any): void {

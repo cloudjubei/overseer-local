@@ -103,7 +103,7 @@ export default function ProjectManagerModal({
   initialProjectId?: string
 }) {
   const { projects, getProjectById } = useProjectContext()
-  const { creds } = useGitHubCredentials()
+  const { credentials } = useGitHubCredentials()
   const [error, setError] = useState<string | null>(null)
 
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')
@@ -195,9 +195,10 @@ export default function ProjectManagerModal({
   async function handleDelete(id: string) {
     if (!confirm('Delete this project configuration?')) return
     setSaving(true)
-    const res = await projectsService.deleteProject(id)
-    if (!res.ok) {
-      alert('Failed to delete: ' + (res.error || 'Unknown error'))
+    try {
+      await projectsService.deleteProject(id)
+    } catch (e) {
+      alert('Failed to delete: ' + (e || 'Unknown error'))
     }
     setSaving(false)
     setMode('list')
@@ -372,7 +373,7 @@ export default function ProjectManagerModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">None</SelectItem>
-                {creds.map((c) => (
+                {credentials.map((c) => (
                   <SelectItem key={c.id} value={c.id!}>
                     {c.name} ({c.username})
                   </SelectItem>

@@ -4,7 +4,7 @@ import { useNavigator } from '../../../navigation/Navigator'
 import { useGitHubCredentials } from '../../../contexts/GitHubCredentialsContext'
 
 export default function GitHubSettings() {
-  const { creds, removeCreds } = useGitHubCredentials()
+  const { credentials, removeCredentials } = useGitHubCredentials()
   const { openModal } = useNavigator()
 
   return (
@@ -16,19 +16,21 @@ export default function GitHubSettings() {
         </Button>
       </div>
       <div className="border rounded-md divide-y">
-        {creds.length === 0 && (
+        {credentials.length === 0 && (
           <div className="p-4 text-sm text-gray-600">
             No credentials yet. Click "Add" to create one.
           </div>
         )}
-        {creds.map((c) => (
+        {credentials.map((c) => (
           <div
             key={c.id}
             className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between"
           >
             <div className="min-w-0">
               <div className="font-medium truncate">{c.name}</div>
-              <div className="text-sm text-gray-600 truncate">{c.username} • {c.email}</div>
+              <div className="text-sm text-gray-600 truncate">
+                {c.username} • {c.email}
+              </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Button
@@ -37,7 +39,7 @@ export default function GitHubSettings() {
               >
                 <IconEdit className="w-4 h-4" />
               </Button>
-              <Button onClick={() => removeCreds(c.id!)} variant="danger">
+              <Button onClick={() => removeCredentials(c.id!)} variant="danger">
                 <IconDelete className="w-4 h-4" />
               </Button>
             </div>

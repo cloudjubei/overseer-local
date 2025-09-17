@@ -1643,6 +1643,18 @@
       "createdAt": "2025-09-17T10:22:57.121Z",
       "updatedAt": "2025-09-17T10:31:34.500Z",
       "completedAt": "2025-09-17T10:31:34.500Z"
+    },
+    {
+      "id": "5a9ae0d2-7711-4149-bd57-1c43303613f6",
+      "status": "-",
+      "title": "Show the same topbar in AgentsView as in AllAgentsView",
+      "description": "@src/renderer/screens/AllAgentsView.tsx has this bar at the top with run statistics - we want to display the exact same per project inside @src/renderer/screens/AgentsView.tsx",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "createdAt": "2025-09-17T15:37:46.138Z",
+      "updatedAt": "2025-09-17T15:37:46.138Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1749,7 +1761,8 @@
     "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101,
     "cb7d825c-b1ad-4a3f-a164-7e036765b93c": 102,
     "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f": 103,
-    "fcfceb8f-d4af-4411-9a5b-7c059338b4a1": 104
+    "fcfceb8f-d4af-4411-9a5b-7c059338b4a1": 104,
+    "5a9ae0d2-7711-4149-bd57-1c43303613f6": 105
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"

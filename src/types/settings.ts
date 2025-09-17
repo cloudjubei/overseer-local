@@ -34,18 +34,12 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     soundsEnabled: true,
     displayDuration: 5,
   },
-  github: {
-    username: '',
-    email: '',
-    token: '',
-  },
   webSearchApiKeys: {},
   database: {},
 }
 export interface AppSettings {
   userPreferences: UserPreferences
   notificationSystemSettings: NotificationSystemSettings
-  github: GithubCredentials
   webSearchApiKeys: WebSearchApiKeys
   database: DatabaseSettings
 }
