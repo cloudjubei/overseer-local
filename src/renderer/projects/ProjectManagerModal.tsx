@@ -6,7 +6,13 @@ import { useProjectContext } from '../contexts/ProjectContext'
 import { Button } from '../components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import { IconDelete, IconEdit, IconPlus } from '../components/ui/Icons'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
 import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
@@ -133,7 +139,11 @@ export default function ProjectManagerModal({
         setForm({
           ...p,
           requirements: Array.isArray(p.requirements) ? p.requirements : [],
-          metadata: { ...(p.metadata ?? {}), icon: normalizedIcon, githubCredentialsId: p.metadata?.githubCredentialsId || '' },
+          metadata: {
+            ...(p.metadata ?? {}),
+            icon: normalizedIcon,
+            githubCredentialsId: p.metadata?.githubCredentialsId || '',
+          },
         })
         setEditingId(id)
         setMode('edit')
@@ -172,7 +182,11 @@ export default function ProjectManagerModal({
     setForm({
       ...p,
       requirements: Array.isArray(p.requirements) ? p.requirements : [],
-      metadata: { ...(p.metadata ?? {}), icon: normalizedIcon, githubCredentialsId: p.metadata?.githubCredentialsId || '' },
+      metadata: {
+        ...(p.metadata ?? {}),
+        icon: normalizedIcon,
+        githubCredentialsId: p.metadata?.githubCredentialsId || '',
+      },
     })
     setEditingId(p.id)
     setMode('edit')
@@ -341,22 +355,23 @@ export default function ProjectManagerModal({
             onChange={(v: string) => setForm((s: any) => ({ ...s, repo_url: v }))}
             placeholder="https://github.com/org/repo"
           />
-          <IconPicker
-            value={form.metadata.icon}
-            onChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, icon: v } }))}
-          />
 
           <div className="form-row">
             <label>GitHub Credentials (optional)</label>
             <Select
-              value={form.metadata.githubCredentialsId || ''}
-              onValueChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, githubCredentialsId: v } }))}
+              value={form.metadata.githubCredentialsId ?? '__none__'}
+              onValueChange={(v) =>
+                setForm((s: any) => ({
+                  ...s,
+                  metadata: { ...s.metadata, githubCredentialsId: v == '__none__' ? undefined : v },
+                }))
+              }
             >
               <SelectTrigger className="ui-select w-full max-w-md">
                 <SelectValue placeholder="Select credentials" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="__none__">None</SelectItem>
                 {creds.map((c) => (
                   <SelectItem key={c.id} value={c.id!}>
                     {c.name} ({c.username})
@@ -365,6 +380,10 @@ export default function ProjectManagerModal({
               </SelectContent>
             </Select>
           </div>
+          <IconPicker
+            value={form.metadata.icon}
+            onChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, icon: v } }))}
+          />
         </form>
       )}
     </Modal>

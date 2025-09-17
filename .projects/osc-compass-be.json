@@ -6,7 +6,8 @@
   "repo_url": "https://github.com/OSCGROUPLTD/compass-be.git",
   "requirements": [],
   "metadata": {
-    "icon": "web"
+    "icon": "web",
+    "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
   },
   "taskIdToDisplayIndex": {}
 }
