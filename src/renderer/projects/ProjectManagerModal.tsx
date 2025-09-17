@@ -6,6 +6,8 @@ import { useProjectContext } from '../contexts/ProjectContext'
 import { Button } from '../components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import { IconDelete, IconEdit, IconPlus } from '../components/ui/Icons'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
+import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -95,6 +97,7 @@ export default function ProjectManagerModal({
   initialProjectId?: string
 }) {
   const { projects, getProjectById } = useProjectContext()
+  const { creds } = useGitHubCredentials()
   const [error, setError] = useState<string | null>(null)
 
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')
@@ -107,7 +110,7 @@ export default function ProjectManagerModal({
     path: '',
     repo_url: '',
     requirements: [],
-    metadata: { icon: 'folder' },
+    metadata: { icon: 'folder', githubCredentialsId: '' },
   })
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
@@ -124,14 +127,13 @@ export default function ProjectManagerModal({
       const p: any = getProjectById(id)
       if (p) {
         const existingIcon = p.metadata?.icon
-        // normalize to a supported key (fallback to folder)
         const normalizedIcon = PROJECT_ICONS.some((opt) => opt.value === existingIcon)
           ? existingIcon
           : 'folder'
         setForm({
           ...p,
           requirements: Array.isArray(p.requirements) ? p.requirements : [],
-          metadata: { ...(p.metadata ?? {}), icon: normalizedIcon },
+          metadata: { ...(p.metadata ?? {}), icon: normalizedIcon, githubCredentialsId: p.metadata?.githubCredentialsId || '' },
         })
         setEditingId(id)
         setMode('edit')
@@ -150,7 +152,7 @@ export default function ProjectManagerModal({
       path: '',
       repo_url: '',
       requirements: [],
-      metadata: { icon: 'folder' },
+      metadata: { icon: 'folder', githubCredentialsId: '' },
     })
     setFormErrors([])
     setSaving(false)
@@ -170,7 +172,7 @@ export default function ProjectManagerModal({
     setForm({
       ...p,
       requirements: Array.isArray(p.requirements) ? p.requirements : [],
-      metadata: { ...(p.metadata ?? {}), icon: normalizedIcon },
+      metadata: { ...(p.metadata ?? {}), icon: normalizedIcon, githubCredentialsId: p.metadata?.githubCredentialsId || '' },
     })
     setEditingId(p.id)
     setMode('edit')
@@ -343,6 +345,26 @@ export default function ProjectManagerModal({
             value={form.metadata.icon}
             onChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, icon: v } }))}
           />
+
+          <div className="form-row">
+            <label>GitHub Credentials (optional)</label>
+            <Select
+              value={form.metadata.githubCredentialsId || ''}
+              onValueChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, githubCredentialsId: v } }))}
+            >
+              <SelectTrigger className="ui-select w-full max-w-md">
+                <SelectValue placeholder="Select credentials" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">None</SelectItem>
+                {creds.map((c) => (
+                  <SelectItem key={c.id} value={c.id!}>
+                    {c.name} ({c.username})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </form>
       )}
     </Modal>

@@ -6,6 +6,7 @@ import TaskEditView from '../tasks/TaskEditView'
 import FeatureCreateView from '../tasks/FeatureCreateView'
 import FeatureEditView from '../tasks/FeatureEditView'
 import SettingsLLMConfigModal from '../../settings/SettingsLLMConfigModal'
+import SettingsGitHubCredentialsModal from '../../settings/SettingsGitHubCredentialsModal'
 import ProjectManagerModal from '../projects/ProjectManagerModal'
 
 export default function ModalHost() {
@@ -37,6 +38,14 @@ export default function ModalHost() {
       break
     case 'llm-config-edit':
       content = <SettingsLLMConfigModal mode="edit" id={modal.id} onRequestClose={closeModal} />
+      break
+    case 'github-credentials-add':
+      content = <SettingsGitHubCredentialsModal mode="add" onRequestClose={closeModal} />
+      break
+    case 'github-credentials-edit':
+      content = (
+        <SettingsGitHubCredentialsModal mode="edit" id={modal.id} onRequestClose={closeModal} />
+      )
       break
     case 'projects-manage':
       content = (

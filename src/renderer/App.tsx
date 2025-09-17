@@ -17,6 +17,7 @@ import { LLMConfigProvider } from './contexts/LLMConfigContext'
 import { AgentsProvider } from './contexts/AgentsContext'
 import { FilesProvider } from './contexts/FilesContext'
 import { TasksProvider } from './contexts/TasksContext'
+import { GitHubCredentialsProvider } from './contexts/GitHubCredentialsContext'
 
 function ServicesBootstrap() {
   const { init } = useLiveData()
@@ -38,14 +39,16 @@ function App() {
               <NavigatorProvider>
                 <ShortcutsProvider>
                   <LLMConfigProvider>
-                    <AgentsProvider>
-                      <ServicesBootstrap />
-                      <ShortcutsBootstrap />
-                      <NotificationClickHandler />
-                      <CommandMenu />
-                      <ShortcutsHelp />
-                      <MainApp />
-                    </AgentsProvider>
+                    <GitHubCredentialsProvider>
+                      <AgentsProvider>
+                        <ServicesBootstrap />
+                        <ShortcutsBootstrap />
+                        <NotificationClickHandler />
+                        <CommandMenu />
+                        <ShortcutsHelp />
+                        <MainApp />
+                      </AgentsProvider>
+                    </GitHubCredentialsProvider>
                   </LLMConfigProvider>
                 </ShortcutsProvider>
               </NavigatorProvider>

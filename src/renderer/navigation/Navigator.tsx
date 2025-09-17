@@ -12,6 +12,8 @@ export type ModalRoute =
   | { type: 'feature-edit'; taskId: string; featureId: string }
   | { type: 'llm-config-add' }
   | { type: 'llm-config-edit'; id: string }
+  | { type: 'github-credentials-add' }
+  | { type: 'github-credentials-edit'; id: string }
   | { type: 'projects-manage'; mode?: 'list' | 'create' | 'edit'; projectId?: string }
 
 export type NavigatorState = {
@@ -65,8 +67,7 @@ const uuidRegex =
 function parseHash(hashRaw: string): NavigatorState {
   const raw = (hashRaw || '').replace(/^#/, '')
 
-  const [prefixRaw] = raw.split('/')
-  const prefix = prefixRaw || 'home'
+  const [prefixRaw] = raw.split('/')</n  const prefix = prefixRaw || 'home'
 
   const currentView: NavigationView = viewPrefixToView(prefix)
 
