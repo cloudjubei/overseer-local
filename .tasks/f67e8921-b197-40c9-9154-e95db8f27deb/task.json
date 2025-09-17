@@ -1646,7 +1646,7 @@
     },
     {
       "id": "5a9ae0d2-7711-4149-bd57-1c43303613f6",
-      "status": "-",
+      "status": "+",
       "title": "Show the same topbar in AgentsView as in AllAgentsView",
       "description": "@src/renderer/screens/AllAgentsView.tsx has this bar at the top with run statistics - we want to display the exact same per project inside @src/renderer/screens/AgentsView.tsx",
       "context": [
@@ -1654,7 +1654,8 @@
         "src/renderer/screens/AgentsView.tsx"
       ],
       "createdAt": "2025-09-17T15:37:46.138Z",
-      "updatedAt": "2025-09-17T15:37:46.138Z"
+      "updatedAt": "2025-09-17T15:41:20.741Z",
+      "completedAt": "2025-09-17T15:41:20.741Z"
     }
   ],
   "featureIdToDisplayIndex": {
