@@ -41,8 +41,7 @@ export default function FeatureEditView({
     async (values: FeatureFormValues) => {
       setSubmitting(true)
       try {
-        const res = await updateFeature(taskId, featureId, values)
-        if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+        const task = await updateFeature(taskId, featureId, values)
         toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
         doClose()
       } catch (e: any) {
@@ -59,8 +58,7 @@ export default function FeatureEditView({
     setShowDeleteConfirm(false)
     setSubmitting(true)
     try {
-      const res = await deleteFeature(taskId, featureId)
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      const task = await deleteFeature(taskId, featureId)
       toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
       doClose()
     } catch (e: any) {

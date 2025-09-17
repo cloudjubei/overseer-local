@@ -1,5 +1,4 @@
 import type { ProjectSpec } from 'thefactory-tools'
-import { ServiceResult } from './serviceResult'
 
 export type ProjectsService = {
   subscribe: (callback: (projects: ProjectSpec[]) => void) => () => void
@@ -7,8 +6,8 @@ export type ProjectsService = {
   getProject: (id: string) => Promise<ProjectSpec | undefined>
   createProject: (spec: ProjectSpec) => Promise<ProjectSpec>
   updateProject: (id: string, spec: ProjectSpec) => Promise<ProjectSpec>
-  deleteProject: (id: string) => Promise<ServiceResult>
-  reorderTask: (projectId: string, fromIndex: number, toIndex: number) => Promise<ServiceResult>
+  deleteProject: (id: string) => Promise<void>
+  reorderTask: (projectId: string, fromIndex: number, toIndex: number) => Promise<ProjectSpec>
 }
 
 export const projectsService: ProjectsService = { ...window.projectsService }

@@ -3,6 +3,7 @@ import FeatureForm, { FeatureFormValues } from '../components/tasks/FeatureForm'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useTasks } from '../contexts/TasksContext'
+import { Status } from 'thefactory-tools'
 
 export default function FeatureCreateView({
   taskId,
@@ -31,8 +32,12 @@ export default function FeatureCreateView({
       }
       setSubmitting(true)
       try {
-        const res = await addFeature(taskId, values)
-        if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+        const task = await addFeature(taskId, {
+          title: values.title,
+          status: values.status ?? '-',
+          description: values.description ?? '',
+          context: values.context ?? [],
+        })
         toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
         doClose()
       } catch (e: any) {

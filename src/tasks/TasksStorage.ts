@@ -1,6 +1,13 @@
 import { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import { createTaskTools, Feature, Task, TaskInput, TaskTools } from 'thefactory-tools'
+import {
+  createTaskTools,
+  FeatureCreateInput,
+  FeatureEditInput,
+  TaskCreateInput,
+  TaskEditInput,
+  TaskTools,
+} from 'thefactory-tools'
 
 export default class TasksStorage {
   private projectRoot: string
@@ -33,15 +40,15 @@ export default class TasksStorage {
     return this.taskTools.getTask(id)
   }
 
-  async createTask(input: TaskInput) {
+  async createTask(input: TaskCreateInput) {
     const task = this.taskTools.createTask(input)
 
     await this.__notify(`New task ${task.id} added.`)
     return task
   }
 
-  async updateTask(taskId: string, data: Partial<Task>) {
-    const next = this.taskTools.updateTask(taskId, data)
+  async updateTask(taskId: string, patch: TaskEditInput) {
+    const next = this.taskTools.updateTask(taskId, patch)
 
     await this.__notify(`Task ${taskId} updated.`)
     return next
@@ -51,38 +58,37 @@ export default class TasksStorage {
     await this.taskTools.deleteTask(taskId)
 
     await this.__notify(`Task ${taskId} deleted.`)
-    return { ok: true }
   }
 
   async getFeature(taskId: string, featureId: string) {
     return await this.taskTools.getFeature(taskId, featureId)
   }
 
-  async addFeature(taskId: string, feature: Partial<Feature>) {
-    const task = await this.taskTools.addFeature(taskId, feature)
+  async addFeature(taskId: string, input: FeatureCreateInput) {
+    const task = this.taskTools.addFeature(taskId, input)
     if (!task) {
       throw new Error(`Task with id: ${taskId} not found`)
     }
     await this.__notify(`Feature added to task ${taskId}.`)
-    return { ok: true }
+    return task
   }
 
-  async updateFeature(taskId: string, featureId: string, data: Partial<Feature>) {
-    const task = await this.taskTools.updateFeature(taskId, featureId, data)
+  async updateFeature(taskId: string, featureId: string, patch: FeatureEditInput) {
+    const task = this.taskTools.updateFeature(taskId, featureId, patch)
     if (!task) {
       throw new Error(`Task with id: ${taskId} not found`)
     }
     await this.__notify(`Feature ${featureId} updated in task ${taskId}`)
-    return { ok: true }
+    return task
   }
 
   async deleteFeature(taskId: string, featureId: string) {
-    const task = await this.taskTools.deleteFeature(taskId, featureId)
+    const task = this.taskTools.deleteFeature(taskId, featureId)
     if (!task) {
       throw new Error(`Task with id: ${taskId} not found`)
     }
     await this.__notify(`Feature ${featureId} deleted from task ${taskId}.`)
-    return { ok: true }
+    return task
   }
 
   async reorderFeatures(taskId: string, payload: { fromIndex: number; toIndex: number }) {
@@ -91,6 +97,6 @@ export default class TasksStorage {
       throw new Error(`Task with id: ${taskId} not found`)
     }
     await this.__notify(`Features reordered for task ${taskId}.`)
-    return { ok: true }
+    return task
   }
 }

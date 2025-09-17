@@ -3,7 +3,7 @@ import TaskForm, { TaskFormValues } from '../components/tasks/TaskForm'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useTasks } from '../contexts/TasksContext'
-import { TaskCreateInput } from '../services/tasksService'
+import { TaskCreateInput } from 'thefactory-tools'
 
 export default function TaskCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -21,8 +21,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
     async (values: TaskFormValues) => {
       setSubmitting(true)
       try {
-        const res = await createTask({ ...values } as TaskCreateInput)
-        if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+        const task = await createTask({ ...values } as TaskCreateInput)
         toast({ title: 'Success', description: 'Task created successfully', variant: 'success' })
         doClose()
       } catch (e: any) {

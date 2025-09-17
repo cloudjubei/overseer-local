@@ -9,5 +9,7 @@
     "icon": "web",
     "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
   },
-  "taskIdToDisplayIndex": {}
+  "taskIdToDisplayIndex": {
+    "70939894-d372-4751-86f8-05a14b68bc31": 1
+  }
 }

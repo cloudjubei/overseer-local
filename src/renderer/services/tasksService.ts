@@ -1,5 +1,12 @@
-import type { Feature, Status, Task } from 'thefactory-tools'
-import { ServiceResult } from './serviceResult'
+import type {
+  Feature,
+  FeatureCreateInput,
+  FeatureEditInput,
+  Status,
+  Task,
+  TaskCreateInput,
+  TaskEditInput,
+} from 'thefactory-tools'
 
 export const STATUS_LABELS: Record<Status, string> = {
   '+': 'Done',
@@ -36,36 +43,33 @@ export interface InvalidRefError {
   message: string
 }
 
-export type TaskCreateInput = Pick<Task, 'status' | 'title' | 'description'> &
-  Partial<Pick<Task, 'features' | 'rejection' | 'blockers'>>
-
 export type ReorderFeaturesPayload = { fromIndex: number; toIndex: number }
 
 export type TasksService = {
   subscribe: (callback: (tasks: Task[]) => void) => () => void
   listTasks: (projectId: string) => Promise<Task[]>
   getTask: (projectId: string, taskId: string) => Promise<Task | undefined>
-  createTask: (projectId: string, task: TaskCreateInput) => Promise<ServiceResult>
-  updateTask: (projectId: string, taskId: string, data: Partial<Task>) => Promise<ServiceResult>
-  deleteTask: (projectId: string, taskId: string) => Promise<ServiceResult>
+  createTask: (projectId: string, input: TaskCreateInput) => Promise<Task>
+  updateTask: (projectId: string, taskId: string, patch: TaskEditInput) => Promise<Task | undefined>
+  deleteTask: (projectId: string, taskId: string) => Promise<void>
   getFeature: (projectId: string, featureId: string) => Promise<Feature | undefined>
   addFeature: (
     projectId: string,
     taskId: string,
-    feature: Omit<Feature, 'id'> | Partial<Feature>,
-  ) => Promise<ServiceResult>
+    input: FeatureCreateInput,
+  ) => Promise<Task | undefined>
   updateFeature: (
     projectId: string,
     taskId: string,
     featureId: string,
-    data: Partial<Feature>,
-  ) => Promise<ServiceResult>
-  deleteFeature: (projectId: string, taskId: string, featureId: string) => Promise<ServiceResult>
+    patch: FeatureEditInput,
+  ) => Promise<Task | undefined>
+  deleteFeature: (projectId: string, taskId: string, featureId: string) => Promise<Task | undefined>
   reorderFeatures: (
     projectId: string,
     taskId: string,
     payload: ReorderFeaturesPayload,
-  ) => Promise<ServiceResult>
+  ) => Promise<Task | undefined>
 }
 
 export const tasksService: TasksService = { ...window.tasksService }

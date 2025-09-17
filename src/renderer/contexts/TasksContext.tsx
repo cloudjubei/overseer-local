@@ -4,30 +4,36 @@ import {
   ResolvedFeatureRef,
   ResolvedRef,
   ResolvedTaskRef,
-  TaskCreateInput,
   tasksService,
 } from '../services/tasksService'
 import { projectsService } from '../services/projectsService'
 import { useActiveProject } from './ProjectContext'
-import { Feature, ProjectSpec, Task } from 'thefactory-tools'
-import { ServiceResult } from '../services/serviceResult'
+import {
+  Feature,
+  ProjectSpec,
+  Task,
+  TaskCreateInput,
+  TaskEditInput,
+  FeatureCreateInput,
+  FeatureEditInput,
+} from 'thefactory-tools'
 
 // Define the context value type based on useTasks return value
 export type TasksContextValue = {
   tasksById: Record<string, Task>
   featuresById: Record<string, Feature>
-  createTask: (updates: TaskCreateInput) => Promise<ServiceResult>
-  updateTask: (taskId: string, updates: Partial<Omit<Task, 'id'>>) => Promise<ServiceResult>
-  deleteTask: (taskId: string) => Promise<ServiceResult>
-  addFeature: (taskId: string, updates: Partial<Omit<Feature, 'id'>>) => Promise<ServiceResult>
+  createTask: (updates: TaskCreateInput) => Promise<Task | undefined>
+  updateTask: (taskId: string, updates: TaskEditInput) => Promise<Task | undefined>
+  deleteTask: (taskId: string) => Promise<void>
+  addFeature: (taskId: string, updates: FeatureCreateInput) => Promise<Task | undefined>
   updateFeature: (
     taskId: string,
     featureId: string,
-    updates: Partial<Omit<Feature, 'id'>>,
-  ) => Promise<ServiceResult>
-  deleteFeature: (taskId: string, featureId: string) => Promise<ServiceResult>
-  reorderFeatures: (taskId: string, fromIndex: number, toIndex: number) => Promise<ServiceResult>
-  reorderTask: (fromIndex: number, toIndex: number) => Promise<ServiceResult>
+    updates: FeatureEditInput,
+  ) => Promise<Task | undefined>
+  deleteFeature: (taskId: string, featureId: string) => Promise<Task | undefined>
+  reorderFeatures: (taskId: string, fromIndex: number, toIndex: number) => Promise<Task | undefined>
+  reorderTask: (fromIndex: number, toIndex: number) => Promise<ProjectSpec | undefined>
   getBlockers: (taskId: string, featureId?: string) => (ResolvedRef | InvalidRefError)[]
   getBlockersOutbound: (id: string) => ResolvedRef[]
   resolveDependency: (dependency: string) => ResolvedRef | InvalidRefError
@@ -273,7 +279,7 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
   )
 
   const createTask = useCallback(
-    async (updates: TaskCreateInput): Promise<ServiceResult> => {
+    async (updates: TaskCreateInput): Promise<Task | undefined> => {
       if (project) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
@@ -281,13 +287,12 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         }
         return await tasksService.createTask(project.id, normalized)
       }
-      return { ok: false }
     },
     [project, normalizeDependency],
   )
 
   const updateTask = useCallback(
-    async (taskId: string, updates: Partial<Omit<Task, 'id'>>): Promise<ServiceResult> => {
+    async (taskId: string, updates: TaskEditInput): Promise<Task | undefined> => {
       if (project) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
@@ -295,23 +300,21 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         }
         return await tasksService.updateTask(project.id, taskId, normalized)
       }
-      return { ok: false }
     },
     [project, normalizeDependency],
   )
 
   const deleteTask = useCallback(
-    async (taskId: string): Promise<ServiceResult> => {
+    async (taskId: string): Promise<void> => {
       if (project) {
         return await tasksService.deleteTask(project.id, taskId)
       }
-      return { ok: false }
     },
     [project],
   )
 
   const addFeature = useCallback(
-    async (taskId: string, updates: Partial<Omit<Feature, 'id'>>): Promise<ServiceResult> => {
+    async (taskId: string, updates: FeatureCreateInput): Promise<Task | undefined> => {
       if (project) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
@@ -319,7 +322,6 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         }
         return await tasksService.addFeature(project.id, taskId, normalized)
       }
-      return { ok: false }
     },
     [project, normalizeDependency],
   )
@@ -328,8 +330,8 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
     async (
       taskId: string,
       featureId: string,
-      updates: Partial<Omit<Feature, 'id'>>,
-    ): Promise<ServiceResult> => {
+      updates: FeatureEditInput,
+    ): Promise<Task | undefined> => {
       if (project) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
@@ -337,37 +339,33 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         }
         return await tasksService.updateFeature(project.id, taskId, featureId, normalized)
       }
-      return { ok: false }
     },
     [project, normalizeDependency],
   )
 
   const deleteFeature = useCallback(
-    async (taskId: string, featureId: string): Promise<ServiceResult> => {
+    async (taskId: string, featureId: string): Promise<Task | undefined> => {
       if (project) {
         return await tasksService.deleteFeature(project.id, taskId, featureId)
       }
-      return { ok: false }
     },
     [project],
   )
 
   const reorderFeatures = useCallback(
-    async (taskId: string, fromIndex: number, toIndex: number): Promise<ServiceResult> => {
+    async (taskId: string, fromIndex: number, toIndex: number): Promise<Task | undefined> => {
       if (project) {
         return await tasksService.reorderFeatures(project.id, taskId, { fromIndex, toIndex })
       }
-      return { ok: false }
     },
     [project],
   )
 
   const reorderTask = useCallback(
-    async (fromIndex: number, toIndex: number): Promise<ServiceResult> => {
+    async (fromIndex: number, toIndex: number): Promise<ProjectSpec | undefined> => {
       if (project) {
         return await projectsService.reorderTask(project.id, fromIndex, toIndex)
       }
-      return { ok: false }
     },
     [project],
   )

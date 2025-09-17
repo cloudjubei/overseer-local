@@ -33,22 +33,22 @@ const TASKS_API = {
   listTasks: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_LIST, { projectId }),
   getTask: (projectId, taskId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_GET, { projectId, taskId }),
-  createTask: (projectId, task) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_CREATE, { projectId, task }),
-  updateTask: (projectId, taskId, data) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_UPDATE, { projectId, taskId, data }),
+  createTask: (projectId, input) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_CREATE, { projectId, input }),
+  updateTask: (projectId, taskId, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_UPDATE, { projectId, taskId, patch }),
   deleteTask: (projectId, taskId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_DELETE, { projectId, taskId }),
   getFeature: (projectId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_GET, { projectId, featureId }),
-  addFeature: (projectId, taskId, feature) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { projectId, taskId, feature }),
-  updateFeature: (projectId, taskId, featureId, data) =>
+  addFeature: (projectId, taskId, input) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { projectId, taskId, input }),
+  updateFeature: (projectId, taskId, featureId, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE, {
       projectId,
       taskId,
       featureId,
-      data,
+      patch,
     }),
   deleteFeature: (projectId, taskId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE, { projectId, taskId, featureId }),

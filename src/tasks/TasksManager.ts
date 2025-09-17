@@ -55,22 +55,22 @@ export default class TasksManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => await this.listTasks(projectId)
     handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, taskId }) =>
       await this.getTask(projectId, taskId)
-    handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ projectId, task }) =>
-      await this.createTask(projectId, task)
-    handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ projectId, taskId, data }) =>
-      (await this.__getStorage(projectId))?.updateTask(taskId, data)
+    handlers[IPC_HANDLER_KEYS.TASKS_CREATE] = async ({ projectId, input }) =>
+      await this.createTask(projectId, input)
+    handlers[IPC_HANDLER_KEYS.TASKS_UPDATE] = async ({ projectId, taskId, patch }) =>
+      (await this.__getStorage(projectId))?.updateTask(taskId, patch)
     handlers[IPC_HANDLER_KEYS.TASKS_DELETE] = async ({ projectId, taskId }) =>
       await this.deleteTask(projectId, taskId)
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_GET] = async ({ projectId, taskId, featureId }) =>
       await this.getFeature(projectId, taskId, featureId)
-    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ projectId, taskId, feature }) =>
-      (await this.__getStorage(projectId))?.addFeature(taskId, feature)
+    handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_ADD] = async ({ projectId, taskId, input }) =>
+      (await this.__getStorage(projectId))?.addFeature(taskId, input)
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE] = async ({
       projectId,
       taskId,
       featureId,
-      data,
-    }) => (await this.__getStorage(projectId))?.updateFeature(taskId, featureId, data)
+      patch,
+    }) => (await this.__getStorage(projectId))?.updateFeature(taskId, featureId, patch)
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE] = async ({ projectId, taskId, featureId }) =>
       (await this.__getStorage(projectId))?.deleteFeature(taskId, featureId)
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ projectId, taskId, payload }) =>

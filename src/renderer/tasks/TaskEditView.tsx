@@ -39,8 +39,7 @@ export default function TaskEditView({
   const onSubmit = async (values: TaskFormValues) => {
     setSubmitting(true)
     try {
-      const res = await updateTask(taskId, values)
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      const task = await updateTask(taskId, values)
       toast({ title: 'Success', description: 'Task updated successfully', variant: 'success' })
       doClose()
     } catch (e: any) {
@@ -55,8 +54,7 @@ export default function TaskEditView({
     setShowDeleteConfirm(false)
     setDeleting(true)
     try {
-      const res = await deleteTask(taskId)
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      const task = await deleteTask(taskId)
       toast({ title: 'Success', description: 'Task deleted successfully', variant: 'success' })
       navigator.navigateView('Home')
       doClose()
