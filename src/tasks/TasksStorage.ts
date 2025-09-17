@@ -1,11 +1,11 @@
 import { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import { createTaskTools, Feature, Task } from 'thefactory-tools'
+import { createTaskTools, Feature, Task, TaskTools } from 'thefactory-tools'
 
 export default class TasksStorage {
   private projectRoot: string
   private window: BrowserWindow
-  private taskTools: any
+  private taskTools: TaskTools
 
   constructor(projectRoot: string, window: BrowserWindow) {
     this.projectRoot = projectRoot
@@ -30,14 +30,14 @@ export default class TasksStorage {
   }
 
   async getTask(id: string) {
-    return await this.taskTools.getTask(id)
+    return this.taskTools.getTask(id)
   }
 
   async createTask(task: Task) {
-    const newTask = await this.taskTools.createTask(task)
+    await this.taskTools.saveTask(task)
 
-    await this.__notify(`New task ${newTask.id} added.`)
-    return newTask
+    await this.__notify(`New task ${task.id} added.`)
+    return task
   }
 
   async updateTask(taskId: string, data: Partial<Task>) {
@@ -85,7 +85,7 @@ export default class TasksStorage {
     return { ok: true }
   }
 
-  async reorderFeatures(taskId: string, payload: { fromIndex: number; toNumber: number }) {
+  async reorderFeatures(taskId: string, payload: { fromIndex: number; toIndex: number }) {
     const task = this.taskTools.reorderFeatures(taskId, payload)
     if (!task) {
       throw new Error(`Task with id: ${taskId} not found`)
