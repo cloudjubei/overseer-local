@@ -1,6 +1,6 @@
 import { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import { createTaskTools, Feature, Task, TaskTools } from 'thefactory-tools'
+import { createTaskTools, Feature, Task, TaskInput, TaskTools } from 'thefactory-tools'
 
 export default class TasksStorage {
   private projectRoot: string
@@ -33,8 +33,9 @@ export default class TasksStorage {
     return this.taskTools.getTask(id)
   }
 
-  async createTask(task: Task) {
-    await this.taskTools.saveTask(task)
+  async createTask(input: TaskInput) {
+    console.log('createTask input: ', input)
+    const task = this.taskTools.createTask(input)
 
     await this.__notify(`New task ${task.id} added.`)
     return task
