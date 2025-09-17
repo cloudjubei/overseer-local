@@ -5,6 +5,8 @@ import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { factoryService } from '../services/factoryService'
 import { tasksService } from '../services/tasksService'
 import { notificationsService } from '../services/notificationsService'
+import { useGitHubCredentials } from './GitHubCredentialsContext'
+import { useProjectContext } from './ProjectContext'
 
 export type AgentsContextValue = {
   runsHistory: AgentRunHistory[]
@@ -25,6 +27,8 @@ const AgentsContext = createContext<AgentsContextValue | null>(null)
 export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { appSettings } = useAppSettings()
   const { activeConfig } = useLLMConfig()
+  const { activeProject } = useProjectContext()
+  const { getCredentials } = useGitHubCredentials()
   const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])
 
   const update = async () => {
@@ -49,6 +53,15 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasksService])
 
+  const activeCredentials = useMemo(() => {
+    if (activeProject) {
+      const githubCredentialsId = activeProject.metadata?.githubCredentialsId
+      if (githubCredentialsId) {
+        return getCredentials(githubCredentialsId)
+      }
+    }
+  }, [activeProject, getCredentials])
+
   const coerceAgentTypeForTask = async (
     agentType: AgentType,
     projectId: string,
@@ -71,13 +84,16 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       if (!activeConfig) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
+      if (!activeCredentials) {
+        throw new Error('NO ACTIVE GITHUB CREDENTIALS')
+      }
       const effectiveAgentType = await coerceAgentTypeForTask(agentType, projectId, taskId)
       const historyRun = factoryService.startTaskRun({
         agentType: effectiveAgentType,
         projectId,
         taskId,
         llmConfig: activeConfig,
-        githubCredentials: appSettings.github,
+        githubCredentials: activeCredentials,
         webSearchApiKeys: appSettings.webSearchApiKeys,
       })
       setRunsHistory((prev) => [...prev, historyRun])
@@ -90,13 +106,16 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       if (!activeConfig) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
+      if (!activeCredentials) {
+        throw new Error('NO ACTIVE GITHUB CREDENTIALS')
+      }
       const historyRun = factoryService.startFeatureRun({
         agentType,
         projectId,
         taskId,
         featureId,
         llmConfig: activeConfig,
-        githubCredentials: appSettings.github,
+        githubCredentials: activeCredentials,
         webSearchApiKeys: appSettings.webSearchApiKeys,
       })
       setRunsHistory((prev) => [...prev, historyRun])

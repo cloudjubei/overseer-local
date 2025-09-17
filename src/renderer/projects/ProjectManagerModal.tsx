@@ -103,7 +103,7 @@ export default function ProjectManagerModal({
   initialProjectId?: string
 }) {
   const { projects, getProjectById } = useProjectContext()
-  const { creds } = useGitHubCredentials()
+  const { credentials: creds } = useGitHubCredentials()
   const [error, setError] = useState<string | null>(null)
 
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')

@@ -15,10 +15,67 @@ function formatTime(iso?: string) {
   }
 }
 
+function formatUSD(n?: number) {
+  if (n == null || !isFinite(n)) return '\u2014'
+  return `$${n.toFixed(4)}`
+}
+
+function formatInteger(n?: number) {
+  if (n == null || !isFinite(n)) return '\u2014'
+  return Math.round(n).toLocaleString()
+}
+
+function formatDuration(ms?: number) {
+  if (ms == null || !isFinite(ms) || ms < 0) return '\u2014'
+  if (ms < 1000) return `${Math.round(ms)}ms`
+  const s = Math.floor(ms / 1000)
+  const hrs = Math.floor(s / 3600)
+  const mins = Math.floor((s % 3600) / 60)
+  const secs = s % 60
+  const parts: string[] = []
+  if (hrs) parts.push(`${hrs}h`)
+  if (mins) parts.push(`${mins}m`)
+  parts.push(`${secs}s`)
+  return parts.join(' ')
+}
+
 export default function AgentsView() {
   const { runsHistory, cancelRun, deleteRunHistory, rateRun } = useAgents()
   const { projectId } = useActiveProject()
   const [openRunId, setOpenRunId] = useState<string | null>(null)
+
+  const projectKpis = useMemo(() => {
+    const projectRuns = runsHistory.filter((r) => r.projectId === projectId)
+
+    const runCalcs = projectRuns.map((r) => {
+      const conversations = r.conversations ?? []
+      const messages = conversations.flatMap((c) => c.messages ?? [])
+      const prompt = messages.map((m) => m.promptTokens ?? 0).reduce((a, b) => a + b, 0)
+      const completion = messages
+        .map((m) => m.completionTokens ?? 0)
+        .reduce((a, b) => a + b, 0)
+      const inputPerM = r.price?.inputPerMTokensUSD ?? 0
+      const outputPerM = r.price?.outputPerMTokensUSD ?? 0
+      const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
+      const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
+      const finishedMs = r.finishedAt
+        ? new Date(r.finishedAt).getTime()
+        : r.updatedAt
+          ? new Date(r.updatedAt).getTime()
+          : Date.now()
+      const durationMs =
+        isFinite(startedMs) && isFinite(finishedMs) ? Math.max(0, finishedMs - startedMs) : 0
+      const totalFeatures = conversations.length
+      return { costUSD, durationMs, totalFeatures }
+    })
+
+    const totalRuns = runCalcs.length
+    const totalCost = runCalcs.reduce((a, b) => a + (b.costUSD || 0), 0)
+    const totalDurationMs = runCalcs.reduce((a, b) => a + (b.durationMs || 0), 0)
+    const featuresTotal = runCalcs.reduce((a, b) => a + (b.totalFeatures || 0), 0)
+
+    return { totalRuns, cost: totalCost, totalDurationMs, featuresTotal }
+  }, [runsHistory, projectId])
 
   const activeProjectRuns = useMemo(
     () =>
@@ -74,6 +131,26 @@ export default function AgentsView() {
       </div>
 
       <div className="p-4 space-y-6">
+        {/* KPIs (same topbar style as AllAgentsView, scoped to current project) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+            <div className="text-xs text-neutral-500">Total Runs</div>
+            <div className="text-lg font-semibold">{projectKpis.totalRuns}</div>
+          </div>
+          <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+            <div className="text-xs text-neutral-500">Total Time Spent</div>
+            <div className="text-lg font-semibold">{formatDuration(projectKpis.totalDurationMs)}</div>
+          </div>
+          <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+            <div className="text-xs text-neutral-500">Total Cost</div>
+            <div className="text-lg font-semibold">{formatUSD(projectKpis.cost)}</div>
+          </div>
+          <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+            <div className="text-xs text-neutral-500">Total Features Worked On</div>
+            <div className="text-lg font-semibold">{formatInteger(projectKpis.featuresTotal)}</div>
+          </div>
+        </div>
+
         <section>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">

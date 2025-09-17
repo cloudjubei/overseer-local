@@ -4,7 +4,7 @@ import { useNavigator } from '../../../navigation/Navigator'
 import { useGitHubCredentials } from '../../../contexts/GitHubCredentialsContext'
 
 export default function GitHubSettings() {
-  const { creds, removeCreds } = useGitHubCredentials()
+  const { credentials: creds, removeCredentials: removeCreds } = useGitHubCredentials()
   const { openModal } = useNavigator()
 
   return (
@@ -28,7 +28,9 @@ export default function GitHubSettings() {
           >
             <div className="min-w-0">
               <div className="font-medium truncate">{c.name}</div>
-              <div className="text-sm text-gray-600 truncate">{c.username} • {c.email}</div>
+              <div className="text-sm text-gray-600 truncate">
+                {c.username} • {c.email}
+              </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Button

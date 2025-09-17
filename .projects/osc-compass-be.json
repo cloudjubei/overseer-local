@@ -3,13 +3,16 @@
   "title": "OSC Compass BE",
   "description": "todo",
   "path": "../../compass-be",
-  "repo_url": "https://github.com/OSCGROUPLTD/compass-be.git",
+  "repo_url": "https://github.com/OSCGROUPLTD/compass-be",
   "requirements": [],
   "metadata": {
     "icon": "web",
     "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
   },
   "taskIdToDisplayIndex": {
-    "70939894-d372-4751-86f8-05a14b68bc31": 1
+    "70939894-d372-4751-86f8-05a14b68bc31": 1,
+    "b39c71b2-ebe6-4d2f-89de-6d3a0698621b": 2,
+    "d3b994f1-4080-462b-8fea-f1edc7a24a2b": 3,
+    "5568d901-6b27-462f-b869-eea8a8adefbd": 4
   }
 }
