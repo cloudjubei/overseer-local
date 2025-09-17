@@ -1628,6 +1628,20 @@
       "createdAt": "2025-09-16T18:05:04.834Z",
       "updatedAt": "2025-09-16T18:56:28.441Z",
       "completedAt": "2025-09-16T18:56:28.441Z"
+    },
+    {
+      "id": "fcfceb8f-d4af-4411-9a5b-7c059338b4a1",
+      "status": "-",
+      "title": "Make it possible to configure github credentials per project",
+      "description": "Just like with LLM settings in @src/renderer/screens/settings/llms/LLMSettings.tsx we want to store multiple github credentials and then each project when being created or edited (in @src/renderer/projects/ProjectManagerModal.tsx ) can optionally have them set (the id of the credentials would be stored in the ProjectSpec metadata). \nSo the @src/renderer/screens/settings/github/GitHubSettings.tsx  needs to be reworked to accomodate too.",
+      "context": [
+        "src/renderer/screens/settings/llms/LLMSettings.tsx",
+        "src/renderer/screens/settings/github/GitHubSettings.tsx",
+        "src/renderer/projects/ProjectManagerModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-17T10:22:57.121Z",
+      "updatedAt": "2025-09-17T10:22:57.121Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1733,7 +1747,8 @@
     "c4236f01-9f8d-4a9a-bd8a-3489a23316d5": 100,
     "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 101,
     "cb7d825c-b1ad-4a3f-a164-7e036765b93c": 102,
-    "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f": 103
+    "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f": 103,
+    "fcfceb8f-d4af-4411-9a5b-7c059338b4a1": 104
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
