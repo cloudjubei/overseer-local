@@ -1,0 +1,10 @@
+{
+  "id": "579568d2-35fa-4c49-baa4-9a062fcf8461",
+  "status": "-",
+  "title": "Create the initial app",
+  "description": "This project is a rewrite of an old system kept here for reference (DO NOT MODIFY) under `old-system-reference` . There was a previous Telegram bot created that can be referenced under `old-system-reference/bot` .\nA new design was created that is shown as a typescript class under `mock-interface.tsx` with the matching css under `mock-interface.css` .\n\nWe want to use TypeScript for the bot and the library:\n'https://github.com/yagop/node-telegram-bot-api' (used by calling `npm i node-telegram-bot-api` ).\n\nIt needs to be clean and extensible. It must",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-18T00:50:51.954Z",
+  "updatedAt": "2025-09-18T00:50:51.954Z"
+}

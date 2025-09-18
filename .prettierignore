@@ -1,0 +1,15 @@
+node_modules
+dist
+build
+out
+coverage
+.husky
+.github
+.next
+.cache
+.turbo
+.vite
+*.json
+*.yml
+*.yaml
+*.md

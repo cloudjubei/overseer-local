@@ -1,0 +1,126 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color tokens for Telegram-style chat interface */
+  --background: #1f2937; /* Primary background color */
+  --foreground: #ffffff; /* Text color for messages */
+  --card: #374151; /* Background for message bubbles */
+  --card-foreground: #ffffff; /* Text color for message bubbles */
+  --popover: #f1f5f9; /* Background for interactive options */
+  --popover-foreground: #1f2937; /* Text color for interactive options */
+  --primary: #6366f1; /* Call-to-action buttons and highlights */
+  --primary-foreground: #ffffff; /* Text color for primary buttons */
+  --secondary: #4b5563; /* Color for secondary actions */
+  --secondary-foreground: #f1f5f9; /* Text color for secondary actions */
+  --muted: #6b7280; /* Muted text for less important information */
+  --muted-foreground: #f1f5f9; /* Text color for muted information */
+  --accent: #6366f1; /* Highlight color for selected options */
+  --accent-foreground: #ffffff; /* Text color for accent elements */
+  --destructive: #ef4444; /* Red for delete actions */
+  --destructive-foreground: #ffffff; /* Text color for destructive actions */
+  --border: #e5e7eb; /* Light border color for input fields */
+  --input: #ffffff; /* Input field color */
+  --ring: rgba(99, 102, 241, 0.5); /* Focus ring color */
+  --chart-1: #6366f1; /* Chart color 1 */
+  --chart-2: #f59e0b; /* Chart color 2 */
+  --chart-3: #3b82f6; /* Chart color 3 */
+  --chart-4: #34d399; /* Chart color 4 */
+  --chart-5: #ef4444; /* Chart color 5 */
+  --radius: 0.5rem; /* Rounded corners for message bubbles */
+  --sidebar: #374151; /* Sidebar background color */
+  --sidebar-foreground: #f1f5f9; /* Sidebar text color */
+  --sidebar-primary: #1f2937; /* Primary sidebar color */
+  --sidebar-primary-foreground: #ffffff; /* Sidebar primary text color */
+  --sidebar-accent: #6366f1; /* Sidebar accent color */
+  --sidebar-accent-foreground: #ffffff; /* Sidebar accent text color */
+  --sidebar-border: #e5e7eb; /* Sidebar border color */
+  --sidebar-ring: rgba(99, 102, 241, 0.5); /* Sidebar focus ring color */
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #334155;
+  --popover-foreground: #f8fafc;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #475569;
+  --secondary-foreground: #f8fafc;
+  --muted: #64748b;
+  --muted-foreground: #cbd5e1;
+  --accent: #6366f1;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #475569;
+  --input: #334155;
+  --ring: rgba(99, 102, 241, 0.5);
+  --chart-1: #6366f1;
+  --chart-2: #f59e0b;
+  --chart-3: #3b82f6;
+  --chart-4: #34d399;
+  --chart-5: #ef4444;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #0f172a;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #6366f1;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #475569;
+  --sidebar-ring: rgba(99, 102, 241, 0.5);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
