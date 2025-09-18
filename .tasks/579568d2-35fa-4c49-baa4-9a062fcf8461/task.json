@@ -11,8 +11,7 @@
       "description": "Set up a new Node.js project with TypeScript. This includes initializing a `package.json` file, creating a `tsconfig.json` file with appropriate settings for a modern Node.js application, and installing necessary dependencies such as `typescript`, `ts-node`, `nodemon`, and `node-telegram-bot-api` with its types (`@types/node-telegram-bot-api`).",
       "context": [],
       "createdAt": "2025-09-18T01:28:47.110Z",
-      "updatedAt": "2025-09-18T09:02:04.611Z",
-      "rejection": "The whole project needs to depend on \"node-telegram-bot-api\"",
+      "updatedAt": "2025-09-18T09:30:36.890Z",
       "blockers": [],
       "completedAt": "2025-09-18T09:02:04.611Z"
     },
@@ -93,8 +92,7 @@
       "description": "Implement a command (e.g., `/newgoal`) to initiate the goal creation process. The bot will prompt the user to describe their goal in their own words. The bot should then capture this free-flowing text and send it to the backend for analysis. This feature focuses on capturing the initial user input and communicating with the backend.",
       "context": [],
       "createdAt": "2025-09-18T01:29:28.008Z",
-      "updatedAt": "2025-09-18T09:02:31.788Z",
-      "rejection": "Blocked: undefined",
+      "updatedAt": "2025-09-18T09:30:39.043Z",
       "blockers": [],
       "completedAt": "2025-09-18T09:02:31.788Z"
     },
