@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ConversationResponseDto } from '../models/ConversationResponseDto';
 import type { HandleInputDto } from '../models/HandleInputDto';
 import type { StartFlowDto } from '../models/StartFlowDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -10,14 +11,14 @@ import { request as __request } from '../core/request';
 export class ConversationsService {
     /**
      * Start a conversation flow
-     * @returns any Returns the first prompt or immediate result
+     * @returns ConversationResponseDto Returns the first prompt or immediate result
      * @throws ApiError
      */
     public static conversationsControllerStart({
         requestBody,
     }: {
         requestBody: StartFlowDto,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<ConversationResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/conversations/start',
@@ -27,14 +28,14 @@ export class ConversationsService {
     }
     /**
      * Handle a user response for a conversation flow
-     * @returns any Returns the next prompt or result
+     * @returns ConversationResponseDto Returns the next prompt or result
      * @throws ApiError
      */
     public static conversationsControllerHandle({
         requestBody,
     }: {
         requestBody: HandleInputDto,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<ConversationResponseDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/conversations/handle',
