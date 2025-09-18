@@ -1,0 +1,10 @@
+{
+  "id": "e82910e9-3a53-4c1c-ab8c-8a677f73919a",
+  "status": "-",
+  "title": "Use the backend's conversation system",
+  "description": "The backend defines endpoints to use for `Conversation` models.\nThey provide ways for creating, updating, deleting and listing conversation flows available for a given user. This app needs to remain dumb and rely on the backend for storing and control over the conversations.\n\nAll the information about the backend endpoints is both in the `swagger.json` as well as the generated `src/generated/backend/services/CheckInsService.ts` and the models `src/generated/backend/models/CheckInDto.ts` , `src/generated/backend/models/CreateCheckInDto.ts`, `src/generated/backend/models/ListCheckInsResultDto.ts` and `src/generated/backend/models/UpdateCheckInDto.ts`",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-18T12:18:58.312Z",
+  "updatedAt": "2025-09-18T12:18:58.312Z"
+}
