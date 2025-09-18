@@ -20,6 +20,8 @@ Key Directories and Files
   - flows/
     - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed). Validates DOB format and accepted gender values.
     - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
+  - conversations/
+    - conversationManager.ts: Generic backend-driven conversation handler. Exposes handleConversationMessage(msg, session) which, when an active session.conversationState exists, packages the user's Telegram message into a HandleInputDto and calls ConversationsService.conversationsControllerHandle. It interprets ConversationResponseDto (prompt/success/error), updates the stored conversation state in sessionStore accordingly, and returns a typed result for the caller to present to the user.
 - tests/
   - setup.ts: Global test setup that defines environment variables, creates a temporary sessions directory, and mocks generated backend services.
   - *.test.ts: Unit tests for modules and flows using Vitest.

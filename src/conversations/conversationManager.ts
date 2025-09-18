@@ -1,0 +1,132 @@
+import type TelegramBot from 'node-telegram-bot-api'
+import { ConversationsService, ConversationResponseDto, HandleInputDto } from '../generated/backend'
+import { setSession, type SessionData } from '../lib/sessionStore'
+import { ensureBackendConfigured, ensureAccessTokenForUser } from '../lib/auth'
+
+export type ConversationHandleResult =
+  | { type: 'prompt'; flow: string; sessionId: string; prompt: ConversationResponseDto['prompt'] }
+  | { type: 'success'; flow: string; sessionId: string; success: ConversationResponseDto['success'] }
+  | { type: 'error'; flow: string; sessionId: string; error: ConversationResponseDto['error'] }
+
+function extractExternalId(msg: TelegramBot.Message): string | undefined {
+  const id = msg.from?.id
+  return typeof id === 'number' ? String(id) : undefined
+}
+
+function buildInputFromMessage(msg: TelegramBot.Message): Record<string, any> {
+  // Generic adapter: pass plain text under "text". Backend-driven flows should interpret this.
+  // If richer mappings are needed (e.g., selections), extend this function accordingly.
+  if (typeof msg.text === 'string' && msg.text.length > 0) {
+    return { text: msg.text }
+  }
+  // Fallback empty object if no usable content
+  return {}
+}
+
+/**
+ * Handle a Telegram message for an active backend-driven conversation.
+ * - Reads active conversation from session.conversationState
+ * - Packages message into HandleInputDto and calls ConversationsService.conversationsControllerHandle
+ * - Persists/clears conversation state based on response type (prompt/success/error)
+ *
+ * Returns null if there is no active conversation for the session.
+ */
+export async function handleConversationMessage(
+  msg: TelegramBot.Message,
+  session: SessionData,
+): Promise<ConversationHandleResult | null> {
+  const convo = session.conversationState
+  const externalId = extractExternalId(msg)
+
+  if (!convo || !convo.flowId) return null
+
+  // Session id must be tracked in conversation context as provided by backend
+  const sessionId = String((convo.context as any)?.sessionId || '')
+  if (!sessionId) {
+    // Corrupt/missing state; clear to avoid user getting stuck
+    setSession({ ...session, conversationState: null })
+    return null
+  }
+
+  // Ensure backend client is configured and token set for this user
+  await ensureBackendConfigured()
+  ensureAccessTokenForUser(session.userId)
+
+  const input: HandleInputDto = {
+    flow: convo.flowId,
+    sessionId,
+    input: buildInputFromMessage(msg),
+    channel: HandleInputDto.channel.TELEGRAM,
+    externalId,
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - generated client naming
+    const res = await ConversationsService.conversationsControllerHandle({ requestBody: input })
+
+    const flow = typeof res?.flow === 'string' ? res.flow : convo.flowId
+    const newSessionId = typeof res?.sessionId === 'string' ? res.sessionId : sessionId
+
+    switch (res?.type) {
+      case ConversationResponseDto.type.PROMPT: {
+        // Persist conversation for next step, store sessionId in context
+        setSession({
+          ...session,
+          conversationState: {
+            flowId: flow,
+            context: { ...(convo.context || {}), sessionId: newSessionId },
+            lastUpdatedAt: Math.floor(Date.now() / 1000),
+          },
+        })
+        return { type: 'prompt', flow, sessionId: newSessionId, prompt: res.prompt }
+      }
+      case ConversationResponseDto.type.SUCCESS: {
+        // Clear conversation on success
+        setSession({ ...session, conversationState: null })
+        return { type: 'success', flow, sessionId: newSessionId, success: res.success }
+      }
+      case ConversationResponseDto.type.ERROR: {
+        // Keep or clear depending on retry flag
+        const retry = !!res.error?.retry
+        setSession({
+          ...session,
+          conversationState: retry
+            ? {
+                flowId: flow,
+                context: { ...(convo.context || {}), sessionId: newSessionId },
+                lastUpdatedAt: Math.floor(Date.now() / 1000),
+              }
+            : null,
+        })
+        return { type: 'error', flow, sessionId: newSessionId, error: res.error }
+      }
+      default: {
+        // Unknown type: keep state as-is to avoid losing context
+        return {
+          type: 'error',
+          flow,
+          sessionId: newSessionId,
+          error: { message: 'Unexpected conversation response.', retry: true },
+        }
+      }
+    }
+  } catch (err: any) {
+    // Network or server error: keep conversation so user can retry
+    console.error('conversations: handle error', err?.response?.data || err?.message || err)
+    setSession({
+      ...session,
+      conversationState: {
+        flowId: convo.flowId,
+        context: { ...(convo.context || {}), sessionId },
+        lastUpdatedAt: Math.floor(Date.now() / 1000),
+      },
+    })
+    return {
+      type: 'error',
+      flow: convo.flowId,
+      sessionId,
+      error: { message: 'Sorry, something went wrong. Please try again.', retry: true },
+    }
+  }
+}
