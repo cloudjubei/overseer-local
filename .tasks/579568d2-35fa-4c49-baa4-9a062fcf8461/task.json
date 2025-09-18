@@ -6,14 +6,15 @@
   "features": [
     {
       "id": "44f37984-d79e-4ddc-9ad6-8186000366bd",
-      "status": "-",
+      "status": "+",
       "title": "Project Setup",
       "description": "Set up a new Node.js project with TypeScript. This includes initializing a `package.json` file, creating a `tsconfig.json` file with appropriate settings for a modern Node.js application, and installing necessary dependencies such as `typescript`, `ts-node`, `nodemon`, and `node-telegram-bot-api` with its types (`@types/node-telegram-bot-api`).",
       "context": [],
       "createdAt": "2025-09-18T01:28:47.110Z",
-      "updatedAt": "2025-09-18T08:54:44.360Z",
+      "updatedAt": "2025-09-18T09:02:04.611Z",
       "rejection": "The whole project needs to depend on \"node-telegram-bot-api\"",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-09-18T09:02:04.611Z"
     },
     {
       "id": "03af7ad1-f957-4a10-8fd1-a60b788c52ba",
