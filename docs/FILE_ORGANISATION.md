@@ -6,6 +6,7 @@ Overview
 
 Key Directories and Files
 - src/
+  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command.
   - config/
     - env.ts: Centralized environment loader using dotenv. Validates required variables and exposes a typed config.
   - generated/
@@ -46,6 +47,7 @@ Usage
   - Then call generated services, e.g.:
     - import { GoalsService } from '../generated/backend';
     - await GoalsService.GoalsController_list({ limit: 10 });
+- Run the bot entry (example via ts-node/loader or compiled JS). The entry sets up polling and handles /start.
 
 Notes
 - Do not modify files under old-system-reference/.
