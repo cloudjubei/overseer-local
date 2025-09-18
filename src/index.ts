@@ -152,6 +152,13 @@ bot.on('message', async (msg: Message) => {
       return
     }
 
+    // /newgoal -> start new goal flow via backend conversations
+    if (/^\/(newgoal)(@\w+)?$/i.test(text)) {
+      const NEW_GOAL_FLOW_ID = 'goals.new' // Backend flow id for creating a new goal
+      await startBackendFlow({ userId, chatId: chat.id, flowId: NEW_GOAL_FLOW_ID, externalId: userId })
+      return
+    }
+
     // Other commands/messages can be handled here as needed
   } catch (err) {
     if (msg.chat?.id) {

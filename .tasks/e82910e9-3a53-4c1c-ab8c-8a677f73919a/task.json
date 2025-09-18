@@ -56,12 +56,13 @@
     },
     {
       "id": "643bc010-ae82-4982-9f4a-8905d8f7a0c5",
-      "status": "-",
+      "status": "+",
       "title": "Migrate /newgoal Command to Use Conversation Service",
       "description": "Update the `/newgoal` command handler in `src/index.ts` to use the new conversation system. It should call `ConversationsService.conversationsControllerStartFlow` with the appropriate `flowId`. The response should be rendered, and the conversation state saved, effectively replacing the logic in `src/flows/newGoal.ts`.",
       "context": [],
       "createdAt": "2025-09-18T13:14:14.291Z",
-      "updatedAt": "2025-09-18T13:14:14.291Z"
+      "updatedAt": "2025-09-18T14:04:39.646Z",
+      "completedAt": "2025-09-18T14:04:39.646Z"
     },
     {
       "id": "f47ac454-a8a1-480c-9b4d-f129e3d6fddc",
