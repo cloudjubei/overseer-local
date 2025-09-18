@@ -76,12 +76,13 @@
     },
     {
       "id": "c60db066-6ac6-4eca-9a2b-e894d7f3f1f9",
-      "status": "-",
+      "status": "+",
       "title": "Remove Old Flow Logic and Files",
       "description": "Once the `/profile` and `/newgoal` commands are fully migrated and tested with the new conversation system, delete the now-obsolete files `src/flows/profile.ts` and `src/flows/newGoal.ts`. Also, remove any related import statements and calls to their functions from `src/index.ts`.",
       "context": [],
       "createdAt": "2025-09-18T13:14:14.292Z",
-      "updatedAt": "2025-09-18T13:14:14.292Z"
+      "updatedAt": "2025-09-18T14:06:20.861Z",
+      "completedAt": "2025-09-18T14:06:20.861Z"
     }
   ],
   "featureIdToDisplayIndex": {

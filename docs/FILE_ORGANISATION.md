@@ -7,7 +7,7 @@ Overview
 
 Key Directories and Files
 - src/
-  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command and global authentication gate. Also registers /profile and /cancel commands, and routes messages into conversation flows. Handles inline callback queries (goal suggestions selection, etc.). Initializes the scheduler for periodic check-ins and shuts it down gracefully on process exit.
+  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires command handling with a global authentication gate. Routes /profile and /newgoal to backend-driven conversation flows via ConversationsService. Handles inline callback queries minimally (acknowledgement) and initializes the scheduler for periodic check-ins; shuts it down gracefully on process exit.
   - config/
     - env.ts: Centralized environment loader using dotenv. Validates required variables and exposes a typed config.
   - generated/
@@ -17,9 +17,6 @@ Key Directories and Files
     - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/.sessions.json (override via SESSIONS_DIR env var). Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
     - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). On each tick, it iterates all authenticated users, fetches their check-ins using CheckInsService, and if a check-in's scheduled time hour matches the current hour, sends the check-in's message (from metadata.message/text/content) to the corresponding Telegram user. Includes simple in-memory deduplication to avoid duplicate sends within the same hour window. Exposes tickSchedulerOnce() for tests.
-  - flows/
-    - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed). Validates DOB format and accepted gender values.
-    - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
   - conversations/
     - conversationManager.ts: Generic backend-driven conversation handler. Exposes handleConversationMessage(msg, session) which, when an active session.conversationState exists, packages the user's Telegram message into a HandleInputDto and calls ConversationsService.conversationsControllerHandle. It interprets ConversationResponseDto (prompt/success/error), updates the stored conversation state in sessionStore accordingly, and returns a typed result for the caller to present to the user.
     - promptRenderer.ts: Renders a backend ConversationPromptDto into a user-facing message and optional inline keyboard. Exported renderBackendPrompt(prompt, bot, chatId) formats title/message/fields and turns PromptOptionDto[] into an InlineKeyboardMarkup. Intended to be used wherever ConversationResponseDto.type === 'prompt'.
@@ -80,21 +77,14 @@ Scheduler (Hourly Check-ins Implemented)
   - For each check-in, if its start time's hour matches the current hour, a notification message is sent to the user's Telegram chat. The message text is taken from metadata.message (fallbacks to metadata.text/content/msg if present).
   - Basic in-memory de-duplication prevents multiple sends for the same check-in within a single hour window.
 
-Profile Update Flow (Implemented)
-- Command: /profile starts a guided flow asking for DOB (YYYY-MM-DD), gender, weight (free text), and height (free text). Users can type 'skip' to leave any field unchanged and /cancel to abort.
-- DOB is validated for format and reasonable ranges before sending to backend.
-- After collecting answers, the bot sends the data to the backend using the generated ProfilesService. It first attempts PATCH /profiles/me; if the profile does not exist (404), it falls back to POST /profiles/me to create it.
-- Free-text for weight and height is passed as weight_raw and height_raw for backend normalization.
-
-New Goal Flow (Implemented)
-- Command: /newgoal starts a flow that asks the user to describe their goal in free text.
-- The bot sends this text to POST /goals/ai/suggestions and receives AI-generated suggestions.
-- Suggestions are displayed using an inline keyboard. The user can:
-  - Tap a suggestion to immediately create it via POST /goals.
-  - Tap "Refine message" to send a new/edited description and request suggestions again.
-  - Tap "Cancel" to abort.
+Conversation Flows (Backend-Driven)
+- Commands:
+  - /profile starts the backend flow 'profile.update' via ConversationsService.conversationsControllerStart.
+  - /newgoal starts the backend flow 'goals.new' via ConversationsService.conversationsControllerStart.
+- Active conversations are handled by src/conversations/conversationManager.ts which sends user inputs to the backend and renders prompts using src/conversations/promptRenderer.ts. The bot keeps minimal state: flowId, sessionId, lastUpdatedAt.
 
 Notes
+- The legacy in-bot flows under src/flows/ (profile.ts, newGoal.ts) were removed after migration to the backend conversation system.
 - Do not modify files under old-system-reference/.
 - Do not manually edit generated files under src/generated/backend/.
 - Follow docs/CODE_STANDARD.md when implementing or modifying features.
