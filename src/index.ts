@@ -1,102 +1,188 @@
-import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api';
-import { config } from './config/env';
-import { ensureAuthenticatedForMessage, ensureAuthenticatedForCallback, withUserSession } from './lib/auth';
-import { getSession, saveSession } from './lib/sessionStore';
-import { handleConversationMessage } from './conversations/conversationManager';
-import { renderBackendPrompt } from './conversations/promptRenderer';
+import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api'
+import { config } from './config/env'
+import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser } from './lib/auth'
+import { getSession, setSession } from './lib/sessionStore'
+import { handleConversationMessage } from './conversations/conversationManager'
+import { renderBackendPrompt } from './conversations/promptRenderer'
+import { ConversationsService } from './generated/backend/services/ConversationsService'
+import { ConversationResponseDto } from './generated/backend/models/ConversationResponseDto'
+import { StartFlowDto } from './generated/backend/models/StartFlowDto'
 
-// Existing bot initialization and command handlers are assumed to be here
-const bot = new TelegramBot(config.telegramBotToken, { polling: true });
+// Initialize Telegram bot
+const bot = new TelegramBot(config.telegramBotToken, { polling: true })
+
+// Helper to start a backend conversation flow and process the initial response
+async function startBackendFlow(params: {
+  userId: string
+  chatId: number
+  flowId: string
+  externalId?: string
+}) {
+  const { userId, chatId, flowId, externalId } = params
+
+  await ensureBackendConfigured()
+  ensureAccessTokenForUser(userId)
+
+  const req: StartFlowDto = {
+    flow: flowId,
+    channel: StartFlowDto.channel.TELEGRAM,
+    externalId,
+  }
+
+  try {
+    const res = await ConversationsService.conversationsControllerStart({ requestBody: req })
+
+    const flow = res.flow
+    const sessionId = res.sessionId
+    const now = Math.floor(Date.now() / 1000)
+
+    switch (res.type) {
+      case ConversationResponseDto.type.PROMPT: {
+        // Persist conversation state
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId }),
+          conversationState: {
+            flowId: flow,
+            context: { sessionId },
+            lastUpdatedAt: now,
+          },
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+        })
+        if (res.prompt) {
+          await renderBackendPrompt(res.prompt, bot, chatId)
+        }
+        break
+      }
+      case ConversationResponseDto.type.SUCCESS: {
+        // Clear conversation state and show success message if provided
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId, accessToken: prev?.accessToken || '' }),
+          conversationState: null,
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+        })
+        const text = (res.success as any)?.message || 'Done.'
+        await bot.sendMessage(chatId, text)
+        break
+      }
+      case ConversationResponseDto.type.ERROR: {
+        // Decide whether to keep conversation based on retry flag
+        const retry = !!(res.error as any)?.retry
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId, accessToken: prev?.accessToken || '' }),
+          conversationState: retry
+            ? {
+                flowId: flow,
+                context: { sessionId },
+                lastUpdatedAt: now,
+              }
+            : null,
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+        })
+        const msg = (res.error as any)?.message || 'Something went wrong.'
+        await bot.sendMessage(chatId, msg)
+        break
+      }
+      default: {
+        await bot.sendMessage(chatId, 'Unexpected response while starting the flow.')
+        break
+      }
+    }
+  } catch (err: any) {
+    // Minimal user-facing error message
+    console.error('startBackendFlow error', err?.response?.data || err?.message || err)
+    await bot.sendMessage(chatId, 'Sorry, failed to start the conversation. Please try again later.')
+  }
+}
 
 // Message handler
 bot.on('message', async (msg: Message) => {
   try {
-    const { chat, from } = msg;
-    if (!from || !chat) return;
+    const { chat, from } = msg
+    if (!from || !chat) return
 
-    // Ensure user is authenticated or prompt for auth
-    const authResult = await ensureAuthenticatedForMessage(bot, msg);
-    if (!authResult.authenticated) {
-      // Authentication flow has sent its own prompts; stop further handling
-      return;
-    }
+    // Global auth flow: returns true if it handled the message (prompted or processed)
+    const authHandled = await handleAuthMessage(bot, msg)
+    if (authHandled) return
 
-    // Load session to check for active conversation
-    const session = getSession(from.id);
+    const userId = String(from.id)
+    const session = getSession(userId)
 
-    // Delegate to backend-driven conversation manager if there's an active conversation
+    // If an active backend-driven conversation exists, delegate to conversation manager
     if (session?.conversationState) {
-      const convHandled = await handleConversationMessage({ bot, msg, session });
-      if (convHandled.handled) {
-        // If a prompt is returned, render it via promptRenderer
-        if (convHandled.type === 'prompt' && convHandled.prompt) {
-          await renderBackendPrompt(convHandled.prompt, bot, chat.id);
-        } else if (convHandled.type === 'success' && convHandled.message) {
-          await bot.sendMessage(chat.id, convHandled.message);
-        } else if (convHandled.type === 'error' && convHandled.message) {
-          await bot.sendMessage(chat.id, convHandled.message);
+      const convHandled = await handleConversationMessage(msg, session)
+      if (convHandled) {
+        switch (convHandled.type) {
+          case 'prompt':
+            if (convHandled.prompt) await renderBackendPrompt(convHandled.prompt, bot, chat.id)
+            break
+          case 'success': {
+            const text = (convHandled.success as any)?.message || 'Done.'
+            await bot.sendMessage(chat.id, text)
+            break
+          }
+          case 'error': {
+            const text = (convHandled.error as any)?.message || 'Something went wrong.'
+            await bot.sendMessage(chat.id, text)
+            break
+          }
         }
-        return; // conversation consumed this message; do not process further
+        return // conversation consumed this message
       }
     }
 
-    // ... existing non-conversation message handling (commands like /start, /profile, /newgoal, etc.)
-    // This code remains unchanged and will execute only if no active conversation consumed the message
+    // Command handling
+    const text = (msg.text || '').trim()
 
+    // /profile -> start profile update flow via backend conversations
+    if (/^\/(profile)(@\w+)?$/i.test(text)) {
+      const PROFILE_UPDATE_FLOW_ID = 'profile.update' // Backend flow id for updating a profile
+      await startBackendFlow({ userId, chatId: chat.id, flowId: PROFILE_UPDATE_FLOW_ID, externalId: userId })
+      return
+    }
+
+    // Other commands/messages can be handled here as needed
   } catch (err) {
-    // Minimal error handling consistent with code standards
-    // Avoid leaking internals; log if needed (omitted here), notify user gracefully
     if (msg.chat?.id) {
-      await bot.sendMessage(msg.chat.id, 'Sorry, something went wrong handling your message.');
+      await bot.sendMessage(msg.chat.id, 'Sorry, something went wrong handling your message.')
     }
   }
-});
+})
 
-// Callback query handler
+// Callback query handler (minimal; conversation selections may be handled in future updates)
 bot.on('callback_query', async (cb: CallbackQuery) => {
   try {
-    const from = cb.from;
-    const message = cb.message;
-    if (!from || !message) return;
+    const message = cb.message
+    if (!message?.chat?.id) return
 
-    const authResult = await ensureAuthenticatedForCallback(bot, cb);
-    if (!authResult.authenticated) {
-      return;
-    }
+    // For now, acknowledge callbacks to avoid client spinners
+    try {
+      await bot.answerCallbackQuery(cb.id)
+    } catch {}
 
-    const session = getSession(from.id);
-
-    // If part of an active conversation, delegate to conversation manager
-    if (session?.conversationState) {
-      // We reuse handleConversationMessage by constructing a pseudo-message from callback data
-      // conversationManager should internally support callback handling based on session state
-      const convHandled = await handleConversationMessage({ bot, callbackQuery: cb, session });
-      if (convHandled.handled) {
-        // Acknowledge callback promptly
-        try { await bot.answerCallbackQuery(cb.id); } catch {}
-
-        if (convHandled.type === 'prompt' && convHandled.prompt) {
-          await renderBackendPrompt(convHandled.prompt, bot, message.chat.id);
-        } else if (convHandled.type === 'success' && convHandled.message) {
-          await bot.sendMessage(message.chat.id, convHandled.message);
-        } else if (convHandled.type === 'error' && convHandled.message) {
-          await bot.sendMessage(message.chat.id, convHandled.message);
-        }
-        return; // stop further callback processing
-      }
-    }
-
-    // ... existing non-conversation callback handling (e.g., newGoal suggestions)
-
+    // Optionally parse and handle selection callbacks here in the future
   } catch (err) {
     if (cb.id) {
-      try { await bot.answerCallbackQuery(cb.id, { text: 'An error occurred.' }); } catch {}
+      try {
+        await bot.answerCallbackQuery(cb.id, { text: 'An error occurred.' })
+      } catch {}
     }
     if (cb.message?.chat?.id) {
-      await bot.sendMessage(cb.message.chat.id, 'Sorry, something went wrong handling your selection.');
+      await bot.sendMessage(cb.message.chat.id, 'Sorry, something went wrong handling your selection.')
     }
   }
-});
+})
 
-// Export bot for tests if needed
-export { bot };
+// Export bot for potential external usage
+export { bot }

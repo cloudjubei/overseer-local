@@ -46,12 +46,13 @@
     },
     {
       "id": "89f444c3-5f3f-4ea0-9630-a7e8f45d2476",
-      "status": "-",
+      "status": "+",
       "title": "Migrate /profile Command to Use Conversation Service",
       "description": "Update the `/profile` command handler in `src/index.ts`. Instead of triggering the old `profile.ts` flow, it should now call `ConversationsService.conversationsControllerStartFlow` with the `flowId` for updating a profile. The initial `ConversationPromptDto` response should be processed by the `promptRenderer`, and the new `conversationState` should be saved to the user's session.",
       "context": [],
       "createdAt": "2025-09-18T13:14:14.291Z",
-      "updatedAt": "2025-09-18T13:14:14.291Z"
+      "updatedAt": "2025-09-18T14:03:09.151Z",
+      "completedAt": "2025-09-18T14:03:09.151Z"
     },
     {
       "id": "643bc010-ae82-4982-9f4a-8905d8f7a0c5",
