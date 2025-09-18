@@ -3,6 +3,7 @@ Project File Organisation
 Overview
 - This repository contains a new TypeScript-based Telegram bot implementation alongside a read-only legacy reference under old-system-reference.
 - Environment configuration is centralized and loaded via dotenv.
+- Before contributing, please read docs/CODE_STANDARD.md for architecture and coding conventions used across the project.
 
 Key Directories and Files
 - src/
@@ -13,7 +14,7 @@ Key Directories and Files
     - backend/: Code generated from swagger.json using openapi-typescript-codegen (DO NOT EDIT MANUALLY). Regenerate with npm run generate:backend.
   - lib/
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
-    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/sessions.json. Exposes getAllUserIds() to iterate all known users.
+    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/.sessions.json. Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
     - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). On each tick, it iterates all authenticated users, fetches their check-ins using CheckInsService, and if a check-in's scheduled time hour matches the current hour, sends the check-in's message (from metadata.message/text/content) to the corresponding Telegram user. Includes simple in-memory deduplication to avoid duplicate sends within the same hour window.
   - flows/
@@ -21,6 +22,7 @@ Key Directories and Files
     - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
 - docs/
   - FILE_ORGANISATION.md: This document. Update when major structural changes occur.
+  - CODE_STANDARD.md: Architecture and code standard. Follow this for any new or changed code.
 - mock-interface.tsx, mock-interface.css: UI mock and styles for reference in designing user flows.
 - swagger.json: OpenAPI spec used to generate backend client code (do not modify here; used by generator).
 - old-system-reference/: Legacy system reference (DO NOT MODIFY).
@@ -86,3 +88,4 @@ New Goal Flow (Implemented)
 Notes
 - Do not modify files under old-system-reference/.
 - Do not manually edit generated files under src/generated/backend/.
+- Follow docs/CODE_STANDARD.md when implementing or modifying features.

@@ -5,9 +5,11 @@ A TypeScript-based Telegram bot for Compass that relies on a generated backend c
 Important
 - Do not modify files under old-system-reference/.
 - Do not manually edit generated files under src/generated/backend/.
+- Read and follow the Code Standard in docs/CODE_STANDARD.md.
 
 Contents
 - Overview
+- Code Standard
 - Prerequisites
 - Local Setup and Run
 - Backend Client Generation
@@ -29,7 +31,10 @@ Overview
   - Profile update (/profile)
   - Goal creation with AI suggestions (/newgoal)
   - List micro and macro goals (/microgoals, /macrogoals)
-  - Daily placeholder check-ins ("hello") at 09:00 and 19:00 in TZ
+  - Hourly check-ins sent based on backend schedule (timezone-aware)
+
+Code Standard
+- Please read docs/CODE_STANDARD.md before contributing. It describes architecture, style, and patterns used across this repository.
 
 Prerequisites
 - Node.js 18+ (LTS recommended) and npm 9+
@@ -59,7 +64,7 @@ Option B: Using ts-node
 
 You should see a log similar to:
 - Compass Telegram Bot started. Environment: development. Timezone: UTC
-- Scheduler initialized. Daily check-ins at 09:00 and 19:00 (UTC).
+- Scheduler initialized. Hourly check-ins enabled (UTC or configured TZ).
 
 5) Talk to your bot in Telegram
 - Open your bot chat using the handle created with @BotFather
@@ -86,7 +91,7 @@ Authentication
 - The first message triggers an auth check.
 - The bot asks for your access code. It then calls the backend with:
   { externalId: <telegram user id>, accessCode, secret: BACKEND_SHARED_SECRET }
-- On success, a session with tokens is persisted in .sessions/sessions.json for reuse.
+- On success, a session with tokens is persisted in .sessions/.sessions.json for reuse.
 - /logout clears the stored session.
 
 Available commands
@@ -108,14 +113,14 @@ General checklist
 - /logout: Verify you are prompted for access code again on next message
 
 Sessions
-- Sessions persist to .sessions/sessions.json
+- Sessions persist to .sessions/.sessions.json
 - To reset a user locally, either use /logout or delete their entry in this file while the bot is stopped
 
-Scheduler (daily placeholder check-ins)
-- The bot will send "hello" to authenticated users at 09:00 and 19:00 in TZ
+Scheduler (hourly check-ins)
+- A cron task runs at the start of every hour (respecting TZ). For every authenticated user, it fetches their check-ins and sends those whose start time hour matches the current hour. Messages are taken from metadata.message (fallbacks to metadata.text/content/msg).
 - To test without waiting:
-  - Temporary method for development only: change the cron expressions in src/lib/scheduler.ts to run every minute (e.g., "*/1 * * * *"), restart the bot, and observe messages. Revert before committing.
-  - Or temporarily set TZ to a timezone approaching the scheduled time and restart the bot.
+  - Temporary method for development only: change the cron expression in src/lib/scheduler.ts to run every minute (e.g., "*/1 * * * *"), restart the bot, and observe messages. Revert before committing.
+  - Or temporarily set TZ to a timezone approaching the scheduled hour and restart the bot.
 
 Deploying on AWS EC2
 The simplest and resilient approach is to run the bot under a process manager like PM2 on a small Ubuntu instance.
@@ -174,5 +179,5 @@ The simplest and resilient approach is to run the bot under a process manager li
 
 Notes
 - The bot makes as few decisions as possible and pushes logic to the backend via the generated client.
-- Authentication persists between sessions via .sessions/sessions.json. Remove with /logout or by deleting the file while the bot is stopped.
+- Authentication persists between sessions via .sessions/.sessions.json. Remove with /logout or by deleting the file while the bot is stopped.
 - When changing swagger.json, regenerate the client (npm run generate:backend) and restart the bot.
