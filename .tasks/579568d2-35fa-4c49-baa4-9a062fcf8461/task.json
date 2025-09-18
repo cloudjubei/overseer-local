@@ -86,12 +86,13 @@
     },
     {
       "id": "9621538b-c151-4142-9e41-7bf86ae00e65",
-      "status": "-",
+      "status": "?",
       "title": "Create New Goal - Initial Input",
       "description": "Implement a command (e.g., `/newgoal`) to initiate the goal creation process. The bot will prompt the user to describe their goal in their own words. The bot should then capture this free-flowing text and send it to the backend for analysis. This feature focuses on capturing the initial user input and communicating with the backend.",
       "context": [],
       "createdAt": "2025-09-18T01:29:28.008Z",
-      "updatedAt": "2025-09-18T01:29:28.008Z"
+      "updatedAt": "2025-09-18T01:49:56.335Z",
+      "rejection": "Blocked: undefined"
     },
     {
       "id": "4eed9e1f-a2a5-4ad8-822c-ad5810583d32",
