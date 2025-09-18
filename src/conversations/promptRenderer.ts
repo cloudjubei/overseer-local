@@ -15,7 +15,10 @@ function formatFields(fields: Array<PromptFieldDto> | undefined): string[] {
   return lines
 }
 
-function buildOptionsKeyboard(options: Array<PromptOptionDto> | undefined, selectionName?: string): TelegramBot.InlineKeyboardMarkup | undefined {
+function buildOptionsKeyboard(
+  options: Array<PromptOptionDto> | undefined,
+  selectionName?: string,
+): TelegramBot.InlineKeyboardMarkup | undefined {
   if (!Array.isArray(options) || options.length === 0) return undefined
 
   const rows: TelegramBot.InlineKeyboardButton[][] = []

@@ -3,8 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ConfirmForgotPasswordDto = {
-    username: string;
-    confirmationCode: string;
-    newPassword: string;
-};
-
+  username: string
+  confirmationCode: string
+  newPassword: string
+}

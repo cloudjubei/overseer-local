@@ -3,17 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TelegramLoginDto = {
-    /**
-     * Telegram user id
-     */
-    externalId: string;
-    /**
-     * Pairing/access code provided by backend
-     */
-    accessCode: string;
-    /**
-     * Shared secret from Telegram bot/app
-     */
-    secret: string;
-};
-
+  /**
+   * Telegram user id
+   */
+  externalId: string
+  /**
+   * Pairing/access code provided by backend
+   */
+  accessCode: string
+  /**
+   * Shared secret from Telegram bot/app
+   */
+  secret: string
+}

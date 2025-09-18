@@ -3,6 +3,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StatusDto = {
-    status: string;
-};
-
+  status: string
+}

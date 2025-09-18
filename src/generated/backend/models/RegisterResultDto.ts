@@ -3,13 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type RegisterResultDto = {
-    /**
-     * User unique id (sub)
-     */
-    userSub: string;
-    /**
-     * Whether the user is confirmed and can login
-     */
-    userConfirmed: boolean;
-};
-
+  /**
+   * User unique id (sub)
+   */
+  userSub: string
+  /**
+   * Whether the user is confirmed and can login
+   */
+  userConfirmed: boolean
+}

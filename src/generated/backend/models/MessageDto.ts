@@ -3,6 +3,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type MessageDto = {
-    message: string;
-};
-
+  message: string
+}

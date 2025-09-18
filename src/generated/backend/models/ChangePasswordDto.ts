@@ -3,11 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ChangePasswordDto = {
-    /**
-     * Access token of the authenticated session
-     */
-    accessToken: string;
-    previousPassword: string;
-    proposedPassword: string;
-};
-
+  /**
+   * Access token of the authenticated session
+   */
+  accessToken: string
+  previousPassword: string
+  proposedPassword: string
+}

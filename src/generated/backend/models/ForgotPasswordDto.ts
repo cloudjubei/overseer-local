@@ -3,6 +3,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ForgotPasswordDto = {
-    username: string;
-};
-
+  username: string
+}

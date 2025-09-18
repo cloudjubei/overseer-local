@@ -26,7 +26,9 @@ export function sameHourOfDay(d1: Date, d2: Date): boolean {
   return d1.getHours() === d2.getHours()
 }
 
-export function getMessageFromMetadata(metadata: Record<string, any> | undefined): string | undefined {
+export function getMessageFromMetadata(
+  metadata: Record<string, any> | undefined,
+): string | undefined {
   if (!metadata || typeof metadata !== 'object') return undefined
   // Common keys we might support
   const candidates = ['message', 'text', 'content', 'msg']

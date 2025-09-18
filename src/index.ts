@@ -102,7 +102,10 @@ async function startBackendFlow(params: {
   } catch (err: any) {
     // Minimal user-facing error message
     console.error('startBackendFlow error', err?.response?.data || err?.message || err)
-    await bot.sendMessage(chatId, 'Sorry, failed to start the conversation. Please try again later.')
+    await bot.sendMessage(
+      chatId,
+      'Sorry, failed to start the conversation. Please try again later.',
+    )
   }
 }
 
@@ -142,14 +145,24 @@ bot.on('message', async (msg: Message) => {
     // /profile -> start profile update flow via backend conversations
     if (/^\/(profile)(@\w+)?$/i.test(text)) {
       const PROFILE_UPDATE_FLOW_ID = 'profile.update' // Backend flow id for updating a profile
-      await startBackendFlow({ userId, chatId: chat.id, flowId: PROFILE_UPDATE_FLOW_ID, externalId: userId })
+      await startBackendFlow({
+        userId,
+        chatId: chat.id,
+        flowId: PROFILE_UPDATE_FLOW_ID,
+        externalId: userId,
+      })
       return
     }
 
     // /newgoal -> start new goal flow via backend conversations
     if (/^\/(newgoal)(@\w+)?$/i.test(text)) {
       const NEW_GOAL_FLOW_ID = 'goals.new' // Backend flow id for creating a new goal
-      await startBackendFlow({ userId, chatId: chat.id, flowId: NEW_GOAL_FLOW_ID, externalId: userId })
+      await startBackendFlow({
+        userId,
+        chatId: chat.id,
+        flowId: NEW_GOAL_FLOW_ID,
+        externalId: userId,
+      })
       return
     }
 
@@ -180,7 +193,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       } catch {}
     }
     if (cb.message?.chat?.id) {
-      await bot.sendMessage(cb.message.chat.id, 'Sorry, something went wrong handling your selection.')
+      await bot.sendMessage(
+        cb.message.chat.id,
+        'Sorry, something went wrong handling your selection.',
+      )
     }
   }
 })

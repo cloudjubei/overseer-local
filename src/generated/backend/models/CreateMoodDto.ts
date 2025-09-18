@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CreateMoodDto = {
-    score: number;
-    text?: string;
-};
-
+  score: number
+  text?: string
+}

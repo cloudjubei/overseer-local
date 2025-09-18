@@ -3,13 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ConversationErrorDto = {
-    /**
-     * Error message
-     */
-    message: string;
-    /**
-     * Whether the client can retry the last step
-     */
-    retry: boolean;
-};
-
+  /**
+   * Error message
+   */
+  message: string
+  /**
+   * Whether the client can retry the last step
+   */
+  retry: boolean
+}

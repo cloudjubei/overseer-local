@@ -81,7 +81,7 @@ export function setSession(session: SessionData) {
     conversationState:
       session.conversationState !== undefined
         ? session.conversationState
-        : prev?.conversationState ?? undefined,
+        : (prev?.conversationState ?? undefined),
   }
   all[session.userId] = merged
   writeAll(all)

@@ -3,13 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type PromptOptionDto = {
-    /**
-     * Visible label for the selectable option
-     */
-    label: string;
-    /**
-     * Submitted value if the option is selected
-     */
-    value: string;
-};
-
+  /**
+   * Visible label for the selectable option
+   */
+  label: string
+  /**
+   * Submitted value if the option is selected
+   */
+  value: string
+}

@@ -5,7 +5,12 @@ import { ensureBackendConfigured, ensureAccessTokenForUser } from '../lib/auth'
 
 export type ConversationHandleResult =
   | { type: 'prompt'; flow: string; sessionId: string; prompt: ConversationResponseDto['prompt'] }
-  | { type: 'success'; flow: string; sessionId: string; success: ConversationResponseDto['success'] }
+  | {
+      type: 'success'
+      flow: string
+      sessionId: string
+      success: ConversationResponseDto['success']
+    }
   | { type: 'error'; flow: string; sessionId: string; error: ConversationResponseDto['error'] }
 
 function extractExternalId(msg: TelegramBot.Message): string | undefined {

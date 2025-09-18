@@ -3,13 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ConversationSuccessDto = {
-    /**
-     * Success message
-     */
-    message: string;
-    /**
-     * Optional payload (e.g., nextFlow, tokens)
-     */
-    payload?: Record<string, any>;
-};
-
+  /**
+   * Success message
+   */
+  message: string
+  /**
+   * Optional payload (e.g., nextFlow, tokens)
+   */
+  payload?: Record<string, any>
+}
