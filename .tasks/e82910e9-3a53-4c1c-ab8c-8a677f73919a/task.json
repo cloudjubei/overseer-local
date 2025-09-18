@@ -36,12 +36,13 @@
     },
     {
       "id": "654283d5-7b61-4f49-9a64-c420fe777ded",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Conversation Manager into Message and Callback Handlers",
       "description": "Modify `src/index.ts`. In the `bot.on('message', ...)` handler, call the new `handleConversationMessage` function. If the function indicates that the message was handled as part of an active conversation, the subsequent command/message processing should be skipped. Similarly, update the `bot.on('callback_query', ...)` handler to delegate callbacks that are part of a conversation to the new manager.",
       "context": [],
       "createdAt": "2025-09-18T13:14:14.291Z",
-      "updatedAt": "2025-09-18T13:14:14.291Z"
+      "updatedAt": "2025-09-18T13:59:24.771Z",
+      "completedAt": "2025-09-18T13:59:24.771Z"
     },
     {
       "id": "89f444c3-5f3f-4ea0-9630-a7e8f45d2476",
