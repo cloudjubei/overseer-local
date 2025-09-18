@@ -1,6 +1,6 @@
 {
   "id": "e82910e9-3a53-4c1c-ab8c-8a677f73919a",
-  "status": "?",
+  "status": "-",
   "title": "Use the backend's conversation system",
   "description": "The backend defines endpoints to use for conversation flows.\nThey provide ways for a client to start a flow and be given exact instructions as to what to present to the user and what path the user can take. This app needs to remain dumb and rely on the backend for controlling the conversation flows.\n\nAll the information about the backend endpoints is both in the `swagger.json` as well as the generated `src/generated/backend/services/ConversationsService.ts` and the models `src/generated/backend/models/ConversationErrorDto.ts`, `src/generated/backend/models/ConversationPromptDto.ts`, `src/generated/backend/models/ConversationResponseDto.ts`, `src/generated/backend/models/ConversationSuccessDto.ts`, `src/generated/backend/models/HandleInputDto.ts` , `src/generated/backend/models/StartFlowDto.ts`,\n`src/generated/backend/models/PromptFieldDto.ts`,\n`src/generated/backend/models/PromptOptionDto.ts` and\n `src/generated/backend/models/MessageDto.ts` .\n\nAs always make sure you adhere to `docs/CODE_STANDARD.md` and `docs/TESTING.md` .",
   "features": [
@@ -66,13 +66,13 @@
     },
     {
       "id": "f47ac454-a8a1-480c-9b4d-f129e3d6fddc",
-      "status": "?",
+      "status": "-",
       "title": "Handle Conversation Completion and Errors",
       "description": "Enhance `conversationManager.ts` to fully handle `ConversationSuccessDto` and `ConversationErrorDto`. When a success or error response is received from the backend, the manager should send the relevant message to the user and, crucially, clear the `conversationState` from the user's session to properly terminate the flow.",
       "context": [],
       "createdAt": "2025-09-18T13:14:14.291Z",
-      "updatedAt": "2025-09-18T14:04:47.911Z",
-      "rejection": "Blocked: Agent loop failed: {\"message\":\"\"}"
+      "updatedAt": "2025-09-18T19:13:25.850Z",
+      "blockers": []
     },
     {
       "id": "c60db066-6ac6-4eca-9a2b-e894d7f3f1f9",
