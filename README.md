@@ -86,7 +86,7 @@ Authentication
 - The first message triggers an auth check.
 - The bot asks for your access code. It then calls the backend with:
   { externalId: <telegram user id>, accessCode, secret: BACKEND_SHARED_SECRET }
-- On success, a session with tokens is persisted in .factory/sessions.json for reuse.
+- On success, a session with tokens is persisted in .sessions/sessions.json for reuse.
 - /logout clears the stored session.
 
 Available commands
@@ -108,7 +108,7 @@ General checklist
 - /logout: Verify you are prompted for access code again on next message
 
 Sessions
-- Sessions persist to .factory/sessions.json
+- Sessions persist to .sessions/sessions.json
 - To reset a user locally, either use /logout or delete their entry in this file while the bot is stopped
 
 Scheduler (daily placeholder check-ins)
@@ -144,17 +144,11 @@ The simplest and resilient approach is to run the bot under a process manager li
 - cp .env.example .env and set TELEGRAM_BOT_TOKEN, BACKEND_SHARED_SECRET, BACKEND_BASE_URL (if not default), TZ
 - npm install
 - npm run generate:backend
+- sudo npm i -g pm2
 
-5) Choose a runner and start the bot with PM2
-Option A: tsx (recommended)
+5) Start the bot with PM2
 - npm i -D tsx typescript @types/node
-- sudo npm i -g pm2
 - npx pm2 start "npx tsx src/index.ts" --name compass-bot
-
-Option B: ts-node
-- npm i -D ts-node typescript @types/node
-- sudo npm i -g pm2
-- npx pm2 start "npx ts-node --esm src/index.ts" --name compass-bot
 
 6) Enable PM2 startup and save
 - pm2 save
@@ -178,32 +172,7 @@ Option B: ts-node
 - Consider setting NODE_ENV=production and a proper TZ in .env
 - Monitor memory/CPU with pm2 monit or CloudWatch
 
-Testing the UI
-A) Test the live Telegram UI (recommended)
-- Use the checklist in "Testing Locally" against your deployed bot
-- Validate all commands: /start, /profile, /newgoal, /microgoals, /macrogoals, /cancel, /logout
-- Verify scheduler messages appear at the expected local times based on TZ
-
-B) View the mock interface (mock-interface.tsx)
-The mock files (mock-interface.tsx, mock-interface.css) illustrate the intended UI/UX but are not part of the running bot. To preview them quickly:
-Option 1: Quick React sandbox
-- Use StackBlitz or CodeSandbox with a React + TypeScript template
-- Install lucide-react
-- Create a minimal Button component to replace the missing import:
-  - Replace the line: import { Button } from "@/components/ui/button"
-  - With:
-    export function Button(props: any) { return <button {...props} /> }
-- The CSS file contains Tailwind directives and design tokens; if your sandbox isn’t configured for Tailwind, you can skip importing mock-interface.css to preview structure and interactions.
-
-Option 2: Local Vite project
-- npm create vite@latest mock-ui -- --template react-ts
-- cd mock-ui && npm install
-- npm install lucide-react
-- In src/, add mock-interface.tsx content and a simple Button component as above
-- In src/App.tsx, render <ChatInterface />
-- If you want styling, integrate Tailwind per Vite+Tailwind docs, then adapt mock-interface.css accordingly. Otherwise, omit styling for a quick functional preview.
-
 Notes
 - The bot makes as few decisions as possible and pushes logic to the backend via the generated client.
-- Authentication persists between sessions via .factory/sessions.json. Remove with /logout or by deleting the file while the bot is stopped.
+- Authentication persists between sessions via .sessions/sessions.json. Remove with /logout or by deleting the file while the bot is stopped.
 - When changing swagger.json, regenerate the client (npm run generate:backend) and restart the bot.

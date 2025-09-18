@@ -104,3 +104,4 @@ out/
 # APP SPECIFIC
 old-system-reference/
 .factory/
+.sessions/

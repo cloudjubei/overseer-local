@@ -9,8 +9,8 @@ export interface UserSession {
   expiresAt?: number // epoch seconds
 }
 
-const DATA_DIR = path.resolve('.factory')
-const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json')
+const DATA_DIR = path.resolve('.sessions')
+const SESSIONS_FILE = path.join(DATA_DIR, '.sessions.json')
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {

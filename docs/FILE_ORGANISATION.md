@@ -13,7 +13,7 @@ Key Directories and Files
     - backend/: Code generated from swagger.json using openapi-typescript-codegen (DO NOT EDIT MANUALLY). Regenerate with npm run generate:backend.
   - lib/
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
-    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .factory/sessions.json. Exposes getAllUserIds() to iterate all known users.
+    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/sessions.json. Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
     - scheduler.ts: Cron-based daily check-ins. Uses node-cron to send a simple 'hello' message to all authenticated users twice a day (09:00 and 19:00) in the configured timezone. Designed to be easily extensible.
   - flows/
