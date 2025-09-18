@@ -617,7 +617,7 @@ export default function ProjectTimelineView() {
     const relativeLeft = cellRect.left - containerRect.left
 
     // Delta required to center the cell within the right-hand scrollable area
-    const delta = (relativeLeft - leftColWidth) + cellRect.width / 2 - visibleRightWidth / 2
+    const delta = relativeLeft - leftColWidth + cellRect.width / 2 - visibleRightWidth / 2
     const target = Math.max(0, Math.min(container.scrollWidth, container.scrollLeft + delta))
 
     container.scrollTo({ left: target, behavior: 'smooth' })
@@ -775,7 +775,10 @@ export default function ProjectTimelineView() {
                 style={{ gridTemplateColumns: gridTemplate }}
                 data-units-row="true"
               >
-                <div className="sticky left-0 z-10 bg-base px-3 py-2 text-xs font-medium text-secondary flex items-center" data-left-col="true"></div>
+                <div
+                  className="sticky left-0 z-10 bg-base px-3 py-2 text-xs font-medium text-secondary flex items-center"
+                  data-left-col="true"
+                ></div>
                 {units.map((u, i) => {
                   const isToday =
                     zoom === 'day'
