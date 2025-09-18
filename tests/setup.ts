@@ -27,7 +27,7 @@ process.env.TELEGRAM_BOT_TOKEN = 'test-telegram-token';
 process.env.BACKEND_SHARED_SECRET = 'test-backend-secret';
 
 // Create a temporary directory for session storage to isolate tests
-const tempSessionsDir = path.join(__dirname, 'temp_sessions');
+const tempSessionsDir = path.join(__dirname, '../.temp_sessions');
 
 // Clean up any previous session files before starting and create the directory
 if (fs.existsSync(tempSessionsDir)) {

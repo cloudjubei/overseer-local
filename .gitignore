@@ -105,3 +105,4 @@ out/
 old-system-reference/
 .factory/
 .sessions/
+.temp_sessions/
