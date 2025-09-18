@@ -10,9 +10,9 @@
     "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
   },
   "taskIdToDisplayIndex": {
-    "579568d2-35fa-4c49-baa4-9a062fcf8461": 1,
-    "a07d83ae-858c-4785-98b5-193d9ebeb51e": 2,
-    "bcf7668d-58f6-4035-b695-0d1bcbe83aef": 3,
+    "bcf7668d-58f6-4035-b695-0d1bcbe83aef": 1,
+    "579568d2-35fa-4c49-baa4-9a062fcf8461": 2,
+    "a07d83ae-858c-4785-98b5-193d9ebeb51e": 3,
     "e82910e9-3a53-4c1c-ab8c-8a677f73919a": 4
   }
 }
