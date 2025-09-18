@@ -145,6 +145,49 @@ async function main() {
     'View your current micro goals'
   );
 
+  // Macro goals listing command
+  commands.register(
+    'macrogoals',
+    async ({ bot, msg }) => {
+      const chatId = msg.chat.id;
+      const userId = getTelegramUserId(msg);
+      if (!userId) {
+        await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.');
+        return;
+      }
+
+      try {
+        await bot.sendChatAction(chatId, 'typing');
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const res = await GoalsService.goalsControllerList({});
+        const items = Array.isArray(res?.items) ? res.items : [];
+        const macro = items.filter((g: any) => g?.type === 'MACRO');
+
+        if (!macro.length) {
+          await bot.sendMessage(chatId, 'You have no macro goals yet.');
+          return;
+        }
+
+        const lines: string[] = [];
+        lines.push(`You have ${macro.length} macro goal${macro.length === 1 ? '' : 's'}:`);
+        for (const g of macro) {
+          const status = g.completedAt ? '✅' : '•';
+          const category = typeof g.category === 'string' ? g.category : 'UNKNOWN';
+          const difficulty = typeof g.difficulty === 'string' ? g.difficulty : 'UNKNOWN';
+          const text = typeof g.text === 'string' ? g.text : '';
+          lines.push(`${status} [${category}/${difficulty}] ${text}`);
+        }
+
+        await bot.sendMessage(chatId, lines.join('\n'));
+      } catch (err: any) {
+        console.error('Failed to fetch macro goals', err?.response?.data || err?.message || err);
+        await bot.sendMessage(chatId, 'Sorry, I could not retrieve your macro goals right now. Please try again later.');
+      }
+    },
+    'View your current macro goals'
+  );
+
   // Optional: expose /cancel to cancel active flows
   commands.register(
     'cancel',
