@@ -5,13 +5,20 @@
 
 import TelegramBot from 'node-telegram-bot-api';
 import { config } from './config/env';
-import { handleAuthMessage, getTelegramUserId, logoutUser } from './lib/auth';
+import { handleAuthMessage, getTelegramUserId, logoutUser, ensureAccessTokenForUser, ensureBackendConfigured } from './lib/auth';
 import {
   startProfileFlow,
   handleProfileFlowMessage,
   isInProfileFlow,
   cancelProfileFlow,
 } from './flows/profile';
+import {
+  startNewGoalFlow,
+  handleNewGoalFlowMessage,
+  isInNewGoalFlow,
+  cancelNewGoalFlow,
+  handleNewGoalCallback,
+} from './flows/newGoal';
 
 // Lazy import generated client services to avoid build-time dependency when not generated yet
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -99,6 +106,21 @@ async function main() {
       await startProfileFlow(bot, userId, chatId);
     },
     'Update your profile (DOB, gender, weight, height)'
+  );
+
+  // New goal creation flow
+  commands.register(
+    'newgoal',
+    async ({ bot, msg }) => {
+      const chatId = msg.chat.id;
+      const userId = getTelegramUserId(msg);
+      if (!userId) {
+        await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.');
+        return;
+      }
+      await startNewGoalFlow(bot, userId, chatId);
+    },
+    'Create a new goal from free text (with AI suggestions)'
   );
 
   // Micro goals listing command
@@ -196,6 +218,8 @@ async function main() {
       if (!userId) return;
       if (isInProfileFlow(userId)) {
         await cancelProfileFlow(bot, userId);
+      } else if (isInNewGoalFlow(userId)) {
+        await cancelNewGoalFlow(bot, userId);
       } else {
         await bot.sendMessage(msg.chat.id, 'Nothing to cancel.');
       }
@@ -232,6 +256,10 @@ async function main() {
         await handleProfileFlowMessage(bot, userId, msg);
         return;
       }
+      if (isInNewGoalFlow(userId)) {
+        await handleNewGoalFlowMessage(bot, userId, msg);
+        return;
+      }
 
       const text = msg.text || '';
       if (!text.startsWith('/')) {
@@ -256,6 +284,28 @@ async function main() {
     } catch (err) {
       console.error('Error handling message:', err);
       await bot.sendMessage(msg.chat.id, 'Sorry, something went wrong while processing your message.');
+    }
+  });
+
+  // Handle inline keyboard callbacks (e.g., goal suggestions selection/refine)
+  bot.on('callback_query', async (query) => {
+    try {
+      // Ensure backend client and token for this user
+      await ensureBackendConfigured();
+      const userId = query.from?.id ? String(query.from.id) : undefined;
+      if (!userId) {
+        try { await bot.answerCallbackQuery(query.id, { text: 'Cannot identify user', show_alert: false }); } catch {}
+        return;
+      }
+      ensureAccessTokenForUser(userId);
+
+      const handled = await handleNewGoalCallback(bot, userId, query);
+      if (!handled) {
+        // Not for our flows; ignore silently or add future handlers
+      }
+    } catch (err) {
+      console.error('Error handling callback_query:', err);
+      try { await bot.answerCallbackQuery(query.id, { text: 'An error occurred', show_alert: false }); } catch {}
     }
   });
 

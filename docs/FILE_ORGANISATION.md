@@ -6,7 +6,7 @@ Overview
 
 Key Directories and Files
 - src/
-  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command and global authentication gate. Also registers /profile and /cancel commands, and routes messages into conversation flows.
+  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command and global authentication gate. Also registers /profile and /cancel commands, and routes messages into conversation flows. Handles inline callback queries (goal suggestions selection, etc.).
   - config/
     - env.ts: Centralized environment loader using dotenv. Validates required variables and exposes a typed config.
   - generated/
@@ -14,9 +14,10 @@ Key Directories and Files
   - lib/
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
     - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .factory/sessions.json.
-    - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens.
+    - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
   - flows/
     - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed).
+    - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
 - docs/
   - FILE_ORGANISATION.md: This document. Update when major structural changes occur.
 - mock-interface.tsx, mock-interface.css: UI mock and styles for reference in designing user flows.
@@ -64,6 +65,14 @@ Profile Update Flow (Implemented)
 - Command: /profile starts a guided flow asking for DOB (YYYY-MM-DD), gender (buttons + free text), weight (free text), and height (free text). Users can type 'skip' to leave any field unchanged and /cancel to abort.
 - After collecting answers, the bot sends the data to the backend using the generated ProfilesService. It first attempts PATCH /profiles/me; if the profile does not exist (404), it falls back to POST /profiles/me to create it.
 - Free-text for weight and height is passed as weight_raw and height_raw for backend normalization.
+
+New Goal Flow (Implemented)
+- Command: /newgoal starts a flow that asks the user to describe their goal in free text.
+- The bot sends this text to POST /goals/ai/suggestions and receives AI-generated suggestions.
+- Suggestions are displayed using an inline keyboard. The user can:
+  - Tap a suggestion to immediately create it via POST /goals.
+  - Tap "Refine message" to send a new/edited description and request suggestions again.
+  - Tap "Cancel" to abort.
 
 Notes
 - Do not modify files under old-system-reference/.

@@ -96,12 +96,13 @@
     },
     {
       "id": "4eed9e1f-a2a5-4ad8-822c-ad5810583d32",
-      "status": "-",
+      "status": "+",
       "title": "Create New Goal - Handle AI Suggestions",
       "description": "After the backend processes the user's initial goal description, it will respond with AI-generated suggestions. This feature involves receiving these suggestions and presenting them to the user. Use Telegram's inline keyboards to display the suggested goals as buttons. Also, provide an option for the user to refine their initial message if none of the suggestions are suitable.",
       "context": [],
       "createdAt": "2025-09-18T01:29:35.231Z",
-      "updatedAt": "2025-09-18T01:29:35.231Z"
+      "updatedAt": "2025-09-18T01:53:30.097Z",
+      "completedAt": "2025-09-18T01:53:30.097Z"
     },
     {
       "id": "5c7e58ae-1324-4be5-809a-f5c2f9640ecd",
