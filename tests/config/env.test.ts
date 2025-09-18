@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Mock dotenv to prevent it from loading .env files and interfering with tests
+vi.mock('dotenv', () => ({
+  config: vi.fn(),
+}));
+
 const originalEnv = { ...process.env };
 
 // This function dynamically imports the module to re-evaluate it with new env vars

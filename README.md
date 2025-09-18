@@ -2,12 +2,12 @@
 
 A TypeScript-based Telegram bot for Compass that relies on a generated backend client from swagger.json and the node-telegram-bot-api library. It authenticates users using a shared secret and a per-user access code validated by the backend.
 
-Important
+## Important
 - Do not modify files under old-system-reference/.
 - Do not manually edit generated files under src/generated/backend/.
 - Read and follow the Code Standard in docs/CODE_STANDARD.md.
 
-Contents
+## Contents
 - Overview
 - Code Standard
 - Prerequisites
@@ -20,7 +20,7 @@ Contents
 - Deploying on AWS EC2 (PM2 recommended)
 - Testing the UI (Telegram flows and mock interface)
 
-Overview
+## Overview
 - Tech:
   - TypeScript + ESM
   - node-telegram-bot-api for Telegram
@@ -34,16 +34,16 @@ Overview
   - List micro and macro goals (/microgoals, /macrogoals)
   - Hourly check-ins sent based on backend schedule (timezone-aware)
 
-Code Standard
+## Code Standard
 - Please read docs/CODE_STANDARD.md before contributing. It describes architecture, style, and patterns used across this repository.
 
-Prerequisites
+## Prerequisites
 - Node.js 18+ (LTS recommended) and npm 9+
 - A Telegram bot token from @BotFather
 - A backend URL and a shared secret provided by your backend team
 - An access code generation/management process on the backend side
 
-Local Setup and Run
+## Local Setup and Run
 1) Clone and configure environment
 - git clone <repo-url>
 - cd compass-telegram
@@ -71,13 +71,13 @@ You should see a log similar to:
 - Open your bot chat using the handle created with @BotFather
 - Send /start and follow prompts
 
-Backend Client Generation
+## Backend Client Generation
 - Script: npm run generate:backend
 - Output: src/generated/backend
 - Generator: openapi-typescript-codegen (axios client, useOptions)
 - Do not modify generated files manually.
 
-Environment Variables
+## Environment Variables
 Required
 - TELEGRAM_BOT_TOKEN: Your bot token from @BotFather
 - BACKEND_SHARED_SECRET: Shared secret the bot sends to backend during login
@@ -87,7 +87,7 @@ Optional
 - NODE_ENV: development | test | production (default development)
 - TZ: Timezone for scheduled jobs (default UTC). Example: Europe/London
 
-Using the Bot (commands and flows)
+## Using the Bot (commands and flows)
 Authentication
 - The first message triggers an auth check.
 - The bot asks for your access code. It then calls the backend with:
@@ -104,12 +104,15 @@ Available commands
 - /cancel: Cancels current flow (/profile or /newgoal)
 - /logout: Clears your saved session
 
-Testing (vital for quality)
-- High-quality, well-tested code is critical. We aim for near-100% automated test coverage across the non-generated codebase.
-- Please read **docs/TESTING.md** for detailed guidance on writing tests, mocking backend/AI responses, and our standards for validating input/output schemas.
-- Also see **docs/CODE_STANDARD.md** for architectural practices that must be followed.
+## Testing (Vital for Quality)
+High-quality, well-tested code is critical for the reliability of this bot. We aim for near-100% automated test coverage across all non-generated code.
 
-Testing Locally
+All contributors are expected to write and maintain tests for their code. Before submitting a pull request, ensure that all tests are passing (`npm test`) and that coverage has not decreased.
+
+- **For detailed guidance on our testing philosophy, tools, and mocking strategies, please read [docs/TESTING.md](docs/TESTING.md).**
+- For architectural best practices that make code more testable, refer to [docs/CODE_STANDARD.md](docs/CODE_STANDARD.md).
+
+## Testing Locally
 General checklist
 - /start: Ensure the bot prompts for an access code when unauthenticated
 - Enter a valid access code: Expect "You are now authenticated."
@@ -118,17 +121,17 @@ General checklist
 - /microgoals and /macrogoals: Verify lists show as expected (or the empty-state message)
 - /logout: Verify you are prompted for an access code again on next message
 
-Sessions
+### Sessions
 - Sessions persist to .sessions/.sessions.json (override in tests via SESSIONS_DIR)
 - To reset a user locally, either use /logout or delete their entry in this file while the bot is stopped
 
-Scheduler (hourly check-ins)
+### Scheduler (hourly check-ins)
 - A cron task runs at the start of every hour (respecting TZ). For every authenticated user, it fetches their check-ins and sends those whose start time hour matches the current hour. Messages are taken from metadata.message (fallbacks to metadata.text/content/msg).
 - To test without waiting:
   - Temporary method for development only: change the cron expression in src/lib/scheduler.ts to run every minute (e.g., "*/1 * * * *"), restart the bot, and observe messages. Revert before committing.
   - In automated tests we use helper tickSchedulerOnce to run the logic immediately with mocks.
 
-Deploying on AWS EC2
+## Deploying on AWS EC2
 The simplest and resilient approach is to run the bot under a process manager like PM2 on a small Ubuntu instance.
 
 1) Provision an EC2 instance
@@ -183,7 +186,7 @@ The simplest and resilient approach is to run the bot under a process manager li
 - Consider setting NODE_ENV=production and a proper TZ in .env
 - Monitor memory/CPU with pm2 monit or CloudWatch
 
-Notes
+## Notes
 - The bot makes as few decisions as possible and pushes logic to the backend via the generated client.
 - Authentication persists between sessions via .sessions/.sessions.json. Remove with /logout or by deleting the file while the bot is stopped.
 - When changing swagger.json, regenerate the client (npm run generate:backend) and restart the bot.

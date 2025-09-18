@@ -4,7 +4,6 @@ import fs from 'fs';
 
 // Mock the generated backend services
 vi.mock('../src/generated/backend', () => ({
-  // Mock all named exports from the generated client
   AuthService: {
     authControllerLoginTelegram: vi.fn(),
   },
@@ -20,7 +19,6 @@ vi.mock('../src/generated/backend', () => ({
     conversationsControllerHandle: vi.fn(),
     conversationsControllerCancel: vi.fn(),
   },
-  // Add mocks for any other services as needed
 }));
 
 // Set up a consistent test environment
@@ -30,9 +28,13 @@ process.env.BACKEND_SHARED_SECRET = 'test-backend-secret';
 
 // Create a temporary directory for session storage to isolate tests
 const tempSessionsDir = path.join(__dirname, 'temp_sessions');
-if (!fs.existsSync(tempSessionsDir)) {
-  fs.mkdirSync(tempSessionsDir);
+
+// Clean up any previous session files before starting and create the directory
+if (fs.existsSync(tempSessionsDir)) {
+  fs.rmSync(tempSessionsDir, { recursive: true, force: true });
 }
+fs.mkdirSync(tempSessionsDir, { recursive: true });
+
 process.env.SESSIONS_DIR = tempSessionsDir;
 
 // Clean up the temporary sessions directory after all tests are done

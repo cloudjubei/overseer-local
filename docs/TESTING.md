@@ -1,81 +1,71 @@
 # Testing Guidance
 
 ## Philosophy
-High-quality, well-tested code is critical for the reliability of the Compass Telegram Bot. We aim for near-100% automated test coverage across the non-generated codebase. Every new feature or bug fix must be accompanied by relevant tests.
+High-quality, well-tested code is critical to the success and reliability of this project. We aim for near-100% automated test coverage across all non-generated code. Every new feature should be accompanied by comprehensive tests, and bug fixes should include a regression test to prevent future issues.
 
-This document provides guidance on our testing strategy, tools, and standards. For architectural and code style conventions, please refer to `docs/CODE_STANDARD.md`.
+Tests should be fast, reliable, and easy to write. They serve as living documentation for our codebase, demonstrating how different components are expected to behave in various scenarios.
 
 ## Tooling
-- **Test Runner**: [Vitest](https://vitest.dev/) - A fast and modern test runner with a Jest-compatible API.
-- **Mocks & Spies**: Vitest's built-in `vi` object.
-- **Assertions**: Vitest's built-in `expect`.
+- **Test Runner**: [Vitest](https://vitest.dev/) is used for its speed, modern ESM support, and compatibility with Vite. It provides a Jest-compatible API.
+- **Mocking**: Vitest's built-in `vi` object is used for mocking, spying, and stubbing. See `vi.mock()` for module-level mocking and `vi.spyOn()` for tracking calls to specific functions.
+- **Assertions**: We use Vitest's built-in `expect` assertion library, which follows the Chai/Jest API.
 
-Tests are located in the `tests/` directory and follow the `*.test.ts` naming convention.
+## Project Test Setup
+- **Global Setup**: The `tests/setup.ts` file is executed before the test suite runs. It is responsible for:
+  - Setting essential environment variables (`NODE_ENV`, tokens, secrets) to ensure a consistent test environment.
+  - Creating a temporary directory for session files (`SESSIONS_DIR`) to isolate test runs from development data and each other.
+  - Globally mocking the generated backend client (`src/generated/backend`) to prevent actual network requests during tests.
+- **Test Location**: Tests for a file `src/lib/module.ts` should be located at `tests/lib/module.test.ts`.
 
-## How to Write Tests
+## Mocking Strategy
+- **Backend Services**: The entire generated backend client is mocked in `tests/setup.ts`. In your tests, you can provide specific mock implementations for the service methods you expect to be called. Always reset mocks (`vi.resetAllMocks()`) in a `beforeEach` block to ensure tests are isolated.
 
-### General Principles
-1.  **Isolate Units**: Tests should be small and focused on a single unit of functionality (e.g., one function or method).
-2.  **AAA Pattern**: Structure tests using the Arrange-Act-Assert pattern:
-    -   **Arrange**: Set up all preconditions, mocks, and inputs.
-    -   **Act**: Execute the function or method being tested.
-    -   **Assert**: Check that the outcome (return value, side effects, mock calls) is what you expect.
-3.  **Descriptive Naming**: Use `describe`, `it`, and `test` blocks to create a clear, readable hierarchy. The `it` block should describe the expected behavior, e.g., `it('should return an authenticated user session on successful login', () => { ... });`.
+  ```typescript
+  import { ConversationsService } from '../src/generated/backend';
+  import { vi } from 'vitest';
 
-### Mocking Strategy
-Effective mocking is key to isolating units and ensuring tests are fast and reliable. Our global test setup is in `tests/setup.ts`.
+  // In your test:
+  vi.mocked(ConversationsService.conversationsControllerHandle).mockResolvedValue({ ... });
+  ```
 
-#### Mocking Backend Services
-All backend services, which are generated under `src/generated/backend/`, must be mocked. Never make live API calls in unit tests.
+- **Dependencies**: Use `vi.mock('path/to/module')` at the top of your test file to mock dependencies like `sessionStore`, `config`, or third-party libraries (`node-cron`). This allows you to control their behavior and isolate the unit under test.
 
-The `tests/setup.ts` file uses `vi.mock` to replace the entire generated module with mock implementations. You can then control the behavior of each service method on a per-test basis using `mockResolvedValue` or `mockRejectedValue`.
+- **Internal Functions**: To test a function that calls another function within the same module, direct mocking won't work. Instead, use a namespace import and `vi.spyOn`:
 
-**Example**: Mocking a `GoalsService` call:
+  ```typescript
+  import * as myModule from '../src/myModule';
 
-```typescript
-import { GoalsService } from '../src/generated/backend';
-import { vi } from 'vitest';
-
-// This mock is often placed in tests/setup.ts or at the top of a test file
-vi.mock('../src/generated/backend');
-
-describe('some feature that uses GoalsService', () => {
-  it('should handle a list of goals correctly', async () => {
-    // Arrange
-    const mockGoals = [{ id: '1', title: 'Test Goal' }];
-    vi.mocked(GoalsService.GoalsController_list).mockResolvedValue(mockGoals as any);
-
-    // Act
-    const result = await someFunctionThatCallsGoalService();
-
-    // Assert
-    expect(GoalsService.GoalsController_list).toHaveBeenCalledWith({ limit: 10 });
-    expect(result).toEqual(mockGoals);
+  it('should call internal function', () => {
+    const internalSpy = vi.spyOn(myModule, 'internalFunction');
+    myModule.publicFunction();
+    expect(internalSpy).toHaveBeenCalled();
   });
-});
-```
+  ```
 
-#### Mocking AI/LLM Responses
-When testing features that rely on AI-generated content (e.g., goal suggestions), it is crucial to mock the backend responses that would typically come from an LLM. This allows us to test for a wide range of scenarios in a deterministic way.
+## Writing Tests
+- **Arrange, Act, Assert**: Structure your tests clearly following this pattern.
+- **Describe and It**: Use `describe` blocks to group tests for a specific function or module. Use `it` blocks with descriptive names for individual test cases (e.g., `it('should return an error if the user is not found')`).
+- **Edge Cases**: Test not only the "happy path" but also edge cases and failure modes:
+  - Invalid or missing input (e.g., `null`, `undefined`, empty strings).
+  - Errors thrown by mocked dependencies.
+  - Unexpected responses from backend APIs (e.g., empty arrays, missing properties).
+- **Schema Validation**: When interacting with the backend, ensure your code is robust against malformed data. While the generated client provides types, your handling logic should gracefully manage scenarios where the runtime data does not match the expected schema. Tests should validate this behavior by mocking responses with missing or incorrect data types.
 
--   **Success Case**: Mock a typical, well-formed AI response.
--   **Empty/No Suggestions**: Mock an empty array or null response to ensure the bot handles it gracefully.
--   **Malformed Data**: Mock a response that deviates from the expected schema (e.g., missing required fields). The bot should handle this without crashing, ideally logging an error and presenting a user-friendly message.
--   **Backend Errors**: Use `mockRejectedValue` to simulate a 500 error from the backend.
-
-### Schema and Data Validation
-While the backend is the ultimate source of truth for data schemas, the bot must be resilient to unexpected data shapes. Tests should validate that our code correctly handles both valid and invalid data from the backend.
-
--   **Input Validation**: For any user input that is parsed or transformed (e.g., dates, numbers), add tests for invalid formats.
--   **Output Validation**: When the bot receives data from the backend, especially within conversation flows, ensure it can handle missing or malformed fields gracefully. For example, if a `ConversationPromptDto` is missing a `title`, the rendering logic should not crash.
-
-## Coverage Expectations
-We aim for **as close to 100% line and branch coverage as possible**. While 100% is not always practical (e.g., for unavoidable error paths in third-party libraries), all new business logic must be fully tested.
-
-Use the coverage report to identify untested code paths:
+## Running Tests
+Execute the test suite with the following command:
 
 ```bash
-npm run test:coverage
+npm test
 ```
 
-Any pull request that decreases overall test coverage will not be merged until coverage is improved.
+To run tests in watch mode during development:
+
+```bash
+npm run test:watch
+```
+
+To check test coverage:
+
+```bash
+npm run coverage
+```
