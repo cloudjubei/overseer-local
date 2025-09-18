@@ -77,7 +77,12 @@ export default function FeatureCreateView({
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         footer={
           <div className="flex justify-between gap-2">
-            <button type="button" className="btn-secondary" onClick={attemptClose} disabled={submitting}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={attemptClose}
+              disabled={submitting}
+            >
               Cancel
             </button>
             <button
