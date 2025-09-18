@@ -3,8 +3,120 @@
   "status": "-",
   "title": "Create the initial app",
   "description": "This project is a rewrite of an old system kept here for reference (DO NOT MODIFY) under `old-system-reference` . There was a previous Telegram bot created that can be referenced under `old-system-reference/bot` .\nA new design was created that is shown as a typescript class under `mock-interface.tsx` with the matching css under `mock-interface.css` .\n\nWe want to use TypeScript for the bot and the library:\n'https://github.com/yagop/node-telegram-bot-api' (used by calling `npm i node-telegram-bot-api` ).\n\nIt needs to be clean and extensible.\nIt needs to use the provided `swagger.json` to generate all needed backend code.\nThis app must rely on the backend code as much as possible and make as few decisions as possible. The way it authenticates with the backend is by providing a shared secret (that will be stored in the `.env` file ) and the user inputting a special access code that will be all verified against the backend. Each user will get an account created - so the Telegram app needs to supply the backend with a unique id to identify a given user across sessions (and to store the credentials so that the user doesn't have to input it anymore once initial auth is done).\n\nThe user must be able to do the following things:\n- update their profile with DOB, gender, weight (free text input) and height (free text input), the backend will try to guess the weight and height units\n- check all micro goals\n- check all macro goals\n- create a new goal, by entering free flowing text, submitting it to the backend, after which the backend will respond with AI generated suggestions, the user then is also given the option to refine their message or pick from a set of suggested goals.\n\nIn the future, the bot will check upon the user every day in the morning and in the evening and ask the user for some input. This functionality can already be prepared - but the spec for what will be asked and how it will be carried out will be provided later. For now the bot can simply send a simple \"hello\" message once in the morning and once in the evening.",
-  "features": [],
-  "featureIdToDisplayIndex": {},
+  "features": [
+    {
+      "id": "44f37984-d79e-4ddc-9ad6-8186000366bd",
+      "status": "-",
+      "title": "Project Setup",
+      "description": "Set up a new Node.js project with TypeScript. This includes initializing a `package.json` file, creating a `tsconfig.json` file with appropriate settings for a modern Node.js application, and installing necessary dependencies such as `typescript`, `ts-node`, `nodemon`, and `node-telegram-bot-api` with its types (`@types/node-telegram-bot-api`).",
+      "context": [],
+      "createdAt": "2025-09-18T01:28:47.110Z",
+      "updatedAt": "2025-09-18T01:28:47.110Z"
+    },
+    {
+      "id": "03af7ad1-f957-4a10-8fd1-a60b788c52ba",
+      "status": "-",
+      "title": "Environment Configuration",
+      "description": "Set up environment variable handling using a library like `dotenv`. Create a `.env.example` file to document the required environment variables, such as `TELEGRAM_BOT_TOKEN` and `BACKEND_SHARED_SECRET`. Ensure the `.env` file is added to `.gitignore` to prevent committing secrets.",
+      "context": [],
+      "createdAt": "2025-09-18T01:28:49.881Z",
+      "updatedAt": "2025-09-18T01:28:49.881Z"
+    },
+    {
+      "id": "6c7c6dc2-e407-4223-a1a8-6c425dc0c83d",
+      "status": "-",
+      "title": "Backend API Client Generation",
+      "description": "Use a tool like `openapi-typescript-codegen` to generate a TypeScript client from the `swagger.json` file. The generated code should be placed in a dedicated directory (e.g., `src/client` or `src/generated/backend`) to keep it separate from the main application logic.",
+      "context": [],
+      "createdAt": "2025-09-18T01:28:53.505Z",
+      "updatedAt": "2025-09-18T01:28:53.505Z"
+    },
+    {
+      "id": "db22a223-5eeb-419c-b996-83226a8b7bd4",
+      "status": "-",
+      "title": "Bot Initialization and Core Structure",
+      "description": "Create the main entry point for the application (e.g., `src/index.ts`). This file will be responsible for reading environment variables, instantiating the `node-telegram-bot-api` client, and setting up a basic message listener. Implement a simple command handler structure that can be extended with more commands later. For now, it can handle a `/start` command with a welcome message.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:01.335Z",
+      "updatedAt": "2025-09-18T01:29:01.335Z"
+    },
+    {
+      "id": "c614bb72-2b32-4b96-bde6-60902cb5b5df",
+      "status": "-",
+      "title": "User Authentication and Registration",
+      "description": "Implement the authentication flow. When an unauthenticated user interacts with the bot, it should prompt for an access code. The bot will then use the generated API client to send the user's Telegram ID and the provided access code to the backend. Upon successful authentication, the bot should store the user's authenticated state (e.g., in a simple in-memory or file-based session store) to avoid asking for the code again.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:10.237Z",
+      "updatedAt": "2025-09-18T01:29:10.237Z"
+    },
+    {
+      "id": "c35c4c5c-e82c-403e-b39b-96b0751a59ca",
+      "status": "-",
+      "title": "Update User Profile",
+      "description": "Implement a conversation flow to update a user's profile. The bot should prompt the user for their date of birth (DOB), gender, weight, and height. Use a state management system to guide the user through the questions. Once all information is collected, send it to the backend via the generated API client. The bot should handle free-text input for weight and height.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:14.474Z",
+      "updatedAt": "2025-09-18T01:29:14.474Z"
+    },
+    {
+      "id": "f32a9913-e2f9-4014-ab43-85464f5427e8",
+      "status": "-",
+      "title": "Check Micro Goals",
+      "description": "Implement a command (e.g., `/microgoals`) that allows the user to view their current micro goals. This feature will involve making a call to the backend using the generated API client to fetch the user's micro goals and then formatting and displaying them to the user in a clear and readable way.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:17.603Z",
+      "updatedAt": "2025-09-18T01:29:17.603Z"
+    },
+    {
+      "id": "96ad7ba3-edd0-47e5-8ff0-4c2fb2695013",
+      "status": "-",
+      "title": "Check Macro Goals",
+      "description": "Implement a command (e.g., `/macrogoals`) that allows the user to view their current macro goals. This feature will involve making a call to the backend using the generated API client to fetch the user's macro goals and then formatting and displaying them to the user in a clear and readable way.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:21.834Z",
+      "updatedAt": "2025-09-18T01:29:21.834Z"
+    },
+    {
+      "id": "9621538b-c151-4142-9e41-7bf86ae00e65",
+      "status": "-",
+      "title": "Create New Goal - Initial Input",
+      "description": "Implement a command (e.g., `/newgoal`) to initiate the goal creation process. The bot will prompt the user to describe their goal in their own words. The bot should then capture this free-flowing text and send it to the backend for analysis. This feature focuses on capturing the initial user input and communicating with the backend.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:28.008Z",
+      "updatedAt": "2025-09-18T01:29:28.008Z"
+    },
+    {
+      "id": "4eed9e1f-a2a5-4ad8-822c-ad5810583d32",
+      "status": "-",
+      "title": "Create New Goal - Handle AI Suggestions",
+      "description": "After the backend processes the user's initial goal description, it will respond with AI-generated suggestions. This feature involves receiving these suggestions and presenting them to the user. Use Telegram's inline keyboards to display the suggested goals as buttons. Also, provide an option for the user to refine their initial message if none of the suggestions are suitable.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:35.231Z",
+      "updatedAt": "2025-09-18T01:29:35.231Z"
+    },
+    {
+      "id": "5c7e58ae-1324-4be5-809a-f5c2f9640ecd",
+      "status": "-",
+      "title": "Scheduled Daily Check-ins (Placeholder)",
+      "description": "Implement a scheduler (e.g., using `node-cron` or a similar library) to send a simple 'hello' message to all authenticated users twice a day, once in the morning and once in the evening. This feature is a placeholder for future, more interactive check-ins. The implementation should be robust enough to handle a growing number of users and be easily extensible.",
+      "context": [],
+      "createdAt": "2025-09-18T01:29:40.818Z",
+      "updatedAt": "2025-09-18T01:29:40.818Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "44f37984-d79e-4ddc-9ad6-8186000366bd": 1,
+    "03af7ad1-f957-4a10-8fd1-a60b788c52ba": 2,
+    "6c7c6dc2-e407-4223-a1a8-6c425dc0c83d": 3,
+    "db22a223-5eeb-419c-b996-83226a8b7bd4": 4,
+    "c614bb72-2b32-4b96-bde6-60902cb5b5df": 5,
+    "c35c4c5c-e82c-403e-b39b-96b0751a59ca": 6,
+    "f32a9913-e2f9-4014-ab43-85464f5427e8": 7,
+    "96ad7ba3-edd0-47e5-8ff0-4c2fb2695013": 8,
+    "9621538b-c151-4142-9e41-7bf86ae00e65": 9,
+    "4eed9e1f-a2a5-4ad8-822c-ad5810583d32": 10,
+    "5c7e58ae-1324-4be5-809a-f5c2f9640ecd": 11
+  },
   "createdAt": "2025-09-18T00:50:51.954Z",
   "updatedAt": "2025-09-18T01:28:23.722Z"
 }
