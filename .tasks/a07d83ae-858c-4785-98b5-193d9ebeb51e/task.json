@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "90d6b32e-1b5e-4641-9d81-0db4af25b324",
-      "status": "-",
+      "status": "+",
       "title": "Refactor Scheduler to Run Hourly",
       "description": "Modify the cron job in `src/lib/scheduler.ts` to run every hour at the beginning of the hour (e.g., 09:00, 10:00, 11:00) instead of the current twice-daily schedule. The core job logic should be cleared out to prepare for the new check-in functionality.",
       "context": [],
       "createdAt": "2025-09-18T11:09:40.979Z",
-      "updatedAt": "2025-09-18T11:09:40.979Z"
+      "updatedAt": "2025-09-18T11:44:47.741Z",
+      "completedAt": "2025-09-18T11:44:47.741Z"
     },
     {
       "id": "901f781b-aa83-4286-a759-faec0ff575ad",
