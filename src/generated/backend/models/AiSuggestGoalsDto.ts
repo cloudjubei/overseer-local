@@ -3,9 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AiSuggestGoalsDto = {
-  /**
-   * Free-text description of goals to suggest
-   */
-  text: string
-  transcriptionConfidence?: number
-}
+    /**
+     * Free-text description of goals to suggest
+     */
+    text: string;
+    transcriptionConfidence?: number;
+};
+

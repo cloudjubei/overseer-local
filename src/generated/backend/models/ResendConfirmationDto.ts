@@ -3,5 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ResendConfirmationDto = {
-  username: string
-}
+    username: string;
+};
+
