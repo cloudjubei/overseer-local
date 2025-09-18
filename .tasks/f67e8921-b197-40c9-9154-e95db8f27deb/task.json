@@ -1671,18 +1671,19 @@
     },
     {
       "id": "fccb9bc5-1ca8-46ad-9702-6376d55de3fa",
-      "status": "-",
+      "status": "+",
       "title": "When switching view modes always show today's date",
       "description": "In @src/renderer/screens/ProjectTimelineView.tsx when the app opens and when switching modes between DAY | WEEK | MONTH - always make sure today's date is visible (so as if the user pressed the \"Today\" button).",
       "context": [
         "src/renderer/screens/ProjectTimelineView.tsx"
       ],
       "createdAt": "2025-09-18T11:47:16.170Z",
-      "updatedAt": "2025-09-18T11:47:16.170Z"
+      "updatedAt": "2025-09-18T11:55:22.476Z",
+      "completedAt": "2025-09-18T11:55:22.476Z"
     },
     {
       "id": "18cbcc94-0531-4534-936c-7c7fa5efda8c",
-      "status": "-",
+      "status": "+",
       "title": "When there are any changes in creating/editing a task or feature confirm",
       "description": "In @src/renderer/components/tasks/FeatureForm.tsx and @src/renderer/components/tasks/TaskForm.tsx that are used in @src/renderer/tasks/FeatureCreateView.tsx , @src/renderer/tasks/FeatureEditView.tsx , @src/renderer/tasks/TaskCreateView.tsx and @src/renderer/tasks/TaskEditView.tsx - make sure that if there are any changes whatsoever to the form, and the user clicks out or in some way tries to close the popup - an alert is displayed saying that there are pending changes and if the user really wants to discard them all and close the popup. The Alert must have a red/destructive \"DISCARD ALL\" button and a standard \"Go Back\" button - only clicking either of these buttons can close the alert.",
       "context": [
@@ -1694,7 +1695,8 @@
         "src/renderer/tasks/TaskEditView.tsx"
       ],
       "createdAt": "2025-09-18T11:49:51.503Z",
-      "updatedAt": "2025-09-18T11:49:51.503Z"
+      "updatedAt": "2025-09-18T12:01:14.795Z",
+      "completedAt": "2025-09-18T12:01:14.795Z"
     }
   ],
   "featureIdToDisplayIndex": {

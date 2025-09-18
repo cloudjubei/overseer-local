@@ -24,8 +24,19 @@ export default function FeatureEditView({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { featuresById, updateFeature, deleteFeature } = useTasks()
 
+  const [hasChanges, setHasChanges] = useState(false)
+
   const doClose = () => {
     onRequestClose?.()
+  }
+
+  const attemptClose = () => {
+    if (hasChanges) {
+      setAlertMessage('You have unsaved changes. Do you really want to discard all changes?')
+      setShowAlert(true)
+      return
+    }
+    doClose()
   }
 
   useEffect(() => {
@@ -75,7 +86,7 @@ export default function FeatureEditView({
     <>
       <Modal
         title="Edit Feature"
-        onClose={doClose}
+        onClose={attemptClose}
         isOpen={true}
         footer={
           <div className="flex justify-between gap-2">
@@ -98,7 +109,7 @@ export default function FeatureEditView({
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={doClose}
+                onClick={attemptClose}
                 disabled={submitting}
               >
                 Cancel
@@ -121,13 +132,14 @@ export default function FeatureEditView({
           <FeatureForm
             initialValues={initialValues}
             onSubmit={onSubmit}
-            onCancel={doClose}
+            onCancel={attemptClose}
             onDelete={() => setShowDeleteConfirm(true)}
             submitting={submitting}
             taskId={taskId}
             featureId={featureId}
             hideActions
             formId={formId}
+            onDirtyChange={setHasChanges}
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
@@ -139,6 +151,14 @@ export default function FeatureEditView({
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
+        confirmText="DISCARD ALL"
+        cancelText="Go Back"
+        destructiveConfirm
+        disableOutsideClose
+        onConfirm={() => {
+          setShowAlert(false)
+          doClose()
+        }}
       />
       <AlertDialog
         isOpen={showDeleteConfirm}

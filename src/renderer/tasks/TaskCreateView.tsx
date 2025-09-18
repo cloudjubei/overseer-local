@@ -13,8 +13,19 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
   const titleRef = useRef<HTMLInputElement>(null)
   const { createTask } = useTasks()
 
+  const [hasChanges, setHasChanges] = useState(false)
+
   const doClose = () => {
     onRequestClose?.()
+  }
+
+  const attemptClose = () => {
+    if (hasChanges) {
+      setAlertMessage('You have unsaved changes. Do you really want to discard all changes?')
+      setShowAlert(true)
+      return
+    }
+    doClose()
   }
 
   const onSubmit = useCallback(
@@ -38,7 +49,7 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
     <>
       <Modal
         title="Create New Task"
-        onClose={doClose}
+        onClose={attemptClose}
         isOpen={true}
         size="md"
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
@@ -47,16 +58,25 @@ export default function TaskCreateView({ onRequestClose }: { onRequestClose?: ()
           id="-1"
           initialValues={{}}
           onSubmit={onSubmit}
-          onCancel={doClose}
+          onCancel={attemptClose}
           submitting={submitting}
           isCreate={true}
           titleRef={titleRef}
+          onDirtyChange={setHasChanges}
         />
       </Modal>
       <AlertDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
+        confirmText="DISCARD ALL"
+        cancelText="Go Back"
+        destructiveConfirm
+        disableOutsideClose
+        onConfirm={() => {
+          setShowAlert(false)
+          doClose()
+        }}
       />
     </>
   )

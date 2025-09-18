@@ -19,8 +19,19 @@ export default function FeatureCreateView({
   const titleRef = useRef<HTMLInputElement>(null)
   const { addFeature } = useTasks()
 
+  const [hasChanges, setHasChanges] = useState(false)
+
   const doClose = () => {
     onRequestClose?.()
+  }
+
+  const attemptClose = () => {
+    if (hasChanges) {
+      setAlertMessage('You have unsaved changes. Do you really want to discard all changes?')
+      setShowAlert(true)
+      return
+    }
+    doClose()
   }
 
   const onSubmit = useCallback(
@@ -60,13 +71,13 @@ export default function FeatureCreateView({
     <>
       <Modal
         title="Create New Feature"
-        onClose={doClose}
+        onClose={attemptClose}
         isOpen={true}
         size="lg"
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         footer={
           <div className="flex justify-between gap-2">
-            <button type="button" className="btn-secondary" onClick={doClose} disabled={submitting}>
+            <button type="button" className="btn-secondary" onClick={attemptClose} disabled={submitting}>
               Cancel
             </button>
             <button
@@ -84,18 +95,27 @@ export default function FeatureCreateView({
       >
         <FeatureForm
           onSubmit={onSubmit}
-          onCancel={doClose}
+          onCancel={attemptClose}
           submitting={submitting}
           titleRef={titleRef}
           taskId={taskId}
           hideActions
           formId={formId}
+          onDirtyChange={setHasChanges}
         />
       </Modal>
       <AlertDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
+        confirmText="DISCARD ALL"
+        cancelText="Go Back"
+        destructiveConfirm
+        disableOutsideClose
+        onConfirm={() => {
+          setShowAlert(false)
+          doClose()
+        }}
       />
     </>
   )
