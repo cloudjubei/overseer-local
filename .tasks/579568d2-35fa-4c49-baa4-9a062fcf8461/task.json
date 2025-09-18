@@ -102,6 +102,17 @@
       "context": [],
       "createdAt": "2025-09-18T01:29:40.818Z",
       "updatedAt": "2025-09-18T01:29:40.818Z"
+    },
+    {
+      "id": "8c738915-3ea9-4fb1-878a-e251e5aad232",
+      "status": "-",
+      "title": "Document the whole app in README.md",
+      "description": "In @README.md make sure there is a step-by-step guide as to how to run the bot locally and test it.\n\nThe intention is to host the bot on AWS EC2 - write a step by step guide for that also.\n\nInclude a section on how to test the UI.",
+      "context": [
+        "README.md"
+      ],
+      "createdAt": "2025-09-18T01:34:56.287Z",
+      "updatedAt": "2025-09-18T01:34:56.287Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -115,7 +126,8 @@
     "96ad7ba3-edd0-47e5-8ff0-4c2fb2695013": 8,
     "9621538b-c151-4142-9e41-7bf86ae00e65": 9,
     "4eed9e1f-a2a5-4ad8-822c-ad5810583d32": 10,
-    "5c7e58ae-1324-4be5-809a-f5c2f9640ecd": 11
+    "5c7e58ae-1324-4be5-809a-f5c2f9640ecd": 11,
+    "8c738915-3ea9-4fb1-878a-e251e5aad232": 12
   },
   "createdAt": "2025-09-18T00:50:51.954Z",
   "updatedAt": "2025-09-18T01:28:23.722Z"
