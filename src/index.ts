@@ -121,22 +121,16 @@ bot.on('message', async (msg: Message) => {
 
     // If an active backend-driven conversation exists, delegate to conversation manager
     if (session?.conversationState) {
-      const convHandled = await handleConversationMessage(msg, session)
+      const convHandled = await handleConversationMessage(bot, msg, session)
       if (convHandled) {
         switch (convHandled.type) {
           case 'prompt':
             if (convHandled.prompt) await renderBackendPrompt(convHandled.prompt, bot, chat.id)
             break
-          case 'success': {
-            const text = (convHandled.success as any)?.message || 'Done.'
-            await bot.sendMessage(chat.id, text)
+          case 'success':
+          case 'error':
+            // Message already sent and state cleared by conversationManager
             break
-          }
-          case 'error': {
-            const text = (convHandled.error as any)?.message || 'Something went wrong.'
-            await bot.sendMessage(chat.id, text)
-            break
-          }
         }
         return // conversation consumed this message
       }

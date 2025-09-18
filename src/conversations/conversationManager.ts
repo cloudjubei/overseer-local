@@ -13,6 +13,11 @@ function extractExternalId(msg: TelegramBot.Message): string | undefined {
   return typeof id === 'number' ? String(id) : undefined
 }
 
+function extractChatId(msg: TelegramBot.Message): number | undefined {
+  const id = msg.chat?.id
+  return typeof id === 'number' ? id : undefined
+}
+
 function buildInputFromMessage(msg: TelegramBot.Message): Record<string, any> {
   // Generic adapter: pass plain text under "text". Backend-driven flows should interpret this.
   // If richer mappings are needed (e.g., selections), extend this function accordingly.
@@ -28,15 +33,18 @@ function buildInputFromMessage(msg: TelegramBot.Message): Record<string, any> {
  * - Reads active conversation from session.conversationState
  * - Packages message into HandleInputDto and calls ConversationsService.conversationsControllerHandle
  * - Persists/clears conversation state based on response type (prompt/success/error)
+ * - For SUCCESS and ERROR responses, sends the backend-provided message to the user and clears state
  *
  * Returns null if there is no active conversation for the session.
  */
 export async function handleConversationMessage(
+  bot: TelegramBot,
   msg: TelegramBot.Message,
   session: SessionData,
 ): Promise<ConversationHandleResult | null> {
   const convo = session.conversationState
   const externalId = extractExternalId(msg)
+  const chatId = extractChatId(msg)
 
   if (!convo || !convo.flowId) return null
 
@@ -82,23 +90,25 @@ export async function handleConversationMessage(
         return { type: 'prompt', flow, sessionId: newSessionId, prompt: res.prompt }
       }
       case ConversationResponseDto.type.SUCCESS: {
-        // Clear conversation on success
+        // Clear conversation on success and send success message if available
         setSession({ ...session, conversationState: null })
+        if (chatId) {
+          const text = (res.success as any)?.message || 'Done.'
+          try {
+            await bot.sendMessage(chatId, text)
+          } catch {}
+        }
         return { type: 'success', flow, sessionId: newSessionId, success: res.success }
       }
       case ConversationResponseDto.type.ERROR: {
-        // Keep or clear depending on retry flag
-        const retry = !!res.error?.retry
-        setSession({
-          ...session,
-          conversationState: retry
-            ? {
-                flowId: flow,
-                context: { ...(convo.context || {}), sessionId: newSessionId },
-                lastUpdatedAt: Math.floor(Date.now() / 1000),
-              }
-            : null,
-        })
+        // Terminate the flow on error to avoid the user getting stuck in a broken state
+        setSession({ ...session, conversationState: null })
+        if (chatId) {
+          const msgText = (res.error as any)?.message || 'Something went wrong.'
+          try {
+            await bot.sendMessage(chatId, msgText)
+          } catch {}
+        }
         return { type: 'error', flow, sessionId: newSessionId, error: res.error }
       }
       default: {
@@ -122,6 +132,11 @@ export async function handleConversationMessage(
         lastUpdatedAt: Math.floor(Date.now() / 1000),
       },
     })
+    if (chatId) {
+      try {
+        await bot.sendMessage(chatId, 'Sorry, something went wrong. Please try again.')
+      } catch {}
+    }
     return {
       type: 'error',
       flow: convo.flowId,
