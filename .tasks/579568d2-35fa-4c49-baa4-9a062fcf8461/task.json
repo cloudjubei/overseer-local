@@ -116,14 +116,15 @@
     },
     {
       "id": "8c738915-3ea9-4fb1-878a-e251e5aad232",
-      "status": "-",
+      "status": "+",
       "title": "Document the whole app in README.md",
       "description": "In @README.md make sure there is a step-by-step guide as to how to run the bot locally and test it.\n\nThe intention is to host the bot on AWS EC2 - write a step by step guide for that also.\n\nInclude a section on how to test the UI.",
       "context": [
         "README.md"
       ],
       "createdAt": "2025-09-18T01:34:56.287Z",
-      "updatedAt": "2025-09-18T01:34:56.287Z"
+      "updatedAt": "2025-09-18T01:57:51.682Z",
+      "completedAt": "2025-09-18T01:57:51.682Z"
     }
   ],
   "featureIdToDisplayIndex": {
