@@ -17,6 +17,7 @@ type Props = {
   isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement>
   onDelete?: () => void
+  onDirtyChange?: (dirty: boolean) => void
 }
 
 export default function TaskForm({
@@ -28,6 +29,7 @@ export default function TaskForm({
   isCreate = false,
   titleRef,
   onDelete,
+  onDirtyChange,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
@@ -37,12 +39,35 @@ export default function TaskForm({
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
 
+  // Baseline snapshot of initial values for dirty tracking
+  const initialSnapshotRef = useRef<{ title: string; status: Status; description: string } | null>(
+    null,
+  )
+  if (initialSnapshotRef.current === null) {
+    initialSnapshotRef.current = {
+      title: initialValues?.title ?? '',
+      status: initialValues?.status ?? '-',
+      description: initialValues?.description ?? '',
+    }
+  }
+
   useEffect(() => {
     if (combinedTitleRef?.current) {
       combinedTitleRef.current.focus()
       combinedTitleRef.current.select?.()
     }
   }, [combinedTitleRef])
+
+  // Dirty state calculation
+  useEffect(() => {
+    const current = { title, status, description }
+    const baseline = initialSnapshotRef.current!
+    const dirty =
+      current.title !== baseline.title ||
+      current.status !== baseline.status ||
+      current.description !== baseline.description
+    onDirtyChange?.(dirty)
+  }, [title, status, description, onDirtyChange])
 
   const canSubmit = useMemo(() => {
     const hasTitle = title.trim().length > 0

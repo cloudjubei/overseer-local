@@ -23,6 +23,8 @@ export default function TaskEditView({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { tasksById, updateTask, deleteTask } = useTasks()
 
+  const [hasChanges, setHasChanges] = useState(false)
+
   useEffect(() => {
     if (taskId && tasksById) {
       const t = tasksById[taskId]
@@ -34,6 +36,15 @@ export default function TaskEditView({
 
   const doClose = () => {
     onRequestClose?.()
+  }
+
+  const attemptClose = () => {
+    if (hasChanges) {
+      setAlertMessage('You have unsaved changes. Do you really want to discard all changes?')
+      setShowAlert(true)
+      return
+    }
+    doClose()
   }
 
   const onSubmit = async (values: TaskFormValues) => {
@@ -68,7 +79,7 @@ export default function TaskEditView({
 
   return (
     <>
-      <Modal title="Edit Task" onClose={doClose} isOpen={true}>
+      <Modal title="Edit Task" onClose={attemptClose} isOpen={true}>
         {initialValues ? (
           <TaskForm
             id={`${initialValues.id}`}
@@ -78,10 +89,11 @@ export default function TaskEditView({
               description: initialValues.description,
             }}
             onSubmit={onSubmit}
-            onCancel={doClose}
+            onCancel={attemptClose}
             submitting={submitting || deleting}
             isCreate={false}
             onDelete={() => setShowDeleteConfirm(true)}
+            onDirtyChange={setHasChanges}
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
@@ -93,6 +105,14 @@ export default function TaskEditView({
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
+        confirmText="DISCARD ALL"
+        cancelText="Go Back"
+        destructiveConfirm
+        disableOutsideClose
+        onConfirm={() => {
+          setShowAlert(false)
+          doClose()
+        }}
       />
       <AlertDialog
         isOpen={showDeleteConfirm}

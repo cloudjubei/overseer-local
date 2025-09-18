@@ -12,6 +12,10 @@ export type ModalProps = {
   // Optional id of a description element rendered within the modal content
   // When provided, the dialog will set aria-describedby to this id
   descriptionId?: string
+  // Control whether pressing Escape closes the modal (default: true)
+  closeOnEsc?: boolean
+  // Control whether clicking the overlay closes the modal (default: true)
+  closeOnOverlayClick?: boolean
 }
 
 function sizeClass(size?: ModalProps['size']) {
@@ -53,6 +57,8 @@ export function Modal({
   hideCloseButton,
   initialFocusRef,
   descriptionId,
+  closeOnEsc = true,
+  closeOnOverlayClick = true,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -66,11 +72,11 @@ export function Modal({
   useEffect(() => {
     if (!isOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && closeOnEsc) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, closeOnEsc])
 
   // Lock body scroll while modal is open, restore on close/unmount
   useEffect(() => {
@@ -97,7 +103,7 @@ export function Modal({
   if (!isOpen) return null
 
   const onOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) onClose()
+    if (e.target === overlayRef.current && closeOnOverlayClick) onClose()
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -183,6 +189,8 @@ export function AlertDialog({
   cancelText = 'Cancel',
   onConfirm,
   initialFocusRef,
+  destructiveConfirm = false,
+  disableOutsideClose = false,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -192,6 +200,8 @@ export function AlertDialog({
   cancelText?: string
   onConfirm?: () => void
   initialFocusRef?: React.RefObject<HTMLElement>
+  destructiveConfirm?: boolean
+  disableOutsideClose?: boolean
 }) {
   const confirmRef = initialFocusRef || React.useRef<HTMLButtonElement>(null)
   // Generate a description id only when a description is provided
@@ -205,6 +215,9 @@ export function AlertDialog({
       title={title}
       initialFocusRef={confirmRef as React.RefObject<HTMLElement>}
       descriptionId={descId}
+      hideCloseButton={disableOutsideClose}
+      closeOnEsc={!disableOutsideClose}
+      closeOnOverlayClick={!disableOutsideClose}
       footer={
         <div className="flex justify-end gap-2">
           <button
@@ -219,7 +232,12 @@ export function AlertDialog({
               onConfirm?.()
               onClose()
             }}
-            className="inline-flex items-center rounded-md bg-brand-600 px-3 py-1.5 text-sm text-text-inverted hover:bg-brand-700 focus-visible:ring-2"
+            className={
+              'inline-flex items-center rounded-md px-3 py-1.5 text-sm focus-visible:ring-2 ' +
+              (destructiveConfirm
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-brand-600 text-text-inverted hover:bg-brand-700')
+            }
           >
             {confirmText}
           </button>

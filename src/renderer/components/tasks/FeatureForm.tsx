@@ -34,6 +34,7 @@ type Props = {
   hideActions?: boolean
   // Optional id to bind external submit buttons using the `form` attribute
   formId?: string
+  onDirtyChange?: (dirty: boolean) => void
 }
 
 export default function FeatureForm({
@@ -47,6 +48,7 @@ export default function FeatureForm({
   featureId = undefined,
   hideActions = false,
   formId,
+  onDirtyChange,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -64,12 +66,47 @@ export default function FeatureForm({
   const combinedTitleRef = titleRef ?? localTitleRef
   const isCreate = !(featureId !== null && featureId !== undefined)
 
+  // Baseline snapshot for dirty tracking
+  const initialSnapshotRef = useRef<{
+    title: string
+    description: string
+    rejection: string
+    status: Status
+    blockers: string[]
+    context: string[]
+  } | null>(null)
+  if (initialSnapshotRef.current === null) {
+    initialSnapshotRef.current = {
+      title: initialValues?.title ?? '',
+      description: initialValues?.description ?? '',
+      rejection: initialValues?.rejection ?? '',
+      status: initialValues?.status ?? '-',
+      blockers: initialValues?.blockers ?? [],
+      context: initialValues?.context ?? [],
+    }
+  }
+
   useEffect(() => {
     if (combinedTitleRef?.current) {
       combinedTitleRef.current.focus()
       combinedTitleRef.current.select?.()
     }
   }, [combinedTitleRef])
+
+  // Dirty tracking
+  useEffect(() => {
+    const baseline = initialSnapshotRef.current!
+    const dirty =
+      title !== baseline.title ||
+      description !== baseline.description ||
+      rejection !== baseline.rejection ||
+      status !== baseline.status ||
+      blockers.length !== baseline.blockers.length ||
+      context.length !== baseline.context.length ||
+      blockers.some((b, i) => b !== baseline.blockers[i]) ||
+      context.some((c, i) => c !== baseline.context[i])
+    onDirtyChange?.(dirty)
+  }, [title, description, rejection, status, blockers, context, onDirtyChange])
 
   const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
 
