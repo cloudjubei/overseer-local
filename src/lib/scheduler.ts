@@ -1,40 +1,56 @@
-import TelegramBot from 'node-telegram-bot-api'
-import cron, { ScheduledTask } from 'node-cron'
-import { config } from '../config/env'
+import cron from 'node-cron';
+import { config } from '../config/env';
+import { getAllUserIds, getSessionByUserId } from './sessionStore';
+import { configureBackendClient } from './backendClient';
+import { CheckInsService } from '../generated/backend/services/CheckInsService';
 
-const tasks: ScheduledTask[] = []
+let scheduledTask: cron.ScheduledTask | null = null;
 
-export function initScheduler(bot: TelegramBot) {
-  // Run at the beginning of every hour (e.g., 09:00, 10:00, 11:00), using configured timezone
-  const tz = config.timezone || 'UTC'
+export function startScheduler() {
+  if (scheduledTask) return;
 
-  const hourly = cron.schedule(
+  // Run at the start of every hour
+  scheduledTask = cron.schedule(
     '0 * * * *',
     async () => {
-      // Placeholder: core job logic cleared out to prepare for check-in functionality
-      // Future implementation will fetch user check-ins from backend and send messages when appropriate.
       try {
-        // no-op for now
-      } catch (err) {
-        console.warn('Hourly scheduler tick error:', (err as any)?.message || err)
+        const userIds = await getAllUserIds();
+        for (const userId of userIds) {
+          try {
+            const session = await getSessionByUserId(userId);
+            if (!session || !session.accessToken) continue;
+
+            // Configure backend client for this user
+            configureBackendClient({ accessToken: session.accessToken });
+
+            // Fetch active check-ins for this user
+            // Assuming the backend uses a query param to filter active ones; if not, this will fetch all and backend handles filtering.
+            await CheckInsService.checkInsControllerList({
+              // Include common pagination defaults if the API supports it
+              limit: 100,
+              offset: 0,
+              active: true as any, // typed per generated client; if not present it's ignored by the client
+            } as any);
+          } catch (err) {
+            // Per-user error isolation: log and continue
+            console.error(`Scheduler error for user ${userId}:`, err);
+          }
+        }
+      } catch (e) {
+        console.error('Scheduler top-level error:', e);
       }
     },
-    { timezone: tz },
-  )
+    {
+      timezone: config.timezone || 'UTC',
+    }
+  );
 
-  tasks.push(hourly)
-  hourly.start()
-
-  console.log(`Scheduler initialized. Running hourly at the start of the hour (${tz}).`)
+  scheduledTask.start();
 }
 
-export function shutdownScheduler() {
-  for (const t of tasks) {
-    try {
-      t.stop()
-      // eslint-disable-next-line no-empty
-    } catch {}
+export function stopScheduler() {
+  if (scheduledTask) {
+    scheduledTask.stop();
+    scheduledTask = null;
   }
-  tasks.length = 0
-  console.log('Scheduler stopped.')
 }

@@ -16,12 +16,13 @@
     },
     {
       "id": "901f781b-aa83-4286-a759-faec0ff575ad",
-      "status": "-",
+      "status": "+",
       "title": "Implement Fetching User Check-ins in Scheduler",
       "description": "Within the hourly cron job in `src/lib/scheduler.ts`, iterate over all authenticated users. For each user, configure the backend API client with their access token and use the `CheckInsService.checkInsControllerList` method to fetch their list of active check-ins.",
       "context": [],
       "createdAt": "2025-09-18T11:09:40.979Z",
-      "updatedAt": "2025-09-18T11:09:40.979Z"
+      "updatedAt": "2025-09-18T11:44:59.317Z",
+      "completedAt": "2025-09-18T11:44:59.317Z"
     },
     {
       "id": "c5fd8a18-bab8-407e-ab95-be36aa8a8750",
