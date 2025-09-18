@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Feature, Task } from 'thefactory-tools'
 import { useTasks } from '../contexts/TasksContext'
 import { useActiveProject } from '../contexts/ProjectContext'
@@ -229,6 +229,10 @@ export default function ProjectTimelineView() {
 
   // Hover state for callout
   const [hover, setHover] = useState<HoverInfo>(null)
+
+  // Auto-scroll bookkeeping
+  const hasInitialAutoScrolledRef = useRef(false)
+  const prevZoomRef = useRef<Zoom>('day')
 
   useEffect(() => {
     if (!projectId) {
@@ -633,6 +637,21 @@ export default function ProjectTimelineView() {
       window.removeEventListener('resize', onScrollOrResize)
     }
   }, [])
+
+  // Auto-scroll to make today visible on initial load and when switching zoom modes
+  useEffect(() => {
+    if (loading) return
+    const isZoomChange = prevZoomRef.current !== zoom
+
+    if (!hasInitialAutoScrolledRef.current || isZoomChange) {
+      // Wait for DOM to paint updated units before measuring/scanning
+      requestAnimationFrame(() => {
+        scrollToToday()
+      })
+      hasInitialAutoScrolledRef.current = true
+      prevZoomRef.current = zoom
+    }
+  }, [loading, zoom, unitCount, startAligned, cellMinWidth])
 
   if (loading) {
     return <div className="p-4 text-secondary">Loading timeline...</div>
