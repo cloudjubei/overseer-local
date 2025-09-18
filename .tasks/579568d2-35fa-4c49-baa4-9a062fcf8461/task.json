@@ -56,12 +56,13 @@
     },
     {
       "id": "c35c4c5c-e82c-403e-b39b-96b0751a59ca",
-      "status": "-",
+      "status": "+",
       "title": "Update User Profile",
       "description": "Implement a conversation flow to update a user's profile. The bot should prompt the user for their date of birth (DOB), gender, weight, and height. Use a state management system to guide the user through the questions. Once all information is collected, send it to the backend via the generated API client. The bot should handle free-text input for weight and height.",
       "context": [],
       "createdAt": "2025-09-18T01:29:14.474Z",
-      "updatedAt": "2025-09-18T01:29:14.474Z"
+      "updatedAt": "2025-09-18T01:46:15.915Z",
+      "completedAt": "2025-09-18T01:46:15.915Z"
     },
     {
       "id": "f32a9913-e2f9-4014-ab43-85464f5427e8",

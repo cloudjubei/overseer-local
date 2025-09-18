@@ -6,6 +6,12 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { config } from './config/env';
 import { handleAuthMessage, getTelegramUserId, logoutUser } from './lib/auth';
+import {
+  startProfileFlow,
+  handleProfileFlowMessage,
+  isInProfileFlow,
+  cancelProfileFlow,
+} from './flows/profile';
 
 // Basic command handler types
 export type CommandHandler = (ctx: {
@@ -75,6 +81,36 @@ async function main() {
     'Log out and clear your session'
   );
 
+  // Profile update flow command
+  commands.register(
+    'profile',
+    async ({ bot, msg }) => {
+      const chatId = msg.chat.id;
+      const userId = getTelegramUserId(msg);
+      if (!userId) {
+        await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.');
+        return;
+      }
+      await startProfileFlow(bot, userId, chatId);
+    },
+    'Update your profile (DOB, gender, weight, height)'
+  );
+
+  // Optional: expose /cancel to cancel active flows
+  commands.register(
+    'cancel',
+    async ({ bot, msg }) => {
+      const userId = getTelegramUserId(msg);
+      if (!userId) return;
+      if (isInProfileFlow(userId)) {
+        await cancelProfileFlow(bot, userId);
+      } else {
+        await bot.sendMessage(msg.chat.id, 'Nothing to cancel.');
+      }
+    },
+    'Cancel the current action'
+  );
+
   // Sync bot command list (as shown in Telegram UI)
   try {
     const botCommands = commands.listForBotCommands();
@@ -93,9 +129,21 @@ async function main() {
       const handledByAuth = await handleAuthMessage(bot, msg);
       if (handledByAuth) return;
 
+      const userId = getTelegramUserId(msg);
+      if (!userId) {
+        await bot.sendMessage(msg.chat.id, 'Unable to determine your Telegram user id.');
+        return;
+      }
+
+      // If user is currently in a conversation flow, route message to it and stop.
+      if (isInProfileFlow(userId)) {
+        await handleProfileFlowMessage(bot, userId, msg);
+        return;
+      }
+
       const text = msg.text || '';
       if (!text.startsWith('/')) {
-        // For now ignore non-commands if authenticated; future features will use this.
+        // For now ignore non-commands if authenticated; flows handle their own inputs above.
         return;
       }
 
