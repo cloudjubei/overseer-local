@@ -15,6 +15,7 @@ Contents
 - Backend Client Generation
 - Environment Variables
 - Using the Bot (commands and flows)
+- Testing (vital for quality)
 - Testing Locally (including scheduler)
 - Deploying on AWS EC2 (PM2 recommended)
 - Testing the UI (Telegram flows and mock interface)
@@ -103,24 +104,29 @@ Available commands
 - /cancel: Cancels current flow (/profile or /newgoal)
 - /logout: Clears your saved session
 
+Testing (vital for quality)
+- High-quality, well-tested code is critical. We aim for near-100% automated test coverage across the non-generated codebase.
+- Please read docs/TESTING.md for detailed guidance on writing tests, mocking backend/AI responses, and our standards for validating input/output schemas.
+- Also see docs/CODE_STANDARD.md for architectural practices to follow.
+
 Testing Locally
 General checklist
 - /start: Ensure the bot prompts for an access code when unauthenticated
 - Enter a valid access code: Expect "You are now authenticated."
-- /profile: Walk through all questions. Try skip and invalid inputs (e.g., gender typo) to see re-prompt.
+- /profile: Walk through all questions. Try skip and invalid inputs (e.g., gender typo or malformed DOB) to see re-prompt.
 - /newgoal: Provide free text, verify suggestions appear. Test "Refine message", selecting a suggestion, and "Cancel".
 - /microgoals and /macrogoals: Verify lists show as expected (or the empty-state message)
 - /logout: Verify you are prompted for access code again on next message
 
 Sessions
-- Sessions persist to .sessions/.sessions.json
+- Sessions persist to .sessions/.sessions.json (override in tests via SESSIONS_DIR)
 - To reset a user locally, either use /logout or delete their entry in this file while the bot is stopped
 
 Scheduler (hourly check-ins)
 - A cron task runs at the start of every hour (respecting TZ). For every authenticated user, it fetches their check-ins and sends those whose start time hour matches the current hour. Messages are taken from metadata.message (fallbacks to metadata.text/content/msg).
 - To test without waiting:
   - Temporary method for development only: change the cron expression in src/lib/scheduler.ts to run every minute (e.g., "*/1 * * * *"), restart the bot, and observe messages. Revert before committing.
-  - Or temporarily set TZ to a timezone approaching the scheduled hour and restart the bot.
+  - In automated tests we use helper tickSchedulerOnce to run the logic immediately with mocks.
 
 Deploying on AWS EC2
 The simplest and resilient approach is to run the bot under a process manager like PM2 on a small Ubuntu instance.

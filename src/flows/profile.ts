@@ -54,6 +54,19 @@ function normalizeGenderInput(text: string): Gender | undefined {
   return undefined
 }
 
+function isValidDobFormat(s: string): boolean {
+  // Basic ISO date format YYYY-MM-DD and a reasonable range check
+  const m = s.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/)
+  if (!m) return false
+  const year = Number(m[1])
+  const month = Number(m[2])
+  const day = Number(m[3])
+  if (year < 1900 || year > 2100) return false
+  if (month < 1 || month > 12) return false
+  if (day < 1 || day > 31) return false
+  return true
+}
+
 export async function handleProfileFlowMessage(
   bot: TelegramBot,
   userId: string,
@@ -77,7 +90,15 @@ export async function handleProfileFlowMessage(
   switch (state.step) {
     case 'ask_dob': {
       if (!skipped && text.length > 0 && !text.startsWith('/')) {
-        state.data.dob = text // backend validates format
+        if (isValidDobFormat(text)) {
+          state.data.dob = text // only accept valid format
+        } else {
+          await bot.sendMessage(
+            chatId,
+            'Please enter a valid date in the format YYYY-MM-DD (e.g., 1990-01-01), or reply with skip.',
+          )
+          return
+        }
       }
       state.step = 'ask_gender'
       flows.set(userId, state)
@@ -176,16 +197,16 @@ export async function handleProfileFlowMessage(
           const parts: string[] = []
           if (typeof result.dob === 'string') parts.push(`DOB: ${result.dob}`)
           if (typeof result.gender === 'string') parts.push(`Gender: ${result.gender}`)
-          const weightPart = result.weight
-            ? `${result.weight} kg`
-            : result.weight_raw
-              ? `${result.weight_raw}`
+          const weightPart = (result as any).weight
+            ? `${(result as any).weight} kg`
+            : (result as any).weight_raw
+              ? `${(result as any).weight_raw}`
               : undefined
           if (weightPart) parts.push(`Weight: ${weightPart}`)
-          const heightPart = result.height
-            ? `${result.height} cm`
-            : result.height_raw
-              ? `${result.height_raw}`
+          const heightPart = (result as any).height
+            ? `${(result as any).height} cm`
+            : (result as any).height_raw
+              ? `${(result as any).height_raw}`
               : undefined
           if (heightPart) parts.push(`Height: ${heightPart}`)
           if (parts.length) lines.push(parts.join('\n'))

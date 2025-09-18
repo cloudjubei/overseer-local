@@ -14,15 +14,19 @@ Key Directories and Files
     - backend/: Code generated from swagger.json using openapi-typescript-codegen (DO NOT EDIT MANUALLY). Regenerate with npm run generate:backend.
   - lib/
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
-    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/.sessions.json. Exposes getAllUserIds() to iterate all known users.
+    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/.sessions.json (override via SESSIONS_DIR env var). Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
-    - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). On each tick, it iterates all authenticated users, fetches their check-ins using CheckInsService, and if a check-in's scheduled time hour matches the current hour, sends the check-in's message (from metadata.message/text/content) to the corresponding Telegram user. Includes simple in-memory deduplication to avoid duplicate sends within the same hour window.
+    - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). On each tick, it iterates all authenticated users, fetches their check-ins using CheckInsService, and if a check-in's scheduled time hour matches the current hour, sends the check-in's message (from metadata.message/text/content) to the corresponding Telegram user. Includes simple in-memory deduplication to avoid duplicate sends within the same hour window. Exposes tickSchedulerOnce() for tests.
   - flows/
-    - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed).
+    - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed). Validates DOB format and accepted gender values.
     - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
+- tests/
+  - setup.ts: Global test setup that defines environment variables, creates a temporary sessions directory, and mocks generated backend services.
+  - *.test.ts: Unit tests for modules and flows using Vitest.
 - docs/
   - FILE_ORGANISATION.md: This document. Update when major structural changes occur.
   - CODE_STANDARD.md: Architecture and code standard. Follow this for any new or changed code.
+  - TESTING.md: Guidance on test tooling, mocking strategy, and coverage expectations.
 - mock-interface.tsx, mock-interface.css: UI mock and styles for reference in designing user flows.
 - swagger.json: OpenAPI spec used to generate backend client code (do not modify here; used by generator).
 - old-system-reference/: Legacy system reference (DO NOT MODIFY).
@@ -36,6 +40,7 @@ Environment Handling
   - BACKEND_BASE_URL: Base URL of backend API (default: http://localhost:3000).
   - NODE_ENV: Node environment (default: development).
   - TZ: Timezone for scheduled jobs (default: UTC). The scheduler in src/lib/scheduler.ts uses this value for cron jobs.
+  - SESSIONS_DIR: Directory for storing session data (default: .sessions). Useful for isolating test runs.
 
 Setup Steps
 1) Copy .env.example to .env and fill in the required values.
@@ -73,7 +78,8 @@ Scheduler (Hourly Check-ins Implemented)
   - Basic in-memory de-duplication prevents multiple sends for the same check-in within a single hour window.
 
 Profile Update Flow (Implemented)
-- Command: /profile starts a guided flow asking for DOB (YYYY-MM-DD), gender (buttons + free text), weight (free text), and height (free text). Users can type 'skip' to leave any field unchanged and /cancel to abort.
+- Command: /profile starts a guided flow asking for DOB (YYYY-MM-DD), gender, weight (free text), and height (free text). Users can type 'skip' to leave any field unchanged and /cancel to abort.
+- DOB is validated for format and reasonable ranges before sending to backend.
 - After collecting answers, the bot sends the data to the backend using the generated ProfilesService. It first attempts PATCH /profiles/me; if the profile does not exist (404), it falls back to POST /profiles/me to create it.
 - Free-text for weight and height is passed as weight_raw and height_raw for backend normalization.
 

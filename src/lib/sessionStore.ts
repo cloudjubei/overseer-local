@@ -9,20 +9,29 @@ export interface UserSession {
   expiresAt?: number // epoch seconds
 }
 
-const DATA_DIR = path.resolve('.sessions')
-const SESSIONS_FILE = path.join(DATA_DIR, '.sessions.json')
+function getDataDir(): string {
+  // Allow override for testing via env var
+  const base = process.env.SESSIONS_DIR || '.sessions'
+  return path.resolve(base)
+}
+
+function getSessionsFile(): string {
+  return path.join(getDataDir(), '.sessions.json')
+}
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
+  const dir = getDataDir()
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
   }
 }
 
 function readAll(): Record<string, UserSession> {
   try {
     ensureDataDir()
-    if (!fs.existsSync(SESSIONS_FILE)) return {}
-    const raw = fs.readFileSync(SESSIONS_FILE, 'utf8')
+    const file = getSessionsFile()
+    if (!fs.existsSync(file)) return {}
+    const raw = fs.readFileSync(file, 'utf8')
     if (!raw.trim()) return {}
     const data = JSON.parse(raw)
     return data && typeof data === 'object' ? (data as Record<string, UserSession>) : {}
@@ -35,9 +44,10 @@ function readAll(): Record<string, UserSession> {
 function writeAll(sessions: Record<string, UserSession>) {
   try {
     ensureDataDir()
-    const tmp = SESSIONS_FILE + '.tmp'
+    const file = getSessionsFile()
+    const tmp = file + '.tmp'
     fs.writeFileSync(tmp, JSON.stringify(sessions, null, 2), 'utf8')
-    fs.renameSync(tmp, SESSIONS_FILE)
+    fs.renameSync(tmp, file)
   } catch (e) {
     console.error('sessionStore: failed to write sessions file', e)
   }
