@@ -19,6 +19,7 @@ import {
   cancelNewGoalFlow,
   handleNewGoalCallback,
 } from './flows/newGoal';
+import { initScheduler, shutdownScheduler } from './lib/scheduler';
 
 // Lazy import generated client services to avoid build-time dependency when not generated yet
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -238,6 +239,9 @@ async function main() {
     console.warn('Failed to set bot commands:', err);
   }
 
+  // Initialize scheduler for daily check-ins
+  initScheduler(bot);
+
   // Global message listener: ensure authentication flow first
   bot.on('message', async (msg) => {
     try {
@@ -314,6 +318,7 @@ async function main() {
     console.log(`\nReceived ${signal}. Stopping bot polling...`);
     try {
       await bot.stopPolling();
+      shutdownScheduler();
       console.log('Bot polling stopped. Exiting.');
     } catch (err) {
       console.error('Error during shutdown:', err);

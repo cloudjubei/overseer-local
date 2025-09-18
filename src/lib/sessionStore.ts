@@ -71,3 +71,9 @@ export function isAuthenticated(userId: string): boolean {
   }
   return true;
 }
+
+// Returns all known Telegram user ids that have ever established a session (authenticated at least once)
+export function getAllUserIds(): string[] {
+  const all = readAll();
+  return Object.keys(all);
+}

@@ -6,15 +6,16 @@ Overview
 
 Key Directories and Files
 - src/
-  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command and global authentication gate. Also registers /profile and /cancel commands, and routes messages into conversation flows. Handles inline callback queries (goal suggestions selection, etc.).
+  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command and global authentication gate. Also registers /profile and /cancel commands, and routes messages into conversation flows. Handles inline callback queries (goal suggestions selection, etc.). Initializes the scheduler for daily check-ins and shuts it down gracefully on process exit.
   - config/
     - env.ts: Centralized environment loader using dotenv. Validates required variables and exposes a typed config.
   - generated/
     - backend/: Code generated from swagger.json using openapi-typescript-codegen (DO NOT EDIT MANUALLY). Regenerate with npm run generate:backend.
   - lib/
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
-    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .factory/sessions.json.
+    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .factory/sessions.json. Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
+    - scheduler.ts: Cron-based daily check-ins. Uses node-cron to send a simple 'hello' message to all authenticated users twice a day (09:00 and 19:00) in the configured timezone. Designed to be easily extensible.
   - flows/
     - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed).
     - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
@@ -32,7 +33,7 @@ Environment Handling
 - Optional variables:
   - BACKEND_BASE_URL: Base URL of backend API (default: http://localhost:3000).
   - NODE_ENV: Node environment (default: development).
-  - TZ: Timezone for scheduled jobs (default: UTC).
+  - TZ: Timezone for scheduled jobs (default: UTC). The scheduler in src/lib/scheduler.ts uses this value for cron jobs.
 
 Setup Steps
 1) Copy .env.example to .env and fill in the required values.
@@ -60,6 +61,13 @@ Authentication Flow (Implemented)
 - The bot sends { externalId: <Telegram user id>, accessCode, secret: BACKEND_SHARED_SECRET } to /auth/login/telegram via the generated AuthService.
 - On success, accessToken and related tokens are persisted via src/lib/sessionStore.ts, avoiding future prompts.
 - Users can /logout to clear the stored session.
+
+Scheduled Daily Check-ins (Placeholder Implemented)
+- A lightweight scheduler sends a simple 'hello' message to all authenticated users twice daily:
+  - Morning at 09:00
+  - Evening at 19:00
+- Scheduling respects the TZ environment variable (defaults to UTC).
+- Implementation is robust and extensible: it retrieves all known users from the session store, filters for valid sessions, and sends messages with bounded concurrency to handle growth.
 
 Profile Update Flow (Implemented)
 - Command: /profile starts a guided flow asking for DOB (YYYY-MM-DD), gender (buttons + free text), weight (free text), and height (free text). Users can type 'skip' to leave any field unchanged and /cancel to abort.
