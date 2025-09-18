@@ -10,7 +10,10 @@
     "start:ts-node": "ts-node --esm src/index.ts",
     "generate:backend": "openapi -i ../compass-be/@swagger/swagger.json -o ./src/generated/backend -c axios --useOptions",
     "pm2:start": "pm2 start 'npx tsx src/index.ts' --name compass-bot",
-    "pm2:start:ts-node": "pm2 start 'npx ts-node --esm src/index.ts' --name compass-bot"
+    "pm2:start:ts-node": "pm2 start 'npx ts-node --esm src/index.ts' --name compass-bot",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "axios": "^1.7.7",
@@ -24,6 +27,8 @@
     "@types/node": "^24.5.2",
     "openapi-typescript-codegen": "^0.29.0",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0"
   }
 }

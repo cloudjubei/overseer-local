@@ -13,7 +13,7 @@ let botRef: TelegramBot | null = null
 // Key format: `${userId}:${checkInId}:${yyyyMMddHH}`
 const sentThisHour = new Set<string>()
 
-function currentHourStamp(date = new Date()): string {
+export function currentHourStamp(date = new Date()): string {
   // Format YYYYMMDDHH in the runtime timezone (process TZ can be set via env; node-cron also uses config.timezone)
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -22,11 +22,11 @@ function currentHourStamp(date = new Date()): string {
   return `${y}${m}${d}${h}`
 }
 
-function sameHourOfDay(d1: Date, d2: Date): boolean {
+export function sameHourOfDay(d1: Date, d2: Date): boolean {
   return d1.getHours() === d2.getHours()
 }
 
-function getMessageFromMetadata(metadata: Record<string, any> | undefined): string | undefined {
+export function getMessageFromMetadata(metadata: Record<string, any> | undefined): string | undefined {
   if (!metadata || typeof metadata !== 'object') return undefined
   // Common keys we might support
   const candidates = ['message', 'text', 'content', 'msg']
@@ -65,10 +65,10 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         // Compare hour-of-day only according to acceptance criteria
         if (!sameHourOfDay(startDate, now)) continue
 
-        const message = getMessageFromMetadata(ci.metadata)
+        const message = getMessageFromMetadata(ci.metadata as any)
         if (!message) continue
 
-        const dedupeKey = `${userId}:${ci.id}:${nowHourStamp}`
+        const dedupeKey = `${userId}:${(ci as any).id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
         // Send to the Telegram user: assume chat id equals Telegram user id
@@ -80,7 +80,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         }
       }
 
-      cursor = res?.cursor || undefined
+      cursor = (res as any)?.cursor || undefined
       if (!cursor) break
     } catch (err) {
       console.error(`Scheduler: failed to fetch check-ins for user ${userId}`, err)
@@ -89,27 +89,28 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
   } while (cursor)
 }
 
+export async function tickSchedulerOnce(now = new Date()) {
+  const nowStamp = currentHourStamp(now)
+  // Reset dedupe set when hour changes (simple pruning)
+  for (const key of Array.from(sentThisHour)) {
+    if (!key.endsWith(nowStamp)) sentThisHour.delete(key)
+  }
+  try {
+    const userIds = getAllUserIds()
+    for (const userId of userIds) {
+      await processUserCheckIns(userId, now, nowStamp)
+    }
+  } catch (e) {
+    console.error('Scheduler top-level error:', e)
+  }
+}
+
 export function initScheduler(bot: TelegramBot) {
   if (scheduledTask) return
   botRef = bot
 
-  // Clear dedupe set at each new hour tick
   const run = async () => {
-    const now = new Date()
-    const nowStamp = currentHourStamp(now)
-    // Reset dedupe set when hour changes (simple pruning)
-    for (const key of Array.from(sentThisHour)) {
-      if (!key.endsWith(nowStamp)) sentThisHour.delete(key)
-    }
-
-    try {
-      const userIds = getAllUserIds()
-      for (const userId of userIds) {
-        await processUserCheckIns(userId, now, nowStamp)
-      }
-    } catch (e) {
-      console.error('Scheduler top-level error:', e)
-    }
+    await tickSchedulerOnce(new Date())
   }
 
   // Run at the start of every hour
@@ -126,5 +127,4 @@ export function shutdownScheduler() {
     scheduledTask = null
   }
   botRef = null
-  sentThisHour.clear()
 }
