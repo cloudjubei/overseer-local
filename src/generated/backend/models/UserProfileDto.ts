@@ -28,6 +28,10 @@ export type UserProfileDto = {
    * Original user-entered height string
    */
   height_raw?: string
+  /**
+   * IANA timezone identifier
+   */
+  timezone: string
 }
 export namespace UserProfileDto {
   export enum gender {

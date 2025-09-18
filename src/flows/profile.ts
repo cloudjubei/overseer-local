@@ -156,7 +156,7 @@ export async function handleProfileFlowMessage(
         if (state.data.weight_raw) payload.weight_raw = state.data.weight_raw
         if (state.data.height_raw) payload.height_raw = state.data.height_raw
 
-        let result : UserProfileDto
+        let result: UserProfileDto
         try {
           result = await ProfilesService.profilesControllerUpdate({ requestBody: payload })
         } catch (err: any) {

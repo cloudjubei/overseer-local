@@ -16,6 +16,10 @@ export type CreateProfileDto = {
    * Raw user-entered height (e.g., "175 cm", "1.75 m", "5'11"", "71 in")
    */
   height_raw?: string
+  /**
+   * IANA timezone identifier
+   */
+  timezone: string
 }
 export namespace CreateProfileDto {
   export enum gender {

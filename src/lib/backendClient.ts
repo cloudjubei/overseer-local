@@ -2,7 +2,7 @@ import { config } from '../config/env'
 import { OpenAPI } from '../generated/backend/core/OpenAPI'
 
 export interface AuthTokens {
-  accessToken?: string 
+  accessToken?: string
 }
 
 export function configureBackendClient(tokens?: AuthTokens) {
