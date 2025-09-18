@@ -26,12 +26,13 @@
     },
     {
       "id": "ef24d0c4-5406-42a1-8f32-39c19a21d0e4",
-      "status": "-",
+      "status": "+",
       "title": "Implement a Backend Prompt Renderer",
       "description": "Create a new file `src/conversations/promptRenderer.ts`. This module will export a function that takes a `ConversationPromptDto` and a `bot` instance. It will be responsible for parsing the DTO's messages and fields, formatting them into a user-friendly string, and generating an inline keyboard for any `PromptOptionDto`s provided. It will then send the formatted message and keyboard to the user.",
       "context": [],
       "createdAt": "2025-09-18T13:14:14.291Z",
-      "updatedAt": "2025-09-18T13:14:14.291Z"
+      "updatedAt": "2025-09-18T13:58:47.392Z",
+      "completedAt": "2025-09-18T13:58:47.392Z"
     },
     {
       "id": "654283d5-7b61-4f49-9a64-c420fe777ded",
