@@ -13,6 +13,7 @@ import {
   GithubCredentials,
   RunOrchestrator,
   AgentType,
+  RunHandle,
 } from 'thefactory-tools'
 import type { BaseManager } from '../managers'
 import type DatabaseManager from '../db/DatabaseManager'
@@ -23,7 +24,7 @@ export default class FactoryToolsManager implements BaseManager {
   private window: BrowserWindow
   private _ipcBound: boolean
 
-  private runHandles: Map<string, any>
+  private runHandles: Map<string, RunHandle>
   private pricingManager?: PricingManager
   private runStore?: AgentRunStore
   private orchestrator?: RunOrchestrator
@@ -74,7 +75,7 @@ export default class FactoryToolsManager implements BaseManager {
     if (this._ipcBound) return
 
     const handlers: Record<string, (args: any) => Promise<any> | any> = {}
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_TASK] = async ({
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_TASK] = ({
       agentType,
       projectId,
       taskId,
@@ -90,7 +91,7 @@ export default class FactoryToolsManager implements BaseManager {
         githubCredentials,
         webSearchApiKeys,
       )
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_FEATURE] = async ({
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_FEATURE] = ({
       agentType,
       projectId,
       taskId,
@@ -108,15 +109,15 @@ export default class FactoryToolsManager implements BaseManager {
         githubCredentials,
         webSearchApiKeys,
       )
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL] = async ({ runId, reason }) =>
-      await this.cancelRun(runId, reason)
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_ACTIVE] = async () => await this.listActiveRuns()
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_HISTORY] = async () => await this.getHistoryRuns()
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_DELETE_HISTORY] = async ({ runId }) =>
-      await this.deleteHistoryRun(runId)
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = async ({ runId, rating }) =>
-      await this.rateRun(runId, rating)
-    handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = async () => await this.listPrices()
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL] = ({ runId, reason }) =>
+      this.cancelRun(runId, reason)
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_ACTIVE] = () => this.listActiveRuns()
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_HISTORY] = () => this.getHistoryRuns()
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_DELETE_HISTORY] = ({ runId }) =>
+      this.deleteHistoryRun(runId)
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = ({ runId, rating }) =>
+      this.rateRun(runId, rating)
+    handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = () => this.listPrices()
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = async ({ provider, url }) =>
       await this.refreshPrices(provider, url)
 
@@ -165,6 +166,7 @@ export default class FactoryToolsManager implements BaseManager {
         dbConnectionString,
       })
       console.log('[factory] Run started (task)', runHandle.id)
+      console.log('[factory] Run started (task) runHistory: ', runHistory)
       this._attachRunHandle(runHandle)
       return runHistory
     } catch (err: any) {
@@ -215,23 +217,23 @@ export default class FactoryToolsManager implements BaseManager {
     }
   }
 
-  async cancelRun(runId: string, reason?: string): Promise<void> {
+  cancelRun(runId: string, reason?: string) {
     console.log('[factory] CANCEL_RUN', { runId, reason })
     const run = this.runHandles.get(runId)
     if (run) {
       try {
-        await run.cancel(reason)
+        run.cancel(reason)
       } catch (err: any) {
         console.warn('[factory] Error cancelling run', runId, err?.message || err)
       }
     } else {
       console.warn('[factory] Cancel requested for unknown run', runId)
-      await this.deleteHistoryRun(runId)
+      this.deleteHistoryRun(runId)
     }
   }
 
-  async listActiveRuns(): Promise<any[]> {
-    let out: any[] = []
+  listActiveRuns(): AgentRunHistory[] {
+    let out: AgentRunHistory[] = []
     const runs = this.orchestrator!.listActiveRuns()
     for (const { runHistory, runHandle } of runs) {
       this._attachRunHandle(runHandle)
@@ -240,24 +242,24 @@ export default class FactoryToolsManager implements BaseManager {
     return out
   }
 
-  async getHistoryRuns(): Promise<AgentRunHistory[]> {
+  getHistoryRuns(): AgentRunHistory[] {
     return this.runStore?.listRuns() ?? []
   }
-  async deleteHistoryRun(runId: string): Promise<AgentRunHistory | undefined> {
+  deleteHistoryRun(runId: string): AgentRunHistory | undefined {
     return this.runStore?.deleteRun(runId)
   }
-  async rateRun(runId: string, rating: AgentRunRatingPatch): Promise<AgentRunHistory | undefined> {
+  rateRun(runId: string, rating: AgentRunRatingPatch): AgentRunHistory | undefined {
     return this.runStore?.rateRun(runId, rating)
   }
 
-  async listPrices(): Promise<PricingState | undefined> {
+  listPrices(): PricingState | undefined {
     return this.pricingManager?.listPrices()
   }
   async refreshPrices(provider?: string, url?: string): Promise<PricingState | undefined> {
     return this.pricingManager?.refresh(provider, url)
   }
 
-  private _attachRunHandle(runHandle: any): void {
+  private _attachRunHandle(runHandle: RunHandle): void {
     if (this.runHandles.get(runHandle.id)) {
       return
     }
