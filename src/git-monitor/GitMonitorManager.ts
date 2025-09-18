@@ -1,12 +1,10 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-
 import gitHelper from './gitHelper'
 import { analyzeBranchHeadForTask } from './CommitAnalyzer'
 import { updateLocalTaskStateFromCommit } from './updateLocalTaskStateFromCommit'
 import { isFeatureBranchName, branchNameToTaskId } from './taskBranchNaming'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 
 /**
  * GitMonitorManager
@@ -15,11 +13,7 @@ import type { BaseManager } from '../managers'
  * - Emits updates to renderer over IPC subscribe channel.
  * - Uses CommitAnalyzer to detect task.json in feature branches and updates local tasks.
  */
-export default class GitMonitorManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-  private _ipcBound: boolean
-
+export default class GitMonitorManager extends BaseManager {
   private _interval: any
   private _pollMs: number
   private _lastSnapshot: any
@@ -27,9 +21,7 @@ export default class GitMonitorManager implements BaseManager {
   private _branchAnalysis: Map<string, string>
 
   constructor(projectRoot: string, window: BrowserWindow) {
-    this.projectRoot = projectRoot
-    this.window = window
-    this._ipcBound = false
+    super(projectRoot, window)
 
     this._interval = null
     this._pollMs = 30_000 // 30 seconds default
@@ -40,18 +32,18 @@ export default class GitMonitorManager implements BaseManager {
   }
 
   async init(): Promise<void> {
-    this._registerIpcHandlers()
-    this.__startWatching()
+    await super.init()
+    await this.__startWatching()
   }
 
-  stopWatching(): void {
+  async stopWatching(): Promise<void> {
     if (this._interval) clearInterval(this._interval)
     this._interval = null
   }
 
-  private __startWatching(): void {
-    this.stopWatching()
-    this._tick().catch((e) => console.warn('[git-monitor] initial tick failed', e?.message || e))
+  private async __startWatching(): Promise<void> {
+    await this.stopWatching()
+    await this._tick()
     this._interval = setInterval(() => {
       this._tick().catch((e) => console.warn('[git-monitor] tick failed', e?.message || e))
     }, this._pollMs)
@@ -76,41 +68,24 @@ export default class GitMonitorManager implements BaseManager {
     return this._lastSnapshot
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
-
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS] = async () => await this.getStatus()
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL] = async () => await this._tick()
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL] = async ({ ms }) =>
       await this.setPollInterval(ms)
-
-    // Unmerged check and merge operations delegated to gitHelper
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_HAS_UNMERGED] = async ({ branchName, baseBranch }) =>
       await gitHelper.hasUnmergedCommits(this.projectRoot, branchName, baseBranch)
-
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH] = async ({ branchName, baseBranch }) => {
       const result = await gitHelper.mergeBranchIntoBase(this.projectRoot, branchName, baseBranch)
       if (result?.ok) {
-        // Refresh snapshot after merge
         await this._tick()
       }
       return result
     }
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   async setPollInterval(ms: number): Promise<void> {

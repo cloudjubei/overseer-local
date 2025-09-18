@@ -20,15 +20,15 @@ export type StartFeatureRunParams = StartTaskRunParams & { featureId: string }
 
 export type FactoryService = {
   subscribeRuns: (callback: (updated: AgentRunHistory) => void) => () => void
-  startTaskRun: (params: StartTaskRunParams) => AgentRunHistory
-  startFeatureRun: (params: StartFeatureRunParams) => AgentRunHistory
-  cancelRun: (runId: string) => void
-  listRunsActive: () => AgentRunHistory[]
-  listRunHistory: () => AgentRunHistory[]
-  deleteRunHistory: (runId: string) => AgentRunHistory | undefined
-  rateRun: (runId: string, rating?: AgentRunRatingPatch) => AgentRunHistory | undefined
+  startTaskRun: (params: StartTaskRunParams) => Promise<AgentRunHistory>
+  startFeatureRun: (params: StartFeatureRunParams) => Promise<AgentRunHistory>
+  cancelRun: (runId: string) => Promise<void>
+  listRunsActive: () => Promise<AgentRunHistory[]>
+  listRunHistory: () => Promise<AgentRunHistory[]>
+  deleteRunHistory: (runId: string) => Promise<AgentRunHistory | undefined>
+  rateRun: (runId: string, rating?: AgentRunRatingPatch) => Promise<AgentRunHistory | undefined>
 
-  listPrices: () => PricingState
+  listPrices: () => Promise<PricingState>
   refreshPricing: (provider: string, url: string) => Promise<PricingState>
 }
 

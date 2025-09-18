@@ -1,11 +1,10 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { LiveDataStore } from './LiveDataStore'
 import { LiveDataRegistry } from './LiveDataRegistry'
 import { createAgentPricesProvider } from './providers/agentPricesProvider'
 import { createFetchJsonProvider } from './providers/fetchJsonProvider'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import FactoryToolsManager from 'src/factory-tools/FactoryToolsManager'
 
 export type LiveService = {
@@ -38,13 +37,9 @@ const DEFAULT_SERVICES: LiveService[] = [
   },
 ]
 
-export default class LiveDataManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-
+export default class LiveDataManager extends BaseManager {
   private store: LiveDataStore
   private registry: LiveDataRegistry
-  private _ipcBound: boolean
 
   private factoryToolsManager: FactoryToolsManager
 
@@ -55,12 +50,9 @@ export default class LiveDataManager implements BaseManager {
     window: BrowserWindow,
     factoryToolsManager: FactoryToolsManager,
   ) {
-    this.projectRoot = projectRoot
-    this.window = window
-
+    super(projectRoot, window)
     this.store = new LiveDataStore()
     this.registry = new LiveDataRegistry()
-    this._ipcBound = false
 
     this.factoryToolsManager = factoryToolsManager
 
@@ -91,31 +83,29 @@ export default class LiveDataManager implements BaseManager {
   }
 
   async init(): Promise<void> {
-    this._registerIpcHandlers()
+    await super.init()
     this._maybeTriggerOnLaunchUpdates()
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlers(): Record<string, (args: any) => any> {
+    const handlers: Record<string, (args: any) => any> = {}
 
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_GET_STATUS, () => this.getServicesStatus())
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_TRIGGER_UPDATE, (_event, { serviceId }) =>
-      this.triggerUpdate(serviceId),
-    )
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_UPDATE_CONFIG, (_event, { serviceId, updates }) =>
-      this.updateServiceConfig(serviceId, updates),
-    )
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, (_event, { serviceId }) =>
-      this.getServiceData(serviceId),
-    )
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_ADD_SERVICE, (_event, { service }) =>
-      this.addService(service),
-    )
-    ipcMain.handle(IPC_HANDLER_KEYS.LIVE_DATA_REMOVE_SERVICE, (_event, { serviceId }) =>
-      this.removeService(serviceId),
-    )
+    handlers[IPC_HANDLER_KEYS.LIVE_DATA_GET_STATUS] = () => this.getServicesStatus()
+    handlers[IPC_HANDLER_KEYS.LIVE_DATA_UPDATE_CONFIG] = ({ serviceId, updates }) =>
+      this.updateServiceConfig(serviceId, updates)
+    handlers[IPC_HANDLER_KEYS.LIVE_DATA_ADD_SERVICE] = ({ service }) => this.addService(service)
+    handlers[IPC_HANDLER_KEYS.LIVE_DATA_REMOVE_SERVICE] = ({ serviceId }) =>
+      this.removeService(serviceId)
+    return handlers
+  }
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    this._ipcBound = true
+    handlers[IPC_HANDLER_KEYS.LIVE_DATA_TRIGGER_UPDATE] = async ({ serviceId }) =>
+      await this.triggerUpdate(serviceId)
+    handlers[IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA] = async ({ serviceId }) =>
+      await this.getServiceData(serviceId)
+    return handlers
   }
 
   getServicesStatus(): (LiveService & { isFresh: boolean })[] {
@@ -219,10 +209,6 @@ export default class LiveDataManager implements BaseManager {
         }
       }
     }
-  }
-
-  stopWatching(): void {
-    // Placeholder for future scheduled triggers
   }
 }
 

@@ -1,9 +1,8 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import ChatsStorage from './ChatsStorage'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type TasksManager from '../tasks/TasksManager'
 import type FilesManager from '../files/FilesManager'
@@ -31,11 +30,8 @@ export type ChatMessage = {
 }
 export type Chat = { id: string; messages: ChatMessage[]; creationDate: string; updateDate: string }
 
-export default class ChatsManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
+export default class ChatsManager extends BaseManager {
   private storages: Record<string, ChatsStorage>
-  private _ipcBound: boolean
 
   private projectsManager: ProjectsManager
   private tasksManager: TasksManager
@@ -50,10 +46,8 @@ export default class ChatsManager implements BaseManager {
     filesManager: FilesManager,
     settingsManager: SettingsManager,
   ) {
-    this.projectRoot = projectRoot
-    this.window = window
+    super(projectRoot, window)
     this.storages = {}
-    this._ipcBound = false
 
     this.projectsManager = projectsManager
     this.tasksManager = tasksManager
@@ -77,14 +71,14 @@ export default class ChatsManager implements BaseManager {
 
   async init(): Promise<void> {
     await this.__getStorage('main')
-    this._registerIpcHandlers()
+    await super.init()
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
-    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async ({ config }) => this.listModels(config)
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async ({ config }) =>
+      await this.listModels(config)
     handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) =>
       (await this.__getStorage(projectId))?.listChats()
     handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ projectId }) =>
@@ -100,18 +94,7 @@ export default class ChatsManager implements BaseManager {
       config,
     }) => this.getCompletion(projectId, chatId, newMessages, config)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   private _withAttachmentsAsMentions(messages: ChatMessage[]): ChatMessage[] {

@@ -1,9 +1,8 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import crypto from 'crypto'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { classifyDocumentType } from '../db/fileTyping'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
@@ -16,16 +15,12 @@ function toRelUnix(p: string): string {
   return (p || '').replace(/\\/g, '/')
 }
 
-export default class DocumentIngestionManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-
+export default class DocumentIngestionManager extends BaseManager {
   private dbManager: DatabaseManager
   private projectsManager: ProjectsManager
   private filesManager: FilesManager
 
   private handling: Record<string, boolean>
-  private _ipcBound: boolean
 
   constructor(
     projectRoot: string,
@@ -34,45 +29,23 @@ export default class DocumentIngestionManager implements BaseManager {
     projectsManager: ProjectsManager,
     filesManager: FilesManager,
   ) {
-    this.projectRoot = projectRoot
-    this.window = window
+    super(projectRoot, window)
 
     this.dbManager = dbManager
     this.projectsManager = projectsManager
     this.filesManager = filesManager
 
     this.handling = {}
-    this._ipcBound = false
   }
 
-  async init(): Promise<void> {
-    this._registerIpcHandlers()
-  }
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-  stopWatching(): void {
-    // no-op; ingestion uses FilesManager watchers
-  }
-
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
-
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.DOCUMENT_INGESTION_ALL] = async () => await this.ingestAll()
     handlers[IPC_HANDLER_KEYS.DOCUMENT_INGESTION_PROJECT] = async ({ projectId }) =>
       await this.ingestProject(projectId)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   async ingestAll(): Promise<void> {

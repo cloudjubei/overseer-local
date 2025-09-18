@@ -1,29 +1,19 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import TasksStorage from './TasksStorage'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import { Task } from 'thefactory-tools'
 
-function resolveTasksDir(projectRoot: string) {
-  return path.join(projectRoot, '.tasks')
-}
-
-export default class TasksManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
+export default class TasksManager extends BaseManager {
   private storages: Record<string, TasksStorage>
-  private _ipcBound: boolean
 
   private projectsManager: ProjectsManager
 
   constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
-    this.projectRoot = projectRoot
-    this.window = window
+    super(projectRoot, window)
     this.storages = {}
-    this._ipcBound = false
 
     this.projectsManager = projectsManager
   }
@@ -45,13 +35,12 @@ export default class TasksManager implements BaseManager {
   async init(): Promise<void> {
     await this.__getStorage('main')
 
-    this._registerIpcHandlers()
+    await super.init()
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.TASKS_LIST] = async ({ projectId }) => await this.listTasks(projectId)
     handlers[IPC_HANDLER_KEYS.TASKS_GET] = async ({ projectId, taskId }) =>
       await this.getTask(projectId, taskId)
@@ -76,18 +65,7 @@ export default class TasksManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER] = async ({ projectId, taskId, payload }) =>
       (await this.__getStorage(projectId))?.reorderFeatures(taskId, payload)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   async listTasks(projectId: string): Promise<Task[]> {

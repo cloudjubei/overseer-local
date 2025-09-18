@@ -10,16 +10,16 @@ import { useProjectContext } from './ProjectContext'
 
 export type AgentsContextValue = {
   runsHistory: AgentRunHistory[]
-  startTaskAgent: (agentType: AgentType, projectId: string, taskId: string) => void
+  startTaskAgent: (agentType: AgentType, projectId: string, taskId: string) => Promise<void>
   startFeatureAgent: (
     agentType: AgentType,
     projectId: string,
     taskId: string,
     featureId: string,
-  ) => void
-  cancelRun: (runId: string) => void
-  deleteRunHistory: (runId: string) => void
-  rateRun: (runId: string, rating?: AgentRunRatingPatch) => void
+  ) => Promise<void>
+  cancelRun: (runId: string) => Promise<void>
+  deleteRunHistory: (runId: string) => Promise<void>
+  rateRun: (runId: string, rating?: AgentRunRatingPatch) => Promise<void>
 }
 
 const AgentsContext = createContext<AgentsContextValue | null>(null)
@@ -32,8 +32,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])
 
   const update = async () => {
-    factoryService.listRunsActive() // ensures handles are recreated
-    const history = factoryService.listRunHistory()
+    await factoryService.listRunsActive() // ensures handles are recreated
+    const history = await factoryService.listRunHistory()
     setRunsHistory(history)
   }
 
@@ -89,7 +89,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       }
       const effectiveAgentType = await coerceAgentTypeForTask(agentType, projectId, taskId)
       console.log('STARTING TASK RUN ', new Date())
-      const historyRun = factoryService.startTaskRun({
+      const historyRun = await factoryService.startTaskRun({
         agentType: effectiveAgentType,
         projectId,
         taskId,
@@ -111,7 +111,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       if (!activeCredentials) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
-      const historyRun = factoryService.startFeatureRun({
+      const historyRun = await factoryService.startFeatureRun({
         agentType,
         projectId,
         taskId,
@@ -125,15 +125,15 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     [activeConfig, appSettings],
   )
 
-  const cancelRun = useCallback(async (runId: string) => factoryService.cancelRun(runId), [])
+  const cancelRun = useCallback(async (runId: string) => await factoryService.cancelRun(runId), [])
 
-  const deleteRunHistory = useCallback((runId: string) => {
+  const deleteRunHistory = useCallback(async (runId: string) => {
     factoryService.deleteRunHistory(runId)
     setRunsHistory((prev) => [...prev.filter((p) => p.id !== runId)])
   }, [])
 
-  const rateRun = useCallback((runId: string, rating?: AgentRunRatingPatch) => {
-    const updatedRun = factoryService.rateRun(runId, rating)
+  const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
+    const updatedRun = await factoryService.rateRun(runId, rating)
     if (updatedRun) {
       setRunsHistory((prev) => prev.map((r) => (r.id === runId ? updatedRun : r)))
     }

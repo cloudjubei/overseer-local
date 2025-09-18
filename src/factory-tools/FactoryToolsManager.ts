@@ -15,15 +15,11 @@ import {
   AgentType,
   RunHandle,
 } from 'thefactory-tools'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
 import { PricingState } from 'thefactory-tools/dist/pricing'
 
-export default class FactoryToolsManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-  private _ipcBound: boolean
-
+export default class FactoryToolsManager extends BaseManager {
   private runHandles: Map<string, RunHandle>
   private pricingManager?: PricingManager
   private runStore?: AgentRunStore
@@ -32,9 +28,7 @@ export default class FactoryToolsManager implements BaseManager {
   private dbManager: DatabaseManager
 
   constructor(projectRoot: string, window: BrowserWindow, dbManager: DatabaseManager) {
-    this.projectRoot = projectRoot
-    this.window = window
-    this._ipcBound = false
+    super(projectRoot, window)
 
     this.runHandles = new Map()
     this.pricingManager = undefined
@@ -62,19 +56,17 @@ export default class FactoryToolsManager implements BaseManager {
     this.orchestrator = createOrchestrator(orchestratorOptions as any)
     console.log('[factory] Orchestrator ready')
 
-    this._registerIpcHandlers()
-
     console.log(
       '[factory] Pricing manager initialized. Loaded',
       this.pricingManager?.listPrices()?.prices?.length || 0,
       'prices.',
     )
+    await super.init()
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlers(): Record<string, (args: any) => any> {
+    const handlers: Record<string, (args: any) => any> = {}
 
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_TASK] = ({
       agentType,
       projectId,
@@ -118,21 +110,14 @@ export default class FactoryToolsManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = ({ runId, rating }) =>
       this.rateRun(runId, rating)
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = () => this.listPrices()
+    return handlers
+  }
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = async ({ provider, url }) =>
       await this.refreshPrices(provider, url)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   startTaskRun(

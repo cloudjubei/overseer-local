@@ -1,11 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
 import chokidar, { FSWatcher } from 'chokidar'
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { validateProjectSpec } from './ProjectsValidator'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import { ProjectSpec } from 'thefactory-tools'
 
 async function pathExists(p: string) {
@@ -17,21 +16,16 @@ async function pathExists(p: string) {
   }
 }
 
-export default class ProjectsManager implements BaseManager {
-  projectRoot: string
+export default class ProjectsManager extends BaseManager {
   projectsDir: string
-  window: BrowserWindow
   watcher: FSWatcher | null
-  private _ipcBound: boolean
 
   private projects: any[]
 
   constructor(projectRoot: string, window: BrowserWindow) {
-    this.projectRoot = path.isAbsolute(projectRoot) ? projectRoot : path.resolve(projectRoot)
+    super(projectRoot, window)
     this.projectsDir = path.join(this.projectRoot, '.projects')
-    this.window = window
     this.watcher = null
-    this._ipcBound = false
 
     this.projects = []
   }
@@ -51,10 +45,10 @@ export default class ProjectsManager implements BaseManager {
         .on('addDir', (_p) => this.__rebuildAndNotify())
         .on('unlinkDir', (_p) => this.__rebuildAndNotify())
     }
-    this._registerIpcHandlers()
+    await super.init()
   }
 
-  stopWatching(): void {
+  async stopWatching(): Promise<void> {
     if (this.watcher) {
       this.watcher.close()
       this.watcher = null
@@ -121,31 +115,25 @@ export default class ProjectsManager implements BaseManager {
 
     return json
   }
+  getHandlers(): Record<string, (args: any) => any> {
+    const handlers: Record<string, (args: any) => any> = {}
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
-
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.PROJECTS_LIST] = () => this.listProjects()
     handlers[IPC_HANDLER_KEYS.PROJECTS_GET] = (args) => this.getProject(args.id)
+
+    return handlers
+  }
+
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
+
     handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = (args) => this.createProject(args.project)
     handlers[IPC_HANDLER_KEYS.PROJECTS_UPDATE] = (args) => this.updateProject(args.id, args.project)
     handlers[IPC_HANDLER_KEYS.PROJECTS_DELETE] = (args) => this.deleteProject(args.id)
     handlers[IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER] = async (args) =>
       this.reorderTask(args.projectId, args.fromIndex, args.toIndex)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   async ensureProjectsDirExists(): Promise<string> {
@@ -180,7 +168,7 @@ export default class ProjectsManager implements BaseManager {
 
     const dir = await this.ensureProjectsDirExists()
 
-    const project = await this.getProject(sanitized.id)
+    const project = this.getProject(sanitized.id)
     if (project) {
       return project
     }
@@ -189,7 +177,7 @@ export default class ProjectsManager implements BaseManager {
     await fs.writeFile(target, JSON.stringify(sanitized, null, 2), 'utf8')
 
     this.projects.push(sanitized)
-    await this.__notify()
+    this.__notify()
     return sanitized
   }
 
@@ -215,7 +203,7 @@ export default class ProjectsManager implements BaseManager {
     } catch {}
 
     this.projects = this.projects.map((p) => (p.id === sanitized.id ? sanitized : p))
-    await this.__notify()
+    this.__notify()
     return sanitized
   }
 
@@ -224,12 +212,16 @@ export default class ProjectsManager implements BaseManager {
     if (await pathExists(p)) {
       await fs.unlink(p)
       this.projects = this.projects.filter((p) => p.id !== id)
-      await this.__notify()
+      this.__notify()
     }
   }
 
-  async reorderTask(projectId: string, fromIndex: number, toIndex: number): Promise<{ ok: true }> {
-    const project: any = await this.getProject(projectId)
+  async reorderTask(
+    projectId: string,
+    fromIndex: number,
+    toIndex: number,
+  ): Promise<ProjectSpec | undefined> {
+    const project = this.getProject(projectId)
     if (!project) {
       throw new Error(`Project with id: ${projectId} not found`)
     }
@@ -250,7 +242,7 @@ export default class ProjectsManager implements BaseManager {
     }
 
     if (JSON.stringify(newOrder) === JSON.stringify(currentOrder)) {
-      return { ok: true }
+      return project
     }
 
     const newIndex: Record<string, number> = {}
@@ -264,7 +256,7 @@ export default class ProjectsManager implements BaseManager {
 
     this.projects = this.projects.map((p) => (p.id === project.id ? project : p))
 
-    await this.__notify()
-    return { ok: true }
+    this.__notify()
+    return project
   }
 }

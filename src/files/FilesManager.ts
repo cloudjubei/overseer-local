@@ -1,21 +1,17 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import FilesStorage from './FilesStorage'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 
-export default class FilesManager implements BaseManager {
-  private window: BrowserWindow
+export default class FilesManager extends BaseManager {
   private storages: Record<string, FilesStorage>
-  private _ipcBound: boolean
   private projectsManager: ProjectsManager
 
   constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
-    this.window = window
+    super(projectRoot, window)
     this.storages = {}
-    this._ipcBound = false
 
     this.projectsManager = projectsManager
   }
@@ -23,7 +19,7 @@ export default class FilesManager implements BaseManager {
   async init(): Promise<void> {
     await this.__getStorage('main')
 
-    this._registerIpcHandlers()
+    await super.init()
   }
 
   private async __getStorage(projectId: string): Promise<FilesStorage | undefined> {
@@ -41,10 +37,9 @@ export default class FilesManager implements BaseManager {
     return this.storages[projectId]
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.FILES_LIST] = async ({ projectId }) =>
       (await this.__getStorage(projectId))?.listFiles()
     handlers[IPC_HANDLER_KEYS.FILES_READ] = async ({ projectId, relPath, encoding }) =>
@@ -62,18 +57,7 @@ export default class FilesManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.FILES_UPLOAD] = async ({ projectId, name, content }) =>
       (await this.__getStorage(projectId))?.uploadFile(name, content)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   async getAbsoluteFilePath(projectId: string, relativePath: string): Promise<string> {

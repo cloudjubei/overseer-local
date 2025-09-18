@@ -1,22 +1,16 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import { openDatabase, TheFactoryDb } from 'thefactory-db'
 import { MatchParams } from 'thefactory-db/dist/types'
 
-export default class DatabaseManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-  private _ipcBound: boolean
+export default class DatabaseManager extends BaseManager {
   private _dbClient: TheFactoryDb | undefined
   private _connectionString: string | undefined
   private _status: { connected: boolean; lastError?: string }
 
   constructor(projectRoot: string, window: BrowserWindow) {
-    this.projectRoot = projectRoot
-    this.window = window
-    this._ipcBound = false
+    super(projectRoot, window)
 
     this._dbClient = undefined
     this._connectionString = undefined
@@ -25,15 +19,9 @@ export default class DatabaseManager implements BaseManager {
       lastError: undefined,
     }
   }
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-  async init(): Promise<void> {
-    this._registerIpcHandlers()
-  }
-
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
-
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.DB_CONNECT] = async ({ connectionString }) =>
       await this.connect(connectionString)
     handlers[IPC_HANDLER_KEYS.DB_GET_STATUS] = async () => await this.getStatus()
@@ -66,18 +54,7 @@ export default class DatabaseManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_CLEAR] = async ({ projectIds }) =>
       await this.clearDocuments(projectIds)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   async connect(connectionString: string): Promise<{ connected: boolean; lastError?: string }> {

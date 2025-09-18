@@ -1,22 +1,16 @@
-import { ipcMain, Notification } from 'electron'
+import { Notification } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import NotificationsStorage from './NotificationsStorage'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import SettingsManager from '../settings/SettingsManager'
 
-export default class NotificationsManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-  private _ipcBound: boolean
-
+export default class NotificationsManager extends BaseManager {
   private storages: Record<string, NotificationsStorage>
   private settingsManager: SettingsManager
 
   constructor(projectRoot: string, window: BrowserWindow, settingsManager: SettingsManager) {
-    this.projectRoot = projectRoot
-    this.window = window
-    this._ipcBound = false
+    super(projectRoot, window)
 
     this.storages = {}
     this.settingsManager = settingsManager
@@ -25,7 +19,7 @@ export default class NotificationsManager implements BaseManager {
   async init(): Promise<void> {
     await this.__getStorage('main')
 
-    this._registerIpcHandlers()
+    await super.init()
   }
 
   private __getStorage(projectId: string): NotificationsStorage {
@@ -50,10 +44,9 @@ export default class NotificationsManager implements BaseManager {
     }
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlers(): Record<string, (args: any) => any> {
+    const handlers: Record<string, (args: any) => any> = {}
 
-    const handlers: Record<string, (args: any) => Promise<any> | any> = {}
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = ({ args }) => this.sendOs(args)
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = ({ projectId }) =>
       this.getRecentNotifications(projectId)
@@ -68,30 +61,19 @@ export default class NotificationsManager implements BaseManager {
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_CREATE] = ({ projectId, input }) =>
       this.createNotification(projectId, input)
 
-    for (const handler of Object.keys(handlers)) {
-      ipcMain.handle(handler, async (_event, args) => {
-        try {
-          return await handlers[handler](args)
-        } catch (e: any) {
-          console.error(`${handler} failed`, e)
-          return { ok: false, error: String(e?.message || e) }
-        }
-      })
-    }
-
-    this._ipcBound = true
+    return handlers
   }
 
   private _getPrefsForProject(projectId: string): any {
     try {
       const app = this.settingsManager.getAppSettings?.()
       const project = this.settingsManager.getProjectSettings?.(projectId)
-      const sys = app?.notificationSystemSettings || {
+      const sys = app?.settings || {
         osNotificationsEnabled: false,
         soundsEnabled: false,
         displayDuration: 5,
       }
-      const categoriesEnabled = project?.notifications?.categoriesEnabled || {}
+      const categoriesEnabled = project?.settings.notifications?.categoriesEnabled || {}
       return { sys, categoriesEnabled }
     } catch (e) {
       return {

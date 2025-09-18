@@ -10,11 +10,7 @@ import LiveDataManager from './live-data/LiveDataManager'
 import DatabaseManager from './db/DatabaseManager'
 import DocumentIngestionManager from './document_ingestion/DocumentIngestionManager'
 import GitMonitorManager from './git-monitor/GitMonitorManager'
-
-export interface BaseManager {
-  init(): Promise<void>
-  stopWatching?: () => void | Promise<void>
-}
+import BaseManager from './BaseManager'
 
 export let dbManager: DatabaseManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
@@ -78,7 +74,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
 export function stopManagers(): void {
   for (const manager of managers) {
     try {
-      manager.stopWatching?.()
+      manager.stopWatching()
     } catch (_) {}
   }
 }

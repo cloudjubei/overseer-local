@@ -1,50 +1,38 @@
-import { ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import type { BaseManager } from '../managers'
+import BaseManager from '../BaseManager'
 import ProjectSettings from './projectSettings'
 import AppSettings from './appSettings'
 
-export default class SettingsManager implements BaseManager {
-  private projectRoot: string
-  private window: BrowserWindow
-
+export default class SettingsManager extends BaseManager {
   private appSettings: AppSettings
   private projectSettings: Record<string, ProjectSettings>
 
-  private _ipcBound: boolean
-
   constructor(projectRoot: string, window: BrowserWindow) {
-    this.projectRoot = projectRoot
-    this.window = window
+    super(projectRoot, window)
 
     this.appSettings = new AppSettings()
     this.projectSettings = {}
-
-    this._ipcBound = false
   }
 
   async init(): Promise<void> {
     await this.__loadProjectSettings('main')
 
-    this._registerIpcHandlers()
+    await super.init()
   }
 
-  private _registerIpcHandlers(): void {
-    if (this._ipcBound) return
+  getHandlers(): Record<string, (args: any) => any> {
+    const handlers: Record<string, (args: any) => any> = {}
 
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_APP, () => this.getAppSettings())
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_APP, (_event, { updates }) =>
-      this.updateAppSettings(updates),
-    )
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_GET_PROJECT, (_event, { projectId }) =>
-      this.__loadProjectSettings(projectId).get(),
-    )
-    ipcMain.handle(IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT, (_event, { projectId, updates }) =>
-      this.__loadProjectSettings(projectId).save(updates),
-    )
+    handlers[IPC_HANDLER_KEYS.SETTINGS_GET_APP] = () => this.getAppSettings()
+    handlers[IPC_HANDLER_KEYS.SETTINGS_UPDATE_APP] = ({ updates }) =>
+      this.updateAppSettings(updates)
+    handlers[IPC_HANDLER_KEYS.SETTINGS_GET_PROJECT] = ({ projectId }) =>
+      this.__loadProjectSettings(projectId).get()
+    handlers[IPC_HANDLER_KEYS.SETTINGS_UPDATE_PROJECT] = ({ projectId, updates }) =>
+      this.__loadProjectSettings(projectId).save(updates)
 
-    this._ipcBound = true
+    return handlers
   }
 
   private __loadProjectSettings(projectId: string): ProjectSettings {
