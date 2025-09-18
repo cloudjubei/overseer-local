@@ -2,13 +2,8 @@ import TelegramBot from 'node-telegram-bot-api'
 import { config } from '../config/env'
 import { isAuthenticated, getSession, setSession, clearSession } from './sessionStore'
 import { configureBackendClient, setAccessToken } from './backendClient'
-
-// Lazy import generated client to avoid build-time dependency when not generated yet
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { AuthService } from '../generated/backend'
 
-// Track users who were prompted for an access code
 const pendingAccessCode = new Set<string>()
 
 export function getTelegramUserId(msg: TelegramBot.Message): string | undefined {

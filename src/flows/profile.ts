@@ -1,8 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { ProfilesService } from '../generated/backend'
+import { ProfilesService, UserProfileDto } from '../generated/backend'
 
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 
@@ -159,7 +156,7 @@ export async function handleProfileFlowMessage(
         if (state.data.weight_raw) payload.weight_raw = state.data.weight_raw
         if (state.data.height_raw) payload.height_raw = state.data.height_raw
 
-        let result
+        let result : UserProfileDto
         try {
           result = await ProfilesService.profilesControllerUpdate({ requestBody: payload })
         } catch (err: any) {
@@ -179,16 +176,16 @@ export async function handleProfileFlowMessage(
           const parts: string[] = []
           if (typeof result.dob === 'string') parts.push(`DOB: ${result.dob}`)
           if (typeof result.gender === 'string') parts.push(`Gender: ${result.gender}`)
-          const weightPart = (result as any).weight
-            ? `${(result as any).weight} kg`
-            : (result as any).weight_raw
-              ? `${(result as any).weight_raw}`
+          const weightPart = result.weight
+            ? `${result.weight} kg`
+            : result.weight_raw
+              ? `${result.weight_raw}`
               : undefined
           if (weightPart) parts.push(`Weight: ${weightPart}`)
-          const heightPart = (result as any).height
-            ? `${(result as any).height} cm`
-            : (result as any).height_raw
-              ? `${(result as any).height_raw}`
+          const heightPart = result.height
+            ? `${result.height} cm`
+            : result.height_raw
+              ? `${result.height_raw}`
               : undefined
           if (heightPart) parts.push(`Height: ${heightPart}`)
           if (parts.length) lines.push(parts.join('\n'))

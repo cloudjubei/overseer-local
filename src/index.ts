@@ -1,8 +1,3 @@
-// Main entry point for the Compass Telegram Bot
-// - Loads environment variables
-// - Instantiates node-telegram-bot-api
-// - Sets up a basic, extensible command handler structure
-
 import TelegramBot from 'node-telegram-bot-api'
 import { config } from './config/env'
 import {
@@ -26,10 +21,6 @@ import {
   handleNewGoalCallback,
 } from './flows/newGoal'
 import { initScheduler, shutdownScheduler } from './lib/scheduler'
-
-// Lazy import generated client services to avoid build-time dependency when not generated yet
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { GoalsService } from './generated/backend'
 
 // Basic command handler types

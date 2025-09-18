@@ -1,7 +1,4 @@
 import TelegramBot from 'node-telegram-bot-api'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { GoalsService } from '../generated/backend'
 
 interface NewGoalFlowState {
