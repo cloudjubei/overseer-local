@@ -13,6 +13,11 @@ import {
   cancelProfileFlow,
 } from './flows/profile';
 
+// Lazy import generated client services to avoid build-time dependency when not generated yet
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { GoalsService } from './generated/backend';
+
 // Basic command handler types
 export type CommandHandler = (ctx: {
   bot: TelegramBot;
@@ -94,6 +99,50 @@ async function main() {
       await startProfileFlow(bot, userId, chatId);
     },
     'Update your profile (DOB, gender, weight, height)'
+  );
+
+  // Micro goals listing command
+  commands.register(
+    'microgoals',
+    async ({ bot, msg }) => {
+      const chatId = msg.chat.id;
+      const userId = getTelegramUserId(msg);
+      if (!userId) {
+        await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.');
+        return;
+      }
+
+      try {
+        await bot.sendChatAction(chatId, 'typing');
+        // Fetch goals (first page, default limit per backend schema)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const res = await GoalsService.goalsControllerList({});
+        const items = Array.isArray(res?.items) ? res.items : [];
+        const micro = items.filter((g: any) => g?.type === 'MICRO');
+
+        if (!micro.length) {
+          await bot.sendMessage(chatId, 'You have no micro goals yet.');
+          return;
+        }
+
+        const lines: string[] = [];
+        lines.push(`You have ${micro.length} micro goal${micro.length === 1 ? '' : 's'}:`);
+        for (const g of micro) {
+          const status = g.completedAt ? '✅' : '•';
+          const category = typeof g.category === 'string' ? g.category : 'UNKNOWN';
+          const difficulty = typeof g.difficulty === 'string' ? g.difficulty : 'UNKNOWN';
+          const text = typeof g.text === 'string' ? g.text : '';
+          lines.push(`${status} [${category}/${difficulty}] ${text}`);
+        }
+
+        await bot.sendMessage(chatId, lines.join('\n'));
+      } catch (err: any) {
+        console.error('Failed to fetch micro goals', err?.response?.data || err?.message || err);
+        await bot.sendMessage(chatId, 'Sorry, I could not retrieve your micro goals right now. Please try again later.');
+      }
+    },
+    'View your current micro goals'
   );
 
   // Optional: expose /cancel to cancel active flows

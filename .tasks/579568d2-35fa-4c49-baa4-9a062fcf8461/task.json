@@ -66,12 +66,13 @@
     },
     {
       "id": "f32a9913-e2f9-4014-ab43-85464f5427e8",
-      "status": "-",
+      "status": "+",
       "title": "Check Micro Goals",
       "description": "Implement a command (e.g., `/microgoals`) that allows the user to view their current micro goals. This feature will involve making a call to the backend using the generated API client to fetch the user's micro goals and then formatting and displaying them to the user in a clear and readable way.",
       "context": [],
       "createdAt": "2025-09-18T01:29:17.603Z",
-      "updatedAt": "2025-09-18T01:29:17.603Z"
+      "updatedAt": "2025-09-18T01:48:05.258Z",
+      "completedAt": "2025-09-18T01:48:05.258Z"
     },
     {
       "id": "96ad7ba3-edd0-47e5-8ff0-4c2fb2695013",
