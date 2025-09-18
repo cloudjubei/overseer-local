@@ -1,6 +1,6 @@
 {
   "id": "bcf7668d-58f6-4035-b695-0d1bcbe83aef",
-  "status": "-",
+  "status": "=",
   "title": "Ongoing Improvements",
   "description": "",
   "features": [
@@ -15,7 +15,7 @@
     },
     {
       "id": "fa10705f-a673-4649-ae33-853df72179b0",
-      "status": "-",
+      "status": "+",
       "title": "Aim for close to 100% test coverage",
       "description": "We need to make sure that the tests cover as close as 100% of the codebase.\nObviously, things like the ai service with getting results from the AI cannot be fully tested - but we can test for many ranges of responses by mocking the LLM responses appropriately. The same idea should be taken everywhere to try to achieve 100% coverage.\n\nOne important thing is to make sure that data that is entering and leaving endpoints is validated thoroughly to make sure that it matches the expected schema. This should be part of the code and the tests should validate it too (i.e. malformed objects being rejected).\n\nThere needs to be a relevant section in @README.md  explaining how vital testing is and to refer to @docs/TESTING.md for all guidance related to writing tests and the standard for them. For reference there is also the @docs/CODE_STANDARD.md  document that highlights the coding standard within the project.",
       "context": [
@@ -23,8 +23,9 @@
         "docs/CODE_STANDARD.md"
       ],
       "createdAt": "2025-09-18T12:17:12.116Z",
-      "updatedAt": "2025-09-18T19:13:46.394Z",
-      "blockers": []
+      "updatedAt": "2025-09-18T19:30:38.336Z",
+      "blockers": [],
+      "completedAt": "2025-09-18T19:30:38.336Z"
     }
   ],
   "featureIdToDisplayIndex": {

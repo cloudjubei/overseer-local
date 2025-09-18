@@ -1,53 +1,81 @@
-Testing Guide
+# Testing Guidance
 
-Purpose
-- Ensure the bot’s behavior is correct and resilient with near-100% coverage of the application code (excluding generated code and the process entry point).
-- Validate the data entering and leaving our boundaries (Telegram inputs and backend API calls) with runtime checks where appropriate.
+## Philosophy
+High-quality, well-tested code is critical for the reliability of the Compass Telegram Bot. We aim for near-100% automated test coverage across the non-generated codebase. Every new feature or bug fix must be accompanied by relevant tests.
 
-Test Runner and Tools
-- Vitest is used for running tests and coverage.
-- Tests are written in TypeScript.
-- External integrations are mocked:
-  - TelegramBot instances are replaced with lightweight fakes in unit tests.
-  - Generated backend client (src/generated/backend) services are mocked via Vitest.
+This document provides guidance on our testing strategy, tools, and standards. For architectural and code style conventions, please refer to `docs/CODE_STANDARD.md`.
 
-Setup
-- Required environment variables are set in tests/setup.ts before modules load.
-- Sessions are directed to a per-run temporary directory via SESSIONS_DIR env var to avoid clobbering real data.
+## Tooling
+- **Test Runner**: [Vitest](https://vitest.dev/) - A fast and modern test runner with a Jest-compatible API.
+- **Mocks & Spies**: Vitest's built-in `vi` object.
+- **Assertions**: Vitest's built-in `expect`.
 
-Conventions
-- Location: tests/**/*.test.ts
-- Keep tests focused and deterministic. No real network calls.
-- Prefer white-box tests for critical logic (flows, auth, session store, scheduler helpers).
-- Mock all generated services; never rely on the real backend during tests.
+Tests are located in the `tests/` directory and follow the `*.test.ts` naming convention.
 
-Coverage
-- Coverage reports are produced with V8 instrumentation. See coverage/ after running tests.
-- We target near-100% coverage of our code under src/ (excluding src/generated/** and src/index.ts). See vitest.config.ts for exact coverage configuration.
+## How to Write Tests
 
-Input/Output Validation
-- Validate incoming user inputs where possible to avoid sending malformed payloads to the backend.
-  - Example: Profile flow validates DOB format (YYYY-MM-DD) and accepted gender values; tests assert that malformed inputs are rejected and that prompts are re-shown.
-  - Goal creation flow validates free text presence and ignores commands.
-- Validate outbound data by constructing request bodies only from validated fields; tests assert that only valid shapes reach the mocked services.
-- When the backend returns heterogeneous data, defensively read fields with type checks in the bot (already implemented) and assert graceful behavior in tests.
+### General Principles
+1.  **Isolate Units**: Tests should be small and focused on a single unit of functionality (e.g., one function or method).
+2.  **AAA Pattern**: Structure tests using the Arrange-Act-Assert pattern:
+    -   **Arrange**: Set up all preconditions, mocks, and inputs.
+    -   **Act**: Execute the function or method being tested.
+    -   **Assert**: Check that the outcome (return value, side effects, mock calls) is what you expect.
+3.  **Descriptive Naming**: Use `describe`, `it`, and `test` blocks to create a clear, readable hierarchy. The `it` block should describe the expected behavior, e.g., `it('should return an authenticated user session on successful login', () => { ... });`.
 
-Mocking AI/LLM
-- The AI suggestions endpoint is treated like an LLM response. Tests mock a range of responses:
-  - No suggestions
-  - Multiple suggestions
-  - Partial/malformed items (missing fields) are coerced to safe defaults by the flow
+### Mocking Strategy
+Effective mocking is key to isolating units and ensuring tests are fast and reliable. Our global test setup is in `tests/setup.ts`.
 
-Running Tests
-- npm run test: Run all tests
-- npm run test:coverage: Run tests with coverage report
+#### Mocking Backend Services
+All backend services, which are generated under `src/generated/backend/`, must be mocked. Never make live API calls in unit tests.
 
-Writing New Tests
-- Add a new *.test.ts under tests/.
-- Mock any backend calls from src/generated/backend.
-- Use a minimal fake bot with only the methods you need (sendMessage, answerCallbackQuery, etc.).
-- Ensure edge cases are covered: invalid inputs, cancellations, retries, and error branches.
+The `tests/setup.ts` file uses `vi.mock` to replace the entire generated module with mock implementations. You can then control the behavior of each service method on a per-test basis using `mockResolvedValue` or `mockRejectedValue`.
 
-Notes
-- Do not import src/index.ts in tests; it starts a real bot. Test individual modules and flows instead.
-- Do not modify files under src/generated/backend/ in tests; always mock them.
+**Example**: Mocking a `GoalsService` call:
+
+```typescript
+import { GoalsService } from '../src/generated/backend';
+import { vi } from 'vitest';
+
+// This mock is often placed in tests/setup.ts or at the top of a test file
+vi.mock('../src/generated/backend');
+
+describe('some feature that uses GoalsService', () => {
+  it('should handle a list of goals correctly', async () => {
+    // Arrange
+    const mockGoals = [{ id: '1', title: 'Test Goal' }];
+    vi.mocked(GoalsService.GoalsController_list).mockResolvedValue(mockGoals as any);
+
+    // Act
+    const result = await someFunctionThatCallsGoalService();
+
+    // Assert
+    expect(GoalsService.GoalsController_list).toHaveBeenCalledWith({ limit: 10 });
+    expect(result).toEqual(mockGoals);
+  });
+});
+```
+
+#### Mocking AI/LLM Responses
+When testing features that rely on AI-generated content (e.g., goal suggestions), it is crucial to mock the backend responses that would typically come from an LLM. This allows us to test for a wide range of scenarios in a deterministic way.
+
+-   **Success Case**: Mock a typical, well-formed AI response.
+-   **Empty/No Suggestions**: Mock an empty array or null response to ensure the bot handles it gracefully.
+-   **Malformed Data**: Mock a response that deviates from the expected schema (e.g., missing required fields). The bot should handle this without crashing, ideally logging an error and presenting a user-friendly message.
+-   **Backend Errors**: Use `mockRejectedValue` to simulate a 500 error from the backend.
+
+### Schema and Data Validation
+While the backend is the ultimate source of truth for data schemas, the bot must be resilient to unexpected data shapes. Tests should validate that our code correctly handles both valid and invalid data from the backend.
+
+-   **Input Validation**: For any user input that is parsed or transformed (e.g., dates, numbers), add tests for invalid formats.
+-   **Output Validation**: When the bot receives data from the backend, especially within conversation flows, ensure it can handle missing or malformed fields gracefully. For example, if a `ConversationPromptDto` is missing a `title`, the rendering logic should not crash.
+
+## Coverage Expectations
+We aim for **as close to 100% line and branch coverage as possible**. While 100% is not always practical (e.g., for unavoidable error paths in third-party libraries), all new business logic must be fully tested.
+
+Use the coverage report to identify untested code paths:
+
+```bash
+npm run test:coverage
+```
+
+Any pull request that decreases overall test coverage will not be merged until coverage is improved.

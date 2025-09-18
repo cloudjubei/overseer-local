@@ -106,8 +106,8 @@ Available commands
 
 Testing (vital for quality)
 - High-quality, well-tested code is critical. We aim for near-100% automated test coverage across the non-generated codebase.
-- Please read docs/TESTING.md for detailed guidance on writing tests, mocking backend/AI responses, and our standards for validating input/output schemas.
-- Also see docs/CODE_STANDARD.md for architectural practices to follow.
+- Please read **docs/TESTING.md** for detailed guidance on writing tests, mocking backend/AI responses, and our standards for validating input/output schemas.
+- Also see **docs/CODE_STANDARD.md** for architectural practices that must be followed.
 
 Testing Locally
 General checklist
@@ -116,7 +116,7 @@ General checklist
 - /profile: Walk through all questions. Try skip and invalid inputs (e.g., gender typo or malformed DOB) to see re-prompt.
 - /newgoal: Provide free text, verify suggestions appear. Test "Refine message", selecting a suggestion, and "Cancel".
 - /microgoals and /macrogoals: Verify lists show as expected (or the empty-state message)
-- /logout: Verify you are prompted for access code again on next message
+- /logout: Verify you are prompted for an access code again on next message
 
 Sessions
 - Sessions persist to .sessions/.sessions.json (override in tests via SESSIONS_DIR)
