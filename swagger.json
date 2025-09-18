@@ -983,6 +983,22 @@
               "FEMALE",
               "OTHER"
             ]
+          },
+          "weight": {
+            "type": "number",
+            "description": "Weight in kilograms (normalized)"
+          },
+          "weight_raw": {
+            "type": "string",
+            "description": "Original user-entered weight string"
+          },
+          "height": {
+            "type": "number",
+            "description": "Height in centimeters (normalized)"
+          },
+          "height_raw": {
+            "type": "string",
+            "description": "Original user-entered height string"
           }
         },
         "required": [
@@ -1004,6 +1020,14 @@
               "FEMALE",
               "OTHER"
             ]
+          },
+          "weight_raw": {
+            "type": "string",
+            "description": "Raw user-entered weight (e.g., \"82 kg\", \"180 lb\", \"11st 4lb\")"
+          },
+          "height_raw": {
+            "type": "string",
+            "description": "Raw user-entered height (e.g., \"175 cm\", \"1.75 m\", \"5'11\"\", \"71 in\")"
           }
         }
       },
@@ -1022,6 +1046,14 @@
               "FEMALE",
               "OTHER"
             ]
+          },
+          "weight_raw": {
+            "type": "string",
+            "description": "Raw user-entered weight (e.g., \"82 kg\", \"180 lb\", \"11st 4lb\")"
+          },
+          "height_raw": {
+            "type": "string",
+            "description": "Raw user-entered height (e.g., \"175 cm\", \"1.75 m\", \"5'11\"\", \"71 in\")"
           }
         }
       },
