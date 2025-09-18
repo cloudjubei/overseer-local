@@ -46,12 +46,13 @@
     },
     {
       "id": "c614bb72-2b32-4b96-bde6-60902cb5b5df",
-      "status": "-",
+      "status": "+",
       "title": "User Authentication and Registration",
       "description": "Implement the authentication flow. When an unauthenticated user interacts with the bot, it should prompt for an access code. The bot will then use the generated API client to send the user's Telegram ID and the provided access code to the backend. Upon successful authentication, the bot should store the user's authenticated state (e.g., in a simple in-memory or file-based session store) to avoid asking for the code again.",
       "context": [],
       "createdAt": "2025-09-18T01:29:10.237Z",
-      "updatedAt": "2025-09-18T01:29:10.237Z"
+      "updatedAt": "2025-09-18T01:43:03.362Z",
+      "completedAt": "2025-09-18T01:43:03.362Z"
     },
     {
       "id": "c35c4c5c-e82c-403e-b39b-96b0751a59ca",

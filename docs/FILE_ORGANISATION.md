@@ -6,13 +6,15 @@ Overview
 
 Key Directories and Files
 - src/
-  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command.
+  - index.ts: Application entry point. Loads environment, starts the Telegram bot (node-telegram-bot-api), and wires a minimal, extensible command handler with a /start command and global authentication gate.
   - config/
     - env.ts: Centralized environment loader using dotenv. Validates required variables and exposes a typed config.
   - generated/
     - backend/: Code generated from swagger.json using openapi-typescript-codegen (DO NOT EDIT MANUALLY). Regenerate with npm run generate:backend.
   - lib/
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
+    - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .factory/sessions.json.
+    - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens.
 - docs/
   - FILE_ORGANISATION.md: This document. Update when major structural changes occur.
 - mock-interface.tsx, mock-interface.css: UI mock and styles for reference in designing user flows.
@@ -48,6 +50,13 @@ Usage
     - import { GoalsService } from '../generated/backend';
     - await GoalsService.GoalsController_list({ limit: 10 });
 - Run the bot entry (example via ts-node/loader or compiled JS). The entry sets up polling and handles /start.
+
+Authentication Flow (Implemented)
+- On any user message, the bot checks authentication state using src/lib/auth.ts.
+- If unauthenticated, the bot prompts for an access code and expects a plain-text reply.
+- The bot sends { externalId: <Telegram user id>, accessCode, secret: BACKEND_SHARED_SECRET } to /auth/login/telegram via the generated AuthService.
+- On success, accessToken and related tokens are persisted via src/lib/sessionStore.ts, avoiding future prompts.
+- Users can /logout to clear the stored session.
 
 Notes
 - Do not modify files under old-system-reference/.

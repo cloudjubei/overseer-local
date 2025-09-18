@@ -5,6 +5,7 @@
 
 import TelegramBot from 'node-telegram-bot-api';
 import { config } from './config/env';
+import { handleAuthMessage, getTelegramUserId, logoutUser } from './lib/auth';
 
 // Basic command handler types
 export type CommandHandler = (ctx: {
@@ -48,16 +49,30 @@ async function main() {
       const name = msg.from?.first_name || 'there';
       const welcome = [
         `Hi ${name}! Welcome to Compass.`,
-        'I\'m your assistant to help manage your goals.',
+        "I'm your assistant to help manage your goals.",
         '',
-        'Getting started:',
-        '- Use this chat to create and review goals.',
-        '- More features will appear as we connect to the backend.',
+        'If this is your first time, please provide your access code when prompted.',
       ].join('\n');
 
       await bot.sendMessage(chatId, welcome, { parse_mode: 'HTML' });
+      // Auth prompting is handled globally in the message listener before commands.
     },
     'Start interacting with the bot'
+  );
+
+  commands.register(
+    'logout',
+    async ({ bot, msg }) => {
+      const chatId = msg.chat.id;
+      const userId = getTelegramUserId(msg);
+      if (!userId) {
+        await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.');
+        return;
+      }
+      logoutUser(userId);
+      await bot.sendMessage(chatId, 'You have been logged out. Send any message to authenticate again.');
+    },
+    'Log out and clear your session'
   );
 
   // Sync bot command list (as shown in Telegram UI)
@@ -71,29 +86,36 @@ async function main() {
     console.warn('Failed to set bot commands:', err);
   }
 
-  // Generic message listener parses commands like "/command arg1 arg2"
+  // Global message listener: ensure authentication flow first
   bot.on('message', async (msg) => {
-    const text = msg.text || '';
-    if (!text.startsWith('/')) return; // ignore non-commands for now
-
-    // Extract command and args. Support forms like /start and /start@BotName
-    const [first, ...rest] = text.trim().split(/\s+/);
-    const rawCommand = first.slice(1); // remove leading '/'
-    const commandOnly = rawCommand.split('@')[0].toLowerCase();
-    const args = rest;
-
-    const def = commands.get(commandOnly);
-    if (!def) {
-      // Optional: basic unknown command feedback
-      await bot.sendMessage(msg.chat.id, `Unknown command: /${commandOnly}`);
-      return;
-    }
-
     try {
+      // Run authentication gate. If it handles the message (prompt/login), stop here.
+      const handledByAuth = await handleAuthMessage(bot, msg);
+      if (handledByAuth) return;
+
+      const text = msg.text || '';
+      if (!text.startsWith('/')) {
+        // For now ignore non-commands if authenticated; future features will use this.
+        return;
+      }
+
+      // Extract command and args. Support forms like /start and /start@BotName
+      const [first, ...rest] = text.trim().split(/\s+/);
+      const rawCommand = first.slice(1); // remove leading '/'
+      const commandOnly = rawCommand.split('@')[0].toLowerCase();
+      const args = rest;
+
+      const def = commands.get(commandOnly);
+      if (!def) {
+        // Optional: basic unknown command feedback
+        await bot.sendMessage(msg.chat.id, `Unknown command: /${commandOnly}`);
+        return;
+      }
+
       await def.handler({ bot, msg, args });
     } catch (err) {
-      console.error(`Error handling /${commandOnly}:`, err);
-      await bot.sendMessage(msg.chat.id, 'Sorry, something went wrong while processing your command.');
+      console.error('Error handling message:', err);
+      await bot.sendMessage(msg.chat.id, 'Sorry, something went wrong while processing your message.');
     }
   });
 
