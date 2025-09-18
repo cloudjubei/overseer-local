@@ -3,8 +3,70 @@
   "status": "-",
   "title": "Use the backend's conversation system",
   "description": "The backend defines endpoints to use for conversation flows.\nThey provide ways for a client to start a flow and be given exact instructions as to what to present to the user and what path the user can take. This app needs to remain dumb and rely on the backend for controlling the conversation flows.\n\nAll the information about the backend endpoints is both in the `swagger.json` as well as the generated `src/generated/backend/services/ConversationsService.ts` and the models `src/generated/backend/models/HandleInputDto.ts` , `src/generated/backend/models/StartFlowDto.ts` and `src/generated/backend/models/MessageDto.ts`",
-  "features": [],
-  "featureIdToDisplayIndex": {},
+  "features": [
+    {
+      "id": "e0342eca-bee5-458d-9e78-8a0df4fc323f",
+      "status": "-",
+      "title": "Create a new Conversation Manager service",
+      "description": "Create a new file `src/lib/conversationManager.ts`. This file will be responsible for managing conversation state and interacting with the backend's `ConversationsService`. It should expose functions to start a conversation flow and to handle subsequent user inputs.",
+      "context": [],
+      "createdAt": "2025-09-18T12:33:21.834Z",
+      "updatedAt": "2025-09-18T12:33:21.834Z"
+    },
+    {
+      "id": "f6d0c2aa-4d2c-4310-a406-503f4f1cc77d",
+      "status": "-",
+      "title": "Integrate Conversation Manager into the main message handler",
+      "description": "Modify `src/index.ts` to use the new `conversationManager`. The `bot.on('message', ...)` handler should check if a user is in an active conversation. If so, it should pass the message to the conversation manager. If not, it should process the message as a potential command.",
+      "context": [],
+      "createdAt": "2025-09-18T12:33:21.834Z",
+      "updatedAt": "2025-09-18T12:33:21.834Z"
+    },
+    {
+      "id": "f56c1964-9279-43b5-91e7-8699cef211ca",
+      "status": "-",
+      "title": "Implement response handling in Conversation Manager",
+      "description": "In `src/lib/conversationManager.ts`, implement the logic to handle the `MessageDto[]` array returned from the backend. This will involve iterating through the messages and using the Telegram bot instance to send them to the user. This includes handling different message types if specified by the backend.",
+      "context": [],
+      "createdAt": "2025-09-18T12:33:21.834Z",
+      "updatedAt": "2025-09-18T12:33:21.834Z"
+    },
+    {
+      "id": "6fa0001e-e137-4dfb-a910-5798ecdf31a3",
+      "status": "-",
+      "title": "Refactor commands to use the new conversation system",
+      "description": "Update command handlers in `src/index.ts` (e.g., for `/start`, `/profile`, `/newgoal`) to initiate conversations through the `conversationManager.startFlow` instead of using the old hardcoded flow logic.",
+      "context": [],
+      "createdAt": "2025-09-18T12:33:21.834Z",
+      "updatedAt": "2025-09-18T12:33:21.834Z"
+    },
+    {
+      "id": "ba5544bb-2c10-495c-a1c4-1ca87fc43435",
+      "status": "-",
+      "title": "Remove old conversation flow files",
+      "description": "Delete the now-obsolete conversation flow files `src/flows/profile.ts` and `src/flows/newGoal.ts`, and remove any related imports from `src/index.ts`.",
+      "context": [],
+      "createdAt": "2025-09-18T12:33:21.835Z",
+      "updatedAt": "2025-09-18T12:33:21.835Z"
+    },
+    {
+      "id": "c5bab981-812b-4820-ba26-4b84e7baeeb7",
+      "status": "-",
+      "title": "Update documentation",
+      "description": "Update `docs/FILE_ORGANISATION.md` to reflect the removal of the `src/flows` directory and the introduction of the new `src/lib/conversationManager.ts` for handling all conversation logic.",
+      "context": [],
+      "createdAt": "2025-09-18T12:33:21.835Z",
+      "updatedAt": "2025-09-18T12:33:21.835Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "e0342eca-bee5-458d-9e78-8a0df4fc323f": 1,
+    "f6d0c2aa-4d2c-4310-a406-503f4f1cc77d": 2,
+    "f56c1964-9279-43b5-91e7-8699cef211ca": 3,
+    "6fa0001e-e137-4dfb-a910-5798ecdf31a3": 4,
+    "ba5544bb-2c10-495c-a1c4-1ca87fc43435": 5,
+    "c5bab981-812b-4820-ba26-4b84e7baeeb7": 6
+  },
   "createdAt": "2025-09-18T12:18:58.312Z",
   "updatedAt": "2025-09-18T12:32:46.574Z"
 }
