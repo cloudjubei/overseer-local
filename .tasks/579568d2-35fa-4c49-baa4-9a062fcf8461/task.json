@@ -16,12 +16,13 @@
     },
     {
       "id": "03af7ad1-f957-4a10-8fd1-a60b788c52ba",
-      "status": "-",
+      "status": "+",
       "title": "Environment Configuration",
       "description": "Set up environment variable handling using a library like `dotenv`. Create a `.env.example` file to document the required environment variables, such as `TELEGRAM_BOT_TOKEN` and `BACKEND_SHARED_SECRET`. Ensure the `.env` file is added to `.gitignore` to prevent committing secrets.",
       "context": [],
       "createdAt": "2025-09-18T01:28:49.881Z",
-      "updatedAt": "2025-09-18T01:28:49.881Z"
+      "updatedAt": "2025-09-18T01:37:22.159Z",
+      "completedAt": "2025-09-18T01:37:22.159Z"
     },
     {
       "id": "6c7c6dc2-e407-4223-a1a8-6c425dc0c83d",
