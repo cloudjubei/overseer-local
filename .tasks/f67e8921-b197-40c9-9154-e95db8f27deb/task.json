@@ -1668,6 +1668,33 @@
       "createdAt": "2025-09-18T11:24:14.814Z",
       "updatedAt": "2025-09-18T11:28:29.480Z",
       "completedAt": "2025-09-18T11:28:29.480Z"
+    },
+    {
+      "id": "fccb9bc5-1ca8-46ad-9702-6376d55de3fa",
+      "status": "-",
+      "title": "When switching view modes always show today's date",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx when the app opens and when switching modes between DAY | WEEK | MONTH - always make sure today's date is visible (so as if the user pressed the \"Today\" button).",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "createdAt": "2025-09-18T11:47:16.170Z",
+      "updatedAt": "2025-09-18T11:47:16.170Z"
+    },
+    {
+      "id": "18cbcc94-0531-4534-936c-7c7fa5efda8c",
+      "status": "-",
+      "title": "When there are any changes in creating/editing a task or feature confirm",
+      "description": "In @src/renderer/components/tasks/FeatureForm.tsx and @src/renderer/components/tasks/TaskForm.tsx that are used in @src/renderer/tasks/FeatureCreateView.tsx , @src/renderer/tasks/FeatureEditView.tsx , @src/renderer/tasks/TaskCreateView.tsx and @src/renderer/tasks/TaskEditView.tsx - make sure that if there are any changes whatsoever to the form, and the user clicks out or in some way tries to close the popup - an alert is displayed saying that there are pending changes and if the user really wants to discard them all and close the popup. The Alert must have a red/destructive \"DISCARD ALL\" button and a standard \"Go Back\" button - only clicking either of these buttons can close the alert.",
+      "context": [
+        "src/renderer/components/tasks/FeatureForm.tsx",
+        "src/renderer/components/tasks/TaskForm.tsx",
+        "src/renderer/tasks/FeatureCreateView.tsx",
+        "src/renderer/tasks/FeatureEditView.tsx",
+        "src/renderer/tasks/TaskCreateView.tsx",
+        "src/renderer/tasks/TaskEditView.tsx"
+      ],
+      "createdAt": "2025-09-18T11:49:51.503Z",
+      "updatedAt": "2025-09-18T11:49:51.503Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1776,7 +1803,9 @@
     "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f": 103,
     "fcfceb8f-d4af-4411-9a5b-7c059338b4a1": 104,
     "5a9ae0d2-7711-4149-bd57-1c43303613f6": 105,
-    "f07cc494-56fa-45c9-9c12-40fbbce37a86": 106
+    "f07cc494-56fa-45c9-9c12-40fbbce37a86": 106,
+    "fccb9bc5-1ca8-46ad-9702-6376d55de3fa": 107,
+    "18cbcc94-0531-4534-936c-7c7fa5efda8c": 108
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
