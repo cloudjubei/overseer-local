@@ -1,6 +1,6 @@
 {
   "id": "579568d2-35fa-4c49-baa4-9a062fcf8461",
-  "status": "-",
+  "status": "+",
   "title": "Create the initial app",
   "description": "This project is a rewrite of an old system kept here for reference (DO NOT MODIFY) under `old-system-reference` . There was a previous Telegram bot created that can be referenced under `old-system-reference/bot` .\nA new design was created that is shown as a typescript class under `mock-interface.tsx` with the matching css under `mock-interface.css` .\n\nWe want to use TypeScript for the bot and the library:\n'https://github.com/yagop/node-telegram-bot-api' (used by calling `npm i node-telegram-bot-api` ).\n\nIt needs to be clean and extensible.\nIt needs to use the provided `swagger.json` to generate all needed backend code.\nThis app must rely on the backend code as much as possible and make as few decisions as possible. The way it authenticates with the backend is by providing a shared secret (that will be stored in the `.env` file ) and the user inputting a special access code that will be all verified against the backend. Each user will get an account created - so the Telegram app needs to supply the backend with a unique id to identify a given user across sessions (and to store the credentials so that the user doesn't have to input it anymore once initial auth is done).\n\nThe user must be able to do the following things:\n- update their profile with DOB, gender, weight (free text input) and height (free text input), the backend will try to guess the weight and height units\n- check all micro goals\n- check all macro goals\n- create a new goal, by entering free flowing text, submitting it to the backend, after which the backend will respond with AI generated suggestions, the user then is also given the option to refine their message or pick from a set of suggested goals.\n\nIn the future, the bot will check upon the user every day in the morning and in the evening and ask the user for some input. This functionality can already be prepared - but the spec for what will be asked and how it will be carried out will be provided later. For now the bot can simply send a simple \"hello\" message once in the morning and once in the evening.",
   "features": [
@@ -133,14 +133,15 @@
     },
     {
       "id": "213d5733-6797-46cb-b85e-dd380a057205",
-      "status": "-",
+      "status": "+",
       "title": "Package.json includes all the necessary dependencies and scripts",
       "description": "All the dependencies and scripts used in @README.md should be put into package.json as easy run scripts",
       "context": [
         "README.md"
       ],
       "createdAt": "2025-09-18T08:59:57.004Z",
-      "updatedAt": "2025-09-18T08:59:57.004Z"
+      "updatedAt": "2025-09-18T09:02:56.090Z",
+      "completedAt": "2025-09-18T09:02:56.090Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -159,5 +160,6 @@
     "8c738915-3ea9-4fb1-878a-e251e5aad232": 13
   },
   "createdAt": "2025-09-18T00:50:51.954Z",
-  "updatedAt": "2025-09-18T01:28:23.722Z"
+  "updatedAt": "2025-09-18T01:28:23.722Z",
+  "completedAt": "2025-09-18T09:02:56.090Z"
 }
