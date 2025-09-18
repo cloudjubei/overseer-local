@@ -9,4 +9,7 @@ coverage
 .cache
 .turbo
 .vite
-docs
+*.json
+*.yml
+*.yaml
+*.md

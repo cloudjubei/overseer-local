@@ -1656,6 +1656,17 @@
       "createdAt": "2025-09-17T15:37:46.138Z",
       "updatedAt": "2025-09-17T15:41:20.741Z",
       "completedAt": "2025-09-17T15:41:20.741Z"
+    },
+    {
+      "id": "f07cc494-56fa-45c9-9c12-40fbbce37a86",
+      "status": "-",
+      "title": "In Timeline the Today button doesn't work correctly",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx the Today button needs to scroll the user to the correct spot in each timeline (Day | Week | Month) - currently it's broken.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "createdAt": "2025-09-18T11:24:14.814Z",
+      "updatedAt": "2025-09-18T11:24:14.814Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1763,7 +1774,8 @@
     "cb7d825c-b1ad-4a3f-a164-7e036765b93c": 102,
     "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f": 103,
     "fcfceb8f-d4af-4411-9a5b-7c059338b4a1": 104,
-    "5a9ae0d2-7711-4149-bd57-1c43303613f6": 105
+    "5a9ae0d2-7711-4149-bd57-1c43303613f6": 105,
+    "f07cc494-56fa-45c9-9c12-40fbbce37a86": 106
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
