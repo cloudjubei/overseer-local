@@ -80,8 +80,8 @@ export function normalizeCommitTaskData(commitData) {
   const featuresArr = Array.isArray(commitData.features)
     ? commitData.features
     : Array.isArray(commitData.tasks)
-    ? commitData.tasks
-    : []
+      ? commitData.tasks
+      : []
 
   const features = featuresArr.map((f) => ({
     id: f?.id ?? f?.featureId ?? null,

@@ -131,11 +131,7 @@ export const FilesView: React.FC = () => {
               className="group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
               title={node.name}
             >
-              {isOpen ? (
-                <IconFolderOpen className="w-4 h-4" />
-              ) : (
-                <IconFolder className="w-4 h-4" />
-              )}
+              {isOpen ? <IconFolderOpen className="w-4 h-4" /> : <IconFolder className="w-4 h-4" />}
               <span className="truncate font-medium text-text-primary">{node.name || 'root'}</span>
               <span className="ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]">
                 {node.files.length}

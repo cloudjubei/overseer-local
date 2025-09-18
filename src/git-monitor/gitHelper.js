@@ -37,7 +37,11 @@ export async function getCurrentBranch(repoPath) {
 export async function listLocalBranches(repoPath) {
   const res = await safeExec(
     'git',
-    ['for-each-ref', '--format=%(refname:short):::%(objectname):::%(committerdate:iso8601)', 'refs/heads/'],
+    [
+      'for-each-ref',
+      '--format=%(refname:short):::%(objectname):::%(committerdate:iso8601)',
+      'refs/heads/',
+    ],
     { cwd: repoPath },
   )
   const raw = res.stdout || ''
@@ -89,7 +93,9 @@ export async function getStatus(projectRoot) {
 }
 
 export async function branchExists(repoPath, branchName) {
-  const res = await safeExec('git', ['rev-parse', '--verify', '--quiet', branchName], { cwd: repoPath })
+  const res = await safeExec('git', ['rev-parse', '--verify', '--quiet', branchName], {
+    cwd: repoPath,
+  })
   return !!res.stdout.trim()
 }
 
@@ -114,10 +120,18 @@ export async function hasUnmergedCommits(projectRoot, branchName, baseBranch) {
       return { ok: true, hasUnmerged: false, notFound: true }
     }
 
-    const countRes = await safeExec('git', ['rev-list', '--count', `${base}..${branchName}`], { cwd: repoPath })
+    const countRes = await safeExec('git', ['rev-list', '--count', `${base}..${branchName}`], {
+      cwd: repoPath,
+    })
     const count = parseInt((countRes.stdout || '0').trim(), 10)
     const hasUnmerged = Number.isFinite(count) && count > 0
-    return { ok: true, hasUnmerged, aheadCount: Number.isFinite(count) ? count : 0, base, branch: branchName }
+    return {
+      ok: true,
+      hasUnmerged,
+      aheadCount: Number.isFinite(count) ? count : 0,
+      base,
+      branch: branchName,
+    }
   } catch (e) {
     return { ok: false, error: String(e?.message || e) }
   }

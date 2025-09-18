@@ -8,7 +8,14 @@ import NotificationSettings from './settings/notifications/NotificationSettings'
 import GitHubSettings from './settings/github/GitHubSettings'
 import WebSearchSettings from './settings/websearch/WebSearchSettings'
 import DatabaseSettings from './settings/database/DatabaseSettings'
-import { IconPalette, IconRobot, IconBell, IconGitHub, IconSearch, IconDatabase } from '../components/ui/Icons'
+import {
+  IconPalette,
+  IconRobot,
+  IconBell,
+  IconGitHub,
+  IconSearch,
+  IconDatabase,
+} from '../components/ui/Icons'
 
 // Settings Categories
 const CATEGORIES = [
@@ -21,8 +28,18 @@ const CATEGORIES = [
     accent: 'brand',
   },
   { id: 'github', label: 'GitHub', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
-  { id: 'websearch', label: 'Web Search', icon: <IconSearch className="h-4 w-4" />, accent: 'orange' },
-  { id: 'database', label: 'Database', icon: <IconDatabase className="h-4 w-4" />, accent: 'indigo' },
+  {
+    id: 'websearch',
+    label: 'Web Search',
+    icon: <IconSearch className="h-4 w-4" />,
+    accent: 'orange',
+  },
+  {
+    id: 'database',
+    label: 'Database',
+    icon: <IconDatabase className="h-4 w-4" />,
+    accent: 'indigo',
+  },
 ]
 
 type CategoryId = (typeof CATEGORIES)[number]['id']

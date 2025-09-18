@@ -21,11 +21,26 @@ export type GitMonitorService = {
   hasUnmerged: (
     branchName: string,
     baseBranch?: string | null,
-  ) => Promise<{ ok: boolean; hasUnmerged?: boolean; aheadCount?: number; base?: string; branch?: string; error?: string }>
+  ) => Promise<{
+    ok: boolean
+    hasUnmerged?: boolean
+    aheadCount?: number
+    base?: string
+    branch?: string
+    error?: string
+  }>
   mergeBranch: (
     branchName: string,
     baseBranch?: string | null,
-  ) => Promise<{ ok: boolean; merged?: boolean; base?: string; branch?: string; commit?: string; reason?: string; error?: string }>
+  ) => Promise<{
+    ok: boolean
+    merged?: boolean
+    base?: string
+    branch?: string
+    commit?: string
+    reason?: string
+    error?: string
+  }>
 }
 
 export const gitMonitorService: GitMonitorService = { ...(window as any).gitMonitorService }

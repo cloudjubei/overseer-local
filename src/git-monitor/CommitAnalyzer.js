@@ -61,11 +61,13 @@ function stripBom(str) {
 
 // Naive removal of // and /* */ comments to tolerate JSON-with-comments.
 function stripJsonComments(str) {
-  return str
-    // remove block comments
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    // remove line comments
-    .replace(/(^|\s)\/\/.*$/gm, '$1')
+  return (
+    str
+      // remove block comments
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      // remove line comments
+      .replace(/(^|\s)\/\/.*$/gm, '$1')
+  )
 }
 
 /**
@@ -194,7 +196,8 @@ export async function analyzeCommitForTask(repoPath, commitSha, options = {}) {
 export async function analyzeBranchHeadForTask(repoPath, branchName, options = {}) {
   const head = await safeGit(repoPath, ['rev-parse', branchName])
   const commit = head.stdout?.trim()
-  if (!commit) return { ok: false, commit: null, found: false, error: 'Unable to resolve branch head' }
+  if (!commit)
+    return { ok: false, commit: null, found: false, error: 'Unable to resolve branch head' }
   return analyzeCommitForTask(repoPath, commit, options)
 }
 

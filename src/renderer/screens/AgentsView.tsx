@@ -51,9 +51,7 @@ export default function AgentsView() {
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
       const prompt = messages.map((m) => m.promptTokens ?? 0).reduce((a, b) => a + b, 0)
-      const completion = messages
-        .map((m) => m.completionTokens ?? 0)
-        .reduce((a, b) => a + b, 0)
+      const completion = messages.map((m) => m.completionTokens ?? 0).reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
@@ -139,7 +137,9 @@ export default function AgentsView() {
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Total Time Spent</div>
-            <div className="text-lg font-semibold">{formatDuration(projectKpis.totalDurationMs)}</div>
+            <div className="text-lg font-semibold">
+              {formatDuration(projectKpis.totalDurationMs)}
+            </div>
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Total Cost</div>

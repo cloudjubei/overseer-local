@@ -479,7 +479,8 @@ export default function ProjectTimelineView() {
       const title = l.content.label
       const k = title
       if (!groups.has(k)) groups.set(k, { key: k, title: k, items: [], rowScope: 'project' })
-      const scopeOfItem: 'project' | '__global__' = l.projectId === projectId ? 'project' : '__global__'
+      const scopeOfItem: 'project' | '__global__' =
+        l.projectId === projectId ? 'project' : '__global__'
       const grp = groups.get(k)!
       grp.items.push({
         id: l.id,
@@ -497,7 +498,10 @@ export default function ProjectTimelineView() {
     })
   }, [labels, projectId])
 
-  const dataRows = useMemo(() => (zoom === 'day' ? featureRows : taskRows), [featureRows, taskRows, zoom])
+  const dataRows = useMemo(
+    () => (zoom === 'day' ? featureRows : taskRows),
+    [featureRows, taskRows, zoom],
+  )
 
   const allRows = useMemo(() => {
     // User label rows at the top; features or tasks row below depending on zoom
@@ -777,10 +781,7 @@ export default function ProjectTimelineView() {
             {/* Rows */}
             {allRows.map((row) => (
               <div key={row.key} className="relative">
-                <div
-                  className="grid relative"
-                  style={{ gridTemplateColumns: gridTemplate }}
-                >
+                <div className="grid relative" style={{ gridTemplateColumns: gridTemplate }}>
                   {/* Row label */}
                   <div className="sticky left-0 z-10 bg-base px-3 py-2 text-sm font-medium text-primary flex items-start border-b border-subtle">
                     {row.title}
@@ -837,7 +838,12 @@ export default function ProjectTimelineView() {
                             if (kind === 'task') {
                               setHover({ kind: 'task', taskId: it.id, rect })
                             } else if (kind === 'feature') {
-                              setHover({ kind: 'feature', taskId: (it as any).taskId!, featureId: it.id, rect })
+                              setHover({
+                                kind: 'feature',
+                                taskId: (it as any).taskId!,
+                                featureId: it.id,
+                                rect,
+                              })
                             } else {
                               setHover(null)
                             }
@@ -934,36 +940,36 @@ export default function ProjectTimelineView() {
             ),
           }}
         >
-          {hover.kind === 'task' ? (
-            (() => {
-              const t = tasksById[hover.taskId]
-              if (!t) return null
-              const displayId = String(project?.taskIdToDisplayIndex?.[t.id] ?? t.id)
-              return (
-                <TaskSummaryCallout
-                  title={t.title}
-                  description={(t as any)?.description || ''}
-                  status={t.status}
-                  displayId={displayId}
-                />
-              )
-            })()
-          ) : hover.kind === 'feature' ? (
-            (() => {
-              const t = tasksById[hover.taskId]
-              const f = t?.features.find((x) => x.id === hover.featureId)
-              if (!t || !f) return null
-              const displayId = String(t.featureIdToDisplayIndex?.[f.id] ?? f.id)
-              return (
-                <FeatureSummaryCallout
-                  title={f.title}
-                  description={f.description || ''}
-                  status={f.status}
-                  displayId={displayId}
-                />
-              )
-            })()
-          ) : null}
+          {hover.kind === 'task'
+            ? (() => {
+                const t = tasksById[hover.taskId]
+                if (!t) return null
+                const displayId = String(project?.taskIdToDisplayIndex?.[t.id] ?? t.id)
+                return (
+                  <TaskSummaryCallout
+                    title={t.title}
+                    description={(t as any)?.description || ''}
+                    status={t.status}
+                    displayId={displayId}
+                  />
+                )
+              })()
+            : hover.kind === 'feature'
+              ? (() => {
+                  const t = tasksById[hover.taskId]
+                  const f = t?.features.find((x) => x.id === hover.featureId)
+                  if (!t || !f) return null
+                  const displayId = String(t.featureIdToDisplayIndex?.[f.id] ?? f.id)
+                  return (
+                    <FeatureSummaryCallout
+                      title={f.title}
+                      description={f.description || ''}
+                      status={f.status}
+                      displayId={displayId}
+                    />
+                  )
+                })()
+              : null}
         </div>
       )}
 

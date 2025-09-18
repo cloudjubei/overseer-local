@@ -181,7 +181,12 @@ export default function ChatView() {
       headerTitle="History"
       headerSubtitle=""
       headerAction={
-        <button className="btn" onClick={createChat} aria-label="Create new chat" title="Create new chat">
+        <button
+          className="btn"
+          onClick={createChat}
+          aria-label="Create new chat"
+          title="Create new chat"
+        >
           <span className="inline-flex items-center gap-1">
             <IconPlus className="w-4 h-4" />
             <span>New</span>

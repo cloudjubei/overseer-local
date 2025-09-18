@@ -163,7 +163,7 @@
 .nav-item__badges--compact {
   position: absolute;
   right: 4px; /* move closer to the edge to avoid covering the centered icon */
-  top: 4px;   /* keep some breathing room from the top border */
+  top: 4px; /* keep some breathing room from the top border */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
