@@ -88,7 +88,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
       const effectiveAgentType = await coerceAgentTypeForTask(agentType, projectId, taskId)
-      console.log('STARTING TASK RUN ', new Date())
       const historyRun = await factoryService.startTaskRun({
         agentType: effectiveAgentType,
         projectId,
@@ -97,7 +96,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         githubCredentials: activeCredentials,
         webSearchApiKeys: appSettings.webSearchApiKeys,
       })
-      console.log('GOT THE STARTED TASK RUN ', new Date(), ' historyRun: ', historyRun)
       setRunsHistory((prev) => [...prev, historyRun])
     },
     [activeConfig, appSettings],
