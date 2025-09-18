@@ -3,10 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UserMoodDto = {
-  score: number
-  text?: string
-  /**
-   * ISO8601 timestamp when the mood was recorded
-   */
-  createdAt: string
-}
+    score: number;
+    text?: string;
+    /**
+     * ISO8601 timestamp when the mood was recorded
+     */
+    createdAt: string;
+};
+

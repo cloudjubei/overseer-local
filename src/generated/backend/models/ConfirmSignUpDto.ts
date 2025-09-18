@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ConfirmSignUpDto = {
-  username: string
-  confirmationCode: string
-}
+    username: string;
+    confirmationCode: string;
+};
+
