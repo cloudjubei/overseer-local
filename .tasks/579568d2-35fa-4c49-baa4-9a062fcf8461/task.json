@@ -1,18 +1,19 @@
 {
   "id": "579568d2-35fa-4c49-baa4-9a062fcf8461",
-  "status": "?",
+  "status": "-",
   "title": "Create the initial app",
   "description": "This project is a rewrite of an old system kept here for reference (DO NOT MODIFY) under `old-system-reference` . There was a previous Telegram bot created that can be referenced under `old-system-reference/bot` .\nA new design was created that is shown as a typescript class under `mock-interface.tsx` with the matching css under `mock-interface.css` .\n\nWe want to use TypeScript for the bot and the library:\n'https://github.com/yagop/node-telegram-bot-api' (used by calling `npm i node-telegram-bot-api` ).\n\nIt needs to be clean and extensible.\nIt needs to use the provided `swagger.json` to generate all needed backend code.\nThis app must rely on the backend code as much as possible and make as few decisions as possible. The way it authenticates with the backend is by providing a shared secret (that will be stored in the `.env` file ) and the user inputting a special access code that will be all verified against the backend. Each user will get an account created - so the Telegram app needs to supply the backend with a unique id to identify a given user across sessions (and to store the credentials so that the user doesn't have to input it anymore once initial auth is done).\n\nThe user must be able to do the following things:\n- update their profile with DOB, gender, weight (free text input) and height (free text input), the backend will try to guess the weight and height units\n- check all micro goals\n- check all macro goals\n- create a new goal, by entering free flowing text, submitting it to the backend, after which the backend will respond with AI generated suggestions, the user then is also given the option to refine their message or pick from a set of suggested goals.\n\nIn the future, the bot will check upon the user every day in the morning and in the evening and ask the user for some input. This functionality can already be prepared - but the spec for what will be asked and how it will be carried out will be provided later. For now the bot can simply send a simple \"hello\" message once in the morning and once in the evening.",
   "features": [
     {
       "id": "44f37984-d79e-4ddc-9ad6-8186000366bd",
-      "status": "?",
+      "status": "-",
       "title": "Project Setup",
       "description": "Set up a new Node.js project with TypeScript. This includes initializing a `package.json` file, creating a `tsconfig.json` file with appropriate settings for a modern Node.js application, and installing necessary dependencies such as `typescript`, `ts-node`, `nodemon`, and `node-telegram-bot-api` with its types (`@types/node-telegram-bot-api`).",
       "context": [],
       "createdAt": "2025-09-18T01:28:47.110Z",
-      "updatedAt": "2025-09-18T01:36:18.188Z",
-      "rejection": "Blocked: Agent loop failed: {\"message\":\"\"}"
+      "updatedAt": "2025-09-18T08:54:44.360Z",
+      "rejection": "The whole project needs to depend on \"node-telegram-bot-api\"",
+      "blockers": []
     },
     {
       "id": "03af7ad1-f957-4a10-8fd1-a60b788c52ba",
@@ -86,13 +87,14 @@
     },
     {
       "id": "9621538b-c151-4142-9e41-7bf86ae00e65",
-      "status": "?",
+      "status": "-",
       "title": "Create New Goal - Initial Input",
       "description": "Implement a command (e.g., `/newgoal`) to initiate the goal creation process. The bot will prompt the user to describe their goal in their own words. The bot should then capture this free-flowing text and send it to the backend for analysis. This feature focuses on capturing the initial user input and communicating with the backend.",
       "context": [],
       "createdAt": "2025-09-18T01:29:28.008Z",
-      "updatedAt": "2025-09-18T01:49:56.335Z",
-      "rejection": "Blocked: undefined"
+      "updatedAt": "2025-09-18T08:54:49.151Z",
+      "rejection": "Blocked: undefined",
+      "blockers": []
     },
     {
       "id": "4eed9e1f-a2a5-4ad8-822c-ad5810583d32",
@@ -123,8 +125,20 @@
         "README.md"
       ],
       "createdAt": "2025-09-18T01:34:56.287Z",
-      "updatedAt": "2025-09-18T01:57:51.682Z",
-      "completedAt": "2025-09-18T01:57:51.682Z"
+      "updatedAt": "2025-09-18T08:59:19.008Z",
+      "completedAt": "2025-09-18T01:57:51.682Z",
+      "blockers": []
+    },
+    {
+      "id": "213d5733-6797-46cb-b85e-dd380a057205",
+      "status": "-",
+      "title": "Package.json includes all the necessary dependencies and scripts",
+      "description": "All the dependencies and scripts used in @README.md should be put into package.json as easy run scripts",
+      "context": [
+        "README.md"
+      ],
+      "createdAt": "2025-09-18T08:59:57.004Z",
+      "updatedAt": "2025-09-18T08:59:57.004Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -139,7 +153,8 @@
     "9621538b-c151-4142-9e41-7bf86ae00e65": 9,
     "4eed9e1f-a2a5-4ad8-822c-ad5810583d32": 10,
     "5c7e58ae-1324-4be5-809a-f5c2f9640ecd": 11,
-    "8c738915-3ea9-4fb1-878a-e251e5aad232": 12
+    "213d5733-6797-46cb-b85e-dd380a057205": 12,
+    "8c738915-3ea9-4fb1-878a-e251e5aad232": 13
   },
   "createdAt": "2025-09-18T00:50:51.954Z",
   "updatedAt": "2025-09-18T01:28:23.722Z"

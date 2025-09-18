@@ -52,11 +52,9 @@ Note: Re-run this whenever swagger.json changes.
 
 4) Run the bot
 Option A: Using tsx (recommended for ESM + TS)
-- Install once for development: npm i -D tsx typescript @types/node
 - Run: npx tsx src/index.ts
 
 Option B: Using ts-node
-- Install once for development: npm i -D ts-node typescript @types/node
 - Run: npx ts-node --esm src/index.ts
 
 You should see a log similar to:
