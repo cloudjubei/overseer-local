@@ -1,6 +1,6 @@
 {
   "id": "a07d83ae-858c-4785-98b5-193d9ebeb51e",
-  "status": "-",
+  "status": "+",
   "title": "Create check in system",
   "description": "The backend defines endpoints to use for `UserCheckIn` models.\nThey provide ways for creating, updating, deleting and listing checkins available for a given user. This app needs to remain dumb and rely on the backend for storing and control over the checkins.\nThe only thing this needs to do, is periodically check the backend (once every 1hr) for checkins for a given user and if the time is appropriate then send the correct message to the user.\nAll the information about the backend endpoints is both in the `swagger.json` as well as the generated `src/generated/backend/services/CheckInsService.ts` and the models `src/generated/backend/models/CheckInDto.ts` , `src/generated/backend/models/CreateCheckInDto.ts`, `src/generated/backend/models/ListCheckInsResultDto.ts` and `src/generated/backend/models/UpdateCheckInDto.ts`",
   "features": [
@@ -26,12 +26,13 @@
     },
     {
       "id": "c5fd8a18-bab8-407e-ab95-be36aa8a8750",
-      "status": "-",
+      "status": "+",
       "title": "Process Check-ins and Send User Notifications",
       "description": "For each check-in retrieved in the scheduler, compare its scheduled time with the current time. If the check-in's time (e.g., `10:00`) matches the current hour, send the check-in's message content to the corresponding Telegram user. Ensure this is done for all matching check-ins for all users during the hourly run.",
       "context": [],
       "createdAt": "2025-09-18T11:09:40.979Z",
-      "updatedAt": "2025-09-18T11:09:40.979Z"
+      "updatedAt": "2025-09-18T11:46:48.346Z",
+      "completedAt": "2025-09-18T11:46:48.346Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -40,5 +41,6 @@
     "c5fd8a18-bab8-407e-ab95-be36aa8a8750": 3
   },
   "createdAt": "2025-09-18T01:20:49.296Z",
-  "updatedAt": "2025-09-18T10:59:43.814Z"
+  "updatedAt": "2025-09-18T10:59:43.814Z",
+  "completedAt": "2025-09-18T11:46:48.346Z"
 }

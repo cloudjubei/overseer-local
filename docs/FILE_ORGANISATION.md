@@ -15,7 +15,7 @@ Key Directories and Files
     - backendClient.ts: Helper to configure the generated client's OpenAPI base URL and bearer token at runtime.
     - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/sessions.json. Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
-    - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). Currently the core job logic is a placeholder (no-op) in preparation for the check-in functionality that will query the backend and send messages when appropriate.
+    - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). On each tick, it iterates all authenticated users, fetches their check-ins using CheckInsService, and if a check-in's scheduled time hour matches the current hour, sends the check-in's message (from metadata.message/text/content) to the corresponding Telegram user. Includes simple in-memory deduplication to avoid duplicate sends within the same hour window.
   - flows/
     - profile.ts: Conversation flow for updating the user profile. Guides user through DOB, gender, weight, height; then calls ProfilesService (PATCH /profiles/me, fallback POST if needed).
     - newGoal.ts: Conversation flow for creating a new goal from free text. Collects initial text, calls GoalsService (POST /goals/ai/suggestions) and displays AI suggestions via inline keyboard. Allows the user to pick a suggestion to create the goal immediately (POST /goals) or refine the message for another suggestion round. Supports cancel at any time.
@@ -62,9 +62,13 @@ Authentication Flow (Implemented)
 - On success, accessToken and related tokens are persisted via src/lib/sessionStore.ts, avoiding future prompts.
 - Users can /logout to clear the stored session.
 
-Scheduler (Hourly Placeholder)
+Scheduler (Hourly Check-ins Implemented)
 - A scheduler runs at the start of every hour (cron: "0 * * * *") respecting the TZ environment variable (default: UTC).
-- The scheduled task is currently a no-op placeholder. Future implementation will query the backend for user check-ins and send messages when appropriate.
+- On each tick, for every authenticated user:
+  - Configures the backend client with that user's access token.
+  - Retrieves check-ins via CheckInsService.checkInsControllerGetCheckIns, paging as needed.
+  - For each check-in, if its start time's hour matches the current hour, a notification message is sent to the user's Telegram chat. The message text is taken from metadata.message (fallbacks to metadata.text/content/msg if present).
+  - Basic in-memory de-duplication prevents multiple sends for the same check-in within a single hour window.
 
 Profile Update Flow (Implemented)
 - Command: /profile starts a guided flow asking for DOB (YYYY-MM-DD), gender (buttons + free text), weight (free text), and height (free text). Users can type 'skip' to leave any field unchanged and /cancel to abort.
