@@ -591,13 +591,32 @@ export default function ProjectTimelineView() {
   const scrollToToday = () => {
     const container = document.getElementById('project-timeline-scroll')
     if (!container) return
-    let todayIdx = 0
-    if (zoom === 'day') todayIdx = clamp(diffInDays(startAligned, new Date()), 0, unitCount - 1)
-    else if (zoom === 'week')
-      todayIdx = clamp(diffInWeeks(startAligned, new Date()), 0, unitCount - 1)
-    else todayIdx = clamp(diffInMonths(startAligned, new Date()), 0, unitCount - 1)
-    const approxCell = cellMinWidth
-    container.scrollTo({ left: todayIdx * approxCell, behavior: 'smooth' })
+
+    const todayIdx = getUnitIndex(zoom, startAligned, unitCount, new Date().toISOString())
+
+    const cell = container.querySelector<HTMLElement>(`[data-unit-index="${todayIdx}"]`)
+    if (!cell) {
+      // Fallback approximate scroll if we cannot find the header cell
+      const approxCell = cellMinWidth
+      container.scrollTo({ left: todayIdx * approxCell, behavior: 'smooth' })
+      return
+    }
+
+    const unitsRow = cell.closest<HTMLElement>('[data-units-row="true"]') || undefined
+    const leftCol = unitsRow?.querySelector<HTMLElement>('[data-left-col="true"]') || undefined
+
+    const leftColWidth = leftCol?.getBoundingClientRect().width ?? 0
+    const containerRect = container.getBoundingClientRect()
+    const cellRect = cell.getBoundingClientRect()
+
+    const visibleRightWidth = Math.max(0, container.clientWidth - leftColWidth)
+    const relativeLeft = cellRect.left - containerRect.left
+
+    // Delta required to center the cell within the right-hand scrollable area
+    const delta = (relativeLeft - leftColWidth) + cellRect.width / 2 - visibleRightWidth / 2
+    const target = Math.max(0, Math.min(container.scrollWidth, container.scrollLeft + delta))
+
+    container.scrollTo({ left: target, behavior: 'smooth' })
   }
 
   // Clear hover on scroll/resize to avoid stale positioning
@@ -750,8 +769,9 @@ export default function ProjectTimelineView() {
               <div
                 className="grid bg-raised/50 border-b border-subtle"
                 style={{ gridTemplateColumns: gridTemplate }}
+                data-units-row="true"
               >
-                <div className="sticky left-0 z-10 bg-base px-3 py-2 text-xs font-medium text-secondary flex items-center"></div>
+                <div className="sticky left-0 z-10 bg-base px-3 py-2 text-xs font-medium text-secondary flex items-center" data-left-col="true"></div>
                 {units.map((u, i) => {
                   const isToday =
                     zoom === 'day'
@@ -765,6 +785,7 @@ export default function ProjectTimelineView() {
                       className={`px-2 py-1.5 text-[11px] leading-4 text-secondary border-l border-subtle flex flex-col items-start ${
                         isToday ? 'bg-status-review-soft-bg/30' : ''
                       }`}
+                      data-unit-index={i}
                     >
                       <span className="font-medium text-primary">{u.labelTop}</span>
                       {u.labelBottom ? <span>{u.labelBottom}</span> : null}

@@ -1,7 +1,7 @@
 {
   "id": "osc-compass-telegram",
   "title": "OSC Compass Telegram",
-  "description": "TODO",
+  "description": "A Telegram chat bot app that uses the Compass BE to get user goals input - promoting journaling and self-betterment",
   "path": "../../compass-telegram",
   "repo_url": "https://github.com/OSCGROUPLTD/compass-telegram",
   "requirements": [],
@@ -9,5 +9,8 @@
     "icon": "mobile",
     "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
   },
-  "taskIdToDisplayIndex": {}
+  "taskIdToDisplayIndex": {
+    "579568d2-35fa-4c49-baa4-9a062fcf8461": 1,
+    "a07d83ae-858c-4785-98b5-193d9ebeb51e": 2
+  }
 }
