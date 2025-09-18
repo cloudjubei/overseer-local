@@ -26,12 +26,13 @@
     },
     {
       "id": "6c7c6dc2-e407-4223-a1a8-6c425dc0c83d",
-      "status": "-",
+      "status": "+",
       "title": "Backend API Client Generation",
       "description": "Use a tool like `openapi-typescript-codegen` to generate a TypeScript client from the `swagger.json` file. The generated code should be placed in a dedicated directory (e.g., `src/client` or `src/generated/backend`) to keep it separate from the main application logic.",
       "context": [],
       "createdAt": "2025-09-18T01:28:53.505Z",
-      "updatedAt": "2025-09-18T01:28:53.505Z"
+      "updatedAt": "2025-09-18T01:38:46.819Z",
+      "completedAt": "2025-09-18T01:38:46.819Z"
     },
     {
       "id": "db22a223-5eeb-419c-b996-83226a8b7bd4",

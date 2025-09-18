@@ -17,6 +17,15 @@ Environment Setup
 Configuration Loader
 - The app uses dotenv to load environment variables.
 - Centralized loader is at src/config/env.ts.
-- Install the dependency when package.json is available:
-  - npm i dotenv
+- Runtime dependency is already declared in package.json.
+
+Backend API Client Generation
+- This project uses openapi-typescript-codegen to generate a TypeScript client from swagger.json.
+- Commands:
+  - npm install
+  - npm run generate:backend
+- Output directory: src/generated/backend (do not edit files here manually).
+- Configure the client at runtime via src/lib/backendClient.ts, which sets base URL and bearer token:
+  - import { configureBackendClient } from './src/lib/backendClient';
+  - configureBackendClient({ accessToken: '<JWT>' });
 
