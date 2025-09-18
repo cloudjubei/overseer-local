@@ -1,12 +1,24 @@
 import fs from 'fs'
 import path from 'path'
 
-export interface UserSession {
+export interface ConversationState {
+  // Identifier for the active conversation flow (as provided by backend)
+  flowId: string
+  // Arbitrary context/state needed to resume the conversation as directed by backend
+  // Keep it open/typed as unknown values; backend controls structure
+  context?: Record<string, any>
+  // Optional timestamp (epoch seconds) to help with expirations/cleanup if needed
+  lastUpdatedAt?: number
+}
+
+export interface SessionData {
   userId: string // Telegram user id as string
   accessToken: string
   idToken?: string
   refreshToken?: string
   expiresAt?: number // epoch seconds
+  // Holds current backend-driven conversation state. Undefined or null when no active flow.
+  conversationState?: ConversationState | null
 }
 
 function getDataDir(): string {
@@ -26,7 +38,7 @@ function ensureDataDir() {
   }
 }
 
-function readAll(): Record<string, UserSession> {
+function readAll(): Record<string, SessionData> {
   try {
     ensureDataDir()
     const file = getSessionsFile()
@@ -34,14 +46,15 @@ function readAll(): Record<string, UserSession> {
     const raw = fs.readFileSync(file, 'utf8')
     if (!raw.trim()) return {}
     const data = JSON.parse(raw)
-    return data && typeof data === 'object' ? (data as Record<string, UserSession>) : {}
+    // Backward compatibility: previously stored records won't have conversationState
+    return data && typeof data === 'object' ? (data as Record<string, SessionData>) : {}
   } catch (e) {
     console.warn('sessionStore: failed to read sessions file, starting empty', e)
     return {}
   }
 }
 
-function writeAll(sessions: Record<string, UserSession>) {
+function writeAll(sessions: Record<string, SessionData>) {
   try {
     ensureDataDir()
     const file = getSessionsFile()
@@ -53,14 +66,24 @@ function writeAll(sessions: Record<string, UserSession>) {
   }
 }
 
-export function getSession(userId: string): UserSession | undefined {
+export function getSession(userId: string): SessionData | undefined {
   const all = readAll()
   return all[userId]
 }
 
-export function setSession(session: UserSession) {
+export function setSession(session: SessionData) {
   const all = readAll()
-  all[session.userId] = session
+  // Preserve existing conversationState if not explicitly provided
+  const prev = all[session.userId]
+  const merged: SessionData = {
+    ...prev,
+    ...session,
+    conversationState:
+      session.conversationState !== undefined
+        ? session.conversationState
+        : prev?.conversationState ?? undefined,
+  }
+  all[session.userId] = merged
   writeAll(all)
 }
 
