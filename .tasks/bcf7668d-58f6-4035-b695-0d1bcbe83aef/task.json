@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "63d1fd97-2775-4404-be52-f193579bd689",
-      "status": "-",
+      "status": "+",
       "title": "Code Standard",
       "description": "The document @docs/CODE_STANDARD.md  highlights the overall architecture and coding standards maintained in this project.\nThere is a clear reference to it inside @README.md and @docs/FILE_ORGANISATION.md so that anyone creating new features or updating existing ones will go to it.\nIt should be as succinct as possible, but explaining the idea as well as possible.\n\nGo over all the code and make sure that it satisfies the standards.",
       "context": [],
       "createdAt": "2025-09-18T12:16:34.145Z",
-      "updatedAt": "2025-09-18T12:16:34.145Z"
+      "updatedAt": "2025-09-18T12:31:37.771Z",
+      "completedAt": "2025-09-18T12:31:37.771Z"
     },
     {
       "id": "fa10705f-a673-4649-ae33-853df72179b0",
