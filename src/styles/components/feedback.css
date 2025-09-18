@@ -8,11 +8,27 @@
   stroke-linecap: round;
   stroke-dasharray: 60;
   stroke-dashoffset: 40;
+  /* Ensure SVG circle rotates around its center across browsers */
+  transform-origin: center;
+  transform-box: fill-box;
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Utility: make any icon spin (used for loader icon in status chips) */
+.icon--spin {
+  animation: spin 1s linear infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-spinner__indicator,
+  .icon--spin {
+    animation-duration: 2.5s;
   }
 }
 

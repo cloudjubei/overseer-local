@@ -1697,6 +1697,16 @@
       "createdAt": "2025-09-18T11:49:51.503Z",
       "updatedAt": "2025-09-18T12:01:14.795Z",
       "completedAt": "2025-09-18T12:01:14.795Z"
+    },
+    {
+      "id": "11b7fc32-af7f-409c-a3f0-12a414749e12",
+      "status": "+",
+      "title": "The spinner doesn't spin",
+      "description": "Whenever the user is presented with a spinner it doesn't animate",
+      "context": [],
+      "createdAt": "2025-09-18T22:45:19.736Z",
+      "updatedAt": "2025-09-18T22:48:16.776Z",
+      "completedAt": "2025-09-18T22:48:16.776Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1807,7 +1817,8 @@
     "5a9ae0d2-7711-4149-bd57-1c43303613f6": 105,
     "f07cc494-56fa-45c9-9c12-40fbbce37a86": 106,
     "fccb9bc5-1ca8-46ad-9702-6376d55de3fa": 107,
-    "18cbcc94-0531-4534-936c-7c7fa5efda8c": 108
+    "18cbcc94-0531-4534-936c-7c7fa5efda8c": 108,
+    "11b7fc32-af7f-409c-a3f0-12a414749e12": 109
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"

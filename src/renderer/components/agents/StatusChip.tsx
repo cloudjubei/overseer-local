@@ -5,7 +5,8 @@ import Tooltip from '../ui/Tooltip'
 export function StatusIcon({ state, className }: { state: AgentRunState; className?: string }) {
   switch (state) {
     case 'running':
-      return <IconLoader className={className} />
+      // Ensure the loader icon visibly spins
+      return <IconLoader className={`${className ?? ''} icon--spin`} />
     case 'completed':
       return <IconCheckCircle className={className} />
     case 'cancelled':
@@ -39,6 +40,7 @@ export default function StatusChip({ state, label }: { state: AgentRunState; lab
       <span
         className={`inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium ${bgClasses(state)}`}
         aria-label={typeof text === 'string' ? text : undefined}
+        aria-busy={state === 'running' ? true : undefined}
       >
         <StatusIcon state={state} className="w-3.5 h-3.5" />
       </span>
