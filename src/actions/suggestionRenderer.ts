@@ -97,10 +97,6 @@ export function buildSuggestionMessageText(params: {
     const line = meta ? `${n}) ${meta} — ${escapeHtml(sug.text)}` : `${n}) ${escapeHtml(sug.text)}`
     lines.push(line)
   })
-
-  // Visual, subtle separator before extra actions (tiny if possible -> italics and dashes)
-  lines.push('\n<i>— Not quite right? —</i>')
-
   return lines.join('\n')
 }
 

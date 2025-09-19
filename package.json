@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "format": "prettier --write .",
-    "start": "tsx src/index.ts",
+    "start": "npm run start:dev",
+    "start:dev": "cp -f envs/.env.dev .env && tsx src/index.ts",
+    "start:prod": "cp -f envs/.env.prod .env && tsx src/index.ts",
     "start:ts-node": "ts-node --esm src/index.ts",
     "generate:backend": "openapi -i ../compass-be/@swagger/swagger.json -o ./src/generated/backend -c axios --useOptions",
     "pm2:start": "pm2 start 'npx tsx src/index.ts' --name compass-bot",

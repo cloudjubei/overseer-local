@@ -150,7 +150,7 @@ bot.on('message', async (msg: Message) => {
     if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
-    if (await textSuggestionAction(bot, chat, from, rawText, msg)) {
+    if (await textSuggestionAction(bot, chat, from, rawText)) {
       return
     }
     if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
