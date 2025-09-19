@@ -44,7 +44,11 @@ export default async function quickSuggestionAction(
   }
 
   // For /q we ignore any trailing free text and guide the user through param picks
-  const header = '<b>What area do you want to focus on?</b>\n<i>Pick a category to get tailored goals.</i>'
-  await bot.sendMessage(chat.id, header, { parse_mode: 'HTML', reply_markup: buildCategoryKeyboard() })
+  const header =
+    '<b>What area do you want to focus on?</b>\n<i>Pick a category to get tailored goals.</i>'
+  await bot.sendMessage(chat.id, header, {
+    parse_mode: 'HTML',
+    reply_markup: buildCategoryKeyboard(),
+  })
   return true
 }

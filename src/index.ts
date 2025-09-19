@@ -15,17 +15,21 @@ import { GoalsService } from './generated/backend/services/GoalsService'
 import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
 import { clearSuggestionsForMessage, getSuggestionsForMessage } from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
+import textSuggestionAction from './actions/textSuggestion'
 
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 
-bot.setMyCommands([
-  // { command: 'start', description: 'Start the bot' },
-  // { command: 'help', description: 'Show the help message' },
-  { command: 'q', description: 'Pick a suggestion from a list' },
-  { command: 't', description: 'Create a Macro Goal suggestion via AI (text)' },
-  { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
-], { scope: { type: 'all_private_chats' } });
+bot.setMyCommands(
+  [
+    // { command: 'start', description: 'Start the bot' },
+    // { command: 'help', description: 'Show the help message' },
+    { command: 'q', description: 'Pick a suggestion from a list' },
+    { command: 't', description: 'Create a Macro Goal suggestion via AI (text)' },
+    { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
+  ],
+  { scope: { type: 'all_private_chats' } },
+)
 
 // Helper to start a backend conversation flow and process the initial response
 async function startBackendFlow(params: {
@@ -59,6 +63,7 @@ async function startBackendFlow(params: {
         setSession({
           ...(prev || { userId }),
           conversationState: {
+            lastAction: '',
             flowId: flow,
             context: { sessionId },
             lastUpdatedAt: now,
@@ -96,6 +101,7 @@ async function startBackendFlow(params: {
           ...(prev || { userId, accessToken: prev?.accessToken || '' }),
           conversationState: retry
             ? {
+                lastAction: '',
                 flowId: flow,
                 context: { sessionId },
                 lastUpdatedAt: now,
@@ -144,13 +150,15 @@ bot.on('message', async (msg: Message) => {
     if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
+    if (await textSuggestionAction(bot, chat, from, rawText, msg)) {
+      return
+    }
     if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
 
     const userId = String(from.id)
     const session = getSession(userId)
-    console.log('session :  ', session)
 
     // If an active backend-driven conversation exists, delegate to conversation manager
     if (session?.conversationState) {
@@ -222,6 +230,8 @@ function buildDifficultyKeyboard(category: string): TelegramBot.InlineKeyboardMa
 // Callback query handler: process suggestion selections and create goals
 bot.on('callback_query', async (cb: CallbackQuery) => {
   try {
+    console.log('callback cb: ', cb)
+
     const message = cb.message
     const data = cb.data || ''
     const chatId = message?.chat?.id
@@ -240,7 +250,8 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       if (data.startsWith('q:cat:')) {
         const category = data.split(':')[2]
         // Ask for difficulty next
-        const prompt = '<b>How ambitious do you feel?</b>\n<i>Pick a difficulty to tailor the goal.</i>'
+        const prompt =
+          '<b>How ambitious do you feel?</b>\n<i>Pick a difficulty to tailor the goal.</i>'
         try {
           await bot.editMessageReplyMarkup(
             { inline_keyboard: [] },
@@ -276,12 +287,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
             )
           } catch {}
 
-          await renderParamSuggestions(
-            bot,
-            chatId,
-            suggestions,
-            'Great! Here are some options:',
-          )
+          await renderParamSuggestions(bot, chatId, suggestions, 'Great! Here are some options:')
         } catch (err: any) {
           const errMsg = err?.response?.data || err?.message || 'Failed to get suggestions.'
           await bot.sendMessage(
@@ -308,7 +314,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         const suggestions = getSuggestionsForMessage(chatId, message.message_id) || []
         const chosen = suggestions[idx]
         if (!chosen) {
-          await bot.sendMessage(chatId, 'That option has expired. Please request suggestions again.')
+          await bot.sendMessage(
+            chatId,
+            'That option has expired. Please request suggestions again.',
+          )
           return
         }
 
@@ -339,7 +348,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           await bot.sendMessage(chatId, confirm)
         } catch (err: any) {
           const errMsg = err?.response?.data || err?.message || 'Failed to create goal.'
-          await bot.sendMessage(chatId, typeof errMsg === 'string' ? errMsg : 'Failed to create goal.')
+          await bot.sendMessage(
+            chatId,
+            typeof errMsg === 'string' ? errMsg : 'Failed to create goal.',
+          )
         }
         return
       }

@@ -3,6 +3,7 @@ import path from 'path'
 import { logger } from './logger'
 
 export interface ConversationState {
+  lastAction: string
   // Identifier for the active conversation flow (as provided by backend)
   flowId: string
   // Arbitrary context/state needed to resume the conversation as directed by backend

@@ -88,6 +88,7 @@ export async function handleConversationMessage(
         setSession({
           ...session,
           conversationState: {
+            lastAction: '',
             flowId: flow,
             context: { ...(convo.context || {}), sessionId: newSessionId },
             lastUpdatedAt: Math.floor(Date.now() / 1000),
@@ -133,6 +134,7 @@ export async function handleConversationMessage(
     setSession({
       ...session,
       conversationState: {
+        lastAction: '',
         flowId: convo.flowId,
         context: { ...(convo.context || {}), sessionId },
         lastUpdatedAt: Math.floor(Date.now() / 1000),

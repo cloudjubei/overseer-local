@@ -50,10 +50,7 @@ export function buildSuggestionKeyboard(
   top.forEach((sug, idx) => {
     const stars = difficultyStars(sug.difficulty)
     const label = difficultyToLabel(sug.difficulty)
-    const text = [stars, label ? ` ${label} —` : '', ` ${sug.text}`]
-      .join('')
-      .trim()
-      .slice(0, 64) // keep within Telegram button display width sensibly
+    const text = [stars, label ? ` ${label} —` : '', ` ${sug.text}`].join('').trim().slice(0, 64) // keep within Telegram button display width sensibly
     rows.push([
       {
         text,
@@ -87,7 +84,13 @@ export function buildSuggestionMessageText(params: {
   transcriptionConfidence?: number
   suggestions: SuggestedGoalDto[]
 }): string {
-  const { headerMessage, understoodText, combinedConfidence, llmConfidence, transcriptionConfidence } = params
+  const {
+    headerMessage,
+    understoodText,
+    combinedConfidence,
+    llmConfidence,
+    transcriptionConfidence,
+  } = params
   const lines: string[] = []
 
   // Header similar to the mock
@@ -120,9 +123,10 @@ export function buildSuggestionMessageText(params: {
 }
 
 // High-level helpers for actions to use
-export function buildAiSuggestionRender(
-  payload: AiSuggestionsResultDto,
-): { text: string; options: TelegramBot.SendMessageOptions } {
+export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
+  text: string
+  options: TelegramBot.SendMessageOptions
+} {
   const suggestions = Array.isArray(payload?.suggestions) ? payload.suggestions : []
   const text = buildSuggestionMessageText({
     headerMessage: payload?.message || 'Great! Here are some options:',

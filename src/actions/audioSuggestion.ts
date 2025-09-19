@@ -4,7 +4,10 @@ import { GoalsService } from '../generated/backend'
 import { renderAiSuggestionResult } from './suggestionRenderer'
 
 // Helper to download a Telegram file as Buffer
-async function downloadTelegramFile(bot: TelegramBot, fileId: string): Promise<{ buffer: Buffer; filename: string; mimeType?: string }> {
+async function downloadTelegramFile(
+  bot: TelegramBot,
+  fileId: string,
+): Promise<{ buffer: Buffer; filename: string; mimeType?: string }> {
   // getFile gives us file_path, but getFileLink constructs a full URL including token
   const fileUrl = await bot.getFileLink(fileId as any)
   // Node 18+ provides global fetch
@@ -34,7 +37,8 @@ export default async function audioSuggestionAction(
   // Case 1: Command /s -> prompt user to record a voice memo
   const cmdMatch = rawText.match(/^\/s(?:@\w+)?(?:\s+([\s\S]*))?$/i)
   if (cmdMatch) {
-    const header = '<b>Voice memo for goal suggestions</b>\n' +
+    const header =
+      '<b>Voice memo for goal suggestions</b>\n' +
       "<i>Tap and hold the microphone to record a short voice message describing what you want to achieve. I'll transcribe it and suggest goals.</i>"
 
     await bot.sendMessage(chat.id, header, { parse_mode: 'HTML' })
