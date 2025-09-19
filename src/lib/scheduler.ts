@@ -45,6 +45,67 @@ function deriveChatIdFromUserId(userId: string): number {
   return Number.isFinite(n) ? n : NaN
 }
 
+function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefined {
+  if (!metadata || typeof metadata !== 'object') return undefined
+  // Support a few shapes:
+  // - metadata.chatId
+  // - metadata.chat_id
+  // - metadata.telegram.chatId
+  // - metadata.telegram.chat.id
+  const direct = (metadata as any).chatId ?? (metadata as any).chat_id
+  if (typeof direct === 'number' && Number.isFinite(direct)) return direct
+  if (typeof direct === 'string' && direct.trim() && Number.isFinite(Number(direct))) {
+    return Number(direct)
+  }
+  const tg = (metadata as any).telegram
+  if (tg && typeof tg === 'object') {
+    const tgChatId = (tg as any).chatId ?? (tg as any)?.chat?.id
+    if (typeof tgChatId === 'number' && Number.isFinite(tgChatId)) return tgChatId
+    if (typeof tgChatId === 'string' && tgChatId.trim() && Number.isFinite(Number(tgChatId))) {
+      return Number(tgChatId)
+    }
+  }
+  return undefined
+}
+
+function needsTelegramChatMetadata(metadata: Record<string, any> | undefined, chatId: number, userId: string): boolean {
+  const existing = getChatIdFromMetadata(metadata)
+  if (existing !== chatId) return true
+  // also check presence of telegram.userId for completeness
+  const hasUserId = !!(metadata as any)?.telegram?.userId
+  return !hasUserId
+}
+
+function mergeTelegramChatMetadata(
+  metadata: Record<string, any> | undefined,
+  chatId: number,
+  userId: string,
+): Record<string, any> {
+  const base: Record<string, any> = metadata && typeof metadata === 'object' ? { ...metadata } : {}
+  const telegram = { ...(base.telegram || {}) }
+  // Prefer a normalized structure
+  telegram.chatId = chatId
+  telegram.userId = userId
+  // also reflect at top-level for broader compatibility if consumers expect it
+  base.chatId = chatId
+  base.telegram = telegram
+  return base
+}
+
+async function ensureTelegramMetadata(ci: CheckInDto, chatId: number, userId: string) {
+  try {
+    if (!needsTelegramChatMetadata(ci.metadata, chatId, userId)) return
+    const newMeta = mergeTelegramChatMetadata(ci.metadata, chatId, userId)
+    await CheckInsService.checkInsControllerUpdateCheckIn({
+      id: ci.id,
+      requestBody: { metadata: newMeta },
+    })
+  } catch (err) {
+    // Non-fatal; continue sending
+    console.warn(`Failed to update check-in metadata for ${ci.id}`, err)
+  }
+}
+
 async function processUserCheckIns(userId: string, now: Date, nowHourStamp: string) {
   const session = getSession(userId)
   if (!session || !session.accessToken) return
@@ -55,14 +116,10 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
   // Page through check-ins
   let cursor: string | undefined = undefined
   do {
-    // Build request object and attach a non-enumerable accessToken to aid test mocks in differentiating users
-    const req = { limit: 100, cursor, accessToken: {
-      value: session.accessToken,
-      enumerable: false,
-      configurable: true,
-    } }
+    // Build request object
+    const req = { limit: 100, cursor }
     try {
-      const res = await CheckInsService.checkInsControllerGetCheckIns(req)
+      const res = await CheckInsService.checkInsControllerGetCheckIns(req as any)
       const items: CheckInDto[] = res.items
 
       for (const ci of items) {
@@ -83,9 +140,21 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         const dedupeKey = `${userId}:${ci.id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
-        // Send to the Telegram user: here we derive a numeric chat id from the userId
+        // Determine chatId from metadata (preferred), fall back to deriving from userId
+        let chatId = getChatIdFromMetadata(ci.metadata)
+        if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
+          chatId = deriveChatIdFromUserId(userId)
+        }
+        if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
+          console.warn(`Skipping check-in ${ci.id} for user ${userId}: unable to determine chatId`)
+          continue
+        }
+
+        // Best-effort: persist telegram chat metadata so backend holds routing context
+        ensureTelegramMetadata(ci, chatId, userId).catch(() => {})
+
+        // Send to the Telegram user
         try {
-          const chatId = deriveChatIdFromUserId(userId)
           await botRef?.sendMessage(chatId, message)
           sentThisHour.add(dedupeKey)
         } catch (err) {
