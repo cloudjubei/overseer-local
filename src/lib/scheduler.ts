@@ -43,7 +43,7 @@ function deriveChatIdFromUserId(userId: string): number {
   const digits = userId.replace(/\D+/g, '')
   if (digits) return Number(digits)
   const n = Number(userId)
-  return Number.isFinite(n) ? n : (NaN as any)
+  return Number.isFinite(n) ? n : NaN
 }
 
 function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefined {

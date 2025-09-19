@@ -1,40 +1,84 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
-// We'll dynamically import the module after tweaking env to assert behaviors
+// Mock dotenv to prevent it from loading .env files and interfering with tests
+vi.mock('dotenv', () => ({
+  config: vi.fn(),
+}))
+
+const originalEnv = { ...process.env }
+
+// This function dynamically imports the module to re-evaluate it with new env vars
+const getFreshEnvModule = async () => {
+  vi.resetModules()
+  return await import('../../src/config/env')
+}
 
 describe('config/env', () => {
-  const origEnv = { ...process.env }
-
   beforeEach(() => {
-    // Reset modules between tests so env.ts runs fresh
-    Object.assign(process.env, origEnv)
+    // Reset process.env before each test
+    process.env = { ...originalEnv }
   })
 
-  it('should load config with defaults when optional BACKEND_BASE_URL missing', async () => {
-    process.env.NODE_ENV = 'test'
-    process.env.TELEGRAM_BOT_TOKEN = 'tok'
-    process.env.BACKEND_SHARED_SECRET = 'secret'
-    delete process.env.BACKEND_BASE_URL
-
-    const mod = await import('../../src/config/env')
-    expect(mod.config.nodeEnv).toBe('test')
-    expect(mod.config.telegramBotToken).toBe('tok')
-    expect(mod.config.backendSharedSecret).toBe('secret')
-    expect(mod.config.backendBaseUrl).toBe('http://localhost:3000')
-    expect(mod.getEnv('backendBaseUrl')).toBe('http://localhost:3000')
+  afterEach(() => {
+    // Restore original process.env after each test
+    process.env = originalEnv
   })
 
-  it('should throw if required TELEGRAM_BOT_TOKEN is missing', async () => {
-    process.env.NODE_ENV = 'test'
+  it('should load config correctly when all required env vars are set', async () => {
+    process.env.TELEGRAM_BOT_TOKEN = 'my-telegram-token'
+    process.env.BACKEND_SHARED_SECRET = 'my-backend-secret'
+    process.env.BACKEND_BASE_URL = 'http://api.example.com'
+    process.env.TZ = 'Europe/London'
+    process.env.NODE_ENV = 'production'
+
+    const { config, getEnv } = await getFreshEnvModule()
+
+    expect(config.telegramBotToken).toBe('my-telegram-token')
+    expect(config.backendSharedSecret).toBe('my-backend-secret')
+    expect(config.backendBaseUrl).toBe('http://api.example.com')
+    expect(config.timezone).toBe('Europe/London')
+    expect(config.nodeEnv).toBe('production')
+    expect(getEnv('nodeEnv')).toBe('production')
+  })
+
+  it('should throw an error if TELEGRAM_BOT_TOKEN is missing', async () => {
     delete process.env.TELEGRAM_BOT_TOKEN
-    process.env.BACKEND_SHARED_SECRET = 'secret'
-    await expect(import('../../src/config/env')).rejects.toThrow(/Missing required environment variable: TELEGRAM_BOT_TOKEN/)
+    process.env.BACKEND_SHARED_SECRET = 'my-backend-secret'
+
+    await expect(getFreshEnvModule()).rejects.toThrow(
+      'Missing required environment variable: TELEGRAM_BOT_TOKEN',
+    )
   })
 
-  it('should throw if required BACKEND_SHARED_SECRET is missing', async () => {
-    process.env.NODE_ENV = 'test'
-    process.env.TELEGRAM_BOT_TOKEN = 'tok'
+  it('should throw an error if BACKEND_SHARED_SECRET is missing', async () => {
+    process.env.TELEGRAM_BOT_TOKEN = 'my-telegram-token'
     delete process.env.BACKEND_SHARED_SECRET
-    await expect(import('../../src/config/env')).rejects.toThrow(/Missing required environment variable: BACKEND_SHARED_SECRET/)
+
+    await expect(getFreshEnvModule()).rejects.toThrow(
+      'Missing required environment variable: BACKEND_SHARED_SECRET',
+    )
+  })
+
+  it('should use default values for optional env vars', async () => {
+    process.env.TELEGRAM_BOT_TOKEN = 'my-telegram-token'
+    process.env.BACKEND_SHARED_SECRET = 'my-backend-secret'
+    delete process.env.BACKEND_BASE_URL
+    delete process.env.TZ
+    delete process.env.NODE_ENV
+
+    const { config } = await getFreshEnvModule()
+
+    expect(config.backendBaseUrl).toBe('http://localhost:3000')
+    expect(config.timezone).toBe('UTC')
+    expect(config.nodeEnv).toBe('development')
+  })
+
+  it('should throw an error for empty required env vars', async () => {
+    process.env.TELEGRAM_BOT_TOKEN = '  ' // whitespace only
+    process.env.BACKEND_SHARED_SECRET = 'my-backend-secret'
+
+    await expect(getFreshEnvModule()).rejects.toThrow(
+      'Missing required environment variable: TELEGRAM_BOT_TOKEN',
+    )
   })
 })

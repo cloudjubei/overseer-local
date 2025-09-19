@@ -5,6 +5,9 @@ High-quality, well-tested code is critical to the success and reliability of thi
 
 Tests should be fast, reliable, and easy to write. They serve as living documentation for our codebase, demonstrating how different components are expected to behave in various scenarios.
 
+### ATOMICITY
+Tests should be as atomic as they can be - each test should be checking a single code path or a single return. One unit test shouldn't be testing the same function multiple times, other than to test out the difference in flow or data stored between multiple runs (if there's any need for that).
+
 ## Tooling
 - Test Runner: Vitest (https://vitest.dev/)
 - Mocking: Vitest's built-in vi object is used for mocking, spying, and stubbing. See vi.mock() for module-level mocking and vi.spyOn() for tracking calls to specific functions.
