@@ -1,6 +1,6 @@
 {
   "id": "7f67e460-8b9a-4507-987f-818e89f7691d",
-  "status": "-",
+  "status": "+",
   "title": "AI suggestions",
   "description": "The user has 3 paths to get suggestions for goals\n- hitting the command `/q` and getting first the choice to pick from GoalCategory types, then from GoalDifficulty. After which the backend's 'goalsControllerParamSuggestions' needs to be called (for now the type needs to be set to MACRO) to return a list of suggestions to display to the user.\n- hitting the command `/t` and providing free form text, the bot should send the text to the backend via GoalsService.goalsControllerAiSuggestions, then gets the response and renders it nicely\n- hitting the command `/s` and recording a sound memo, this then needs to be passed to the backend via GoalsService.goalsControllerAiSuggestionsFromAudio, then similarly to the above, we need to render the response correctly\n\nCurrently the first `/q` command is almost implemented - just the rendering part is missing - it needs to match the display design, colours and format of the provided `mock-interface.tsx` and `mock-interface.css`",
   "features": [
@@ -61,12 +61,13 @@
     },
     {
       "id": "282c61d7-3075-4f23-99e7-69bb84593a22",
-      "status": "-",
+      "status": "+",
       "title": "Display Suggestions for Audio Input",
       "description": "In `src/actions/audioSuggestion.ts`, after receiving the response from `GoalsService.goalsControllerAiSuggestionsFromAudio`, use the `suggestionRenderer` to format the suggestions and send them to the user as a message with an inline keyboard.",
       "context": [],
       "createdAt": "2025-09-19T17:01:50.110Z",
-      "updatedAt": "2025-09-19T17:01:50.110Z"
+      "updatedAt": "2025-09-19T17:33:36.581Z",
+      "completedAt": "2025-09-19T17:33:36.581Z"
     },
     {
       "id": "fc21862b-b762-498d-8c0f-f19fadfef4df",
@@ -92,5 +93,6 @@
     "282c61d7-3075-4f23-99e7-69bb84593a22": 7
   },
   "createdAt": "2025-09-19T16:59:15.760Z",
-  "updatedAt": "2025-09-19T17:10:41.745Z"
+  "updatedAt": "2025-09-19T17:10:41.745Z",
+  "completedAt": "2025-09-19T17:33:36.581Z"
 }
