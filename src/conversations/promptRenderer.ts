@@ -37,12 +37,16 @@ function buildOptionsKeyboard(
 
 export function formatPromptMessage(prompt: ConversationPromptDto): string {
   const lines: string[] = []
-  if (prompt.title && prompt.title.trim().length > 0) {
-    lines.push(prompt.title.trim())
-    lines.push('')
+  const hasTitle = !!(prompt.title && prompt.title.trim().length > 0)
+  const hasMessage = !!(prompt.message && prompt.message.trim().length > 0)
+
+  if (hasTitle) {
+    lines.push(prompt.title!.trim())
   }
-  if (prompt.message && prompt.message.trim().length > 0) {
-    lines.push(prompt.message.trim())
+
+  if (hasMessage) {
+    if (lines.length) lines.push('')
+    lines.push(prompt.message!.trim())
   }
 
   const fieldLines = formatFields(prompt.fields)
