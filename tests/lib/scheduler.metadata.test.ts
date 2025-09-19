@@ -47,7 +47,11 @@ describe('lib/scheduler metadata handling', () => {
   it('should derive chatId from metadata.chat_id (string) and update metadata to include telegram info', async () => {
     vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
       items: [
-        { id: 'ci2', start: checkInTime.toISOString(), metadata: { message: 'yo', chat_id: '123' } },
+        {
+          id: 'ci2',
+          start: checkInTime.toISOString(),
+          metadata: { message: 'yo', chat_id: '123' },
+        },
       ],
     } as any)
 
@@ -80,9 +84,7 @@ describe('lib/scheduler metadata handling', () => {
 
   it('should skip when chatId cannot be determined', async () => {
     vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
-      items: [
-        { id: 'ci4', start: checkInTime.toISOString(), metadata: { message: 'no chat' } },
-      ],
+      items: [{ id: 'ci4', start: checkInTime.toISOString(), metadata: { message: 'no chat' } }],
     } as any)
 
     await tickSchedulerOnce(now)

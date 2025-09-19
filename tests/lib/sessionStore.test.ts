@@ -29,7 +29,11 @@ describe('lib/sessionStore', () => {
   })
 
   it('should persist, read, and clear sessions', () => {
-    const s: SessionData = { userId: 'u1', accessToken: 't1', conversationState: { flowId: 'flow' } }
+    const s: SessionData = {
+      userId: 'u1',
+      accessToken: 't1',
+      conversationState: { flowId: 'flow' },
+    }
     setSession(s)
     expect(getAllUserIds()).toEqual(['u1'])
 
