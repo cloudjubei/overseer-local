@@ -7,7 +7,9 @@ import { renderBackendPrompt } from './conversations/promptRenderer'
 import { ConversationsService } from './generated/backend/services/ConversationsService'
 import { ConversationResponseDto } from './generated/backend/models/ConversationResponseDto'
 import { StartFlowDto } from './generated/backend/models/StartFlowDto'
-import { AiService } from './generated/backend/services/AiService'
+import testAction from './actions/test'
+import testLLMAction from './actions/testLLM'
+import quickSuggestionAction from './actions/quickSuggestion'
 
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
@@ -118,80 +120,21 @@ bot.on('message', async (msg: Message) => {
 
     const rawText = (msg.text || '').trim()
 
-    // Handle /test command locally, even for non-authenticated users
-    const testMatch = rawText.match(/^\/test(?:@\w+)?(?:\s+([\s\S]*))?$/i)
-    if (testMatch) {
-      const payload = (testMatch[1] || '').trim()
-      if (!payload) {
-        await bot.sendMessage(chat.id, 'Usage: /test <text to echo with stars>')
-      } else {
-        await bot.sendMessage(chat.id, `⭐ ${payload} ⭐`)
-      }
+    if (await testAction(bot, chat, rawText)) {
       return
     }
-
-    // /test-llm -> send input directly to backend AI test endpoint and return result (authenticated users only)
-    const llmMatchEarly = rawText.match(/^\/test-llm(@\w+)?(?:\s+([\s\S]*))?$/i)
-    if (llmMatchEarly) {
-      // Run auth gate but do NOT proceed with other handlers if it prompts/handles
-      const authHandledForLlm = await handleAuthMessage(bot, msg)
-      if (authHandledForLlm) return
-
-      const userId = String(from.id)
-      const rawPayload = (llmMatchEarly[2] || '').trim()
-      if (!rawPayload) {
-        await bot.sendMessage(
-          chat.id,
-          'Usage: /test-llm [openai|gemini|anthropic]: <your prompt>\nExample: /test-llm openai: Hello world',
-        )
-        return
-      }
-
-      // Parse optional model prefix like "openai:", "gemini:", "anthropic:" or flag "--model <name>"
-      let model: 'openai' | 'gemini' | 'anthropic' = 'openai'
-      let input = rawPayload
-
-      const modelPrefixMatch = rawPayload.match(/^(openai|gemini|anthropic)\s*:([\s\S]*)$/i)
-      if (modelPrefixMatch) {
-        model = modelPrefixMatch[1].toLowerCase() as typeof model
-        input = (modelPrefixMatch[2] || '').trim()
-      } else {
-        const flagMatch = rawPayload.match(/^--model\s+(openai|gemini|anthropic)\s+([\s\S]*)$/i)
-        if (flagMatch) {
-          model = flagMatch[1].toLowerCase() as typeof model
-          input = (flagMatch[2] || '').trim()
-        }
-      }
-
-      if (!input) {
-        await bot.sendMessage(chat.id, 'Please provide text to send to the LLM.')
-        return
-      }
-
-      try {
-        await ensureBackendConfigured()
-        ensureAccessTokenForUser(userId)
-
-        const response = await AiService.aiControllerTest({
-          model,
-          // Send raw text as request body; backend returns raw text
-          requestBody: input as unknown as any,
-        })
-
-        await bot.sendMessage(chat.id, response || '(empty response)')
-      } catch (err: any) {
-        const errMsg = err?.response?.data || err?.message || 'LLM test failed.'
-        await bot.sendMessage(chat.id, typeof errMsg === 'string' ? errMsg : 'LLM test failed.')
-      }
+    if (await testLLMAction(bot, chat, from, rawText, msg)) {
       return
     }
+    if (await handleAuthMessage(bot, msg)) return
 
-    // Global auth flow: returns true if it handled the message (prompted or processed)
-    const authHandled = await handleAuthMessage(bot, msg)
-    if (authHandled) return
+    if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
+      return
+    }
 
     const userId = String(from.id)
     const session = getSession(userId)
+    console.log('session :  ', session)
 
     // If an active backend-driven conversation exists, delegate to conversation manager
     if (session?.conversationState) {
@@ -210,12 +153,9 @@ bot.on('message', async (msg: Message) => {
       }
     }
 
-    // Command handling
-    const text = (msg.text || '').trim()
-
     // /profile -> start profile update flow via backend conversations
-    if (/^\/(profile)(@\w+)?$/i.test(text)) {
-      const PROFILE_UPDATE_FLOW_ID = 'profile.update' // Backend flow id for updating a profile
+    if (/^\/(profile)(@\w+)?$/i.test(rawText)) {
+      const PROFILE_UPDATE_FLOW_ID = 'setup_profile' // Backend flow id for updating a profile
       await startBackendFlow({
         userId,
         chatId: chat.id,
@@ -226,7 +166,7 @@ bot.on('message', async (msg: Message) => {
     }
 
     // /newgoal -> start new goal flow via backend conversations
-    if (/^\/(newgoal)(@\w+)?$/i.test(text)) {
+    if (/^\/(newgoal)(@\w+)?$/i.test(rawText)) {
       const NEW_GOAL_FLOW_ID = 'goals.new' // Backend flow id for creating a new goal
       await startBackendFlow({
         userId,
