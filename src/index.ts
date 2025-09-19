@@ -10,6 +10,7 @@ import { StartFlowDto } from './generated/backend/models/StartFlowDto'
 import testAction from './actions/test'
 import testLLMAction from './actions/testLLM'
 import quickSuggestionAction from './actions/quickSuggestion'
+import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
 import { clearSuggestionsForMessage, getSuggestionsForMessage } from './actions/suggestionState'
@@ -133,6 +134,9 @@ bot.on('message', async (msg: Message) => {
     if (await handleAuthMessage(bot, msg)) return
 
     if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
+      return
+    }
+    if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
 
