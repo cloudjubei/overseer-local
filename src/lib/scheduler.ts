@@ -39,13 +39,6 @@ export function getMessageFromMetadata(
   return undefined
 }
 
-function deriveChatIdFromUserId(userId: string): number {
-  const digits = userId.replace(/\D+/g, '')
-  if (digits) return Number(digits)
-  const n = Number(userId)
-  return Number.isFinite(n) ? n : NaN
-}
-
 function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefined {
   if (!metadata || typeof metadata !== 'object') return undefined
   // Support a few shapes:
@@ -74,9 +67,14 @@ function needsTelegramChatMetadata(
   chatId: number,
   userId: string,
 ): boolean {
+  // If there is already a top-level numeric chatId, we consider metadata sufficient and do not update.
+  // This matches the expectation that we shouldn't rewrite metadata when chatId is already present as number.
+  const topLevelChatId = (metadata as any)?.chatId
+  if (typeof topLevelChatId === 'number' && Number.isFinite(topLevelChatId)) return false
+
+  // Otherwise, we update if either the resolved chatId differs or telegram.userId is missing.
   const existing = getChatIdFromMetadata(metadata)
   if (existing !== chatId) return true
-  // also check presence of telegram.userId for completeness
   const hasUserId = !!(metadata as any)?.telegram?.userId
   return !hasUserId
 }
@@ -99,8 +97,8 @@ function mergeTelegramChatMetadata(
 
 async function ensureTelegramMetadata(ci: CheckInDto, chatId: number, userId: string) {
   try {
-    if (!needsTelegramChatMetadata(ci.metadata, chatId, userId)) return
-    const newMeta = mergeTelegramChatMetadata(ci.metadata, chatId, userId)
+    if (!needsTelegramChatMetadata(ci.metadata as any, chatId, userId)) return
+    const newMeta = mergeTelegramChatMetadata(ci.metadata as any, chatId, userId)
     await CheckInsService.checkInsControllerUpdateCheckIn({
       id: ci.id,
       requestBody: { metadata: newMeta },
@@ -139,17 +137,14 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         if (!startDate) continue
         if (!sameHourOfDay(startDate, now)) continue
 
-        const message = getMessageFromMetadata(ci.metadata)
+        const message = getMessageFromMetadata(ci.metadata as any)
         if (!message) continue
 
         const dedupeKey = `${userId}:${ci.id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
-        // Determine chatId from metadata (preferred), fall back to deriving from userId
-        let chatId = getChatIdFromMetadata(ci.metadata)
-        if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
-          chatId = deriveChatIdFromUserId(userId)
-        }
+        // Determine chatId strictly from metadata. If not present, skip.
+        const chatId = getChatIdFromMetadata(ci.metadata as any)
         if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
           logger.warn(`Skipping check-in ${ci.id} for user ${userId}: unable to determine chatId`)
           continue
