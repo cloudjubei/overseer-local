@@ -1,6 +1,6 @@
 {
   "id": "bcf7668d-58f6-4035-b695-0d1bcbe83aef",
-  "status": "-",
+  "status": "=",
   "title": "Ongoing Improvements",
   "description": "",
   "features": [
@@ -28,13 +28,14 @@
     },
     {
       "id": "00b11270-6e08-4fce-bdda-11030f802da9",
-      "status": "-",
+      "status": "+",
       "title": "Create a /test command that works even for non-authed users",
       "description": "when the user types in the command, the bot will repeat whatever the user said after the command, but it will add star emojis at the beginning and at the end of what was written. This command must not touch the backend and be 'local' to this project.",
       "context": [],
       "createdAt": "2025-09-19T14:12:49.184Z",
-      "updatedAt": "2025-09-19T14:16:45.610Z",
-      "blockers": []
+      "updatedAt": "2025-09-19T14:39:42.542Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T14:39:42.542Z"
     }
   ],
   "featureIdToDisplayIndex": {

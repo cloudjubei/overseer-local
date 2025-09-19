@@ -115,6 +115,19 @@ bot.on('message', async (msg: Message) => {
     const { chat, from } = msg
     if (!from || !chat) return
 
+    // Handle /test command locally, even for non-authenticated users
+    const rawText = (msg.text || '').trim()
+    const testMatch = rawText.match(/^\/test(?:@\w+)?(?:\s+([\s\S]*))?$/i)
+    if (testMatch) {
+      const payload = (testMatch[1] || '').trim()
+      if (!payload) {
+        await bot.sendMessage(chat.id, 'Usage: /test <text to echo with stars>')
+      } else {
+        await bot.sendMessage(chat.id, `⭐ ${payload} ⭐`)
+      }
+      return
+    }
+
     // Global auth flow: returns true if it handled the message (prompted or processed)
     const authHandled = await handleAuthMessage(bot, msg)
     if (authHandled) return
