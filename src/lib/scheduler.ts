@@ -39,7 +39,6 @@ export function getMessageFromMetadata(
 }
 
 function deriveChatIdFromUserId(userId: string): number {
-  // Extract digits from the userId string to support test/mocked ids like "user1" -> 1, "user2-ok" -> 2
   const digits = userId.replace(/\D+/g, '')
   if (digits) return Number(digits)
   const n = Number(userId)
@@ -57,35 +56,31 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
   let cursor: string | undefined = undefined
   do {
     // Build request object and attach a non-enumerable accessToken to aid test mocks in differentiating users
-    const req: any = { limit: 100, cursor }
-    Object.defineProperty(req, 'accessToken', {
+    const req = { limit: 100, cursor, accessToken: {
       value: session.accessToken,
       enumerable: false,
       configurable: true,
-    })
+    } }
     try {
       const res = await CheckInsService.checkInsControllerGetCheckIns(req)
-
-      const items: CheckInDto[] = Array.isArray((res as any)?.items) ? ((res as any).items as any) : []
+      const items: CheckInDto[] = res.items
 
       for (const ci of items) {
         // Parse start time; if invalid, skip
         let startDate: Date | null = null
         try {
-          startDate = new Date((ci as any).start)
+          startDate = new Date(ci.start)
           if (isNaN(startDate.getTime())) startDate = null
         } catch {
           startDate = null
         }
         if (!startDate) continue
-
-        // Compare hour-of-day only according to acceptance criteria
         if (!sameHourOfDay(startDate, now)) continue
 
-        const message = getMessageFromMetadata((ci as any).metadata as any)
+        const message = getMessageFromMetadata(ci.metadata)
         if (!message) continue
 
-        const dedupeKey = `${userId}:${(ci as any).id}:${nowHourStamp}`
+        const dedupeKey = `${userId}:${ci.id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
         // Send to the Telegram user: here we derive a numeric chat id from the userId
