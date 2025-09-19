@@ -129,7 +129,13 @@ describe('lib/scheduler', () => {
     it('should skip check-ins that are in a different hour', async () => {
       const differentHour = new Date('2023-05-15T15:00:00Z')
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
-        items: [{ id: 'c1', start: differentHour.toISOString(), metadata: { message: '...', chatId: '0001' } }],
+        items: [
+          {
+            id: 'c1',
+            start: differentHour.toISOString(),
+            metadata: { message: '...', chatId: '0001' },
+          },
+        ],
       } as any)
       await tickSchedulerOnce(now)
       expect(mockBot.sendMessage).not.toHaveBeenCalled()
@@ -138,7 +144,11 @@ describe('lib/scheduler', () => {
     it('should skip check-ins with invalid start dates or no message', async () => {
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
         items: [
-          { id: 'ci-invalid-date', start: 'not a date', metadata: { message: '...', chatId: '0001' } },
+          {
+            id: 'ci-invalid-date',
+            start: 'not a date',
+            metadata: { message: '...', chatId: '0001' },
+          },
           { id: 'ci-no-message', start: checkInTime.toISOString(), metadata: { chatId: '0002' } },
           { id: 'ci-no-chatId', start: checkInTime.toISOString(), metadata: { message: '...' } },
         ],
