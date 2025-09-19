@@ -70,11 +70,14 @@ describe('lib/auth', () => {
 
   describe('handleAuthMessage', () => {
     it('should return false if user is already authenticated', async () => {
-      const ensureSpy = vi.spyOn(auth, 'ensureAccessTokenForUser')
       vi.mocked(isAuthenticated).mockReturnValue(true)
+      // ensure downstream effect of ensureAccessTokenForUser by providing a session
+      vi.mocked(getSession).mockReturnValue({ userId, accessToken: 'existing-token' })
+
       const result = await auth.handleAuthMessage(mockBot, mockMsg)
+
       expect(result).toBe(false)
-      expect(ensureSpy).toHaveBeenCalledWith(userId)
+      expect(setAccessToken).toHaveBeenCalledWith('existing-token')
       expect(mockBot.sendMessage).not.toHaveBeenCalled()
     })
 
