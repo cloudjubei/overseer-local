@@ -1,6 +1,6 @@
 {
   "id": "bcf7668d-58f6-4035-b695-0d1bcbe83aef",
-  "status": "-",
+  "status": "=",
   "title": "Ongoing Improvements",
   "description": "",
   "features": [
@@ -15,18 +15,16 @@
     },
     {
       "id": "fa10705f-a673-4649-ae33-853df72179b0",
-      "status": "-",
+      "status": "=",
       "title": "Aim for close to 100% test coverage",
       "description": "We need to make sure that the tests cover as close as 100% of the codebase.\nObviously, things like the ai service with getting results from the AI cannot be fully tested - but we can test for many ranges of responses by mocking the LLM responses appropriately. The same idea should be taken everywhere to try to achieve 100% coverage.\n\nOne important thing is to make sure that data that is entering and leaving endpoints is validated thoroughly to make sure that it matches the expected schema. This should be part of the code and the tests should validate it too (i.e. malformed objects being rejected).\n\nThere needs to be a relevant section in @README.md  explaining how vital testing is and to refer to @docs/TESTING.md for all guidance related to writing tests and the standard for them. For reference there is also the @docs/CODE_STANDARD.md  document that highlights the coding standard within the project.\n\nNEVER FIX CODE JUST SO TESTS PASS - THE PROJECT CODE NEEDS TO MAKE SENSE AND WORK SO THE FEATURES ARE SATISFIED. TESTS ALWAYS NEED TO POKE AT HOLES AND EDGES OF THE CODE.",
       "context": [
         "README.md",
-        "docs/CODE_STANDARD.md",
-        "tests/lib/scheduler.test.ts"
+        "docs/CODE_STANDARD.md"
       ],
       "createdAt": "2025-09-18T12:17:12.116Z",
-      "updatedAt": "2025-09-19T09:59:18.207Z",
-      "blockers": [],
-      "rejection": "Currently n the @tests/lib/scheduler.test.ts 2 unit tests fail, they are shown below:\n\n\n FAIL  tests/lib/scheduler.test.ts > lib/scheduler > tickSchedulerOnce > should handle pagination correctly\nAssertionError: expected \"spy\" to be called with arguments: [ 1, 'msg2' ]\n\nReceived: \n\n  1st spy call:\n\n  Array [\n    1,\n-   \"msg2\",\n+   \"msg1\",\n  ]\n\n  2nd spy call:\n\n  Array [\n-   1,\n+   2,\n    \"msg2\",\n  ]\n\n\nNumber of calls: 2\n\n ❯ tests/lib/scheduler.test.ts:208:35\n    206|       })\n    207|       expect(mockBot.sendMessage).toHaveBeenCalledWith(1, 'msg1')\n    208|       expect(mockBot.sendMessage).toHaveBeenCalledWith(1, 'msg2')\n       |                                   ^\n    209|     })\n    210| \n\n\n FAIL  tests/lib/scheduler.test.ts > l FAIL  tests/lib/scheduler.test.ts > lib/scheduler > tickSchedulerOnce > should continue if sending a message fails\nAssertionError: expected \"spy\" to be called with arguments: [ 1, 'msg2' ]\n\nReceived: \n\n  1st spy call:\n\n  Array [\n    1,\n-   \"msg2\",\n+   \"msg1\",\n  ]\n\n  2nd spy call:\n\n  Array [\n-   1,\n+   2,\n    \"msg2\",\n  ]\n\n\nNumber of calls: 2\n\n ❯ tests/lib/scheduler.test.ts:234:35\n    232|       expect(mockBot.sendMessage).toHaveBeenCalledTimes(2)\n    233|       expect(mockBot.sendMessage).toHaveBeenCalledWith(1, 'msg1')\n    234|       expect(mockBot.sendMessage).toHaveBeenCalledWith(1, 'msg2')\n       |                                   ^\n    235|     })\n    236|"
+      "updatedAt": "2025-09-19T10:39:22.962Z",
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
