@@ -13,11 +13,11 @@ let botRef: TelegramBot | null = null
 const sentThisHour = new Set<string>()
 
 export function currentHourStamp(date = new Date()): string {
-  // Format YYYYMMDDHH in the runtime timezone (process TZ can be set via env; node-cron also uses config.timezone)
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  const h = String(date.getHours()).padStart(2, '0')
+    // Format YYYYMMDDHH using UTC to keep deterministic formatting in tests and across environments
+  const y = date.getUTCFullYear()
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(date.getUTCDate()).padStart(2, '0')
+  const h = String(date.getUTCHours()).padStart(2, '0')
   return `${y}${m}${d}${h}`
 }
 
