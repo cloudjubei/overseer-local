@@ -1,6 +1,6 @@
 {
   "id": "7f67e460-8b9a-4507-987f-818e89f7691d",
-  "status": "-",
+  "status": "+",
   "title": "AI suggestions",
   "description": "The user has 3 paths to get suggestions for goals\n- hitting the command `/q` and getting first the choice to pick from GoalCategory types, then from GoalDifficulty. After which the backend's 'goalsControllerParamSuggestions' needs to be called (for now the type needs to be set to MACRO) to return a list of suggestions to display to the user.\n- hitting the command `/t` and providing free form text, the bot should send the text to the backend via GoalsService.goalsControllerAiSuggestions, then gets the response and renders it nicely\n- hitting the command `/s` and recording a sound memo, this then needs to be passed to the backend via GoalsService.goalsControllerAiSuggestionsFromAudio, then similarly to the above, we need to render the response correctly\n\nCurrently the first `/q` command is almost implemented - just the rendering part is missing - it needs to match the display design, colours and format of the provided `mock-interface.tsx` and `mock-interface.css`",
   "features": [
@@ -84,12 +84,13 @@
     },
     {
       "id": "33c3045a-549b-436e-bd6b-ee0cddf4e0bd",
-      "status": "-",
+      "status": "+",
       "title": "When getting suggestions back (through any of the commands `\\t`, `\\q` or `\\s` ) make sure the options render correctly",
       "description": "Right now there's an issue with the rendering of the suggestions:\n1) some of the suggestions are a bit longer than 1 line - they are getting clipped, but they shouldn't\n2) the \"Not quite right?\" text between the options should be tiny if possible\n3) clicking refine is the same as if the user sent the `\\t` action again\n4) clicking the extra suggestions buttons shows the `genericSuggestions` stored in the AiSuggestionsResultDto",
       "context": [],
       "createdAt": "2025-09-19T18:48:33.336Z",
-      "updatedAt": "2025-09-19T18:48:33.336Z"
+      "updatedAt": "2025-09-19T18:57:13.366Z",
+      "completedAt": "2025-09-19T18:57:13.366Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -103,5 +104,6 @@
     "33c3045a-549b-436e-bd6b-ee0cddf4e0bd": 8
   },
   "createdAt": "2025-09-19T16:59:15.760Z",
-  "updatedAt": "2025-09-19T17:10:41.745Z"
+  "updatedAt": "2025-09-19T17:10:41.745Z",
+  "completedAt": "2025-09-19T18:57:13.366Z"
 }

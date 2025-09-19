@@ -33,25 +33,20 @@ function difficultyStars(d: SuggestedGoalDto.difficulty | string | undefined): s
   return count > 0 ? '★'.repeat(count) : ''
 }
 
-function formatConfidence(n?: number): string | undefined {
-  if (typeof n !== 'number' || isNaN(n)) return undefined
-  // If in 0..1, render as percentage, else clamp 0..100
-  const pct = n <= 1 ? Math.round(n * 100) : Math.round(Math.max(0, Math.min(100, n)))
-  return `${pct}%`
-}
-
 // Core builders
 export function buildSuggestionKeyboard(
   suggestions: SuggestedGoalDto[],
-  showExtraSuggestions: boolean,
+  showExtraSuggestions: boolean = false,
 ): TelegramBot.InlineKeyboardMarkup {
-  const top = suggestions
   const rows: TelegramBot.InlineKeyboardButton[][] = []
 
-  top.forEach((sug, idx) => {
+  // Short, unclipped buttons that map to numbered options in the message body
+  suggestions.forEach((sug, idx) => {
     const stars = difficultyStars(sug.difficulty)
     const label = difficultyToLabel(sug.difficulty)
-    const text = [stars, label ? ` ${label} —` : '', ` ${sug.text}`].join('').trim().slice(0, 64) // keep within Telegram button display width sensibly
+    const n = idx + 1
+    // Keep the label short to avoid clipping in Telegram buttons
+    const text = stars ? `${n} • ${stars}` : `${n} • ${label}`
     rows.push([
       {
         text,
@@ -60,6 +55,7 @@ export function buildSuggestionKeyboard(
     ])
   })
 
+  // Secondary actions
   rows.push([
     {
       text: '✏️ Refine',
@@ -80,13 +76,9 @@ export function buildSuggestionKeyboard(
 
 export function buildSuggestionMessageText(params: {
   headerMessage?: string
-  understoodText?: string
-  combinedConfidence?: number
-  llmConfidence?: number
-  transcriptionConfidence?: number
   suggestions: SuggestedGoalDto[]
 }): string {
-  const { headerMessage } = params
+  const { headerMessage, suggestions } = params
   const lines: string[] = []
 
   // Header similar to the mock
@@ -96,7 +88,17 @@ export function buildSuggestionMessageText(params: {
     lines.push('<b>Great! Here are some options:</b>')
   }
 
-  // Visual separator similar to the mock before secondary actions
+  // Render full option texts (numbered) so they never get clipped
+  suggestions.forEach((sug, idx) => {
+    const n = idx + 1
+    const stars = difficultyStars(sug.difficulty)
+    const label = difficultyToLabel(sug.difficulty)
+    const meta = [stars, label && !stars ? label : ''].filter(Boolean).join(' ')
+    const line = meta ? `${n}) ${meta} — ${escapeHtml(sug.text)}` : `${n}) ${escapeHtml(sug.text)}`
+    lines.push(line)
+  })
+
+  // Visual, subtle separator before extra actions (tiny if possible -> italics and dashes)
   lines.push('\n<i>— Not quite right? —</i>')
 
   return lines.join('\n')
@@ -107,19 +109,20 @@ export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
   text: string
   options: TelegramBot.SendMessageOptions
 } {
-  const showGenericSuggestions = payload.suggestions.length == 0
-  const suggestions = showGenericSuggestions ? payload.genericSuggestions : payload.suggestions
+  // If AI returned no targeted suggestions, fall back to generic ones
+  const hasPrimary = Array.isArray(payload?.suggestions) && payload.suggestions.length > 0
+  const suggestions = hasPrimary ? payload.suggestions : payload.genericSuggestions
+
   const text = buildSuggestionMessageText({
     headerMessage: payload.needsConfirmation
       ? payload?.message || 'Great! Here are some options:'
-      : 'Great! Here are some options',
-    understoodText: payload?.understoodText,
-    combinedConfidence: payload?.combinedConfidence,
-    llmConfidence: payload?.llmConfidence,
-    transcriptionConfidence: payload?.transcriptionConfidence,
-    suggestions: suggestions,
+      : 'Great! Here are some options:',
+    suggestions,
   })
-  const reply_markup = buildSuggestionKeyboard(suggestions, !showGenericSuggestions)
+
+  // Show extra generic button only if we have primary suggestions and also have generic suggestions to offer
+  const showExtraSuggestions = hasPrimary && Array.isArray(payload?.genericSuggestions) && payload.genericSuggestions.length > 0
+  const reply_markup = buildSuggestionKeyboard(suggestions, showExtraSuggestions)
   return { text, options: { parse_mode: 'HTML', reply_markup } }
 }
 
@@ -131,7 +134,8 @@ export function buildParamSuggestionRender(
     headerMessage: header || 'Great! Here are some options:',
     suggestions,
   })
-  const reply_markup = buildSuggestionKeyboard(suggestions)
+  // For param suggestions (/q), we do not show the extra generic selector button
+  const reply_markup = buildSuggestionKeyboard(suggestions, false)
   return { text, options: { parse_mode: 'HTML', reply_markup } }
 }
 
@@ -142,9 +146,10 @@ export async function renderAiSuggestionResult(
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildAiSuggestionRender(payload)
   const sent = await bot.sendMessage(chatId, text, options)
-  // Store suggestions for callback handling
+  // Store both primary and generic suggestions for callback handling
   const suggestions = Array.isArray(payload?.suggestions) ? payload.suggestions : []
-  saveSuggestionsForMessage(chatId, sent.message_id, suggestions)
+  const generic = Array.isArray(payload?.genericSuggestions) ? payload.genericSuggestions : []
+  saveSuggestionsForMessage(chatId, sent.message_id, suggestions, generic)
   return sent
 }
 
@@ -156,7 +161,7 @@ export async function renderParamSuggestions(
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildParamSuggestionRender(suggestions, header)
   const sent = await bot.sendMessage(chatId, text, options)
-  // Store suggestions for callback handling
+  // Store only the primary suggestions for param-based flows
   saveSuggestionsForMessage(chatId, sent.message_id, suggestions)
   return sent
 }

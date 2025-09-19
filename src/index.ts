@@ -13,7 +13,7 @@ import quickSuggestionAction from './actions/quickSuggestion'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
-import { clearSuggestionsForMessage, getSuggestionsForMessage } from './actions/suggestionState'
+import { clearSuggestionsForMessage, getSuggestionsForMessage, getSuggestionBundleForMessage } from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
 import textSuggestionAction from './actions/textSuggestion'
 
@@ -357,11 +357,49 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       }
 
       if (data === 'suggest:refine') {
-        await bot.sendMessage(chatId, 'Tell me how you want to refine this goal.')
+        // Behave like /t: set lastAction to 't' and prompt user for free-form text
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId }),
+          conversationState: {
+            lastAction: 't',
+            flowId: '',
+          },
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+        })
+        // Clean old keyboard to reduce clutter
+        try {
+          await bot.editMessageReplyMarkup(
+            { inline_keyboard: [] },
+            { chat_id: chatId, message_id: message.message_id },
+          )
+        } catch {}
+
+        const header =
+          '<b>Get a personalised goal</b>\n' + '<i>Describe what goal you would like to achieve?</i>'
+        await bot.sendMessage(chatId, header, { parse_mode: 'HTML' })
         return
       }
       if (data === 'suggest:select') {
-        await bot.sendMessage(chatId, 'Use /q to pick a category and difficulty.')
+        // Show genericSuggestions stored alongside the original message's suggestions
+        const bundle = getSuggestionBundleForMessage(chatId, message.message_id)
+        const generic = bundle?.genericSuggestions || []
+        if (!generic.length) {
+          await bot.sendMessage(chatId, 'No additional suggestions available right now.')
+          return
+        }
+        // Clear the previous keyboard to reduce clutter
+        try {
+          await bot.editMessageReplyMarkup(
+            { inline_keyboard: [] },
+            { chat_id: chatId, message_id: message.message_id },
+          )
+        } catch {}
+
+        await renderParamSuggestions(bot, chatId, generic, 'Here are more options:')
         return
       }
     }
