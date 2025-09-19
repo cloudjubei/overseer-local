@@ -3,6 +3,7 @@ import { config } from '../config/env'
 import { isAuthenticated, getSession, setSession, clearSession } from './sessionStore'
 import { configureBackendClient, setAccessToken } from './backendClient'
 import { AuthService } from '../generated/backend'
+import { logger } from './logger'
 
 const pendingAccessCode = new Set<string>()
 
@@ -94,7 +95,10 @@ export async function handleAuthMessage(
       await bot.sendMessage(chatId, 'You are now authenticated. 🎉')
     } catch (err: any) {
       // On failure, do not clear pending, allow retry
-      console.error('Login failed for user', userId, err?.response?.data || err?.message || err)
+      logger.warn('auth: login failed', {
+        userId,
+        error: err?.response?.data || err?.message || String(err),
+      })
       await bot.sendMessage(
         chatId,
         'That access code did not work. Please try again, or /cancel to stop.',

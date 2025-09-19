@@ -4,6 +4,7 @@ import { config } from '../config/env'
 import { getAllUserIds, getSession } from './sessionStore'
 import { configureBackendClient } from './backendClient'
 import { CheckInsService, CheckInDto } from '../generated/backend'
+import { logger } from './logger'
 
 let scheduledTask: cron.ScheduledTask | null = null
 let botRef: TelegramBot | null = null
@@ -42,7 +43,7 @@ function deriveChatIdFromUserId(userId: string): number {
   const digits = userId.replace(/\D+/g, '')
   if (digits) return Number(digits)
   const n = Number(userId)
-  return Number.isFinite(n) ? n : NaN
+  return Number.isFinite(n) ? n : (NaN as any)
 }
 
 function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefined {
@@ -106,7 +107,7 @@ async function ensureTelegramMetadata(ci: CheckInDto, chatId: number, userId: st
     })
   } catch (err) {
     // Non-fatal; continue sending
-    console.warn(`Failed to update check-in metadata for ${ci.id}`, err)
+    logger.warn(`Failed to update check-in metadata for ${ci.id}`, err)
   }
 }
 
@@ -150,7 +151,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
           chatId = deriveChatIdFromUserId(userId)
         }
         if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
-          console.warn(`Skipping check-in ${ci.id} for user ${userId}: unable to determine chatId`)
+          logger.warn(`Skipping check-in ${ci.id} for user ${userId}: unable to determine chatId`)
           continue
         }
 
@@ -162,14 +163,14 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
           await botRef?.sendMessage(chatId, message)
           sentThisHour.add(dedupeKey)
         } catch (err) {
-          console.error(`Failed to send check-in message to user ${userId}`, err)
+          logger.error(`Failed to send check-in message to user ${userId}`, err)
         }
       }
 
       cursor = (res as any)?.cursor || undefined
       if (!cursor) break
     } catch (err) {
-      console.error(`Scheduler: failed to fetch check-ins for user ${userId}`, err)
+      logger.error(`Scheduler: failed to fetch check-ins for user ${userId}`, err)
       break // stop paging on error for this user
     }
   } while (cursor)
@@ -187,7 +188,7 @@ export async function tickSchedulerOnce(now = new Date()) {
       await processUserCheckIns(userId, now, nowStamp)
     }
   } catch (e) {
-    console.error('Scheduler top-level error:', e)
+    logger.error('Scheduler top-level error:', e)
   }
 }
 

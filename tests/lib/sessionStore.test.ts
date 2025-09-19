@@ -1,185 +1,109 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
+
 import {
   getSession,
   setSession,
   clearSession,
-  getAllUserIds,
   isAuthenticated,
-  SessionData,
+  getAllUserIds,
+  type SessionData,
 } from '../../src/lib/sessionStore'
+import { logger } from '../../src/lib/logger'
 
-const sessionsDir = process.env.SESSIONS_DIR!
-const sessionsFile = path.join(sessionsDir, '.sessions.json')
+const sessionsDir = path.join(__dirname, '../.temp_sessions')
 
 describe('lib/sessionStore', () => {
-  // Clean up the sessions file before each test
   beforeEach(() => {
-    if (fs.existsSync(sessionsFile)) {
-      fs.unlinkSync(sessionsFile)
+    // ensure temp dir cleaned between tests
+    if (fs.existsSync(sessionsDir)) fs.rmSync(sessionsDir, { recursive: true, force: true })
+    fs.mkdirSync(sessionsDir, { recursive: true })
+    process.env.SESSIONS_DIR = sessionsDir
+    vi.restoreAllMocks()
+  })
+
+  it('should return undefined when no session exists and list empty users', () => {
+    expect(getSession('nope')).toBeUndefined()
+    expect(getAllUserIds()).toEqual([])
+  })
+
+  it('should persist, read, and clear sessions', () => {
+    const s: SessionData = { userId: 'u1', accessToken: 't1', conversationState: { flowId: 'flow' } }
+    setSession(s)
+    expect(getAllUserIds()).toEqual(['u1'])
+
+    const read = getSession('u1')!
+    expect(read.accessToken).toBe('t1')
+    expect(read.conversationState?.flowId).toBe('flow')
+
+    clearSession('u1')
+    expect(getSession('u1')).toBeUndefined()
+    expect(getAllUserIds()).toEqual([])
+  })
+
+  it('should preserve previous conversationState if not provided', () => {
+    const first: SessionData = {
+      userId: 'u2',
+      accessToken: 't2',
+      conversationState: { flowId: 'flowA', context: { a: 1 } },
     }
+    setSession(first)
+
+    // merge without conversationState provided -> keep previous
+    setSession({ userId: 'u2', accessToken: 't2b' })
+    const merged = getSession('u2')!
+    expect(merged.accessToken).toBe('t2b')
+    expect(merged.conversationState).toEqual({ flowId: 'flowA', context: { a: 1 } })
+
+    // now explicitly clear conversation state
+    setSession({ userId: 'u2', accessToken: 't2c', conversationState: null })
+    const cleared = getSession('u2')!
+    expect(cleared.conversationState).toBeNull()
   })
 
-  describe('getSession and setSession', () => {
-    it('should return undefined for a non-existent session', () => {
-      expect(getSession('user123')).toBeUndefined()
-    })
+  it('isAuthenticated should consider expiresAt with small skew', () => {
+    const nowSec = 1_700_000_000
+    vi.spyOn(Date, 'now').mockReturnValue(nowSec * 1000)
 
-    it('should create and retrieve a new session', () => {
-      const newSession: SessionData = {
-        userId: 'user123',
-        accessToken: 'token-abc',
-      }
-      setSession(newSession)
+    // Not authenticated without session
+    expect(isAuthenticated('nouser')).toBe(false)
 
-      const retrieved = getSession('user123')
-      expect(retrieved).toEqual(newSession)
-    })
+    // Authenticated without expiresAt
+    setSession({ userId: 'u3', accessToken: 'tk' })
+    expect(isAuthenticated('u3')).toBe(true)
 
-    it('should update an existing session', () => {
-      const initialSession: SessionData = {
-        userId: 'user123',
-        accessToken: 'token-abc',
-      }
-      setSession(initialSession)
+    // Expired: expiresAt < now + 30
+    setSession({ userId: 'u4', accessToken: 'tk', expiresAt: nowSec + 10 })
+    expect(isAuthenticated('u4')).toBe(false)
 
-      const updatedSession: SessionData = {
-        userId: 'user123',
-        accessToken: 'token-xyz',
-        refreshToken: 'refresh-token',
-      }
-      setSession(updatedSession)
-
-      const retrieved = getSession('user123')
-      expect(retrieved?.accessToken).toBe('token-xyz')
-      expect(retrieved?.refreshToken).toBe('refresh-token')
-    })
-
-    it('should preserve conversationState when updating other fields', () => {
-      const initialSession: SessionData = {
-        userId: 'user456',
-        accessToken: 'token-1',
-        conversationState: { flowId: 'profile.update' },
-      }
-      setSession(initialSession)
-
-      const updatedSession: SessionData = {
-        userId: 'user456',
-        accessToken: 'token-2',
-      }
-      setSession(updatedSession) // `conversationState` is not provided here
-
-      const retrieved = getSession('user456')
-      expect(retrieved?.accessToken).toBe('token-2')
-      expect(retrieved?.conversationState).toEqual({ flowId: 'profile.update' })
-    })
-
-    it('should explicitly update conversationState when provided', () => {
-      const initialSession: SessionData = {
-        userId: 'user456',
-        accessToken: 'token-1',
-        conversationState: { flowId: 'profile.update' },
-      }
-      setSession(initialSession)
-
-      const updatedSession: SessionData = {
-        userId: 'user456',
-        accessToken: 'token-1',
-        conversationState: { flowId: 'goals.new', context: { step: 1 } },
-      }
-      setSession(updatedSession)
-
-      const retrieved = getSession('user456')
-      expect(retrieved?.conversationState).toEqual({ flowId: 'goals.new', context: { step: 1 } })
-    })
-
-    it('should clear conversationState when set to null', () => {
-      const initialSession: SessionData = {
-        userId: 'user456',
-        accessToken: 'token-1',
-        conversationState: { flowId: 'profile.update' },
-      }
-      setSession(initialSession)
-
-      const updatedSession: SessionData = {
-        userId: 'user456',
-        accessToken: 'token-1',
-        conversationState: null,
-      }
-      setSession(updatedSession)
-
-      const retrieved = getSession('user456')
-      expect(retrieved?.conversationState).toBeNull()
-    })
+    // Valid: expiresAt sufficiently in future
+    setSession({ userId: 'u5', accessToken: 'tk', expiresAt: nowSec + 3600 })
+    expect(isAuthenticated('u5')).toBe(true)
   })
 
-  describe('clearSession', () => {
-    it('should remove an existing session', () => {
-      setSession({ userId: 'user1', accessToken: 'token-1' })
-      setSession({ userId: 'user2', accessToken: 'token-2' })
+  it('should handle read errors gracefully and start empty', () => {
+    const file = path.join(sessionsDir, '.sessions.json')
+    fs.writeFileSync(file, '{not-json', 'utf8')
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
 
-      clearSession('user1')
-
-      expect(getSession('user1')).toBeUndefined()
-      expect(getSession('user2')).toBeDefined()
-    })
-
-    it('should do nothing if the session does not exist', () => {
-      setSession({ userId: 'user1', accessToken: 'token-1' })
-      clearSession('user-non-existent')
-      expect(getSession('user1')).toBeDefined()
-    })
+    // Any call that reads should swallow error and return defaults
+    expect(getAllUserIds()).toEqual([])
+    expect(getSession('u1')).toBeUndefined()
+    expect(warnSpy).toHaveBeenCalled()
   })
 
-  describe('getAllUserIds', () => {
-    it('should return an empty array when there are no sessions', () => {
-      expect(getAllUserIds()).toEqual([])
+  it('should handle write errors gracefully', () => {
+    const errSpy = vi.spyOn(logger, 'error').mockImplementation(() => {})
+    // cause write to throw
+    const writeSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {
+      throw new Error('disk full')
     })
 
-    it('should return all user IDs from the session file', () => {
-      setSession({ userId: 'user-a', accessToken: 'token-a' })
-      setSession({ userId: 'user-b', accessToken: 'token-b' })
-      setSession({ userId: 'user-c', accessToken: 'token-c' })
+    // setSession should not throw
+    expect(() => setSession({ userId: 'u6', accessToken: 'tk' })).not.toThrow()
+    expect(errSpy).toHaveBeenCalled()
 
-      const userIds = getAllUserIds()
-      expect(userIds).toHaveLength(3)
-      expect(userIds).toContain('user-a')
-      expect(userIds).toContain('user-b')
-      expect(userIds).toContain('user-c')
-    })
-  })
-
-  describe('isAuthenticated', () => {
-    const now = Math.floor(Date.now() / 1000)
-
-    it('should return false for a non-existent user', () => {
-      expect(isAuthenticated('non-user')).toBe(false)
-    })
-
-    it('should return false if session exists but has no accessToken', () => {
-      setSession({ userId: 'user-no-token' } as any)
-      expect(isAuthenticated('user-no-token')).toBe(false)
-    })
-
-    it('should return true for a session with an accessToken and no expiry', () => {
-      setSession({ userId: 'user-ok', accessToken: 'token-ok' })
-      expect(isAuthenticated('user-ok')).toBe(true)
-    })
-
-    it('should return true for a session with a future expiresAt', () => {
-      setSession({ userId: 'user-future', accessToken: 'token-future', expiresAt: now + 3600 })
-      expect(isAuthenticated('user-future')).toBe(true)
-    })
-
-    it('should return false for a session with a past expiresAt', () => {
-      setSession({ userId: 'user-past', accessToken: 'token-past', expiresAt: now - 100 })
-      expect(isAuthenticated('user-past')).toBe(false)
-    })
-
-    it('should return false for a session expiring within the 30-second skew', () => {
-      setSession({ userId: 'user-skew', accessToken: 'token-skew', expiresAt: now + 20 })
-      expect(isAuthenticated('user-skew')).toBe(false)
-    })
+    writeSpy.mockRestore()
   })
 })

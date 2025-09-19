@@ -17,6 +17,7 @@ Key Directories and Files
     - sessionStore.ts: Simple file-based session store that persists Telegram user sessions under .sessions/.sessions.json (override via SESSIONS_DIR env var). Exposes getAllUserIds() to iterate all known users.
     - auth.ts: Authentication flow utilities. Prompts unauthenticated users for an access code, logs in via backend (AuthController_loginTelegram), and stores session tokens. Exposes helpers to configure the client per-callback/message.
     - scheduler.ts: Cron-based scheduler that runs every hour at the beginning of the hour (e.g., 09:00, 10:00). On each tick, it iterates all authenticated users, fetches their check-ins using CheckInsService, and if a check-in's scheduled time hour matches the current hour, sends the check-in's message (from metadata.message/text/content) to the corresponding Telegram user. Includes simple in-memory deduplication to avoid duplicate sends within the same hour window. Exposes tickSchedulerOnce() for tests.
+    - logger.ts: Environment-aware logger that routes error/warn/info/debug. In test environment, warn/error are suppressed by default to keep test output clean; override with LOG_LEVEL.
   - conversations/
     - conversationManager.ts: Generic backend-driven conversation handler. Exposes handleConversationMessage(msg, session) which, when an active session.conversationState exists, packages the user's Telegram message into a HandleInputDto and calls ConversationsService.conversationsControllerHandle. It interprets ConversationResponseDto (prompt/success/error), updates the stored conversation state in sessionStore accordingly, and returns a typed result for the caller to present to the user.
     - promptRenderer.ts: Renders a backend ConversationPromptDto into a user-facing message and optional inline keyboard. Exported renderBackendPrompt(prompt, bot, chatId) formats title/message/fields and turns PromptOptionDto[] into an InlineKeyboardMarkup. Intended to be used wherever ConversationResponseDto.type === 'prompt'.
@@ -41,6 +42,7 @@ Environment Handling
   - NODE_ENV: Node environment (default: development).
   - TZ: Timezone for scheduled jobs (default: UTC). The scheduler in src/lib/scheduler.ts uses this value for cron jobs.
   - SESSIONS_DIR: Directory for storing session data (default: .sessions). Useful for isolating test runs.
+  - LOG_LEVEL: Logger level override ('silent' | 'error' | 'warn' | 'info' | 'debug'). In tests, warn/error are suppressed unless this is set.
 
 Setup Steps
 1) Copy .env.example to .env and fill in the required values.
@@ -74,7 +76,7 @@ Scheduler (Hourly Check-ins Implemented)
 - On each tick, for every authenticated user:
   - Configures the backend client with that user's access token.
   - Retrieves check-ins via CheckInsService.checkInsControllerGetCheckIns, paging as needed.
-  - For each check-in, if its start time's hour matches the current hour, a notification message is sent to the user's Telegram chat. The message text is taken from metadata.message (fallbacks to metadata.text/content/msg if present).
+  - For each check-in, if its start time's hour matches the current hour, sends the check-in's message (from metadata.message/text/content/msg) to the user's Telegram chat.
   - Basic in-memory de-duplication prevents multiple sends for the same check-in within a single hour window.
 
 Conversation Flows (Backend-Driven)

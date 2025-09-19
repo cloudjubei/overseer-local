@@ -2,6 +2,7 @@ import type TelegramBot from 'node-telegram-bot-api'
 import { ConversationsService, ConversationResponseDto, HandleInputDto } from '../generated/backend'
 import { setSession, type SessionData } from '../lib/sessionStore'
 import { ensureBackendConfigured, ensureAccessTokenForUser } from '../lib/auth'
+import { logger } from '../lib/logger'
 
 export type ConversationHandleResult =
   | { type: 'prompt'; flow: string; sessionId: string; prompt: ConversationResponseDto['prompt'] }
@@ -128,7 +129,7 @@ export async function handleConversationMessage(
     }
   } catch (err: any) {
     // Network or server error: keep conversation so user can retry
-    console.error('conversations: handle error', err?.response?.data || err?.message || err)
+    logger.error('conversations: handle error', err?.response?.data || err?.message || err)
     setSession({
       ...session,
       conversationState: {

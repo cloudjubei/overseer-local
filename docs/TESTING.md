@@ -17,6 +17,14 @@ Tests should be fast, reliable, and easy to write. They serve as living document
   - Globally mocking the generated backend client (src/generated/backend) to prevent actual network requests during tests.
 - Test Location: Tests for a file src/lib/module.ts should be located at tests/lib/module.test.ts.
 
+## Logging in Tests
+To prevent noisy stderr during tests, we use an environment-aware logger at src/lib/logger.ts. In NODE_ENV=test, warn and error logs are suppressed by default. If you need to see them while debugging a flaky test, set LOG_LEVEL explicitly (e.g., LOG_LEVEL=debug or LOG_LEVEL=error).
+
+- Default behavior (NODE_ENV=test):
+  - warn/error suppressed, info logged via console.log, debug suppressed
+- Override:
+  - LOG_LEVEL=silent | error | warn | info | debug
+
 ## Mocking Strategy
 - Backend Services: The entire generated backend client is mocked in tests/setup.ts. In your tests, you can provide specific mock implementations for the service methods you expect to be called. Always reset mocks (vi.resetAllMocks()) in a beforeEach block to ensure tests are isolated.
 

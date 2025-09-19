@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { logger } from './logger'
 
 export interface ConversationState {
   // Identifier for the active conversation flow (as provided by backend)
@@ -49,7 +50,7 @@ function readAll(): Record<string, SessionData> {
     // Backward compatibility: previously stored records won't have conversationState
     return data && typeof data === 'object' ? (data as Record<string, SessionData>) : {}
   } catch (e) {
-    console.warn('sessionStore: failed to read sessions file, starting empty', e)
+    logger.warn('sessionStore: failed to read sessions file, starting empty', e)
     return {}
   }
 }
@@ -62,7 +63,7 @@ function writeAll(sessions: Record<string, SessionData>) {
     fs.writeFileSync(tmp, JSON.stringify(sessions, null, 2), 'utf8')
     fs.renameSync(tmp, file)
   } catch (e) {
-    console.error('sessionStore: failed to write sessions file', e)
+    logger.error('sessionStore: failed to write sessions file', e)
   }
 }
 

@@ -13,6 +13,7 @@ vi.mock('../src/generated/backend', () => ({
   },
   CheckInsService: {
     checkInsControllerGetCheckIns: vi.fn(),
+    checkInsControllerUpdateCheckIn: vi.fn(),
   },
   ConversationsService: {
     conversationsControllerStart: vi.fn(),
