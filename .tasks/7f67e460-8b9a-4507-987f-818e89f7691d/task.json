@@ -1,6 +1,6 @@
 {
   "id": "7f67e460-8b9a-4507-987f-818e89f7691d",
-  "status": "+",
+  "status": "-",
   "title": "AI suggestions",
   "description": "The user has 3 paths to get suggestions for goals\n- hitting the command `/q` and getting first the choice to pick from GoalCategory types, then from GoalDifficulty. After which the backend's 'goalsControllerParamSuggestions' needs to be called (for now the type needs to be set to MACRO) to return a list of suggestions to display to the user.\n- hitting the command `/t` and providing free form text, the bot should send the text to the backend via GoalsService.goalsControllerAiSuggestions, then gets the response and renders it nicely\n- hitting the command `/s` and recording a sound memo, this then needs to be passed to the backend via GoalsService.goalsControllerAiSuggestionsFromAudio, then similarly to the above, we need to render the response correctly\n\nCurrently the first `/q` command is almost implemented - just the rendering part is missing - it needs to match the display design, colours and format of the provided `mock-interface.tsx` and `mock-interface.css`",
   "features": [
@@ -81,6 +81,15 @@
       "updatedAt": "2025-09-19T17:29:55.058Z",
       "blockers": [],
       "completedAt": "2025-09-19T17:29:55.058Z"
+    },
+    {
+      "id": "33c3045a-549b-436e-bd6b-ee0cddf4e0bd",
+      "status": "-",
+      "title": "When getting suggestions back (through any of the commands `\\t`, `\\q` or `\\s` ) make sure the options render correctly",
+      "description": "Right now there's an issue with the rendering of the suggestions:\n1) some of the suggestions are a bit longer than 1 line - they are getting clipped, but they shouldn't\n2) the \"Not quite right?\" text between the options should be tiny if possible\n3) clicking refine is the same as if the user sent the `\\t` action again\n4) clicking the extra suggestions buttons shows the `genericSuggestions` stored in the AiSuggestionsResultDto",
+      "context": [],
+      "createdAt": "2025-09-19T18:48:33.336Z",
+      "updatedAt": "2025-09-19T18:48:33.336Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -90,9 +99,9 @@
     "fc21862b-b762-498d-8c0f-f19fadfef4df": 4,
     "0d9bd5fe-0494-4082-b3c5-02afb26c2ab6": 5,
     "0e4a1179-cd9a-42f9-8837-5a300e5efa02": 6,
-    "282c61d7-3075-4f23-99e7-69bb84593a22": 7
+    "282c61d7-3075-4f23-99e7-69bb84593a22": 7,
+    "33c3045a-549b-436e-bd6b-ee0cddf4e0bd": 8
   },
   "createdAt": "2025-09-19T16:59:15.760Z",
-  "updatedAt": "2025-09-19T17:10:41.745Z",
-  "completedAt": "2025-09-19T17:33:36.581Z"
+  "updatedAt": "2025-09-19T17:10:41.745Z"
 }

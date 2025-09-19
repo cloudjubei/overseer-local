@@ -5,6 +5,7 @@
 import type { SuggestedGoalDto } from './SuggestedGoalDto'
 export type AiSuggestionsResultDto = {
   suggestions: Array<SuggestedGoalDto>
+  genericSuggestions: Array<SuggestedGoalDto>
   transcriptionConfidence?: number
   llmConfidence?: number
   combinedConfidence: number

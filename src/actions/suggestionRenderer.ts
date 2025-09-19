@@ -43,8 +43,9 @@ function formatConfidence(n?: number): string | undefined {
 // Core builders
 export function buildSuggestionKeyboard(
   suggestions: SuggestedGoalDto[],
+  showExtraSuggestions: boolean,
 ): TelegramBot.InlineKeyboardMarkup {
-  const top = (suggestions || []).slice(0, 3)
+  const top = suggestions
   const rows: TelegramBot.InlineKeyboardButton[][] = []
 
   top.forEach((sug, idx) => {
@@ -59,19 +60,20 @@ export function buildSuggestionKeyboard(
     ])
   })
 
-  // Additional actions inspired by mock: Refine / Select
   rows.push([
     {
       text: '✏️ Refine',
       callback_data: 'suggest:refine',
     },
   ])
-  rows.push([
-    {
-      text: '📋 Select',
-      callback_data: 'suggest:select',
-    },
-  ])
+  if (showExtraSuggestions) {
+    rows.push([
+      {
+        text: '📋 Select',
+        callback_data: 'suggest:select',
+      },
+    ])
+  }
 
   return { inline_keyboard: rows }
 }
@@ -84,13 +86,7 @@ export function buildSuggestionMessageText(params: {
   transcriptionConfidence?: number
   suggestions: SuggestedGoalDto[]
 }): string {
-  const {
-    headerMessage,
-    understoodText,
-    combinedConfidence,
-    llmConfidence,
-    transcriptionConfidence,
-  } = params
+  const { headerMessage } = params
   const lines: string[] = []
 
   // Header similar to the mock
@@ -100,24 +96,8 @@ export function buildSuggestionMessageText(params: {
     lines.push('<b>Great! Here are some options:</b>')
   }
 
-  // Subtext (optional understanding + confidences)
-  const confBits: string[] = []
-  const combined = formatConfidence(combinedConfidence)
-  const llm = formatConfidence(llmConfidence)
-  const tr = formatConfidence(transcriptionConfidence)
-  if (combined) confBits.push(`confidence ${combined}`)
-  if (llm) confBits.push(`LLM ${llm}`)
-  if (tr) confBits.push(`ASR ${tr}`)
-
-  const subparts: string[] = []
-  if (understoodText && understoodText.trim()) {
-    subparts.push(`understood: “${escapeHtml(understoodText.trim())}”`)
-  }
-  if (confBits.length) subparts.push(confBits.join(', '))
-  if (subparts.length) lines.push(`<i>${subparts.join(' • ')}</i>`) // italic hint
-
   // Visual separator similar to the mock before secondary actions
-  lines.push('\n<i>— Not the goals you looked for? —</i>')
+  lines.push('\n<i>— Not quite right? —</i>')
 
   return lines.join('\n')
 }
@@ -127,16 +107,19 @@ export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
   text: string
   options: TelegramBot.SendMessageOptions
 } {
-  const suggestions = Array.isArray(payload?.suggestions) ? payload.suggestions : []
+  const showGenericSuggestions = payload.suggestions.length == 0
+  const suggestions = showGenericSuggestions ? payload.genericSuggestions : payload.suggestions
   const text = buildSuggestionMessageText({
-    headerMessage: payload?.message || 'Great! Here are some options:',
+    headerMessage: payload.needsConfirmation
+      ? payload?.message || 'Great! Here are some options:'
+      : 'Great! Here are some options',
     understoodText: payload?.understoodText,
     combinedConfidence: payload?.combinedConfidence,
     llmConfidence: payload?.llmConfidence,
     transcriptionConfidence: payload?.transcriptionConfidence,
-    suggestions,
+    suggestions: suggestions,
   })
-  const reply_markup = buildSuggestionKeyboard(suggestions)
+  const reply_markup = buildSuggestionKeyboard(suggestions, !showGenericSuggestions)
   return { text, options: { parse_mode: 'HTML', reply_markup } }
 }
 
