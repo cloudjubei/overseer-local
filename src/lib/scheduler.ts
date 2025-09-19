@@ -13,7 +13,7 @@ let botRef: TelegramBot | null = null
 const sentThisHour = new Set<string>()
 
 export function currentHourStamp(date = new Date()): string {
-    // Format YYYYMMDDHH using UTC to keep deterministic formatting in tests and across environments
+  // Format YYYYMMDDHH using UTC to keep deterministic formatting in tests and across environments
   const y = date.getUTCFullYear()
   const m = String(date.getUTCMonth() + 1).padStart(2, '0')
   const d = String(date.getUTCDate()).padStart(2, '0')
@@ -68,7 +68,11 @@ function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefin
   return undefined
 }
 
-function needsTelegramChatMetadata(metadata: Record<string, any> | undefined, chatId: number, userId: string): boolean {
+function needsTelegramChatMetadata(
+  metadata: Record<string, any> | undefined,
+  chatId: number,
+  userId: string,
+): boolean {
   const existing = getChatIdFromMetadata(metadata)
   if (existing !== chatId) return true
   // also check presence of telegram.userId for completeness
