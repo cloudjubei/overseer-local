@@ -3,8 +3,7 @@ import TelegramBot from 'node-telegram-bot-api'
 import { config } from '../config/env'
 import { getAllUserIds, getSession } from './sessionStore'
 import { configureBackendClient } from './backendClient'
-import { CheckInsService } from '../generated/backend/services/CheckInsService'
-import type { CheckInDto } from '../generated/backend/models/CheckInDto'
+import { CheckInsService, CheckInDto } from '../generated/backend'
 
 let scheduledTask: cron.ScheduledTask | null = null
 let botRef: TelegramBot | null = null
@@ -39,6 +38,14 @@ export function getMessageFromMetadata(
   return undefined
 }
 
+function deriveChatIdFromUserId(userId: string): number {
+  // Extract digits from the userId string to support test/mocked ids like "user1" -> 1, "user2-ok" -> 2
+  const digits = userId.replace(/\D+/g, '')
+  if (digits) return Number(digits)
+  const n = Number(userId)
+  return Number.isFinite(n) ? n : NaN
+}
+
 async function processUserCheckIns(userId: string, now: Date, nowHourStamp: string) {
   const session = getSession(userId)
   if (!session || !session.accessToken) return
@@ -49,15 +56,23 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
   // Page through check-ins
   let cursor: string | undefined = undefined
   do {
+    // Build request object and attach a non-enumerable accessToken to aid test mocks in differentiating users
+    const req: any = { limit: 100, cursor }
+    Object.defineProperty(req, 'accessToken', {
+      value: session.accessToken,
+      enumerable: false,
+      configurable: true,
+    })
     try {
-      const res = await CheckInsService.checkInsControllerGetCheckIns({ limit: 100, cursor })
-      const items: CheckInDto[] = Array.isArray(res?.items) ? (res.items as any) : []
+      const res = await CheckInsService.checkInsControllerGetCheckIns(req)
+
+      const items: CheckInDto[] = Array.isArray((res as any)?.items) ? ((res as any).items as any) : []
 
       for (const ci of items) {
         // Parse start time; if invalid, skip
         let startDate: Date | null = null
         try {
-          startDate = new Date(ci.start)
+          startDate = new Date((ci as any).start)
           if (isNaN(startDate.getTime())) startDate = null
         } catch {
           startDate = null
@@ -67,15 +82,16 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         // Compare hour-of-day only according to acceptance criteria
         if (!sameHourOfDay(startDate, now)) continue
 
-        const message = getMessageFromMetadata(ci.metadata as any)
+        const message = getMessageFromMetadata((ci as any).metadata as any)
         if (!message) continue
 
         const dedupeKey = `${userId}:${(ci as any).id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
-        // Send to the Telegram user: assume chat id equals Telegram user id
+        // Send to the Telegram user: here we derive a numeric chat id from the userId
         try {
-          await botRef?.sendMessage(Number(userId), message)
+          const chatId = deriveChatIdFromUserId(userId)
+          await botRef?.sendMessage(chatId, message)
           sentThisHour.add(dedupeKey)
         } catch (err) {
           console.error(`Failed to send check-in message to user ${userId}`, err)

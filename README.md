@@ -99,8 +99,7 @@ Available commands
 - /start: Welcome + basic instructions
 - /profile: Guided flow to update profile (DOB YYYY-MM-DD, gender, weight free text, height free text). Reply with skip to leave any field unchanged. /cancel to abort.
 - /newgoal: Describe your goal in free text. The bot calls the backend for AI suggestions and shows them as inline buttons. You can pick one to create immediately, refine your message, or cancel.
-- /microgoals: Lists current micro goals from backend
-- /macrogoals: Lists current macro goals from backend
+- /microgoals and /macrogoals: Verify lists show as expected (or the empty-state message)
 - /cancel: Cancels current flow (/profile or /newgoal)
 - /logout: Clears your saved session
 
@@ -109,8 +108,8 @@ High-quality, well-tested code is critical for the reliability of this bot. We a
 
 All contributors are expected to write and maintain tests for their code. Before submitting a pull request, ensure that all tests are passing (`npm test`) and that coverage has not decreased.
 
-- **For detailed guidance on our testing philosophy, tools, and mocking strategies, please read [docs/TESTING.md](docs/TESTING.md).**
-- For architectural best practices that make code more testable, refer to [docs/CODE_STANDARD.md](docs/CODE_STANDARD.md).
+- For detailed guidance on our testing philosophy, tools, and mocking strategies, please read docs/TESTING.md.
+- For architectural best practices that make code more testable, refer to docs/CODE_STANDARD.md.
 
 ## Testing Locally
 General checklist
@@ -130,6 +129,11 @@ General checklist
 - To test without waiting:
   - Temporary method for development only: change the cron expression in src/lib/scheduler.ts to run every minute (e.g., "*/1 * * * *"), restart the bot, and observe messages. Revert before committing.
   - In automated tests we use helper tickSchedulerOnce to run the logic immediately with mocks.
+
+## Running Tests
+- Run all tests once: npm test
+- Watch mode: npm run test:watch
+- Coverage report: npm run test:coverage
 
 ## Deploying on AWS EC2
 The simplest and resilient approach is to run the bot under a process manager like PM2 on a small Ubuntu instance.
