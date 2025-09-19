@@ -24,9 +24,9 @@
         "tests/lib/auth.test.ts"
       ],
       "createdAt": "2025-09-18T12:17:12.116Z",
-      "updatedAt": "2025-09-19T01:03:20.029Z",
+      "updatedAt": "2025-09-19T01:08:24.837Z",
       "blockers": [],
-      "rejection": "1 test failing - @tests/lib/auth.test.ts :\n\n FAIL  tests/lib/auth.test.ts > lib/auth > handleAuthMessage > should return false if user is already authenticated\nAssertionError: expected \"ensureAccessTokenForUser\" to be called with arguments: [ '54321' ]\n\nReceived: \n\n\n\nNumber of calls: 0\n\n ❯ tests/lib/auth.test.ts:77:25\n     75|       const result = await auth.handleAuthMessage(mockBot, mockMsg)\n     76|       expect(result).toBe(false)\n     77|       expect(ensureSpy).toHaveBeenCalledWith(userId)\n       |                         ^\n     78|       expect(mockBot.sendMessage).not.toHaveBeenCalled()\n     79|     })"
+      "rejection": "1 test failing - @tests/lib/auth.test.ts . \nThere is a solution using: \n`      const mod = await import('./auth')\n      mod.ensureAccessTokenForUser(userId)\n`\nSo a dynamic import - but we shouldn't modify any project code unless it makes it work correctly. The code already works correctly, so either the mock should be improved or done in a different way.\nThe error is below:\n\n FAIL  tests/lib/auth.test.ts > lib/auth > handleAuthMessage > should return false if user is already authenticated\nAssertionError: expected \"ensureAccessTokenForUser\" to be called with arguments: [ '54321' ]\n\nReceived: \n\n\n\nNumber of calls: 0\n\n ❯ tests/lib/auth.test.ts:77:25\n     75|       const result = await auth.handleAuthMessage(mockBot, mockMsg)\n     76|       expect(result).toBe(false)\n     77|       expect(ensureSpy).toHaveBeenCalledWith(userId)\n       |                         ^\n     78|       expect(mockBot.sendMessage).not.toHaveBeenCalled()\n     79|     })"
     }
   ],
   "featureIdToDisplayIndex": {
