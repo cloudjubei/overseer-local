@@ -1,6 +1,6 @@
 {
   "id": "bcf7668d-58f6-4035-b695-0d1bcbe83aef",
-  "status": "=",
+  "status": "-",
   "title": "Ongoing Improvements",
   "description": "",
   "features": [
@@ -36,12 +36,22 @@
       "updatedAt": "2025-09-19T14:39:42.542Z",
       "blockers": [],
       "completedAt": "2025-09-19T14:39:42.542Z"
+    },
+    {
+      "id": "1d4e6fd4-794a-4f3f-9dc1-39aa1e57f80c",
+      "status": "-",
+      "title": "There should be a `/test-llm` command",
+      "description": "we need to have a `/test-llm` command for authed users. It just needs to take whatever input the user provides and pass it onto the 'ai/test' BE endpoint and return directly whatever the backend returns. just like the `/test` command - this doesn't go through the standard conversation flow",
+      "context": [],
+      "createdAt": "2025-09-19T15:47:29.689Z",
+      "updatedAt": "2025-09-19T15:47:29.689Z"
     }
   ],
   "featureIdToDisplayIndex": {
     "63d1fd97-2775-4404-be52-f193579bd689": 1,
     "fa10705f-a673-4649-ae33-853df72179b0": 2,
-    "00b11270-6e08-4fce-bdda-11030f802da9": 3
+    "00b11270-6e08-4fce-bdda-11030f802da9": 3,
+    "1d4e6fd4-794a-4f3f-9dc1-39aa1e57f80c": 4
   },
   "createdAt": "2025-09-18T12:16:23.163Z",
   "updatedAt": "2025-09-18T12:16:23.163Z"
