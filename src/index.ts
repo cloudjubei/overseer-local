@@ -14,6 +14,14 @@ import quickSuggestionAction from './actions/quickSuggestion'
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 
+bot.setMyCommands([
+  // { command: 'start', description: 'Start the bot' },
+  // { command: 'help', description: 'Show the help message' },
+  { command: 'q', description: 'Pick a suggestion from a list' },
+  { command: 't', description: 'Create a Macro Goal suggestion via AI (text)' },
+  { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
+], { scope: { type: 'all_private_chats' } });
+
 // Helper to start a backend conversation flow and process the initial response
 async function startBackendFlow(params: {
   userId: string
