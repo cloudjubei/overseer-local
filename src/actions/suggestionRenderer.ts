@@ -1,6 +1,7 @@
 import type TelegramBot from 'node-telegram-bot-api'
 import type { AiSuggestionsResultDto } from '../generated/backend/models/AiSuggestionsResultDto'
 import type { SuggestedGoalDto } from '../generated/backend/models/SuggestedGoalDto'
+import { saveSuggestionsForMessage } from './suggestionState'
 
 // Utilities
 function escapeHtml(s: string): string {
@@ -8,7 +9,7 @@ function escapeHtml(s: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/\"/g, '&quot;')
     .replace(/'/g, '&#39;')
 }
 
@@ -153,7 +154,11 @@ export async function renderAiSuggestionResult(
   payload: AiSuggestionsResultDto,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildAiSuggestionRender(payload)
-  return bot.sendMessage(chatId, text, options)
+  const sent = await bot.sendMessage(chatId, text, options)
+  // Store suggestions for callback handling
+  const suggestions = Array.isArray(payload?.suggestions) ? payload.suggestions : []
+  saveSuggestionsForMessage(chatId, sent.message_id, suggestions)
+  return sent
 }
 
 export async function renderParamSuggestions(
@@ -163,5 +168,8 @@ export async function renderParamSuggestions(
   header?: string,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildParamSuggestionRender(suggestions, header)
-  return bot.sendMessage(chatId, text, options)
+  const sent = await bot.sendMessage(chatId, text, options)
+  // Store suggestions for callback handling
+  saveSuggestionsForMessage(chatId, sent.message_id, suggestions)
+  return sent
 }
