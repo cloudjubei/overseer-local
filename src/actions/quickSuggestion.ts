@@ -1,6 +1,7 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { GoalsService } from 'src/generated/backend'
 import { ensureAccessTokenForUser, ensureBackendConfigured } from 'src/lib/auth'
+import { renderAiSuggestionResult } from './suggestionRenderer'
 
 export default async function quickSuggestionAction(
   bot: TelegramBot,
@@ -30,7 +31,8 @@ export default async function quickSuggestionAction(
       requestBody: { text: input, transcriptionConfidence: 1 },
     })
 
-    await bot.sendMessage(chat.id, JSON.stringify(response) || '(empty response)')
+    // Use the suggestion renderer to format and send the response nicely
+    await renderAiSuggestionResult(bot, chat.id, response)
   } catch (err: any) {
     const errMsg = err?.response?.data || err?.message || 'LLM test failed.'
     await bot.sendMessage(chat.id, typeof errMsg === 'string' ? errMsg : 'LLM test failed.')
