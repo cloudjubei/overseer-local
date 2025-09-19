@@ -1,0 +1,10 @@
+{
+  "id": "7f67e460-8b9a-4507-987f-818e89f7691d",
+  "status": "-",
+  "title": "AI suggestions",
+  "description": "The user has 2 paths to get suggestions for goals\n- hitting the command `/q` and providing free form text, the bot should send the text to the backend via GoalsService.goalsControllerAiSuggestions, then gets the response and renders it nicely\n- hitting the command `/s` and recording a sound memo, this then needs to be passed to the backend via GoalsService.goalsControllerAiSuggestionsFromAudio, then similarly to the above, we need to render the response correctly\n\nCurrently the first `/q` command is almost implemented - just the rendering part is missing - it needs to match the display design, colours and format of the provided `mock-interface.tsx` and `mock-interface.css`",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-19T16:59:15.760Z",
+  "updatedAt": "2025-09-19T16:59:15.760Z"
+}
