@@ -114,9 +114,9 @@ describe('lib/scheduler', () => {
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
         items: [
           {
-            id: 'ci1',
+            id: 'c1',
             start: checkInTime.toISOString(),
-            metadata: { message: 'Time for your check-in!' },
+            metadata: { message: 'Time for your check-in!', chatId: '001' },
           },
         ],
       } as any)
@@ -129,7 +129,7 @@ describe('lib/scheduler', () => {
     it('should skip check-ins that are in a different hour', async () => {
       const differentHour = new Date('2023-05-15T15:00:00Z')
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
-        items: [{ id: 'ci1', start: differentHour.toISOString(), metadata: { message: '...' } }],
+        items: [{ id: 'c1', start: differentHour.toISOString(), metadata: { message: '...', chatId: '0001' } }],
       } as any)
       await tickSchedulerOnce(now)
       expect(mockBot.sendMessage).not.toHaveBeenCalled()
@@ -138,8 +138,9 @@ describe('lib/scheduler', () => {
     it('should skip check-ins with invalid start dates or no message', async () => {
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
         items: [
-          { id: 'ci-invalid-date', start: 'not a date', metadata: { message: '...' } },
-          { id: 'ci-no-message', start: checkInTime.toISOString(), metadata: {} },
+          { id: 'ci-invalid-date', start: 'not a date', metadata: { message: '...', chatId: '0001' } },
+          { id: 'ci-no-message', start: checkInTime.toISOString(), metadata: { chatId: '0002' } },
+          { id: 'ci-no-chatId', start: checkInTime.toISOString(), metadata: { message: '...' } },
         ],
       } as any)
       await tickSchedulerOnce(now)
@@ -148,9 +149,9 @@ describe('lib/scheduler', () => {
 
     it('should not send the same message twice in the same hour', async () => {
       const checkIn = {
-        id: 'ci1',
+        id: 'c1',
         start: checkInTime.toISOString(),
-        metadata: { message: 'hello' },
+        metadata: { message: 'hello', chatId: '001' },
       }
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
         items: [checkIn],
@@ -162,9 +163,9 @@ describe('lib/scheduler', () => {
 
     it('should send the same message again in a new hour', async () => {
       const checkIn = {
-        id: 'ci1',
+        id: 'c1',
         start: checkInTime.toISOString(),
-        metadata: { message: 'hello' },
+        metadata: { message: 'hello', chatId: '001' },
       }
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
         items: [checkIn],
@@ -185,11 +186,11 @@ describe('lib/scheduler', () => {
     it('should handle pagination correctly', async () => {
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns)
         .mockResolvedValueOnce({
-          items: [{ id: 'ci1', start: checkInTime.toISOString(), metadata: { message: 'msg1' } }],
+          items: [{ id: 'c1', start: checkInTime.toISOString(), metadata: { message: 'msg1', chatId: '0001' } }],
           cursor: 'next',
         } as any)
         .mockResolvedValueOnce({
-          items: [{ id: 'ci2', start: checkInTime.toISOString(), metadata: { message: 'msg2' } }],
+          items: [{ id: 'c2', start: checkInTime.toISOString(), metadata: { message: 'msg2', chatId: '0002' } }],
         } as any)
 
       await tickSchedulerOnce(now)
@@ -218,8 +219,8 @@ describe('lib/scheduler', () => {
 
     it('should continue if sending a message fails', async () => {
       const checkIns = [
-        { id: 'ci1', start: checkInTime.toISOString(), metadata: { message: 'msg1' } },
-        { id: 'ci2', start: checkInTime.toISOString(), metadata: { message: 'msg2' } },
+        { id: 'c1', start: checkInTime.toISOString(), metadata: { message: 'msg1', chatId: '0001' } },
+        { id: 'c2', start: checkInTime.toISOString(), metadata: { message: 'msg2', chatId: '0002' } },
       ]
       vi.mocked(CheckInsService.checkInsControllerGetCheckIns).mockResolvedValue({
         items: checkIns,
@@ -234,11 +235,11 @@ describe('lib/scheduler', () => {
     })
 
     it('should continue with other users if one fails', async () => {
-      vi.mocked(getAllUserIds).mockReturnValue(['user1-fail', 'user2-ok'])
+      vi.mocked(getAllUserIds).mockReturnValue(['c1', 'c2'])
 
       vi.mocked(getSession).mockImplementation((userId) => {
-        if (userId === 'user1-fail') return { userId: 'user1-fail', accessToken: 'token1' }
-        if (userId === 'user2-ok') return { userId: 'user2-ok', accessToken: 'token2' }
+        if (userId === 'c1') return { userId: 'c1', accessToken: 'token1' }
+        if (userId === 'c2') return { userId: 'c2', accessToken: 'token2' }
         return undefined
       })
       let userAccessToken: string | undefined = undefined
@@ -247,11 +248,11 @@ describe('lib/scheduler', () => {
       })
       const checkInsApi = vi.mocked(CheckInsService.checkInsControllerGetCheckIns)
       checkInsApi.mockImplementation((_) => {
-        const session = getSession(userAccessToken === 'token1' ? 'user1-fail' : 'user2-ok')
-        if (session?.userId === 'user1-fail') throw new Error('API Down')
+        const session = getSession(userAccessToken === 'token1' ? 'c1' : 'c2')
+        if (session?.userId === 'c1') throw new Error('API Down')
         return {
           items: [
-            { id: 'ci-ok', start: now.toISOString(), metadata: { message: 'user2 message' } },
+            { id: 'ci-ok', start: now.toISOString(), metadata: { message: 'user2 message', chatId: '0002' } },
           ],
         } as any
       })
