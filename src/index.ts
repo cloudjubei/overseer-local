@@ -10,6 +10,11 @@ import { StartFlowDto } from './generated/backend/models/StartFlowDto'
 import testAction from './actions/test'
 import testLLMAction from './actions/testLLM'
 import quickSuggestionAction from './actions/quickSuggestion'
+import audioSuggestionAction from './actions/audioSuggestion'
+import { GoalsService } from './generated/backend/services/GoalsService'
+import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
+import { clearSuggestionsForMessage, getSuggestionsForMessage } from './actions/suggestionState'
+import { renderParamSuggestions } from './actions/suggestionRenderer'
 
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
@@ -139,6 +144,9 @@ bot.on('message', async (msg: Message) => {
     if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
+    if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
+      return
+    }
 
     const userId = String(from.id)
     const session = getSession(userId)
@@ -193,18 +201,160 @@ bot.on('message', async (msg: Message) => {
   }
 })
 
-// Callback query handler (minimal; conversation selections may be handled in future updates)
+function buildDifficultyKeyboard(category: string): TelegramBot.InlineKeyboardMarkup {
+  const rows: TelegramBot.InlineKeyboardButton[][] = []
+  const diffs: { key: string; label: string; emoji: string }[] = [
+    { key: 'EASY', label: 'Easy', emoji: '⭐' },
+    { key: 'MEDIUM', label: 'Medium', emoji: '⭐⭐' },
+    { key: 'HARD', label: 'Ambitious', emoji: '⭐⭐⭐' },
+  ]
+  diffs.forEach((d) => {
+    rows.push([
+      {
+        text: `${d.emoji} ${d.label}`,
+        callback_data: `q:diff:${category}:${d.key}`,
+      },
+    ])
+  })
+  return { inline_keyboard: rows }
+}
+
+// Callback query handler: process suggestion selections and create goals
 bot.on('callback_query', async (cb: CallbackQuery) => {
   try {
     const message = cb.message
-    if (!message?.chat?.id) return
+    const data = cb.data || ''
+    const chatId = message?.chat?.id
 
-    // For now, acknowledge callbacks to avoid client spinners
+    if (!message || !chatId) return
+
+    // Always ack to stop loading spinner
     try {
       await bot.answerCallbackQuery(cb.id)
     } catch {}
 
-    // Optionally parse and handle selection callbacks here in the future
+    // Handle /q param flow selections
+    if (data.startsWith('q:')) {
+      const userId = String(cb.from.id)
+
+      if (data.startsWith('q:cat:')) {
+        const category = data.split(':')[2]
+        // Ask for difficulty next
+        const prompt = '<b>How ambitious do you feel?</b>\n<i>Pick a difficulty to tailor the goal.</i>'
+        try {
+          await bot.editMessageReplyMarkup(
+            { inline_keyboard: [] },
+            { chat_id: chatId, message_id: message.message_id },
+          )
+        } catch {}
+        await bot.sendMessage(chatId, prompt, {
+          parse_mode: 'HTML',
+          reply_markup: buildDifficultyKeyboard(category),
+        })
+        return
+      }
+
+      if (data.startsWith('q:diff:')) {
+        const parts = data.split(':')
+        const category = parts[2]
+        const difficulty = parts[3]
+        try {
+          await ensureBackendConfigured()
+          ensureAccessTokenForUser(userId)
+
+          const suggestions = await GoalsService.goalsControllerParamSuggestions({
+            type: 'MACRO',
+            category: category as any,
+            difficulty: difficulty as any,
+          })
+
+          // Clear the difficulty keyboard to reduce clutter
+          try {
+            await bot.editMessageReplyMarkup(
+              { inline_keyboard: [] },
+              { chat_id: chatId, message_id: message.message_id },
+            )
+          } catch {}
+
+          await renderParamSuggestions(
+            bot,
+            chatId,
+            suggestions,
+            'Great! Here are some options:',
+          )
+        } catch (err: any) {
+          const errMsg = err?.response?.data || err?.message || 'Failed to get suggestions.'
+          await bot.sendMessage(
+            chatId,
+            typeof errMsg === 'string' ? errMsg : 'Failed to get suggestions.',
+          )
+        }
+        return
+      }
+    }
+
+    // Handle suggestion actions
+    if (data.startsWith('suggest:')) {
+      const userId = String(cb.from.id)
+
+      if (data.startsWith('suggest:choose:')) {
+        const idxStr = data.split(':')[2]
+        const idx = Number.parseInt(idxStr, 10)
+        if (!Number.isFinite(idx)) {
+          await bot.sendMessage(chatId, 'Invalid selection.')
+          return
+        }
+
+        const suggestions = getSuggestionsForMessage(chatId, message.message_id) || []
+        const chosen = suggestions[idx]
+        if (!chosen) {
+          await bot.sendMessage(chatId, 'That option has expired. Please request suggestions again.')
+          return
+        }
+
+        try {
+          await ensureBackendConfigured()
+          ensureAccessTokenForUser(userId)
+
+          const body: CreateGoalDto = {
+            type: chosen.type as any,
+            category: chosen.category as any,
+            difficulty: chosen.difficulty as any,
+            text: chosen.text,
+          }
+
+          const created = await GoalsService.goalsControllerCreate({ requestBody: body })
+
+          // Remove keyboard to prevent duplicate submissions
+          try {
+            await bot.editMessageReplyMarkup(
+              { inline_keyboard: [] },
+              { chat_id: chatId, message_id: message.message_id },
+            )
+          } catch {}
+
+          clearSuggestionsForMessage(chatId, message.message_id)
+
+          const confirm = `✅ Goal created: ${created.text}`
+          await bot.sendMessage(chatId, confirm)
+        } catch (err: any) {
+          const errMsg = err?.response?.data || err?.message || 'Failed to create goal.'
+          await bot.sendMessage(chatId, typeof errMsg === 'string' ? errMsg : 'Failed to create goal.')
+        }
+        return
+      }
+
+      if (data === 'suggest:refine') {
+        await bot.sendMessage(chatId, 'Tell me how you want to refine this goal.')
+        return
+      }
+      if (data === 'suggest:select') {
+        await bot.sendMessage(chatId, 'Use /q to pick a category and difficulty.')
+        return
+      }
+    }
+
+    // Other callback types can be handled here as needed
   } catch (err) {
     if (cb.id) {
       try {

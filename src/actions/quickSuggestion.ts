@@ -1,39 +1,50 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { GoalsService } from 'src/generated/backend'
-import { ensureAccessTokenForUser, ensureBackendConfigured } from 'src/lib/auth'
+
+// This action now implements the /q param-based suggestion picker.
+// Flow:
+//  - /q -> present GoalCategory options inline
+//  - user picks category -> callback handled in index.ts (q:cat:<CATEGORY>)
+//  - then difficulty selection -> callback handled in index.ts (q:diff:<CATEGORY>:<DIFFICULTY>)
+//  - backend suggestions are fetched and rendered via suggestionRenderer.renderParamSuggestions
+
+function buildCategoryKeyboard(): TelegramBot.InlineKeyboardMarkup {
+  const rows: TelegramBot.InlineKeyboardButton[][] = []
+  const cats: { key: string; label: string; emoji: string }[] = [
+    { key: 'FITNESS', label: 'Fitness', emoji: '🏃' },
+    { key: 'SLEEP', label: 'Sleep', emoji: '😴' },
+    { key: 'FOCUS', label: 'Focus', emoji: '🎯' },
+    { key: 'STRESS', label: 'Stress', emoji: '🧘' },
+    { key: 'OTHER', label: 'Other', emoji: '✨' },
+  ]
+
+  // Arrange 2 per row for nicer layout
+  for (let i = 0; i < cats.length; i += 2) {
+    const a = cats[i]
+    const b = cats[i + 1]
+    const row: TelegramBot.InlineKeyboardButton[] = [
+      { text: `${a.emoji} ${a.label}`, callback_data: `q:cat:${a.key}` },
+    ]
+    if (b) row.push({ text: `${b.emoji} ${b.label}`, callback_data: `q:cat:${b.key}` })
+    rows.push(row)
+  }
+
+  return { inline_keyboard: rows }
+}
 
 export default async function quickSuggestionAction(
   bot: TelegramBot,
   chat: TelegramBot.Chat,
-  from: TelegramBot.User,
+  _from: TelegramBot.User,
   rawText: string,
-  msg: Message,
+  _msg: Message,
 ) {
   const match = rawText.match(/^\/q(?:@\w+)?(?:\s+([\s\S]*))?$/i)
   if (!match) {
     return false
   }
 
-  const input = (match[1] || '').trim()
-  if (!input) {
-    await bot.sendMessage(chat.id, 'Please say what do you need suggestions for?')
-    return
-  }
-
-  const userId = String(from.id)
-
-  try {
-    await ensureBackendConfigured()
-    ensureAccessTokenForUser(userId)
-
-    const response = await GoalsService.goalsControllerAiSuggestions({
-      requestBody: { text: input, transcriptionConfidence: 1 },
-    })
-
-    await bot.sendMessage(chat.id, JSON.stringify(response) || '(empty response)')
-  } catch (err: any) {
-    const errMsg = err?.response?.data || err?.message || 'LLM test failed.'
-    await bot.sendMessage(chat.id, typeof errMsg === 'string' ? errMsg : 'LLM test failed.')
-  }
+  // For /q we ignore any trailing free text and guide the user through param picks
+  const header = '<b>What area do you want to focus on?</b>\n<i>Pick a category to get tailored goals.</i>'
+  await bot.sendMessage(chat.id, header, { parse_mode: 'HTML', reply_markup: buildCategoryKeyboard() })
   return true
 }

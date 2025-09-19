@@ -1,31 +1,33 @@
 {
   "id": "7f67e460-8b9a-4507-987f-818e89f7691d",
-  "status": "-",
+  "status": "+",
   "title": "AI suggestions",
   "description": "The user has 3 paths to get suggestions for goals\n- hitting the command `/q` and getting first the choice to pick from GoalCategory types, then from GoalDifficulty. After which the backend's 'goalsControllerParamSuggestions' needs to be called (for now the type needs to be set to MACRO) to return a list of suggestions to display to the user.\n- hitting the command `/t` and providing free form text, the bot should send the text to the backend via GoalsService.goalsControllerAiSuggestions, then gets the response and renders it nicely\n- hitting the command `/s` and recording a sound memo, this then needs to be passed to the backend via GoalsService.goalsControllerAiSuggestionsFromAudio, then similarly to the above, we need to render the response correctly\n\nCurrently the first `/q` command is almost implemented - just the rendering part is missing - it needs to match the display design, colours and format of the provided `mock-interface.tsx` and `mock-interface.css`",
   "features": [
     {
       "id": "503e5ada-9fd6-4765-9776-442eb55f3615",
-      "status": "-",
+      "status": "+",
       "title": "Create Suggestion Renderer Module",
       "description": "Create a new file at `src/actions/suggestionRenderer.ts`. This module will be responsible for formatting the AI suggestion response from the backend into a user-friendly HTML message with an `InlineKeyboardMarkup` for Telegram, based on the design in `mock-interface.tsx`.",
       "context": [],
       "createdAt": "2025-09-19T17:01:15.286Z",
-      "updatedAt": "2025-09-19T17:01:15.286Z"
+      "updatedAt": "2025-09-19T17:18:37.189Z",
+      "completedAt": "2025-09-19T17:18:37.189Z"
     },
     {
       "id": "be1f7936-578d-400c-9890-5370875beaa1",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Suggestion Renderer with /t Command",
       "description": "Modify `src/actions/quickSuggestion.ts` to import and use the new `suggestionRenderer`. Instead of sending the raw JSON response, it should now send the formatted HTML message and inline keyboard returned by the renderer.",
       "context": [],
       "createdAt": "2025-09-19T17:01:23.331Z",
-      "updatedAt": "2025-09-19T17:10:58.784Z",
-      "blockers": []
+      "updatedAt": "2025-09-19T17:19:32.844Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T17:19:32.844Z"
     },
     {
       "id": "3ce0df43-fc97-41ed-a9c5-01d6c9ae0301",
-      "status": "-",
+      "status": "+",
       "title": "Implement Callback Handler for Suggestion Buttons",
       "description": "Create a callback query handler to process user selections from the suggestion inline keyboard. The handler should be registered in @src/index.ts . When a button is clicked, it should parse the callback data and call the method `goalsControllerCreate` in @src/generated/backend/services/GoalsService.ts .",
       "context": [
@@ -33,47 +35,52 @@
         "src/index.ts"
       ],
       "createdAt": "2025-09-19T17:01:31.312Z",
-      "updatedAt": "2025-09-19T17:08:20.834Z",
-      "blockers": []
+      "updatedAt": "2025-09-19T17:24:56.945Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T17:24:56.945Z"
     },
     {
       "id": "0d9bd5fe-0494-4082-b3c5-02afb26c2ab6",
-      "status": "-",
+      "status": "+",
       "title": "Implement /s Command for Audio Suggestions",
       "description": "Create a new action file `src/actions/audioSuggestion.ts` to handle the `/s` command. This action should register a listener for the `/s` command in `index.ts`. When a user sends `/s`, the bot should reply with a message prompting them to record and send a voice memo for goal suggestions.",
       "context": [],
       "createdAt": "2025-09-19T17:01:36.984Z",
-      "updatedAt": "2025-09-19T17:01:36.984Z"
+      "updatedAt": "2025-09-19T17:31:57.692Z",
+      "completedAt": "2025-09-19T17:31:57.692Z"
     },
     {
       "id": "0e4a1179-cd9a-42f9-8837-5a300e5efa02",
-      "status": "-",
+      "status": "+",
       "title": "Process and Submit Voice Memo for Suggestions",
       "description": "In `src/actions/audioSuggestion.ts`, add logic to handle incoming voice messages. The handler should download the audio file, and then call `GoalsService.goalsControllerAiSuggestionsFromAudio`, sending the audio file as a blob or buffer to the backend.",
       "context": [],
       "createdAt": "2025-09-19T17:01:42.952Z",
-      "updatedAt": "2025-09-19T17:01:42.952Z"
+      "updatedAt": "2025-09-19T17:33:10.871Z",
+      "completedAt": "2025-09-19T17:33:10.871Z"
     },
     {
       "id": "282c61d7-3075-4f23-99e7-69bb84593a22",
-      "status": "-",
+      "status": "+",
       "title": "Display Suggestions for Audio Input",
       "description": "In `src/actions/audioSuggestion.ts`, after receiving the response from `GoalsService.goalsControllerAiSuggestionsFromAudio`, use the `suggestionRenderer` to format the suggestions and send them to the user as a message with an inline keyboard.",
       "context": [],
       "createdAt": "2025-09-19T17:01:50.110Z",
-      "updatedAt": "2025-09-19T17:01:50.110Z"
+      "updatedAt": "2025-09-19T17:33:36.581Z",
+      "completedAt": "2025-09-19T17:33:36.581Z"
     },
     {
       "id": "fc21862b-b762-498d-8c0f-f19fadfef4df",
-      "status": "-",
+      "status": "+",
       "title": "Integrate suggestion renderer with the `\\q` command",
       "description": "First create ui to allow a user to choose from the different required enum options:\n1st GoalCategory, 2nd GoalDifficulty .\nAfter the choice, the backend is called via @src/generated/backend/services/GoalsService.ts and the method `goalsControllerParamSuggestions` (the type needs to be set to MACRO for now) and the user should be shown the suggestions via the new Suggestion Renderer.",
       "context": [
         "src/generated/backend/services/GoalsService.ts"
       ],
       "createdAt": "2025-09-19T17:13:09.079Z",
-      "updatedAt": "2025-09-19T17:13:26.165Z",
-      "blockers": []
+      "updatedAt": "2025-09-19T17:29:55.058Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T17:29:55.058Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -86,5 +93,6 @@
     "282c61d7-3075-4f23-99e7-69bb84593a22": 7
   },
   "createdAt": "2025-09-19T16:59:15.760Z",
-  "updatedAt": "2025-09-19T17:10:41.745Z"
+  "updatedAt": "2025-09-19T17:10:41.745Z",
+  "completedAt": "2025-09-19T17:33:36.581Z"
 }
