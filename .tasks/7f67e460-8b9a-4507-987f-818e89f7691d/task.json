@@ -68,15 +68,16 @@
     },
     {
       "id": "fc21862b-b762-498d-8c0f-f19fadfef4df",
-      "status": "-",
+      "status": "+",
       "title": "Integrate suggestion renderer with the `\\q` command",
       "description": "First create ui to allow a user to choose from the different required enum options:\n1st GoalCategory, 2nd GoalDifficulty .\nAfter the choice, the backend is called via @src/generated/backend/services/GoalsService.ts and the method `goalsControllerParamSuggestions` (the type needs to be set to MACRO for now) and the user should be shown the suggestions via the new Suggestion Renderer.",
       "context": [
         "src/generated/backend/services/GoalsService.ts"
       ],
       "createdAt": "2025-09-19T17:13:09.079Z",
-      "updatedAt": "2025-09-19T17:13:26.165Z",
-      "blockers": []
+      "updatedAt": "2025-09-19T17:29:55.058Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T17:29:55.058Z"
     }
   ],
   "featureIdToDisplayIndex": {
