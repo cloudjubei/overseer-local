@@ -208,5 +208,6 @@ export function shutdownScheduler() {
     scheduledTask.stop()
     scheduledTask = null
   }
+  sentThisHour.clear()
   botRef = null
 }

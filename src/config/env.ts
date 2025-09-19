@@ -2,7 +2,7 @@
 // Uses dotenv to load variables from .env files
 // Ensure to install runtime dependency: npm i dotenv
 
-import dotenv from 'dotenv'
+import * as dotenv from 'dotenv'
 
 // Load .env.local first (optional overrides), then .env
 // This allows developers to have local overrides without changing the shared .env.example

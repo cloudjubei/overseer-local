@@ -8,6 +8,7 @@ vi.mock('../../src/config/env', () => ({ config: { timezone: 'UTC' } }));
 vi.mock('../../src/lib/sessionStore');
 vi.mock('../../src/lib/backendClient');
 vi.mock('../../src/generated/backend');
+vi.mock('../../src/lib/backendClient');
 
 import {
   initScheduler,
@@ -19,6 +20,7 @@ import {
 } from '../../src/lib/scheduler';
 import { getAllUserIds, getSession } from '../../src/lib/sessionStore';
 import { CheckInsService } from '../../src/generated/backend';
+import { configureBackendClient } from '../../src/lib/backendClient';
 
 describe('lib/scheduler', () => {
   const mockBot = { sendMessage: vi.fn() } as unknown as TelegramBot;
@@ -202,10 +204,13 @@ describe('lib/scheduler', () => {
           if (userId === 'user2-ok') return { userId: 'user2-ok', accessToken: 'token2' };
           return undefined;
         });
-
+        let userAccessToken : string | undefined = undefined
+        vi.mocked(configureBackendClient).mockImplementation((tokens) => {
+          userAccessToken = tokens?.accessToken
+        });
         const checkInsApi = vi.mocked(CheckInsService.checkInsControllerGetCheckIns);
-        checkInsApi.mockImplementation(async (args: any) => {
-            const session = getSession(args.accessToken === 'token1' ? 'user1-fail': 'user2-ok');
+        checkInsApi.mockImplementation((_) => {
+            const session = getSession(userAccessToken === 'token1' ? 'user1-fail': 'user2-ok');
             if(session?.userId === 'user1-fail') throw new Error('API Down');
             return { items: [{ id: 'ci-ok', start: now.toISOString(), metadata: { message: 'user2 message' } }] } as any;
         });
