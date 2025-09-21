@@ -1,0 +1,79 @@
+{
+  "id": "38830d31-c031-43b1-bdf5-8c9c9d1d0a83",
+  "status": "+",
+  "title": "Code projects need to be more clever in terms of dependency resolution, structure, architecture and cleanliness",
+  "description": "There are a few issues that need to be resolved under this story:\n1) a new package needs to be added, but the agents don't know about it (what it does and what the interfaces are). In fact even if there already is a package, its interfaces are not known and the purpose of the package isn't obvious. Therefore there must be a scheme, probably creating a file called PACKAGES.md - that will keep up to date information about what each package does and what are the most important interfaces.\n2) There's architecture and patterns for every project that are established. Even for this project these are not really carried out by an agent, cos it's difficult to infer this information. For instance how managers are created in this project - i.e. they get initialised in src/managers.js, they are created in their folder like src/stories/StoriesManager.js , they have keys for IPC defined in src/ipcHandlersKeys.js and they expose an API in src/preload.js, which the renderer side consumes for StoriesManager for instance in  src/renderer/services/storiesService.ts and always also updates src/types/external.d.ts .\nSo there's a lot of information just here, for this 1 pattern - this needs to be captured for this project and a way of capturing such patterns and then passing them onto an agent must be written down.\n3) docs/FILE_ORGANISATION.md is meant to serve as an overview of the app, but still it doesn't capture many intricacies. For instance it doesn't explain how this project uses thefactory-tools to run agents, and how thefactory-tools and this project both use thefactory-db to store document data. There probably needs to be a document ARCHITECTURE.md that describes these. There also needs to be a good strategy in terms of how/when this should be injected into the prompt for agents. Currently the main prompt is created in the local project 'thefactory-tools' - in the file 'src/orchestrator.ts' and the function 'constructSystemPrompt'.\n\n4) Similarly to the architecture above, we have some files under docs/ux, docs/styleguide and docs/design - but there's so many of them that we cannot easily inject them to the agent prompt (they would also consume a lot of tokens if we always supply them). We must have a strategy for cleverly mentioning/linking them inside at least docs/FILE_ORGANISATION.md so that every agent that produces UI components would consult them. In fact there should be a small GO TO ui doc that explains the overall rules to follow and if there's more details an agent would need, they could read some component/pattern specific docs.",
+  "features": [
+    {
+      "id": "68c1c5f0-de5d-4975-bcaa-c6a8acb9c972",
+      "status": "+",
+      "title": "Create `docs/PACKAGES.md` to document project packages",
+      "description": "Create a new file `docs/PACKAGES.md`. This file will serve as a central registry for all internal and external packages used in the project. For each package, it should describe its purpose and main interfaces. To start, add an entry for the local `factory-ts` package, explaining its role in agent orchestration.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T14:25:07.000Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
+    },
+    {
+      "id": "3d7afe9b-18e4-4e12-9153-8c9eb5105ebc",
+      "status": "+",
+      "title": "Document the 'Manager' architectural pattern in `docs/PATTERNS.md`",
+      "description": "Create a new file `docs/PATTERNS.md`. In this file, document the \"Manager\" pattern used for creating main-process services. The documentation should detail the full lifecycle and integration points of a manager, including:\n1. Location of manager source files (e.g., `src/stories/StoriesManager.js`).\n2. Initialization in `src/managers.js`.\n3. Definition of IPC keys in `src/ipcHandlersKeys.js`.\n4. Exposure to the renderer via `src/preload.js`.\n5. Consumption on the renderer side (e.g., `src/renderer/services/storiesService.ts`).\n6. Associated type definitions in `src/types/external.d.ts`.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T20:18:27.576Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
+    },
+    {
+      "id": "6468048f-5fb3-4a0a-bb9b-84d450e778eb",
+      "status": "+",
+      "title": "Create `docs/ARCHITECTURE.md` for high-level architecture",
+      "description": "Create a new file `docs/ARCHITECTURE.md`. This document should provide a high-level overview of the project's architecture. It needs to explain the relationship and data flow between the main application, `thefactory-tools`, and `thefactory-db`. Specifically, describe how `thefactory-tools` is used to run agents within the project and how both systems utilize `thefactory-db` for data storage.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T15:38:06.503Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
+    },
+    {
+      "id": "8132a2b7-6d5d-4f33-a314-f8b445fae5ef",
+      "status": "+",
+      "title": "Document a strategy for injecting context into agent prompts",
+      "description": "Add a new section called \"Agent Prompting Strategy\" to `docs/ARCHITECTURE.md`. This section should outline a strategy for how and when to inject architectural and pattern documentation into agent prompts. It should reference the `constructSystemPrompt` function in `thefactory-tools/src/orchestrator.ts` as the current implementation point and suggest how it could be modified to include context from `ARCHITECTURE.md`, `PATTERNS.md`, and other relevant documents without overloading the context window. The goal is to make agents aware of the project's structure and conventions.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T13:40:33.434Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
+    },
+    {
+      "id": "4e603939-15a8-49bf-aa53-5240a849cd7a",
+      "status": "+",
+      "title": "Create a central UI development guide at `docs/ui/README.md`",
+      "description": "Create a new file `docs/ui/README.md`. This file will act as the primary guide for any agent or developer working on UI components. It should summarize the core principles from the existing documentation in `docs/ux`, `docs/styleguide`, and `docs/design`. It must also provide links to these more specific documents for developers who need more detail on a particular component or pattern. This consolidates the entry point for UI-related work.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T17:30:06.216Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
+    },
+    {
+      "id": "4c7d8e3f-7969-46b8-8605-3e9c46eb47c6",
+      "status": "+",
+      "title": "Update `docs/FILE_ORGANISATION.md` with links to new architecture documents",
+      "description": "Modify `docs/FILE_ORGANISATION.md` to make the new documentation discoverable. Add references and links to the newly created files: `docs/ARCHITECTURE.md`, `docs/PATTERNS.md`, `docs/PACKAGES.md`, and `docs/ui/README.md`. Place these links in a relevant section, such as under \"Where to Learn More\" or by updating the \"docs/\" description, to ensure they are easily found by developers and agents.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.976Z",
+      "completedAt": "2025-09-15T18:44:40.346Z",
+      "updatedAt": "2025-09-16T13:05:37.976Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "68c1c5f0-de5d-4975-bcaa-c6a8acb9c972": 1,
+    "3d7afe9b-18e4-4e12-9153-8c9eb5105ebc": 2,
+    "6468048f-5fb3-4a0a-bb9b-84d450e778eb": 3,
+    "8132a2b7-6d5d-4f33-a314-f8b445fae5ef": 4,
+    "4e603939-15a8-49bf-aa53-5240a849cd7a": 5,
+    "4c7d8e3f-7969-46b8-8605-3e9c46eb47c6": 6
+  },
+  "createdAt": "2025-09-16T13:05:37.976Z",
+  "completedAt": "2025-09-15T20:18:27.576Z",
+  "updatedAt": "2025-09-16T13:05:37.976Z"
+}

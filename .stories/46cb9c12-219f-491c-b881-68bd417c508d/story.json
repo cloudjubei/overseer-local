@@ -1,0 +1,72 @@
+{
+  "id": "46cb9c12-219f-491c-b881-68bd417c508d",
+  "status": "+",
+  "title": "Store app usage user preferences",
+  "description": "Following setting storing, we want to store the last project active, the configuration active for stories (i.e. list vs board), if it was list - then which sorting was used.\nEssentially we want the user to resume the app in exactly the same state as they left it.",
+  "features": [
+    {
+      "id": "d877642c-9e5d-44ca-b100-dbe5a7ad119c",
+      "status": "+",
+      "title": "Store and restore last active project",
+      "description": "Integrate user preferences into the projects system to automatically store the last active project when it changes and restore it on app startup. Update the projects service and relevant components to persist and load the last active project preference.",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/screens/SettingsView.tsx",
+        "src/preferences/userPreferences.js",
+        "src/types/userPreferences.ts",
+        "src/preferences/manager.js",
+        "src/managers.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.977Z",
+      "completedAt": "2025-09-14T04:36:58.472Z",
+      "updatedAt": "2025-09-16T13:05:37.977Z"
+    },
+    {
+      "id": "632d7c0e-6caa-4f11-85a1-73cc4ad378bd",
+      "status": "+",
+      "title": "Store and restore story view configuration",
+      "description": "Integrate user preferences into the stories view system to store whether the user was in list or board view mode. Update @StoriesView.tsx and related components to persist the current view mode and restore it when navigating back to stories or restarting the app.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/screens/StoriesView.tsx",
+        "src/renderer/stories/BoardView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.977Z",
+      "completedAt": "2025-09-14T05:48:56.430Z",
+      "updatedAt": "2025-09-16T13:05:37.977Z"
+    },
+    {
+      "id": "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1",
+      "status": "+",
+      "title": "StoriesListView has 2 TODOs",
+      "description": "make useAppSettings easier to use, by adding top level settings helper functions",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/hooks/useAppSettings.ts",
+        "src/settings/manager.js",
+        "src/settings/appSettings.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.977Z",
+      "completedAt": "2025-09-14T06:31:39.771Z",
+      "updatedAt": "2025-09-16T13:05:37.977Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "4aa629d1-91be-4c45-82cc-b210dacab4f4": 1,
+    "d877642c-9e5d-44ca-b100-dbe5a7ad119c": 2,
+    "632d7c0e-6caa-4f11-85a1-73cc4ad378bd": 3,
+    "3f5d91b8-ec5c-4532-9aed-56ff5dad83b1": 4
+  },
+  "createdAt": "2025-09-16T13:05:37.977Z",
+  "completedAt": "2025-09-14T06:31:39.771Z",
+  "updatedAt": "2025-09-16T13:05:37.977Z"
+}

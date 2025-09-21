@@ -132,12 +132,12 @@
 }
 
 /* Generic form layouts */
-.task-form,
+.story-form,
 .feature-form {
   display: grid;
   gap: 12px;
 }
-.task-form .form-row,
+.story-form .form-row,
 .feature-form .form-group {
   display: grid;
   gap: 6px;
@@ -150,16 +150,16 @@
   border-top: 1px solid var(--border-subtle);
   margin-top: 4px;
 }
-.task-form label,
+.story-form label,
 .feature-form label {
   font-size: var(--fs-xs, 12px);
   color: var(--text-secondary);
 }
-.task-form input[type='number']::-webkit-inner-spin-button,
-.task-form input[type='number']::-webkit-outer-spin-button {
+.story-form input[type='number']::-webkit-inner-spin-button,
+.story-form input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-.task-form input[type='number'] {
+.story-form input[type='number'] {
   -moz-appearance: textfield;
 }

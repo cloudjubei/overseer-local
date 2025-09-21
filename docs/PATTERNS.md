@@ -2,40 +2,40 @@ PATTERNS: MANAGER (MAIN-PROCESS SERVICE)
 
 Overview
 
-- Managers are main-process services responsible for a domain (tasks, projects, files, etc.).
+- Managers are main-process services responsible for a domain (stories, projects, files, etc.).
 - They encapsulate IPC handlers, coordinate storage and validation, and broadcast updates to the renderer.
 - Each manager exposes a typed, safe API to the renderer via preload.
 
 Core Anatomy
 
 - Location: src/<domain>/<Domain>Manager.js
-  - Example: src/tasks/TasksManager.js
+  - Example: src/stories/StoriesManager.js
   - Managers may depend on other managers (dependency injection via constructor).
-  - Supporting files (storage, validator, etc.) live in the same domain folder (e.g., src/tasks/TasksStorage.js).
+  - Supporting files (storage, validator, etc.) live in the same domain folder (e.g., src/stories/StoriesStorage.js).
 
 - Initialization: src/managers.js
-  - Creates one instance per manager and stores them as module-level exports (e.g., tasksManager).
+  - Creates one instance per manager and stores them as module-level exports (e.g., storiesManager).
   - initManagers(projectRoot, mainWindow) constructs all managers, wires dependencies, and awaits init() in order.
   - stopManagers() gracefully stops watchers/listeners across all managers.
 
 - IPC Keys: src/ipcHandlersKeys.js
   - Single source of truth for all IPC channels (invoke and subscribe).
   - Keys are namespaced per domain, e.g.:
-    - Tasks: tasks:subscribe, tasks:list, tasks:get, tasks:create, tasks:update, tasks:delete, tasks-feature:* ...
+    - Stories: stories:subscribe, stories:list, stories:get, stories:create, stories:update, stories:delete, stories-feature:* ...
     - Projects: projects:* ; Files: files:* ; etc.
   - Managers import these keys and register ipcMain.handle for request/response channels.
 
 - Preload Exposure: src/preload.js
   - Creates per-domain API objects that call ipcRenderer.invoke on request channels and set up ipcRenderer.on for subscriptions.
-  - Uses contextBridge.exposeInMainWorld('<domain>Service', API) to expose to the renderer (e.g., 'tasksService').
+  - Uses contextBridge.exposeInMainWorld('<domain>Service', API) to expose to the renderer (e.g., 'storiesService').
 
 - Renderer Consumption: src/renderer/services/<domain>Service.ts
   - Declares the typed interface for the service and exports an implementation bound to window.<domain>Service.
-  - Example: src/renderer/services/tasksService.ts exports tasksService using ...window.tasksService.
+  - Example: src/renderer/services/storiesService.ts exports storiesService using ...window.storiesService.
 
 - Types: src/types/external.d.ts
   - Extends the Window interface with all exposed services so TypeScript code in the renderer can use them safely.
-  - Example: adds window.tasksService, window.projectsService, etc.
+  - Example: adds window.storiesService, window.projectsService, etc.
 
 Lifecycle (End-to-End)
 
@@ -52,9 +52,9 @@ Lifecycle (End-to-End)
   - Set up any file/system watchers.
 - stopWatching() should clean up watchers/subscriptions.
 - For subscriptions, broadcast updates via mainWindow.webContents.send(<SUBSCRIBE_KEY>, payload).
-- Example (Tasks): src/tasks/TasksManager.js
-  - Uses ipcMain.handle to register handlers for TASKS_LIST, TASKS_GET, TASKS_CREATE, etc.
-  - Delegates storage to TasksStorage (constructed with window to send updates).
+- Example (Stories): src/stories/StoriesManager.js
+  - Uses ipcMain.handle to register handlers for STORIES_LIST, STORIES_GET, STORIES_CREATE, etc.
+  - Delegates storage to StoriesStorage (constructed with window to send updates).
 
 3) Wire into the app
 - Update src/managers.js
@@ -78,36 +78,36 @@ Lifecycle (End-to-End)
 6) Global typing
 - Update src/types/external.d.ts to add window.<domain>Service to the global Window interface.
 
-Concrete Example: Tasks
+Concrete Example: Stories
 
-- Manager: src/tasks/TasksManager.js
-  - Registers handlers using IPC_HANDLER_KEYS.TASKS_LIST, TASKS_GET, TASKS_CREATE, TASKS_UPDATE, TASKS_DELETE, TASKS_FEATURE_*.
-  - Delegates persistence to src/tasks/TasksStorage.js and emits updates to the renderer via the main window.
+- Manager: src/stories/StoriesManager.js
+  - Registers handlers using IPC_HANDLER_KEYS.STORIES_LIST, STORIES_GET, STORIES_CREATE, STORIES_UPDATE, STORIES_DELETE, STORIES_FEATURE_*.
+  - Delegates persistence to src/stories/StoriesStorage.js and emits updates to the renderer via the main window.
 
 - Initialization: src/managers.js
-  - tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
-  - await tasksManager.init()
+  - storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
+  - await storiesManager.init()
 
 - IPC Keys: src/ipcHandlersKeys.js
-  - TASKS_SUBSCRIBE, TASKS_LIST, TASKS_GET, TASKS_CREATE, TASKS_UPDATE, TASKS_DELETE, TASKS_FEATURE_GET/ADD/UPDATE/DELETE, TASKS_FEATURES_REORDER.
+  - STORIES_SUBSCRIBE, STORIES_LIST, STORIES_GET, STORIES_CREATE, STORIES_UPDATE, STORIES_DELETE, STORIES_FEATURE_GET/ADD/UPDATE/DELETE, STORIES_FEATURES_REORDER.
 
 - Preload: src/preload.js
-  - TASKS_API calls ipcRenderer.invoke for list/get/create/update/delete.
-  - subscribe(callback) binds to IPC_HANDLER_KEYS.TASKS_SUBSCRIBE and returns unsubscribe.
-  - Exposed as window.tasksService.
+  - STORIES_API calls ipcRenderer.invoke for list/get/create/update/delete.
+  - subscribe(callback) binds to IPC_HANDLER_KEYS.STORIES_SUBSCRIBE and returns unsubscribe.
+  - Exposed as window.storiesService.
 
-- Renderer: src/renderer/services/tasksService.ts
-  - Exports tasksService and the TasksService interface used throughout the UI.
+- Renderer: src/renderer/services/storiesService.ts
+  - Exports storiesService and the StoriesService interface used throughout the UI.
 
 - Types: src/types/external.d.ts
-  - Declares tasksService on window, alongside other services.
+  - Declares storiesService on window, alongside other services.
 
 Conventions and Guidelines
 
 - Naming
   - Manager classes end with Manager (e.g., FilesManager, ProjectsManager).
   - Renderer services end with Service and map 1:1 to a main-process manager API.
-  - IPC keys are lowercase, hyphen-separated segments with domain prefix (e.g., 'tasks:list', 'files:read-directory').
+  - IPC keys are lowercase, hyphen-separated segments with domain prefix (e.g., 'stories:list', 'files:read-directory').
 
 - Error handling
   - Wrap ipcMain handlers in try/catch and return structured errors { ok: false, error } to the renderer.
@@ -117,7 +117,7 @@ Conventions and Guidelines
   - Unsubscribe by removing the listener returned from subscribe().
 
 - Dependencies
-  - Pass other managers as constructor dependencies when cross-domain coordination is required (e.g., TasksManager uses ProjectsManager).
+  - Pass other managers as constructor dependencies when cross-domain coordination is required (e.g., StoriesManager uses ProjectsManager).
 
 - Testing
   - In devtools, you can call window.<domain>Service.* to verify endpoints.
@@ -126,4 +126,4 @@ Conventions and Guidelines
 Where to read more
 
 - High-level map: docs/FILE_ORGANISATION.md
-- Look at existing managers for reference: src/tasks, src/files, src/projects, src/chat, src/db, etc.
+- Look at existing managers for reference: src/stories, src/files, src/projects, src/chat, src/db, etc.

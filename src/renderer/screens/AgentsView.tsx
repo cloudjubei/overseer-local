@@ -165,7 +165,7 @@ export default function AgentsView() {
                 <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
-                    <th className="text-left px-3 py-2">Task</th>
+                    <th className="text-left px-3 py-2">Story</th>
                     <th className="text-left px-3 py-2">Model</th>
                     <th className="text-left px-3 py-2">Features</th>
                     <th className="text-left px-3 py-2">Cost</th>
@@ -208,7 +208,7 @@ export default function AgentsView() {
                 <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
-                    <th className="text-left px-3 py-2">Task</th>
+                    <th className="text-left px-3 py-2">Story</th>
                     <th className="text-left px-3 py-2">Status</th>
                     <th className="text-left px-3 py-2">Model</th>
                     <th className="text-left px-3 py-2">Features</th>
@@ -249,7 +249,7 @@ export default function AgentsView() {
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
                 <div className="font-semibold text-sm truncate">
-                  Run #{selectedRun.id.slice(0, 8)} {selectedRun.taskId ?? 'Task'}
+                  Run #{selectedRun.id.slice(0, 8)} {selectedRun.storyId ?? 'Story'}
                 </div>
                 <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
                   <ModelChip

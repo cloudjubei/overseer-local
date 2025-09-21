@@ -1,10 +1,10 @@
 # overseer-local
 
-Overseer - Local App used for task and project orchestration [TheFactory-Child]
+Overseer - Local App used for story and project orchestration [TheFactory-Child]
 
 ## Overview
 
-This is an Electron desktop application built with React and TypeScript using the electron-vite toolchain. It serves as a local app for task and project orchestration.
+This is an Electron desktop application built with React and TypeScript using the electron-vite toolchain. It serves as a local app for story and project orchestration.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ This is an Electron desktop application built with React and TypeScript using th
 
 - `src/`: Main application source code (Electron, React, TypeScript).
 - `docs/`: Documentation files.
-- `.tasks/`: Task-related metadata and tests.
+- `.stories/`: Story-related metadata and tests.
 - `scripts/`: Automation scripts.
 
 For more details on file organization, see `docs/FILE_ORGANISATION.md`.

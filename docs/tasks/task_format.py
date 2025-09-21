@@ -21,16 +21,16 @@ class Feature(TypedDict):
     plan: str
     context: List[str]
     acceptance: List[str]
-    blockers: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
+    blockers: NotRequired[List[str]] # ["{story_id}.{feature_id}","{story_id}"]
     rejection: NotRequired[str]
 
-class Task(TypedDict):
+class Story(TypedDict):
     id: str
     status: Status
     title: str
     description: str
     features: List[Feature]
-    blockers: NotRequired[List[str]] # ["{task_id}.{feature_id}","{task_id}"]
+    blockers: NotRequired[List[str]] # ["{story_id}.{feature_id}","{story_id}"]
     rejection: NotRequired[str]
     featureIdToDisplayIndex: Dict[str,int]
 
@@ -38,7 +38,7 @@ class ProjectRequirement(TypedDict):
     id: int
     status: Status
     description: str
-    tasks: List[str]
+    stories: List[str]
 
 class ProjectSpec(TypedDict):
     id: str
@@ -47,4 +47,4 @@ class ProjectSpec(TypedDict):
     path: str
     repo_url: str
     requirements: List[ProjectRequirement]
-    taskIdToDisplayIndex: Dict[str,int]
+    storyIdToDisplayIndex: Dict[str,int]

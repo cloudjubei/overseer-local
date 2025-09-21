@@ -7,17 +7,17 @@ export type NotificationType =
   | 'success'
   | 'warning'
   | 'error'
-  | 'task'
+  | 'story'
   | 'system'
   | 'chat'
   | 'files'
 
-export type NotificationCategory = 'general' | 'tasks' | 'chat' | 'files' | 'system' | 'updates'
+export type NotificationCategory = 'general' | 'stories' | 'chat' | 'files' | 'system' | 'updates'
 
 export interface NotificationMetadata {
   [key: string]: any
   runId?: string
-  taskId?: string
+  storyId?: string
   featureId?: string
   chatId?: string
   documentPath?: string

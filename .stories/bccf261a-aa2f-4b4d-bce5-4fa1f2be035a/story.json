@@ -1,0 +1,240 @@
+{
+  "id": "bccf261a-aa2f-4b4d-bce5-4fa1f2be035a",
+  "status": "+",
+  "title": "Stories & Feature blockers",
+  "description": "Features should have editable blockers. When creating or editing a feature it should be easy to browse and select other features as blockers. If a feature has a blocker from a different story - the story should display these in the StoryDetails as well as in the Stories list (similarly to how features have it in the StoryDetails).\n\nWhen hovering over a feature blocker bullet (in the StoryDetails) it should show a little summary card of that feature (as a callout) and when clicking on it it should take the user to the StoryDetails where that Feature is and highlight that Feature row.\nWhen hovering over a Story blocker it should behave analogously to the Features but for Stories.\n\nIt's important to make reusable components for the Story blocker bullet and the Feature blocker bullet, as well as the summary callout cards.\nWhen talking in chat, it must be possible to reference a feature or story by starting to type '#' this should show a Story&Feature blocker selector. Whenever a a story or feature is referenced in the chat in such a way, the blocker bullets should be used with the standard behaviour described before.\n\nVery important - it must be possible to reference any story or feature in the whole project scope - as defined by the project's @config.json under /projects.",
+  "features": [
+    {
+      "id": "2b445d1d-375d-4555-84e6-c3623c2ac54b",
+      "status": "+",
+      "title": "Add dependency types and data structures",
+      "description": "Extend the TypeScript types to support blockers between features and stories. Add blocker arrays to Feature and Story types, and create supporting types for blocker references that can point to features or stories across the entire project scope. Update the data structures to store and validate these cross-references.",
+      "plan": "",
+      "context": [
+        "/docs/stories/story_format.py",
+        "/src/types/stories.ts"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T21:58:52.278Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "7e9dfa0f-d700-4c75-ba3f-1a54c2642c93",
+      "status": "+",
+      "title": "Create reusable dependency bullet components",
+      "description": "Create reusable React components for displaying blocker bullets: FeatureDependencyBullet and StoryDependencyBullet. These should be small, clickable elements that show the blocker type and provide hover states. Include proper styling to match the existing design system and ensure they work in both light and dark themes.",
+      "plan": "",
+      "context": [
+        "/docs/stories/story_format.py",
+        "/src/types/stories.ts",
+        "src/renderer/components/stories/DependencyBullet.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T13:56:42.630Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "77cbec31-1f74-44b2-826d-2a98fae3f9ba",
+      "status": "+",
+      "title": "Create dependency summary callout cards",
+      "description": "Implement summary callout card components that appear on hover over blocker bullets. Create FeatureSummaryCard and StorySummaryCard that show key information about the referenced feature/story (title, status, brief description). These should be styled as tooltips/popovers and positioned appropriately relative to the trigger element.",
+      "plan": "",
+      "context": [
+        "/docs/stories/story_format.py",
+        "/src/types/stories.ts",
+        "src/renderer/components/stories/DependencyBullet.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T15:40:22.480Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "73caec53-eec1-4266-9ec9-54b83e43bd41",
+      "status": "+",
+      "title": "Implement dependency browsing and selection interface",
+      "description": "Create a blocker selector component that allows users to browse and select features and stories from across the current project when creating or editing features. This should include search/filter capabilities and support for multi-select. The interface should be intuitive and clearly show the hierarchy of projects, stories, and features.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/components/stories/DependencySelector.tsx",
+        "src/renderer/stories/FeatureCreateView.tsx",
+        "src/renderer/stories/FeatureEditView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T16:55:09.587Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "8db22861-ea13-4d23-b4a6-9990f9d5a565",
+      "status": "+",
+      "title": "Add dependency editing to feature creation and editing forms",
+      "description": "Integrate the blocker selection interface into the FeatureCreateView and FeatureEditView components. Add form fields and UI for managing blockers, including the ability to add, remove, and reorder blockers. Ensure proper validation and user feedback for blocker cycles or invalid references.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/components/stories/DependencySelector.tsx",
+        "src/renderer/stories/FeatureCreateView.tsx",
+        "src/renderer/stories/FeatureEditView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T13:20:04.993Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "82914e76-685b-4a71-94d5-b211123f0ef7",
+      "status": "+",
+      "title": "Display feature blockers in StoryDetails",
+      "description": "Update the StoryDetailsView to show blocker bullets for each feature that has blockers. Display both inbound blockers (features that depend on this one) and outbound blockers (features this one depends on). Include proper grouping and labeling to make the blocker relationships clear.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesDetailsView.tsx",
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T13:42:06.650Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "441fa016-262b-4bb5-93bb-3c7999868afc",
+      "status": "+",
+      "title": "Display story blockers in StoryDetailsView and StoriesListView",
+      "description": "When a story has blockers show these in:\n1) StoryDetails view next to the Status.\n2) StoriesListView as a the one but last column.\nBoth should have it presented in the same way as a Feature does in the StoryDetailsView",
+      "plan": "",
+      "context": [
+        "src/types/stories.ts",
+        "src/renderer/stories/StoriesDetailsView.tsx",
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx",
+        "src/renderer/types.ts",
+        "src/renderer/services/storyService.ts",
+        "src/renderer/hooks/useStoriesIndex.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T18:51:50.875Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "d2f19809-fd04-4d34-b136-85b2081b409d",
+      "status": "+",
+      "title": "Implement click navigation and highlighting for dependency bullets",
+      "description": "Add click handlers to blocker bullets that navigate to the target feature or story and highlight it. For feature blockers, navigate to the StoryDetails containing that feature and highlight the specific feature row. For story blockers, navigate to the story and provide appropriate highlighting. Ensure smooth transitions and clear visual feedback.",
+      "plan": "",
+      "context": [
+        "src/types/stories.ts",
+        "src/renderer/stories/StoriesDetailsView.tsx",
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx",
+        "src/renderer/services/storyService.ts",
+        "src/renderer/hooks/useStoriesIndex.ts"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T12:03:52.138Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "fa2dd209-a2ab-47b6-bded-48ab0c1cb6ea",
+      "status": "+",
+      "title": "Create project-wide dependency resolution service",
+      "description": "Implement a service that can resolve blocker references across the current project as defined in the ProjectSpec. This service should handle loading and indexing all stories, and features, providing fast lookup and validation of blocker references. Include error handling for broken or invalid references.",
+      "plan": "",
+      "context": [
+        "src/types/stories.ts",
+        "src/renderer/components/stories/DependencyBullet.tsx",
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/hooks/useDependencyResolver.ts",
+        "src/renderer/renderer/stories/StoriesListView.tsx",
+        "src/renderer/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/App.tsx",
+        "src/main.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T09:47:05.133Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "041d42bb-0156-4e04-bc58-58c6b16bce9a",
+      "status": "+",
+      "title": "Implement chat '#' reference selector for stories and features",
+      "description": "Add functionality to the chat interface that shows a Story&Feature blocker selector when users type '#'. This should provide autocomplete/search functionality across all stories and features in the project scope, allowing users to easily reference and link to specific items. The selected references should be rendered using the standard blocker bullet components.",
+      "plan": "",
+      "context": [
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/hooks/useDependencyResolver.ts",
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/hooks/useReferencesAutocomplete.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T23:09:22.725Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "ddfb39dd-d250-4fc8-ac53-c1534aa3b0b7",
+      "status": "+",
+      "title": "Dependency errors don't show in UI",
+      "description": "In FeatureForm the blocker errors don't show",
+      "plan": "",
+      "context": [
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/hooks/useDependencyResolver.ts",
+        "src/renderer/components/FeatureForm.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T10:56:59.483Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    },
+    {
+      "id": "4131dd1a-3f9f-4ad1-95c8-02f7eea251f7",
+      "status": "+",
+      "title": "When editing blockers in FeatureForm - they should show as bullets with x",
+      "description": "The blocker should show a capsule, with the reference name and and x right next to it indicating that clicking it - removes the blocker.\nSo essentially the current display but with this extra \"x\" icon.\n\nThe list of blockers can then be a grid of 5 or more items (depends on popup width) that keep on filling it up.\nThe add button can be a similar looking capsule with the word \"Add\" and a \"+\" at the end. The color should be green - using the classnme '.chip--ok' ",
+      "plan": "",
+      "context": [
+        "src/renderer/components/FeatureForm.tsx",
+        "src/renderer/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx",
+        "src/styles/components/badges.css"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.981Z",
+      "completedAt": "2025-09-08T20:12:19.244Z",
+      "updatedAt": "2025-09-16T13:05:37.981Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "2b445d1d-375d-4555-84e6-c3623c2ac54b": 0,
+    "7e9dfa0f-d700-4c75-ba3f-1a54c2642c93": 1,
+    "77cbec31-1f74-44b2-826d-2a98fae3f9ba": 2,
+    "73caec53-eec1-4266-9ec9-54b83e43bd41": 3,
+    "8db22861-ea13-4d23-b4a6-9990f9d5a565": 4,
+    "82914e76-685b-4a71-94d5-b211123f0ef7": 5,
+    "441fa016-262b-4bb5-93bb-3c7999868afc": 6,
+    "d2f19809-fd04-4d34-b136-85b2081b409d": 7,
+    "fa2dd209-a2ab-47b6-bded-48ab0c1cb6ea": 8,
+    "041d42bb-0156-4e04-bc58-58c6b16bce9a": 9,
+    "ddfb39dd-d250-4fc8-ac53-c1534aa3b0b7": 10,
+    "4131dd1a-3f9f-4ad1-95c8-02f7eea251f7": 11
+  },
+  "createdAt": "2025-09-16T13:05:37.981Z",
+  "completedAt": "2025-09-08T23:09:22.725Z",
+  "updatedAt": "2025-09-16T13:05:37.981Z"
+}

@@ -20,7 +20,7 @@ Core Components
     - Emits DB status updates to the renderer.
   - FactoryToolsManager (src/factory-tools/FactoryToolsManager.js)
     - Integrates with thefactory-tools to run agents (createOrchestrator, createAgentRunStore, createPricingManager).
-    - Starts task/feature runs on request, forwards credentials/LLM config, and injects dbConnectionString from DatabaseManager.
+    - Starts story/feature runs on request, forwards credentials/LLM config, and injects dbConnectionString from DatabaseManager.
     - Streams run events to the renderer over IPC; persists run history locally (.factory directory via run store).
   - DocumentIngestionManager (src/document_ingestion/DocumentIngestionManager.js)
     - Watches project files (via FilesManager) and upserts documents into thefactory-db (via DatabaseManager).
@@ -41,7 +41,7 @@ Core Components
 High-Level Data Flow
 
 1) Startup and Wiring (src/managers.js)
-- Main process constructs and initializes all managers (DatabaseManager, FactoryToolsManager, Files/Projects/Tasks/Chats/Settings, DocumentIngestionManager, etc.).
+- Main process constructs and initializes all managers (DatabaseManager, FactoryToolsManager, Files/Projects/Stories/Chats/Settings, DocumentIngestionManager, etc.).
 - FactoryToolsManager is given a reference to DatabaseManager so it can pass the active DB connection string into agent runs.
 
 2) DB Connection Lifecycle (src/db/DatabaseManager.js)
@@ -55,7 +55,7 @@ High-Level Data Flow
 - Documents are stored with their source path and metadata (ext, size, mtime, contentHash) to enable efficient sync and queries.
 
 4) Running Agents with thefactory-tools (src/factory-tools/FactoryToolsManager.js)
-- Renderer requests a run via factoryService.startTaskRun or startFeatureRun, providing agentType, project/task/feature identifiers, LLM config, and optional credentials.
+- Renderer requests a run via factoryService.startStoryRun or startFeatureRun, providing agentType, project/story/feature identifiers, LLM config, and optional credentials.
 - FactoryToolsManager starts a run using the orchestrator created by thefactory-tools and includes the current dbConnectionString from DatabaseManager.
 - Orchestrator emits run events (updates, completed, cancelled, error); FactoryToolsManager forwards these over IPC (FACTORY_RUNS_SUBSCRIBE) to update the UI in real time.
 - Run history and ratings are persisted locally through createAgentRunStore in the .factory directory.
@@ -67,7 +67,7 @@ Renderer Integration Surface (src/preload.js)
   - connect, getStatus, subscribe to DB status.
   - CRUD, search, match for entities/documents via IPC handlers in DatabaseManager.
 - factoryService
-  - startTaskRun, startFeatureRun, cancelRun, list active/history runs, delete history, rate run.
+  - startStoryRun, startFeatureRun, cancelRun, list active/history runs, delete history, rate run.
   - subscribeRuns to receive orchestrator updates in real time.
 - documentIngestionService
   - ingestAllProjects, ingestProject triggers ingestion pipelines.
@@ -83,7 +83,7 @@ Storage Overview
 IPC Contract Summary (src/ipcHandlersKeys.js)
 
 - DB: DB_CONNECT, DB_GET_STATUS, DB_SUBSCRIBE, DB_ENTITIES_*, DB_DOCUMENTS_*.
-- Factory (runs): FACTORY_RUNS_START_TASK, FACTORY_RUNS_START_FEATURE, FACTORY_RUNS_CANCEL, FACTORY_RUNS_LIST_ACTIVE, FACTORY_RUNS_LIST_HISTORY, FACTORY_RUNS_DELETE_HISTORY, FACTORY_RUNS_RATE, FACTORY_RUNS_SUBSCRIBE.
+- Factory (runs): FACTORY_RUNS_START_STORY, FACTORY_RUNS_START_FEATURE, FACTORY_RUNS_CANCEL, FACTORY_RUNS_LIST_ACTIVE, FACTORY_RUNS_LIST_HISTORY, FACTORY_RUNS_DELETE_HISTORY, FACTORY_RUNS_RATE, FACTORY_RUNS_SUBSCRIBE.
 - Document ingestion: DOCUMENT_INGESTION_ALL, DOCUMENT_INGESTION_PROJECT.
 
 Configuration
@@ -114,14 +114,14 @@ Goal
 
 Current injection point
 - The system prompt is built in thefactory-tools/src/orchestrator.ts within constructSystemPrompt(...).
-- Suggested approach: add a ContextAssembler that selects, summarizes, and injects small, targeted doc slices from this repository (e.g., docs/ARCHITECTURE.md, docs/PATTERNS.md, docs/FILE_ORGANISATION.md, docs/PACKAGES.md) based on the task type and target area.
+- Suggested approach: add a ContextAssembler that selects, summarizes, and injects small, targeted doc slices from this repository (e.g., docs/ARCHITECTURE.md, docs/PATTERNS.md, docs/FILE_ORGANISATION.md, docs/PACKAGES.md) based on the story type and target area.
 
 What to inject and when
 - Always include
   - Project mission and top-level layout: a 10–20 line digest derived from docs/FILE_ORGANISATION.md.
   - Architectural core: a short summary from docs/ARCHITECTURE.md (Main process vs Preload vs Renderer, DB, agents).
   - A DocIndex: a compact list of available deep-dive docs with one-line descriptions and paths (ARCHITECTURE.md, PATTERNS.md, PACKAGES.md, design/styleguide/ux pointers).
-- Conditional, by task area (heuristics)
+- Conditional, by story area (heuristics)
   - Main-process manager or IPC changes: include the Managers pattern from docs/PATTERNS.md (anatomy, IPC keys, preload exposure, renderer service, typings).
   - UI components/screens: include a short “GO TO UI” summary (if present under docs/ux) and links to docs/styleguide and docs/design; do not inline full style guides.
   - DB or ingestion work: include the DB and ingestion sections of this file plus a brief reminder of the IPC contract and data flow.
@@ -132,25 +132,25 @@ What to inject and when
 
 Token budgeting policy
 - Reserve a fixed budget for documentation context (e.g., 800–1500 tokens depending on model).
-- Prioritize in this order: Task-specific pattern snippet > Architecture digest > DocIndex.
+- Prioritize in this order: Story-specific pattern snippet > Architecture digest > DocIndex.
 - If the budget is exceeded, drop long examples and keep only rules, headings, and API names.
 
 Implementation outline in constructSystemPrompt
 - Introduce a ContextAssembler module with utilities
   - getDocDigest(path, maxTokens): load, strip examples, summarize key headers and bullet points.
-  - pickDocs(task): map from task classification to required docs (see heuristics above).
+  - pickDocs(story): map from story classification to required docs (see heuristics above).
   - buildDocIndex(): 6–12 bullets listing key docs with 1-liners and paths.
   - cacheDigestsByHash(): compute and cache content hashes for docs to avoid recomputation.
 - Extend constructSystemPrompt(...)
   - Accept options such as featureArea, changedPaths, uiWork, mainProcessWork, dbWork to guide doc selection.
-  - Compose the final system prompt sections in order: Role and guardrails -> Architecture digest -> Pattern snippet(s) -> DocIndex -> Task-specific instructions.
+  - Compose the final system prompt sections in order: Role and guardrails -> Architecture digest -> Pattern snippet(s) -> DocIndex -> Story-specific instructions.
   - Append a short instruction telling the agent how to request additional sections by file path and heading if needed.
 
 Classification signals for doc selection
 - changedPaths contain src/<domain>/<Domain>Manager.js or src/ipcHandlersKeys.js -> include PATTERNS Manager section.
 - changedPaths touch src/preload.js or src/renderer/services -> include Preload Exposure and Renderer Consumption from PATTERNS.md.
 - changedPaths under src/renderer or docs/ux/styleguide/design -> include UI “GO TO” summary and styleguide links.
-- task title/description mentions DB, entities, documents, ingestion -> include DB/ingestion digest from this file.
+- story title/description mentions DB, entities, documents, ingestion -> include DB/ingestion digest from this file.
 - mentions orchestrator, pricing, runs -> include orchestrator integration digest.
 - mentions packages or dependencies -> include PACKAGES.md excerpt.
 

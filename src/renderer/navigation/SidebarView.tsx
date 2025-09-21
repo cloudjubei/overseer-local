@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import TasksView from '../screens/TasksView'
+import StoriesView from '../screens/StoriesView'
 import FilesView from '../screens/FilesView'
 import SettingsView from '../screens/SettingsView'
 import ChatView from '../screens/ChatView'
@@ -15,7 +15,7 @@ import { MAIN_PROJECT, useProjectContext } from '../contexts/ProjectContext'
 import type { NavigationView } from '../types'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useAgents } from '../contexts/AgentsContext'
-import NotificationBadge from '../components/tasks/NotificationBadge'
+import NotificationBadge from '../components/stories/NotificationBadge'
 import { ProjectSpec } from 'thefactory-tools'
 import {
   IconHome,
@@ -320,7 +320,7 @@ export default function SidebarView({}: SidebarProps) {
       )
     return (
       <div key="Home" className="flex flex-col flex-1 min-h-0 view-transition">
-        <TasksView />
+        <StoriesView />
       </div>
     )
   }, [currentView])

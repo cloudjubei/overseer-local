@@ -62,7 +62,7 @@ const PROVIDER_MAP = [
     test: (m) => /renderer\/hooks\/useTheme(\.ts)?$/.test(m) || /useTheme$/.test(m),
     need: 'theme',
   },
-  { test: (m) => /renderer\/services\/taskService(\.ts)?$/.test(m), need: 'tasksMock' },
+  { test: (m) => /renderer\/services\/storyService(\.ts)?$/.test(m), need: 'storiesMock' },
   {
     test: (m) => /renderer\/services\/notificationsService(\.ts)?$/.test(m),
     need: 'notificationsMock',

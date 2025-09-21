@@ -6,7 +6,7 @@ This document outlines the plan for extending the application to support multipl
 
 The current Electron application operates entirely on the local machine. The migration will involve connecting it to the new backend services while preserving its powerful offline capabilities.
 
-- **Backend Integration**: All services currently managing local data (e.g., `projects`, `tasks`, `files`) will be refactored to communicate with a REST or GraphQL API. This includes `src/renderer/services` and parts of the main process logic.
+- **Backend Integration**: All services currently managing local data (e.g., `projects`, `stories`, `files`) will be refactored to communicate with a REST or GraphQL API. This includes `src/renderer/services` and parts of the main process logic.
 - **Offline-First Sync**: The app will use a local database (e.g., SQLite via `better-sqlite3` or a file-based solution like PouchDB/CouchDB) as the primary source of truth for the UI. A synchronization layer will be built to push and pull changes to/from the backend when the application is online.
 - **Local Agent Orchestration**: The `factory-ts` agent orchestrator will continue to run locally for performance and to leverage local file system access. However, its state, history, and outputs will be synchronized with the backend, allowing them to be viewed on other clients.
 - **File Management**: While maintaining direct file system access, the app will sync file metadata and content (where appropriate) with a central storage solution (e.g., S3). A local cache will be maintained for offline access and performance.
@@ -58,7 +58,7 @@ A backend service will be responsible for dispatching notifications to all clien
 
 The user experience will be tailored to the platform.
 
-- **Layout & Density**: Desktop will feature multi-pane layouts and higher information density. Mobile will focus on single-screen tasks and a cleaner, more focused UI.
+- **Layout & Density**: Desktop will feature multi-pane layouts and higher information density. Mobile will focus on single-screen stories and a cleaner, more focused UI.
 - **Input Methods**: Desktop design will prioritize mouse (hover, right-click) and keyboard (shortcuts). Mobile design will be touch-first (taps, swipes, gestures).
 - **Component Adaptation**: Core UI components will be designed to be adaptive, but some will have distinct mobile-only or desktop-only implementations to provide the best experience.
 

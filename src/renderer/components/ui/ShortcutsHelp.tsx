@@ -24,7 +24,7 @@ export default function ShortcutsHelp() {
 
   const idToCombo: Record<string, string> = {
     'command-menu': appSettings.userPreferences.shortcuts.commandMenu,
-    'new-task': appSettings.userPreferences.shortcuts.newTask,
+    'new-story': appSettings.userPreferences.shortcuts.newStory,
     help: appSettings.userPreferences.shortcuts.help,
     'add-ui-feature': appSettings.userPreferences.shortcuts.addUiFeature,
   }

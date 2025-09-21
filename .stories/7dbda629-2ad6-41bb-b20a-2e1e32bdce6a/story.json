@@ -1,0 +1,121 @@
+{
+  "id": "7dbda629-2ad6-41bb-b20a-2e1e32bdce6a",
+  "status": "+",
+  "title": "UI and UX fixes",
+  "description": "",
+  "features": [
+    {
+      "id": "af51b414-6ecf-48a6-afe6-bc1bd2c45419",
+      "status": "+",
+      "title": "StoriesList fixes",
+      "description": "Allow sorting of stories and display them in reverse to begin with.\nThe status dropdown should be the same as the one StatusControl uses.\nThe search box needs to be bigger and the Clear button only showing if searching. This can just be a (x) icon at the end of the search input.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T22:30:39.296Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    },
+    {
+      "id": "3ea0f62c-5068-40c6-87b4-747e85959718",
+      "status": "+",
+      "title": "The Tooltip for DependencyBullet should show close to the center of the screen",
+      "description": "In many cases when the DependencyBullet is close to the right or bottom edge, the tooltip it shows gets cut off by the window end.\nWhenever the tooltip is close to an edge - it should offset in the opposite direction.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-14T02:32:23.513Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    },
+    {
+      "id": "7a5efff9-125d-481f-bb73-51dc3991bdae",
+      "status": "+",
+      "title": "ChatView errors",
+      "description": "When opening ChatView - there's an error:\n\nvalidateDOMNesting(...): <button> cannot appear as a descendant of <button>.\n    at button\n    at span\n    at button\n    at li\n    at ul\n    at nav\n    at aside\n    at SidebarContent (http://localhost:5173/src/renderer/components/ui/CollapsibleSidebar.tsx:50:40)",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-14T00:52:47.644Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    },
+    {
+      "id": "916bebdb-a2c4-429f-a559-dff03aed4eef",
+      "status": "+",
+      "title": "Board view fixes",
+      "description": "Fix clicking. Only drag works - not even key press does.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T23:06:44.999Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    },
+    {
+      "id": "06680296-05e8-434c-868c-b07a44f86570",
+      "status": "+",
+      "title": "StoryService should be the only interface for story related ops",
+      "description": "Currently StoriesIndex (StoriesIndexSnapshot) is exposed as well as dependencyResolver. These should not be available outside of the StoryService - this service should be the only interface for handling stories.",
+      "plan": "",
+      "context": [
+        "src/renderer/services/dependencyResolver.ts",
+        "src/renderer/services/storyService.ts",
+        "src/renderer/components/stories/DependencyBullet.tsx",
+        "src/renderer/projects/DependencyResolverBootstrap.tsx",
+        "src/stories/indexer.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-14T04:07:08.097Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    },
+    {
+      "id": "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe",
+      "status": "+",
+      "title": "no chat send message error",
+      "description": "when sending a messages and no chat is selected - it needs to auto-select the newly created chat",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/ChatView.tsx",
+        "src/chats/manager.js",
+        "src/chats/storage.js",
+        "src/ipcHandlersKeys.js",
+        "src/renderer/services/chatsService.ts",
+        "src/renderer/hooks/useChats.tsx"
+      ],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T21:00:02.425Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    },
+    {
+      "id": "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe",
+      "status": "+",
+      "title": "go over the @FILE_ORGANISATION.md and update the Top-Level Directory Layout for missing values",
+      "description": "only folders need describing and only up to a certain level where it still remains significant",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.978Z",
+      "completedAt": "2025-09-13T19:21:39.248Z",
+      "updatedAt": "2025-09-16T13:05:37.978Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "af51b414-6ecf-48a6-afe6-bc1bd2c45419": 1,
+    "3ea0f62c-5068-40c6-87b4-747e85959718": 2,
+    "7a5efff9-125d-481f-bb73-51dc3991bdae": 3,
+    "916bebdb-a2c4-429f-a559-dff03aed4eef": 4,
+    "06680296-05e8-434c-868c-b07a44f86570": 5,
+    "cc6ac3c2-5d10-4e38-ba0a-fec322c1babe": 6,
+    "dd6ac3c2-5d10-4e38-ba0a-fec322c1babe": 7
+  },
+  "createdAt": "2025-09-16T13:05:37.978Z",
+  "completedAt": "2025-09-14T04:07:08.097Z",
+  "updatedAt": "2025-09-16T13:05:37.978Z"
+}

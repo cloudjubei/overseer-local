@@ -27,13 +27,6 @@ export default class ProjectsManager extends BaseManager {
     await super.init()
   }
 
-
-  private __notify(msg: string) {
-    if (msg) console.log(msg) //TODO: change into a logger
-    if (this.window) {
-      this.window.webContents.send(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE)
-    }
-  }
   getHandlers(): Record<string, (args: any) => any> {
     const handlers: Record<string, (args: any) => any> = {}
 
@@ -42,8 +35,8 @@ export default class ProjectsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = ({ input }) => this.createProject(input)
     handlers[IPC_HANDLER_KEYS.PROJECTS_UPDATE] = ({ projectId, patch }) =>
       this.updateProject(projectId, patch)
-    handlers[IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER] = async ({ projectId, payload }) =>
-      this.reorderTask(projectId, payload)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER] = async ({ projectId, payload }) =>
+      this.reorderStory(projectId, payload)
 
     return handlers
   }
@@ -67,34 +60,21 @@ export default class ProjectsManager extends BaseManager {
     return this.tools.getProject(projectId)
   }
   async createProject(input: ProjectSpecCreateInput): Promise<ProjectSpec | undefined> {
-    const p = await this.tools.createProject(input)
-    if (p) {
-      this.__notify(`New project created: ${p.id}`)
-    }
-    return p
+    return await this.tools.createProject(input)
   }
   async updateProject(
     projectId: string,
     patch: ProjectSpecEditInput,
   ): Promise<ProjectSpec | undefined> {
-    const p = await this.tools.updateProject(projectId, patch)
-    if (p) {
-      this.__notify(`Project updated: ${projectId}`)
-    }
-    return p
+    return await this.tools.updateProject(projectId, patch)
   }
   async deleteProject(projectId: string): Promise<void> {
-    await this.tools.deleteProject(projectId)
-    this.__notify(`Project ${projectId} deleted`)
+    return await this.tools.deleteProject(projectId)
   }
-  async getTaskIdFromIndex(projectId: string, index: number): Promise<string | undefined> {
-    return await this.tools.getTaskIdFromIndex(projectId, index)
+  async getStoryIdFromIndex(projectId: string, index: number): Promise<string | undefined> {
+    return await this.tools.getStoryIdFromIndex(projectId, index)
   }
-  async reorderTask(projectId: string, payload: ReorderPayload): Promise<ProjectSpec | undefined> {
-    const p = await this.tools.reorderTask(projectId, payload)
-    if (p) {
-      this.__notify(`Tasks reordered in project: ${projectId}`)
-    }
-    return p
+  async reorderStory(projectId: string, payload: ReorderPayload): Promise<ProjectSpec | undefined> {
+    return await this.tools.reorderStory(projectId, payload)
   }
 }

@@ -81,18 +81,18 @@ export default class FactoryToolsManager extends BaseManager {
       this.deleteHistoryRun(runId)
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = ({ runId, rating }) =>
       this.rateRun(runId, rating)
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_TASK] = ({
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_STORY] = ({
       agentType,
       projectId,
-      taskId,
+      storyId,
       llmConfig,
       githubCredentials,
       webSearchApiKeys,
     }) =>
-      this.startTaskRun(
+      this.startStoryRun(
         agentType,
         projectId,
-        taskId,
+        storyId,
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
@@ -100,7 +100,7 @@ export default class FactoryToolsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START_FEATURE] = ({
       agentType,
       projectId,
-      taskId,
+      storyId,
       featureId,
       llmConfig,
       githubCredentials,
@@ -109,7 +109,7 @@ export default class FactoryToolsManager extends BaseManager {
       this.startFeatureRun(
         agentType,
         projectId,
-        taskId,
+        storyId,
         featureId,
         llmConfig,
         githubCredentials,
@@ -121,20 +121,20 @@ export default class FactoryToolsManager extends BaseManager {
     return handlers
   }
 
-  async startTaskRun(
+  async startStoryRun(
     agentType: AgentType,
     projectId: string,
-    taskId: string,
+    storyId: string,
     llmConfig: LLMConfig,
     githubCredentials: GithubCredentials,
     webSearchApiKeys?: WebSearchApiKeys,
   ): Promise<AgentRunHistory> {
     console.log(
-      '[factory] START_TASK',
+      '[factory] START_STORY',
       this._maskSecrets({
         agentType,
         projectId,
-        taskId,
+        storyId,
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
@@ -145,19 +145,19 @@ export default class FactoryToolsManager extends BaseManager {
       const { runHistory, runHandle } = await this.orchestrator!.startRun({
         agentType,
         projectId,
-        taskId,
+        storyId,
         llmConfig,
         githubCredentials,
         webSearchApiKeys,
         dbConnectionString,
       })
-      console.log('[factory] Run started (task)', runHandle.id)
-      console.log('[factory] Run started (task) runHistory: ', runHistory)
+      console.log('[factory] Run started (story)', runHandle.id)
+      console.log('[factory] Run started (story) runHistory: ', runHistory)
       this._attachRunHandle(runHandle)
       this._emitUpdate({ type: 'started', runId: runHistory.id, run: runHistory })
       return runHistory
     } catch (err: any) {
-      console.error('[factory] Failed to start task run', err?.stack || String(err))
+      console.error('[factory] Failed to start story run', err?.stack || String(err))
       throw err
     }
   }
@@ -165,7 +165,7 @@ export default class FactoryToolsManager extends BaseManager {
   async startFeatureRun(
     agentType: AgentType,
     projectId: string,
-    taskId: string,
+    storyId: string,
     featureId: string,
     llmConfig: LLMConfig,
     githubCredentials: GithubCredentials,
@@ -176,7 +176,7 @@ export default class FactoryToolsManager extends BaseManager {
       this._maskSecrets({
         agentType,
         projectId,
-        taskId,
+        storyId,
         featureId,
         llmConfig,
         githubCredentials,
@@ -188,7 +188,7 @@ export default class FactoryToolsManager extends BaseManager {
       const { runHistory, runHandle } = await this.orchestrator!.startRun({
         agentType,
         projectId,
-        taskId,
+        storyId,
         featureId,
         llmConfig,
         githubCredentials,

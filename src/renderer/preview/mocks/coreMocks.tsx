@@ -46,21 +46,25 @@ export function createDefaultMocksRegistry() {
     asWrapper((node) => <Frame>{node}</Frame>),
   )
 
-  // Example in-memory tasks service context for previews.
-  // We don't try to override app imports; instead, components that want this can declare 'tasksMock'.
-  const TasksContext = React.createContext<{ tasks: any[]; addTask: (t: any) => void } | null>(null)
-  function TasksProvider({ children }: { children: ReactNode }) {
-    const [tasks, setTasks] = React.useState<any[]>([
-      { id: 'T-1', title: 'Sample task', status: 'Todo', priority: 'P2' },
+  // Example in-memory stories service context for previews.
+  // We don't try to override app imports; instead, components that want this can declare 'storiesMock'.
+  const StoriesContext = React.createContext<{ stories: any[]; addStory: (t: any) => void } | null>(
+    null,
+  )
+  function StoriesProvider({ children }: { children: ReactNode }) {
+    const [stories, setStories] = React.useState<any[]>([
+      { id: 'T-1', title: 'Sample story', status: 'Todo', priority: 'P2' },
       { id: 'T-2', title: 'Make previews awesome', status: 'In Progress', priority: 'P1' },
     ])
-    const addTask = (t: any) => setTasks((s) => [...s, t])
-    return <TasksContext.Provider value={{ tasks, addTask }}>{children}</TasksContext.Provider>
+    const addStory = (t: any) => setStories((s) => [...s, t])
+    return (
+      <StoriesContext.Provider value={{ stories, addStory }}>{children}</StoriesContext.Provider>
+    )
   }
-  ;(globalThis as any).__PreviewTasksContext = TasksContext
+  ;(globalThis as any).__PreviewStoriesContext = StoriesContext
   registry.register(
-    'tasksMock',
-    asWrapper((node) => <TasksProvider>{node}</TasksProvider>),
+    'storiesMock',
+    asWrapper((node) => <StoriesProvider>{node}</StoriesProvider>),
   )
 
   // Notifications mock

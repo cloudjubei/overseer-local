@@ -7,7 +7,7 @@ export type ProjectsService = {
   createProject: (input: ProjectSpec) => Promise<ProjectSpec>
   updateProject: (projectId: string, patch: ProjectSpec) => Promise<ProjectSpec>
   deleteProject: (projectId: string) => Promise<void>
-  reorderTask: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec>
+  reorderStory: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec>
 }
 
 export const projectsService: ProjectsService = { ...window.projectsService }

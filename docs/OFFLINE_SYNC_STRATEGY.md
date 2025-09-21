@@ -67,7 +67,7 @@ The local database is our primary cache.
 
 On mobile, it's crucial to be able to sync data even when the app is not in the foreground.
 
-- **React Native**: We can use libraries like `react-native-background-fetch` or `react-native-background-task` to schedule periodic background tasks. These tasks will trigger our sync logic, processing the queue and pulling down fresh data.
+- **React Native**: We can use libraries like `react-native-background-fetch` or `react-native-background-story` to schedule periodic background stories. These stories will trigger our sync logic, processing the queue and pulling down fresh data.
 - **Web (Progressive Web Apps)**: For the PWA version of the web app, Service Workers with the `Background Sync API` can be used to defer network requests (like our sync queue) until the user has stable connectivity.
 
 ## 9. Offline Indicator UX Patterns

@@ -104,8 +104,8 @@ export function NotificationClickHandler() {
   useEffect(() => {
     const unsubscribe = window.notificationsService.onOpenNotification(
       (metadata: NotificationMetadata) => {
-        if (metadata.taskId) {
-          nav.navigateTaskDetails(metadata.taskId, metadata.featureId)
+        if (metadata.storyId) {
+          nav.navigateStoryDetails(metadata.storyId, metadata.featureId)
         } else if (metadata.chatId) {
           nav.navigateView('Chat')
         } else if (metadata.documentPath) {

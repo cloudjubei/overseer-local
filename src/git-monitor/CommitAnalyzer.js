@@ -5,8 +5,8 @@ const execFileAsync = promisify(execFile)
 
 /**
  * CommitAnalyzer
- * Utilities to inspect a given git commit and extract feature/task status by
- * locating and parsing a task.json file directly from the commit tree.
+ * Utilities to inspect a given git commit and extract feature/story status by
+ * locating and parsing a story.json file directly from the commit tree.
  *
  * This avoids switching branches or checking out the tree by using:
  *  - git ls-tree -r --name-only <rev>
@@ -71,11 +71,11 @@ function stripJsonComments(str) {
 }
 
 /**
- * Try to parse task.json with some tolerance for comments/BOM.
+ * Try to parse story.json with some tolerance for comments/BOM.
  * @param {string} content
  * @returns {any}
  */
-export function parseTaskJson(content) {
+export function parseStoryJson(content) {
   if (typeof content !== 'string') return null
   const cleaned = stripJsonComments(stripBom(content))
   try {
@@ -86,32 +86,32 @@ export function parseTaskJson(content) {
 }
 
 /**
- * Extract a lightweight summary from a parsed task.json.
+ * Extract a lightweight summary from a parsed story.json.
  * Attempts to find common fields: status, features (array), id/title, etc.
  * Falls back to returning nulls if not present.
- * @param {any} taskObj
+ * @param {any} storyObj
  * @returns {{ status: string|null, summary: object|null, features: Array<object>|null }}
  */
-export function extractTaskSummary(taskObj) {
-  if (!taskObj || typeof taskObj !== 'object') {
+export function extractStorySummary(storyObj) {
+  if (!storyObj || typeof storyObj !== 'object') {
     return { status: null, summary: null, features: null }
   }
 
-  const status = taskObj.status || taskObj.state || null
+  const status = storyObj.status || storyObj.state || null
 
   // Normalize features if present
   let features = null
-  if (Array.isArray(taskObj.features)) {
-    features = taskObj.features.map((f) => ({
+  if (Array.isArray(storyObj.features)) {
+    features = storyObj.features.map((f) => ({
       id: f?.id ?? f?.featureId ?? null,
       title: f?.title ?? null,
       status: f?.status ?? f?.state ?? null,
       description: f?.description ?? null,
     }))
-  } else if (Array.isArray(taskObj.tasks)) {
-    // Some schemas may name them tasks
-    features = taskObj.tasks.map((f) => ({
-      id: f?.id ?? f?.taskId ?? null,
+  } else if (Array.isArray(storyObj.stories)) {
+    // Some schemas may name them stories
+    features = storyObj.stories.map((f) => ({
+      id: f?.id ?? f?.storyId ?? null,
       title: f?.title ?? null,
       status: f?.status ?? f?.state ?? null,
       description: f?.description ?? null,
@@ -120,8 +120,8 @@ export function extractTaskSummary(taskObj) {
 
   // A minimal summary with a few common fields
   const summary = {
-    id: taskObj.id ?? taskObj.taskId ?? null,
-    title: taskObj.title ?? taskObj.name ?? null,
+    id: storyObj.id ?? storyObj.storyId ?? null,
+    title: storyObj.title ?? storyObj.name ?? null,
     status,
   }
 
@@ -129,7 +129,7 @@ export function extractTaskSummary(taskObj) {
 }
 
 /**
- * Analyze a given commit for a task.json file and extract status/details.
+ * Analyze a given commit for a story.json file and extract status/details.
  * @param {string} repoPath
  * @param {string} commitSha
  * @param {{ fileName?: string }} [options]
@@ -137,16 +137,16 @@ export function extractTaskSummary(taskObj) {
  *   ok: boolean,
  *   commit: string,
  *   found: boolean,
- *   taskJsonPath?: string|null,
- *   taskRaw?: any,
+ *   storyJsonPath?: string|null,
+ *   storyRaw?: any,
  *   extracted?: { status: string|null, summary: object|null, features: Array<object>|null },
  *   error?: string
  * }>}
  */
-export async function analyzeCommitForTask(repoPath, commitSha, options = {}) {
-  const fileName = options.fileName || 'task.json'
+export async function analyzeCommitForStory(repoPath, commitSha, options = {}) {
+  const fileName = options.fileName || 'story.json'
 
-  // List files in commit to find task.json candidates
+  // List files in commit to find story.json candidates
   const files = await listFilesAtRevision(repoPath, commitSha)
   if (!files.length) {
     return { ok: false, commit: commitSha, found: false, error: 'No files found at commit' }
@@ -157,29 +157,29 @@ export async function analyzeCommitForTask(repoPath, commitSha, options = {}) {
     return { ok: true, commit: commitSha, found: false }
   }
 
-  // Prefer root-level or tasks/ first
+  // Prefer root-level or stories/ first
   const prioritized = candidates.sort((a, b) => {
     const score = (p) => {
       const isRoot = !p.includes('/')
-      const inTasks = p.startsWith('tasks/') || p.includes('/tasks/')
-      return (isRoot ? 2 : 0) + (inTasks ? 1 : 0)
+      const inStories = p.startsWith('stories/') || p.includes('/stories/')
+      return (isRoot ? 2 : 0) + (inStories ? 1 : 0)
     }
     return score(b) - score(a)
   })
 
-  for (const taskPath of prioritized) {
-    const content = await readFileAtRevision(repoPath, commitSha, taskPath)
+  for (const storyPath of prioritized) {
+    const content = await readFileAtRevision(repoPath, commitSha, storyPath)
     if (!content) continue
-    const parsed = parseTaskJson(content)
+    const parsed = parseStoryJson(content)
     if (!parsed) continue
 
-    const extracted = extractTaskSummary(parsed)
+    const extracted = extractStorySummary(parsed)
     return {
       ok: true,
       commit: commitSha,
       found: true,
-      taskJsonPath: taskPath,
-      taskRaw: parsed,
+      storyJsonPath: storyPath,
+      storyRaw: parsed,
       extracted,
     }
   }
@@ -193,19 +193,19 @@ export async function analyzeCommitForTask(repoPath, commitSha, options = {}) {
  * @param {string} branchName
  * @param {{ fileName?: string }} [options]
  */
-export async function analyzeBranchHeadForTask(repoPath, branchName, options = {}) {
+export async function analyzeBranchHeadForStory(repoPath, branchName, options = {}) {
   const head = await safeGit(repoPath, ['rev-parse', branchName])
   const commit = head.stdout?.trim()
   if (!commit)
     return { ok: false, commit: null, found: false, error: 'Unable to resolve branch head' }
-  return analyzeCommitForTask(repoPath, commit, options)
+  return analyzeCommitForStory(repoPath, commit, options)
 }
 
 export default {
   listFilesAtRevision,
   readFileAtRevision,
-  parseTaskJson,
-  extractTaskSummary,
-  analyzeCommitForTask,
-  analyzeBranchHeadForTask,
+  parseStoryJson,
+  extractStorySummary,
+  analyzeCommitForStory,
+  analyzeBranchHeadForStory,
 }

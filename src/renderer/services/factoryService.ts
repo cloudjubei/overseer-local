@@ -9,19 +9,19 @@ import {
   WebSearchApiKeys,
 } from 'thefactory-tools'
 
-export type StartTaskRunParams = {
+export type StartStoryRunParams = {
   agentType: AgentType
   projectId: string
-  taskId: string
+  storyId: string
   llmConfig: LLMConfig
   githubCredentials: GithubCredentials
   webSearchApiKeys?: WebSearchApiKeys
 }
-export type StartFeatureRunParams = StartTaskRunParams & { featureId: string }
+export type StartFeatureRunParams = StartStoryRunParams & { featureId: string }
 
 export type FactoryService = {
   subscribeRuns: (callback: (update: AgentRunUpdate) => void) => () => void
-  startTaskRun: (params: StartTaskRunParams) => Promise<AgentRunHistory>
+  startStoryRun: (params: StartStoryRunParams) => Promise<AgentRunHistory>
   startFeatureRun: (params: StartFeatureRunParams) => Promise<AgentRunHistory>
   cancelRun: (runId: string) => Promise<void>
   listRunsActive: () => Promise<AgentRunHistory[]>

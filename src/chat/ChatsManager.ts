@@ -4,7 +4,7 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import ChatsStorage from './ChatsStorage'
 import BaseManager from '../BaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
-import type TasksManager from '../tasks/TasksManager'
+import type StoriesManager from '../stories/StoriesManager'
 import type FilesManager from '../files/FilesManager'
 import type SettingsManager from '../settings/SettingsManager'
 import {
@@ -34,7 +34,7 @@ export default class ChatsManager extends BaseManager {
   private storages: Record<string, ChatsStorage>
 
   private projectsManager: ProjectsManager
-  private tasksManager: TasksManager
+  private storiesManager: StoriesManager
   private filesManager: FilesManager
   private settingsManager: SettingsManager
 
@@ -42,7 +42,7 @@ export default class ChatsManager extends BaseManager {
     projectRoot: string,
     window: BrowserWindow,
     projectsManager: ProjectsManager,
-    tasksManager: TasksManager,
+    storiesManager: StoriesManager,
     filesManager: FilesManager,
     settingsManager: SettingsManager,
   ) {
@@ -50,7 +50,7 @@ export default class ChatsManager extends BaseManager {
     this.storages = {}
 
     this.projectsManager = projectsManager
-    this.tasksManager = tasksManager
+    this.storiesManager = storiesManager
     this.filesManager = filesManager
     this.settingsManager = settingsManager
   }
@@ -116,7 +116,7 @@ export default class ChatsManager extends BaseManager {
     const project: any = await this.projectsManager.getProject(projectId as any)
 
     const parts = [
-      'You are a helpful project assistant. Discuss tasks, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_task_reference. You can create new files using write_file (use .md if it is a markdown note).',
+      'You are a helpful project assistant. Discuss stories, files, and related topics. Use tools to query project info. If user mentions @path, use read_file.  If user mentions #reference, use get_story_reference. You can create new files using write_file (use .md if it is a markdown note).',
     ]
 
     if (project) {

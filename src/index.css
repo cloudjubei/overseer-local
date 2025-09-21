@@ -20,8 +20,8 @@
 @import './styles/layout/nav.css';
 
 /* Screens */
-@import './styles/screens/tasks.css';
-@import './styles/screens/task-details.css';
+@import './styles/screens/stories.css';
+@import './styles/screens/story-details.css';
 @import './styles/screens/board.css';
 @import './styles/screens/docs.css';
 @import './styles/screens/settings.css';

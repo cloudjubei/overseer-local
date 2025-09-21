@@ -17,7 +17,7 @@ Top-Level Layout
 
 - docs/: Project-wide documentation and specs; single source of truth for protocols and workflows.
   - ui/: Central UI development guide (entry point for UI work; links to UX/styleguide/design docs).
-- scripts/: Utility scripts for maintenance and data operations (e.g., date alteration for tasks/features).
+- scripts/: Utility scripts for maintenance and data operations (e.g., date alteration for stories/features).
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
   - db/: Main process database integration (thefactory-db connection lifecycle and IPC handlers for status, CRUD/search of entities/documents, including new handlers for features and timeline labels). Exposes DB status via IPC and preload (dbService).
   - document_ingestion/: Project file-to-DB ingestion and sync pipeline. Listens to FilesManager changes (add/change/delete/rename) and upserts/archives documents in thefactory-db; supports full-project ingestion via IPC (DOCUMENT_INGESTION_ALL / DOCUMENT_INGESTION_PROJECT).

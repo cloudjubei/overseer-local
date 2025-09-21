@@ -246,7 +246,7 @@ export default class NotificationsStorage {
 
     const byCategory = {
       general: 0,
-      tasks: 0,
+      stories: 0,
       chat: 0,
       documents: 0,
       system: 0,
@@ -258,7 +258,7 @@ export default class NotificationsStorage {
       success: 0,
       warning: 0,
       error: 0,
-      task: 0,
+      story: 0,
       system: 0,
       chat: 0,
       docs: 0,

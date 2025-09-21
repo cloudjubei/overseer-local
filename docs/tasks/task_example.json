@@ -1,33 +1,33 @@
 {
   "id": "13",
-  "title": "JSON-based tasks format",
+  "title": "JSON-based stories format",
   "status": "-",
-  "description": "Define and implement a new JSON-based format for tasks to replace `docs/TASKS.md`. This involves defining the schema, creating necessary tooling for interaction, migrating existing tasks, and finally deprecating the old format.",
+  "description": "Define and implement a new JSON-based format for stories to replace `docs/STORIES.md`. This involves defining the schema, creating necessary tooling for interaction, migrating existing stories, and finally deprecating the old format.",
   "features": [
     {
       "id": "13.1",
-      "title": "Define Task Schema in Python",
+      "title": "Define Story Schema in Python",
       "status": "+",
-      "description": "Create `docs/tasks/task_format.py` to define the new task structure using Python's `TypedDict` or similar data classes. This will serve as the canonical schema for tasks, features, and related objects.",
-      "plan": "1. Create the file `docs/tasks/task_format.py`. 2. Define a TypedDict for `Task`. 3. Define a TypedDict for `Feature`. 4. Include all required and optional fields as specified in the project's guidance.",
-      "context": ["docs/tasks/TASKS_GUIDANCE.md"],
+      "description": "Create `docs/stories/story_format.py` to define the new story structure using Python's `TypedDict` or similar data classes. This will serve as the canonical schema for stories, features, and related objects.",
+      "plan": "1. Create the file `docs/stories/story_format.py`. 2. Define a TypedDict for `Story`. 3. Define a TypedDict for `Feature`. 4. Include all required and optional fields as specified in the project's guidance.",
+      "context": ["docs/stories/STORIES_GUIDANCE.md"],
       "acceptance": [
-        "`docs/tasks/task_format.py` exists.",
-        "The file defines Python types for `Task`, `Feature`, and other relevant data structures.",
-        "The types cover all fields currently used in `TASKS.md` and `plan.md` files."
+        "`docs/stories/story_format.py` exists.",
+        "The file defines Python types for `Story`, `Feature`, and other relevant data structures.",
+        "The types cover all fields currently used in `STORIES.md` and `plan.md` files."
       ],
       "blockers": []
     },
     {
       "id": "13.2",
-      "title": "Create Example JSON Task File",
+      "title": "Create Example JSON Story File",
       "status": "-",
-      "action": "Create `docs/tasks/task_example.json` that demonstrates a complete task in the new format, adhering to the schema defined in `task_format.py`.",
-      "plan": "1. Create the file `docs/tasks/task_example.json`. 2. Populate it with a sample task that includes at least two features. 3. Ensure the structure strictly follows the `Task` and `Feature` schemas from `task_format.py`.",
-      "context": ["docs/tasks/task_format.py"],
+      "action": "Create `docs/stories/story_example.json` that demonstrates a complete story in the new format, adhering to the schema defined in `story_format.py`.",
+      "plan": "1. Create the file `docs/stories/story_example.json`. 2. Populate it with a sample story that includes at least two features. 3. Ensure the structure strictly follows the `Story` and `Feature` schemas from `story_format.py`.",
+      "context": ["docs/stories/story_format.py"],
       "acceptance": [
-        "`docs/tasks/task_example.json` exists.",
-        "The JSON is valid and conforms to the structure defined in `docs/tasks/task_format.py`."
+        "`docs/stories/story_example.json` exists.",
+        "The JSON is valid and conforms to the structure defined in `docs/stories/story_format.py`."
       ],
       "blockers": ["13.1"]
     }

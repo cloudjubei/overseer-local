@@ -16,7 +16,7 @@ import { NotificationClickHandler } from './hooks/useNotifications'
 import { LLMConfigProvider } from './contexts/LLMConfigContext'
 import { AgentsProvider } from './contexts/AgentsContext'
 import { FilesProvider } from './contexts/FilesContext'
-import { TasksProvider } from './contexts/TasksContext'
+import { StoriesProvider } from './contexts/StoriesContext'
 import { GitHubCredentialsProvider } from './contexts/GitHubCredentialsContext'
 
 function ServicesBootstrap() {
@@ -34,7 +34,7 @@ function App() {
     <AppSettingsProvider>
       <ToastProvider>
         <ProjectsProvider>
-          <TasksProvider>
+          <StoriesProvider>
             <FilesProvider>
               <NavigatorProvider>
                 <ShortcutsProvider>
@@ -53,7 +53,7 @@ function App() {
                 </ShortcutsProvider>
               </NavigatorProvider>
             </FilesProvider>
-          </TasksProvider>
+          </StoriesProvider>
         </ProjectsProvider>
       </ToastProvider>
     </AppSettingsProvider>

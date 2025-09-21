@@ -1,8 +1,8 @@
 import type { BrowserWindow } from 'electron'
 import FactoryToolsManager from './factory-tools/FactoryToolsManager'
-import TasksManager from './tasks/TasksManager'
 import FilesManager from './files/FilesManager'
 import ProjectsManager from './projects/ProjectsManager'
+import StoriesManager from './stories/StoriesManager'
 import ChatsManager from './chat/ChatsManager'
 import NotificationsManager from './notifications/NotificationsManager'
 import SettingsManager from './settings/SettingsManager'
@@ -14,7 +14,7 @@ import BaseManager from './BaseManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
-export let tasksManager: TasksManager | undefined
+export let storiesManager: StoriesManager | undefined
 export let filesManager: FilesManager | undefined
 export let projectsManager: ProjectsManager | undefined
 export let chatsManager: ChatsManager | undefined
@@ -30,7 +30,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   databaseManager = new DatabaseManager(projectRoot, mainWindow)
   factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, databaseManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
-  tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
+  storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
   settingsManager = new SettingsManager(projectRoot, mainWindow)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager)
@@ -39,7 +39,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     projectRoot,
     mainWindow,
     projectsManager,
-    tasksManager,
+    storiesManager,
     filesManager,
     settingsManager,
   )
@@ -56,7 +56,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     databaseManager,
     factoryToolsManager,
     projectsManager,
-    tasksManager,
+    storiesManager,
     filesManager,
     chatsManager,
     notificationsManager,

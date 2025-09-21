@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import DependencyBullet from '../tasks/DependencyBullet'
+import DependencyBullet from '../stories/DependencyBullet'
 import StatusChip from './StatusChip'
 import ModelChip from './ModelChip'
 import {
@@ -149,7 +149,7 @@ export default function AgentRunRow({
       <td className="px-3 py-2">
         <DependencyBullet
           className={'max-w-[100px] overflow-clip'}
-          dependency={run.taskId}
+          dependency={run.storyId}
           notFoundDependencyDisplay={'?'}
         />
       </td>

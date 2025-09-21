@@ -3,18 +3,18 @@ import { AgentRunHistory, AgentType, AgentRunRatingPatch } from 'thefactory-tool
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { factoryService } from '../services/factoryService'
-import { tasksService } from '../services/tasksService'
+import { storiesService } from '../services/storiesService'
 import { notificationsService } from '../services/notificationsService'
 import { useGitHubCredentials } from './GitHubCredentialsContext'
 import { useProjectContext } from './ProjectContext'
 
 export type AgentsContextValue = {
   runsHistory: AgentRunHistory[]
-  startTaskAgent: (agentType: AgentType, projectId: string, taskId: string) => Promise<void>
+  startStoryAgent: (agentType: AgentType, projectId: string, storyId: string) => Promise<void>
   startFeatureAgent: (
     agentType: AgentType,
     projectId: string,
-    taskId: string,
+    storyId: string,
     featureId: string,
   ) => Promise<void>
   cancelRun: (runId: string) => Promise<void>
@@ -51,7 +51,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       unsubscribe()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tasksService])
+  }, [storiesService])
 
   const activeCredentials = useMemo(() => {
     if (activeProject) {
@@ -62,36 +62,36 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [activeProject, getCredentials])
 
-  const coerceAgentTypeForTask = async (
+  const coerceAgentTypeForStory = async (
     agentType: AgentType,
     projectId: string,
-    taskId: string,
+    storyId: string,
   ): Promise<AgentType> => {
     try {
-      const task = await tasksService.getTask(projectId, taskId)
-      if (task && task.features.length === 0) return 'speccer'
+      const story = await storiesService.getStory(projectId, storyId)
+      if (story && story.features.length === 0) return 'speccer'
     } catch (err) {
       console.warn(
-        '[agentsService] coerceAgentTypeForTask failed; keeping provided agentType',
+        '[agentsService] coerceAgentTypeForStory failed; keeping provided agentType',
         (err as any)?.message || err,
       )
     }
     return agentType
   }
 
-  const startTaskAgent = useCallback(
-    async (agentType: AgentType, projectId: string, taskId: string) => {
+  const startStoryAgent = useCallback(
+    async (agentType: AgentType, projectId: string, storyId: string) => {
       if (!activeConfig) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
       if (!activeCredentials) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
-      const effectiveAgentType = await coerceAgentTypeForTask(agentType, projectId, taskId)
-      const historyRun = await factoryService.startTaskRun({
+      const effectiveAgentType = await coerceAgentTypeForStory(agentType, projectId, storyId)
+      const historyRun = await factoryService.startStoryRun({
         agentType: effectiveAgentType,
         projectId,
-        taskId,
+        storyId,
         llmConfig: activeConfig,
         githubCredentials: activeCredentials,
         webSearchApiKeys: appSettings.webSearchApiKeys,
@@ -102,7 +102,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const startFeatureAgent = useCallback(
-    async (agentType: AgentType, projectId: string, taskId: string, featureId: string) => {
+    async (agentType: AgentType, projectId: string, storyId: string, featureId: string) => {
       if (!activeConfig) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
@@ -112,7 +112,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const historyRun = await factoryService.startFeatureRun({
         agentType,
         projectId,
-        taskId,
+        storyId,
         featureId,
         llmConfig: activeConfig,
         githubCredentials: activeCredentials,
@@ -142,7 +142,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const baseTitle = 'Agent finished'
       const parts: string[] = []
       parts.push(`Agent ${run.agentType}`)
-      parts.push(`task ${run.taskId}`)
+      parts.push(`story ${run.storyId}`)
       const message = parts.join(' • ')
 
       await notificationsService.create(run.projectId, {
@@ -163,13 +163,13 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AgentsContextValue>(
     () => ({
       runsHistory,
-      startTaskAgent,
+      startStoryAgent,
       startFeatureAgent,
       cancelRun,
       deleteRunHistory,
       rateRun,
     }),
-    [runsHistory, startTaskAgent, startFeatureAgent, cancelRun, deleteRunHistory, rateRun],
+    [runsHistory, startStoryAgent, startFeatureAgent, cancelRun, deleteRunHistory, rateRun],
   )
 
   return <AgentsContext.Provider value={value}>{children}</AgentsContext.Provider>

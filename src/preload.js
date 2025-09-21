@@ -31,36 +31,36 @@ const FILES_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPLOAD_FILE, { projectId, name, content }),
 }
 
-const TASKS_API = {
+const STORIES_API = {
   subscribe: (callback) => {
     const listener = (_event) => callback()
-    ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener)
-    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener)
+    ipcRenderer.on(IPC_HANDLER_KEYS.STORIES_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.STORIES_SUBSCRIBE, listener)
   },
-  listTasks: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_LIST, { projectId }),
-  getTask: (projectId, taskId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_GET, { projectId, taskId }),
-  createTask: (projectId, input) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_CREATE, { projectId, input }),
-  updateTask: (projectId, taskId, patch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_UPDATE, { projectId, taskId, patch }),
-  deleteTask: (projectId, taskId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_DELETE, { projectId, taskId }),
+  listStories: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_LIST, { projectId }),
+  getStory: (projectId, storyId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_GET, { projectId, storyId }),
+  createStory: (projectId, input) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_CREATE, { projectId, input }),
+  updateStory: (projectId, storyId, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE, { projectId, storyId, patch }),
+  deleteStory: (projectId, storyId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_DELETE, { projectId, storyId }),
   getFeature: (projectId, featureId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_GET, { projectId, featureId }),
-  addFeature: (projectId, taskId, input) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_ADD, { projectId, taskId, input }),
-  updateFeature: (projectId, taskId, featureId, patch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_UPDATE, {
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_GET, { projectId, featureId }),
+  addFeature: (projectId, storyId, input) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_ADD, { projectId, storyId, input }),
+  updateFeature: (projectId, storyId, featureId, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_UPDATE, {
       projectId,
-      taskId,
+      storyId,
       featureId,
       patch,
     }),
-  deleteFeature: (projectId, taskId, featureId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURE_DELETE, { projectId, taskId, featureId }),
-  reorderFeatures: (projectId, taskId, payload) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.TASKS_FEATURES_REORDER, { projectId, taskId, payload }),
+  deleteFeature: (projectId, storyId, featureId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_DELETE, { projectId, storyId, featureId }),
+  reorderFeatures: (projectId, storyId, payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURES_REORDER, { projectId, storyId, payload }),
 }
 
 const CHATS_API = {
@@ -124,8 +124,8 @@ const PROJECTS_API = {
   updateProject: (projectId, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { projectId, patch }),
   deleteProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { projectId }),
-  reorderTask: (projectId, payload) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { projectId, payload }),
+  reorderStory: (projectId, payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER, { projectId, payload }),
 }
 
 const SCREENSHOT_API = {
@@ -171,7 +171,7 @@ const FACTORY_API = {
     ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
   },
-  startTaskRun: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_START_TASK, params),
+  startStoryRun: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_START_STORY, params),
   startFeatureRun: (params) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_START_FEATURE, params),
   cancelRun: (runId, reason) =>
@@ -240,7 +240,7 @@ const GIT_MONITOR_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH, { branchName, baseBranch }),
 }
 
-contextBridge.exposeInMainWorld('tasksService', TASKS_API)
+contextBridge.exposeInMainWorld('storiesService', STORIES_API)
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
 contextBridge.exposeInMainWorld('filesService', FILES_API)
 contextBridge.exposeInMainWorld('chatsService', CHATS_API)

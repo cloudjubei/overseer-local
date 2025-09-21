@@ -259,7 +259,7 @@ export default function ChatView() {
               </div>
               <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
                 Attach markdown or text files to give context. Mention files with @, and reference
-                tasks/features with #.
+                stories/features with #.
               </div>
             </div>
           ) : (
@@ -370,7 +370,7 @@ export default function ChatView() {
                   placeholder={
                     isConfigured
                       ? 'Type your message…'
-                      : 'You can compose a message and reference files (@) and tasks/features (#) even before configuring. Configure LLM to send.'
+                      : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.'
                   }
                   rows={1}
                   aria-label="Message input"
@@ -426,7 +426,7 @@ export default function ChatView() {
                         onChange={handleFileUpload}
                       />
                       <span className="hidden sm:inline">
-                        Tip: Use @ for files • Use # for tasks and features
+                        Tip: Use @ for files • Use # for stories and features
                       </span>
                     </div>
                     <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>

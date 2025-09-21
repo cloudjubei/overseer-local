@@ -1,10 +1,10 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigator } from './Navigator'
-import TaskCreateView from '../tasks/TaskCreateView'
-import TaskEditView from '../tasks/TaskEditView'
-import FeatureCreateView from '../tasks/FeatureCreateView'
-import FeatureEditView from '../tasks/FeatureEditView'
+import StoryCreateView from '../stories/StoryCreateView'
+import StoryEditView from '../stories/StoryEditView'
+import FeatureCreateView from '../stories/FeatureCreateView'
+import FeatureEditView from '../stories/FeatureEditView'
 import SettingsLLMConfigModal from '../../settings/SettingsLLMConfigModal'
 import SettingsGitHubCredentialsModal from '../../settings/SettingsGitHubCredentialsModal'
 import ProjectManagerModal from '../projects/ProjectManagerModal'
@@ -15,19 +15,19 @@ export default function ModalHost() {
 
   let content: React.ReactNode = null
   switch (modal.type) {
-    case 'task-create':
-      content = <TaskCreateView onRequestClose={closeModal} />
+    case 'story-create':
+      content = <StoryCreateView onRequestClose={closeModal} />
       break
-    case 'task-edit':
-      content = <TaskEditView taskId={modal.taskId} onRequestClose={closeModal} />
+    case 'story-edit':
+      content = <StoryEditView storyId={modal.storyId} onRequestClose={closeModal} />
       break
     case 'feature-create':
-      content = <FeatureCreateView taskId={modal.taskId} onRequestClose={closeModal} />
+      content = <FeatureCreateView storyId={modal.storyId} onRequestClose={closeModal} />
       break
     case 'feature-edit':
       content = (
         <FeatureEditView
-          taskId={modal.taskId}
+          storyId={modal.storyId}
           featureId={modal.featureId}
           onRequestClose={closeModal}
         />

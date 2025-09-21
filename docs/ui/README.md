@@ -56,8 +56,8 @@ Components and patterns
 UX patterns and shortcuts
 
 - Read: docs/ux/LINEAR_UX_GUIDELINES.md for Linear.app-inspired flows and behaviors.
-  - Global command menu (Cmd/Ctrl+K), search (/), new task (Cmd/Ctrl+N), Esc to close, roving focus in lists/grids.
-  - Task flows: create (quick create + templates), inline editing, right-side Details panel, bulk editing, drag-and-drop on boards.
+  - Global command menu (Cmd/Ctrl+K), search (/), new story (Cmd/Ctrl+N), Esc to close, roving focus in lists/grids.
+  - Story flows: create (quick create + templates), inline editing, right-side Details panel, bulk editing, drag-and-drop on boards.
   - Micro-interactions: hover affordances, subtle transitions, toasts with Undo.
   - Performance guidance: virtualization for long lists/boards, debounced/coalesced updates, preload likely-needed data.
 
@@ -73,7 +73,7 @@ Renderer structure and conventions
 
 - Follow docs/STANDARDS.md for placement and naming.
   - Screens: src/renderer/screens/<Name>View.tsx
-  - Modals: src/renderer/tasks/<Name>View.tsx (or components if generic)
+  - Modals: src/renderer/stories/<Name>View.tsx (or components if generic)
   - Components: src/renderer/components/...
   - Hooks: src/renderer/hooks/useFeatureName.ts
   - Services (IPC): src/renderer/services/featureService.ts

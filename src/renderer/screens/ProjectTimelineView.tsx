@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Feature, Task } from 'thefactory-tools'
-import { useTasks } from '../contexts/TasksContext'
+import { Feature, Story } from 'thefactory-tools'
+import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import { Entity } from 'thefactory-db'
 import { EntityInput } from 'thefactory-db/dist/types'
-import TaskSummaryCallout from '../components/tasks/TaskSummaryCallout'
-import FeatureSummaryCallout from '../components/tasks/FeatureSummaryCallout'
+import StorySummaryCallout from '../components/stories/StorySummaryCallout'
+import FeatureSummaryCallout from '../components/stories/FeatureSummaryCallout'
 import { useNavigator } from '../navigation/Navigator'
 
 function startOfDay(d: Date) {
@@ -111,32 +111,32 @@ function mapFeatureToTimelineLabel(projectId: string, feature: Feature): Timelin
   }
 }
 
-function getTaskCompletedAt(task: Task): string | null {
-  const anyTask: any = task as any
-  if (anyTask?.completedAt) return anyTask.completedAt as string
+function getStoryCompletedAt(story: Story): string | null {
+  const anyStory: any = story as any
+  if (anyStory?.completedAt) return anyStory.completedAt as string
   // Fallback: latest completed feature timestamp
-  const times = (task.features || [])
+  const times = (story.features || [])
     .map((f: any) => f?.completedAt)
     .filter((ts: any): ts is string => !!ts)
   if (!times.length) return null
   return times.reduce((max, ts) => (new Date(ts) > new Date(max) ? ts : max), times[0])
 }
 
-function mapTaskToTimelineLabel(projectId: string, task: Task): TimelineLabel | null {
-  const ts = getTaskCompletedAt(task)
+function mapStoryToTimelineLabel(projectId: string, story: Story): TimelineLabel | null {
+  const ts = getStoryCompletedAt(story)
   if (!ts) return null
   return {
-    id: `task-${task.id}`,
+    id: `story-${story.id}`,
     projectId,
     type: ENTITY_TYPE,
     content: {
       timestamp: ts,
-      label: task.title,
-      description: (task as any)?.description,
+      label: story.title,
+      description: (story as any)?.description,
     },
-    createdAt: (task as any)?.createdAt,
-    updatedAt: (task as any)?.updatedAt,
-    metadata: task,
+    createdAt: (story as any)?.createdAt,
+    updatedAt: (story as any)?.updatedAt,
+    metadata: story,
   }
 }
 
@@ -149,15 +149,15 @@ function tsToInput(ts: string) {
   }
 }
 
-// Helper for consistent color-coding by task
+// Helper for consistent color-coding by story
 function hashToHue(str: string): number {
   let h = 0
   for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0
   h = Math.abs(h)
   return h % 360
 }
-function taskColorStyles(taskId: string | undefined): React.CSSProperties {
-  const base = taskId || 'default'
+function storyColorStyles(storyId: string | undefined): React.CSSProperties {
+  const base = storyId || 'default'
   const hue = hashToHue(base)
   const bg = `hsl(${hue}, 85%, 92%)`
   const border = `hsl(${hue}, 60%, 70%)`
@@ -177,8 +177,8 @@ interface RowItem {
   id: string
   title: string
   timestamp: string
-  kind: 'feature' | 'task' | 'label'
-  taskId?: string // for feature coloring
+  kind: 'feature' | 'story' | 'label'
+  storyId?: string // for feature coloring
   scope?: 'project' | '__global__' // for label coloring
 }
 
@@ -186,21 +186,21 @@ interface RowItem {
 type HoverInfo =
   | null
   | {
-      kind: 'task'
-      taskId: string
+      kind: 'story'
+      storyId: string
       rect: DOMRect
     }
   | {
       kind: 'feature'
-      taskId: string
+      storyId: string
       featureId: string
       rect: DOMRect
     }
 
 export default function ProjectTimelineView() {
   const { projectId, project } = useActiveProject()
-  const { tasksById } = useTasks()
-  const { navigateTaskDetails } = useNavigator()
+  const { storiesById } = useStories()
+  const { navigateStoryDetails } = useNavigator()
 
   const [features, setFeatures] = useState<Feature[]>([])
   const [labels, setLabels] = useState<TimelineLabel[]>([])
@@ -245,8 +245,8 @@ export default function ProjectTimelineView() {
       setLoading(true)
       setError(null)
       try {
-        const tasks: Task[] = Object.values(tasksById)
-        const fetchedFeatures = tasks.flatMap((t) => t.features).filter((f) => !!f.completedAt)
+        const stories: Story[] = Object.values(storiesById)
+        const fetchedFeatures = stories.flatMap((t) => t.features).filter((f) => !!f.completedAt)
 
         const fetchedProjectLabels = await dbService.matchEntities(undefined, {
           projectIds: [projectId],
@@ -272,25 +272,25 @@ export default function ProjectTimelineView() {
     }
 
     fetchTimelineData()
-  }, [projectId, tasksById])
+  }, [projectId, storiesById])
 
   const timelineItems = useMemo(() => {
     const fs = features
       .filter((f) => f.completedAt)
       .map((f) => mapFeatureToTimelineLabel(projectId, f))
 
-    // Include tasks for week/month so the range reflects tasks when those views are active
+    // Include stories for week/month so the range reflects stories when those views are active
     let ts: TimelineLabel[] = []
     if (zoom !== 'day') {
-      ts = Object.values(tasksById)
-        .map((t) => mapTaskToTimelineLabel(projectId, t))
+      ts = Object.values(storiesById)
+        .map((t) => mapStoryToTimelineLabel(projectId, t))
         .filter((x): x is TimelineLabel => !!x)
     }
 
     return [...fs, ...ts, ...labels].sort(
       (a, b) => new Date(a.content.timestamp).getTime() - new Date(b.content.timestamp).getTime(),
     )
-  }, [features, labels, projectId, zoom, tasksById])
+  }, [features, labels, projectId, zoom, storiesById])
 
   // Determine raw min/max
   const { rawStartDate, rawEndDate } = useMemo(() => {
@@ -421,11 +421,11 @@ export default function ProjectTimelineView() {
     [unitCount, cellMinWidth],
   )
 
-  // Build rows for features (day) or tasks (week/month) and user-defined label rows
+  // Build rows for features (day) or stories (week/month) and user-defined label rows
   const featureRows = useMemo(() => {
-    // build from tasks to capture taskId for color coding
+    // build from stories to capture storyId for color coding
     const items: RowItem[] = []
-    for (const t of Object.values(tasksById)) {
+    for (const t of Object.values(storiesById)) {
       for (const f of t.features || []) {
         if (!f?.completedAt) continue
         items.push({
@@ -433,7 +433,7 @@ export default function ProjectTimelineView() {
           title: f.title,
           timestamp: f.completedAt ?? new Date().toISOString(),
           kind: 'feature',
-          taskId: t.id,
+          storyId: t.id,
         })
       }
     }
@@ -444,30 +444,30 @@ export default function ProjectTimelineView() {
         items,
       },
     ]
-  }, [tasksById])
+  }, [storiesById])
 
-  const taskRows = useMemo(() => {
-    const items = Object.values(tasksById)
+  const storyRows = useMemo(() => {
+    const items = Object.values(storiesById)
       .map((t) => {
-        const ts = getTaskCompletedAt(t)
+        const ts = getStoryCompletedAt(t)
         if (!ts) return null
         return {
           id: t.id,
           title: t.title,
           timestamp: ts,
-          kind: 'task' as const,
+          kind: 'story' as const,
         } as RowItem
       })
       .filter((x): x is RowItem => !!x)
 
     return [
       {
-        key: 'tasks',
-        title: 'Tasks (completed)',
+        key: 'stories',
+        title: 'Stories (completed)',
         items,
       },
     ]
-  }, [tasksById])
+  }, [storiesById])
 
   const labelRows = useMemo(() => {
     const groups = new Map<
@@ -503,12 +503,12 @@ export default function ProjectTimelineView() {
   }, [labels, projectId])
 
   const dataRows = useMemo(
-    () => (zoom === 'day' ? featureRows : taskRows),
-    [featureRows, taskRows, zoom],
+    () => (zoom === 'day' ? featureRows : storyRows),
+    [featureRows, storyRows, zoom],
   )
 
   const allRows = useMemo(() => {
-    // User label rows at the top; features or tasks row below depending on zoom
+    // User label rows at the top; features or stories row below depending on zoom
     return [...labelRows, ...dataRows]
   }, [dataRows, labelRows])
 
@@ -873,17 +873,17 @@ export default function ProjectTimelineView() {
                           }`
 
                           const style = !isLabel
-                            ? taskColorStyles(isFeature ? it.taskId : it.id)
+                            ? storyColorStyles(isFeature ? it.storyId : it.id)
                             : undefined
 
                           const onMouseEnter: React.MouseEventHandler<HTMLDivElement> = (e) => {
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                            if (kind === 'task') {
-                              setHover({ kind: 'task', taskId: it.id, rect })
+                            if (kind === 'story') {
+                              setHover({ kind: 'story', storyId: it.id, rect })
                             } else if (kind === 'feature') {
                               setHover({
                                 kind: 'feature',
-                                taskId: (it as any).taskId!,
+                                storyId: (it as any).storyId!,
                                 featureId: it.id,
                                 rect,
                               })
@@ -896,10 +896,10 @@ export default function ProjectTimelineView() {
                           }
 
                           const onClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
-                            if (kind === 'task') {
-                              navigateTaskDetails(it.id, undefined, true)
+                            if (kind === 'story') {
+                              navigateStoryDetails(it.id, undefined, true)
                             } else if (kind === 'feature') {
-                              navigateTaskDetails((it as any).taskId!, it.id)
+                              navigateStoryDetails((it as any).storyId!, it.id)
                             }
                           }
 
@@ -983,13 +983,13 @@ export default function ProjectTimelineView() {
             ),
           }}
         >
-          {hover.kind === 'task'
+          {hover.kind === 'story'
             ? (() => {
-                const t = tasksById[hover.taskId]
+                const t = storiesById[hover.storyId]
                 if (!t) return null
-                const displayId = String(project?.taskIdToDisplayIndex?.[t.id] ?? t.id)
+                const displayId = String(project?.storyIdToDisplayIndex?.[t.id] ?? t.id)
                 return (
-                  <TaskSummaryCallout
+                  <StorySummaryCallout
                     title={t.title}
                     description={(t as any)?.description || ''}
                     status={t.status}
@@ -999,7 +999,7 @@ export default function ProjectTimelineView() {
               })()
             : hover.kind === 'feature'
               ? (() => {
-                  const t = tasksById[hover.taskId]
+                  const t = storiesById[hover.storyId]
                   const f = t?.features.find((x) => x.id === hover.featureId)
                   if (!t || !f) return null
                   const displayId = String(t.featureIdToDisplayIndex?.[f.id] ?? f.id)

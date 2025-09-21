@@ -5,7 +5,7 @@ export type ShortcutsModifier = 'meta' | 'ctrl'
 
 export type ShortcutsConfig = {
   commandMenu: string // e.g., 'Mod+K'
-  newTask: string // e.g., 'Mod+N'
+  newStory: string // e.g., 'Mod+N'
   help: string // e.g., 'Mod+/'
   addUiFeature: string // e.g., 'Mod+Shift+F'
 }
@@ -13,9 +13,9 @@ export type ShortcutsConfig = {
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   userPreferences: {
     lastActiveProjectId: 'main',
-    tasksViewMode: 'list',
-    tasksListViewSorting: 'index_desc',
-    tasksListViewStatusFilter: 'all',
+    storiesViewMode: 'list',
+    storiesListViewSorting: 'index_desc',
+    storiesListViewStatusFilter: 'all',
     sidebarCollapsed: false,
     shortcutsModifier:
       navigator.platform.toLowerCase().includes('mac') ||
@@ -24,7 +24,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
         : 'ctrl',
     shortcuts: {
       commandMenu: 'Mod+K',
-      newTask: 'Mod+N',
+      newStory: 'Mod+N',
       help: 'Mod+/',
       addUiFeature: 'Mod+Shift+F',
     },
@@ -50,19 +50,19 @@ export interface NotificationSystemSettings {
   displayDuration: number
 }
 
-export type TaskListStatusFilter = 'all' | 'not-done' | '-' | '~' | '+' | '=' | '?'
+export type StoryListStatusFilter = 'all' | 'not-done' | '-' | '~' | '+' | '=' | '?'
 
 export interface UserPreferences {
   lastActiveProjectId: string
-  tasksViewMode: TaskViewMode
-  tasksListViewSorting: TaskListViewSorting
-  tasksListViewStatusFilter: TaskListStatusFilter
+  storiesViewMode: StoryViewMode
+  storiesListViewSorting: StoryListViewSorting
+  storiesListViewStatusFilter: StoryListStatusFilter
   sidebarCollapsed: boolean
   shortcutsModifier: ShortcutsModifier
   shortcuts: ShortcutsConfig
 }
-export type TaskViewMode = 'list' | 'board'
-export type TaskListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
+export type StoryViewMode = 'list' | 'board'
+export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
 export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   notifications: {
@@ -70,7 +70,7 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
       general: true,
       files: true,
       chat: true,
-      tasks: true,
+      stories: true,
       system: true,
       updates: true,
     },

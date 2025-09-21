@@ -117,7 +117,7 @@
   border-color: var(--color-gray-400);
 }
 
-/* ID chip: compact bubble for IDs (tasks/features), similar to dependency chips */
+/* ID chip: compact bubble for IDs (stories/features), similar to dependency chips */
 .id-chip {
   display: inline-flex;
   align-items: center;
@@ -133,7 +133,7 @@
   white-space: nowrap;
 }
 
-/* Dependency bullets (clickable chips for task/feature refs) */
+/* Dependency bullets (clickable chips for story/feature refs) */
 
 .chips-list {
   display: flex;
@@ -216,12 +216,12 @@
   outline: none;
   box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring);
 }
-.chip.task {
+.chip.story {
   border-color: var(--color-blue-800);
   background: color-mix(in srgb, var(--color-blue-800) 6%, transparent);
   color: var(--color-blue-800);
 }
-.chip.task.chip--blocks {
+.chip.story.chip--blocks {
   border-color: var(--color-purple-800);
 }
 .chip.feature {

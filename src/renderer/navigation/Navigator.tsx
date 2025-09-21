@@ -1,15 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { NavigationView } from '../types'
 
-export type TasksRoute =
+export type StoriesRoute =
   | { name: 'list' }
-  | { name: 'details'; taskId: string; highlightFeatureId?: string; highlightTask?: boolean }
+  | { name: 'details'; storyId: string; highlightFeatureId?: string; highlightStory?: boolean }
 
 export type ModalRoute =
-  | { type: 'task-create' }
-  | { type: 'task-edit'; taskId: string }
-  | { type: 'feature-create'; taskId: string }
-  | { type: 'feature-edit'; taskId: string; featureId: string }
+  | { type: 'story-create' }
+  | { type: 'story-edit'; storyId: string }
+  | { type: 'feature-create'; storyId: string }
+  | { type: 'feature-edit'; storyId: string; featureId: string }
   | { type: 'llm-config-add' }
   | { type: 'llm-config-edit'; id: string }
   | { type: 'github-credentials-add' }
@@ -18,7 +18,7 @@ export type ModalRoute =
 
 export type NavigatorState = {
   currentView: NavigationView
-  tasksRoute: TasksRoute
+  storiesRoute: StoriesRoute
 }
 export type ModalState = {
   modal: ModalRoute | null
@@ -29,10 +29,10 @@ export type NavigatorApi = NavigatorState &
     openModal: (m: ModalRoute) => void
     closeModal: () => void
     navigateView: (v: NavigationView) => void
-    navigateTaskDetails: (
-      taskId: string,
+    navigateStoryDetails: (
+      storyId: string,
       highlightFeatureId?: string,
-      highlightTask?: boolean,
+      highlightStory?: boolean,
     ) => void
     navigateAgentRun: (runId: string) => void
   }
@@ -72,21 +72,21 @@ function parseHash(hashRaw: string): NavigatorState {
 
   const currentView: NavigationView = viewPrefixToView(prefix)
 
-  let tasksRoute: TasksRoute = { name: 'list' }
+  let storiesRoute: StoriesRoute = { name: 'list' }
   let m: RegExpExecArray | null
   if (
     (m =
-      /^task\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})(?:\/highlight-task)?(?:\/highlight-feature\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}))?/.exec(
+      /^story\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})(?:\/highlight-story)?(?:\/highlight-feature\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}))?/.exec(
         raw,
       ))
   ) {
-    const taskId = m[1]
+    const storyId = m[1]
     const highlightFeatureId = m[2] || undefined
-    const highlightTask = raw.includes('/highlight-task') ? true : undefined
-    tasksRoute = { name: 'details', taskId, highlightFeatureId, highlightTask }
+    const highlightStory = raw.includes('/highlight-story') ? true : undefined
+    storiesRoute = { name: 'details', storyId, highlightFeatureId, highlightStory }
   }
 
-  return { currentView, tasksRoute }
+  return { currentView, storiesRoute }
 }
 
 const NavigatorContext = createContext<NavigatorApi | null>(null)
@@ -145,13 +145,13 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const navigateTaskDetails = useCallback(
-    (taskId: string, highlightFeatureId?: string, highlightTask: boolean = false) => {
-      let hash = `#task/${taskId}`
+  const navigateStoryDetails = useCallback(
+    (storyId: string, highlightFeatureId?: string, highlightStory: boolean = false) => {
+      let hash = `#story/${storyId}`
       if (highlightFeatureId) {
         hash += `/highlight-feature/${highlightFeatureId}`
-      } else if (highlightTask) {
-        hash += `/highlight-task`
+      } else if (highlightStory) {
+        hash += `/highlight-story`
       }
       window.location.hash = hash
     },
@@ -169,10 +169,10 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
       openModal,
       closeModal,
       navigateView,
-      navigateTaskDetails,
+      navigateStoryDetails,
       navigateAgentRun,
     }),
-    [state, modal, openModal, closeModal, navigateView, navigateTaskDetails, navigateAgentRun],
+    [state, modal, openModal, closeModal, navigateView, navigateStoryDetails, navigateAgentRun],
   )
 
   return <NavigatorContext.Provider value={value}>{children}</NavigatorContext.Provider>

@@ -2,14 +2,14 @@
 
 Purpose
 
-- Capture best-in-class UX patterns inspired by Linear.app and adapt them to our task management app.
+- Capture best-in-class UX patterns inspired by Linear.app and adapt them to our story management app.
 - Define interaction models, controls, and behaviors to achieve speed, clarity, and power-user efficiency.
 - Align with our Renderer-driven navigation (Navigator + ModalHost) and existing UI components and design tokens.
 
 Guiding Principles
 
 - Keyboard-first: every primary action should be executable via shortcuts and the command menu.
-- Minimal chrome, maximal focus: keep the interface clean and emphasize the content (tasks) over UI furniture.
+- Minimal chrome, maximal focus: keep the interface clean and emphasize the content (stories) over UI furniture.
 - Instant feedback: optimistic updates, subtle animations, and undo affordances.
 - Inline over modal, modal over page: inline edits by default; side-panel or lightweight modal when necessary.
 - Progressive disclosure: show advanced fields when needed; keep defaults minimal.
@@ -19,10 +19,10 @@ Guiding Principles
 Core Navigation Patterns
 
 - Global command menu: a universal entry point (Cmd/Ctrl+K) to search and execute actions; type-to-filter.
-- Left sidebar navigation: high-level areas (Inbox/My Tasks, All Tasks, Boards, Projects, Docs, Chat), collapsible groups.
-- Contextual panels: task details open in a right-side panel/sheet over list or board; never lose context.
+- Left sidebar navigation: high-level areas (Inbox/My Stories, All Stories, Boards, Projects, Docs, Chat), collapsible groups.
+- Contextual panels: story details open in a right-side panel/sheet over list or board; never lose context.
 - Persistent filters and views: list and board views remember sort/filter/group; support quick toggles.
-- Search first: top-level search (/) focuses the command/search input; results include tasks, projects, views.
+- Search first: top-level search (/) focuses the command/search input; results include stories, projects, views.
 
 Keyboard Shortcuts (Recommended Mapping)
 Note: Provide consistent shortcut semantics; do not rely on platform-specific nonstandard keys. Ensure shortcut discoverability via a Help overlay.
@@ -31,15 +31,15 @@ Note: Provide consistent shortcut semantics; do not rely on platform-specific no
   - Cmd/Ctrl+K: Open command menu
   - /: Focus search
   - ?: Open shortcuts help
-  - Cmd/Ctrl+N: New task (from anywhere)
+  - Cmd/Ctrl+N: New story (from anywhere)
   - Esc: Close modals/panels, clear focus when appropriate
 - Selection and Navigation
   - Up/Down: Move row selection in lists
   - Left/Right: Collapse/expand groups or move across board columns when focused
-  - Enter: Open selected task in details panel
+  - Enter: Open selected story in details panel
   - Shift+Up/Down: Multi-select range in lists
   - Cmd/Ctrl+A: Select all (within the current list/filter)
-- Task Actions (when a task or multi-selection is active)
+- Story Actions (when a story or multi-selection is active)
   - E: Edit title inline (focus title field)
   - S: Change status (open status picker)
   - A: Change assignee (open assignee picker)
@@ -47,43 +47,43 @@ Note: Provide consistent shortcut semantics; do not rely on platform-specific no
   - L: Manage labels/tags (open label picker)
   - D: Set due date (open date picker)
   - M: Move to project (open project picker)
-  - T: Toggle subtask creation inline
+  - T: Toggle substory creation inline
   - . (dot): Open quick actions menu for selected items
   - Backspace/Delete: Archive/delete (with confirm + undo)
 - Panels/Modals
   - Cmd/Ctrl+Enter: Save and close
   - Esc: Cancel/close (respect unsaved changes confirmation)
 
-Task Lifecycle Flows
+Story Lifecycle Flows
 
-- Create Task
+- Create Story
   - Quick create
-    - Trigger via Cmd/Ctrl+N or a prominent New Task button.
+    - Trigger via Cmd/Ctrl+N or a prominent New Story button.
     - Present a small modal or inline composer with: Title (required), Assignee (optional), Status (defaults), Project (optional).
     - Advanced fields available via a disclosure toggle or keyboard commands (e.g., press P to set priority).
     - Optimistic create: insert into current list/board immediately; show Undo toast.
   - Templates
     - Allow selection of templates in quick create via command menu or a small dropdown.
-- Edit Task
+- Edit Story
   - Inline editing by default: title, status, assignee, priority editable in-place in both lists and panels.
   - Details panel
     - Opens over current view without navigation; panel width responsive (~480-640px)
-    - Sections: Header (title, status, assignee, priority, due), Description (rich text/markdown), Subtasks, Attachments, Activity/Comments.
+    - Sections: Header (title, status, assignee, priority, due), Description (rich text/markdown), Substories, Attachments, Activity/Comments.
     - Keyboard-optimized field focus order and shortcuts to jump among sections.
 - Change Status
   - Drag-and-drop between board columns.
   - Press S to open a status picker with type-ahead; arrow keys to navigate; Enter to confirm.
   - Bulk status changes supported for multi-selection.
 - Bulk Editing
-  - Multi-select tasks via Shift/Click or keyboard.
+  - Multi-select stories via Shift/Click or keyboard.
   - Show a contextual bulk action bar (sticky footer or header) with status, assignee, labels, project, priority, delete/archive.
   - All actions keyboard-accessible via quick actions or command menu.
 - Comments and Activity
   - Comment composer with Cmd/Ctrl+Enter to submit; supports mentions, inline formatting.
   - Activity feed shows changes with compact timestamps and actor avatars.
   - Edits and comments should be undoable where safe and show toasts.
-- Subtasks and Relations
-  - Inline add subtask beneath parent; Tab/Shift+Tab to indent/outdent where appropriate.
+- Substories and Relations
+  - Inline add substory beneath parent; Tab/Shift+Tab to indent/outdent where appropriate.
   - Relations (blocks/blocked-by, duplicates, relates-to) via a relation picker; display chips in details.
 
 Modals and Panels Behavior
@@ -134,7 +134,7 @@ Implementation Guidelines for Our App
 - Components
   - Reuse src/renderer/components/ui primitives (Button, Input, Select, Modal, Toast). Extend with:
     - CommandMenu: a headless command palette integrated with Navigator and services.
-    - SidePanel: a right-side sheet pattern for task details.
+    - SidePanel: a right-side sheet pattern for story details.
     - InlineEditableText: title editing with confirm/cancel and debounced saves.
     - TokenPickers: AssigneePicker, StatusPicker, LabelPicker with type-ahead.
 - Design Tokens

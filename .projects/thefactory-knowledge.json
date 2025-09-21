@@ -5,7 +5,7 @@
   "path": "../../thefactory-knowledge",
   "repo_url": "https://github.com/cloudjubei/thefactory-knowledge.git",
   "requirements": [],
-  "taskIdToDisplayIndex": {
+  "storyIdToDisplayIndex": {
     "7463c50a-2ce4-4501-9a38-c62811b50f44": 1,
     "f72dbcdb-77e7-4d00-bf72-e2cc59271644": 2,
     "15a2115a-b435-43f7-a8bc-3346a8868753": 3,

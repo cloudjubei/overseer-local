@@ -5,7 +5,7 @@
   "path": "../",
   "repo_url": "https://github.com/cloudjubei/overseer-local",
   "requirements": [],
-  "taskIdToDisplayIndex": {
+  "storyIdToDisplayIndex": {
     "f67e8921-b197-40c9-9154-e95db8f27deb": 1,
     "f1f12817-8f44-4f92-9b2f-af5910289a13": 2,
     "9eccbb8c-2c9e-44bb-a695-4deeac8d7f26": 3,

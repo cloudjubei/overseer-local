@@ -1,14 +1,14 @@
 import React from 'react'
 import FileDisplay, { FileMeta } from './FileDisplay'
 import { useFiles } from '../../contexts/FilesContext'
-import DependencyBullet from '../tasks/DependencyBullet'
+import DependencyBullet from '../stories/DependencyBullet'
 
 // Renders text into rich content:
 // - @file/path.ext mentions -> inline File chip with hover preview
-// - #<uuid>(.<uuid>) or #<display>(.<display>) task/feature references -> DependencyBullet
+// - #<uuid>(.<uuid>) or #<display>(.<display>) story/feature references -> DependencyBullet
 // In forms: keep raw text; use this component only for display contexts.
 
-// UUID pattern used by tasks/features
+// UUID pattern used by stories/features
 const UUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 
 // Combined tokenizer: captures @file mentions and #dependency tokens while preserving text

@@ -5,7 +5,7 @@ This document defines standards for creating and styling views in the Electron r
 Scope
 
 - Screens under src/renderer/screens
-- Task modals under src/renderer/tasks
+- Story modals under src/renderer/stories
 - Shared UI components under src/renderer/components
 - Hooks under src/renderer/hooks
 - Services under src/renderer/services
@@ -55,8 +55,8 @@ Core Principles
 
 Folder and File Placement
 
-- Screens: src/renderer/screens/<Name>View.tsx (e.g., TasksView.tsx, DocumentsView.tsx)
-- Modals for tasks: src/renderer/tasks/<Name>View.tsx (e.g., TaskCreateView.tsx)
+- Screens: src/renderer/screens/<Name>View.tsx (e.g., StoriesView.tsx, DocumentsView.tsx)
+- Modals for stories: src/renderer/stories/<Name>View.tsx (e.g., StoryCreateView.tsx)
 - Shared UI components: src/renderer/components/... (e.g., components/ui/Modal.tsx)
 - Hooks: src/renderer/hooks/useFeatureName.ts
 - Services: src/renderer/services/featureService.ts
@@ -202,7 +202,7 @@ Async/IPC and Errors
 Naming Checklist
 
 - Screens: <Feature>View.tsx (e.g., DocumentsView.tsx)
-- Modals: <Thing><Action>View.tsx (e.g., TaskCreateView.tsx)
+- Modals: <Thing><Action>View.tsx (e.g., StoryCreateView.tsx)
 - Hooks: use<Thing><Action>.ts (e.g., useDocsIndex.ts)
 - Services: <thing>Service.ts (e.g., chatService.ts)
 
@@ -217,7 +217,7 @@ When Creating a New Screen
 
 When Creating a New Modal
 
-1. Place the file under src/renderer/tasks or components if generic.
+1. Place the file under src/renderer/stories or components if generic.
 2. Accept onRequestClose and call it to close.
 3. Use Modal from components/ui.
 4. Keep the modal logic thin; move data access to hooks/services.

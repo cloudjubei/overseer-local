@@ -1,9 +1,9 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import gitHelper from './gitHelper'
-import { analyzeBranchHeadForTask } from './CommitAnalyzer'
-import { updateLocalTaskStateFromCommit } from './updateLocalTaskStateFromCommit'
-import { isFeatureBranchName, branchNameToTaskId } from './taskBranchNaming'
+import { analyzeBranchHeadForStory } from './CommitAnalyzer'
+import { updateLocalStoryStateFromCommit } from './updateLocalStoryStateFromCommit'
+import { isFeatureBranchName, branchNameToStoryId } from './storyBranchNaming'
 import BaseManager from '../BaseManager'
 
 /**
@@ -11,7 +11,7 @@ import BaseManager from '../BaseManager'
  * - Periodically checks the project git repo for updates.
  * - Fetches remotes and lists branches with their latest commit SHAs and timestamps.
  * - Emits updates to renderer over IPC subscribe channel.
- * - Uses CommitAnalyzer to detect task.json in feature branches and updates local tasks.
+ * - Uses CommitAnalyzer to detect story.json in feature branches and updates local stories.
  */
 export default class GitMonitorManager extends BaseManager {
   private _interval: any
@@ -53,7 +53,7 @@ export default class GitMonitorManager extends BaseManager {
     try {
       const status = await this.getStatus()
 
-      // Try to analyze feature branches for task.json updates
+      // Try to analyze feature branches for story.json updates
       if (status?.ok && status?.repoPath && Array.isArray(status?.branches)) {
         await this._analyzeFeatureBranches(status.repoPath, status.branches)
       }
@@ -114,19 +114,19 @@ export default class GitMonitorManager extends BaseManager {
       if (last && last === headCommit) continue
 
       try {
-        const analysis = await analyzeBranchHeadForTask(this.projectRoot, branchName)
+        const analysis = await analyzeBranchHeadForStory(this.projectRoot, branchName)
         if (analysis?.ok && analysis?.found) {
-          const taskId =
-            branchNameToTaskId(branchName) || (analysis as any)?.extracted?.summary?.id || null
+          const storyId =
+            branchNameToStoryId(branchName) || (analysis as any)?.extracted?.summary?.id || null
 
-          const commitTaskData = (analysis as any).taskRaw || (analysis as any).extracted || null
-          if (commitTaskData && taskId) {
-            await updateLocalTaskStateFromCommit(this.projectRoot, commitTaskData, {
-              taskId,
+          const commitStoryData = (analysis as any).storyRaw || (analysis as any).extracted || null
+          if (commitStoryData && storyId) {
+            await updateLocalStoryStateFromCommit(this.projectRoot, commitStoryData, {
+              storyId,
               gitMeta: {
                 commit: analysis.commit,
                 branch: branchName,
-                taskJsonPath: (analysis as any).taskJsonPath || null,
+                storyJsonPath: (analysis as any).storyJsonPath || null,
               },
             })
           }

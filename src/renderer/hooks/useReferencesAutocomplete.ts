@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useTasks } from '../contexts/TasksContext'
+import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 
 type RefItem = {
   ref: string
   display: string
   title: string
-  type: 'task' | 'feature'
+  type: 'story' | 'feature'
 }
 
 export function useReferencesAutocomplete(params: {
@@ -17,28 +17,28 @@ export function useReferencesAutocomplete(params: {
 }) {
   const { project } = useActiveProject()
   const { input, setInput, textareaRef, mirrorRef } = params
-  const { tasksById } = useTasks()
+  const { storiesById } = useStories()
 
   const references = useMemo<RefItem[]>(() => {
     if (!project) {
       return []
     }
     const refs: RefItem[] = []
-    Object.values(tasksById).forEach((task) => {
-      const taskDisplay = `${project.taskIdToDisplayIndex[task.id]}`
-      refs.push({ ref: `${task.id}`, display: taskDisplay, title: task.title, type: 'task' })
-      ;(task.features || []).forEach((f) => {
-        const featureDisplay = `${task.featureIdToDisplayIndex[f.id]}`
+    Object.values(storiesById).forEach((story) => {
+      const storyDisplay = `${project.storyIdToDisplayIndex[story.id]}`
+      refs.push({ ref: `${story.id}`, display: storyDisplay, title: story.title, type: 'story' })
+      ;(story.features || []).forEach((f) => {
+        const featureDisplay = `${story.featureIdToDisplayIndex[f.id]}`
         refs.push({
-          ref: `${task.id}.${f.id}`,
-          display: `${taskDisplay}.${featureDisplay}`,
+          ref: `${story.id}.${f.id}`,
+          display: `${storyDisplay}.${featureDisplay}`,
           title: f.title,
           type: 'feature',
         })
       })
     })
     return refs.sort((a, b) => a.ref.localeCompare(b.ref))
-  }, [tasksById, project])
+  }, [storiesById, project])
 
   const [isOpen, setIsOpen] = useState(false)
   const [matches, setMatches] = useState<RefItem[]>([])

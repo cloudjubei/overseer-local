@@ -1,0 +1,359 @@
+/* Screens: Stories (list + toolbar) */
+.stories-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+}
+.stories-toolbar .left,
+.stories-toolbar .right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stories-toolbar .control input[type='search'] {
+  width: 320px;
+  height: var(--control-h-md);
+  padding: 0 var(--control-pad-x);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  color: var(--text-primary);
+}
+.stories-toolbar .control input[type='search']:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
+}
+.stories-toolbar .search-wrapper {
+  position: relative;
+}
+.stories-toolbar .clear-search {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
+}
+.stories-toolbar .clear-search:hover {
+  color: var(--text-primary);
+}
+.stories-toolbar .status-filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--control-pad-x);
+  height: var(--control-h-md);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.stories-toolbar .status-filter-btn:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent);
+}
+
+.stories-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.story-item + .story-item {
+  border-top: 1px solid var(--border-subtle);
+}
+/* Story row container */
+.story-row {
+  padding: 8px 12px;
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.story-row:hover {
+  background: color-mix(in srgb, var(--surface-base) 92%, var(--text-primary) 8%);
+}
+.story-row.draggable {
+  cursor: grab;
+}
+.story-row:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent)
+    inset;
+}
+
+/* New grid for main story info */
+.story-grid {
+  display: grid;
+  grid-template-columns: 0.1fr 1.3fr max-content;
+  grid-template-rows: auto auto auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 4px 2px;
+}
+.story-grid .col-id {
+  grid-row: 1 / 4;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: center;
+  align-items: center;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.story-grid .col-title {
+  grid-row: 1;
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: var(--fw-medium, 500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.story-grid .col-description {
+  grid-row: 2;
+  grid-column: 2;
+  color: var(--text-muted);
+  font-size: var(--fs-xs, 12px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.story-grid .col-actions {
+  grid-row: 2;
+  grid-column: 3;
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+.story-grid .col-blockers {
+  grid-row: 3;
+  grid-column: 2;
+  display: flex;
+  gap: 32px;
+}
+
+.story-grid:hover .col-actions,
+.col-row:focus .col-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Dependencies sections */
+.story-deps {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.deps-blocking,
+.deps-blocked {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-sm, 13px);
+}
+.deps-label {
+  font-weight: var(--fw-medium, 500);
+  color: var(--text-secondary);
+}
+.chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.chips-sub {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs, 12px);
+  color: var(--text-muted);
+}
+.chips-sub__label {
+  font-weight: var(--fw-medium, 500);
+}
+
+/* Status bullet interactive control */
+.status-bullet-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.status-bullet {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border-strong) 60%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 8%, transparent);
+  transition:
+    transform var(--motion-fast, 120ms) ease,
+    box-shadow var(--motion-fast, 120ms) ease;
+}
+.status-bullet-btn .status-bullet__edit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-inverted);
+  opacity: 0;
+  transition: opacity var(--motion-fast, 120ms) ease;
+  pointer-events: none;
+}
+.story-row:hover .status-bullet,
+.feature-item:hover .status-bullet,
+.details-header__bar:hover .status-bullet {
+  transform: scale(1.35);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--focus-ring) 50%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, #000 10%, transparent);
+}
+.story-row:hover .status-bullet-btn .status-bullet__edit,
+.feature-item:hover .status-bullet-btn .status-bullet__edit,
+.details-header__bar:hover .status-bullet-btn .status-bullet__edit {
+  opacity: 0.9;
+}
+.status-bullet-btn:focus-visible .status-bullet {
+  transform: scale(1.35);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--focus-ring) 55%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, #000 10%, transparent);
+}
+
+/* Map bullet colors to semantic status tokens (bold fills) */
+.status-bullet--empty {
+  background: var(--status-empty-bg);
+}
+.status-bullet--done {
+  background: var(--status-done-bg);
+}
+.status-bullet--working {
+  background: var(--status-working-bg);
+}
+.status-bullet--queued {
+  background: var(--status-queued-bg);
+}
+.status-bullet--stuck {
+  background: var(--status-stuck-bg);
+}
+.status-bullet--onhold {
+  background: var(--status-on_hold-bg);
+}
+
+/* Picker popover */
+.standard-picker {
+  position: absolute;
+  z-index: var(--z-dropdown, 1000);
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-2);
+  padding: 6px;
+}
+.standard-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-2);
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+}
+.standard-picker__item:hover,
+.standard-picker__item.is-active {
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--text-primary) 8%);
+}
+.standard-picker__label {
+  font-size: 13px;
+}
+.standard-picker__check {
+  margin-left: auto;
+  color: var(--text-secondary);
+}
+
+/* #stories-view specific DnD transitions and drop indicators */
+#stories-view .stories-list {
+  position: relative;
+}
+#stories-view .stories-list.dnd-active {
+  user-select: none;
+}
+#stories-view .story-row {
+  transition:
+    transform var(--motion-fast, 120ms) var(--easing-decelerate, ease-out),
+    background-color var(--motion-fast, 120ms) ease,
+    box-shadow var(--motion-fast, 120ms) ease;
+  background: transparent;
+}
+#stories-view .story-row.draggable {
+  cursor: grab;
+}
+#stories-view .story-row.is-dragging {
+  cursor: grabbing;
+  opacity: 0.6;
+  transform: scale(0.98);
+  box-shadow: var(--shadow-1);
+}
+#stories-view .story-row.is-drop-target {
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+}
+#stories-view .drop-indicator {
+  height: 6px;
+  margin: 6px 8px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary),
+    color-mix(in srgb, var(--accent-primary) 70%, var(--color-blue-650, var(--accent-primary)))
+  );
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent-primary) 28%, transparent),
+    0 4px 10px -2px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+  transform-origin: center;
+  transform: scaleX(0.85);
+  animation: dropPulse var(--motion-normal, 160ms) var(--easing-decelerate, ease-out) forwards;
+}
+@keyframes dropPulse {
+  from {
+    transform: scaleX(0.6);
+    opacity: 0.5;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+#stories-view .stories-list::after {
+  content: '';
+  display: block;
+  height: 16px;
+}

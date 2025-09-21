@@ -62,7 +62,7 @@ We will use a tool like **Nx** or **Turborepo** to manage dependencies and build
 
 - **`@acme/core`**: This package will contain all platform-agnostic logic:
   - TypeScript types and interfaces for all data models.
-  - Business logic and services (e.g., task management, project logic).
+  - Business logic and services (e.g., story management, project logic).
   - Validation schemas.
 - **`@acme/ui`**: A shared component library built with React and React Native.
   - We will use a strategy like React Native Web or platform-specific file extensions (`*.web.tsx`, `*.native.tsx`) to maximize code reuse.
@@ -129,7 +129,7 @@ The migration will be phased to minimize risk and deliver value incrementally.
 
 - **Phase 1: Foundation (Current Quarter)**
   - [ ] Set up the monorepo with Turborepo.
-  - [ ] Develop the v1 backend service with user authentication and core data models (e.g., projects, tasks).
+  - [ ] Develop the v1 backend service with user authentication and core data models (e.g., projects, stories).
   - [ ] Create the `@acme/core` package and begin migrating shared types and services.
   - [ ] Define the REST schema and set up `@acme/api-client`, use Open-api to generate an api spec that can be used by clients.
 

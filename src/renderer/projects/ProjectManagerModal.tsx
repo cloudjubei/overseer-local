@@ -317,7 +317,7 @@ export default function ProjectManagerModal({
       )}
 
       {(mode === 'create' || mode === 'edit') && (
-        <form id={formId} className="task-form" onSubmit={handleSubmit}>
+        <form id={formId} className="story-form" onSubmit={handleSubmit}>
           {formErrors.length > 0 && (
             <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
               {formErrors.map((e, i) => (

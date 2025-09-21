@@ -1,0 +1,270 @@
+/* Screens: Story Details (and Features list) */
+.story-details {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.details-header {
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+}
+.details-header__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.details-title {
+  margin: 0;
+  font-size: var(--fs-xl, 20px);
+  line-height: var(--lh-tight, 1.1);
+  font-weight: var(--fw-semibold, 600);
+}
+.details-header__bar .spacer {
+  flex: 1 1 auto;
+}
+.details-header__meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 0 12px 10px;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs, 12px);
+}
+.meta-item {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.meta-label {
+  color: var(--text-muted);
+}
+
+.details-content {
+  padding: 12px;
+}
+.panel {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-0);
+  padding: 12px;
+}
+.panel + .panel {
+  margin-top: 12px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.section-header .section-title {
+  margin: 0;
+  font-size: var(--fs-lg, 18px);
+}
+.section-header .section-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.section-title {
+  margin: 0 0 8px;
+  font-size: var(--fs-lg, 18px);
+}
+.story-desc {
+  color: var(--text-primary);
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+/* Compact ID and Actions columns using max-content; shrink Status and bias more width to Dependencies */
+.feature-item + .feature-item {
+  border-top: 1px solid var(--border-subtle);
+}
+.feature-row {
+  display: grid;
+  grid-template-columns: 0.1fr 1.3fr max-content;
+  grid-template-rows: auto auto auto;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 12px 8px;
+}
+.feature-row:hover {
+  background: color-mix(in srgb, var(--surface-raised) 95%, var(--text-primary) 5%);
+}
+.feature-row.draggable {
+  cursor: grab;
+}
+.feature-row:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) color-mix(in srgb, var(--focus-ring) 45%, transparent)
+    inset;
+}
+.feature-row .col-id {
+  grid-row: 1 / 4;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: center;
+  align-items: center;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.feature-row .col-title {
+  grid-row: 1;
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: var(--fw-medium, 500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.feature-row .col-description {
+  grid-row: 2;
+  grid-column: 2;
+  color: var(--text-muted);
+  font-size: var(--fs-xs, 12px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.feature-row .col-actions {
+  grid-row: 2;
+  grid-column: 3;
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  align-items: center;
+  transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease);
+}
+.feature-row .col-blockers {
+  grid-row: 3;
+  grid-column: 2;
+  display: flex;
+  gap: 32px;
+}
+
+.feature-row:hover .col-actions,
+.feature-row:focus .col-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Force the actions visible while a child control has an open popover (e.g., RunAgentButton long-press picker) */
+.feature-row .col-actions.is-sticky-visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.empty {
+  padding: 12px;
+  color: var(--text-secondary);
+}
+
+/* DnD: Match stories list cues and animations for features */
+.story-details .features-list {
+  position: relative;
+}
+.story-details .features-list.dnd-active {
+  user-select: none;
+}
+.story-details .feature-row {
+  transition:
+    transform var(--motion-fast, 120ms) var(--easing-decelerate, ease-out),
+    background-color var(--motion-fast, 120ms) ease,
+    box-shadow var(--motion-fast, 120ms) ease;
+  background: transparent;
+}
+.story-details .feature-row.draggable {
+  cursor: grab;
+}
+.story-details .feature-row.is-dragging {
+  cursor: grabbing;
+  opacity: 0.6;
+  transform: scale(0.98);
+  box-shadow: var(--shadow-1);
+}
+.story-details .feature-row.is-drop-target {
+  background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+}
+.story-details .drop-indicator {
+  height: 6px;
+  margin: 6px 8px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary),
+    color-mix(in srgb, var(--accent-primary) 70%, var(--color-blue-650, var(--accent-primary)))
+  );
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent-primary) 28%, transparent),
+    0 4px 10px -2px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+  transform-origin: center;
+  transform: scaleX(0.85);
+  animation: dropPulse var(--motion-normal, 160ms) var(--easing-decelerate, ease-out) forwards;
+}
+@keyframes dropPulse {
+  from {
+    transform: scaleX(0.6);
+    opacity: 0.5;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+.story-details .features-list::after {
+  content: '';
+  display: block;
+  height: 16px;
+}
+
+.rejection-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-color: var(transparent);
+  background: var(transparent);
+  color: var(transparent);
+}
+
+/* Collapsible Overview */
+.collapse-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.collapse-toggle:hover {
+  color: var(--text-primary);
+}
+.icon-chevron {
+  transition: transform var(--motion-fast);
+  display: block;
+}
+.icon-chevron.expanded {
+  transform: rotate(90deg);
+}
+.overview-content {
+  transition: max-height var(--motion-normal) var(--easing-decelerate);
+  overflow: hidden;
+}
+.overview-content.collapsed {
+  max-height: 0;
+}
+.overview-content.expanded {
+  max-height: 6em;
+  overflow-y: auto;
+}
+.story-desc {
+  margin: 0;
+  line-height: 1.5;
+}

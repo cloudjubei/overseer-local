@@ -9,8 +9,8 @@ export function validateProjectSpec(spec) {
   if (typeof spec.path !== 'string' || !spec.path.trim())
     errors.push('path must be a non-empty string')
   if (typeof spec.repo_url !== 'string') errors.push('repo_url must be a string')
-  if (typeof spec.taskIdToDisplayIndex !== 'object')
-    errors.push('taskIdToDisplayIndex must be an object')
+  if (typeof spec.storyIdToDisplayIndex !== 'object')
+    errors.push('storyIdToDisplayIndex must be an object')
 
   if (!Array.isArray(spec.requirements)) errors.push('requirements must be an array')
   else {
@@ -25,10 +25,10 @@ export function validateProjectSpec(spec) {
         errors.push(`requirements[${i}].status invalid`)
       if (typeof r.description !== 'string')
         errors.push(`requirements[${i}].description must be a string`)
-      if (!Array.isArray(r.tasks))
-        errors.push(`requirements[${i}].tasks must be an array of numbers`)
-      else if (!r.tasks.every((n) => Number.isInteger(n)))
-        errors.push(`requirements[${i}].tasks contains non-integer`)
+      if (!Array.isArray(r.stories))
+        errors.push(`requirements[${i}].stories must be an array of numbers`)
+      else if (!r.stories.every((n) => Number.isInteger(n)))
+        errors.push(`requirements[${i}].stories contains non-integer`)
     }
   }
   if (spec.metadata && typeof spec.metadata !== 'object') errors.push('Metadata must be an object')

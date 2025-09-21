@@ -23,7 +23,7 @@ function getIconForType(type: Notification['type']): string {
       return '⚠️'
     case 'error':
       return '❌'
-    case 'task':
+    case 'story':
       return '📋'
     case 'system':
       return '🖥️'

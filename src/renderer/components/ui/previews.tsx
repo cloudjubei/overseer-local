@@ -139,11 +139,11 @@ export function CollapsibleSidebar_Default() {
       <CollapsibleSidebar
         headerTitle="Navigation"
         items={[
-          { id: 'tasks', label: 'Tasks' },
+          { id: 'stories', label: 'Stories' },
           { id: 'docs', label: 'Docs' },
           { id: 'chat', label: 'Chat' },
         ]}
-        activeId={'tasks'}
+        activeId={'stories'}
         onSelect={() => {}}
       />
       <div style={{ padding: 16, flex: 1 }}>Content area</div>

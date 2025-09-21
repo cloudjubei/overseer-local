@@ -10,15 +10,15 @@ export type CommandMenuApi = {
   isOpen: () => boolean
 }
 
-export const UI_IMPROVEMENTS_TASK_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb'
+export const UI_IMPROVEMENTS_STORY_ID = 'f67e8921-b197-40c9-9154-e95db8f27deb'
 
 const commandsBase = (nav: ReturnType<typeof useNavigator>) => [
   {
     id: 'add-ui-feature',
     label: 'Add Feature to UI Improvements',
-    run: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }),
+    run: () => nav.openModal({ type: 'feature-create', storyId: UI_IMPROVEMENTS_STORY_ID }),
   },
-  { id: 'new-task', label: 'New Task', run: () => nav.openModal({ type: 'task-create' }) },
+  { id: 'new-story', label: 'New Story', run: () => nav.openModal({ type: 'story-create' }) },
   { id: 'go-home', label: 'Go to Home', run: () => nav.navigateView('Home') },
   { id: 'go-files', label: 'Go to Files', run: () => nav.navigateView('Files') },
   { id: 'go-chat', label: 'Go to Chat', run: () => nav.navigateView('Chat') },
@@ -126,7 +126,7 @@ export default function CommandMenu() {
     'command-menu': combos.commandMenu,
     help: combos.help,
     'add-ui-feature': combos.addUiFeature,
-    'new-task': combos.newTask,
+    'new-story': combos.newStory,
   }
 
   if (!open) return null

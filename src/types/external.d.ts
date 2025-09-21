@@ -1,7 +1,7 @@
 import type { ProjectsService } from 'src/renderer/services/projectsService'
 import type { ChatsService } from 'src/renderer/services/chatsService'
 import type { FilesService } from 'src/renderer/services/filesService'
-import type { TasksService } from 'src/renderer/services/tasksService'
+import type { StoriesService } from 'src/renderer/services/storiesService'
 import type { NotificationsService } from 'src/renderer/services/notificationsService'
 import type { SettingsService } from 'src/renderer/services/settingsService'
 import type { LiveDataService } from 'src/renderer/services/liveDataService'
@@ -15,7 +15,7 @@ declare global {
   interface Window {
     dbService: DBService
     factoryService: FactoryService
-    tasksService: TasksService
+    storiesService: StoriesService
     projectsService: ProjectsService
     filesService: FilesService
     chatsService: ChatsService

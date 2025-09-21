@@ -62,7 +62,7 @@ StatusBadge
 - Variants: soft (default in dense lists/boards) and bold (for emphasis or headers).
 - Tokens: status.\* soft/bold pairs; rounded pill shape.
 
-TaskCard
+StoryCard
 
 - Tokens: surface.raised; border.default; shadow-1; hover elevates to shadow-2 and nudges; quick actions appear on hover.
 - Behavior: keyboard focusable; Enter opens details panel; S/A/P/L/D shortcuts route to pickers.

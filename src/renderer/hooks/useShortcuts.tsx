@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 import { useNavigator } from '../navigation/Navigator'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import { UI_IMPROVEMENTS_TASK_ID } from '../components/ui/CommandMenu'
+import { UI_IMPROVEMENTS_STORY_ID } from '../components/ui/CommandMenu'
 
 type ShortcutHandler = (e: KeyboardEvent) => boolean | void
 export type Shortcut = {
@@ -178,15 +178,15 @@ export function ShortcutsBootstrap() {
 
   useEffect(() => {
     const unregisterNew = register({
-      id: 'new-task',
-      comboKeys: combos.newTask,
-      handler: () => nav.openModal({ type: 'task-create' }),
-      description: 'New task',
+      id: 'new-story',
+      comboKeys: combos.newStory,
+      handler: () => nav.openModal({ type: 'story-create' }),
+      description: 'New story',
     })
     const unregisterAddUiFeature = register({
       id: 'add-ui-feature',
       comboKeys: combos.addUiFeature,
-      handler: () => nav.openModal({ type: 'feature-create', taskId: UI_IMPROVEMENTS_TASK_ID }),
+      handler: () => nav.openModal({ type: 'feature-create', storyId: UI_IMPROVEMENTS_STORY_ID }),
       description: 'Add feature to UI Improvements',
       scope: 'global',
     })
@@ -194,7 +194,7 @@ export function ShortcutsBootstrap() {
       unregisterNew()
       unregisterAddUiFeature()
     }
-  }, [register, nav, combos.newTask, combos.addUiFeature])
+  }, [register, nav, combos.newStory, combos.addUiFeature])
 
   useEffect(() => {
     const onHash = () => {}

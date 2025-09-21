@@ -6,7 +6,7 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_CREATE: 'projects:create',
   PROJECTS_UPDATE: 'projects:update',
   PROJECTS_DELETE: 'projects:delete',
-  PROJECTS_TASK_REORDER: 'projects:reorder-task',
+  PROJECTS_STORY_REORDER: 'projects:reorder-story',
 
   // Chats
   CHATS_SUBSCRIBE: 'chats:subscribe',
@@ -29,18 +29,18 @@ const IPC_HANDLER_KEYS = {
   FILES_SEARCH: 'files:search',
   FILES_UPLOAD_FILE: 'files:upload-file',
 
-  // Tasks
-  TASKS_SUBSCRIBE: 'tasks:subscribe',
-  TASKS_LIST: 'tasks:list',
-  TASKS_GET: 'tasks:get',
-  TASKS_CREATE: 'tasks:create',
-  TASKS_UPDATE: 'tasks:update',
-  TASKS_DELETE: 'tasks:delete',
-  TASKS_FEATURE_GET: 'tasks-feature:get',
-  TASKS_FEATURE_ADD: 'tasks-feature:add',
-  TASKS_FEATURE_UPDATE: 'tasks-feature:update',
-  TASKS_FEATURE_DELETE: 'tasks-feature:delete',
-  TASKS_FEATURES_REORDER: 'tasks-features:reorder',
+  // Stories
+  STORIES_SUBSCRIBE: 'stories:subscribe',
+  STORIES_LIST: 'stories:list',
+  STORIES_GET: 'stories:get',
+  STORIES_CREATE: 'stories:create',
+  STORIES_UPDATE: 'stories:update',
+  STORIES_DELETE: 'stories:delete',
+  STORIES_FEATURE_GET: 'stories-feature:get',
+  STORIES_FEATURE_ADD: 'stories-feature:add',
+  STORIES_FEATURE_UPDATE: 'stories-feature:update',
+  STORIES_FEATURE_DELETE: 'stories-feature:delete',
+  STORIES_FEATURES_REORDER: 'stories-features:reorder',
 
   // Settings
   SETTINGS_SUBSCRIBE: 'preferences:subscribe',
@@ -71,7 +71,7 @@ const IPC_HANDLER_KEYS = {
 
   // Factory runs
   FACTORY_RUNS_SUBSCRIBE: 'factory:runs:subscribe',
-  FACTORY_RUNS_START_TASK: 'factory:runs:start-task',
+  FACTORY_RUNS_START_STORY: 'factory:runs:start-story',
   FACTORY_RUNS_START_FEATURE: 'factory:runs:start-feature',
   FACTORY_RUNS_CANCEL: 'factory:runs:cancel',
   FACTORY_RUNS_LIST_ACTIVE: 'factory:runs:list-active',
