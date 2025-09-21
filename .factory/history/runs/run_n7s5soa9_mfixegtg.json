@@ -201,7 +201,7 @@
   "id": "run_n7s5soa9_mfixegtg",
   "agentType": "developer",
   "projectId": "thefactory-knowledge",
-  "taskId": "15a2115a-b435-43f7-a8bc-3346a8868753",
+  "storyId": "15a2115a-b435-43f7-a8bc-3346a8868753",
   "llmConfig": {
     "provider": "openai",
     "model": "gpt-5",

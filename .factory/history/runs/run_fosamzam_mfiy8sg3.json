@@ -463,7 +463,7 @@
   "id": "run_fosamzam_mfiy8sg3",
   "agentType": "developer",
   "projectId": "thefactory-knowledge",
-  "taskId": "15a2115a-b435-43f7-a8bc-3346a8868753",
+  "storyId": "15a2115a-b435-43f7-a8bc-3346a8868753",
   "llmConfig": {
     "provider": "openai",
     "model": "gpt-5",

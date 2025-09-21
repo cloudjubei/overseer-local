@@ -115,7 +115,7 @@
   "id": "run_vryf5p5b_mfixe9ph",
   "agentType": "developer",
   "projectId": "thefactory-db",
-  "taskId": "80ed9778-d7d8-421f-818a-1027f98a580f",
+  "storyId": "80ed9778-d7d8-421f-818a-1027f98a580f",
   "llmConfig": {
     "provider": "openai",
     "model": "gpt-5",

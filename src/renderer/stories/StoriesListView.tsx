@@ -1,13 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Button } from '../components/ui/Button'
 import { useNavigator } from '../navigation/Navigator'
 import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../contexts/ProjectContext'
 import DependencyBullet from '../components/stories/DependencyBullet'
 import StatusControl, { StatusPicker, statusKey } from '../components/stories/StatusControl'
-import { STATUS_LABELS } from '../services/storiesService'
-import { useStories } from '../contexts/StoriesContext'
 import { StoryListViewSorting, StoryViewMode, StoryListStatusFilter } from '../../types/settings'
 import { useAgents } from '../contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
@@ -19,6 +16,8 @@ import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
 import { useAppSettings } from '../contexts/AppSettingsContext'
+import { STATUS_LABELS } from '../services/storiesService'
+import { useStories } from '../contexts/StoriesContext'
 
 function countFeatures(story: Story) {
   const features = Array.isArray(story.features) ? story.features : []

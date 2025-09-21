@@ -92,10 +92,10 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
         className="border rounded-md max-h-[50vh] overflow-auto p-1 bg-surface-raised border-border"
       >
         {filteredFiles.map((file) => {
-          const selected = isSelected(file.path)
+          const selected = isSelected(file.relativePath!)
           return (
             <div
-              key={file.path}
+              key={file.relativePath!}
               role="option"
               aria-selected={selected}
               className="flex items-center"
@@ -105,7 +105,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
                 density="normal"
                 interactive
                 showPreviewOnHover
-                onClick={() => toggle(file.path)}
+                onClick={() => toggle(file.relativePath!)}
                 trailing={
                   <span
                     className={

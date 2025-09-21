@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Modal } from '../components/ui/Modal'
 import { projectsService } from '../services/projectsService'
-import { validateProjectClient } from './validateProject'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { Button } from '../components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from '../components/ui/Select'
 import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
+import { validateProjectClient } from './validateProject'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -216,7 +216,7 @@ export default function ProjectManagerModal({
     }
 
     // Additional: unique id on create
-    if (mode === 'create' && projectsList.find((p: any) => p.id === form.id)) {
+    if (mode === 'create' && projectsList.find((p) => p.id === form.id)) {
       setFormErrors([`Project id ${form.id} already exists`])
       return
     }
@@ -276,7 +276,7 @@ export default function ProjectManagerModal({
           <div>
             {projectsList.length === 0 && <div className="empty">No child projects yet.</div>}
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {projectsList.map((p: any) => (
+              {projectsList.map((p) => (
                 <li
                   key={p.id}
                   style={{

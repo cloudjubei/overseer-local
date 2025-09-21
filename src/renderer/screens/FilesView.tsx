@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useFiles, DirNode } from '../contexts/FilesContext'
-import { FileMeta } from '../services/filesService'
 import { MarkdownEditor } from '../components/files/MarkdownEditor'
 import BasicFileViewer from '../components/files/BasicFileViewer'
 import { goToFile, parseFileFromHash } from '../navigation/filesNavigation'
 import { IconChevron, IconDocument, IconFolder, IconFolderOpen } from '../components/ui/Icons'
+import { FileMeta } from 'thefactory-tools'
 
 function isMarkdown(f: FileMeta) {
   return f.ext === 'md' || f.ext === 'mdx'
@@ -68,7 +68,7 @@ export const FilesView: React.FC = () => {
   const selectedFile = useMemo(() => {
     if (!files.length) return undefined
     const sp = selectedPath
-    if (sp) return files.find((f) => f.path === sp) || undefined
+    if (sp) return files.find((f) => f.relativePath === sp) || undefined
     return undefined
   }, [files, selectedPath])
 
@@ -109,7 +109,7 @@ export const FilesView: React.FC = () => {
 
     const childFiles = useMemo(() => {
       if (!q) return node.files
-      return node.files.filter((f) => filterMatch(f.name, f.path))
+      return node.files.filter((f) => filterMatch(f.name, f.relativePath!))
     }, [node.files, q])
 
     return (
@@ -145,14 +145,14 @@ export const FilesView: React.FC = () => {
               <DirTree key={`dir:${d.relPath}`} node={d} level={level + 1} />
             ))}
             {childFiles.map((f) => {
-              const isSel = selectedFile?.path === f.path
+              const isSel = selectedFile?.relativePath === f.relativePath
               return (
                 <button
-                  key={`file:${f.path}`}
+                  key={`file:${f.relativePath!}`}
                   className={`group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm ${isSel ? 'bg-[color:var(--surface-raised)] border border-[color:var(--border-default)] shadow-[var(--shadow-1)]' : 'hover:bg-[color:var(--border-subtle)] focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'}`}
-                  onClick={() => goToFile(f.path)}
+                  onClick={() => goToFile(f.relativePath!)}
                   style={{ paddingLeft: level * 14 + 28 }}
-                  title={f.path}
+                  title={f.name}
                   aria-current={isSel ? 'true' : undefined}
                 >
                   <IconDocument className="w-4 h-4 opacity-80 mt-[2px]" />
@@ -180,7 +180,7 @@ export const FilesView: React.FC = () => {
       const fd = filterDir(d, match)
       if (fd) filteredDirs.push(fd)
     }
-    const filteredFiles = node.files.filter((f) => match(f.name, f.path))
+    const filteredFiles = node.files.filter((f) => match(f.name, f.relativePath!))
     const selfMatches = match(node.name, node.relPath)
     if (selfMatches || filteredDirs.length > 0 || filteredFiles.length > 0) {
       return { ...node, dirs: filteredDirs, files: filteredFiles }

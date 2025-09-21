@@ -48,7 +48,7 @@
   "id": "run_3n2dkhlx_mfk85ul4",
   "agentType": "speccer",
   "projectId": "thefactory-db",
-  "taskId": "30a26e88-c04e-4619-a89c-1d21ed660e20",
+  "storyId": "30a26e88-c04e-4619-a89c-1d21ed660e20",
   "llmConfig": {
     "provider": "gemini",
     "model": "gemini-2.5-pro",

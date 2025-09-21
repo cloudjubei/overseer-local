@@ -76,7 +76,7 @@ export default class StoriesManager extends BaseManager {
     }) => this.updateFeature(projectId, storyId, featureId, patch)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_DELETE] = ({ projectId, storyId, featureId }) =>
       this.deleteFeature(projectId, storyId, featureId)
-    handlers[IPC_HANDLER_KEYS.STORIES_FEATURES_REORDER] = ({ projectId, storyId, payload }) =>
+    handlers[IPC_HANDLER_KEYS.STORIES_FEATURES_REORDER] = async ({ projectId, storyId, payload }) =>
       this.reorderFeatures(projectId, storyId, payload)
 
     return handlers

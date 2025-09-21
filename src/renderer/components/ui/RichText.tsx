@@ -1,7 +1,8 @@
 import React from 'react'
-import FileDisplay, { FileMeta } from './FileDisplay'
+import FileDisplay from './FileDisplay'
 import { useFiles } from '../../contexts/FilesContext'
 import DependencyBullet from '../stories/DependencyBullet'
+import { FileMeta } from 'thefactory-tools'
 
 // Renders text into rich content:
 // - @file/path.ext mentions -> inline File chip with hover preview
@@ -70,9 +71,10 @@ export function RichText({ text }: { text: string | null | undefined }) {
           if (found) {
             meta = {
               name: found.name || token.split('/').pop() || token,
-              path: found.path,
+              absolutePath: found.absolutePath,
               size: found.size,
               mtime: found.mtime,
+              ctime: found.ctime,
               type: found.type,
             }
           } else {
@@ -81,9 +83,10 @@ export function RichText({ text }: { text: string | null | undefined }) {
             if (alt)
               meta = {
                 name: alt.name || short,
-                path: alt.path,
+                absolutePath: alt.absolutePath,
                 size: alt.size,
                 mtime: alt.mtime,
+                ctime: alt.ctime,
                 type: alt.type,
               }
           }

@@ -48,7 +48,7 @@
   "id": "run_o2knd9yo_mfkbb022",
   "agentType": "speccer",
   "projectId": "main",
-  "taskId": "c895c02d-7c6a-4b77-a3ae-4e9ede935c2c",
+  "storyId": "c895c02d-7c6a-4b77-a3ae-4e9ede935c2c",
   "llmConfig": {
     "provider": "gemini",
     "model": "gemini-2.5-pro",

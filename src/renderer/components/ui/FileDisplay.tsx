@@ -2,18 +2,9 @@ import React from 'react'
 import Tooltip from './Tooltip'
 import { goToFile } from '../../navigation/filesNavigation'
 import { useFiles, inferFileType } from '../../contexts/FilesContext'
+import { FileMeta } from 'thefactory-tools'
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown'
-
-export interface FileMeta {
-  id?: string
-  path?: string
-  name: string
-  size?: number | null // bytes
-  mtime?: number | string | Date | null // epoch ms or ISO or Date
-  type?: string | null // mime or extension
-  kind?: FileKind
-}
 
 export interface FileDisplayProps {
   file: FileMeta
@@ -352,7 +343,7 @@ const textLikeTypes = new Set([
 ])
 
 function isTextLike(file: FileMeta): boolean {
-  const t = (file.type || inferFileType(file.path || file.name)).toString().toLowerCase()
+  const t = (file.type || inferFileType(file.absolutePath || file.name)).toString().toLowerCase()
   return textLikeTypes.has(t)
 }
 
@@ -367,7 +358,7 @@ function useFilePreviewContent(file: FileMeta) {
   }>({ loading: false, error: null, text: null })
   React.useEffect(() => {
     let cancelled = false
-    const relPath = file.path
+    const relPath = file.relativePath
     if (!relPath || !isTextLike(file)) {
       setState((s) => ({ ...s, loading: false, text: null, error: null }))
       return
@@ -390,15 +381,15 @@ function useFilePreviewContent(file: FileMeta) {
     return () => {
       cancelled = true
     }
-  }, [file.path, file.type, file.name])
+  }, [file.absolutePath, file.type, file.name])
   return state
 }
 
 function FilePreviewCard({ file }: { file: FileMeta }) {
   const sizeLabel = formatBytes(file.size ?? null)
   const dateLabel = formatDate(file.mtime ?? null)
-  const typeLabel = (file.type || inferFileType(file.path || file.name)).toString()
-  const relPath = file.path
+  const typeLabel = (file.type || inferFileType(file.absolutePath || file.name)).toString()
+  const relPath = file.relativePath
   const { loading, error, text } = useFilePreviewContent(file)
 
   return (
@@ -460,8 +451,8 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
     `${file.name}${sizeLabel ? `, ${sizeLabel}` : ''}${dateLabel ? `, modified ${dateLabel}` : ''}`
 
   async function handleNavigate(e: React.MouseEvent) {
-    if (!file.path) return
-    await goToFile(file.path)
+    if (!file.absolutePath) return
+    await goToFile(file.absolutePath)
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -515,7 +506,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
         >
           <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
           <div className="fd-content">
-            <div className="fd-name" title={file.path || file.name}>
+            <div className="fd-name" title={file.absolutePath || file.name}>
               {file.name}
             </div>
             {showMeta && sizeLabel && <div className="fd-size">{sizeLabel}</div>}

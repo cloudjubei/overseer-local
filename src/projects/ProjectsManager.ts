@@ -19,7 +19,7 @@ export default class ProjectsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    this.tools.subscribe((projectUpdate) => {
+    this.tools.subscribe(async (projectUpdate) => {
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, projectUpdate)
       }
@@ -27,37 +27,30 @@ export default class ProjectsManager extends BaseManager {
     await super.init()
   }
 
-  getHandlers(): Record<string, (args: any) => any> {
-    const handlers: Record<string, (args: any) => any> = {}
+  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
+    const handlers: Record<string, (args: any) => Promise<any>> = {}
 
     handlers[IPC_HANDLER_KEYS.PROJECTS_LIST] = () => this.listProjects()
     handlers[IPC_HANDLER_KEYS.PROJECTS_GET] = ({ projectId }) => this.getProject(projectId)
     handlers[IPC_HANDLER_KEYS.PROJECTS_CREATE] = ({ input }) => this.createProject(input)
     handlers[IPC_HANDLER_KEYS.PROJECTS_UPDATE] = ({ projectId, patch }) =>
       this.updateProject(projectId, patch)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_DELETE] = ({ projectId }) =>
+      this.tools.deleteProject(projectId)
     handlers[IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER] = async ({ projectId, payload }) =>
       this.reorderStory(projectId, payload)
 
     return handlers
   }
 
-  getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
-    const handlers: Record<string, (args: any) => Promise<any>> = {}
-
-    handlers[IPC_HANDLER_KEYS.PROJECTS_DELETE] = ({ projectId }) =>
-      this.tools.deleteProject(projectId)
-
-    return handlers
-  }
-
   async getProjectDir(projectId: string): Promise<string | undefined> {
-    return this.tools.getProjectDir(projectId)
+    return await this.tools.getProjectDir(projectId)
   }
   async listProjects(): Promise<ProjectSpec[]> {
-    return this.tools.listProjects()
+    return await this.tools.listProjects()
   }
   async getProject(projectId: string): Promise<ProjectSpec | undefined> {
-    return this.tools.getProject(projectId)
+    return await this.tools.getProject(projectId)
   }
   async createProject(input: ProjectSpecCreateInput): Promise<ProjectSpec | undefined> {
     return await this.tools.createProject(input)

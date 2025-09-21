@@ -3,7 +3,7 @@ import IPC_HANDLER_KEYS from './ipcHandlersKeys'
 
 const FILES_API = {
   subscribe: (callback) => {
-    const listener = (_event, fileUpdate) => callback(fileUpdate)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener)
   },
@@ -33,7 +33,7 @@ const FILES_API = {
 
 const STORIES_API = {
   subscribe: (callback) => {
-    const listener = (_event) => callback()
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.STORIES_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.STORIES_SUBSCRIBE, listener)
   },
@@ -66,7 +66,7 @@ const STORIES_API = {
 const CHATS_API = {
   listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, { config }),
   subscribe: (callback) => {
-    const listener = (_event, chats) => callback(chats)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, listener)
   },
@@ -87,7 +87,7 @@ const CHATS_API = {
 
 const NOTIFICATIONS_API = {
   onOpenNotification: (callback) => {
-    const listener = (_event, metadata) => callback(metadata)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.NOTIFICATIONS_ON_OPEN, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.NOTIFICATIONS_ON_OPEN, listener)
   },
@@ -114,7 +114,7 @@ const NOTIFICATIONS_API = {
 
 const PROJECTS_API = {
   subscribe: (callback) => {
-    const listener = (_event) => callback()
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener)
   },
@@ -134,7 +134,7 @@ const SCREENSHOT_API = {
 
 const SETTINGS_API = {
   subscribe: (callback) => {
-    const listener = (_event, projectSettings) => callback(projectSettings)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.SETTINGS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.SETTINGS_SUBSCRIBE, listener)
   },
@@ -149,7 +149,7 @@ const SETTINGS_API = {
 
 const LIVEDATA_API = {
   subscribe: (callback) => {
-    const listener = (_event, services) => callback(services)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.LIVE_DATA_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.LIVE_DATA_SUBSCRIBE, listener)
   },
@@ -167,7 +167,7 @@ const LIVEDATA_API = {
 // Factory orchestrator API exposed to renderer
 const FACTORY_API = {
   subscribeRuns: (callback) => {
-    const listener = (_event, runUpdate) => callback(runUpdate)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
   },
@@ -190,7 +190,7 @@ const FACTORY_API = {
 
 const DB_API = {
   subscribe: (callback) => {
-    const listener = (_event, status) => callback(status)
+    const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.DB_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.DB_SUBSCRIBE, listener)
   },

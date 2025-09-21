@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { FileMeta } from '../../services/filesService'
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges'
 import { useFiles } from '../../contexts/FilesContext'
+import { FileMeta } from 'thefactory-tools'
 
 function escapeHtml(str: string) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -36,20 +36,20 @@ export type MarkdownEditorProps = {
 }
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
-  const { readFile, saveFile } = useFiles()
+  const { readFile, writeFile } = useFiles()
   const [value, setValue] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [saveSupported, setSaveSupported] = useState<boolean>(false)
   const [dirty, setDirty] = useState<boolean>(false)
 
-  useUnsavedChanges(`markdown:${file.path}`, () => dirty)
+  useUnsavedChanges(`markdown:${file.relativePath!}`, () => dirty)
 
   useEffect(() => {
     let mounted = true
     setLoading(true)
     setSaveSupported(false)
     setDirty(false)
-    readFile(file.path).then((txt) => {
+    readFile(file.relativePath!).then((txt) => {
       if (!mounted) return
       setValue(txt ?? '')
       setLoading(false)
@@ -58,11 +58,11 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
     return () => {
       mounted = false
     }
-  }, [file.path])
+  }, [file.relativePath!])
 
   async function handleSave() {
     try {
-      await saveFile(file.path, value)
+      await writeFile(file.relativePath!, value)
     } catch (e) {
       console.error('Save failed', e)
       alert('Failed to save file')

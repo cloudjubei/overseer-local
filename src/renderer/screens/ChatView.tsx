@@ -45,7 +45,7 @@ export default function ChatView() {
     position: autocompletePosition,
     onSelect: onAutocompleteSelect,
   } = useFilesAutocomplete({
-    filesList: files.map((f) => f.path),
+    filesList: files.map((f) => f.relativePath!),
     input,
     setInput,
     textareaRef,

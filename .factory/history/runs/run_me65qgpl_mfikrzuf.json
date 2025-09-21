@@ -214,7 +214,7 @@
   "id": "run_me65qgpl_mfikrzuf",
   "agentType": "developer",
   "projectId": "main",
-  "taskId": "f67e8921-b197-40c9-9154-e95db8f27deb",
+  "storyId": "f67e8921-b197-40c9-9154-e95db8f27deb",
   "llmConfig": {
     "provider": "openai",
     "model": "gpt-5",

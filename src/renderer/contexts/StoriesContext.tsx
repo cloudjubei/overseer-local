@@ -366,7 +366,9 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     async (payload: ReorderPayload): Promise<ProjectSpec | undefined> => {
       console.log('StoryContext reorderStory payload: ', payload, ' project: ', project)
       if (project) {
-        return await projectsService.reorderStory(project.id, payload)
+        const p = await projectsService.reorderStory(project.id, payload)
+        console.log('StoryContext reorderStory POST  project: ', project)
+        return p
       }
     },
     [project],

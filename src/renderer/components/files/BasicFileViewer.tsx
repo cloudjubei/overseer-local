@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { FileMeta } from '../../services/filesService'
 import { useFiles, isLikelyText, guessLanguageFromExt } from '../../contexts/FilesContext'
+import { FileMeta } from 'thefactory-tools'
 
 export type BasicFileViewerProps = {
   file: FileMeta
@@ -16,7 +16,7 @@ const BasicFileViewer: React.FC<BasicFileViewerProps> = ({ file }) => {
     setLoading(true)
     setContent(null)
     if (isLikelyText(file)) {
-      readFile(file.path).then((txt) => {
+      readFile(file.relativePath!).then((txt) => {
         if (!mounted) return
         if (txt) {
           setContent(txt)
@@ -29,7 +29,7 @@ const BasicFileViewer: React.FC<BasicFileViewerProps> = ({ file }) => {
     return () => {
       mounted = false
     }
-  }, [file.path, file.size, file.type])
+  }, [file.relativePath!, file.size, file.type])
 
   if (loading) return <div style={{ padding: 16 }}>Loading...</div>
 

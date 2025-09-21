@@ -819,7 +819,7 @@
   "id": "run_4cx31exd_mfiv4fo1",
   "agentType": "developer",
   "projectId": "thefactory-db",
-  "taskId": "80ed9778-d7d8-421f-818a-1027f98a580f",
+  "storyId": "80ed9778-d7d8-421f-818a-1027f98a580f",
   "llmConfig": {
     "provider": "openai",
     "model": "gpt-5",

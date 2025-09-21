@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ProjectSpec } from 'thefactory-tools'
+import type { ProjectSpec, ProjectUpdate } from 'thefactory-tools'
 import { projectsService } from '../services/projectsService'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 
@@ -26,14 +26,28 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   // Load projects and subscribe to updates
   const update = async () => {
     const projects = await projectsService.listProjects()
-    updateCurrentProjects(projects)
+    setProjects(projects)
   }
-  const updateCurrentProjects = (projectsList: ProjectSpec[]) => {
-    setProjects(projectsList)
+  const onProjectUpdate = async (projectUpdate: ProjectUpdate) => {
+    console.log('onProjectUpdate projectUpdate: ', projectUpdate)
+    switch (projectUpdate.type) {
+      case 'add':
+        const p = await projectsService.getProject(projectUpdate.projectId)
+        if (p) {
+          setProjects((prev) => [...prev, p])
+        }
+      case 'delete':
+        setProjects((prev) => prev.filter((p) => p.id !== projectUpdate.projectId))
+      case 'change':
+        const p2 = await projectsService.getProject(projectUpdate.projectId)
+        if (p2) {
+          setProjects((prev) => prev.map((p) => (p.id !== projectUpdate.projectId ? p : p2)))
+        }
+    }
   }
   useEffect(() => {
     update()
-    const unsubscribe = projectsService.subscribe(update)
+    const unsubscribe = projectsService.subscribe(onProjectUpdate)
     return () => {
       unsubscribe()
     }
