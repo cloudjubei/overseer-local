@@ -57,11 +57,11 @@ export default class ChatsManager extends BaseManager {
 
   private async __getStorage(projectId: string): Promise<ChatsStorage | undefined> {
     if (!this.storages[projectId]) {
-      const project = await this.projectsManager.getProject(projectId as any)
-      if (!project) {
+      const projectRoot = await this.projectsManager.getProjectDir(projectId)
+      if (!projectRoot) {
         return
       }
-      const chatsDir = path.join(this.projectsManager.projectsDir, `${projectId}/chats`)
+      const chatsDir = path.join(projectRoot, `${projectId}/chats`)
       const storage = new ChatsStorage(projectId, chatsDir, this.window)
       await storage.init()
       this.storages[projectId] = storage
@@ -161,7 +161,7 @@ export default class ChatsManager extends BaseManager {
         projectId,
         webSearchApiKeys,
         dbConnectionString,
-      } as any)
+      })
       const model = (config as any).model
       const completion = createCompletionClient(config as any)
 

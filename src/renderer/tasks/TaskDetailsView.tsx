@@ -207,8 +207,7 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
     if (!task) return
     setSaving(true)
     try {
-      const res = await reorderFeatures(task.id, fromIndex, toIndex)
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      await reorderFeatures(task.id, { fromIndex, toIndex })
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)
     } finally {
@@ -462,7 +461,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 <AgentRunBullet
                   key={taskRun.id}
                   run={taskRun}
-                  onClick={() => navigateAgentRun(taskRun.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    navigateAgentRun(taskRun.id)
+                  }}
                 />
               </div>
             )}
@@ -638,11 +640,13 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                const featureTaskRun = runsHistory.find(
-                  (r) => r.state === 'running' && r.taskId === task.id,
+                // const featureTaskRun = runsHistory.find(
+                //   (r) => r.state === 'running' && r.taskId === task.id,
+                // )
+                const featureHasActiveRun = !!taskRun?.conversations.find(
+                  (c) => c.featureId === f.id,
                 )
-                const featureConversation = taskRun?.conversations.find((c) => c.featureId === f.id)
-                const featureHasActiveRun = !!featureConversation
+                // const featureHasActiveRun = !!featureConversation
 
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
@@ -719,10 +723,10 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                         <RichText text={f.description || ''} />
                       </div>
                       <div className="col col-actions">
-                        {!featureHasActiveRun && (
+                        {!taskHasActiveRun && (
                           <RunAgentButton
                             onClick={(agentType) => {
-                              if (!projectId || featureHasActiveRun) return
+                              if (!projectId || taskHasActiveRun) return
                               startFeatureAgent(agentType, projectId, task.id, f.id)
                             }}
                           />
@@ -759,17 +763,17 @@ export default function TaskDetailsView({ taskId }: { taskId: string }) {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 pr-2">
-                          {featureHasActiveRun && featureTaskRun && (
+                          {featureHasActiveRun && taskRun && (
                             <div
                               className="flex items-center gap-2"
                               aria-label={`Active agents for Feature ${f.id}`}
                             >
                               <AgentRunBullet
-                                key={featureTaskRun.id}
-                                run={featureTaskRun}
+                                key={taskRun.id}
+                                run={taskRun}
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigateAgentRun(featureTaskRun.id)
+                                  navigateAgentRun(taskRun.id)
                                 }}
                               />
                             </div>

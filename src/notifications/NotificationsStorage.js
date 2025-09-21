@@ -1,6 +1,7 @@
 import AppStorage from '../settings/AppStorage'
 
 export default class NotificationsStorage {
+  //TODO: transform into ts
   constructor(projectId) {
     this.projectId = projectId
     this.appStorage = new AppStorage('notifications')

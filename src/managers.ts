@@ -12,7 +12,7 @@ import DocumentIngestionManager from './document_ingestion/DocumentIngestionMana
 import GitMonitorManager from './git-monitor/GitMonitorManager'
 import BaseManager from './BaseManager'
 
-export let dbManager: DatabaseManager | undefined
+export let databaseManager: DatabaseManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
 export let tasksManager: TasksManager | undefined
 export let filesManager: FilesManager | undefined
@@ -27,11 +27,11 @@ export let gitMonitorManager: GitMonitorManager | undefined
 let managers: BaseManager[] = []
 
 export async function initManagers(projectRoot: string, mainWindow: BrowserWindow): Promise<void> {
-  dbManager = new DatabaseManager(projectRoot, mainWindow)
-  factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, dbManager)
+  databaseManager = new DatabaseManager(projectRoot, mainWindow)
+  factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, databaseManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   tasksManager = new TasksManager(projectRoot, mainWindow, projectsManager)
-  filesManager = new FilesManager(projectRoot, mainWindow, projectsManager)
+  filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
   settingsManager = new SettingsManager(projectRoot, mainWindow)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryToolsManager)
@@ -46,14 +46,14 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   documentIngestionManager = new DocumentIngestionManager(
     projectRoot,
     mainWindow,
-    dbManager,
+    databaseManager,
     projectsManager,
     filesManager,
   )
   gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
 
   managers = [
-    dbManager,
+    databaseManager,
     factoryToolsManager,
     projectsManager,
     tasksManager,

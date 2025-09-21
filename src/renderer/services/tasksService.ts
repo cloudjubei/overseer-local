@@ -2,6 +2,7 @@ import type {
   Feature,
   FeatureCreateInput,
   FeatureEditInput,
+  ReorderPayload,
   Status,
   Task,
   TaskCreateInput,
@@ -43,10 +44,8 @@ export interface InvalidRefError {
   message: string
 }
 
-export type ReorderFeaturesPayload = { fromIndex: number; toIndex: number }
-
 export type TasksService = {
-  subscribe: (callback: (tasks: Task[]) => void) => () => void
+  subscribe: (callback: () => void) => () => void
   listTasks: (projectId: string) => Promise<Task[]>
   getTask: (projectId: string, taskId: string) => Promise<Task | undefined>
   createTask: (projectId: string, input: TaskCreateInput) => Promise<Task>
@@ -68,7 +67,7 @@ export type TasksService = {
   reorderFeatures: (
     projectId: string,
     taskId: string,
-    payload: ReorderFeaturesPayload,
+    payload: ReorderPayload,
   ) => Promise<Task | undefined>
 }
 

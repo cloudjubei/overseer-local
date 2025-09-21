@@ -6,7 +6,7 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_CREATE: 'projects:create',
   PROJECTS_UPDATE: 'projects:update',
   PROJECTS_DELETE: 'projects:delete',
-  PROJECTS_TASK_REORDER: 'projects:reorder_task',
+  PROJECTS_TASK_REORDER: 'projects:reorder-task',
 
   // Chats
   CHATS_SUBSCRIBE: 'chats:subscribe',
@@ -20,13 +20,14 @@ const IPC_HANDLER_KEYS = {
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',
   FILES_LIST: 'files:list',
-  FILES_READ: 'files:read',
-  FILES_READ_BINARY: 'files:read-binary',
-  FILES_READ_DIRECTORY: 'files:read-directory',
-  FILES_WRITE: 'files:write',
-  FILES_DELETE: 'files:delete',
-  FILES_RENAME: 'files:rename',
-  FILES_UPLOAD: 'files:upload',
+  FILES_READ_FILE: 'files:read-file',
+  FILES_READ_PATHS: 'files:read-paths',
+  FILES_GET_ALL_STATS: 'files:get-all-stats',
+  FILES_WRITE_FILE: 'files:write-file',
+  FILES_RENAME_PATH: 'files:rename-path',
+  FILES_DELETE_PATH: 'files:delete-path',
+  FILES_SEARCH: 'files:search',
+  FILES_UPLOAD_FILE: 'files:upload-file',
 
   // Tasks
   TASKS_SUBSCRIBE: 'tasks:subscribe',

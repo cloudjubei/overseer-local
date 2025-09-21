@@ -1,7 +1,9 @@
 import AppStorage from './AppStorage'
-import { DEFAULT_APP_SETTINGS } from '../types/settings'
+import { AppSettings, DEFAULT_APP_SETTINGS } from '../types/settings'
 
-export default class AppSettings {
+export default class AppSettingsStorage {
+  private appStorage: AppStorage
+  private settings: AppSettings
   constructor() {
     this.appStorage = new AppStorage('app-settings')
     this.settings = this.__load()
@@ -26,7 +28,7 @@ export default class AppSettings {
     return this.settings
   }
 
-  save(updates) {
+  save(updates: Partial<AppSettings>) {
     const newSettings = { ...this.settings, ...updates }
     try {
       this.appStorage.setItem(this.__storageKey(), JSON.stringify(newSettings))

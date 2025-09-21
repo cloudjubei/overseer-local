@@ -1,7 +1,8 @@
-import { AgentRunRatingPatch } from 'thefactory-tools/dist/agentRunStore'
 import { PricingState } from './pricingService'
 import {
   AgentRunHistory,
+  AgentRunRatingPatch,
+  AgentRunUpdate,
   AgentType,
   GithubCredentials,
   LLMConfig,
@@ -19,7 +20,7 @@ export type StartTaskRunParams = {
 export type StartFeatureRunParams = StartTaskRunParams & { featureId: string }
 
 export type FactoryService = {
-  subscribeRuns: (callback: (updated: AgentRunHistory) => void) => () => void
+  subscribeRuns: (callback: (update: AgentRunUpdate) => void) => () => void
   startTaskRun: (params: StartTaskRunParams) => Promise<AgentRunHistory>
   startFeatureRun: (params: StartFeatureRunParams) => Promise<AgentRunHistory>
   cancelRun: (runId: string) => Promise<void>

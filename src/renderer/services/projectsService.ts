@@ -1,13 +1,13 @@
-import type { ProjectSpec } from 'thefactory-tools'
+import type { ProjectSpec, ReorderPayload } from 'thefactory-tools'
 
 export type ProjectsService = {
-  subscribe: (callback: (projects: ProjectSpec[]) => void) => () => void
+  subscribe: (callback: () => void) => () => void
   listProjects: () => Promise<ProjectSpec[]>
-  getProject: (id: string) => Promise<ProjectSpec | undefined>
-  createProject: (spec: ProjectSpec) => Promise<ProjectSpec>
-  updateProject: (id: string, spec: ProjectSpec) => Promise<ProjectSpec>
-  deleteProject: (id: string) => Promise<void>
-  reorderTask: (projectId: string, fromIndex: number, toIndex: number) => Promise<ProjectSpec>
+  getProject: (projectId: string) => Promise<ProjectSpec | undefined>
+  createProject: (input: ProjectSpec) => Promise<ProjectSpec>
+  updateProject: (projectId: string, patch: ProjectSpec) => Promise<ProjectSpec>
+  deleteProject: (projectId: string) => Promise<void>
+  reorderTask: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec>
 }
 
 export const projectsService: ProjectsService = { ...window.projectsService }

@@ -2,7 +2,7 @@ import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
 import { openDatabase, TheFactoryDb } from 'thefactory-db'
-import { MatchParams } from 'thefactory-db/dist/types'
+import type { DocumentInput, MatchParams, Document, DocumentWithScore } from 'thefactory-db'
 
 export default class DatabaseManager extends BaseManager {
   private _dbClient: TheFactoryDb | undefined
@@ -103,28 +103,28 @@ export default class DatabaseManager extends BaseManager {
     await this.close()
   }
 
-  async addDocument(input: any): Promise<any> {
+  async addDocument(input: DocumentInput): Promise<Document | undefined> {
     return await this._dbClient?.addDocument(input)
   }
-  async getDocumentById(id: string): Promise<any> {
+  async getDocumentById(id: string): Promise<Document | undefined> {
     return await this._dbClient?.getDocumentById(id)
   }
-  async getDocumentBySrc(src: string): Promise<any> {
+  async getDocumentBySrc(src: string): Promise<Document | undefined> {
     return await this._dbClient?.getDocumentBySrc(src)
   }
-  async updateDocument(id: string, patch: any): Promise<any> {
+  async updateDocument(id: string, patch: any): Promise<Document | undefined> {
     return await this._dbClient?.updateDocument(id, patch)
   }
-  async deleteDocument(id: string): Promise<any> {
+  async deleteDocument(id: string): Promise<boolean | undefined> {
     return await this._dbClient?.deleteDocument(id)
   }
-  async searchDocuments(params: any): Promise<any> {
-    return await this._dbClient?.searchDocuments(params)
+  async searchDocuments(params: any): Promise<DocumentWithScore[]> {
+    return (await this._dbClient?.searchDocuments(params)) ?? []
   }
-  async matchDocuments(options: MatchParams): Promise<any> {
-    return await this._dbClient?.matchDocuments(options)
+  async matchDocuments(options: MatchParams): Promise<Document[]> {
+    return (await this._dbClient?.matchDocuments(options)) ?? []
   }
-  async clearDocuments(projectIds?: string[]): Promise<any> {
+  async clearDocuments(projectIds?: string[]): Promise<void> {
     return await this._dbClient?.clearDocuments(projectIds)
   }
   private _setConnected(connected: boolean): void {

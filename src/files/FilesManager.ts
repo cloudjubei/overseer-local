@@ -1,94 +1,187 @@
 import type { BrowserWindow } from 'electron'
-import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import FilesStorage from './FilesStorage'
 import BaseManager from '../BaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
+import {
+  createFileTools,
+  FileTools,
+  FilesResult,
+  getFileStats as getFileMetaStats,
+  FileMeta,
+  FileChangeHandler,
+} from 'thefactory-tools'
+import DatabaseManager from 'src/db/DatabaseManager'
 
 export default class FilesManager extends BaseManager {
-  private storages: Record<string, FilesStorage>
+  private tools: Record<string, FileTools>
   private projectsManager: ProjectsManager
+  private databaseManager: DatabaseManager
 
-  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    projectsManager: ProjectsManager,
+    databaseManager: DatabaseManager,
+  ) {
     super(projectRoot, window)
-    this.storages = {}
+    this.tools = {}
 
     this.projectsManager = projectsManager
+    this.databaseManager = databaseManager
   }
 
   async init(): Promise<void> {
-    await this.__getStorage('main')
+    await this.__getTools('main')
 
     await super.init()
   }
 
-  private async __getStorage(projectId: string): Promise<FilesStorage | undefined> {
-    if (!this.storages[projectId]) {
-      const project: any = await this.projectsManager.getProject(projectId as any)
-      if (!project) {
-        return
-      }
-      const projectRoot = path.resolve(this.projectsManager.projectsDir, project.path)
-      const filesDir = projectRoot
-      const storage = new FilesStorage(projectId, filesDir, this.window)
-      await storage.init()
-      this.storages[projectId] = storage
+  async updateTools(): Promise<void> {
+    for (const projectId in Object.keys(this.tools)) {
+      await this.updateTool(projectId)
     }
-    return this.storages[projectId]
   }
 
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    handlers[IPC_HANDLER_KEYS.FILES_LIST] = async ({ projectId }) =>
-      (await this.__getStorage(projectId))?.listFiles()
-    handlers[IPC_HANDLER_KEYS.FILES_READ] = async ({ projectId, relPath, encoding }) =>
-      await this.readFile(projectId, relPath, encoding)
-    handlers[IPC_HANDLER_KEYS.FILES_READ_BINARY] = async ({ projectId, relPath }) =>
-      (await this.__getStorage(projectId))?.readFileBinary(relPath)
-    handlers[IPC_HANDLER_KEYS.FILES_READ_DIRECTORY] = async ({ projectId, relPath }) =>
-      (await this.__getStorage(projectId))?.readDirectory(relPath)
-    handlers[IPC_HANDLER_KEYS.FILES_WRITE] = async ({ projectId, relPath, content, encoding }) =>
-      await this.writeFile(projectId, relPath, content, encoding)
-    handlers[IPC_HANDLER_KEYS.FILES_DELETE] = async ({ projectId, relPath }) =>
-      (await this.__getStorage(projectId))?.deleteFile(relPath)
-    handlers[IPC_HANDLER_KEYS.FILES_RENAME] = async ({ projectId, relPathSource, relPathTarget }) =>
-      (await this.__getStorage(projectId))?.renameFile(relPathSource, relPathTarget)
-    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD] = async ({ projectId, name, content }) =>
-      (await this.__getStorage(projectId))?.uploadFile(name, content)
+    handlers[IPC_HANDLER_KEYS.FILES_LIST] = ({ projectId, relPath }) =>
+      this.listFiles(projectId, relPath)
+    handlers[IPC_HANDLER_KEYS.FILES_READ_FILE] = ({ projectId, relPath, encoding }) =>
+      this.readFile(projectId, relPath, encoding)
+    handlers[IPC_HANDLER_KEYS.FILES_READ_PATHS] = ({ projectId, pathsRel }) =>
+      this.readPaths(projectId, pathsRel)
+    handlers[IPC_HANDLER_KEYS.FILES_GET_ALL_STATS] = ({ projectId }) =>
+      this.getAllFileStats(projectId)
+    handlers[IPC_HANDLER_KEYS.FILES_WRITE_FILE] = ({ projectId, relPath, content, encoding }) =>
+      this.writeFile(projectId, relPath, content, encoding)
+    handlers[IPC_HANDLER_KEYS.FILES_RENAME_PATH] = ({ projectId, srcRel, dstRel }) =>
+      this.renamePath(projectId, srcRel, dstRel)
+    handlers[IPC_HANDLER_KEYS.FILES_DELETE_PATH] = ({ projectId, relPath }) =>
+      this.deletePath(projectId, relPath)
+    handlers[IPC_HANDLER_KEYS.FILES_SEARCH] = async ({ projectId, query, relPath }) =>
+      this.searchFiles(projectId, query, relPath)
+    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD_FILE] = async ({ projectId, name, content }) =>
+      this.uploadFile(projectId, name, content)
 
     return handlers
   }
 
-  async getAbsoluteFilePath(projectId: string, relativePath: string): Promise<string> {
-    const s = await this.__getStorage(projectId)
-    return s!.getAbsolutePath(relativePath)
+  async listFiles(projectId: string, relPath: string = '.'): Promise<string[]> {
+    const tools = await this.__getTools(projectId)
+    return (await tools?.listFiles(relPath)) ?? []
   }
-  async listFiles(projectId: string): Promise<any> {
-    const s = await this.__getStorage(projectId)
-    return await s?.listFiles()
+  async readFile(
+    projectId: string,
+    relPath: string,
+    encoding: BufferEncoding = 'utf8',
+  ): Promise<string | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    return await tools.readFile(relPath, encoding)
   }
-  async readFile(projectId: string, relPath: string, encoding: BufferEncoding | 'utf8' = 'utf8') {
-    const s = await this.__getStorage(projectId)
-    return await s?.readFile(relPath, encoding)
+
+  async readPaths(projectId: string, pathsRel: string[]): Promise<FilesResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    return await tools.readPaths(pathsRel)
   }
-  async getFileStats(projectId: string, relPath: string): Promise<any> {
-    const s = await this.__getStorage(projectId)
-    const absolutePath = s?.getAbsolutePath(relPath)
-    return await s?.getFileStats(absolutePath)
+
+  async getAllFileStats(projectId: string): Promise<FileMeta[]> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return []
+    }
+    return tools.getAllFileStats()
   }
+
   async writeFile(
     projectId: string,
     relPath: string,
     content: string | Buffer,
-    encoding: BufferEncoding | 'utf8' = 'utf8',
+    encoding: BufferEncoding = 'utf8',
   ) {
-    const s = await this.__getStorage(projectId)
-    return await s?.writeFile(relPath, content, encoding)
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    await tools.writeFile(relPath, content, encoding)
+  }
+  async renamePath(projectId: string, srcRel: string, dstRel: string) {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    await tools.renamePath(srcRel, dstRel)
+  }
+  async deletePath(projectId: string, relPath: string) {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    await tools.deletePath(relPath)
+  }
+  async searchFiles(projectId: string, query: string, relPath: string = '.') {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    return await tools.searchFiles(query, relPath)
+  }
+  async uploadFile(
+    projectId: string,
+    name: string,
+    content: string | Buffer,
+  ): Promise<string | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    return await tools.uploadFile(name, content)
   }
 
-  async addChangeHandler(projectId: string, handler: any): Promise<void> {
-    const s = await this.__getStorage(projectId)
-    s?.addChangeHandler(handler)
+  async getFileStats(projectId: string, relPath: string): Promise<FileMeta | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    const absolutePath = tools.getAbsolutePath(relPath)
+    return getFileMetaStats(absolutePath)
+  }
+
+  async addChangeHandler(projectId: string, handler: FileChangeHandler): Promise<void> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
+    }
+    tools.subscribe(handler)
+  }
+
+  private async updateTool(projectId: string): Promise<FileTools | undefined> {
+    const projectRoot = await this.projectsManager.getProjectDir(projectId)
+    if (!projectRoot) {
+      return
+    }
+    const connectionString = this.databaseManager.getConnectionString()
+
+    const tools = createFileTools(projectId, projectRoot, connectionString)
+    await tools.init()
+    this.tools[projectId] = tools
+
+    tools.subscribe((fileUpdate) => {
+      if (this.window) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, fileUpdate)
+      }
+    })
+  }
+  private async __getTools(projectId: string): Promise<FileTools | undefined> {
+    if (!this.tools[projectId]) {
+      return await this.updateTool(projectId)
+    }
+    return this.tools[projectId]
   }
 }

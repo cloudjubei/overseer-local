@@ -33,7 +33,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   }
   useEffect(() => {
     update()
-    const unsubscribe = projectsService.subscribe(updateCurrentProjects)
+    const unsubscribe = projectsService.subscribe(update)
     return () => {
       unsubscribe()
     }

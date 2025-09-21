@@ -6,6 +6,8 @@ import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
+import { FileMeta } from 'thefactory-tools'
+import { Document } from 'thefactory-db'
 
 function sha1(buf: Buffer): string {
   return crypto.createHash('sha1').update(buf).digest('hex')
@@ -70,17 +72,19 @@ export default class DocumentIngestionManager extends BaseManager {
       return
     }
 
-    const files = ((await this.filesManager.listFiles(projectId)) || []) as any[]
+    const files = ((await this.filesManager.getAllFileStats(projectId)) || []) as FileMeta[]
 
     let ingested = 0
     let failed = 0
 
     for (const f of files) {
       try {
-        const relPath: string = f.path
-        const content = (await this.filesManager.readFile(projectId, relPath)) as string
+        const relPath: string = f.relativePath!
+        const content = await this.filesManager.readFile(projectId, relPath)
         const stats = await this.filesManager.getFileStats(projectId, relPath)
-        await this.__handleFileAdded({ projectId, relPath, content, stats })
+        if (content && stats) {
+          await this.__handleFileAdded(projectId, relPath, content, stats)
+        }
         ingested++
       } catch (e) {
         failed++
@@ -97,44 +101,23 @@ export default class DocumentIngestionManager extends BaseManager {
     )
   }
 
-  handleFileAdded = async ({
-    projectId,
-    relPath,
-    content,
-  }: {
-    projectId: string
-    relPath: string
-    content: string
-  }) => {
+  private async handleFileAdded(projectId: string, relPath: string) {
     try {
+      const content = await this.filesManager.readFile(projectId, relPath)
       const stats = await this.filesManager.getFileStats(projectId, relPath)
-      await this.__handleFileAdded({ projectId, relPath, content, stats })
+      if (content && stats) {
+        await this.__handleFileAdded(projectId, relPath, content, stats)
+      }
     } catch (e) {
       console.warn('[DocumentIngestion] handleFileAdded failed', projectId, relPath, e)
     }
   }
 
-  handleFileChanged = async ({
-    projectId,
-    relPath,
-    content,
-  }: {
-    projectId: string
-    relPath: string
-    content: string
-  }) => {
-    this.handleFileAdded({ projectId, relPath, content })
+  private async handleFileChanged(projectId: string, relPath: string) {
+    return this.handleFileAdded(projectId, relPath)
   }
 
-  handleFileRenamed = async ({
-    projectId,
-    relPathSource,
-    relPathTarget,
-  }: {
-    projectId: string
-    relPathSource: string
-    relPathTarget: string
-  }) => {
+  private async handleFileRenamed(projectId: string, relPathSource: string, relPathTarget: string) {
     try {
       const d = await this.dbManager.getDocumentBySrc(toRelUnix(relPathSource))
       if (d) {
@@ -145,7 +128,7 @@ export default class DocumentIngestionManager extends BaseManager {
     }
   }
 
-  handleFileDeleted = async ({ projectId, relPath }: { projectId: string; relPath: string }) => {
+  private async handleFileDeleted(projectId: string, relPath: string) {
     try {
       const d = await this.dbManager.getDocumentBySrc(toRelUnix(relPath))
       if (d?.id) await this.dbManager.deleteDocument(d.id)
@@ -154,17 +137,12 @@ export default class DocumentIngestionManager extends BaseManager {
     }
   }
 
-  private __handleFileAdded = async ({
-    projectId,
-    relPath,
-    content,
-    stats,
-  }: {
-    projectId: string
-    relPath: string
-    content: string
-    stats: any
-  }): Promise<any> => {
+  private __handleFileAdded = async (
+    projectId: string,
+    relPath: string,
+    content: string,
+    stats: FileMeta,
+  ): Promise<Document | undefined> => {
     const contentHash = sha1(Buffer.from(content || '', 'utf8'))
     const type = classifyDocumentType(stats.ext, relPath)
 
@@ -199,11 +177,22 @@ export default class DocumentIngestionManager extends BaseManager {
 
   private async _ensureHandling(projectId: string): Promise<void> {
     if (!this.handling[projectId]) {
-      await this.filesManager.addChangeHandler(projectId, {
-        onAdd: this.handleFileAdded,
-        onChange: this.handleFileChanged,
-        onUnlink: this.handleFileDeleted,
-        onRename: this.handleFileRenamed,
+      await this.filesManager.addChangeHandler(projectId, (update) => {
+        switch (update.type) {
+          case 'addFile': {
+            this.handleFileAdded(projectId, update.relPath)
+          }
+          case 'change': {
+            this.handleFileChanged(projectId, update.relPath)
+          }
+          case 'deleteFile': {
+            this.handleFileDeleted(projectId, update.relPath)
+          }
+          // case 'addDirectory' : {
+          // }
+          // case 'deleteDirectory' : {
+          // }
+        }
       })
       this.handling[projectId] = true
     }

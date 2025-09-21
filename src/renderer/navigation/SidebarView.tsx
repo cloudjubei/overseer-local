@@ -341,9 +341,11 @@ export default function SidebarView({}: SidebarProps) {
         {!effectiveCollapsed && (
           <div className="px-1">
             <div className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-              Workspace
+              The Overseer
             </div>
-            <div className="text-[11px] text-neutral-500 dark:text-neutral-400">Navigation</div>
+            <div className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              powered by TheFactory
+            </div>
           </div>
         )}
         <button

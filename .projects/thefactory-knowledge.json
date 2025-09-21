@@ -6,19 +6,22 @@
   "repo_url": "https://github.com/cloudjubei/thefactory-knowledge.git",
   "requirements": [],
   "taskIdToDisplayIndex": {
-    "f72dbcdb-77e7-4d00-bf72-e2cc59271644": 1,
-    "15a2115a-b435-43f7-a8bc-3346a8868753": 2,
-    "181bc859-006b-45c1-bea7-ba6756d26e5a": 3,
-    "0ebeb37f-7249-45f9-bb93-9ac91098a18b": 4,
-    "4072ce15-c3b3-4561-82ea-720a2e526090": 5,
-    "3a8c34c7-a549-4ff0-9df7-6c6ec80ff0ed": 6,
-    "1ac3e17b-ca60-4f54-bd19-21c2dc1ab7a0": 7,
-    "ac68aa4d-940c-4613-8999-81a0562acc59": 8,
-    "7463c50a-2ce4-4501-9a38-c62811b50f44": 9,
-    "c009f8f4-fbeb-4cb6-9dc2-0ac68053d172": 10
+    "7463c50a-2ce4-4501-9a38-c62811b50f44": 1,
+    "f72dbcdb-77e7-4d00-bf72-e2cc59271644": 2,
+    "15a2115a-b435-43f7-a8bc-3346a8868753": 3,
+    "181bc859-006b-45c1-bea7-ba6756d26e5a": 4,
+    "0ebeb37f-7249-45f9-bb93-9ac91098a18b": 5,
+    "4072ce15-c3b3-4561-82ea-720a2e526090": 6,
+    "3a8c34c7-a549-4ff0-9df7-6c6ec80ff0ed": 7,
+    "1ac3e17b-ca60-4f54-bd19-21c2dc1ab7a0": 8,
+    "ac68aa4d-940c-4613-8999-81a0562acc59": 9,
+    "c08d5be3-02d2-4677-8dfd-951e1e5c98c7": 10,
+    "c009f8f4-fbeb-4cb6-9dc2-0ac68053d172": 11
   },
   "metadata": {
     "icon": "ai-ml",
     "githubCredentialsId": "0c5aa9e8-9d2e-4891-8239-a3ab7b841564"
-  }
+  },
+  "createdAt": "2025-09-14T19:03:30.461Z",
+  "updatedAt": "2025-09-16T13:05:37.972Z"
 }

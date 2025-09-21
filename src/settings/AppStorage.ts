@@ -3,14 +3,16 @@ import path from 'path'
 import { app } from 'electron'
 
 export default class AppStorage {
-  constructor(subdir) {
+  private basePath: string
+
+  constructor(subdir: string) {
     this.basePath = path.join(app.getPath('userData'), subdir)
     if (!fs.existsSync(this.basePath)) {
       fs.mkdirSync(this.basePath, { recursive: true })
     }
   }
 
-  getItem(key) {
+  getItem(key: string) {
     const filePath = path.join(this.basePath, `${key}.json`)
     try {
       if (!fs.existsSync(filePath)) return null
@@ -21,7 +23,7 @@ export default class AppStorage {
     }
   }
 
-  setItem(key, value) {
+  setItem(key: string, value: string) {
     const filePath = path.join(this.basePath, `${key}.json`)
     try {
       fs.writeFileSync(filePath, value, 'utf8')
@@ -30,7 +32,7 @@ export default class AppStorage {
     }
   }
 
-  removeItem(key) {
+  removeItem(key: string) {
     const filePath = path.join(this.basePath, `${key}.json`)
     try {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath)

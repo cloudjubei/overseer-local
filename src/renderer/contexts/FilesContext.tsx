@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'
-import { filesService, FileMeta } from '../services/filesService'
+import { filesService } from '../services/filesService'
 import { useActiveProject } from '../contexts/ProjectContext'
+import { FileMeta, FileUpdate } from 'thefactory-tools'
 
 export type DirNode = {
   name: string
@@ -28,7 +29,7 @@ function buildDirTree(files: FileMeta[]): DirNode {
   }
 
   for (const f of files) {
-    const path = f.path || f.name
+    const path = f.relativePath || f.absolutePath || f.name
     const parts = path.split('/')
     const fileName = parts.pop() || f.name
     const dirPath = parts.join('/')
@@ -52,7 +53,7 @@ export type FilesContextValue = {
   filesByPath: Record<string, FileMeta>
   directoryTree: DirNode | null
   readFile: (path: string) => Promise<string | undefined>
-  saveFile: (path: string, content: string) => Promise<void>
+  writeFile: (path: string, content: string) => Promise<void>
   uploadFile: (name: string, content: string) => Promise<string | undefined>
 }
 
@@ -66,7 +67,7 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
   const [directoryTree, setDirectoryTree] = useState<DirNode | null>(null)
 
   const update = async () => {
-    const files = await filesService.listFiles(projectId)
+    const files = await filesService.getAllFileStats(projectId)
     updateCurrentFiles(files)
   }
   const updateCurrentFiles = (files: FileMeta[]) => {
@@ -75,7 +76,7 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     setDirectoryTree(newTree)
     let newFilesByPath: Record<string, FileMeta> = {}
     for (const f of files) {
-      newFilesByPath[f.path] = f
+      newFilesByPath[f.absolutePath] = f
     }
     setFilesByPath(newFilesByPath)
   }
@@ -83,17 +84,20 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (projectId) {
       update()
-      const unsubscribe = filesService.subscribe(updateCurrentFiles)
+      const unsubscribe = filesService.subscribe((fileUpdate) => update())
       return () => {
         unsubscribe()
       }
     }
   }, [projectId])
 
-  const readFile = async (path: string): Promise<string | undefined> => {
-    return await filesService.readFile(projectId, path)
+  const readFile = async (
+    path: string,
+    encoding: BufferEncoding = 'utf8',
+  ): Promise<string | undefined> => {
+    return await filesService.readFile(projectId, path, encoding)
   }
-  const saveFile = async (path: string, content: string): Promise<void> => {
+  const writeFile = async (path: string, content: string): Promise<void> => {
     await filesService.writeFile(projectId, path, content)
   }
 
@@ -106,11 +110,11 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
       files,
       directoryTree,
       readFile,
-      saveFile,
+      writeFile,
       filesByPath,
       uploadFile,
     }),
-    [files, directoryTree, readFile, saveFile, filesByPath, uploadFile],
+    [files, directoryTree, readFile, writeFile, filesByPath, uploadFile],
   )
 
   return <FilesContext.Provider value={value}>{children}</FilesContext.Provider>

@@ -151,8 +151,7 @@ export default function TasksListView() {
     if (saving) return
     setSaving(true)
     try {
-      const res = await reorderTask(fromIndex, toIndex)
-      if (!res || !res.ok) throw new Error(res?.error || 'Unknown error')
+      await reorderTask({ fromIndex, toIndex })
     } catch (e: any) {
       alert(`Failed to reorder task: ${e.message || e}`)
     } finally {

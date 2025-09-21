@@ -16,6 +16,7 @@ import {
   TaskEditInput,
   FeatureCreateInput,
   FeatureEditInput,
+  ReorderPayload,
 } from 'thefactory-tools'
 
 // Define the context value type based on useTasks return value
@@ -32,8 +33,8 @@ export type TasksContextValue = {
     updates: FeatureEditInput,
   ) => Promise<Task | undefined>
   deleteFeature: (taskId: string, featureId: string) => Promise<Task | undefined>
-  reorderFeatures: (taskId: string, fromIndex: number, toIndex: number) => Promise<Task | undefined>
-  reorderTask: (fromIndex: number, toIndex: number) => Promise<ProjectSpec | undefined>
+  reorderFeatures: (taskId: string, payload: ReorderPayload) => Promise<Task | undefined>
+  reorderTask: (payload: ReorderPayload) => Promise<ProjectSpec | undefined>
   getBlockers: (taskId: string, featureId?: string) => (ResolvedRef | InvalidRefError)[]
   getBlockersOutbound: (id: string) => ResolvedRef[]
   resolveDependency: (dependency: string) => ResolvedRef | InvalidRefError
@@ -205,9 +206,9 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
 
     updateForProject()
 
-    const unsubscribe = tasksService.subscribe((tasks) => {
+    const unsubscribe = tasksService.subscribe(() => {
       if (isMounted) {
-        updateCurrentProjectTasks(project, tasks)
+        updateForProject()
       }
     })
 
@@ -353,18 +354,19 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
   )
 
   const reorderFeatures = useCallback(
-    async (taskId: string, fromIndex: number, toIndex: number): Promise<Task | undefined> => {
+    async (taskId: string, payload: ReorderPayload): Promise<Task | undefined> => {
       if (project) {
-        return await tasksService.reorderFeatures(project.id, taskId, { fromIndex, toIndex })
+        return await tasksService.reorderFeatures(project.id, taskId, payload)
       }
     },
     [project],
   )
 
   const reorderTask = useCallback(
-    async (fromIndex: number, toIndex: number): Promise<ProjectSpec | undefined> => {
+    async (payload: ReorderPayload): Promise<ProjectSpec | undefined> => {
+      console.log('TaskContext reorderTask payload: ', payload, ' project: ', project)
       if (project) {
-        return await projectsService.reorderTask(project.id, fromIndex, toIndex)
+        return await projectsService.reorderTask(project.id, payload)
       }
     },
     [project],

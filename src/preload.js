@@ -3,30 +3,37 @@ import IPC_HANDLER_KEYS from './ipcHandlersKeys'
 
 const FILES_API = {
   subscribe: (callback) => {
-    const listener = (_event, files) => callback(files)
+    const listener = (_event, fileUpdate) => callback(fileUpdate)
     ipcRenderer.on(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener)
   },
   listFiles: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_LIST, { projectId }),
   readFile: (projectId, relPath, encoding = 'utf8') =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ, { projectId, relPath, encoding }),
-  readFileBinary: (projectId, relPath) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_BINARY, { projectId, relPath }),
-  readDirectory: (projectId, relPath) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_DIRECTORY, { projectId, relPath }),
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_FILE, { projectId, relPath, encoding }),
+  readPaths: (projectId, pathsRel) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_READ_PATHS, { projectId, pathsRel }),
+  getAllFileStats: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_GET_ALL_STATS, { projectId }),
   writeFile: (projectId, relPath, content, encoding = 'utf8') =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_WRITE, { projectId, relPath, content, encoding }),
-  deleteFile: (projectId, relPath) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_DELETE, { projectId, relPath }),
-  renameFile: (projectId, relPathSource, relPathTarget) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_RENAME, { projectId, relPathSource, relPathTarget }),
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_WRITE_FILE, {
+      projectId,
+      relPath,
+      content,
+      encoding,
+    }),
+  renamePath: (projectId, srcRel, dstRel) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_RENAME_PATH, { projectId, srcRel, dstRel }),
+  deletePath: (projectId, relPath) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_DELETE_PATH, { projectId, relPath }),
+  searchFiles: (projectId, query, relPath = '.') =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_SEARCH, { projectId, query, relPath }),
   uploadFile: (projectId, name, content) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPLOAD, { projectId, name, content }),
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPLOAD_FILE, { projectId, name, content }),
 }
 
 const TASKS_API = {
   subscribe: (callback) => {
-    const listener = (_event, tasks) => callback(tasks)
+    const listener = (_event) => callback()
     ipcRenderer.on(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.TASKS_SUBSCRIBE, listener)
   },
@@ -107,19 +114,18 @@ const NOTIFICATIONS_API = {
 
 const PROJECTS_API = {
   subscribe: (callback) => {
-    const listener = (_event, projects) => callback(projects)
+    const listener = (_event) => callback()
     ipcRenderer.on(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, listener)
   },
   listProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_LIST),
-  getProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_GET, { id }),
-  createProject: (project) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { id: project?.id, project }),
-  updateProject: (id, project) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { id, project }),
-  deleteProject: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { id }),
-  reorderTask: (projectId, fromIndex, toIndex) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { projectId, fromIndex, toIndex }),
+  getProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_GET, { projectId }),
+  createProject: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CREATE, { input }),
+  updateProject: (projectId, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { projectId, patch }),
+  deleteProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { projectId }),
+  reorderTask: (projectId, payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_TASK_REORDER, { projectId, payload }),
 }
 
 const SCREENSHOT_API = {
@@ -161,7 +167,7 @@ const LIVEDATA_API = {
 // Factory orchestrator API exposed to renderer
 const FACTORY_API = {
   subscribeRuns: (callback) => {
-    const listener = (_event, run) => callback(run)
+    const listener = (_event, runUpdate) => callback(runUpdate)
     ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
   },

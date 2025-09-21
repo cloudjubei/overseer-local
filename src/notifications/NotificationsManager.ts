@@ -25,10 +25,7 @@ export default class NotificationsManager extends BaseManager {
   private __getStorage(projectId: string): NotificationsStorage {
     if (!this.storages[projectId]) {
       const storage = new NotificationsStorage(projectId)
-      // Broadcast to renderer on any storage changes
-      try {
-        storage.subscribe(() => this._broadcast(projectId))
-      } catch {}
+      storage.subscribe(() => this._broadcast(projectId))
       this.storages[projectId] = storage
     }
     return this.storages[projectId]
@@ -68,12 +65,12 @@ export default class NotificationsManager extends BaseManager {
     try {
       const app = this.settingsManager.getAppSettings?.()
       const project = this.settingsManager.getProjectSettings?.(projectId)
-      const sys = app?.settings || {
+      const sys = app?.notificationSystemSettings || {
         osNotificationsEnabled: false,
         soundsEnabled: false,
         displayDuration: 5,
       }
-      const categoriesEnabled = project?.settings.notifications?.categoriesEnabled || {}
+      const categoriesEnabled = project?.notifications.categoriesEnabled || {}
       return { sys, categoriesEnabled }
     } catch (e) {
       return {

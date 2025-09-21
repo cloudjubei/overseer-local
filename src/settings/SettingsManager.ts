@@ -1,18 +1,19 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
-import ProjectSettings from './projectSettings'
-import AppSettings from './appSettings'
+import ProjectSettingsStorage from './ProjectSettingsStorage'
+import AppSettingsStorage from './AppSettingsStorage'
+import { AppSettings, ProjectSettings } from 'src/types/settings'
 
 export default class SettingsManager extends BaseManager {
-  private appSettings: AppSettings
-  private projectSettings: Record<string, ProjectSettings>
+  private appSettingsStorage: AppSettingsStorage
+  private projectSettingsStorage: Record<string, ProjectSettingsStorage>
 
   constructor(projectRoot: string, window: BrowserWindow) {
     super(projectRoot, window)
 
-    this.appSettings = new AppSettings()
-    this.projectSettings = {}
+    this.appSettingsStorage = new AppSettingsStorage()
+    this.projectSettingsStorage = {}
   }
 
   async init(): Promise<void> {
@@ -35,19 +36,19 @@ export default class SettingsManager extends BaseManager {
     return handlers
   }
 
-  private __loadProjectSettings(projectId: string): ProjectSettings {
-    if (!this.projectSettings[projectId]) {
-      this.projectSettings[projectId] = new ProjectSettings(projectId)
+  private __loadProjectSettings(projectId: string): ProjectSettingsStorage {
+    if (!this.projectSettingsStorage[projectId]) {
+      this.projectSettingsStorage[projectId] = new ProjectSettingsStorage(projectId)
     }
-    return this.projectSettings[projectId]
+    return this.projectSettingsStorage[projectId]
   }
 
   getAppSettings(): AppSettings {
-    return this.appSettings.get()
+    return this.appSettingsStorage.get()
   }
 
   updateAppSettings(updates: any): AppSettings {
-    return this.appSettings.save(updates)
+    return this.appSettingsStorage.save(updates)
   }
   getProjectSettings(projectId: string): ProjectSettings {
     return this.__loadProjectSettings(projectId).get()
