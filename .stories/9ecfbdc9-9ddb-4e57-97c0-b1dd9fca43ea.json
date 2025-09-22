@@ -3,8 +3,70 @@
   "status": "-",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
-  "features": [],
-  "featureIdToDisplayIndex": {},
+  "features": [
+    {
+      "id": "e92d8ada-b10d-4a75-bbbb-e8ba9907c7d1",
+      "status": "-",
+      "title": "Create 'Tests' Screen and Add Sidebar Navigation",
+      "description": "Create a new screen component for 'Tests'. Add a new navigation entry in the sidebar, including a new icon, to route to this screen. The initial screen should have a basic layout with a title.",
+      "context": [],
+      "createdAt": "2025-09-22T23:51:23.418Z",
+      "updatedAt": "2025-09-22T23:51:23.418Z"
+    },
+    {
+      "id": "d05e25fe-33f1-466a-9237-5abbe3ea43ee",
+      "status": "-",
+      "title": "Implement Tabbed View for Test Results and Coverage",
+      "description": "On the 'Tests' screen, implement a tabbed interface with two tabs: 'Test Results' and 'Test Coverage'. The content for each tab will be implemented in subsequent features.",
+      "context": [],
+      "createdAt": "2025-09-22T23:51:23.420Z",
+      "updatedAt": "2025-09-22T23:51:23.420Z"
+    },
+    {
+      "id": "72ab35c0-0d17-4aef-adec-88225d64680d",
+      "status": "-",
+      "title": "Integrate Test Runner and Display Loading State",
+      "description": "Integrate the `factory-tools` test runner. Add a 'Run Tests' button to the 'Test Results' tab. When clicked, trigger the test run and display a loading indicator while the tests are in progress. The raw results should be stored in the component's state.",
+      "context": [],
+      "createdAt": "2025-09-22T23:51:23.421Z",
+      "updatedAt": "2025-09-22T23:51:23.421Z"
+    },
+    {
+      "id": "7b0d3b50-e90d-4273-a1f1-0927f0f893ff",
+      "status": "-",
+      "title": "Display Test Results",
+      "description": "Parse the test results from the `factory-tools` runner and display them in the 'Test Results' tab. Special attention should be given to formatting failures, showing the failed test, the error message, and a relevant code snippet.",
+      "context": [],
+      "createdAt": "2025-09-22T23:51:23.422Z",
+      "updatedAt": "2025-09-22T23:51:23.422Z"
+    },
+    {
+      "id": "a18529eb-24c1-4857-af45-d464ee37de06",
+      "status": "-",
+      "title": "Integrate Coverage Runner and Display Loading State",
+      "description": "Add a 'Run Coverage' button to the 'Test Coverage' tab. When clicked, trigger the coverage run via `factory-tools` and display a loading indicator until the process is complete. The raw coverage data should be stored in the component's state.",
+      "context": [],
+      "createdAt": "2025-09-22T23:51:23.423Z",
+      "updatedAt": "2025-09-22T23:51:23.423Z"
+    },
+    {
+      "id": "f0866210-92d5-410e-9d81-c2059e24ee26",
+      "status": "-",
+      "title": "Display Coverage Report",
+      "description": "Parse the coverage data from the `factory-tools` runner and display it in a clear, user-friendly format within the 'Test Coverage' tab. The report should be easy to read and analyze.",
+      "context": [],
+      "createdAt": "2025-09-22T23:51:23.424Z",
+      "updatedAt": "2025-09-22T23:51:23.424Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "e92d8ada-b10d-4a75-bbbb-e8ba9907c7d1": 1,
+    "d05e25fe-33f1-466a-9237-5abbe3ea43ee": 2,
+    "72ab35c0-0d17-4aef-adec-88225d64680d": 3,
+    "7b0d3b50-e90d-4273-a1f1-0927f0f893ff": 4,
+    "a18529eb-24c1-4857-af45-d464ee37de06": 5,
+    "f0866210-92d5-410e-9d81-c2059e24ee26": 6
+  },
   "createdAt": "2025-09-22T23:34:09.482Z",
   "updatedAt": "2025-09-22T23:34:09.482Z"
 }
