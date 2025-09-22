@@ -87,7 +87,7 @@ export default function StoriesListView() {
     getBlockers,
     getBlockersOutbound,
   } = useStories()
-  const { runsHistory, startAgent } = useAgents()
+  const { runsActive, startAgent } = useAgents()
 
   useEffect(() => {
     const storyIds = storyIdsByProject[projectId] ?? []
@@ -458,9 +458,7 @@ export default function StoriesListView() {
                 const blockers = getBlockers(t.id)
                 const blockersOutbound = getBlockersOutbound(t.id)
                 const hasRejectedFeatures = t.features.filter((f) => !!f.rejection).length > 0
-                const storyRun = runsHistory.find(
-                  (r) => r.state === 'running' && r.storyId === t.id,
-                )
+                const storyRun = runsActive.find((r) => r.storyId === t.id)
 
                 return (
                   <li key={t.id} className="story-item" role="listitem">

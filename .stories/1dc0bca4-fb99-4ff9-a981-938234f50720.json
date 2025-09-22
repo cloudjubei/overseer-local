@@ -1,0 +1,10 @@
+{
+  "id": "1dc0bca4-fb99-4ff9-a981-938234f50720",
+  "status": "-",
+  "title": "New screen - Tools",
+  "description": "For various testing purposes, we want to have a screen where a user can see all the tools that are available via the factory-tools (from the createTools) and where they can call them to try them out. All appropriate inputs must be presented.\nMake sure the UI/UX is clear and easy to navigate. The tools should be searchable and grouped by the files they come from (for instance all the StoryTools should be together).",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-22T23:38:29.822Z",
+  "updatedAt": "2025-09-22T23:38:29.822Z"
+}

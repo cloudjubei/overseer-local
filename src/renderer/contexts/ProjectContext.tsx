@@ -36,14 +36,17 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
         if (p) {
           setProjects((prev) => [...prev, p])
         }
+        break
       case 'delete':
         setProjects((prev) => prev.filter((p) => p.id !== projectUpdate.projectId))
+        break
       case 'change':
         const p2 =
           projectUpdate.project ?? (await projectsService.getProject(projectUpdate.projectId))
         if (p2) {
           setProjects((prev) => prev.map((p) => (p.id !== projectUpdate.projectId ? p : p2)))
         }
+        break
     }
   }
   useEffect(() => {

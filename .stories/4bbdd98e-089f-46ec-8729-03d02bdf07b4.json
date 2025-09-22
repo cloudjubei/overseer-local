@@ -1,0 +1,10 @@
+{
+  "id": "4bbdd98e-089f-46ec-8729-03d02bdf07b4",
+  "status": "-",
+  "title": "Improve chat",
+  "description": "We need to make chat more user friendly and easy to use.\n- The main chat window should be of constant size and the messages should be horizontally scrollable and extend vertically as far as they need.\n- While waiting for a response there's a spinner showing the agent thinking.\n- We need to show how long the agent took to respond.\n- We get the full message content, but we want it to appear as if it was streamed in (written on the ago), create an appropriate animation\n- if the user is at the bottom of the chat window, then if there's a new message, only scroll a little bit so that the user can start reading and not chase the newly appearing text.\n- The message the user sends needs to appear instantly with a nice popping animation.\n- There needs to be a sound for sending a message and receiving a message.\n- The input needs to be reworked to be more like the FeatureForm, it should allow fast lookup of files and references to stories and features (when hitting @ for files and # for stories/features).\n- Whenever a file is references via @ in the text (whether the input box or in a message, it should be displayed with a nice chip. In the input box, if the caret is at the end of the chip and the user presses backspace - the view transforms into text, deletes the last character and goes back into showing file lookup. The equivalent thing should also happen for story/feature references.\n- if there's an error in the chat, show an appropriate error bubble\n- whenever the agent invokes tool calls, show it via a custom view that will allow inspection of the tool call (arguments and results and time taken)",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-22T23:49:45.348Z",
+  "updatedAt": "2025-09-22T23:49:45.348Z"
+}

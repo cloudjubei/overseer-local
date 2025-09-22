@@ -1,11 +1,18 @@
 import { AgentRunState } from 'thefactory-tools'
-import { IconCheckCircle, IconLoader, IconStopCircle, IconXCircle } from '../ui/Icons'
+import {
+  IconCheckCircle,
+  IconLightbulb,
+  IconLoader,
+  IconStopCircle,
+  IconXCircle,
+} from '../ui/Icons'
 import Tooltip from '../ui/Tooltip'
 
 export function StatusIcon({ state, className }: { state: AgentRunState; className?: string }) {
   switch (state) {
+    case 'created':
+      return <IconLightbulb className={className} />
     case 'running':
-      // Ensure the loader icon visibly spins
       return <IconLoader className={`${className ?? ''} icon--spin`} />
     case 'completed':
       return <IconCheckCircle className={className} />

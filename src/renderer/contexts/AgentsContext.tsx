@@ -9,6 +9,7 @@ import { useGitHubCredentials } from './GitHubCredentialsContext'
 import { useProjectContext } from './ProjectContext'
 
 export type AgentsContextValue = {
+  runsActive: AgentRunHistory[]
   runsHistory: AgentRunHistory[]
   startAgent: (
     agentType: AgentType,
@@ -29,10 +30,12 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { activeProject } = useProjectContext()
   const { getCredentials } = useGitHubCredentials()
   const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])
+  const [runsActive, setRunsActive] = useState<AgentRunHistory[]>([])
 
   const update = async () => {
     const history = await factoryService.listRunHistory()
     setRunsHistory(history)
+    setRunsActive(history.filter((h) => h.state === 'running' || h.state === 'created'))
   }
 
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
@@ -41,22 +44,30 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         const run = agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])
+          setRunsActive((prev) => [...prev, run])
         }
+        break
       case 'delete':
         setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
+        setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
+        break
       case 'change':
         const run2 =
           agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
         if (run2) {
           const prevRun = runsHistory.find((r) => r.id === agentRunUpdate.runId)
-          if (
-            prevRun?.state === 'running' ||
-            (prevRun?.state === 'created' && run2.state !== 'running' && run2.state !== 'created')
-          ) {
+          const isRunning = run2.state === 'running' || run2.state === 'created'
+          if ((prevRun?.state === 'running' || prevRun?.state === 'created') && !isRunning) {
             fireCompletionNotification(run2)
           }
           setRunsHistory((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
+          if (isRunning) {
+            setRunsActive((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
+          } else {
+            setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
+          }
         }
+        break
     }
   }
 
@@ -158,13 +169,14 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AgentsContextValue>(
     () => ({
+      runsActive,
       runsHistory,
       startAgent,
       cancelRun,
       deleteRunHistory,
       rateRun,
     }),
-    [runsHistory, startAgent, cancelRun, deleteRunHistory, rateRun],
+    [runsActive, runsHistory, startAgent, cancelRun, deleteRunHistory, rateRun],
   )
 
   return <AgentsContext.Provider value={value}>{children}</AgentsContext.Provider>

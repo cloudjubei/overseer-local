@@ -1,7 +1,7 @@
 import type { ProjectSpec, ReorderPayload, ProjectUpdate } from 'thefactory-tools'
 
 export type ProjectsService = {
-  subscribe: (callback: (projectUpdate: ProjectUpdate) => void) => () => void
+  subscribe: (callback: (projectUpdate: ProjectUpdate) => Promise<void>) => () => void
   listProjects: () => Promise<ProjectSpec[]>
   getProject: (projectId: string) => Promise<ProjectSpec | undefined>
   createProject: (input: ProjectSpec) => Promise<ProjectSpec>

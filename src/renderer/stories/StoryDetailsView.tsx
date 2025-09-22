@@ -54,7 +54,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     getBlockers,
     getBlockersOutbound,
   } = useStories()
-  const { runsHistory, startAgent } = useAgents()
+  const { runsActive, startAgent } = useAgents()
 
   // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
   const preventDragFromNoDragRef = useRef(false)
@@ -170,6 +170,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   }, [featuresSorted, statusFilter, query])
 
   const isSearchFiltered = query !== ''
+
+  const storyRun = useMemo(
+    () => (story ? runsActive.find((r) => r.storyId === story!.id) : undefined),
+    [story, runsActive],
+  )
 
   const handleEditStory = () => {
     if (!story) return
@@ -366,7 +371,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const storyBlockers = getBlockers(story.id)
   const storyBlockersOutbound = getBlockersOutbound(story.id)
 
-  const storyRun = runsHistory.find((r) => r.state === 'running' && r.storyId === story.id)
   const storyHasActiveRun = !!storyRun
   const hasRejectedFeatures = story.features.filter((f) => !!f.rejection).length > 0
   const storyDisplayIndex = project?.storyIdToDisplayIndex[story.id] ?? 0

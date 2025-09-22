@@ -1,0 +1,10 @@
+{
+  "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
+  "status": "-",
+  "title": "New screen - Tests",
+  "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-09-22T23:34:09.482Z",
+  "updatedAt": "2025-09-22T23:34:09.482Z"
+}
