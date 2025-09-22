@@ -31,14 +31,16 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const onProjectUpdate = async (projectUpdate: ProjectUpdate) => {
     switch (projectUpdate.type) {
       case 'add':
-        const p = await projectsService.getProject(projectUpdate.projectId)
+        const p =
+          projectUpdate.project ?? (await projectsService.getProject(projectUpdate.projectId))
         if (p) {
           setProjects((prev) => [...prev, p])
         }
       case 'delete':
         setProjects((prev) => prev.filter((p) => p.id !== projectUpdate.projectId))
       case 'change':
-        const p2 = await projectsService.getProject(projectUpdate.projectId)
+        const p2 =
+          projectUpdate.project ?? (await projectsService.getProject(projectUpdate.projectId))
         if (p2) {
           setProjects((prev) => prev.map((p) => (p.id !== projectUpdate.projectId ? p : p2)))
         }

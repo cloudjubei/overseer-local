@@ -1,31 +1,13 @@
 import { PricingState } from './pricingService'
-import {
-  AgentRunHistory,
-  AgentRunRatingPatch,
-  AgentRunUpdate,
-  AgentType,
-  GithubCredentials,
-  LLMConfig,
-  WebSearchApiKeys,
-} from 'thefactory-tools'
-
-export type StartStoryRunParams = {
-  agentType: AgentType
-  projectId: string
-  storyId: string
-  llmConfig: LLMConfig
-  githubCredentials: GithubCredentials
-  webSearchApiKeys?: WebSearchApiKeys
-}
-export type StartFeatureRunParams = StartStoryRunParams & { featureId: string }
+import { AgentRun, AgentRunHistory, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
 
 export type FactoryService = {
   subscribeRuns: (callback: (update: AgentRunUpdate) => void) => () => void
-  startStoryRun: (params: StartStoryRunParams) => Promise<AgentRunHistory>
-  startFeatureRun: (params: StartFeatureRunParams) => Promise<AgentRunHistory>
+  startRun: (params: AgentRun) => Promise<AgentRunHistory>
   cancelRun: (runId: string) => Promise<void>
-  listRunsActive: () => Promise<AgentRunHistory[]>
+  listRunsActive: () => Promise<string[]>
   listRunHistory: () => Promise<AgentRunHistory[]>
+  getRunHistory: (runId: string) => Promise<AgentRunHistory | undefined>
   deleteRunHistory: (runId: string) => Promise<AgentRunHistory | undefined>
   rateRun: (runId: string, rating?: AgentRunRatingPatch) => Promise<AgentRunHistory | undefined>
 

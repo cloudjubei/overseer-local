@@ -18,7 +18,7 @@ function toRelUnix(p: string): string {
 }
 
 export default class DocumentIngestionManager extends BaseManager {
-  private dbManager: DatabaseManager
+  private databaseManager: DatabaseManager
   private projectsManager: ProjectsManager
   private filesManager: FilesManager
 
@@ -27,13 +27,13 @@ export default class DocumentIngestionManager extends BaseManager {
   constructor(
     projectRoot: string,
     window: BrowserWindow,
-    dbManager: DatabaseManager,
+    databaseManager: DatabaseManager,
     projectsManager: ProjectsManager,
     filesManager: FilesManager,
   ) {
     super(projectRoot, window)
 
-    this.dbManager = dbManager
+    this.databaseManager = databaseManager
     this.projectsManager = projectsManager
     this.filesManager = filesManager
 
@@ -60,7 +60,7 @@ export default class DocumentIngestionManager extends BaseManager {
   async ingestProject(projectId: string): Promise<void> {
     await this._ensureHandling(projectId)
 
-    if (!this.dbManager.isConnected()) {
+    if (!this.databaseManager.isConnected()) {
       console.info('[DocumentIngestion] stopped - dbManager not connected projectId:', projectId)
       return
     }
@@ -118,9 +118,9 @@ export default class DocumentIngestionManager extends BaseManager {
 
   private async handleFileRenamed(projectId: string, relPathSource: string, relPathTarget: string) {
     try {
-      const d = await this.dbManager.getDocumentBySrc(toRelUnix(relPathSource))
+      const d = await this.databaseManager.getDocumentBySrc(toRelUnix(relPathSource))
       if (d) {
-        await this.dbManager.updateDocument(d.id, { src: toRelUnix(relPathTarget) })
+        await this.databaseManager.updateDocument(d.id, { src: toRelUnix(relPathTarget) })
       }
     } catch (e) {
       console.warn('[DocumentIngestion] handleFileRenamed failed', projectId, relPathSource, e)
@@ -129,8 +129,8 @@ export default class DocumentIngestionManager extends BaseManager {
 
   private async handleFileDeleted(projectId: string, relPath: string) {
     try {
-      const d = await this.dbManager.getDocumentBySrc(toRelUnix(relPath))
-      if (d?.id) await this.dbManager.deleteDocument(d.id)
+      const d = await this.databaseManager.getDocumentBySrc(toRelUnix(relPath))
+      if (d?.id) await this.databaseManager.deleteDocument(d.id)
     } catch (e) {
       console.warn('[DocumentIngestion] handleFileDeleted failed', projectId, relPath, e)
     }
@@ -147,12 +147,12 @@ export default class DocumentIngestionManager extends BaseManager {
 
     const srcKey = toRelUnix(relPath)
 
-    const d = await this.dbManager.getDocumentBySrc(srcKey)
+    const d = await this.databaseManager.getDocumentBySrc(srcKey)
     if (d) {
       if (d.metadata?.contentHash === contentHash && d.metadata?.mtime === stats.mtime) {
         return d
       }
-      return await this.dbManager.updateDocument(d.id, {
+      return await this.databaseManager.updateDocument(d.id, {
         content,
         metadata: { ...(d.metadata || {}), contentHash, mtime: stats.mtime },
       })
@@ -171,21 +171,21 @@ export default class DocumentIngestionManager extends BaseManager {
         contentHash,
       },
     }
-    return await this.dbManager.addDocument(input)
+    return await this.databaseManager.addDocument(input)
   }
 
   private async _ensureHandling(projectId: string): Promise<void> {
     if (!this.handling[projectId]) {
-      await this.filesManager.addChangeHandler(projectId, (update) => {
+      await this.filesManager.addChangeHandler(projectId, async (update) => {
         switch (update.type) {
           case 'addFile': {
-            this.handleFileAdded(projectId, update.relPath)
+            await this.handleFileAdded(projectId, update.relPath)
           }
           case 'change': {
-            this.handleFileChanged(projectId, update.relPath)
+            await this.handleFileChanged(projectId, update.relPath)
           }
           case 'deleteFile': {
-            this.handleFileDeleted(projectId, update.relPath)
+            await this.handleFileDeleted(projectId, update.relPath)
           }
           // case 'addDirectory' : {
           // }

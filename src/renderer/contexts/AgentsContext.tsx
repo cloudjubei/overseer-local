@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { AgentRunHistory, AgentType, AgentRunRatingPatch } from 'thefactory-tools'
+import { AgentRunHistory, AgentType, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { factoryService } from '../services/factoryService'
@@ -10,12 +10,11 @@ import { useProjectContext } from './ProjectContext'
 
 export type AgentsContextValue = {
   runsHistory: AgentRunHistory[]
-  startStoryAgent: (agentType: AgentType, projectId: string, storyId: string) => Promise<void>
-  startFeatureAgent: (
+  startAgent: (
     agentType: AgentType,
     projectId: string,
     storyId: string,
-    featureId: string,
+    featureId?: string,
   ) => Promise<void>
   cancelRun: (runId: string) => Promise<void>
   deleteRunHistory: (runId: string) => Promise<void>
@@ -32,26 +31,40 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])
 
   const update = async () => {
-    await factoryService.listRunsActive() // ensures handles are recreated
     const history = await factoryService.listRunHistory()
     setRunsHistory(history)
   }
 
-  const updateRun = (updated: AgentRunHistory) => {
-    if (updated.state !== 'running') {
-      fireCompletionNotification(updated)
+  const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
+    switch (agentRunUpdate.type) {
+      case 'add':
+        const run = agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
+        if (run) {
+          setRunsHistory((prev) => [...prev, run])
+        }
+      case 'delete':
+        setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
+      case 'change':
+        const run2 =
+          agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
+        if (run2) {
+          if (run2.state !== 'running') {
+            fireCompletionNotification(run2)
+          }
+          setRunsHistory((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
+        }
     }
-    setRunsHistory((prev) => [...prev.filter((p) => p.id !== updated.id), updated])
   }
 
   useEffect(() => {
-    update()
-    const unsubscribe = factoryService.subscribeRuns(updateRun)
+    const unsubscribe = factoryService.subscribeRuns(onAgentRunUpdate)
     return () => {
       unsubscribe()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storiesService])
+  }, [onAgentRunUpdate])
+  useEffect(() => {
+    update()
+  }, [])
 
   const activeCredentials = useMemo(() => {
     if (activeProject) {
@@ -79,8 +92,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     return agentType
   }
 
-  const startStoryAgent = useCallback(
-    async (agentType: AgentType, projectId: string, storyId: string) => {
+  const startAgent = useCallback(
+    async (agentType: AgentType, projectId: string, storyId: string, featureId?: string) => {
       if (!activeConfig) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
@@ -88,29 +101,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
       const effectiveAgentType = await coerceAgentTypeForStory(agentType, projectId, storyId)
-      const historyRun = await factoryService.startStoryRun({
+      const historyRun = await factoryService.startRun({
         agentType: effectiveAgentType,
-        projectId,
-        storyId,
-        llmConfig: activeConfig,
-        githubCredentials: activeCredentials,
-        webSearchApiKeys: appSettings.webSearchApiKeys,
-      })
-      setRunsHistory((prev) => [...prev, historyRun])
-    },
-    [activeConfig, appSettings],
-  )
-
-  const startFeatureAgent = useCallback(
-    async (agentType: AgentType, projectId: string, storyId: string, featureId: string) => {
-      if (!activeConfig) {
-        throw new Error('NO ACTIVE LLM CONFIG')
-      }
-      if (!activeCredentials) {
-        throw new Error('NO ACTIVE GITHUB CREDENTIALS')
-      }
-      const historyRun = await factoryService.startFeatureRun({
-        agentType,
         projectId,
         storyId,
         featureId,
@@ -163,13 +155,12 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AgentsContextValue>(
     () => ({
       runsHistory,
-      startStoryAgent,
-      startFeatureAgent,
+      startAgent,
       cancelRun,
       deleteRunHistory,
       rateRun,
     }),
-    [runsHistory, startStoryAgent, startFeatureAgent, cancelRun, deleteRunHistory, rateRun],
+    [runsHistory, startAgent, cancelRun, deleteRunHistory, rateRun],
   )
 
   return <AgentsContext.Provider value={value}>{children}</AgentsContext.Provider>
