@@ -35,12 +35,14 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const update = async () => {
     const history = await factoryService.listRunHistory()
     setRunsHistory(history)
+    console.log('AgentsContext update - setRunsActive')
     setRunsActive(history.filter((h) => h.state === 'running' || h.state === 'created'))
   }
 
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
     switch (agentRunUpdate.type) {
       case 'add':
+        console.log(' ADDING RUN : ', agentRunUpdate.runId)
         const run = agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])
@@ -48,6 +50,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         }
         break
       case 'delete':
+        console.log(' Deleting RUN : ', agentRunUpdate.runId)
         setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
         setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
         break
@@ -62,8 +65,10 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           }
           setRunsHistory((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
           if (isRunning) {
+            console.log(' Changing RUN : ', agentRunUpdate.runId)
             setRunsActive((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
           } else {
+            console.log(' Removing RUN : ', agentRunUpdate.runId)
             setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
           }
         }
