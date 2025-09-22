@@ -44,6 +44,7 @@ export default class FactoryToolsManager extends BaseManager {
         this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, agentRunUpdate)
       }
     })
+    await this.agentRunTools.init()
 
     this.orchestrator = createOrchestrator({
       agentRunTools: this.agentRunTools,
