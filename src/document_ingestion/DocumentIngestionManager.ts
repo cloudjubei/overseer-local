@@ -58,7 +58,6 @@ export default class DocumentIngestionManager extends BaseManager {
   }
 
   async ingestProject(projectId: string): Promise<void> {
-    console.info('[DocumentIngestion] ingestProject:', projectId)
     await this._ensureHandling(projectId)
 
     if (!this.dbManager.isConnected()) {
