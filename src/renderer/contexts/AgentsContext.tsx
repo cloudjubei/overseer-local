@@ -41,6 +41,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
     switch (agentRunUpdate.type) {
       case 'add':
+        console.log(' ADDING RUN : ', agentRunUpdate.runId)
         const run = agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])

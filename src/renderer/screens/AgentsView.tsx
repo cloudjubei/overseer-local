@@ -83,6 +83,7 @@ export default function AgentsView() {
         .sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || '')),
     [runsHistory, projectId],
   )
+  console.log('activeProjectRuns: ', activeProjectRuns)
 
   const projectRuns = useMemo(
     () =>

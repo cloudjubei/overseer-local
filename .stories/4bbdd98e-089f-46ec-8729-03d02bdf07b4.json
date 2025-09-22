@@ -3,8 +3,120 @@
   "status": "-",
   "title": "Improve chat",
   "description": "We need to make chat more user friendly and easy to use.\n- The main chat window should be of constant size and the messages should be horizontally scrollable and extend vertically as far as they need.\n- While waiting for a response there's a spinner showing the agent thinking.\n- We need to show how long the agent took to respond.\n- We get the full message content, but we want it to appear as if it was streamed in (written on the ago), create an appropriate animation\n- if the user is at the bottom of the chat window, then if there's a new message, only scroll a little bit so that the user can start reading and not chase the newly appearing text.\n- The message the user sends needs to appear instantly with a nice popping animation.\n- There needs to be a sound for sending a message and receiving a message.\n- The input needs to be reworked to be more like the FeatureForm, it should allow fast lookup of files and references to stories and features (when hitting @ for files and # for stories/features).\n- Whenever a file is references via @ in the text (whether the input box or in a message, it should be displayed with a nice chip. In the input box, if the caret is at the end of the chip and the user presses backspace - the view transforms into text, deletes the last character and goes back into showing file lookup. The equivalent thing should also happen for story/feature references.\n- if there's an error in the chat, show an appropriate error bubble\n- whenever the agent invokes tool calls, show it via a custom view that will allow inspection of the tool call (arguments and results and time taken)",
-  "features": [],
-  "featureIdToDisplayIndex": {},
+  "features": [
+    {
+      "id": "b6cdf920-004a-4ff2-8a9f-8bc56c1047f7",
+      "status": "-",
+      "title": "Refactor Chat Window to a Fixed-Size Layout",
+      "description": "Modify the main chat window component (`ChatConversation.tsx`) to have a constant height, removing the responsive `vh` units. Ensure the main message list scrolls vertically. Individual messages that are too long should wrap, not scroll horizontally, to maintain readability.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:31.958Z",
+      "updatedAt": "2025-09-22T23:55:31.958Z"
+    },
+    {
+      "id": "57606b53-c938-4b37-8478-46ef4e081d8a",
+      "status": "-",
+      "title": "Display a Spinner While Awaiting Agent Response",
+      "description": "Implement a loading indicator (spinner) that is displayed in the chat UI when the application is waiting for a response from the agent. This provides visual feedback to the user that their request is being processed. This will require tracking the 'thinking' state of the agent.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:31.966Z",
+      "updatedAt": "2025-09-22T23:55:31.966Z"
+    },
+    {
+      "id": "38ba647b-9f8f-40f0-ab1c-666c65e06034",
+      "status": "-",
+      "title": "Animate Incoming Messages with a Typewriter Effect",
+      "description": "Create a 'typewriter' animation for incoming agent messages. Instead of the full message appearing at once, the text should be revealed character by character to simulate live typing. This will likely involve creating a new component or hook to handle the animation logic.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:31.972Z",
+      "updatedAt": "2025-09-22T23:55:31.972Z"
+    },
+    {
+      "id": "1da817b7-bbab-4246-9576-70d2fbba6c2d",
+      "status": "-",
+      "title": "Refine Chat Auto-Scrolling on New Messages",
+      "description": "Adjust the auto-scroll behavior for new messages. When a new message arrives and the user is scrolled to the bottom, the view should scroll just enough to reveal the start of the new message, preventing the user from having to 'chase' the text as it animates in.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:31.984Z",
+      "updatedAt": "2025-09-22T23:55:31.984Z"
+    },
+    {
+      "id": "70dacc08-74b0-4296-887c-6f70422c11c3",
+      "status": "-",
+      "title": "Add a 'Pop-in' Animation for User Messages",
+      "description": "Implement a subtle 'pop-in' animation for new messages sent by the user to provide instant visual feedback that the message has been added to the conversation. Use CSS transitions for this effect on the user message bubble.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.060Z",
+      "updatedAt": "2025-09-22T23:55:32.060Z"
+    },
+    {
+      "id": "b1cddab1-8fa2-43a4-a20e-98d10ca1d771",
+      "status": "-",
+      "title": "Implement Sound Notifications for Chat Messages",
+      "description": "Add audio cues for chat events. A sound should be played when the user sends a message, and a different sound should be played when a new message is received from the agent. This involves adding sound files and triggering them from the UI.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.078Z",
+      "updatedAt": "2025-09-22T23:55:32.078Z"
+    },
+    {
+      "id": "09d03ceb-884a-453b-bb21-3c2beea95527",
+      "status": "-",
+      "title": "Create an Error Bubble for Chat Failures",
+      "description": "Implement a dedicated error bubble component. When an error occurs during the agent's turn (e.g., a failed tool call or an API error), display the error message in a distinctively styled bubble within the chat conversation.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.102Z",
+      "updatedAt": "2025-09-22T23:55:32.102Z"
+    },
+    {
+      "id": "c1215925-dd57-4655-8168-8ae0f1276dc6",
+      "status": "-",
+      "title": "Improve Inspection View for Agent Tool Calls",
+      "description": "Enhance the existing `ToolCallRow` component. Add the time taken for each individual tool call to complete. Improve the layout for better readability of arguments and results, possibly with syntax highlighting for JSON.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.125Z",
+      "updatedAt": "2025-09-22T23:55:32.125Z"
+    },
+    {
+      "id": "c53d5f00-cd0e-47f7-bcde-6f74d5081850",
+      "status": "-",
+      "title": "Render File and Story/Feature Mentions as Chips",
+      "description": "Update the message rendering logic to detect `@<file_path>` and `#<story_or_feature_id>` mentions in message content. These mentions should be displayed as styled, non-interactive 'chips' within the message bubble for better readability. This will likely involve modifying the `RichText` component.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.126Z",
+      "updatedAt": "2025-09-22T23:55:32.126Z"
+    },
+    {
+      "id": "3e8a3f07-5983-4c9c-ad27-ae001eb9e683",
+      "status": "-",
+      "title": "Create an Advanced Chat Input with Mention Support",
+      "description": "Replace the current chat input with a new component that supports autocompletion. It should trigger a file lookup panel when the user types `@` and a story/feature lookup panel when the user types `#`.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.129Z",
+      "updatedAt": "2025-09-22T23:55:32.129Z"
+    },
+    {
+      "id": "95bd507b-3644-4c61-aaba-2d8781514767",
+      "status": "-",
+      "title": "Add Interactive Mention Chips to the Chat Input",
+      "description": "Building on the advanced chat input, make the file and story/feature mentions appear as interactive chips *within the input box itself*. Implement the behavior where pressing backspace at the end of a chip converts it back to editable text.",
+      "context": [],
+      "createdAt": "2025-09-22T23:55:32.130Z",
+      "updatedAt": "2025-09-22T23:55:32.130Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "b6cdf920-004a-4ff2-8a9f-8bc56c1047f7": 1,
+    "57606b53-c938-4b37-8478-46ef4e081d8a": 2,
+    "38ba647b-9f8f-40f0-ab1c-666c65e06034": 3,
+    "1da817b7-bbab-4246-9576-70d2fbba6c2d": 4,
+    "70dacc08-74b0-4296-887c-6f70422c11c3": 5,
+    "b1cddab1-8fa2-43a4-a20e-98d10ca1d771": 6,
+    "09d03ceb-884a-453b-bb21-3c2beea95527": 7,
+    "c1215925-dd57-4655-8168-8ae0f1276dc6": 8,
+    "c53d5f00-cd0e-47f7-bcde-6f74d5081850": 9,
+    "3e8a3f07-5983-4c9c-ad27-ae001eb9e683": 10,
+    "95bd507b-3644-4c61-aaba-2d8781514767": 11
+  },
   "createdAt": "2025-09-22T23:49:45.348Z",
   "updatedAt": "2025-09-22T23:49:45.348Z"
 }
