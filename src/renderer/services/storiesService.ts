@@ -10,13 +10,6 @@ import type {
   StoryUpdate,
 } from 'thefactory-tools'
 
-export const STATUS_LABELS: Record<Status, string> = {
-  '+': 'Done',
-  '~': 'In Progress',
-  '-': 'Pending',
-  '?': 'Blocked',
-  '=': 'Deferred',
-}
 export type ReferenceKind = 'story' | 'feature'
 
 export interface ResolvedStoryRef {

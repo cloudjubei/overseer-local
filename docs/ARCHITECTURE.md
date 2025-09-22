@@ -55,7 +55,7 @@ High-Level Data Flow
 - Documents are stored with their source path and metadata (ext, size, mtime, contentHash) to enable efficient sync and queries.
 
 4) Running Agents with thefactory-tools (src/factory-tools/FactoryToolsManager.js)
-- Renderer requests a run via factoryService.startStoryRun or startFeatureRun, providing agentType, project/story/feature identifiers, LLM config, and optional credentials.
+- Renderer requests a run via factoryService.startRun, providing agentType, project/story/feature identifiers, LLM config, and optional credentials.
 - FactoryToolsManager starts a run using the orchestrator created by thefactory-tools and includes the current dbConnectionString from DatabaseManager.
 - Orchestrator emits run events (updates, completed, cancelled, error); FactoryToolsManager forwards these over IPC (FACTORY_RUNS_SUBSCRIBE) to update the UI in real time.
 - Run history and ratings are persisted locally through createAgentRunStore in the .factory directory.
@@ -67,7 +67,7 @@ Renderer Integration Surface (src/preload.js)
   - connect, getStatus, subscribe to DB status.
   - CRUD, search, match for entities/documents via IPC handlers in DatabaseManager.
 - factoryService
-  - startStoryRun, startFeatureRun, cancelRun, list active/history runs, delete history, rate run.
+  - startRun, cancelRun, list active/history runs, delete history, rate run.
   - subscribeRuns to receive orchestrator updates in real time.
 - documentIngestionService
   - ingestAllProjects, ingestProject triggers ingestion pipelines.

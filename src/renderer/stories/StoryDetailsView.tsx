@@ -2,9 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '../navigation/Navigator'
 import DependencyBullet from '../components/stories/DependencyBullet'
 import StatusControl from '../components/stories/StatusControl'
-import { STATUS_LABELS } from '../services/storiesService'
 import { useActiveProject } from '../contexts/ProjectContext'
-import { useStories } from '../contexts/StoriesContext'
 import { useAgents } from '../contexts/AgentsContext'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { Feature, Status, Story } from 'thefactory-tools'
@@ -16,6 +14,8 @@ import ModelChip from '../components/agents/ModelChip'
 import { StatusPicker, statusKey } from '../components/stories/StatusControl'
 import { gitMonitorService } from '../services/gitMonitorService'
 import { Button } from '../components/ui/Button'
+import { STATUS_LABELS } from '../utils/status'
+import { useStories } from '../contexts/StoriesContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -54,7 +54,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     getBlockers,
     getBlockersOutbound,
   } = useStories()
-  const { runsHistory, startStoryAgent, startFeatureAgent } = useAgents()
+  const { runsHistory, startAgent } = useAgents()
 
   // Tracks if the initial pointer down started within a .no-drag element to block parent row dragging
   const preventDragFromNoDragRef = useRef(false)
@@ -491,7 +491,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               <RunAgentButton
                 onClick={(agentType) => {
                   if (!projectId || storyHasActiveRun) return
-                  startStoryAgent(agentType, projectId, story.id)
+                  startAgent(agentType, projectId, story.id)
                 }}
               />
             )}
@@ -727,7 +727,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           <RunAgentButton
                             onClick={(agentType) => {
                               if (!projectId || storyHasActiveRun) return
-                              startFeatureAgent(agentType, projectId, story.id, f.id)
+                              startAgent(agentType, projectId, story.id, f.id)
                             }}
                           />
                         )}

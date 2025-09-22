@@ -16,8 +16,8 @@ import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import { STATUS_LABELS } from '../services/storiesService'
 import { useStories } from '../contexts/StoriesContext'
+import { STATUS_LABELS } from '../utils/status'
 
 function countFeatures(story: Story) {
   const features = Array.isArray(story.features) ? story.features : []
@@ -87,7 +87,7 @@ export default function StoriesListView() {
     getBlockers,
     getBlockersOutbound,
   } = useStories()
-  const { runsHistory, startStoryAgent } = useAgents()
+  const { runsHistory, startAgent } = useAgents()
 
   useEffect(() => {
     const storyIds = storyIdsByProject[projectId] ?? []
@@ -545,7 +545,7 @@ export default function StoriesListView() {
                             <RunAgentButton
                               onClick={(agentType) => {
                                 if (!projectId) return
-                                startStoryAgent(agentType, projectId, t.id)
+                                startAgent(agentType, projectId, t.id)
                               }}
                             />
                           )}

@@ -24,7 +24,7 @@ export default function StoryCard({
   showStatus?: boolean
   onStatusChange?: (status: Status) => void | Promise<void>
 }) {
-  const { runsHistory, startStoryAgent } = useAgents()
+  const { runsHistory, startAgent } = useAgents()
   const { navigateAgentRun } = useNavigator()
   const storyRun = runsHistory.find((r) => r.state === 'running' && r.storyId === story.id)
 
@@ -68,7 +68,7 @@ export default function StoryCard({
           ) : (
             <RunAgentButton
               onClick={(agentType) => {
-                startStoryAgent(agentType, project.id, story.id)
+                startAgent(agentType, project.id, story.id)
               }}
             />
           )}

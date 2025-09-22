@@ -1,15 +1,9 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { STATUS_LABELS } from '../../utils/status'
 import type { Status } from 'thefactory-tools'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
-const STATUS_LABELS: Record<Status, string> = {
-  '-': 'Pending',
-  '~': 'In Progress',
-  '+': 'Done',
-  '?': 'Blocked',
-  '=': 'Deferred',
-}
 
 export function statusKey(s: Status): 'queued' | 'working' | 'done' | 'stuck' | 'onhold' {
   switch (s) {

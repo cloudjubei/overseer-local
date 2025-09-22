@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status, Story } from 'thefactory-tools'
-import StoryCard from '../components/stories/StoryCard'
-import { STATUS_LABELS } from '../services/storiesService'
 import { useActiveProject } from '../contexts/ProjectContext'
 import StatusControl from '../components/stories/StatusControl'
 import { useNavigator } from '../navigation/Navigator'
+import StoryCard from '../components/stories/StoryCard'
+import { STATUS_LABELS } from '../utils/status'
 import { useStories } from '../contexts/StoriesContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
