@@ -172,7 +172,7 @@ export default class FilesManager extends BaseManager {
     await tools.init()
     this.tools[projectId] = tools
 
-    tools.subscribe((fileUpdate) => {
+    tools.subscribe(async (fileUpdate) => {
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, fileUpdate)
       }
@@ -180,7 +180,7 @@ export default class FilesManager extends BaseManager {
   }
   private async __getTools(projectId: string): Promise<FileTools | undefined> {
     if (!this.tools[projectId]) {
-      return await this.updateTool(projectId)
+      await this.updateTool(projectId)
     }
     return this.tools[projectId]
   }

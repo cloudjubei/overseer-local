@@ -19,6 +19,7 @@ export default class ProjectsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
+    await this.tools.init()
     this.tools.subscribe(async (projectUpdate) => {
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.PROJECTS_SUBSCRIBE, projectUpdate)

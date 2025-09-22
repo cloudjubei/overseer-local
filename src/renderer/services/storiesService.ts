@@ -7,6 +7,7 @@ import type {
   Story,
   StoryCreateInput,
   StoryEditInput,
+  StoryUpdate,
 } from 'thefactory-tools'
 
 export const STATUS_LABELS: Record<Status, string> = {
@@ -45,7 +46,7 @@ export interface InvalidRefError {
 }
 
 export type StoriesService = {
-  subscribe: (callback: () => void) => () => void
+  subscribe: (callback: (storyUpdate: StoryUpdate) => Promise<void>) => () => void
   listStories: (projectId: string) => Promise<Story[]>
   getStory: (projectId: string, storyId: string) => Promise<Story | undefined>
   createStory: (projectId: string, input: StoryCreateInput) => Promise<Story>

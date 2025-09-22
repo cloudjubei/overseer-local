@@ -79,12 +79,21 @@ export default function StoriesListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project, projectId } = useActiveProject()
-  const { storiesById, updateStory, reorderStory, getBlockers, getBlockersOutbound } = useStories()
+  const {
+    storyIdsByProject,
+    storiesById,
+    updateStory,
+    reorderStory,
+    getBlockers,
+    getBlockersOutbound,
+  } = useStories()
   const { runsHistory, startStoryAgent } = useAgents()
 
   useEffect(() => {
-    setAllStories(Object.values(storiesById))
-  }, [storiesById])
+    const storyIds = storyIdsByProject[projectId] ?? []
+    const stories = storyIds.map((s) => storiesById[s]).filter((s) => s !== undefined)
+    setAllStories(stories)
+  }, [projectId, storyIdsByProject, storiesById])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

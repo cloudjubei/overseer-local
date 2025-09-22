@@ -29,7 +29,6 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     setProjects(projects)
   }
   const onProjectUpdate = async (projectUpdate: ProjectUpdate) => {
-    console.log('onProjectUpdate projectUpdate: ', projectUpdate)
     switch (projectUpdate.type) {
       case 'add':
         const p = await projectsService.getProject(projectUpdate.projectId)
@@ -46,11 +45,13 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     }
   }
   useEffect(() => {
-    update()
     const unsubscribe = projectsService.subscribe(onProjectUpdate)
     return () => {
       unsubscribe()
     }
+  }, [onProjectUpdate])
+  useEffect(() => {
+    update()
   }, [])
 
   useEffect(() => {

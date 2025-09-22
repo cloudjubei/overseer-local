@@ -10,6 +10,7 @@ import {
   ProjectSpec,
   ReorderPayload,
   Story,
+  StoryChangeHandler,
   StoryCreateInput,
   StoryEditInput,
   StoryTools,
@@ -31,25 +32,6 @@ export default class StoriesManager extends BaseManager {
     await this.__getTools('main')
 
     await super.init()
-  }
-
-  private async __getTools(projectId: string): Promise<StoryTools | undefined> {
-    if (!this.tools[projectId]) {
-      const projectRoot = await this.projectsManager.getProjectDir(projectId)
-      if (!projectRoot) {
-        return
-      }
-
-      this.tools[projectId] = createStoryTools(projectRoot)
-    }
-    return this.tools[projectId]
-  }
-
-  private __notify(msg: string) {
-    if (msg) console.log(msg) //TODO: change into a logger
-    if (this.window) {
-      this.window.webContents.send(IPC_HANDLER_KEYS.STORIES_SUBSCRIBE)
-    }
   }
 
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
@@ -108,7 +90,6 @@ export default class StoriesManager extends BaseManager {
     newProject.storyIdToDisplayIndex[newStory.id] =
       Object.keys(newProject.storyIdToDisplayIndex).length + 1
     await this.projectsManager.updateProject(project.id, newProject)
-    this.__notify(`New story added: ${newStory.id} : ${newStory.title}`)
     return newStory
   }
   async updateStory(
@@ -118,11 +99,7 @@ export default class StoriesManager extends BaseManager {
   ): Promise<Story | undefined> {
     const tools = await this.__getTools(projectId)
     if (tools) {
-      const t = await tools.updateStory(storyId, patch)
-      if (t) {
-        this.__notify(`Story updated: ${t.id}`)
-      }
-      return t
+      return await tools.updateStory(storyId, patch)
     }
   }
 
@@ -146,7 +123,6 @@ export default class StoriesManager extends BaseManager {
       }
     }
     await this.projectsManager.updateProject(projectId, newProject)
-    this.__notify('Story was deleted')
     return newProject
   }
 
@@ -170,11 +146,7 @@ export default class StoriesManager extends BaseManager {
     if (!tools) {
       return
     }
-    const t = await tools.addFeature(storyId, input)
-    if (t) {
-      this.__notify(`New feature added to story: ${t.id}`)
-    }
-    return t
+    return await tools.addFeature(storyId, input)
   }
   async updateFeature(
     projectId: string,
@@ -186,11 +158,7 @@ export default class StoriesManager extends BaseManager {
     if (!tools) {
       return
     }
-    const t = await tools.updateFeature(storyId, featureId, patch)
-    if (t) {
-      this.__notify(`Feature: ${featureId} updated in story: ${t.id}`)
-    }
-    return t
+    return await tools.updateFeature(storyId, featureId, patch)
   }
   async deleteFeature(
     projectId: string,
@@ -201,11 +169,7 @@ export default class StoriesManager extends BaseManager {
     if (!tools) {
       return
     }
-    const t = await tools.deleteFeature(storyId, featureId)
-    if (t) {
-      this.__notify(`Feature delete from story: ${t.id}`)
-    }
-    return t
+    return await tools.deleteFeature(storyId, featureId)
   }
   async reorderFeatures(
     projectId: string,
@@ -216,10 +180,35 @@ export default class StoriesManager extends BaseManager {
     if (!tools) {
       return
     }
-    const t = await tools.reorderFeatures(storyId, payload)
-    if (t) {
-      this.__notify(`Features reordered in story: ${t.id}`)
+    return await tools.reorderFeatures(storyId, payload)
+  }
+  async addChangeHandler(projectId: string, handler: StoryChangeHandler): Promise<void> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      return
     }
-    return t
+    tools.subscribe(handler)
+  }
+
+  private async updateTool(projectId: string): Promise<StoryTools | undefined> {
+    const projectRoot = await this.projectsManager.getProjectDir(projectId)
+    if (!projectRoot) {
+      return
+    }
+    const tools = createStoryTools(projectId, projectRoot)
+    await tools.init()
+    this.tools[projectId] = tools
+
+    tools.subscribe(async (storyUpdate) => {
+      if (this.window) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.STORIES_SUBSCRIBE, storyUpdate)
+      }
+    })
+  }
+  private async __getTools(projectId: string): Promise<StoryTools | undefined> {
+    if (!this.tools[projectId]) {
+      await this.updateTool(projectId)
+    }
+    return this.tools[projectId]
   }
 }
