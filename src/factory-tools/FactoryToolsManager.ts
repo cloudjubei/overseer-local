@@ -13,6 +13,7 @@ import {
   LLMConfig,
   createAgentRunTools,
   AgentRunTools,
+  AgentRun,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
@@ -78,54 +79,18 @@ export default class FactoryToolsManager extends BaseManager {
       this.deleteHistoryRun(runId)
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = ({ runId, rating }) =>
       this.rateRun(runId, rating)
-    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START] = ({
-      agentType,
-      projectId,
-      storyId,
-      llmConfig,
-      githubCredentials,
-      webSearchApiKeys,
-    }) =>
-      this.startRun(agentType, projectId, storyId, llmConfig, githubCredentials, webSearchApiKeys)
+    handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START] = (params) => this.startRun(params)
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = ({ provider, url }) =>
       this.refreshPrices(provider, url)
 
     return handlers
   }
 
-  async startRun(
-    agentType: AgentType,
-    projectId: string,
-    storyId: string,
-    featureId: string | undefined,
-    llmConfig: LLMConfig,
-    githubCredentials: GithubCredentials,
-    webSearchApiKeys?: WebSearchApiKeys,
-  ): Promise<AgentRunHistory> {
-    console.log(
-      '[factory] START_STORY',
-      this._maskSecrets({
-        agentType,
-        projectId,
-        storyId,
-        featureId,
-        llmConfig,
-        githubCredentials,
-        webSearchApiKeys,
-      }),
-    )
+  async startRun(params: AgentRun): Promise<AgentRunHistory> {
+    console.log('[factory] START_STORY', this._maskSecrets(params))
     try {
       const dbConnectionString = this.dbManager.getConnectionString()
-      return await this.orchestrator!.startRun({
-        agentType,
-        projectId,
-        storyId,
-        featureId,
-        llmConfig,
-        githubCredentials,
-        webSearchApiKeys,
-        dbConnectionString,
-      })
+      return await this.orchestrator!.startRun({ ...params, dbConnectionString })
     } catch (err: any) {
       console.error('[factory] Failed to start story run', err?.stack || String(err))
       throw err

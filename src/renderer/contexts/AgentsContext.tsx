@@ -48,7 +48,11 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         const run2 =
           agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
         if (run2) {
-          if (run2.state !== 'running') {
+          const prevRun = runsHistory.find((r) => r.id === agentRunUpdate.runId)
+          if (
+            prevRun?.state === 'running' ||
+            (prevRun?.state === 'created' && run2.state !== 'running' && run2.state !== 'created')
+          ) {
             fireCompletionNotification(run2)
           }
           setRunsHistory((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
