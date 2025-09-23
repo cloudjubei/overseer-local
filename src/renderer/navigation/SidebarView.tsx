@@ -359,7 +359,7 @@ export default function SidebarView({}: SidebarProps) {
   // Sidebar element (shared for desktop and mobile drawer)
   const Aside = (
     <aside
-      className={`sidebar relative z-30 flex h-full shrink-0 flex-col border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${effectiveCollapsed ? 'collapsed' : ''}`}
+      className={`sidebar relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${effectiveCollapsed ? 'collapsed' : ''}`}
       aria-label="Primary navigation"
       data-collapsed={effectiveCollapsed ? 'true' : 'false'}
       style={{}}
@@ -394,7 +394,7 @@ export default function SidebarView({}: SidebarProps) {
         </button>
       </div>
 
-      <nav className="nav" onKeyDown={onKeyDownList}>
+      <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
           {NAV_ITEMS.filter((n) => n.view !== 'Settings' && n.view !== 'AllAgents').map(
             (item, i) => {

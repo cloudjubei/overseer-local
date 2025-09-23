@@ -8,6 +8,7 @@ import type {
   AgentRunConversation,
   AgentRunMessage,
 } from 'thefactory-tools'
+import { formatHmsCompact } from './time'
 
 // Parse assistant JSON response to extract thoughts and tool calls safely
 function parseAssistant(content: string): AgentResponse | null {
@@ -305,7 +306,7 @@ function FeatureContent({
                   </div>
                   {t.thinkingTime != null && (
                     <div className="flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 rounded-full px-2 py-0.5 text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap mt-1">
-                      {(t.thinkingTime / 1000).toFixed(1)}s
+                      {formatHmsCompact(t.thinkingTime)}
                     </div>
                   )}
                 </div>

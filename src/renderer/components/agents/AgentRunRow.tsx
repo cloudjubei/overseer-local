@@ -15,6 +15,7 @@ import CostChip from './CostChip'
 import TokensChip from './TokensChip'
 import { AgentRunHistory, AgentRunRatingPatch } from 'thefactory-tools'
 import { Button } from '../ui/Button'
+import { formatHmsCompact } from './time'
 
 function formatTime(iso?: string) {
   if (!iso) return ''
@@ -34,20 +35,6 @@ function formatDate(iso?: string) {
   } catch {
     return iso ?? ''
   }
-}
-
-function formatDuration(ms?: number) {
-  if (ms == null || !isFinite(ms) || ms < 0) return '—'
-  if (ms < 1000) return `${Math.round(ms)}ms`
-  const s = Math.floor(ms / 1000)
-  const hrs = Math.floor(s / 3600)
-  const mins = Math.floor((s % 3600) / 60)
-  const secs = s % 60
-  const parts: string[] = []
-  if (hrs) parts.push(`${hrs}h`)
-  if (mins) parts.push(`${mins}m`)
-  parts.push(`${secs}s`)
-  return parts.join(' ')
 }
 
 function useConversationCounts(run: AgentRunHistory) {
@@ -75,7 +62,7 @@ function useDurationTimers(run: AgentRunHistory) {
 
   const startMs = Math.max(0, end - start)
   const thinkingMs = Math.max(0, now - lastUpdate)
-  return { duration: formatDuration(startMs), thinking: formatDuration(thinkingMs) }
+  return { duration: formatHmsCompact(startMs), thinking: formatHmsCompact(thinkingMs) }
 }
 export interface AgentRunRowProps {
   run: AgentRunHistory

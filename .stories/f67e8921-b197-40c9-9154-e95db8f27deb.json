@@ -1736,7 +1736,7 @@
     },
     {
       "id": "b951665d-139c-4761-94f1-c259b36dab42",
-      "status": "-",
+      "status": "+",
       "title": "Improve the time display in ChatConversation to show a time display similar to AgentRows",
       "description": "In @src/renderer/components/agents/ChatConversation.tsx it always shows the time taken to respond in seconds - we want it to be more human friendly, so it should always show it in the h:mm:ss format, and now show h or mm if the time is small enough - it should be done similarly in @src/renderer/components/agents/AgentRunRow.tsx",
       "context": [
@@ -1744,30 +1744,20 @@
         "src/renderer/components/agents/AgentRunRow.tsx"
       ],
       "createdAt": "2025-09-23T09:53:32.603Z",
-      "updatedAt": "2025-09-23T09:53:32.603Z"
+      "updatedAt": "2025-09-23T10:36:41.151Z",
+      "completedAt": "2025-09-23T10:36:41.151Z"
     },
     {
       "id": "70889fe4-d1cd-4718-9cf1-f11739204e42",
-      "status": "-",
+      "status": "+",
       "title": "The Sidebar has grown - make the top with the title stay stick and only the rest scroll",
       "description": "@src/renderer/navigation/SidebarView.tsx",
       "context": [
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "createdAt": "2025-09-23T09:56:28.943Z",
-      "updatedAt": "2025-09-23T09:56:28.943Z"
-    },
-    {
-      "id": "d0987162-7d10-4b50-960d-402df1e7cd6f",
-      "status": "-",
-      "title": "show the running agent badges on the \"Agents\" button in the Sidebar",
-      "description": "In @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx - for a given project - make sure the running agents badge is showing not just on its project button but also on the \"Agents\" button when that project is selected.",
-      "context": [
-        "src/renderer/components/ui/CollapsibleSidebar.tsx",
-        "src/renderer/navigation/SidebarView.tsx"
-      ],
-      "createdAt": "2025-09-23T10:53:25.409Z",
-      "updatedAt": "2025-09-23T10:53:25.409Z"
+      "updatedAt": "2025-09-23T10:39:42.169Z",
+      "completedAt": "2025-09-23T10:39:42.169Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1883,8 +1873,7 @@
     "47590194-5f78-4d06-8aac-62cf60f5fc86": 110,
     "a571d64e-213b-4f0e-b641-51678b5c26b5": 111,
     "b951665d-139c-4761-94f1-c259b36dab42": 112,
-    "70889fe4-d1cd-4718-9cf1-f11739204e42": 113,
-    "d0987162-7d10-4b50-960d-402df1e7cd6f": 114
+    "70889fe4-d1cd-4718-9cf1-f11739204e42": 113
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
