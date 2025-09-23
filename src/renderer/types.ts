@@ -8,3 +8,4 @@ export type NavigationView =
   | 'AllAgents'
   | 'LiveData'
   | 'ProjectTimeline'
+  | 'Tests'

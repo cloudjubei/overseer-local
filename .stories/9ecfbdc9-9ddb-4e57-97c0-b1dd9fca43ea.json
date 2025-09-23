@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "e92d8ada-b10d-4a75-bbbb-e8ba9907c7d1",
-      "status": "-",
+      "status": "+",
       "title": "Create 'Tests' Screen and Add Sidebar Navigation",
       "description": "Create a new screen component for 'Tests'. Add a new navigation entry in the sidebar, including a new icon, to route to this screen. The initial screen should have a basic layout with a title.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.418Z",
-      "updatedAt": "2025-09-22T23:51:23.418Z"
+      "updatedAt": "2025-09-23T00:15:26.345Z",
+      "completedAt": "2025-09-23T00:15:26.345Z"
     },
     {
       "id": "d05e25fe-33f1-466a-9237-5abbe3ea43ee",
