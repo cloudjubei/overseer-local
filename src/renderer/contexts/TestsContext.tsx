@@ -1,11 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useActiveProject } from './ProjectContext'
 import { factoryTestsService } from '../services/factoryTestsService'
-import type { TestResult } from 'thefactory-tools'
+import type { CoverageResult, TestResult } from 'thefactory-tools'
 import type { ParsedTestResults, ParsedFailure } from '../utils/testResults'
 import { parseTestOutput } from '../utils/testResults'
-import type { ParsedCoverage } from '../utils/coverage'
-import { parseCoverageOutput } from '../utils/coverage'
 
 export type TestsCatalogItem = { value: string; label: string }
 
@@ -16,7 +14,7 @@ export type TestsContextValue = {
   isLoadingCatalog: boolean
   // last results
   results: ParsedTestResults | null
-  coverage: ParsedCoverage | null
+  coverage?: CoverageResult
   // invalidation flags and timestamps
   resultsInvalidated: boolean | null
   coverageInvalidated: boolean | null
@@ -194,7 +192,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
 
   const [results, setResults] = useState<ParsedTestResults | null>(null)
-  const [coverage, setCoverage] = useState<ParsedCoverage | null>(null)
+  const [coverage, setCoverage] = useState<CoverageResult | undefined>(undefined)
 
   const [resultsInvalidated, setResultsInvalidated] = useState<boolean | null>(null)
   const [coverageInvalidated, setCoverageInvalidated] = useState<boolean | null>(null)
@@ -228,12 +226,11 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
           setResultsAt(null)
         }
         if (lastCov && lastCov.result) {
-          const parsedCov = parseCoverageOutput(lastCov.result as any)
-          setCoverage(parsedCov)
+          setCoverage(lastCov.result)
           setCoverageInvalidated(!!lastCov.invalidated)
           setCoverageAt(lastCov.at || null)
         } else {
-          setCoverage(null)
+          setCoverage(undefined)
           setCoverageInvalidated(null)
           setCoverageAt(null)
         }
@@ -292,7 +289,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const resetCoverage = useCallback(() => {
-    setCoverage(null)
+    setCoverage(undefined)
     setCoverageError(null)
     setCoverageInvalidated(null)
     setCoverageAt(null)
@@ -324,11 +321,10 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       if (!projectId) return
       setIsRunningCoverage(true)
       setCoverageError(null)
-      setCoverage(null)
+      setCoverage(undefined)
       try {
         const res = await factoryTestsService.runCoverages(projectId, path?.trim() || '.')
-        const parsed = parseCoverageOutput(res as any)
-        setCoverage(parsed)
+        setCoverage(res)
         setCoverageInvalidated(false)
         setCoverageAt(Date.now())
       } catch (e: any) {
