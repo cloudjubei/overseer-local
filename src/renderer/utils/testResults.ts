@@ -144,7 +144,9 @@ function parseFailuresFromText(rawText: string): ParsedFailure[] {
     // Extract message: look for first line that seems like an error message
     let message = ''
     for (const l of block) {
-      if (/^Error[:\s]|AssertionError|TypeError|ReferenceError|Expected|Received|\bThrown\b/i.test(l)) {
+      if (
+        /^Error[:\s]|AssertionError|TypeError|ReferenceError|Expected|Received|\bThrown\b/i.test(l)
+      ) {
         message = l.trim()
         break
       }

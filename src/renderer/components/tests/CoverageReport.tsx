@@ -35,14 +35,23 @@ function FileRow({ f }: { f: CoverageFile }) {
       <div className="truncate" title={f.filePath}>
         {rel}
       </div>
-      <div className={`justify-self-end tabular-nums ${pctColor(f.statementsPct)}`}>{f.statementsPct.toFixed(1)}%</div>
-      <div className={`justify-self-end tabular-nums ${pctColor(f.branchesPct)}`}>{f.branchesPct.toFixed(1)}%</div>
-      <div className={`justify-self-end tabular-nums ${pctColor(f.functionsPct)}`}>{f.functionsPct.toFixed(1)}%</div>
+      <div className={`justify-self-end tabular-nums ${pctColor(f.statementsPct)}`}>
+        {f.statementsPct.toFixed(1)}%
+      </div>
+      <div className={`justify-self-end tabular-nums ${pctColor(f.branchesPct)}`}>
+        {f.branchesPct.toFixed(1)}%
+      </div>
+      <div className={`justify-self-end tabular-nums ${pctColor(f.functionsPct)}`}>
+        {f.functionsPct.toFixed(1)}%
+      </div>
       <div className="justify-self-end flex items-center gap-2">
         <span className={`tabular-nums ${pctColor(f.linesPct)}`}>{f.linesPct.toFixed(1)}%</span>
         <ProgressBar value={f.linesPct} />
       </div>
-      <div className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate" title={uncovered}>
+      <div
+        className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate"
+        title={uncovered}
+      >
         {uncovered || '—'}
       </div>
     </div>

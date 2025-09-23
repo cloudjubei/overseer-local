@@ -14,9 +14,9 @@ function CodeSnippet({
   column?: number | null
 }) {
   const { projectId } = useActiveProject()
-  const [state, setState] = React.useState<{ loading: boolean; text?: string; error?: string }>(
-    { loading: true },
-  )
+  const [state, setState] = React.useState<{ loading: boolean; text?: string; error?: string }>({
+    loading: true,
+  })
 
   React.useEffect(() => {
     let cancelled = false
@@ -86,7 +86,11 @@ function FailureItem({ failure }: { failure: ParsedFailure }) {
         <div className="text-xs text-neutral-600 dark:text-neutral-400">{failure.filePath}</div>
       ) : null}
       {rel ? (
-        <CodeSnippet relPath={rel} line={failure.line ?? undefined} column={failure.column ?? undefined} />
+        <CodeSnippet
+          relPath={rel}
+          line={failure.line ?? undefined}
+          column={failure.column ?? undefined}
+        />
       ) : null}
       {failure.stack && (
         <details className="mt-1">
@@ -104,10 +108,14 @@ export default function TestResultsView({ results }: { results: ParsedTestResult
   if (results.ok && results.failures.length === 0) {
     return (
       <div className="rounded-md border border-green-300/50 dark:border-green-800 p-4 bg-green-50/50 dark:bg-green-900/10">
-        <div className="text-sm font-medium text-green-700 dark:text-green-300">All tests passed</div>
+        <div className="text-sm font-medium text-green-700 dark:text-green-300">
+          All tests passed
+        </div>
         {results.summary && (
           <div className="text-xs text-green-700/80 dark:text-green-300/80 mt-1">
-            {typeof results.summary.passed === 'number' ? `${results.summary.passed} passed` : 'Passed'}
+            {typeof results.summary.passed === 'number'
+              ? `${results.summary.passed} passed`
+              : 'Passed'}
             {typeof results.summary.total === 'number' ? ` • ${results.summary.total} total` : ''}
           </div>
         )}
@@ -123,7 +131,9 @@ export default function TestResultsView({ results }: { results: ParsedTestResult
           {results.failures.length} failing test{results.failures.length === 1 ? '' : 's'}
         </div>
       ) : (
-        <div className="text-sm text-neutral-500">No structured failures detected. Raw output below.</div>
+        <div className="text-sm text-neutral-500">
+          No structured failures detected. Raw output below.
+        </div>
       )}
 
       {hasFailures && (
