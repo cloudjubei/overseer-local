@@ -219,6 +219,26 @@
       "createdAt": "2025-09-23T20:03:42.963Z",
       "updatedAt": "2025-09-23T22:10:48.634Z",
       "completedAt": "2025-09-23T22:10:48.634Z"
+    },
+    {
+      "id": "47bd596c-fe57-4cd9-a5b8-0b7ef6a4f74e",
+      "status": "-",
+      "title": "The coverage view needs improving",
+      "description": "In @src/renderer/screens/TestsView.tsx the coverage section need to be improved:\n- Statements, Branches, Functions and Lines should all show the percentage value and the percentage bar that currently only Lines show. These should be vertically stacked i.e. the numbers at the top, the bar at the bottom. All of these columns should take up the same exact width.\n- Uncovered lines should only be as wide as the title i.e. \"Uncovered Lines\" .\n- Statements, Branches, Functions and Lines should show the breakdown, total against covered, in a tooltip on hover.\n- Uncovered Lines should show the full lines display in a tooltip on hover.\n- The summary should match its values to the columns for the file by file values. No need for the extra captions/titles.\n- the files should be alphabetically sorted by path.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T23:13:27.551Z",
+      "updatedAt": "2025-09-23T23:13:27.551Z"
+    },
+    {
+      "id": "e880756b-5b9e-4cc2-9e25-c6473b0cec1a",
+      "status": "-",
+      "title": "The tests view needs imrpoving",
+      "description": "After running tests in @src/renderer/screens/TestsView.tsx there's a lot of information provided in the data - we should display it all. I.e. all passing tests, all failing tests and all skipped tests.\nSimilarly to how `vitest` displays it in the console.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T23:13:48.690Z",
+      "updatedAt": "2025-09-23T23:13:48.690Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -239,7 +259,9 @@
     "f4c9351c-b638-4a4e-accc-6d525f5adb54": 15,
     "9e72a552-12df-416c-bbed-8e0fb8928aaa": 16,
     "2fac1501-456a-41bb-81a1-ca4c9b8c792b": 17,
-    "346aaa45-47c8-4325-b166-efc7c4fa245f": 18
+    "47bd596c-fe57-4cd9-a5b8-0b7ef6a4f74e": 18,
+    "e880756b-5b9e-4cc2-9e25-c6473b0cec1a": 19,
+    "346aaa45-47c8-4325-b166-efc7c4fa245f": 20
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
   "updatedAt": "2025-09-22T23:34:09.482Z"
