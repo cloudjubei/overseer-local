@@ -518,7 +518,7 @@ export default function StoriesListView() {
                             <RichText text={t.description || ''} />
                           </div>
                         </div>
-                        <div className="col col-actions">
+                        <div className={`col col-actions ${storyRun ? 'is-always-visible' : ''}`}>
                           <button
                             type="button"
                             className="btn-secondary btn-icon"
