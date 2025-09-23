@@ -54,6 +54,9 @@ export default function ChatView() {
   const prevLenForAnimRef = useRef<number>(messages.length)
   const animationChatChangedRef = useRef<boolean>(false)
 
+  // Track new-user-message animation (length-based)
+  const prevLenForUserAnimRef = useRef<number>(messages.length)
+
   // Scrolling state/refs
   const isAtBottomRef = useRef<boolean>(true)
   const lastMessageRef = useRef<HTMLDivElement>(null)
@@ -88,6 +91,8 @@ export default function ChatView() {
       animationChatChangedRef.current = false
       prevLenForAnimRef.current = messages.length
       setAnimateAssistantIdx(null)
+      // Also align user animation tracker to avoid false pop after switching chats
+      prevLenForUserAnimRef.current = messages.length
       return
     }
 
@@ -102,6 +107,31 @@ export default function ChatView() {
     }
 
     prevLenForAnimRef.current = messages.length
+  }, [messages])
+
+  // Trigger the user bubble pop-in transition when a new user message is appended
+  useEffect(() => {
+    const increased = messages.length > prevLenForUserAnimRef.current
+    const last = messages[messages.length - 1]
+    const isNewUser = increased && last && last.role === 'user'
+
+    if (animationChatChangedRef.current) {
+      // On chat switch, align counters and skip animation
+      prevLenForUserAnimRef.current = messages.length
+      return
+    }
+
+    if (isNewUser) {
+      requestAnimationFrame(() => {
+        const wrapper = lastMessageRef.current
+        const bubble = wrapper?.querySelector('.chat-bubble') as HTMLElement | null
+        if (bubble) {
+          bubble.classList.add('chat-bubble--in')
+        }
+      })
+    }
+
+    prevLenForUserAnimRef.current = messages.length
   }, [messages])
 
   // Track is-at-bottom on user scroll
@@ -353,6 +383,13 @@ export default function ChatView() {
                   )
                 }
 
+                // Determine if this is a newly added user message to apply pop-in classes
+                const isNewUserBubble =
+                  isUser &&
+                  index === enhancedMessages.length - 1 &&
+                  messages.length > prevLenForUserAnimRef.current &&
+                  !animationChatChangedRef.current
+
                 return (
                   <div
                     key={index}
@@ -394,6 +431,9 @@ export default function ChatView() {
                             ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                             : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
                           msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                          // Bubble animation classes
+                          'chat-bubble',
+                          isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
                         ].join(' ')}
                       >
                         {isUser ? (
