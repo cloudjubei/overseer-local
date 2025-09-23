@@ -1,6 +1,6 @@
 {
   "id": "1dc0bca4-fb99-4ff9-a981-938234f50720",
-  "status": "-",
+  "status": "+",
   "title": "New screen - Tools",
   "description": "For various testing purposes, we want to have a screen where a user can see all the tools that are available via the factory-tools (from the createTools) and where they can call them to try them out. All appropriate inputs must be presented.\nMake sure the UI/UX is clear and easy to navigate. The tools should be searchable and grouped by the files they come from (for instance all the StoryTools should be together).",
   "features": [
@@ -36,7 +36,7 @@
     },
     {
       "id": "7b5f6173-1247-4f06-a671-e0248afa9c02",
-      "status": "-",
+      "status": "+",
       "title": "Fetch and Display Tools on the ToolsView",
       "description": "On the @src/renderer/screens/ToolsView.tsx , use the @src/renderer/services/factoryToolsService.ts available tools when the component mounts. Render the tools grouped by their source file, as requested. Each tool item should display its name and a clear description.",
       "context": [
@@ -44,54 +44,59 @@
         "src/renderer/services/factoryToolsService.ts"
       ],
       "createdAt": "2025-09-22T23:53:41.490Z",
-      "updatedAt": "2025-09-23T09:14:44.694Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:19:55.873Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:19:55.873Z"
     },
     {
       "id": "b793d0ac-a617-468c-89dd-9b5ce15401bf",
-      "status": "-",
+      "status": "+",
       "title": "Implement Search Functionality for Tools",
       "description": "Add a search input field to the @src/renderer/screens/ToolsView.tsx . Implement client-side filtering logic that updates the displayed list of tools in real-time as the user types into the search bar. The search should match against tool names and descriptions.",
       "context": [
         "src/renderer/screens/ToolsView.tsx"
       ],
       "createdAt": "2025-09-22T23:53:41.490Z",
-      "updatedAt": "2025-09-23T09:15:38.728Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:20:09.632Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:20:09.632Z"
     },
     {
       "id": "e7b7b5ee-ec41-4288-ae7d-201c33ff148e",
-      "status": "-",
+      "status": "+",
       "title": "Dynamically Generate Input Forms for Tools",
       "description": "When a user selects a tool, dynamically render a form based on its input schema. For each parameter in the schema, generate a corresponding form field (e.g., text input for string, number input for number, etc.). Include a 'Run' button to submit the form.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.491Z",
-      "updatedAt": "2025-09-23T09:14:53.922Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:21:11.132Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:21:11.132Z"
     },
     {
       "id": "28b4dc28-1748-4c6a-a45a-6188d260492a",
-      "status": "-",
+      "status": "+",
       "title": "Execute Tools and Display Results",
       "description": "On form submission, use the @src/renderer/services/factoryToolsService.ts  to run the selected tool with the user-provided arguments. Display a loading state while the tool is running. Once execution completes, display the returned result or any error messages in a dedicated output area on the screen.",
       "context": [
         "src/renderer/services/factoryToolsService.ts"
       ],
       "createdAt": "2025-09-22T23:53:41.492Z",
-      "updatedAt": "2025-09-23T09:15:25.256Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:21:42.993Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:21:42.993Z"
     },
     {
       "id": "e49be804-23db-4c7e-86aa-38856ce1071d",
-      "status": "-",
+      "status": "+",
       "title": "Update ToolsView",
       "description": "@src/renderer/screens/ToolsView.tsx needs to be updated to match the new 'thefactory-tools' schemas for tools.\nHere are the ones we should use for reference from the 'thefactory-tools':\n\n\nexport type ToolCallContext = { agent?: string; git?: GitManager }\n\nexport type ToolManager = {\n  // JSON schemas (OpenAI function-style) suitable for LLM prompt exposure\n  getSchemas(): ChatTool[]\n  // Human-readable signatures (per-agent filtered), for building textual prompts\n  getSignaturesForAgent(agent: string, git: any): string[]\n  // Build the executable tool mapping and signatures for a given agent\n  getToolsForAgent(\n    agent: string,\n    git: GitManager,\n  ): [Record<string, (args: any) => Promise<any> | any>, string[]]\n  // Execute a tool by name with normalized arguments; context may be required for agent-scoped tools\n  callTool(name: string, args: any, ctx?: ToolCallContext): Promise<any>\n}\nexport type ChatTool = {\n  type: 'function'\n  function: {\n    name: string\n    description: string\n    parameters: any\n  }\n}\n\nHere is an example tool :\n\n {\n      type: 'function',\n      function: {\n        name: 'list_files',\n        description: 'List all files in the current project',\n        parameters: {\n          type: 'object',\n          properties: {\n            path: {\n              type: 'string',\n              description: 'Project-relative path to the directory to list files and directories.',\n            },\n          },\n          required: ['path'],\n        },\n      },\n    },",
       "context": [
         "src/renderer/screens/ToolsView.tsx"
       ],
       "createdAt": "2025-09-23T09:16:15.043Z",
-      "updatedAt": "2025-09-23T15:57:17.380Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:17:15.473Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:17:15.473Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -105,5 +110,6 @@
     "28b4dc28-1748-4c6a-a45a-6188d260492a": 8
   },
   "createdAt": "2025-09-22T23:38:29.822Z",
-  "updatedAt": "2025-09-23T09:06:43.575Z"
+  "updatedAt": "2025-09-23T09:06:43.575Z",
+  "completedAt": "2025-09-23T16:21:42.993Z"
 }
