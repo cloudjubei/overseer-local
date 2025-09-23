@@ -27,8 +27,16 @@ export type ChatMessage = {
   content: string
   model?: string
   attachments?: string[]
+  error?: {
+    message: string
+  }
 }
-export type Chat = { id: string; messages: ChatMessage[]; creationDate: string; updateDate: string }
+export type Chat = {
+  id: string
+  messages: ChatMessage[]
+  creationDate: string
+  updateDate: string
+}
 
 export default class ChatsManager extends BaseManager {
   private storages: Record<string, ChatsStorage>
@@ -135,8 +143,8 @@ export default class ChatsManager extends BaseManager {
     newMessages: ChatMessage[],
     config: ChatConfig,
   ): Promise<any> {
+    const storage = await this.__getStorage(projectId)
     try {
-      const storage = await this.__getStorage(projectId)
       const chat: any = await storage?.getChat(chatId)
       if (!chat) throw new Error(`Couldn't load chat with chatId: ${chatId}`)
 
@@ -206,6 +214,26 @@ export default class ChatsManager extends BaseManager {
         .filter(Boolean)
         .join('\n')
       console.error('Error in chat completion:', details)
+
+      if (storage) {
+        const chat: any = await storage.getChat(chatId)
+        if (chat) {
+          const errorMessage: ChatMessage = {
+            role: 'assistant',
+            content: `An error occurred while processing your request.`,
+            error: {
+              message: details,
+            },
+          }
+          return await storage.saveChat(
+            chatId,
+            [...(chat.messages || []), ...(newMessages || []), errorMessage],
+            chat.rawResponses ?? [],
+          )
+        }
+      }
+
+      throw new Error('Failed to get completion and save error state.')
     }
   }
 

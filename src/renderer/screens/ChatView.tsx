@@ -20,6 +20,7 @@ import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
 import Spinner from '../components/ui/Spinner'
 import sendSoundFile from '../assets/sounds/send.mp3'
 import receiveSoundFile from '../assets/sounds/receive.mp3'
+import ErrorBubble from '../components/ui/ErrorBubble'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -301,6 +302,21 @@ export default function ChatView() {
           ) : (
             <div className="mx-auto max-w-[960px] space-y-3">
               {enhancedMessages.map((msg, index) => {
+                if (msg.error) {
+                  return (
+                    <div key={index} className="flex items-start gap-2 flex-row">
+                      <div
+                        className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                        aria-hidden="true"
+                      >
+                        AI
+                      </div>
+                      <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+                        <ErrorBubble error={msg.error} />
+                      </div>
+                    </div>
+                  )
+                }
                 const isUser = msg.role === 'user'
                 const isSystem = msg.role === 'system'
 

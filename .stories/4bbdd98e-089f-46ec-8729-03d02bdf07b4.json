@@ -69,12 +69,13 @@
     },
     {
       "id": "09d03ceb-884a-453b-bb21-3c2beea95527",
-      "status": "-",
+      "status": "+",
       "title": "Create an Error Bubble for Chat Failures",
       "description": "Implement a dedicated error bubble component. When an error occurs during the agent's turn (e.g., a failed tool call or an API error), display the error message in a distinctively styled bubble within the chat conversation.",
       "context": [],
       "createdAt": "2025-09-22T23:55:32.102Z",
-      "updatedAt": "2025-09-22T23:55:32.102Z"
+      "updatedAt": "2025-09-23T00:39:44.142Z",
+      "completedAt": "2025-09-23T00:39:44.142Z"
     },
     {
       "id": "c1215925-dd57-4655-8168-8ae0f1276dc6",
