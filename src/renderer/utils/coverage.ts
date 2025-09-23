@@ -1,16 +1,3 @@
-export type CoverageFileMetrics = {
-  pct_statements: number
-  pct_branch: number | null
-  pct_functions: number | null
-  pct_lines: number
-  uncovered_lines: number[]
-}
-
-export type ParsedCoverage = {
-  files: Record<string, CoverageFileMetrics>
-  rawText?: string
-}
-
 /**
  * Format a list of uncovered line numbers by grouping consecutive numbers
  * into ranges (e.g., [1,2,3,4,5,8,9,10] -> "1-5,8-10").
@@ -54,7 +41,8 @@ export function formatUncoveredLines(
   segments.push({ start, end: prev })
 
   const maxSegments = options?.maxSegments
-  const limited = typeof maxSegments === 'number' && maxSegments > 0 ? segments.slice(0, maxSegments) : segments
+  const limited =
+    typeof maxSegments === 'number' && maxSegments > 0 ? segments.slice(0, maxSegments) : segments
 
   const parts = limited.map((s) => (s.start === s.end ? String(s.start) : `${s.start}-${s.end}`))
 

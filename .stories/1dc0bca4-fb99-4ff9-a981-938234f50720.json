@@ -1,6 +1,6 @@
 {
   "id": "1dc0bca4-fb99-4ff9-a981-938234f50720",
-  "status": "+",
+  "status": "-",
   "title": "New screen - Tools",
   "description": "For various testing purposes, we want to have a screen where a user can see all the tools that are available via the factory-tools (from the createTools) and where they can call them to try them out. All appropriate inputs must be presented.\nMake sure the UI/UX is clear and easy to navigate. The tools should be searchable and grouped by the files they come from (for instance all the StoryTools should be together).",
   "features": [
@@ -97,6 +97,30 @@
       "updatedAt": "2025-09-23T16:17:15.473Z",
       "blockers": [],
       "completedAt": "2025-09-23T16:17:15.473Z"
+    },
+    {
+      "id": "4181f136-d24c-4606-bf01-e1c206bf8126",
+      "status": "-",
+      "title": "The coverage view needs improving",
+      "description": "In @src/renderer/screens/TestsView.tsx the coverage section need to be improved:\n- Statements, Branches, Functions and Lines should all show the percentage value and the percentage bar that currently only Lines show. These should be vertically stacked i.e. the numbers at the top, the bar at the bottom. All of these columns should take up the same exact width.\n- Uncovered lines should only be as wide as the title i.e. \"Uncovered Lines\" .\n- Statements, Branches, Functions and Lines should show the breakdown, total against covered, in a tooltip on hover.\n- Uncovered Lines should show the full lines display in a tooltip on hover.\n- The summary should match its values to the columns for the file by file values. No need for the extra captions/titles.\n- the files should be alphabetically sorted by path.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T23:06:29.387Z",
+      "updatedAt": "2025-09-23T23:06:29.387Z"
+    },
+    {
+      "id": "57c6bf88-5b3c-413f-b054-eb2766261df7",
+      "status": "-",
+      "title": "The tests view needs improving",
+      "description": "After running tests in @src/renderer/screens/TestsView.tsx there's a lot of information provided in the data - we should display it all. I.e. all passing tests, all failing tests and all skipped tests.\nSimilarly to how `vitest` displays it in the console.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T23:07:34.289Z",
+      "updatedAt": "2025-09-23T23:07:34.289Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -107,9 +131,10 @@
     "7b5f6173-1247-4f06-a671-e0248afa9c02": 5,
     "b793d0ac-a617-468c-89dd-9b5ce15401bf": 6,
     "e7b7b5ee-ec41-4288-ae7d-201c33ff148e": 7,
-    "28b4dc28-1748-4c6a-a45a-6188d260492a": 8
+    "28b4dc28-1748-4c6a-a45a-6188d260492a": 8,
+    "4181f136-d24c-4606-bf01-e1c206bf8126": 9,
+    "57c6bf88-5b3c-413f-b054-eb2766261df7": 10
   },
   "createdAt": "2025-09-22T23:38:29.822Z",
-  "updatedAt": "2025-09-23T09:06:43.575Z",
-  "completedAt": "2025-09-23T16:21:42.993Z"
+  "updatedAt": "2025-09-23T09:06:43.575Z"
 }

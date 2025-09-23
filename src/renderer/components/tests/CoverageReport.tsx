@@ -1,10 +1,10 @@
 import React from 'react'
-import type { ParsedCoverage } from '../../utils/coverage'
 import { formatUncoveredLines } from '../../utils/coverage'
 import { useNavigator } from '../../navigation/Navigator'
 import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
 import { Button } from '../ui/Button'
+import { CoverageResult } from 'thefactory-tools'
 
 function pctColor(p: number) {
   if (p >= 90) return 'text-green-700 dark:text-green-300'
@@ -37,7 +37,7 @@ function normalizePath(p: string): string {
   return out.replace(/^\//, '')
 }
 
-export default function CoverageReport({ data }: { data: ParsedCoverage }) {
+export default function CoverageReport({ data }: { data: CoverageResult }) {
   const { openModal } = useNavigator()
   const { storyIdsByProject, storiesById, createStory } = useStories()
   const { projectId } = useActiveProject()
@@ -198,18 +198,26 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
                         {rel}
                       </div>
                     </td>
-                    <td className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_statements)}`}>
+                    <td
+                      className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_statements)}`}
+                    >
                       {f.pct_statements.toFixed(1)}%
                     </td>
-                    <td className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_branch ?? 0)}`}>
+                    <td
+                      className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_branch ?? 0)}`}
+                    >
                       {typeof f.pct_branch === 'number' ? f.pct_branch.toFixed(1) : '—'}
                     </td>
-                    <td className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_functions ?? 0)}`}>
+                    <td
+                      className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_functions ?? 0)}`}
+                    >
                       {typeof f.pct_functions === 'number' ? f.pct_functions.toFixed(1) : '—'}
                     </td>
                     <td className="px-3 py-2 text-right">
                       <div className="inline-flex items-center gap-2">
-                        <span className={`tabular-nums ${pctColor(f.pct_lines)}`}>{f.pct_lines.toFixed(1)}%</span>
+                        <span className={`tabular-nums ${pctColor(f.pct_lines)}`}>
+                          {f.pct_lines.toFixed(1)}%
+                        </span>
                         <ProgressBar value={f.pct_lines} />
                       </div>
                     </td>
@@ -225,7 +233,7 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
                       {showImprove ? (
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
                           <Button
-                            size="xs"
+                            size="sm"
                             variant="secondary"
                             onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}
                           >
