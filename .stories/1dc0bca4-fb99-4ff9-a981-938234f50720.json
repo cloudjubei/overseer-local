@@ -83,15 +83,16 @@
     },
     {
       "id": "e49be804-23db-4c7e-86aa-38856ce1071d",
-      "status": "-",
+      "status": "+",
       "title": "Update ToolsView",
       "description": "@src/renderer/screens/ToolsView.tsx needs to be updated to match the new 'thefactory-tools' schemas for tools.\nHere are the ones we should use for reference from the 'thefactory-tools':\n\n\nexport type ToolCallContext = { agent?: string; git?: GitManager }\n\nexport type ToolManager = {\n  // JSON schemas (OpenAI function-style) suitable for LLM prompt exposure\n  getSchemas(): ChatTool[]\n  // Human-readable signatures (per-agent filtered), for building textual prompts\n  getSignaturesForAgent(agent: string, git: any): string[]\n  // Build the executable tool mapping and signatures for a given agent\n  getToolsForAgent(\n    agent: string,\n    git: GitManager,\n  ): [Record<string, (args: any) => Promise<any> | any>, string[]]\n  // Execute a tool by name with normalized arguments; context may be required for agent-scoped tools\n  callTool(name: string, args: any, ctx?: ToolCallContext): Promise<any>\n}\nexport type ChatTool = {\n  type: 'function'\n  function: {\n    name: string\n    description: string\n    parameters: any\n  }\n}\n\nHere is an example tool :\n\n {\n      type: 'function',\n      function: {\n        name: 'list_files',\n        description: 'List all files in the current project',\n        parameters: {\n          type: 'object',\n          properties: {\n            path: {\n              type: 'string',\n              description: 'Project-relative path to the directory to list files and directories.',\n            },\n          },\n          required: ['path'],\n        },\n      },\n    },",
       "context": [
         "src/renderer/screens/ToolsView.tsx"
       ],
       "createdAt": "2025-09-23T09:16:15.043Z",
-      "updatedAt": "2025-09-23T15:57:17.380Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:17:15.473Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:17:15.473Z"
     }
   ],
   "featureIdToDisplayIndex": {
