@@ -141,6 +141,44 @@ function mapTestResultToParsed(res: TestResult): ParsedTestResults {
   return mapped
 }
 
+function mapTestResultsAggregate(list: TestResult[] | undefined | null): ParsedTestResults | null {
+  if (!list || list.length === 0) return null
+  let ok = true
+  const failures: ParsedFailure[] = []
+  const rawParts: string[] = []
+  let total: number | undefined
+  let passed: number | undefined
+  let failed: number | undefined
+  let skipped: number | undefined
+  let durationMs: number | undefined
+
+  for (const it of list) {
+    const p = mapTestResultToParsed(it)
+    ok = ok && p.ok
+    failures.push(...(p.failures || []))
+    if (p.rawText) rawParts.push(p.rawText)
+
+    // Aggregate summary numbers when present
+    if (p.summary?.total != null) total = (total ?? 0) + (p.summary.total ?? 0)
+    if (p.summary?.passed != null) passed = (passed ?? 0) + (p.summary.passed ?? 0)
+    if (p.summary?.failed != null) failed = (failed ?? 0) + (p.summary.failed ?? 0)
+    if (p.summary?.skipped != null) skipped = (skipped ?? 0) + (p.summary.skipped ?? 0)
+    if (p.summary?.durationMs != null) durationMs = (durationMs ?? 0) + (p.summary.durationMs ?? 0)
+  }
+
+  const summary =
+    total != null || passed != null || failed != null || skipped != null || durationMs != null
+      ? { total, passed, failed, skipped, durationMs }
+      : undefined
+
+  return {
+    ok,
+    failures,
+    rawText: rawParts.join('\n\n---\n'),
+    summary,
+  }
+}
+
 function extractTestLabel(x: any): string | null {
   if (x == null) return null
   if (typeof x === 'string') return x
@@ -180,7 +218,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
         ])
         if (cancelled) return
         if (lastRes && lastRes.result) {
-          const parsed = mapTestResultToParsed(lastRes.result as any)
+          const parsed = mapTestResultsAggregate(lastRes.result as any)
           setResults(parsed)
           setResultsInvalidated(!!lastRes.invalidated)
           setResultsAt(lastRes.at || null)
@@ -267,8 +305,8 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       setTestsError(null)
       setResults(null)
       try {
-        const res = await factoryTestsService.runTests(projectId, path?.trim())
-        const parsed = mapTestResultToParsed(res)
+        const res = await factoryTestsService.runTests(projectId, path?.trim() || '.')
+        const parsed = mapTestResultsAggregate(res)
         setResults(parsed)
         setResultsInvalidated(false)
         setResultsAt(Date.now())
@@ -288,7 +326,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       setCoverageError(null)
       setCoverage(null)
       try {
-        const res = await factoryTestsService.runCoverage(projectId, path?.trim())
+        const res = await factoryTestsService.runCoverages(projectId, path?.trim() || '.')
         const parsed = parseCoverageOutput(res as any)
         setCoverage(parsed)
         setCoverageInvalidated(false)
