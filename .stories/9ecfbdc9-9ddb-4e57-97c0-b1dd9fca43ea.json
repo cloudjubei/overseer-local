@@ -100,7 +100,7 @@
     },
     {
       "id": "fb2c5983-344a-4467-91a5-d6c799a98325",
-      "status": "-",
+      "status": "+",
       "title": "Store information about tests ran and show it straight away when opening the view",
       "description": "When @src/renderer/screens/TestsView.tsx opens, the user should be shown all tests (available to be pulled from 'thefactory-tools' via @src/factory/FactoryTestsManager.ts ) . If some of the files have changed since when the result for that test was recorded - it is invalidated and shown.\nThe same idea should be done for test coverage.",
       "context": [
@@ -108,7 +108,8 @@
         "src/factory/FactoryTestsManager.ts"
       ],
       "createdAt": "2025-09-23T12:08:06.445Z",
-      "updatedAt": "2025-09-23T12:08:06.445Z"
+      "updatedAt": "2025-09-23T13:25:24.491Z",
+      "completedAt": "2025-09-23T13:25:24.491Z"
     },
     {
       "id": "bfdba512-14ae-4bae-b2dc-ff5c4b34c58e",

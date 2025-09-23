@@ -194,6 +194,10 @@ const FACTORY_TESTS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN, { projectId, path }),
   runCoverage: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE, { projectId, path }),
+  getLastResult: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT, { projectId }),
+  getLastCoverage: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE, { projectId }),
 }
 
 const DB_API = {

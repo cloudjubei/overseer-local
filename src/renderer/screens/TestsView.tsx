@@ -7,6 +7,22 @@ import { Input } from '../components/ui/Input'
 import CoverageReport from '../components/tests/CoverageReport'
 import { TestsProvider, useTests } from '../contexts/TestsContext'
 
+function TimeAgo({ ts }: { ts: number }) {
+  const [now, setNow] = React.useState(Date.now())
+  React.useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30000)
+    return () => clearInterval(id)
+  }, [])
+  const diff = Math.max(0, now - ts)
+  const minutes = Math.floor(diff / 60000)
+  if (minutes <= 0) return <span>just now</span>
+  if (minutes === 1) return <span>1 minute ago</span>
+  if (minutes < 60) return <span>{minutes} minutes ago</span>
+  const hours = Math.floor(minutes / 60)
+  if (hours === 1) return <span>1 hour ago</span>
+  return <span>{hours} hours ago</span>
+}
+
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
 
@@ -22,6 +38,10 @@ function TestsInner() {
     coverageError,
     runTests,
     runCoverage,
+    resultsInvalidated,
+    coverageInvalidated,
+    resultsAt,
+    coverageAt,
   } = useTests()
 
   return (
@@ -60,6 +80,20 @@ function TestsInner() {
               {isRunningTests ? <Spinner size={16} label="Running tests..." /> : null}
             </div>
 
+            {results && (
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  {resultsInvalidated ? (
+                    <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                      Results are outdated (files changed since last run)
+                    </span>
+                  ) : resultsAt ? (
+                    <span className="text-neutral-500">Last updated <TimeAgo ts={resultsAt} /></span>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
             {testsError ? (
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
                 {testsError}
@@ -95,6 +129,20 @@ function TestsInner() {
               </Button>
               {isRunningCoverage ? <Spinner size={16} label="Running coverage..." /> : null}
             </div>
+
+            {coverage && (
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  {coverageInvalidated ? (
+                    <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                      Coverage is outdated (files changed since last run)
+                    </span>
+                  ) : coverageAt ? (
+                    <span className="text-neutral-500">Last updated <TimeAgo ts={coverageAt} /></span>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
             {coverageError ? (
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
