@@ -8,6 +8,7 @@ import AgentsView from '../screens/AgentsView'
 import AllAgentsView from '../screens/AllAgentsView'
 import LiveDataView from '../screens/LiveDataView'
 import ProjectTimelineView from '../screens/ProjectTimelineView'
+import ToolsScreen from '../screens/ToolsView'
 import { useNavigator } from './Navigator'
 import Tooltip from '../components/ui/Tooltip'
 import { useNotifications } from '../hooks/useNotifications'
@@ -31,6 +32,7 @@ import {
   IconMenu,
   IconChevron,
   IconTimeline,
+  IconToolbox,
 } from '../components/ui/Icons'
 import { renderProjectIcon } from '../projects/projectIcons'
 import { notificationsService } from '../services/notificationsService'
@@ -79,6 +81,13 @@ const NAV_ITEMS: NavDef[] = [
     view: 'ProjectTimeline',
     icon: <IconTimeline />,
     accent: 'purple',
+  },
+  {
+    id: 'tools',
+    label: 'Tools',
+    view: 'Tools',
+    icon: <IconToolbox />,
+    accent: 'brand',
   },
   {
     id: 'notifications',
@@ -316,6 +325,12 @@ export default function SidebarView({}: SidebarProps) {
       return (
         <div key="ProjectTimeline" className="flex flex-col flex-1 min-h-0 view-transition">
           <ProjectTimelineView />
+        </div>
+      )
+    if (currentView === 'Tools')
+      return (
+        <div key="Tools" className="flex flex-col flex-1 min-h-0 view-transition">
+          <ToolsScreen />
         </div>
       )
     return (
