@@ -66,12 +66,13 @@
     },
     {
       "id": "28b4dc28-1748-4c6a-a45a-6188d260492a",
-      "status": "-",
+      "status": "+",
       "title": "Execute Tools and Display Results",
       "description": "On form submission, use the `FACTORY_TOOLS_EXECUTE` IPC channel to run the selected tool with the user-provided arguments. Display a loading state while the tool is running. Once execution completes, display the returned result or any error messages in a dedicated output area on the screen.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.492Z",
-      "updatedAt": "2025-09-22T23:53:41.492Z"
+      "updatedAt": "2025-09-23T00:17:41.297Z",
+      "completedAt": "2025-09-23T00:17:41.297Z"
     }
   ],
   "featureIdToDisplayIndex": {
