@@ -23,9 +23,10 @@ export default class StoriesManager extends BaseManager {
 
   constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
     super(projectRoot, window)
-    this.tools = {}
 
     this.projectsManager = projectsManager
+
+    this.tools = {}
   }
 
   async init(): Promise<void> {

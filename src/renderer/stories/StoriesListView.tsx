@@ -518,7 +518,7 @@ export default function StoriesListView() {
                             <RichText text={t.description || ''} />
                           </div>
                         </div>
-                        <div className="col col-actions">
+                        <div className={`col col-actions ${storyRun ? 'is-always-visible' : ''}`}>
                           <button
                             type="button"
                             className="btn-secondary btn-icon"
@@ -540,12 +540,19 @@ export default function StoriesListView() {
                               }}
                             />
                           ) : (
-                            <RunAgentButton
-                              onClick={(agentType) => {
-                                if (!projectId) return
-                                startAgent(agentType, projectId, t.id)
-                              }}
-                            />
+                            // Wrap RunAgentButton to stop propagation so we don't navigate to StoryDetails
+                            <div
+                              className="no-drag"
+                              onClick={(e) => e.stopPropagation()}
+                              onPointerDown={(e) => e.stopPropagation()}
+                            >
+                              <RunAgentButton
+                                onClick={(agentType) => {
+                                  if (!projectId) return
+                                  startAgent(agentType, projectId, t.id)
+                                }}
+                              />
+                            </div>
                           )}
                         </div>
                         <div className="col col-blockers" aria-label={`Blockers for Story ${t.id}`}>

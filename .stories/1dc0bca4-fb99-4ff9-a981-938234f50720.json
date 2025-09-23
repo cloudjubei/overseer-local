@@ -6,48 +6,58 @@
   "features": [
     {
       "id": "16b8588c-1eac-4907-8b22-739a61a9a84f",
-      "status": "-",
+      "status": "+",
       "title": "Expose Tool Definitions via IPC",
       "description": "In the main process, create a mechanism to get all tool definitions from `thefactory-tools`. This should include the tool's name, description, input schema (e.g., Zod or JSON schema), and its source file. Add a new IPC handler, `FACTORY_TOOLS_LIST`, in `FactoryToolsManager.ts` to expose this data to the renderer process.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.488Z",
-      "updatedAt": "2025-09-22T23:53:41.488Z"
+      "updatedAt": "2025-09-23T00:10:24.614Z",
+      "completedAt": "2025-09-23T00:10:24.614Z"
     },
     {
       "id": "e3870538-6350-4ba2-9c9d-3791a5e53506",
-      "status": "-",
+      "status": "+",
       "title": "Implement IPC Handler for Tool Execution",
       "description": "Create a new IPC handler, `FACTORY_TOOLS_EXECUTE`, in `FactoryToolsManager.ts`. This handler will accept a tool name and an object of arguments. It will find the specified tool, execute it with the provided arguments, and return the result. Implement robust error handling for tool not found or execution failures.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.489Z",
-      "updatedAt": "2025-09-22T23:53:41.489Z"
+      "updatedAt": "2025-09-23T00:12:09.158Z",
+      "completedAt": "2025-09-23T00:12:09.158Z"
     },
     {
       "id": "ea80df42-e4d4-4f74-8649-a94952b96450",
-      "status": "-",
+      "status": "+",
       "title": "Create New 'Tools' Screen Component and Route",
       "description": "In `src/renderer/screens`, create a new directory and file for a `ToolsScreen` component. This will be the main view for browsing and running tools. Add a new route in the application's navigation system to make this screen accessible, likely via a new entry in a sidebar or menu.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.489Z",
-      "updatedAt": "2025-09-22T23:53:41.489Z"
+      "updatedAt": "2025-09-23T00:14:12.266Z",
+      "completedAt": "2025-09-23T00:14:12.266Z"
     },
     {
       "id": "7b5f6173-1247-4f06-a671-e0248afa9c02",
       "status": "-",
-      "title": "Fetch and Display Tools on the Tools Screen",
-      "description": "On the `ToolsScreen`, use the `FACTORY_TOOLS_LIST` IPC channel to fetch the list of available tools when the component mounts. Render the tools grouped by their source file, as requested. Each tool item should display its name and a clear description.",
-      "context": [],
+      "title": "Fetch and Display Tools on the ToolsView",
+      "description": "On the @src/renderer/screens/ToolsView.tsx , use the @src/renderer/services/factoryToolsService.ts available tools when the component mounts. Render the tools grouped by their source file, as requested. Each tool item should display its name and a clear description.",
+      "context": [
+        "src/renderer/screens/ToolsView.tsx",
+        "src/renderer/services/factoryToolsService.ts"
+      ],
       "createdAt": "2025-09-22T23:53:41.490Z",
-      "updatedAt": "2025-09-22T23:53:41.490Z"
+      "updatedAt": "2025-09-23T09:14:44.694Z",
+      "blockers": []
     },
     {
       "id": "b793d0ac-a617-468c-89dd-9b5ce15401bf",
       "status": "-",
       "title": "Implement Search Functionality for Tools",
-      "description": "Add a search input field to the `ToolsScreen`. Implement client-side filtering logic that updates the displayed list of tools in real-time as the user types into the search bar. The search should match against tool names and descriptions.",
-      "context": [],
+      "description": "Add a search input field to the @src/renderer/screens/ToolsView.tsx . Implement client-side filtering logic that updates the displayed list of tools in real-time as the user types into the search bar. The search should match against tool names and descriptions.",
+      "context": [
+        "src/renderer/screens/ToolsView.tsx"
+      ],
       "createdAt": "2025-09-22T23:53:41.490Z",
-      "updatedAt": "2025-09-22T23:53:41.490Z"
+      "updatedAt": "2025-09-23T09:15:38.728Z",
+      "blockers": []
     },
     {
       "id": "e7b7b5ee-ec41-4288-ae7d-201c33ff148e",
@@ -56,27 +66,43 @@
       "description": "When a user selects a tool, dynamically render a form based on its input schema. For each parameter in the schema, generate a corresponding form field (e.g., text input for string, number input for number, etc.). Include a 'Run' button to submit the form.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.491Z",
-      "updatedAt": "2025-09-22T23:53:41.491Z"
+      "updatedAt": "2025-09-23T09:14:53.922Z",
+      "blockers": []
     },
     {
       "id": "28b4dc28-1748-4c6a-a45a-6188d260492a",
       "status": "-",
       "title": "Execute Tools and Display Results",
-      "description": "On form submission, use the `FACTORY_TOOLS_EXECUTE` IPC channel to run the selected tool with the user-provided arguments. Display a loading state while the tool is running. Once execution completes, display the returned result or any error messages in a dedicated output area on the screen.",
-      "context": [],
+      "description": "On form submission, use the @src/renderer/services/factoryToolsService.ts  to run the selected tool with the user-provided arguments. Display a loading state while the tool is running. Once execution completes, display the returned result or any error messages in a dedicated output area on the screen.",
+      "context": [
+        "src/renderer/services/factoryToolsService.ts"
+      ],
       "createdAt": "2025-09-22T23:53:41.492Z",
-      "updatedAt": "2025-09-22T23:53:41.492Z"
+      "updatedAt": "2025-09-23T09:15:25.256Z",
+      "blockers": []
+    },
+    {
+      "id": "e49be804-23db-4c7e-86aa-38856ce1071d",
+      "status": "-",
+      "title": "Update FactoryToolsManager",
+      "description": "@src/factory/FactoryToolsManager.ts needs to be updated to match the new 'factory-tools' schemas for tools",
+      "context": [
+        "src/factory/FactoryToolsManager.ts"
+      ],
+      "createdAt": "2025-09-23T09:16:15.043Z",
+      "updatedAt": "2025-09-23T09:16:15.043Z"
     }
   ],
   "featureIdToDisplayIndex": {
     "16b8588c-1eac-4907-8b22-739a61a9a84f": 1,
     "e3870538-6350-4ba2-9c9d-3791a5e53506": 2,
     "ea80df42-e4d4-4f74-8649-a94952b96450": 3,
-    "7b5f6173-1247-4f06-a671-e0248afa9c02": 4,
-    "b793d0ac-a617-468c-89dd-9b5ce15401bf": 5,
-    "e7b7b5ee-ec41-4288-ae7d-201c33ff148e": 6,
-    "28b4dc28-1748-4c6a-a45a-6188d260492a": 7
+    "e49be804-23db-4c7e-86aa-38856ce1071d": 4,
+    "7b5f6173-1247-4f06-a671-e0248afa9c02": 5,
+    "b793d0ac-a617-468c-89dd-9b5ce15401bf": 6,
+    "e7b7b5ee-ec41-4288-ae7d-201c33ff148e": 7,
+    "28b4dc28-1748-4c6a-a45a-6188d260492a": 8
   },
   "createdAt": "2025-09-22T23:38:29.822Z",
-  "updatedAt": "2025-09-22T23:38:29.822Z"
+  "updatedAt": "2025-09-23T09:06:43.575Z"
 }

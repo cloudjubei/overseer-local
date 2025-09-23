@@ -21,6 +21,7 @@ Top-Level Layout
 - src/: Application source (Electron app: main, preload, renderer, and tooling).
   - db/: Main process database integration (thefactory-db connection lifecycle and IPC handlers for status, CRUD/search of entities/documents, including new handlers for features and timeline labels). Exposes DB status via IPC and preload (dbService).
   - document_ingestion/: Project file-to-DB ingestion and sync pipeline. Listens to FilesManager changes (add/change/delete/rename) and upserts/archives documents in thefactory-db; supports full-project ingestion via IPC (DOCUMENT_INGESTION_ALL / DOCUMENT_INGESTION_PROJECT).
+  - factory-tools/: Main process integration with the 'thefactory-tools' library for agent runs, pricing, and tool management.
   - live-data/: Main process live data service and types for live data services.
   - renderer/: React UI (components, screens, hooks, services, navigation, preview runtime), including new screens like `ProjectTimelineView`.
     - components/agents/: Agent-specific UI (status chips, run bullets, model selectors, project/cost/token chips).
@@ -29,6 +30,7 @@ Top-Level Layout
     - settings/: AppSettings React context provider used app-wide (singleton).
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).
+  - tests/: Main process tests manager bridging thefactory-tools test runner via IPC (exposed to renderer as testsService).
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer (exposes live data API, db API, and new timelineService API).
 - Root config files: package.json, tsconfig.json, tailwind/postcss configs, vite configs, forge config, .env.

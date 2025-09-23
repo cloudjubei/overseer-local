@@ -8,6 +8,8 @@ import AgentsView from '../screens/AgentsView'
 import AllAgentsView from '../screens/AllAgentsView'
 import LiveDataView from '../screens/LiveDataView'
 import ProjectTimelineView from '../screens/ProjectTimelineView'
+import ToolsScreen from '../screens/ToolsView'
+import TestsView from '../screens/TestsView'
 import { useNavigator } from './Navigator'
 import Tooltip from '../components/ui/Tooltip'
 import { useNotifications } from '../hooks/useNotifications'
@@ -31,6 +33,8 @@ import {
   IconMenu,
   IconChevron,
   IconTimeline,
+  IconToolbox,
+  IconTests,
 } from '../components/ui/Icons'
 import { renderProjectIcon } from '../projects/projectIcons'
 import { notificationsService } from '../services/notificationsService'
@@ -67,6 +71,13 @@ const NAV_ITEMS: NavDef[] = [
     accent: 'teal',
   },
   {
+    id: 'tests',
+    label: 'Tests',
+    view: 'Tests',
+    icon: <IconTests />,
+    accent: 'teal',
+  },
+  {
     id: 'live-data',
     label: 'Live Data',
     view: 'LiveData',
@@ -79,6 +90,13 @@ const NAV_ITEMS: NavDef[] = [
     view: 'ProjectTimeline',
     icon: <IconTimeline />,
     accent: 'purple',
+  },
+  {
+    id: 'tools',
+    label: 'Tools',
+    view: 'Tools',
+    icon: <IconToolbox />,
+    accent: 'brand',
   },
   {
     id: 'notifications',
@@ -306,6 +324,12 @@ export default function SidebarView({}: SidebarProps) {
           <AgentsView />
         </div>
       )
+    if (currentView === 'Tests')
+      return (
+        <div key="Tests" className="flex flex-col flex-1 min-h-0 view-transition">
+          <TestsView />
+        </div>
+      )
     if (currentView === 'LiveData')
       return (
         <div key="LiveData" className="flex flex-col flex-1 min-h-0 view-transition">
@@ -316,6 +340,12 @@ export default function SidebarView({}: SidebarProps) {
       return (
         <div key="ProjectTimeline" className="flex flex-col flex-1 min-h-0 view-transition">
           <ProjectTimelineView />
+        </div>
+      )
+    if (currentView === 'Tools')
+      return (
+        <div key="Tools" className="flex flex-col flex-1 min-h-0 view-transition">
+          <ToolsScreen />
         </div>
       )
     return (

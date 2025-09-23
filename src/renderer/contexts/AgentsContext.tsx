@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { AgentRunHistory, AgentType, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
-import { factoryService } from '../services/factoryService'
+import { factoryAgentRunService } from '../services/factoryAgentRunService'
 import { storiesService } from '../services/storiesService'
 import { notificationsService } from '../services/notificationsService'
 import { useGitHubCredentials } from './GitHubCredentialsContext'
@@ -33,7 +33,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const [runsActive, setRunsActive] = useState<AgentRunHistory[]>([])
 
   const update = async () => {
-    const history = await factoryService.listRunHistory()
+    const history = await factoryAgentRunService.listRunHistory()
     setRunsHistory(history)
     setRunsActive(history.filter((h) => h.state === 'running' || h.state === 'created'))
   }
@@ -41,7 +41,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
     switch (agentRunUpdate.type) {
       case 'add':
-        const run = agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
+        const run =
+          agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])
           setRunsActive((prev) => [...prev, run])
@@ -53,7 +54,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         break
       case 'change':
         const run2 =
-          agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
+          agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
         if (run2) {
           const prevRun = runsHistory.find((r) => r.id === agentRunUpdate.runId)
           const isRunning = run2.state === 'running' || run2.state === 'created'
@@ -72,7 +73,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const unsubscribe = factoryService.subscribeRuns(onAgentRunUpdate)
+    const unsubscribe = factoryAgentRunService.subscribeRuns(onAgentRunUpdate)
     return () => {
       unsubscribe()
     }
@@ -116,7 +117,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
       const effectiveAgentType = await coerceAgentTypeForStory(agentType, projectId, storyId)
-      await factoryService.startRun({
+      await factoryAgentRunService.startRun({
         agentType: effectiveAgentType,
         projectId,
         storyId,
@@ -129,14 +130,17 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     [activeConfig, appSettings],
   )
 
-  const cancelRun = useCallback(async (runId: string) => await factoryService.cancelRun(runId), [])
+  const cancelRun = useCallback(
+    async (runId: string) => await factoryAgentRunService.cancelRun(runId),
+    [],
+  )
 
   const deleteRunHistory = useCallback(async (runId: string) => {
-    await factoryService.deleteRunHistory(runId)
+    await factoryAgentRunService.deleteRunHistory(runId)
   }, [])
 
   const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
-    await factoryService.rateRun(runId, rating)
+    await factoryAgentRunService.rateRun(runId, rating)
   }, [])
 
   const fireCompletionNotification = async (run: AgentRunHistory) => {

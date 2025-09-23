@@ -1,7 +1,7 @@
 import { PricingState } from './pricingService'
 import { AgentRun, AgentRunHistory, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
 
-export type FactoryService = {
+export type FactoryAgentRunService = {
   subscribeRuns: (callback: (update: AgentRunUpdate) => Promise<void>) => () => void
   startRun: (params: AgentRun) => Promise<AgentRunHistory>
   cancelRun: (runId: string) => Promise<void>
@@ -15,4 +15,4 @@ export type FactoryService = {
   refreshPricing: (provider: string, url: string) => Promise<PricingState>
 }
 
-export const factoryService: FactoryService = { ...window.factoryService }
+export const factoryAgentRunService: FactoryAgentRunService = { ...window.factoryAgentRunService }
