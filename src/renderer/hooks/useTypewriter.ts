@@ -1,23 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react'
 
 export function useTypewriter(text: string, speed: number = 50) {
-  const [displayText, setDisplayText] = useState('');
-  const index = useRef(0);
+  const [displayText, setDisplayText] = useState('')
+  const index = useRef(0)
 
   useEffect(() => {
-    setDisplayText('');
-    index.current = 0;
+    setDisplayText('')
+    index.current = 0
     const intervalId = setInterval(() => {
       if (index.current < text.length) {
-        setDisplayText((prev) => prev + text.charAt(index.current));
-        index.current += 1;
+        setDisplayText((prev) => prev + text.charAt(index.current))
+        index.current += 1
       } else {
-        clearInterval(intervalId);
+        clearInterval(intervalId)
       }
-    }, speed);
+    }, speed)
 
-    return () => clearInterval(intervalId);
-  }, [text, speed]);
+    return () => clearInterval(intervalId)
+  }, [text, speed])
 
-  return displayText;
+  return displayText
 }
