@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
 import { useFiles, inferFileType } from '../../contexts/FilesContext'
 import FileDisplay from '../ui/FileDisplay'
+import { RichText } from '../ui/RichText'
 
 interface ChatInputProps {
   onSend: (message: string, attachments: string[]) => void
@@ -89,6 +90,14 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
 
   const canSend = (input.trim().length > 0 || pendingAttachments.length > 0) && isConfigured
 
+  const placeholderText = useMemo(
+    () =>
+      isConfigured
+        ? 'Type your message…'
+        : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.',
+    [isConfigured]
+  )
+
   return (
     <div className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
       <div
@@ -99,23 +108,34 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
       <div className="p-3">
         <div className="relative flex items-end gap-2">
           <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onInput={autoSizeTextarea}
-              onKeyDown={handleTextareaKeyDown}
-              className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
-              placeholder={
-                isConfigured
-                  ? 'Type your message…'
-                  : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.'
-              }
-              rows={1}
-              aria-label="Message input"
-              style={{ maxHeight: 200, overflowY: 'auto' }}
-              disabled={isThinking}
-            />
+            <div className="relative">
+              {/* Visual overlay that renders mention chips while preserving layout */}
+              <div
+                className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-words pointer-events-none text-[var(--text-primary)]"
+                aria-hidden="true"
+              >
+                {input ? (
+                  <RichText text={input} variant="input" />
+                ) : (
+                  <span className="text-[var(--text-muted)]">{placeholderText}</span>
+                )}
+              </div>
+
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onInput={autoSizeTextarea}
+                onKeyDown={handleTextareaKeyDown}
+                className="w-full resize-none bg-transparent px-3 py-2 outline-none"
+                placeholder={'' /* placeholder handled by overlay */}
+                rows={1}
+                aria-label="Message input"
+                style={{ maxHeight: 200, overflowY: 'auto', color: 'transparent', caretColor: 'var(--text-primary)' }}
+                disabled={isThinking}
+              />
+            </div>
+
             <div className="px-3 py-1 border-t border-[var(--border-subtle)]">
               {pendingAttachments.length > 0 && (
                 <div className="mb-1 flex flex-wrap gap-1">

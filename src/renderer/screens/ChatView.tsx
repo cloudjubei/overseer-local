@@ -18,10 +18,142 @@ import Spinner from '../components/ui/Spinner'
 import ErrorBubble from '../components/ui/ErrorBubble'
 import { ChatInput } from '../components/Chat'
 import { Chat, ChatMessage } from 'src/chat/ChatsManager'
+import TypewriterText from '../components/ui/TypewriterText'
+import JsonView from '../components/ui/JsonView'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
   isFirstInGroup?: boolean
+}
+
+// Parse assistant JSON response to extract thoughts and tool calls safely
+function parseAssistant(content: string): { thoughts?: string; tool_calls?: any[] } | null {
+  try {
+    const obj = JSON.parse(content)
+    if (obj && typeof obj === 'object') return obj as any
+    return null
+  } catch {
+    return null
+  }
+}
+
+// Attempt to parse tool results (array of { name, result, durationMs? })
+function parseToolResultsObjects(text?: string): Array<{ name: string; result: any; durationMs?: number }> {
+  const trimmed = (text || '').trim()
+  if (!trimmed) return []
+  try {
+    const arr = JSON.parse(trimmed)
+    if (Array.isArray(arr)) {
+      return arr.filter(
+        (x) => x && typeof x === 'object' && typeof x.name === 'string' && 'result' in x,
+      )
+    }
+  } catch {}
+  return []
+}
+
+function isLargeJson(value: any) {
+  try {
+    const s = typeof value === 'string' ? value : JSON.stringify(value)
+    return s.length > 600
+  } catch {
+    return false
+  }
+}
+
+function Collapsible({
+  title,
+  children,
+  defaultOpen = false,
+  className,
+  innerClassName,
+}: {
+  title: React.ReactNode
+  children: React.ReactNode
+  defaultOpen?: boolean
+  className?: string
+  innerClassName?: string
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div
+      className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}
+    >
+      <button
+        className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[var(--surface-raised)]"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="text-xs font-medium truncate pr-2">{title}</span>
+        <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
+      </button>
+      {open ? (
+        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>{children}</div>
+      ) : null}
+    </div>
+  )
+}
+
+function ToolCallCard({
+  index,
+  toolName,
+  args,
+  result,
+  durationMs,
+}: {
+  index: number
+  toolName: string
+  args: any
+  result?: any
+  durationMs?: number
+}) {
+  const isHeavy = toolName === 'read_files' || toolName === 'write_file' || isLargeJson(args) || isLargeJson(result)
+  const durationText = typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
+  return (
+    <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--surface-base)]">
+      <div className="px-3 py-2 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-xs font-semibold">
+            {index + 1}. {toolName}
+          </div>
+          <div className="text-[11px] text-[var(--text-secondary)]">Arguments</div>
+        </div>
+        {durationText && (
+          <div className="flex-shrink-0 bg-[var(--surface-overlay)] rounded-full px-2 py-0.5 text-xs text-[var(--text-secondary)] whitespace-nowrap border border-[var(--border-subtle)]">
+            {durationText}
+          </div>
+        )}
+      </div>
+      <div className="px-3 pb-2">
+        {isHeavy ? (
+          <Collapsible title={<span>View arguments</span>}>
+            <div className="p-2 max-h-64 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
+              <JsonView value={args} />
+            </div>
+          </Collapsible>
+        ) : (
+          <div className="rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] p-2 max-h-60 overflow-auto">
+            <JsonView value={args} />
+          </div>
+        )}
+      </div>
+      {typeof result !== 'undefined' && (
+        <div className="px-3 pb-3">
+          <div className="text-[11px] text-[var(--text-secondary)] mb-1">Result</div>
+          {isHeavy ? (
+            <Collapsible title={<span>View result</span>}>
+              <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
+                <JsonView value={result} />
+              </div>
+            </Collapsible>
+          ) : (
+            <div className="rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] p-2 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
+              <JsonView value={result} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function ChatView() {
@@ -48,12 +180,28 @@ export default function ChatView() {
   const prevMessagesCountRef = useRef(messages.length)
   const chatChanged = useRef(false)
 
+  // Track which assistant message should animate (index-based)
+  const [animateAssistantIdx, setAnimateAssistantIdx] = useState<number | null>(null)
+  const prevLenForAnimRef = useRef<number>(messages.length)
+  const animationChatChangedRef = useRef<boolean>(false)
+
+  // Track new-user-message animation (length-based)
+  const prevLenForUserAnimRef = useRef<number>(messages.length)
+
+  // Scrolling state/refs
+  const isAtBottomRef = useRef<boolean>(true)
+  const lastMessageRef = useRef<HTMLDivElement>(null)
+  const prevLenForScrollRef = useRef<number>(messages.length)
+
   useEffect(() => {
     chatChanged.current = true
+    // also mark animation to skip on initial load of a different chat
+    animationChatChangedRef.current = true
   }, [currentChatId])
 
   useEffect(() => {
     if (chatChanged.current) {
+      // On chat switch, don't play receive sound for historical messages
       chatChanged.current = false
       prevMessagesCountRef.current = messages.length
       return
@@ -67,11 +215,121 @@ export default function ChatView() {
     prevMessagesCountRef.current = messages.length
   }, [messages, receiveSound])
 
+  // Decide when to animate the latest assistant message
   useEffect(() => {
-    const el = messageListRef.current
-    if (!el) return
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  }, [chatsById, isThinking])
+    if (animationChatChangedRef.current) {
+      // Skip animation when chat changes (initial load of messages)
+      animationChatChangedRef.current = false
+      prevLenForAnimRef.current = messages.length
+      setAnimateAssistantIdx(null)
+      // Also align user animation tracker to avoid false pop after switching chats
+      prevLenForUserAnimRef.current = messages.length
+      return
+    }
+
+    if (messages.length > prevLenForAnimRef.current) {
+      const lastIdx = messages.length - 1
+      const lastMsg = messages[lastIdx]
+      if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.error) {
+        setAnimateAssistantIdx(lastIdx)
+      } else {
+        setAnimateAssistantIdx(null)
+      }
+    }
+
+    prevLenForAnimRef.current = messages.length
+  }, [messages])
+
+  // Trigger the user bubble pop-in transition when a new user message is appended
+  useEffect(() => {
+    const increased = messages.length > prevLenForUserAnimRef.current
+    const last = messages[messages.length - 1]
+    const isNewUser = increased && last && last.role === 'user'
+
+    if (animationChatChangedRef.current) {
+      // On chat switch, align counters and skip animation
+      prevLenForUserAnimRef.current = messages.length
+      return
+    }
+
+    if (isNewUser) {
+      requestAnimationFrame(() => {
+        const wrapper = lastMessageRef.current
+        const bubble = wrapper?.querySelector('.chat-bubble') as HTMLElement | null
+        if (bubble) {
+          bubble.classList.add('chat-bubble--in')
+        }
+      })
+    }
+
+    prevLenForUserAnimRef.current = messages.length
+  }, [messages])
+
+  // Track is-at-bottom on user scroll
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
+    const el = e.currentTarget
+    const threshold = 10
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
+    isAtBottomRef.current = atBottom
+  }
+
+  // Auto-scroll behavior
+  useEffect(() => {
+    const container = messageListRef.current
+    if (!container) return
+
+    const prev = prevLenForScrollRef.current
+    const increased = messages.length > prev
+    prevLenForScrollRef.current = messages.length
+
+    if (!increased) return
+
+    // If we just switched chats, jump to bottom (show full latest) and exit
+    if (animationChatChangedRef.current) {
+      requestAnimationFrame(() => {
+        const c = messageListRef.current
+        if (!c) return
+        c.scrollTo({ top: c.scrollHeight, behavior: 'auto' })
+        animationChatChangedRef.current = false
+        // Being at bottom now
+        isAtBottomRef.current = true
+      })
+      return
+    }
+
+    // Only partially scroll when user is at the bottom
+    if (!isAtBottomRef.current) return
+
+    requestAnimationFrame(() => {
+      const c = messageListRef.current
+      if (!c) return
+      const revealPadding = 24 // small gap so user starts reading without chasing
+      const lastEl = lastMessageRef.current
+
+      let targetTop = c.scrollHeight - c.clientHeight - revealPadding
+      if (lastEl) {
+        targetTop = lastEl.offsetTop - (c.clientHeight - revealPadding)
+      }
+      if (targetTop < 0) targetTop = 0
+      c.scrollTo({ top: targetTop, behavior: 'smooth' })
+    })
+  }, [messages])
+
+  // When entering thinking state and user is at bottom, reveal spinner start gently
+  useEffect(() => {
+    const c = messageListRef.current
+    if (!c) return
+    if (!isThinking) return
+    if (!isAtBottomRef.current) return
+
+    requestAnimationFrame(() => {
+      const container = messageListRef.current
+      if (!container) return
+      const revealPadding = 24
+      const targetTop = Math.max(0, container.scrollHeight - container.clientHeight - revealPadding)
+      container.scrollTo({ top: targetTop, behavior: 'smooth' })
+    })
+  }, [isThinking])
 
   useEffect(() => {
     if (currentChatId) {
@@ -159,7 +417,8 @@ export default function ChatView() {
       }
       emptyMessage="No chats yet"
     >
-      <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
+      {/* Fixed-height chat container to avoid responsive vh; list scrolls vertically */}
+      <section className="flex-1 flex flex-col w-full h-[720px] bg-[var(--surface-base)] overflow-hidden">
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
@@ -208,7 +467,11 @@ export default function ChatView() {
           </div>
         )}
 
-        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
+        <div
+          ref={messageListRef}
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
+          onScroll={handleScroll}
+        >
           {enhancedMessages.length === 0 && !isThinking ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
@@ -251,9 +514,28 @@ export default function ChatView() {
                   )
                 }
 
+                // Determine if this is a newly added user message to apply pop-in classes
+                const isNewUserBubble =
+                  isUser &&
+                  index === enhancedMessages.length - 1 &&
+                  messages.length > prevLenForUserAnimRef.current &&
+                  !animationChatChangedRef.current
+
+                // Parse assistant content (thoughts/tool calls) and pair with next tool results message
+                const parsedAssistant = !isUser ? parseAssistant(msg.content) : null
+                const hasToolCalls = !!parsedAssistant?.tool_calls?.length
+                let toolResults: Array<{ name: string; result: any; durationMs?: number }> = []
+                if (hasToolCalls) {
+                  const nextMsg = messages[index + 1]
+                  if (nextMsg && nextMsg.role === 'user') {
+                    toolResults = parseToolResultsObjects(nextMsg.content)
+                  }
+                }
+
                 return (
                   <div
                     key={index}
+                    ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
                     className={[
                       'flex items-start gap-2',
                       isUser ? 'flex-row-reverse' : 'flex-row',
@@ -291,10 +573,41 @@ export default function ChatView() {
                             ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                             : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
                           msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                          // Bubble animation classes
+                          'chat-bubble',
+                          isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
                         ].join(' ')}
                       >
-                        <RichText text={msg.content} />
+                        {isUser ? (
+                          <RichText text={msg.content} />
+                        ) : index === animateAssistantIdx ? (
+                          // If the assistant sent structured JSON, we still animate typing for natural feel
+                          <TypewriterText text={msg.content} />
+                        ) : (
+                          <RichText text={msg.content} />
+                        )}
                       </div>
+
+                      {/* Tool call inspection view */}
+                      {!isUser && hasToolCalls && (
+                        <div className="mt-2 w-full space-y-2">
+                          {parsedAssistant!.tool_calls!.map((call: any, i: number) => {
+                            const name = call.tool_name || call.name || 'tool'
+                            const args = call.arguments ?? {}
+                            const res = toolResults[i]
+                            return (
+                              <ToolCallCard
+                                key={`tool-${index}-${i}`}
+                                index={i}
+                                toolName={name}
+                                args={args}
+                                result={res?.result}
+                                durationMs={res?.durationMs}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
 
                       {msg.attachments && msg.attachments.length > 0 && (
                         <div

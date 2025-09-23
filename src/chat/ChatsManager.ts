@@ -198,8 +198,10 @@ export default class ChatsManager extends BaseManager {
           const toolName = toolCall.tool_name
           const args = normalizeTool(toolCall.arguments, toolName)
 
+          const t0 = Date.now()
           const result = await callTool(toolName, args)
-          toolOutputs.push({ name: toolName, result })
+          const durationMs = Date.now() - t0
+          toolOutputs.push({ name: toolName, result, durationMs })
         }
         const content = JSON.stringify(toolOutputs)
         const toolResultMsg: ChatMessage = { role: 'user', content }
