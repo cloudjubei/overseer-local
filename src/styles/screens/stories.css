@@ -141,6 +141,7 @@
   transition: opacity var(--motion-fast, 120ms) var(--easing-standard, ease);
 }
 /* Always show actions when an agent run is active */
+.story-grid .col-actions.is-sticky-visible,
 .story-grid .col-actions.is-always-visible {
   opacity: 1;
   pointer-events: auto;
