@@ -155,6 +155,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
       case 'Tests':
         window.location.hash = '#tests'
         break
+      case 'Tools':
+        window.location.hash = '#tools'
+        break
     }
   }, [])
 
