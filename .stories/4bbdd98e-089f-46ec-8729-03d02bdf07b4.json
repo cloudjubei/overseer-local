@@ -91,7 +91,7 @@
     },
     {
       "id": "c1215925-dd57-4655-8168-8ae0f1276dc6",
-      "status": "-",
+      "status": "+",
       "title": "Inspection View for Agent Tool Calls",
       "description": "Similarly to the `ToolCallRow` in @src/renderer/components/agents/ChatConversation.tsx (which is used for AgentRuns) we need to have a nice display for tool calls in user chat in @src/renderer/screens/ChatView.tsx . Add the time taken for each individual tool call to complete. Make the layout for better readability of arguments and results, with syntax highlighting for JSON.",
       "context": [
@@ -99,8 +99,9 @@
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-22T23:55:32.125Z",
-      "updatedAt": "2025-09-23T09:30:38.894Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T10:04:36.542Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T10:04:36.542Z"
     },
     {
       "id": "c53d5f00-cd0e-47f7-bcde-6f74d5081850",
