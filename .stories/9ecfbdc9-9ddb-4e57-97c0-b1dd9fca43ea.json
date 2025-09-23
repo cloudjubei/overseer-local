@@ -68,14 +68,14 @@
       "id": "c28d53e1-1da4-439b-9a55-c2f74b119106",
       "status": "-",
       "title": "FactoryTools updated",
-      "description": "@src/factory/FactoryTestsManager.ts  needs to update as 'factory-tools' schemas for tests have been updated.\nThe changes need to propagate to @src/renderer/screens/TestsView.tsx , via @src/renderer/services/factoryTestsService.ts , so that all the tests and test coverage displays correctly",
+      "description": "@src/factory/FactoryTestsManager.ts  needs to update as 'thefactory-tools' schemas for tests have been updated - they now expose `TestResult` and `CoverageResult`.\nThe changes need to propagate to @src/renderer/screens/TestsView.tsx , via @src/renderer/services/factoryTestsService.ts , so that all the tests and test coverage displays correctly.\nDo not create any new schemas/types - always use the ones provided by 'thefactory-tools'",
       "context": [
         "src/factory/FactoryTestsManager.ts",
         "src/renderer/screens/TestsView.tsx",
         "src/renderer/services/factoryTestsService.ts"
       ],
       "createdAt": "2025-09-23T09:06:35.698Z",
-      "updatedAt": "2025-09-23T09:17:38.766Z",
+      "updatedAt": "2025-09-23T10:58:35.415Z",
       "blockers": []
     }
   ],
