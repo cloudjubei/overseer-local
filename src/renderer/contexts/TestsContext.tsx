@@ -1,0 +1,227 @@
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { useActiveProject } from './ProjectContext'
+import { factoryTestsService } from '../services/factoryTestsService'
+import type { TestResult } from 'thefactory-tools'
+import type { ParsedTestResults, ParsedFailure } from '../utils/testResults'
+import { parseTestOutput } from '../utils/testResults'
+import type { ParsedCoverage } from '../utils/coverage'
+import { parseCoverageOutput } from '../utils/coverage'
+
+export type TestsContextValue = {
+  // loading flags
+  isRunningTests: boolean
+  isRunningCoverage: boolean
+  // last results
+  results: ParsedTestResults | null
+  coverage: ParsedCoverage | null
+  // errors
+  testsError: string | null
+  coverageError: string | null
+  // actions
+  runTests: (path?: string) => Promise<void>
+  runCoverage: (path?: string) => Promise<void>
+  resetTests: () => void
+  resetCoverage: () => void
+}
+
+const TestsContext = createContext<TestsContextValue | null>(null)
+
+function mapTestResultToParsed(res: TestResult): ParsedTestResults {
+  const anyRes: any = res as any
+  // Build raw text for fallback viewing
+  const chunks: string[] = []
+  if (typeof anyRes.stdout === 'string' && anyRes.stdout.length) chunks.push(anyRes.stdout)
+  if (typeof anyRes.stderr === 'string' && anyRes.stderr.length) chunks.push(anyRes.stderr)
+  const rawText = chunks.length
+    ? chunks.join('\n')
+    : (() => {
+        try {
+          return JSON.stringify(res, null, 2)
+        } catch {
+          return String(res)
+        }
+      })()
+
+  // Determine ok status defensively
+  const status: string | undefined = typeof anyRes.status === 'string' ? anyRes.status : undefined
+  const ok: boolean =
+    typeof anyRes.ok === 'boolean'
+      ? anyRes.ok
+      : status
+        ? /^(ok|pass|passed|success)$/i.test(status)
+        : Array.isArray(anyRes.failures)
+          ? anyRes.failures.length === 0
+          : true
+
+  // Map failures if present
+  const failures: ParsedFailure[] = []
+  if (Array.isArray((anyRes as any).failures)) {
+    for (const f of (anyRes as any).failures) {
+      if (!f) continue
+      failures.push({
+        testName: (f as any).testName || (f as any).title || (f as any).name,
+        filePath: (f as any).filePath || (f as any).file || (f as any).path,
+        line: typeof (f as any).line === 'number' ? (f as any).line : null,
+        column: typeof (f as any).column === 'number' ? (f as any).column : null,
+        message:
+          (f as any).message ||
+          (Array.isArray((f as any).messages) ? (f as any).messages.join('\n') : undefined) ||
+          'Test failed',
+        stack: (f as any).stack,
+      })
+    }
+  }
+
+  // Map summary if available
+  const summarySrc: any = (anyRes.summary || anyRes.stats || anyRes.result || {}) as any
+  const summary = {
+    total:
+      typeof summarySrc.total === 'number'
+        ? summarySrc.total
+        : typeof summarySrc.numTotalTests === 'number'
+          ? summarySrc.numTotalTests
+          : undefined,
+    passed:
+      typeof summarySrc.passed === 'number'
+        ? summarySrc.passed
+        : typeof summarySrc.numPassedTests === 'number'
+          ? summarySrc.numPassedTests
+          : undefined,
+    failed:
+      typeof summarySrc.failed === 'number'
+        ? summarySrc.failed
+        : typeof summarySrc.numFailedTests === 'number'
+          ? summarySrc.numFailedTests
+          : undefined,
+    skipped:
+      typeof summarySrc.skipped === 'number'
+        ? summarySrc.skipped
+        : typeof summarySrc.numPendingTests === 'number'
+          ? summarySrc.numPendingTests
+          : undefined,
+    durationMs:
+      typeof summarySrc.durationMs === 'number'
+        ? summarySrc.durationMs
+        : typeof summarySrc.runtime === 'number'
+          ? summarySrc.runtime
+          : typeof summarySrc.time === 'number'
+            ? summarySrc.time
+            : undefined,
+  }
+
+  const mapped: ParsedTestResults = {
+    ok,
+    rawText,
+    failures,
+    summary,
+  }
+
+  // If no explicit failures and raw text exists, run heuristic parser to try to improve details
+  if (mapped.failures.length === 0 && typeof rawText === 'string' && rawText.length > 0) {
+    const heuristic = parseTestOutput(rawText)
+    // Prefer detailed failures from heuristic if it found any
+    if (heuristic.failures.length > 0) {
+      mapped.failures = heuristic.failures
+      mapped.summary = mapped.summary || heuristic.summary
+      mapped.ok = mapped.ok && heuristic.ok
+    }
+  }
+
+  return mapped
+}
+
+export function TestsProvider({ children }: { children: React.ReactNode }) {
+  const { projectId } = useActiveProject()
+
+  const [isRunningTests, setIsRunningTests] = useState(false)
+  const [isRunningCoverage, setIsRunningCoverage] = useState(false)
+
+  const [results, setResults] = useState<ParsedTestResults | null>(null)
+  const [coverage, setCoverage] = useState<ParsedCoverage | null>(null)
+
+  const [testsError, setTestsError] = useState<string | null>(null)
+  const [coverageError, setCoverageError] = useState<string | null>(null)
+
+  const resetTests = useCallback(() => {
+    setResults(null)
+    setTestsError(null)
+  }, [])
+
+  const resetCoverage = useCallback(() => {
+    setCoverage(null)
+    setCoverageError(null)
+  }, [])
+
+  const runTests = useCallback(
+    async (path?: string) => {
+      if (!projectId) return
+      setIsRunningTests(true)
+      setTestsError(null)
+      setResults(null)
+      try {
+        const res = await factoryTestsService.runTests(projectId, path?.trim() || undefined)
+        const parsed = mapTestResultToParsed(res)
+        setResults(parsed)
+      } catch (e: any) {
+        setTestsError(e?.message || String(e))
+      } finally {
+        setIsRunningTests(false)
+      }
+    },
+    [projectId],
+  )
+
+  const runCoverage = useCallback(
+    async (path?: string) => {
+      if (!projectId) return
+      setIsRunningCoverage(true)
+      setCoverageError(null)
+      setCoverage(null)
+      try {
+        const res = await factoryTestsService.runCoverage(projectId, path?.trim() || undefined)
+        const parsed = parseCoverageOutput(res as any)
+        setCoverage(parsed)
+      } catch (e: any) {
+        setCoverageError(e?.message || String(e))
+      } finally {
+        setIsRunningCoverage(false)
+      }
+    },
+    [projectId],
+  )
+
+  const value = useMemo<TestsContextValue>(
+    () => ({
+      isRunningTests,
+      isRunningCoverage,
+      results,
+      coverage,
+      testsError,
+      coverageError,
+      runTests,
+      runCoverage,
+      resetTests,
+      resetCoverage,
+    }),
+    [
+      isRunningTests,
+      isRunningCoverage,
+      results,
+      coverage,
+      testsError,
+      coverageError,
+      runTests,
+      runCoverage,
+      resetTests,
+      resetCoverage,
+    ],
+  )
+
+  return <TestsContext.Provider value={value}>{children}</TestsContext.Provider>
+}
+
+export function useTests(): TestsContextValue {
+  const ctx = useContext(TestsContext)
+  if (!ctx) throw new Error('useTests must be used within TestsProvider')
+  return ctx
+}

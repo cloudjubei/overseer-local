@@ -127,7 +127,7 @@
     },
     {
       "id": "6f87dd12-0f6a-43c9-9cae-3cc0a5a338f9",
-      "status": "-",
+      "status": "+",
       "title": "Abstract away all tests in a TestsContext",
       "description": "Just like there is @src/renderer/contexts/StoriesContext.tsx , we should have an equivalent for tests to make it easy to use them.\n@src/renderer/screens/TestsView.tsx needs to use it instead of directly using @src/renderer/services/factoryTestsService.ts",
       "context": [
@@ -136,7 +136,8 @@
         "src/renderer/services/factoryTestsService.ts"
       ],
       "createdAt": "2025-09-23T12:32:19.602Z",
-      "updatedAt": "2025-09-23T12:32:19.602Z"
+      "updatedAt": "2025-09-23T13:09:30.654Z",
+      "completedAt": "2025-09-23T13:09:30.654Z"
     }
   ],
   "featureIdToDisplayIndex": {
