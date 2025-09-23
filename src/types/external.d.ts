@@ -10,6 +10,7 @@ import type { DBService } from 'src/renderer/services/dbService'
 import type { DocumentIngestionService } from 'src/renderer/services/documentIngestionService'
 import type { GitMonitorService } from 'src/renderer/services/gitMonitorService'
 import type { TimelineService } from 'src/renderer/services/timelineService'
+import type { TestsService } from 'src/renderer/services/testsService'
 
 declare global {
   interface Window {
@@ -25,6 +26,7 @@ declare global {
     documentIngestionService: DocumentIngestionService
     gitMonitorService: GitMonitorService
     timelineService: TimelineService
+    testsService: TestsService
   }
 }
 export {}

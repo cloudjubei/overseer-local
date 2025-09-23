@@ -11,6 +11,7 @@ import DatabaseManager from './db/DatabaseManager'
 import DocumentIngestionManager from './document_ingestion/DocumentIngestionManager'
 import GitMonitorManager from './git-monitor/GitMonitorManager'
 import BaseManager from './BaseManager'
+import TestsManager from './tests/TestsManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
@@ -23,6 +24,7 @@ export let settingsManager: SettingsManager | undefined
 export let liveDataManager: LiveDataManager | undefined
 export let documentIngestionManager: DocumentIngestionManager | undefined
 export let gitMonitorManager: GitMonitorManager | undefined
+export let testsManager: TestsManager | undefined
 
 let managers: BaseManager[] = []
 
@@ -51,6 +53,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     filesManager,
   )
   gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
+  testsManager = new TestsManager(projectRoot, mainWindow)
 
   managers = [
     databaseManager,
@@ -64,6 +67,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     liveDataManager,
     documentIngestionManager,
     gitMonitorManager,
+    testsManager,
   ]
 
   for (const manager of managers) {

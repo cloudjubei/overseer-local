@@ -26,12 +26,13 @@
     },
     {
       "id": "72ab35c0-0d17-4aef-adec-88225d64680d",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Test Runner and Display Loading State",
       "description": "Integrate the `factory-tools` test runner. Add a 'Run Tests' button to the 'Test Results' tab. When clicked, trigger the test run and display a loading indicator while the tests are in progress. The raw results should be stored in the component's state.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.421Z",
-      "updatedAt": "2025-09-22T23:51:23.421Z"
+      "updatedAt": "2025-09-23T00:21:57.247Z",
+      "completedAt": "2025-09-23T00:21:57.247Z"
     },
     {
       "id": "7b0d3b50-e90d-4273-a1f1-0927f0f893ff",

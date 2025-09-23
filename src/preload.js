@@ -187,6 +187,10 @@ const FACTORY_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 }
 
+const TESTS_API = {
+  runTests: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TESTS_RUN, { relPath: options?.path }),
+}
+
 const DB_API = {
   subscribe: (callback) => {
     const listener = (_event, payload) => callback(payload)
@@ -248,6 +252,7 @@ contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API)
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
 contextBridge.exposeInMainWorld('factoryService', FACTORY_API)
+contextBridge.exposeInMainWorld('testsService', TESTS_API)
 contextBridge.exposeInMainWorld('dbService', DB_API)
 contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
 contextBridge.exposeInMainWorld('gitMonitorService', GIT_MONITOR_API)

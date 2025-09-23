@@ -83,6 +83,9 @@ const IPC_HANDLER_KEYS = {
   FACTORY_PRICING_LIST: 'factory:pricing:list',
   FACTORY_PRICING_REFRESH: 'factory:pricing:refresh',
 
+  // Tests
+  TESTS_RUN: 'tests:run',
+
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',
   DB_CONNECT: 'db:connect',
