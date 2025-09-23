@@ -198,7 +198,7 @@
     },
     {
       "id": "9e72a552-12df-416c-bbed-8e0fb8928aaa",
-      "status": "-",
+      "status": "+",
       "title": "If there are no tests (like in this project) show a button in the middle",
       "description": "Show info in the middle and a button that would do a similar thing to \"Improve tests\" in coverage - it will open up the Create Feature form with some predefined info to make tests for everything.\nThe buttons needs to show only in the tests section of @src/renderer/screens/TestsView.tsx",
       "context": [
@@ -206,7 +206,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-23T19:30:08.682Z",
-      "updatedAt": "2025-09-23T19:36:22.600Z"
+      "updatedAt": "2025-09-23T22:09:20.156Z",
+      "completedAt": "2025-09-23T22:09:20.156Z"
     },
     {
       "id": "2fac1501-456a-41bb-81a1-ca4c9b8c792b",

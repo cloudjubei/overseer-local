@@ -6,6 +6,9 @@ import TestResultsView from '../components/tests/TestResults'
 import CoverageReport from '../components/tests/CoverageReport'
 import { TestsProvider, useTests } from '../contexts/TestsContext'
 import { timeAgo } from '../components/agents/time'
+import { useNavigator } from '../navigation/Navigator'
+import { useStories } from '../contexts/StoriesContext'
+import { useActiveProject } from '../contexts/ProjectContext'
 
 function TimeAgo({ ts }: { ts: number }) {
   const [now, setNow] = React.useState(Date.now())
@@ -33,7 +36,60 @@ function TestsInner() {
     coverageInvalidated,
     resultsAt,
     coverageAt,
+    testsCatalog,
+    isLoadingCatalog,
   } = useTests()
+
+  const { openModal } = useNavigator()
+  const { storyIdsByProject, storiesById, createStory } = useStories()
+  const { projectId } = useActiveProject()
+
+  async function ensureTestingStory(): Promise<string | undefined> {
+    if (!projectId) return undefined
+    const ids = storyIdsByProject[projectId] || []
+    const existing = ids
+      .map((id) => storiesById[id])
+      .find((s) => s && typeof s.title === 'string' && s.title.trim().toUpperCase() === 'TESTING')
+    if (existing) return existing.id
+    try {
+      const created = await createStory({
+        title: 'TESTING',
+        description: 'Ongoing Testing improvements',
+        status: '-',
+      } as any)
+      return created?.id
+    } catch (e) {
+      console.error('Failed to create TESTING story', e)
+      return undefined
+    }
+  }
+
+  async function onCreateTestsFeatureClick() {
+    const storyId = await ensureTestingStory()
+    if (!storyId) return
+
+    const title = 'Set up tests and improve coverage'
+    const description = [
+      'Initialize and configure the test framework for this project (e.g., Vitest/Jest or Pytest as appropriate).',
+      'Establish base test utilities, fixtures, and CI integration.',
+      'Author comprehensive unit and integration tests across src/, prioritizing critical paths and uncovered code.',
+    ].join('\n\n')
+
+    openModal({
+      type: 'feature-create',
+      storyId,
+      initialValues: {
+        title,
+        description,
+        status: '-',
+        context: ['src/'],
+      },
+      focusDescription: true,
+    })
+  }
+
+  const showNoTestsCta =
+    activeTab === 'results' && !isRunningTests && !isLoadingCatalog && (testsCatalog?.length ?? 0) === 0
 
   return (
     <div className="flex-1 overflow-auto">
@@ -93,9 +149,23 @@ function TestsInner() {
               </div>
             ) : null}
 
+            {showNoTestsCta && (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center max-w-xl">
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
+                    No tests detected in this project. Kickstart testing by creating a feature to set up
+                    the testing framework and add coverage.
+                  </div>
+                  <Button variant="secondary" onClick={onCreateTestsFeatureClick}>
+                    Create feature to add tests
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
 
-            {!isRunningTests && !testsError && !results && (
+            {!isRunningTests && !testsError && !results && !showNoTestsCta && (
               <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
             )}
 
