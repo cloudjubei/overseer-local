@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1708,10 +1708,9 @@
         "src/renderer/components/stories/RunAgentButton.tsx"
       ],
       "createdAt": "2025-09-23T00:09:45.531Z",
-      "updatedAt": "2025-09-23T20:38:03.061Z",
+      "updatedAt": "2025-09-23T22:02:15.128Z",
       "blockers": [],
-      "rejection": "Now the run bullet shows in @src/renderer/stories/StoriesListView.tsx (although it's not vertically centred) but so does the edit button (it shouldn't).",
-      "completedAt": "2025-09-23T20:38:03.061Z"
+      "completedAt": "2025-09-23T22:02:15.128Z"
     },
     {
       "id": "a571d64e-213b-4f0e-b641-51678b5c26b5",
@@ -1896,6 +1895,5 @@
     "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6": 114
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T20:07:41.212Z",
-  "completedAt": "2025-09-23T20:38:03.061Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z"
 }

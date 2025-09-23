@@ -4,7 +4,11 @@ import BoardView from './BoardView'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import { useActiveProject } from '../contexts/ProjectContext'
 import DependencyBullet from '../components/stories/DependencyBullet'
-import StatusControl, { StatusPicker, statusKey } from '../components/stories/StatusControl'
+import StatusControl, {
+  STATUS_LABELS,
+  StatusPicker,
+  statusKey,
+} from '../components/stories/StatusControl'
 import { StoryListViewSorting, StoryViewMode, StoryListStatusFilter } from '../../types/settings'
 import { useAgents } from '../contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
@@ -17,7 +21,6 @@ import ModelChip from '../components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useStories } from '../contexts/StoriesContext'
-import { STATUS_LABELS } from '../utils/status'
 
 function countFeatures(story: Story) {
   const features = Array.isArray(story.features) ? story.features : []

@@ -2,7 +2,7 @@ import React from 'react'
 import { filesService } from '../../services/filesService'
 import { useActiveProject } from '../../contexts/ProjectContext'
 import Spinner from '../ui/Spinner'
-import { ParsedTestResults, ParsedFailure, extractRelPath } from '../../utils/testResults'
+import { TestFailure, TestResult, TestsResult } from 'thefactory-tools'
 
 function CodeSnippet({
   relPath,
@@ -60,8 +60,9 @@ function CodeSnippet({
   )
 }
 
-function FailureItem({ failure }: { failure: ParsedFailure }) {
-  const rel = extractRelPath(failure.filePath)
+function FailureItem({ test, failure }: { test: TestResult; failure: TestFailure }) {
+  const rel = test.filePath
+  const testName = failure.testName
   return (
     <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2">
       <div className="flex items-start justify-between gap-3">
@@ -76,22 +77,16 @@ function FailureItem({ failure }: { failure: ParsedFailure }) {
           </div>
         </div>
       </div>
-      {rel ? (
-        <div className="text-xs text-neutral-600 dark:text-neutral-400">
-          {rel}
-          {failure.line ? `:${failure.line}` : ''}
-          {failure.column ? `:${failure.column}` : ''}
-        </div>
-      ) : failure.filePath ? (
-        <div className="text-xs text-neutral-600 dark:text-neutral-400">{failure.filePath}</div>
-      ) : null}
-      {rel ? (
-        <CodeSnippet
-          relPath={rel}
-          line={failure.line ?? undefined}
-          column={failure.column ?? undefined}
-        />
-      ) : null}
+      <div className="text-xs text-neutral-600 dark:text-neutral-400">
+        {rel}
+        {failure.line ? `:${failure.line}` : ''}
+        {failure.column ? `:${failure.column}` : ''}
+      </div>
+      <CodeSnippet
+        relPath={rel}
+        line={failure.line ?? undefined}
+        column={failure.column ?? undefined}
+      />
       {failure.stack && (
         <details className="mt-1">
           <summary className="text-xs text-neutral-500 cursor-pointer">Stack trace</summary>
@@ -100,12 +95,22 @@ function FailureItem({ failure }: { failure: ParsedFailure }) {
           </pre>
         </details>
       )}
+      {failure.message && (
+        <details className="mt-1">
+          <summary className="text-xs text-neutral-500 cursor-pointer">Message</summary>
+          <pre className="text-[11px] bg-neutral-50 dark:bg-neutral-900 p-2 rounded-md overflow-auto whitespace-pre-wrap">
+            {failure.message}
+          </pre>
+        </details>
+      )}
     </div>
   )
 }
 
-export default function TestResultsView({ results }: { results: ParsedTestResults }) {
-  if (results.ok && results.failures.length === 0) {
+export default function TestResultsView({ results }: { results: TestsResult }) {
+  console.log('results: ', results)
+  //TODO: improve this display to show the stats per TestResult in results.tests
+  if (results.status == 'ok') {
     return (
       <div className="rounded-md border border-green-300/50 dark:border-green-800 p-4 bg-green-50/50 dark:bg-green-900/10">
         <div className="text-sm font-medium text-green-700 dark:text-green-300">
@@ -122,13 +127,14 @@ export default function TestResultsView({ results }: { results: ParsedTestResult
       </div>
     )
   }
-
-  const hasFailures = results.failures && results.failures.length > 0
+  //TODO: not ok which means that there are either skips or failures
+  const hasSkips = results.summary.skipped > 0
+  const hasFailures = results.summary.failed > 0
   return (
     <div className="space-y-3">
       {hasFailures ? (
         <div className="text-sm font-medium text-red-700 dark:text-red-300">
-          {results.failures.length} failing test{results.failures.length === 1 ? '' : 's'}
+          {results.summary.failed} failing test{results.summary.failed === 1 ? '' : 's'}
         </div>
       ) : (
         <div className="text-sm text-neutral-500">
@@ -138,16 +144,10 @@ export default function TestResultsView({ results }: { results: ParsedTestResult
 
       {hasFailures && (
         <div className="space-y-3">
-          {results.failures.map((f, i) => (
+          {/* {results.tests.map((f, i) => (
             <FailureItem key={i} failure={f} />
-          ))}
+          ))} */}
         </div>
-      )}
-
-      {!hasFailures && (
-        <pre className="text-xs bg-neutral-50 dark:bg-neutral-900 p-3 rounded-md overflow-auto max-h-[60vh] whitespace-pre-wrap">
-          {results.rawText}
-        </pre>
       )}
     </div>
   )

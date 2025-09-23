@@ -1,41 +1,24 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
-import { createTestTools, TestTools, TestResult, CoverageResult, FileMeta } from 'thefactory-tools'
+import {
+  createTestTools,
+  TestTools,
+  TestResult,
+  CoverageResult,
+  FileMeta,
+  TestsResult,
+} from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
-import type FilesManager from '../files/FilesManager'
-
-export type LastTestResult = {
-  result: TestResult[]
-  snapshot: FileSnapshot
-  at: number
-  invalidated: boolean
-}
-export type LastCoverageResult = {
-  result: CoverageResult
-  snapshot: FileSnapshot
-  at: number
-  invalidated: boolean
-}
 
 export default class FactoryTestsManager extends BaseManager {
   private tools: Record<string, TestTools>
   private projectsManager: ProjectsManager
-  private filesManager: FilesManager
 
-  private lastTestResults: Record<string, LastTestResult> = {}
-  private lastCoverageResults: Record<string, LastCoverageResult> = {}
-
-  constructor(
-    projectRoot: string,
-    window: BrowserWindow,
-    projectsManager: ProjectsManager,
-    filesManager: FilesManager,
-  ) {
+  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
     super(projectRoot, window)
 
     this.projectsManager = projectsManager
-    this.filesManager = filesManager
 
     this.tools = {}
   }
@@ -74,101 +57,31 @@ export default class FactoryTestsManager extends BaseManager {
 
   async runTest(projectId: string, path: string): Promise<TestResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTest(path)
-    if (res) {
-      //TODO: update
-      // const snapshot = await this.buildProjectSnapshot(projectId)
-      // this.lastTestResults[projectId] = {
-      //   result: res,
-      //   snapshot,
-      //   at: Date.now(),
-      //   invalidated: false,
-      // }
-    }
-    return res
+    return await tools?.runTest(path)
   }
-  async runTests(projectId: string, path: string = '.'): Promise<TestResult[]> {
+  async runTests(projectId: string, path: string = '.'): Promise<TestsResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTests(path)
-    if (res) {
-      const snapshot = await this.buildProjectSnapshot(projectId)
-      this.lastTestResults[projectId] = {
-        result: res,
-        snapshot,
-        at: Date.now(),
-        invalidated: false,
-      }
-    }
-    return res ?? []
+    return await tools?.runTests(path)
   }
 
   async runTestCoverage(projectId: string, path: string): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTestCoverage(path)
-    if (res) {
-      const snapshot = await this.buildProjectSnapshot(projectId)
-      this.lastCoverageResults[projectId] = {
-        result: res,
-        snapshot,
-        at: Date.now(),
-        invalidated: false,
-      }
-    }
-    return res
+    return await tools?.runTestCoverage(path)
   }
   async runTestsCoverage(
     projectId: string,
     path: string = '.',
   ): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTestsCoverage(path)
-    if (res) {
-      const snapshot = await this.buildProjectSnapshot(projectId)
-      this.lastCoverageResults[projectId] = {
-        result: res,
-        snapshot,
-        at: Date.now(),
-        invalidated: false,
-      }
-    }
-    return res
+    return await tools?.runTestsCoverage(path)
   }
 
   async getLastResult(projectId: string) {
-    const entry = this.lastTestResults[projectId]
-    if (!entry) return undefined
-    const snapshot = await this.buildProjectSnapshot(projectId)
-    const invalidated = this.isSnapshotInvalidated(entry.snapshot, snapshot)
-    return { result: entry.result, snapshot, at: entry.at, invalidated }
+    return undefined
   }
 
   async getLastCoverage(projectId: string) {
-    const entry = this.lastCoverageResults[projectId]
-    if (!entry) return undefined
-    const snapshot = await this.buildProjectSnapshot(projectId)
-    const invalidated = this.isSnapshotInvalidated(entry.snapshot, snapshot)
-    return { result: entry.result, snapshot, at: entry.at, invalidated }
-  }
-
-  private async buildProjectSnapshot(projectId: string): Promise<FileSnapshot> {
-    const stats = (await this.filesManager.getAllFileStats(projectId)) ?? []
-    const snap: FileSnapshot = {}
-    for (const meta of stats as any[]) {
-      const k = toSnapshotKey(meta)
-      if (!k) continue
-      snap[k] = toSnapshotVal(meta)
-    }
-    return snap
-  }
-  private isSnapshotInvalidated(prev: FileSnapshot, curr: FileSnapshot): boolean {
-    const prevKeys = new Set(Object.keys(prev))
-    const currKeys = new Set(Object.keys(curr))
-    if (prevKeys.size !== currKeys.size) return true
-    for (const k of prevKeys) {
-      if (!currKeys.has(k)) return true
-      if (prev[k] !== curr[k]) return true
-    }
-    return false
+    return undefined
   }
 
   private async updateTool(projectId: string): Promise<TestTools | undefined> {
@@ -192,21 +105,4 @@ export default class FactoryTestsManager extends BaseManager {
     }
     return this.tools[projectId]
   }
-}
-
-type FileSnapshot = Record<string, string>
-
-function toSnapshotKey(meta: any): string | null {
-  // Try several common keys for a relative path
-  const key = meta?.relPath || meta?.path || meta?.file || meta?.name || null
-  if (!key || typeof key !== 'string') return null
-  return key
-}
-function toSnapshotVal(meta: any): string {
-  // Build a signature using common timestamp/size-like fields
-  const mtime =
-    meta?.mtimeMs ?? meta?.mtime ?? meta?.modifiedMs ?? meta?.modified ?? meta?.updatedAt ?? 0
-  const size = meta?.size ?? meta?.length ?? ''
-  const hash = meta?.hash ?? ''
-  return `${mtime}-${size}-${hash}`
 }
