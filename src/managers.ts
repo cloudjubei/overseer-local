@@ -63,7 +63,12 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     filesManager,
   )
   gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
-  factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, projectsManager)
+  factoryToolsManager = new FactoryToolsManager(
+    projectRoot,
+    mainWindow,
+    projectsManager,
+    settingsManager,
+  )
   factoryTestsManager = new FactoryTestsManager(
     projectRoot,
     mainWindow,

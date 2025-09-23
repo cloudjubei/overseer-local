@@ -1762,6 +1762,18 @@
       "createdAt": "2025-09-23T14:46:35.238Z",
       "updatedAt": "2025-09-23T14:49:31.093Z",
       "completedAt": "2025-09-23T14:49:31.093Z"
+    },
+    {
+      "id": "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6",
+      "status": "-",
+      "title": "when a file is added while the app is running it's not picked up",
+      "description": "when using @src/renderer/hooks/useFilesAutocomplete.ts a new file doesn't show - there must be some disconnect with @src/renderer/contexts/FilesContext.tsx",
+      "context": [
+        "src/renderer/hooks/useFilesAutocomplete.ts",
+        "src/renderer/contexts/FilesContext.tsx"
+      ],
+      "createdAt": "2025-09-23T17:02:30.318Z",
+      "updatedAt": "2025-09-23T17:02:30.318Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1877,7 +1889,8 @@
     "a571d64e-213b-4f0e-b641-51678b5c26b5": 110,
     "b951665d-139c-4761-94f1-c259b36dab42": 111,
     "70889fe4-d1cd-4718-9cf1-f11739204e42": 112,
-    "995dbbc4-cf40-4749-9cd7-1721cae3e4b6": 113
+    "995dbbc4-cf40-4749-9cd7-1721cae3e4b6": 113,
+    "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6": 114
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-23T16:11:43.790Z"

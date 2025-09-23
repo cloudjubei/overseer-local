@@ -160,7 +160,7 @@ export default class ChatsManager extends BaseManager {
       let currentMessages: ChatMessage[] = [systemPrompt, ...providerMessages]
 
       const repoRoot = this.projectRoot
-      const appSettings: any = this.settingsManager.getAppSettings()
+      const appSettings = this.settingsManager.getAppSettings()
       const webSearchApiKeys = appSettings?.webSearchApiKeys
       const dbConnectionString = appSettings?.database?.connectionString
 

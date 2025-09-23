@@ -3,14 +3,22 @@ import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { ChatTool, createToolManager, createTools, ToolManager } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import ProjectsManager from 'src/projects/ProjectsManager'
+import SettingsManager from 'src/settings/SettingsManager'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
+  private settingsManager: SettingsManager
   private toolManagers: Record<string, ToolManager> = {}
 
-  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    projectsManager: ProjectsManager,
+    settingsManager: SettingsManager,
+  ) {
     super(projectRoot, window)
     this.projectsManager = projectsManager
+    this.settingsManager = settingsManager
   }
 
   async init(): Promise<void> {
@@ -49,8 +57,10 @@ export default class FactoryToolsManager extends BaseManager {
     if (!projectRoot) {
       return
     }
-    const dbConnectionString = undefined //TODO:
-    const webSearchApiKeys = {} //TODO:
+    const appSettings = this.settingsManager.getAppSettings()
+    const webSearchApiKeys = appSettings?.webSearchApiKeys
+    const dbConnectionString = appSettings?.database?.connectionString
+
     const tools = createTools(projectId, projectRoot, webSearchApiKeys, dbConnectionString)
     const toolManager = createToolManager(tools)
 
