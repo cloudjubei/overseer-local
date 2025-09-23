@@ -50,15 +50,16 @@
     },
     {
       "id": "b793d0ac-a617-468c-89dd-9b5ce15401bf",
-      "status": "-",
+      "status": "+",
       "title": "Implement Search Functionality for Tools",
       "description": "Add a search input field to the @src/renderer/screens/ToolsView.tsx . Implement client-side filtering logic that updates the displayed list of tools in real-time as the user types into the search bar. The search should match against tool names and descriptions.",
       "context": [
         "src/renderer/screens/ToolsView.tsx"
       ],
       "createdAt": "2025-09-22T23:53:41.490Z",
-      "updatedAt": "2025-09-23T09:15:38.728Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:20:09.632Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:20:09.632Z"
     },
     {
       "id": "e7b7b5ee-ec41-4288-ae7d-201c33ff148e",
