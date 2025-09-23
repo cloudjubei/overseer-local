@@ -1,13 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
-import {
-  createTestTools,
-  TestTools,
-  TestResult,
-  TestResultStatus,
-  CoverageResult,
-} from 'thefactory-tools'
+import { createTestTools, TestTools, TestResult, CoverageResult } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 
 export default class FactoryTestsManager extends BaseManager {
@@ -40,12 +34,12 @@ export default class FactoryTestsManager extends BaseManager {
     return handlers
   }
 
-  async runTest(projectId: string, path: string): Promise<string | undefined> {
+  async runTest(projectId: string, path?: string): Promise<TestResult | undefined> {
     const tools = await this.__getTools(projectId)
     return tools?.runTest(path)
   }
 
-  async runTestCoverage(projectId: string, path: string): Promise<string | undefined> {
+  async runTestCoverage(projectId: string, path?: string): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
     return tools?.runTestCoverage(path)
   }
@@ -56,14 +50,7 @@ export default class FactoryTestsManager extends BaseManager {
       return
     }
     const tools = createTestTools(projectRoot)
-    // await tools.init()
     this.tools[projectId] = tools
-
-    // tools.subscribe(async (storyUpdate) => {
-    //   if (this.window) {
-    //     this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, storyUpdate)
-    //   }
-    // })
   }
   private async __getTools(projectId: string): Promise<TestTools | undefined> {
     if (!this.tools[projectId]) {
