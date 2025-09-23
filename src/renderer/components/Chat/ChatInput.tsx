@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
-import { useFiles, inferFileType } from '../../contexts/FilesContext'
-import FileDisplay from '../ui/FileDisplay'
+import { useFiles } from '../../contexts/FilesContext'
 import { RichText } from '../ui/RichText'
+import AttachmentList from './AttachmentList'
+import FilesSuggestionsMenu from './FilesSuggestionsMenu'
+import RefsSuggestionsMenu from './RefsSuggestionsMenu'
 
 interface ChatInputProps {
   onSend: (message: string, attachments: string[]) => void
@@ -18,7 +20,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const mirrorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { files, filesByPath, uploadFile } = useFiles()
+  const { files, uploadFile } = useFiles()
 
   const {
     isOpen: isAutocompleteOpen,
@@ -109,11 +111,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
         <div className="relative flex items-end gap-2">
           <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
             <div className="relative">
-              {/* Visual overlay that renders mention chips while preserving layout */}
-              <div
-                className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-words pointer-events-none text-[var(--text-primary)]"
-                aria-hidden="true"
-              >
+              <div className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-words pointer-events-none text-[var(--text-primary)]" aria-hidden="true">
                 {input ? (
                   <RichText text={input} variant="input" />
                 ) : (
@@ -128,61 +126,20 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 onInput={autoSizeTextarea}
                 onKeyDown={handleTextareaKeyDown}
                 className="w-full resize-none bg-transparent px-3 py-2 outline-none"
-                placeholder={'' /* placeholder handled by overlay */}
+                placeholder={''}
                 rows={1}
                 aria-label="Message input"
-                style={{
-                  maxHeight: 200,
-                  overflowY: 'auto',
-                  color: 'transparent',
-                  caretColor: 'var(--text-primary)',
-                }}
+                style={{ maxHeight: 200, overflowY: 'auto', color: 'transparent', caretColor: 'var(--text-primary)' }}
                 disabled={isThinking}
               />
             </div>
 
             <div className="px-3 py-1 border-t border-[var(--border-subtle)]">
-              {pendingAttachments.length > 0 && (
-                <div className="mb-1 flex flex-wrap gap-1">
-                  {pendingAttachments.map((path, idx) => {
-                    const meta = filesByPath[path]
-                    const name = meta?.name || path.split('/').pop() || path
-                    const type = meta?.type || inferFileType(path)
-                    const size = meta?.size ?? undefined
-                    const mtime = meta?.mtime ?? undefined
-                    const ctime = meta?.ctime ?? undefined
-                    return (
-                      <div key={`${idx}-${path}`} className="inline-flex items-center gap-1">
-                        <FileDisplay
-                          file={{
-                            name,
-                            absolutePath: path,
-                            relativePath: path,
-                            type,
-                            size,
-                            mtime,
-                            ctime,
-                          }}
-                          density="compact"
-                          interactive
-                          showPreviewOnHover
-                        />
-                        <button
-                          type="button"
-                          className="btn-secondary"
-                          aria-label={`Remove ${name}`}
-                          onClick={() =>
-                            setPendingAttachments((prev) => prev.filter((p) => p !== path))
-                          }
-                          disabled={isThinking}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+              <AttachmentList
+                attachments={pendingAttachments}
+                onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
+                disabled={isThinking}
+              />
               <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
                 <div className="flex items-center gap-2">
                   <button
@@ -201,87 +158,21 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                     style={{ display: 'none' }}
                     onChange={handleFileUpload}
                   />
-                  <span className="hidden sm:inline">
-                    Tip: Use @ for files • Use # for stories and features
-                  </span>
+                  <span className="hidden sm:inline">Tip: Use @ for files • Use # for stories and features</span>
                 </div>
                 <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
               </div>
             </div>
           </div>
 
-          <button
-            onClick={handleSend}
-            className="btn"
-            disabled={!canSend || isThinking}
-            aria-label="Send message"
-          >
-            Send
-          </button>
+          <button onClick={handleSend} className="btn" disabled={!canSend || isThinking} aria-label="Send message">Send</button>
 
           {isAutocompleteOpen && autocompletePosition && (
-            <div
-              className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
-              style={{
-                left: `${autocompletePosition.left}px`,
-                top: `${autocompletePosition.top}px`,
-                transform: 'translateY(-100%)',
-              }}
-              role="listbox"
-              aria-label="Files suggestions"
-            >
-              {matchingDocs.map((path, idx) => {
-                const meta = filesByPath[path]
-                const name = meta?.name || path.split('/').pop() || path
-                const type = meta?.type || inferFileType(path)
-                const size = meta?.size ?? undefined
-                const mtime = meta?.mtime ?? undefined
-                const ctime = meta?.ctime ?? undefined
-                return (
-                  <div key={idx} role="option" className="px-1 py-0.5">
-                    <FileDisplay
-                      file={{
-                        name,
-                        absolutePath: path,
-                        relativePath: path,
-                        type,
-                        size,
-                        mtime,
-                        ctime,
-                      }}
-                      density="compact"
-                      interactive
-                      showPreviewOnHover
-                      onClick={() => onAutocompleteSelect(path)}
-                    />
-                  </div>
-                )
-              })}
-            </div>
+            <FilesSuggestionsMenu matches={matchingDocs} position={autocompletePosition} onSelect={onAutocompleteSelect} />
           )}
 
           {isRefsOpen && refsPosition && (
-            <div
-              className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
-              style={{
-                left: `${refsPosition.left}px`,
-                top: `${refsPosition.top}px`,
-                transform: 'translateY(-100%)',
-              }}
-              role="listbox"
-              aria-label="References suggestions"
-            >
-              {matchingRefs.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]"
-                  role="option"
-                  onClick={() => onRefsSelect(item.ref)}
-                >
-                  #{item.display} - {item.title} ({item.type})
-                </div>
-              ))}
-            </div>
+            <RefsSuggestionsMenu matches={matchingRefs as any} position={refsPosition} onSelect={onRefsSelect} />
           )}
         </div>
       </div>
