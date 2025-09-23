@@ -1,5 +1,5 @@
 import { PricingState } from './pricingService'
-import { AgentRun, AgentRunHistory, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
+import { AgentRun, AgentRunHistory, AgentRunRatingPatch, AgentRunUpdate, ToolDefinition } from 'thefactory-tools'
 
 export type FactoryService = {
   subscribeRuns: (callback: (update: AgentRunUpdate) => Promise<void>) => () => void
@@ -13,6 +13,8 @@ export type FactoryService = {
 
   listPrices: () => Promise<PricingState>
   refreshPricing: (provider: string, url: string) => Promise<PricingState>
+
+  listTools: () => Promise<ToolDefinition[]>
 }
 
 export const factoryService: FactoryService = { ...window.factoryService }

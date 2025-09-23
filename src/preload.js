@@ -185,6 +185,8 @@ const FACTORY_API = {
   listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
   refreshPricing: (provider, url) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
+
+  listTools: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST),
 }
 
 const DB_API = {

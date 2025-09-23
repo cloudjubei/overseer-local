@@ -14,6 +14,7 @@ import {
   createAgentRunTools,
   AgentRunTools,
   AgentRun,
+  ToolDefinition,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
@@ -82,6 +83,7 @@ export default class FactoryToolsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START] = (params) => this.startRun(params)
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = ({ provider, url }) =>
       this.refreshPrices(provider, url)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST] = () => this.listTools()
 
     return handlers
   }
@@ -126,6 +128,10 @@ export default class FactoryToolsManager extends BaseManager {
   }
   async refreshPrices(provider?: string, url?: string): Promise<PricingState | undefined> {
     return this.pricingManager?.refresh(provider, url)
+  }
+
+  async listTools(): Promise<ToolDefinition[]> {
+    return this.agentRunTools?.listTools() || []
   }
 
   private _maskSecrets(obj: any): any {

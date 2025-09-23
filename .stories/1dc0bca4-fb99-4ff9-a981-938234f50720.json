@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "16b8588c-1eac-4907-8b22-739a61a9a84f",
-      "status": "-",
+      "status": "+",
       "title": "Expose Tool Definitions via IPC",
       "description": "In the main process, create a mechanism to get all tool definitions from `thefactory-tools`. This should include the tool's name, description, input schema (e.g., Zod or JSON schema), and its source file. Add a new IPC handler, `FACTORY_TOOLS_LIST`, in `FactoryToolsManager.ts` to expose this data to the renderer process.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.488Z",
-      "updatedAt": "2025-09-22T23:53:41.488Z"
+      "updatedAt": "2025-09-23T00:10:24.614Z",
+      "completedAt": "2025-09-23T00:10:24.614Z"
     },
     {
       "id": "e3870538-6350-4ba2-9c9d-3791a5e53506",
