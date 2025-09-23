@@ -518,7 +518,7 @@ export default function StoriesListView() {
                             <RichText text={t.description || ''} />
                           </div>
                         </div>
-                        <div className={`col col-actions ${storyRun ? 'is-always-visible' : ''}`}>
+                        <div className="col col-actions">
                           <button
                             type="button"
                             className="btn-secondary btn-icon"
@@ -531,14 +531,16 @@ export default function StoriesListView() {
                             <IconEdit className="h-[16px] w-[16px]" />
                           </button>
                           {storyRun ? (
-                            <AgentRunBullet
-                              key={storyRun.id}
-                              run={storyRun}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigateAgentRun(storyRun.id)
-                              }}
-                            />
+                            <div className="is-always-visible">
+                              <AgentRunBullet
+                                key={storyRun.id}
+                                run={storyRun}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigateAgentRun(storyRun.id)
+                                }}
+                              />
+                            </div>
                           ) : (
                             // Wrap RunAgentButton to stop propagation so we don't navigate to StoryDetails
                             <div
