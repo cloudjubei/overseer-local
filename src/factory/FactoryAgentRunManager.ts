@@ -6,21 +6,16 @@ import {
   PricingManager,
   AgentRunRatingPatch,
   AgentRunHistory,
-  WebSearchApiKeys,
-  GithubCredentials,
   RunOrchestrator,
-  AgentType,
-  LLMConfig,
   createAgentRunTools,
   AgentRunTools,
   AgentRun,
-  ToolDefinition,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
 import { PricingState } from 'thefactory-tools/dist/pricing'
 
-export default class FactoryToolsManager extends BaseManager {
+export default class FactoryAgentRunManager extends BaseManager {
   private pricingManager?: PricingManager
   private agentRunTools?: AgentRunTools
   private orchestrator?: RunOrchestrator
@@ -53,6 +48,8 @@ export default class FactoryToolsManager extends BaseManager {
       pricing: this.pricingManager,
     })
 
+    // this.tools = createTools(this.projectRoot)
+
     console.log(
       '[factory] Pricing manager initialized. Loaded',
       this.pricingManager?.listPrices()?.prices?.length || 0,
@@ -64,9 +61,10 @@ export default class FactoryToolsManager extends BaseManager {
   getHandlers(): Record<string, (args: any) => any> {
     const handlers: Record<string, (args: any) => any> = {}
 
-    handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = () => this.listPrices()
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL] = ({ runId, reason }) =>
       this.cancelRun(runId, reason)
+
+    handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = () => this.listPrices()
 
     return handlers
   }
@@ -81,10 +79,9 @@ export default class FactoryToolsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = ({ runId, rating }) =>
       this.rateRun(runId, rating)
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START] = (params) => this.startRun(params)
+
     handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = ({ provider, url }) =>
       this.refreshPrices(provider, url)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST] = () => this.listTools()
-    handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE] = ({ toolName, args }) => this.executeTool(toolName, args)
 
     return handlers
   }
@@ -129,36 +126,6 @@ export default class FactoryToolsManager extends BaseManager {
   }
   async refreshPrices(provider?: string, url?: string): Promise<PricingState | undefined> {
     return this.pricingManager?.refresh(provider, url)
-  }
-
-  async listTools(): Promise<ToolDefinition[]> {
-    return this.agentRunTools?.listTools() || []
-  }
-
-  async executeTool(toolName: string, args: any): Promise<any> {
-    if (!this.agentRunTools) {
-      throw new Error('AgentRunTools not initialized')
-    }
-
-    const tool = (await this.agentRunTools.listTools()).find(t => t.name === toolName)
-
-    if (!tool) {
-      throw new Error(`Tool "${toolName}" not found`)
-    }
-
-    try {
-      // NOTE: `executeTool` is not a method on agentRunTools, we need to call the tool's execute method directly
-      // This is a placeholder for the actual execution logic, which might need to be adjusted
-      // based on the actual structure of `thefactory-tools`
-      if (typeof tool.execute !== 'function') {
-        throw new Error(`Tool "${toolName}" is not executable.`)
-      }
-      const result = await tool.execute(args)
-      return result
-    } catch (error: any) {
-      console.error(`Error executing tool "${toolName}":`, error)
-      throw new Error(`Failed to execute tool "${toolName}": ${error.message}`)
-    }
   }
 
   private _maskSecrets(obj: any): any {

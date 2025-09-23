@@ -1,5 +1,6 @@
 import type { BrowserWindow } from 'electron'
-import FactoryToolsManager from './factory-tools/FactoryToolsManager'
+import FactoryAgentRunManager from './factory/FactoryAgentRunManager'
+import FactoryToolsManager from './factory/FactoryToolsManager'
 import FilesManager from './files/FilesManager'
 import ProjectsManager from './projects/ProjectsManager'
 import StoriesManager from './stories/StoriesManager'
@@ -13,7 +14,7 @@ import GitMonitorManager from './git-monitor/GitMonitorManager'
 import BaseManager from './BaseManager'
 
 export let databaseManager: DatabaseManager | undefined
-export let factoryToolsManager: FactoryToolsManager | undefined
+export let factoryAgentRunManager: FactoryAgentRunManager | undefined
 export let storiesManager: StoriesManager | undefined
 export let filesManager: FilesManager | undefined
 export let projectsManager: ProjectsManager | undefined
@@ -23,18 +24,19 @@ export let settingsManager: SettingsManager | undefined
 export let liveDataManager: LiveDataManager | undefined
 export let documentIngestionManager: DocumentIngestionManager | undefined
 export let gitMonitorManager: GitMonitorManager | undefined
+export let factoryToolsManager: FactoryToolsManager | undefined
 
 let managers: BaseManager[] = []
 
 export async function initManagers(projectRoot: string, mainWindow: BrowserWindow): Promise<void> {
   databaseManager = new DatabaseManager(projectRoot, mainWindow)
-  factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow, databaseManager)
+  factoryAgentRunManager = new FactoryAgentRunManager(projectRoot, mainWindow, databaseManager)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
   settingsManager = new SettingsManager(projectRoot, mainWindow)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager)
-  liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryToolsManager)
+  liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryAgentRunManager)
   chatsManager = new ChatsManager(
     projectRoot,
     mainWindow,
@@ -51,10 +53,11 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     filesManager,
   )
   gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
+  // factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow)
 
   managers = [
     databaseManager,
-    factoryToolsManager,
+    factoryAgentRunManager,
     projectsManager,
     storiesManager,
     filesManager,
@@ -64,6 +67,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     liveDataManager,
     documentIngestionManager,
     gitMonitorManager,
+    // factoryToolsManager,
   ]
 
   for (const manager of managers) {

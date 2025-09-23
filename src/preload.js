@@ -164,8 +164,7 @@ const LIVEDATA_API = {
   getData: (serviceId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, { serviceId }),
 }
 
-// Factory orchestrator API exposed to renderer
-const FACTORY_API = {
+const FACTORY_AGENT_RUN_API = {
   subscribeRuns: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
@@ -185,7 +184,8 @@ const FACTORY_API = {
   listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
   refreshPricing: (provider, url) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
-
+}
+const FACTORY_TOOLS_API = {
   listTools: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST),
 }
 
@@ -249,7 +249,8 @@ contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API)
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API)
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
-contextBridge.exposeInMainWorld('factoryService', FACTORY_API)
+contextBridge.exposeInMainWorld('factoryAgentRunService', FACTORY_AGENT_RUN_API)
+contextBridge.exposeInMainWorld('factoryToolsService', FACTORY_TOOLS_API)
 contextBridge.exposeInMainWorld('dbService', DB_API)
 contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
 contextBridge.exposeInMainWorld('gitMonitorService', GIT_MONITOR_API)
