@@ -1749,14 +1749,15 @@
     },
     {
       "id": "70889fe4-d1cd-4718-9cf1-f11739204e42",
-      "status": "-",
+      "status": "+",
       "title": "The Sidebar has grown - make the top with the title stay stick and only the rest scroll",
       "description": "@src/renderer/navigation/SidebarView.tsx",
       "context": [
         "src/renderer/navigation/SidebarView.tsx"
       ],
       "createdAt": "2025-09-23T09:56:28.943Z",
-      "updatedAt": "2025-09-23T09:56:28.943Z"
+      "updatedAt": "2025-09-23T10:39:42.169Z",
+      "completedAt": "2025-09-23T10:39:42.169Z"
     }
   ],
   "featureIdToDisplayIndex": {
