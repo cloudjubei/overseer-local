@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1750,7 +1750,7 @@
     },
     {
       "id": "995dbbc4-cf40-4749-9cd7-1721cae3e4b6",
-      "status": "-",
+      "status": "+",
       "title": "Sometimes when a running agent finishes it hangs",
       "description": "A 'finishFeature' tool call can be seen as received and the agent has finished (all the commits have gone through) but yet, in @src/renderer/screens/AgentsView.tsx there is a running agent showing. After restarting this app - the agent no longer shows as running. It seems there's an issue in @src/renderer/contexts/AgentsContext.tsx with how it stores finished agents?",
       "context": [
@@ -1758,7 +1758,8 @@
         "src/renderer/contexts/AgentsContext.tsx"
       ],
       "createdAt": "2025-09-23T14:46:35.238Z",
-      "updatedAt": "2025-09-23T14:46:35.238Z"
+      "updatedAt": "2025-09-23T14:49:31.093Z",
+      "completedAt": "2025-09-23T14:49:31.093Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1877,5 +1878,6 @@
     "995dbbc4-cf40-4749-9cd7-1721cae3e4b6": 113
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T14:46:45.341Z"
+  "updatedAt": "2025-09-23T14:46:45.341Z",
+  "completedAt": "2025-09-23T14:49:31.093Z"
 }
