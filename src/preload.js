@@ -190,10 +190,20 @@ const FACTORY_TOOLS_API = {
 }
 
 const FACTORY_TESTS_API = {
+  subscribe: (callback) => {
+    const listener = (_event, payload) => callback(payload)
+    ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, listener)
+  },
+  listTests: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_LIST, { projectId }),
   runTests: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN, { projectId, path }),
   runCoverage: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE, { projectId, path }),
+  getLastResult: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT, { projectId }),
+  getLastCoverage: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE, { projectId }),
 }
 
 const DB_API = {

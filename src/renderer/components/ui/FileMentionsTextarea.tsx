@@ -15,6 +15,8 @@ export type FileMentionsTextareaProps = {
   ariaLabel?: string
   onFileMentionSelected?: (path: string) => void
   onReferenceSelected?: (ref: string) => void
+  // Optional external ref to control focus/caret from parent
+  inputRef?: React.RefObject<HTMLTextAreaElement>
 }
 
 export default function FileMentionsTextarea({
@@ -29,9 +31,11 @@ export default function FileMentionsTextarea({
   ariaLabel,
   onFileMentionSelected,
   onReferenceSelected,
+  inputRef,
 }: FileMentionsTextareaProps) {
   const { files } = useFiles()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const innerRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = inputRef ?? innerRef
   const mirrorRef = useRef<HTMLDivElement>(null)
 
   const filesList = useMemo(() => files.map((f) => f.relativePath!), [files])

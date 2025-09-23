@@ -2,158 +2,55 @@ import React from 'react'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import { Button } from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
-import { factoryTestsService } from '../services/factoryTestsService'
 import TestResultsView from '../components/tests/TestResults'
-import { parseTestOutput, ParsedTestResults, ParsedFailure } from '../utils/testResults'
-import { Input } from '../components/ui/Input'
 import CoverageReport from '../components/tests/CoverageReport'
-import { parseCoverageOutput, ParsedCoverage } from '../utils/coverage'
-import { useActiveProject } from '../contexts/ProjectContext'
-import type { TestResult } from 'thefactory-tools'
+import { TestsProvider, useTests } from '../contexts/TestsContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 
-function mapTestResultToParsed(res: TestResult): ParsedTestResults {
-  // Build raw text for fallback viewing
-  const rawText = (() => {
-    const chunks: string[] = []
-    const anyRes: any = res as any
-    if (typeof anyRes.stdout === 'string' && anyRes.stdout.length) chunks.push(anyRes.stdout)
-    if (typeof anyRes.stderr === 'string' && anyRes.stderr.length) chunks.push(anyRes.stderr)
-    if (chunks.length) return chunks.join('\n')
-    try {
-      return JSON.stringify(res, null, 2)
-    } catch {
-      return String(res)
-    }
-  })()
-
-  // Determine ok status defensively
-  const anyRes: any = res as any
-  const status: string | undefined = typeof anyRes.status === 'string' ? anyRes.status : undefined
-  const ok: boolean =
-    typeof anyRes.ok === 'boolean'
-      ? anyRes.ok
-      : status
-        ? /^(ok|pass|passed|success)$/i.test(status)
-        : Array.isArray(anyRes.failures)
-          ? anyRes.failures.length === 0
-          : true
-
-  // Map failures if present
-  const failures: ParsedFailure[] = []
-  if (Array.isArray((anyRes as any).failures)) {
-    for (const f of (anyRes as any).failures) {
-      if (!f) continue
-      failures.push({
-        testName: (f as any).testName || (f as any).title || (f as any).name,
-        filePath: (f as any).filePath || (f as any).file || (f as any).path,
-        line: typeof (f as any).line === 'number' ? (f as any).line : null,
-        column: typeof (f as any).column === 'number' ? (f as any).column : null,
-        message:
-          (f as any).message ||
-          (Array.isArray((f as any).messages) ? (f as any).messages.join('\n') : undefined) ||
-          'Test failed',
-        stack: (f as any).stack,
-      })
-    }
-  }
-
-  // Map summary if available
-  const summarySrc: any = (anyRes.summary || anyRes.stats || anyRes.result || {}) as any
-  const summary = {
-    total:
-      typeof summarySrc.total === 'number'
-        ? summarySrc.total
-        : typeof summarySrc.numTotalTests === 'number'
-          ? summarySrc.numTotalTests
-          : undefined,
-    passed:
-      typeof summarySrc.passed === 'number'
-        ? summarySrc.passed
-        : typeof summarySrc.numPassedTests === 'number'
-          ? summarySrc.numPassedTests
-          : undefined,
-    failed:
-      typeof summarySrc.failed === 'number'
-        ? summarySrc.failed
-        : typeof summarySrc.numFailedTests === 'number'
-          ? summarySrc.numFailedTests
-          : undefined,
-    skipped:
-      typeof summarySrc.skipped === 'number'
-        ? summarySrc.skipped
-        : typeof summarySrc.numPendingTests === 'number'
-          ? summarySrc.numPendingTests
-          : undefined,
-    durationMs:
-      typeof summarySrc.durationMs === 'number'
-        ? summarySrc.durationMs
-        : typeof summarySrc.runtime === 'number'
-          ? summarySrc.runtime
-          : typeof summarySrc.time === 'number'
-            ? summarySrc.time
-            : undefined,
-  }
-
-  return {
-    ok,
-    rawText,
-    failures,
-    summary,
-  }
+function TimeAgo({ ts }: { ts: number }) {
+  const [now, setNow] = React.useState(Date.now())
+  React.useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30000)
+    return () => clearInterval(id)
+  }, [])
+  const diff = Math.max(0, now - ts)
+  const minutes = Math.floor(diff / 60000)
+  if (minutes <= 0) return <span>just now</span>
+  if (minutes === 1) return <span>1 minute ago</span>
+  if (minutes < 60) return <span>{minutes} minutes ago</span>
+  const hours = Math.floor(minutes / 60)
+  if (hours === 1) return <span>1 hour ago</span>
+  return <span>{hours} hours ago</span>
 }
 
-export default function TestsView() {
-  const { projectId } = useActiveProject()
-
+function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
 
-  // Tests state
-  const [testsPath, setTestsPath] = React.useState('')
-  const [isRunning, setIsRunning] = React.useState(false)
-  const [results, setResults] = React.useState<ParsedTestResults | null>(null)
-  const [error, setError] = React.useState<string | null>(null)
+  const [selectedTestScope, setSelectedTestScope] = React.useState<string>('.')
+  const [selectedCoverageScope, setSelectedCoverageScope] = React.useState<string>('.')
 
-  // Coverage state
-  const [coveragePath, setCoveragePath] = React.useState('')
-  const [isRunningCoverage, setIsRunningCoverage] = React.useState(false)
-  const [coverageError, setCoverageError] = React.useState<string | null>(null)
-  const [coverageParsed, setCoverageParsed] = React.useState<ParsedCoverage | null>(null)
+  const {
+    isRunningTests,
+    isRunningCoverage,
+    isLoadingCatalog,
+    results,
+    coverage,
+    testsError,
+    coverageError,
+    runTests,
+    runCoverage,
+    resultsInvalidated,
+    coverageInvalidated,
+    resultsAt,
+    coverageAt,
+    testsCatalog,
+    refreshTestsCatalog,
+  } = useTests()
 
-  const runTests = async () => {
-    setIsRunning(true)
-    setError(null)
-    setResults(null)
-    try {
-      const path = testsPath?.trim() || undefined
-      const res = await factoryTestsService.runTests(projectId, path)
-      const parsed = mapTestResultToParsed(res)
-      setResults(parsed)
-      if (!parsed.ok) {
-        // keep failures displayed; no explicit error unless missing output
-      }
-    } catch (e: any) {
-      setError(e?.message || String(e))
-    } finally {
-      setIsRunning(false)
-    }
-  }
-
-  const runCoverage = async () => {
-    setIsRunningCoverage(true)
-    setCoverageError(null)
-    setCoverageParsed(null)
-    try {
-      const path = coveragePath?.trim() || undefined
-      const res = await factoryTestsService.runCoverage(projectId, path)
-      // parseCoverageOutput can consume objects with various shapes
-      const parsed = parseCoverageOutput(res as any)
-      setCoverageParsed(parsed)
-    } catch (e: any) {
-      setCoverageError(e?.message || String(e))
-    } finally {
-      setIsRunningCoverage(false)
-    }
-  }
+  React.useEffect(() => {
+    // Ensure catalog is available on mount
+    refreshTestsCatalog()
+  }, [])
 
   return (
     <div className="flex-1 overflow-auto">
@@ -177,51 +74,100 @@ export default function TestsView() {
 
         {activeTab === 'results' && (
           <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <Input
-                  placeholder="Optional: Enter test path (e.g., src/components/MyComponent.test.ts)"
-                  value={testsPath}
-                  onChange={(e) => setTestsPath(e.target.value)}
-                />
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Select value={selectedTestScope} onValueChange={setSelectedTestScope}>
+                  <SelectTrigger aria-label="Select test scope" className="min-w-[260px]">
+                    <SelectValue placeholder="Select tests to run" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value=".">All tests</SelectItem>
+                    {testsCatalog.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isLoadingCatalog && <Spinner size={14} label="Loading tests..." />}
+                <Button size="sm" variant="secondary" onClick={refreshTestsCatalog}>
+                  Refresh
+                </Button>
               </div>
-              <Button onClick={runTests} loading={isRunning} variant="primary">
+              <div className="flex-1" />
+              <Button onClick={() => runTests(selectedTestScope)} loading={isRunningTests} variant="primary">
                 Run Tests
               </Button>
-              {isRunning ? <Spinner size={16} label="Running tests..." /> : null}
+              {isRunningTests ? <Spinner size={16} label="Running tests..." /> : null}
             </div>
 
-            {error ? (
+            {results && (
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  {resultsInvalidated ? (
+                    <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                      Results are outdated (files changed since last run)
+                    </span>
+                  ) : resultsAt ? (
+                    <span className="text-neutral-500">Last updated <TimeAgo ts={resultsAt} /></span>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {testsError ? (
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                {error}
+                {testsError}
               </div>
             ) : null}
 
-            {!isRunning && !error && results && <TestResultsView results={results} />}
+            {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
 
-            {!isRunning && !error && !results && (
-              <div className="text-sm text-neutral-500">
-                No test results yet. Click "Run Tests" to start.
-              </div>
+            {!isRunningTests && !testsError && !results && (
+              <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
             )}
           </div>
         )}
 
         {activeTab === 'coverage' && (
           <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <Input
-                  placeholder="Optional: Enter path (e.g., src/components/) to scope coverage"
-                  value={coveragePath}
-                  onChange={(e) => setCoveragePath(e.target.value)}
-                />
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Select value={selectedCoverageScope} onValueChange={setSelectedCoverageScope}>
+                  <SelectTrigger aria-label="Select coverage scope" className="min-w-[260px]">
+                    <SelectValue placeholder="Select coverage scope" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value=".">All files</SelectItem>
+                    {testsCatalog.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isLoadingCatalog && <Spinner size={14} label="Loading..." />}
               </div>
-              <Button onClick={runCoverage} loading={isRunningCoverage} variant="primary">
+              <div className="flex-1" />
+              <Button onClick={() => runCoverage(selectedCoverageScope)} loading={isRunningCoverage} variant="primary">
                 Run Coverage
               </Button>
               {isRunningCoverage ? <Spinner size={16} label="Running coverage..." /> : null}
             </div>
+
+            {coverage && (
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  {coverageInvalidated ? (
+                    <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                      Coverage is outdated (files changed since last run)
+                    </span>
+                  ) : coverageAt ? (
+                    <span className="text-neutral-500">Last updated <TimeAgo ts={coverageAt} /></span>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
             {coverageError ? (
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
@@ -229,21 +175,17 @@ export default function TestsView() {
               </div>
             ) : null}
 
-            {!isRunningCoverage && !coverageError && coverageParsed && (
-              <CoverageReport data={coverageParsed} />
+            {!isRunningCoverage && !coverageError && coverage && <CoverageReport data={coverage} />}
+
+            {!isRunningCoverage && !coverageError && !coverage && (
+              <div className="text-sm text-neutral-500">Click "Run Coverage" to start.</div>
             )}
 
-            {!isRunningCoverage && !coverageError && !coverageParsed && (
-              <div className="text-sm text-neutral-500">Enter a path and click "Run Coverage".</div>
-            )}
-
-            {!isRunningCoverage && !coverageError && coverageParsed && coverageParsed.rawText && (
+            {!isRunningCoverage && !coverageError && coverage && (coverage as any).rawText && (
               <details className="mt-2">
-                <summary className="text-xs text-neutral-500 cursor-pointer">
-                  View raw output
-                </summary>
+                <summary className="text-xs text-neutral-500 cursor-pointer">View raw output</summary>
                 <pre className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
-                  {coverageParsed.rawText}
+                  {(coverage as any).rawText}
                 </pre>
               </details>
             )}
@@ -251,5 +193,13 @@ export default function TestsView() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function TestsView() {
+  return (
+    <TestsProvider>
+      <TestsInner />
+    </TestsProvider>
   )
 }

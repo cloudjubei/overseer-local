@@ -1,6 +1,6 @@
 {
   "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
-  "status": "-",
+  "status": "+",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
   "features": [
@@ -81,26 +81,28 @@
     },
     {
       "id": "e67dc4d1-2b22-46bf-9e9e-98c2712af48a",
-      "status": "-",
+      "status": "+",
       "title": "TestsView shouldn't require the path to run all the tests",
       "description": "when passing in \".\" as the path - all tests will be ran.\nSame goes for the test coverage.\nThe user shouldn't be given the option to type in the test to run - this should be handled via nice UI.",
       "context": [],
       "createdAt": "2025-09-23T11:55:29.754Z",
-      "updatedAt": "2025-09-23T12:01:25.971Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T13:37:57.105Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T13:37:57.105Z"
     },
     {
       "id": "c13680c0-c41b-4119-81e8-957cabc388fa",
-      "status": "-",
+      "status": "+",
       "title": "TestCoverage shows untested files",
       "description": "For all badly tested or untested files there needs to be a button that will open up the Create New Feature form for the given project and for a predefined task id that needs to be created if it doesn't exist (that is titled 'TESTING' with the description 'Ongoing Testing improvements'). The feature form must be filled in with some standard Title and description, so the user should ideally just need to hit the \"Create Feature button\". The file to be tested must be correctly referenced in the description - i.e. \"@src/path/file.ts\" and it needs to be added into the context.\nThe Description field should be focused and the caret at the end so the user can add extra info if needed.",
       "context": [],
       "createdAt": "2025-09-23T12:05:34.305Z",
-      "updatedAt": "2025-09-23T12:05:34.305Z"
+      "updatedAt": "2025-09-23T13:54:28.118Z",
+      "completedAt": "2025-09-23T13:54:28.118Z"
     },
     {
       "id": "fb2c5983-344a-4467-91a5-d6c799a98325",
-      "status": "-",
+      "status": "+",
       "title": "Store information about tests ran and show it straight away when opening the view",
       "description": "When @src/renderer/screens/TestsView.tsx opens, the user should be shown all tests (available to be pulled from 'thefactory-tools' via @src/factory/FactoryTestsManager.ts ) . If some of the files have changed since when the result for that test was recorded - it is invalidated and shown.\nThe same idea should be done for test coverage.",
       "context": [
@@ -108,11 +110,12 @@
         "src/factory/FactoryTestsManager.ts"
       ],
       "createdAt": "2025-09-23T12:08:06.445Z",
-      "updatedAt": "2025-09-23T12:08:06.445Z"
+      "updatedAt": "2025-09-23T13:25:24.491Z",
+      "completedAt": "2025-09-23T13:25:24.491Z"
     },
     {
       "id": "bfdba512-14ae-4bae-b2dc-ff5c4b34c58e",
-      "status": "-",
+      "status": "+",
       "title": "TheFactoryTools was updated with new subscribe and list tests functionality",
       "description": "Update @src/factory/FactoryTestsManager.ts , @src/renderer/services/factoryTestsService.ts , @src/preload.js , @src/ipcHandlersKeys.js to include this new API.\nFollow the same exact pattern that @src/stories/StoriesManager.ts does with subscribe and list.",
       "context": [
@@ -123,11 +126,12 @@
         "src/stories/StoriesManager.ts"
       ],
       "createdAt": "2025-09-23T12:30:47.377Z",
-      "updatedAt": "2025-09-23T12:30:47.377Z"
+      "updatedAt": "2025-09-23T13:29:52.250Z",
+      "completedAt": "2025-09-23T13:29:52.250Z"
     },
     {
       "id": "6f87dd12-0f6a-43c9-9cae-3cc0a5a338f9",
-      "status": "-",
+      "status": "+",
       "title": "Abstract away all tests in a TestsContext",
       "description": "Just like there is @src/renderer/contexts/StoriesContext.tsx , we should have an equivalent for tests to make it easy to use them.\n@src/renderer/screens/TestsView.tsx needs to use it instead of directly using @src/renderer/services/factoryTestsService.ts",
       "context": [
@@ -136,7 +140,8 @@
         "src/renderer/services/factoryTestsService.ts"
       ],
       "createdAt": "2025-09-23T12:32:19.602Z",
-      "updatedAt": "2025-09-23T12:32:19.602Z"
+      "updatedAt": "2025-09-23T13:09:30.654Z",
+      "completedAt": "2025-09-23T13:09:30.654Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -154,5 +159,6 @@
     "c13680c0-c41b-4119-81e8-957cabc388fa": 12
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
-  "updatedAt": "2025-09-22T23:34:09.482Z"
+  "updatedAt": "2025-09-22T23:34:09.482Z",
+  "completedAt": "2025-09-23T13:54:28.118Z"
 }

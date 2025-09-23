@@ -22,7 +22,14 @@ export default function ModalHost() {
       content = <StoryEditView storyId={modal.storyId} onRequestClose={closeModal} />
       break
     case 'feature-create':
-      content = <FeatureCreateView storyId={modal.storyId} onRequestClose={closeModal} />
+      content = (
+        <FeatureCreateView
+          storyId={modal.storyId}
+          onRequestClose={closeModal}
+          initialValues={modal.initialValues}
+          focusDescription={modal.focusDescription}
+        />
+      )
       break
     case 'feature-edit':
       content = (
@@ -62,6 +69,5 @@ export default function ModalHost() {
 
   if (!content) return null
 
-  // Render modals above all app content to avoid stacking context issues
   return createPortal(<>{content}</>, document.body)
 }

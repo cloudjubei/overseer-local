@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { NavigationView } from '../types'
+import type { FeatureFormValues } from '../components/stories/FeatureForm'
 
 export type StoriesRoute =
   | { name: 'list' }
@@ -8,7 +9,12 @@ export type StoriesRoute =
 export type ModalRoute =
   | { type: 'story-create' }
   | { type: 'story-edit'; storyId: string }
-  | { type: 'feature-create'; storyId: string }
+  | {
+      type: 'feature-create'
+      storyId: string
+      initialValues?: Partial<FeatureFormValues>
+      focusDescription?: boolean
+    }
   | { type: 'feature-edit'; storyId: string; featureId: string }
   | { type: 'llm-config-add' }
   | { type: 'llm-config-edit'; id: string }

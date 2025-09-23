@@ -1,172 +1,107 @@
-export type CoverageFile = {
-  filePath: string
-  statementsPct: number
-  branchesPct: number
-  functionsPct: number
-  linesPct: number
-  uncoveredRanges?: { start: number; end?: number }[]
+// Coverage parsing utility that accepts multiple shapes
+// Primary support is for the run_test_coverage tool contract and generic objects from thefactory-tools
+
+export type ParsedCoverageFile = {
+  pct_statements: number
+  pct_branch: number | null
+  pct_functions: number | null
+  pct_lines: number
+  uncovered_lines: number[]
 }
 
 export type ParsedCoverage = {
-  files: CoverageFile[]
-  summary: {
-    fileCount: number
-    avgStatementsPct: number
-    avgBranchesPct: number
-    avgFunctionsPct: number
-    avgLinesPct: number
-  }
+  files: Record<string, ParsedCoverageFile>
   rawText?: string
-  raw?: any
+  summary?: {
+    pct_statements?: number
+    pct_branch?: number | null
+    pct_functions?: number | null
+    pct_lines?: number
+  }
 }
 
-function toNumberSafe(v: any): number | undefined {
-  if (v == null) return undefined
-  if (typeof v === 'number' && isFinite(v)) return v
-  if (typeof v === 'string') {
-    const t = v.trim().replace(/%$/, '')
-    const n = Number(t)
-    return isFinite(n) ? n : undefined
-  }
-  return undefined
+function toPct(n: any): number | null {
+  const v = typeof n === 'number' ? n : typeof n === 'string' ? parseFloat(n) : NaN
+  return Number.isFinite(v) ? v : null
 }
 
-function readPct(obj: any, key: string): number | undefined {
-  if (!obj || typeof obj !== 'object') return undefined
-  // Look for keys like '%statements', 'statementsPct', 'statements'
-  const percentKeys = [`%${key}`, `${key}Pct`, key]
-  for (const k of percentKeys) {
-    if (k in obj) {
-      const v = (obj as any)[k]
-      if (typeof v === 'object' && v && 'pct' in v) {
-        const n = toNumberSafe((v as any).pct)
-        if (typeof n === 'number') return Math.max(0, Math.min(100, n))
-      }
-      const n = toNumberSafe(v)
-      if (typeof n === 'number') return Math.max(0, Math.min(100, n))
-    }
-  }
-  // Istanbul summary style e.g. obj.statements.pct
-  if (obj[key] && typeof obj[key] === 'object' && 'pct' in obj[key]) {
-    const n = toNumberSafe(obj[key].pct)
-    if (typeof n === 'number') return Math.max(0, Math.min(100, n))
-  }
-  return undefined
-}
-
-function parseUncoveredRanges(input: any): { start: number; end?: number }[] | undefined {
-  if (!input) return undefined
-  const arr = Array.isArray(input) ? input : typeof input === 'string' ? input.split(/[,\s]+/) : []
-  const ranges: { start: number; end?: number }[] = []
-  for (const it of arr) {
-    if (it == null || it === '') continue
-    if (typeof it === 'number' && isFinite(it)) {
-      ranges.push({ start: Math.floor(it) })
-    } else if (typeof it === 'string') {
-      const s = it.trim()
-      if (!s) continue
-      const m = s.match(/^(\d+)(?:\s*-\s*(\d+))?$/)
-      if (m) {
-        const a = Number(m[1])
-        const b = m[2] ? Number(m[2]) : undefined
-        if (isFinite(a)) {
-          if (b != null && isFinite(b)) ranges.push({ start: Math.min(a, b), end: Math.max(a, b) })
-          else ranges.push({ start: a })
-        }
-      }
-    }
-  }
-  return ranges.length > 0 ? ranges : undefined
-}
-
-function pickUncovered(raw: any): any {
-  if (!raw || typeof raw !== 'object') return undefined
-  const keys = ['uncovered', 'uncoveredLines', 'uncoveredLineNumbers', 'uncovered_lines']
-  for (const k of keys) {
-    if (k in raw) return (raw as any)[k]
-  }
-  return undefined
+function toNum(n: any): number | null {
+  const v = typeof n === 'number' ? n : typeof n === 'string' ? parseFloat(n) : NaN
+  return Number.isFinite(v) ? v : null
 }
 
 export function parseCoverageOutput(raw: any): ParsedCoverage {
-  let json: any = raw
-  let rawText: string | undefined
+  // If input already resembles our normalized shape
+  if (raw && typeof raw === 'object' && raw.files && typeof raw.files === 'object') {
+    const out: ParsedCoverage = { files: {} }
+    for (const [file, data] of Object.entries<any>(raw.files)) {
+      out.files[file] = {
+        pct_statements: toPct((data as any).pct_statements) ?? 0,
+        pct_branch: toPct((data as any).pct_branch),
+        pct_functions: toPct((data as any).pct_functions),
+        pct_lines: toPct((data as any).pct_lines) ?? 0,
+        uncovered_lines: Array.isArray((data as any).uncovered_lines)
+          ? (data as any).uncovered_lines.filter((n: any) => typeof n === 'number')
+          : [],
+      }
+    }
+    // Try to compute a simple average summary
+    const filesArr = Object.values(out.files)
+    if (filesArr.length > 0) {
+      const avg = (getter: (f: ParsedCoverageFile) => number | null) => {
+        const vals = filesArr.map(getter).filter((v): v is number => typeof v === 'number')
+        if (!vals.length) return undefined
+        return vals.reduce((a, b) => a + b, 0) / vals.length
+      }
+      out.summary = {
+        pct_statements: avg((f) => f.pct_statements) ?? undefined,
+        pct_branch: avg((f) => f.pct_branch) ?? null,
+        pct_functions: avg((f) => f.pct_functions) ?? null,
+        pct_lines: avg((f) => f.pct_lines) ?? undefined,
+      }
+    }
+    return out
+  }
+
+  // If it's a string, attempt JSON parse first
   if (typeof raw === 'string') {
-    rawText = raw
     try {
-      json = JSON.parse(raw)
-    } catch {
-      // Not JSON; return minimal structure with raw text
-      return {
-        files: [],
-        summary: {
-          fileCount: 0,
-          avgStatementsPct: 0,
-          avgBranchesPct: 0,
-          avgFunctionsPct: 0,
-          avgLinesPct: 0,
-        },
-        rawText,
-      }
+      const parsed = JSON.parse(raw)
+      return parseCoverageOutput(parsed)
+    } catch (_) {
+      return { files: {}, rawText: raw }
     }
   }
 
-  const files: CoverageFile[] = []
-
-  const pushFile = (filePath: string, data: any) => {
-    const statements = readPct(data, 'statements') ?? readPct(data, 'statement') ?? 0
-    const branches = readPct(data, 'branches') ?? readPct(data, 'branch') ?? 0
-    const functions = readPct(data, 'functions') ?? readPct(data, 'function') ?? 0
-    const lines = readPct(data, 'lines') ?? readPct(data, 'line') ?? 0
-    const uncoveredRaw = pickUncovered(data)
-    const uncoveredRanges = parseUncoveredRanges(uncoveredRaw)
-
-    files.push({
-      filePath,
-      statementsPct: statements,
-      branchesPct: branches,
-      functionsPct: functions,
-      linesPct: lines,
-      uncoveredRanges,
-    })
-  }
-
-  if (Array.isArray(json)) {
-    for (const it of json) {
-      if (!it) continue
-      const path = it.file || it.filePath || it.path || it.name
-      if (typeof path === 'string') pushFile(path, it)
-    }
-  } else if (json && typeof json === 'object') {
-    // Could be { total, files: {...} } or just map of files
-    if (json.files && typeof json.files === 'object') {
-      const m = json.files
-      for (const k of Object.keys(m)) {
-        pushFile(k, m[k])
-      }
-    } else {
-      // treat as map of file -> stat, but skip known keys
-      const skip = new Set(['total', 'summary'])
-      for (const k of Object.keys(json)) {
-        if (skip.has(k)) continue
-        const v = (json as any)[k]
-        if (v && typeof v === 'object') pushFile(k, v)
+  // Generic object without files map, try to infer Istanbul-like summary
+  if (raw && typeof raw === 'object') {
+    const out: ParsedCoverage = { files: {}, rawText: undefined }
+    // Some tools might return an array of files with keys
+    if (Array.isArray((raw as any).files)) {
+      for (const item of (raw as any).files) {
+        const name = (item as any).path || (item as any).file || (item as any).name
+        if (!name) continue
+        out.files[name] = {
+          pct_statements: toPct((item as any).statements) ?? toPct((item as any).pct_statements) ?? 0,
+          pct_branch: toPct((item as any).branches) ?? toPct((item as any).pct_branch),
+          pct_functions: toPct((item as any).functions) ?? toPct((item as any).pct_functions),
+          pct_lines: toPct((item as any).lines) ?? toPct((item as any).pct_lines) ?? 0,
+          uncovered_lines: Array.isArray((item as any).uncovered_lines)
+            ? (item as any).uncovered_lines.filter((n: any) => typeof n === 'number')
+            : [],
+        }
       }
     }
+
+    try {
+      out.rawText = JSON.stringify(raw, null, 2)
+    } catch (_) {
+      // ignore
+    }
+
+    return out
   }
 
-  // Sort by worst lines coverage first
-  files.sort((a, b) => a.linesPct - b.linesPct)
-
-  const avg = (arr: number[]) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0)
-
-  const summary = {
-    fileCount: files.length,
-    avgStatementsPct: Number(avg(files.map((f) => f.statementsPct)).toFixed(1)),
-    avgBranchesPct: Number(avg(files.map((f) => f.branchesPct)).toFixed(1)),
-    avgFunctionsPct: Number(avg(files.map((f) => f.functionsPct)).toFixed(1)),
-    avgLinesPct: Number(avg(files.map((f) => f.linesPct)).toFixed(1)),
-  }
-
-  return { files, summary, rawText, raw: json }
+  // Fallback
+  return { files: {}, rawText: String(raw ?? '') }
 }
