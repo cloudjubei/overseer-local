@@ -218,7 +218,7 @@ export function parseTestOutput(raw: any): ParsedTestResults {
     failed = mFailed ? parseInt(mFailed[1], 10) : undefined
     skipped = mSkipped ? parseInt(mSkipped[1], 10) : undefined
     if (passed != null || failed != null || skipped != null) {
-      total = [passed, failed, skipped].reduce((a, b) => a + (b || 0), 0)
+      total = [passed, failed, skipped].reduce((a, b) => a! + (b ?? 0), 0)
     }
   }
 

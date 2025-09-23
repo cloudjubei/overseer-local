@@ -5,23 +5,14 @@ import Spinner from '../components/ui/Spinner'
 import TestResultsView from '../components/tests/TestResults'
 import CoverageReport from '../components/tests/CoverageReport'
 import { TestsProvider, useTests } from '../contexts/TestsContext'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-
-function TimeAgo({ ts }: { ts: number }) {
-  const [now, setNow] = React.useState(Date.now())
-  React.useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30000)
-    return () => clearInterval(id)
-  }, [])
-  const diff = Math.max(0, now - ts)
-  const minutes = Math.floor(diff / 60000)
-  if (minutes <= 0) return <span>just now</span>
-  if (minutes === 1) return <span>1 minute ago</span>
-  if (minutes < 60) return <span>{minutes} minutes ago</span>
-  const hours = Math.floor(minutes / 60)
-  if (hours === 1) return <span>1 hour ago</span>
-  return <span>{hours} hours ago</span>
-}
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
+import { TimeAgo } from '../components/agents/time'
 
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
@@ -95,7 +86,11 @@ function TestsInner() {
                 </Button>
               </div>
               <div className="flex-1" />
-              <Button onClick={() => runTests(selectedTestScope)} loading={isRunningTests} variant="primary">
+              <Button
+                onClick={() => runTests(selectedTestScope)}
+                loading={isRunningTests}
+                variant="primary"
+              >
                 Run Tests
               </Button>
               {isRunningTests ? <Spinner size={16} label="Running tests..." /> : null}
@@ -109,7 +104,9 @@ function TestsInner() {
                       Results are outdated (files changed since last run)
                     </span>
                   ) : resultsAt ? (
-                    <span className="text-neutral-500">Last updated <TimeAgo ts={resultsAt} /></span>
+                    <span className="text-neutral-500">
+                      Last updated <span>{TimeAgo({ ts: resultsAt })}</span>
+                    </span>
                   ) : null}
                 </div>
               </div>
@@ -149,7 +146,11 @@ function TestsInner() {
                 {isLoadingCatalog && <Spinner size={14} label="Loading..." />}
               </div>
               <div className="flex-1" />
-              <Button onClick={() => runCoverage(selectedCoverageScope)} loading={isRunningCoverage} variant="primary">
+              <Button
+                onClick={() => runCoverage(selectedCoverageScope)}
+                loading={isRunningCoverage}
+                variant="primary"
+              >
                 Run Coverage
               </Button>
               {isRunningCoverage ? <Spinner size={16} label="Running coverage..." /> : null}
@@ -163,7 +164,9 @@ function TestsInner() {
                       Coverage is outdated (files changed since last run)
                     </span>
                   ) : coverageAt ? (
-                    <span className="text-neutral-500">Last updated <TimeAgo ts={coverageAt} /></span>
+                    <span className="text-neutral-500">
+                      Last updated <TimeAgo ts={coverageAt} />
+                    </span>
                   ) : null}
                 </div>
               </div>
@@ -183,7 +186,9 @@ function TestsInner() {
 
             {!isRunningCoverage && !coverageError && coverage && (coverage as any).rawText && (
               <details className="mt-2">
-                <summary className="text-xs text-neutral-500 cursor-pointer">View raw output</summary>
+                <summary className="text-xs text-neutral-500 cursor-pointer">
+                  View raw output
+                </summary>
                 <pre className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
                   {(coverage as any).rawText}
                 </pre>

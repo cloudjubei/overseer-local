@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-09-16T14:11:57.324Z",
+  "updatedAt": "2025-09-23T14:13:33.191Z",
   "prices": [
     {
       "provider": "openai",
@@ -9512,6 +9512,132 @@
       "model": "ovhcloud/mamba-codestral-7B-v0.1",
       "inputPerMTokensUSD": 0.19,
       "outputPerMTokensUSD": 0.19,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "twelvelabs.marengo-embed-2-7-v1:0",
+      "inputPerMTokensUSD": 70,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "us.twelvelabs.marengo-embed-2-7-v1:0",
+      "inputPerMTokensUSD": 70,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "eu.twelvelabs.marengo-embed-2-7-v1:0",
+      "inputPerMTokensUSD": 70,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/x-ai/grok-4-fast:free",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/openai/gpt-oss-120b",
+      "inputPerMTokensUSD": 15000,
+      "outputPerMTokensUSD": 60000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/openai/gpt-oss-20b",
+      "inputPerMTokensUSD": 5000,
+      "outputPerMTokensUSD": 20000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/zai-org/GLM-4.5",
+      "inputPerMTokensUSD": 55000,
+      "outputPerMTokensUSD": 200000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "inputPerMTokensUSD": 10000,
+      "outputPerMTokensUSD": 10000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/Qwen/Qwen3-Coder-480B-A35B-Instruct",
+      "inputPerMTokensUSD": 100000,
+      "outputPerMTokensUSD": 150000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/Qwen/Qwen3-235B-A22B-Thinking-2507",
+      "inputPerMTokensUSD": 10000,
+      "outputPerMTokensUSD": 10000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/moonshotai/Kimi-K2-Instruct",
+      "inputPerMTokensUSD": 135000,
+      "outputPerMTokensUSD": 400000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/meta-llama/Llama-3.1-8B-Instruct",
+      "inputPerMTokensUSD": 22000,
+      "outputPerMTokensUSD": 22000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/deepseek-ai/DeepSeek-V3.1",
+      "inputPerMTokensUSD": 55000,
+      "outputPerMTokensUSD": 165000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/deepseek-ai/DeepSeek-R1-0528",
+      "inputPerMTokensUSD": 135000,
+      "outputPerMTokensUSD": 540000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/deepseek-ai/DeepSeek-V3-0324",
+      "inputPerMTokensUSD": 114000,
+      "outputPerMTokensUSD": 275000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/meta-llama/Llama-3.3-70B-Instruct",
+      "inputPerMTokensUSD": 71000,
+      "outputPerMTokensUSD": 71000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "inputPerMTokensUSD": 17000,
+      "outputPerMTokensUSD": 66000,
+      "currency": "USD"
+    },
+    {
+      "provider": "wandb",
+      "model": "wandb/microsoft/Phi-4-mini-instruct",
+      "inputPerMTokensUSD": 8000,
+      "outputPerMTokensUSD": 35000,
       "currency": "USD"
     }
   ]

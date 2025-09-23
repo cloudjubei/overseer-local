@@ -267,7 +267,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       setTestsError(null)
       setResults(null)
       try {
-        const res = await factoryTestsService.runTests(projectId, path?.trim() || undefined)
+        const res = await factoryTestsService.runTests(projectId, path?.trim())
         const parsed = mapTestResultToParsed(res)
         setResults(parsed)
         setResultsInvalidated(false)
@@ -288,7 +288,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       setCoverageError(null)
       setCoverage(null)
       try {
-        const res = await factoryTestsService.runCoverage(projectId, path?.trim() || undefined)
+        const res = await factoryTestsService.runCoverage(projectId, path?.trim())
         const parsed = parseCoverageOutput(res as any)
         setCoverage(parsed)
         setCoverageInvalidated(false)

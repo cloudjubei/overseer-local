@@ -5,30 +5,17 @@ import { createTestTools, TestTools, TestResult, CoverageResult } from 'thefacto
 import ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
 
-// A lightweight snapshot of project files to detect invalidation
-type FileSnapshot = Record<string, string>
-
-function toSnapshotKey(meta: any): string | null {
-  // Try several common keys for a relative path
-  const key = meta?.relPath || meta?.path || meta?.file || meta?.name || null
-  if (!key || typeof key !== 'string') return null
-  return key
+export type LastTestResult = {
+  result: TestResult
+  snapshot: FileSnapshot
+  at: number
+  invalidated: boolean
 }
-function toSnapshotVal(meta: any): string {
-  // Build a signature using common timestamp/size-like fields
-  const mtime =
-    meta?.mtimeMs ?? meta?.mtime ?? meta?.modifiedMs ?? meta?.modified ?? meta?.updatedAt ?? 0
-  const size = meta?.size ?? meta?.length ?? ''
-  const hash = meta?.hash ?? ''
-  return `${mtime}-${size}-${hash}`
-}
-
-function normalizeRunPath(path?: string): string | undefined {
-  // Treat '.', empty, or whitespace-only as "run all"
-  if (path == null) return undefined
-  const p = String(path).trim()
-  if (p === '' || p === '.' || p === './') return undefined
-  return p
+export type LastCoverageResult = {
+  result: CoverageResult
+  snapshot: FileSnapshot
+  at: number
+  invalidated: boolean
 }
 
 export default class FactoryTestsManager extends BaseManager {
@@ -36,14 +23,8 @@ export default class FactoryTestsManager extends BaseManager {
   private projectsManager: ProjectsManager
   private filesManager: FilesManager
 
-  private lastTestResults: Record<
-    string,
-    { result: TestResult; snapshot: FileSnapshot; at: number }
-  > = {}
-  private lastCoverageResults: Record<
-    string,
-    { result: CoverageResult; snapshot: FileSnapshot; at: number }
-  > = {}
+  private lastTestResults: Record<string, LastTestResult> = {}
+  private lastCoverageResults: Record<string, LastCoverageResult> = {}
 
   constructor(
     projectRoot: string,
@@ -70,57 +51,70 @@ export default class FactoryTestsManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_LIST] = async ({ projectId }) =>
       this.listTests(projectId)
-
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN] = async ({ projectId, path }) =>
       this.runTest(projectId, path)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE] = async ({ projectId, path }) =>
       this.runTestCoverage(projectId, path)
-
-    // New: fetch last cached results
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT] = async ({ projectId }) => {
-      const entry = this.lastTestResults[projectId]
-      if (!entry) return undefined
-      const current = await this.buildProjectSnapshot(projectId)
-      const invalidated = this.isSnapshotInvalidated(entry.snapshot, current)
-      return { result: entry.result, at: entry.at, invalidated }
-    }
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE] = async ({ projectId }) => {
-      const entry = this.lastCoverageResults[projectId]
-      if (!entry) return undefined
-      const current = await this.buildProjectSnapshot(projectId)
-      const invalidated = this.isSnapshotInvalidated(entry.snapshot, current)
-      return { result: entry.result, at: entry.at, invalidated }
-    }
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT] = async ({ projectId }) =>
+      this.getLastResult(projectId)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE] = async ({ projectId }) =>
+      this.getLastCoverage(projectId)
 
     return handlers
   }
 
-  async listTests(projectId: string): Promise<any[]> {
+  async listTests(projectId: string): Promise<string[]> {
     const tools = await this.__getTools(projectId)
-    // listTests added in thefactory-tools; optional chaining for safety
-    return (await tools?.listTests?.()) ?? []
+    return (await tools?.listTests()) ?? []
   }
 
-  async runTest(projectId: string, path?: string): Promise<TestResult | undefined> {
+  async runTest(projectId: string, path: string = '.'): Promise<TestResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const normalized = normalizeRunPath(path)
-    const res = await tools?.runTest(normalized)
+    const res = await tools?.runTest(path)
     if (res) {
       const snapshot = await this.buildProjectSnapshot(projectId)
-      this.lastTestResults[projectId] = { result: res, snapshot, at: Date.now() }
+      this.lastTestResults[projectId] = {
+        result: res,
+        snapshot,
+        at: Date.now(),
+        invalidated: false,
+      }
     }
     return res
   }
 
-  async runTestCoverage(projectId: string, path?: string): Promise<CoverageResult | undefined> {
+  async runTestCoverage(
+    projectId: string,
+    path: string = '.',
+  ): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const normalized = normalizeRunPath(path)
-    const res = await tools?.runTestCoverage(normalized)
+    const res = await tools?.runTestCoverage(path)
     if (res) {
       const snapshot = await this.buildProjectSnapshot(projectId)
-      this.lastCoverageResults[projectId] = { result: res, snapshot, at: Date.now() }
+      this.lastCoverageResults[projectId] = {
+        result: res,
+        snapshot,
+        at: Date.now(),
+        invalidated: false,
+      }
     }
     return res
+  }
+
+  async getLastResult(projectId: string) {
+    const entry = this.lastTestResults[projectId]
+    if (!entry) return undefined
+    const snapshot = await this.buildProjectSnapshot(projectId)
+    const invalidated = this.isSnapshotInvalidated(entry.snapshot, snapshot)
+    return { result: entry.result, snapshot, at: entry.at, invalidated }
+  }
+
+  async getLastCoverage(projectId: string) {
+    const entry = this.lastCoverageResults[projectId]
+    if (!entry) return undefined
+    const snapshot = await this.buildProjectSnapshot(projectId)
+    const invalidated = this.isSnapshotInvalidated(entry.snapshot, snapshot)
+    return { result: entry.result, snapshot, at: entry.at, invalidated }
   }
 
   private async buildProjectSnapshot(projectId: string): Promise<FileSnapshot> {
@@ -150,14 +144,12 @@ export default class FactoryTestsManager extends BaseManager {
       return
     }
     const tools = createTestTools(projectRoot)
-    // Initialize if available (pattern similar to Stories)
-    await (tools as any)?.init?.()
+    await tools.init()
     this.tools[projectId] = tools
 
-    // forward subscribe updates from test tools to renderer via IPC
-    ;(tools as any)?.subscribe?.((update: any) => {
+    tools.subscribe(async (testUpdate) => {
       if (this.window) {
-        this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, update)
+        this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, testUpdate)
       }
     })
   }
@@ -167,4 +159,21 @@ export default class FactoryTestsManager extends BaseManager {
     }
     return this.tools[projectId]
   }
+}
+
+type FileSnapshot = Record<string, string>
+
+function toSnapshotKey(meta: any): string | null {
+  // Try several common keys for a relative path
+  const key = meta?.relPath || meta?.path || meta?.file || meta?.name || null
+  if (!key || typeof key !== 'string') return null
+  return key
+}
+function toSnapshotVal(meta: any): string {
+  // Build a signature using common timestamp/size-like fields
+  const mtime =
+    meta?.mtimeMs ?? meta?.mtime ?? meta?.modifiedMs ?? meta?.modified ?? meta?.updatedAt ?? 0
+  const size = meta?.size ?? meta?.length ?? ''
+  const hash = meta?.hash ?? ''
+  return `${mtime}-${size}-${hash}`
 }
