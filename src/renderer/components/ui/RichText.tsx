@@ -61,7 +61,7 @@ export function RichText({ text }: { text: string | null | undefined }) {
       {segments.map((seg, idx) => {
         if (seg.type === 'text') return <React.Fragment key={idx}>{seg.value}</React.Fragment>
         if (seg.type === 'dep') {
-          return <DependencyBullet key={idx} dependency={seg.value} />
+          return <DependencyBullet key={idx} dependency={seg.value} interactive={false} />
         }
         // seg.type === 'file'
         const token = seg.value
