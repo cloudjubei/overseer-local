@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1724,7 +1724,7 @@
     },
     {
       "id": "b951665d-139c-4761-94f1-c259b36dab42",
-      "status": "-",
+      "status": "+",
       "title": "Improve the time display in ChatConversation to show a time display similar to AgentRows",
       "description": "In @src/renderer/components/agents/ChatConversation.tsx it always shows the time taken to respond in seconds - we want it to be more human friendly, so it should always show it in the h:mm:ss format, and now show h or mm if the time is small enough - it should be done similarly in @src/renderer/components/agents/AgentRunRow.tsx",
       "context": [
@@ -1732,9 +1732,10 @@
         "src/renderer/components/agents/AgentRunRow.tsx"
       ],
       "createdAt": "2025-09-23T09:53:32.603Z",
-      "updatedAt": "2025-09-23T12:25:57.305Z",
+      "updatedAt": "2025-09-23T12:27:19.728Z",
       "rejection": "Make sure the display also includes an appropriate unit:\n- 1:30:40h\n- 25:25min\n- 45s",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-09-23T12:27:19.728Z"
     },
     {
       "id": "70889fe4-d1cd-4718-9cf1-f11739204e42",
@@ -1864,5 +1865,6 @@
     "70889fe4-d1cd-4718-9cf1-f11739204e42": 112
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T10:59:02.263Z"
+  "updatedAt": "2025-09-23T10:59:02.263Z",
+  "completedAt": "2025-09-23T12:27:19.728Z"
 }
