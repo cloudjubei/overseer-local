@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ParsedCoverage } from '../../utils/coverage'
+import { formatUncoveredLines } from '../../utils/coverage'
 import { useNavigator } from '../../navigation/Navigator'
 import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
@@ -109,11 +110,11 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
     const storyId = await ensureTestingStory()
     if (!storyId) return
     const rel = normalizePath(file)
-    const lines = uncovered && uncovered.length ? uncovered.join(', ') : ''
+    const lines = formatUncoveredLines(uncovered)
     const title = `Add tests for ${rel}`
     const parts = [
       `Improve test coverage for @${rel}.`,
-      lines ? `Target uncovered lines: ${lines}.` : undefined,
+      lines && lines !== '—' ? `Target uncovered lines: ${lines}.` : undefined,
       '',
     ].filter(Boolean)
     const description = parts.join('\n')
@@ -188,8 +189,7 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
             ) : (
               rows.map((f, i) => {
                 const rel = normalizePath(f.file)
-                const uncovered = f.uncovered_lines?.slice(0, 25)
-                const uncoveredText = uncovered && uncovered.length ? uncovered.join(', ') : '—'
+                const uncoveredText = formatUncoveredLines(f.uncovered_lines)
                 const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
                 return (
                   <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">

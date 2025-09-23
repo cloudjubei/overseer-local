@@ -211,13 +211,14 @@
     },
     {
       "id": "2fac1501-456a-41bb-81a1-ca4c9b8c792b",
-      "status": "-",
+      "status": "+",
       "title": "When showing uncovered lines - bunch consecutive ones together",
       "description": "So:\n[1,2,3,4,5,8,9,10]\nbecomes:\n\"1-5,8-10\" when displaying",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-23T20:03:42.963Z",
-      "updatedAt": "2025-09-23T20:03:42.963Z"
+      "updatedAt": "2025-09-23T22:10:48.634Z",
+      "completedAt": "2025-09-23T22:10:48.634Z"
     }
   ],
   "featureIdToDisplayIndex": {
