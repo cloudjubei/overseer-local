@@ -18,6 +18,8 @@ import RichText from '../components/ui/RichText'
 import { inferFileType, useFiles } from '../contexts/FilesContext'
 import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
 import Spinner from '../components/ui/Spinner'
+import sendSoundFile from '../assets/sounds/send.mp3'
+import receiveSoundFile from '../assets/sounds/receive.mp3'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -38,6 +40,9 @@ export default function ChatView() {
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
+  const sendSound = useMemo(() => new Audio(sendSoundFile), [])
+  const receiveSound = useMemo(() => new Audio(receiveSoundFile), [])
+
   const [currentChat, setCurrentChat] = useState<Chat | undefined>()
   const [input, setInput] = useState<string>('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
@@ -46,6 +51,9 @@ export default function ChatView() {
   const mirrorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+
+  const prevMessagesCountRef = useRef(messages.length)
+  const chatChanged = useRef(false)
 
   const {
     isOpen: isAutocompleteOpen,
@@ -66,6 +74,25 @@ export default function ChatView() {
     position: refsPosition,
     onSelect: onRefsSelect,
   } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef })
+
+  useEffect(() => {
+    chatChanged.current = true
+  }, [currentChatId])
+
+  useEffect(() => {
+    if (chatChanged.current) {
+      chatChanged.current = false
+      prevMessagesCountRef.current = messages.length
+      return
+    }
+    if (
+      messages.length > prevMessagesCountRef.current &&
+      messages[messages.length - 1]?.role === 'assistant'
+    ) {
+      receiveSound.play()
+    }
+    prevMessagesCountRef.current = messages.length
+  }, [messages, receiveSound])
 
   useEffect(() => {
     const el = messageListRef.current
@@ -106,6 +133,7 @@ export default function ChatView() {
 
   const handleSend = async () => {
     if (!input.trim() || !activeConfig) return
+    sendSound.play()
     await sendMessage(input, activeConfig, pendingAttachments)
     setInput('')
     setPendingAttachments([])
