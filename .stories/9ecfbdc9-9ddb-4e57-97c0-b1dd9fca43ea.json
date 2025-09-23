@@ -1,6 +1,6 @@
 {
   "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
-  "status": "-",
+  "status": "+",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
   "features": [
@@ -145,7 +145,7 @@
     },
     {
       "id": "cc8704ca-976b-418e-8401-0446a1d0e773",
-      "status": "-",
+      "status": "+",
       "title": "The current TestsView was assuming single test calls - the 'thefactory-tools' api was updated",
       "description": "The @src/factory/FactoryToolsManager.ts and @src/renderer/services/factoryToolsService.ts were updated to include new apis for running tests and coverages in a directory - which is what we mainly need for @src/renderer/screens/TestsView.tsx . The whole view needs to be updated.",
       "context": [
@@ -154,7 +154,8 @@
         "src/renderer/screens/TestsView.tsx"
       ],
       "createdAt": "2025-09-23T16:13:08.228Z",
-      "updatedAt": "2025-09-23T16:13:08.228Z"
+      "updatedAt": "2025-09-23T16:17:28.743Z",
+      "completedAt": "2025-09-23T16:17:28.743Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -173,5 +174,6 @@
     "cc8704ca-976b-418e-8401-0446a1d0e773": 13
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
-  "updatedAt": "2025-09-22T23:34:09.482Z"
+  "updatedAt": "2025-09-22T23:34:09.482Z",
+  "completedAt": "2025-09-23T16:17:28.743Z"
 }

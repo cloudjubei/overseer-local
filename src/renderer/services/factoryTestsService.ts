@@ -1,9 +1,9 @@
 import type { LastCoverageResult, LastTestResult } from '../../factory/FactoryTestsManager'
-import type { TestResult, CoverageResult, TestUpdate } from 'thefactory-tools'
+import type { TestResult, CoverageResult, TestUpdate, FileMeta } from 'thefactory-tools'
 
 export type FactoryTestsService = {
   subscribe: (callback: TestUpdate) => () => void
-  listTests: (projectId: string) => Promise<string[]>
+  listTests: (projectId: string) => Promise<FileMeta[]>
   runTest: (projectId: string, path: string) => Promise<TestResult>
   runTests: (projectId: string, path?: string) => Promise<TestResult[]>
   runCoverage: (projectId: string, path: string) => Promise<CoverageResult>
