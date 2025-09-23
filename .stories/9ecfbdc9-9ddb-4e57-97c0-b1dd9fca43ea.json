@@ -109,6 +109,34 @@
       ],
       "createdAt": "2025-09-23T12:08:06.445Z",
       "updatedAt": "2025-09-23T12:08:06.445Z"
+    },
+    {
+      "id": "bfdba512-14ae-4bae-b2dc-ff5c4b34c58e",
+      "status": "-",
+      "title": "TheFactoryTools was updated with new subscribe and list tests functionality",
+      "description": "Update @src/factory/FactoryTestsManager.ts , @src/renderer/services/factoryTestsService.ts , @src/preload.js , @src/ipcHandlersKeys.js to include this new API.\nFollow the same exact pattern that @src/stories/StoriesManager.ts does with subscribe and list.",
+      "context": [
+        "src/renderer/services/factoryTestsService.ts",
+        "src/factory/FactoryTestsManager.ts",
+        "src/preload.js",
+        "src/ipcHandlersKeys.js",
+        "src/stories/StoriesManager.ts"
+      ],
+      "createdAt": "2025-09-23T12:30:47.377Z",
+      "updatedAt": "2025-09-23T12:30:47.377Z"
+    },
+    {
+      "id": "6f87dd12-0f6a-43c9-9cae-3cc0a5a338f9",
+      "status": "-",
+      "title": "Abstract away all tests in a TestsContext",
+      "description": "Just like there is @src/renderer/contexts/StoriesContext.tsx , we should have an equivalent for tests to make it easy to use them.\n@src/renderer/screens/TestsView.tsx needs to use it instead of directly using @src/renderer/services/factoryTestsService.ts",
+      "context": [
+        "src/renderer/contexts/StoriesContext.tsx",
+        "src/renderer/screens/TestsView.tsx",
+        "src/renderer/services/factoryTestsService.ts"
+      ],
+      "createdAt": "2025-09-23T12:32:19.602Z",
+      "updatedAt": "2025-09-23T12:32:19.602Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -119,9 +147,11 @@
     "a18529eb-24c1-4857-af45-d464ee37de06": 5,
     "f0866210-92d5-410e-9d81-c2059e24ee26": 6,
     "c28d53e1-1da4-439b-9a55-c2f74b119106": 7,
-    "fb2c5983-344a-4467-91a5-d6c799a98325": 8,
-    "e67dc4d1-2b22-46bf-9e9e-98c2712af48a": 9,
-    "c13680c0-c41b-4119-81e8-957cabc388fa": 10
+    "6f87dd12-0f6a-43c9-9cae-3cc0a5a338f9": 8,
+    "fb2c5983-344a-4467-91a5-d6c799a98325": 9,
+    "bfdba512-14ae-4bae-b2dc-ff5c4b34c58e": 10,
+    "e67dc4d1-2b22-46bf-9e9e-98c2712af48a": 11,
+    "c13680c0-c41b-4119-81e8-957cabc388fa": 12
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
   "updatedAt": "2025-09-22T23:34:09.482Z"
