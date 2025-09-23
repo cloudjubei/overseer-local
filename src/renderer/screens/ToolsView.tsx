@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { factoryAgentRunService } from '../services/factoryAgentRunService'
-import { ToolDefinition } from 'thefactory-tools'
+import { ChatTool } from 'thefactory-tools'
+import { factoryToolsService } from '../services/factoryToolsService'
 
 // Define a type for the grouped tools
 type GroupedTools = {
-  [source: string]: ToolDefinition[]
+  [source: string]: ChatTool[]
 }
 
 const ToolsScreen: React.FC = () => {
@@ -15,7 +15,7 @@ const ToolsScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
 
   // State for tool execution
-  const [selectedTool, setSelectedTool] = useState<ToolDefinition | null>(null)
+  const [selectedTool, setSelectedTool] = useState<ChatTool | null>(null)
   const [args, setArgs] = useState<{ [key: string]: any }>({})
   const [isExecuting, setIsExecuting] = useState<boolean>(false)
   const [executionResult, setExecutionResult] = useState<any | null>(null)
@@ -25,10 +25,10 @@ const ToolsScreen: React.FC = () => {
     const fetchTools = async () => {
       try {
         setLoading(true)
-        const tools = await factoryAgentRunService.listTools()
+        const tools = await factoryToolsService.listTools(projectId)
 
         const groups: GroupedTools = tools.reduce((acc, tool) => {
-          const source = tool.source || 'Unknown Source'
+          const source = tool.function.name
           if (!acc[source]) {
             acc[source] = []
           }
@@ -70,24 +70,12 @@ const ToolsScreen: React.FC = () => {
     setFilteredGroupedTools(filtered)
   }, [searchQuery, groupedTools])
 
-  const handleSelectTool = (tool: ToolDefinition) => {
+  const handleSelectTool = (tool: ChatTool) => {
     setSelectedTool(tool)
     setArgs({}) // Reset args when a new tool is selected
     setExecutionResult(null)
     setExecutionError(null)
-    // Pre-fill args with default values from Zod schema if they exist
-    if (tool.arguments && tool.arguments.shape) {
-      const initialArgs: { [key: string]: any } = {}
-      for (const key in tool.arguments.shape) {
-        const schema = tool.arguments.shape[key]
-        if (schema._def.defaultValue) {
-          initialArgs[key] = schema._def.defaultValue()
-        } else {
-          initialArgs[key] = '' // Default to empty string for inputs
-        }
-      }
-      setArgs(initialArgs)
-    }
+    //TODO:
   }
 
   const handleArgChange = (paramName: string, value: any) => {
@@ -102,7 +90,11 @@ const ToolsScreen: React.FC = () => {
     setExecutionError(null)
 
     try {
-      const result = await factoryAgentRunService.executeTool(selectedTool.name, args)
+      const result = await factoryToolsService.executeTool(
+        projectId,
+        selectedTool.function.name,
+        args,
+      )
       setExecutionResult(result)
     } catch (err: any) {
       console.error('Failed to execute tool:', err)
@@ -112,11 +104,8 @@ const ToolsScreen: React.FC = () => {
     }
   }
 
-  const renderArgInput = (key: string, schema: z.ZodTypeAny) => {
-    const description = schema.description || key
-    const typeName = schema._def.typeName
-
-    if (typeName === 'ZodBoolean') {
+  const renderArgInput = (key: string, type: string, description?: string) => {
+    if (type === 'boolean') {
       return (
         <div key={key} className="flex items-center">
           <input
@@ -141,7 +130,7 @@ const ToolsScreen: React.FC = () => {
         </label>
         <input
           id={key}
-          type={typeName === 'ZodNumber' ? 'number' : 'text'}
+          type={type === 'number' ? 'number' : 'text'}
           value={args[key] || ''}
           onChange={(e) => handleArgChange(key, e.target.value)}
           className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white"

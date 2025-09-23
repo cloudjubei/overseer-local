@@ -186,7 +186,9 @@ const FACTORY_AGENT_RUN_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 }
 const FACTORY_TOOLS_API = {
-  listTools: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST),
+  listTools: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST, { projectId }),
+  executeTool: (projectId, toolName, args) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE, { projectId, toolName, args }),
 }
 
 const FACTORY_TESTS_API = {
@@ -196,10 +198,14 @@ const FACTORY_TESTS_API = {
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, listener)
   },
   listTests: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_LIST, { projectId }),
+  runTest: (projectId, path) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TEST, { projectId, path }),
   runTests: (projectId, path) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN, { projectId, path }),
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId, path }),
   runCoverage: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE, { projectId, path }),
+  runCoverages: (projectId, path) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES, { projectId, path }),
   getLastResult: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT, { projectId }),
   getLastCoverage: (projectId) =>

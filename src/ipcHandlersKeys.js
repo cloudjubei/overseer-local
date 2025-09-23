@@ -90,8 +90,10 @@ const IPC_HANDLER_KEYS = {
   // Factory Tests
   FACTORY_TESTS_SUBSCRIBE: 'factory:tests:subscribe',
   FACTORY_TESTS_LIST: 'factory:tests:list',
-  FACTORY_TESTS_RUN: 'factory:tests:run',
+  FACTORY_TESTS_RUN_TEST: 'factory:tests:run-test',
+  FACTORY_TESTS_RUN_TESTS: 'factory:tests:run-tests',
   FACTORY_TESTS_RUN_COVERAGE: 'factory:tests:run-coverage',
+  FACTORY_TESTS_RUN_COVERAGES: 'factory:tests:run-coverages',
   FACTORY_TESTS_GET_LAST_RESULT: 'factory:tests:get-last-result',
   FACTORY_TESTS_GET_LAST_COVERAGE: 'factory:tests:get-last-coverage',
 

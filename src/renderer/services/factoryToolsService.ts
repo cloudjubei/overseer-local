@@ -1,8 +1,8 @@
-import { PricingState } from './pricingService'
-import { AgentRun, AgentRunHistory, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
+import { ChatTool } from 'thefactory-tools'
 
 export type FactoryToolsService = {
-  listTools: () => Promise<ToolDefinition[]>
+  listTools: (projectId: string) => Promise<ChatTool[]>
+  executeTool: (projectId: string, toolName: string, args: any) => Promise<any>
 }
 
 export const factoryToolsService: FactoryToolsService = { ...window.factoryToolsService }

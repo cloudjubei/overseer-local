@@ -1,12 +1,12 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
-import { createTestTools, TestTools, TestResult, CoverageResult } from 'thefactory-tools'
+import { createTestTools, TestTools, TestResult, CoverageResult, FileMeta } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
 
 export type LastTestResult = {
-  result: TestResult
+  result: TestResult[]
   snapshot: FileSnapshot
   at: number
   invalidated: boolean
@@ -51,10 +51,14 @@ export default class FactoryTestsManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_LIST] = async ({ projectId }) =>
       this.listTests(projectId)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN] = async ({ projectId, path }) =>
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TEST] = async ({ projectId, path }) =>
       this.runTest(projectId, path)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS] = async ({ projectId, path }) =>
+      this.runTests(projectId, path)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE] = async ({ projectId, path }) =>
       this.runTestCoverage(projectId, path)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES] = async ({ projectId, path }) =>
+      this.runTestsCoverage(projectId, path)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT] = async ({ projectId }) =>
       this.getLastResult(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE] = async ({ projectId }) =>
@@ -63,14 +67,29 @@ export default class FactoryTestsManager extends BaseManager {
     return handlers
   }
 
-  async listTests(projectId: string): Promise<string[]> {
+  async listTests(projectId: string): Promise<FileMeta[]> {
     const tools = await this.__getTools(projectId)
     return (await tools?.listTests()) ?? []
   }
 
-  async runTest(projectId: string, path: string = '.'): Promise<TestResult | undefined> {
+  async runTest(projectId: string, path: string): Promise<TestResult | undefined> {
     const tools = await this.__getTools(projectId)
     const res = await tools?.runTest(path)
+    if (res) {
+      //TODO: update
+      // const snapshot = await this.buildProjectSnapshot(projectId)
+      // this.lastTestResults[projectId] = {
+      //   result: res,
+      //   snapshot,
+      //   at: Date.now(),
+      //   invalidated: false,
+      // }
+    }
+    return res
+  }
+  async runTests(projectId: string, path: string = '.'): Promise<TestResult[]> {
+    const tools = await this.__getTools(projectId)
+    const res = await tools?.runTests(path)
     if (res) {
       const snapshot = await this.buildProjectSnapshot(projectId)
       this.lastTestResults[projectId] = {
@@ -80,15 +99,29 @@ export default class FactoryTestsManager extends BaseManager {
         invalidated: false,
       }
     }
-    return res
+    return res ?? []
   }
 
-  async runTestCoverage(
+  async runTestCoverage(projectId: string, path: string): Promise<CoverageResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    const res = await tools?.runTestCoverage(path)
+    if (res) {
+      const snapshot = await this.buildProjectSnapshot(projectId)
+      this.lastCoverageResults[projectId] = {
+        result: res,
+        snapshot,
+        at: Date.now(),
+        invalidated: false,
+      }
+    }
+    return res
+  }
+  async runTestsCoverage(
     projectId: string,
     path: string = '.',
   ): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTestCoverage(path)
+    const res = await tools?.runTestsCoverage(path)
     if (res) {
       const snapshot = await this.buildProjectSnapshot(projectId)
       this.lastCoverageResults[projectId] = {
