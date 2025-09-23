@@ -85,6 +85,7 @@ const IPC_HANDLER_KEYS = {
 
   // Factory tools
   FACTORY_TOOLS_LIST: 'factory:tools:list',
+  FACTORY_TOOLS_EXECUTE: 'factory:tools:execute',
 
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',
