@@ -162,7 +162,7 @@ export default function SidebarView({}: SidebarProps) {
   const { unreadCount } = useNotifications()
   const { activeProjectId, projects, setActiveProjectId } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
-  const { runsHistory } = useAgents()
+  const { runsActive } = useAgents()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -187,13 +187,12 @@ export default function SidebarView({}: SidebarProps) {
 
   const activeCountByProject = useMemo(() => {
     const map = new Map<string, number>()
-    for (const r of runsHistory) {
-      if (r.state !== 'running') continue
+    for (const r of runsActive) {
       const k = r.projectId
       map.set(k, (map.get(k) || 0) + 1)
     }
     return map
-  }, [runsHistory])
+  }, [runsActive])
 
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
