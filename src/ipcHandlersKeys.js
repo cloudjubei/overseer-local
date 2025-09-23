@@ -85,6 +85,7 @@ const IPC_HANDLER_KEYS = {
 
   // Tests
   TESTS_RUN: 'tests:run',
+  TESTS_RUN_COVERAGE: 'tests:run-coverage',
 
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',

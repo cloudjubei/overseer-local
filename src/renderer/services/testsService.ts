@@ -5,6 +5,7 @@ export type TestRunResult = {
 
 export type TestsService = {
   runTests: (options?: { path?: string }) => Promise<TestRunResult>
+  runCoverage: (options?: { path?: string }) => Promise<TestRunResult>
 }
 
 export const testsService: TestsService = { ...(window as any).testsService }

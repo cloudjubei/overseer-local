@@ -189,6 +189,7 @@ const FACTORY_API = {
 
 const TESTS_API = {
   runTests: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TESTS_RUN, { relPath: options?.path }),
+  runCoverage: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.TESTS_RUN_COVERAGE, { relPath: options?.path }),
 }
 
 const DB_API = {

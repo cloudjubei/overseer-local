@@ -1,7 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
-import path from 'node:path'
 import { createTestTools } from 'thefactory-tools/dist/tools/testTools'
 
 export default class TestsManager extends BaseManager {
@@ -18,6 +17,19 @@ export default class TestsManager extends BaseManager {
         // If relPath is not provided, run all tests by passing '.' (vitest will pick up all)
         const target = relPath && relPath.trim().length > 0 ? relPath : '.'
         const output = await tools.runTest(target)
+        return { ok: true, raw: output }
+      } catch (e: any) {
+        return { ok: false, raw: e?.message || String(e) }
+      }
+    }
+
+    handlers[IPC_HANDLER_KEYS.TESTS_RUN_COVERAGE] = async ({ relPath }: { relPath?: string }) => {
+      try {
+        const tools = createTestTools(this.projectRoot)
+        if (!relPath || relPath.trim().length === 0) {
+          return { ok: false, raw: 'Coverage requires a specific test file path (e.g., tests/foo.spec.ts)'}
+        }
+        const output = await tools.runTestCoverage(relPath)
         return { ok: true, raw: output }
       } catch (e: any) {
         return { ok: false, raw: e?.message || String(e) }

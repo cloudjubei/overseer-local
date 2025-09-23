@@ -46,12 +46,13 @@
     },
     {
       "id": "a18529eb-24c1-4857-af45-d464ee37de06",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Coverage Runner and Display Loading State",
       "description": "Add a 'Run Coverage' button to the 'Test Coverage' tab. When clicked, trigger the coverage run via `factory-tools` and display a loading indicator until the process is complete. The raw coverage data should be stored in the component's state.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.423Z",
-      "updatedAt": "2025-09-22T23:51:23.423Z"
+      "updatedAt": "2025-09-23T00:30:48.632Z",
+      "completedAt": "2025-09-23T00:30:48.632Z"
     },
     {
       "id": "f0866210-92d5-410e-9d81-c2059e24ee26",
