@@ -30,12 +30,14 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { activeProject } = useProjectContext()
   const { getCredentials } = useGitHubCredentials()
   const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])
-  const [runsActive, setRunsActive] = useState<AgentRunHistory[]>([])
+  const runsActive = useMemo(
+    () => runsHistory.filter((h) => h.state === 'running' || h.state === 'created'),
+    [runsHistory],
+  )
 
   const update = async () => {
     const history = await factoryAgentRunService.listRunHistory()
     setRunsHistory(history)
-    setRunsActive(history.filter((h) => h.state === 'running' || h.state === 'created'))
   }
 
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
@@ -45,28 +47,23 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])
-          setRunsActive((prev) => [...prev, run])
         }
         break
       case 'delete':
         setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
-        setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
         break
       case 'change':
         const run2 =
           agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
         if (run2) {
-          const prevRun = runsHistory.find((r) => r.id === agentRunUpdate.runId)
-          const isRunning = run2.state === 'running' || run2.state === 'created'
-          if ((prevRun?.state === 'running' || prevRun?.state === 'created') && !isRunning) {
-            fireCompletionNotification(run2)
-          }
-          setRunsHistory((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
-          if (isRunning) {
-            setRunsActive((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
-          } else {
-            setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
-          }
+          setRunsHistory((prev) => {
+            const prevRun = prev.find((r) => r.id === agentRunUpdate.runId)
+            const isRunning = run2.state === 'running' || run2.state === 'created'
+            if ((prevRun?.state === 'running' || prevRun?.state === 'created') && !isRunning) {
+              fireCompletionNotification(run2)
+            }
+            return prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2))
+          })
         }
         break
     }
