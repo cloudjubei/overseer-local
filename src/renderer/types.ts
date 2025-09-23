@@ -9,3 +9,4 @@ export type NavigationView =
   | 'LiveData'
   | 'ProjectTimeline'
   | 'Tools'
+  | 'Tests'

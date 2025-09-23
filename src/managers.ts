@@ -13,6 +13,7 @@ import DocumentIngestionManager from './document_ingestion/DocumentIngestionMana
 import GitMonitorManager from './git-monitor/GitMonitorManager'
 import BaseManager from './BaseManager'
 import FactoryLLMPricingManager from './factory/FactoryLLMPricingManager'
+import FactoryTestsManager from './factory/FactoryTestsManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryLLMPricingManager: FactoryLLMPricingManager | undefined
@@ -27,6 +28,7 @@ export let liveDataManager: LiveDataManager | undefined
 export let documentIngestionManager: DocumentIngestionManager | undefined
 export let gitMonitorManager: GitMonitorManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
+export let factoryTestsManager: FactoryTestsManager | undefined
 
 let managers: BaseManager[] = []
 
@@ -62,6 +64,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   )
   gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
   // factoryToolsManager = new FactoryToolsManager(projectRoot, mainWindow)
+  factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
 
   managers = [
     databaseManager,
@@ -77,6 +80,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     documentIngestionManager,
     gitMonitorManager,
     // factoryToolsManager,
+    factoryTestsManager,
   ]
 
   for (const manager of managers) {

@@ -189,6 +189,13 @@ const FACTORY_TOOLS_API = {
   listTools: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST),
 }
 
+const FACTORY_TESTS_API = {
+  runTests: (projectId, path) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN, { projectId, path }),
+  runCoverage: (projectId, path) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE, { projectId, path }),
+}
+
 const DB_API = {
   subscribe: (callback) => {
     const listener = (_event, payload) => callback(payload)
@@ -251,6 +258,7 @@ contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)
 contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
 contextBridge.exposeInMainWorld('factoryAgentRunService', FACTORY_AGENT_RUN_API)
 contextBridge.exposeInMainWorld('factoryToolsService', FACTORY_TOOLS_API)
+contextBridge.exposeInMainWorld('factoryTestsService', FACTORY_TESTS_API)
 contextBridge.exposeInMainWorld('dbService', DB_API)
 contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
 contextBridge.exposeInMainWorld('gitMonitorService', GIT_MONITOR_API)

@@ -87,6 +87,10 @@ const IPC_HANDLER_KEYS = {
   FACTORY_TOOLS_LIST: 'factory:tools:list',
   FACTORY_TOOLS_EXECUTE: 'factory:tools:execute',
 
+  // Factory Tests
+  FACTORY_TESTS_RUN: 'factory:tests:run',
+  FACTORY_TESTS_RUN_COVERAGE: 'factorytests:run-coverage',
+
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',
   DB_CONNECT: 'db:connect',

@@ -6,57 +6,77 @@
   "features": [
     {
       "id": "e92d8ada-b10d-4a75-bbbb-e8ba9907c7d1",
-      "status": "-",
+      "status": "+",
       "title": "Create 'Tests' Screen and Add Sidebar Navigation",
       "description": "Create a new screen component for 'Tests'. Add a new navigation entry in the sidebar, including a new icon, to route to this screen. The initial screen should have a basic layout with a title.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.418Z",
-      "updatedAt": "2025-09-22T23:51:23.418Z"
+      "updatedAt": "2025-09-23T00:15:26.345Z",
+      "completedAt": "2025-09-23T00:15:26.345Z"
     },
     {
       "id": "d05e25fe-33f1-466a-9237-5abbe3ea43ee",
-      "status": "-",
+      "status": "+",
       "title": "Implement Tabbed View for Test Results and Coverage",
       "description": "On the 'Tests' screen, implement a tabbed interface with two tabs: 'Test Results' and 'Test Coverage'. The content for each tab will be implemented in subsequent features.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.420Z",
-      "updatedAt": "2025-09-22T23:51:23.420Z"
+      "updatedAt": "2025-09-23T00:16:29.818Z",
+      "completedAt": "2025-09-23T00:16:29.818Z"
     },
     {
       "id": "72ab35c0-0d17-4aef-adec-88225d64680d",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Test Runner and Display Loading State",
       "description": "Integrate the `factory-tools` test runner. Add a 'Run Tests' button to the 'Test Results' tab. When clicked, trigger the test run and display a loading indicator while the tests are in progress. The raw results should be stored in the component's state.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.421Z",
-      "updatedAt": "2025-09-22T23:51:23.421Z"
+      "updatedAt": "2025-09-23T00:21:57.247Z",
+      "completedAt": "2025-09-23T00:21:57.247Z"
     },
     {
       "id": "7b0d3b50-e90d-4273-a1f1-0927f0f893ff",
-      "status": "-",
+      "status": "+",
       "title": "Display Test Results",
       "description": "Parse the test results from the `factory-tools` runner and display them in the 'Test Results' tab. Special attention should be given to formatting failures, showing the failed test, the error message, and a relevant code snippet.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.422Z",
-      "updatedAt": "2025-09-22T23:51:23.422Z"
+      "updatedAt": "2025-09-23T00:26:03.680Z",
+      "completedAt": "2025-09-23T00:26:03.680Z"
     },
     {
       "id": "a18529eb-24c1-4857-af45-d464ee37de06",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Coverage Runner and Display Loading State",
       "description": "Add a 'Run Coverage' button to the 'Test Coverage' tab. When clicked, trigger the coverage run via `factory-tools` and display a loading indicator until the process is complete. The raw coverage data should be stored in the component's state.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.423Z",
-      "updatedAt": "2025-09-22T23:51:23.423Z"
+      "updatedAt": "2025-09-23T00:30:48.632Z",
+      "completedAt": "2025-09-23T00:30:48.632Z"
     },
     {
       "id": "f0866210-92d5-410e-9d81-c2059e24ee26",
-      "status": "-",
+      "status": "+",
       "title": "Display Coverage Report",
       "description": "Parse the coverage data from the `factory-tools` runner and display it in a clear, user-friendly format within the 'Test Coverage' tab. The report should be easy to read and analyze.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.424Z",
-      "updatedAt": "2025-09-22T23:51:23.424Z"
+      "updatedAt": "2025-09-23T00:34:29.364Z",
+      "completedAt": "2025-09-23T00:34:29.364Z"
+    },
+    {
+      "id": "c28d53e1-1da4-439b-9a55-c2f74b119106",
+      "status": "-",
+      "title": "FactoryTools updated",
+      "description": "@src/factory/FactoryTestsManager.ts  needs to update as 'factory-tools' schemas for tests have been updated.\nThe changes need to propagate to @src/renderer/screens/TestsView.tsx , via @src/renderer/services/factoryTestsService.ts , so that all the tests and test coverage displays correctly",
+      "context": [
+        "src/factory/FactoryTestsManager.ts",
+        "src/renderer/screens/TestsView.tsx",
+        "src/renderer/services/factoryTestsService.ts"
+      ],
+      "createdAt": "2025-09-23T09:06:35.698Z",
+      "updatedAt": "2025-09-23T09:17:38.766Z",
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -65,7 +85,8 @@
     "72ab35c0-0d17-4aef-adec-88225d64680d": 3,
     "7b0d3b50-e90d-4273-a1f1-0927f0f893ff": 4,
     "a18529eb-24c1-4857-af45-d464ee37de06": 5,
-    "f0866210-92d5-410e-9d81-c2059e24ee26": 6
+    "f0866210-92d5-410e-9d81-c2059e24ee26": 6,
+    "c28d53e1-1da4-439b-9a55-c2f74b119106": 7
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
   "updatedAt": "2025-09-22T23:34:09.482Z"
