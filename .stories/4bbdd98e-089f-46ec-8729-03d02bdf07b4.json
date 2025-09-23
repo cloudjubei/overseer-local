@@ -71,15 +71,16 @@
     },
     {
       "id": "b1cddab1-8fa2-43a4-a20e-98d10ca1d771",
-      "status": "-",
+      "status": "+",
       "title": "Implement Sound Notifications for Chat Messages",
       "description": "In @src/renderer/screens/ChatView.tsx  add audio cues for chat events. A sound should be played when the user sends a message, and a different sound should be played when a new message is received from the agent. This involves adding sound files and triggering them from the UI.\nAdd the two new sounds under `assets` and import them.\nFind appropriate sounds online and place them here.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-22T23:55:32.078Z",
-      "updatedAt": "2025-09-23T10:56:55.692Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T11:09:27.101Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T11:09:27.101Z"
     },
     {
       "id": "09d03ceb-884a-453b-bb21-3c2beea95527",

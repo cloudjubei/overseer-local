@@ -20,6 +20,7 @@ import { ChatInput } from '../components/Chat'
 import { Chat, ChatMessage } from 'src/chat/ChatsManager'
 import TypewriterText from '../components/ui/TypewriterText'
 import JsonView from '../components/ui/JsonView'
+import { playSendSound, playReceiveSound, tryResumeAudioContext } from '../../../assets/sounds'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -179,9 +180,6 @@ export default function ChatView() {
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
-  const sendSound = useMemo(() => new Audio(sendSoundFile), [])
-  const receiveSound = useMemo(() => new Audio(receiveSoundFile), [])
-
   const [currentChat, setCurrentChat] = useState<Chat | undefined>()
   const messageListRef = useRef<HTMLDivElement>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -219,10 +217,10 @@ export default function ChatView() {
       messages.length > prevMessagesCountRef.current &&
       messages[messages.length - 1]?.role === 'assistant'
     ) {
-      receiveSound.play()
+      playReceiveSound()
     }
     prevMessagesCountRef.current = messages.length
-  }, [messages, receiveSound])
+  }, [messages])
 
   // Decide when to animate the latest assistant message
   useEffect(() => {
@@ -361,7 +359,8 @@ export default function ChatView() {
 
   const handleSend = async (message: string, attachments: string[]) => {
     if (!activeConfig) return
-    sendSound.play()
+    tryResumeAudioContext()
+    playSendSound()
     await sendMessage(message, activeConfig, attachments)
   }
 
