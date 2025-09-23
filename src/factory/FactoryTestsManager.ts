@@ -1,7 +1,13 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
-import { createTestTools, TestTools } from 'thefactory-tools'
+import {
+  createTestTools,
+  TestTools,
+  TestResult,
+  TestResultStatus,
+  CoverageResult,
+} from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 
 export default class FactoryTestsManager extends BaseManager {
