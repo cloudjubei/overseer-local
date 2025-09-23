@@ -14,15 +14,17 @@ const UUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
 
 // Combined tokenizer: captures @file mentions and #dependency tokens while preserving text
 // Include the raw matched token (with its leading symbol) so input-mode can render width-preserving content.
-function tokenize(input: string): Array<
-  { type: 'text'; value: string } |
-  { type: 'file'; value: string; raw: string } |
-  { type: 'dep'; value: string; raw: string }
+function tokenize(
+  input: string,
+): Array<
+  | { type: 'text'; value: string }
+  | { type: 'file'; value: string; raw: string }
+  | { type: 'dep'; value: string; raw: string }
 > {
   const parts: Array<
-    { type: 'text'; value: string } |
-    { type: 'file'; value: string; raw: string } |
-    { type: 'dep'; value: string; raw: string }
+    | { type: 'text'; value: string }
+    | { type: 'file'; value: string; raw: string }
+    | { type: 'dep'; value: string; raw: string }
   > = []
   if (!input) return [{ type: 'text', value: '' }]
 
@@ -62,7 +64,13 @@ function tokenize(input: string): Array<
   return parts
 }
 
-export function RichText({ text, variant = 'display' }: { text: string | null | undefined; variant?: 'display' | 'input' }) {
+export function RichText({
+  text,
+  variant = 'display',
+}: {
+  text: string | null | undefined
+  variant?: 'display' | 'input'
+}) {
   const { filesByPath } = useFiles()
   const segments = React.useMemo(() => tokenize(text || ''), [text])
 

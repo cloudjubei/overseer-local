@@ -95,7 +95,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
       isConfigured
         ? 'Type your message…'
         : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.',
-    [isConfigured]
+    [isConfigured],
   )
 
   return (
@@ -131,7 +131,12 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 placeholder={'' /* placeholder handled by overlay */}
                 rows={1}
                 aria-label="Message input"
-                style={{ maxHeight: 200, overflowY: 'auto', color: 'transparent', caretColor: 'var(--text-primary)' }}
+                style={{
+                  maxHeight: 200,
+                  overflowY: 'auto',
+                  color: 'transparent',
+                  caretColor: 'var(--text-primary)',
+                }}
                 disabled={isThinking}
               />
             </div>

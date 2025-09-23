@@ -16,7 +16,8 @@
 
 /* Generic chat bubble transition (used for user pop-in) */
 .chat-bubble {
-  transition: opacity var(--chat-pop-duration) var(--chat-pop-ease),
+  transition:
+    opacity var(--chat-pop-duration) var(--chat-pop-ease),
     transform var(--chat-pop-duration) var(--chat-pop-ease);
   transform-origin: 50% 100%;
 }

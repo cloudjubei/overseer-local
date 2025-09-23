@@ -38,7 +38,9 @@ function parseAssistant(content: string): { thoughts?: string; tool_calls?: any[
 }
 
 // Attempt to parse tool results (array of { name, result, durationMs? })
-function parseToolResultsObjects(text?: string): Array<{ name: string; result: any; durationMs?: number }> {
+function parseToolResultsObjects(
+  text?: string,
+): Array<{ name: string; result: any; durationMs?: number }> {
   const trimmed = (text || '').trim()
   if (!trimmed) return []
   try {
@@ -87,7 +89,9 @@ function Collapsible({
         <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
-        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>{children}</div>
+        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>
+          {children}
+        </div>
       ) : null}
     </div>
   )
@@ -106,8 +110,13 @@ function ToolCallCard({
   result?: any
   durationMs?: number
 }) {
-  const isHeavy = toolName === 'read_files' || toolName === 'write_file' || isLargeJson(args) || isLargeJson(result)
-  const durationText = typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
+  const isHeavy =
+    toolName === 'read_files' ||
+    toolName === 'write_file' ||
+    isLargeJson(args) ||
+    isLargeJson(result)
+  const durationText =
+    typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
   return (
     <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--surface-base)]">
       <div className="px-3 py-2 flex items-start justify-between gap-3">
