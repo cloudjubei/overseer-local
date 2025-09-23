@@ -1722,7 +1722,7 @@
     },
     {
       "id": "a571d64e-213b-4f0e-b641-51678b5c26b5",
-      "status": "-",
+      "status": "+",
       "title": "when clicking Start Run on a Story row in StoriesListView - don't go to StoryDetailsView",
       "description": "Currently when clicking start run in @src/renderer/stories/StoriesListView.tsx it will go to the @src/renderer/stories/StoryDetailsView.tsx screen. Clearly the click is somehow propagating - it shouldn't.",
       "context": [
@@ -1730,7 +1730,8 @@
         "src/renderer/stories/StoryDetailsView.tsx"
       ],
       "createdAt": "2025-09-23T00:11:02.070Z",
-      "updatedAt": "2025-09-23T00:11:02.070Z"
+      "updatedAt": "2025-09-23T00:29:20.602Z",
+      "completedAt": "2025-09-23T00:29:20.602Z"
     }
   ],
   "featureIdToDisplayIndex": {
