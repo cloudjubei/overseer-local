@@ -6,15 +6,16 @@
   "features": [
     {
       "id": "b6cdf920-004a-4ff2-8a9f-8bc56c1047f7",
-      "status": "-",
+      "status": "+",
       "title": "Refactor Chat Window to a Fixed-Size Layout",
       "description": "Modify the main chat window component @src/renderer/screens/ChatView.tsx   to have a constant height, removing the responsive `vh` units. Ensure the main message list scrolls vertically. Individual messages that are too long should wrap, not scroll horizontally, to maintain readability.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-22T23:55:31.958Z",
-      "updatedAt": "2025-09-23T09:26:52.611Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T09:43:25.305Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T09:43:25.305Z"
     },
     {
       "id": "57606b53-c938-4b37-8478-46ef4e081d8a",

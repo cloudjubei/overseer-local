@@ -159,7 +159,8 @@ export default function ChatView() {
       }
       emptyMessage="No chats yet"
     >
-      <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
+      {/* Fixed-height chat container to avoid responsive vh; list scrolls vertically */}
+      <section className="flex-1 flex flex-col w-full h-[720px] bg-[var(--surface-base)] overflow-hidden">
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
@@ -208,7 +209,7 @@ export default function ChatView() {
           </div>
         )}
 
-        <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
+        <div ref={messageListRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
           {enhancedMessages.length === 0 && !isThinking ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
