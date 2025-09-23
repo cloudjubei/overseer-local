@@ -8,9 +8,13 @@ import { Status } from 'thefactory-tools'
 export default function FeatureCreateView({
   storyId,
   onRequestClose,
+  initialValues,
+  focusDescription = false,
 }: {
   storyId: string
   onRequestClose?: () => void
+  initialValues?: Partial<FeatureFormValues>
+  focusDescription?: boolean
 }) {
   const { toast } = useToast()
   const [showAlert, setShowAlert] = useState(false)
@@ -107,6 +111,8 @@ export default function FeatureCreateView({
           hideActions
           formId={formId}
           onDirtyChange={setHasChanges}
+          initialValues={initialValues}
+          focusDescription={focusDescription}
         />
       </Modal>
       <AlertDialog

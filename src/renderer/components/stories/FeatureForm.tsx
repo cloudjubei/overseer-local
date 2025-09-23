@@ -35,6 +35,8 @@ type Props = {
   // Optional id to bind external submit buttons using the `form` attribute
   formId?: string
   onDirtyChange?: (dirty: boolean) => void
+  // If true, focus the Description textarea and place caret at the end on mount
+  focusDescription?: boolean
 }
 
 export default function FeatureForm({
@@ -49,6 +51,7 @@ export default function FeatureForm({
   hideActions = false,
   formId,
   onDirtyChange,
+  focusDescription = false,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -64,6 +67,7 @@ export default function FeatureForm({
 
   const localTitleRef = useRef<HTMLInputElement>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const isCreate = !(featureId !== null && featureId !== undefined)
 
   // Baseline snapshot for dirty tracking
@@ -87,11 +91,24 @@ export default function FeatureForm({
   }
 
   useEffect(() => {
+    // Focus logic: If requested, focus description and place caret at end; otherwise focus title
+    if (focusDescription && descriptionRef.current) {
+      const el = descriptionRef.current
+      el.focus()
+      // Move caret to end
+      const len = el.value?.length ?? 0
+      try {
+        el.setSelectionRange(len, len)
+      } catch (_) {
+        // ignore selection errors on some browsers
+      }
+      return
+    }
     if (combinedTitleRef?.current) {
       combinedTitleRef.current.focus()
       combinedTitleRef.current.select?.()
     }
-  }, [combinedTitleRef])
+  }, [combinedTitleRef, focusDescription])
 
   // Dirty tracking
   useEffect(() => {
@@ -258,6 +275,7 @@ export default function FeatureForm({
             ariaLabel="Feature description"
             onFileMentionSelected={handleFileMentionSelected}
             onReferenceSelected={handleReferenceSelected}
+            inputRef={descriptionRef}
           />
         </div>
 

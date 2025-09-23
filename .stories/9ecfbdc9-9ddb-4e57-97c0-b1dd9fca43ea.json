@@ -1,6 +1,6 @@
 {
   "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
-  "status": "-",
+  "status": "+",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
   "features": [
@@ -92,12 +92,13 @@
     },
     {
       "id": "c13680c0-c41b-4119-81e8-957cabc388fa",
-      "status": "-",
+      "status": "+",
       "title": "TestCoverage shows untested files",
       "description": "For all badly tested or untested files there needs to be a button that will open up the Create New Feature form for the given project and for a predefined task id that needs to be created if it doesn't exist (that is titled 'TESTING' with the description 'Ongoing Testing improvements'). The feature form must be filled in with some standard Title and description, so the user should ideally just need to hit the \"Create Feature button\". The file to be tested must be correctly referenced in the description - i.e. \"@src/path/file.ts\" and it needs to be added into the context.\nThe Description field should be focused and the caret at the end so the user can add extra info if needed.",
       "context": [],
       "createdAt": "2025-09-23T12:05:34.305Z",
-      "updatedAt": "2025-09-23T12:05:34.305Z"
+      "updatedAt": "2025-09-23T13:54:28.118Z",
+      "completedAt": "2025-09-23T13:54:28.118Z"
     },
     {
       "id": "fb2c5983-344a-4467-91a5-d6c799a98325",
@@ -158,5 +159,6 @@
     "c13680c0-c41b-4119-81e8-957cabc388fa": 12
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
-  "updatedAt": "2025-09-22T23:34:09.482Z"
+  "updatedAt": "2025-09-22T23:34:09.482Z",
+  "completedAt": "2025-09-23T13:54:28.118Z"
 }
