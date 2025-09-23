@@ -127,14 +127,14 @@ export function useFilesAutocomplete(params: {
     return () => document.removeEventListener('selectionchange', handleSelectionChange)
   }, [textareaRef])
 
-  // Compute suggestions purely from the controlled input and current caret position
-  // Avoid including 'matches' in deps to prevent update loops when matches state updates
+  // Recompute suggestions from the controlled input and current caret position
+  // Include filesList so new/removed files reflect in the open suggestions menu
   useEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
     const pos = textarea.selectionStart ?? caretPos
     checkForMention(input, pos)
-  }, [input, caretPos])
+  }, [input, caretPos, filesList, textareaRef])
 
   return { isOpen, matches, position, onSelect }
 }
