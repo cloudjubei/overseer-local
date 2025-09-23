@@ -23,6 +23,14 @@ function toSnapshotVal(meta: any): string {
   return `${mtime}-${size}-${hash}`
 }
 
+function normalizeRunPath(path?: string): string | undefined {
+  // Treat '.', empty, or whitespace-only as "run all"
+  if (path == null) return undefined
+  const p = String(path).trim()
+  if (p === '' || p === '.' || p === './') return undefined
+  return p
+}
+
 export default class FactoryTestsManager extends BaseManager {
   private tools: Record<string, TestTools>
   private projectsManager: ProjectsManager
@@ -95,7 +103,8 @@ export default class FactoryTestsManager extends BaseManager {
 
   async runTest(projectId: string, path?: string): Promise<TestResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTest(path)
+    const normalized = normalizeRunPath(path)
+    const res = await tools?.runTest(normalized)
     if (res) {
       const snapshot = await this.buildProjectSnapshot(projectId)
       this.lastTestResults[projectId] = { result: res, snapshot, at: Date.now() }
@@ -105,7 +114,8 @@ export default class FactoryTestsManager extends BaseManager {
 
   async runTestCoverage(projectId: string, path?: string): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    const res = await tools?.runTestCoverage(path)
+    const normalized = normalizeRunPath(path)
+    const res = await tools?.runTestCoverage(normalized)
     if (res) {
       const snapshot = await this.buildProjectSnapshot(projectId)
       this.lastCoverageResults[projectId] = { result: res, snapshot, at: Date.now() }

@@ -7,10 +7,13 @@ import { parseTestOutput } from '../utils/testResults'
 import type { ParsedCoverage } from '../utils/coverage'
 import { parseCoverageOutput } from '../utils/coverage'
 
+export type TestsCatalogItem = { value: string; label: string }
+
 export type TestsContextValue = {
   // loading flags
   isRunningTests: boolean
   isRunningCoverage: boolean
+  isLoadingCatalog: boolean
   // last results
   results: ParsedTestResults | null
   coverage: ParsedCoverage | null
@@ -22,6 +25,9 @@ export type TestsContextValue = {
   // errors
   testsError: string | null
   coverageError: string | null
+  // test list/catalog for UI selection
+  testsCatalog: TestsCatalogItem[]
+  refreshTestsCatalog: () => Promise<void>
   // actions
   runTests: (path?: string) => Promise<void>
   runCoverage: (path?: string) => Promise<void>
@@ -135,11 +141,19 @@ function mapTestResultToParsed(res: TestResult): ParsedTestResults {
   return mapped
 }
 
+function extractTestLabel(x: any): string | null {
+  if (x == null) return null
+  if (typeof x === 'string') return x
+  const cand = x.relPath || x.path || x.file || x.name || x.id || x.title || null
+  return typeof cand === 'string' ? cand : null
+}
+
 export function TestsProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
 
   const [isRunningTests, setIsRunningTests] = useState(false)
   const [isRunningCoverage, setIsRunningCoverage] = useState(false)
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
 
   const [results, setResults] = useState<ParsedTestResults | null>(null)
   const [coverage, setCoverage] = useState<ParsedCoverage | null>(null)
@@ -151,6 +165,8 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
 
   const [testsError, setTestsError] = useState<string | null>(null)
   const [coverageError, setCoverageError] = useState<string | null>(null)
+
+  const [testsCatalog, setTestsCatalog] = useState<TestsCatalogItem[]>([])
 
   // Load last cached results/coverage on mount or project change
   useEffect(() => {
@@ -192,6 +208,43 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       cancelled = true
     }
   }, [projectId])
+
+  // Load/refresh available tests list
+  const refreshTestsCatalog = useCallback(async () => {
+    if (!projectId) return
+    setIsLoadingCatalog(true)
+    try {
+      const list: any[] = await factoryTestsService.listTests(projectId)
+      const items: TestsCatalogItem[] = []
+      for (const t of list ?? []) {
+        const label = extractTestLabel(t)
+        if (!label) continue
+        items.push({ value: label, label })
+      }
+      // Deduplicate by value
+      const seen = new Set<string>()
+      const deduped: TestsCatalogItem[] = []
+      for (const it of items) {
+        if (seen.has(it.value)) continue
+        seen.add(it.value)
+        deduped.push(it)
+      }
+      setTestsCatalog(deduped)
+    } catch (_) {
+      // ignore catalog errors; leave empty
+      setTestsCatalog([])
+    } finally {
+      setIsLoadingCatalog(false)
+    }
+  }, [projectId])
+
+  useEffect(() => {
+    // refresh when project changes
+    setTestsCatalog([])
+    if (projectId) {
+      refreshTestsCatalog()
+    }
+  }, [projectId, refreshTestsCatalog])
 
   const resetTests = useCallback(() => {
     setResults(null)
@@ -253,6 +306,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isRunningTests,
       isRunningCoverage,
+      isLoadingCatalog,
       results,
       coverage,
       resultsInvalidated,
@@ -261,6 +315,8 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       coverageAt,
       testsError,
       coverageError,
+      testsCatalog,
+      refreshTestsCatalog,
       runTests,
       runCoverage,
       resetTests,
@@ -269,6 +325,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     [
       isRunningTests,
       isRunningCoverage,
+      isLoadingCatalog,
       results,
       coverage,
       resultsInvalidated,
@@ -277,6 +334,8 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       coverageAt,
       testsError,
       coverageError,
+      testsCatalog,
+      refreshTestsCatalog,
       runTests,
       runCoverage,
       resetTests,

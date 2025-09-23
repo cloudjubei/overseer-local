@@ -3,9 +3,9 @@ import SegmentedControl from '../components/ui/SegmentedControl'
 import { Button } from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import TestResultsView from '../components/tests/TestResults'
-import { Input } from '../components/ui/Input'
 import CoverageReport from '../components/tests/CoverageReport'
 import { TestsProvider, useTests } from '../contexts/TestsContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 
 function TimeAgo({ ts }: { ts: number }) {
   const [now, setNow] = React.useState(Date.now())
@@ -26,12 +26,13 @@ function TimeAgo({ ts }: { ts: number }) {
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
 
-  const [testsPath, setTestsPath] = React.useState('')
-  const [coveragePath, setCoveragePath] = React.useState('')
+  const [selectedTestScope, setSelectedTestScope] = React.useState<string>('.')
+  const [selectedCoverageScope, setSelectedCoverageScope] = React.useState<string>('.')
 
   const {
     isRunningTests,
     isRunningCoverage,
+    isLoadingCatalog,
     results,
     coverage,
     testsError,
@@ -42,7 +43,14 @@ function TestsInner() {
     coverageInvalidated,
     resultsAt,
     coverageAt,
+    testsCatalog,
+    refreshTestsCatalog,
   } = useTests()
+
+  React.useEffect(() => {
+    // Ensure catalog is available on mount
+    refreshTestsCatalog()
+  }, [])
 
   return (
     <div className="flex-1 overflow-auto">
@@ -66,15 +74,28 @@ function TestsInner() {
 
         {activeTab === 'results' && (
           <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <Input
-                  placeholder="Optional: Enter test path (e.g., src/components/MyComponent.test.ts)"
-                  value={testsPath}
-                  onChange={(e) => setTestsPath(e.target.value)}
-                />
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Select value={selectedTestScope} onValueChange={setSelectedTestScope}>
+                  <SelectTrigger aria-label="Select test scope" className="min-w-[260px]">
+                    <SelectValue placeholder="Select tests to run" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value=".">All tests</SelectItem>
+                    {testsCatalog.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isLoadingCatalog && <Spinner size={14} label="Loading tests..." />}
+                <Button size="sm" variant="secondary" onClick={refreshTestsCatalog}>
+                  Refresh
+                </Button>
               </div>
-              <Button onClick={() => runTests(testsPath)} loading={isRunningTests} variant="primary">
+              <div className="flex-1" />
+              <Button onClick={() => runTests(selectedTestScope)} loading={isRunningTests} variant="primary">
                 Run Tests
               </Button>
               {isRunningTests ? <Spinner size={16} label="Running tests..." /> : null}
@@ -103,28 +124,32 @@ function TestsInner() {
             {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
 
             {!isRunningTests && !testsError && !results && (
-              <div className="text-sm text-neutral-500">
-                No test results yet. Click "Run Tests" to start.
-              </div>
+              <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
             )}
           </div>
         )}
 
         {activeTab === 'coverage' && (
           <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <Input
-                  placeholder="Optional: Enter path (e.g., src/components/) to scope coverage"
-                  value={coveragePath}
-                  onChange={(e) => setCoveragePath(e.target.value)}
-                />
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Select value={selectedCoverageScope} onValueChange={setSelectedCoverageScope}>
+                  <SelectTrigger aria-label="Select coverage scope" className="min-w-[260px]">
+                    <SelectValue placeholder="Select coverage scope" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value=".">All files</SelectItem>
+                    {testsCatalog.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isLoadingCatalog && <Spinner size={14} label="Loading..." />}
               </div>
-              <Button
-                onClick={() => runCoverage(coveragePath)}
-                loading={isRunningCoverage}
-                variant="primary"
-              >
+              <div className="flex-1" />
+              <Button onClick={() => runCoverage(selectedCoverageScope)} loading={isRunningCoverage} variant="primary">
                 Run Coverage
               </Button>
               {isRunningCoverage ? <Spinner size={16} label="Running coverage..." /> : null}
@@ -153,14 +178,14 @@ function TestsInner() {
             {!isRunningCoverage && !coverageError && coverage && <CoverageReport data={coverage} />}
 
             {!isRunningCoverage && !coverageError && !coverage && (
-              <div className="text-sm text-neutral-500">Enter a path and click "Run Coverage".</div>
+              <div className="text-sm text-neutral-500">Click "Run Coverage" to start.</div>
             )}
 
-            {!isRunningCoverage && !coverageError && coverage && coverage.rawText && (
+            {!isRunningCoverage && !coverageError && coverage && (coverage as any).rawText && (
               <details className="mt-2">
                 <summary className="text-xs text-neutral-500 cursor-pointer">View raw output</summary>
                 <pre className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
-                  {coverage.rawText}
+                  {(coverage as any).rawText}
                 </pre>
               </details>
             )}

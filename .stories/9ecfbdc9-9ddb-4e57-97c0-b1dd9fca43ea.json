@@ -81,13 +81,14 @@
     },
     {
       "id": "e67dc4d1-2b22-46bf-9e9e-98c2712af48a",
-      "status": "-",
+      "status": "+",
       "title": "TestsView shouldn't require the path to run all the tests",
       "description": "when passing in \".\" as the path - all tests will be ran.\nSame goes for the test coverage.\nThe user shouldn't be given the option to type in the test to run - this should be handled via nice UI.",
       "context": [],
       "createdAt": "2025-09-23T11:55:29.754Z",
-      "updatedAt": "2025-09-23T12:01:25.971Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T13:37:57.105Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T13:37:57.105Z"
     },
     {
       "id": "c13680c0-c41b-4119-81e8-957cabc388fa",
