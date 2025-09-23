@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1698,16 +1698,16 @@
     },
     {
       "id": "47590194-5f78-4d06-8aac-62cf60f5fc86",
-      "status": "+",
+      "status": "-",
       "title": "In StoriesListView when a Story has an agent running - always show it",
-      "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx",
+      "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx  this seems to be correctly implemented in @src/renderer/stories/StoryDetailsView.tsx",
       "context": [
-        "src/renderer/stories/StoriesListView.tsx"
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
       ],
       "createdAt": "2025-09-23T00:09:45.531Z",
-      "updatedAt": "2025-09-23T09:53:41.446Z",
-      "blockers": [],
-      "completedAt": "2025-09-23T09:44:25.969Z"
+      "updatedAt": "2025-09-23T16:15:07.808Z",
+      "blockers": []
     },
     {
       "id": "a571d64e-213b-4f0e-b641-51678b5c26b5",
