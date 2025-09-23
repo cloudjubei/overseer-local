@@ -1,30 +1,29 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/Select'
-import { useChats } from '../hooks/useChats'
-import { useFilesAutocomplete } from '../hooks/useFilesAutocomplete'
-import { useReferencesAutocomplete } from '../hooks/useReferencesAutocomplete'
-import { useLLMConfig } from '../contexts/LLMConfigContext'
-import { useNavigator } from '../navigation/Navigator'
-import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
-import FileDisplay from '../components/ui/FileDisplay'
-import { Chat, ChatMessage } from '../services/chatsService'
-import RichText from '../components/ui/RichText'
-import { inferFileType, useFiles } from '../contexts/FilesContext'
-import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
-import Spinner from '../components/ui/Spinner'
-import sendSoundFile from '../assets/sounds/send.mp3'
-import receiveSoundFile from '../assets/sounds/receive.mp3'
-import ErrorBubble from '../components/ui/ErrorBubble'
+} from '../components/ui/Select';
+import { useChats } from '../hooks/useChats';
+import { useLLMConfig } from '../contexts/LLMConfigContext';
+import { useNavigator } from '../navigation/Navigator';
+import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
+import FileDisplay from '../components/ui/FileDisplay';
+import { Chat, ChatMessage } from '../services/chatsService';
+import RichText from '../components/ui/RichText';
+import { inferFileType, useFiles } from '../contexts/FilesContext';
+import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons';
+import Spinner from '../components/ui/Spinner';
+import sendSoundFile from '../assets/sounds/send.mp3';
+import receiveSoundFile from '../assets/sounds/receive.mp3';
+import ErrorBubble from '../components/ui/ErrorBubble';
+import { ChatInput } from '../components/Chat';
 
 interface EnhancedMessage extends ChatMessage {
-  showModel?: boolean
-  isFirstInGroup?: boolean
+  showModel?: boolean;
+  isFirstInGroup?: boolean;
 }
 
 export default function ChatView() {
@@ -36,155 +35,85 @@ export default function ChatView() {
     deleteChat,
     sendMessage,
     isThinking,
-  } = useChats()
-  const { files, filesByPath, uploadFile } = useFiles()
-  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
-  const { navigateView } = useNavigator()
+  } = useChats();
+  const { filesByPath } = useFiles();
+  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig();
+  const { navigateView } = useNavigator();
 
-  const sendSound = useMemo(() => new Audio(sendSoundFile), [])
-  const receiveSound = useMemo(() => new Audio(receiveSoundFile), [])
+  const sendSound = useMemo(() => new Audio(sendSoundFile), []);
+  const receiveSound = useMemo(() => new Audio(receiveSoundFile), []);
 
-  const [currentChat, setCurrentChat] = useState<Chat | undefined>()
-  const [input, setInput] = useState<string>('')
-  const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
-  const messageListRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const mirrorRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [currentChat, setCurrentChat] = useState<Chat | undefined>();
+  const messageListRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  const prevMessagesCountRef = useRef(messages.length)
-  const chatChanged = useRef(false)
-
-  const {
-    isOpen: isAutocompleteOpen,
-    matches: matchingDocs,
-    position: autocompletePosition,
-    onSelect: onAutocompleteSelect,
-  } = useFilesAutocomplete({
-    filesList: files.map((f) => f.relativePath!),
-    input,
-    setInput,
-    textareaRef,
-    mirrorRef,
-  })
-
-  const {
-    isOpen: isRefsOpen,
-    matches: matchingRefs,
-    position: refsPosition,
-    onSelect: onRefsSelect,
-  } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef })
+  const prevMessagesCountRef = useRef(messages.length);
+  const chatChanged = useRef(false);
 
   useEffect(() => {
-    chatChanged.current = true
-  }, [currentChatId])
+    chatChanged.current = true;
+  }, [currentChatId]);
 
   useEffect(() => {
     if (chatChanged.current) {
-      chatChanged.current = false
-      prevMessagesCountRef.current = messages.length
-      return
+      chatChanged.current = false;
+      prevMessagesCountRef.current = messages.length;
+      return;
     }
     if (
       messages.length > prevMessagesCountRef.current &&
       messages[messages.length - 1]?.role === 'assistant'
     ) {
-      receiveSound.play()
+      receiveSound.play();
     }
-    prevMessagesCountRef.current = messages.length
-  }, [messages, receiveSound])
+    prevMessagesCountRef.current = messages.length;
+  }, [messages, receiveSound]);
 
   useEffect(() => {
-    const el = messageListRef.current
-    if (!el) return
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  }, [chatsById, isThinking])
+    const el = messageListRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, [chatsById, isThinking]);
 
   useEffect(() => {
     if (currentChatId) {
-      const chat = chatsById[currentChatId]
-      setCurrentChat(chat)
+      const chat = chatsById[currentChatId];
+      setCurrentChat(chat);
     }
-  }, [currentChatId, chatsById])
+  }, [currentChatId, chatsById]);
 
   useEffect(() => {
     if (currentChat) {
-      setMessages(currentChat.messages)
+      setMessages(currentChat.messages);
     }
-  }, [currentChat])
+  }, [currentChat]);
 
   const chatHistories = useMemo(() => {
     return Object.values(chatsById).sort(
       (a, b) => new Date(a.updateDate).getTime() - new Date(b.updateDate).getTime(),
-    )
-  }, [chatsById])
+    );
+  }, [chatsById]);
 
-  const autoSizeTextarea = () => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    const max = 200
-    const next = Math.min(el.scrollHeight, max)
-    el.style.height = next + 'px'
-  }
-  useEffect(() => {
-    autoSizeTextarea()
-  }, [input])
-
-  const handleSend = async () => {
-    if (!input.trim() || !activeConfig) return
-    sendSound.play()
-    await sendMessage(input, activeConfig, pendingAttachments)
-    setInput('')
-    setPendingAttachments([])
-    requestAnimationFrame(() => {
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto'
-        textareaRef.current.focus()
-      }
-    })
-  }
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      const content = event.target?.result as string
-      const newPath = await uploadFile(file.name, content)
-      if (newPath) {
-        setPendingAttachments((prev) => Array.from(new Set([...prev, newPath])))
-      }
-    }
-    reader.readAsText(file)
-    // e.currentTarget.value = ''
-  }
-
-  const handleTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault()
-      handleSend()
-    }
-  }
+  const handleSend = async (message: string, attachments: string[]) => {
+    if (!activeConfig) return;
+    sendSound.play();
+    await sendMessage(message, activeConfig, attachments);
+  };
 
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
     return messages.map((msg, index) => {
-      let showModel = false
+      let showModel = false;
       if (msg.role === 'assistant' && msg.model) {
         const prevAssistant = [...messages.slice(0, index)]
           .reverse()
-          .find((m) => m.role === 'assistant')
-        showModel = !prevAssistant || prevAssistant.model !== msg.model
+          .find((m) => m.role === 'assistant');
+        showModel = !prevAssistant || prevAssistant.model !== msg.model;
       }
-      const prev = messages[index - 1]
-      const isFirstInGroup = !prev || prev.role !== msg.role || msg.role === 'system'
-      return { ...msg, showModel, isFirstInGroup }
-    })
-  }, [messages])
-
-  const canSend = Boolean(input.trim() && activeConfig && isConfigured)
+      const prev = messages[index - 1];
+      const isFirstInGroup = !prev || prev.role !== msg.role || msg.role === 'system';
+      return { ...msg, showModel, isFirstInGroup };
+    });
+  }, [messages]);
 
   const chatItems = useMemo(
     () =>
@@ -196,8 +125,8 @@ export default function ChatView() {
         action: (
           <button
             onClick={(e) => {
-              e.stopPropagation()
-              deleteChat(chat.id)
+              e.stopPropagation();
+              deleteChat(chat.id);
             }}
             aria-label="Delete chat"
             title="Delete chat"
@@ -207,7 +136,7 @@ export default function ChatView() {
         ),
       })),
     [chatHistories, deleteChat],
-  )
+  );
 
   return (
     <CollapsibleSidebar
@@ -233,12 +162,6 @@ export default function ChatView() {
       emptyMessage="No chats yet"
     >
       <section className="flex-1 flex flex-col w-full h-full bg-[var(--surface-base)] overflow-hidden">
-        <div
-          ref={mirrorRef}
-          aria-hidden="true"
-          className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none"
-        />
-
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
@@ -315,10 +238,10 @@ export default function ChatView() {
                         <ErrorBubble error={msg.error} />
                       </div>
                     </div>
-                  )
+                  );
                 }
-                const isUser = msg.role === 'user'
-                const isSystem = msg.role === 'system'
+                const isUser = msg.role === 'user';
+                const isSystem = msg.role === 'system';
 
                 if (isSystem) {
                   return (
@@ -327,7 +250,7 @@ export default function ChatView() {
                         <RichText text={msg.content} />
                       </div>
                     </div>
-                  )
+                  );
                 }
 
                 return (
@@ -383,11 +306,11 @@ export default function ChatView() {
                           ].join(' ')}
                         >
                           {msg.attachments.map((path, i) => {
-                            const meta = filesByPath[path]
-                            const name = meta?.name || path.split('/').pop() || path
-                            const type = meta?.type || inferFileType(path)
-                            const size = meta?.size ?? undefined
-                            const mtime = meta?.mtime ?? undefined
+                            const meta = filesByPath[path];
+                            const name = meta?.name || path.split('/').pop() || path;
+                            const type = meta?.type || inferFileType(path);
+                            const size = meta?.size ?? undefined;
+                            const mtime = meta?.mtime ?? undefined;
                             return (
                               <FileDisplay
                                 key={`${index}-att-${i}-${path}`}
@@ -396,13 +319,13 @@ export default function ChatView() {
                                 interactive
                                 showPreviewOnHover
                               />
-                            )
+                            );
                           })}
                         </div>
                       )}
                     </div>
                   </div>
-                )
+                );
               })}
 
               {isThinking && (
@@ -424,155 +347,8 @@ export default function ChatView() {
           )}
         </div>
 
-        <div className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
-          <div className="p-3">
-            <div className="relative flex items-end gap-2">
-              <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onInput={autoSizeTextarea}
-                  onKeyDown={handleTextareaKeyDown}
-                  className="w-full resize-none bg-transparent px-3 py-2 text-[var(--text-primary)] outline-none"
-                  placeholder={
-                    isConfigured
-                      ? 'Type your message…'
-                      : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.'
-                  }
-                  rows={1}
-                  aria-label="Message input"
-                  style={{ maxHeight: 200, overflowY: 'auto' }}
-                  disabled={isThinking}
-                />
-                <div className="px-3 py-1 border-t border-[var(--border-subtle)]">
-                  {pendingAttachments.length > 0 && (
-                    <div className="mb-1 flex flex-wrap gap-1">
-                      {pendingAttachments.map((path, idx) => {
-                        const meta = filesByPath[path]
-                        const name = meta?.name || path.split('/').pop() || path
-                        const type = meta?.type || inferFileType(path)
-                        const size = meta?.size ?? undefined
-                        const mtime = meta?.mtime ?? undefined
-                        return (
-                          <div key={`${idx}-${path}`} className="inline-flex items-center gap-1">
-                            <FileDisplay
-                              file={{ name, path, type, size, mtime }}
-                              density="compact"
-                              interactive
-                              showPreviewOnHover
-                            />
-                            <button
-                              type="button"
-                              className="btn-secondary"
-                              aria-label={`Remove ${name}`}
-                              onClick={() =>
-                                setPendingAttachments((prev) => prev.filter((p) => p !== path))
-                              }
-                              disabled={isThinking}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="btn-secondary"
-                        aria-label="Attach a document"
-                        type="button"
-                        disabled={isThinking}
-                      >
-                        Attach
-                      </button>
-                      <input
-                        type="file"
-                        accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleFileUpload}
-                      />
-                      <span className="hidden sm:inline">
-                        Tip: Use @ for files • Use # for stories and features
-                      </span>
-                    </div>
-                    <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleSend}
-                className="btn"
-                disabled={!canSend || isThinking}
-                aria-label="Send message"
-              >
-                Send
-              </button>
-
-              {isAutocompleteOpen && autocompletePosition && (
-                <div
-                  className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
-                  style={{
-                    left: `${autocompletePosition.left}px`,
-                    top: `${autocompletePosition.top}px`,
-                    transform: 'translateY(-100%)',
-                  }}
-                  role="listbox"
-                  aria-label="Files suggestions"
-                >
-                  {matchingDocs.map((path, idx) => {
-                    const meta = filesByPath[path]
-                    const name = meta?.name || path.split('/').pop() || path
-                    const type = meta?.type || inferFileType(path)
-                    const size = meta?.size ?? undefined
-                    const mtime = meta?.mtime ?? undefined
-                    return (
-                      <div key={idx} role="option" className="px-1 py-0.5">
-                        <FileDisplay
-                          file={{ name, path, type, size, mtime }}
-                          density="compact"
-                          interactive
-                          showPreviewOnHover
-                          onClick={() => onAutocompleteSelect(path)}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-
-              {isRefsOpen && refsPosition && (
-                <div
-                  className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
-                  style={{
-                    left: `${refsPosition.left}px`,
-                    top: `${refsPosition.top}px`,
-                    transform: 'translateY(-100%)',
-                  }}
-                  role="listbox"
-                  aria-label="References suggestions"
-                >
-                  {matchingRefs.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]"
-                      role="option"
-                      onClick={() => onRefsSelect(item.ref)}
-                    >
-                      #{item.display} - {item.title} ({item.type})
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
       </section>
     </CollapsibleSidebar>
-  )
+  );
 }

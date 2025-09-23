@@ -99,12 +99,13 @@
     },
     {
       "id": "3e8a3f07-5983-4c9c-ad27-ae001eb9e683",
-      "status": "-",
+      "status": "+",
       "title": "Create an Advanced Chat Input with Mention Support",
       "description": "Replace the current chat input with a new component that supports autocompletion. It should trigger a file lookup panel when the user types `@` and a story/feature lookup panel when the user types `#`.",
       "context": [],
       "createdAt": "2025-09-22T23:55:32.129Z",
-      "updatedAt": "2025-09-22T23:55:32.129Z"
+      "updatedAt": "2025-09-23T00:44:56.079Z",
+      "completedAt": "2025-09-23T00:44:56.079Z"
     },
     {
       "id": "95bd507b-3644-4c61-aaba-2d8781514767",
