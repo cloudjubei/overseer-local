@@ -11,10 +11,9 @@ import ExclamationChip from '../components/stories/ExclamationChip'
 import RunAgentButton from '../components/stories/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
 import ModelChip from '../components/agents/ModelChip'
-import { StatusPicker, statusKey } from '../components/stories/StatusControl'
+import { StatusPicker, statusKey, STATUS_LABELS } from '../components/stories/StatusControl'
 import { gitMonitorService } from '../services/gitMonitorService'
 import { Button } from '../components/ui/Button'
-import { STATUS_LABELS } from '../utils/status'
 import { useStories } from '../contexts/StoriesContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
@@ -701,7 +700,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                       <div className="col col-description" title={f.description || ''}>
                         <RichText text={f.description || ''} />
                       </div>
-                      <div className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}>
+                      <div
+                        className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}
+                      >
                         {featureHasActiveRun && storyRun ? (
                           <div className="no-drag">
                             <AgentRunBullet

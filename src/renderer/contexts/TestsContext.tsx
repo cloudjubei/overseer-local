@@ -1,20 +1,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useActiveProject } from './ProjectContext'
 import { factoryTestsService } from '../services/factoryTestsService'
-import type { CoverageResult, TestResult } from 'thefactory-tools'
-import type { ParsedTestResults, ParsedFailure } from '../utils/testResults'
-import { parseTestOutput } from '../utils/testResults'
+import type { CoverageResult, FileMeta, TestResult, TestsResult } from 'thefactory-tools'
 
 export type TestsCatalogItem = { value: string; label: string }
 
 export type TestsContextValue = {
-  // loading flags
   isRunningTests: boolean
   isRunningCoverage: boolean
   isLoadingCatalog: boolean
-  // last results
-  results: ParsedTestResults | null
+
+  results?: TestsResult
   coverage?: CoverageResult
+
   // invalidation flags and timestamps
   resultsInvalidated: boolean | null
   coverageInvalidated: boolean | null
@@ -26,7 +24,6 @@ export type TestsContextValue = {
   // test list/catalog for UI selection
   testsCatalog: TestsCatalogItem[]
   refreshTestsCatalog: () => Promise<void>
-  // actions
   runTests: (path?: string) => Promise<void>
   runCoverage: (path?: string) => Promise<void>
   resetTests: () => void
@@ -35,155 +32,6 @@ export type TestsContextValue = {
 
 const TestsContext = createContext<TestsContextValue | null>(null)
 
-function mapTestResultToParsed(res: TestResult): ParsedTestResults {
-  const anyRes: any = res as any
-  // Build raw text for fallback viewing
-  const chunks: string[] = []
-  if (typeof anyRes.stdout === 'string' && anyRes.stdout.length) chunks.push(anyRes.stdout)
-  if (typeof anyRes.stderr === 'string' && anyRes.stderr.length) chunks.push(anyRes.stderr)
-  const rawText = chunks.length
-    ? chunks.join('\n')
-    : (() => {
-        try {
-          return JSON.stringify(res, null, 2)
-        } catch {
-          return String(res)
-        }
-      })()
-
-  // Determine ok status defensively
-  const status: string | undefined = typeof anyRes.status === 'string' ? anyRes.status : undefined
-  const ok: boolean =
-    typeof anyRes.ok === 'boolean'
-      ? anyRes.ok
-      : status
-        ? /^(ok|pass|passed|success)$/i.test(status)
-        : Array.isArray(anyRes.failures)
-          ? anyRes.failures.length === 0
-          : true
-
-  // Map failures if present
-  const failures: ParsedFailure[] = []
-  if (Array.isArray((anyRes as any).failures)) {
-    for (const f of (anyRes as any).failures) {
-      if (!f) continue
-      failures.push({
-        testName: (f as any).testName || (f as any).title || (f as any).name,
-        filePath: (f as any).filePath || (f as any).file || (f as any).path,
-        line: typeof (f as any).line === 'number' ? (f as any).line : null,
-        column: typeof (f as any).column === 'number' ? (f as any).column : null,
-        message:
-          (f as any).message ||
-          (Array.isArray((f as any).messages) ? (f as any).messages.join('\n') : undefined) ||
-          'Test failed',
-        stack: (f as any).stack,
-      })
-    }
-  }
-
-  // Map summary if available
-  const summarySrc: any = (anyRes.summary || anyRes.stats || anyRes.result || {}) as any
-  const summary = {
-    total:
-      typeof summarySrc.total === 'number'
-        ? summarySrc.total
-        : typeof summarySrc.numTotalTests === 'number'
-          ? summarySrc.numTotalTests
-          : undefined,
-    passed:
-      typeof summarySrc.passed === 'number'
-        ? summarySrc.passed
-        : typeof summarySrc.numPassedTests === 'number'
-          ? summarySrc.numPassedTests
-          : undefined,
-    failed:
-      typeof summarySrc.failed === 'number'
-        ? summarySrc.failed
-        : typeof summarySrc.numFailedTests === 'number'
-          ? summarySrc.numFailedTests
-          : undefined,
-    skipped:
-      typeof summarySrc.skipped === 'number'
-        ? summarySrc.skipped
-        : typeof summarySrc.numPendingTests === 'number'
-          ? summarySrc.numPendingTests
-          : undefined,
-    durationMs:
-      typeof summarySrc.durationMs === 'number'
-        ? summarySrc.durationMs
-        : typeof summarySrc.runtime === 'number'
-          ? summarySrc.runtime
-          : typeof summarySrc.time === 'number'
-            ? summarySrc.time
-            : undefined,
-  }
-
-  const mapped: ParsedTestResults = {
-    ok,
-    rawText,
-    failures,
-    summary,
-  }
-
-  // If no explicit failures and raw text exists, run heuristic parser to try to improve details
-  if (mapped.failures.length === 0 && typeof rawText === 'string' && rawText.length > 0) {
-    const heuristic = parseTestOutput(rawText)
-    // Prefer detailed failures from heuristic if it found any
-    if (heuristic.failures.length > 0) {
-      mapped.failures = heuristic.failures
-      mapped.summary = mapped.summary || heuristic.summary
-      mapped.ok = mapped.ok && heuristic.ok
-    }
-  }
-
-  return mapped
-}
-
-function mapTestResultsAggregate(list: TestResult[] | undefined | null): ParsedTestResults | null {
-  if (!list || list.length === 0) return null
-  let ok = true
-  const failures: ParsedFailure[] = []
-  const rawParts: string[] = []
-  let total: number | undefined
-  let passed: number | undefined
-  let failed: number | undefined
-  let skipped: number | undefined
-  let durationMs: number | undefined
-
-  for (const it of list) {
-    const p = mapTestResultToParsed(it)
-    ok = ok && p.ok
-    failures.push(...(p.failures || []))
-    if (p.rawText) rawParts.push(p.rawText)
-
-    // Aggregate summary numbers when present
-    if (p.summary?.total != null) total = (total ?? 0) + (p.summary.total ?? 0)
-    if (p.summary?.passed != null) passed = (passed ?? 0) + (p.summary.passed ?? 0)
-    if (p.summary?.failed != null) failed = (failed ?? 0) + (p.summary.failed ?? 0)
-    if (p.summary?.skipped != null) skipped = (skipped ?? 0) + (p.summary.skipped ?? 0)
-    if (p.summary?.durationMs != null) durationMs = (durationMs ?? 0) + (p.summary.durationMs ?? 0)
-  }
-
-  const summary =
-    total != null || passed != null || failed != null || skipped != null || durationMs != null
-      ? { total, passed, failed, skipped, durationMs }
-      : undefined
-
-  return {
-    ok,
-    failures,
-    rawText: rawParts.join('\n\n---\n'),
-    summary,
-  }
-}
-
-function extractTestLabel(x: any): string | null {
-  if (x == null) return null
-  if (typeof x === 'string') return x
-  const cand = x.relPath || x.path || x.file || x.name || x.id || x.title || null
-  return typeof cand === 'string' ? cand : null
-}
-
 export function TestsProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
 
@@ -191,7 +39,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   const [isRunningCoverage, setIsRunningCoverage] = useState(false)
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
 
-  const [results, setResults] = useState<ParsedTestResults | null>(null)
+  const [results, setResults] = useState<TestsResult | undefined>(undefined)
   const [coverage, setCoverage] = useState<CoverageResult | undefined>(undefined)
 
   const [resultsInvalidated, setResultsInvalidated] = useState<boolean | null>(null)
@@ -215,20 +63,20 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
           factoryTestsService.getLastCoverage(projectId),
         ])
         if (cancelled) return
-        if (lastRes && lastRes.result) {
-          const parsed = mapTestResultsAggregate(lastRes.result as any)
-          setResults(parsed)
-          setResultsInvalidated(!!lastRes.invalidated)
-          setResultsAt(lastRes.at || null)
+        if (lastRes) {
+          // const parsed = mapTestResultsAggregate(lastRes.result as any)
+          // setResults(parsed)
+          // setResultsInvalidated(!!lastRes.invalidated)
+          // setResultsAt(lastRes.at || null)
         } else {
-          setResults(null)
+          setResults(undefined)
           setResultsInvalidated(null)
           setResultsAt(null)
         }
-        if (lastCov && lastCov.result) {
-          setCoverage(lastCov.result)
-          setCoverageInvalidated(!!lastCov.invalidated)
-          setCoverageAt(lastCov.at || null)
+        if (lastCov) {
+          // setCoverage(lastCov.result)
+          // setCoverageInvalidated(!!lastCov.invalidated)
+          // setCoverageAt(lastCov.at || null)
         } else {
           setCoverage(undefined)
           setCoverageInvalidated(null)
@@ -249,11 +97,10 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     if (!projectId) return
     setIsLoadingCatalog(true)
     try {
-      const list: any[] = await factoryTestsService.listTests(projectId)
+      const list = await factoryTestsService.listTests(projectId)
       const items: TestsCatalogItem[] = []
       for (const t of list ?? []) {
-        const label = extractTestLabel(t)
-        if (!label) continue
+        const label = t.name
         items.push({ value: label, label })
       }
       // Deduplicate by value
@@ -282,7 +129,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   }, [projectId, refreshTestsCatalog])
 
   const resetTests = useCallback(() => {
-    setResults(null)
+    setResults(undefined)
     setTestsError(null)
     setResultsInvalidated(null)
     setResultsAt(null)
@@ -300,11 +147,10 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       if (!projectId) return
       setIsRunningTests(true)
       setTestsError(null)
-      setResults(null)
+      setResults(undefined)
       try {
         const res = await factoryTestsService.runTests(projectId, path?.trim() || '.')
-        const parsed = mapTestResultsAggregate(res)
-        setResults(parsed)
+        setResults(res)
         setResultsInvalidated(false)
         setResultsAt(Date.now())
       } catch (e: any) {

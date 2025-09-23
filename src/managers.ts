@@ -69,12 +69,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     projectsManager,
     settingsManager,
   )
-  factoryTestsManager = new FactoryTestsManager(
-    projectRoot,
-    mainWindow,
-    projectsManager,
-    filesManager,
-  )
+  factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
 
   managers = [
     databaseManager,

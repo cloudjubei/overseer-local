@@ -1,6 +1,6 @@
 {
   "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
-  "status": "-",
+  "status": "?",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
   "features": [
@@ -158,18 +158,8 @@
       "completedAt": "2025-09-23T16:17:28.743Z"
     },
     {
-      "id": "c7ee0e36-2485-4e2c-b1d5-b85054b6b44e",
-      "status": "-",
-      "title": "There's an error when running tests",
-      "description": "A red error shows:\nCannot read properties of undefined (reading 'replace')",
-      "context": [],
-      "blockers": [],
-      "createdAt": "2025-09-23T19:23:17.204Z",
-      "updatedAt": "2025-09-23T19:23:17.204Z"
-    },
-    {
       "id": "346aaa45-47c8-4325-b166-efc7c4fa245f",
-      "status": "-",
+      "status": "?",
       "title": "After having run coverage it isn't saved",
       "description": "After going away from @src/renderer/screens/TestsView.tsx and coming back to the screen - the just ran coverage isn't showing anymore - it should.",
       "context": [
@@ -177,7 +167,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-23T19:24:57.838Z",
-      "updatedAt": "2025-09-23T19:24:57.838Z"
+      "updatedAt": "2025-09-23T21:41:17.916Z"
     },
     {
       "id": "f4c9351c-b638-4a4e-accc-6d525f5adb54",
@@ -241,12 +231,11 @@
     "e67dc4d1-2b22-46bf-9e9e-98c2712af48a": 11,
     "c13680c0-c41b-4119-81e8-957cabc388fa": 12,
     "cc8704ca-976b-418e-8401-0446a1d0e773": 13,
-    "c7ee0e36-2485-4e2c-b1d5-b85054b6b44e": 14,
-    "7698ec2c-015b-4eef-ab87-a88a2d14e777": 15,
-    "346aaa45-47c8-4325-b166-efc7c4fa245f": 16,
-    "f4c9351c-b638-4a4e-accc-6d525f5adb54": 17,
-    "9e72a552-12df-416c-bbed-8e0fb8928aaa": 18,
-    "2fac1501-456a-41bb-81a1-ca4c9b8c792b": 19
+    "7698ec2c-015b-4eef-ab87-a88a2d14e777": 14,
+    "f4c9351c-b638-4a4e-accc-6d525f5adb54": 15,
+    "9e72a552-12df-416c-bbed-8e0fb8928aaa": 16,
+    "2fac1501-456a-41bb-81a1-ca4c9b8c792b": 17,
+    "346aaa45-47c8-4325-b166-efc7c4fa245f": 18
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
   "updatedAt": "2025-09-22T23:34:09.482Z"
