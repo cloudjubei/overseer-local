@@ -19,12 +19,13 @@
     },
     {
       "id": "57606b53-c938-4b37-8478-46ef4e081d8a",
-      "status": "-",
+      "status": "+",
       "title": "Display a Spinner While Awaiting Agent Response",
       "description": "Implement a loading indicator (spinner) that is displayed in the chat UI when the application is waiting for a response from the agent. This provides visual feedback to the user that their request is being processed. This will require tracking the 'thinking' state of the agent.",
       "context": [],
       "createdAt": "2025-09-22T23:55:31.966Z",
-      "updatedAt": "2025-09-22T23:55:31.966Z"
+      "updatedAt": "2025-09-23T00:26:46.365Z",
+      "completedAt": "2025-09-23T00:26:46.365Z"
     },
     {
       "id": "38ba647b-9f8f-40f0-ab1c-666c65e06034",

@@ -10,6 +10,7 @@ export function useChats() {
 
   const [chatsById, setChatsById] = useState<Record<string, Chat>>({})
   const [currentChatId, setCurrentChatId] = useState<string | undefined>()
+  const [isThinking, setIsThinking] = useState(false)
 
   const update = async () => {
     if (project) {
@@ -101,7 +102,12 @@ export function useChats() {
       }
     })
 
-    return await chatsService.getCompletion(project.id, chat.id, newMessages, config)
+    setIsThinking(true)
+    try {
+      return await chatsService.getCompletion(project.id, chat.id, newMessages, config)
+    } finally {
+      setIsThinking(false)
+    }
   }
 
   const listModels = async (config: LLMConfig): Promise<string[]> => {
@@ -116,5 +122,6 @@ export function useChats() {
     deleteChat,
     sendMessage,
     listModels,
+    isThinking,
   }
 }

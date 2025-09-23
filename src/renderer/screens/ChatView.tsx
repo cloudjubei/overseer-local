@@ -17,6 +17,7 @@ import { Chat, ChatMessage } from '../services/chatsService'
 import RichText from '../components/ui/RichText'
 import { inferFileType, useFiles } from '../contexts/FilesContext'
 import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
+import Spinner from '../components/ui/Spinner'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -24,8 +25,15 @@ interface EnhancedMessage extends ChatMessage {
 }
 
 export default function ChatView() {
-  const { currentChatId, setCurrentChatId, chatsById, createChat, deleteChat, sendMessage } =
-    useChats()
+  const {
+    currentChatId,
+    setCurrentChatId,
+    chatsById,
+    createChat,
+    deleteChat,
+    sendMessage,
+    isThinking,
+  } = useChats()
   const { files, filesByPath, uploadFile } = useFiles()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
@@ -62,8 +70,8 @@ export default function ChatView() {
   useEffect(() => {
     const el = messageListRef.current
     if (!el) return
-    el.scrollTo({ top: el.scrollHeight })
-  }, [chatsById])
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }, [chatsById, isThinking])
 
   useEffect(() => {
     if (currentChatId) {
@@ -251,7 +259,7 @@ export default function ChatView() {
         )}
 
         <div ref={messageListRef} className="flex-1 min-h-0 overflow-auto p-4">
-          {enhancedMessages.length === 0 ? (
+          {enhancedMessages.length === 0 && !isThinking ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
               <div className="text-[13px] mt-2">
@@ -352,6 +360,22 @@ export default function ChatView() {
                   </div>
                 )
               })}
+
+              {isThinking && (
+                <div className="flex items-start gap-2 flex-row">
+                  <div
+                    className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                    aria-hidden="true"
+                  >
+                    AI
+                  </div>
+                  <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+                    <div className="px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
+                      <Spinner size="sm" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -375,6 +399,7 @@ export default function ChatView() {
                   rows={1}
                   aria-label="Message input"
                   style={{ maxHeight: 200, overflowY: 'auto' }}
+                  disabled={isThinking}
                 />
                 <div className="px-3 py-1 border-t border-[var(--border-subtle)]">
                   {pendingAttachments.length > 0 && (
@@ -400,6 +425,7 @@ export default function ChatView() {
                               onClick={() =>
                                 setPendingAttachments((prev) => prev.filter((p) => p !== path))
                               }
+                              disabled={isThinking}
                             >
                               ✕
                             </button>
@@ -415,6 +441,7 @@ export default function ChatView() {
                         className="btn-secondary"
                         aria-label="Attach a document"
                         type="button"
+                        disabled={isThinking}
                       >
                         Attach
                       </button>
@@ -437,7 +464,7 @@ export default function ChatView() {
               <button
                 onClick={handleSend}
                 className="btn"
-                disabled={!canSend}
+                disabled={!canSend || isThinking}
                 aria-label="Send message"
               >
                 Send
