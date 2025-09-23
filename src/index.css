@@ -15,6 +15,7 @@
 @import './styles/components/cards.css';
 @import './styles/components/segmented.css';
 @import './styles/components/file-display.css';
+@import './styles/components/chat.css';
 
 /* Layout */
 @import './styles/layout/nav.css';
