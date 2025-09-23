@@ -1745,6 +1745,17 @@
       ],
       "createdAt": "2025-09-23T09:53:32.603Z",
       "updatedAt": "2025-09-23T09:53:32.603Z"
+    },
+    {
+      "id": "70889fe4-d1cd-4718-9cf1-f11739204e42",
+      "status": "-",
+      "title": "The Sidebar has grown - make the top with the title stay stick and only the rest scroll",
+      "description": "@src/renderer/navigation/SidebarView.tsx",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "createdAt": "2025-09-23T09:56:28.943Z",
+      "updatedAt": "2025-09-23T09:56:28.943Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1859,7 +1870,8 @@
     "11b7fc32-af7f-409c-a3f0-12a414749e12": 109,
     "47590194-5f78-4d06-8aac-62cf60f5fc86": 110,
     "a571d64e-213b-4f0e-b641-51678b5c26b5": 111,
-    "b951665d-139c-4761-94f1-c259b36dab42": 112
+    "b951665d-139c-4761-94f1-c259b36dab42": 112,
+    "70889fe4-d1cd-4718-9cf1-f11739204e42": 113
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
