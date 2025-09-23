@@ -63,13 +63,14 @@
     },
     {
       "id": "e7b7b5ee-ec41-4288-ae7d-201c33ff148e",
-      "status": "-",
+      "status": "+",
       "title": "Dynamically Generate Input Forms for Tools",
       "description": "When a user selects a tool, dynamically render a form based on its input schema. For each parameter in the schema, generate a corresponding form field (e.g., text input for string, number input for number, etc.). Include a 'Run' button to submit the form.",
       "context": [],
       "createdAt": "2025-09-22T23:53:41.491Z",
-      "updatedAt": "2025-09-23T09:14:53.922Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:21:11.132Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:21:11.132Z"
     },
     {
       "id": "28b4dc28-1748-4c6a-a45a-6188d260492a",
