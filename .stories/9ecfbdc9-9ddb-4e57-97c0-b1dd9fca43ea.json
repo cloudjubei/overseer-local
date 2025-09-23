@@ -16,12 +16,13 @@
     },
     {
       "id": "d05e25fe-33f1-466a-9237-5abbe3ea43ee",
-      "status": "-",
+      "status": "+",
       "title": "Implement Tabbed View for Test Results and Coverage",
       "description": "On the 'Tests' screen, implement a tabbed interface with two tabs: 'Test Results' and 'Test Coverage'. The content for each tab will be implemented in subsequent features.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.420Z",
-      "updatedAt": "2025-09-22T23:51:23.420Z"
+      "updatedAt": "2025-09-23T00:16:29.818Z",
+      "completedAt": "2025-09-23T00:16:29.818Z"
     },
     {
       "id": "72ab35c0-0d17-4aef-adec-88225d64680d",
