@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ParsedCoverage } from '../../utils/coverage'
+import { formatUncoveredLines } from '../../utils/coverage'
 import { useNavigator } from '../../navigation/Navigator'
 import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
@@ -109,11 +110,11 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
     const storyId = await ensureTestingStory()
     if (!storyId) return
     const rel = normalizePath(file)
-    const lines = uncovered && uncovered.length ? uncovered.join(', ') : ''
+    const lines = formatUncoveredLines(uncovered)
     const title = `Add tests for ${rel}`
     const parts = [
       `Improve test coverage for @${rel}.`,
-      lines ? `Target uncovered lines: ${lines}.` : undefined,
+      lines && lines !== '—' ? `Target uncovered lines: ${lines}.` : undefined,
       '',
     ].filter(Boolean)
     const description = parts.join('\n')
@@ -133,7 +134,7 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3">
+      <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 bg-white dark:bg-neutral-900">
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <div className="text-neutral-800 dark:text-neutral-200 font-medium">Summary</div>
           <div className="text-neutral-600 dark:text-neutral-400">{summary.fileCount} files</div>
@@ -165,63 +166,82 @@ export default function CoverageReport({ data }: { data: ParsedCoverage }) {
         </div>
       </div>
 
-      <div className="rounded-md border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-        <div className="grid grid-cols-[minmax(200px,1fr)_auto_auto_auto_auto_minmax(120px,1fr)_auto] gap-3 items-center px-3 py-2 bg-neutral-50 dark:bg-neutral-900 text-[11px] font-medium text-neutral-600 dark:text-neutral-400">
-          <div>File</div>
-          <div className="justify-self-end">Statements</div>
-          <div className="justify-self-end">Branches</div>
-          <div className="justify-self-end">Functions</div>
-          <div className="justify-self-end">Lines</div>
-          <div>Uncovered lines</div>
-          <div className="justify-self-end">Action</div>
-        </div>
-        <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
-          {rows.length === 0 ? (
-            <div className="px-3 py-4 text-sm text-neutral-500">No coverage data found.</div>
-          ) : (
-            rows.map((f, i) => {
-              const rel = normalizePath(f.file)
-              const uncovered = f.uncovered_lines?.slice(0, 25)
-              const uncoveredText = uncovered && uncovered.length ? uncovered.join(', ') : '—'
-              const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
-              return (
-                <div
-                  key={i}
-                  className="grid grid-cols-[minmax(200px,1fr)_auto_auto_auto_auto_minmax(120px,1fr)_auto] gap-3 items-center px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 text-xs"
-                >
-                  <div className="truncate" title={f.file}>
-                    {rel}
-                  </div>
-                  <div className={`justify-self-end tabular-nums ${pctColor(f.pct_statements)}`}>
-                    {f.pct_statements.toFixed(1)}%
-                  </div>
-                  <div className={`justify-self-end tabular-nums ${pctColor(f.pct_branch ?? 0)}`}>
-                    {typeof f.pct_branch === 'number' ? f.pct_branch.toFixed(1) : '—'}
-                  </div>
-                  <div className={`justify-self-end tabular-nums ${pctColor(f.pct_functions ?? 0)}`}>
-                    {typeof f.pct_functions === 'number' ? f.pct_functions.toFixed(1) : '—'}
-                  </div>
-                  <div className="justify-self-end flex items-center gap-2">
-                    <span className={`tabular-nums ${pctColor(f.pct_lines)}`}>{f.pct_lines.toFixed(1)}%</span>
-                    <ProgressBar value={f.pct_lines} />
-                  </div>
-                  <div className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate" title={uncoveredText}>
-                    {uncoveredText}
-                  </div>
-                  <div className="justify-self-end">
-                    {showImprove ? (
-                      <Button size="xs" variant="secondary" onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}>
-                        Improve tests
-                      </Button>
-                    ) : (
-                      <span className="text-neutral-400">—</span>
-                    )}
-                  </div>
-                </div>
-              )
-            })
-          )}
-        </div>
+      <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
+        <table className="min-w-full text-sm">
+          <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+            <tr>
+              <th className="text-left px-3 py-2">File</th>
+              <th className="text-right px-3 py-2">Statements</th>
+              <th className="text-right px-3 py-2">Branches</th>
+              <th className="text-right px-3 py-2">Functions</th>
+              <th className="text-right px-3 py-2">Lines</th>
+              <th className="text-left px-3 py-2">Uncovered lines</th>
+              <th className="text-right px-3 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td className="px-3 py-4 text-sm text-neutral-500" colSpan={7}>
+                  No coverage data found.
+                </td>
+              </tr>
+            ) : (
+              rows.map((f, i) => {
+                const rel = normalizePath(f.file)
+                const uncoveredText = formatUncoveredLines(f.uncovered_lines)
+                const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
+                return (
+                  <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">
+                    <td className="px-3 py-2">
+                      <div className="truncate max-w-[520px]" title={f.file}>
+                        {rel}
+                      </div>
+                    </td>
+                    <td className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_statements)}`}>
+                      {f.pct_statements.toFixed(1)}%
+                    </td>
+                    <td className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_branch ?? 0)}`}>
+                      {typeof f.pct_branch === 'number' ? f.pct_branch.toFixed(1) : '—'}
+                    </td>
+                    <td className={`px-3 py-2 text-right tabular-nums ${pctColor(f.pct_functions ?? 0)}`}>
+                      {typeof f.pct_functions === 'number' ? f.pct_functions.toFixed(1) : '—'}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <div className="inline-flex items-center gap-2">
+                        <span className={`tabular-nums ${pctColor(f.pct_lines)}`}>{f.pct_lines.toFixed(1)}%</span>
+                        <ProgressBar value={f.pct_lines} />
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div
+                        className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate max-w-[360px]"
+                        title={uncoveredText}
+                      >
+                        {uncoveredText}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {showImprove ? (
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
+                          <Button
+                            size="xs"
+                            variant="secondary"
+                            onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}
+                          >
+                            Improve tests
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
       {data && (data as any).rawText && (

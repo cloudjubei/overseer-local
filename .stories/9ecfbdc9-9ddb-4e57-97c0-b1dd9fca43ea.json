@@ -171,7 +171,7 @@
     },
     {
       "id": "f4c9351c-b638-4a4e-accc-6d525f5adb54",
-      "status": "-",
+      "status": "+",
       "title": "The styling should follow the same as AgentsView",
       "description": "The style of the tables in @src/renderer/screens/TestsView.tsx should follow the same pattern as in @src/renderer/screens/AgentsView.tsx - the action button should also only show on hover.",
       "context": [
@@ -180,11 +180,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-23T19:26:47.518Z",
-      "updatedAt": "2025-09-23T19:26:47.518Z"
+      "updatedAt": "2025-09-23T22:06:54.663Z",
+      "completedAt": "2025-09-23T22:06:54.663Z"
     },
     {
       "id": "7698ec2c-015b-4eef-ab87-a88a2d14e777",
-      "status": "-",
+      "status": "+",
       "title": "There's no need for selecting specific tests to rerun",
       "description": "Always only allow rerunning all tests or cover for everything - just like at the beginning when @src/renderer/screens/TestsView.tsx first shows",
       "context": [
@@ -192,11 +193,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-23T19:28:32.718Z",
-      "updatedAt": "2025-09-23T19:28:32.718Z"
+      "updatedAt": "2025-09-23T22:03:31.580Z",
+      "completedAt": "2025-09-23T22:03:31.580Z"
     },
     {
       "id": "9e72a552-12df-416c-bbed-8e0fb8928aaa",
-      "status": "-",
+      "status": "+",
       "title": "If there are no tests (like in this project) show a button in the middle",
       "description": "Show info in the middle and a button that would do a similar thing to \"Improve tests\" in coverage - it will open up the Create Feature form with some predefined info to make tests for everything.\nThe buttons needs to show only in the tests section of @src/renderer/screens/TestsView.tsx",
       "context": [
@@ -204,17 +206,19 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-23T19:30:08.682Z",
-      "updatedAt": "2025-09-23T19:36:22.600Z"
+      "updatedAt": "2025-09-23T22:09:20.156Z",
+      "completedAt": "2025-09-23T22:09:20.156Z"
     },
     {
       "id": "2fac1501-456a-41bb-81a1-ca4c9b8c792b",
-      "status": "-",
+      "status": "+",
       "title": "When showing uncovered lines - bunch consecutive ones together",
       "description": "So:\n[1,2,3,4,5,8,9,10]\nbecomes:\n\"1-5,8-10\" when displaying",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-23T20:03:42.963Z",
-      "updatedAt": "2025-09-23T20:03:42.963Z"
+      "updatedAt": "2025-09-23T22:10:48.634Z",
+      "completedAt": "2025-09-23T22:10:48.634Z"
     }
   ],
   "featureIdToDisplayIndex": {
