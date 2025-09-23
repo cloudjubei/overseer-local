@@ -9,6 +9,8 @@ type GroupedTools = {
 
 const ToolsScreen: React.FC = () => {
   const [groupedTools, setGroupedTools] = useState<GroupedTools>({});
+  const [filteredGroupedTools, setFilteredGroupedTools] = useState<GroupedTools>({});
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,15 +42,43 @@ const ToolsScreen: React.FC = () => {
     fetchTools();
   }, []);
 
+  useEffect(() => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    if (!lowercasedQuery) {
+      setFilteredGroupedTools(groupedTools);
+      return;
+    }
+
+    const filtered: GroupedTools = {};
+    for (const source in groupedTools) {
+      const tools = groupedTools[source].filter(
+        (tool) =>
+          tool.name.toLowerCase().includes(lowercasedQuery) ||
+          (tool.description && tool.description.toLowerCase().includes(lowercasedQuery))
+      );
+      if (tools.length > 0) {
+        filtered[source] = tools;
+      }
+    }
+    setFilteredGroupedTools(filtered);
+  }, [searchQuery, groupedTools]);
+
   return (
     <div className="p-4 h-full overflow-y-auto">
       <h1 className="text-2xl font-bold mb-4">Available Tools</h1>
+      <input
+        type="text"
+        placeholder="Search tools by name or description..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full p-2 mb-4 bg-gray-700 border border-gray-600 rounded-lg text-white"
+      />
       {loading && <p>Loading tools...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      {!loading && !error && Object.keys(groupedTools).length === 0 && (
-        <p>No tools available.</p>
+      {!loading && !error && Object.keys(filteredGroupedTools).length === 0 && (
+        <p>No tools available{searchQuery ? ' matching your search.' : '.'}</p>
       )}
-      {Object.entries(groupedTools).map(([source, tools]) => (
+      {Object.entries(filteredGroupedTools).map(([source, tools]) => (
         <div key={source} className="mb-6">
           <h2 className="text-xl font-semibold border-b pb-2 mb-2">{source}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
