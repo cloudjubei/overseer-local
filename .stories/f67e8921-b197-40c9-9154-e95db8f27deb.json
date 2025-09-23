@@ -1700,13 +1700,15 @@
       "id": "47590194-5f78-4d06-8aac-62cf60f5fc86",
       "status": "-",
       "title": "In StoriesListView when a Story has an agent running - always show it",
-      "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx  this seems to be correctly implemented in @src/renderer/stories/StoryDetailsView.tsx",
+      "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx  in @src/renderer/stories/StoryDetailsView.tsx it's also slightly wrong, as the @src/renderer/components/agents/AgentRunBullet.tsx should replace @src/renderer/components/stories/RunAgentButton.tsx - i.e. it should occupy the same space - it should simply NEVER disappear when there's a task running.",
       "context": [
         "src/renderer/stories/StoriesListView.tsx",
-        "src/renderer/stories/StoryDetailsView.tsx"
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx",
+        "src/renderer/components/stories/RunAgentButton.tsx"
       ],
       "createdAt": "2025-09-23T00:09:45.531Z",
-      "updatedAt": "2025-09-23T16:15:07.808Z",
+      "updatedAt": "2025-09-23T16:22:45.900Z",
       "blockers": []
     },
     {
