@@ -82,47 +82,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [storyId, storiesById])
 
-  //TODO: logic needs to be cleand up
-  // useEffect(() => {
-  //   let disposed = false
-
-  //   async function check() {
-  //     if (!story) {
-  //       setHasUnmerged(false)
-  //       return
-  //     }
-  //     setCheckingMerge(true)
-  //     try {
-  //       const status = await gitMonitorService.getStatus()
-  //       const base = status.currentBranch || null
-  //       setGitBaseBranch(base)
-  //       const branchName = `features/${story.id}`
-  //       if (!base) {
-  //         setHasUnmerged(false)
-  //         return
-  //       }
-  //       const res = await gitMonitorService.hasUnmerged(branchName, base)
-  //       if (!disposed) {
-  //         setHasUnmerged(!!res.ok && !!res.hasUnmerged)
-  //       }
-  //     } catch (e) {
-  //       if (!disposed) setHasUnmerged(false)
-  //     } finally {
-  //       if (!disposed) setCheckingMerge(false)
-  //     }
-  //   }
-
-  //   check()
-  //   const unsubscribe = gitMonitorService.subscribe((_s) => {
-  //     // Re-check on git status updates
-  //     check()
-  //   })
-  //   return () => {
-  //     disposed = true
-  //     unsubscribe?.()
-  //   }
-  // }, [story])
-
   const sortedFeaturesBase = useMemo(() => {
     if (!story) {
       return []
@@ -457,11 +416,10 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </div>
           <div className="spacer" />
           <div className="flex items-center gap-3">
-            {storyRun && (
-              <div
-                className="flex items-center gap-2"
-                aria-label={`Active agents for Story ${story.id}`}
-              >
+            <ModelChip editable />
+            {/* Replace RunAgentButton space with AgentRunBullet when active */}
+            <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
+              {storyRun ? (
                 <AgentRunBullet
                   key={storyRun.id}
                   run={storyRun}
@@ -470,35 +428,15 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                     navigateAgentRun(storyRun.id)
                   }}
                 />
-              </div>
-            )}
-            <ModelChip editable />
-
-            {/* <button
-              type="button"
-              className={`btn ${!hasUnmerged || merging || checkingMerge ? 'btn-disabled' : ''}`}
-              disabled={!hasUnmerged || merging || checkingMerge}
-              title={
-                mergeError
-                  ? `Merge failed: ${mergeError}`
-                  : hasUnmerged
-                    ? `Merge features/${story.id} into ${gitBaseBranch || 'current branch'}`
-                    : checkingMerge
-                      ? 'Checking merge status...'
-                      : 'No commits to merge'
-              }
-              onClick={onClickMerge}
-            >
-              {merging ? 'Merging…' : 'Merge'}
-            </button> */}
-            {!storyHasActiveRun && (
-              <RunAgentButton
-                onClick={(agentType) => {
-                  if (!projectId || storyHasActiveRun) return
-                  startAgent(agentType, projectId, story.id)
-                }}
-              />
-            )}
+              ) : (
+                <RunAgentButton
+                  onClick={(agentType) => {
+                    if (!projectId || storyHasActiveRun) return
+                    startAgent(agentType, projectId, story.id)
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -644,13 +582,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                 const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                // const featureStoryRun = runsHistory.find(
-                //   (r) => r.state === 'running' && r.storyId === story.id,
-                // )
                 const featureHasActiveRun = !!storyRun?.conversations.find(
                   (c) => c.featureId === f.id,
                 )
-                // const featureHasActiveRun = !!featureConversation
 
                 return (
                   <li key={f.id} className="feature-item" role="listitem">
@@ -726,14 +660,27 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                       <div className="col col-description" title={f.description || ''}>
                         <RichText text={f.description || ''} />
                       </div>
-                      <div className="col col-actions">
-                        {!storyHasActiveRun && (
-                          <RunAgentButton
-                            onClick={(agentType) => {
-                              if (!projectId || storyHasActiveRun) return
-                              startAgent(agentType, projectId, story.id, f.id)
-                            }}
-                          />
+                      <div className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}>
+                        {featureHasActiveRun && storyRun ? (
+                          <div className="no-drag">
+                            <AgentRunBullet
+                              key={storyRun.id}
+                              run={storyRun}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigateAgentRun(storyRun.id)
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          !storyHasActiveRun && (
+                            <RunAgentButton
+                              onClick={(agentType) => {
+                                if (!projectId || storyHasActiveRun) return
+                                startAgent(agentType, projectId, story.id, f.id)
+                              }}
+                            />
+                          )
                         )}
                       </div>
 
@@ -767,21 +714,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 pr-2">
-                          {featureHasActiveRun && storyRun && (
-                            <div
-                              className="flex items-center gap-2"
-                              aria-label={`Active agents for Feature ${f.id}`}
-                            >
-                              <AgentRunBullet
-                                key={storyRun.id}
-                                run={storyRun}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  navigateAgentRun(storyRun.id)
-                                }}
-                              />
-                            </div>
-                          )}
+                          {/* AgentRunBullet for features is now rendered in the actions column to replace the RunAgentButton when active */}
                         </div>
                       </div>
                     </div>

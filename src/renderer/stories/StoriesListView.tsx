@@ -9,7 +9,7 @@ import { StoryListViewSorting, StoryViewMode, StoryListStatusFilter } from '../.
 import { useAgents } from '../contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '../components/stories/ExclamationChip'
-import { IconBoard, IconEdit, IconPlay, IconPlus, IconList } from '../components/ui/Icons'
+import { IconBoard, IconEdit, IconPlus, IconList } from '../components/ui/Icons'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import RunAgentButton from '../components/stories/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -518,7 +518,7 @@ export default function StoriesListView() {
                             <RichText text={t.description || ''} />
                           </div>
                         </div>
-                        <div className="col col-actions">
+                        <div className={`col col-actions ${storyRun ? 'is-sticky-visible' : ''}`}>
                           <button
                             type="button"
                             className="btn-secondary btn-icon"
@@ -531,7 +531,7 @@ export default function StoriesListView() {
                             <IconEdit className="h-[16px] w-[16px]" />
                           </button>
                           {storyRun ? (
-                            <div className="is-always-visible">
+                            <div className="no-drag">
                               <AgentRunBullet
                                 key={storyRun.id}
                                 run={storyRun}
