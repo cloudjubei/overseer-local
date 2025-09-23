@@ -12,7 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/Select'
-import { TimeAgo } from '../components/agents/time'
+import { timeAgo } from '../components/agents/time'
+
+function TimeAgo({ ts }: { ts: number }) {
+  const [now, setNow] = React.useState(Date.now())
+  React.useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30000)
+    return () => clearInterval(id)
+  }, [])
+  const text = timeAgo(now, ts)
+  return <span>{text}</span>
+}
 
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
@@ -105,7 +115,7 @@ function TestsInner() {
                     </span>
                   ) : resultsAt ? (
                     <span className="text-neutral-500">
-                      Last updated <span>{TimeAgo({ ts: resultsAt })}</span>
+                      Last updated <TimeAgo ts={resultsAt} />
                     </span>
                   ) : null}
                 </div>

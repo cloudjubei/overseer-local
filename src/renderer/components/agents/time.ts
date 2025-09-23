@@ -13,13 +13,8 @@ export function formatHmsCompact(ms?: number): string {
   return `${seconds}s`
 }
 
-export function TimeAgo({ ts }: { ts: number }) {
-  const [now, setNow] = React.useState(Date.now())
-  React.useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30000)
-    return () => clearInterval(id)
-  }, [])
-  const diff = Math.max(0, now - ts)
+export function timeAgo(from: number, to: number) {
+  const diff = Math.max(0, from - to)
   const minutes = Math.floor(diff / 60000)
   if (minutes <= 0) return 'just now'
   if (minutes === 1) return '1 minute ago'

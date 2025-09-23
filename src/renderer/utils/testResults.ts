@@ -104,7 +104,7 @@ function tryParseJson(raw: any): ParsedTestResults | null {
 //   at Object.<anonymous> (src/file.ts:123:45)
 // Or Vitest stack with absolute paths ending with ":line:column"
 
-const FILE_LOC_RE = /([\w@\/\\.:\-]+\.(?:[jt]sx?|vue|ts|tsx|json|md|mjs|cjs)):(\d+)(?::(\d+))?/i
+const FILE_LOC_RE = /([\w@\/\\.:\-]+\.(?:[jt]sx?|vue|ts|tsx|json|md|mjs|cjs)):(\d+)(?::(\d+))?/g
 
 function parseFailuresFromText(rawText: string): ParsedFailure[] {
   const lines = rawText.split(/\r?\n/)
