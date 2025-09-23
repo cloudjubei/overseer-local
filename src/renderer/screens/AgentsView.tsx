@@ -78,17 +78,20 @@ export default function AgentsView() {
   const activeProjectRuns = useMemo(
     () =>
       runsHistory
-        .filter((r) => r.projectId === projectId && r.state === 'running')
+        .filter(
+          (r) => r.projectId === projectId && (r.state === 'created' || r.state === 'running'),
+        )
         .slice()
         .sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || '')),
     [runsHistory, projectId],
   )
-  console.log('activeProjectRuns: ', activeProjectRuns)
 
   const projectRuns = useMemo(
     () =>
       runsHistory
-        .filter((r) => r.projectId === projectId && r.state !== 'running')
+        .filter(
+          (r) => r.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
+        )
         .slice()
         .sort((a, b) =>
           (b.finishedAt || b.updatedAt || '').localeCompare(a.finishedAt || a.updatedAt || ''),

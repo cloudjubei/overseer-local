@@ -35,14 +35,12 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const update = async () => {
     const history = await factoryService.listRunHistory()
     setRunsHistory(history)
-    console.log('AgentsContext update - setRunsActive')
     setRunsActive(history.filter((h) => h.state === 'running' || h.state === 'created'))
   }
 
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
     switch (agentRunUpdate.type) {
       case 'add':
-        console.log(' ADDING RUN : ', agentRunUpdate.runId)
         const run = agentRunUpdate.run ?? (await factoryService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])
@@ -50,7 +48,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         }
         break
       case 'delete':
-        console.log(' Deleting RUN : ', agentRunUpdate.runId)
         setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
         setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
         break
@@ -65,10 +62,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           }
           setRunsHistory((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
           if (isRunning) {
-            console.log(' Changing RUN : ', agentRunUpdate.runId)
             setRunsActive((prev) => prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2)))
           } else {
-            console.log(' Removing RUN : ', agentRunUpdate.runId)
             setRunsActive((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
           }
         }
@@ -121,7 +116,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
       const effectiveAgentType = await coerceAgentTypeForStory(agentType, projectId, storyId)
-      const historyRun = await factoryService.startRun({
+      await factoryService.startRun({
         agentType: effectiveAgentType,
         projectId,
         storyId,
@@ -130,7 +125,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         githubCredentials: activeCredentials,
         webSearchApiKeys: appSettings.webSearchApiKeys,
       })
-      setRunsHistory((prev) => [...prev, historyRun])
     },
     [activeConfig, appSettings],
   )
@@ -138,15 +132,11 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const cancelRun = useCallback(async (runId: string) => await factoryService.cancelRun(runId), [])
 
   const deleteRunHistory = useCallback(async (runId: string) => {
-    factoryService.deleteRunHistory(runId)
-    setRunsHistory((prev) => [...prev.filter((p) => p.id !== runId)])
+    await factoryService.deleteRunHistory(runId)
   }, [])
 
   const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
-    const updatedRun = await factoryService.rateRun(runId, rating)
-    if (updatedRun) {
-      setRunsHistory((prev) => prev.map((r) => (r.id === runId ? updatedRun : r)))
-    }
+    await factoryService.rateRun(runId, rating)
   }, [])
 
   const fireCompletionNotification = async (run: AgentRunHistory) => {
