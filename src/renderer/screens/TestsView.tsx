@@ -3,23 +3,26 @@ import SegmentedControl from '../components/ui/SegmentedControl'
 import { Button } from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { testsService } from '../services/testsService'
+import TestResultsView from '../components/tests/TestResults'
+import { parseTestOutput, ParsedTestResults } from '../utils/testResults'
 
 export default function TestsView() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
   const [isRunning, setIsRunning] = React.useState(false)
-  const [rawResults, setRawResults] = React.useState<string | null>(null)
+  const [results, setResults] = React.useState<ParsedTestResults | null>(null)
   const [error, setError] = React.useState<string | null>(null)
 
   const runTests = async () => {
     setIsRunning(true)
     setError(null)
-    setRawResults(null)
+    setResults(null)
     try {
       const res = await testsService.runTests()
       if (!res?.ok) {
         setError(typeof res?.raw === 'string' ? res.raw : 'Failed to run tests')
       } else {
-        setRawResults(typeof res.raw === 'string' ? res.raw : JSON.stringify(res.raw, null, 2))
+        const parsed = parseTestOutput(res.raw)
+        setResults(parsed)
       }
     } catch (e: any) {
       setError(e?.message || String(e))
@@ -59,13 +62,9 @@ export default function TestsView() {
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
             ) : null}
 
-            {!isRunning && !error && rawResults && (
-              <pre className="text-xs bg-neutral-50 dark:bg-neutral-900 p-3 rounded-md overflow-auto max-h-[60vh] whitespace-pre-wrap">
-                {rawResults}
-              </pre>
-            )}
+            {!isRunning && !error && results && <TestResultsView results={results} />}
 
-            {!isRunning && !error && !rawResults && (
+            {!isRunning && !error && !results && (
               <div className="text-sm text-neutral-500">No test results yet. Click "Run Tests" to start.</div>
             )}
           </div>

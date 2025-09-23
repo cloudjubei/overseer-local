@@ -36,12 +36,13 @@
     },
     {
       "id": "7b0d3b50-e90d-4273-a1f1-0927f0f893ff",
-      "status": "-",
+      "status": "+",
       "title": "Display Test Results",
       "description": "Parse the test results from the `factory-tools` runner and display them in the 'Test Results' tab. Special attention should be given to formatting failures, showing the failed test, the error message, and a relevant code snippet.",
       "context": [],
       "createdAt": "2025-09-22T23:51:23.422Z",
-      "updatedAt": "2025-09-22T23:51:23.422Z"
+      "updatedAt": "2025-09-23T00:26:03.680Z",
+      "completedAt": "2025-09-23T00:26:03.680Z"
     },
     {
       "id": "a18529eb-24c1-4857-af45-d464ee37de06",
