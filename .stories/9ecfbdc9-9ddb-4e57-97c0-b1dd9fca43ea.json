@@ -233,13 +233,14 @@
     },
     {
       "id": "e880756b-5b9e-4cc2-9e25-c6473b0cec1a",
-      "status": "-",
+      "status": "+",
       "title": "The tests view needs imrpoving",
       "description": "After running tests in @src/renderer/screens/TestsView.tsx there's a lot of information provided in the data - we should display it all. I.e. all passing tests, all failing tests and all skipped tests.\nSimilarly to how `vitest` displays it in the console.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-23T23:13:48.690Z",
-      "updatedAt": "2025-09-23T23:13:48.690Z"
+      "updatedAt": "2025-09-23T23:23:03.996Z",
+      "completedAt": "2025-09-23T23:23:03.996Z"
     }
   ],
   "featureIdToDisplayIndex": {
