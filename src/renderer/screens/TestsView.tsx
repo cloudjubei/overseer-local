@@ -6,6 +6,8 @@ import { testsService } from '../services/testsService'
 import TestResultsView from '../components/tests/TestResults'
 import { parseTestOutput, ParsedTestResults } from '../utils/testResults'
 import { Input } from '../components/ui/Input'
+import CoverageReport from '../components/tests/CoverageReport'
+import { parseCoverageOutput, ParsedCoverage } from '../utils/coverage'
 
 export default function TestsView() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
@@ -18,6 +20,7 @@ export default function TestsView() {
   const [isRunningCoverage, setIsRunningCoverage] = React.useState(false)
   const [coverageError, setCoverageError] = React.useState<string | null>(null)
   const [coverageRaw, setCoverageRaw] = React.useState<any | null>(null)
+  const [coverageParsed, setCoverageParsed] = React.useState<ParsedCoverage | null>(null)
 
   const runTests = async () => {
     setIsRunning(true)
@@ -42,6 +45,7 @@ export default function TestsView() {
     setIsRunningCoverage(true)
     setCoverageError(null)
     setCoverageRaw(null)
+    setCoverageParsed(null)
     try {
       const path = coveragePath?.trim()
       const res = await testsService.runCoverage({ path })
@@ -49,6 +53,7 @@ export default function TestsView() {
         setCoverageError(typeof res?.raw === 'string' ? res.raw : 'Failed to run coverage')
       } else {
         setCoverageRaw(res.raw)
+        setCoverageParsed(parseCoverageOutput(res.raw))
       }
     } catch (e: any) {
       setCoverageError(e?.message || String(e))
@@ -116,14 +121,21 @@ export default function TestsView() {
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{coverageError}</div>
             ) : null}
 
-            {!isRunningCoverage && !coverageError && coverageRaw && (
-              <div className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
-                {typeof coverageRaw === 'string' ? coverageRaw : JSON.stringify(coverageRaw, null, 2)}
-              </div>
+            {!isRunningCoverage && !coverageError && coverageParsed && (
+              <CoverageReport data={coverageParsed} />
             )}
 
-            {!isRunningCoverage && !coverageError && !coverageRaw && (
+            {!isRunningCoverage && !coverageError && !coverageParsed && (
               <div className="text-sm text-neutral-500">Enter a test file path and click "Run Coverage".</div>
+            )}
+
+            {!isRunningCoverage && !coverageError && coverageParsed && coverageParsed.rawText && (
+              <details className="mt-2">
+                <summary className="text-xs text-neutral-500 cursor-pointer">View raw output</summary>
+                <pre className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
+                  {coverageParsed.rawText}
+                </pre>
+              </details>
             )}
           </div>
         )}
