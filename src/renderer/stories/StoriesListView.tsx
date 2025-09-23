@@ -519,43 +519,47 @@ export default function StoriesListView() {
                           </div>
                         </div>
                         <div className={`col col-actions ${storyRun ? 'is-sticky-visible' : ''}`}>
-                          <button
-                            type="button"
-                            className="btn-secondary btn-icon"
-                            aria-label="Edit story"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEditStory(t.id)
-                            }}
-                          >
-                            <IconEdit className="h-[16px] w-[16px]" />
-                          </button>
-                          {storyRun ? (
-                            <div className="no-drag">
-                              <AgentRunBullet
-                                key={storyRun.id}
-                                run={storyRun}
+                          <div className="flex items-center justify-end gap-2">
+                            {!storyRun && (
+                              <button
+                                type="button"
+                                className="btn-secondary btn-icon"
+                                aria-label="Edit story"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigateAgentRun(storyRun.id)
+                                  handleEditStory(t.id)
                                 }}
-                              />
-                            </div>
-                          ) : (
-                            // Wrap RunAgentButton to stop propagation so we don't navigate to StoryDetails
-                            <div
-                              className="no-drag"
-                              onClick={(e) => e.stopPropagation()}
-                              onPointerDown={(e) => e.stopPropagation()}
-                            >
-                              <RunAgentButton
-                                onClick={(agentType) => {
-                                  if (!projectId) return
-                                  startAgent(agentType, projectId, t.id)
-                                }}
-                              />
-                            </div>
-                          )}
+                              >
+                                <IconEdit className="h-[16px] w-[16px]" />
+                              </button>
+                            )}
+                            {storyRun ? (
+                              <div className="no-drag">
+                                <AgentRunBullet
+                                  key={storyRun.id}
+                                  run={storyRun}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigateAgentRun(storyRun.id)
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              // Wrap RunAgentButton to stop propagation so we don't navigate to StoryDetails
+                              <div
+                                className="no-drag"
+                                onClick={(e) => e.stopPropagation()}
+                                onPointerDown={(e) => e.stopPropagation()}
+                              >
+                                <RunAgentButton
+                                  onClick={(agentType) => {
+                                    if (!projectId) return
+                                    startAgent(agentType, projectId, t.id)
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div className="col col-blockers" aria-label={`Blockers for Story ${t.id}`}>
                           <div className="chips-list">
