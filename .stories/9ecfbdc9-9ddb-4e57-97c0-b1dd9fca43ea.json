@@ -171,7 +171,7 @@
     },
     {
       "id": "f4c9351c-b638-4a4e-accc-6d525f5adb54",
-      "status": "-",
+      "status": "+",
       "title": "The styling should follow the same as AgentsView",
       "description": "The style of the tables in @src/renderer/screens/TestsView.tsx should follow the same pattern as in @src/renderer/screens/AgentsView.tsx - the action button should also only show on hover.",
       "context": [
@@ -180,7 +180,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-23T19:26:47.518Z",
-      "updatedAt": "2025-09-23T19:26:47.518Z"
+      "updatedAt": "2025-09-23T22:06:54.663Z",
+      "completedAt": "2025-09-23T22:06:54.663Z"
     },
     {
       "id": "7698ec2c-015b-4eef-ab87-a88a2d14e777",
