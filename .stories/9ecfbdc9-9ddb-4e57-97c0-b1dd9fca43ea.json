@@ -222,23 +222,25 @@
     },
     {
       "id": "47bd596c-fe57-4cd9-a5b8-0b7ef6a4f74e",
-      "status": "-",
+      "status": "+",
       "title": "The coverage view needs improving",
       "description": "In @src/renderer/screens/TestsView.tsx the coverage section need to be improved:\n- Statements, Branches, Functions and Lines should all show the percentage value and the percentage bar that currently only Lines show. These should be vertically stacked i.e. the numbers at the top, the bar at the bottom. All of these columns should take up the same exact width.\n- Uncovered lines should only be as wide as the title i.e. \"Uncovered Lines\" .\n- Statements, Branches, Functions and Lines should show the breakdown, total against covered, in a tooltip on hover.\n- Uncovered Lines should show the full lines display in a tooltip on hover.\n- The summary should match its values to the columns for the file by file values. No need for the extra captions/titles.\n- the files should be alphabetically sorted by path.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-23T23:13:27.551Z",
-      "updatedAt": "2025-09-23T23:13:27.551Z"
+      "updatedAt": "2025-09-23T23:18:21.249Z",
+      "completedAt": "2025-09-23T23:18:21.249Z"
     },
     {
       "id": "e880756b-5b9e-4cc2-9e25-c6473b0cec1a",
-      "status": "-",
+      "status": "+",
       "title": "The tests view needs imrpoving",
       "description": "After running tests in @src/renderer/screens/TestsView.tsx there's a lot of information provided in the data - we should display it all. I.e. all passing tests, all failing tests and all skipped tests.\nSimilarly to how `vitest` displays it in the console.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-23T23:13:48.690Z",
-      "updatedAt": "2025-09-23T23:13:48.690Z"
+      "updatedAt": "2025-09-23T23:23:03.996Z",
+      "completedAt": "2025-09-23T23:23:03.996Z"
     }
   ],
   "featureIdToDisplayIndex": {
