@@ -36,7 +36,7 @@
     },
     {
       "id": "7b5f6173-1247-4f06-a671-e0248afa9c02",
-      "status": "-",
+      "status": "+",
       "title": "Fetch and Display Tools on the ToolsView",
       "description": "On the @src/renderer/screens/ToolsView.tsx , use the @src/renderer/services/factoryToolsService.ts available tools when the component mounts. Render the tools grouped by their source file, as requested. Each tool item should display its name and a clear description.",
       "context": [
@@ -44,8 +44,9 @@
         "src/renderer/services/factoryToolsService.ts"
       ],
       "createdAt": "2025-09-22T23:53:41.490Z",
-      "updatedAt": "2025-09-23T09:14:44.694Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T16:19:55.873Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:19:55.873Z"
     },
     {
       "id": "b793d0ac-a617-468c-89dd-9b5ce15401bf",

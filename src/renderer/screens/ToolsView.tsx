@@ -5,14 +5,19 @@ import { useActiveProject } from '../contexts/ProjectContext'
 
 // Define a type for the grouped tools
 // Key is a group label; value is array of ChatTool
-// Grouping is best-effort based on tool.function.name prefix (e.g., story_*, git_*, file_*).
-// If no recognizable prefix, falls back to 'Misc'.
  type GroupedTools = {
   [group: string]: ChatTool[]
 }
 
+// Best-effort basename helper
+function basename(path: string): string {
+  if (!path) return 'Misc'
+  const parts = path.split(/[\\/]/)
+  return parts[parts.length - 1] || path
+}
+
+// Fallback grouping based on name when no source present
 function getGroupFromName(name: string): string {
-  // Prefer prefix up to first '.' or '_' as group; otherwise 'Misc'
   const dotIdx = name.indexOf('.')
   const underIdx = name.indexOf('_')
   let idx = -1
@@ -20,13 +25,38 @@ function getGroupFromName(name: string): string {
   else idx = dotIdx !== -1 ? dotIdx : underIdx
 
   const raw = idx > 0 ? name.slice(0, idx) : name
-  // Heuristic: if name has no separators, check common suffix 'Tools'
   const cleaned = raw.replace(/Tools$/i, '')
   const base = cleaned || raw
-  // If still no separators and not informative, use 'Misc'
   const label = base && base !== name ? base : idx === -1 ? 'Misc' : base
-  // Human readable title case
   return label.charAt(0).toUpperCase() + label.slice(1)
+}
+
+// Primary grouping by the source file if available in the tool schema
+function getGroupFromTool(tool: ChatTool): string {
+  const anyTool = tool as any
+  // Try common locations/keys where source metadata might be stored
+  const possible =
+    anyTool?.meta?.source?.file ||
+    anyTool?.meta?.source ||
+    anyTool?.source?.file ||
+    anyTool?.source?.path ||
+    anyTool?.source ||
+    anyTool?.origin?.file ||
+    anyTool?.origin ||
+    anyTool?.filePath ||
+    anyTool?.file ||
+    anyTool?.module
+
+  if (typeof possible === 'string') {
+    return basename(possible)
+  }
+  if (possible && typeof possible === 'object') {
+    const str = possible.file || possible.path || possible.name
+    if (typeof str === 'string' && str.length > 0) return basename(str)
+  }
+
+  const name = tool.function?.name ?? 'unknown'
+  return getGroupFromName(name)
 }
 
 const ToolsScreen: React.FC = () => {
@@ -55,8 +85,7 @@ const ToolsScreen: React.FC = () => {
         const tools = await factoryToolsService.listTools(projectId)
 
         const groups: GroupedTools = tools.reduce((acc, tool) => {
-          const name = tool.function?.name ?? 'unknown'
-          const group = getGroupFromName(name)
+          const group = getGroupFromTool(tool)
           if (!acc[group]) acc[group] = []
           acc[group].push(tool)
           return acc
@@ -114,7 +143,6 @@ const ToolsScreen: React.FC = () => {
       return isNaN(n as number) ? undefined : n
     }
     if (t === 'array') {
-      // Basic support: comma-separated values; for array of numbers/integers, coerce items
       if (typeof raw === 'string') {
         const parts = raw.split(',').map((s) => s.trim()).filter((s) => s.length > 0)
         if (schema.items && (schema.items.type === 'number' || schema.items.type === 'integer')) {
@@ -128,17 +156,15 @@ const ToolsScreen: React.FC = () => {
       return Array.isArray(raw) ? raw : []
     }
     if (t === 'object') {
-      // Accept JSON in textarea
       if (typeof raw === 'string') {
         try {
           return raw ? JSON.parse(raw) : {}
         } catch {
-          return raw // Keep as string until valid JSON
+          return raw
         }
       }
       return raw
     }
-    // default to string
     return raw
   }
 
@@ -174,7 +200,6 @@ const ToolsScreen: React.FC = () => {
     const description = schema?.description || key
     const required = (selectedTool?.function.parameters?.required || []).includes(key)
 
-    // enums -> select
     if (schema && Array.isArray(schema.enum)) {
       return (
         <div key={key}>
@@ -254,7 +279,6 @@ const ToolsScreen: React.FC = () => {
       )
     }
 
-    // For string, number, integer, etc.
     const inputType = type === 'integer' || type === 'number' ? 'number' : 'text'
     return (
       <div key={key}>
@@ -305,7 +329,7 @@ const ToolsScreen: React.FC = () => {
                     onClick={() => handleSelectTool(tool)}
                   >
                     <h3 className="font-bold text-md">{tool.function.name}</h3>
-                    <p className="text-gray-400 text-sm mt-1">{tool.function.description}</p>
+                    <p className="text-gray-400 text-sm mt-1">{tool.function.description || 'No description provided.'}</p>
                   </div>
                 ))}
               </div>
@@ -316,7 +340,7 @@ const ToolsScreen: React.FC = () => {
           {selectedTool ? (
             <div className="bg-gray-800 p-4 rounded-lg flex flex-col flex-grow">
               <h2 className="text-xl font-bold mb-2">{selectedTool.function.name}</h2>
-              <p className="text-gray-400 mb-4">{selectedTool.function.description}</p>
+              <p className="text-gray-400 mb-4">{selectedTool.function.description || 'No description provided.'}</p>
 
               <div className="space-y-4 mb-4">
                 {selectedToolProps && Object.keys(selectedToolProps).length > 0 ? (
