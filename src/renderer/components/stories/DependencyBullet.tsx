@@ -13,6 +13,7 @@ export interface DependencyBulletProps {
   isOutbound?: boolean
   notFoundDependencyDisplay?: string
   onRemove?: () => void
+  interactive?: boolean
 }
 
 const DependencyBullet: React.FC<DependencyBulletProps> = ({
@@ -21,6 +22,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   isOutbound = false,
   notFoundDependencyDisplay,
   onRemove,
+  interactive = true,
 }) => {
   const { navigateStoryDetails, storiesRoute } = useNavigator()
   const { resolveDependency } = useStories()
@@ -56,6 +58,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   }
 
   const handleClick = () => {
+    if (!interactive) return
     if (onRemove) {
       onRemove()
       return
@@ -93,23 +96,28 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
     <StorySummaryCallout {...summary} />
   )
 
+  const spanProps: React.HTMLAttributes<HTMLSpanElement> = {}
+  if (interactive) {
+    spanProps.onClick = (e) => {
+      e.preventDefault()
+      handleClick()
+    }
+    spanProps.role = 'button'
+    spanProps.tabIndex = 0
+    spanProps.onKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleClick()
+      }
+    }
+  }
+
   return (
-    <Tooltip content={content}>
+    <Tooltip content={content} disabled={!interactive}>
       <span
         className={`${className} chip  ${isError ? '' : isFeatureDependency ? 'feature' : 'story'} ${isError ? 'chip--missing' : isOutbound ? 'chip--blocks' : 'chip--ok'}`}
         title={`${display}${isOutbound ? ' (requires this)' : ''}`}
-        onClick={(e) => {
-          e.preventDefault()
-          handleClick()
-        }}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            handleClick()
-          }
-        }}
+        {...spanProps}
       >
         #{display}
         {onRemove && <IconXCircle className="w-3.5 h-3" />}
