@@ -1,29 +1,27 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/Select';
-import { useChats } from '../hooks/useChats';
-import { useLLMConfig } from '../contexts/LLMConfigContext';
-import { useNavigator } from '../navigation/Navigator';
-import CollapsibleSidebar from '../components/ui/CollapsibleSidebar';
-import FileDisplay from '../components/ui/FileDisplay';
-import { Chat, ChatMessage } from '../services/chatsService';
-import RichText from '../components/ui/RichText';
-import { inferFileType, useFiles } from '../contexts/FilesContext';
-import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons';
-import Spinner from '../components/ui/Spinner';
-import sendSoundFile from '../assets/sounds/send.mp3';
-import receiveSoundFile from '../assets/sounds/receive.mp3';
-import ErrorBubble from '../components/ui/ErrorBubble';
-import { ChatInput } from '../components/Chat';
+} from '../components/ui/Select'
+import { useChats } from '../hooks/useChats'
+import { useLLMConfig } from '../contexts/LLMConfigContext'
+import { useNavigator } from '../navigation/Navigator'
+import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
+import FileDisplay from '../components/ui/FileDisplay'
+import RichText from '../components/ui/RichText'
+import { inferFileType, useFiles } from '../contexts/FilesContext'
+import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
+import Spinner from '../components/ui/Spinner'
+import ErrorBubble from '../components/ui/ErrorBubble'
+import { ChatInput } from '../components/Chat'
+import { Chat, ChatMessage } from 'src/chat/ChatsManager'
 
 interface EnhancedMessage extends ChatMessage {
-  showModel?: boolean;
-  isFirstInGroup?: boolean;
+  showModel?: boolean
+  isFirstInGroup?: boolean
 }
 
 export default function ChatView() {
@@ -35,85 +33,85 @@ export default function ChatView() {
     deleteChat,
     sendMessage,
     isThinking,
-  } = useChats();
-  const { filesByPath } = useFiles();
-  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig();
-  const { navigateView } = useNavigator();
+  } = useChats()
+  const { filesByPath } = useFiles()
+  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
+  const { navigateView } = useNavigator()
 
-  const sendSound = useMemo(() => new Audio(sendSoundFile), []);
-  const receiveSound = useMemo(() => new Audio(receiveSoundFile), []);
+  const sendSound = useMemo(() => new Audio(sendSoundFile), [])
+  const receiveSound = useMemo(() => new Audio(receiveSoundFile), [])
 
-  const [currentChat, setCurrentChat] = useState<Chat | undefined>();
-  const messageListRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [currentChat, setCurrentChat] = useState<Chat | undefined>()
+  const messageListRef = useRef<HTMLDivElement>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
 
-  const prevMessagesCountRef = useRef(messages.length);
-  const chatChanged = useRef(false);
+  const prevMessagesCountRef = useRef(messages.length)
+  const chatChanged = useRef(false)
 
   useEffect(() => {
-    chatChanged.current = true;
-  }, [currentChatId]);
+    chatChanged.current = true
+  }, [currentChatId])
 
   useEffect(() => {
     if (chatChanged.current) {
-      chatChanged.current = false;
-      prevMessagesCountRef.current = messages.length;
-      return;
+      chatChanged.current = false
+      prevMessagesCountRef.current = messages.length
+      return
     }
     if (
       messages.length > prevMessagesCountRef.current &&
       messages[messages.length - 1]?.role === 'assistant'
     ) {
-      receiveSound.play();
+      receiveSound.play()
     }
-    prevMessagesCountRef.current = messages.length;
-  }, [messages, receiveSound]);
+    prevMessagesCountRef.current = messages.length
+  }, [messages, receiveSound])
 
   useEffect(() => {
-    const el = messageListRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-  }, [chatsById, isThinking]);
+    const el = messageListRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }, [chatsById, isThinking])
 
   useEffect(() => {
     if (currentChatId) {
-      const chat = chatsById[currentChatId];
-      setCurrentChat(chat);
+      const chat = chatsById[currentChatId]
+      setCurrentChat(chat)
     }
-  }, [currentChatId, chatsById]);
+  }, [currentChatId, chatsById])
 
   useEffect(() => {
     if (currentChat) {
-      setMessages(currentChat.messages);
+      setMessages(currentChat.messages)
     }
-  }, [currentChat]);
+  }, [currentChat])
 
   const chatHistories = useMemo(() => {
     return Object.values(chatsById).sort(
       (a, b) => new Date(a.updateDate).getTime() - new Date(b.updateDate).getTime(),
-    );
-  }, [chatsById]);
+    )
+  }, [chatsById])
 
   const handleSend = async (message: string, attachments: string[]) => {
-    if (!activeConfig) return;
-    sendSound.play();
-    await sendMessage(message, activeConfig, attachments);
-  };
+    if (!activeConfig) return
+    sendSound.play()
+    await sendMessage(message, activeConfig, attachments)
+  }
 
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
     return messages.map((msg, index) => {
-      let showModel = false;
+      let showModel = false
       if (msg.role === 'assistant' && msg.model) {
         const prevAssistant = [...messages.slice(0, index)]
           .reverse()
-          .find((m) => m.role === 'assistant');
-        showModel = !prevAssistant || prevAssistant.model !== msg.model;
+          .find((m) => m.role === 'assistant')
+        showModel = !prevAssistant || prevAssistant.model !== msg.model
       }
-      const prev = messages[index - 1];
-      const isFirstInGroup = !prev || prev.role !== msg.role || msg.role === 'system';
-      return { ...msg, showModel, isFirstInGroup };
-    });
-  }, [messages]);
+      const prev = messages[index - 1]
+      const isFirstInGroup = !prev || prev.role !== msg.role || msg.role === 'system'
+      return { ...msg, showModel, isFirstInGroup }
+    })
+  }, [messages])
 
   const chatItems = useMemo(
     () =>
@@ -125,8 +123,8 @@ export default function ChatView() {
         action: (
           <button
             onClick={(e) => {
-              e.stopPropagation();
-              deleteChat(chat.id);
+              e.stopPropagation()
+              deleteChat(chat.id)
             }}
             aria-label="Delete chat"
             title="Delete chat"
@@ -136,7 +134,7 @@ export default function ChatView() {
         ),
       })),
     [chatHistories, deleteChat],
-  );
+  )
 
   return (
     <CollapsibleSidebar
@@ -238,10 +236,10 @@ export default function ChatView() {
                         <ErrorBubble error={msg.error} />
                       </div>
                     </div>
-                  );
+                  )
                 }
-                const isUser = msg.role === 'user';
-                const isSystem = msg.role === 'system';
+                const isUser = msg.role === 'user'
+                const isSystem = msg.role === 'system'
 
                 if (isSystem) {
                   return (
@@ -250,7 +248,7 @@ export default function ChatView() {
                         <RichText text={msg.content} />
                       </div>
                     </div>
-                  );
+                  )
                 }
 
                 return (
@@ -306,26 +304,35 @@ export default function ChatView() {
                           ].join(' ')}
                         >
                           {msg.attachments.map((path, i) => {
-                            const meta = filesByPath[path];
-                            const name = meta?.name || path.split('/').pop() || path;
-                            const type = meta?.type || inferFileType(path);
-                            const size = meta?.size ?? undefined;
-                            const mtime = meta?.mtime ?? undefined;
+                            const meta = filesByPath[path]
+                            const name = meta?.name || path.split('/').pop() || path
+                            const type = meta?.type || inferFileType(path)
+                            const size = meta?.size ?? undefined
+                            const mtime = meta?.mtime ?? undefined
+                            const ctime = meta?.ctime ?? undefined
                             return (
                               <FileDisplay
                                 key={`${index}-att-${i}-${path}`}
-                                file={{ name, path, type, size, mtime }}
+                                file={{
+                                  name,
+                                  absolutePath: path,
+                                  relativePath: path,
+                                  type,
+                                  size,
+                                  mtime,
+                                  ctime,
+                                }}
                                 density="compact"
                                 interactive
                                 showPreviewOnHover
                               />
-                            );
+                            )
                           })}
                         </div>
                       )}
                     </div>
                   </div>
-                );
+                )
               })}
 
               {isThinking && (
@@ -338,7 +345,7 @@ export default function ChatView() {
                   </div>
                   <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
                     <div className="px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
-                      <Spinner size="sm" />
+                      <Spinner />
                     </div>
                   </div>
                 </div>
@@ -350,5 +357,5 @@ export default function ChatView() {
         <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
       </section>
     </CollapsibleSidebar>
-  );
+  )
 }

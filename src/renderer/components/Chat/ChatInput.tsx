@@ -1,23 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete';
-import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete';
-import { useFiles, inferFileType } from '../../contexts/FilesContext';
-import FileDisplay from '../ui/FileDisplay';
+import React, { useState, useRef, useEffect } from 'react'
+import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
+import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
+import { useFiles, inferFileType } from '../../contexts/FilesContext'
+import FileDisplay from '../ui/FileDisplay'
 
 interface ChatInputProps {
-  onSend: (message: string, attachments: string[]) => void;
-  isThinking: boolean;
-  isConfigured: boolean;
+  onSend: (message: string, attachments: string[]) => void
+  isThinking: boolean
+  isConfigured: boolean
 }
 
 export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInputProps) {
-  const [input, setInput] = useState<string>('');
-  const [pendingAttachments, setPendingAttachments] = useState<string[]>([]);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const mirrorRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [input, setInput] = useState<string>('')
+  const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const mirrorRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { files, filesByPath, uploadFile } = useFiles();
+  const { files, filesByPath, uploadFile } = useFiles()
 
   const {
     isOpen: isAutocompleteOpen,
@@ -30,64 +30,64 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     setInput,
     textareaRef,
     mirrorRef,
-  });
+  })
 
   const {
     isOpen: isRefsOpen,
     matches: matchingRefs,
     position: refsPosition,
     onSelect: onRefsSelect,
-  } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef });
+  } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef })
 
   const autoSizeTextarea = () => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    const max = 200;
-    const next = Math.min(el.scrollHeight, max);
-    el.style.height = next + 'px';
-  };
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const max = 200
+    const next = Math.min(el.scrollHeight, max)
+    el.style.height = next + 'px'
+  }
 
   useEffect(() => {
-    autoSizeTextarea();
-  }, [input]);
+    autoSizeTextarea()
+  }, [input])
 
   const handleSend = () => {
-    if (!input.trim() && pendingAttachments.length === 0) return;
-    onSend(input, pendingAttachments);
-    setInput('');
-    setPendingAttachments([]);
+    if (!input.trim() && pendingAttachments.length === 0) return
+    onSend(input, pendingAttachments)
+    setInput('')
+    setPendingAttachments([])
     requestAnimationFrame(() => {
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-        textareaRef.current.focus();
+        textareaRef.current.style.height = 'auto'
+        textareaRef.current.focus()
       }
-    });
-  };
+    })
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = async (event) => {
-      const content = event.target?.result as string;
-      const newPath = await uploadFile(file.name, content);
+      const content = event.target?.result as string
+      const newPath = await uploadFile(file.name, content)
       if (newPath) {
-        setPendingAttachments((prev) => Array.from(new Set([...prev, newPath])));
+        setPendingAttachments((prev) => Array.from(new Set([...prev, newPath])))
       }
-    };
-    reader.readAsText(file);
-  };
+    }
+    reader.readAsText(file)
+  }
 
   const handleTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
-  const canSend = (input.trim().length > 0 || pendingAttachments.length > 0) && isConfigured;
+  const canSend = (input.trim().length > 0 || pendingAttachments.length > 0) && isConfigured
 
   return (
     <div className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
@@ -120,15 +120,24 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
               {pendingAttachments.length > 0 && (
                 <div className="mb-1 flex flex-wrap gap-1">
                   {pendingAttachments.map((path, idx) => {
-                    const meta = filesByPath[path];
-                    const name = meta?.name || path.split('/').pop() || path;
-                    const type = meta?.type || inferFileType(path);
-                    const size = meta?.size ?? undefined;
-                    const mtime = meta?.mtime ?? undefined;
+                    const meta = filesByPath[path]
+                    const name = meta?.name || path.split('/').pop() || path
+                    const type = meta?.type || inferFileType(path)
+                    const size = meta?.size ?? undefined
+                    const mtime = meta?.mtime ?? undefined
+                    const ctime = meta?.ctime ?? undefined
                     return (
                       <div key={`${idx}-${path}`} className="inline-flex items-center gap-1">
                         <FileDisplay
-                          file={{ name, path, type, size, mtime }}
+                          file={{
+                            name,
+                            absolutePath: path,
+                            relativePath: path,
+                            type,
+                            size,
+                            mtime,
+                            ctime,
+                          }}
                           density="compact"
                           interactive
                           showPreviewOnHover
@@ -145,7 +154,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                           ✕
                         </button>
                       </div>
-                    );
+                    )
                   })}
                 </div>
               )}
@@ -197,22 +206,31 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
               aria-label="Files suggestions"
             >
               {matchingDocs.map((path, idx) => {
-                const meta = filesByPath[path];
-                const name = meta?.name || path.split('/').pop() || path;
-                const type = meta?.type || inferFileType(path);
-                const size = meta?.size ?? undefined;
-                const mtime = meta?.mtime ?? undefined;
+                const meta = filesByPath[path]
+                const name = meta?.name || path.split('/').pop() || path
+                const type = meta?.type || inferFileType(path)
+                const size = meta?.size ?? undefined
+                const mtime = meta?.mtime ?? undefined
+                const ctime = meta?.ctime ?? undefined
                 return (
                   <div key={idx} role="option" className="px-1 py-0.5">
                     <FileDisplay
-                      file={{ name, path, type, size, mtime }}
+                      file={{
+                        name,
+                        absolutePath: path,
+                        relativePath: path,
+                        type,
+                        size,
+                        mtime,
+                        ctime,
+                      }}
                       density="compact"
                       interactive
                       showPreviewOnHover
                       onClick={() => onAutocompleteSelect(path)}
                     />
                   </div>
-                );
+                )
               })}
             </div>
           )}
@@ -243,5 +261,5 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
         </div>
       </div>
     </div>
-  );
+  )
 }
