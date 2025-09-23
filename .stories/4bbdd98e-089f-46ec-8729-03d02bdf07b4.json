@@ -44,15 +44,16 @@
     },
     {
       "id": "1da817b7-bbab-4246-9576-70d2fbba6c2d",
-      "status": "-",
+      "status": "+",
       "title": "Refine Chat Auto-Scrolling on New Messages",
       "description": "In @src/renderer/screens/ChatView.tsx  adjust the auto-scroll behavior for new messages. When a new message arrives and the user is scrolled to the bottom, the view should scroll just enough to reveal the start of the new message, preventing the user from having to 'chase' the text as it animates in.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-22T23:55:31.984Z",
-      "updatedAt": "2025-09-23T09:27:49.378Z",
-      "blockers": []
+      "updatedAt": "2025-09-23T09:52:41.178Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T09:52:41.178Z"
     },
     {
       "id": "70dacc08-74b0-4296-887c-6f70422c11c3",

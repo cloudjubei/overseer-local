@@ -54,6 +54,11 @@ export default function ChatView() {
   const prevLenForAnimRef = useRef<number>(messages.length)
   const animationChatChangedRef = useRef<boolean>(false)
 
+  // Scrolling state/refs
+  const isAtBottomRef = useRef<boolean>(true)
+  const lastMessageRef = useRef<HTMLDivElement>(null)
+  const prevLenForScrollRef = useRef<number>(messages.length)
+
   useEffect(() => {
     chatChanged.current = true
     // also mark animation to skip on initial load of a different chat
@@ -62,6 +67,7 @@ export default function ChatView() {
 
   useEffect(() => {
     if (chatChanged.current) {
+      // On chat switch, don't play receive sound for historical messages
       chatChanged.current = false
       prevMessagesCountRef.current = messages.length
       return
@@ -98,11 +104,71 @@ export default function ChatView() {
     prevLenForAnimRef.current = messages.length
   }, [messages])
 
+  // Track is-at-bottom on user scroll
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
+    const el = e.currentTarget
+    const threshold = 10
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
+    isAtBottomRef.current = atBottom
+  }
+
+  // Auto-scroll behavior
   useEffect(() => {
-    const el = messageListRef.current
-    if (!el) return
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  }, [chatsById, isThinking])
+    const container = messageListRef.current
+    if (!container) return
+
+    const prev = prevLenForScrollRef.current
+    const increased = messages.length > prev
+    prevLenForScrollRef.current = messages.length
+
+    if (!increased) return
+
+    // If we just switched chats, jump to bottom (show full latest) and exit
+    if (animationChatChangedRef.current) {
+      requestAnimationFrame(() => {
+        const c = messageListRef.current
+        if (!c) return
+        c.scrollTo({ top: c.scrollHeight, behavior: 'auto' })
+        animationChatChangedRef.current = false
+        // Being at bottom now
+        isAtBottomRef.current = true
+      })
+      return
+    }
+
+    // Only partially scroll when user is at the bottom
+    if (!isAtBottomRef.current) return
+
+    requestAnimationFrame(() => {
+      const c = messageListRef.current
+      if (!c) return
+      const revealPadding = 24 // small gap so user starts reading without chasing
+      const lastEl = lastMessageRef.current
+
+      let targetTop = c.scrollHeight - c.clientHeight - revealPadding
+      if (lastEl) {
+        targetTop = lastEl.offsetTop - (c.clientHeight - revealPadding)
+      }
+      if (targetTop < 0) targetTop = 0
+      c.scrollTo({ top: targetTop, behavior: 'smooth' })
+    })
+  }, [messages])
+
+  // When entering thinking state and user is at bottom, reveal spinner start gently
+  useEffect(() => {
+    const c = messageListRef.current
+    if (!c) return
+    if (!isThinking) return
+    if (!isAtBottomRef.current) return
+
+    requestAnimationFrame(() => {
+      const container = messageListRef.current
+      if (!container) return
+      const revealPadding = 24
+      const targetTop = Math.max(0, container.scrollHeight - container.clientHeight - revealPadding)
+      container.scrollTo({ top: targetTop, behavior: 'smooth' })
+    })
+  }, [isThinking])
 
   useEffect(() => {
     if (currentChatId) {
@@ -240,7 +306,11 @@ export default function ChatView() {
           </div>
         )}
 
-        <div ref={messageListRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
+        <div
+          ref={messageListRef}
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
+          onScroll={handleScroll}
+        >
           {enhancedMessages.length === 0 && !isThinking ? (
             <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
               <div className="text-[18px] font-medium">Start chatting about the project</div>
@@ -286,6 +356,7 @@ export default function ChatView() {
                 return (
                   <div
                     key={index}
+                    ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
                     className={[
                       'flex items-start gap-2',
                       isUser ? 'flex-row-reverse' : 'flex-row',
