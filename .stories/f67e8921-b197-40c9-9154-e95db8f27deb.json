@@ -1710,15 +1710,17 @@
     },
     {
       "id": "47590194-5f78-4d06-8aac-62cf60f5fc86",
-      "status": "+",
+      "status": "-",
       "title": "In StoriesListView when a Story has an agent running - always show it",
       "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx",
       "context": [
-        "src/renderer/stories/StoriesListView.tsx"
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx"
       ],
       "createdAt": "2025-09-23T00:09:45.531Z",
-      "updatedAt": "2025-09-23T00:27:23.490Z",
-      "completedAt": "2025-09-23T00:27:23.490Z"
+      "updatedAt": "2025-09-23T09:40:50.833Z",
+      "rejection": "But the other buttons (the edit button) should not be permanently showing - just the @src/renderer/components/agents/AgentRunBullet.tsx",
+      "blockers": []
     },
     {
       "id": "a571d64e-213b-4f0e-b641-51678b5c26b5",
