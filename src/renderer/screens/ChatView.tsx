@@ -18,6 +18,7 @@ import Spinner from '../components/ui/Spinner'
 import ErrorBubble from '../components/ui/ErrorBubble'
 import { ChatInput } from '../components/Chat'
 import { Chat, ChatMessage } from 'src/chat/ChatsManager'
+import TypewriterText from '../components/ui/TypewriterText'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -48,8 +49,15 @@ export default function ChatView() {
   const prevMessagesCountRef = useRef(messages.length)
   const chatChanged = useRef(false)
 
+  // Track which assistant message should animate (index-based)
+  const [animateAssistantIdx, setAnimateAssistantIdx] = useState<number | null>(null)
+  const prevLenForAnimRef = useRef<number>(messages.length)
+  const animationChatChangedRef = useRef<boolean>(false)
+
   useEffect(() => {
     chatChanged.current = true
+    // also mark animation to skip on initial load of a different chat
+    animationChatChangedRef.current = true
   }, [currentChatId])
 
   useEffect(() => {
@@ -66,6 +74,29 @@ export default function ChatView() {
     }
     prevMessagesCountRef.current = messages.length
   }, [messages, receiveSound])
+
+  // Decide when to animate the latest assistant message
+  useEffect(() => {
+    if (animationChatChangedRef.current) {
+      // Skip animation when chat changes (initial load of messages)
+      animationChatChangedRef.current = false
+      prevLenForAnimRef.current = messages.length
+      setAnimateAssistantIdx(null)
+      return
+    }
+
+    if (messages.length > prevLenForAnimRef.current) {
+      const lastIdx = messages.length - 1
+      const lastMsg = messages[lastIdx]
+      if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.error) {
+        setAnimateAssistantIdx(lastIdx)
+      } else {
+        setAnimateAssistantIdx(null)
+      }
+    }
+
+    prevLenForAnimRef.current = messages.length
+  }, [messages])
 
   useEffect(() => {
     const el = messageListRef.current
@@ -294,7 +325,13 @@ export default function ChatView() {
                           msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
                         ].join(' ')}
                       >
-                        <RichText text={msg.content} />
+                        {isUser ? (
+                          <RichText text={msg.content} />
+                        ) : index === animateAssistantIdx ? (
+                          <TypewriterText text={msg.content} />
+                        ) : (
+                          <RichText text={msg.content} />
+                        )}
                       </div>
 
                       {msg.attachments && msg.attachments.length > 0 && (
