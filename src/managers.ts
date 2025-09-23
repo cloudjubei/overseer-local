@@ -12,8 +12,10 @@ import DatabaseManager from './db/DatabaseManager'
 import DocumentIngestionManager from './document_ingestion/DocumentIngestionManager'
 import GitMonitorManager from './git-monitor/GitMonitorManager'
 import BaseManager from './BaseManager'
+import FactoryLLMPricingManager from './factory/FactoryLLMPricingManager'
 
 export let databaseManager: DatabaseManager | undefined
+export let factoryLLMPricingManager: FactoryLLMPricingManager | undefined
 export let factoryAgentRunManager: FactoryAgentRunManager | undefined
 export let storiesManager: StoriesManager | undefined
 export let filesManager: FilesManager | undefined
@@ -30,7 +32,13 @@ let managers: BaseManager[] = []
 
 export async function initManagers(projectRoot: string, mainWindow: BrowserWindow): Promise<void> {
   databaseManager = new DatabaseManager(projectRoot, mainWindow)
-  factoryAgentRunManager = new FactoryAgentRunManager(projectRoot, mainWindow, databaseManager)
+  factoryLLMPricingManager = new FactoryLLMPricingManager(projectRoot, mainWindow)
+  factoryAgentRunManager = new FactoryAgentRunManager(
+    projectRoot,
+    mainWindow,
+    factoryLLMPricingManager,
+    databaseManager,
+  )
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
@@ -57,6 +65,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
 
   managers = [
     databaseManager,
+    factoryLLMPricingManager,
     factoryAgentRunManager,
     projectsManager,
     storiesManager,

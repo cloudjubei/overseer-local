@@ -2,8 +2,6 @@ import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import {
   createOrchestrator,
-  createPricingManager,
-  PricingManager,
   AgentRunRatingPatch,
   AgentRunHistory,
   RunOrchestrator,
@@ -13,28 +11,31 @@ import {
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import type DatabaseManager from '../db/DatabaseManager'
-import { PricingState } from 'thefactory-tools/dist/pricing'
+import FactoryLLMPricingManager from './FactoryLLMPricingManager'
 
 export default class FactoryAgentRunManager extends BaseManager {
-  private pricingManager?: PricingManager
   private agentRunTools?: AgentRunTools
   private orchestrator?: RunOrchestrator
 
+  private factoryLLMPricingManager: FactoryLLMPricingManager
   private dbManager: DatabaseManager
 
-  constructor(projectRoot: string, window: BrowserWindow, dbManager: DatabaseManager) {
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    factoryLLMPricingManager: FactoryLLMPricingManager,
+    dbManager: DatabaseManager,
+  ) {
     super(projectRoot, window)
 
+    this.factoryLLMPricingManager = factoryLLMPricingManager
     this.dbManager = dbManager
 
-    this.pricingManager = undefined
     this.agentRunTools = undefined
     this.orchestrator = undefined
   }
 
   async init(): Promise<void> {
-    this.pricingManager = createPricingManager({ projectRoot: this.projectRoot })
-
     this.agentRunTools = createAgentRunTools(this.projectRoot)
     this.agentRunTools!.subscribe(async (agentRunUpdate) => {
       if (this.window) {
@@ -45,16 +46,9 @@ export default class FactoryAgentRunManager extends BaseManager {
 
     this.orchestrator = createOrchestrator({
       agentRunTools: this.agentRunTools,
-      pricing: this.pricingManager,
+      pricing: this.factoryLLMPricingManager.getManager()!,
     })
 
-    // this.tools = createTools(this.projectRoot)
-
-    console.log(
-      '[factory] Pricing manager initialized. Loaded',
-      this.pricingManager?.listPrices()?.prices?.length || 0,
-      'prices.',
-    )
     await super.init()
   }
 
@@ -63,8 +57,6 @@ export default class FactoryAgentRunManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL] = ({ runId, reason }) =>
       this.cancelRun(runId, reason)
-
-    handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_LIST] = () => this.listPrices()
 
     return handlers
   }
@@ -79,9 +71,6 @@ export default class FactoryAgentRunManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_RATE] = ({ runId, rating }) =>
       this.rateRun(runId, rating)
     handlers[IPC_HANDLER_KEYS.FACTORY_RUNS_START] = (params) => this.startRun(params)
-
-    handlers[IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH] = ({ provider, url }) =>
-      this.refreshPrices(provider, url)
 
     return handlers
   }
@@ -119,13 +108,6 @@ export default class FactoryAgentRunManager extends BaseManager {
 
   async rateRun(runId: string, rating: AgentRunRatingPatch): Promise<AgentRunHistory | undefined> {
     return await this.agentRunTools?.rateRun(runId, rating)
-  }
-
-  listPrices(): PricingState | undefined {
-    return this.pricingManager?.listPrices()
-  }
-  async refreshPrices(provider?: string, url?: string): Promise<PricingState | undefined> {
-    return this.pricingManager?.refresh(provider, url)
   }
 
   private _maskSecrets(obj: any): any {
