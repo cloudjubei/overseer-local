@@ -61,7 +61,14 @@ export function playSendSound() {
   const ctx = getCtx()
   if (!ctx) return
   // Base blip
-  playTone({ frequency: 820, durationMs: 110, type: 'sine', volume: 0.23, attackMs: 5, releaseMs: 60 })
+  playTone({
+    frequency: 820,
+    durationMs: 110,
+    type: 'sine',
+    volume: 0.23,
+    attackMs: 5,
+    releaseMs: 60,
+  })
   // Slight up-chirp overlay
   const now = ctx.currentTime
   const osc = ctx.createOscillator()
@@ -81,8 +88,24 @@ export function playSendSound() {
 export function playReceiveSound() {
   // Two-note pleasant confirmation: low -> slightly higher
   // Note A4 (440Hz) then E5 (~659Hz)
-  playTone({ frequency: 440, durationMs: 100, type: 'sine', volume: 0.22, attackMs: 6, releaseMs: 70, startTimeOffset: 0 })
-  playTone({ frequency: 660, durationMs: 140, type: 'sine', volume: 0.22, attackMs: 6, releaseMs: 90, startTimeOffset: 0.10 })
+  playTone({
+    frequency: 440,
+    durationMs: 100,
+    type: 'sine',
+    volume: 0.22,
+    attackMs: 6,
+    releaseMs: 70,
+    startTimeOffset: 0,
+  })
+  playTone({
+    frequency: 660,
+    durationMs: 140,
+    type: 'sine',
+    volume: 0.22,
+    attackMs: 6,
+    releaseMs: 90,
+    startTimeOffset: 0.1,
+  })
 }
 
 // Optional: expose a mute toggle in the future if needed

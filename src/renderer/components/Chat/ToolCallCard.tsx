@@ -25,7 +25,9 @@ function Collapsible({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}>
+    <div
+      className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}
+    >
       <button
         className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[var(--surface-raised)]"
         onClick={() => setOpen((v) => !v)}
@@ -34,7 +36,9 @@ function Collapsible({
         <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
-        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>{children}</div>
+        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>
+          {children}
+        </div>
       ) : null}
     </div>
   )
@@ -54,13 +58,19 @@ export default function ToolCallCard({
   durationMs?: number
 }) {
   const isHeavy =
-    toolName === 'read_files' || toolName === 'write_file' || isLargeJson(args) || isLargeJson(result)
-  const durationText = typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
+    toolName === 'read_files' ||
+    toolName === 'write_file' ||
+    isLargeJson(args) ||
+    isLargeJson(result)
+  const durationText =
+    typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
   return (
     <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--surface-base)]">
       <div className="px-3 py-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs font-semibold">{index + 1}. {toolName}</div>
+          <div className="text-xs font-semibold">
+            {index + 1}. {toolName}
+          </div>
           <div className="text-[11px] text-[var(--text-secondary)]">Arguments</div>
         </div>
         {durationText && (

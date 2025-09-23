@@ -203,13 +203,20 @@ export default function MessageList({
   }, [isThinking])
 
   return (
-    <div ref={messageListRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4" onScroll={handleScroll}>
+    <div
+      ref={messageListRef}
+      className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
+      onScroll={handleScroll}
+    >
       {enhancedMessages.length === 0 && !isThinking ? (
         <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
           <div className="text-[18px] font-medium">Start chatting about the project</div>
-          <div className="text-[13px] mt-2">Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline</div>
+          <div className="text-[13px] mt-2">
+            Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline
+          </div>
           <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
-            Attach markdown or text files to give context. Mention files with @, and reference stories/features with #.
+            Attach markdown or text files to give context. Mention files with @, and reference
+            stories/features with #.
           </div>
         </div>
       ) : (
@@ -218,8 +225,15 @@ export default function MessageList({
             if (msg.error) {
               return (
                 <div key={index} className="flex items-start gap-2 flex-row">
-                  <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]" aria-hidden="true">AI</div>
-                  <div className="max-w-[72%] min-w-[80px] flex flex-col items-start"><ErrorBubble error={msg.error} /></div>
+                  <div
+                    className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                    aria-hidden="true"
+                  >
+                    AI
+                  </div>
+                  <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+                    <ErrorBubble error={msg.error} />
+                  </div>
                 </div>
               )
             }
@@ -237,7 +251,9 @@ export default function MessageList({
             }
 
             const isNewUserBubble =
-              isUser && index === enhancedMessages.length - 1 && messages.length > prevLenForUserAnimRef.current
+              isUser &&
+              index === enhancedMessages.length - 1 &&
+              messages.length > prevLenForUserAnimRef.current
 
             const parsedAssistant = !isUser ? parseAssistant(msg.content) : null
             const hasToolCalls = !!parsedAssistant?.tool_calls?.length
@@ -250,10 +266,32 @@ export default function MessageList({
             }
 
             return (
-              <div key={index} ref={index === enhancedMessages.length - 1 ? lastMessageRef : null} className={[ 'flex items-start gap-2', isUser ? 'flex-row-reverse' : 'flex-row', ].join(' ')}>
-                <div className={[ 'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold', isUser ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]' : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]', ].join(' ')} aria-hidden="true">{isUser ? 'You' : 'AI'}</div>
+              <div
+                key={index}
+                ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
+                className={[
+                  'flex items-start gap-2',
+                  isUser ? 'flex-row-reverse' : 'flex-row',
+                ].join(' ')}
+              >
+                <div
+                  className={[
+                    'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                    isUser
+                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                      : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                  ].join(' ')}
+                  aria-hidden="true"
+                >
+                  {isUser ? 'You' : 'AI'}
+                </div>
 
-                <div className={[ 'max-w-[72%] min-w-[80px] flex flex-col', isUser ? 'items-end' : 'items-start', ].join(' ')}>
+                <div
+                  className={[
+                    'max-w-[72%] min-w-[80px] flex flex-col',
+                    isUser ? 'items-end' : 'items-start',
+                  ].join(' ')}
+                >
                   {!isUser && msg.showModel && msg.model && (
                     <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
@@ -261,7 +299,17 @@ export default function MessageList({
                     </div>
                   )}
 
-                  <div className={[ 'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow', isUser ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md' : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md', msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md', 'chat-bubble', isNewUserBubble ? 'chat-bubble--user-pop-enter' : '', ].join(' ')}>
+                  <div
+                    className={[
+                      'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                      isUser
+                        ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
+                        : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                      msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                      'chat-bubble',
+                      isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
+                    ].join(' ')}
+                  >
                     {isUser ? (
                       <RichText text={msg.content} />
                     ) : index === animateAssistantIdx ? (
@@ -292,7 +340,12 @@ export default function MessageList({
                   )}
 
                   {msg.attachments && msg.attachments.length > 0 && (
-                    <div className={[ 'mt-1 flex flex-wrap gap-1', isUser ? 'justify-end' : 'justify-start', ].join(' ')}>
+                    <div
+                      className={[
+                        'mt-1 flex flex-wrap gap-1',
+                        isUser ? 'justify-end' : 'justify-start',
+                      ].join(' ')}
+                    >
                       {msg.attachments.map((path, i) => {
                         const meta = filesByPath[path]
                         const name = meta?.name || path.split('/').pop() || path
@@ -303,7 +356,15 @@ export default function MessageList({
                         return (
                           <FileDisplay
                             key={`${index}-att-${i}-${path}`}
-                            file={{ name, absolutePath: path, relativePath: path, type, size, mtime, ctime }}
+                            file={{
+                              name,
+                              absolutePath: path,
+                              relativePath: path,
+                              type,
+                              size,
+                              mtime,
+                              ctime,
+                            }}
                             density="compact"
                             interactive
                             showPreviewOnHover
@@ -319,7 +380,12 @@ export default function MessageList({
 
           {isThinking && (
             <div className="flex items-start gap-2 flex-row">
-              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]" aria-hidden="true">AI</div>
+              <div
+                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                aria-hidden="true"
+              >
+                AI
+              </div>
               <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
                 <div className="px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
                   <Spinner />

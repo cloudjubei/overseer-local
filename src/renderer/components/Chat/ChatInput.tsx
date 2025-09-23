@@ -111,7 +111,10 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
         <div className="relative flex items-end gap-2">
           <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
             <div className="relative">
-              <div className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-words pointer-events-none text-[var(--text-primary)]" aria-hidden="true">
+              <div
+                className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-words pointer-events-none text-[var(--text-primary)]"
+                aria-hidden="true"
+              >
                 {input ? (
                   <RichText text={input} variant="input" />
                 ) : (
@@ -129,7 +132,12 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 placeholder={''}
                 rows={1}
                 aria-label="Message input"
-                style={{ maxHeight: 200, overflowY: 'auto', color: 'transparent', caretColor: 'var(--text-primary)' }}
+                style={{
+                  maxHeight: 200,
+                  overflowY: 'auto',
+                  color: 'transparent',
+                  caretColor: 'var(--text-primary)',
+                }}
                 disabled={isThinking}
               />
             </div>
@@ -158,21 +166,38 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                     style={{ display: 'none' }}
                     onChange={handleFileUpload}
                   />
-                  <span className="hidden sm:inline">Tip: Use @ for files • Use # for stories and features</span>
+                  <span className="hidden sm:inline">
+                    Tip: Use @ for files • Use # for stories and features
+                  </span>
                 </div>
                 <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
               </div>
             </div>
           </div>
 
-          <button onClick={handleSend} className="btn" disabled={!canSend || isThinking} aria-label="Send message">Send</button>
+          <button
+            onClick={handleSend}
+            className="btn"
+            disabled={!canSend || isThinking}
+            aria-label="Send message"
+          >
+            Send
+          </button>
 
           {isAutocompleteOpen && autocompletePosition && (
-            <FilesSuggestionsMenu matches={matchingDocs} position={autocompletePosition} onSelect={onAutocompleteSelect} />
+            <FilesSuggestionsMenu
+              matches={matchingDocs}
+              position={autocompletePosition}
+              onSelect={onAutocompleteSelect}
+            />
           )}
 
           {isRefsOpen && refsPosition && (
-            <RefsSuggestionsMenu matches={matchingRefs as any} position={refsPosition} onSelect={onRefsSelect} />
+            <RefsSuggestionsMenu
+              matches={matchingRefs as any}
+              position={refsPosition}
+              onSelect={onRefsSelect}
+            />
           )}
         </div>
       </div>

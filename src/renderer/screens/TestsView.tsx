@@ -33,10 +33,10 @@ function mapTestResultToParsed(res: TestResult): ParsedTestResults {
     typeof anyRes.ok === 'boolean'
       ? anyRes.ok
       : status
-      ? /^(ok|pass|passed|success)$/i.test(status)
-      : Array.isArray(anyRes.failures)
-      ? anyRes.failures.length === 0
-      : true
+        ? /^(ok|pass|passed|success)$/i.test(status)
+        : Array.isArray(anyRes.failures)
+          ? anyRes.failures.length === 0
+          : true
 
   // Map failures if present
   const failures: ParsedFailure[] = []
@@ -64,34 +64,34 @@ function mapTestResultToParsed(res: TestResult): ParsedTestResults {
       typeof summarySrc.total === 'number'
         ? summarySrc.total
         : typeof summarySrc.numTotalTests === 'number'
-        ? summarySrc.numTotalTests
-        : undefined,
+          ? summarySrc.numTotalTests
+          : undefined,
     passed:
       typeof summarySrc.passed === 'number'
         ? summarySrc.passed
         : typeof summarySrc.numPassedTests === 'number'
-        ? summarySrc.numPassedTests
-        : undefined,
+          ? summarySrc.numPassedTests
+          : undefined,
     failed:
       typeof summarySrc.failed === 'number'
         ? summarySrc.failed
         : typeof summarySrc.numFailedTests === 'number'
-        ? summarySrc.numFailedTests
-        : undefined,
+          ? summarySrc.numFailedTests
+          : undefined,
     skipped:
       typeof summarySrc.skipped === 'number'
         ? summarySrc.skipped
         : typeof summarySrc.numPendingTests === 'number'
-        ? summarySrc.numPendingTests
-        : undefined,
+          ? summarySrc.numPendingTests
+          : undefined,
     durationMs:
       typeof summarySrc.durationMs === 'number'
         ? summarySrc.durationMs
         : typeof summarySrc.runtime === 'number'
-        ? summarySrc.runtime
-        : typeof summarySrc.time === 'number'
-        ? summarySrc.time
-        : undefined,
+          ? summarySrc.runtime
+          : typeof summarySrc.time === 'number'
+            ? summarySrc.time
+            : undefined,
   }
 
   return {
@@ -234,9 +234,7 @@ export default function TestsView() {
             )}
 
             {!isRunningCoverage && !coverageError && !coverageParsed && (
-              <div className="text-sm text-neutral-500">
-                Enter a path and click "Run Coverage".
-              </div>
+              <div className="text-sm text-neutral-500">Enter a path and click "Run Coverage".</div>
             )}
 
             {!isRunningCoverage && !coverageError && coverageParsed && coverageParsed.rawText && (

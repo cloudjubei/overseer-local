@@ -24,7 +24,11 @@ export default function RefsSuggestionsMenu({
   return (
     <div
       className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
-      style={{ left: `${position.left}px`, top: `${position.top}px`, transform: 'translateY(-100%)' }}
+      style={{
+        left: `${position.left}px`,
+        top: `${position.top}px`,
+        transform: 'translateY(-100%)',
+      }}
       role="listbox"
       aria-label="References suggestions"
     >
