@@ -1714,12 +1714,10 @@
       "title": "In StoriesListView when a Story has an agent running - always show it",
       "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx",
       "context": [
-        "src/renderer/stories/StoriesListView.tsx",
-        "src/renderer/components/agents/AgentRunBullet.tsx"
+        "src/renderer/stories/StoriesListView.tsx"
       ],
       "createdAt": "2025-09-23T00:09:45.531Z",
-      "updatedAt": "2025-09-23T09:44:25.969Z",
-      "rejection": "But the other buttons (the edit button) should not be permanently showing - just the @src/renderer/components/agents/AgentRunBullet.tsx",
+      "updatedAt": "2025-09-23T09:53:41.446Z",
       "blockers": [],
       "completedAt": "2025-09-23T09:44:25.969Z"
     },
@@ -1735,6 +1733,18 @@
       "createdAt": "2025-09-23T00:11:02.070Z",
       "updatedAt": "2025-09-23T00:29:20.602Z",
       "completedAt": "2025-09-23T00:29:20.602Z"
+    },
+    {
+      "id": "b951665d-139c-4761-94f1-c259b36dab42",
+      "status": "-",
+      "title": "Improve the time display in ChatConversation to show a time display similar to AgentRows",
+      "description": "In @src/renderer/components/agents/ChatConversation.tsx it always shows the time taken to respond in seconds - we want it to be more human friendly, so it should always show it in the h:mm:ss format, and now show h or mm if the time is small enough - it should be done similarly in @src/renderer/components/agents/AgentRunRow.tsx",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/components/agents/AgentRunRow.tsx"
+      ],
+      "createdAt": "2025-09-23T09:53:32.603Z",
+      "updatedAt": "2025-09-23T09:53:32.603Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1848,7 +1858,8 @@
     "18cbcc94-0531-4534-936c-7c7fa5efda8c": 108,
     "11b7fc32-af7f-409c-a3f0-12a414749e12": 109,
     "47590194-5f78-4d06-8aac-62cf60f5fc86": 110,
-    "a571d64e-213b-4f0e-b641-51678b5c26b5": 111
+    "a571d64e-213b-4f0e-b641-51678b5c26b5": 111,
+    "b951665d-139c-4761-94f1-c259b36dab42": 112
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-16T15:58:09.300Z"
