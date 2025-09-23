@@ -1,16 +1,10 @@
 // Coverage parsing utility that accepts multiple shapes
 // Primary support is for the run_test_coverage tool contract and generic objects from thefactory-tools
 
-export type ParsedCoverageFile = {
-  pct_statements: number
-  pct_branch: number | null
-  pct_functions: number | null
-  pct_lines: number
-  uncovered_lines: number[]
-}
+import { CoverageFileStats } from 'thefactory-tools'
 
 export type ParsedCoverage = {
-  files: Record<string, ParsedCoverageFile>
+  files: Record<string, CoverageFileStats>
   rawText?: string
   summary?: {
     pct_statements?: number
@@ -48,7 +42,7 @@ export function parseCoverageOutput(raw: any): ParsedCoverage {
     // Try to compute a simple average summary
     const filesArr = Object.values(out.files)
     if (filesArr.length > 0) {
-      const avg = (getter: (f: ParsedCoverageFile) => number | null) => {
+      const avg = (getter: (f: CoverageFileStats) => number | null) => {
         const vals = filesArr.map(getter).filter((v): v is number => typeof v === 'number')
         if (!vals.length) return undefined
         return vals.reduce((a, b) => a + b, 0) / vals.length
@@ -82,7 +76,8 @@ export function parseCoverageOutput(raw: any): ParsedCoverage {
         const name = (item as any).path || (item as any).file || (item as any).name
         if (!name) continue
         out.files[name] = {
-          pct_statements: toPct((item as any).statements) ?? toPct((item as any).pct_statements) ?? 0,
+          pct_statements:
+            toPct((item as any).statements) ?? toPct((item as any).pct_statements) ?? 0,
           pct_branch: toPct((item as any).branches) ?? toPct((item as any).pct_branch),
           pct_functions: toPct((item as any).functions) ?? toPct((item as any).pct_functions),
           pct_lines: toPct((item as any).lines) ?? toPct((item as any).pct_lines) ?? 0,

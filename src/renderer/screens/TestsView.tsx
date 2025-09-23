@@ -103,7 +103,6 @@ function TestsInner() {
               >
                 Run Tests
               </Button>
-              {isRunningTests ? <Spinner size={16} label="Running tests..." /> : null}
             </div>
 
             {results && (
@@ -163,7 +162,6 @@ function TestsInner() {
               >
                 Run Coverage
               </Button>
-              {isRunningCoverage ? <Spinner size={16} label="Running coverage..." /> : null}
             </div>
 
             {coverage && (

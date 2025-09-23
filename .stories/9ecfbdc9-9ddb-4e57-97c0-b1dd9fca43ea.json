@@ -1,6 +1,6 @@
 {
   "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
-  "status": "+",
+  "status": "-",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
   "features": [
@@ -156,6 +156,75 @@
       "createdAt": "2025-09-23T16:13:08.228Z",
       "updatedAt": "2025-09-23T16:17:28.743Z",
       "completedAt": "2025-09-23T16:17:28.743Z"
+    },
+    {
+      "id": "c7ee0e36-2485-4e2c-b1d5-b85054b6b44e",
+      "status": "-",
+      "title": "There's an error when running tests",
+      "description": "A red error shows:\nCannot read properties of undefined (reading 'replace')",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T19:23:17.204Z",
+      "updatedAt": "2025-09-23T19:23:17.204Z"
+    },
+    {
+      "id": "346aaa45-47c8-4325-b166-efc7c4fa245f",
+      "status": "-",
+      "title": "After having run coverage it isn't saved",
+      "description": "After going away from @src/renderer/screens/TestsView.tsx and coming back to the screen - the just ran coverage isn't showing anymore - it should.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T19:24:57.838Z",
+      "updatedAt": "2025-09-23T19:24:57.838Z"
+    },
+    {
+      "id": "f4c9351c-b638-4a4e-accc-6d525f5adb54",
+      "status": "-",
+      "title": "The styling should follow the same as AgentsView",
+      "description": "The style of the tables in @src/renderer/screens/TestsView.tsx should follow the same pattern as in @src/renderer/screens/AgentsView.tsx - the action button should also only show on hover.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T19:26:47.518Z",
+      "updatedAt": "2025-09-23T19:26:47.518Z"
+    },
+    {
+      "id": "7698ec2c-015b-4eef-ab87-a88a2d14e777",
+      "status": "-",
+      "title": "There's no need for selecting specific tests to rerun",
+      "description": "Always only allow rerunning all tests or cover for everything - just like at the beginning when @src/renderer/screens/TestsView.tsx first shows",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T19:28:32.718Z",
+      "updatedAt": "2025-09-23T19:28:32.718Z"
+    },
+    {
+      "id": "9e72a552-12df-416c-bbed-8e0fb8928aaa",
+      "status": "-",
+      "title": "If there are no tests (like in this project) show a button in the middle",
+      "description": "Show info in the middle and a button that would do a similar thing to \"Improve tests\" in coverage - it will open up the Create Feature form with some predefined info to make tests for everything.\nThe buttons needs to show only in the tests section of @src/renderer/screens/TestsView.tsx",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T19:30:08.682Z",
+      "updatedAt": "2025-09-23T19:36:22.600Z"
+    },
+    {
+      "id": "2fac1501-456a-41bb-81a1-ca4c9b8c792b",
+      "status": "-",
+      "title": "When showing uncovered lines - bunch consecutive ones together",
+      "description": "So:\n[1,2,3,4,5,8,9,10]\nbecomes:\n\"1-5,8-10\" when displaying",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T20:03:42.963Z",
+      "updatedAt": "2025-09-23T20:03:42.963Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -171,9 +240,14 @@
     "bfdba512-14ae-4bae-b2dc-ff5c4b34c58e": 10,
     "e67dc4d1-2b22-46bf-9e9e-98c2712af48a": 11,
     "c13680c0-c41b-4119-81e8-957cabc388fa": 12,
-    "cc8704ca-976b-418e-8401-0446a1d0e773": 13
+    "cc8704ca-976b-418e-8401-0446a1d0e773": 13,
+    "c7ee0e36-2485-4e2c-b1d5-b85054b6b44e": 14,
+    "7698ec2c-015b-4eef-ab87-a88a2d14e777": 15,
+    "346aaa45-47c8-4325-b166-efc7c4fa245f": 16,
+    "f4c9351c-b638-4a4e-accc-6d525f5adb54": 17,
+    "9e72a552-12df-416c-bbed-8e0fb8928aaa": 18,
+    "2fac1501-456a-41bb-81a1-ca4c9b8c792b": 19
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
-  "updatedAt": "2025-09-22T23:34:09.482Z",
-  "completedAt": "2025-09-23T16:17:28.743Z"
+  "updatedAt": "2025-09-22T23:34:09.482Z"
 }
