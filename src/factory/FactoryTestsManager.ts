@@ -60,6 +60,9 @@ export default class FactoryTestsManager extends BaseManager {
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_LIST] = async ({ projectId }) =>
+      this.listTests(projectId)
+
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN] = async ({ projectId, path }) =>
       this.runTest(projectId, path)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE] = async ({ projectId, path }) =>
@@ -82,6 +85,12 @@ export default class FactoryTestsManager extends BaseManager {
     }
 
     return handlers
+  }
+
+  async listTests(projectId: string): Promise<any[]> {
+    const tools = await this.__getTools(projectId)
+    // listTests added in thefactory-tools; optional chaining for safety
+    return (await tools?.listTests?.()) ?? []
   }
 
   async runTest(projectId: string, path?: string): Promise<TestResult | undefined> {
@@ -131,7 +140,16 @@ export default class FactoryTestsManager extends BaseManager {
       return
     }
     const tools = createTestTools(projectRoot)
+    // Initialize if available (pattern similar to Stories)
+    await (tools as any)?.init?.()
     this.tools[projectId] = tools
+
+    // forward subscribe updates from test tools to renderer via IPC
+    ;(tools as any)?.subscribe?.((update: any) => {
+      if (this.window) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, update)
+      }
+    })
   }
   private async __getTools(projectId: string): Promise<TestTools | undefined> {
     if (!this.tools[projectId]) {

@@ -113,7 +113,7 @@
     },
     {
       "id": "bfdba512-14ae-4bae-b2dc-ff5c4b34c58e",
-      "status": "-",
+      "status": "+",
       "title": "TheFactoryTools was updated with new subscribe and list tests functionality",
       "description": "Update @src/factory/FactoryTestsManager.ts , @src/renderer/services/factoryTestsService.ts , @src/preload.js , @src/ipcHandlersKeys.js to include this new API.\nFollow the same exact pattern that @src/stories/StoriesManager.ts does with subscribe and list.",
       "context": [
@@ -124,7 +124,8 @@
         "src/stories/StoriesManager.ts"
       ],
       "createdAt": "2025-09-23T12:30:47.377Z",
-      "updatedAt": "2025-09-23T12:30:47.377Z"
+      "updatedAt": "2025-09-23T13:29:52.250Z",
+      "completedAt": "2025-09-23T13:29:52.250Z"
     },
     {
       "id": "6f87dd12-0f6a-43c9-9cae-3cc0a5a338f9",
