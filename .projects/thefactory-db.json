@@ -16,5 +16,9 @@
     "30a26e88-c04e-4619-a89c-1d21ed660e20": 4
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-09-16T13:05:37.972Z"
+  "updatedAt": "2025-09-24T22:46:15.145Z",
+  "codeInfo": {
+    "language": "typescript",
+    "testFramework": "vitest"
+  }
 }

@@ -15,7 +15,7 @@ import {
 import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
 import { validateProjectClient } from './validateProject'
 import { Switch } from '../components/ui/Switch'
-import { Chip } from './Chip'
+import { Chip } from '../components/ui/Chip'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
@@ -416,7 +416,6 @@ export default function ProjectManagerModal({
           <div className="form-row flex items-center gap-4">
             <label htmlFor="coding-project-switch">Coding Project</label>
             <Switch
-              id="coding-project-switch"
               checked={!!form.codeInfo}
               onCheckedChange={(checked) => {
                 if (checked) {
@@ -432,16 +431,25 @@ export default function ProjectManagerModal({
             <div className="form-row">
               <label>Code Info</label>
               <div className="flex gap-2">
-                <Chip button onClick={() => setIsCodeInfoModalOpen(true)}>
+                <Chip
+                  // button
+                  onClick={() => setIsCodeInfoModalOpen(true)}
+                >
                   {form.codeInfo.language}
                 </Chip>
                 {form.codeInfo.framework && (
-                  <Chip button onClick={() => setIsCodeInfoModalOpen(true)}>
+                  <Chip
+                    // button
+                    onClick={() => setIsCodeInfoModalOpen(true)}
+                  >
                     {form.codeInfo.framework}
                   </Chip>
                 )}
                 {form.codeInfo.testFramework && (
-                  <Chip button onClick={() => setIsCodeInfoModalOpen(true)}>
+                  <Chip
+                    // button
+                    onClick={() => setIsCodeInfoModalOpen(true)}
+                  >
                     {form.codeInfo.testFramework}
                   </Chip>
                 )}

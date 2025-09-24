@@ -15,10 +15,15 @@ import type {
   TestFrameworkName,
 } from 'thefactory-tools'
 import {
-  KNOWN_LANGUAGES,
   KNOWN_FRAMEWORKS_BY_LANGUAGE,
+  KNOWN_LANGUAGES,
   KNOWN_TEST_FRAMEWORKS_BY_LANGUAGE,
-} from 'thefactory-tools'
+} from '../services/projectsService'
+// import {
+//   KNOWN_LANGUAGES,
+//   KNOWN_FRAMEWORKS_BY_LANGUAGE,
+//   KNOWN_TEST_FRAMEWORKS_BY_LANGUAGE,
+// } from 'thefactory-tools'
 
 interface ProjectCodeInfoModalProps {
   codeInfo?: Partial<ProjectCodeInfo>
