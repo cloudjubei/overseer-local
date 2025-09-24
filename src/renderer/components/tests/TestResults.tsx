@@ -94,14 +94,6 @@ function FailureItem({ test, failure }: { test: TestResult; failure: TestFailure
           </pre>
         </details>
       )}
-      {failure.message && (
-        <details className="mt-1">
-          <summary className="text-xs text-neutral-500 cursor-pointer">Message</summary>
-          <pre className="text-[11px] bg-neutral-50 dark:bg-neutral-900 p-2 rounded-md overflow-auto whitespace-pre-wrap">
-            {failure.message}
-          </pre>
-        </details>
-      )}
     </div>
   )
 }
@@ -158,7 +150,12 @@ function extractPassedNames(raw?: string): string[] {
     if (m) {
       const name = (m[1] || '').trim()
       // Ignore potential summary lines that could be misinterpreted
-      if (!/\btests?\b/i.test(name) && !/\bpassed\b/i.test(name) && !/\bskipped\b/i.test(name) && !/\bfailed\b/i.test(name)) {
+      if (
+        !/\btests?\b/i.test(name) &&
+        !/\bpassed\b/i.test(name) &&
+        !/\bskipped\b/i.test(name) &&
+        !/\bfailed\b/i.test(name)
+      ) {
         out.push(name)
       }
     }
@@ -224,25 +221,31 @@ export default function TestResultsView({ results }: { results: TestsResult }) {
           <span className="text-green-700 dark:text-green-300">✓ {results.summary.passed}</span>
           <span className="text-red-700 dark:text-red-300">✗ {results.summary.failed}</span>
           <span className="text-amber-700 dark:text-amber-300">○ {results.summary.skipped}</span>
-          <span className="text-neutral-600 dark:text-neutral-400">• {results.summary.total} total</span>
+          <span className="text-neutral-600 dark:text-neutral-400">
+            • {results.summary.total} total
+          </span>
           {typeof results.summary.durationMs === 'number' && (
             <span className="text-neutral-600 dark:text-neutral-400">• {totalDur}</span>
           )}
         </div>
       </div>
 
-      {/* Failing tests */}
       {hasFailures && (
         <div className="space-y-2">
           <div className="text-sm font-medium text-red-700 dark:text-red-300">
             {results.summary.failed} failing test{results.summary.failed === 1 ? '' : 's'}
           </div>
           {failing.length === 0 ? (
-            <div className="text-xs text-neutral-500">No structured failures detected. See raw outputs below.</div>
+            <div className="text-xs text-neutral-500">
+              No structured failures detected. See raw outputs below.
+            </div>
           ) : null}
 
           {failing.map((t, idx) => (
-            <div key={`fail-${idx}`} className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2">
+            <div
+              key={`fail-${idx}`}
+              className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2"
+            >
               <FileHeader t={t} />
               <div className="space-y-2">
                 {(t.failures || []).map((f, i) => (
@@ -264,7 +267,10 @@ export default function TestResultsView({ results }: { results: TestsResult }) {
             {results.summary.skipped} skipped test{results.summary.skipped === 1 ? '' : 's'}
           </div>
           {skippedFiles.map((t, idx) => (
-            <div key={`skip-${idx}`} className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2">
+            <div
+              key={`skip-${idx}`}
+              className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2"
+            >
               <FileHeader t={t} />
               <SkipsList t={t} />
               <PassesList t={t} />
@@ -281,7 +287,10 @@ export default function TestResultsView({ results }: { results: TestsResult }) {
             {results.summary.passed} passing test{results.summary.passed === 1 ? '' : 's'}
           </div>
           {passing.map((t, idx) => (
-            <div key={`pass-${idx}`} className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2">
+            <div
+              key={`pass-${idx}`}
+              className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2"
+            >
               <FileHeader t={t} />
               <PassesList t={t} />
               <SkipsList t={t} />

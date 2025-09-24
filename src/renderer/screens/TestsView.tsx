@@ -89,7 +89,10 @@ function TestsInner() {
   }
 
   const showNoTestsCta =
-    activeTab === 'results' && !isRunningTests && !isLoadingCatalog && (testsCatalog?.length ?? 0) === 0
+    activeTab === 'results' &&
+    !isRunningTests &&
+    !isLoadingCatalog &&
+    (testsCatalog?.length ?? 0) === 0
 
   return (
     <div className="flex-1 overflow-auto">
@@ -118,11 +121,7 @@ function TestsInner() {
                 All tests will be run.
               </div>
               <div className="flex-1" />
-              <Button
-                onClick={() => runTests()}
-                loading={isRunningTests}
-                variant="primary"
-              >
+              <Button onClick={() => runTests()} loading={isRunningTests} variant="primary">
                 Run Tests
               </Button>
             </div>
@@ -153,8 +152,8 @@ function TestsInner() {
               <div className="flex items-center justify-center py-16">
                 <div className="text-center max-w-xl">
                   <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
-                    No tests detected in this project. Kickstart testing by creating a feature to set up
-                    the testing framework and add coverage.
+                    No tests detected in this project. Kickstart testing by creating a feature to
+                    set up the testing framework and add coverage.
                   </div>
                   <Button variant="secondary" onClick={onCreateTestsFeatureClick}>
                     Create feature to add tests
@@ -168,12 +167,6 @@ function TestsInner() {
             {!isRunningTests && !testsError && !results && !showNoTestsCta && (
               <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
             )}
-
-            {isRunningTests && (
-              <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                <Spinner size={14} label="Running tests..." />
-              </div>
-            )}
           </div>
         )}
 
@@ -184,11 +177,7 @@ function TestsInner() {
                 Coverage will be collected for all files.
               </div>
               <div className="flex-1" />
-              <Button
-                onClick={() => runCoverage()}
-                loading={isRunningCoverage}
-                variant="primary"
-              >
+              <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary">
                 Run Coverage
               </Button>
             </div>
@@ -225,17 +214,6 @@ function TestsInner() {
               <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
                 <Spinner size={14} label="Running coverage..." />
               </div>
-            )}
-
-            {!isRunningCoverage && !coverageError && coverage && (coverage as any).rawText && (
-              <details className="mt-2">
-                <summary className="text-xs text-neutral-500 cursor-pointer">
-                  View raw output
-                </summary>
-                <pre className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
-                  {(coverage as any).rawText}
-                </pre>
-              </details>
             )}
           </div>
         )}
