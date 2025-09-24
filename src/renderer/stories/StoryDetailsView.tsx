@@ -687,6 +687,18 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           status={f.status}
                           onChange={(next) => handleFeatureStatusChange(story.id, f.id, next)}
                         />
+                        {featureHasActiveRun && storyRun && (
+                          <div className="no-drag mt-1">
+                            <AgentRunBullet
+                              key={storyRun.id}
+                              run={storyRun}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigateAgentRun(storyRun.id)
+                              }}
+                            />
+                          </div>
+                        )}
                         {f.rejection && (
                           <ExclamationChip title={f.rejection} tooltip="Has rejection reason" />
                         )}
@@ -703,26 +715,13 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                       <div
                         className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}
                       >
-                        {featureHasActiveRun && storyRun ? (
-                          <div className="no-drag">
-                            <AgentRunBullet
-                              key={storyRun.id}
-                              run={storyRun}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigateAgentRun(storyRun.id)
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          !storyHasActiveRun && (
-                            <RunAgentButton
-                              onClick={(agentType) => {
-                                if (!projectId || storyHasActiveRun) return
-                                startAgent(agentType, projectId, story.id, f.id)
-                              }}
-                            />
-                          )
+                        {!storyHasActiveRun && (
+                          <RunAgentButton
+                            onClick={(agentType) => {
+                              if (!projectId || storyHasActiveRun) return
+                              startAgent(agentType, projectId, story.id, f.id)
+                            }}
+                          />
                         )}
                       </div>
 

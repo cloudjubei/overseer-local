@@ -492,7 +492,21 @@ export default function StoriesListView() {
                     >
                       <div className="story-grid">
                         <div className="col col-id">
-                          <span className="id-chip">{storyIdToDisplayIndex[t.id]}</span>
+                          <div className="flex items-center">
+                            {storyRun && (
+                              <div className="no-drag mr-2">
+                                <AgentRunBullet
+                                  key={storyRun.id}
+                                  run={storyRun}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigateAgentRun(storyRun.id)
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <span className="id-chip">{storyIdToDisplayIndex[t.id]}</span>
+                          </div>
                           <StatusControl
                             status={t.status}
                             onChange={(next) => handleStatusChange(t.id, next)}
@@ -523,31 +537,18 @@ export default function StoriesListView() {
                         </div>
                         <div className={`col col-actions ${storyRun ? 'is-sticky-visible' : ''}`}>
                           <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              className="btn-secondary btn-icon"
+                              aria-label="Edit story"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditStory(t.id)
+                              }}
+                            >
+                              <IconEdit className="h-[16px] w-[16px]" />
+                            </button>
                             {!storyRun && (
-                              <button
-                                type="button"
-                                className="btn-secondary btn-icon"
-                                aria-label="Edit story"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleEditStory(t.id)
-                                }}
-                              >
-                                <IconEdit className="h-[16px] w-[16px]" />
-                              </button>
-                            )}
-                            {storyRun ? (
-                              <div className="no-drag">
-                                <AgentRunBullet
-                                  key={storyRun.id}
-                                  run={storyRun}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    navigateAgentRun(storyRun.id)
-                                  }}
-                                />
-                              </div>
-                            ) : (
                               // Wrap RunAgentButton to stop propagation so we don't navigate to StoryDetails
                               <div
                                 className="no-drag"
