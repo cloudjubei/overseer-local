@@ -51,6 +51,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
           factoryTestsService.getLastResult(projectId),
           factoryTestsService.getLastCoverage(projectId),
         ])
+        console.log(' GOT LastCov: ', lastCov)
         if (cancelled) return
         setResults(lastRes)
         setCoverage(lastCov)

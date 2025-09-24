@@ -237,7 +237,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
   }
 
   return (
-    <div className="h-full overflow-auto rounded-md border border-neutral-200 dark:border-neutral-800">
+    <div className="h-full overflow-auto hide-scrollbar rounded-md border border-neutral-200 dark:border-neutral-800">
       <table className="min-w-full text-sm table-fixed">
         <colgroup>
           <col className="w-auto" />
@@ -248,7 +248,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
           <col className="w-40" />
           <col className="w-32" />
         </colgroup>
-        <thead className="sticky top-0 z-10 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+        <thead className="sticky top-0 z-10 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 border-b-2 border-neutral-200 dark:border-neutral-700/50">
           <tr>
             <th className="text-left px-3 py-2">File</th>
             <th className="text-center px-3 py-2">Statements</th>
@@ -258,7 +258,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
             <th className="text-left px-3 py-2 whitespace-nowrap">Uncovered lines</th>
             <th className="text-right px-3 py-2">Actions</th>
           </tr>
-          <tr className="border-t border-neutral-200 dark:border-neutral-700/50">
+          <tr>
             <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-600 dark:text-neutral-400">
               {summary.fileCount} files
             </th>
