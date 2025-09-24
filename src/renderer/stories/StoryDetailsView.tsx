@@ -6,7 +6,7 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { useAgents } from '../contexts/AgentsContext'
 import AgentRunBullet from '../components/agents/AgentRunBullet'
 import { Feature, Status, Story } from 'thefactory-tools'
-import { IconBack, IconChevron, IconEdit, IconPlus } from '../components/ui/Icons'
+import { IconBack, IconChat, IconChevron, IconEdit, IconPlus } from '../components/ui/Icons'
 import ExclamationChip from '../components/stories/ExclamationChip'
 import RunAgentButton from '../components/stories/RunAgentButton'
 import { RichText } from '../components/ui/RichText'
@@ -15,6 +15,7 @@ import { StatusPicker, statusKey, STATUS_LABELS } from '../components/stories/St
 import { gitMonitorService } from '../services/gitMonitorService'
 import { Button } from '../components/ui/Button'
 import { useStories } from '../contexts/StoriesContext'
+import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -38,6 +39,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const { openModal, navigateView, storiesRoute, navigateAgentRun } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -71,6 +73,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [checkingMerge, setCheckingMerge] = useState<boolean>(false)
   const [merging, setMerging] = useState<boolean>(false)
   const [mergeError, setMergeError] = useState<string | null>(null)
+
+  const chatContextId = useMemo(() => {
+    if (!projectId || !storyId) return undefined;
+    return `${projectId}/${storyId}`;
+  }, [projectId, storyId]);
 
   useEffect(() => {
     if (storyId && storiesById) {
@@ -388,6 +395,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         : statusKey(statusFilter as Status)
 
   return (
+    <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
     <div
       className="story-details flex flex-col flex-1 min-h-0 w-full overflow-hidden"
       role="region"
@@ -456,6 +464,13 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </div>
           <div className="spacer" />
           <div className="flex items-center gap-3">
+            <Button
+              className="btn-secondary btn-icon"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              aria-label="Toggle chat"
+            >
+              <IconChat className="w-4 h-4" />
+            </Button>
             <ModelChip editable />
             {/* Replace RunAgentButton space with AgentRunBullet when active */}
             <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
@@ -775,6 +790,15 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           style={{ position: 'fixed', bottom: 12, right: 16 }}
         >
           Reordering…
+        </div>
+      )}
+    </div>
+      {isChatOpen && chatContextId && (
+        <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
+            <ContextualChatSidebar
+              contextId={chatContextId}
+              chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
+            />
         </div>
       )}
     </div>

@@ -51,15 +51,16 @@
     },
     {
       "id": "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6",
-      "status": "-",
+      "status": "+",
       "title": "Implement LLM Communication for the Chat Sidebar",
       "description": "Connect the `ChatSidebar` to an LLM service. When a user sends a message, it should be sent to the LLM along with the chat history and the context-specific prompt. The LLM's response should then be displayed in the chat and saved to the history. This may involve adapting existing logic from @src/renderer/screens/ChatView.tsx or `thefactory-tools`.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.806Z",
-      "updatedAt": "2025-09-24T17:55:41.890Z",
-      "blockers": []
+      "updatedAt": "2025-09-24T22:08:46.852Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T22:08:46.852Z"
     },
     {
       "id": "91e943ca-515b-4ee4-a44d-cdcff61cc379",
