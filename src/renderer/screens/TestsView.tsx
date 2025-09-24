@@ -16,7 +16,7 @@ function TimeAgo({ ts }: { ts: number }) {
     const id = setInterval(() => setNow(Date.now()), 30000)
     return () => clearInterval(id)
   }, [])
-    const text = timeAgo(now, ts)
+  const text = timeAgo(now, ts)
   return <span>{text}</span>
 }
 
@@ -84,11 +84,14 @@ function TestsInner() {
     })
   }
 
+  // Only show the CTA when there are truly no tests and no last results to display
   const showNoTestsCta =
     activeTab === 'results' &&
     !isRunningTests &&
     !isLoadingCatalog &&
-    (testsCatalog?.length ?? 0) === 0
+    (testsCatalog?.length ?? 0) === 0 &&
+    !results &&
+    !testsError
 
   const isResults = activeTab === 'results'
 
@@ -152,6 +155,12 @@ function TestsInner() {
               )}
 
               {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
+
+              {isRunningTests && (
+                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  <Spinner size={14} label="Running tests..." />
+                </div>
+              )}
 
               {!isRunningTests && !testsError && !results && !showNoTestsCta && (
                 <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
