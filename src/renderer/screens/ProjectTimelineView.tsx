@@ -202,7 +202,6 @@ export default function ProjectTimelineView() {
   const { storiesById } = useStories()
   const { navigateStoryDetails } = useNavigator()
 
-  const [features, setFeatures] = useState<Feature[]>([])
   const [labels, setLabels] = useState<TimelineLabel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -234,8 +233,33 @@ export default function ProjectTimelineView() {
   const hasInitialAutoScrolledRef = useRef(false)
   const prevZoomRef = useRef<Zoom>('day')
 
+  const [showAllProjects, setShowAllProjects] = useState(false)
+
+  const prevProjectIdRef = useRef(projectId)
   useEffect(() => {
-    if (!projectId) {
+    if (prevProjectIdRef.current !== projectId) {
+      hasInitialAutoScrolledRef.current = false // Retrigger auto-scroll
+      setShowAllProjects(false) // Reset toggle on project change
+      prevProjectIdRef.current = projectId
+    }
+  }, [projectId])
+
+  const displayedStories = useMemo(() => {
+    if (showAllProjects) return Object.values(storiesById)
+    if (!projectId) return []
+    return Object.values(storiesById).filter((s: any) => s.projectId === projectId)
+  }, [storiesById, projectId, showAllProjects])
+
+  const displayedFeatures = useMemo(() => {
+    return displayedStories
+      .flatMap((t: any) =>
+        (t.features || []).map((f: Feature) => ({ ...f, storyProjectId: t.projectId, storyId: t.id })),
+      )
+      .filter((f) => !!f.completedAt)
+  }, [displayedStories])
+
+  useEffect(() => {
+    if (!projectId && !showAllProjects) {
       setError('Project ID is missing.')
       setLoading(false)
       return
@@ -245,24 +269,23 @@ export default function ProjectTimelineView() {
       setLoading(true)
       setError(null)
       try {
-        const stories: Story[] = Object.values(storiesById)
-        const fetchedFeatures = stories.flatMap((t) => t.features).filter((f) => !!f.completedAt)
-
-        const fetchedProjectLabels = await dbService.matchEntities(undefined, {
-          projectIds: [projectId],
-          types: [ENTITY_TYPE],
-        })
-        const fetchedGlobalLabels = (
-          await dbService.matchEntities(undefined, {
+        let fetchedLabels: Entity[] = []
+        if (showAllProjects) {
+          fetchedLabels = await dbService.matchEntities(undefined, { types: [ENTITY_TYPE] })
+        } else {
+          const projectLabels = projectId
+            ? await dbService.matchEntities(undefined, {
+                projectIds: [projectId],
+                types: [ENTITY_TYPE],
+              })
+            : []
+          const globalLabels = await dbService.matchEntities(undefined, {
+            projectIds: ['__global__'],
             types: [ENTITY_TYPE],
           })
-        ).filter((l) => l.projectId !== projectId)
-
-        setFeatures(fetchedFeatures)
-        setLabels([
-          ...normalizeLabels(fetchedProjectLabels),
-          ...normalizeLabels(fetchedGlobalLabels),
-        ])
+          fetchedLabels = [...projectLabels, ...globalLabels]
+        }
+        setLabels(normalizeLabels(fetchedLabels))
       } catch (err: any) {
         console.error('Failed to fetch timeline data:', err)
         setError(err?.message || 'An unknown error occurred while fetching timeline data.')
@@ -272,25 +295,23 @@ export default function ProjectTimelineView() {
     }
 
     fetchTimelineData()
-  }, [projectId, storiesById])
+  }, [projectId, showAllProjects])
 
   const timelineItems = useMemo(() => {
-    const fs = features
-      .filter((f) => f.completedAt)
-      .map((f) => mapFeatureToTimelineLabel(projectId, f))
+    const fs = displayedFeatures.map((f: any) => mapFeatureToTimelineLabel(f.storyProjectId, f))
 
     // Include stories for week/month so the range reflects stories when those views are active
     let ts: TimelineLabel[] = []
     if (zoom !== 'day') {
-      ts = Object.values(storiesById)
-        .map((t) => mapStoryToTimelineLabel(projectId, t))
+      ts = displayedStories
+        .map((t: any) => mapStoryToTimelineLabel(t.projectId, t))
         .filter((x): x is TimelineLabel => !!x)
     }
 
     return [...fs, ...ts, ...labels].sort(
       (a, b) => new Date(a.content.timestamp).getTime() - new Date(b.content.timestamp).getTime(),
     )
-  }, [features, labels, projectId, zoom, storiesById])
+  }, [displayedFeatures, displayedStories, labels, zoom])
 
   // Determine raw min/max
   const { rawStartDate, rawEndDate } = useMemo(() => {
@@ -423,20 +444,13 @@ export default function ProjectTimelineView() {
 
   // Build rows for features (day) or stories (week/month) and user-defined label rows
   const featureRows = useMemo(() => {
-    // build from stories to capture storyId for color coding
-    const items: RowItem[] = []
-    for (const t of Object.values(storiesById)) {
-      for (const f of t.features || []) {
-        if (!f?.completedAt) continue
-        items.push({
-          id: f.id,
-          title: f.title,
-          timestamp: f.completedAt ?? new Date().toISOString(),
-          kind: 'feature',
-          storyId: t.id,
-        })
-      }
-    }
+    const items: RowItem[] = displayedFeatures.map((f: any) => ({
+      id: f.id,
+      title: f.title,
+      timestamp: f.completedAt ?? new Date().toISOString(),
+      kind: 'feature',
+      storyId: f.storyId,
+    }))
     return [
       {
         key: 'features',
@@ -444,16 +458,16 @@ export default function ProjectTimelineView() {
         items,
       },
     ]
-  }, [storiesById])
+  }, [displayedFeatures])
 
   const storyRows = useMemo(() => {
-    const items = Object.values(storiesById)
+    const items = displayedStories
       .map((t) => {
         const ts = getStoryCompletedAt(t)
         if (!ts) return null
         return {
-          id: t.id,
-          title: t.title,
+          id: (t as any).id,
+          title: (t as any).title,
           timestamp: ts,
           kind: 'story' as const,
         } as RowItem
@@ -467,7 +481,7 @@ export default function ProjectTimelineView() {
         items,
       },
     ]
-  }, [storiesById])
+  }, [displayedStories])
 
   const labelRows = useMemo(() => {
     const groups = new Map<
@@ -665,7 +679,19 @@ export default function ProjectTimelineView() {
           <div className="text-lg font-semibold text-primary truncate">Project timeline</div>
           <div className="text-xs text-muted truncate">Project: {projectId}</div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="show-all-projects-toggle"
+              className="h-4 w-4 rounded border-subtle text-accent-primary focus:ring-accent-primary"
+              checked={showAllProjects}
+              onChange={(e) => setShowAllProjects(e.target.checked)}
+            />
+            <label htmlFor="show-all-projects-toggle" className="ml-2 text-sm text-secondary">
+              Show all projects
+            </label>
+          </div>
           <div className="hidden sm:flex items-center rounded border border-subtle overflow-hidden">
             {(['day', 'week', 'month'] as Zoom[]).map((z) => (
               <button
