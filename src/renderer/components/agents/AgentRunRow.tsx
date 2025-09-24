@@ -56,11 +56,12 @@ function useDurationTimers(run: AgentRunHistory) {
     return () => clearInterval(id)
   }, [run.state])
 
-  const start = new Date(run.startedAt).getTime()
+  const create = new Date(run.createdAt).getTime()
+  // const start = run.startedAt ? new Date(run.startedAt).getTime() : now
   const end = run.finishedAt ? new Date(run.finishedAt).getTime() : now
   const lastUpdate = new Date(run.updatedAt).getTime()
 
-  const startMs = Math.max(0, end - start)
+  const startMs = Math.max(0, end - create)
   const thinkingMs = Math.max(0, now - lastUpdate)
   return { duration: formatHmsCompact(startMs), thinking: formatHmsCompact(thinkingMs) }
 }

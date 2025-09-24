@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/Select'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
+import type {
   ProjectCodeInfo,
-  KNOWN_LANGUAGES,
-  KNOWN_FRAMEWORKS_BY_LANGUAGE,
-  KNOWN_TEST_FRAMEWORKS_BY_LANGUAGE,
   ProgrammingLanguage,
   FrameworkName,
   TestFrameworkName,
-} from './codeInfoTypes'
+} from 'thefactory-tools'
+import {
+  KNOWN_LANGUAGES,
+  KNOWN_FRAMEWORKS_BY_LANGUAGE,
+  KNOWN_TEST_FRAMEWORKS_BY_LANGUAGE,
+} from 'thefactory-tools'
 
 interface ProjectCodeInfoModalProps {
   codeInfo?: Partial<ProjectCodeInfo>
@@ -26,9 +34,9 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
   )
 
   const [availableFrameworks, setAvailableFrameworks] = useState<readonly FrameworkName[]>([])
-  const [availableTestFrameworks, setAvailableTestFrameworks] = useState<readonly TestFrameworkName[]>(
-    [],
-  )
+  const [availableTestFrameworks, setAvailableTestFrameworks] = useState<
+    readonly TestFrameworkName[]
+  >([])
 
   useEffect(() => {
     if (language) {

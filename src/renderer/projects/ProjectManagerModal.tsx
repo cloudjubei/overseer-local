@@ -15,8 +15,7 @@ import {
 import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
 import { validateProjectClient } from './validateProject'
 import { Switch } from '../components/ui/Switch'
-import { Chip } from '../components/ui/Chip'
-import { ProjectCodeInfo } from './codeInfoTypes'
+import { Chip } from './Chip'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
