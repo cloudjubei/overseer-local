@@ -492,18 +492,18 @@ export default function StoriesListView() {
                     >
                       <div className="story-grid">
                         <div className="col col-id">
-                          <div className="flex items-center">
+                          <div className="flex justify-center gap-0.5 items-center">
                             {storyRun && (
-                              <div className="no-drag mr-2">
-                                <AgentRunBullet
-                                  key={storyRun.id}
-                                  run={storyRun}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    navigateAgentRun(storyRun.id)
-                                  }}
-                                />
-                              </div>
+                              // <div className="no-drag">
+                              <AgentRunBullet
+                                key={storyRun.id}
+                                run={storyRun}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigateAgentRun(storyRun.id)
+                                }}
+                              />
+                              // </div>
                             )}
                             <span className="id-chip">{storyIdToDisplayIndex[t.id]}</span>
                           </div>
@@ -535,7 +535,7 @@ export default function StoriesListView() {
                             <RichText text={t.description || ''} />
                           </div>
                         </div>
-                        <div className={`col col-actions ${storyRun ? 'is-sticky-visible' : ''}`}>
+                        <div className={`col col-actions`}>
                           <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
@@ -549,7 +549,6 @@ export default function StoriesListView() {
                               <IconEdit className="h-[16px] w-[16px]" />
                             </button>
                             {!storyRun && (
-                              // Wrap RunAgentButton to stop propagation so we don't navigate to StoryDetails
                               <div
                                 className="no-drag"
                                 onClick={(e) => e.stopPropagation()}
