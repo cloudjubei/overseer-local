@@ -156,12 +156,6 @@ function TestsInner() {
 
               {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
 
-              {isRunningTests && (
-                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                  <Spinner size={14} label="Running tests..." />
-                </div>
-              )}
-
               {!isRunningTests && !testsError && !results && !showNoTestsCta && (
                 <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
               )}
