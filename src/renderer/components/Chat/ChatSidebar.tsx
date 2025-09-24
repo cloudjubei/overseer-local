@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -6,6 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/Select'
+import { Switch } from '../ui/Switch'
+import { Modal } from '../ui/Modal'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../../../assets/sounds'
 
@@ -34,6 +36,12 @@ export interface LLMConfig {
   [key: string]: any
 }
 
+export interface Tool {
+  id: string
+  name: string
+  enabled: boolean
+}
+
 interface ChatSidebarProps {
   chatContextTitle: string
   currentChat?: Chat
@@ -45,6 +53,10 @@ interface ChatSidebarProps {
   onConfigChange: (configId: string) => void
   onConfigure: () => void
   activeConfig: LLMConfig | null
+  tools?: Tool[]
+  onToolToggle?: (toolId: string) => void
+  autoApprove?: boolean
+  onAutoApproveChange?: (checked: boolean) => void
 }
 
 export default function ChatSidebar({
@@ -57,8 +69,14 @@ export default function ChatSidebar({
   activeConfigId,
   onConfigChange,
   onConfigure,
-  activeConfig
+  activeConfig,
+  tools,
+  onToolToggle,
+  autoApprove,
+  onAutoApproveChange
 }: ChatSidebarProps) {
+    const [isToolModalOpen, setIsToolModalOpen] = useState(false)
+
     const handleSend = async (message: string, attachments: string[]) => {
         if (!activeConfig) return
         tryResumeAudioContext()
@@ -88,6 +106,19 @@ export default function ChatSidebar({
               ))}
             </SelectContent>
           </Select>
+
+          {tools && onToolToggle && (
+              <button className="btn-secondary" onClick={() => setIsToolModalOpen(true)}>Tools</button>
+          )}
+
+          {onAutoApproveChange && (
+            <Switch
+              checked={!!autoApprove}
+              onCheckedChange={onAutoApproveChange}
+              label="Auto-approve"
+            />
+          )}
+
           <button
             onClick={onConfigure}
             className="btn-secondary"
@@ -123,6 +154,21 @@ export default function ChatSidebar({
       />
 
       <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
+      
+      {tools && onToolToggle && (
+        <Modal isOpen={isToolModalOpen} onClose={() => setIsToolModalOpen(false)} title="Tools">
+          <div className="flex flex-col gap-4">
+            {tools.map((tool) => (
+              <Switch
+                key={tool.id}
+                checked={tool.enabled}
+                onCheckedChange={() => onToolToggle(tool.id)}
+                label={tool.name}
+              />
+            ))}
+          </div>
+        </Modal>
+      )}
     </section>
   )
 }
