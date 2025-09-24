@@ -1,18 +1,10 @@
 import React, { useMemo } from 'react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/Select'
 import { useChats } from '../hooks/useChats'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
-import { ChatInput, MessageList } from '../components/Chat'
-import { playSendSound, tryResumeAudioContext } from '../../../assets/sounds'
+import { ChatSidebar } from '../components/Chat'
 
 export default function ChatView() {
   const {
@@ -40,10 +32,8 @@ export default function ChatView() {
     [chatsById],
   )
 
-  const handleSend = async (message: string, attachments: string[]) => {
+  const handleSendMessage = async (message: string, attachments: string[]) => {
     if (!activeConfig) return
-    tryResumeAudioContext()
-    playSendSound()
     await sendMessage(message, activeConfig, attachments)
   }
 
@@ -93,66 +83,18 @@ export default function ChatView() {
       }
       emptyMessage="No chats yet"
     >
-      {/* Fill parent container: flex column, allow children to size and scroll */}
-      <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
-        <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-              Project Chat{' '}
-              {currentChat ? `(${new Date(currentChat.updateDate).toLocaleString()})` : ''}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Select value={activeConfigId || ''} onValueChange={setActive}>
-              <SelectTrigger className="ui-select w-[220px]">
-                <SelectValue placeholder="Select Model" />
-              </SelectTrigger>
-              <SelectContent>
-                {configs.map((cfg) => (
-                  <SelectItem key={cfg.id} value={cfg.id!}>
-                    {cfg.name} ({cfg.model})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <button
-              onClick={() => navigateView('Settings')}
-              className="btn-secondary"
-              aria-label="Open Settings"
-            >
-              Settings
-            </button>
-          </div>
-        </header>
-
-        {!isConfigured && (
-          <div
-            className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
-            style={{
-              background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
-              color: 'var(--text-primary)',
-            }}
-            role="status"
-          >
-            <span>
-              LLM not configured. Set your API key in Settings to enable sending messages.
-            </span>
-            <button className="btn" onClick={() => navigateView('Settings')}>
-              Configure
-            </button>
-          </div>
-        )}
-
-        {/* Message list occupies remaining space and scrolls vertically */}
-        <MessageList
-          chatId={currentChat?.id}
-          messages={currentChat?.messages || []}
-          isThinking={isThinking}
-        />
-
-        {/* Input stays docked at bottom */}
-        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
-      </section>
+      <ChatSidebar
+        chatContextTitle="Project Chat"
+        currentChat={currentChat}
+        isThinking={isThinking}
+        isConfigured={isConfigured}
+        onSend={handleSendMessage}
+        configs={configs}
+        activeConfigId={activeConfigId}
+        onConfigChange={setActive}
+        onConfigure={() => navigateView('Settings')}
+        activeConfig={activeConfig}
+      />
     </CollapsibleSidebar>
   )
 }
