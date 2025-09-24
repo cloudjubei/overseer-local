@@ -93,42 +93,51 @@ export default function FileMentionsTextarea({
   }
 
   // Keep overlay scroll in sync with textarea scroll (when maxHeight/overflow is used)
-  useEffect(() => {
-    const ta = textareaRef.current
-    if (!ta || !overlayContentRef.current) return
-    function onScroll() {
-      if (!overlayContentRef.current) return
-      overlayContentRef.current.style.transform = `translateY(-${ta.scrollTop}px)`
-    }
-    ta.addEventListener('scroll', onScroll)
-    return () => ta.removeEventListener('scroll', onScroll)
-  }, [textareaRef])
+  //TODO: fix
+  // useEffect(() => {
+  //   const ta = textareaRef.current
+  //   if (!ta || !overlayContentRef.current) return
+  //   function onScroll() {
+  //     if (!overlayContentRef.current) return
+  //     overlayContentRef.current.style.transform = `translateY(-${ta.scrollTop}px)`
+  //   }
+  //   ta.addEventListener('scroll', onScroll)
+  //   return () => ta.removeEventListener('scroll', onScroll)
+  // }, [textareaRef])
 
   // Track caret for chip editing range logic and autocomplete position updates
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const ta = textareaRef.current
-      if (!ta) return
-      if (document.activeElement === ta) {
-        try {
-          const pos = ta.selectionStart ?? 0
-          setCaretPos(pos)
-          // If caret moved outside the current editingRange, clear it
-          if (editingRange && (pos < editingRange.start || pos > editingRange.end)) {
-            setEditingRange(null)
-          }
-        } catch {
-          // ignore
-        }
-      }
-    }
-    document.addEventListener('selectionchange', handleSelectionChange)
-    return () => document.removeEventListener('selectionchange', handleSelectionChange)
-  }, [textareaRef, editingRange])
+  //TODO: fix
+  // useEffect(() => {
+  //   const handleSelectionChange = () => {
+  //     const ta = textareaRef.current
+  //     if (!ta) return
+  //     if (document.activeElement === ta) {
+  //       try {
+  //         const pos = ta.selectionStart ?? 0
+  //         setCaretPos(pos)
+  //         // If caret moved outside the current editingRange, clear it
+  //         if (editingRange && (pos < editingRange.start || pos > editingRange.end)) {
+  //           setEditingRange(null)
+  //         }
+  //       } catch {
+  //         // ignore
+  //       }
+  //     }
+  //   }
+  //   document.addEventListener('selectionchange', handleSelectionChange)
+  //   return () => document.removeEventListener('selectionchange', handleSelectionChange)
+  // }, [textareaRef, editingRange])
 
-  function findMentionBeforeCaret(text: string, pos: number):
-    | { start: number; end: number; raw: string; prefix: '@' | '#'; hadTrailingSpace: boolean }
-    | null {
+  function findMentionBeforeCaret(
+    text: string,
+    pos: number,
+  ): {
+    start: number
+    end: number
+    raw: string
+    prefix: '@' | '#'
+    hadTrailingSpace: boolean
+  } | null {
     let i = pos - 1
     if (i < 0) return null
     let hadTrailingSpace = false
@@ -159,37 +168,38 @@ export default function FileMentionsTextarea({
   const onKeyDownInternal = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const key = e.key
 
+    //TODO: fix
     // If Backspace pressed at end of a chip, convert chip to editable text and delete last character
-    if (key === 'Backspace') {
-      const ta = textareaRef.current
-      if (ta && ta.selectionStart === ta.selectionEnd) {
-        const pos = ta.selectionStart ?? 0
-        const mention = findMentionBeforeCaret(value, pos)
-        if (mention) {
-          e.preventDefault()
-          e.stopPropagation()
-          // Remove last character from the mention token and drop the trailing space if it existed
-          const newRaw = mention.raw.length > 1 ? mention.raw.slice(0, -1) : mention.raw
-          const before = value.slice(0, mention.start)
-          const afterStart = mention.hadTrailingSpace ? pos - 1 : pos
-          const after = value.slice(afterStart)
-          const updated = before + newRaw + after
-          const newCaret = mention.start + newRaw.length
-          onChange(updated)
-          setEditingRange({ start: mention.start, end: newCaret })
-          // Focus and set selection after state update
-          setTimeout(() => {
-            const el = textareaRef.current
-            if (!el) return
-            el.focus()
-            try {
-              el.setSelectionRange(newCaret, newCaret)
-            } catch {}
-          }, 0)
-          return
-        }
-      }
-    }
+    // if (key === 'Backspace') {
+    //   const ta = textareaRef.current
+    //   if (ta && ta.selectionStart === ta.selectionEnd) {
+    //     const pos = ta.selectionStart ?? 0
+    //     const mention = findMentionBeforeCaret(value, pos)
+    //     if (mention) {
+    //       e.preventDefault()
+    //       e.stopPropagation()
+    //       // Remove last character from the mention token and drop the trailing space if it existed
+    //       const newRaw = mention.raw.length > 1 ? mention.raw.slice(0, -1) : mention.raw
+    //       const before = value.slice(0, mention.start)
+    //       const afterStart = mention.hadTrailingSpace ? pos - 1 : pos
+    //       const after = value.slice(afterStart)
+    //       const updated = before + newRaw + after
+    //       const newCaret = mention.start + newRaw.length
+    //       onChange(updated)
+    //       setEditingRange({ start: mention.start, end: newCaret })
+    //       // Focus and set selection after state update
+    //       setTimeout(() => {
+    //         const el = textareaRef.current
+    //         if (!el) return
+    //         el.focus()
+    //         try {
+    //           el.setSelectionRange(newCaret, newCaret)
+    //         } catch {}
+    //       }, 0)
+    //       return
+    //     }
+    //   }
+    // }
 
     const isSpace = key === ' ' || key === 'Spacebar' || key === 'Space'
     if (isSpace) {

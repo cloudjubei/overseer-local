@@ -17,10 +17,13 @@
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
       "status": "-",
       "title": "Develop a Reusable Chat Sidebar React Component",
-      "description": "Create a new React component, `ChatSidebar`, responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.",
-      "context": [],
+      "description": "Create a new React component, `ChatSidebar`, responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-24T17:18:35.801Z"
+      "updatedAt": "2025-09-24T17:55:08.599Z",
+      "blockers": []
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
@@ -35,19 +38,25 @@
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
       "status": "-",
       "title": "Add a Chat Button and Sidebar to StoryDetailsView",
-      "description": "Integrate the `ChatSidebar` into the `StoryDetailsView`. Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the `ChatSidebar`. Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
-      "context": [],
+      "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoryDetailsView.tsx . Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the `ChatSidebar`. Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
+      "context": [
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.805Z",
-      "updatedAt": "2025-09-24T17:18:35.805Z"
+      "updatedAt": "2025-09-24T17:55:28.178Z",
+      "blockers": []
     },
     {
       "id": "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6",
       "status": "-",
       "title": "Implement LLM Communication for the Chat Sidebar",
-      "description": "Connect the `ChatSidebar` to an LLM service. When a user sends a message, it should be sent to the LLM along with the chat history and the context-specific prompt. The LLM's response should then be displayed in the chat and saved to the history. This may involve adapting existing logic from `ChatView` or `thefactory-tools`.",
-      "context": [],
+      "description": "Connect the `ChatSidebar` to an LLM service. When a user sends a message, it should be sent to the LLM along with the chat history and the context-specific prompt. The LLM's response should then be displayed in the chat and saved to the history. This may involve adapting existing logic from @src/renderer/screens/ChatView.tsx or `thefactory-tools`.",
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.806Z",
-      "updatedAt": "2025-09-24T17:18:35.806Z"
+      "updatedAt": "2025-09-24T17:55:41.890Z",
+      "blockers": []
     },
     {
       "id": "91e943ca-515b-4ee4-a44d-cdcff61cc379",
@@ -62,10 +71,13 @@
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
       "status": "-",
       "title": "Add a Chat Button and Sidebar to StoriesListView",
-      "description": "Integrate the `ChatSidebar` into the `StoriesListView`. Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
-      "context": [],
+      "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoriesListView.tsx . Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-24T17:18:35.807Z"
+      "updatedAt": "2025-09-24T17:56:00.550Z",
+      "blockers": []
     },
     {
       "id": "ba16d671-5c40-496f-b887-7c9d94694711",
@@ -80,10 +92,14 @@
       "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",
       "status": "-",
       "title": "Add Project-Level Chat Sidebars to Tests and Agents Views",
-      "description": "Add a \"Chat\" button and the `ChatSidebar` to the `Tests` view and the `Agents` view. The chat context for the `Tests` view will be the project's tests, and for the `Agents` view, it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
-      "context": [],
+      "description": "Add a \"Chat\" button and the `ChatSidebar` to the @src/renderer/screens/TestsView.tsx and the @src/renderer/screens/AgentsView.tsx . The chat context for the @src/renderer/screens/TestsView.tsx  will be the project's tests, and for the @src/renderer/screens/AgentsView.tsx it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-24T17:18:35.808Z"
+      "updatedAt": "2025-09-24T17:56:52.164Z",
+      "blockers": []
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
@@ -98,24 +114,27 @@
       "id": "441f4d8d-3daf-4a37-b18d-16a08b5b7992",
       "status": "-",
       "title": "Unify Chat Experience by Refactoring ChatView",
-      "description": "Update the existing `ChatView` to use the newly created reusable chat component(s) from the `ChatSidebar`. This will ensure a consistent look, feel, and functionality for all chat interfaces across the application.",
-      "context": [],
+      "description": "Update the existing @src/renderer/screens/ChatView.tsx to use the newly created reusable chat component(s) from the `ChatSidebar`. This will ensure a consistent look, feel, and functionality for all chat interfaces across the application.",
+      "context": [
+        "src/renderer/screens/ChatView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-24T17:18:35.808Z"
+      "updatedAt": "2025-09-24T17:57:03.507Z",
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
     "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b": 1,
     "8515f4d8-c436-4780-a5cc-7c3106e1efd3": 2,
-    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 3,
-    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 4,
-    "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6": 5,
-    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 6,
-    "02b401c9-5219-48ee-8fca-174c6702ff2f": 7,
-    "ba16d671-5c40-496f-b887-7c9d94694711": 8,
-    "860c56c9-61e0-476f-8459-f7ccc4838ef3": 9,
-    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 10,
-    "441f4d8d-3daf-4a37-b18d-16a08b5b7992": 11
+    "441f4d8d-3daf-4a37-b18d-16a08b5b7992": 3,
+    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 4,
+    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 5,
+    "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6": 6,
+    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 7,
+    "02b401c9-5219-48ee-8fca-174c6702ff2f": 8,
+    "ba16d671-5c40-496f-b887-7c9d94694711": 9,
+    "860c56c9-61e0-476f-8459-f7ccc4838ef3": 10,
+    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 11
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"
