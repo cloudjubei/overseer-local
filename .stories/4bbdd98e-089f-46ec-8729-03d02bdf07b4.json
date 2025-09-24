@@ -6,15 +6,16 @@
   "features": [
     {
       "id": "b6cdf920-004a-4ff2-8a9f-8bc56c1047f7",
-      "status": "-",
+      "status": "+",
       "title": "Improve Chat Window",
       "description": "Modify the main chat window component @src/renderer/screens/ChatView.tsx to always fill up its parent container to max height and all available width. Ensure the main message list scrolls vertically. Individual messages that are too long should wrap, not scroll horizontally, to maintain readability - but they should display markdown and if there are tables or code inside (i.e. not text) than that item should scroll on its own within the message.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-22T23:55:31.958Z",
-      "updatedAt": "2025-09-24T16:56:20.120Z",
-      "blockers": []
+      "updatedAt": "2025-09-24T17:02:52.795Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T17:02:52.795Z"
     },
     {
       "id": "57606b53-c938-4b37-8478-46ef4e081d8a",
