@@ -289,7 +289,7 @@ export default function MessageList({
 
                 <div
                   className={[
-                    'max-w-[72%] min-w-0 min-w-[80px] flex flex-col',
+                    'max-w-[85%] min-w-0 flex flex-col',
                     isUser ? 'items-end' : 'items-start',
                   ].join(' ')}
                 >
