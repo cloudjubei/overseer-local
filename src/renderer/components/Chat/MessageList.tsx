@@ -301,7 +301,7 @@ export default function MessageList({
 
                   <div
                     className={[
-                      'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                      'overflow-hidden px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                       isUser
                         ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                         : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
