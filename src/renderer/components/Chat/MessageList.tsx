@@ -8,6 +8,7 @@ import TypewriterText from '../ui/TypewriterText'
 import ToolCallCard from './ToolCallCard'
 import { inferFileType, useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../../../assets/sounds'
+import Markdown from '../ui/Markdown'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -231,7 +232,7 @@ export default function MessageList({
                   >
                     AI
                   </div>
-                  <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+                  <div className="max-w-[72%] min-w-0 min-w-[80px] flex flex-col items-start">
                     <ErrorBubble error={msg.error} />
                   </div>
                 </div>
@@ -288,7 +289,7 @@ export default function MessageList({
 
                 <div
                   className={[
-                    'max-w-[72%] min-w-[80px] flex flex-col',
+                    'max-w-[85%] min-w-0 flex flex-col',
                     isUser ? 'items-end' : 'items-start',
                   ].join(' ')}
                 >
@@ -301,7 +302,7 @@ export default function MessageList({
 
                   <div
                     className={[
-                      'overflow-hidden px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                      'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow',
                       isUser
                         ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                         : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
@@ -313,9 +314,9 @@ export default function MessageList({
                     {isUser ? (
                       <RichText text={msg.content} />
                     ) : index === animateAssistantIdx ? (
-                      <TypewriterText text={msg.content} />
+                      <TypewriterText text={msg.content} renderer="markdown" />
                     ) : (
-                      <RichText text={msg.content} />
+                      <Markdown text={msg.content} />
                     )}
                   </div>
 
@@ -386,8 +387,8 @@ export default function MessageList({
               >
                 AI
               </div>
-              <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
-                <div className="px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
+              <div className="max-w-[72%] min-w-0 min-w-[80px] flex flex-col items-start">
+                <div className="overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
                   <Spinner />
                 </div>
               </div>

@@ -1,6 +1,6 @@
 {
   "id": "4bbdd98e-089f-46ec-8729-03d02bdf07b4",
-  "status": "-",
+  "status": "+",
   "title": "Improve chat",
   "description": "We need to make chat more user friendly and easy to use.\n- The main chat window should be of constant size and the messages should be horizontally scrollable and extend vertically as far as they need.\n- While waiting for a response there's a spinner showing the agent thinking.\n- We need to show how long the agent took to respond.\n- We get the full message content, but we want it to appear as if it was streamed in (written on the ago), create an appropriate animation\n- if the user is at the bottom of the chat window, then if there's a new message, only scroll a little bit so that the user can start reading and not chase the newly appearing text.\n- The message the user sends needs to appear instantly with a nice popping animation.\n- There needs to be a sound for sending a message and receiving a message.\n- The input needs to be reworked to be more like the FeatureForm, it should allow fast lookup of files and references to stories and features (when hitting @ for files and # for stories/features).\n- Whenever a file is references via @ in the text (whether the input box or in a message, it should be displayed with a nice chip. In the input box, if the caret is at the end of the chip and the user presses backspace - the view transforms into text, deletes the last character and goes back into showing file lookup. The equivalent thing should also happen for story/feature references.\n- if there's an error in the chat, show an appropriate error bubble\n- whenever the agent invokes tool calls, show it via a custom view that will allow inspection of the tool call (arguments and results and time taken)\n\nThe main Chat view component is:\nsrc/renderer/screens/ChatView.tsx",
   "features": [
@@ -135,7 +135,7 @@
     },
     {
       "id": "95bd507b-3644-4c61-aaba-2d8781514767",
-      "status": "-",
+      "status": "+",
       "title": "Add Interactive Mention Chips to the Chat Input",
       "description": "Building on the advanced chat input @src/renderer/components/Chat/ChatInput.tsx , make the file and story/feature mentions appear as interactive chips *within the input box itself*. Currently they are already implemented as chips in @src/renderer/components/ui/RichText.tsx . Implement the behavior where pressing backspace at the end of a chip converts it back to editable text.",
       "context": [
@@ -144,9 +144,10 @@
         "src/renderer/components/ui/FileMentionsTextarea.tsx"
       ],
       "createdAt": "2025-09-22T23:55:32.130Z",
-      "updatedAt": "2025-09-24T17:53:41.019Z",
+      "updatedAt": "2025-09-24T18:55:16.568Z",
       "blockers": [],
-      "rejection": "Multiple issues so bad that I had to comment out the code in @src/renderer/components/ui/FileMentionsTextarea.tsx so that it can work and things can be typed in.\nIssues:\n- when the code for the backspace key is in then backspace doesn't work. It doesn't work on normal characters and only works when editing characters within a chip.\n- only the chip for the task reference '#' shows but not for files using '@' .\n- when the other pieces of code inside `useEffect` are left in - everything blocks up and the app is unusable."
+      "rejection": "Multiple issues so bad that I had to comment out the code in @src/renderer/components/ui/FileMentionsTextarea.tsx so that it can work and things can be typed in.\nIssues:\n- when the code for the backspace key is in then backspace doesn't work. It doesn't work on normal characters and only works when editing characters within a chip.\n- only the chip for the task reference '#' shows but not for files using '@' .\n- when the other pieces of code inside `useEffect` are left in - everything blocks up and the app is unusable.",
+      "completedAt": "2025-09-24T18:55:16.568Z"
     },
     {
       "id": "c21bb932-1f29-49f8-ae61-44bf83bba8b5",
@@ -164,7 +165,7 @@
     },
     {
       "id": "3ae0afee-4d33-4133-a87e-11a1c0124846",
-      "status": "-",
+      "status": "+",
       "title": "Chat bubble don't wrap correctly",
       "description": "Both the user and assistant bubble's don't wrap text that is very wide correctly - the bubble currently stretches beyond the screen (it gets clipped). All text should be made to fit the max bubble width and flow vertically as far as it needs. This is in @src/renderer/components/Chat/MessageList.tsx which uses @src/renderer/components/ui/RichText.tsx",
       "context": [
@@ -173,17 +174,19 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T17:49:24.650Z",
-      "updatedAt": "2025-09-24T18:44:13.067Z"
+      "updatedAt": "2025-09-24T18:48:49.440Z",
+      "completedAt": "2025-09-24T18:48:49.440Z"
     },
     {
       "id": "321d97e3-4263-44d3-b9a6-5594d5caa276",
-      "status": "-",
+      "status": "+",
       "title": "Assistant bubbles display markdown",
       "description": "Assistant bubbles can display markdown.\nWhen tables or code or json (or custom things like these) are displayed that might be too wide for the bubble to show - those should be rendered in their own 'box' which will allow horizontal scrolling but never vertical scrolling (the bubble should always just stretch vertically).",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-24T17:51:13.116Z",
-      "updatedAt": "2025-09-24T17:51:13.116Z"
+      "updatedAt": "2025-09-24T18:52:41.839Z",
+      "completedAt": "2025-09-24T18:52:41.839Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -203,5 +206,6 @@
     "95bd507b-3644-4c61-aaba-2d8781514767": 14
   },
   "createdAt": "2025-09-22T23:49:45.348Z",
-  "updatedAt": "2025-09-23T10:29:27.711Z"
+  "updatedAt": "2025-09-23T10:29:27.711Z",
+  "completedAt": "2025-09-24T18:55:16.568Z"
 }

@@ -28,7 +28,9 @@ function tokenize(
   > = []
   if (!input) return [{ type: 'text', value: '' }]
 
-  const fileRe = /@([A-Za-z0-9_\-./]+\.[A-Za-z0-9]+)/g // crude heuristic for file-like tokens
+  // File mention pattern: start with @ and then a path-like token until whitespace or a control char.
+  // This is intentionally broad to cover directories and files (with or without extensions).
+  const fileRe = /@([A-Za-z0-9_\-./]+(?:\.[A-Za-z0-9]+)?)/g
   // Match either UUID or numeric display (e.g., 8), optionally with "." and either UUID or numeric
   const depRe = new RegExp(`#((?:${UUID})|(?:\\d+))(?:\.((?:${UUID})|(?:\\d+)))?`, 'g')
 
