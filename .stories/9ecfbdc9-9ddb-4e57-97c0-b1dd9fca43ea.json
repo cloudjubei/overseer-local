@@ -257,7 +257,7 @@
     },
     {
       "id": "488ffc56-b217-411a-b285-4abc37cece2e",
-      "status": "-",
+      "status": "+",
       "title": "Coverage view improvements",
       "description": "In @src/renderer/screens/TestsView.tsx the coverage view needs to have its table updated:\n- make the summary be the actual table header - that way when horizontally scrolling the columns are aligned. Keep the column titles and show the percentage + percentage bar under.\n- The Statements, Branches, Functions & Lines columns can all be slightly thinner (to match Statements, as it's the longest word) in width.\n- When hovering over a value that has the percentage and percentage bar, in the tooltip it should show \"VALUE/TOTAL\" not the percentage.\n- The Improve Tests button should turn into a button that shows a double up arrow icon at the top and the word \"Tests\" at the bottom. This new icon needs to be created in @src/renderer/components/ui/Icons.tsx .\n- the table fills up the whole main section - there shouldn't be anything else other than it.",
       "context": [
@@ -266,7 +266,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T00:06:56.242Z",
-      "updatedAt": "2025-09-24T00:06:56.242Z"
+      "updatedAt": "2025-09-24T00:20:04.672Z",
+      "completedAt": "2025-09-24T00:20:04.672Z"
     }
   ],
   "featureIdToDisplayIndex": {
