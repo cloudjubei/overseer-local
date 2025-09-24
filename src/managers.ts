@@ -14,6 +14,7 @@ import GitMonitorManager from './git-monitor/GitMonitorManager'
 import BaseManager from './BaseManager'
 import FactoryLLMPricingManager from './factory/FactoryLLMPricingManager'
 import FactoryTestsManager from './factory/FactoryTestsManager'
+import ContextChatsManager from './chat/ContextChatsManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryLLMPricingManager: FactoryLLMPricingManager | undefined
@@ -29,6 +30,7 @@ export let documentIngestionManager: DocumentIngestionManager | undefined
 export let gitMonitorManager: GitMonitorManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
 export let factoryTestsManager: FactoryTestsManager | undefined
+export let contextChatsManager: ContextChatsManager | undefined
 
 let managers: BaseManager[] = []
 
@@ -70,6 +72,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     settingsManager,
   )
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
+  contextChatsManager = new ContextChatsManager(projectRoot, mainWindow)
 
   managers = [
     databaseManager,
@@ -86,6 +89,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     gitMonitorManager,
     factoryToolsManager,
     factoryTestsManager,
+    contextChatsManager,
   ]
 
   for (const manager of managers) {

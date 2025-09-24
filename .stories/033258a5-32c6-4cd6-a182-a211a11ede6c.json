@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b",
-      "status": "-",
+      "status": "+",
       "title": "Create a Chat Storage Service for Context-Specific Conversations",
       "description": "Implement a service in the main process to manage reading and writing chat history. The service will handle JSON files stored in the `.factory/chats/` directory, with subdirectories for projects and stories. It needs to resolve paths based on context identifiers (projectId, storyId, featureId, 'tests', 'agents'). Expose this service to the renderer process via IPC channels and the preload script.",
       "context": [],
       "createdAt": "2025-09-24T17:18:35.800Z",
-      "updatedAt": "2025-09-24T23:18:52.577Z"
+      "updatedAt": "2025-09-24T23:51:52.232Z",
+      "completedAt": "2025-09-24T23:51:52.232Z"
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
