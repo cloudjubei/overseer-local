@@ -91,7 +91,7 @@ export default class FactoryTestsManager extends BaseManager {
     if (!projectRoot) {
       return
     }
-    const tools = createTestTools(projectRoot)
+    const tools = createTestTools(projectId, projectRoot)
     await tools.init()
     this.tools[projectId] = tools
 
