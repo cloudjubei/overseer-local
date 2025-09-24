@@ -17,6 +17,8 @@ export type FileMentionsTextareaProps = {
   onReferenceSelected?: (ref: string) => void
   // Optional external ref to control focus/caret from parent
   inputRef?: React.RefObject<HTMLTextAreaElement>
+  // Optional key handler (e.g., Cmd/Ctrl+Enter to submit from parent)
+  onKeyDown?: React.KeyboardEventHandler<HTMLTextAreaElement>
 }
 
 export default function FileMentionsTextarea({
@@ -32,6 +34,7 @@ export default function FileMentionsTextarea({
   onFileMentionSelected,
   onReferenceSelected,
   inputRef,
+  onKeyDown,
 }: FileMentionsTextareaProps) {
   const { files } = useFiles()
   const innerRef = useRef<HTMLTextAreaElement>(null)
@@ -76,7 +79,7 @@ export default function FileMentionsTextarea({
     if (onReferenceSelected) onReferenceSelected(refDisplay)
   }
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKeyDownInternal = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const key = e.key
     const isSpace = key === ' ' || key === 'Spacebar' || key === 'Space'
     if (isSpace) {
@@ -84,16 +87,17 @@ export default function FileMentionsTextarea({
         e.preventDefault()
         e.stopPropagation()
         handleFileSelect(fileMatches[0])
-        return
-      }
-      if (isRefsOpen && refMatches.length > 0) {
+        // Let parent also see the event after our handling
+      } else if (isRefsOpen && refMatches.length > 0) {
         e.preventDefault()
         e.stopPropagation()
         // Pass display index for insertion
         handleRefSelect(refMatches[0].display)
-        return
+        // Let parent also see the event after our handling
       }
     }
+    // Bubble to parent handler if provided
+    onKeyDown?.(e)
   }
 
   return (
@@ -108,7 +112,7 @@ export default function FileMentionsTextarea({
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={onKeyDown}
+        onKeyDown={onKeyDownInternal}
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}

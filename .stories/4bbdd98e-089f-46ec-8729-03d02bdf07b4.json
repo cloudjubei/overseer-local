@@ -121,7 +121,7 @@
     },
     {
       "id": "3e8a3f07-5983-4c9c-ad27-ae001eb9e683",
-      "status": "-",
+      "status": "+",
       "title": "Create an Advanced Chat Input with Mention Support",
       "description": "Improve the @src/renderer/components/Chat/ChatInput.tsx  with a component that supports autocompletion. It should trigger a file lookup panel when the user types `@` and a story/feature lookup panel when the user types `#` - we already have an input that works well inside @src/renderer/components/stories/FeatureForm.tsx . The component for this should be isolated and reused in both of these places.",
       "context": [
@@ -129,8 +129,9 @@
         "src/renderer/components/Chat/ChatInput.tsx"
       ],
       "createdAt": "2025-09-22T23:55:32.129Z",
-      "updatedAt": "2025-09-24T16:58:26.308Z",
-      "blockers": []
+      "updatedAt": "2025-09-24T17:04:58.093Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T17:04:58.093Z"
     },
     {
       "id": "95bd507b-3644-4c61-aaba-2d8781514767",
