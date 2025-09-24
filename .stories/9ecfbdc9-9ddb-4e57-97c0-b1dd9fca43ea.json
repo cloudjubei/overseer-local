@@ -1,6 +1,6 @@
 {
   "id": "9ecfbdc9-9ddb-4e57-97c0-b1dd9fca43ea",
-  "status": "?",
+  "status": "+",
   "title": "New screen - Tests",
   "description": "factory-tools exposes tooling for running tests and test coverage based on paths.\nWe need a new screen \"Tests\" that will be accessible from the Sidebar (under \"Agents\"). It requires a new icon to be created.\nThe new screen needs to have 2 sections (selectable via tabs):\n1) test results - especially if there are any failures, we want to show the test lines and the code that is responsible for the failure\n2) test coverage - show the latest test coverage in a clear format so the user can read and analyse the data well.\n\nWhile the tests/coverage is running - make sure the user is shown appropriate loaders so the screen doesn't seem stuck.",
   "features": [
@@ -158,18 +158,6 @@
       "completedAt": "2025-09-23T16:17:28.743Z"
     },
     {
-      "id": "346aaa45-47c8-4325-b166-efc7c4fa245f",
-      "status": "?",
-      "title": "After having run coverage it isn't saved",
-      "description": "After going away from @src/renderer/screens/TestsView.tsx and coming back to the screen - the just ran coverage isn't showing anymore - it should.",
-      "context": [
-        "src/renderer/screens/TestsView.tsx"
-      ],
-      "blockers": [],
-      "createdAt": "2025-09-23T19:24:57.838Z",
-      "updatedAt": "2025-09-23T21:41:17.916Z"
-    },
-    {
       "id": "f4c9351c-b638-4a4e-accc-6d525f5adb54",
       "status": "+",
       "title": "The styling should follow the same as AgentsView",
@@ -318,10 +306,10 @@
     "e880756b-5b9e-4cc2-9e25-c6473b0cec1a": 19,
     "7e682d56-cece-4615-92a0-75658d7ad9f8": 20,
     "488ffc56-b217-411a-b285-4abc37cece2e": 21,
-    "346aaa45-47c8-4325-b166-efc7c4fa245f": 22,
-    "57d6794f-b9cd-4661-afca-8715ae79ceda": 23,
-    "c9bb9c86-e863-492e-9ca7-faf114083b78": 24
+    "57d6794f-b9cd-4661-afca-8715ae79ceda": 22,
+    "c9bb9c86-e863-492e-9ca7-faf114083b78": 23
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
-  "updatedAt": "2025-09-22T23:34:09.482Z"
+  "updatedAt": "2025-09-24T01:25:44.491Z",
+  "completedAt": "2025-09-24T01:25:44.491Z"
 }

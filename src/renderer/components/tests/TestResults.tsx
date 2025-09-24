@@ -169,10 +169,8 @@ export default function TestResultsView({ results }: { results: TestsResult }) {
   const tests = Array.isArray(results.tests) ? results.tests : []
 
   const failing = tests.filter((t) => (t.failures?.length || 0) > 0 || t.status === 'fail')
-  console.log('FAILING: ', failing)
   const skippedFiles = tests.filter((t) => (t.summary?.skipped || 0) > 0)
   const passing = tests.filter((t) => t.summary?.passed > 0 && t.status === 'ok')
-  console.log('passing: ', passing)
 
   const hasFailures = (results.summary?.failed || 0) > 0 || failing.length > 0
   const hasSkips = (results.summary?.skipped || 0) > 0
