@@ -83,7 +83,7 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
             <SelectTrigger className="ui-select w-full">
               <SelectValue placeholder="Select a language" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               {KNOWN_LANGUAGES.map((lang) => (
                 <SelectItem key={lang} value={lang}>
                   {lang}
@@ -103,7 +103,7 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
             <SelectTrigger className="ui-select w-full">
               <SelectValue placeholder="Select a framework" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               {availableFrameworks.map((fw) => (
                 <SelectItem key={fw} value={fw}>
                   {fw}
@@ -123,7 +123,7 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
             <SelectTrigger className="ui-select w-full">
               <SelectValue placeholder="Select a test framework" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               {availableTestFrameworks.map((tfw) => (
                 <SelectItem key={tfw} value={tfw}>
                   {tfw}
