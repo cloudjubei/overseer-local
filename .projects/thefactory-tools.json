@@ -22,9 +22,10 @@
     "githubCredentialsId": "0c5aa9e8-9d2e-4891-8239-a3ab7b841564"
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-09-24T22:45:30.427Z",
+  "updatedAt": "2025-09-24T23:36:44.805Z",
   "codeInfo": {
     "language": "typescript",
+    "framework": "node",
     "testFramework": "vitest"
   }
 }

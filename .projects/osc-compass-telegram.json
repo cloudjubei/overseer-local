@@ -18,9 +18,10 @@
     "2a1623d8-03aa-410a-b7eb-dc768ec04414": 6
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-09-24T22:47:04.149Z",
+  "updatedAt": "2025-09-24T23:36:25.402Z",
   "codeInfo": {
     "language": "typescript",
+    "framework": "node",
     "testFramework": "vitest"
   }
 }

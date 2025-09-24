@@ -323,12 +323,7 @@ export default function ProjectManagerModal({
                     {p.codeInfo && (
                       <div className="flex gap-2">
                         <Chip variant="secondary" size="sm">
-                          <span className="inline-flex items-center gap-1">
-                            <span aria-hidden className="inline-flex items-center">
-                              {renderLanguageIcon(p.codeInfo.language as any, 'w-4 h-4')}
-                            </span>
-                            <span>{p.codeInfo.language}</span>
-                          </span>
+                          {renderLanguageIcon(p.codeInfo.language as any, 'w-4 h-4')}
                         </Chip>
                         {p.codeInfo.framework && (
                           <Chip variant="secondary" size="sm">
@@ -448,12 +443,7 @@ export default function ProjectManagerModal({
               <label>Code Info</label>
               <div className="flex gap-2">
                 <Chip variant="secondary" size="sm" onClick={() => setIsCodeInfoModalOpen(true)}>
-                  <span className="inline-flex items-center gap-1">
-                    <span aria-hidden className="inline-flex items-center">
-                      {renderLanguageIcon(form.codeInfo.language as any, 'w-4 h-4')}
-                    </span>
-                    <span>{form.codeInfo.language}</span>
-                  </span>
+                  {renderLanguageIcon(form.codeInfo.language as any, 'w-4 h-4')}
                 </Chip>
                 {form.codeInfo.framework && (
                   <Chip variant="secondary" size="sm" onClick={() => setIsCodeInfoModalOpen(true)}>
