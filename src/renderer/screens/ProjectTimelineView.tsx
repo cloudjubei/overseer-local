@@ -8,6 +8,7 @@ import { EntityInput } from 'thefactory-db/dist/types'
 import StorySummaryCallout from '../components/stories/StorySummaryCallout'
 import FeatureSummaryCallout from '../components/stories/FeatureSummaryCallout'
 import { useNavigator } from '../navigation/Navigator'
+import { Switch } from '../components/ui/Switch'
 
 function startOfDay(d: Date) {
   const x = new Date(d)
@@ -245,10 +246,15 @@ export default function ProjectTimelineView() {
   }, [projectId])
 
   const displayedStories = useMemo(() => {
-    if (showAllProjects) return Object.values(storiesById)
-    if (!projectId) return []
-    return Object.values(storiesById).filter((s: any) => s.projectId === projectId)
-  }, [storiesById, projectId, showAllProjects])
+    if (showAllProjects) {
+      return Object.values(storiesById)
+    }
+    if (!project?.storyIdToDisplayIndex) {
+      return []
+    }
+    const projectStoryIds = Object.keys(project.storyIdToDisplayIndex)
+    return projectStoryIds.map((id) => storiesById[id]).filter(Boolean)
+  }, [storiesById, project, showAllProjects])
 
   const displayedFeatures = useMemo(() => {
     return displayedStories
@@ -680,18 +686,11 @@ export default function ProjectTimelineView() {
           <div className="text-xs text-muted truncate">Project: {projectId}</div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="show-all-projects-toggle"
-              className="h-4 w-4 rounded border-subtle text-accent-primary focus:ring-accent-primary"
-              checked={showAllProjects}
-              onChange={(e) => setShowAllProjects(e.target.checked)}
-            />
-            <label htmlFor="show-all-projects-toggle" className="ml-2 text-sm text-secondary">
-              Show all projects
-            </label>
-          </div>
+          <Switch
+            label="Show all projects"
+            checked={showAllProjects}
+            onCheckedChange={setShowAllProjects}
+          />
           <div className="hidden sm:flex items-center rounded border border-subtle overflow-hidden">
             {(['day', 'week', 'month'] as Zoom[]).map((z) => (
               <button
