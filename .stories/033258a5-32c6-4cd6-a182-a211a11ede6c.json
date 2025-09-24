@@ -3,8 +3,120 @@
   "status": "-",
   "title": "Better Chats with AI everywhere",
   "description": "We want the user to be able to have a conversation with an LLM about a given context in many places in the app. First, where do we want the user's to have chats available:\n- when editing or creating a story, there needs to be a chat button (at the top next to the close button) that will open the chat interface (in a sidebar to the right of the popup) \n- similarly, when editing or creating a feature\n- inside StoryDetailsView there needs to be a chat button (at the top next to the run agent button) that will open a sidebar (on the right) that will allow the user to talk about the given Story and its features.\n- inside StoriesListView there needs to be a chat button (at the top next to the run agent button) that will open a chat about the current project and its stories and features.\n- following StoryDetailsView and StoriesListView and opening the chat interface in a sidebar to the right, we need a chat button on other screens that will do a similar thing, we need it in Tests and Agents.\n\nSecond, each chat is tied to a particular context and must be stored so that whenever the user comes back to the screen where that chat should be shown - the messages history must be resumed. Thus, the contexts are a specific Feature, a specific Story, a specific ProjectSpec, a ProjectSpec's tests and ProjectSpec's Agents. Essentially all these contexts must store appropriate chats somewhere under `.factory/chats` so that they can be easily retrieved via ids. We need `.factory/chats/projectId.json` to be the chat for a specific project, `.factory/chats/projectId/storyId.json` to be the chat for a specific story, `.factory/chats/projectId/storyId/featureId.json` to be the chat for a specific feature, `.factory/chats/projectId/tests.json` to be the chat for a project's tests, `.factory/chats/projectId/agents.json` to be the chat for a project's agents.\nEach one of these chats for the different contexts needs to have a different prompt that will come loaded with different information relevant to the context.\n\nThis chat interface should be unified and feel familiar across the different projects, the user simply should have an indicator of what context they are in. In this interface the user must be able to choose some settings for that particular context (stored as an app wide setting) - allowing the agent to use certain tools and others not. Choosing the model (similar to how ChatView already does it). Allowing the agent to auto call tools or require user confirmation.\nThis UI needs to be used anywhere where chats are used (so ChatView needs to benefit from these improvements too).",
-  "features": [],
-  "featureIdToDisplayIndex": {},
+  "features": [
+    {
+      "id": "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b",
+      "status": "-",
+      "title": "Create a Chat Storage Service for Context-Specific Conversations",
+      "description": "Implement a service in the main process to manage reading and writing chat history. The service will handle JSON files stored in the `.factory/chats/` directory, with subdirectories for projects and stories. It needs to resolve paths based on context identifiers (projectId, storyId, featureId, 'tests', 'agents'). Expose this service to the renderer process via IPC channels and the preload script.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.800Z",
+      "updatedAt": "2025-09-24T17:18:35.800Z"
+    },
+    {
+      "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
+      "status": "-",
+      "title": "Develop a Reusable Chat Sidebar React Component",
+      "description": "Create a new React component, `ChatSidebar`, responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.801Z",
+      "updatedAt": "2025-09-24T17:18:35.801Z"
+    },
+    {
+      "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
+      "status": "-",
+      "title": "Add Chat Settings Controls to the Chat Sidebar",
+      "description": "Enhance the `ChatSidebar` component to include UI controls for chat settings. This includes a model selector dropdown, a mechanism for enabling/disabling tools, and a toggle for the agent's tool auto-approval. These settings will be passed in as props and will trigger callbacks when changed.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.803Z",
+      "updatedAt": "2025-09-24T17:18:35.803Z"
+    },
+    {
+      "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
+      "status": "-",
+      "title": "Add a Chat Button and Sidebar to StoryDetailsView",
+      "description": "Integrate the `ChatSidebar` into the `StoryDetailsView`. Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the `ChatSidebar`. Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.805Z",
+      "updatedAt": "2025-09-24T17:18:35.805Z"
+    },
+    {
+      "id": "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6",
+      "status": "-",
+      "title": "Implement LLM Communication for the Chat Sidebar",
+      "description": "Connect the `ChatSidebar` to an LLM service. When a user sends a message, it should be sent to the LLM along with the chat history and the context-specific prompt. The LLM's response should then be displayed in the chat and saved to the history. This may involve adapting existing logic from `ChatView` or `thefactory-tools`.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.806Z",
+      "updatedAt": "2025-09-24T17:18:35.806Z"
+    },
+    {
+      "id": "91e943ca-515b-4ee4-a44d-cdcff61cc379",
+      "status": "-",
+      "title": "Create and Load Context-Specific System Prompts for Chats",
+      "description": "Implement a mechanism to generate and provide a unique system prompt for each chat context (Project, Story, Feature, Tests, Agents). When a new chat is initiated, the appropriate prompt, containing relevant information about the context, should be used as the first message from the system.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.806Z",
+      "updatedAt": "2025-09-24T17:18:35.806Z"
+    },
+    {
+      "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
+      "status": "-",
+      "title": "Add a Chat Button and Sidebar to StoriesListView",
+      "description": "Integrate the `ChatSidebar` into the `StoriesListView`. Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.807Z",
+      "updatedAt": "2025-09-24T17:18:35.807Z"
+    },
+    {
+      "id": "ba16d671-5c40-496f-b887-7c9d94694711",
+      "status": "-",
+      "title": "Add Chat Functionality to Story and Feature Edit Modals",
+      "description": "Add a \"Chat\" button to the header of the story and feature creation/editing modals. Clicking the button will open the `ChatSidebar` to the right of the modal content. The chat context will be the specific story or feature being edited.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.807Z",
+      "updatedAt": "2025-09-24T17:18:35.807Z"
+    },
+    {
+      "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",
+      "status": "-",
+      "title": "Add Project-Level Chat Sidebars to Tests and Agents Views",
+      "description": "Add a \"Chat\" button and the `ChatSidebar` to the `Tests` view and the `Agents` view. The chat context for the `Tests` view will be the project's tests, and for the `Agents` view, it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.808Z",
+      "updatedAt": "2025-09-24T17:18:35.808Z"
+    },
+    {
+      "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
+      "status": "-",
+      "title": "Implement Persistence for Chat Settings",
+      "description": "Store the user-selected settings (model, tool configuration, auto-approve) for each chat context. The settings should be saved alongside the chat messages in the corresponding JSON file and reloaded when the user re-opens the chat.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.808Z",
+      "updatedAt": "2025-09-24T17:18:35.808Z"
+    },
+    {
+      "id": "441f4d8d-3daf-4a37-b18d-16a08b5b7992",
+      "status": "-",
+      "title": "Unify Chat Experience by Refactoring ChatView",
+      "description": "Update the existing `ChatView` to use the newly created reusable chat component(s) from the `ChatSidebar`. This will ensure a consistent look, feel, and functionality for all chat interfaces across the application.",
+      "context": [],
+      "createdAt": "2025-09-24T17:18:35.808Z",
+      "updatedAt": "2025-09-24T17:18:35.808Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b": 1,
+    "8515f4d8-c436-4780-a5cc-7c3106e1efd3": 2,
+    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 3,
+    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 4,
+    "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6": 5,
+    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 6,
+    "02b401c9-5219-48ee-8fca-174c6702ff2f": 7,
+    "ba16d671-5c40-496f-b887-7c9d94694711": 8,
+    "860c56c9-61e0-476f-8459-f7ccc4838ef3": 9,
+    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 10,
+    "441f4d8d-3daf-4a37-b18d-16a08b5b7992": 11
+  },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"
 }
