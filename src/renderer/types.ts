@@ -5,7 +5,6 @@ export type NavigationView =
   | 'Chat'
   | 'Notifications'
   | 'Agents'
-  | 'AllAgents'
   | 'LiveData'
   | 'ProjectTimeline'
   | 'Tools'

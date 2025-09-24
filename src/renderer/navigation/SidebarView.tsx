@@ -5,7 +5,6 @@ import ChatView from '../screens/ChatView'
 import NotificationsView from '../screens/NotificationsView'
 import StoriesView from '../screens/StoriesView'
 import AgentsView from '../screens/AgentsView'
-import AllAgentsView from '../screens/AllAgentsView'
 import LiveDataView from '../screens/LiveDataView'
 import ProjectTimelineView from '../screens/ProjectTimelineView'
 import ToolsScreen from '../screens/ToolsView'
@@ -111,13 +110,6 @@ const NAV_ITEMS: NavDef[] = [
     view: 'Settings',
     icon: <IconSettings />,
     accent: 'gray',
-  },
-  {
-    id: 'all-agents',
-    label: 'All Agents',
-    view: 'AllAgents',
-    icon: <IconCollection />,
-    accent: 'teal',
   },
 ]
 
@@ -299,12 +291,6 @@ export default function SidebarView({}: SidebarProps) {
           <SettingsView />
         </div>
       )
-    if (currentView === 'AllAgents')
-      return (
-        <div key="AllAgents" className="flex flex-col flex-1 min-h-0 view-transition">
-          <AllAgentsView />
-        </div>
-      )
     if (currentView === 'Chat')
       return (
         <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition">
@@ -396,68 +382,66 @@ export default function SidebarView({}: SidebarProps) {
 
       <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
-          {NAV_ITEMS.filter((n) => n.view !== 'Settings' && n.view !== 'AllAgents').map(
-            (item, i) => {
-              const isActive = currentView === item.view
-              const ref = i === 0 ? firstItemRef : undefined
-              const showBadge = item.view === 'Notifications' && unreadCount > 0
-              const Btn = (
-                <button
-                  ref={ref as any}
-                  type="button"
-                  className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'brand'}`}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => onActivate(item.view)}
-                  title={item.label}
-                  tabIndex={focusIndex === i ? 0 : -1}
-                  onFocus={() => setFocusIndex(i)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      onActivate(item.view)
-                    }
-                  }}
-                >
-                  <span className="nav-item__icon">{item.icon}</span>
-                  {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-                  {showBadge && (
-                    <span
-                      className={classNames(
-                        'nav-item__badges',
-                        effectiveCollapsed && 'nav-item__badges--compact',
-                      )}
-                      aria-hidden
-                    >
-                      <NotificationBadge
-                        className={
-                          effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                        }
-                        text={`${unreadCount}`}
-                        tooltipLabel={`${unreadCount} unread notifications`}
-                      />
-                    </span>
-                  )}
-                </button>
-              )
-              return (
-                <li key={item.id} className="nav-li">
-                  {effectiveCollapsed ? (
-                    <Tooltip content={item.label} placement="right">
-                      {Btn}
-                    </Tooltip>
-                  ) : (
-                    Btn
-                  )}
-                </li>
-              )
-            },
-          )}
+          {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
+            const isActive = currentView === item.view
+            const ref = i === 0 ? firstItemRef : undefined
+            const showBadge = item.view === 'Notifications' && unreadCount > 0
+            const Btn = (
+              <button
+                ref={ref as any}
+                type="button"
+                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'brand'}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => onActivate(item.view)}
+                title={item.label}
+                tabIndex={focusIndex === i ? 0 : -1}
+                onFocus={() => setFocusIndex(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onActivate(item.view)
+                  }
+                }}
+              >
+                <span className="nav-item__icon">{item.icon}</span>
+                {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
+                {showBadge && (
+                  <span
+                    className={classNames(
+                      'nav-item__badges',
+                      effectiveCollapsed && 'nav-item__badges--compact',
+                    )}
+                    aria-hidden
+                  >
+                    <NotificationBadge
+                      className={
+                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                      }
+                      text={`${unreadCount}`}
+                      tooltipLabel={`${unreadCount} unread notifications`}
+                    />
+                  </span>
+                )}
+              </button>
+            )
+            return (
+              <li key={item.id} className="nav-li">
+                {effectiveCollapsed ? (
+                  <Tooltip content={item.label} placement="right">
+                    {Btn}
+                  </Tooltip>
+                ) : (
+                  Btn
+                )}
+              </li>
+            )
+          })}
         </ul>
 
         <div className="nav-sep" aria-hidden />
 
         <ul className="nav-list" role="list">
-          {NAV_ITEMS.filter((n) => n.view === 'Settings' || n.view === 'AllAgents').map((item) => {
+          {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item) => {
             const idx = NAV_ITEMS.findIndex((n) => n.view === item.view)
             const isActive = currentView === item.view
             const Btn = (

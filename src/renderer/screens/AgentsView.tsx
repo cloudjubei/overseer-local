@@ -6,7 +6,6 @@ import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
 import { useActiveProject } from '../contexts/ProjectContext'
 
-// Helper functions (mostly from AgentsView, they cover AllAgentsView's needs)
 function formatTime(iso?: string) {
   if (!iso) return ''
   try {
@@ -128,7 +127,6 @@ const CurrentProjectView = () => {
   return (
     <>
       <div className="p-4 space-y-6">
-        {/* KPIs (same topbar style as AllAgentsView, scoped to current project) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Total Runs</div>
@@ -610,9 +608,7 @@ const AllProjectsView = () => {
         </div>
         <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <div className="text-xs text-neutral-500">Total Time Spent</div>
-          <div className="text-lg font-semibold">
-            {formatDuration(stats.kpis.totalDurationMs)}
-          </div>
+          <div className="text-lg font-semibold">{formatDuration(stats.kpis.totalDurationMs)}</div>
         </div>
         <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <div className="text-xs text-neutral-500">Total Cost</div>
@@ -1001,10 +997,7 @@ const AllProjectsView = () => {
                 {stats.modelsList
                   .sort((a, b) => (a.provider + a.model).localeCompare(b.provider + b.model))
                   .map((m) => (
-                    <tr
-                      key={m.key}
-                      className="border-t border-neutral-200 dark:border-neutral-800"
-                    >
+                    <tr key={m.key} className="border-t border-neutral-200 dark:border-neutral-800">
                       <td className="px-3 py-2">
                         <ModelChip provider={m.provider} model={m.model} />
                       </td>
@@ -1044,7 +1037,7 @@ export default function AgentsView() {
         <div className="flex items-center rounded-md p-1 bg-neutral-100 dark:bg-neutral-900">
           <button
             onClick={() => setViewMode('current')}
-            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${ 
+            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
               viewMode === 'current'
                 ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
                 : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
@@ -1054,7 +1047,7 @@ export default function AgentsView() {
           </button>
           <button
             onClick={() => setViewMode('all')}
-            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${ 
+            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
               viewMode === 'all'
                 ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
                 : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
