@@ -92,6 +92,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 ariaLabel="Message input"
                 inputRef={textareaRef}
                 onKeyDown={handleTextareaKeyDown}
+                renderChipsInInput={true}
               />
             </div>
 
