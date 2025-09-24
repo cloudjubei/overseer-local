@@ -8,22 +8,17 @@ export type TestsCatalogItem = { value: string; label: string }
 export type TestsContextValue = {
   isRunningTests: boolean
   isRunningCoverage: boolean
-  isLoadingCatalog: boolean
 
   results?: TestsResult
   coverage?: CoverageResult
 
-  // invalidation flags and timestamps
-  resultsInvalidated: boolean | null
-  coverageInvalidated: boolean | null
-  resultsAt: number | null
-  coverageAt: number | null
-  // errors
   testsError: string | null
   coverageError: string | null
-  // test list/catalog for UI selection
+
+  isLoadingCatalog: boolean
   testsCatalog: TestsCatalogItem[]
   refreshTestsCatalog: () => Promise<void>
+
   runTests: (path?: string) => Promise<void>
   runCoverage: (path?: string) => Promise<void>
   resetTests: () => void
@@ -42,17 +37,11 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   const [results, setResults] = useState<TestsResult | undefined>(undefined)
   const [coverage, setCoverage] = useState<CoverageResult | undefined>(undefined)
 
-  const [resultsInvalidated, setResultsInvalidated] = useState<boolean | null>(null)
-  const [coverageInvalidated, setCoverageInvalidated] = useState<boolean | null>(null)
-  const [resultsAt, setResultsAt] = useState<number | null>(null)
-  const [coverageAt, setCoverageAt] = useState<number | null>(null)
-
   const [testsError, setTestsError] = useState<string | null>(null)
   const [coverageError, setCoverageError] = useState<string | null>(null)
 
   const [testsCatalog, setTestsCatalog] = useState<TestsCatalogItem[]>([])
 
-  // Load last cached results/coverage on mount or project change
   useEffect(() => {
     let cancelled = false
     async function load() {
@@ -63,25 +52,8 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
           factoryTestsService.getLastCoverage(projectId),
         ])
         if (cancelled) return
-        if (lastRes) {
-          // const parsed = mapTestResultsAggregate(lastRes.result as any)
-          // setResults(parsed)
-          // setResultsInvalidated(!!lastRes.invalidated)
-          // setResultsAt(lastRes.at || null)
-        } else {
-          setResults(undefined)
-          setResultsInvalidated(null)
-          setResultsAt(null)
-        }
-        if (lastCov) {
-          // setCoverage(lastCov.result)
-          // setCoverageInvalidated(!!lastCov.invalidated)
-          // setCoverageAt(lastCov.at || null)
-        } else {
-          setCoverage(undefined)
-          setCoverageInvalidated(null)
-          setCoverageAt(null)
-        }
+        setResults(lastRes)
+        setCoverage(lastCov)
       } catch (_) {
         // ignore preload errors on initial load
       }
@@ -131,15 +103,11 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   const resetTests = useCallback(() => {
     setResults(undefined)
     setTestsError(null)
-    setResultsInvalidated(null)
-    setResultsAt(null)
   }, [])
 
   const resetCoverage = useCallback(() => {
     setCoverage(undefined)
     setCoverageError(null)
-    setCoverageInvalidated(null)
-    setCoverageAt(null)
   }, [])
 
   const runTests = useCallback(
@@ -151,8 +119,6 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await factoryTestsService.runTests(projectId, path?.trim() || '.')
         setResults(res)
-        setResultsInvalidated(false)
-        setResultsAt(Date.now())
       } catch (e: any) {
         setTestsError(e?.message || String(e))
       } finally {
@@ -171,8 +137,6 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await factoryTestsService.runCoverages(projectId, path?.trim() || '.')
         setCoverage(res)
-        setCoverageInvalidated(false)
-        setCoverageAt(Date.now())
       } catch (e: any) {
         setCoverageError(e?.message || String(e))
       } finally {
@@ -189,10 +153,6 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       isLoadingCatalog,
       results,
       coverage,
-      resultsInvalidated,
-      coverageInvalidated,
-      resultsAt,
-      coverageAt,
       testsError,
       coverageError,
       testsCatalog,
@@ -208,10 +168,6 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       isLoadingCatalog,
       results,
       coverage,
-      resultsInvalidated,
-      coverageInvalidated,
-      resultsAt,
-      coverageAt,
       testsError,
       coverageError,
       testsCatalog,

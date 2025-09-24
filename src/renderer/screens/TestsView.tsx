@@ -32,10 +32,6 @@ function TestsInner() {
     coverageError,
     runTests,
     runCoverage,
-    resultsInvalidated,
-    coverageInvalidated,
-    resultsAt,
-    coverageAt,
     testsCatalog,
     isLoadingCatalog,
   } = useTests()
@@ -126,22 +122,6 @@ function TestsInner() {
               </Button>
             </div>
 
-            {results && (
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  {resultsInvalidated ? (
-                    <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                      Results are outdated (files changed since last run)
-                    </span>
-                  ) : resultsAt ? (
-                    <span className="text-neutral-500">
-                      Last updated <TimeAgo ts={resultsAt} />
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            )}
-
             {testsError ? (
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
                 {testsError}
@@ -181,22 +161,6 @@ function TestsInner() {
                 Run Coverage
               </Button>
             </div>
-
-            {coverage && (
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  {coverageInvalidated ? (
-                    <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                      Coverage is outdated (files changed since last run)
-                    </span>
-                  ) : coverageAt ? (
-                    <span className="text-neutral-500">
-                      Last updated <TimeAgo ts={coverageAt} />
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            )}
 
             {coverageError ? (
               <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">

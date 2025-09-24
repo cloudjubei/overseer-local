@@ -13,8 +13,8 @@ export type FactoryTestsService = {
   runTests: (projectId: string, path?: string) => Promise<TestsResult | undefined>
   runCoverage: (projectId: string, path: string) => Promise<CoverageResult | undefined>
   runCoverages: (projectId: string, path?: string) => Promise<CoverageResult | undefined>
-  getLastResult: (projectId: string) => Promise<undefined>
-  getLastCoverage: (projectId: string) => Promise<undefined>
+  getLastResult: (projectId: string) => Promise<TestsResult | undefined>
+  getLastCoverage: (projectId: string) => Promise<CoverageResult | undefined>
 }
 
 export const factoryTestsService: FactoryTestsService = { ...window.factoryTestsService }

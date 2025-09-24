@@ -77,11 +77,13 @@ export default class FactoryTestsManager extends BaseManager {
   }
 
   async getLastResult(projectId: string) {
-    return undefined
+    const tools = await this.__getTools(projectId)
+    return await tools?.getLastTestsRun()
   }
 
   async getLastCoverage(projectId: string) {
-    return undefined
+    const tools = await this.__getTools(projectId)
+    return await tools?.getLastTestsCoverage()
   }
 
   private async updateTool(projectId: string): Promise<TestTools | undefined> {
