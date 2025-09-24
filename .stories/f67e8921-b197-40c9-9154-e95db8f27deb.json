@@ -1811,6 +1811,20 @@
       "blockers": [],
       "createdAt": "2025-09-24T16:44:41.298Z",
       "updatedAt": "2025-09-24T16:44:41.298Z"
+    },
+    {
+      "id": "93772c3c-639f-4110-a2e2-7d5d7f9e91df",
+      "status": "-",
+      "title": "when an agent is running move the spinner",
+      "description": "In @src/renderer/stories/StoriesListView.tsx when an agent is running for a story and showing the @src/renderer/components/agents/AgentRunBullet.tsx - place the bullet to the left of the Story's Id chip (similarly to how the blocked indicator is placed next to the feature's chip).\nMake the action buttons show on hover always (when an agent is running do not show the Run agent button).\nWe need a very similar layout update in @src/renderer/stories/StoryDetailsView.tsx where the @src/renderer/components/agents/AgentRunBullet.tsx needs to move below the status chip for a given feature.",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T17:27:06.560Z",
+      "updatedAt": "2025-09-24T17:27:06.560Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1930,7 +1944,8 @@
     "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6": 114,
     "72945db3-a39d-422d-95c1-23123a9ef01a": 115,
     "362f2ca1-0fc2-4076-a70b-3581cd73bd66": 116,
-    "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc": 117
+    "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc": 117,
+    "93772c3c-639f-4110-a2e2-7d5d7f9e91df": 118
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-23T22:02:16.498Z"
