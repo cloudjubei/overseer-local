@@ -7,13 +7,13 @@
     {
       "id": "b6cdf920-004a-4ff2-8a9f-8bc56c1047f7",
       "status": "-",
-      "title": "Refactor Chat Window to a Fixed-Size Layout",
-      "description": "Modify the main chat window component @src/renderer/screens/ChatView.tsx   to have a constant height, removing the responsive `vh` units. Ensure the main message list scrolls vertically. Individual messages that are too long should wrap, not scroll horizontally, to maintain readability.",
+      "title": "Improve Chat Window",
+      "description": "Modify the main chat window component @src/renderer/screens/ChatView.tsx to always fill up its parent container to max height and all available width. Ensure the main message list scrolls vertically. Individual messages that are too long should wrap, not scroll horizontally, to maintain readability - but they should display markdown and if there are tables or code inside (i.e. not text) than that item should scroll on its own within the message.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-22T23:55:31.958Z",
-      "updatedAt": "2025-09-23T11:52:40.442Z",
+      "updatedAt": "2025-09-24T16:56:20.120Z",
       "blockers": []
     },
     {
@@ -120,13 +120,16 @@
     },
     {
       "id": "3e8a3f07-5983-4c9c-ad27-ae001eb9e683",
-      "status": "+",
+      "status": "-",
       "title": "Create an Advanced Chat Input with Mention Support",
-      "description": "Replace the current chat input with a new component that supports autocompletion. It should trigger a file lookup panel when the user types `@` and a story/feature lookup panel when the user types `#`.",
-      "context": [],
+      "description": "Improve the @src/renderer/components/Chat/ChatInput.tsx  with a component that supports autocompletion. It should trigger a file lookup panel when the user types `@` and a story/feature lookup panel when the user types `#` - we already have an input that works well inside @src/renderer/components/stories/FeatureForm.tsx . The component for this should be isolated and reused in both of these places.",
+      "context": [
+        "src/renderer/components/stories/FeatureForm.tsx",
+        "src/renderer/components/Chat/ChatInput.tsx"
+      ],
       "createdAt": "2025-09-22T23:55:32.129Z",
-      "updatedAt": "2025-09-23T00:44:56.079Z",
-      "completedAt": "2025-09-23T00:44:56.079Z"
+      "updatedAt": "2025-09-24T16:58:26.308Z",
+      "blockers": []
     },
     {
       "id": "95bd507b-3644-4c61-aaba-2d8781514767",

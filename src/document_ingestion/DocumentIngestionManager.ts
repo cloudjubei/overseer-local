@@ -8,6 +8,7 @@ import type ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
 import { FileMeta } from 'thefactory-tools'
 import { Document } from 'thefactory-db'
+import path from 'path'
 
 function sha1(buf: Buffer): string {
   return crypto.createHash('sha1').update(buf).digest('hex')
@@ -145,6 +146,7 @@ export default class DocumentIngestionManager extends BaseManager {
     const contentHash = sha1(Buffer.from(content || '', 'utf8'))
     const type = classifyDocumentType(stats.ext, relPath)
 
+    const name = path.basename(relPath)
     const srcKey = toRelUnix(relPath)
 
     const d = await this.databaseManager.getDocumentBySrc(srcKey)
@@ -163,6 +165,7 @@ export default class DocumentIngestionManager extends BaseManager {
       type,
       content,
       src: srcKey,
+      name,
       metadata: {
         ext: stats.ext,
         size: stats.size,

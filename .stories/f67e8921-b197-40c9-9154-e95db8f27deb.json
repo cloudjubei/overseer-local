@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1776,6 +1776,41 @@
       "createdAt": "2025-09-23T17:02:30.318Z",
       "updatedAt": "2025-09-23T20:13:11.361Z",
       "completedAt": "2025-09-23T20:13:11.361Z"
+    },
+    {
+      "id": "72945db3-a39d-422d-95c1-23123a9ef01a",
+      "status": "-",
+      "title": "The timeline doesn't filter by projectId",
+      "description": "When switching to different projects while having the @src/renderer/screens/ProjectTimelineView.tsx open it keeps on showing stories/features for all projects.\nIt should only show the stories/feature for the given project.\nDisplaying stories/features for all proejcts should be controlled by a toggle left to the Day|Week|Month buttons. When switching projects, the timeline should show today (i.e. same behaviour as if the Today button was clicked).",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T16:40:57.363Z",
+      "updatedAt": "2025-09-24T16:40:57.363Z"
+    },
+    {
+      "id": "362f2ca1-0fc2-4076-a70b-3581cd73bd66",
+      "status": "-",
+      "title": "The AllAgentsView should be merged into Agents",
+      "description": "We need to have a toggle at the top right of the @src/renderer/screens/AgentsView.tsx that will either show the current project's runs (what @src/renderer/screens/AgentsView.tsx is currently showing) or for all projects (what @src/renderer/screens/AllAgentsView.tsx is showing) . The All Agents option from the sidebar can be removed",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T16:42:05.556Z",
+      "updatedAt": "2025-09-24T16:42:24.048Z"
+    },
+    {
+      "id": "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc",
+      "status": "-",
+      "title": "The settings should be in a footer at the bottom of the sidebar",
+      "description": "Same as the header - it shouldn't scroll - only the button in between should.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-24T16:44:41.298Z",
+      "updatedAt": "2025-09-24T16:44:41.298Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1892,7 +1927,10 @@
     "b951665d-139c-4761-94f1-c259b36dab42": 111,
     "70889fe4-d1cd-4718-9cf1-f11739204e42": 112,
     "995dbbc4-cf40-4749-9cd7-1721cae3e4b6": 113,
-    "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6": 114
+    "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6": 114,
+    "72945db3-a39d-422d-95c1-23123a9ef01a": 115,
+    "362f2ca1-0fc2-4076-a70b-3581cd73bd66": 116,
+    "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc": 117
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-23T22:02:16.498Z"
