@@ -39,15 +39,16 @@
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
-      "status": "-",
+      "status": "+",
       "title": "Add a Chat Button and Sidebar to StoryDetailsView",
       "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoryDetailsView.tsx . Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the `ChatSidebar`. Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
       "context": [
         "src/renderer/stories/StoryDetailsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.805Z",
-      "updatedAt": "2025-09-24T23:14:58.850Z",
-      "blockers": []
+      "updatedAt": "2025-09-24T23:57:28.801Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T23:57:28.801Z"
     },
     {
       "id": "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6",

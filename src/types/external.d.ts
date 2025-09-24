@@ -11,6 +11,7 @@ import type { DocumentIngestionService } from 'src/renderer/services/documentIng
 import type { GitMonitorService } from 'src/renderer/services/gitMonitorService'
 import type { StoriesService } from 'src/renderer/services/storiesService'
 import type { FactoryTestsService } from 'src/renderer/services/factoryTestsService'
+import type { ContextChatsService } from 'src/renderer/services/contextChatsService'
 
 declare global {
   interface Window {
@@ -21,6 +22,7 @@ declare global {
     projectsService: ProjectsService
     filesService: FilesService
     chatsService: ChatsService
+    contextChatsService: ContextChatsService
     notificationsService: NotificationsService
     settingsService: SettingsService
     liveDataService: LiveDataService
