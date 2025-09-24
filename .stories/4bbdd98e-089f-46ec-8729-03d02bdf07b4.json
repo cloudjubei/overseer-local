@@ -178,13 +178,14 @@
     },
     {
       "id": "321d97e3-4263-44d3-b9a6-5594d5caa276",
-      "status": "-",
+      "status": "+",
       "title": "Assistant bubbles display markdown",
       "description": "Assistant bubbles can display markdown.\nWhen tables or code or json (or custom things like these) are displayed that might be too wide for the bubble to show - those should be rendered in their own 'box' which will allow horizontal scrolling but never vertical scrolling (the bubble should always just stretch vertically).",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-24T17:51:13.116Z",
-      "updatedAt": "2025-09-24T17:51:13.116Z"
+      "updatedAt": "2025-09-24T18:52:41.839Z",
+      "completedAt": "2025-09-24T18:52:41.839Z"
     }
   ],
   "featureIdToDisplayIndex": {

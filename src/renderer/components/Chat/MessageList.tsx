@@ -8,6 +8,7 @@ import TypewriterText from '../ui/TypewriterText'
 import ToolCallCard from './ToolCallCard'
 import { inferFileType, useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../../../assets/sounds'
+import Markdown from '../ui/Markdown'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -313,9 +314,9 @@ export default function MessageList({
                     {isUser ? (
                       <RichText text={msg.content} />
                     ) : index === animateAssistantIdx ? (
-                      <TypewriterText text={msg.content} />
+                      <TypewriterText text={msg.content} renderer="markdown" />
                     ) : (
-                      <RichText text={msg.content} />
+                      <Markdown text={msg.content} />
                     )}
                   </div>
 
