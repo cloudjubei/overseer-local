@@ -164,14 +164,16 @@
     },
     {
       "id": "3ae0afee-4d33-4133-a87e-11a1c0124846",
-      "status": "+",
-      "title": "User chat bubble doesn't wrap correctly",
-      "description": "Currently the assistant bubble's correctly wrap and even when the text is too wide only ever take up a maximum amount of width - the user bubble's don't - they stretch, but they shouldn't - they should be follow the same exact rules as the assistant bubbles.",
-      "context": [],
+      "status": "-",
+      "title": "Chat bubble don't wrap correctly",
+      "description": "Both the user and assistant bubble's don't wrap text that is very wide correctly - the bubble currently stretches beyond the screen (it gets clipped). All text should be made to fit the max bubble width and flow vertically as far as it needs. This is in @src/renderer/components/Chat/MessageList.tsx which uses @src/renderer/components/ui/RichText.tsx",
+      "context": [
+        "src/renderer/components/Chat/MessageList.tsx",
+        "src/renderer/components/ui/RichText.tsx"
+      ],
       "blockers": [],
       "createdAt": "2025-09-24T17:49:24.650Z",
-      "updatedAt": "2025-09-24T18:11:12.154Z",
-      "completedAt": "2025-09-24T18:11:12.154Z"
+      "updatedAt": "2025-09-24T18:44:13.067Z"
     },
     {
       "id": "321d97e3-4263-44d3-b9a6-5594d5caa276",
