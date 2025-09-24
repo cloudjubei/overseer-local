@@ -244,7 +244,7 @@
     },
     {
       "id": "7e682d56-cece-4615-92a0-75658d7ad9f8",
-      "status": "-",
+      "status": "+",
       "title": "Improvements in both tab views of TestsView",
       "description": "In @src/renderer/screens/TestsView.tsx the main button of each section needs to be moved to be vertically centered with the Test Results | Test Coverage switch (the last updated info can be to the left of it).\nThe main section of each of the views is the one that is scrollable - not the whole view.",
       "context": [
@@ -252,11 +252,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T00:02:02.614Z",
-      "updatedAt": "2025-09-24T00:02:02.614Z"
+      "updatedAt": "2025-09-24T00:13:41.603Z",
+      "completedAt": "2025-09-24T00:13:41.603Z"
     },
     {
       "id": "488ffc56-b217-411a-b285-4abc37cece2e",
-      "status": "-",
+      "status": "+",
       "title": "Coverage view improvements",
       "description": "In @src/renderer/screens/TestsView.tsx the coverage view needs to have its table updated:\n- make the summary be the actual table header - that way when horizontally scrolling the columns are aligned. Keep the column titles and show the percentage + percentage bar under.\n- The Statements, Branches, Functions & Lines columns can all be slightly thinner (to match Statements, as it's the longest word) in width.\n- When hovering over a value that has the percentage and percentage bar, in the tooltip it should show \"VALUE/TOTAL\" not the percentage.\n- The Improve Tests button should turn into a button that shows a double up arrow icon at the top and the word \"Tests\" at the bottom. This new icon needs to be created in @src/renderer/components/ui/Icons.tsx .\n- the table fills up the whole main section - there shouldn't be anything else other than it.",
       "context": [
@@ -265,7 +266,32 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T00:06:56.242Z",
-      "updatedAt": "2025-09-24T00:06:56.242Z"
+      "updatedAt": "2025-09-24T00:20:04.672Z",
+      "completedAt": "2025-09-24T00:20:04.672Z"
+    },
+    {
+      "id": "57d6794f-b9cd-4661-afca-8715ae79ceda",
+      "status": "-",
+      "title": "The cover view needs improving",
+      "description": "In @src/renderer/screens/TestsView.tsx the cover view needs the following improvements:\n- make the table fill up the main view, there's no need for this extra text \"Coverage will be collected for all files\".\n- the header should be sticky and the rest of the cell in the table are scrollable vertically, but the whole table scrolls horizontally (with the header).\n- the action button needs to be a bit higher\n- if there's nothing to display in a section, just show nothing and not \"-\".",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T00:27:41.064Z",
+      "updatedAt": "2025-09-24T00:27:41.064Z"
+    },
+    {
+      "id": "c9bb9c86-e863-492e-9ca7-faf114083b78",
+      "status": "-",
+      "title": "FactoryTestsService provides getLastResult and getLastCoverage - they should be used correctly",
+      "description": "In @src/renderer/screens/TestsView.tsx the values need to be used to show the last test results and last coverage whenever the projectId changes or whenever the view appears.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T00:44:47.992Z",
+      "updatedAt": "2025-09-24T00:44:47.992Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -290,7 +316,9 @@
     "e880756b-5b9e-4cc2-9e25-c6473b0cec1a": 19,
     "7e682d56-cece-4615-92a0-75658d7ad9f8": 20,
     "488ffc56-b217-411a-b285-4abc37cece2e": 21,
-    "346aaa45-47c8-4325-b166-efc7c4fa245f": 22
+    "346aaa45-47c8-4325-b166-efc7c4fa245f": 22,
+    "57d6794f-b9cd-4661-afca-8715ae79ceda": 23,
+    "c9bb9c86-e863-492e-9ca7-faf114083b78": 24
   },
   "createdAt": "2025-09-22T23:34:09.482Z",
   "updatedAt": "2025-09-22T23:34:09.482Z"

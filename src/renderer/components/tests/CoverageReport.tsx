@@ -5,6 +5,7 @@ import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
 import { Button } from '../ui/Button'
 import { CoverageResult } from 'thefactory-tools'
+import { IconDoubleUp } from '../ui/Icons'
 
 function pctColor(p: number) {
   if (p >= 90) return 'text-green-700 dark:text-green-300'
@@ -67,26 +68,24 @@ type MetricCellProps = {
   pct: number | null
   covered?: number | null
   total?: number | null
+  showLabel?: boolean
 }
 
-function buildBreakdownTitle({ label, pct, covered, total }: MetricCellProps): string {
-  const pctText = typeof pct === 'number' ? `${pct.toFixed(1)}%` : '—'
-  const hasCounts = typeof covered === 'number' && typeof total === 'number'
-  if (hasCounts) {
-    return `${label}: ${pctText} (${covered}/${total})`
-  }
-  return `${label}: ${pctText}`
-}
-
-function MetricCell({ label, pct, covered = null, total = null }: MetricCellProps) {
+function MetricCell({ label, pct }: MetricCellProps) {
   const pctVal = typeof pct === 'number' ? pct : null
   return (
-    <div className="w-28 mx-auto text-center" title={buildBreakdownTitle({ label, pct, covered, total })}>
-      <div className={`text-sm font-medium tabular-nums ${pctVal !== null ? pctColor(pctVal) : 'text-neutral-400'}`}>
+    <div className="w-28 mx-auto text-center" title={label}>
+      <div
+        className={`text-sm font-medium tabular-nums ${pctVal !== null ? pctColor(pctVal) : 'text-neutral-400'}`}
+      >
         {pctVal !== null ? `${pctVal.toFixed(1)}%` : '—'}
       </div>
       <div className="mt-1">
-        {pctVal !== null ? <ProgressBar value={pctVal} /> : <div className="h-2 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />}
+        {pctVal !== null ? (
+          <ProgressBar value={pctVal} />
+        ) : (
+          <div className="h-2 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
+        )}
       </div>
     </div>
   )
@@ -228,132 +227,129 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 bg-white dark:bg-neutral-900">
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          <div className="text-neutral-800 dark:text-neutral-200 font-medium">Summary</div>
-          <div className="text-neutral-600 dark:text-neutral-400">{summary.fileCount} files</div>
-          <div className="flex-1" />
-          <div className="flex items-center gap-4">
-            <MetricCell label="Statements" pct={summary.avgStatementsPct} />
-            <MetricCell label="Branches" pct={summary.avgBranchesPct} />
-            <MetricCell label="Functions" pct={summary.avgFunctionsPct} />
-            <MetricCell label="Lines" pct={summary.avgLinesPct} />
-          </div>
-        </div>
-      </div>
-
-      <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
-        <table className="min-w-full text-sm table-fixed">
-          <colgroup>
-            <col className="w-auto" />
-            <col className="w-28" />
-            <col className="w-28" />
-            <col className="w-28" />
-            <col className="w-28" />
-            <col className="w-40" />
-            <col className="w-32" />
-          </colgroup>
-          <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+    <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
+      <table className="min-w-full text-sm table-fixed">
+        <colgroup>
+          <col className="w-auto" />
+          <col className="w-28" />
+          <col className="w-28" />
+          <col className="w-28" />
+          <col className="w-28" />
+          <col className="w-40" />
+          <col className="w-32" />
+        </colgroup>
+        <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+          <tr>
+            <th className="text-left px-3 py-2">File</th>
+            <th className="text-center px-3 py-2">Statements</th>
+            <th className="text-center px-3 py-2">Branches</th>
+            <th className="text-center px-3 py-2">Functions</th>
+            <th className="text-center px-3 py-2">Lines</th>
+            <th className="text-left px-3 py-2 whitespace-nowrap">Uncovered lines</th>
+            <th className="text-right px-3 py-2">Actions</th>
+          </tr>
+          <tr className="border-t border-neutral-200 dark:border-neutral-700/50">
+            <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-600 dark:text-neutral-400">
+              {summary.fileCount} files
+            </th>
+            <th className="text-center px-3 pt-2 pb-3 font-normal">
+              <MetricCell label="Statements" pct={summary.avgStatementsPct} />
+            </th>
+            <th className="text-center px-3 pt-2 pb-3 font-normal">
+              <MetricCell label="Branches" pct={summary.avgBranchesPct} />
+            </th>
+            <th className="text-center px-3 pt-2 pb-3 font-normal">
+              <MetricCell label="Functions" pct={summary.avgFunctionsPct} />
+            </th>
+            <th className="text-center px-3 pt-2 pb-3 font-normal">
+              <MetricCell label="Lines" pct={summary.avgLinesPct} />
+            </th>
+            <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-400">—</th>
+            <th className="text-right px-3 pt-2 pb-3 font-normal text-neutral-400">—</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
             <tr>
-              <th className="text-left px-3 py-2">File</th>
-              <th className="text-center px-3 py-2">Statements</th>
-              <th className="text-center px-3 py-2">Branches</th>
-              <th className="text-center px-3 py-2">Functions</th>
-              <th className="text-center px-3 py-2">Lines</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">Uncovered lines</th>
-              <th className="text-right px-3 py-2">Actions</th>
+              <td className="px-3 py-4 text-sm text-neutral-500" colSpan={7}>
+                No coverage data found.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td className="px-3 py-4 text-sm text-neutral-500" colSpan={7}>
-                  No coverage data found.
-                </td>
-              </tr>
-            ) : (
-              rows.map((f, i) => {
-                const uncoveredText = formatUncoveredLines(f.uncovered_lines)
-                const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
-                return (
-                  <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">
-                    <td className="px-3 py-2">
-                      <div className="truncate max-w-[520px]" title={f.file}>
-                        {f.rel}
+          ) : (
+            rows.map((f, i) => {
+              const uncoveredText = formatUncoveredLines(f.uncovered_lines)
+              const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
+              return (
+                <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">
+                  <td className="px-3 py-2">
+                    <div className="truncate max-w-[520px]" title={f.file}>
+                      {f.rel}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <MetricCell
+                      label="Statements"
+                      pct={f.pct_statements}
+                      covered={f.statements_covered}
+                      total={f.statements_total}
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <MetricCell
+                      label="Branches"
+                      pct={f.pct_branch}
+                      covered={f.branches_covered}
+                      total={f.branches_total}
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <MetricCell
+                      label="Functions"
+                      pct={f.pct_functions}
+                      covered={f.functions_covered}
+                      total={f.functions_total}
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <MetricCell
+                      label="Lines"
+                      pct={f.pct_lines}
+                      covered={f.lines_covered}
+                      total={f.lines_total}
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <div
+                      className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
+                      title={uncoveredText}
+                    >
+                      {uncoveredText}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    {showImprove ? (
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}
+                        >
+                          <div className="flex flex-col items-center leading-none">
+                            <IconDoubleUp className="w-4 h-4 mb-0.5" />
+                            <span className="text-[10px]">Tests</span>
+                          </div>
+                        </Button>
                       </div>
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      <MetricCell
-                        label="Statements"
-                        pct={f.pct_statements}
-                        covered={f.statements_covered}
-                        total={f.statements_total}
-                      />
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      <MetricCell
-                        label="Branches"
-                        pct={f.pct_branch}
-                        covered={f.branches_covered}
-                        total={f.branches_total}
-                      />
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      <MetricCell
-                        label="Functions"
-                        pct={f.pct_functions}
-                        covered={f.functions_covered}
-                        total={f.functions_total}
-                      />
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      <MetricCell
-                        label="Lines"
-                        pct={f.pct_lines}
-                        covered={f.lines_covered}
-                        total={f.lines_total}
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <div
-                        className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
-                        title={uncoveredText}
-                      >
-                        {uncoveredText}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {showImprove ? (
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}
-                          >
-                            Improve tests
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-neutral-400">—</span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {data && (data as any).rawText && (
-        <details className="mt-2">
-          <summary className="text-xs text-neutral-500 cursor-pointer">View raw output</summary>
-          <pre className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-all max-h-64 overflow-auto bg-neutral-50 dark:bg-neutral-900 p-2 rounded">
-            {(data as any).rawText}
-          </pre>
-        </details>
-      )}
+                    ) : (
+                      <span className="text-neutral-400">—</span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }

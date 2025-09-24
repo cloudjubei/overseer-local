@@ -90,8 +90,21 @@ function TestsInner() {
     !isLoadingCatalog &&
     (testsCatalog?.length ?? 0) === 0
 
+  // Determine control bar right-side info and button based on active tab
+  const isResults = activeTab === 'results'
+
+  const actionButton = isResults ? (
+    <Button onClick={() => runTests()} loading={isRunningTests} variant="primary">
+      Run Tests
+    </Button>
+  ) : (
+    <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary">
+      Run Coverage
+    </Button>
+  )
+
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 min-h-0 flex flex-col">
       <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
         <div className="text-lg font-semibold">Tests</div>
         <div className="text-sm text-neutral-600 dark:text-neutral-400">
@@ -99,86 +112,81 @@ function TestsInner() {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        <SegmentedControl
-          ariaLabel="Tests view tabs"
-          value={activeTab}
-          onChange={(v) => setActiveTab(v as 'results' | 'coverage')}
-          options={[
-            { value: 'results', label: 'Test Results' },
-            { value: 'coverage', label: 'Test Coverage' },
-          ]}
-        />
+      <div className="p-4 flex flex-col gap-4 flex-1 min-h-0">
+        <div className="flex items-center gap-3">
+          <SegmentedControl
+            ariaLabel="Tests view tabs"
+            value={activeTab}
+            onChange={(v) => setActiveTab(v as 'results' | 'coverage')}
+            options={[
+              { value: 'results', label: 'Test Results' },
+              { value: 'coverage', label: 'Test Coverage' },
+            ]}
+          />
+          <div className="ml-auto flex items-center gap-3 text-xs">{actionButton}</div>
+        </div>
 
-        {activeTab === 'results' && (
-          <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                All tests will be run.
-              </div>
-              <div className="flex-1" />
-              <Button onClick={() => runTests()} loading={isRunningTests} variant="primary">
-                Run Tests
-              </Button>
+        {isResults && (
+          <div className="flex-1 min-h-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
+            <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
+              All tests will be run.
             </div>
-
-            {testsError ? (
-              <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                {testsError}
-              </div>
-            ) : null}
-
-            {showNoTestsCta && (
-              <div className="flex items-center justify-center py-16">
-                <div className="text-center max-w-xl">
-                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
-                    No tests detected in this project. Kickstart testing by creating a feature to
-                    set up the testing framework and add coverage.
-                  </div>
-                  <Button variant="secondary" onClick={onCreateTestsFeatureClick}>
-                    Create feature to add tests
-                  </Button>
+            <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">
+              {testsError ? (
+                <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                  {testsError}
                 </div>
-              </div>
-            )}
+              ) : null}
 
-            {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
+              {showNoTestsCta && (
+                <div className="flex items-center justify-center py-16">
+                  <div className="text-center max-w-xl">
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
+                      No tests detected in this project. Kickstart testing by creating a feature to
+                      set up the testing framework and add coverage.
+                    </div>
+                    <Button variant="secondary" onClick={onCreateTestsFeatureClick}>
+                      Create feature to add tests
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-            {!isRunningTests && !testsError && !results && !showNoTestsCta && (
-              <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
-            )}
+              {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
+
+              {!isRunningTests && !testsError && !results && !showNoTestsCta && (
+                <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
+              )}
+            </div>
           </div>
         )}
 
-        {activeTab === 'coverage' && (
-          <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                Coverage will be collected for all files.
-              </div>
-              <div className="flex-1" />
-              <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary">
-                Run Coverage
-              </Button>
+        {!isResults && (
+          <div className="flex-1 min-h-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
+            <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
+              Coverage will be collected for all files.
             </div>
+            <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">
+              {coverageError ? (
+                <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                  {coverageError}
+                </div>
+              ) : null}
 
-            {coverageError ? (
-              <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                {coverageError}
-              </div>
-            ) : null}
+              {!isRunningCoverage && !coverageError && coverage && (
+                <CoverageReport data={coverage} />
+              )}
 
-            {!isRunningCoverage && !coverageError && coverage && <CoverageReport data={coverage} />}
+              {!isRunningCoverage && !coverageError && !coverage && (
+                <div className="text-sm text-neutral-500">Click "Run Coverage" to start.</div>
+              )}
 
-            {!isRunningCoverage && !coverageError && !coverage && (
-              <div className="text-sm text-neutral-500">Click "Run Coverage" to start.</div>
-            )}
-
-            {isRunningCoverage && (
-              <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                <Spinner size={14} label="Running coverage..." />
-              </div>
-            )}
+              {isRunningCoverage && (
+                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  <Spinner size={14} label="Running coverage..." />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
