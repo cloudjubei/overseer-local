@@ -51,13 +51,17 @@ export const SelectContent = React.forwardRef<
         className,
       )}
       position={position}
+      side="bottom"
       sideOffset={6}
+      avoidCollisions={false}
       {...props}
     >
       <SelectPrimitive.ScrollUpButton className="flex items-center justify-center py-1 text-text-muted">
         ▲
       </SelectPrimitive.ScrollUpButton>
-      <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
+      <SelectPrimitive.Viewport className="p-1 max-h-60 overflow-auto">
+        {children}
+      </SelectPrimitive.Viewport>
       <SelectPrimitive.ScrollDownButton className="flex items-center justify-center py-1 text-text-muted">
         ▼
       </SelectPrimitive.ScrollDownButton>
