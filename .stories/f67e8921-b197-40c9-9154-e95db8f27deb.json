@@ -1832,7 +1832,7 @@
     },
     {
       "id": "4c1c2af8-b8dd-4bdc-8857-eac4b21ec98d",
-      "status": "-",
+      "status": "+",
       "title": "'thefactory-tools' exposes a new ProjectCodeInfo - use it",
       "description": "Essentially, each ProjectSpec has a new field `codeInfo` that should be configurable via @src/renderer/projects/ProjectManagerModal.tsx . The new types are referenced in a comment in @src/renderer/services/projectsService.ts .\nIf `codeInfo` is present in a ProjectSpect it means it's a coding project. We must allow users to toggle to a coding project via a switch - then a small popup with dropdowns for language, framework and test framework should appear. If the user exits this popup (with no items selected) - the project gets switched back to a non-coding project one. If there is `codeInfo` in a ProjectSpec then 3 chips need to show with the appropriate info side-by-side in a row. Clicking on any of the chips will open the selector popup mentioned previously but this time with some values preselected.",
       "context": [
@@ -1841,7 +1841,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T21:29:44.028Z",
-      "updatedAt": "2025-09-24T21:29:44.028Z"
+      "updatedAt": "2025-09-24T21:45:09.692Z",
+      "completedAt": "2025-09-24T21:45:09.692Z"
     }
   ],
   "featureIdToDisplayIndex": {
