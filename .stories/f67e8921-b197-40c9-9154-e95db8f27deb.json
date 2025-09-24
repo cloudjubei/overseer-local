@@ -1806,13 +1806,14 @@
     },
     {
       "id": "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc",
-      "status": "-",
+      "status": "+",
       "title": "The settings should be in a footer at the bottom of the sidebar",
       "description": "Same as the header - it shouldn't scroll - only the button in between should.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-24T16:44:41.298Z",
-      "updatedAt": "2025-09-24T16:44:41.298Z"
+      "updatedAt": "2025-09-24T18:48:59.642Z",
+      "completedAt": "2025-09-24T18:48:59.642Z"
     },
     {
       "id": "93772c3c-639f-4110-a2e2-7d5d7f9e91df",

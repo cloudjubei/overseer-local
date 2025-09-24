@@ -380,6 +380,7 @@ export default function SidebarView({}: SidebarProps) {
         </button>
       </div>
 
+      {/* Scrollable middle content */}
       <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
@@ -440,45 +441,6 @@ export default function SidebarView({}: SidebarProps) {
 
         <div className="nav-sep" aria-hidden />
 
-        <ul className="nav-list" role="list">
-          {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item) => {
-            const idx = NAV_ITEMS.findIndex((n) => n.view === item.view)
-            const isActive = currentView === item.view
-            const Btn = (
-              <button
-                type="button"
-                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
-                aria-current={isActive ? 'page' : undefined}
-                onClick={() => onActivate(item.view)}
-                title={item.label}
-                tabIndex={focusIndex === idx ? 0 : -1}
-                onFocus={() => setFocusIndex(idx)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onActivate(item.view)
-                  }
-                }}
-              >
-                <span className="nav-item__icon">{item.icon}</span>
-                {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-              </button>
-            )
-            return (
-              <li key={item.id} className="nav-li">
-                {effectiveCollapsed ? (
-                  <Tooltip content={item.label} placement="right">
-                    {Btn}
-                  </Tooltip>
-                ) : (
-                  Btn
-                )}
-              </li>
-            )
-          })}
-        </ul>
-
-        <div className="nav-sep" />
         {!effectiveCollapsed && (
           <div className="px-3" aria-hidden>
             <div
@@ -591,6 +553,48 @@ export default function SidebarView({}: SidebarProps) {
           })}
         </ul>
       </nav>
+
+      {/* Fixed footer: Settings at the bottom, does not scroll */}
+      <div className="shrink-0" aria-label="Footer">
+        <div className="nav-sep" aria-hidden />
+        <ul className="nav-list" role="list" onKeyDown={onKeyDownList}>
+          {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item) => {
+            const idx = NAV_ITEMS.findIndex((n) => n.view === item.view)
+            const isActive = currentView === item.view
+            const Btn = (
+              <button
+                type="button"
+                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => onActivate(item.view)}
+                title={item.label}
+                tabIndex={focusIndex === idx ? 0 : -1}
+                onFocus={() => setFocusIndex(idx)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onActivate(item.view)
+                  }
+                }}
+              >
+                <span className="nav-item__icon">{item.icon}</span>
+                {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
+              </button>
+            )
+            return (
+              <li key={item.id} className="nav-li">
+                {effectiveCollapsed ? (
+                  <Tooltip content={item.label} placement="right">
+                    {Btn}
+                  </Tooltip>
+                ) : (
+                  Btn
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </div>
     </aside>
   )
 
