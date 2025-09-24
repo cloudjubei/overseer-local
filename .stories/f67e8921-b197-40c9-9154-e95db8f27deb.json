@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1779,7 +1779,7 @@
     },
     {
       "id": "72945db3-a39d-422d-95c1-23123a9ef01a",
-      "status": "+",
+      "status": "?",
       "title": "The timeline doesn't filter by projectId",
       "description": "When switching to different projects while having the @src/renderer/screens/ProjectTimelineView.tsx open it keeps on showing stories/features for all projects.\nIt should only show the stories/feature for the given project.\nDisplaying stories/features for all proejcts should be controlled by a toggle left to the Day|Week|Month buttons. When switching projects, the timeline should show today (i.e. same behaviour as if the Today button was clicked).",
       "context": [
@@ -1787,8 +1787,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T16:40:57.363Z",
-      "updatedAt": "2025-09-24T17:23:55.685Z",
-      "completedAt": "2025-09-24T17:23:55.685Z"
+      "updatedAt": "2025-09-24T18:04:52.967Z",
+      "rejection": "when showing stories or features for a particular project - nothing shows.\nThe toggle for switching should be an actual switch component - the tickbox is ugly."
     },
     {
       "id": "362f2ca1-0fc2-4076-a70b-3581cd73bd66",
