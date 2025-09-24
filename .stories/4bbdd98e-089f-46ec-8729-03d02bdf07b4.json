@@ -164,13 +164,14 @@
     },
     {
       "id": "3ae0afee-4d33-4133-a87e-11a1c0124846",
-      "status": "-",
+      "status": "+",
       "title": "User chat bubble doesn't wrap correctly",
       "description": "Currently the assistant bubble's correctly wrap and even when the text is too wide only ever take up a maximum amount of width - the user bubble's don't - they stretch, but they shouldn't - they should be follow the same exact rules as the assistant bubbles.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-24T17:49:24.650Z",
-      "updatedAt": "2025-09-24T17:49:24.650Z"
+      "updatedAt": "2025-09-24T18:11:12.154Z",
+      "completedAt": "2025-09-24T18:11:12.154Z"
     },
     {
       "id": "321d97e3-4263-44d3-b9a6-5594d5caa276",
