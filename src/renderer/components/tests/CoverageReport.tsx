@@ -73,22 +73,32 @@ type MetricCellProps = {
 
 function MetricCell({ label, pct }: MetricCellProps) {
   const pctVal = typeof pct === 'number' ? pct : null
+  if (pctVal === null) {
+    // Show nothing if there is no value to display (no placeholder dash)
+    return <div className="w-28 mx-auto text-center" title={label}></div>
+  }
   return (
     <div className="w-28 mx-auto text-center" title={label}>
-      <div
-        className={`text-sm font-medium tabular-nums ${pctVal !== null ? pctColor(pctVal) : 'text-neutral-400'}`}
-      >
-        {pctVal !== null ? `${pctVal.toFixed(1)}%` : '—'}
+      <div className={`text-sm font-medium tabular-nums ${pctColor(pctVal)}`}>
+        {`${pctVal.toFixed(1)}%`}
       </div>
       <div className="mt-1">
-        {pctVal !== null ? (
-          <ProgressBar value={pctVal} />
-        ) : (
-          <div className="h-2 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
-        )}
+        <ProgressBar value={pctVal} />
       </div>
     </div>
   )
+}
+
+function comparePathsDepthFirst(aRel: string, bRel: string): number {
+  const aSeg = aRel.split('/')
+  const bSeg = bRel.split('/')
+  const len = Math.min(aSeg.length, bSeg.length)
+  for (let i = 0; i < len; i++) {
+    const cmp = aSeg[i].localeCompare(bSeg[i])
+    if (cmp !== 0) return cmp
+  }
+  // If one path is a prefix of the other, shorter (shallower) comes first
+  return aSeg.length - bSeg.length
 }
 
 export default function CoverageReport({ data }: { data: CoverageResult }) {
@@ -159,8 +169,8 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
         uncovered_lines,
       })
     }
-    // Sort alphabetically by path
-    list.sort((a, b) => a.rel.localeCompare(b.rel))
+    // Sort depth-first by path segments, alphabetically
+    list.sort((a, b) => comparePathsDepthFirst(a.rel, b.rel))
     return list
   }, [data])
 
@@ -227,7 +237,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
   }
 
   return (
-    <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
+    <div className="h-full overflow-auto rounded-md border border-neutral-200 dark:border-neutral-800">
       <table className="min-w-full text-sm table-fixed">
         <colgroup>
           <col className="w-auto" />
@@ -238,7 +248,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
           <col className="w-40" />
           <col className="w-32" />
         </colgroup>
-        <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+        <thead className="sticky top-0 z-10 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
           <tr>
             <th className="text-left px-3 py-2">File</th>
             <th className="text-center px-3 py-2">Statements</th>
@@ -264,8 +274,8 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
             <th className="text-center px-3 pt-2 pb-3 font-normal">
               <MetricCell label="Lines" pct={summary.avgLinesPct} />
             </th>
-            <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-400">—</th>
-            <th className="text-right px-3 pt-2 pb-3 font-normal text-neutral-400">—</th>
+            <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-400"></th>
+            <th className="text-right px-3 pt-2 pb-3 font-normal text-neutral-400"></th>
           </tr>
         </thead>
         <tbody>
@@ -319,12 +329,14 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
                     />
                   </td>
                   <td className="px-3 py-2">
-                    <div
-                      className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
-                      title={uncoveredText}
-                    >
-                      {uncoveredText}
-                    </div>
+                    {uncoveredText && uncoveredText !== '—' ? (
+                      <div
+                        className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
+                        title={uncoveredText}
+                      >
+                        {uncoveredText}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="px-3 py-2 text-right">
                     {showImprove ? (
@@ -340,9 +352,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
                           </div>
                         </Button>
                       </div>
-                    ) : (
-                      <span className="text-neutral-400">—</span>
-                    )}
+                    ) : null}
                   </td>
                 </tr>
               )

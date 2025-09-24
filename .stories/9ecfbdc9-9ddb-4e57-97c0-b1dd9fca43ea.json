@@ -271,7 +271,7 @@
     },
     {
       "id": "57d6794f-b9cd-4661-afca-8715ae79ceda",
-      "status": "-",
+      "status": "+",
       "title": "The cover view needs improving",
       "description": "In @src/renderer/screens/TestsView.tsx the cover view needs the following improvements:\n- make the table fill up the main view, there's no need for this extra text \"Coverage will be collected for all files\".\n- the header should be sticky and the rest of the cell in the table are scrollable vertically, but the whole table scrolls horizontally (with the header).\n- the action button needs to be a bit higher\n- if there's nothing to display in a section, just show nothing and not \"-\".\n- the rows should be sorted in the same order as they would be in a file system or IDE, first the root folder (alphabetically), then depth first the first alphabetical folder and so on.",
       "context": [
@@ -279,7 +279,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T00:27:41.064Z",
-      "updatedAt": "2025-09-24T00:49:28.302Z"
+      "updatedAt": "2025-09-24T00:54:39.199Z",
+      "completedAt": "2025-09-24T00:54:39.199Z"
     },
     {
       "id": "c9bb9c86-e863-492e-9ca7-faf114083b78",

@@ -16,7 +16,7 @@ function TimeAgo({ ts }: { ts: number }) {
     const id = setInterval(() => setNow(Date.now()), 30000)
     return () => clearInterval(id)
   }, [])
-  const text = timeAgo(now, ts)
+    const text = timeAgo(now, ts)
   return <span>{text}</span>
 }
 
@@ -90,15 +90,14 @@ function TestsInner() {
     !isLoadingCatalog &&
     (testsCatalog?.length ?? 0) === 0
 
-  // Determine control bar right-side info and button based on active tab
   const isResults = activeTab === 'results'
 
   const actionButton = isResults ? (
-    <Button onClick={() => runTests()} loading={isRunningTests} variant="primary">
+    <Button onClick={() => runTests()} loading={isRunningTests} variant="primary" size="lg">
       Run Tests
     </Button>
   ) : (
-    <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary">
+    <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary" size="lg">
       Run Coverage
     </Button>
   )
@@ -123,7 +122,7 @@ function TestsInner() {
               { value: 'coverage', label: 'Test Coverage' },
             ]}
           />
-          <div className="ml-auto flex items-center gap-3 text-xs">{actionButton}</div>
+          <div className="ml-auto flex items-center gap-3">{actionButton}</div>
         </div>
 
         {isResults && (
@@ -162,27 +161,26 @@ function TestsInner() {
         )}
 
         {!isResults && (
-          <div className="flex-1 min-h-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
-            <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
-              Coverage will be collected for all files.
-            </div>
-            <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 min-h-0 overflow-hidden">
               {coverageError ? (
-                <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap p-4">
                   {coverageError}
                 </div>
               ) : null}
 
               {!isRunningCoverage && !coverageError && coverage && (
-                <CoverageReport data={coverage} />
+                <div className="h-full">
+                  <CoverageReport data={coverage} />
+                </div>
               )}
 
               {!isRunningCoverage && !coverageError && !coverage && (
-                <div className="text-sm text-neutral-500">Click "Run Coverage" to start.</div>
+                <div className="text-sm text-neutral-500 p-4">Click "Run Coverage" to start.</div>
               )}
 
               {isRunningCoverage && (
-                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 p-4">
                   <Spinner size={14} label="Running coverage..." />
                 </div>
               )}
