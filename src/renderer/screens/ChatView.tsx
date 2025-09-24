@@ -93,7 +93,8 @@ export default function ChatView() {
       }
       emptyMessage="No chats yet"
     >
-      <section className="flex-1 flex flex-col w-full h-[720px] bg-[var(--surface-base)] overflow-hidden">
+      {/* Fill parent container: flex column, allow children to size and scroll */}
+      <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
         <header className="flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
@@ -142,12 +143,14 @@ export default function ChatView() {
           </div>
         )}
 
+        {/* Message list occupies remaining space and scrolls vertically */}
         <MessageList
           chatId={currentChat?.id}
           messages={currentChat?.messages || []}
           isThinking={isThinking}
         />
 
+        {/* Input stays docked at bottom */}
         <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
       </section>
     </CollapsibleSidebar>

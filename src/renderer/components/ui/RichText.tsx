@@ -67,21 +67,43 @@ function tokenize(
 export function RichText({
   text,
   variant = 'display',
+  inputEditRange,
 }: {
   text: string | null | undefined
   variant?: 'display' | 'input'
+  // When rendering in input mode, if provided, suppress chip styling for any mention whose
+  // raw token range intersects this range (render as plain text for editing UX at caret).
+  inputEditRange?: { start: number; end: number } | null
 }) {
   const { filesByPath } = useFiles()
   const segments = React.useMemo(() => tokenize(text || ''), [text])
 
   if (variant === 'input') {
     // Input overlay mode: preserve exact text width and content, but visually style mentions as chips.
+    // Also support suppressing chip styling when the caret is editing a mention (inputEditRange).
+    let pos = 0
     return (
       <>
         {segments.map((seg, idx) => {
-          if (seg.type === 'text') return <React.Fragment key={idx}>{seg.value}</React.Fragment>
+          if (seg.type === 'text') {
+            const out = <React.Fragment key={idx}>{seg.value}</React.Fragment>
+            pos += seg.value.length
+            return out
+          }
           // seg.type === 'file' | 'dep'
           const raw = seg.raw // includes @ or # prefix; preserve exact characters
+          const start = pos
+          const end = start + raw.length
+          pos = end
+
+          const isEditing = !!(
+            inputEditRange && Math.max(start, inputEditRange.start) < Math.min(end, inputEditRange.end)
+          )
+
+          if (isEditing) {
+            return <React.Fragment key={idx}>{raw}</React.Fragment>
+          }
+
           const isFile = seg.type === 'file'
           const label = raw
           return (
@@ -94,7 +116,6 @@ export function RichText({
                   ? 'bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] text-[var(--text-primary)]'
                   : 'bg-[color-mix(in_srgb,var(--accent-secondary,_#a78bfa)_10%,transparent)] text-[var(--text-primary)]')
               }
-              // Keep the raw text as content to maintain width and caret mapping
             >
               {label}
             </span>

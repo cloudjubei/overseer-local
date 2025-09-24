@@ -1,41 +1,17 @@
-@keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Chat specific adjustments: ensure code blocks and tables scroll within bubbles */
+.chat-bubble pre,
+.chat-bubble code,
+.chat-bubble table {
+  max-width: 100%;
 }
 
-:root {
-  --chat-pop-duration: 160ms;
-  --chat-pop-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+.chat-bubble pre,
+.chat-bubble table {
+  overflow-x: auto;
+  display: block;
 }
 
-/* Generic chat bubble transition (used for user pop-in) */
+/* Prevent overall horizontal scroll within the bubble */
 .chat-bubble {
-  transition:
-    opacity var(--chat-pop-duration) var(--chat-pop-ease),
-    transform var(--chat-pop-duration) var(--chat-pop-ease);
-  transform-origin: 50% 100%;
-}
-
-/* Initial state for a just-added user message bubble */
-.chat-bubble--user-pop-enter {
-  opacity: 0;
-  transform: scale(0.96);
-}
-
-/* Applied after mount to trigger the transition to full size/opacity */
-.chat-bubble--user-pop-enter.chat-bubble--in {
-  opacity: 1;
-  transform: scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chat-bubble {
-    transition: none;
-  }
+  overflow-x: hidden;
 }

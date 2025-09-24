@@ -1,11 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
-import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
-import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
 import { useFiles } from '../../contexts/FilesContext'
-import { RichText } from '../ui/RichText'
 import AttachmentList from './AttachmentList'
-import FilesSuggestionsMenu from './FilesSuggestionsMenu'
-import RefsSuggestionsMenu from './RefsSuggestionsMenu'
+import FileMentionsTextarea from '../ui/FileMentionsTextarea'
 
 interface ChatInputProps {
   onSend: (message: string, attachments: string[]) => void
@@ -17,30 +13,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const [input, setInput] = useState<string>('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const mirrorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { files, uploadFile } = useFiles()
-
-  const {
-    isOpen: isAutocompleteOpen,
-    matches: matchingDocs,
-    position: autocompletePosition,
-    onSelect: onAutocompleteSelect,
-  } = useFilesAutocomplete({
-    filesList: files.map((f) => f.relativePath!),
-    input,
-    setInput,
-    textareaRef,
-    mirrorRef,
-  })
-
-  const {
-    isOpen: isRefsOpen,
-    matches: matchingRefs,
-    position: refsPosition,
-    onSelect: onRefsSelect,
-  } = useReferencesAutocomplete({ input, setInput, textareaRef, mirrorRef })
+  const { uploadFile } = useFiles()
 
   const autoSizeTextarea = () => {
     const el = textareaRef.current
@@ -95,50 +70,29 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const placeholderText = useMemo(
     () =>
       isConfigured
-        ? 'Type your message…'
+        ? 'Type your message… Use @ for files and # for stories/features'
         : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.',
     [isConfigured],
   )
 
   return (
     <div className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
-      <div
-        ref={mirrorRef}
-        aria-hidden="true"
-        className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none"
-      />
       <div className="p-3">
         <div className="relative flex items-end gap-2">
           <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
             <div className="relative">
-              <div
-                className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-words pointer-events-none text-[var(--text-primary)]"
-                aria-hidden="true"
-              >
-                {input ? (
-                  <RichText text={input} variant="input" />
-                ) : (
-                  <span className="text-[var(--text-muted)]">{placeholderText}</span>
-                )}
-              </div>
-
-              <textarea
-                ref={textareaRef}
+              <FileMentionsTextarea
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onInput={autoSizeTextarea}
-                onKeyDown={handleTextareaKeyDown}
-                className="w-full resize-none bg-transparent px-3 py-2 outline-none"
-                placeholder={''}
+                onChange={setInput}
+                placeholder={placeholderText}
                 rows={1}
-                aria-label="Message input"
-                style={{
-                  maxHeight: 200,
-                  overflowY: 'auto',
-                  color: 'transparent',
-                  caretColor: 'var(--text-primary)',
-                }}
                 disabled={isThinking}
+                className="w-full resize-none bg-transparent px-3 py-2 outline-none text-[var(--text-primary)]"
+                style={{ maxHeight: 200, overflowY: 'auto' }}
+                ariaLabel="Message input"
+                inputRef={textareaRef}
+                onKeyDown={handleTextareaKeyDown}
+                renderChipsInInput={true}
               />
             </div>
 
@@ -183,22 +137,6 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
           >
             Send
           </button>
-
-          {isAutocompleteOpen && autocompletePosition && (
-            <FilesSuggestionsMenu
-              matches={matchingDocs}
-              position={autocompletePosition}
-              onSelect={onAutocompleteSelect}
-            />
-          )}
-
-          {isRefsOpen && refsPosition && (
-            <RefsSuggestionsMenu
-              matches={matchingRefs as any}
-              position={refsPosition}
-              onSelect={onRefsSelect}
-            />
-          )}
         </div>
       </div>
     </div>
