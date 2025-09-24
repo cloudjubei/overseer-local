@@ -140,13 +140,11 @@
       "description": "Building on the advanced chat input @src/renderer/components/Chat/ChatInput.tsx , make the file and story/feature mentions appear as interactive chips *within the input box itself*. Currently they are already implemented as chips in @src/renderer/components/ui/RichText.tsx . Implement the behavior where pressing backspace at the end of a chip converts it back to editable text.",
       "context": [
         "src/renderer/components/Chat/ChatInput.tsx",
-        "src/renderer/components/ui/RichText.tsx",
-        "src/renderer/components/ui/FileMentionsTextarea.tsx"
+        "src/renderer/components/ui/RichText.tsx"
       ],
       "createdAt": "2025-09-22T23:55:32.130Z",
-      "updatedAt": "2025-09-24T18:55:16.568Z",
+      "updatedAt": "2025-09-24T21:21:26.182Z",
       "blockers": [],
-      "rejection": "Multiple issues so bad that I had to comment out the code in @src/renderer/components/ui/FileMentionsTextarea.tsx so that it can work and things can be typed in.\nIssues:\n- when the code for the backspace key is in then backspace doesn't work. It doesn't work on normal characters and only works when editing characters within a chip.\n- only the chip for the task reference '#' shows but not for files using '@' .\n- when the other pieces of code inside `useEffect` are left in - everything blocks up and the app is unusable.",
       "completedAt": "2025-09-24T18:55:16.568Z"
     },
     {
