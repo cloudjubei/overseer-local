@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
 import { useFiles } from '../../contexts/FilesContext'
@@ -24,6 +24,33 @@ export type FileMentionsTextareaProps = {
   renderChipsInInput?: boolean
 }
 
+// Local tokenizer for mentions with ranges so we can detect chip boundaries at caret
+function getMentionRanges(text: string): Array<{
+  type: 'file' | 'dep'
+  start: number
+  end: number
+  raw: string
+}> {
+  const ranges: Array<{ type: 'file' | 'dep'; start: number; end: number; raw: string }> = []
+  if (!text) return ranges
+
+  // Keep patterns aligned with RichText tokenizer
+  const fileRe = /@([A-Za-z0-9_\-./]+(?:\.[A-Za-z0-9]+)?)/g
+  const UUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+  const depRe = new RegExp(`#((?:${UUID})|(?:\\d+))(?:\.((?:${UUID})|(?:\\d+)))?`, 'g')
+
+  let m: RegExpExecArray | null
+  while ((m = fileRe.exec(text))) {
+    ranges.push({ type: 'file', start: m.index, end: m.index + m[0].length, raw: m[0] })
+  }
+  while ((m = depRe.exec(text))) {
+    ranges.push({ type: 'dep', start: m.index, end: m.index + m[0].length, raw: m[0] })
+  }
+
+  ranges.sort((a, b) => a.start - b.start)
+  return ranges
+}
+
 export default function FileMentionsTextarea({
   id,
   value,
@@ -47,7 +74,6 @@ export default function FileMentionsTextarea({
   const overlayRef = useRef<HTMLDivElement>(null)
   const overlayContentRef = useRef<HTMLDivElement>(null)
 
-  const [caretPos, setCaretPos] = useState<number>(0)
   const [editingRange, setEditingRange] = useState<{ start: number; end: number } | null>(null)
 
   const filesList = useMemo(() => files.map((f) => f.relativePath!), [files])
@@ -80,140 +106,72 @@ export default function FileMentionsTextarea({
   const handleFileSelect = (path: string) => {
     onFileSelectInternal(path)
     if (onFileMentionSelected) onFileMentionSelected(path)
-    // Exit editing mode if we were editing a token
     setEditingRange(null)
   }
 
-  // For references, we now insert/display using the display indices (e.g., 3.2)
   const handleRefSelect = (refDisplay: string) => {
     onRefSelectInternal(refDisplay)
     if (onReferenceSelected) onReferenceSelected(refDisplay)
-    // Exit editing mode if we were editing a token
     setEditingRange(null)
   }
 
-  // Keep overlay scroll in sync with textarea scroll (when maxHeight/overflow is used)
-  //TODO: fix
-  // useEffect(() => {
-  //   const ta = textareaRef.current
-  //   if (!ta || !overlayContentRef.current) return
-  //   function onScroll() {
-  //     if (!overlayContentRef.current) return
-  //     overlayContentRef.current.style.transform = `translateY(-${ta.scrollTop}px)`
-  //   }
-  //   ta.addEventListener('scroll', onScroll)
-  //   return () => ta.removeEventListener('scroll', onScroll)
-  // }, [textareaRef])
-
-  // Track caret for chip editing range logic and autocomplete position updates
-  //TODO: fix
-  // useEffect(() => {
-  //   const handleSelectionChange = () => {
-  //     const ta = textareaRef.current
-  //     if (!ta) return
-  //     if (document.activeElement === ta) {
-  //       try {
-  //         const pos = ta.selectionStart ?? 0
-  //         setCaretPos(pos)
-  //         // If caret moved outside the current editingRange, clear it
-  //         if (editingRange && (pos < editingRange.start || pos > editingRange.end)) {
-  //           setEditingRange(null)
-  //         }
-  //       } catch {
-  //         // ignore
-  //       }
-  //     }
-  //   }
-  //   document.addEventListener('selectionchange', handleSelectionChange)
-  //   return () => document.removeEventListener('selectionchange', handleSelectionChange)
-  // }, [textareaRef, editingRange])
-
-  function findMentionBeforeCaret(
-    text: string,
-    pos: number,
-  ): {
-    start: number
-    end: number
-    raw: string
-    prefix: '@' | '#'
-    hadTrailingSpace: boolean
-  } | null {
-    let i = pos - 1
-    if (i < 0) return null
-    let hadTrailingSpace = false
-    // Skip exactly one trailing space/newline if present
-    if (text[i] === ' ' || text[i] === '\n' || text[i] === '\t') {
-      hadTrailingSpace = true
-      i -= 1
-    }
-    if (i < 0) return null
-    // scan back to previous whitespace/newline start
-    let j = i
-    while (j >= 0 && text[j] !== ' ' && text[j] !== '\n' && text[j] !== '\t') j++
-    while (j >= 0 && text[j] !== ' ' && text[j] !== '\n' && text[j] !== '\t') j--
-    // Correction: walk back only
-    j = i
-    while (j >= 0 && text[j] !== ' ' && text[j] !== '\n' && text[j] !== '\t') j--
-    const start = j + 1
-    const endNoSpace = i + 1
-    const raw = text.slice(start, endNoSpace)
-    if (!raw) return null
-    const first = raw[0]
-    if (first === '@' || first === '#') {
-      return { start, end: endNoSpace, raw, prefix: first, hadTrailingSpace }
-    }
-    return null
-  }
-
+  // Backspace logic: if caret is immediately after a mention chip, switch to editing that mention and delete last char
   const onKeyDownInternal = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const key = e.key
 
-    //TODO: fix
-    // If Backspace pressed at end of a chip, convert chip to editable text and delete last character
-    // if (key === 'Backspace') {
-    //   const ta = textareaRef.current
-    //   if (ta && ta.selectionStart === ta.selectionEnd) {
-    //     const pos = ta.selectionStart ?? 0
-    //     const mention = findMentionBeforeCaret(value, pos)
-    //     if (mention) {
-    //       e.preventDefault()
-    //       e.stopPropagation()
-    //       // Remove last character from the mention token and drop the trailing space if it existed
-    //       const newRaw = mention.raw.length > 1 ? mention.raw.slice(0, -1) : mention.raw
-    //       const before = value.slice(0, mention.start)
-    //       const afterStart = mention.hadTrailingSpace ? pos - 1 : pos
-    //       const after = value.slice(afterStart)
-    //       const updated = before + newRaw + after
-    //       const newCaret = mention.start + newRaw.length
-    //       onChange(updated)
-    //       setEditingRange({ start: mention.start, end: newCaret })
-    //       // Focus and set selection after state update
-    //       setTimeout(() => {
-    //         const el = textareaRef.current
-    //         if (!el) return
-    //         el.focus()
-    //         try {
-    //           el.setSelectionRange(newCaret, newCaret)
-    //         } catch {}
-    //       }, 0)
-    //       return
-    //     }
-    //   }
-    // }
+    if (key === 'Backspace' && renderChipsInInput) {
+      const ta = textareaRef.current
+      if (ta && ta.selectionStart === ta.selectionEnd) {
+        const caret = ta.selectionStart ?? 0
+        if (caret > 0) {
+          const ranges = getMentionRanges(value)
+          // Find a mention whose end is at caret or caret - 1 is a whitespace and mention ends before it
+          const prevChar = value[caret - 1]
+          const isPrevSpace = prevChar === ' ' || prevChar === '\n' || prevChar === '\t'
+          const target = ranges.find((r) => r.end === caret || (isPrevSpace && r.end === caret - 1))
+          if (target) {
+            e.preventDefault()
+            e.stopPropagation()
 
+            // Delete the last character of the mention token (but keep at least the prefix @/#)
+            const token = value.slice(target.start, target.end)
+            const keepLen = Math.max(1, token.length - 1)
+            const newToken = token.slice(0, keepLen)
+
+            const before = value.slice(0, target.start)
+            const after = value.slice(target.end) // keep any trailing space intact
+            const updated = before + newToken + after
+            const newCaret = target.start + newToken.length
+
+            onChange(updated)
+            setEditingRange({ start: target.start, end: newCaret })
+
+            // move caret into the token so user can continue editing
+            setTimeout(() => {
+              const el = textareaRef.current
+              if (!el) return
+              try {
+                el.focus()
+                el.setSelectionRange(newCaret, newCaret)
+              } catch {}
+            }, 0)
+            return
+          }
+        }
+      }
+    }
+
+    // Accept with Space while a suggestion list is open
     const isSpace = key === ' ' || key === 'Spacebar' || key === 'Space'
     if (isSpace) {
       if (isFilesOpen && fileMatches.length > 0) {
         e.preventDefault()
         e.stopPropagation()
         handleFileSelect(fileMatches[0])
-        // Let parent also see the event after our handling
       } else if (isRefsOpen && refMatches.length > 0) {
         e.preventDefault()
         e.stopPropagation()
-        // Pass display index for insertion
         handleRefSelect(refMatches[0].display)
-        // Let parent also see the event after our handling
       }
     }
 
@@ -222,6 +180,25 @@ export default function FileMentionsTextarea({
   }
 
   const overlayActive = renderChipsInInput
+
+  // Keep overlay scroll in sync with textarea scroll using a lightweight handler
+  const onScrollInternal = () => {
+    const ta = textareaRef.current
+    const content = overlayContentRef.current
+    if (!ta || !content) return
+    content.style.transform = `translateY(-${ta.scrollTop}px)`
+  }
+
+  // Clear editing range when selection moves outside it
+  const onSelectInternal = () => {
+    const ta = textareaRef.current
+    if (!ta) return
+    const start = ta.selectionStart ?? 0
+    const end = ta.selectionEnd ?? start
+    if (!editingRange) return
+    const outside = end < editingRange.start || start > editingRange.end
+    if (outside) setEditingRange(null)
+  }
 
   return (
     <div className="relative">
@@ -255,6 +232,8 @@ export default function FileMentionsTextarea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDownInternal}
+        onScroll={onScrollInternal}
+        onSelect={onSelectInternal}
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}
@@ -270,7 +249,7 @@ export default function FileMentionsTextarea({
 
       {isFilesOpen && filesPosition && (
         <div
-          className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
+          className="fixed z-[var(--z-dropdown,1000)] min-w={[260]}px max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
           style={{
             left: `${filesPosition.left}px`,
             top: `${filesPosition.top}px`,
