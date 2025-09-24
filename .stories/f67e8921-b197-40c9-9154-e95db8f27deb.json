@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1779,7 +1779,7 @@
     },
     {
       "id": "72945db3-a39d-422d-95c1-23123a9ef01a",
-      "status": "-",
+      "status": "+",
       "title": "The timeline doesn't filter by projectId",
       "description": "When switching to different projects while having the @src/renderer/screens/ProjectTimelineView.tsx open it keeps on showing stories/features for all projects.\nIt should only show the stories/feature for the given project.\nDisplaying stories/features for all proejcts should be controlled by a toggle left to the Day|Week|Month buttons. When switching projects, the timeline should show today (i.e. same behaviour as if the Today button was clicked).",
       "context": [
@@ -1787,8 +1787,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T16:40:57.363Z",
-      "updatedAt": "2025-09-24T21:52:55.576Z",
-      "rejection": "when showing stories or features for a particular project - nothing shows.\nThe toggle for switching should be an actual switch component - the tickbox is ugly."
+      "updatedAt": "2025-09-24T21:59:38.768Z",
+      "rejection": "when showing stories or features for a particular project - nothing shows.\nThe toggle for switching should be an actual switch component - the tickbox is ugly.",
+      "completedAt": "2025-09-24T21:59:38.768Z"
     },
     {
       "id": "362f2ca1-0fc2-4076-a70b-3581cd73bd66",
@@ -1832,7 +1833,7 @@
     },
     {
       "id": "4c1c2af8-b8dd-4bdc-8857-eac4b21ec98d",
-      "status": "-",
+      "status": "+",
       "title": "'thefactory-tools' exposes a new ProjectCodeInfo - use it",
       "description": "Essentially, each ProjectSpec has a new field `codeInfo` that should be configurable via @src/renderer/projects/ProjectManagerModal.tsx . The new types are referenced in a comment in @src/renderer/services/projectsService.ts .\nIf `codeInfo` is present in a ProjectSpect it means it's a coding project. We must allow users to toggle to a coding project via a switch - then a small popup with dropdowns for language, framework and test framework should appear. If the user exits this popup (with no items selected) - the project gets switched back to a non-coding project one. If there is `codeInfo` in a ProjectSpec then 3 chips need to show with the appropriate info side-by-side in a row. Clicking on any of the chips will open the selector popup mentioned previously but this time with some values preselected.",
       "context": [
@@ -1841,8 +1842,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-24T21:29:44.028Z",
-      "updatedAt": "2025-09-24T21:45:09.692Z",
-      "completedAt": "2025-09-24T21:45:09.692Z"
+      "updatedAt": "2025-09-24T21:56:30.143Z",
+      "completedAt": "2025-09-24T21:56:30.143Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1967,5 +1968,6 @@
     "93772c3c-639f-4110-a2e2-7d5d7f9e91df": 119
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z",
+  "completedAt": "2025-09-24T21:59:38.768Z"
 }

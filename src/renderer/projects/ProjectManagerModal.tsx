@@ -14,6 +14,10 @@ import {
 } from '../components/ui/Select'
 import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
 import { validateProjectClient } from './validateProject'
+import { Switch } from '../components/ui/Switch'
+import { Chip } from '../components/ui/Chip'
+import { ProjectCodeInfo } from './codeInfoTypes'
+import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -117,10 +121,12 @@ export default function ProjectManagerModal({
     repo_url: '',
     requirements: [],
     metadata: { icon: 'folder', githubCredentialsId: '' },
+    codeInfo: undefined,
   })
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
+  const [isCodeInfoModalOpen, setIsCodeInfoModalOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -163,6 +169,7 @@ export default function ProjectManagerModal({
       repo_url: '',
       requirements: [],
       metadata: { icon: 'folder', githubCredentialsId: '' },
+      codeInfo: undefined,
     })
     setFormErrors([])
     setSaving(false)
@@ -265,6 +272,22 @@ export default function ProjectManagerModal({
         </div>
       )}
 
+      {isCodeInfoModalOpen && (
+        <ProjectCodeInfoModal
+          codeInfo={form.codeInfo}
+          onSave={(newCodeInfo) => {
+            setForm((s: any) => ({ ...s, codeInfo: newCodeInfo }))
+            setIsCodeInfoModalOpen(false)
+          }}
+          onClose={() => {
+            setIsCodeInfoModalOpen(false)
+            if (!form.codeInfo?.language) {
+              setForm((s: any) => ({ ...s, codeInfo: undefined }))
+            }
+          }}
+        />
+      )}
+
       {mode === 'list' && (
         <div className="flex flex-col" style={{ gap: 12 }}>
           <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -287,14 +310,23 @@ export default function ProjectManagerModal({
                     padding: '8px 0',
                   }}
                 >
-                  <div className="flex" style={{ alignItems: 'center', gap: 8 }}>
-                    <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{p.title}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                        {p.id} · {p.path}
+                  <div className="flex flex-col gap-2" style={{ alignItems: 'flex-start' }}>
+                    <div className="flex items-center gap-2">
+                      <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{p.title}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                          {p.id} · {p.path}
+                        </div>
                       </div>
                     </div>
+                    {p.codeInfo && (
+                      <div className="flex gap-2">
+                        <Chip>{p.codeInfo.language}</Chip>
+                        {p.codeInfo.framework && <Chip>{p.codeInfo.framework}</Chip>}
+                        {p.codeInfo.testFramework && <Chip>{p.codeInfo.testFramework}</Chip>}
+                      </div>
+                    )}
                   </div>
                   <div className="flex" style={{ gap: 8 }}>
                     <Button className="btn-secondary" onClick={() => startEdit(p)}>
@@ -381,6 +413,43 @@ export default function ProjectManagerModal({
               </SelectContent>
             </Select>
           </div>
+
+          <div className="form-row flex items-center gap-4">
+            <label htmlFor="coding-project-switch">Coding Project</label>
+            <Switch
+              id="coding-project-switch"
+              checked={!!form.codeInfo}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setIsCodeInfoModalOpen(true)
+                } else {
+                  setForm((s: any) => ({ ...s, codeInfo: undefined }))
+                }
+              }}
+            />
+          </div>
+
+          {form.codeInfo && (
+            <div className="form-row">
+              <label>Code Info</label>
+              <div className="flex gap-2">
+                <Chip button onClick={() => setIsCodeInfoModalOpen(true)}>
+                  {form.codeInfo.language}
+                </Chip>
+                {form.codeInfo.framework && (
+                  <Chip button onClick={() => setIsCodeInfoModalOpen(true)}>
+                    {form.codeInfo.framework}
+                  </Chip>
+                )}
+                {form.codeInfo.testFramework && (
+                  <Chip button onClick={() => setIsCodeInfoModalOpen(true)}>
+                    {form.codeInfo.testFramework}
+                  </Chip>
+                )}
+              </div>
+            </div>
+          )}
+
           <IconPicker
             value={form.metadata.icon}
             onChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, icon: v } }))}
