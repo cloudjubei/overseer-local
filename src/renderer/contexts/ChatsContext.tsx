@@ -1,6 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useActiveProject } from './ProjectContext'
-import type { ServiceResult } from '../services/serviceResult'
 import type { LLMConfig } from 'thefactory-tools'
 import type { Chat, ChatMessage, ChatContext, ChatSettings } from 'src/chat/ChatsManager'
 import { chatsService as typedChatsService } from '../services/chatsService'
@@ -10,12 +9,12 @@ export type ChatsContextValue = {
   setCurrentChatId: (id?: string) => void
   chatsById: Record<string, Chat>
   createChat: () => Promise<Chat | undefined>
-  deleteChat: (chatId: string) => Promise<ServiceResult>
-  sendMessage: (message: string, config: LLMConfig, attachments?: string[]) => Promise<ServiceResult>
+  deleteChat: (chatId: string) => Promise<void>
+  sendMessage: (message: string, config: LLMConfig, attachments?: string[]) => Promise<void>
   saveChatSettings: (
     chatId: string,
     settings: Partial<ChatSettings>,
-  ) => Promise<ServiceResult | undefined>
+  ) => Promise<ChatSettings | undefined>
   listModels: (config: LLMConfig) => Promise<string[]>
   isThinking: boolean
 }
@@ -80,12 +79,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   }, [project])
 
   const deleteChat = useCallback(
-    async (chatId: string): Promise<ServiceResult> => {
+    async (chatId: string): Promise<void> => {
       const chat = chatsById[chatId]
       if (project && chat && chat.context) {
         return await typedChatsService.deleteChat(chat.context)
       }
-      return { ok: false }
     },
     [project, chatsById],
   )
@@ -112,8 +110,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const sendMessage = useCallback(
-    async (message: string, config: LLMConfig, attachments?: string[]): Promise<ServiceResult> => {
-      if (!project) return { ok: false }
+    async (message: string, config: LLMConfig, attachments?: string[]): Promise<void> => {
+      if (!project) return
 
       const newMessages: ChatMessage[] = [
         {
@@ -127,14 +125,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       let targetChatId = currentChatId
       if (!targetChatId || !chatsById[targetChatId]) {
         chat = await typedChatsService.createChat({ projectId: project.id })
-        if (!chat) return { ok: false }
+        if (!chat) return
         targetChatId = chat.id
         setCurrentChatId(targetChatId)
       } else {
         chat = chatsById[targetChatId]
       }
 
-      if (!chat.context) return { ok: false, message: 'Chat context not found' }
+      if (!chat.context) return
 
       setChatsById((prev) => {
         return {

@@ -3,13 +3,12 @@ import {
   NotificationMetadata,
   NotificationCreateInput,
 } from 'src/types/notifications'
-import { ServiceResult } from './serviceResult'
 
 export type NotificationsService = {
   // outbound call
   onOpenNotification: (callback: (metadata: NotificationMetadata) => void) => () => void
 
-  sendOs: (data: any) => Promise<ServiceResult>
+  sendOs: (data: any) => Promise<void>
   subscribe: (callback: (payload?: any) => void) => () => void
   getRecentNotifications: (projectId: string) => Promise<Notification[]>
   getUnreadNotificationsCount: (projectId: string) => Promise<number>

@@ -21,7 +21,7 @@
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
-      "status": "+",
+      "status": "-",
       "title": "Develop a Reusable Chat Sidebar React Component",
       "description": "Create a new React component, @src/renderer/components/Chat/ChatSidebar.tsx , responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
       "context": [
@@ -31,7 +31,7 @@
         "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-25T11:07:46.937Z",
+      "updatedAt": "2025-09-25T11:17:58.833Z",
       "blockers": [],
       "rejection": "During the last developer run\n@src/renderer/components/Chat/ContextualChatSidebar.tsx was created which should be merged with @src/renderer/components/Chat/ChatSidebar.tsx - as all chats require a context. The ChatSidebar needs to correctly use info provided by @src/renderer/contexts/ChatsContext.tsx"
     },
@@ -51,16 +51,16 @@
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
-      "status": "+",
+      "status": "-",
       "title": "Add a Chat Button and Sidebar to StoryDetailsView",
-      "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoryDetailsView.tsx . Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the `ChatSidebar`. Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
+      "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoryDetailsView.tsx . Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the @src/renderer/components/Chat/ChatSidebar.tsx . Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
       "context": [
-        "src/renderer/stories/StoryDetailsView.tsx"
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.805Z",
-      "updatedAt": "2025-09-25T00:35:31.597Z",
-      "blockers": [],
-      "completedAt": "2025-09-25T00:35:31.597Z"
+      "updatedAt": "2025-09-25T11:18:47.303Z",
+      "blockers": []
     },
     {
       "id": "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6",
@@ -92,25 +92,27 @@
     },
     {
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
-      "status": "+",
+      "status": "-",
       "title": "Add a Chat Button and Sidebar to StoriesListView",
-      "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoriesListView.tsx . Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
+      "description": "Integrate the @src/renderer/components/Chat/ChatSidebar.tsx  into the @src/renderer/stories/StoriesListView.tsx . Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
       "context": [
-        "src/renderer/stories/StoriesListView.tsx"
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-25T00:35:35.542Z",
-      "blockers": [],
-      "completedAt": "2025-09-25T00:35:35.542Z"
+      "updatedAt": "2025-09-25T11:19:01.080Z",
+      "blockers": []
     },
     {
       "id": "ba16d671-5c40-496f-b887-7c9d94694711",
-      "status": "?",
+      "status": "-",
       "title": "Add Chat Functionality to Story and Feature Edit Modals",
-      "description": "Add a \"Chat\" button to the header of the story and feature creation/editing modals. Clicking the button will open the `ChatSidebar` to the right of the modal content. The chat context will be the specific story or feature being edited.",
-      "context": [],
+      "description": "Add a \"Chat\" button to the header of the story and feature creation/editing modals. Clicking the button will open the @src/renderer/components/Chat/ChatSidebar.tsx  to the right of the modal content. The chat context will be the specific story or feature being edited.",
+      "context": [
+        "src/renderer/components/Chat/ChatSidebar.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-25T09:20:07.596Z",
+      "updatedAt": "2025-09-25T11:18:18.887Z",
       "rejection": "Make it use an icon instead of text. When opening closing - have it do so with a nice animation.\nThe chat must be scrollable and resizable in terms of width up to a certain amount.\nWhen opening - it shouldn't discard changes the user has in the Form input.",
       "blockers": []
     },
@@ -182,7 +184,7 @@
     },
     {
       "id": "57d3f1bc-ccd0-4101-873c-4c3758c5fa5a",
-      "status": "?",
+      "status": "-",
       "title": "Create a chatsContext",
       "description": "Instead of @src/renderer/hooks/useChats.tsx there should be a @src/renderer/contexts/ChatsContext.tsx  that follows the same patterns as @src/renderer/contexts/ProjectContext.tsx or @src/renderer/contexts/FilesContext.tsx .\n@src/renderer/contexts/ChatsContext.tsx needs to be the interface for using @src/renderer/services/chatsService.ts (just like the other contexts use their services).",
       "context": [
@@ -194,7 +196,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T09:17:18.893Z",
-      "updatedAt": "2025-09-25T11:09:09.086Z",
+      "updatedAt": "2025-09-25T11:17:19.004Z",
       "rejection": "@src/renderer/contexts/ChatsContext.tsx needs to be updated to serve the chats now based on context. All legacy code or needs should be ignored/removed - all chats should now require a context."
     }
   ],
