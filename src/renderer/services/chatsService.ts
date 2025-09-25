@@ -18,6 +18,7 @@ export type ChatsService = {
   ) => Promise<ServiceResult>
   getDefaultPrompt: (context: ChatContext) => Promise<string>
   savePrompt: (context: ChatContext, prompt: string) => Promise<ServiceResult>
+  saveSettings: (context: ChatContext, settings: ChatSettings) => Promise<ServiceResult>
 }
 
 export const chatsService: ChatsService = { ...window.chatsService }

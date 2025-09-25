@@ -3,8 +3,8 @@ import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import ChatSidebar from './ChatSidebar'
 import { factoryToolsService } from '../../services/factoryToolsService'
-import { ChatsProvider, useChats } from '../../contexts/ChatsContext'
-import { useProjectSettings } from '../../hooks/useProjectSettings'
+import { ChatsProvider, useChatsContext } from '../../contexts/ContextualChatsContext'
+import { ChatSettings } from 'src/chat/ChatsManager'
 
 interface ContextualChatSidebarProps {
   contextId: string
@@ -25,21 +25,18 @@ const ChatView: React.FC<{ chatContextTitle: string; contextId: string }> = ({
   chatContextTitle,
   contextId,
 }) => {
-  const { chatsById, sendMessage, isThinking } = useChats()
+  const { chat, sendMessage, isThinking, saveChatSettings } = useChatsContext()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
   const projectId = useMemo(() => parseProjectIdFromContextId(contextId), [contextId])
-  const { projectSettings, updateProjectSettings, setNotificationProjectSettings } =
-    useProjectSettings()
 
-  const settings = projectSettings?.chatSettings
+  const settings = chat?.settings
   const setSettings = useCallback(
-    async (patch: any) => {
-      await updateProjectSettings({ chatSettings: { ...(settings || {}), ...(patch || {}) } })
-      setNotificationProjectSettings({ chatSettings: { ...(settings || {}), ...(patch || {}) } })
+    async (patch: Partial<ChatSettings>) => {
+      await saveChatSettings(patch)
     },
-    [settings, updateProjectSettings, setNotificationProjectSettings],
+    [saveChatSettings],
   )
 
   const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)

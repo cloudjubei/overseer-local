@@ -21,7 +21,7 @@
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
-      "status": "-",
+      "status": "+",
       "title": "Develop a Reusable Chat Sidebar React Component",
       "description": "Create a new React component, @src/renderer/components/Chat/ChatSidebar.tsx , responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
       "context": [
@@ -31,13 +31,13 @@
         "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-25T11:10:21.804Z",
+      "updatedAt": "2025-09-25T11:07:46.937Z",
       "blockers": [],
       "rejection": "During the last developer run\n@src/renderer/components/Chat/ContextualChatSidebar.tsx was created which should be merged with @src/renderer/components/Chat/ChatSidebar.tsx - as all chats require a context. The ChatSidebar needs to correctly use info provided by @src/renderer/contexts/ChatsContext.tsx"
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
-      "status": "-",
+      "status": "+",
       "title": "Add Chat Settings Controls to the Chat Sidebar",
       "description": "Enhance the @src/renderer/components/Chat/ContextualChatSidebar.tsx   component to include UI controls for chat settings. This includes a model selector dropdown, a mechanism for enabling/disabling tools, and a toggle for the agent's tool auto-approval. These settings will be passed in as props and will trigger callbacks when changed. Use @src/renderer/contexts/ChatsContext.tsx to modify the settings",
       "context": [
@@ -45,8 +45,9 @@
         "src/renderer/contexts/ChatsContext.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.803Z",
-      "updatedAt": "2025-09-25T09:41:40.755Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T11:09:30.603Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T11:09:30.603Z"
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
@@ -129,7 +130,7 @@
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
-      "status": "-",
+      "status": "+",
       "title": "Implement Persistence for Chat Settings",
       "description": "Store the user-selected settings (model, tool configuration, auto-approve) for each chat context. The settings should be saved alongside the chat messages in the corresponding JSON file and reloaded when the user re-opens the chat.\nAugment @src/chat/ChatsManager.ts , @src/chat/ChatsStorage.ts , @src/renderer/services/chatsService.ts and @src/renderer/contexts/ChatsContext.tsx to allow modifying these setetings",
       "context": [
@@ -139,8 +140,9 @@
         "src/renderer/contexts/ChatsContext.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-25T09:40:36.071Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T11:06:43.320Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T11:06:43.320Z"
     },
     {
       "id": "441f4d8d-3daf-4a37-b18d-16a08b5b7992",
@@ -180,7 +182,7 @@
     },
     {
       "id": "57d3f1bc-ccd0-4101-873c-4c3758c5fa5a",
-      "status": "-",
+      "status": "?",
       "title": "Create a chatsContext",
       "description": "Instead of @src/renderer/hooks/useChats.tsx there should be a @src/renderer/contexts/ChatsContext.tsx  that follows the same patterns as @src/renderer/contexts/ProjectContext.tsx or @src/renderer/contexts/FilesContext.tsx .\n@src/renderer/contexts/ChatsContext.tsx needs to be the interface for using @src/renderer/services/chatsService.ts (just like the other contexts use their services).",
       "context": [

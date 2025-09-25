@@ -137,6 +137,7 @@ export default class ChatsStorage {
       creationDate: new Date().toISOString(),
       updateDate: new Date().toISOString(),
       settings: {},
+      context,
     }
 
     await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8')
@@ -168,6 +169,7 @@ export default class ChatsStorage {
       settings,
       updateDate: new Date().toISOString(),
       creationDate: chatData.creationDate || new Date().toISOString(),
+      context,
     }
 
     await fs.mkdir(path.dirname(chatPath), { recursive: true })

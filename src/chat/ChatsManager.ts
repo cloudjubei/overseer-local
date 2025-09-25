@@ -53,6 +53,7 @@ export type Chat = {
   creationDate: string
   updateDate: string
   settings?: ChatSettings
+  context?: ChatContext
 }
 
 export default class ChatsManager extends BaseManager {
@@ -121,6 +122,8 @@ export default class ChatsManager extends BaseManager {
       this.getDefaultPrompt(context)
     handlers[IPC_HANDLER_KEYS.CHATS_SAVE_PROMPT] = async ({ context, prompt }) =>
       this.savePrompt(context, prompt)
+    handlers[IPC_HANDLER_KEYS.CHATS_SAVE_SETTINGS] = async ({ context, settings }) =>
+      this.saveSettings(context, settings)
 
     return handlers
   }
@@ -176,15 +179,24 @@ export default class ChatsManager extends BaseManager {
     return getSystemPrompt({ additionalContext: parts.join('\n') })
   }
 
-  async savePrompt(context: ChatContext, prompt: string): Promise<{ ok: true }> {
+  async saveSettings(context: ChatContext, settings: ChatSettings): Promise<{ ok: true }> {
     const storage = await this.__getStorage(context.projectId)
     if (!storage) throw new Error('Could not get storage for project')
 
     const chat = await storage.getChat(context)
     if (!chat) throw new Error('Chat not found')
 
-    const newSettings = { ...(chat.settings || {}), prompt }
-    return await storage.saveChat(context, chat.messages, (chat as any).rawResponses, newSettings)
+    const newSettings = { ...(chat.settings || {}), ...settings }
+    return await storage.saveChat(
+      context,
+      chat.messages,
+      (chat as any).rawResponses,
+      newSettings,
+    )
+  }
+
+  async savePrompt(context: ChatContext, prompt: string): Promise<{ ok: true }> {
+    return this.saveSettings(context, { prompt })
   }
 
   private async _ensureSystemSeeded(storage: ChatsStorage, chat: Chat, context: ChatContext) {
