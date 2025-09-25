@@ -6,19 +6,17 @@
   "features": [
     {
       "id": "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b",
-      "status": "+",
-      "title": "Create a Chat Storage Service for Context-Specific Conversations",
-      "description": "Implement a service in the main process to manage reading and writing chat history. The service will handle JSON files stored in the `.factory/chats/` directory, with subdirectories for projects and stories. It needs to resolve paths based on context identifiers (projectId, storyId, featureId, 'tests', 'agents'). Expose this service to the renderer process via IPC channels and the preload script.",
+      "status": "-",
+      "title": "Update ChatsManager, ChatsStorage and chatsService",
+      "description": "@src/chat/ChatsManager.ts , @src/chat/ChatsStorage.js and @src/renderer/services/chatsService.ts  already handle storing chats and doing things with them - augment them to handle the requirements for this task - i.e. storing/retrieving contextual chats as well as the settings for them",
       "context": [
         "src/chat/ChatsManager.ts",
         "src/chat/ChatsStorage.js",
         "src/renderer/services/chatsService.ts"
       ],
       "createdAt": "2025-09-24T17:18:35.800Z",
-      "updatedAt": "2025-09-25T00:51:48.820Z",
-      "rejection": "@src/chat/ChatsManager.ts , @src/chat/ChatsStorage.js and @src/renderer/services/chatsService.ts  already handle storing chats - they should simply be augmented to serve the new requirements. There's no need for a new ContextChatsManager etc.",
-      "blockers": [],
-      "completedAt": "2025-09-25T00:51:48.820Z"
+      "updatedAt": "2025-09-25T08:56:45.744Z",
+      "blockers": []
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
@@ -35,17 +33,13 @@
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
-      "status": "+",
+      "status": "?",
       "title": "Add Chat Settings Controls to the Chat Sidebar",
       "description": "Enhance the `ChatSidebar` component to include UI controls for chat settings. This includes a model selector dropdown, a mechanism for enabling/disabling tools, and a toggle for the agent's tool auto-approval. These settings will be passed in as props and will trigger callbacks when changed.",
-      "context": [
-        "src/renderer/screens/SettingsView.tsx"
-      ],
+      "context": [],
       "createdAt": "2025-09-24T17:18:35.803Z",
-      "updatedAt": "2025-09-25T00:54:18.459Z",
-      "rejection": "The settings button currently implemented takes the user to the @src/renderer/screens/SettingsView.tsx - this shouldn't happen. A special dropdown should show with the settings required.",
-      "blockers": [],
-      "completedAt": "2025-09-25T00:54:18.459Z"
+      "updatedAt": "2025-09-25T09:00:53.323Z",
+      "blockers": []
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
@@ -75,13 +69,17 @@
     },
     {
       "id": "91e943ca-515b-4ee4-a44d-cdcff61cc379",
-      "status": "+",
+      "status": "-",
       "title": "Create and Load Context-Specific System Prompts for Chats",
-      "description": "Implement a mechanism to generate and provide a unique system prompt for each chat context (Project, Story, Feature, Tests, Agents). When a new chat is initiated, the appropriate prompt, containing relevant information about the context, should be used as the first message from the system.",
-      "context": [],
+      "description": "Implement a mechanism to generate and provide a unique system prompt for each chat context (Project, Story, Feature, Tests, Agents). When a new chat is initiated, the appropriate prompt, containing relevant information about the context, should be used as the first message from the system.\nThe user must be able to see these system prompts and edit them for future cases. There should be an option to go back to the default one always.\nThis means that @src/chat/ChatsManager.ts and @src/chat/ChatsStorage.ts and @src/renderer/services/chatsService.ts needs to be updated to hold information about the current prompts. There probably needs to be a sub-service for handling all sorts of prompts used by the application.",
+      "context": [
+        "src/chat/ChatsManager.ts",
+        "src/chat/ChatsStorage.ts",
+        "src/renderer/services/chatsService.ts"
+      ],
       "createdAt": "2025-09-24T17:18:35.806Z",
-      "updatedAt": "2025-09-25T00:55:51.838Z",
-      "completedAt": "2025-09-25T00:55:51.838Z"
+      "updatedAt": "2025-09-25T08:58:45.060Z",
+      "blockers": []
     },
     {
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
@@ -110,29 +108,27 @@
     },
     {
       "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",
-      "status": "?",
+      "status": "-",
       "title": "Add Project-Level Chat Sidebars to Tests and Agents Views",
       "description": "Add a \"Chat\" button and the `ChatSidebar` to the @src/renderer/screens/TestsView.tsx and the @src/renderer/screens/AgentsView.tsx . The chat context for the @src/renderer/screens/TestsView.tsx  will be the project's tests, and for the @src/renderer/screens/AgentsView.tsx it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
       "context": [
         "src/renderer/screens/TestsView.tsx",
-        "src/renderer/screens/AgentsView.tsx",
-        "src/renderer/screens/ChatView.tsx",
-        "src/renderer/components/Chat/MessageList.tsx"
+        "src/renderer/screens/AgentsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-25T01:10:47.440Z",
+      "updatedAt": "2025-09-25T08:59:50.944Z",
       "blockers": [],
-      "rejection": "Blocked: Agent loop failed: {\"message\":\"fetch failed\",\"stacktrace\":\"TypeError: fetch failed\\n    at node:internal/deps/undici/undici:13510:13\\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:13804:17\\n    at async runConversation (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14164:19)\\n    at async runAgentOnFeature (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14305:3)\\n    at async runOrchestrator (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14368:5)\\n    at async runIsolatedOrchestrator (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14400:5)\\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14003:9\",\"cause\":{\"name\":\"HeadersTimeoutError\",\"code\":\"UND_ERR_HEADERS_TIMEOUT\",\"message\":\"Headers Timeout Error\"}}"
+      "rejection": "@src/renderer/screens/TestsView.tsx has the button - only @src/renderer/screens/AgentsView.tsx is missing it to the left of the projects switch"
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
-      "status": "+",
+      "status": "?",
       "title": "Implement Persistence for Chat Settings",
       "description": "Store the user-selected settings (model, tool configuration, auto-approve) for each chat context. The settings should be saved alongside the chat messages in the corresponding JSON file and reloaded when the user re-opens the chat.",
       "context": [],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-25T01:17:47.386Z",
-      "completedAt": "2025-09-25T01:17:47.386Z"
+      "updatedAt": "2025-09-25T09:00:22.551Z",
+      "blockers": []
     },
     {
       "id": "441f4d8d-3daf-4a37-b18d-16a08b5b7992",
@@ -149,7 +145,7 @@
     },
     {
       "id": "92ea6113-9709-4f89-9e62-24a5c7c5b4ee",
-      "status": "?",
+      "status": "-",
       "title": "The input box needs improving",
       "description": "In the @src/renderer/components/Chat/ChatInput.tsx the send button should be an icon -  create one in @src/renderer/components/ui/Icons.tsx . There should also be an appropriate icon for the Attach button.\nBoth of the buttons should be part of the input view (in the footer with the hints) so that it can take as much space horizontally as possible with just a little bit of padding. The input box should only grow to 30% of the total chat view - no matter where it is used.",
       "context": [
@@ -158,7 +154,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T00:42:13.695Z",
-      "updatedAt": "2025-09-25T00:42:35.710Z"
+      "updatedAt": "2025-09-25T09:00:31.341Z"
     },
     {
       "id": "e30f1aae-50de-416d-8f67-05c6f7687590",
@@ -176,14 +172,14 @@
     "441f4d8d-3daf-4a37-b18d-16a08b5b7992": 2,
     "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6": 3,
     "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b": 4,
-    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 5,
-    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 6,
-    "02b401c9-5219-48ee-8fca-174c6702ff2f": 7,
-    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 8,
+    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 5,
+    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 6,
+    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 7,
+    "02b401c9-5219-48ee-8fca-174c6702ff2f": 8,
     "ba16d671-5c40-496f-b887-7c9d94694711": 9,
     "860c56c9-61e0-476f-8459-f7ccc4838ef3": 10,
-    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 11,
-    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 12,
+    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 11,
+    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 12,
     "e30f1aae-50de-416d-8f67-05c6f7687590": 13
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
