@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
-import { ChatsProvider, useChats } from '../../contexts/ChatsContext'
+import { useChats } from '../../contexts/ChatsContext'
 import type { ChatContext } from 'src/chat/ChatsManager'
 import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
@@ -16,7 +16,7 @@ import {
 } from '../ui/Select'
 
 // Internal tool toggle type for UI
- type ToolToggle = { id: string; name: string; enabled: boolean }
+type ToolToggle = { id: string; name: string; enabled: boolean }
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -27,9 +27,16 @@ function parseProjectIdFromContext(context: ChatContext): string | undefined {
   return context?.projectId
 }
 
-function InnerSidebar({ chatContextTitle }: { chatContextTitle: string }) {
-  const { chat, isThinking, sendMessage, saveChatSettings } = useChats()
-  const { configs, activeConfigId, activeConfig, setActive } = useLLMConfig()
+export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
+  const { getChatState, sendMessage, saveChatSettings, refreshChat } = useChats()
+
+  const { chat, isThinking } = getChatState(context)
+
+  useEffect(() => {
+    refreshChat(context)
+  }, [context, refreshChat])
+
+  const { configs, activeConfig, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
   const settings = chat?.settings
@@ -53,9 +60,9 @@ function InnerSidebar({ chatContextTitle }: { chatContextTitle: string }) {
       if (!selectedConfig) return
       tryResumeAudioContext()
       playSendSound()
-      await sendMessage(message, selectedConfig, attachments)
+      await sendMessage(context, message, selectedConfig, attachments)
     },
-    [selectedConfig, sendMessage],
+    [context, selectedConfig, sendMessage],
   )
 
   const handleConfigChange = useCallback(
@@ -63,15 +70,15 @@ function InnerSidebar({ chatContextTitle }: { chatContextTitle: string }) {
       const cfg = configs.find((c) => c.id === configId)
       if (!cfg) return
       // Persist model choice into chat settings for this context and align global active
-      await saveChatSettings({ model: cfg.model })
+      await saveChatSettings(context, { model: cfg.model })
       setActive(configId)
     },
-    [configs, saveChatSettings, setActive],
+    [context, configs, saveChatSettings, setActive],
   )
 
   // Tools management (allowedTools is an allowlist; undefined => all allowed)
   const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
-  const projectId = parseProjectIdFromContext(useChats().context)
+  const projectId = parseProjectIdFromContext(context)
   useEffect(() => {
     let isMounted = true
     async function loadTools() {
@@ -107,16 +114,16 @@ function InnerSidebar({ chatContextTitle }: { chatContextTitle: string }) {
       } else {
         allowed.add(toolId)
       }
-      await saveChatSettings({ allowedTools: Array.from(allowed) })
+      await saveChatSettings(context, { allowedTools: Array.from(allowed) })
     },
-    [settings?.allowedTools, tools, saveChatSettings],
+    [context, settings?.allowedTools, tools, saveChatSettings],
   )
 
   const handleAutoApproveChange = useCallback(
     async (checked: boolean) => {
-      await saveChatSettings({ autoToolCall: checked })
+      await saveChatSettings(context, { autoToolCall: checked })
     },
-    [saveChatSettings],
+    [context, saveChatSettings],
   )
 
   // Settings dropdown UI state
@@ -260,13 +267,5 @@ function InnerSidebar({ chatContextTitle }: { chatContextTitle: string }) {
 
       <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
     </section>
-  )
-}
-
-export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
-  return (
-    <ChatsProvider context={context}>
-      <InnerSidebar chatContextTitle={chatContextTitle} />
-    </ChatsProvider>
   )
 }
