@@ -1852,14 +1852,11 @@
       "context": [
         "src/renderer/projects/ProjectManagerModal.tsx",
         "src/renderer/projects/projectIcons.tsx",
-        "src/renderer/projects/ProjectCodeInfoModal.tsx",
-        "src/renderer/components/agents/TokensChip.tsx",
-        "src/renderer/components/agents/CostChip.tsx"
+        "src/renderer/projects/ProjectCodeInfoModal.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-24T23:02:43.623Z",
-      "updatedAt": "2025-09-24T23:47:46.815Z",
-      "rejection": "The `Chip` used by @src/renderer/projects/ProjectManagerModal.tsx is still not implemented. This should be a reusable component based off other chips in the app such as @src/renderer/components/agents/TokensChip.tsx or @src/renderer/components/agents/CostChip.tsx . On hover for the language it should show the language name (because normally it shows the icon).\nThere needs to be a discernible difference when the chip is interactive and when it isn't (so in the list of projects vs inside the edit modal).",
+      "updatedAt": "2025-09-25T00:14:13.570Z",
       "completedAt": "2025-09-24T23:47:46.815Z"
     }
   ],
