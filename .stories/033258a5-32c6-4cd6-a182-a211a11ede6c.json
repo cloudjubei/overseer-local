@@ -149,7 +149,7 @@
     },
     {
       "id": "92ea6113-9709-4f89-9e62-24a5c7c5b4ee",
-      "status": "-",
+      "status": "?",
       "title": "The input box needs improving",
       "description": "In the @src/renderer/components/Chat/ChatInput.tsx the send button should be an icon -  create one in @src/renderer/components/ui/Icons.tsx . There should also be an appropriate icon for the Attach button.\nBoth of the buttons should be part of the input view (in the footer with the hints) so that it can take as much space horizontally as possible with just a little bit of padding. The input box should only grow to 30% of the total chat view - no matter where it is used.",
       "context": [
@@ -158,7 +158,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T00:42:13.695Z",
-      "updatedAt": "2025-09-25T00:42:35.710Z"
+      "updatedAt": "2025-09-25T01:22:52.602Z",
+      "rejection": "Blocked: Agent loop failed: {\"message\":\"fetch failed\",\"stacktrace\":\"TypeError: fetch failed\\n    at node:internal/deps/undici/undici:13510:13\\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:13804:17\\n    at async runConversation (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14164:19)\\n    at async runAgentOnFeature (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14305:3)\\n    at async runOrchestrator (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14368:5)\\n    at async runIsolatedOrchestrator (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14400:5)\\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-CF5sfuED.js:14003:9\",\"cause\":{\"name\":\"HeadersTimeoutError\",\"code\":\"UND_ERR_HEADERS_TIMEOUT\",\"message\":\"Headers Timeout Error\"}}"
     },
     {
       "id": "e30f1aae-50de-416d-8f67-05c6f7687590",
