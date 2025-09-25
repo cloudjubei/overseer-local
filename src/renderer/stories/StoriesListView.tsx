@@ -98,12 +98,7 @@ export default function StoriesListView() {
   const [isChatOpen, setIsChatOpen] = useState(false)
 
   // Chat service hooks (project-level storage)
-  const {
-    currentChatId,
-    chatsById,
-    sendMessage,
-    isThinking,
-  } = useChats()
+  const { currentChatId, chatsById, sendMessage, isThinking } = useChats()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const currentChat = useMemo(
     () => (currentChatId ? chatsById[currentChatId] : undefined),
@@ -598,7 +593,10 @@ export default function StoriesListView() {
                               )}
                             </div>
                           </div>
-                          <div className="col col-blockers" aria-label={`Blockers for Story ${t.id}`}>
+                          <div
+                            className="col col-blockers"
+                            aria-label={`Blockers for Story ${t.id}`}
+                          >
                             <div className="chips-list">
                               <span className="chips-sub__label">References</span>
                               {blockers.length === 0 ? (
@@ -606,7 +604,9 @@ export default function StoriesListView() {
                                   None
                                 </span>
                               ) : (
-                                blockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
+                                blockers.map((d) => (
+                                  <DependencyBullet key={d.id} dependency={d.id} />
+                                ))
                               )}
                             </div>
                             <div className="chips-list">
@@ -646,7 +646,7 @@ export default function StoriesListView() {
 
       {isChatOpen && projectId && (
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ChatSidebar
+          {/* <ChatSidebar
             chatContextTitle={project?.title || 'Project Chat'}
             currentChat={currentChat}
             isThinking={isThinking}
@@ -654,10 +654,12 @@ export default function StoriesListView() {
             onSend={handleSendMessage}
             configs={configs}
             activeConfigId={activeConfigId}
-            onConfigChange={setActive}
-            onConfigure={() => {/* Settings navigation available globally in nav */}}
-            activeConfig={activeConfig}
-          />
+            onConfigChange={setActive} */}
+          {/* onConfigure={() => { */}
+          {/* /* Settings navigation available globally in nav */}
+          {/* }} */}
+          {/* activeConfig={activeConfig} */}
+          {/* /> */}
         </div>
       )}
     </div>

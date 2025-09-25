@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { useContextualChat } from '../../hooks/useContextualChat'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import ChatSidebar from './ChatSidebar'
 import { factoryToolsService } from '../../services/factoryToolsService'
+import { useChats } from 'src/renderer/hooks/useChats'
 
 interface ContextualChatSidebarProps {
   contextId: string
@@ -20,107 +20,105 @@ function parseProjectIdFromContextId(contextId: string): string | undefined {
   return parts[0]
 }
 
-export default function ContextualChatSidebar({ contextId, chatContextTitle }: ContextualChatSidebarProps) {
-  const {
-    currentChatId,
-    chatsById,
-    sendMessage,
-    isThinking,
-    settings,
-    setSettings,
-  } = useContextualChat(contextId)
-  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
-  const { navigateView } = useNavigator()
+export default function ContextualChatSidebar({
+  contextId,
+  chatContextTitle,
+}: ContextualChatSidebarProps) {
+  // const { currentChatId, chatsById, sendMessage, isThinking } = useChats()
+  // const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
+  // const { navigateView } = useNavigator()
 
-  const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
-  const projectId = useMemo(() => parseProjectIdFromContextId(contextId), [contextId])
+  // const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
+  // const projectId = useMemo(() => parseProjectIdFromContextId(contextId), [contextId])
 
-  // Load tools for the project and map with persisted toggles
-  useEffect(() => {
-    let isMounted = true
-    async function load() {
-      if (!projectId) return
-      try {
-        const list = await factoryToolsService.listTools(projectId)
-        const toggles = settings?.toolToggles || {}
-        const mapped: ToolToggle[] = list.map((t) => ({
-          id: t.name,
-          name: t.name,
-          enabled: toggles[t.name] != null ? !!toggles[t.name] : true,
-        }))
-        if (isMounted) setTools(mapped)
-      } catch (e) {
-        // Tools might not be available; fail silently
-        if (isMounted) setTools([])
-      }
-    }
-    load()
-    return () => {
-      isMounted = false
-    }
-  }, [projectId, settings?.toolToggles])
+  // // Load tools for the project and map with persisted toggles
+  // useEffect(() => {
+  //   let isMounted = true
+  //   async function load() {
+  //     if (!projectId) return
+  //     try {
+  //       const list = await factoryToolsService.listTools(projectId)
+  //       const toggles = settings?.toolToggles || {}
+  //       const mapped: ToolToggle[] = list.map((t) => ({
+  //         id: t.name,
+  //         name: t.name,
+  //         enabled: toggles[t.name] != null ? !!toggles[t.name] : true,
+  //       }))
+  //       if (isMounted) setTools(mapped)
+  //     } catch (e) {
+  //       // Tools might not be available; fail silently
+  //       if (isMounted) setTools([])
+  //     }
+  //   }
+  //   load()
+  //   return () => {
+  //     isMounted = false
+  //   }
+  // }, [projectId, settings?.toolToggles])
 
-  const currentChat = useMemo(
-    () => (currentChatId ? chatsById[currentChatId] : undefined),
-    [currentChatId, chatsById],
-  )
+  // const currentChat = useMemo(
+  //   () => (currentChatId ? chatsById[currentChatId] : undefined),
+  //   [currentChatId, chatsById],
+  // )
 
-  // Effective config is the per-context selected model if set, otherwise global active
-  const selectedConfigId = settings?.modelConfigId ?? activeConfigId ?? undefined
-  const effectiveConfig = useMemo(
-    () => (selectedConfigId ? configs.find((c) => c.id === selectedConfigId) : activeConfig) || null,
-    [configs, selectedConfigId, activeConfig],
-  )
+  // // Effective config is the per-context selected model if set, otherwise global active
+  // const selectedConfigId = settings?.modelConfigId ?? activeConfigId ?? undefined
+  // const effectiveConfig = useMemo(
+  //   () =>
+  //     (selectedConfigId ? configs.find((c) => c.id === selectedConfigId) : activeConfig) || null,
+  //   [configs, selectedConfigId, activeConfig],
+  // )
 
-  const effectiveIsConfigured = !!effectiveConfig?.apiKey
+  // const effectiveIsConfigured = !!effectiveConfig?.apiKey
 
-  const handleSendMessage = async (message: string, attachments: string[]) => {
-    if (!effectiveConfig) return
-    await sendMessage(message, effectiveConfig, attachments)
-  }
+  // const handleSendMessage = async (message: string, attachments: string[]) => {
+  //   if (!effectiveConfig) return
+  //   await sendMessage(message, effectiveConfig, attachments)
+  // }
 
-  const handleConfigChange = useCallback(
-    async (configId: string) => {
-      // Persist per-context selection
-      await setSettings({ modelConfigId: configId })
-      // Also set as globally active for convenience (does not affect persistence here)
-      setActive(configId)
-    },
-    [setSettings, setActive],
-  )
+  // const handleConfigChange = useCallback(
+  //   async (configId: string) => {
+  //     // Persist per-context selection
+  //     await setSettings({ modelConfigId: configId })
+  //     // Also set as globally active for convenience (does not affect persistence here)
+  //     setActive(configId)
+  //   },
+  //   [setSettings, setActive],
+  // )
 
-  const handleToolToggle = useCallback(
-    async (toolId: string) => {
-      const current = settings?.toolToggles || {}
-      const next = { ...current, [toolId]: !(current[toolId] != null ? current[toolId] : true) }
-      await setSettings({ toolToggles: next })
-    },
-    [settings?.toolToggles, setSettings],
-  )
+  // const handleToolToggle = useCallback(
+  //   async (toolId: string) => {
+  //     const current = settings?.toolToggles || {}
+  //     const next = { ...current, [toolId]: !(current[toolId] != null ? current[toolId] : true) }
+  //     await setSettings({ toolToggles: next })
+  //   },
+  //   [settings?.toolToggles, setSettings],
+  // )
 
-  const handleAutoApproveChange = useCallback(
-    async (checked: boolean) => {
-      await setSettings({ autoApprove: checked })
-    },
-    [setSettings],
-  )
+  // const handleAutoApproveChange = useCallback(
+  //   async (checked: boolean) => {
+  //     await setSettings({ autoApprove: checked })
+  //   },
+  //   [setSettings],
+  // )
 
   return (
-    <ChatSidebar
-      chatContextTitle={chatContextTitle}
-      currentChat={currentChat}
-      isThinking={isThinking}
-      isConfigured={effectiveIsConfigured}
-      onSend={handleSendMessage}
-      configs={configs}
-      activeConfigId={selectedConfigId || undefined}
-      onConfigChange={handleConfigChange}
-      onConfigure={() => navigateView('Settings')}
-      activeConfig={effectiveConfig}
-      tools={tools}
-      onToolToggle={tools ? handleToolToggle : undefined}
-      autoApprove={settings?.autoApprove}
-      onAutoApproveChange={handleAutoApproveChange}
-    />
+    <></>
+    // <ChatSidebar
+    //   chatContextTitle={chatContextTitle}
+    //   currentChat={currentChat}
+    //   isThinking={isThinking}
+    //   isConfigured={effectiveIsConfigured}
+    //   onSend={handleSendMessage}
+    //   configs={configs}
+    //   activeConfigId={selectedConfigId || undefined}
+    //   onConfigChange={handleConfigChange}
+    //   onConfigure={() => navigateView('Settings')}
+    //   activeConfig={effectiveConfig}
+    //   tools={tools}
+    //   onToolToggle={tools ? handleToolToggle : undefined}
+    //   autoApprove={settings?.autoApprove}
+    //   onAutoApproveChange={handleAutoApproveChange}
+    // />
   )
 }

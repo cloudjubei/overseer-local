@@ -3,8 +3,9 @@ import path from 'path'
 import chokidar from 'chokidar'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { randomUUID } from 'crypto'
+import { BrowserWindow } from 'electron'
 
-async function pathExists(p) {
+async function pathExists(p: string) {
   try {
     await fs.stat(p)
     return true
@@ -14,7 +15,7 @@ async function pathExists(p) {
 }
 
 export default class ChatsStorage {
-  constructor(projectId, chatsDir, window) {
+  constructor(projectId: string, chatsDir: string, window: BrowserWindow) {
     this.projectId = projectId
     this.chatsDir = chatsDir
     this.window = window

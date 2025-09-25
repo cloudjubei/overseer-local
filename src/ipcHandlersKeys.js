@@ -17,11 +17,6 @@ const IPC_HANDLER_KEYS = {
   CHATS_GET: 'chats:get',
   CHATS_DELETE: 'chats:delete',
 
-  // Context chats (context-specific storage under .factory/chats)
-  CONTEXT_CHATS_GET: 'context-chats:get',
-  CONTEXT_CHATS_SAVE: 'context-chats:save',
-  CONTEXT_CHATS_DELETE: 'context-chats:delete',
-
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',
   FILES_LIST: 'files:list',
