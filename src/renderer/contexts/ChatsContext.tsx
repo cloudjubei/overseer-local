@@ -12,7 +12,10 @@ export type ChatsContextValue = {
   createChat: () => Promise<Chat | undefined>
   deleteChat: (chatId: string) => Promise<ServiceResult>
   sendMessage: (message: string, config: LLMConfig, attachments?: string[]) => Promise<ServiceResult>
-  saveChatSettings: (chatId: string, settings: ChatSettings) => Promise<ServiceResult | undefined>
+  saveChatSettings: (
+    chatId: string,
+    settings: Partial<ChatSettings>,
+  ) => Promise<ServiceResult | undefined>
   listModels: (config: LLMConfig) => Promise<string[]>
   isThinking: boolean
 }
@@ -88,7 +91,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const saveChatSettings = useCallback(
-    async (chatId: string, settings: ChatSettings) => {
+    async (chatId: string, settings: Partial<ChatSettings>) => {
       const chat = chatsById[chatId]
       if (!project || !chat || !chat.context) return
 
