@@ -217,6 +217,28 @@
       "blockers": [],
       "createdAt": "2025-09-25T13:24:43.049Z",
       "updatedAt": "2025-09-25T13:24:43.049Z"
+    },
+    {
+      "id": "c3804c5f-ec19-410e-b866-3d0229cb354a",
+      "status": "-",
+      "title": "Improve the top buttons in ChatSidebar",
+      "description": "",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-25T13:29:28.459Z",
+      "updatedAt": "2025-09-25T13:29:28.459Z"
+    },
+    {
+      "id": "4fdbae23-ff2f-4616-a7cf-61d831dc8377",
+      "status": "-",
+      "title": "no need to mention Shift+Enter for newline",
+      "description": "In @src/renderer/components/Chat/ChatInput.tsx no need to mention Shift+Enter as normal Enter creates a newline.",
+      "context": [
+        "src/renderer/components/Chat/ChatInput.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-25T13:34:26.711Z",
+      "updatedAt": "2025-09-25T13:34:26.711Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -235,7 +257,9 @@
     "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 13,
     "95c7a067-9e9b-4e54-b786-6d3997dfff30": 14,
     "f50d7e7c-034c-4455-8772-81afac6c660c": 15,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 16
+    "c3804c5f-ec19-410e-b866-3d0229cb354a": 16,
+    "4fdbae23-ff2f-4616-a7cf-61d831dc8377": 17,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 18
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"

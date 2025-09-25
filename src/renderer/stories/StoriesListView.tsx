@@ -633,7 +633,7 @@ export default function StoriesListView() {
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
           <ChatSidebar
             context={{ projectId, type: 'project' }}
-            chatContextTitle={project ? `Project Chat — ${project.name}` : 'Project Chat'}
+            chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
           />
         </div>
       )}
