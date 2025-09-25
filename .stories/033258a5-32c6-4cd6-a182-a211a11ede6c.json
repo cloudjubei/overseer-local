@@ -1,6 +1,6 @@
 {
   "id": "033258a5-32c6-4cd6-a182-a211a11ede6c",
-  "status": "-",
+  "status": "?",
   "title": "Better Chats with AI everywhere",
   "description": "We want the user to be able to have a conversation with an LLM about a given context in many places in the app. First, where do we want the user's to have chats available:\n- when editing or creating a story, there needs to be a chat button (at the top next to the close button) that will open the chat interface (in a sidebar to the right of the popup) \n- similarly, when editing or creating a feature\n- inside StoryDetailsView there needs to be a chat button (at the top next to the run agent button) that will open a sidebar (on the right) that will allow the user to talk about the given Story and its features.\n- inside StoriesListView there needs to be a chat button (at the top next to the run agent button) that will open a chat about the current project and its stories and features.\n- following StoryDetailsView and StoriesListView and opening the chat interface in a sidebar to the right, we need a chat button on other screens that will do a similar thing, we need it in Tests and Agents.\n\nSecond, each chat is tied to a particular context and must be stored so that whenever the user comes back to the screen where that chat should be shown - the messages history must be resumed. Thus, the contexts are a specific Feature, a specific Story, a specific ProjectSpec, a ProjectSpec's tests and ProjectSpec's Agents. Essentially all these contexts must store appropriate chats somewhere under `.factory/chats` so that they can be easily retrieved via ids. We need `.factory/chats/projectId.json` to be the chat for a specific project, `.factory/chats/projectId/storyId.json` to be the chat for a specific story, `.factory/chats/projectId/storyId/featureId.json` to be the chat for a specific feature, `.factory/chats/projectId/tests.json` to be the chat for a project's tests, `.factory/chats/projectId/agents.json` to be the chat for a project's agents.\nEach one of these chats for the different contexts needs to have a different prompt that will come loaded with different information relevant to the context.\n\nThis chat interface should be unified and feel familiar across the different projects, the user simply should have an indicator of what context they are in. In this interface the user must be able to choose some settings for that particular context (stored as an app wide setting) - allowing the agent to use certain tools and others not. Choosing the model (similar to how ChatView already does it). Allowing the agent to auto call tools or require user confirmation.\nThis UI needs to be used anywhere where chats are used (so ChatView needs to benefit from these improvements too).",
   "features": [
@@ -98,7 +98,7 @@
     },
     {
       "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",
-      "status": "-",
+      "status": "?",
       "title": "Add Project-Level Chat Sidebars to Tests and Agents Views",
       "description": "Add a \"Chat\" button and the `ChatSidebar` to the @src/renderer/screens/TestsView.tsx and the @src/renderer/screens/AgentsView.tsx . The chat context for the @src/renderer/screens/TestsView.tsx  will be the project's tests, and for the @src/renderer/screens/AgentsView.tsx it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
       "context": [
@@ -106,8 +106,9 @@
         "src/renderer/screens/AgentsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-24T17:56:52.164Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T00:29:49.428Z",
+      "blockers": [],
+      "rejection": "Blocked: Agent loop failed: {\"message\":\"fetch failed\",\"stacktrace\":\"TypeError: fetch failed\\n    at node:internal/deps/undici/undici:13510:13\\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-Dk1E7l1w.js:13756:17\\n    at async runConversation (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-Dk1E7l1w.js:14116:19)\\n    at async runAgentOnFeature (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-Dk1E7l1w.js:14257:3)\\n    at async runOrchestrator (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-Dk1E7l1w.js:14320:5)\\n    at async runIsolatedOrchestrator (/Users/cloud/Documents/Work/overseer-local/.vite/build/main-Dk1E7l1w.js:14352:5)\\n    at async /Users/cloud/Documents/Work/overseer-local/.vite/build/main-Dk1E7l1w.js:13955:9\",\"cause\":{\"name\":\"HeadersTimeoutError\",\"code\":\"UND_ERR_HEADERS_TIMEOUT\",\"message\":\"Headers Timeout Error\"}}"
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
