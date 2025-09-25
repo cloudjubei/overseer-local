@@ -5,6 +5,8 @@ import { useToast } from '../components/ui/Toast'
 import { useNavigator } from '../navigation/Navigator'
 import { useStories } from '../contexts/StoriesContext'
 import { Story } from 'thefactory-tools'
+import { useActiveProject } from '../contexts/ProjectContext'
+import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 
 export default function StoryEditView({
   storyId,
@@ -22,8 +24,10 @@ export default function StoryEditView({
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { storiesById, updateStory, deleteStory } = useStories()
+  const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   useEffect(() => {
     if (storyId && storiesById) {
@@ -77,24 +81,65 @@ export default function StoryEditView({
     }
   }
 
+  const contextId = `${projectId}/${storyId}`
+
   return (
     <>
-      <Modal title="Edit Story" onClose={attemptClose} isOpen={true}>
+      <Modal
+        title="Edit Story"
+        onClose={attemptClose}
+        isOpen={true}
+        size={isChatOpen ? 'xl' : undefined}
+        headerActions={
+          <button
+            className="btn-secondary"
+            onClick={() => setIsChatOpen((v) => !v)}
+            aria-pressed={isChatOpen}
+          >
+            {isChatOpen ? 'Close Chat' : 'Chat'}
+          </button>
+        }
+        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
+      >
         {initialValues ? (
-          <StoryForm
-            id={`${initialValues.id}`}
-            initialValues={{
-              status: initialValues.status,
-              title: initialValues.title,
-              description: initialValues.description,
-            }}
-            onSubmit={onSubmit}
-            onCancel={attemptClose}
-            submitting={submitting || deleting}
-            isCreate={false}
-            onDelete={() => setShowDeleteConfirm(true)}
-            onDirtyChange={setHasChanges}
-          />
+          isChatOpen ? (
+            <div className="w-full h-full flex">
+              <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+                <StoryForm
+                  id={`${initialValues.id}`}
+                  initialValues={{
+                    status: initialValues.status,
+                    title: initialValues.title,
+                    description: initialValues.description,
+                  }}
+                  onSubmit={onSubmit}
+                  onCancel={attemptClose}
+                  submitting={submitting || deleting}
+                  isCreate={false}
+                  onDelete={() => setShowDeleteConfirm(true)}
+                  onDirtyChange={setHasChanges}
+                />
+              </div>
+              <div className="w-[320px] border-l border-border bg-surface-base">
+                <ContextualChatSidebar contextId={contextId} chatContextTitle="Story Chat" />
+              </div>
+            </div>
+          ) : (
+            <StoryForm
+              id={`${initialValues.id}`}
+              initialValues={{
+                status: initialValues.status,
+                title: initialValues.title,
+                description: initialValues.description,
+              }}
+              onSubmit={onSubmit}
+              onCancel={attemptClose}
+              submitting={submitting || deleting}
+              isCreate={false}
+              onDelete={() => setShowDeleteConfirm(true)}
+              onDirtyChange={setHasChanges}
+            />
+          )
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
             Loading story…

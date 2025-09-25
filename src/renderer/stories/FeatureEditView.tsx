@@ -6,6 +6,8 @@ import { useStories } from '../contexts/StoriesContext'
 import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureForm'
 import { Button } from '../components/ui/Button'
 import { IconDelete } from '../components/ui/Icons'
+import { useActiveProject } from '../contexts/ProjectContext'
+import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 
 export default function FeatureEditView({
   storyId,
@@ -23,8 +25,10 @@ export default function FeatureEditView({
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { featuresById, updateFeature, deleteFeature } = useStories()
+  const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -81,6 +85,7 @@ export default function FeatureEditView({
   }
 
   const formId = 'feature-form-edit'
+  const contextId = `${projectId}/${storyId}/${featureId}`
 
   return (
     <>
@@ -88,6 +93,17 @@ export default function FeatureEditView({
         title="Edit Feature"
         onClose={attemptClose}
         isOpen={true}
+        size={isChatOpen ? 'xl' : undefined}
+        headerActions={
+          <button
+            className="btn-secondary"
+            onClick={() => setIsChatOpen((v) => !v)}
+            aria-pressed={isChatOpen}
+          >
+            {isChatOpen ? 'Close Chat' : 'Chat'}
+          </button>
+        }
+        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
         footer={
           <div className="flex justify-between gap-2">
             {!initialValues ? (
@@ -129,18 +145,40 @@ export default function FeatureEditView({
         }
       >
         {initialValues ? (
-          <FeatureForm
-            initialValues={initialValues}
-            onSubmit={onSubmit}
-            onCancel={attemptClose}
-            onDelete={() => setShowDeleteConfirm(true)}
-            submitting={submitting}
-            storyId={storyId}
-            featureId={featureId}
-            hideActions
-            formId={formId}
-            onDirtyChange={setHasChanges}
-          />
+          isChatOpen ? (
+            <div className="w-full h-full flex">
+              <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+                <FeatureForm
+                  initialValues={initialValues}
+                  onSubmit={onSubmit}
+                  onCancel={attemptClose}
+                  onDelete={() => setShowDeleteConfirm(true)}
+                  submitting={submitting}
+                  storyId={storyId}
+                  featureId={featureId}
+                  hideActions
+                  formId={formId}
+                  onDirtyChange={setHasChanges}
+                />
+              </div>
+              <div className="w-[320px] border-l border-border bg-surface-base">
+                <ContextualChatSidebar contextId={contextId} chatContextTitle="Feature Chat" />
+              </div>
+            </div>
+          ) : (
+            <FeatureForm
+              initialValues={initialValues}
+              onSubmit={onSubmit}
+              onCancel={attemptClose}
+              onDelete={() => setShowDeleteConfirm(true)}
+              submitting={submitting}
+              storyId={storyId}
+              featureId={featureId}
+              hideActions
+              formId={formId}
+              onDirtyChange={setHasChanges}
+            />
+          )
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
             Loading feature…

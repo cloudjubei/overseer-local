@@ -3,6 +3,8 @@ import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureFor
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useStories } from '../contexts/StoriesContext'
+import { useActiveProject } from '../contexts/ProjectContext'
+import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 
 export default function FeatureCreateView({
   storyId,
@@ -21,8 +23,10 @@ export default function FeatureCreateView({
   const [submitting, setSubmitting] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
   const { addFeature } = useStories()
+  const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -67,6 +71,7 @@ export default function FeatureCreateView({
   }
 
   const formId = 'feature-form-create'
+  const contextId = `${projectId}/${storyId}`
 
   return (
     <>
@@ -74,8 +79,18 @@ export default function FeatureCreateView({
         title="Create New Feature"
         onClose={attemptClose}
         isOpen={true}
-        size="lg"
+        size={isChatOpen ? 'xl' : 'lg'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+        headerActions={
+          <button
+            className="btn-secondary"
+            onClick={() => setIsChatOpen((v) => !v)}
+            aria-pressed={isChatOpen}
+          >
+            {isChatOpen ? 'Close Chat' : 'Chat'}
+          </button>
+        }
+        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
         footer={
           <div className="flex justify-between gap-2">
             <button
@@ -99,18 +114,40 @@ export default function FeatureCreateView({
           </div>
         }
       >
-        <FeatureForm
-          onSubmit={onSubmit}
-          onCancel={attemptClose}
-          submitting={submitting}
-          titleRef={titleRef}
-          storyId={storyId}
-          hideActions
-          formId={formId}
-          onDirtyChange={setHasChanges}
-          initialValues={initialValues}
-          focusDescription={focusDescription}
-        />
+        {isChatOpen ? (
+          <div className="w-full h-full flex">
+            <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+              <FeatureForm
+                onSubmit={onSubmit}
+                onCancel={attemptClose}
+                submitting={submitting}
+                titleRef={titleRef}
+                storyId={storyId}
+                hideActions
+                formId={formId}
+                onDirtyChange={setHasChanges}
+                initialValues={initialValues}
+                focusDescription={focusDescription}
+              />
+            </div>
+            <div className="w-[320px] border-l border-border bg-surface-base">
+              <ContextualChatSidebar contextId={contextId} chatContextTitle="Story Chat (New Feature)" />
+            </div>
+          </div>
+        ) : (
+          <FeatureForm
+            onSubmit={onSubmit}
+            onCancel={attemptClose}
+            submitting={submitting}
+            titleRef={titleRef}
+            storyId={storyId}
+            hideActions
+            formId={formId}
+            onDirtyChange={setHasChanges}
+            initialValues={initialValues}
+            focusDescription={focusDescription}
+          />
+        )}
       </Modal>
       <AlertDialog
         isOpen={showAlert}

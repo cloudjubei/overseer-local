@@ -4,6 +4,8 @@ import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { useStories } from '../contexts/StoriesContext'
 import { StoryCreateInput } from 'thefactory-tools'
+import { useActiveProject } from '../contexts/ProjectContext'
+import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 
 export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -12,8 +14,10 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
   const [submitting, setSubmitting] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
   const { createStory } = useStories()
+  const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -45,25 +49,58 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
     [toast, createStory],
   )
 
+  // While creating a story, we don't yet have a storyId; use project-level chat context.
+  const contextId = projectId
+
   return (
     <>
       <Modal
         title="Create New Story"
         onClose={attemptClose}
         isOpen={true}
-        size="md"
+        size={isChatOpen ? 'xl' : 'md'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+        headerActions={
+          <button
+            className="btn-secondary"
+            onClick={() => setIsChatOpen((v) => !v)}
+            aria-pressed={isChatOpen}
+          >
+            {isChatOpen ? 'Close Chat' : 'Chat'}
+          </button>
+        }
+        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
       >
-        <StoryForm
-          id="-1"
-          initialValues={{}}
-          onSubmit={onSubmit}
-          onCancel={attemptClose}
-          submitting={submitting}
-          isCreate={true}
-          titleRef={titleRef}
-          onDirtyChange={setHasChanges}
-        />
+        {isChatOpen ? (
+          <div className="w-full h-full flex">
+            <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+              <StoryForm
+                id="-1"
+                initialValues={{}}
+                onSubmit={onSubmit}
+                onCancel={attemptClose}
+                submitting={submitting}
+                isCreate={true}
+                titleRef={titleRef}
+                onDirtyChange={setHasChanges}
+              />
+            </div>
+            <div className="w-[320px] border-l border-border bg-surface-base">
+              <ContextualChatSidebar contextId={contextId} chatContextTitle="Project Chat (New Story)" />
+            </div>
+          </div>
+        ) : (
+          <StoryForm
+            id="-1"
+            initialValues={{}}
+            onSubmit={onSubmit}
+            onCancel={attemptClose}
+            submitting={submitting}
+            isCreate={true}
+            titleRef={titleRef}
+            onDirtyChange={setHasChanges}
+          />
+        )}
       </Modal>
       <AlertDialog
         isOpen={showAlert}
