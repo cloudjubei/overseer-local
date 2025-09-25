@@ -14,6 +14,8 @@ export default async function textSuggestionAction(
   const prev = getSession(userId)
 
   const cmdMatch = rawText.match(/^\/t(?:@\w+)?(?:\s+([\s\S]*))?$/i)
+  console.log('LELELE textSuggestionAction cmdMatch: ', cmdMatch)
+  console.log('LELELE prev: ', prev)
   if (cmdMatch) {
     setSession({
       ...(prev || { userId }),
@@ -34,30 +36,30 @@ export default async function textSuggestionAction(
     return true
   }
 
-  if (prev?.conversationState?.lastAction == 't') {
-    // current text is to get a suggestion from ai
-    await ensureBackendConfigured()
-    ensureAccessTokenForUser(userId)
-    const waiting = await bot.sendMessage(chat.id, 'Processing your text...')
+  // if (prev?.conversationState?.lastAction == 't') {
+  //   // current text is to get a suggestion from ai
+  //   await ensureBackendConfigured()
+  //   ensureAccessTokenForUser(userId)
+  //   const waiting = await bot.sendMessage(chat.id, 'Processing your text...')
 
-    try {
-      const result = await GoalsService.goalsControllerAiSuggestions({
-        requestBody: { text: rawText, transcriptionConfidence: 1 },
-      })
+  //   try {
+  //     const result = await GoalsService.goalsControllerAiSuggestions({
+  //       requestBody: { text: rawText, transcriptionConfidence: 1 },
+  //     })
 
-      await renderAiSuggestionResult(bot, chat.id, result)
-    } catch (err: any) {
-      const errMsg = err?.response?.data || err?.message || 'Failed to process your message.'
-      await bot.sendMessage(
-        chat.id,
-        typeof errMsg === 'string' ? errMsg : 'Failed to your message.',
-      )
-    } finally {
-      try {
-        await bot.deleteMessage(chat.id, waiting.message_id)
-      } catch {}
-    }
-    return true
-  }
+  //     await renderAiSuggestionResult(bot, chat.id, result)
+  //   } catch (err: any) {
+  //     const errMsg = err?.response?.data || err?.message || 'Failed to process your message.'
+  //     await bot.sendMessage(
+  //       chat.id,
+  //       typeof errMsg === 'string' ? errMsg : 'Failed to your message.',
+  //     )
+  //   } finally {
+  //     try {
+  //       await bot.deleteMessage(chat.id, waiting.message_id)
+  //     } catch {}
+  //   }
+  //   return true
+  // }
   return false
 }

@@ -2,8 +2,8 @@ import TelegramBot from 'node-telegram-bot-api'
 import { config } from '../config/env'
 import { isAuthenticated, getSession, setSession, clearSession } from './sessionStore'
 import { configureBackendClient, setAccessToken } from './backendClient'
-import { AuthService } from '../generated/backend'
 import { logger } from './logger'
+import { AuthService } from 'src/generated/backend/services/AuthService'
 
 const pendingAccessCode = new Set<string>()
 
@@ -45,6 +45,7 @@ export async function handleAuthMessage(
   // Returns true if this message was handled by auth flow (either processed or prompted), false otherwise
   const chatId = msg.chat.id
   const userId = getTelegramUserId(msg)
+  console.log('LELELE handleAuthMessage msg: ', msg)
   if (!userId) {
     await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.')
     return true

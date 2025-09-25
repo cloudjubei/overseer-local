@@ -1,13 +1,13 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { ensureAccessTokenForUser, ensureBackendConfigured, getTelegramUserId } from '../lib/auth'
-import { GoalsService } from '../generated/backend'
 import { renderAiSuggestionResult } from './suggestionRenderer'
+import { GoalsService } from 'src/generated/backend/services/GoalsService'
 
 // Helper to download a Telegram file as Buffer
 async function downloadTelegramFile(
   bot: TelegramBot,
   fileId: string,
-): Promise<{ buffer: Buffer; filename: string; mimeType?: string }> {
+): Promise<{ blob: Blob; filename: string; mimeType?: string }> {
   // getFile gives us file_path, but getFileLink constructs a full URL including token
   const fileUrl = await bot.getFileLink(fileId as any)
   // Node 18+ provides global fetch
@@ -15,8 +15,9 @@ async function downloadTelegramFile(
   if (!res.ok) {
     throw new Error(`Failed to download file: ${res.status} ${res.statusText}`)
   }
-  const arrayBuf = await res.arrayBuffer()
-  const buffer = Buffer.from(arrayBuf)
+
+  // await res.
+  const blob = await res.blob()
 
   // Try to derive filename from URL
   const urlObj = new URL(fileUrl)
@@ -24,7 +25,7 @@ async function downloadTelegramFile(
   const base = pathname.substring(pathname.lastIndexOf('/') + 1) || 'voice.oga'
   const contentType = res.headers.get('content-type') || undefined
 
-  return { buffer, filename: base, mimeType: contentType || 'audio/ogg' }
+  return { blob, filename: base, mimeType: contentType || 'audio/ogg' }
 }
 
 export default async function audioSuggestionAction(
@@ -36,6 +37,7 @@ export default async function audioSuggestionAction(
 ) {
   // Case 1: Command /s -> prompt user to record a voice memo
   const cmdMatch = rawText.match(/^\/s(?:@\w+)?(?:\s+([\s\S]*))?$/i)
+  console.log('LELELE audioSuggestionAction cmdMatch: ', cmdMatch)
   if (cmdMatch) {
     const header =
       '<b>Voice memo for goal suggestions</b>\n' +
@@ -49,6 +51,7 @@ export default async function audioSuggestionAction(
   // Accept Telegram voice notes (msg.voice) and general audio (msg.audio)
   const voice = msg.voice
   const audio = msg.audio
+  console.log('LELELE audioSuggestionAction voice: ', voice)
   if (!voice && !audio) {
     return false
   }
@@ -69,30 +72,24 @@ export default async function audioSuggestionAction(
     const fileId = voice?.file_id || audio?.file_id
     if (!fileId) throw new Error('No file id found on message')
 
-    const { buffer, filename, mimeType } = await downloadTelegramFile(bot, fileId)
-
-    // Prepare multipart/form-data for backend endpoint
-    // openapi-typescript-codegen client accepts File/Blob in browser; in Node we can pass a Buffer with filename via FormData
-    // Use undici's FormData (global in Node 18) if available
-    const form = new FormData()
-    const file = new Blob([buffer], { type: mimeType || 'application/octet-stream' })
-    form.append('file', file, filename)
+    const { blob, filename, mimeType } = await downloadTelegramFile(bot, fileId)
 
     const result = await GoalsService.goalsControllerAiSuggestionsFromAudio({
-      formData: form as any,
-    } as any)
+      formData: { file: blob },
+    })
 
     // Render nicely following the mock style
     await renderAiSuggestionResult(bot, chat.id, result)
 
     // Optionally remove the waiting message to reduce clutter
     try {
-      await bot.deleteMessage(chat.id, String(waiting.message_id))
+      await bot.deleteMessage(chat.id, waiting.message_id)
     } catch {}
   } catch (err: any) {
+    console.log('ERROR FROM PROCESSING AUDIO: ', err)
     // Clean up waiting message
     try {
-      await bot.deleteMessage(chat.id, String(waiting.message_id))
+      await bot.deleteMessage(chat.id, waiting.message_id)
     } catch {}
 
     const errMsg = err?.response?.data || err?.message || 'Failed to process audio.'

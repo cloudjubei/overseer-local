@@ -14,8 +14,8 @@ export default defineConfig({
         ...coverageConfigDefaults.exclude,
         'src/generated/**/*',
         'src/index.ts', // Entry point is hard to test directly
-        'tests/**', 
-        '.stories/**'
+        'tests/**',
+        '.stories/**',
       ],
     },
   },

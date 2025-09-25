@@ -117,7 +117,10 @@ export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
   })
 
   // Show extra generic button only if we have primary suggestions and also have generic suggestions to offer
-  const showExtraSuggestions = hasPrimary && Array.isArray(payload?.genericSuggestions) && payload.genericSuggestions.length > 0
+  const showExtraSuggestions =
+    hasPrimary &&
+    Array.isArray(payload?.genericSuggestions) &&
+    payload.genericSuggestions.length > 0
   const reply_markup = buildSuggestionKeyboard(suggestions, showExtraSuggestions)
   return { text, options: { parse_mode: 'HTML', reply_markup } }
 }

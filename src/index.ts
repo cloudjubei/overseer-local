@@ -13,7 +13,11 @@ import quickSuggestionAction from './actions/quickSuggestion'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
-import { clearSuggestionsForMessage, getSuggestionsForMessage, getSuggestionBundleForMessage } from './actions/suggestionState'
+import {
+  clearSuggestionsForMessage,
+  getSuggestionsForMessage,
+  getSuggestionBundleForMessage,
+} from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
 import textSuggestionAction from './actions/textSuggestion'
 
@@ -26,7 +30,9 @@ bot.setMyCommands(
     // { command: 'help', description: 'Show the help message' },
     { command: 'q', description: 'Pick a suggestion from a list' },
     { command: 't', description: 'Create a Macro Goal suggestion via AI (text)' },
+    // { command: 'macro', description: 'Create a Macro Goal suggestion via AI (text)' },
     { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
+    // { command: 'micro', description: 'Create a Micro Goal suggestion via AI (text)' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
@@ -379,7 +385,8 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         } catch {}
 
         const header =
-          '<b>Get a personalised goal</b>\n' + '<i>Describe what goal you would like to achieve?</i>'
+          '<b>Get a personalised goal</b>\n' +
+          '<i>Describe what goal you would like to achieve?</i>'
         await bot.sendMessage(chatId, header, { parse_mode: 'HTML' })
         return
       }
