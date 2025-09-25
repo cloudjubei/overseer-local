@@ -147,7 +147,7 @@
     },
     {
       "id": "92ea6113-9709-4f89-9e62-24a5c7c5b4ee",
-      "status": "-",
+      "status": "+",
       "title": "The input box needs improving",
       "description": "In the @src/renderer/components/Chat/ChatInput.tsx the send button should be an icon -  create one in @src/renderer/components/ui/Icons.tsx . There should also be an appropriate icon for the Attach button.\nBoth of the buttons should be part of the input view (in the footer with the hints) so that it can take as much space horizontally as possible with just a little bit of padding. The input box should only grow to 30% of the total chat view - no matter where it is used.",
       "context": [
@@ -156,7 +156,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T00:42:13.695Z",
-      "updatedAt": "2025-09-25T09:00:31.341Z"
+      "updatedAt": "2025-09-25T09:11:23.917Z",
+      "completedAt": "2025-09-25T09:11:23.917Z"
     },
     {
       "id": "e30f1aae-50de-416d-8f67-05c6f7687590",

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useFiles } from '../../contexts/FilesContext'
 import AttachmentList from './AttachmentList'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
+import { IconAttach, IconSend } from '../ui/Icons'
 
 interface ChatInputProps {
   onSend: (message: string, attachments: string[]) => void
@@ -14,20 +15,28 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatInputRef = useRef<HTMLDivElement>(null)
 
   const { uploadFile } = useFiles()
 
   const autoSizeTextarea = () => {
     const el = textareaRef.current
-    if (!el) return
+    if (!el || !chatInputRef.current) return
+
+    const parentHeight = chatInputRef.current.parentElement?.clientHeight || 0
+    const maxHeight = parentHeight * 0.3
+
     el.style.height = 'auto'
-    const max = 200
-    const next = Math.min(el.scrollHeight, max)
+    const next = Math.min(el.scrollHeight, maxHeight)
     el.style.height = next + 'px'
   }
 
   useEffect(() => {
     autoSizeTextarea()
+    window.addEventListener('resize', autoSizeTextarea)
+    return () => {
+      window.removeEventListener('resize', autoSizeTextarea)
+    }
   }, [input])
 
   const handleSend = () => {
@@ -75,20 +84,29 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     [isConfigured],
   )
 
+  const maxHeightStyle = useMemo(() => {
+    if (!chatInputRef.current) return { maxHeight: '30vh' } // Fallback
+    const parentHeight = chatInputRef.current.parentElement?.clientHeight || 0
+    return { maxHeight: parentHeight * 0.3 }
+  }, [chatInputRef.current])
+
   return (
-    <div className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
+    <div
+      ref={chatInputRef}
+      className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]"
+    >
       <div className="p-3">
         <div className="relative flex items-end gap-2">
           <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
-            <div className="relative">
+            <div className="relative p-1">
               <FileMentionsTextarea
                 value={input}
                 onChange={setInput}
                 placeholder={placeholderText}
                 rows={1}
                 disabled={isThinking}
-                className="w-full resize-none bg-transparent px-3 py-2 outline-none text-[var(--text-primary)]"
-                style={{ maxHeight: 200, overflowY: 'auto' }}
+                className="w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]"
+                style={{ ...maxHeightStyle, overflowY: 'auto' }}
                 ariaLabel="Message input"
                 inputRef={textareaRef}
                 onKeyDown={handleTextareaKeyDown}
@@ -96,7 +114,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
               />
             </div>
 
-            <div className="px-3 py-1 border-t border-[var(--border-subtle)]">
+            <div className="px-3 py-1.5 border-t border-[var(--border-subtle)]">
               <AttachmentList
                 attachments={pendingAttachments}
                 onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
@@ -104,22 +122,6 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
               />
               <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="btn-secondary"
-                    aria-label="Attach a document"
-                    type="button"
-                    disabled={isThinking}
-                  >
-                    Attach
-                  </button>
-                  <input
-                    type="file"
-                    accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileUpload}
-                  />
                   <span className="hidden sm:inline">
                     Tip: Use @ for files • Use # for stories and features
                   </span>
@@ -129,14 +131,33 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
             </div>
           </div>
 
-          <button
-            onClick={handleSend}
-            className="btn"
-            disabled={!canSend || isThinking}
-            aria-label="Send message"
-          >
-            Send
-          </button>
+          <div className="flex flex-col gap-1.5 self-stretch">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-icon"
+              aria-label="Attach a document"
+              type="button"
+              disabled={isThinking}
+            >
+              <IconAttach className="w-5 h-5" />
+            </button>
+            <input
+              type="file"
+              accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+
+            <button
+              onClick={handleSend}
+              className="btn-icon flex-1"
+              disabled={!canSend || isThinking}
+              aria-label="Send message"
+            >
+              <IconSend className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
