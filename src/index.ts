@@ -30,9 +30,11 @@ import {
   sendDifficultyKeyboardMessage,
   sendTypeKeyboardMessage,
 } from './common/keyboards'
+import { initScheduler } from './lib/scheduler'
 
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
+initScheduler(bot)
 
 bot.setMyCommands(
   [
@@ -98,7 +100,7 @@ async function startBackendFlow(params: {
         // Clear conversation state and show success message if provided
         const prev = getSession(userId)
         setSession({
-          ...(prev || { userId, accessToken: prev?.accessToken || '' }),
+          ...(prev || { userId }),
           conversationState: null,
           accessToken: prev?.accessToken || '',
           idToken: prev?.idToken,
@@ -114,7 +116,7 @@ async function startBackendFlow(params: {
         const retry = !!(res.error as any)?.retry
         const prev = getSession(userId)
         setSession({
-          ...(prev || { userId, accessToken: prev?.accessToken || '' }),
+          ...(prev || { userId }),
           conversationState: retry
             ? {
                 lastAction: '',

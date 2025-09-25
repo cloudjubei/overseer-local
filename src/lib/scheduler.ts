@@ -136,6 +136,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         }
         if (!startDate) continue
         if (!sameHourOfDay(startDate, now)) continue
+        // if (now.getMinutes() % 2 != 0) continue //DEV
 
         const message = getMessageFromMetadata(ci.metadata as any)
         if (!message) continue
@@ -155,7 +156,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
 
         // Send to the Telegram user
         try {
-          await botRef?.sendMessage(chatId, message)
+          await botRef?.sendMessage(chatId, message, { parse_mode: 'HTML' })
           sentThisHour.add(dedupeKey)
         } catch (err) {
           logger.error(`Failed to send check-in message to user ${userId}`, err)

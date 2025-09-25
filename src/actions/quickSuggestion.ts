@@ -4,7 +4,13 @@ import {
   sendDifficultyKeyboardMessage,
   sendTypeKeyboardMessage,
 } from 'src/common/keyboards'
-import { CreateGoalDto, GoalsService, SuggestedGoalDto } from 'src/generated/backend'
+import {
+  CheckInsService,
+  CreateCheckInDto,
+  CreateGoalDto,
+  GoalsService,
+  SuggestedGoalDto,
+} from 'src/generated/backend'
 import { ensureAccessTokenForUser, ensureBackendConfigured } from 'src/lib/auth'
 import { getSession, setSession } from 'src/lib/sessionStore'
 import { renderParamSuggestions, renderParamSuggestionsKeyboard } from './suggestionRenderer'
@@ -190,6 +196,16 @@ export async function chooseSuggestion(
     }
 
     const created = await GoalsService.goalsControllerCreate({ requestBody: body })
+    await CheckInsService.checkInsControllerAddCheckIn({
+      requestBody: {
+        start: new Date().toISOString(),
+        frequency: CreateCheckInDto.frequency.DAILY,
+        metadata: {
+          message: `<b>Check In!</b>\n<i>I hope you're on track of your goal:</i>\n${created.text}`,
+          chatId,
+        },
+      },
+    })
 
     // Remove keyboard to prevent duplicate submissions
     try {
