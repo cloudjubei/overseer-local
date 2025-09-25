@@ -1,4 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLLMConfig } from '../../contexts/LLMConfigContext'
+import { useNavigator } from '../../navigation/Navigator'
+import { ChatsProvider, useChats } from '../../contexts/ChatsContext'
+import type { ChatContext } from 'src/chat/ChatsManager'
+import { factoryToolsService } from '../../services/factoryToolsService'
+import { ChatInput, MessageList } from '.'
+import { playSendSound, tryResumeAudioContext } from '../../../../assets/sounds'
+import { Switch } from '../ui/Switch'
 import {
   Select,
   SelectContent,
@@ -6,86 +14,116 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/Select'
-import { Switch } from '../ui/Switch'
-import { ChatInput, MessageList } from '.'
-import { playSendSound, tryResumeAudioContext } from '../../../../assets/sounds'
 
-// TODO: Move these types to a shared location
-export interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  // other properties can exist
-  [key: string]: any
-}
+// Internal tool toggle type for UI
+ type ToolToggle = { id: string; name: string; enabled: boolean }
 
-export interface Chat {
-  id: string
-  messages: Message[]
-  updateDate: string | Date
-  // other properties can exist
-  [key: string]: any
-}
-
-export interface LLMConfig {
-  id?: string
-  name: string
-  model: string
-  // other properties can exist
-  [key: string]: any
-}
-
-export interface Tool {
-  id: string
-  name: string
-  enabled: boolean
-}
-
-interface ChatSidebarProps {
+export type ChatSidebarProps = {
+  context: ChatContext
   chatContextTitle: string
-  currentChat?: Chat
-  isThinking: boolean
-  isConfigured: boolean
-  onSend: (message: string, attachments: string[]) => Promise<void>
-  configs: LLMConfig[]
-  activeConfigId?: string
-  onConfigChange: (configId: string) => void
-  onConfigure: () => void
-  activeConfig: LLMConfig | null
-  tools?: Tool[]
-  onToolToggle?: (toolId: string) => void
-  autoApprove?: boolean
-  onAutoApproveChange?: (checked: boolean) => void
 }
 
-export default function ChatSidebar({
-  chatContextTitle,
-  currentChat,
-  isThinking,
-  isConfigured,
-  onSend,
-  configs,
-  activeConfigId,
-  onConfigChange,
-  onConfigure,
-  activeConfig,
-  tools,
-  onToolToggle,
-  autoApprove,
-  onAutoApproveChange,
-}: ChatSidebarProps) {
+function parseProjectIdFromContext(context: ChatContext): string | undefined {
+  return context?.projectId
+}
+
+function InnerSidebar({ chatContextTitle }: { chatContextTitle: string }) {
+  const { chat, isThinking, sendMessage, saveChatSettings } = useChats()
+  const { configs, activeConfigId, activeConfig, setActive } = useLLMConfig()
+  const { navigateView } = useNavigator()
+
+  const settings = chat?.settings
+
+  // Determine selected model/config
+  const selectedModel: string | undefined = settings?.model
+  const selectedConfig = useMemo(() => {
+    if (selectedModel) {
+      const byModel = configs.find((c) => c.model === selectedModel)
+      if (byModel) return byModel
+    }
+    if (activeConfig) return activeConfig
+    return configs[0]
+  }, [configs, activeConfig, selectedModel])
+
+  const selectedConfigId = selectedConfig?.id
+  const isConfigured = !!selectedConfig?.apiKey
+
+  const handleSend = useCallback(
+    async (message: string, attachments: string[]) => {
+      if (!selectedConfig) return
+      tryResumeAudioContext()
+      playSendSound()
+      await sendMessage(message, selectedConfig, attachments)
+    },
+    [selectedConfig, sendMessage],
+  )
+
+  const handleConfigChange = useCallback(
+    async (configId: string) => {
+      const cfg = configs.find((c) => c.id === configId)
+      if (!cfg) return
+      // Persist model choice into chat settings for this context and align global active
+      await saveChatSettings({ model: cfg.model })
+      setActive(configId)
+    },
+    [configs, saveChatSettings, setActive],
+  )
+
+  // Tools management (allowedTools is an allowlist; undefined => all allowed)
+  const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
+  const projectId = parseProjectIdFromContext(useChats().context)
+  useEffect(() => {
+    let isMounted = true
+    async function loadTools() {
+      if (!projectId) return
+      try {
+        const list = await factoryToolsService.listTools(projectId)
+        const allowed = settings?.allowedTools
+        const mapped: ToolToggle[] = list.map((t: any) => ({
+          id: t.name,
+          name: t.name,
+          enabled: !allowed ? true : allowed.includes(t.name),
+        }))
+        if (isMounted) setTools(mapped)
+      } catch (e) {
+        if (isMounted) setTools([])
+      }
+    }
+    loadTools()
+    return () => {
+      isMounted = false
+    }
+  }, [projectId, settings?.allowedTools])
+
+  const handleToolToggle = useCallback(
+    async (toolId: string) => {
+      const allowed = new Set(settings?.allowedTools || [])
+      // If no explicit allowlist yet, initialize as all current enabled tools from UI
+      if (!settings?.allowedTools && tools) {
+        tools.forEach((t) => t.enabled && allowed.add(t.id))
+      }
+      if (allowed.has(toolId)) {
+        allowed.delete(toolId)
+      } else {
+        allowed.add(toolId)
+      }
+      await saveChatSettings({ allowedTools: Array.from(allowed) })
+    },
+    [settings?.allowedTools, tools, saveChatSettings],
+  )
+
+  const handleAutoApproveChange = useCallback(
+    async (checked: boolean) => {
+      await saveChatSettings({ autoToolCall: checked })
+    },
+    [saveChatSettings],
+  )
+
+  // Settings dropdown UI state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
-  const handleSend = async (message: string, attachments: string[]) => {
-    if (!activeConfig) return
-    tryResumeAudioContext()
-    playSendSound()
-    await onSend(message, attachments)
-  }
-
-  // Close settings dropdown on outside click or Escape
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       const t = e.target as Node
@@ -96,9 +134,7 @@ export default function ChatSidebar({
     }
     function onKey(e: KeyboardEvent) {
       if (!isSettingsOpen) return
-      if (e.key === 'Escape') {
-        setIsSettingsOpen(false)
-      }
+      if (e.key === 'Escape') setIsSettingsOpen(false)
     }
     document.addEventListener('mousedown', onDocClick)
     document.addEventListener('keydown', onKey)
@@ -114,12 +150,11 @@ export default function ChatSidebar({
         <div className="flex items-center gap-3 min-w-0">
           <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
             {chatContextTitle}{' '}
-            {currentChat ? `(${new Date(currentChat.updateDate).toLocaleString()})` : ''}
+            {chat ? `(${new Date(chat.updateDate).toLocaleString()})` : ''}
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          {/* Quick model selector (kept for convenience) */}
-          <Select value={activeConfigId || ''} onValueChange={onConfigChange}>
+          <Select value={selectedConfigId || ''} onValueChange={handleConfigChange}>
             <SelectTrigger className="ui-select w-[220px]">
               <SelectValue placeholder="Select Model" />
             </SelectTrigger>
@@ -132,7 +167,6 @@ export default function ChatSidebar({
             </SelectContent>
           </Select>
 
-          {/* Unified settings dropdown opener */}
           <button
             ref={settingsBtnRef}
             onClick={() => setIsSettingsOpen((v) => !v)}
@@ -144,11 +178,10 @@ export default function ChatSidebar({
             Settings
           </button>
 
-          {/* Settings dropdown */}
           {isSettingsOpen && (
             <div
               ref={dropdownRef}
-              className="absolute top-full right-4 mt-2 w-[340px] rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
+              className="absolute top-full right-4 mt-2 w-[360px] rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
               role="menu"
               aria-label="Chat Settings"
             >
@@ -158,10 +191,9 @@ export default function ChatSidebar({
               </div>
 
               <div className="p-3 space-y-4 max-h-[60vh] overflow-auto">
-                {/* Model selector inside dropdown */}
                 <div className="space-y-1">
                   <div className="text-xs font-medium text-[var(--text-secondary)]">Model</div>
-                  <Select value={activeConfigId || ''} onValueChange={(v) => onConfigChange(v)}>
+                  <Select value={selectedConfigId || ''} onValueChange={handleConfigChange}>
                     <SelectTrigger className="ui-select w-full">
                       <SelectValue placeholder="Select Model" />
                     </SelectTrigger>
@@ -175,8 +207,7 @@ export default function ChatSidebar({
                   </Select>
                 </div>
 
-                {/* Tools toggles */}
-                {tools && onToolToggle ? (
+                {tools ? (
                   <div className="space-y-2">
                     <div className="text-xs font-medium text-[var(--text-secondary)]">Tools</div>
                     <div className="rounded-md border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
@@ -188,11 +219,7 @@ export default function ChatSidebar({
                         tools.map((tool) => (
                           <div key={tool.id} className="flex items-center justify-between px-2 py-2">
                             <div className="text-sm text-[var(--text-primary)] truncate pr-2">{tool.name}</div>
-                            <Switch
-                              checked={tool.enabled}
-                              onCheckedChange={() => onToolToggle(tool.id)}
-                              label=""
-                            />
+                            <Switch checked={tool.enabled} onCheckedChange={() => handleToolToggle(tool.id)} label="" />
                           </div>
                         ))
                       )}
@@ -200,22 +227,15 @@ export default function ChatSidebar({
                   </div>
                 ) : null}
 
-                {/* Auto-approve toggle */}
-                {onAutoApproveChange ? (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-[var(--text-primary)]">Auto-approve tool calls</div>
-                      <div className="text-xs text-[var(--text-secondary)]">
-                        When enabled, the agent can invoke tools without asking for confirmation.
-                      </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-[var(--text-primary)]">Auto-approve tool calls</div>
+                    <div className="text-xs text-[var(--text-secondary)]">
+                      When enabled, the agent can invoke tools without asking for confirmation.
                     </div>
-                    <Switch
-                      checked={!!autoApprove}
-                      onCheckedChange={onAutoApproveChange}
-                      label="Auto-approve"
-                    />
                   </div>
-                ) : null}
+                  <Switch checked={!!settings?.autoToolCall} onCheckedChange={handleAutoApproveChange} label="Auto-approve" />
+                </div>
               </div>
             </div>
           )}
@@ -231,22 +251,22 @@ export default function ChatSidebar({
           }}
           role="status"
         >
-          <span>
-            LLM not configured. Set your API key in Settings to enable sending messages.
-          </span>
-          <button className="btn" onClick={onConfigure}>
-            Configure
-          </button>
+          <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+          <button className="btn" onClick={() => navigateView('Settings')}>Configure</button>
         </div>
       )}
 
-      <MessageList
-        chatId={currentChat?.id}
-        messages={currentChat?.messages || []}
-        isThinking={isThinking}
-      />
+      <MessageList chatId={chat?.id} messages={chat?.messages || []} isThinking={isThinking} />
 
       <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
     </section>
+  )
+}
+
+export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
+  return (
+    <ChatsProvider context={context}>
+      <InnerSidebar chatContextTitle={chatContextTitle} />
+    </ChatsProvider>
   )
 }

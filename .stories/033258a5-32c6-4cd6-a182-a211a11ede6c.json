@@ -21,7 +21,7 @@
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
-      "status": "-",
+      "status": "+",
       "title": "Develop a Reusable Chat Sidebar React Component",
       "description": "Create a new React component, @src/renderer/components/Chat/ChatSidebar.tsx , responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
       "context": [
@@ -31,9 +31,10 @@
         "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-25T11:17:58.833Z",
+      "updatedAt": "2025-09-25T11:27:15.684Z",
       "blockers": [],
-      "rejection": "During the last developer run\n@src/renderer/components/Chat/ContextualChatSidebar.tsx was created which should be merged with @src/renderer/components/Chat/ChatSidebar.tsx - as all chats require a context. The ChatSidebar needs to correctly use info provided by @src/renderer/contexts/ChatsContext.tsx"
+      "rejection": "During the last developer run\n@src/renderer/components/Chat/ContextualChatSidebar.tsx was created which should be merged with @src/renderer/components/Chat/ChatSidebar.tsx - as all chats require a context. The ChatSidebar needs to correctly use info provided by @src/renderer/contexts/ChatsContext.tsx",
+      "completedAt": "2025-09-25T11:27:15.684Z"
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
