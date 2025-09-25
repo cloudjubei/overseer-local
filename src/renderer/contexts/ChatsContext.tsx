@@ -2,12 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useActiveProject } from './ProjectContext'
 import type { ServiceResult } from '../services/serviceResult'
 import type { LLMConfig } from 'thefactory-tools'
-import type { Chat, ChatMessage } from 'src/chat/ChatsManager'
+import type { Chat, ChatMessage, ChatContext, ChatSettings } from 'src/chat/ChatsManager'
 import { chatsService as typedChatsService } from '../services/chatsService'
-
-// Note: The preload API currently uses projectId/chatId for some methods.
-// To maintain compatibility with existing ChatView, we coerce calls via any-cast where needed.
-const rawChatsService: any = (typedChatsService as unknown) as any
 
 export type ChatsContextValue = {
   currentChatId?: string
@@ -16,6 +12,7 @@ export type ChatsContextValue = {
   createChat: () => Promise<Chat | undefined>
   deleteChat: (chatId: string) => Promise<ServiceResult>
   sendMessage: (message: string, config: LLMConfig, attachments?: string[]) => Promise<ServiceResult>
+  saveChatSettings: (chatId: string, settings: ChatSettings) => Promise<ServiceResult | undefined>
   listModels: (config: LLMConfig) => Promise<string[]>
   isThinking: boolean
 }
@@ -29,32 +26,38 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const [currentChatId, setCurrentChatId] = useState<string | undefined>()
   const [isThinking, setIsThinking] = useState(false)
 
-  const updateCurrentProjectChats = useCallback((chats: Chat[]) => {
-    const newChats = chats.reduce((acc, c) => {
-      acc[c.id] = c
-      return acc
-    }, {} as Record<string, Chat>)
+  const updateCurrentProjectChats = useCallback(
+    (chats: Chat[]) => {
+      const newChats = chats.reduce(
+        (acc, c) => {
+          acc[c.id] = c
+          return acc
+        },
+        {} as Record<string, Chat>,
+      )
 
-    setChatsById(newChats)
+      setChatsById(newChats)
 
-    if (!currentChatId || !newChats[currentChatId]) {
-      const mostRecent = chats
-        .slice()
-        .sort((a, b) => new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime())[0]
-      if (mostRecent) setCurrentChatId(mostRecent.id)
-    }
-  }, [currentChatId])
+      if (!currentChatId || !newChats[currentChatId]) {
+        const mostRecent = chats
+          .slice()
+          .sort((a, b) => new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime())[0]
+        if (mostRecent) setCurrentChatId(mostRecent.id)
+      }
+    },
+    [currentChatId],
+  )
 
   const update = useCallback(async () => {
     if (project) {
-      const chats = await rawChatsService.listChats(project.id)
+      const chats = await typedChatsService.listChats(project.id)
       updateCurrentProjectChats(chats)
     }
   }, [project, updateCurrentProjectChats])
 
   useEffect(() => {
     update()
-    const unsubscribe = rawChatsService.subscribe(updateCurrentProjectChats)
+    const unsubscribe = typedChatsService.subscribe(updateCurrentProjectChats)
     return () => {
       if (unsubscribe) unsubscribe()
     }
@@ -66,19 +69,44 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const createChat = useCallback(async (): Promise<Chat | undefined> => {
     if (!project) return undefined
-    const chat: Chat | undefined = await rawChatsService.createChat(project.id)
+    const chat: Chat | undefined = await typedChatsService.createChat({ projectId: project.id })
     if (chat) {
       setCurrentChatId(chat.id)
     }
     return chat
   }, [project])
 
-  const deleteChat = useCallback(async (chatId: string): Promise<ServiceResult> => {
-    if (project) {
-      return await rawChatsService.deleteChat(project.id, chatId)
-    }
-    return { ok: false }
-  }, [project])
+  const deleteChat = useCallback(
+    async (chatId: string): Promise<ServiceResult> => {
+      const chat = chatsById[chatId]
+      if (project && chat && chat.context) {
+        return await typedChatsService.deleteChat(chat.context)
+      }
+      return { ok: false }
+    },
+    [project, chatsById],
+  )
+
+  const saveChatSettings = useCallback(
+    async (chatId: string, settings: ChatSettings) => {
+      const chat = chatsById[chatId]
+      if (!project || !chat || !chat.context) return
+
+      setChatsById((prev) => ({
+        ...prev,
+        [chatId]: {
+          ...prev[chatId],
+          settings: {
+            ...(prev[chatId].settings || {}),
+            ...settings,
+          },
+        },
+      }))
+
+      return await typedChatsService.saveSettings(chat.context, settings)
+    },
+    [project, chatsById],
+  )
 
   const sendMessage = useCallback(
     async (message: string, config: LLMConfig, attachments?: string[]): Promise<ServiceResult> => {
@@ -95,13 +123,15 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       let chat: Chat
       let targetChatId = currentChatId
       if (!targetChatId || !chatsById[targetChatId]) {
-        chat = await rawChatsService.createChat(project.id)
+        chat = await typedChatsService.createChat({ projectId: project.id })
         if (!chat) return { ok: false }
         targetChatId = chat.id
         setCurrentChatId(targetChatId)
       } else {
         chat = chatsById[targetChatId]
       }
+
+      if (!chat.context) return { ok: false, message: 'Chat context not found' }
 
       setChatsById((prev) => {
         return {
@@ -112,7 +142,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       setIsThinking(true)
       try {
-        return await rawChatsService.getCompletion(project.id, chat.id, newMessages, config)
+        return await typedChatsService.getCompletion(chat.context, newMessages, config)
       } finally {
         setIsThinking(false)
       }
@@ -132,10 +162,20 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       createChat,
       deleteChat,
       sendMessage,
+      saveChatSettings,
       listModels,
       isThinking,
     }),
-    [currentChatId, chatsById, createChat, deleteChat, sendMessage, listModels, isThinking],
+    [
+      currentChatId,
+      chatsById,
+      createChat,
+      deleteChat,
+      sendMessage,
+      saveChatSettings,
+      listModels,
+      isThinking,
+    ],
   )
 
   return <ChatsContext.Provider value={value}>{children}</ChatsContext.Provider>

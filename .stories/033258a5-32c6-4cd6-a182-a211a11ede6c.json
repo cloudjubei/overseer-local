@@ -128,7 +128,7 @@
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
-      "status": "-",
+      "status": "+",
       "title": "Implement Persistence for Chat Settings",
       "description": "Store the user-selected settings (model, tool configuration, auto-approve) for each chat context. The settings should be saved alongside the chat messages in the corresponding JSON file and reloaded when the user re-opens the chat.\nAugment @src/chat/ChatsManager.ts , @src/chat/ChatsStorage.ts , @src/renderer/services/chatsService.ts and @src/renderer/contexts/ChatsContext.tsx to allow modifying these setetings",
       "context": [
@@ -138,8 +138,9 @@
         "src/renderer/contexts/ChatsContext.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-25T09:40:36.071Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T11:06:43.320Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T11:06:43.320Z"
     },
     {
       "id": "441f4d8d-3daf-4a37-b18d-16a08b5b7992",
