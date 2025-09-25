@@ -3,7 +3,7 @@ import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import ChatSidebar from './ChatSidebar'
 import { factoryToolsService } from '../../services/factoryToolsService'
-import { ChatsProvider, useChatsContext } from '../../contexts/ChatsContext'
+import { ChatsProvider, useChatsContext } from '../../contexts/ContextualChatsContext'
 import { useProjectSettings } from '../../hooks/useProjectSettings'
 
 interface ContextualChatSidebarProps {
@@ -32,6 +32,15 @@ const ChatView: React.FC<{ chatContextTitle: string; contextId: string }> = ({
   const projectId = useMemo(() => parseProjectIdFromContextId(contextId), [contextId])
   const { projectSettings, updateProjectSettings, setNotificationProjectSettings } =
     useProjectSettings()
+
+  const settings = projectSettings?.chatSettings
+  const setSettings = useCallback(
+    async (patch: any) => {
+      await updateProjectSettings({ chatSettings: { ...(settings || {}), ...(patch || {}) } })
+      setNotificationProjectSettings({ chatSettings: { ...(settings || {}), ...(patch || {}) } })
+    },
+    [settings, updateProjectSettings, setNotificationProjectSettings],
+  )
 
   const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
 

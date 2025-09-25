@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react'
-import { useChats } from '../hooks/useChats'
+import { ChatsProvider, useChats } from '../contexts/ChatsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { useNavigator } from '../navigation/Navigator'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { IconChat, IconDelete, IconPlus } from '../components/ui/Icons'
 import { ChatSidebar } from '../components/Chat'
 
-export default function ChatView() {
+function ChatScreenInner() {
   const {
     currentChatId,
     setCurrentChatId,
@@ -96,5 +96,13 @@ export default function ChatView() {
         activeConfig={activeConfig}
       />
     </CollapsibleSidebar>
+  )
+}
+
+export default function ChatView() {
+  return (
+    <ChatsProvider>
+      <ChatScreenInner />
+    </ChatsProvider>
   )
 }
