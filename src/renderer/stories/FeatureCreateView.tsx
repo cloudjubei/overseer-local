@@ -5,6 +5,7 @@ import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import { IconChat } from '../components/ui/Icons'
 
 export default function FeatureCreateView({
   storyId,
@@ -27,6 +28,8 @@ export default function FeatureCreateView({
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [chatWidth, setChatWidth] = useState<number>(340)
+  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const doClose = () => {
     onRequestClose?.()
@@ -73,6 +76,29 @@ export default function FeatureCreateView({
   const formId = 'feature-form-create'
   const contextId = `${projectId}/${storyId}`
 
+  // Resize handlers
+  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isChatOpen) return
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    resizingRef.current = { startX: e.clientX, startWidth: chatWidth }
+    window.addEventListener('pointermove', onResizeMove)
+    window.addEventListener('pointerup', onResizeEnd)
+  }
+  const onResizeMove = (e: PointerEvent) => {
+    if (!resizingRef.current) return
+    const { startX, startWidth } = resizingRef.current
+    const dx = e.clientX - startX
+    const next = startWidth - dx
+    const clamped = Math.max(280, Math.min(640, next))
+    setChatWidth(clamped)
+  }
+  const onResizeEnd = (_e: PointerEvent) => {
+    resizingRef.current = null
+    window.removeEventListener('pointermove', onResizeMove)
+    window.removeEventListener('pointerup', onResizeEnd)
+  }
+
   return (
     <>
       <Modal
@@ -83,14 +109,16 @@ export default function FeatureCreateView({
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         headerActions={
           <button
-            className="btn-secondary"
+            className="btn-secondary btn-icon"
             onClick={() => setIsChatOpen((v) => !v)}
             aria-pressed={isChatOpen}
+            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
+            title={isChatOpen ? 'Close chat' : 'Open chat'}
           >
-            {isChatOpen ? 'Close Chat' : 'Chat'}
+            <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
+        contentClassName="flex-grow overflow-hidden p-0"
         footer={
           <div className="flex justify-between gap-2">
             <button
@@ -114,40 +142,46 @@ export default function FeatureCreateView({
           </div>
         }
       >
-        {isChatOpen ? (
-          <div className="w-full h-full flex">
-            <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-              <FeatureForm
-                onSubmit={onSubmit}
-                onCancel={attemptClose}
-                submitting={submitting}
-                titleRef={titleRef}
-                storyId={storyId}
-                hideActions
-                formId={formId}
-                onDirtyChange={setHasChanges}
-                initialValues={initialValues}
-                focusDescription={focusDescription}
+        <div className="w-full h-full flex">
+          <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+            <FeatureForm
+              onSubmit={onSubmit}
+              onCancel={attemptClose}
+              submitting={submitting}
+              titleRef={titleRef}
+              storyId={storyId}
+              hideActions
+              formId={formId}
+              onDirtyChange={setHasChanges}
+              initialValues={initialValues}
+              focusDescription={focusDescription}
+            />
+          </div>
+          <div
+            className="relative flex-shrink-0 border-l border-border bg-surface-base"
+            style={{ width: isChatOpen ? chatWidth : 0, transition: 'width 240ms ease' }}
+            aria-hidden={!isChatOpen}
+          >
+            {isChatOpen && (
+              <div
+                onPointerDown={onResizeStart}
+                className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
+                style={{ zIndex: 1 }}
+                aria-label="Resize chat sidebar"
+                role="separator"
+                aria-orientation="vertical"
               />
-            </div>
-            <div className="w-[320px] border-l border-border bg-surface-base">
-              <ContextualChatSidebar contextId={contextId} chatContextTitle="Story Chat (New Feature)" />
+            )}
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+            >
+              {isChatOpen && (
+                <ContextualChatSidebar contextId={contextId} chatContextTitle="Story Chat (New Feature)" />
+              )}
             </div>
           </div>
-        ) : (
-          <FeatureForm
-            onSubmit={onSubmit}
-            onCancel={attemptClose}
-            submitting={submitting}
-            titleRef={titleRef}
-            storyId={storyId}
-            hideActions
-            formId={formId}
-            onDirtyChange={setHasChanges}
-            initialValues={initialValues}
-            focusDescription={focusDescription}
-          />
-        )}
+        </div>
       </Modal>
       <AlertDialog
         isOpen={showAlert}

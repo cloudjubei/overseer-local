@@ -16,10 +16,16 @@ export type ContextChatMessage = {
   error?: { message: string }
 }
 
+export type ContextChatSettings = {
+  modelConfigId?: string | null
+  toolToggles?: Record<string, boolean>
+  autoApprove?: boolean
+}
+
 export type ContextChatData = {
   context: ContextChatIdentifier
   messages: ContextChatMessage[]
-  settings?: any
+  settings?: ContextChatSettings
   createdAt: string
   updatedAt: string
 }

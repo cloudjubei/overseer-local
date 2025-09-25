@@ -7,6 +7,7 @@ import {
   ContextChatData,
   ContextChatIdentifier,
   ContextChatMessage,
+  ContextChatSettings,
 } from '../services/contextChatsService'
 
 function parseContextId(contextId: string | undefined): ContextChatIdentifier | undefined {
@@ -58,6 +59,8 @@ export function useContextualChat(contextId?: string) {
     if (!currentChat) return {}
     return { [currentChat.id]: currentChat }
   }, [currentChat])
+
+  const settings: ContextChatSettings | undefined = data?.settings
 
   const buildContext = (): ContextChatIdentifier | undefined => parseContextId(contextId)
 
@@ -135,21 +138,47 @@ export function useContextualChat(contextId?: string) {
 
     setIsThinking(true)
     try {
-      // For contextual chats, we currently only persist messages to the context storage.
-      // Completion is handled elsewhere for project-level chats.
       await contextChatsService.saveContextChat(ctx, {
         messages: [
           ...((data?.messages as ContextChatMessage[]) || []),
           userMessage,
         ],
       })
-      // Optionally, could trigger an assistant reply via future IPC here.
       return { ok: true }
     } catch (e) {
       console.error('Failed to save context chat message', e)
       return { ok: false }
     } finally {
       setIsThinking(false)
+    }
+  }
+
+  const setSettings = async (patch: Partial<ContextChatSettings>): Promise<ServiceResult> => {
+    const ctx = buildContext()
+    if (!ctx) return { ok: false }
+
+    const next: ContextChatSettings = {
+      ...(settings || {}),
+      ...patch,
+    }
+
+    // Optimistic local update
+    setData((prev) => {
+      const base: ContextChatData =
+        prev ?? { context: ctx, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+      return {
+        ...base,
+        settings: next,
+        updatedAt: new Date().toISOString(),
+      }
+    })
+
+    try {
+      await contextChatsService.saveContextChat(ctx, { settings: next })
+      return { ok: true }
+    } catch (e) {
+      console.error('Failed to save context chat settings', e)
+      return { ok: false }
     }
   }
 
@@ -161,6 +190,8 @@ export function useContextualChat(contextId?: string) {
     deleteChat,
     sendMessage,
     isThinking,
+    settings,
+    setSettings,
   }
 }
 
