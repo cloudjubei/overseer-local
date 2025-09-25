@@ -26,13 +26,11 @@
       "description": "Create a new React component, @src/renderer/components/Chat/ChatSidebar.tsx , responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
       "context": [
         "src/renderer/screens/ChatView.tsx",
-        "src/renderer/components/Chat/ChatSidebar.tsx",
-        "src/renderer/contexts/ChatsContext.tsx"
+        "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-25T13:03:07.604Z",
+      "updatedAt": "2025-09-25T13:22:24.146Z",
       "blockers": [],
-      "rejection": "@src/renderer/components/Chat/ChatSidebar.tsx needs to accept a context that is retrieved via `useChats` from @src/renderer/contexts/ChatsContext.tsx",
       "completedAt": "2025-09-25T13:03:07.604Z"
     },
     {
@@ -114,8 +112,7 @@
         "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-25T13:06:18.807Z",
-      "rejection": "Make it use an icon instead of text. When opening closing - have it do so with a nice animation.\nThe chat must be scrollable and resizable in terms of width up to a certain amount.\nWhen opening - it shouldn't discard changes the user has in the Form input.",
+      "updatedAt": "2025-09-25T13:22:19.965Z",
       "blockers": [],
       "completedAt": "2025-09-25T13:06:18.807Z"
     },
@@ -129,9 +126,8 @@
         "src/renderer/screens/AgentsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-25T13:08:36.615Z",
+      "updatedAt": "2025-09-25T13:24:01.997Z",
       "blockers": [],
-      "rejection": "@src/renderer/screens/AgentsView.tsx still needs the button",
       "completedAt": "2025-09-25T13:08:36.615Z"
     },
     {
@@ -165,7 +161,7 @@
     },
     {
       "id": "92ea6113-9709-4f89-9e62-24a5c7c5b4ee",
-      "status": "?",
+      "status": "-",
       "title": "The input box needs improving",
       "description": "In the @src/renderer/components/Chat/ChatInput.tsx the send button should be an icon -  create one in @src/renderer/components/ui/Icons.tsx . There should also be an appropriate icon for the Attach button.\nBoth of the buttons should be part of the input view (in the footer with the hints) so that it can take as much space horizontally as possible with just a little bit of padding. The input box should only grow to 30% of the total chat view - no matter where it is used.",
       "context": [
@@ -174,7 +170,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T00:42:13.695Z",
-      "updatedAt": "2025-09-25T09:19:57.441Z"
+      "updatedAt": "2025-09-25T13:22:54.381Z"
     },
     {
       "id": "e30f1aae-50de-416d-8f67-05c6f7687590",
@@ -195,14 +191,32 @@
         "src/renderer/hooks/useChats.tsx",
         "src/renderer/contexts/ChatsContext.tsx",
         "src/renderer/services/chatsService.ts",
-        "src/renderer/contexts/StoriesContext.tsx",
-        "src/renderer/App.tsx"
+        "src/renderer/contexts/StoriesContext.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-25T09:17:18.893Z",
-      "updatedAt": "2025-09-25T13:00:48.819Z",
-      "rejection": "This is wrongly implemented - this is used app-wide in @src/renderer/App.tsx - so that at any time any component can get the relevant context based on a combination of types/ids .",
+      "updatedAt": "2025-09-25T13:21:47.309Z",
       "completedAt": "2025-09-25T13:00:48.819Z"
+    },
+    {
+      "id": "95c7a067-9e9b-4e54-b786-6d3997dfff30",
+      "status": "-",
+      "title": "Improve the chat sidebar ui on screens",
+      "description": "TODO",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-25T13:24:33.055Z",
+      "updatedAt": "2025-09-25T13:24:33.055Z"
+    },
+    {
+      "id": "f50d7e7c-034c-4455-8772-81afac6c660c",
+      "status": "-",
+      "title": "Improve the chat UI on popups",
+      "description": "",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-25T13:24:43.049Z",
+      "updatedAt": "2025-09-25T13:24:43.049Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -219,7 +233,9 @@
     "ba16d671-5c40-496f-b887-7c9d94694711": 11,
     "860c56c9-61e0-476f-8459-f7ccc4838ef3": 12,
     "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 13,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 14
+    "95c7a067-9e9b-4e54-b786-6d3997dfff30": 14,
+    "f50d7e7c-034c-4455-8772-81afac6c660c": 15,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 16
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"
