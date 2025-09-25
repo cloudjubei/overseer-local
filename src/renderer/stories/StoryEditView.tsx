@@ -6,7 +6,7 @@ import { useNavigator } from '../navigation/Navigator'
 import { useStories } from '../contexts/StoriesContext'
 import { Story } from 'thefactory-tools'
 import { useActiveProject } from '../contexts/ProjectContext'
-import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import ChatSidebar from '../components/Chat/ChatSidebar'
 import { IconChat } from '../components/ui/Icons'
 
 export default function StoryEditView({
@@ -169,11 +169,13 @@ export default function StoryEditView({
             )}
             <div
               className="absolute inset-0 overflow-hidden"
-              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+              style={{
+                opacity: isChatOpen ? 1 : 0,
+                transition: 'opacity 200ms ease 80ms',
+                pointerEvents: isChatOpen ? 'auto' : 'none',
+              }}
             >
-              {isChatOpen && (
-                <ContextualChatSidebar contextId={contextId} chatContextTitle="Story Chat" />
-              )}
+              {isChatOpen && <ChatSidebar contextId={contextId} chatContextTitle="Story Chat" />}
             </div>
           </div>
         </div>

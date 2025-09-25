@@ -4,12 +4,7 @@ import { useActiveProject } from '../contexts/ProjectContext'
 
 export default function ChatView() {
   const { projectId, project } = useActiveProject()
-  const title = project ? `Project Chat — ${project.name}` : 'Project Chat'
+  const title = project ? `Project Chat — ${project.title}` : 'Project Chat'
 
-  return (
-    <ChatSidebar
-      context={{ projectId, type: 'project' }}
-      chatContextTitle={title}
-    />
-  )
+  return <ChatSidebar context={{ projectId, type: 'project' }} chatContextTitle={title} />
 }

@@ -9,8 +9,8 @@ import { timeAgo } from '../components/agents/time'
 import { useNavigator } from '../navigation/Navigator'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
-import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 import { IconChat } from '../components/ui/Icons'
+import { ChatSidebar } from '../components/Chat'
 
 function TimeAgo({ ts }: { ts: number }) {
   const [now, setNow] = React.useState(Date.now())
@@ -167,8 +167,8 @@ function TestsInner() {
                   <div className="flex items-center justify-center py-16">
                     <div className="text-center max-w-xl">
                       <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
-                        No tests detected in this project. Kickstart testing by creating a feature to
-                        set up the testing framework and add coverage.
+                        No tests detected in this project. Kickstart testing by creating a feature
+                        to set up the testing framework and add coverage.
                       </div>
                       <Button variant="secondary" onClick={onCreateTestsFeatureClick}>
                         Create feature to add tests
@@ -218,7 +218,7 @@ function TestsInner() {
 
       {isChatOpen && chatContextId && (
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ContextualChatSidebar contextId={chatContextId} chatContextTitle="Tests chat" />
+          <ChatSidebar contextId={chatContextId} chatContextTitle="Tests chat" />
         </div>
       )}
     </div>

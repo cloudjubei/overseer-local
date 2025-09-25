@@ -5,7 +5,7 @@ import { useToast } from '../components/ui/Toast'
 import { useStories } from '../contexts/StoriesContext'
 import { StoryCreateInput } from 'thefactory-tools'
 import { useActiveProject } from '../contexts/ProjectContext'
-import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import ChatSidebar from '../components/Chat/ChatSidebar'
 import { IconChat } from '../components/ui/Icons'
 
 export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
@@ -129,10 +129,14 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
             )}
             <div
               className="absolute inset-0 overflow-hidden"
-              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+              style={{
+                opacity: isChatOpen ? 1 : 0,
+                transition: 'opacity 200ms ease 80ms',
+                pointerEvents: isChatOpen ? 'auto' : 'none',
+              }}
             >
               {isChatOpen && (
-                <ContextualChatSidebar contextId={contextId} chatContextTitle="Project Chat (New Story)" />
+                <ChatSidebar contextId={contextId} chatContextTitle="Project Chat (New Story)" />
               )}
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
-import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import ChatSidebar from '../components/Chat/ChatSidebar'
 import { IconChat } from '../components/ui/Icons'
 
 export default function FeatureCreateView({
@@ -174,10 +174,14 @@ export default function FeatureCreateView({
             )}
             <div
               className="absolute inset-0 overflow-hidden"
-              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+              style={{
+                opacity: isChatOpen ? 1 : 0,
+                transition: 'opacity 200ms ease 80ms',
+                pointerEvents: isChatOpen ? 'auto' : 'none',
+              }}
             >
               {isChatOpen && (
-                <ContextualChatSidebar contextId={contextId} chatContextTitle="Story Chat (New Feature)" />
+                <ChatSidebar contextId={contextId} chatContextTitle="Story Chat (New Feature)" />
               )}
             </div>
           </div>

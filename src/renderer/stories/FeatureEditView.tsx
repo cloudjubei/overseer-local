@@ -7,7 +7,7 @@ import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureFor
 import { Button } from '../components/ui/Button'
 import { IconChat, IconDelete } from '../components/ui/Icons'
 import { useActiveProject } from '../contexts/ProjectContext'
-import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import ChatSidebar from '../components/Chat/ChatSidebar'
 
 export default function FeatureEditView({
   storyId,
@@ -87,7 +87,10 @@ export default function FeatureEditView({
   }
 
   const formId = 'feature-form-edit'
-  const contextId = useMemo(() => `${projectId}/${storyId}/${featureId}`, [projectId, storyId, featureId])
+  const contextId = useMemo(
+    () => `${projectId}/${storyId}/${featureId}`,
+    [projectId, storyId, featureId],
+  )
 
   // Resize handlers
   const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -212,11 +215,13 @@ export default function FeatureEditView({
             )}
             <div
               className="absolute inset-0 overflow-hidden"
-              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+              style={{
+                opacity: isChatOpen ? 1 : 0,
+                transition: 'opacity 200ms ease 80ms',
+                pointerEvents: isChatOpen ? 'auto' : 'none',
+              }}
             >
-              {isChatOpen && (
-                <ContextualChatSidebar contextId={contextId} chatContextTitle="Feature Chat" />
-              )}
+              {isChatOpen && <ChatSidebar contextId={contextId} chatContextTitle="Feature Chat" />}
             </div>
           </div>
         </div>
