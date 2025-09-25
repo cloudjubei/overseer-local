@@ -22,8 +22,8 @@ import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useStories } from '../contexts/StoriesContext'
 import { ChatSidebar } from '../components/Chat'
-import { useChats } from '../hooks/useChats'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
+import { useChats } from '../contexts/ChatsContext'
 
 function countFeatures(story: Story) {
   const features = Array.isArray(story.features) ? story.features : []
