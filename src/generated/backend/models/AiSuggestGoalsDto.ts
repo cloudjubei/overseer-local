@@ -7,5 +7,9 @@ export type AiSuggestGoalsDto = {
    * Free-text description of goals to suggest
    */
   text: string
+  /**
+   * Goal Type - defaults to MACRO
+   */
+  type?: string
   transcriptionConfidence?: number
 }

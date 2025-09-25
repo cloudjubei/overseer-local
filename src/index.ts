@@ -9,7 +9,10 @@ import { ConversationResponseDto } from './generated/backend/models/Conversation
 import { StartFlowDto } from './generated/backend/models/StartFlowDto'
 import testAction from './actions/test'
 import testLLMAction from './actions/testLLM'
-import quickSuggestionAction from './actions/quickSuggestion'
+import quickSuggestionAction, {
+  chooseSuggestion,
+  quickSuggestionAction2,
+} from './actions/quickSuggestion'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
@@ -19,7 +22,7 @@ import {
   getSuggestionBundleForMessage,
 } from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
-import textSuggestionAction from './actions/textSuggestion'
+import { textSuggestionActionMicro, textSuggestionActionMacro } from './actions/textSuggestion'
 import {
   buildDifficultyKeyboard,
   buildCategoryKeyboard,
@@ -35,11 +38,11 @@ bot.setMyCommands(
   [
     // { command: 'start', description: 'Start the bot' },
     // { command: 'help', description: 'Show the help message' },
-    { command: 'q', description: 'Pick a suggestion from a list' },
-    { command: 't', description: 'Create a Macro Goal suggestion via AI (text)' },
-    // { command: 'macro', description: 'Create a Macro Goal suggestion via AI (text)' },
+    { command: 'q', description: 'Pick a suggestion from a list V1' },
+    { command: 'q2', description: 'Pick a suggestion from a list V2' },
+    { command: 'micro', description: 'Create a Micro Goal suggestion via AI (text) V1' },
+    { command: 'macro', description: 'Create a Macro Goal suggestion via AI (text) V2' },
     { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
-    // { command: 'micro', description: 'Create a Micro Goal suggestion via AI (text)' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
@@ -151,6 +154,9 @@ bot.on('message', async (msg: Message) => {
     if (!from || !chat) return
 
     const rawText = (msg.text || '').trim()
+    const hasResponse = rawText.lastIndexOf('‎')
+    console.log('RAW TEXT: ', rawText)
+    console.log('HAS RESPONSE: ', hasResponse)
 
     if (await testAction(bot, chat, rawText)) {
       return
@@ -160,10 +166,16 @@ bot.on('message', async (msg: Message) => {
     }
     if (await handleAuthMessage(bot, msg)) return
 
+    if (await quickSuggestionAction2(bot, chat, from, rawText, msg.message_id, hasResponse)) {
+      return
+    }
     if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
-    if (await textSuggestionAction(bot, chat, from, rawText)) {
+    if (await textSuggestionActionMacro(bot, chat, from, rawText, msg.message_id, hasResponse)) {
+      return
+    }
+    if (await textSuggestionActionMicro(bot, chat, from, rawText)) {
       return
     }
     if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
@@ -279,19 +291,19 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         const type = parts[3]
         const category = parts[4]
 
-        await sendDifficultyKeyboardMessage(bot, chatId, type, category)
+        await sendDifficultyKeyboardMessage(bot, chatId, type, category, true)
         return
       }
       if (data.startsWith('q:type:')) {
         const parts = data.split(':')
         const type = parts[2]
 
-        await sendCategoryKeyboardMessage(bot, chatId, type)
+        await sendCategoryKeyboardMessage(bot, chatId, type, true)
         return
       }
 
       //start the flow again
-      await sendTypeKeyboardMessage(bot, chatId)
+      await sendTypeKeyboardMessage(bot, chatId, true)
       return
     }
 
@@ -302,63 +314,17 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       if (data.startsWith('suggest:choose:')) {
         const idxStr = data.split(':')[2]
         const idx = Number.parseInt(idxStr, 10)
-        if (!Number.isFinite(idx)) {
-          await bot.sendMessage(chatId, 'Invalid selection.')
-          return
-        }
-
-        const suggestions = getSuggestionsForMessage(chatId, message.message_id) || []
-        const chosen = suggestions[idx]
-        if (!chosen) {
-          await bot.sendMessage(
-            chatId,
-            'That option has expired. Please request suggestions again.',
-          )
-          return
-        }
-
-        try {
-          await ensureBackendConfigured()
-          ensureAccessTokenForUser(userId)
-
-          const body: CreateGoalDto = {
-            type: chosen.type as any,
-            category: chosen.category as any,
-            difficulty: chosen.difficulty as any,
-            text: chosen.text,
-          }
-
-          const created = await GoalsService.goalsControllerCreate({ requestBody: body })
-
-          // Remove keyboard to prevent duplicate submissions
-          try {
-            await bot.editMessageReplyMarkup(
-              { inline_keyboard: [] },
-              { chat_id: chatId, message_id: message.message_id },
-            )
-          } catch {}
-
-          clearSuggestionsForMessage(chatId, message.message_id)
-
-          const confirm = `✅ Goal created: ${created.text}`
-          await bot.sendMessage(chatId, confirm)
-        } catch (err: any) {
-          const errMsg = err?.response?.data || err?.message || 'Failed to create goal.'
-          await bot.sendMessage(
-            chatId,
-            typeof errMsg === 'string' ? errMsg : 'Failed to create goal.',
-          )
-        }
+        await chooseSuggestion(bot, chatId, userId, message.message_id, idx)
         return
       }
 
       if (data === 'suggest:refine') {
-        // Behave like /t: set lastAction to 't' and prompt user for free-form text
+        // Behave like /t: set lastAction to 'macro' and prompt user for free-form text
         const prev = getSession(userId)
         setSession({
           ...(prev || { userId }),
           conversationState: {
-            lastAction: 't',
+            lastAction: 'macro',
             flowId: '',
           },
           accessToken: prev?.accessToken || '',

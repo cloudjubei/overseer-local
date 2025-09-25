@@ -2,6 +2,11 @@ import type TelegramBot from 'node-telegram-bot-api'
 import type { AiSuggestionsResultDto } from '../generated/backend/models/AiSuggestionsResultDto'
 import type { SuggestedGoalDto } from '../generated/backend/models/SuggestedGoalDto'
 import { saveSuggestionsForMessage } from './suggestionState'
+import {
+  buildSuggestionKeyboard,
+  buildSuggestionKeyboardInline,
+  difficultyStars,
+} from 'src/common/keyboards'
 
 // Utilities
 function escapeHtml(s: string): string {
@@ -13,68 +18,17 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function difficultyToLabel(d: SuggestedGoalDto.difficulty | string | undefined): string {
+export function difficultyToLabel(d: SuggestedGoalDto.difficulty | string | undefined): string {
   switch (String(d || '').toUpperCase()) {
     case 'EASY':
       return 'Easy'
     case 'MEDIUM':
       return 'Medium'
     case 'HARD':
-      // Mock uses "Ambitious" for HARD
       return 'Ambitious'
     default:
       return 'Other'
   }
-}
-
-function difficultyStars(d?: SuggestedGoalDto.difficulty | string): string {
-  const diff = String(d || '').toUpperCase()
-  const count = diff === 'MEDIUM' ? 2 : diff === 'HARD' ? 3 : 1
-  return '★'.repeat(count)
-}
-
-// Core builders
-export function buildSuggestionKeyboard(
-  suggestions: SuggestedGoalDto[],
-  showExtraSuggestions: boolean = false,
-): TelegramBot.InlineKeyboardMarkup {
-  const rows: TelegramBot.InlineKeyboardButton[][] = []
-
-  const isSameDifficulty = suggestions.every((s) => s.difficulty === suggestions[0].difficulty)
-
-  suggestions.forEach((sug, idx) => {
-    const label = isSameDifficulty ? sug.summary : difficultyStars(sug.difficulty)
-    const n = idx + 1
-    const text = `${n} • ${label}`
-    rows.push([
-      {
-        text,
-        callback_data: `suggest:choose:${idx}`,
-      },
-    ])
-  })
-
-  if (showExtraSuggestions) {
-    rows.push([
-      {
-        text: '✏️ Refine',
-        callback_data: 'suggest:refine',
-      },
-      {
-        text: '📋 Select',
-        callback_data: 'suggest:select',
-      },
-    ])
-  } else {
-    rows.push([
-      {
-        text: '✏️ Refine',
-        callback_data: 'suggest:refine',
-      },
-    ])
-  }
-
-  return { inline_keyboard: rows }
 }
 
 export function buildSuggestionMessageText(params: {
@@ -124,7 +78,7 @@ export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
     hasPrimary &&
     Array.isArray(payload?.genericSuggestions) &&
     payload.genericSuggestions.length > 0
-  const reply_markup = buildSuggestionKeyboard(suggestions, showExtraSuggestions)
+  const reply_markup = buildSuggestionKeyboardInline(suggestions, showExtraSuggestions)
   return { text, options: { parse_mode: 'HTML', reply_markup } }
 }
 
@@ -137,7 +91,7 @@ export function buildParamSuggestionRender(
     suggestions,
   })
   // For param suggestions (/q), we do not show the extra generic selector button
-  const reply_markup = buildSuggestionKeyboard(suggestions, false)
+  const reply_markup = buildSuggestionKeyboardInline(suggestions, false)
   return { text, options: { parse_mode: 'HTML', reply_markup } }
 }
 
@@ -147,6 +101,20 @@ export async function renderAiSuggestionResult(
   payload: AiSuggestionsResultDto,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildAiSuggestionRender(payload)
+  const sent = await bot.sendMessage(chatId, text, options)
+  // Store both primary and generic suggestions for callback handling
+  const suggestions = Array.isArray(payload?.suggestions) ? payload.suggestions : []
+  const generic = Array.isArray(payload?.genericSuggestions) ? payload.genericSuggestions : []
+  saveSuggestionsForMessage(chatId, sent.message_id, suggestions, generic)
+  return sent
+}
+
+export async function renderAiSuggestionResultKeyboard(
+  bot: TelegramBot,
+  chatId: number,
+  payload: AiSuggestionsResultDto,
+): Promise<TelegramBot.Message> {
+  const { text, options } = buildAiSuggestionRenderKeyboard(payload)
   const sent = await bot.sendMessage(chatId, text, options)
   // Store both primary and generic suggestions for callback handling
   const suggestions = Array.isArray(payload?.suggestions) ? payload.suggestions : []
@@ -166,4 +134,55 @@ export async function renderParamSuggestions(
   // Store only the primary suggestions for param-based flows
   saveSuggestionsForMessage(chatId, sent.message_id, suggestions)
   return sent
+}
+
+export async function renderParamSuggestionsKeyboard(
+  bot: TelegramBot,
+  chatId: number,
+  suggestions: SuggestedGoalDto[],
+  header?: string,
+): Promise<TelegramBot.Message> {
+  const { text, options } = buildParamSuggestionRenderKeyboard(suggestions, header)
+  const sent = await bot.sendMessage(chatId, text, options)
+  // Store only the primary suggestions for param-based flows
+  saveSuggestionsForMessage(chatId, sent.message_id, suggestions)
+  return sent
+}
+export function buildParamSuggestionRenderKeyboard(
+  suggestions: SuggestedGoalDto[],
+  header?: string,
+): { text: string; options: TelegramBot.SendMessageOptions } {
+  const text = buildSuggestionMessageText({
+    headerMessage: header || 'Great! Here are some options:',
+    suggestions,
+  })
+  // For param suggestions (/q), we do not show the extra generic selector button
+  const reply_markup = buildSuggestionKeyboard(suggestions, false)
+  return { text, options: { parse_mode: 'HTML', reply_markup } }
+}
+
+// High-level helpers for actions to use
+export function buildAiSuggestionRenderKeyboard(payload: AiSuggestionsResultDto): {
+  text: string
+  options: TelegramBot.SendMessageOptions
+} {
+  // If AI returned no targeted suggestions, fall back to generic ones
+  const hasPrimary = Array.isArray(payload?.suggestions) && payload.suggestions.length > 0
+  const suggestions = hasPrimary ? payload.suggestions : payload.genericSuggestions
+
+  const text = buildSuggestionMessageText({
+    headerMessage: payload.needsConfirmation
+      ? payload?.message || 'Great! Here are some options:'
+      : 'Great! Here are some options:',
+    suggestions,
+  })
+
+  // Show extra generic button only if we have primary suggestions and also have generic suggestions to offer
+  const showExtraSuggestions =
+    hasPrimary &&
+    Array.isArray(payload?.genericSuggestions) &&
+    payload.genericSuggestions.length > 0
+
+  const reply_markup = buildSuggestionKeyboard(suggestions, showExtraSuggestions)
+  return { text, options: { parse_mode: 'HTML', reply_markup } }
 }
