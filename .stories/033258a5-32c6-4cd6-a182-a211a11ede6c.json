@@ -9,9 +9,15 @@
       "status": "-",
       "title": "Create a Chat Storage Service for Context-Specific Conversations",
       "description": "Implement a service in the main process to manage reading and writing chat history. The service will handle JSON files stored in the `.factory/chats/` directory, with subdirectories for projects and stories. It needs to resolve paths based on context identifiers (projectId, storyId, featureId, 'tests', 'agents'). Expose this service to the renderer process via IPC channels and the preload script.",
-      "context": [],
+      "context": [
+        "src/chat/ChatsManager.ts",
+        "src/chat/ChatsStorage.js",
+        "src/renderer/services/chatsService.ts"
+      ],
       "createdAt": "2025-09-24T17:18:35.800Z",
-      "updatedAt": "2025-09-24T23:18:52.577Z"
+      "updatedAt": "2025-09-25T00:07:43.757Z",
+      "rejection": "@src/chat/ChatsManager.ts , @src/chat/ChatsStorage.js and @src/renderer/services/chatsService.ts  already handle storing chats - they should simply be augmented to serve the new requirements. There's no need for a new ContextChatsManager etc.",
+      "blockers": []
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
@@ -31,9 +37,13 @@
       "status": "-",
       "title": "Add Chat Settings Controls to the Chat Sidebar",
       "description": "Enhance the `ChatSidebar` component to include UI controls for chat settings. This includes a model selector dropdown, a mechanism for enabling/disabling tools, and a toggle for the agent's tool auto-approval. These settings will be passed in as props and will trigger callbacks when changed.",
-      "context": [],
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
       "createdAt": "2025-09-24T17:18:35.803Z",
-      "updatedAt": "2025-09-24T23:18:21.136Z"
+      "updatedAt": "2025-09-25T00:08:34.245Z",
+      "rejection": "The settings button currently implemented takes the user to the @src/renderer/screens/SettingsView.tsx - this shouldn't happen. A special dropdown should show with the settings required.",
+      "blockers": []
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
