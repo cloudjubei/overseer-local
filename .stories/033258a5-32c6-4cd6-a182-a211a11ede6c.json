@@ -184,7 +184,7 @@
     },
     {
       "id": "57d3f1bc-ccd0-4101-873c-4c3758c5fa5a",
-      "status": "-",
+      "status": "+",
       "title": "Create a chatsContext",
       "description": "Instead of @src/renderer/hooks/useChats.tsx there should be a @src/renderer/contexts/ChatsContext.tsx  that follows the same patterns as @src/renderer/contexts/ProjectContext.tsx or @src/renderer/contexts/FilesContext.tsx .\n@src/renderer/contexts/ChatsContext.tsx needs to be the interface for using @src/renderer/services/chatsService.ts (just like the other contexts use their services).",
       "context": [
@@ -196,8 +196,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T09:17:18.893Z",
-      "updatedAt": "2025-09-25T11:17:19.004Z",
-      "rejection": "@src/renderer/contexts/ChatsContext.tsx needs to be updated to serve the chats now based on context. All legacy code or needs should be ignored/removed - all chats should now require a context."
+      "updatedAt": "2025-09-25T11:21:57.619Z",
+      "rejection": "@src/renderer/contexts/ChatsContext.tsx needs to be updated to serve the chats now based on context. All legacy code or needs should be ignored/removed - all chats should now require a context.",
+      "completedAt": "2025-09-25T11:21:57.619Z"
     }
   ],
   "featureIdToDisplayIndex": {
