@@ -21,16 +21,16 @@
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
-      "status": "+",
+      "status": "-",
       "title": "Develop a Reusable Chat Sidebar React Component",
-      "description": "Create a new React component, `ChatSidebar`, responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
+      "description": "Create a new React component, @ContextualChatSidebar, responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
       "context": [
         "src/renderer/screens/ChatView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-24T22:02:01.013Z",
+      "updatedAt": "2025-09-25T09:17:52.895Z",
       "blockers": [],
-      "completedAt": "2025-09-24T22:02:01.013Z"
+      "rejection": "ContextualChatSidebar was commented because it was incorrectly using `useChats` - it should us the new ChatsContext"
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
@@ -168,22 +168,37 @@
       "blockers": [],
       "createdAt": "2025-09-25T00:49:25.269Z",
       "updatedAt": "2025-09-25T00:49:25.269Z"
+    },
+    {
+      "id": "57d3f1bc-ccd0-4101-873c-4c3758c5fa5a",
+      "status": "-",
+      "title": "Create a chatsContext",
+      "description": "Instead of @src/renderer/hooks/useChats.tsx there should be a ChatsContext that follows the same patterns as @src/renderer/contexts/ProjectContext.tsx or @src/renderer/contexts/FilesContext.tsx .",
+      "context": [
+        "src/renderer/hooks/useChats.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/contexts/FilesContext.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-25T09:17:18.893Z",
+      "updatedAt": "2025-09-25T09:17:18.893Z"
     }
   ],
   "featureIdToDisplayIndex": {
-    "8515f4d8-c436-4780-a5cc-7c3106e1efd3": 1,
-    "441f4d8d-3daf-4a37-b18d-16a08b5b7992": 2,
-    "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6": 3,
-    "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b": 4,
-    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 5,
-    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 6,
-    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 7,
-    "02b401c9-5219-48ee-8fca-174c6702ff2f": 8,
-    "ba16d671-5c40-496f-b887-7c9d94694711": 9,
-    "860c56c9-61e0-476f-8459-f7ccc4838ef3": 10,
-    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 11,
-    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 12,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 13
+    "57d3f1bc-ccd0-4101-873c-4c3758c5fa5a": 1,
+    "8515f4d8-c436-4780-a5cc-7c3106e1efd3": 2,
+    "441f4d8d-3daf-4a37-b18d-16a08b5b7992": 3,
+    "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6": 4,
+    "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b": 5,
+    "91e943ca-515b-4ee4-a44d-cdcff61cc379": 6,
+    "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7": 7,
+    "bfe7399a-4e44-4455-b2f9-dd4ec412dde3": 8,
+    "02b401c9-5219-48ee-8fca-174c6702ff2f": 9,
+    "ba16d671-5c40-496f-b887-7c9d94694711": 10,
+    "860c56c9-61e0-476f-8459-f7ccc4838ef3": 11,
+    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 12,
+    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 13,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 14
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"

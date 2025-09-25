@@ -154,6 +154,16 @@ export default class DocumentIngestionManager extends BaseManager {
       if (d.metadata?.contentHash === contentHash && d.metadata?.mtime === stats.mtime) {
         return d
       }
+      console.log(
+        '__handleFileAdded old mtime: ',
+        d.metadata?.mtime,
+        ' stats.mtime: ',
+        stats.mtime,
+        ' d.hash: ',
+        d.metadata?.contentHash,
+        ' contentHash: ',
+        contentHash,
+      )
       return await this.databaseManager.updateDocument(d.id, {
         content,
         metadata: { ...(d.metadata || {}), contentHash, mtime: stats.mtime },
