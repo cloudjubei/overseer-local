@@ -15,9 +15,8 @@ import {
 import { useGitHubCredentials } from '../contexts/GitHubCredentialsContext'
 import { validateProjectClient } from './validateProject'
 import { Switch } from '../components/ui/Switch'
-import { Chip } from '../components/ui/Chip'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
-import { renderLanguageIcon } from './codeInfoIcons'
+import { CodeInfoChip } from './CodeInfoChip'
 
 function TextInput({ label, value, onChange, placeholder, disabled }: any) {
   const id = React.useId()
@@ -322,18 +321,12 @@ export default function ProjectManagerModal({
                     </div>
                     {p.codeInfo && (
                       <div className="flex gap-2">
-                        <Chip variant="secondary" size="sm">
-                          {renderLanguageIcon(p.codeInfo.language as any, 'w-4 h-4')}
-                        </Chip>
+                        <CodeInfoChip type="language" value={p.codeInfo.language} />
                         {p.codeInfo.framework && (
-                          <Chip variant="secondary" size="sm">
-                            {p.codeInfo.framework}
-                          </Chip>
+                          <CodeInfoChip type="framework" value={p.codeInfo.framework} />
                         )}
                         {p.codeInfo.testFramework && (
-                          <Chip variant="secondary" size="sm">
-                            {p.codeInfo.testFramework}
-                          </Chip>
+                          <CodeInfoChip type="testFramework" value={p.codeInfo.testFramework} />
                         )}
                       </div>
                     )}
@@ -442,18 +435,27 @@ export default function ProjectManagerModal({
             <div className="form-row">
               <label>Code Info</label>
               <div className="flex gap-2">
-                <Chip variant="secondary" size="sm" onClick={() => setIsCodeInfoModalOpen(true)}>
-                  {renderLanguageIcon(form.codeInfo.language as any, 'w-4 h-4')}
-                </Chip>
+                <CodeInfoChip
+                  type="language"
+                  value={form.codeInfo.language}
+                  isInteractive
+                  onClick={() => setIsCodeInfoModalOpen(true)}
+                />
                 {form.codeInfo.framework && (
-                  <Chip variant="secondary" size="sm" onClick={() => setIsCodeInfoModalOpen(true)}>
-                    {form.codeInfo.framework}
-                  </Chip>
+                  <CodeInfoChip
+                    type="framework"
+                    value={form.codeInfo.framework}
+                    isInteractive
+                    onClick={() => setIsCodeInfoModalOpen(true)}
+                  />
                 )}
                 {form.codeInfo.testFramework && (
-                  <Chip variant="secondary" size="sm" onClick={() => setIsCodeInfoModalOpen(true)}>
-                    {form.codeInfo.testFramework}
-                  </Chip>
+                  <CodeInfoChip
+                    type="testFramework"
+                    value={form.codeInfo.testFramework}
+                    isInteractive
+                    onClick={() => setIsCodeInfoModalOpen(true)}
+                  />
                 )}
               </div>
             </div>

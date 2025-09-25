@@ -1,18 +1,13 @@
 import React, { FC, memo } from 'react'
 import ReactMarkdown, { Options, type Components } from 'react-markdown'
 import RichText from './RichText'
-import { twMerge } from 'tailwind-merge'
-import { type ClassValue, clsx } from 'clsx'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { cn } from '../../utils/utils'
 
 // Helper: render children while converting string nodes into RichText (mentions -> chips)
 function InlineWithMentions({ children }: { children: React.ReactNode }) {
