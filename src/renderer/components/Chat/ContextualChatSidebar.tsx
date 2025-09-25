@@ -3,7 +3,7 @@ import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import ChatSidebar from './ChatSidebar'
 import { factoryToolsService } from '../../services/factoryToolsService'
-import { ChatsProvider, useChatsContext } from '../../contexts/ContextualChatsContext'
+import { ChatsProvider, useChats } from '../../contexts/ChatsContext'
 import { useProjectSettings } from '../../hooks/useProjectSettings'
 
 interface ContextualChatSidebarProps {
@@ -25,7 +25,7 @@ const ChatView: React.FC<{ chatContextTitle: string; contextId: string }> = ({
   chatContextTitle,
   contextId,
 }) => {
-  const { chat, sendMessage, isThinking } = useChatsContext()
+  const { chatsById, sendMessage, isThinking } = useChats()
   const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 

@@ -23,16 +23,17 @@
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
       "status": "-",
       "title": "Develop a Reusable Chat Sidebar React Component",
-      "description": "Create a new React component, @ContextualChatSidebar, responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
+      "description": "Create a new React component, @src/renderer/components/Chat/ChatSidebar.tsx , responsible for rendering a chat interface. This component will display a list of messages, a user input field with a send button, and the current chat context (e.g., \"Chatting about Story: 'User Login'\"). It should be a presentational component that receives its state and callbacks via props.\nThere already is an interface in @src/renderer/screens/ChatView.tsx that should be extracted/consolidated into this reusable one to be used by this Story.",
       "context": [
         "src/renderer/screens/ChatView.tsx",
         "src/renderer/components/Chat/ContextualChatSidebar.tsx",
-        "src/renderer/contexts/ChatsContext.tsx"
+        "src/renderer/contexts/ChatsContext.tsx",
+        "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.801Z",
-      "updatedAt": "2025-09-25T09:40:53.409Z",
+      "updatedAt": "2025-09-25T11:10:21.804Z",
       "blockers": [],
-      "rejection": "@src/renderer/components/Chat/ContextualChatSidebar.tsx needs to correctly use the settings provided by @src/renderer/contexts/ChatsContext.tsx"
+      "rejection": "During the last developer run\n@src/renderer/components/Chat/ContextualChatSidebar.tsx was created which should be merged with @src/renderer/components/Chat/ChatSidebar.tsx - as all chats require a context. The ChatSidebar needs to correctly use info provided by @src/renderer/contexts/ChatsContext.tsx"
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
@@ -187,13 +188,12 @@
         "src/renderer/contexts/ProjectContext.tsx",
         "src/renderer/contexts/FilesContext.tsx",
         "src/renderer/contexts/ChatsContext.tsx",
-        "src/renderer/services/chatsService.ts",
-        "src/renderer/contexts/ContextualChatsContext.tsx"
+        "src/renderer/services/chatsService.ts"
       ],
       "blockers": [],
       "createdAt": "2025-09-25T09:17:18.893Z",
-      "updatedAt": "2025-09-25T11:00:16.957Z",
-      "rejection": "@src/renderer/contexts/ChatsContext.tsx was split into a separate @src/renderer/contexts/ContextualChatsContext.tsx - they should be merged and there should be only one ChatsContext and one 'useChats' used everywhere with contextual information always (the general chat accessed via the sidebar can have a completely separate context -> 'general' that will have a different prompt encompassing all projects)."
+      "updatedAt": "2025-09-25T11:09:09.086Z",
+      "rejection": "@src/renderer/contexts/ChatsContext.tsx needs to be updated to serve the chats now based on context. All legacy code or needs should be ignored/removed - all chats should now require a context."
     }
   ],
   "featureIdToDisplayIndex": {
