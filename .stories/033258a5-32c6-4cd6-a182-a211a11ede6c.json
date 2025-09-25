@@ -121,7 +121,7 @@
     },
     {
       "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",
-      "status": "-",
+      "status": "+",
       "title": "Add Project-Level Chat Sidebars to Tests and Agents Views",
       "description": "Add a \"Chat\" button and the `ChatSidebar` to the @src/renderer/screens/TestsView.tsx and the @src/renderer/screens/AgentsView.tsx . The chat context for the @src/renderer/screens/TestsView.tsx  will be the project's tests, and for the @src/renderer/screens/AgentsView.tsx it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
       "context": [
@@ -129,9 +129,10 @@
         "src/renderer/screens/AgentsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-25T09:42:05.783Z",
+      "updatedAt": "2025-09-25T13:08:36.615Z",
       "blockers": [],
-      "rejection": "@src/renderer/screens/AgentsView.tsx still needs the button"
+      "rejection": "@src/renderer/screens/AgentsView.tsx still needs the button",
+      "completedAt": "2025-09-25T13:08:36.615Z"
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",

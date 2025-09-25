@@ -5,6 +5,8 @@ import AgentRunRow from '../components/agents/AgentRunRow'
 import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
 import { useActiveProject } from '../contexts/ProjectContext'
+import { IconChat } from '../components/ui/Icons'
+import { ChatSidebar } from '../components/Chat'
 
 function formatTime(iso?: string) {
   if (!iso) return ''
@@ -1022,42 +1024,70 @@ const AllProjectsView = () => {
 
 export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const { projectId } = useActiveProject()
+
+  const chatContextId = useMemo(() => {
+    if (!projectId) return undefined
+    return `${projectId}@agents`
+  }, [projectId])
 
   return (
-    <div className="flex-1 overflow-auto">
-      <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-        <div>
-          <div className="text-lg font-semibold">Agents</div>
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">
-            {viewMode === 'current'
-              ? 'Monitor running agents, usage and costs'
-              : 'Summaries across all runs, costs, and model performance'}
+    <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+          <div>
+            <div className="text-lg font-semibold">Agents</div>
+            <div className="text-sm text-neutral-600 dark:text-neutral-400">
+              {viewMode === 'current'
+                ? 'Monitor running agents, usage and costs'
+                : 'Summaries across all runs, costs, and model performance'}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-md p-1 bg-neutral-100 dark:bg-neutral-900">
+              <button
+                onClick={() => setViewMode('current')}
+                className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
+                  viewMode === 'current'
+                    ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+                }`}
+              >
+                Current Project
+              </button>
+              <button
+                onClick={() => setViewMode('all')}
+                className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
+                  viewMode === 'all'
+                    ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+                }`}
+              >
+                All Projects
+              </button>
+            </div>
+            {viewMode === 'current' && (
+              <button
+                className="btn-secondary btn-icon"
+                onClick={() => setIsChatOpen((v) => !v)}
+                aria-label="Toggle chat"
+                title="Chat"
+              >
+                <IconChat className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
-        <div className="flex items-center rounded-md p-1 bg-neutral-100 dark:bg-neutral-900">
-          <button
-            onClick={() => setViewMode('current')}
-            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
-              viewMode === 'current'
-                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
-            }`}
-          >
-            Current Project
-          </button>
-          <button
-            onClick={() => setViewMode('all')}
-            className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
-              viewMode === 'all'
-                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
-            }`}
-          >
-            All Projects
-          </button>
+        <div className="flex-1 overflow-auto">
+          {viewMode === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
         </div>
       </div>
-      {viewMode === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
+      {viewMode === 'current' && isChatOpen && chatContextId && (
+        <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
+          <ChatSidebar contextId={chatContextId} chatContextTitle="Agents chat" />
+        </div>
+      )}
     </div>
   )
 }
