@@ -35,16 +35,17 @@
     },
     {
       "id": "856ac3c4-91d3-48f4-9a9f-f38260a3f9a7",
-      "status": "-",
+      "status": "+",
       "title": "Add Chat Settings Controls to the Chat Sidebar",
       "description": "Enhance the `ChatSidebar` component to include UI controls for chat settings. This includes a model selector dropdown, a mechanism for enabling/disabling tools, and a toggle for the agent's tool auto-approval. These settings will be passed in as props and will trigger callbacks when changed.",
       "context": [
         "src/renderer/screens/SettingsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.803Z",
-      "updatedAt": "2025-09-25T00:08:34.245Z",
+      "updatedAt": "2025-09-25T00:54:18.459Z",
       "rejection": "The settings button currently implemented takes the user to the @src/renderer/screens/SettingsView.tsx - this shouldn't happen. A special dropdown should show with the settings required.",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-09-25T00:54:18.459Z"
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
