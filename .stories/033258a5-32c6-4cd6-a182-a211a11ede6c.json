@@ -75,12 +75,13 @@
     },
     {
       "id": "91e943ca-515b-4ee4-a44d-cdcff61cc379",
-      "status": "-",
+      "status": "+",
       "title": "Create and Load Context-Specific System Prompts for Chats",
       "description": "Implement a mechanism to generate and provide a unique system prompt for each chat context (Project, Story, Feature, Tests, Agents). When a new chat is initiated, the appropriate prompt, containing relevant information about the context, should be used as the first message from the system.",
       "context": [],
       "createdAt": "2025-09-24T17:18:35.806Z",
-      "updatedAt": "2025-09-24T17:18:35.806Z"
+      "updatedAt": "2025-09-25T00:55:51.838Z",
+      "completedAt": "2025-09-25T00:55:51.838Z"
     },
     {
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
