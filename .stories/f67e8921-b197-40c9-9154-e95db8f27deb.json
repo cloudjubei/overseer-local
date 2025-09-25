@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1861,13 +1861,14 @@
     },
     {
       "id": "36a5ae63-4c86-48d3-b7ca-788cd5327671",
-      "status": "-",
+      "status": "+",
       "title": "the sidebar hide/show button needs improving",
       "description": "When it is showing the arrow needs to point down, when hidden like now pointing right.\nThe transition needs to animate.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-25T13:31:18.592Z",
-      "updatedAt": "2025-09-25T13:31:18.592Z"
+      "updatedAt": "2025-09-25T23:51:04.545Z",
+      "completedAt": "2025-09-25T23:51:04.545Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1994,5 +1995,6 @@
     "36a5ae63-4c86-48d3-b7ca-788cd5327671": 121
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z",
+  "completedAt": "2025-09-25T23:51:04.545Z"
 }

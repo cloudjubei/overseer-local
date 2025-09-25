@@ -146,7 +146,8 @@ export default function CollapsibleSidebar(props: Props) {
               <span aria-hidden>
                 <IconChevron
                   className="w-4 h-4"
-                  style={{ transform: collapsed ? 'none' : 'rotate(180deg)' }}
+                  /* When showing (expanded), point down; when hidden (collapsed), point right */
+                  style={{ transform: collapsed ? 'none' : 'rotate(90deg)' }}
                 />
               </span>
             </button>
