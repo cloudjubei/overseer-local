@@ -6,6 +6,7 @@ import { useStories } from '../contexts/StoriesContext'
 import { StoryCreateInput } from 'thefactory-tools'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import { IconChat } from '../components/ui/Icons'
 
 export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -18,6 +19,8 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [chatWidth, setChatWidth] = useState<number>(360)
+  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const doClose = () => {
     onRequestClose?.()
@@ -36,7 +39,7 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
     async (values: StoryFormValues) => {
       setSubmitting(true)
       try {
-        const story = await createStory({ ...values } as StoryCreateInput)
+        await createStory({ ...values } as StoryCreateInput)
         toast({ title: 'Success', description: 'Story created successfully', variant: 'success' })
         doClose()
       } catch (e: any) {
@@ -52,6 +55,29 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
   // While creating a story, we don't yet have a storyId; use project-level chat context.
   const contextId = projectId
 
+  // Resize handlers
+  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isChatOpen) return
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    resizingRef.current = { startX: e.clientX, startWidth: chatWidth }
+    window.addEventListener('pointermove', onResizeMove)
+    window.addEventListener('pointerup', onResizeEnd)
+  }
+  const onResizeMove = (e: PointerEvent) => {
+    if (!resizingRef.current) return
+    const { startX, startWidth } = resizingRef.current
+    const dx = e.clientX - startX
+    const next = startWidth - dx
+    const clamped = Math.max(280, Math.min(640, next))
+    setChatWidth(clamped)
+  }
+  const onResizeEnd = (_e: PointerEvent) => {
+    resizingRef.current = null
+    window.removeEventListener('pointermove', onResizeMove)
+    window.removeEventListener('pointerup', onResizeEnd)
+  }
+
   return (
     <>
       <Modal
@@ -62,45 +88,55 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         headerActions={
           <button
-            className="btn-secondary"
+            className="btn-secondary btn-icon"
             onClick={() => setIsChatOpen((v) => !v)}
             aria-pressed={isChatOpen}
+            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
+            title={isChatOpen ? 'Close chat' : 'Open chat'}
           >
-            {isChatOpen ? 'Close Chat' : 'Chat'}
+            <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
+        contentClassName="flex-grow overflow-hidden p-0"
       >
-        {isChatOpen ? (
-          <div className="w-full h-full flex">
-            <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-              <StoryForm
-                id="-1"
-                initialValues={{}}
-                onSubmit={onSubmit}
-                onCancel={attemptClose}
-                submitting={submitting}
-                isCreate={true}
-                titleRef={titleRef}
-                onDirtyChange={setHasChanges}
+        <div className="w-full h-full flex">
+          <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+            <StoryForm
+              id="-1"
+              initialValues={{}}
+              onSubmit={onSubmit}
+              onCancel={attemptClose}
+              submitting={submitting}
+              isCreate={true}
+              titleRef={titleRef}
+              onDirtyChange={setHasChanges}
+            />
+          </div>
+          <div
+            className="relative flex-shrink-0 border-l border-border bg-surface-base"
+            style={{ width: isChatOpen ? chatWidth : 0, transition: 'width 240ms ease' }}
+            aria-hidden={!isChatOpen}
+          >
+            {isChatOpen && (
+              <div
+                onPointerDown={onResizeStart}
+                className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
+                style={{ zIndex: 1 }}
+                aria-label="Resize chat sidebar"
+                role="separator"
+                aria-orientation="vertical"
               />
-            </div>
-            <div className="w-[320px] border-l border-border bg-surface-base">
-              <ContextualChatSidebar contextId={contextId} chatContextTitle="Project Chat (New Story)" />
+            )}
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+            >
+              {isChatOpen && (
+                <ContextualChatSidebar contextId={contextId} chatContextTitle="Project Chat (New Story)" />
+              )}
             </div>
           </div>
-        ) : (
-          <StoryForm
-            id="-1"
-            initialValues={{}}
-            onSubmit={onSubmit}
-            onCancel={attemptClose}
-            submitting={submitting}
-            isCreate={true}
-            titleRef={titleRef}
-            onDirtyChange={setHasChanges}
-          />
-        )}
+        </div>
       </Modal>
       <AlertDialog
         isOpen={showAlert}

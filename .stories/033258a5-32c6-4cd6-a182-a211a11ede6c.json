@@ -98,14 +98,15 @@
     },
     {
       "id": "ba16d671-5c40-496f-b887-7c9d94694711",
-      "status": "-",
+      "status": "+",
       "title": "Add Chat Functionality to Story and Feature Edit Modals",
       "description": "Add a \"Chat\" button to the header of the story and feature creation/editing modals. Clicking the button will open the `ChatSidebar` to the right of the modal content. The chat context will be the specific story or feature being edited.",
       "context": [],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-25T00:37:51.507Z",
+      "updatedAt": "2025-09-25T01:04:58.975Z",
       "rejection": "Make it use an icon instead of text. When opening closing - have it do so with a nice animation.\nThe chat must be scrollable and resizable in terms of width up to a certain amount.\nWhen opening - it shouldn't discard changes the user has in the Form input.",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-09-25T01:04:58.975Z"
     },
     {
       "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",

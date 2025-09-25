@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import type { Feature } from 'thefactory-tools'
 import { useStories } from '../contexts/StoriesContext'
 import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureForm'
 import { Button } from '../components/ui/Button'
-import { IconDelete } from '../components/ui/Icons'
+import { IconChat, IconDelete } from '../components/ui/Icons'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
 
@@ -29,6 +29,8 @@ export default function FeatureEditView({
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [chatWidth, setChatWidth] = useState<number>(380)
+  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const doClose = () => {
     onRequestClose?.()
@@ -56,7 +58,7 @@ export default function FeatureEditView({
     async (values: FeatureFormValues) => {
       setSubmitting(true)
       try {
-        const story = await updateFeature(storyId, featureId, values)
+        await updateFeature(storyId, featureId, values)
         toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
         doClose()
       } catch (e: any) {
@@ -73,7 +75,7 @@ export default function FeatureEditView({
     setShowDeleteConfirm(false)
     setSubmitting(true)
     try {
-      const story = await deleteFeature(storyId, featureId)
+      await deleteFeature(storyId, featureId)
       toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
       doClose()
     } catch (e: any) {
@@ -85,7 +87,31 @@ export default function FeatureEditView({
   }
 
   const formId = 'feature-form-edit'
-  const contextId = `${projectId}/${storyId}/${featureId}`
+  const contextId = useMemo(() => `${projectId}/${storyId}/${featureId}`, [projectId, storyId, featureId])
+
+  // Resize handlers
+  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isChatOpen) return
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    resizingRef.current = { startX: e.clientX, startWidth: chatWidth }
+    window.addEventListener('pointermove', onResizeMove)
+    window.addEventListener('pointerup', onResizeEnd)
+  }
+  const onResizeMove = (e: PointerEvent) => {
+    if (!resizingRef.current) return
+    const { startX, startWidth } = resizingRef.current
+    const dx = e.clientX - startX
+    // Handle is on the left edge; moving left (dx < 0) increases width
+    const next = startWidth - dx
+    const clamped = Math.max(280, Math.min(640, next))
+    setChatWidth(clamped)
+  }
+  const onResizeEnd = (_e: PointerEvent) => {
+    resizingRef.current = null
+    window.removeEventListener('pointermove', onResizeMove)
+    window.removeEventListener('pointerup', onResizeEnd)
+  }
 
   return (
     <>
@@ -96,14 +122,16 @@ export default function FeatureEditView({
         size={isChatOpen ? 'xl' : undefined}
         headerActions={
           <button
-            className="btn-secondary"
+            className="btn-secondary btn-icon"
             onClick={() => setIsChatOpen((v) => !v)}
             aria-pressed={isChatOpen}
+            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
+            title={isChatOpen ? 'Close chat' : 'Open chat'}
           >
-            {isChatOpen ? 'Close Chat' : 'Chat'}
+            <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName={isChatOpen ? 'flex-grow overflow-hidden p-0' : undefined}
+        contentClassName="flex-grow overflow-hidden p-0"
         footer={
           <div className="flex justify-between gap-2">
             {!initialValues ? (
@@ -144,46 +172,54 @@ export default function FeatureEditView({
           </div>
         }
       >
-        {initialValues ? (
-          isChatOpen ? (
-            <div className="w-full h-full flex">
-              <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-                <FeatureForm
-                  initialValues={initialValues}
-                  onSubmit={onSubmit}
-                  onCancel={attemptClose}
-                  onDelete={() => setShowDeleteConfirm(true)}
-                  submitting={submitting}
-                  storyId={storyId}
-                  featureId={featureId}
-                  hideActions
-                  formId={formId}
-                  onDirtyChange={setHasChanges}
-                />
+        <div className="w-full h-full flex">
+          <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+            {initialValues ? (
+              <FeatureForm
+                initialValues={initialValues}
+                onSubmit={onSubmit}
+                onCancel={attemptClose}
+                onDelete={() => setShowDeleteConfirm(true)}
+                submitting={submitting}
+                storyId={storyId}
+                featureId={featureId}
+                hideActions
+                formId={formId}
+                onDirtyChange={setHasChanges}
+              />
+            ) : (
+              <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
+                Loading feature…
               </div>
-              <div className="w-[320px] border-l border-border bg-surface-base">
-                <ContextualChatSidebar contextId={contextId} chatContextTitle="Feature Chat" />
-              </div>
-            </div>
-          ) : (
-            <FeatureForm
-              initialValues={initialValues}
-              onSubmit={onSubmit}
-              onCancel={attemptClose}
-              onDelete={() => setShowDeleteConfirm(true)}
-              submitting={submitting}
-              storyId={storyId}
-              featureId={featureId}
-              hideActions
-              formId={formId}
-              onDirtyChange={setHasChanges}
-            />
-          )
-        ) : (
-          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
-            Loading feature…
+            )}
           </div>
-        )}
+          {/* Animated, resizable chat sidebar */}
+          <div
+            className="relative flex-shrink-0 border-l border-border bg-surface-base"
+            style={{ width: isChatOpen ? chatWidth : 0, transition: 'width 240ms ease' }}
+            aria-hidden={!isChatOpen}
+          >
+            {/* Resize handle at the left edge */}
+            {isChatOpen && (
+              <div
+                onPointerDown={onResizeStart}
+                className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
+                style={{ zIndex: 1 }}
+                aria-label="Resize chat sidebar"
+                role="separator"
+                aria-orientation="vertical"
+              />
+            )}
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ opacity: isChatOpen ? 1 : 0, transition: 'opacity 200ms ease 80ms', pointerEvents: isChatOpen ? 'auto' : 'none' }}
+            >
+              {isChatOpen && (
+                <ContextualChatSidebar contextId={contextId} chatContextTitle="Feature Chat" />
+              )}
+            </div>
+          </div>
+        </div>
       </Modal>
       <AlertDialog
         isOpen={showAlert}
