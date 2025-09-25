@@ -70,7 +70,7 @@
     },
     {
       "id": "91e943ca-515b-4ee4-a44d-cdcff61cc379",
-      "status": "-",
+      "status": "+",
       "title": "Create and Load Context-Specific System Prompts for Chats",
       "description": "Implement a mechanism to generate and provide a unique system prompt for each chat context (Project, Story, Feature, Tests, Agents). When a new chat is initiated, the appropriate prompt, containing relevant information about the context, should be used as the first message from the system.\nThe user must be able to see these system prompts and edit them for future cases. There should be an option to go back to the default one always.\nThis means that @src/chat/ChatsManager.ts and @src/chat/ChatsStorage.ts and @src/renderer/services/chatsService.ts needs to be updated to hold information about the current prompts. There probably needs to be a sub-service for handling all sorts of prompts used by the application.",
       "context": [
@@ -79,8 +79,9 @@
         "src/renderer/services/chatsService.ts"
       ],
       "createdAt": "2025-09-24T17:18:35.806Z",
-      "updatedAt": "2025-09-25T08:58:45.060Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T09:07:46.534Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T09:07:46.534Z"
     },
     {
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",

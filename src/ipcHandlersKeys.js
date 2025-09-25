@@ -16,6 +16,8 @@ const IPC_HANDLER_KEYS = {
   CHATS_CREATE: 'chats:create',
   CHATS_GET: 'chats:get',
   CHATS_DELETE: 'chats:delete',
+  CHATS_GET_DEFAULT_PROMPT: 'chats:get-default-prompt',
+  CHATS_SAVE_PROMPT: 'chats:save-prompt',
 
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',

@@ -16,6 +16,8 @@ export type ChatsService = {
     newMessages: ChatMessage[],
     config: LLMConfig,
   ) => Promise<ServiceResult>
+  getDefaultPrompt: (context: ChatContext) => Promise<string>
+  savePrompt: (context: ChatContext, prompt: string) => Promise<ServiceResult>
 }
 
 export const chatsService: ChatsService = { ...window.chatsService }
