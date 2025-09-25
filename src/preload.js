@@ -85,6 +85,15 @@ const CHATS_API = {
     }),
 }
 
+const CONTEXT_CHATS_API = {
+  getContextChat: (context, createIfMissing = true) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CONTEXT_CHATS_GET, { context, createIfMissing }),
+  saveContextChat: (context, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CONTEXT_CHATS_SAVE, { context, patch }),
+  deleteContextChat: (context) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CONTEXT_CHATS_DELETE, { context }),
+}
+
 const NOTIFICATIONS_API = {
   onOpenNotification: (callback) => {
     const listener = (_event, payload) => callback(payload)
@@ -268,6 +277,7 @@ contextBridge.exposeInMainWorld('storiesService', STORIES_API)
 contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
 contextBridge.exposeInMainWorld('filesService', FILES_API)
 contextBridge.exposeInMainWorld('chatsService', CHATS_API)
+contextBridge.exposeInMainWorld('contextChatsService', CONTEXT_CHATS_API)
 contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API)
 contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API)
 contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)

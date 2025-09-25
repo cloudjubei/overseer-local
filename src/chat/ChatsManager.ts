@@ -90,7 +90,7 @@ export default class ChatsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) =>
       (await this.__getStorage(projectId))?.listChats()
     handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ projectId }) =>
-      (await this.__getStorage(projectId))?.createChat()
+      this.createChat(projectId)
     handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ projectId, id }) =>
       (await this.__getStorage(projectId))?.getChat(id)
     handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ projectId, chatId }) =>
@@ -132,6 +132,27 @@ export default class ChatsManager extends BaseManager {
       }
     }
     return getSystemPrompt({ additionalContext: parts.join('\n') })
+  }
+
+  private async _ensureSystemSeeded(storage: ChatsStorage, chat: Chat, projectId: string) {
+    if (!chat || !Array.isArray(chat.messages) || chat.messages.length === 0) {
+      try {
+        const systemPromptContent = await this._constructSystemPrompt(projectId)
+        const systemPrompt: ChatMessage = { role: 'system', content: systemPromptContent }
+        await storage.saveChat(chat.id, [systemPrompt], chat && (chat as any).rawResponses)
+      } catch (e) {
+        // best effort: do not block chat creation
+      }
+    }
+  }
+
+  private async createChat(projectId: string): Promise<Chat | undefined> {
+    const storage = await this.__getStorage(projectId)
+    if (!storage) return undefined
+    const chat = await storage.createChat()
+    // Seed system prompt as first message
+    await this._ensureSystemSeeded(storage, chat as Chat, projectId)
+    return chat
   }
 
   async getCompletion(

@@ -1,136 +1,174 @@
-import { useEffect, useState } from 'react'
-import { chatsService } from '../services/chatsService'
+import { useEffect, useMemo, useState } from 'react'
 import { ServiceResult } from '../services/serviceResult'
 import { LLMConfig } from 'thefactory-tools'
 import { Chat, ChatMessage } from 'src/chat/ChatsManager'
+import {
+  contextChatsService,
+  ContextChatData,
+  ContextChatIdentifier,
+  ContextChatMessage,
+} from '../services/contextChatsService'
+
+function parseContextId(contextId: string | undefined): ContextChatIdentifier | undefined {
+  if (!contextId) return undefined
+  // Expecting formats:
+  // - projectId
+  // - projectId/storyId
+  // - projectId/storyId/featureId
+  // For scope-based (tests/agents), future-proof by allowing projectId@scope
+  const scopeSepIdx = contextId.indexOf('@')
+  if (scopeSepIdx > 0) {
+    const projectId = contextId.slice(0, scopeSepIdx)
+    const scope = contextId.slice(scopeSepIdx + 1) as any
+    if (!projectId || !scope) return undefined
+    return { projectId, scope }
+  }
+  const parts = contextId.split('/').filter(Boolean)
+  if (parts.length === 1) {
+    const [projectId] = parts
+    return { projectId }
+  }
+  if (parts.length === 2) {
+    const [projectId, storyId] = parts
+    return { projectId, storyId }
+  }
+  if (parts.length >= 3) {
+    const [projectId, storyId, featureId] = parts
+    return { projectId, storyId, featureId }
+  }
+  return undefined
+}
 
 export function useContextualChat(contextId?: string) {
-  const [chatsById, setChatsById] = useState<Record<string, Chat>>({})
-  const [currentChatId, setCurrentChatId] = useState<string | undefined>()
+  const [data, setData] = useState<ContextChatData | undefined>()
   const [isThinking, setIsThinking] = useState(false)
 
+  // Build a Chat-like object for ChatSidebar consumption
+  const currentChat: Chat | undefined = useMemo(() => {
+    if (!data) return undefined
+    return {
+      id: buildSyntheticChatId(data.context),
+      messages: (data.messages as unknown as ChatMessage[]) || [],
+      creationDate: data.createdAt,
+      updateDate: data.updatedAt,
+    } as Chat
+  }, [data])
+
+  const chatsById = useMemo(() => {
+    if (!currentChat) return {}
+    return { [currentChat.id]: currentChat }
+  }, [currentChat])
+
+  const buildContext = (): ContextChatIdentifier | undefined => parseContextId(contextId)
+
   const update = async () => {
-    if (contextId) {
-      const chats = await chatsService.listChats(contextId)
-      updateChatsState(chats)
-    } else {
-      updateChatsState([]) // clear chats if no context
+    const ctx = buildContext()
+    if (!ctx) {
+      setData(undefined)
+      return
     }
-  }
-
-  const updateChatsState = (chats: Chat[]) => {
-    const newChatsById = chats.reduce(
-      (acc, c) => {
-        acc[c.id] = c
-        return acc
-      },
-      {} as Record<string, Chat>,
-    )
-
-    setChatsById(newChatsById)
-
-    if (!currentChatId || !newChatsById[currentChatId]) {
-      const mostRecent = chats
-        .slice()
-        .sort((a, b) => new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime())[0]
-      if (mostRecent) {
-        setCurrentChatId(mostRecent.id)
-      } else {
-        setCurrentChatId(undefined)
-      }
+    try {
+      const d = await contextChatsService.getContextChat(ctx, true)
+      setData(d)
+    } catch (e) {
+      console.error('Failed to load context chat', e)
+      setData(undefined)
     }
   }
 
   useEffect(() => {
     update()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextId])
 
   const createChat = async (): Promise<Chat | undefined> => {
-    if (!contextId) return undefined
-    const chat = await chatsService.createChat(contextId)
-
-    if (chat) {
-      setChatsById((prev) => ({ ...prev, [chat.id]: chat }))
-      setCurrentChatId(chat.id)
+    const ctx = buildContext()
+    if (!ctx) return undefined
+    const d = await contextChatsService.getContextChat(ctx, true)
+    setData(d)
+    return {
+      id: buildSyntheticChatId(ctx),
+      messages: (d.messages as unknown as ChatMessage[]) || [],
+      creationDate: d.createdAt,
+      updateDate: d.updatedAt,
     }
-    return chat
   }
 
-  const deleteChat = async (chatId: string): Promise<ServiceResult> => {
-    if (!contextId) return { ok: false }
-    const result = await chatsService.deleteChat(contextId, chatId)
-    if (result.ok) {
-      const newChats = { ...chatsById }
-      delete newChats[chatId]
-      setChatsById(newChats)
-
-      if (currentChatId === chatId) {
-        const remainingChats = Object.values(newChats)
-        const mostRecent = remainingChats
-          .slice()
-          .sort((a, b) => new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime())[0]
-        setCurrentChatId(mostRecent?.id)
-      }
+  const deleteChat = async (_chatId: string): Promise<ServiceResult> => {
+    const ctx = buildContext()
+    if (!ctx) return { ok: false }
+    try {
+      const res = await contextChatsService.deleteContextChat(ctx)
+      if (res.ok) setData(undefined)
+      return res
+    } catch (e) {
+      console.error('Failed to delete context chat', e)
+      return { ok: false }
     }
-    return result
   }
 
   const sendMessage = async (
     message: string,
-    config: LLMConfig,
+    _config: LLMConfig,
     attachments?: string[],
   ): Promise<ServiceResult> => {
-    if (!contextId) return { ok: false }
+    const ctx = buildContext()
+    if (!ctx) return { ok: false }
 
-    const userMessage: ChatMessage = {
+    const userMessage: ContextChatMessage = {
       role: 'user',
       content: message,
       attachments: attachments && attachments.length ? attachments : undefined,
     }
 
-    let chat: Chat
-    let targetChatId = currentChatId
-
-    if (!targetChatId || !chatsById[targetChatId]) {
-      const newChat = await createChat()
-      if (!newChat) return { ok: false }
-      chat = newChat
-      targetChatId = chat.id
-    } else {
-      chat = chatsById[targetChatId]
-    }
-
-    // Optimistically update UI with user message
-    const updatedChatWithUserMessage = { ...chat, messages: [...chat.messages, userMessage] }
-    setChatsById((prev) => ({
-      ...prev,
-      [chat.id]: updatedChatWithUserMessage,
-    }))
+    // Optimistically update local data
+    setData((prev) => {
+      const now = new Date().toISOString()
+      const base: ContextChatData =
+        prev ?? { context: ctx, messages: [], createdAt: now, updatedAt: now }
+      return {
+        ...base,
+        messages: [...(base.messages || []), userMessage],
+        updatedAt: now,
+      }
+    })
 
     setIsThinking(true)
     try {
-      const result = await chatsService.getCompletion(contextId, chat.id, [userMessage], config)
-
-      if (result.ok) {
-        const updatedChatFromServer = await chatsService.getChat(contextId, chat.id)
-        if (updatedChatFromServer) {
-          setChatsById((prev) => ({ ...prev, [updatedChatFromServer.id]: updatedChatFromServer }))
-        }
-      }
-
-      return result
+      // For contextual chats, we currently only persist messages to the context storage.
+      // Completion is handled elsewhere for project-level chats.
+      await contextChatsService.saveContextChat(ctx, {
+        messages: [
+          ...((data?.messages as ContextChatMessage[]) || []),
+          userMessage,
+        ],
+      })
+      // Optionally, could trigger an assistant reply via future IPC here.
+      return { ok: true }
+    } catch (e) {
+      console.error('Failed to save context chat message', e)
+      return { ok: false }
     } finally {
       setIsThinking(false)
     }
   }
 
   return {
-    currentChatId,
-    setCurrentChatId,
+    currentChatId: currentChat?.id,
+    setCurrentChatId: (_id: string | undefined) => {},
     chatsById,
     createChat,
     deleteChat,
     sendMessage,
     isThinking,
   }
+}
+
+function buildSyntheticChatId(ctx: ContextChatIdentifier): string {
+  // Stable id based on context for UI; not used for storage
+  const { projectId, storyId, featureId, scope } = ctx
+  if (scope && !storyId && !featureId) return `${projectId}@${scope}`
+  if (projectId && storyId && featureId) return `${projectId}/${storyId}/${featureId}`
+  if (projectId && storyId) return `${projectId}/${storyId}`
+  return projectId
 }
