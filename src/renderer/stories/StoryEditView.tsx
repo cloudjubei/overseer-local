@@ -8,6 +8,7 @@ import { Story } from 'thefactory-tools'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ChatSidebar from '../components/Chat/ChatSidebar'
 import { IconChat } from '../components/ui/Icons'
+import type { ChatContext } from 'src/chat/ChatsManager'
 
 export default function StoryEditView({
   storyId,
@@ -84,7 +85,10 @@ export default function StoryEditView({
     }
   }
 
-  const contextId = useMemo(() => `${projectId}/${storyId}`, [projectId, storyId])
+  const context = useMemo(
+    (): ChatContext => ({ type: 'story', projectId: projectId!, storyId }),
+    [projectId, storyId],
+  )
 
   // Resize handlers
   const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -175,7 +179,7 @@ export default function StoryEditView({
                 pointerEvents: isChatOpen ? 'auto' : 'none',
               }}
             >
-              {isChatOpen && <ChatSidebar contextId={contextId} chatContextTitle="Story Chat" />}
+              {isChatOpen && <ChatSidebar context={context} chatContextTitle="Story Chat" />}
             </div>
           </div>
         </div>
@@ -196,8 +200,8 @@ export default function StoryEditView({
       <AlertDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
-        title="Delete Feature"
-        description="Are you sure you want to delete this feature? This will also remove any blockers referencing it. This action cannot be undone."
+        title="Delete Story"
+        description="Are you sure you want to delete this story? This will also remove any features and blockers referencing it. This action cannot be undone."
         confirmText="Delete"
         onConfirm={handleDelete}
       />

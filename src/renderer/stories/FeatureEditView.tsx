@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button'
 import { IconChat, IconDelete } from '../components/ui/Icons'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ChatSidebar from '../components/Chat/ChatSidebar'
+import type { ChatContext } from 'src/chat/ChatsManager'
 
 export default function FeatureEditView({
   storyId,
@@ -87,8 +88,13 @@ export default function FeatureEditView({
   }
 
   const formId = 'feature-form-edit'
-  const contextId = useMemo(
-    () => `${projectId}/${storyId}/${featureId}`,
+  const context = useMemo(
+    (): ChatContext => ({
+      type: 'feature',
+      projectId: projectId!,
+      storyId,
+      featureId,
+    }),
     [projectId, storyId, featureId],
   )
 
@@ -221,7 +227,7 @@ export default function FeatureEditView({
                 pointerEvents: isChatOpen ? 'auto' : 'none',
               }}
             >
-              {isChatOpen && <ChatSidebar contextId={contextId} chatContextTitle="Feature Chat" />}
+              {isChatOpen && <ChatSidebar context={context} chatContextTitle="Feature Chat" />}
             </div>
           </div>
         </div>

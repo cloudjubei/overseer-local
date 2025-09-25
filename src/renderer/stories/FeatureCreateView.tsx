@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureForm'
 import { useToast } from '../components/ui/Toast'
 import { AlertDialog, Modal } from '../components/ui/Modal'
@@ -6,6 +6,7 @@ import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ChatSidebar from '../components/Chat/ChatSidebar'
 import { IconChat } from '../components/ui/Icons'
+import type { ChatContext } from 'src/chat/ChatsManager'
 
 export default function FeatureCreateView({
   storyId,
@@ -74,7 +75,10 @@ export default function FeatureCreateView({
   }
 
   const formId = 'feature-form-create'
-  const contextId = `${projectId}/${storyId}`
+  const context = useMemo(
+    (): ChatContext => ({ type: 'story', projectId: projectId!, storyId }),
+    [projectId, storyId],
+  )
 
   // Resize handlers
   const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -181,7 +185,7 @@ export default function FeatureCreateView({
               }}
             >
               {isChatOpen && (
-                <ChatSidebar contextId={contextId} chatContextTitle="Story Chat (New Feature)" />
+                <ChatSidebar context={context} chatContextTitle="Story Chat (New Feature)" />
               )}
             </div>
           </div>

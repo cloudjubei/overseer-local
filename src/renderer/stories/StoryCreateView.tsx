@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import StoryForm, { StoryFormValues } from '../components/stories/StoryForm'
 import { AlertDialog, Modal } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
@@ -7,6 +7,7 @@ import { StoryCreateInput } from 'thefactory-tools'
 import { useActiveProject } from '../contexts/ProjectContext'
 import ChatSidebar from '../components/Chat/ChatSidebar'
 import { IconChat } from '../components/ui/Icons'
+import type { ChatContext } from 'src/chat/ChatsManager'
 
 export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -53,7 +54,10 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
   )
 
   // While creating a story, we don't yet have a storyId; use project-level chat context.
-  const contextId = projectId
+  const context = useMemo(
+    (): ChatContext => ({ type: 'project-chat', projectId: projectId! }),
+    [projectId],
+  )
 
   // Resize handlers
   const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -136,7 +140,7 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
               }}
             >
               {isChatOpen && (
-                <ChatSidebar contextId={contextId} chatContextTitle="Project Chat (New Story)" />
+                <ChatSidebar context={context} chatContextTitle="Project Chat (New Story)" />
               )}
             </div>
           </div>
