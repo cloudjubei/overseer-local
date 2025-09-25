@@ -1,4 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
+import { sendTypeKeyboardMessage } from 'src/common/keyboards'
 
 // This action now implements the /q param-based suggestion picker.
 // Flow:
@@ -6,30 +7,6 @@ import TelegramBot, { Message } from 'node-telegram-bot-api'
 //  - user picks category -> callback handled in index.ts (q:cat:<CATEGORY>)
 //  - then difficulty selection -> callback handled in index.ts (q:diff:<CATEGORY>:<DIFFICULTY>)
 //  - backend suggestions are fetched and rendered via suggestionRenderer.renderParamSuggestions
-
-function buildCategoryKeyboard(): TelegramBot.InlineKeyboardMarkup {
-  const rows: TelegramBot.InlineKeyboardButton[][] = []
-  const cats: { key: string; label: string; emoji: string }[] = [
-    { key: 'FITNESS', label: 'Fitness', emoji: '🏃' },
-    { key: 'SLEEP', label: 'Sleep', emoji: '😴' },
-    { key: 'FOCUS', label: 'Focus', emoji: '🎯' },
-    { key: 'STRESS', label: 'Stress', emoji: '🧘' },
-    { key: 'OTHER', label: 'Other', emoji: '✨' },
-  ]
-
-  // Arrange 2 per row for nicer layout
-  for (let i = 0; i < cats.length; i += 2) {
-    const a = cats[i]
-    const b = cats[i + 1]
-    const row: TelegramBot.InlineKeyboardButton[] = [
-      { text: `${a.emoji} ${a.label}`, callback_data: `q:cat:${a.key}` },
-    ]
-    if (b) row.push({ text: `${b.emoji} ${b.label}`, callback_data: `q:cat:${b.key}` })
-    rows.push(row)
-  }
-
-  return { inline_keyboard: rows }
-}
 
 export default async function quickSuggestionAction(
   bot: TelegramBot,
@@ -43,12 +20,6 @@ export default async function quickSuggestionAction(
     return false
   }
 
-  // For /q we ignore any trailing free text and guide the user through param picks
-  const header =
-    '<b>What area do you want to focus on?</b>\n<i>Pick a category to get tailored goals.</i>'
-  await bot.sendMessage(chat.id, header, {
-    parse_mode: 'HTML',
-    reply_markup: buildCategoryKeyboard(),
-  })
+  await sendTypeKeyboardMessage(bot, chat.id)
   return true
 }

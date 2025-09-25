@@ -20,6 +20,13 @@ import {
 } from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
 import textSuggestionAction from './actions/textSuggestion'
+import {
+  buildDifficultyKeyboard,
+  buildCategoryKeyboard,
+  sendCategoryKeyboardMessage,
+  sendDifficultyKeyboardMessage,
+  sendTypeKeyboardMessage,
+} from './common/keyboards'
 
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
@@ -215,24 +222,6 @@ bot.on('message', async (msg: Message) => {
   }
 })
 
-function buildDifficultyKeyboard(category: string): TelegramBot.InlineKeyboardMarkup {
-  const rows: TelegramBot.InlineKeyboardButton[][] = []
-  const diffs: { key: string; label: string; emoji: string }[] = [
-    { key: 'EASY', label: 'Easy', emoji: '⭐' },
-    { key: 'MEDIUM', label: 'Medium', emoji: '⭐⭐' },
-    { key: 'HARD', label: 'Ambitious', emoji: '⭐⭐⭐' },
-  ]
-  diffs.forEach((d) => {
-    rows.push([
-      {
-        text: `${d.emoji} ${d.label}`,
-        callback_data: `q:diff:${category}:${d.key}`,
-      },
-    ])
-  })
-  return { inline_keyboard: rows }
-}
-
 // Callback query handler: process suggestion selections and create goals
 bot.on('callback_query', async (cb: CallbackQuery) => {
   try {
@@ -248,50 +237,32 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
     try {
       await bot.answerCallbackQuery(cb.id)
     } catch {}
+    //reset previous keyboard
+    try {
+      await bot.editMessageReplyMarkup(
+        { inline_keyboard: [] },
+        { chat_id: chatId, message_id: message.message_id },
+      )
+    } catch {}
 
     // Handle /q param flow selections
     if (data.startsWith('q:')) {
       const userId = String(cb.from.id)
 
-      if (data.startsWith('q:cat:')) {
-        const category = data.split(':')[2]
-        // Ask for difficulty next
-        const prompt =
-          '<b>How ambitious do you feel?</b>\n<i>Pick a difficulty to tailor the goal.</i>'
-        try {
-          await bot.editMessageReplyMarkup(
-            { inline_keyboard: [] },
-            { chat_id: chatId, message_id: message.message_id },
-          )
-        } catch {}
-        await bot.sendMessage(chatId, prompt, {
-          parse_mode: 'HTML',
-          reply_markup: buildDifficultyKeyboard(category),
-        })
-        return
-      }
-
-      if (data.startsWith('q:diff:')) {
+      if (data.startsWith('q:type:cat:diff:')) {
         const parts = data.split(':')
-        const category = parts[2]
-        const difficulty = parts[3]
+        const type = parts[4]
+        const category = parts[5]
+        const difficulty = parts[6]
         try {
           await ensureBackendConfigured()
           ensureAccessTokenForUser(userId)
 
           const suggestions = await GoalsService.goalsControllerParamSuggestions({
-            type: 'MACRO',
+            type: type as any,
             category: category as any,
             difficulty: difficulty as any,
           })
-
-          // Clear the difficulty keyboard to reduce clutter
-          try {
-            await bot.editMessageReplyMarkup(
-              { inline_keyboard: [] },
-              { chat_id: chatId, message_id: message.message_id },
-            )
-          } catch {}
 
           await renderParamSuggestions(bot, chatId, suggestions, 'Great! Here are some options:')
         } catch (err: any) {
@@ -303,6 +274,25 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         }
         return
       }
+      if (data.startsWith('q:type:cat:')) {
+        const parts = data.split(':')
+        const type = parts[3]
+        const category = parts[4]
+
+        await sendDifficultyKeyboardMessage(bot, chatId, type, category)
+        return
+      }
+      if (data.startsWith('q:type:')) {
+        const parts = data.split(':')
+        const type = parts[2]
+
+        await sendCategoryKeyboardMessage(bot, chatId, type)
+        return
+      }
+
+      //start the flow again
+      await sendTypeKeyboardMessage(bot, chatId)
+      return
     }
 
     // Handle suggestion actions

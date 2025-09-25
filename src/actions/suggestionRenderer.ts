@@ -27,10 +27,10 @@ function difficultyToLabel(d: SuggestedGoalDto.difficulty | string | undefined):
   }
 }
 
-function difficultyStars(d: SuggestedGoalDto.difficulty | string | undefined): string {
+function difficultyStars(d?: SuggestedGoalDto.difficulty | string): string {
   const diff = String(d || '').toUpperCase()
-  const count = diff === 'EASY' ? 1 : diff === 'MEDIUM' ? 2 : diff === 'HARD' ? 3 : 0
-  return count > 0 ? '★'.repeat(count) : ''
+  const count = diff === 'MEDIUM' ? 2 : diff === 'HARD' ? 3 : 1
+  return '★'.repeat(count)
 }
 
 // Core builders
@@ -40,13 +40,12 @@ export function buildSuggestionKeyboard(
 ): TelegramBot.InlineKeyboardMarkup {
   const rows: TelegramBot.InlineKeyboardButton[][] = []
 
-  // Short, unclipped buttons that map to numbered options in the message body
+  const isSameDifficulty = suggestions.every((s) => s.difficulty === suggestions[0].difficulty)
+
   suggestions.forEach((sug, idx) => {
-    const stars = difficultyStars(sug.difficulty)
-    const label = difficultyToLabel(sug.difficulty)
+    const label = isSameDifficulty ? sug.summary : difficultyStars(sug.difficulty)
     const n = idx + 1
-    // Keep the label short to avoid clipping in Telegram buttons
-    const text = stars ? `${n} • ${stars}` : `${n} • ${label}`
+    const text = `${n} • ${label}`
     rows.push([
       {
         text,
@@ -55,18 +54,22 @@ export function buildSuggestionKeyboard(
     ])
   })
 
-  // Secondary actions
-  rows.push([
-    {
-      text: '✏️ Refine',
-      callback_data: 'suggest:refine',
-    },
-  ])
   if (showExtraSuggestions) {
     rows.push([
       {
+        text: '✏️ Refine',
+        callback_data: 'suggest:refine',
+      },
+      {
         text: '📋 Select',
         callback_data: 'suggest:select',
+      },
+    ])
+  } else {
+    rows.push([
+      {
+        text: '✏️ Refine',
+        callback_data: 'suggest:refine',
       },
     ])
   }

@@ -101,9 +101,9 @@ export class GoalsService {
     category,
     difficulty,
   }: {
-    type: 'MACRO' | 'MICRO' | 'OTHER'
+    type: 'MACRO' | 'MICRO'
     category: 'FITNESS' | 'SLEEP' | 'FOCUS' | 'STRESS' | 'OTHER'
-    difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'OTHER'
+    difficulty?: 'EASY' | 'MEDIUM' | 'HARD'
   }): CancelablePromise<Array<SuggestedGoalDto>> {
     return __request(OpenAPI, {
       method: 'GET',

@@ -14,8 +14,6 @@ export default async function textSuggestionAction(
   const prev = getSession(userId)
 
   const cmdMatch = rawText.match(/^\/t(?:@\w+)?(?:\s+([\s\S]*))?$/i)
-  console.log('LELELE textSuggestionAction cmdMatch: ', cmdMatch)
-  console.log('LELELE prev: ', prev)
   if (cmdMatch) {
     setSession({
       ...(prev || { userId }),

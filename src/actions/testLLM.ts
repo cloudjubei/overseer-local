@@ -54,7 +54,6 @@ export default async function testLLMAction(
 
     const response = await AiService.aiControllerTest({
       model,
-      // Send raw text as request body; backend returns raw text
       requestBody: { text: input },
     })
 

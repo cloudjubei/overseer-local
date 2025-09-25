@@ -11,10 +11,6 @@ export default async function testAction(
   }
 
   const payload = (testMatch[1] || '').trim()
-  if (!payload) {
-    await bot.sendMessage(chat.id, 'Usage: /test <text to echo with stars>')
-  } else {
-    await bot.sendMessage(chat.id, `⭐ ${payload} ⭐`)
-  }
+  await bot.sendMessage(chat.id, `⭐ ${payload} ⭐`)
   return true
 }

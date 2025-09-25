@@ -15,7 +15,6 @@ export namespace CreateGoalDto {
   export enum type {
     MACRO = 'MACRO',
     MICRO = 'MICRO',
-    OTHER = 'OTHER',
   }
   export enum category {
     FITNESS = 'FITNESS',
@@ -28,6 +27,5 @@ export namespace CreateGoalDto {
     EASY = 'EASY',
     MEDIUM = 'MEDIUM',
     HARD = 'HARD',
-    OTHER = 'OTHER',
   }
 }

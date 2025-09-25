@@ -7,12 +7,12 @@ export type SuggestedGoalDto = {
   category: SuggestedGoalDto.category
   difficulty: SuggestedGoalDto.difficulty
   text: string
+  summary: string
 }
 export namespace SuggestedGoalDto {
   export enum type {
     MACRO = 'MACRO',
     MICRO = 'MICRO',
-    OTHER = 'OTHER',
   }
   export enum category {
     FITNESS = 'FITNESS',
@@ -25,6 +25,5 @@ export namespace SuggestedGoalDto {
     EASY = 'EASY',
     MEDIUM = 'MEDIUM',
     HARD = 'HARD',
-    OTHER = 'OTHER',
   }
 }
