@@ -1,17 +1,18 @@
 import { LLMConfig } from 'thefactory-tools'
 import { ServiceResult } from './serviceResult'
-import { Chat, ChatMessage } from '../../chat/ChatsManager'
+import { Chat, ChatMessage, ChatContext, ChatSettings } from '../../chat/ChatsManager'
+
+export type { Chat, ChatMessage, ChatContext, ChatSettings }
 
 export type ChatsService = {
   listModels: (config: LLMConfig) => Promise<string[]>
   subscribe: (callback: (chats: Chat[]) => void) => () => void
   listChats: (projectId: string) => Promise<Chat[]>
-  createChat: (projectId: string) => Promise<Chat>
-  getChat: (projectId: string, chatId: string) => Promise<Chat>
-  deleteChat: (projectId: string, chatId: string) => Promise<ServiceResult>
+  createChat: (context: ChatContext) => Promise<Chat>
+  getChat: (context: ChatContext) => Promise<Chat>
+  deleteChat: (context: ChatContext) => Promise<ServiceResult>
   getCompletion: (
-    projectId: string,
-    chatId: string,
+    context: ChatContext,
     newMessages: ChatMessage[],
     config: LLMConfig,
   ) => Promise<ServiceResult>

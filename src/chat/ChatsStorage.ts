@@ -4,6 +4,7 @@ import chokidar from 'chokidar'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { randomUUID } from 'crypto'
 import { BrowserWindow } from 'electron'
+import { Chat, ChatContext, ChatMessage, ChatSettings } from './ChatsManager'
 
 async function pathExists(p: string) {
   try {
@@ -15,12 +16,17 @@ async function pathExists(p: string) {
 }
 
 export default class ChatsStorage {
+  private projectId: string
+  private chatsDir: string
+  private window: BrowserWindow
+  private watcher: chokidar.FSWatcher | null
+  private chats: Chat[]
+
   constructor(projectId: string, chatsDir: string, window: BrowserWindow) {
     this.projectId = projectId
     this.chatsDir = chatsDir
     this.window = window
     this.watcher = null
-
     this.chats = []
   }
 
@@ -29,10 +35,23 @@ export default class ChatsStorage {
     await this.__startWatcher()
   }
 
+  private __getChatPath(context: ChatContext): string {
+    if (context.featureId && context.storyId) {
+      return path.join(this.chatsDir, context.storyId, `${context.featureId}.json`)
+    } else if (context.storyId) {
+      return path.join(this.chatsDir, `${context.storyId}.json`)
+    } else if (context.type === 'tests') {
+      return path.join(this.chatsDir, 'tests.json')
+    } else if (context.type === 'agents') {
+      return path.join(this.chatsDir, 'agents.json')
+    }
+    return path.join(this.chatsDir, 'project.json')
+  }
+
   async __startWatcher() {
     if (this.watcher) this.stopWatching()
     if (!(await pathExists(this.chatsDir))) return
-    this.watcher = chokidar.watch(path.join(this.chatsDir, '*.json'), {
+    this.watcher = chokidar.watch(path.join(this.chatsDir, '**/*.json'), {
       ignored: /(^|[\/\\])\../,
       persistent: true,
       ignoreInitial: true,
@@ -50,94 +69,135 @@ export default class ChatsStorage {
     }
   }
 
-  __notify(msg) {
+  private __notify(msg?: string) {
     if (msg) console.log(msg)
     if (this.window) {
       this.window.webContents.send(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, this.chats)
     }
   }
-  async __rebuildAndNotify(msg) {
+
+  private async __rebuildAndNotify(msg?: string) {
     await this.__buildIndex()
     this.__notify(msg)
   }
 
-  async __buildIndex() {
+  private async __readChat(filePath: string): Promise<Chat | null> {
     try {
-      if (await pathExists(this.chatsDir)) {
-        const chatFiles = await fs.readdir(this.chatsDir, { withFileTypes: true })
-        const chats = []
-        for (const file of chatFiles) {
-          if (file.isFile() && file.name.includes('.json')) {
-            const chatFilePath = path.join(this.chatsDir, file.name)
-            const content = await fs.readFile(chatFilePath, 'utf-8')
-            try {
-              const chat = JSON.parse(content)
-              chats.push(chat)
-            } catch (err) {}
-          }
-        }
-        this.chats = chats
-      }
-    } catch (err) {}
+      const content = await fs.readFile(filePath, 'utf-8')
+      return JSON.parse(content) as Chat
+    } catch (err) {
+      return null
+    }
   }
 
-  async listChats() {
+  private async __buildIndex() {
+    const chats: Chat[] = []
+    const readDirRecursive = async (dir: string) => {
+      try {
+        if (!(await pathExists(dir))) return
+        const entries = await fs.readdir(dir, { withFileTypes: true })
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name)
+          if (entry.isDirectory()) {
+            await readDirRecursive(fullPath)
+          } else if (entry.isFile() && entry.name.endsWith('.json')) {
+            const chat = await this.__readChat(fullPath)
+            if (chat) {
+              chats.push(chat)
+            }
+          }
+        }
+      } catch (err) {
+        console.error(`Error building chat index for dir ${dir}:`, err)
+      }
+    }
+
+    await readDirRecursive(this.chatsDir)
+    this.chats = chats
+  }
+
+  async listChats(): Promise<Chat[]> {
     return this.chats
   }
 
-  async getChat(id) {
-    return this.chats.find((c) => c.id === id)
+  async getChat(context: ChatContext): Promise<Chat | undefined> {
+    const chatPath = this.__getChatPath(context)
+    return this.__readChat(chatPath).then((chat) => chat || undefined)
   }
 
-  async createChat() {
-    const chatId = randomUUID()
+  async createChat(context: ChatContext): Promise<Chat> {
+    const chatId = randomUUID() // This is now more of an internal ID
+    const chatPath = this.__getChatPath(context)
 
-    await fs.mkdir(this.chatsDir, { recursive: true })
+    await fs.mkdir(path.dirname(chatPath), { recursive: true })
 
-    const newChat = {
+    const newChat: Chat = {
       id: chatId,
       messages: [],
       creationDate: new Date().toISOString(),
       updateDate: new Date().toISOString(),
+      settings: {},
     }
 
-    const chatPath = path.join(this.chatsDir, `${chatId}.json`)
     await fs.writeFile(chatPath, JSON.stringify(newChat, null, 2), 'utf-8')
     this.chats.push(newChat)
-    await this.__notify(`New chat ${chatId} added.`)
+    await this.__notify(`New chat for context ${JSON.stringify(context)} added.`)
     return newChat
   }
 
-  async saveChat(chatId, messages, rawResponses) {
-    const chatPath = path.join(this.chatsDir, `${chatId}.json`)
-    let chatData
+  async saveChat(
+    context: ChatContext,
+    messages: ChatMessage[],
+    rawResponses: any[],
+    settings: ChatSettings,
+  ): Promise<{ ok: true }> {
+    const chatPath = this.__getChatPath(context)
+    let chatData: Partial<Chat> = {}
     try {
       const raw = await fs.readFile(chatPath, 'utf-8')
       chatData = JSON.parse(raw)
     } catch (e) {
-      throw new Error(`Could not read or parse chat file for chat ${chatId}: ${e.message}`)
+      // File might not exist yet, that's okay, we'll create it.
     }
 
-    const next = { ...chatData, messages, rawResponses, updateDate: new Date().toISOString() }
+    const next: Chat = {
+      ...chatData,
+      id: chatData.id || randomUUID(),
+      messages,
+      rawResponses,
+      settings,
+      updateDate: new Date().toISOString(),
+      creationDate: chatData.creationDate || new Date().toISOString(),
+    }
 
+    await fs.mkdir(path.dirname(chatPath), { recursive: true })
     await fs.writeFile(chatPath, JSON.stringify(next, null, 2), 'utf-8')
-    this.chats = this.chats.map((c) => (c.id === next.id ? next : c))
 
-    await this.__notify(`Chat ${chatId} saved.`)
+    const chatIndex = this.chats.findIndex((c) => c.id === next.id)
+    if (chatIndex !== -1) {
+      this.chats[chatIndex] = next
+    } else {
+      this.chats.push(next)
+    }
+
+    await this.__notify(`Chat for context ${JSON.stringify(context)} saved.`)
     return { ok: true }
   }
 
-  async deleteChat(chatId) {
-    const chatPath = path.join(this.chatsDir, `${chatId}.json`)
+  async deleteChat(context: ChatContext): Promise<{ ok: true }> {
+    const chatPath = this.__getChatPath(context)
+    const chat = await this.getChat(context)
     try {
-      await fs.rm(chatPath, { recursive: true, force: true })
-    } catch (e) {
-      throw new Error(`Could not delete chat directory for chat ${chatId}: ${e.message}`)
+      await fs.rm(chatPath, { force: true })
+    } catch (e: any) {
+      throw new Error(`Could not delete chat file for context ${JSON.stringify(context)}: ${e.message}`)
     }
 
-    this.chats = this.chats.filter((c) => c.id !== chatId)
+    if (chat) {
+      this.chats = this.chats.filter((c) => c.id !== chat.id)
+    }
 
-    await this.__notify(`Chat ${chatId} deleted.`)
+    await this.__notify(`Chat for context ${JSON.stringify(context)} deleted.`)
     return { ok: true }
   }
 }

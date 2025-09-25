@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "e2d1d322-7e72-49ad-9f8f-f7d6f4437c5b",
-      "status": "-",
+      "status": "+",
       "title": "Update ChatsManager, ChatsStorage and chatsService",
       "description": "@src/chat/ChatsManager.ts , @src/chat/ChatsStorage.js and @src/renderer/services/chatsService.ts  already handle storing chats and doing things with them - augment them to handle the requirements for this task - i.e. storing/retrieving contextual chats as well as the settings for them",
       "context": [
@@ -15,8 +15,9 @@
         "src/renderer/services/chatsService.ts"
       ],
       "createdAt": "2025-09-24T17:18:35.800Z",
-      "updatedAt": "2025-09-25T08:56:45.744Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T09:04:29.240Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T09:04:29.240Z"
     },
     {
       "id": "8515f4d8-c436-4780-a5cc-7c3106e1efd3",
