@@ -94,7 +94,7 @@
     },
     {
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
-      "status": "-",
+      "status": "+",
       "title": "Add a Chat Button and Sidebar to StoriesListView",
       "description": "Integrate the @src/renderer/components/Chat/ChatSidebar.tsx  into the @src/renderer/stories/StoriesListView.tsx . Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
       "context": [
@@ -102,8 +102,9 @@
         "src/renderer/components/Chat/ChatSidebar.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-25T11:19:01.080Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T11:35:56.872Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T11:35:56.872Z"
     },
     {
       "id": "ba16d671-5c40-496f-b887-7c9d94694711",

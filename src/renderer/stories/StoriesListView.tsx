@@ -22,8 +22,6 @@ import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useStories } from '../contexts/StoriesContext'
 import { ChatSidebar } from '../components/Chat'
-import { useLLMConfig } from '../contexts/LLMConfigContext'
-import { useChats } from '../contexts/ChatsContext'
 
 function countFeatures(story: Story) {
   const features = Array.isArray(story.features) ? story.features : []
@@ -96,14 +94,6 @@ export default function StoriesListView() {
   const { runsActive, startAgent } = useAgents()
 
   const [isChatOpen, setIsChatOpen] = useState(false)
-
-  // Chat service hooks (project-level storage)
-  const { currentChatId, chatsById, sendMessage, isThinking } = useChats()
-  const { configs, activeConfigId, activeConfig, isConfigured, setActive } = useLLMConfig()
-  const currentChat = useMemo(
-    () => (currentChatId ? chatsById[currentChatId] : undefined),
-    [currentChatId, chatsById],
-  )
 
   useEffect(() => {
     const storyIds = storyIdsByProject[projectId] ?? []
@@ -330,11 +320,6 @@ export default function StoriesListView() {
       </div>
     </li>
   )
-
-  const handleSendMessage = async (message: string, attachments: string[]) => {
-    if (!activeConfig) return
-    await sendMessage(message, activeConfig, attachments)
-  }
 
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
@@ -646,20 +631,10 @@ export default function StoriesListView() {
 
       {isChatOpen && projectId && (
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          {/* <ChatSidebar
-            chatContextTitle={project?.title || 'Project Chat'}
-            currentChat={currentChat}
-            isThinking={isThinking}
-            isConfigured={isConfigured}
-            onSend={handleSendMessage}
-            configs={configs}
-            activeConfigId={activeConfigId}
-            onConfigChange={setActive} */}
-          {/* onConfigure={() => { */}
-          {/* /* Settings navigation available globally in nav */}
-          {/* }} */}
-          {/* activeConfig={activeConfig} */}
-          {/* /> */}
+          <ChatSidebar
+            context={{ projectId, type: 'project' }}
+            chatContextTitle={project ? `Project Chat — ${project.name}` : 'Project Chat'}
+          />
         </div>
       )}
     </div>
