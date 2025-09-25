@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1846,20 +1846,18 @@
     },
     {
       "id": "fae23bb4-639b-41c1-ab9a-a9ab8f56ea29",
-      "status": "-",
+      "status": "+",
       "title": "ProjectManagerModal codeInfo improvements",
       "description": "The Chip inside @src/renderer/projects/ProjectManagerModal.tsx was never implemented (I simply wired it to a button). So the modal itself looks bad.\nThis chip needs to be implemented for each item of `codeInfo` .\nFor the languages it should display the image of the language. These icons should be stored somewhere - similarly to @src/renderer/projects/projectIcons.tsx we can have @src/renderer/projects/codeInfoIcons.tsx .\n\nAlso, when editing the items inside @src/renderer/projects/ProjectCodeInfoModal.tsx - some of the lists are so long they end up being clipped by the edge of the app. The list should always be placed below the buttons, be scrollable and of some manageable max size.",
       "context": [
         "src/renderer/projects/ProjectManagerModal.tsx",
         "src/renderer/projects/projectIcons.tsx",
-        "src/renderer/projects/ProjectCodeInfoModal.tsx",
-        "src/renderer/components/agents/TokensChip.tsx",
-        "src/renderer/components/agents/CostChip.tsx"
+        "src/renderer/projects/ProjectCodeInfoModal.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-24T23:02:43.623Z",
-      "updatedAt": "2025-09-24T23:43:26.430Z",
-      "rejection": "The `Chip` used by @src/renderer/projects/ProjectManagerModal.tsx is still not implemented. This should be a reusable component based off other chips in the app such as @src/renderer/components/agents/TokensChip.tsx or @src/renderer/components/agents/CostChip.tsx . On hover for the language it should show the language name (because normally it shows the icon).\nThere needs to be a discernible difference when the chip is interactive and when it isn't (so in the list of projects vs inside the edit modal)."
+      "updatedAt": "2025-09-25T00:34:20.189Z",
+      "completedAt": "2025-09-25T00:34:20.189Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1985,5 +1983,6 @@
     "fae23bb4-639b-41c1-ab9a-a9ab8f56ea29": 120
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z",
+  "completedAt": "2025-09-25T00:34:20.189Z"
 }

@@ -47,15 +47,16 @@
     },
     {
       "id": "bfe7399a-4e44-4455-b2f9-dd4ec412dde3",
-      "status": "-",
+      "status": "+",
       "title": "Add a Chat Button and Sidebar to StoryDetailsView",
       "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoryDetailsView.tsx . Add a \"Chat\" button to the view's header. Clicking this button will toggle the visibility of the `ChatSidebar`. Wire up the sidebar to the Chat Storage Service to load and save the chat history for the currently viewed story, using the `projectId` and `storyId` as context.",
       "context": [
         "src/renderer/stories/StoryDetailsView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.805Z",
-      "updatedAt": "2025-09-24T23:14:58.850Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T00:35:31.597Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T00:35:31.597Z"
     },
     {
       "id": "09df5d7d-5d5b-4681-8ac2-2b903cd6dcb6",
@@ -81,15 +82,16 @@
     },
     {
       "id": "02b401c9-5219-48ee-8fca-174c6702ff2f",
-      "status": "-",
+      "status": "+",
       "title": "Add a Chat Button and Sidebar to StoriesListView",
       "description": "Integrate the `ChatSidebar` into the @src/renderer/stories/StoriesListView.tsx . Add a \"Chat\" button to the view's header. This chat will be for the entire project context. Wire it up to use the Chat Storage Service with the `projectId`.",
       "context": [
         "src/renderer/stories/StoriesListView.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-24T17:56:00.550Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T00:35:35.542Z",
+      "blockers": [],
+      "completedAt": "2025-09-25T00:35:35.542Z"
     },
     {
       "id": "ba16d671-5c40-496f-b887-7c9d94694711",
@@ -98,7 +100,9 @@
       "description": "Add a \"Chat\" button to the header of the story and feature creation/editing modals. Clicking the button will open the `ChatSidebar` to the right of the modal content. The chat context will be the specific story or feature being edited.",
       "context": [],
       "createdAt": "2025-09-24T17:18:35.807Z",
-      "updatedAt": "2025-09-24T17:18:35.807Z"
+      "updatedAt": "2025-09-25T00:37:51.507Z",
+      "rejection": "Make it use an icon instead of text. When opening closing - have it do so with a nice animation.\nThe chat must be scrollable and resizable in terms of width up to a certain amount.\nWhen opening - it shouldn't discard changes the user has in the Form input.",
+      "blockers": []
     },
     {
       "id": "860c56c9-61e0-476f-8459-f7ccc4838ef3",
@@ -107,11 +111,14 @@
       "description": "Add a \"Chat\" button and the `ChatSidebar` to the @src/renderer/screens/TestsView.tsx and the @src/renderer/screens/AgentsView.tsx . The chat context for the @src/renderer/screens/TestsView.tsx  will be the project's tests, and for the @src/renderer/screens/AgentsView.tsx it will be the project's agents. Use the file paths `.factory/chats/projectId/tests.json` and `.factory/chats/projectId/agents.json` respectively.",
       "context": [
         "src/renderer/screens/TestsView.tsx",
-        "src/renderer/screens/AgentsView.tsx"
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/components/Chat/MessageList.tsx"
       ],
       "createdAt": "2025-09-24T17:18:35.808Z",
-      "updatedAt": "2025-09-24T17:56:52.164Z",
-      "blockers": []
+      "updatedAt": "2025-09-25T00:39:28.130Z",
+      "blockers": [],
+      "rejection": "Tests currently have the button, Agents don't.\nThe chat in Tests displays an ugly prompt in the chat window. The bubbles inside should be styled consistently like in @src/renderer/screens/ChatView.tsx and @src/renderer/components/Chat/MessageList.tsx"
     },
     {
       "id": "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef",
@@ -134,6 +141,19 @@
       "updatedAt": "2025-09-24T22:02:58.670Z",
       "blockers": [],
       "completedAt": "2025-09-24T22:02:58.670Z"
+    },
+    {
+      "id": "92ea6113-9709-4f89-9e62-24a5c7c5b4ee",
+      "status": "-",
+      "title": "The input box needs improving",
+      "description": "In the @src/renderer/components/Chat/ChatInput.tsx the send button should be an icon -  create one in @src/renderer/components/ui/Icons.tsx . There should also be an appropriate icon for the Attach button.\nBoth of the buttons should be part of the input view (in the footer with the hints) so that it can take as much space horizontally as possible with just a little bit of padding. The input box should only grow to 30% of the total chat view - no matter where it is used.",
+      "context": [
+        "src/renderer/components/Chat/ChatInput.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-25T00:42:13.695Z",
+      "updatedAt": "2025-09-25T00:42:35.710Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -147,7 +167,8 @@
     "91e943ca-515b-4ee4-a44d-cdcff61cc379": 8,
     "ba16d671-5c40-496f-b887-7c9d94694711": 9,
     "860c56c9-61e0-476f-8459-f7ccc4838ef3": 10,
-    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 11
+    "ad2a21e1-d63e-43a4-b0d9-14faff1aa5ef": 11,
+    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 12
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"
