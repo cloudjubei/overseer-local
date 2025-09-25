@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, coverageConfigDefaults } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -7,11 +7,15 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reportsDirectory: '.coverage-v8',
+      reporter: ['text', 'json'],
       include: ['src/**/*.ts'],
       exclude: [
+        ...coverageConfigDefaults.exclude,
         'src/generated/**/*',
         'src/index.ts', // Entry point is hard to test directly
+        'tests/**', 
+        '.stories/**'
       ],
     },
   },
