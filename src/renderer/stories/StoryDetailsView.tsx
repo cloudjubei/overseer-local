@@ -15,7 +15,7 @@ import { StatusPicker, statusKey, STATUS_LABELS } from '../components/stories/St
 import { gitMonitorService } from '../services/gitMonitorService'
 import { Button } from '../components/ui/Button'
 import { useStories } from '../contexts/StoriesContext'
-import ContextualChatSidebar from '../components/Chat/ContextualChatSidebar'
+import { ChatSidebar } from '../components/Chat'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -39,7 +39,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const { openModal, navigateView, storiesRoute, navigateAgentRun } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -74,10 +74,10 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [merging, setMerging] = useState<boolean>(false)
   const [mergeError, setMergeError] = useState<string | null>(null)
 
-  const chatContextId = useMemo(() => {
-    if (!projectId || !storyId) return undefined;
-    return `${projectId}/${storyId}`;
-  }, [projectId, storyId]);
+  const chatContext = useMemo(() => {
+    if (!projectId || !storyId) return undefined
+    return { projectId, storyId }
+  }, [projectId, storyId])
 
   useEffect(() => {
     if (storyId && storiesById) {
@@ -91,7 +91,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   //TODO: logic needs to be cleand up
   // useEffect(() => {
   //   let disposed = false
-
+  //
   //   async function check() {
   //     if (!story) {
   //       setHasUnmerged(false)
@@ -117,7 +117,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   //       if (!disposed) setCheckingMerge(false)
   //     }
   //   }
-
+  //
   //   check()
   //   const unsubscribe = gitMonitorService.subscribe((_s) => {
   //     // Re-check on git status updates
@@ -396,409 +396,409 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
-    <div
-      className="story-details flex flex-col flex-1 min-h-0 w-full overflow-hidden"
-      role="region"
-      aria-labelledby="story-details-heading"
-    >
-      <header className="details-header shrink-0">
-        <div className="details-header__bar">
-          <Button
-            className="btn-secondary w-9 "
-            onClick={() => {
-              navigateView('Home')
-            }}
-            aria-label="Back to Stories"
-          >
-            <IconBack className="w-4 h-4" />
-          </Button>
-
-          <div
-            className="col col-id flex flex-col items-center gap-1"
-            style={{ gridRow: '1 / 4', alignSelf: 'center' }}
-          >
-            {hasRejectedFeatures && (
-              <ExclamationChip
-                title={'One or more features were rejected'}
-                tooltip="Has rejection reason"
-              />
-            )}
-            <span className="id-chip">{storyDisplayIndex}</span>
-            <StatusControl
-              status={story.status}
-              className="ml-2"
-              onChange={(next) => handleStoryStatusChange(story.id, next)}
-            />
-          </div>
-
-          <h1 id="story-details-heading" className="details-title">
-            <RichText text={story.title || `Story ${storyDisplayIndex}`} />
-          </h1>
-
-          <div
-            className="flex flex-col gap-2 ml-2"
-            aria-label={`Blockers for Story ${storyDisplayIndex}`}
-          >
-            <div className="chips-list">
-              <span className="chips-sub__label">Blockers</span>
-              {storyBlockers.length === 0 ? (
-                <span className="chips-sub__label" title="No dependencies">
-                  None
-                </span>
-              ) : (
-                storyBlockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
-              )}
-            </div>
-            <div className="chips-list">
-              <span className="chips-sub__label">Blocks</span>
-              {storyBlockersOutbound.length === 0 ? (
-                <span className="chips-sub__label" title="No dependents">
-                  None
-                </span>
-              ) : (
-                storyBlockersOutbound.map((d) => (
-                  <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                ))
-              )}
-            </div>
-          </div>
-          <div className="spacer" />
-          <div className="flex items-center gap-3">
+      <div
+        className="story-details flex flex-col flex-1 min-h-0 w-full overflow-hidden"
+        role="region"
+        aria-labelledby="story-details-heading"
+      >
+        <header className="details-header shrink-0">
+          <div className="details-header__bar">
             <Button
-              className="btn-secondary btn-icon"
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              aria-label="Toggle chat"
+              className="btn-secondary w-9 "
+              onClick={() => {
+                navigateView('Home')
+              }}
+              aria-label="Back to Stories"
             >
-              <IconChat className="w-4 h-4" />
+              <IconBack className="w-4 h-4" />
             </Button>
-            <ModelChip editable />
-            {/* Replace RunAgentButton space with AgentRunBullet when active */}
-            <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
-              {storyRun ? (
-                <AgentRunBullet
-                  key={storyRun.id}
-                  run={storyRun}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    navigateAgentRun(storyRun.id)
-                  }}
+
+            <div
+              className="col col-id flex flex-col items-center gap-1"
+              style={{ gridRow: '1 / 4', alignSelf: 'center' }}
+            >
+              {hasRejectedFeatures && (
+                <ExclamationChip
+                  title={'One or more features were rejected'}
+                  tooltip="Has rejection reason"
                 />
-              ) : (
-                <RunAgentButton
-                  onClick={(agentType) => {
-                    if (!projectId || storyHasActiveRun) return
-                    startAgent(agentType, projectId, story.id)
+              )}
+              <span className="id-chip">{storyDisplayIndex}</span>
+              <StatusControl
+                status={story.status}
+                className="ml-2"
+                onChange={(next) => handleStoryStatusChange(story.id, next)}
+              />
+            </div>
+
+            <h1 id="story-details-heading" className="details-title">
+              <RichText text={story.title || `Story ${storyDisplayIndex}`} />
+            </h1>
+
+            <div
+              className="flex flex-col gap-2 ml-2"
+              aria-label={`Blockers for Story ${storyDisplayIndex}`}
+            >
+              <div className="chips-list">
+                <span className="chips-sub__label">Blockers</span>
+                {storyBlockers.length === 0 ? (
+                  <span className="chips-sub__label" title="No dependencies">
+                    None
+                  </span>
+                ) : (
+                  storyBlockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
+                )}
+              </div>
+              <div className="chips-list">
+                <span className="chips-sub__label">Blocks</span>
+                {storyBlockersOutbound.length === 0 ? (
+                  <span className="chips-sub__label" title="No dependents">
+                    None
+                  </span>
+                ) : (
+                  storyBlockersOutbound.map((d) => (
+                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                  ))
+                )}
+              </div>
+            </div>
+            <div className="spacer" />
+            <div className="flex items-center gap-3">
+              <Button
+                className="btn-secondary btn-icon"
+                onClick={() => setIsChatOpen(!isChatOpen)}
+                aria-label="Toggle chat"
+              >
+                <IconChat className="w-4 h-4" />
+              </Button>
+              <ModelChip editable />
+              {/* Replace RunAgentButton space with AgentRunBullet when active */}
+              <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
+                {storyRun ? (
+                  <AgentRunBullet
+                    key={storyRun.id}
+                    run={storyRun}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigateAgentRun(storyRun.id)
+                    }}
+                  />
+                ) : (
+                  <RunAgentButton
+                    onClick={(agentType) => {
+                      if (!projectId || storyHasActiveRun) return
+                      startAgent(agentType, projectId, story.id)
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Top toolbars similar to StoriesListView: search/filter/sort and count/add */}
+        <div className="stories-toolbar shrink-0">
+          <div className="left">
+            <div className="control search-wrapper">
+              <input
+                type="search"
+                placeholder="Search by id, title, or description"
+                aria-label="Search features"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            <div className="control">
+              <div
+                ref={statusFilterRef}
+                className="status-filter-btn ui-select gap-2"
+                role="button"
+                aria-haspopup="menu"
+                aria-expanded={openFilter}
+                aria-label="Filter by status"
+                tabIndex={0}
+                onClick={() => setOpenFilter(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
+                }}
+              >
+                <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+                <span className="standard-picker__label">{currentFilterLabel}</span>
+              </div>
+              {openFilter && statusFilterRef.current && (
+                <StatusPicker
+                  anchorEl={statusFilterRef.current}
+                  value={statusFilter}
+                  isAllAllowed={true}
+                  includeNotDone={true}
+                  onSelect={(val) => {
+                    setStatusFilter(val as any)
+                    setOpenFilter(false)
                   }}
+                  onClose={() => setOpenFilter(false)}
                 />
               )}
             </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Top toolbars similar to StoriesListView: search/filter/sort and count/add */}
-      <div className="stories-toolbar shrink-0">
-        <div className="left">
-          <div className="control search-wrapper">
-            <input
-              type="search"
-              placeholder="Search by id, title, or description"
-              aria-label="Search features"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-          <div className="control">
-            <div
-              ref={statusFilterRef}
-              className="status-filter-btn ui-select gap-2"
-              role="button"
-              aria-haspopup="menu"
-              aria-expanded={openFilter}
-              aria-label="Filter by status"
-              tabIndex={0}
-              onClick={() => setOpenFilter(true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
-              }}
-            >
-              <span className={`status-bullet status-bullet--${k}`} aria-hidden />
-              <span className="standard-picker__label">{currentFilterLabel}</span>
+            <div className="control">
+              <select
+                className="ui-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as FeatureSort)}
+                aria-label="Sort features by"
+              >
+                <option value="index_asc">Ascending ↓</option>
+                <option value="index_desc">Descending ↑</option>
+                <option value="status_asc">Status ↓</option>
+                <option value="status_desc">Status ↑</option>
+              </select>
             </div>
-            {openFilter && statusFilterRef.current && (
-              <StatusPicker
-                anchorEl={statusFilterRef.current}
-                value={statusFilter}
-                isAllAllowed={true}
-                includeNotDone={true}
-                onSelect={(val) => {
-                  setStatusFilter(val as any)
-                  setOpenFilter(false)
-                }}
-                onClose={() => setOpenFilter(false)}
-              />
-            )}
           </div>
-          <div className="control">
-            <select
-              className="ui-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as FeatureSort)}
-              aria-label="Sort features by"
-            >
-              <option value="index_asc">Ascending ↓</option>
-              <option value="index_desc">Descending ↑</option>
-              <option value="status_asc">Status ↓</option>
-              <option value="status_desc">Status ↑</option>
-            </select>
-          </div>
-        </div>
-        <div className="right">
-          <button
-            type="button"
-            className="btn-secondary btn-icon"
-            aria-label="Edit story"
-            onClick={handleEditStory}
-          >
-            <IconEdit className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            className="btn btn-icon"
-            aria-label="Add feature"
-            onClick={handleAddFeature}
-          >
-            <IconPlus className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
-        <section className="panel shrink-0">
-          <div className="section-header">
+          <div className="right">
             <button
               type="button"
-              className="collapse-toggle btn-icon"
-              aria-expanded={isOverviewExpanded}
-              aria-controls="overview-content"
-              onClick={() => setIsOverviewExpanded((prev) => !prev)}
+              className="btn-secondary btn-icon"
+              aria-label="Edit story"
+              onClick={handleEditStory}
             >
-              <IconChevron
-                className={`w-4 h-4 icon-chevron ${isOverviewExpanded ? 'expanded' : ''}`}
-              />
+              <IconEdit className="w-4 h-4" />
             </button>
-            <h2 className="section-title">Overview</h2>
-          </div>
-          <div
-            id="overview-content"
-            className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}
-          >
-            <p className="story-desc">
-              <RichText text={story.description || 'No description provided.'} />
-            </p>
-          </div>
-        </section>
-
-        <section className="panel flex flex-col flex-1 min-h-0">
-          <div className="section-header shrink-0">
-            <h2 className="section-title">Features</h2>
-          </div>
-
-          {featuresFiltered.length === 0 ? (
-            <div className="flex-1 min-h-0 overflow-y-auto empty">No features found.</div>
-          ) : (
-            <ul
-              className={`flex-1 min-h-0 overflow-y-auto features-list ${dragging ? 'dnd-active' : ''}`}
-              role="list"
-              aria-label="Features"
-              ref={ulRef}
-              onDragOver={(e) => {
-                if (dndEnabled) {
-                  e.preventDefault()
-                  e.dataTransfer.dropEffect = 'move'
-                }
-              }}
-              onDrop={(e) => {
-                if (!dndEnabled || !dragging) return
-                e.preventDefault()
-                preventDragFromNoDragRef.current = false
-                onListDrop()
-              }}
-              onDragEnd={() => {
-                preventDragFromNoDragRef.current = false
-                clearDndState()
-              }}
+            <button
+              type="button"
+              className="btn btn-icon"
+              aria-label="Add feature"
+              onClick={handleAddFeature}
             >
-              {featuresFiltered.map((f: Feature, idx: number) => {
-                const blockers = getBlockers(story.id, f.id)
-                const blockersOutbound = getBlockersOutbound(f.id)
+              <IconPlus className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
 
-                const isDragSource = dragFeatureId === f.id
-                const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
-                const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
+        <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
+          <section className="panel shrink-0">
+            <div className="section-header">
+              <button
+                type="button"
+                className="collapse-toggle btn-icon"
+                aria-expanded={isOverviewExpanded}
+                aria-controls="overview-content"
+                onClick={() => setIsOverviewExpanded((prev) => !prev)}
+              >
+                <IconChevron
+                  className={`w-4 h-4 icon-chevron ${isOverviewExpanded ? 'expanded' : ''}`}
+                />
+              </button>
+              <h2 className="section-title">Overview</h2>
+            </div>
+            <div
+              id="overview-content"
+              className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}
+            >
+              <p className="story-desc">
+                <RichText text={story.description || 'No description provided.'} />
+              </p>
+            </div>
+          </section>
 
-                const featureHasActiveRun = !!storyRun?.conversations.find(
-                  (c) => c.featureId === f.id,
-                )
+          <section className="panel flex flex-col flex-1 min-h-0">
+            <div className="section-header shrink-0">
+              <h2 className="section-title">Features</h2>
+            </div>
 
-                return (
-                  <li key={f.id} className="feature-item" role="listitem">
-                    {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
-                    <div
-                      className={`feature-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''} ${f.id === highlightFeatureId ? 'highlighted' : ''}`}
-                      role="button"
-                      tabIndex={0}
-                      data-index={idx}
-                      data-feature-id={f.id}
-                      draggable={dndEnabled}
-                      aria-grabbed={isDragSource}
-                      onPointerDownCapture={(e) => {
-                        const t = e.target as HTMLElement | null
-                        preventDragFromNoDragRef.current = !!(t && t.closest('.no-drag'))
-                      }}
-                      onPointerUpCapture={() => {
-                        preventDragFromNoDragRef.current = false
-                      }}
-                      onDragStart={(e) => {
-                        // If the initial pointer down started on a non-draggable UI (e.g., action buttons), block row drag
-                        if (preventDragFromNoDragRef.current) {
-                          e.preventDefault()
-                          e.stopPropagation()
+            {featuresFiltered.length === 0 ? (
+              <div className="flex-1 min-h-0 overflow-y-auto empty">No features found.</div>
+            ) : (
+              <ul
+                className={`flex-1 min-h-0 overflow-y-auto features-list ${dragging ? 'dnd-active' : ''}`}
+                role="list"
+                aria-label="Features"
+                ref={ulRef}
+                onDragOver={(e) => {
+                  if (dndEnabled) {
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                  }
+                }}
+                onDrop={(e) => {
+                  if (!dndEnabled || !dragging) return
+                  e.preventDefault()
+                  preventDragFromNoDragRef.current = false
+                  onListDrop()
+                }}
+                onDragEnd={() => {
+                  preventDragFromNoDragRef.current = false
+                  clearDndState()
+                }}
+              >
+                {featuresFiltered.map((f: Feature, idx: number) => {
+                  const blockers = getBlockers(story.id, f.id)
+                  const blockersOutbound = getBlockersOutbound(f.id)
+
+                  const isDragSource = dragFeatureId === f.id
+                  const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
+                  const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
+
+                  const featureHasActiveRun = !!storyRun?.conversations.find(
+                    (c) => c.featureId === f.id,
+                  )
+
+                  return (
+                    <li key={f.id} className="feature-item" role="listitem">
+                      {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
+                      <div
+                        className={`feature-row ${dndEnabled ? 'draggable' : ''} ${isDragSource ? 'is-dragging' : ''} ${dragging && dropIndex === idx ? 'is-drop-target' : ''} ${f.id === highlightFeatureId ? 'highlighted' : ''}`}
+                        role="button"
+                        tabIndex={0}
+                        data-index={idx}
+                        data-feature-id={f.id}
+                        draggable={dndEnabled}
+                        aria-grabbed={isDragSource}
+                        onPointerDownCapture={(e) => {
+                          const t = e.target as HTMLElement | null
+                          preventDragFromNoDragRef.current = !!(t && t.closest('.no-drag'))
+                        }}
+                        onPointerUpCapture={() => {
                           preventDragFromNoDragRef.current = false
-                          return
-                        }
-                        if (!dndEnabled) return
-                        // Fallback: if somehow target is within .no-drag, block as well
-                        const target = e.target as HTMLElement | null
-                        if (target && target.closest('.no-drag')) {
+                        }}
+                        onDragStart={(e) => {
+                          // If the initial pointer down started on a non-draggable UI (e.g., action buttons), block row drag
+                          if (preventDragFromNoDragRef.current) {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            preventDragFromNoDragRef.current = false
+                            return
+                          }
+                          if (!dndEnabled) return
+                          // Fallback: if somehow target is within .no-drag, block as well
+                          const target = e.target as HTMLElement | null
+                          if (target && target.closest('.no-drag')) {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            return
+                          }
+                          setDragFeatureId(f.id)
+                          setDragging(true)
+                          setDraggingIndex(idx)
+                          e.dataTransfer.setData('text/plain', String(f.id))
+                          e.dataTransfer.effectAllowed = 'move'
+                        }}
+                        onDragOver={(e) => {
+                          if (!dndEnabled) return
                           e.preventDefault()
-                          e.stopPropagation()
-                          return
-                        }
-                        setDragFeatureId(f.id)
-                        setDragging(true)
-                        setDraggingIndex(idx)
-                        e.dataTransfer.setData('text/plain', String(f.id))
-                        e.dataTransfer.effectAllowed = 'move'
-                      }}
-                      onDragOver={(e) => {
-                        if (!dndEnabled) return
-                        e.preventDefault()
-                        computeDropForRow(e, idx)
-                      }}
-                      onKeyDown={(e) => onRowKeyDown(e, f.id)}
-                      onClick={(e) => {
-                        // Ignore clicks if we were dragging or if clicking on specific action areas
-                        if (dragging) return
-                        const t = e.target as HTMLElement | null
-                        if (t && t.closest('.no-drag')) return
-                        handleEditFeature(f.id)
-                      }}
-                      aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${blockers.length} items this feature is blocked by, ${blockersOutbound.length} items this feature is blocking.  Press Enter to edit.`}
-                    >
-                      <div className="col col-id">
-                        <span className="id-chip">{story.featureIdToDisplayIndex[f.id]}</span>
-                        <StatusControl
-                          status={f.status}
-                          onChange={(next) => handleFeatureStatusChange(story.id, f.id, next)}
-                        />
-                        {featureHasActiveRun && storyRun && (
-                          <div className="no-drag mt-1">
-                            <AgentRunBullet
-                              key={storyRun.id}
-                              run={storyRun}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigateAgentRun(storyRun.id)
+                          computeDropForRow(e, idx)
+                        }}
+                        onKeyDown={(e) => onRowKeyDown(e, f.id)}
+                        onClick={(e) => {
+                          // Ignore clicks if we were dragging or if clicking on specific action areas
+                          if (dragging) return
+                          const t = e.target as HTMLElement | null
+                          if (t && t.closest('.no-drag')) return
+                          handleEditFeature(f.id)
+                        }}
+                        aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${blockers.length} items this feature is blocked by, ${blockersOutbound.length} items this feature is blocking.  Press Enter to edit.`}
+                      >
+                        <div className="col col-id">
+                          <span className="id-chip">{story.featureIdToDisplayIndex[f.id]}</span>
+                          <StatusControl
+                            status={f.status}
+                            onChange={(next) => handleFeatureStatusChange(story.id, f.id, next)}
+                          />
+                          {featureHasActiveRun && storyRun && (
+                            <div className="no-drag mt-1">
+                              <AgentRunBullet
+                                key={storyRun.id}
+                                run={storyRun}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigateAgentRun(storyRun.id)
+                                }}
+                              />
+                            </div>
+                          )}
+                          {f.rejection && (
+                            <ExclamationChip title={f.rejection} tooltip="Has rejection reason" />
+                          )}
+                        </div>
+
+                        <div className="col col-title">
+                          <span className="title-text">
+                            <RichText text={f.title || ''} />
+                          </span>
+                        </div>
+                        <div className="col col-description" title={f.description || ''}>
+                          <RichText text={f.description || ''} />
+                        </div>
+                        <div
+                          className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}
+                        >
+                          {!storyHasActiveRun && (
+                            <RunAgentButton
+                              onClick={(agentType) => {
+                                if (!projectId || storyHasActiveRun) return
+                                startAgent(agentType, projectId, story.id, f.id)
                               }}
                             />
-                          </div>
-                        )}
-                        {f.rejection && (
-                          <ExclamationChip title={f.rejection} tooltip="Has rejection reason" />
-                        )}
-                      </div>
+                          )}
+                        </div>
 
-                      <div className="col col-title">
-                        <span className="title-text">
-                          <RichText text={f.title || ''} />
-                        </span>
-                      </div>
-                      <div className="col col-description" title={f.description || ''}>
-                        <RichText text={f.description || ''} />
-                      </div>
-                      <div
-                        className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}
-                      >
-                        {!storyHasActiveRun && (
-                          <RunAgentButton
-                            onClick={(agentType) => {
-                              if (!projectId || storyHasActiveRun) return
-                              startAgent(agentType, projectId, story.id, f.id)
-                            }}
-                          />
-                        )}
-                      </div>
-
-                      <div
-                        style={{ gridRow: 3, gridColumn: 2 }}
-                        className="flex items-center justify-between gap-8"
-                        aria-label={`Blockers and actions for Feature ${f.id}`}
-                      >
-                        <div className="flex gap-8">
-                          <div className="chips-list">
-                            <span className="chips-sub__label">References</span>
-                            {blockers.length === 0 ? (
-                              <span className="chips-sub__label" title="No dependencies">
-                                None
-                              </span>
-                            ) : (
-                              blockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
-                            )}
+                        <div
+                          style={{ gridRow: 3, gridColumn: 2 }}
+                          className="flex items-center justify-between gap-8"
+                          aria-label={`Blockers and actions for Feature ${f.id}`}
+                        >
+                          <div className="flex gap-8">
+                            <div className="chips-list">
+                              <span className="chips-sub__label">References</span>
+                              {blockers.length === 0 ? (
+                                <span className="chips-sub__label" title="No dependencies">
+                                  None
+                                </span>
+                              ) : (
+                                blockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
+                              )}
+                            </div>
+                            <div className="chips-list">
+                              <span className="chips-sub__label">Blocks</span>
+                              {blockersOutbound.length === 0 ? (
+                                <span className="chips-sub__label" title="No dependents">
+                                  None
+                                </span>
+                              ) : (
+                                blockersOutbound.map((d) => (
+                                  <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                                ))
+                              )}
+                            </div>
                           </div>
-                          <div className="chips-list">
-                            <span className="chips-sub__label">Blocks</span>
-                            {blockersOutbound.length === 0 ? (
-                              <span className="chips-sub__label" title="No dependents">
-                                None
-                              </span>
-                            ) : (
-                              blockersOutbound.map((d) => (
-                                <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                              ))
-                            )}
+                          <div className="flex items-center gap-3 pr-2">
+                            {/* AgentRunBullet for features is now rendered in the actions column to replace the RunAgentButton when active */}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 pr-2">
-                          {/* AgentRunBullet for features is now rendered in the actions column to replace the RunAgentButton when active */}
-                        </div>
                       </div>
-                    </div>
-                    {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </section>
-      </main>
+                      {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
+        </main>
 
-      {saving && (
-        <div
-          className="saving-indicator"
-          aria-live="polite"
-          style={{ position: 'fixed', bottom: 12, right: 16 }}
-        >
-          Reordering…
-        </div>
-      )}
-    </div>
-      {isChatOpen && chatContextId && (
+        {saving && (
+          <div
+            className="saving-indicator"
+            aria-live="polite"
+            style={{ position: 'fixed', bottom: 12, right: 16 }}
+          >
+            Reordering…
+          </div>
+        )}
+      </div>
+      {isChatOpen && chatContext && (
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-            <ContextualChatSidebar
-              contextId={chatContextId}
-              chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
-            />
+          <ChatSidebar
+            context={chatContext}
+            chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
+          />
         </div>
       )}
     </div>
