@@ -36,4 +36,4 @@ export type ContextChatsService = {
   deleteContextChat: (context: ContextChatIdentifier) => Promise<ServiceResult>
 }
 
-export const contextChatsService: ContextChatsService = { ...window.contextChatsService }
+export const contextChatsService: ContextChatsService = { ...window.contextChatsService } as any

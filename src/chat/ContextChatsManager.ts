@@ -3,6 +3,9 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import BaseManager from '../BaseManager'
+import type ProjectsManager from '../projects/ProjectsManager'
+import type StoriesManager from '../stories/StoriesManager'
+import { getSystemPrompt } from './ChatsManager'
 
 export type ContextChatScope = 'tests' | 'agents'
 export type ContextChatIdentifier = {
@@ -38,8 +41,13 @@ async function pathExists(p: string): Promise<boolean> {
 }
 
 export default class ContextChatsManager extends BaseManager {
-  constructor(projectRoot: string, window: BrowserWindow) {
+  private projectsManager?: ProjectsManager
+  private storiesManager?: StoriesManager
+
+  constructor(projectRoot: string, window: BrowserWindow, projectsManager?: ProjectsManager, storiesManager?: StoriesManager) {
     super(projectRoot, window)
+    this.projectsManager = projectsManager
+    this.storiesManager = storiesManager
   }
 
   private getBaseDir(): string {
@@ -105,12 +113,73 @@ export default class ContextChatsManager extends BaseManager {
     return { context: ctx, messages: [], createdAt: now, updatedAt: now }
   }
 
+  private async buildContextSystemMessage(ctx: ContextChatIdentifier): Promise<ContextChatMessage> {
+    const { projectId, storyId, featureId, scope } = ctx
+    const parts: string[] = []
+
+    // Project info
+    try {
+      if (this.projectsManager) {
+        const project: any = await this.projectsManager.getProject(projectId)
+        if (project) {
+          parts.push(`#CURRENT PROJECT: ${project.name}`)
+          if (project.description) parts.push(`##DESCRIPTION:\n${project.description}`)
+        }
+      }
+    } catch {}
+
+    if (storyId) {
+      try {
+        const story: any = await this.storiesManager?.getStory(projectId, storyId)
+        if (story) {
+          parts.push(`\n#CURRENT STORY: ${story.title || storyId} (ID: ${story.id})`)
+          if (story.description) parts.push(`##STORY DESCRIPTION:\n${story.description}`)
+
+          if (!featureId) {
+            const list = (story.features || []).map((f: any) => `- [${f.status}] ${f.title || f.id}`).join('\n')
+            if (list) parts.push(`##FEATURES:\n${list}`)
+          }
+        }
+      } catch {}
+    }
+
+    if (storyId && featureId) {
+      try {
+        const feature: any = await this.storiesManager?.getFeature(projectId, storyId, featureId)
+        if (feature) {
+          parts.push(`\n#CURRENT FEATURE: ${feature.title || featureId} (ID: ${feature.id})`)
+          if (feature.description) parts.push(`##FEATURE DESCRIPTION:\n${feature.description}`)
+          parts.push(`Status: ${feature.status}`)
+        }
+      } catch {}
+    }
+
+    if (scope === 'tests') {
+      parts.push(`\n#CONTEXT: Project Tests\nDiscuss and plan tests for this project. Provide test ideas, strategies, and improvements. Reference files with @path and stories/features with #ref.`)
+    }
+    if (scope === 'agents') {
+      parts.push(`\n#CONTEXT: Project Agents\nDiscuss and configure AI agents for this project. Consider available tools and intended workflows. Reference files with @path and stories/features with #ref.`)
+    }
+
+    const content = getSystemPrompt({ additionalContext: parts.join('\n') })
+    return { role: 'system', content }
+  }
+
   async getContextChat(ctx: ContextChatIdentifier, createIfMissing = true): Promise<ContextChatData> {
     const existing = await this.readContextChatFile(ctx)
     if (existing) return existing
 
     if (!createIfMissing) throw new Error('Context chat not found')
     const data = this.createDefaultData(ctx)
+
+    // Insert initial system message tailored to context
+    try {
+      const systemMsg = await this.buildContextSystemMessage(ctx)
+      data.messages = [systemMsg]
+    } catch (_) {
+      // Best-effort; if prompt generation fails, proceed with empty messages
+    }
+
     await this.writeContextChatFile(ctx, data)
     return data
   }

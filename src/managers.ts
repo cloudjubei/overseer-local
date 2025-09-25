@@ -72,7 +72,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     settingsManager,
   )
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
-  contextChatsManager = new ContextChatsManager(projectRoot, mainWindow)
+  contextChatsManager = new ContextChatsManager(projectRoot, mainWindow, projectsManager, storiesManager)
 
   managers = [
     databaseManager,
