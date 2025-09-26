@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1872,16 +1872,16 @@
     },
     {
       "id": "23e11a4c-977b-4c11-9088-34103071ba5c",
-      "status": "+",
-      "title": "the table in TestsView should be horizontally scrollable",
-      "description": "Right now the table in @src/renderer/screens/TestsView.tsx expands the whole screen to the right - it shouldn't. it should scroll to the right if it grows too big.",
+      "status": "-",
+      "title": "the coverage table in TestsView should be horizontally scrollable",
+      "description": "Right now the table in @src/renderer/screens/TestsView.tsx expands the whole screen to the right - it shouldn't. it should scroll to the right if it grows too big.\nIt's the first column that grows wildly - because some names can be long - but still, the table should have a set size, and only the content within should scroll - the header and the rows.",
       "context": [
         "src/renderer/screens/TestsView.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-26T01:09:29.374Z",
-      "updatedAt": "2025-09-26T01:13:58.799Z",
-      "completedAt": "2025-09-26T01:13:58.799Z"
+      "updatedAt": "2025-09-26T01:26:31.941Z",
+      "rejection": "This is still wrong"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2009,6 +2009,5 @@
     "23e11a4c-977b-4c11-9088-34103071ba5c": 122
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z",
-  "completedAt": "2025-09-26T01:13:58.800Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z"
 }
