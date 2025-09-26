@@ -100,12 +100,12 @@ function MetricCell({ label, pct }: MetricCellProps) {
 function comparePathsDepthFirst(aRel: string, bRel: string): number {
   const aSeg = aRel.split('/')
   const bSeg = bRel.split('/')
-  const len = Math.min(aSeg.length, bSeg.length)
+
+  const len = Math.min(aSeg.length - 1, bSeg.length - 1) //compare dirs
   for (let i = 0; i < len; i++) {
     const cmp = aSeg[i].localeCompare(bSeg[i])
     if (cmp !== 0) return cmp
   }
-  // If one path is a prefix of the other, shorter (shallower) comes first
   return aSeg.length - bSeg.length
 }
 

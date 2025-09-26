@@ -1,5 +1,4 @@
 import type { BrowserWindow } from 'electron'
-import crypto from 'crypto'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
 import { classifyDocumentType } from '../db/fileTyping'
 import BaseManager from '../BaseManager'
@@ -106,17 +105,6 @@ export default class DocumentIngestionManager extends BaseManager {
     return this.handleFileAdded(projectId, relPath)
   }
 
-  private async handleFileRenamed(projectId: string, relPathSource: string, relPathTarget: string) {
-    try {
-      const d = await this.databaseManager.getDocumentBySrc(projectId, toRelUnix(relPathSource))
-      if (d) {
-        await this.databaseManager.updateDocument(d.id, { src: toRelUnix(relPathTarget) })
-      }
-    } catch (e) {
-      console.warn('[DocumentIngestion] handleFileRenamed failed', projectId, relPathSource, e)
-    }
-  }
-
   private async handleFileDeleted(projectId: string, relPath: string) {
     try {
       const d = await this.databaseManager.getDocumentBySrc(projectId, toRelUnix(relPath))
@@ -179,10 +167,6 @@ export default class DocumentIngestionManager extends BaseManager {
             await this.handleFileDeleted(projectId, update.relPath)
             break
           }
-          // case 'addDirectory' : {
-          // }
-          // case 'deleteDirectory' : {
-          // }
         }
       })
       this.handling[projectId] = true
