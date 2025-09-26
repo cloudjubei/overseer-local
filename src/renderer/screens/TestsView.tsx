@@ -114,8 +114,8 @@ function TestsInner() {
   )
 
   return (
-    <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
-      <div className="flex-1 min-h-0 flex flex-col">
+    <div className="flex flex-row flex-1 min-h-0 min-w-0 w-full overflow-hidden">
+      <div className="flex-1 min-h-0 min-w-0 flex flex-col">
         <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -137,7 +137,7 @@ function TestsInner() {
           </div>
         </div>
 
-        <div className="p-4 flex flex-col gap-4 flex-1 min-h-0">
+        <div className="p-4 flex flex-col gap-4 flex-1 min-h-0 min-w-0">
           <div className="flex items-center gap-3">
             <SegmentedControl
               ariaLabel="Tests view tabs"
@@ -152,7 +152,7 @@ function TestsInner() {
           </div>
 
           {isResults && (
-            <div className="flex-1 min-h-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
+            <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
               <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
                 All tests will be run.
               </div>
@@ -187,8 +187,8 @@ function TestsInner() {
           )}
 
           {!isResults && (
-            <div className="flex-1 min-h-0 flex flex-col">
-              <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 min-w-0 flex flex-col">
+              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
                 {coverageError ? (
                   <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap p-4">
                     {coverageError}
@@ -196,7 +196,7 @@ function TestsInner() {
                 ) : null}
 
                 {!isRunningCoverage && !coverageError && coverage && (
-                  <div className="h-full">
+                  <div className="h-full min-w-0">
                     <CoverageReport data={coverage} />
                   </div>
                 )}

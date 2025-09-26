@@ -236,9 +236,9 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
   }
 
   return (
-    <div className="h-full rounded-md border border-neutral-200 dark:border-neutral-800">
+    <div className="h-full min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800">
       {/* Single scroll container handles both axes so header and rows scroll together */}
-      <div className="h-full overflow-auto">
+      <div className="h-full w-full overflow-auto">
         <table className="w-max text-sm table-fixed">
           <colgroup>
             {/* Clamp the first column so long file names do not expand layout */}
