@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1869,6 +1869,18 @@
       "createdAt": "2025-09-25T13:31:18.592Z",
       "updatedAt": "2025-09-25T23:51:04.545Z",
       "completedAt": "2025-09-25T23:51:04.545Z"
+    },
+    {
+      "id": "23e11a4c-977b-4c11-9088-34103071ba5c",
+      "status": "-",
+      "title": "the table in TestsView should be horizontally scrollable",
+      "description": "Right now the table in @src/renderer/screens/TestsView.tsx expands the whole screen to the right - it shouldn't. it should scroll to the right if it grows too big.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-26T01:09:29.374Z",
+      "updatedAt": "2025-09-26T01:09:29.374Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -1992,9 +2004,9 @@
     "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc": 118,
     "93772c3c-639f-4110-a2e2-7d5d7f9e91df": 119,
     "fae23bb4-639b-41c1-ab9a-a9ab8f56ea29": 120,
-    "36a5ae63-4c86-48d3-b7ca-788cd5327671": 121
+    "36a5ae63-4c86-48d3-b7ca-788cd5327671": 121,
+    "23e11a4c-977b-4c11-9088-34103071ba5c": 122
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z",
-  "completedAt": "2025-09-25T23:51:04.545Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z"
 }
