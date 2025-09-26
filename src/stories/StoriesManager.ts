@@ -15,9 +15,11 @@ import {
   StoryEditInput,
   StoryTools,
 } from 'thefactory-tools'
+import Mutex from '../utils/Mutex'
 
 export default class StoriesManager extends BaseManager {
-  private tools: Record<string, StoryTools>
+  private toolsLock = new Mutex()
+  private tools: Record<string, StoryTools> = {}
 
   private projectsManager: ProjectsManager
 
@@ -25,8 +27,6 @@ export default class StoriesManager extends BaseManager {
     super(projectRoot, window)
 
     this.projectsManager = projectsManager
-
-    this.tools = {}
   }
 
   async init(): Promise<void> {
@@ -207,9 +207,11 @@ export default class StoriesManager extends BaseManager {
     })
   }
   private async __getTools(projectId: string): Promise<StoryTools | undefined> {
+    await this.toolsLock.lock()
     if (!this.tools[projectId]) {
       await this.updateTool(projectId)
     }
+    this.toolsLock.unlock()
     return this.tools[projectId]
   }
 }

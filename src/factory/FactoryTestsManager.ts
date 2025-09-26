@@ -10,17 +10,17 @@ import {
   TestsResult,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
+import Mutex from '../utils/Mutex'
 
 export default class FactoryTestsManager extends BaseManager {
-  private tools: Record<string, TestTools>
+  private toolsLock = new Mutex()
+  private tools: Record<string, TestTools> = {}
   private projectsManager: ProjectsManager
 
   constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
     super(projectRoot, window)
 
     this.projectsManager = projectsManager
-
-    this.tools = {}
   }
 
   async init(): Promise<void> {
@@ -102,9 +102,11 @@ export default class FactoryTestsManager extends BaseManager {
     })
   }
   private async __getTools(projectId: string): Promise<TestTools | undefined> {
+    await this.toolsLock.lock()
     if (!this.tools[projectId]) {
       await this.updateTool(projectId)
     }
+    this.toolsLock.unlock()
     return this.tools[projectId]
   }
 }

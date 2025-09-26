@@ -7,12 +7,8 @@ import type DatabaseManager from '../db/DatabaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
 import { FileMeta } from 'thefactory-tools'
-import { Document } from 'thefactory-db'
+import { Document, DocumentInput } from 'thefactory-db'
 import path from 'path'
-
-function sha1(buf: Buffer): string {
-  return crypto.createHash('sha1').update(buf).digest('hex')
-}
 
 function toRelUnix(p: string): string {
   return (p || '').replace(/\\/g, '/')
@@ -74,31 +70,24 @@ export default class DocumentIngestionManager extends BaseManager {
 
     const files = ((await this.filesManager.getAllFileStats(projectId)) || []) as FileMeta[]
 
-    let ingested = 0
-    let failed = 0
-
+    const documentsToUpsert: DocumentInput[] = []
     for (const f of files) {
       try {
         const relPath: string = f.relativePath!
         const content = await this.filesManager.readFile(projectId, relPath)
         const stats = await this.filesManager.getFileStats(projectId, relPath)
         if (content && stats) {
-          await this.__handleFileAdded(projectId, relPath, content, stats)
+          documentsToUpsert.push(this.createDocumentInput(projectId, relPath, content, stats))
         }
-        ingested++
       } catch (e) {
-        failed++
         console.warn('[DocumentIngestion] file ingest failed for: ', f, ' error: ', e)
       }
     }
-    console.info(
-      '[DocumentIngestion] Finished ingestProject:',
-      projectId,
-      ' ingested: ',
-      ingested,
-      ' failed: ',
-      failed,
-    )
+    try {
+      await this.databaseManager.upsertDocuments(documentsToUpsert)
+    } catch (e) {
+      console.warn('[DocumentIngestion] file ingest failed in batch. Error: ', e)
+    }
   }
 
   private async handleFileAdded(projectId: string, relPath: string) {
@@ -119,7 +108,7 @@ export default class DocumentIngestionManager extends BaseManager {
 
   private async handleFileRenamed(projectId: string, relPathSource: string, relPathTarget: string) {
     try {
-      const d = await this.databaseManager.getDocumentBySrc(toRelUnix(relPathSource))
+      const d = await this.databaseManager.getDocumentBySrc(projectId, toRelUnix(relPathSource))
       if (d) {
         await this.databaseManager.updateDocument(d.id, { src: toRelUnix(relPathTarget) })
       }
@@ -130,51 +119,48 @@ export default class DocumentIngestionManager extends BaseManager {
 
   private async handleFileDeleted(projectId: string, relPath: string) {
     try {
-      const d = await this.databaseManager.getDocumentBySrc(toRelUnix(relPath))
+      const d = await this.databaseManager.getDocumentBySrc(projectId, toRelUnix(relPath))
       if (d?.id) await this.databaseManager.deleteDocument(d.id)
     } catch (e) {
       console.warn('[DocumentIngestion] handleFileDeleted failed', projectId, relPath, e)
     }
   }
 
-  private __handleFileAdded = async (
+  private createDocumentInput(
     projectId: string,
     relPath: string,
     content: string,
     stats: FileMeta,
-  ): Promise<Document | undefined> => {
-    const contentHash = sha1(Buffer.from(content || '', 'utf8'))
+  ): DocumentInput {
     const type = classifyDocumentType(stats.ext, relPath)
 
     const name = path.basename(relPath)
-    const srcKey = toRelUnix(relPath)
+    const src = toRelUnix(relPath)
 
-    const d = await this.databaseManager.getDocumentBySrc(srcKey)
-    if (d) {
-      if (d.metadata?.contentHash === contentHash && d.metadata?.mtime === stats.mtime) {
-        return d
-      }
-      return await this.databaseManager.updateDocument(d.id, {
-        content,
-        metadata: { ...(d.metadata || {}), contentHash, mtime: stats.mtime },
-      })
-    }
-
-    const input = {
+    return {
       projectId,
       type,
-      content,
-      src: srcKey,
+      src,
       name,
+      content,
       metadata: {
         ext: stats.ext,
         size: stats.size,
         mtime: stats.mtime,
         ctime: stats.ctime,
-        contentHash,
       },
     }
-    return await this.databaseManager.addDocument(input)
+  }
+
+  private async __handleFileAdded(
+    projectId: string,
+    relPath: string,
+    content: string,
+    stats: FileMeta,
+  ): Promise<Document | undefined> {
+    const input = this.createDocumentInput(projectId, relPath, content, stats)
+
+    return await this.databaseManager.upsertDocument(input)
   }
 
   private async _ensureHandling(projectId: string): Promise<void> {
@@ -183,12 +169,15 @@ export default class DocumentIngestionManager extends BaseManager {
         switch (update.type) {
           case 'addFile': {
             await this.handleFileAdded(projectId, update.relPath)
+            break
           }
           case 'change': {
             await this.handleFileChanged(projectId, update.relPath)
+            break
           }
           case 'deleteFile': {
             await this.handleFileDeleted(projectId, update.relPath)
+            break
           }
           // case 'addDirectory' : {
           // }

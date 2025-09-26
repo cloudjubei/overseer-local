@@ -42,8 +42,8 @@ export default class DatabaseManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_ADD] = async ({ input }) => await this.addDocument(input)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_ID] = async ({ id }) =>
       await this.getDocumentById(id)
-    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC] = async ({ src }) =>
-      await this.getDocumentBySrc(src)
+    handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC] = async ({ projectId, src }) =>
+      await this.getDocumentBySrc(projectId, src)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE] = async ({ id, patch }) =>
       await this.updateDocument(id, patch)
     handlers[IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE] = async ({ id }) => await this.deleteDocument(id)
@@ -109,10 +109,16 @@ export default class DatabaseManager extends BaseManager {
   async getDocumentById(id: string): Promise<Document | undefined> {
     return await this._dbClient?.getDocumentById(id)
   }
-  async getDocumentBySrc(src: string): Promise<Document | undefined> {
-    return await this._dbClient?.getDocumentBySrc(src)
+  async getDocumentBySrc(projectId: string, src: string): Promise<Document | undefined> {
+    return await this._dbClient?.getDocumentBySrc(projectId, src)
   }
-  async updateDocument(id: string, patch: any): Promise<Document | undefined> {
+  async upsertDocuments(inputs: Partial<DocumentInput>[]): Promise<Document[]> {
+    return (await this._dbClient?.upsertDocuments(inputs)) ?? []
+  }
+  async upsertDocument(input: Partial<DocumentInput>): Promise<Document | undefined> {
+    return await this._dbClient?.upsertDocument(input)
+  }
+  async updateDocument(id: string, patch: Partial<DocumentInput>): Promise<Document | undefined> {
     return await this._dbClient?.updateDocument(id, patch)
   }
   async deleteDocument(id: string): Promise<boolean | undefined> {

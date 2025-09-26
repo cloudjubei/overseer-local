@@ -10,10 +10,12 @@ import {
   FileMeta,
   FileChangeHandler,
 } from 'thefactory-tools'
-import DatabaseManager from 'src/db/DatabaseManager'
+import DatabaseManager from '../db/DatabaseManager'
+import Mutex from '../utils/Mutex'
 
 export default class FilesManager extends BaseManager {
-  private tools: Record<string, FileTools>
+  private toolsLock = new Mutex()
+  private tools: Record<string, FileTools> = {}
   private projectsManager: ProjectsManager
   private databaseManager: DatabaseManager
 
@@ -24,7 +26,6 @@ export default class FilesManager extends BaseManager {
     databaseManager: DatabaseManager,
   ) {
     super(projectRoot, window)
-    this.tools = {}
 
     this.projectsManager = projectsManager
     this.databaseManager = databaseManager
@@ -179,9 +180,11 @@ export default class FilesManager extends BaseManager {
     })
   }
   private async __getTools(projectId: string): Promise<FileTools | undefined> {
+    await this.toolsLock.lock()
     if (!this.tools[projectId]) {
       await this.updateTool(projectId)
     }
+    this.toolsLock.unlock()
     return this.tools[projectId]
   }
 }
