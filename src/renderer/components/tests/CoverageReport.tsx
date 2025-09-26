@@ -29,6 +29,15 @@ function ProgressBar({ value }: { value: number }) {
   )
 }
 
+function getFilename(p: string): string {
+  let parts = p.split('/')
+  return parts[parts.length - 1]
+}
+function getDirname(p: string): string {
+  let parts = p.split('/')
+  parts.pop()
+  return parts.join('/')
+}
 function normalizePath(p: string): string {
   let out = p.replace(/\\/g, '/').replace(/^\.[/\\]/, '')
   // Attempt to trim anything before common roots, prefer starting at src/
@@ -74,10 +83,10 @@ function MetricCell({ label, pct }: MetricCellProps) {
   const pctVal = typeof pct === 'number' ? pct : null
   if (pctVal === null) {
     // Show nothing if there is no value to display (no placeholder dash)
-    return <div className="w-28 mx-auto text-center" title={label}></div>
+    return <div className="mx-auto text-center" title={label}></div>
   }
   return (
-    <div className="w-28 mx-auto text-center" title={label}>
+    <div className="mx-auto text-center" title={label}>
       <div className={`text-sm font-medium tabular-nums ${pctColor(pctVal)}`}>
         {`${pctVal.toFixed(1)}%`}
       </div>
@@ -241,14 +250,13 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
       <div className="h-full w-full overflow-auto">
         <table className="w-max text-sm table-fixed">
           <colgroup>
-            {/* Clamp the first column so long file names do not expand layout */}
-            <col className="w-[520px]" />
+            <col className="max-w-[300px]" />
             <col className="w-28" />
             <col className="w-28" />
             <col className="w-28" />
             <col className="w-28" />
-            <col className="w-40" />
-            <col className="w-32" />
+            <col className="max-w-[200px]" />
+            <col className="min-w-24" />
           </colgroup>
           <thead className="sticky top-0 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
             <tr>
@@ -258,7 +266,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
               <th className="text-center px-3 py-2">Functions</th>
               <th className="text-center px-3 py-2">Lines</th>
               <th className="text-left px-3 py-2 whitespace-nowrap">Uncovered lines</th>
-              <th className="text-right px-3 py-2">Actions</th>
+              <th className="text-center px-3 py-2">Actions</th>
             </tr>
             <tr>
               <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-600 dark:text-neutral-400">
@@ -303,8 +311,13 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
                 return (
                   <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">
                     <td className="px-3 py-2">
-                      <div className="truncate w-[520px] whitespace-nowrap" title={f.file}>
-                        {f.rel}
+                      <div className="truncate whitespace-nowrap" title={f.file}>
+                        <div className="flex flex-col">
+                          <span>{getFilename(f.file)}</span>
+                          <span className="text-xs text-neutral-500 font-light">
+                            {getDirname(f.file)}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-center">
@@ -339,19 +352,19 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
                         total={f.lines_total}
                       />
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="max-w-[200px] px-3 py-2">
                       {uncoveredText && uncoveredText !== '—' ? (
                         <div
-                          className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
+                          className="text-xs text-neutral-600 dark:text-neutral-400 truncate"
                           title={uncoveredText}
                         >
                           {uncoveredText}
                         </div>
                       ) : null}
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="min-w-24 px-3 py-2 text-center">
                       {showImprove ? (
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-center">
                           <Button
                             size="sm"
                             variant="secondary"
