@@ -237,140 +237,140 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
 
   return (
     <div className="h-full rounded-md border border-neutral-200 dark:border-neutral-800">
-      <div className="h-full overflow-y-auto">
-        <div className="w-full overflow-x-auto">
-          <table className="min-w-max text-sm table-fixed">
-            <colgroup>
-              <col className="w-auto" />
-              <col className="w-28" />
-              <col className="w-28" />
-              <col className="w-28" />
-              <col className="w-28" />
-              <col className="w-40" />
-              <col className="w-32" />
-            </colgroup>
-            <thead className="sticky top-0 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+      {/* Single scroll container handles both axes so header and rows scroll together */}
+      <div className="h-full overflow-auto">
+        <table className="w-max text-sm table-fixed">
+          <colgroup>
+            {/* Clamp the first column so long file names do not expand layout */}
+            <col className="w-[520px]" />
+            <col className="w-28" />
+            <col className="w-28" />
+            <col className="w-28" />
+            <col className="w-28" />
+            <col className="w-40" />
+            <col className="w-32" />
+          </colgroup>
+          <thead className="sticky top-0 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+            <tr>
+              <th className="text-left px-3 py-2">File</th>
+              <th className="text-center px-3 py-2">Statements</th>
+              <th className="text-center px-3 py-2">Branches</th>
+              <th className="text-center px-3 py-2">Functions</th>
+              <th className="text-center px-3 py-2">Lines</th>
+              <th className="text-left px-3 py-2 whitespace-nowrap">Uncovered lines</th>
+              <th className="text-right px-3 py-2">Actions</th>
+            </tr>
+            <tr>
+              <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-600 dark:text-neutral-400">
+                {summary.fileCount} files
+              </th>
+              <th className="text-center px-3 pt-2 pb-3 font-normal">
+                <MetricCell label="Statements" pct={summary.avgStatementsPct} />
+              </th>
+              <th className="text-center px-3 pt-2 pb-3 font-normal">
+                <MetricCell label="Branches" pct={summary.avgBranchesPct} />
+              </th>
+              <th className="text-center px-3 pt-2 pb-3 font-normal">
+                <MetricCell label="Functions" pct={summary.avgFunctionsPct} />
+              </th>
+              <th className="text-center px-3 pt-2 pb-3 font-normal">
+                <MetricCell label="Lines" pct={summary.avgLinesPct} />
+              </th>
+              <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-400"></th>
+              <th className="text-right px-3 pt-2 pb-3 font-normal text-neutral-400"></th>
+            </tr>
+            <tr>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+              <th className="h-0.5 bg-neutral-700/50"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
               <tr>
-                <th className="text-left px-3 py-2">File</th>
-                <th className="text-center px-3 py-2">Statements</th>
-                <th className="text-center px-3 py-2">Branches</th>
-                <th className="text-center px-3 py-2">Functions</th>
-                <th className="text-center px-3 py-2">Lines</th>
-                <th className="text-left px-3 py-2 whitespace-nowrap">Uncovered lines</th>
-                <th className="text-right px-3 py-2">Actions</th>
+                <td className="px-3 py-4 text-sm text-neutral-500" colSpan={7}>
+                  No coverage data found.
+                </td>
               </tr>
-              <tr>
-                <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-600 dark:text-neutral-400">
-                  {summary.fileCount} files
-                </th>
-                <th className="text-center px-3 pt-2 pb-3 font-normal">
-                  <MetricCell label="Statements" pct={summary.avgStatementsPct} />
-                </th>
-                <th className="text-center px-3 pt-2 pb-3 font-normal">
-                  <MetricCell label="Branches" pct={summary.avgBranchesPct} />
-                </th>
-                <th className="text-center px-3 pt-2 pb-3 font-normal">
-                  <MetricCell label="Functions" pct={summary.avgFunctionsPct} />
-                </th>
-                <th className="text-center px-3 pt-2 pb-3 font-normal">
-                  <MetricCell label="Lines" pct={summary.avgLinesPct} />
-                </th>
-                <th className="text-left px-3 pt-2 pb-3 font-normal text-neutral-400"></th>
-                <th className="text-right px-3 pt-2 pb-3 font-normal text-neutral-400"></th>
-              </tr>
-              <tr>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-                <th className="h-0.5 bg-neutral-700/50"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td className="px-3 py-4 text-sm text-neutral-500" colSpan={7}>
-                    No coverage data found.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((f, i) => {
-                  const uncoveredText = formatUncoveredLines(f.uncovered_lines)
-                  const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
-                  return (
-                    <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">
-                      <td className="px-3 py-2">
-                        <div className="truncate max-w-[520px]" title={f.file}>
-                          {f.rel}
+            ) : (
+              rows.map((f, i) => {
+                const uncoveredText = formatUncoveredLines(f.uncovered_lines)
+                const showImprove = (f.pct_lines ?? 0) < 80 || (f.uncovered_lines?.length ?? 0) > 0
+                return (
+                  <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800 group">
+                    <td className="px-3 py-2">
+                      <div className="truncate w-[520px] whitespace-nowrap" title={f.file}>
+                        {f.rel}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <MetricCell
+                        label="Statements"
+                        pct={f.pct_statements}
+                        covered={f.statements_covered}
+                        total={f.statements_total}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <MetricCell
+                        label="Branches"
+                        pct={f.pct_branch}
+                        covered={f.branches_covered}
+                        total={f.branches_total}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <MetricCell
+                        label="Functions"
+                        pct={f.pct_functions}
+                        covered={f.functions_covered}
+                        total={f.functions_total}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <MetricCell
+                        label="Lines"
+                        pct={f.pct_lines}
+                        covered={f.lines_covered}
+                        total={f.lines_total}
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      {uncoveredText && uncoveredText !== '—' ? (
+                        <div
+                          className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
+                          title={uncoveredText}
+                        >
+                          {uncoveredText}
                         </div>
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <MetricCell
-                          label="Statements"
-                          pct={f.pct_statements}
-                          covered={f.statements_covered}
-                          total={f.statements_total}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <MetricCell
-                          label="Branches"
-                          pct={f.pct_branch}
-                          covered={f.branches_covered}
-                          total={f.branches_total}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <MetricCell
-                          label="Functions"
-                          pct={f.pct_functions}
-                          covered={f.functions_covered}
-                          total={f.functions_total}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <MetricCell
-                          label="Lines"
-                          pct={f.pct_lines}
-                          covered={f.lines_covered}
-                          total={f.lines_total}
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        {uncoveredText && uncoveredText !== '—' ? (
-                          <div
-                            className="text-[11px] text-neutral-600 dark:text-neutral-400 truncate w-40"
-                            title={uncoveredText}
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {showImprove ? (
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}
                           >
-                            {uncoveredText}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        {showImprove ? (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex justify-end">
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => onImproveTestsClick(f.file, f.uncovered_lines || [])}
-                            >
-                              <div className="flex flex-col items-center leading-none">
-                                <IconDoubleUp className="w-4 h-4 mb-0.5" />
-                                <span className="text-[10px]">Tests</span>
-                              </div>
-                            </Button>
-                          </div>
-                        ) : null}
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                            <div className="flex flex-col items-center leading-none">
+                              <IconDoubleUp className="w-4 h-4 mb-0.5" />
+                              <span className="text-[10px]">Tests</span>
+                            </div>
+                          </Button>
+                        </div>
+                      ) : null}
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
