@@ -11,14 +11,12 @@ const IPC_HANDLER_KEYS = {
   // Chats
   CHATS_SUBSCRIBE: 'chats:subscribe',
   CHATS_COMPLETION: 'chats:completion',
-  CHATS_LIST_MODELS: 'chats:list-models',
   CHATS_LIST: 'chats:list',
-  CHATS_CREATE: 'chats:create',
   CHATS_GET: 'chats:get',
+  CHATS_CREATE: 'chats:create',
+  CHATS_UPDATE: 'chats:update',
   CHATS_DELETE: 'chats:delete',
   CHATS_GET_DEFAULT_PROMPT: 'chats:get-default-prompt',
-  CHATS_SAVE_PROMPT: 'chats:save-prompt',
-  CHATS_SAVE_SETTINGS: 'chats:save-settings',
 
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',

@@ -11,6 +11,7 @@ import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 import { IconChat } from '../components/ui/Icons'
 import { ChatSidebar } from '../components/Chat'
+import { ChatContext } from 'thefactory-tools'
 
 function TimeAgo({ ts }: { ts: number }) {
   const [now, setNow] = React.useState(Date.now())
@@ -43,9 +44,13 @@ function TestsInner() {
   const { storyIdsByProject, storiesById, createStory } = useStories()
   const { projectId } = useActiveProject()
 
-  const chatContextId = React.useMemo(() => {
+  const chatContext: ChatContext | undefined = React.useMemo(() => {
     if (!projectId) return undefined
-    return `${projectId}@tests`
+    return {
+      type: 'PROJECT_TOPIC',
+      projectId,
+      projectTopic: 'tests',
+    }
   }, [projectId])
 
   async function ensureTestingStory(): Promise<string | undefined> {
@@ -216,9 +221,9 @@ function TestsInner() {
         </div>
       </div>
 
-      {isChatOpen && chatContextId && (
+      {isChatOpen && chatContext && (
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ChatSidebar contextId={chatContextId} chatContextTitle="Tests chat" />
+          <ChatSidebar context={chatContext} chatContextTitle="Tests chat" />
         </div>
       )}
     </div>

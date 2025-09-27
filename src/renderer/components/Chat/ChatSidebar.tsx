@@ -1,19 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import { useChats } from '../../contexts/ChatsContext'
-import type { ChatContext } from 'src/chat/ChatsManager'
 import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/Select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
+import { ChatContext } from 'thefactory-tools'
 
 // Internal tool toggle type for UI
 type ToolToggle = { id: string; name: string; enabled: boolean }
@@ -156,8 +150,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       <header className="relative flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-            {chatContextTitle}{' '}
-            {chat ? `(${new Date(chat.updateDate).toLocaleString()})` : ''}
+            {chatContextTitle} {chat ? `(${new Date(chat.updateDate).toLocaleString()})` : ''}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -193,7 +186,9 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
               aria-label="Chat Settings"
             >
               <div className="px-3 py-2 border-b border-[var(--border-subtle)]">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">Chat Settings</div>
+                <div className="text-sm font-semibold text-[var(--text-primary)]">
+                  Chat Settings
+                </div>
                 <div className="text-xs text-[var(--text-secondary)]">Controls for this chat</div>
               </div>
 
@@ -224,9 +219,18 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
                         </div>
                       ) : (
                         tools.map((tool) => (
-                          <div key={tool.id} className="flex items-center justify-between px-2 py-2">
-                            <div className="text-sm text-[var(--text-primary)] truncate pr-2">{tool.name}</div>
-                            <Switch checked={tool.enabled} onCheckedChange={() => handleToolToggle(tool.id)} label="" />
+                          <div
+                            key={tool.id}
+                            className="flex items-center justify-between px-2 py-2"
+                          >
+                            <div className="text-sm text-[var(--text-primary)] truncate pr-2">
+                              {tool.name}
+                            </div>
+                            <Switch
+                              checked={tool.enabled}
+                              onCheckedChange={() => handleToolToggle(tool.id)}
+                              label=""
+                            />
                           </div>
                         ))
                       )}
@@ -236,12 +240,18 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm text-[var(--text-primary)]">Auto-approve tool calls</div>
+                    <div className="text-sm text-[var(--text-primary)]">
+                      Auto-approve tool calls
+                    </div>
                     <div className="text-xs text-[var(--text-secondary)]">
                       When enabled, the agent can invoke tools without asking for confirmation.
                     </div>
                   </div>
-                  <Switch checked={!!settings?.autoToolCall} onCheckedChange={handleAutoApproveChange} label="Auto-approve" />
+                  <Switch
+                    checked={!!settings?.autoToolCall}
+                    onCheckedChange={handleAutoApproveChange}
+                    label="Auto-approve"
+                  />
                 </div>
               </div>
             </div>
@@ -259,7 +269,9 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
           role="status"
         >
           <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
-          <button className="btn" onClick={() => navigateView('Settings')}>Configure</button>
+          <button className="btn" onClick={() => navigateView('Settings')}>
+            Configure
+          </button>
         </div>
       )}
 

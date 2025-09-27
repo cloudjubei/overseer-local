@@ -1,14 +1,14 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import { ChatTool, createToolManager, createTools, ToolManager } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import ProjectsManager from 'src/projects/ProjectsManager'
 import SettingsManager from 'src/settings/SettingsManager'
+import { AgentToolChatSchema, AgentTools, createAgentTools, createTools } from 'thefactory-tools'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
   private settingsManager: SettingsManager
-  private toolManagers: Record<string, ToolManager> = {}
+  private agentToolsMap: Record<string, AgentTools> = {}
 
   constructor(
     projectRoot: string,
@@ -36,9 +36,9 @@ export default class FactoryToolsManager extends BaseManager {
     return handlers
   }
 
-  async listTools(projectId: string): Promise<ChatTool[]> {
+  async listTools(projectId: string): Promise<AgentToolChatSchema[]> {
     const tools = await this.__getTools(projectId)
-    return (await tools?.getSchemas()) ?? []
+    return tools?.getSchemas() ?? []
   }
 
   async executeTool(projectId: string, toolName: string, args: any): Promise<any> {
@@ -52,7 +52,7 @@ export default class FactoryToolsManager extends BaseManager {
     }
   }
 
-  private async updateTool(projectId: string): Promise<ToolManager | undefined> {
+  private async updateTool(projectId: string): Promise<AgentTools | undefined> {
     const projectRoot = await this.projectsManager.getProjectDir(projectId)
     if (!projectRoot) {
       return
@@ -62,14 +62,14 @@ export default class FactoryToolsManager extends BaseManager {
     const dbConnectionString = appSettings?.database?.connectionString
 
     const tools = createTools(projectId, projectRoot, webSearchApiKeys, dbConnectionString)
-    const toolManager = createToolManager(tools)
+    const agentTools = createAgentTools(tools)
 
-    this.toolManagers[projectId] = toolManager
+    this.agentToolsMap[projectId] = agentTools
   }
-  private async __getTools(projectId: string): Promise<ToolManager | undefined> {
-    if (!this.toolManagers[projectId]) {
+  private async __getTools(projectId: string): Promise<AgentTools | undefined> {
+    if (!this.agentToolsMap[projectId]) {
       await this.updateTool(projectId)
     }
-    return this.toolManagers[projectId]
+    return this.agentToolsMap[projectId]
   }
 }

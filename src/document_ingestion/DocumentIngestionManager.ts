@@ -156,15 +156,15 @@ export default class DocumentIngestionManager extends BaseManager {
       await this.filesManager.addChangeHandler(projectId, async (update) => {
         switch (update.type) {
           case 'addFile': {
-            await this.handleFileAdded(projectId, update.relPath)
+            await this.handleFileAdded(projectId, update.relativePath)
             break
           }
           case 'change': {
-            await this.handleFileChanged(projectId, update.relPath)
+            await this.handleFileChanged(projectId, update.relativePath)
             break
           }
           case 'deleteFile': {
-            await this.handleFileDeleted(projectId, update.relPath)
+            await this.handleFileDeleted(projectId, update.relativePath)
             break
           }
         }

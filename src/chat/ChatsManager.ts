@@ -1,303 +1,210 @@
 import type { BrowserWindow } from 'electron'
-import path from 'path'
 import IPC_HANDLER_KEYS from '../ipcHandlersKeys'
-import ChatsStorage from './ChatsStorage'
 import BaseManager from '../BaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type StoriesManager from '../stories/StoriesManager'
-import type FilesManager from '../files/FilesManager'
-import type SettingsManager from '../settings/SettingsManager'
-import {
-  buildChatTools,
-  createCompletionClient,
-  parseAgentResponse,
-  normalizeTool,
-  ToolCall,
+import { createCompletionClient, createChatsTools } from 'thefactory-tools'
+import type {
+  ChatMessage,
+  ChatsTools,
+  Chat,
+  ChatContext,
+  ChatCreateInput,
+  ChatEditInput,
+  ChatContextProject,
+  ChatContextStory,
+  ChatContextFeature,
+  ChatContextAgentRun,
+  ChatContextProjectTopic,
+  CompletionMessage,
+  LLMConfig,
 } from 'thefactory-tools'
 import { getSystemPrompt, defaultContextPrompts } from './promptTemplates'
+import FactoryAgentRunManager from 'src/factory/FactoryAgentRunManager'
 
 const MESSAGES_TO_SEND = 10
 
-type ChatConfig = any
-
-export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom'
-
-export type ChatRole = 'user' | 'assistant' | 'system'
-export type ChatMessage = {
-  role: ChatRole
-  content: string
-  model?: string
-  attachments?: string[]
-  error?: {
-    message: string
-  }
-}
-
-export type ChatContext = {
-  projectId: string
-  storyId?: string
-  featureId?: string
-  type?: 'tests' | 'agents' | 'project'
-}
-
-export type ChatSettings = {
-  model?: string
-  autoToolCall?: boolean
-  allowedTools?: string[]
-  prompt?: string
-}
-
-export type Chat = {
-  id: string
-  messages: ChatMessage[]
-  creationDate: string
-  updateDate: string
-  settings?: ChatSettings
-  context?: ChatContext
-}
-
 export default class ChatsManager extends BaseManager {
-  private storages: Record<string, ChatsStorage>
-
+  private tools: ChatsTools
   private projectsManager: ProjectsManager
   private storiesManager: StoriesManager
-  private filesManager: FilesManager
-  private settingsManager: SettingsManager
+  private factoryAgentRunManager: FactoryAgentRunManager
 
   constructor(
     projectRoot: string,
     window: BrowserWindow,
     projectsManager: ProjectsManager,
     storiesManager: StoriesManager,
-    filesManager: FilesManager,
-    settingsManager: SettingsManager,
+    factoryAgentRunManager: FactoryAgentRunManager,
   ) {
     super(projectRoot, window)
-    this.storages = {}
 
     this.projectsManager = projectsManager
     this.storiesManager = storiesManager
-    this.filesManager = filesManager
-    this.settingsManager = settingsManager
-  }
+    this.factoryAgentRunManager = factoryAgentRunManager
 
-  private async __getStorage(projectId: string): Promise<ChatsStorage | undefined> {
-    if (!this.storages[projectId]) {
-      const projectRoot = await this.projectsManager.getProjectDir(projectId)
-      if (!projectRoot) {
-        return
-      }
-      const chatsDir = path.join(projectRoot, '.factory', 'chats')
-      const storage = new ChatsStorage(projectId, chatsDir, this.window)
-      await storage.init()
-      this.storages[projectId] = storage
-    }
-    return this.storages[projectId]
+    this.tools = createChatsTools(this.projectRoot)
   }
 
   async init(): Promise<void> {
-    await this.__getStorage('main')
+    await this.tools.init()
+    this.tools.subscribe(async (chatUpdate) => {
+      if (this.window) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, chatUpdate)
+      }
+    })
     await super.init()
   }
 
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    handlers[IPC_HANDLER_KEYS.CHATS_LIST_MODELS] = async ({ config }) =>
-      await this.listModels(config)
-    handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) =>
-      (await this.__getStorage(projectId))?.listChats()
-    handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ context }) =>
-      this.createChat(context)
-    handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ context }) =>
-      (await this.__getStorage(context.projectId))?.getChat(context)
-    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ context }) =>
-      (await this.__getStorage(context.projectId))?.deleteChat(context)
-    handlers[IPC_HANDLER_KEYS.CHATS_COMPLETION] = async ({
-      context,
-      newMessages,
-      config,
-    }) => this.getCompletion(context, newMessages, config)
-    handlers[IPC_HANDLER_KEYS.CHATS_GET_DEFAULT_PROMPT] = async ({ context }) =>
-      this.getDefaultPrompt(context)
-    handlers[IPC_HANDLER_KEYS.CHATS_SAVE_PROMPT] = async ({ context, prompt }) =>
-      this.savePrompt(context, prompt)
-    handlers[IPC_HANDLER_KEYS.CHATS_SAVE_SETTINGS] = async ({ context, settings }) =>
-      this.saveSettings(context, settings)
+    handlers[IPC_HANDLER_KEYS.CHATS_COMPLETION] = async ({ context, newMessages, config }) =>
+      this.getCompletion(context, newMessages, config)
+
+    handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) => this.listChats(projectId)
+    handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ input }) => this.createChat(input)
+    handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ context }) => this.getChat(context)
+    handlers[IPC_HANDLER_KEYS.CHATS_UPDATE] = async ({ context, patch }) =>
+      this.updateChat(context, patch)
+    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ context }) => this.deleteChat(context)
 
     return handlers
   }
 
-  private _withAttachmentsAsMentions(messages: ChatMessage[]): ChatMessage[] {
+  private _withAttachmentsAsMentions(messages: CompletionMessage[]): CompletionMessage[] {
     // Transform messages with attachments into content that includes @path mentions
     return (messages || []).map((m) => {
       try {
-        if (m && Array.isArray(m.attachments) && m.attachments.length) {
-          const unique = Array.from(new Set(m.attachments.filter(Boolean)))
+        if (m && Array.isArray(m.files) && m.files.length) {
+          const unique = Array.from(new Set(m.files.filter(Boolean)))
           const attachText = unique.map((p) => `@${p}`).join('\n')
           const sep = m.content && attachText ? '\n\n' : ''
-          return { ...m, content: `${m.content || ''}${sep}Attached files:\n${attachText}` }
+          return {
+            ...m,
+            content: `${m.content || ''}${sep}Attached files:\n${attachText}`,
+          }
         }
       } catch {}
       return m
     })
   }
 
-  private async _constructSystemPrompt(context: ChatContext): Promise<string> {
-    const chat = await (await this.__getStorage(context.projectId))?.getChat(context)
-    if (chat?.settings?.prompt) {
-      return chat.settings.prompt
-    }
-    return this.getDefaultPrompt(context)
-  }
-
-  private async getDefaultPrompt(context: ChatContext): Promise<string> {
-    const project: any = await this.projectsManager.getProject(context.projectId as any)
-
-    const parts = []
-    let basePrompt = defaultContextPrompts.project
-
-    if (context.featureId) {
-      basePrompt = defaultContextPrompts.feature
-    } else if (context.storyId) {
-      basePrompt = defaultContextPrompts.story
-    } else if (context.type) {
-      basePrompt = defaultContextPrompts[context.type]
-    }
-
-    parts.push(basePrompt)
-
-    if (project) {
-      parts.push(`\n#CURRENT PROJECT: ${project.name}`)
-      if (project.description) {
-        parts.push(`##DESCRIPTION:\n${project.description}`)
+  private async getContextPrompt(context: ChatContext): Promise<string> {
+    switch (context.type) {
+      case 'GENERAL':
+        return 'GENERIC TODO' //TODO:
+      case 'PROJECT': {
+        const c = context as ChatContextProject
+        const project = await this.projectsManager.getProject(c.projectId)
+        return defaultContextPrompts.project
+          .replace('@@project_title@@', project!.title)
+          .replace('@@project_description@@', project!.description)
+      }
+      case 'STORY': {
+        const c = context as ChatContextStory
+        const project = await this.projectsManager.getProject(c.projectId)
+        const story = await this.storiesManager.getStory(c.projectId, c.storyId)
+        return defaultContextPrompts.story
+          .replace('@@project_title@@', project!.title)
+          .replace('@@project_description@@', project!.description)
+          .replace('@@story_title@@', story!.title)
+          .replace('@@story_description@@', story!.description)
+      }
+      case 'FEATURE': {
+        const c = context as ChatContextFeature
+        const project = await this.projectsManager.getProject(c.projectId)
+        const story = await this.storiesManager.getStory(c.projectId, c.storyId)
+        const feature = await this.storiesManager.getFeature(c.projectId, c.storyId, c.featureId)
+        return defaultContextPrompts.story
+          .replace('@@project_title@@', project!.title)
+          .replace('@@project_description@@', project!.description)
+          .replace('@@story_title@@', story!.title)
+          .replace('@@story_description@@', story!.description)
+          .replace('@@feature_title@@', feature!.title)
+          .replace('@@feature_description@@', feature!.description)
+      }
+      case 'AGENT_RUN': {
+        const c = context as ChatContextAgentRun
+        const project = await this.projectsManager.getProject(c.projectId)
+        const story = await this.storiesManager.getStory(c.projectId, c.storyId)
+        const agentRun = await this.factoryAgentRunManager.getRun(c.agentRunId)
+        const conversations = agentRun!.conversations.map((c) => c.messages)
+        return defaultContextPrompts.agentRun
+          .replace('@@project_title@@', project!.title)
+          .replace('@@project_description@@', project!.description)
+          .replace('@@story_title@@', story!.title)
+          .replace('@@story_description@@', story!.description)
+          .replace('@@agen_type@@', agentRun!.agentType)
+          .replace('@@agent_conversations@@', JSON.stringify(conversations))
+      }
+      case 'PROJECT_TOPIC': {
+        const c = context as ChatContextProjectTopic
+        const project = await this.projectsManager.getProject(c.projectId)
+        const topic = c.projectTopic
+        return defaultContextPrompts.projectTopic
+          .replace('@@project_title@@', project!.title)
+          .replace('@@project_description@@', project!.description)
+          .replace('@@project_topic@@', c.projectTopic)
       }
     }
-
-    // TODO: Add more context based on storyId, featureId, etc.
-
-    return getSystemPrompt({ additionalContext: parts.join('\n') })
+    return 'UNKNOWN CONTEXT'
   }
 
-  async saveSettings(context: ChatContext, settings: ChatSettings): Promise<{ ok: true }> {
-    const storage = await this.__getStorage(context.projectId)
-    if (!storage) throw new Error('Could not get storage for project')
-
-    const chat = await storage.getChat(context)
-    if (!chat) throw new Error('Chat not found')
-
-    const newSettings = { ...(chat.settings || {}), ...settings }
-    return await storage.saveChat(
-      context,
-      chat.messages,
-      (chat as any).rawResponses,
-      newSettings,
-    )
+  async getDefaultPrompt(context: ChatContext): Promise<string> {
+    const contextPrompt = await this.getContextPrompt(context)
+    return getSystemPrompt({ additionalContext: contextPrompt })
   }
 
-  async savePrompt(context: ChatContext, prompt: string): Promise<{ ok: true }> {
-    return this.saveSettings(context, { prompt })
+  async listChats(projectId?: string): Promise<Chat[]> {
+    return await this.tools.listChats(projectId)
   }
-
-  private async _ensureSystemSeeded(storage: ChatsStorage, chat: Chat, context: ChatContext) {
-    if (!chat || !Array.isArray(chat.messages) || chat.messages.length === 0) {
-      try {
-        const systemPromptContent = await this._constructSystemPrompt(context)
-        const systemPrompt: ChatMessage = { role: 'system', content: systemPromptContent }
-        await storage.saveChat(context, [systemPrompt], chat && (chat as any).rawResponses, chat.settings)
-      } catch (e) {
-        // best effort: do not block chat creation
-      }
-    }
+  async getChat(context: ChatContext): Promise<Chat> {
+    return await this.tools.getChat(context)
   }
-
-  private async createChat(context: ChatContext): Promise<Chat | undefined> {
-    const storage = await this.__getStorage(context.projectId)
-    if (!storage) return undefined
-
-    // Check if chat already exists, if so return it
-    const existingChat = await storage.getChat(context)
-    if (existingChat) return existingChat
-
-    const chat = await storage.createChat(context)
-    // Seed system prompt as first message
-    await this._ensureSystemSeeded(storage, chat as Chat, context)
-    return chat
+  async createChat(input: ChatCreateInput): Promise<Chat> {
+    return await this.tools.createChat(input)
+  }
+  async updateChat(context: ChatContext, patch: ChatEditInput): Promise<Chat | undefined> {
+    return await this.tools.updateChat(context, patch)
+  }
+  async deleteChat(context: ChatContext): Promise<void> {
+    return await this.tools.deleteChat(context)
   }
 
   async getCompletion(
     context: ChatContext,
     newMessages: ChatMessage[],
-    config: ChatConfig,
+    config: LLMConfig,
   ): Promise<any> {
-    const storage = await this.__getStorage(context.projectId)
-    if (!storage) throw new Error('Could not get storage for project')
-
     try {
-      const chat: any = await storage?.getChat(context)
-      if (!chat) throw new Error(`Couldn't load chat for the given context: ${JSON.stringify(context)}`)
+      const chat = await this.getChat(context)
+      if (!chat)
+        throw new Error(`Couldn't load chat for the given context: ${JSON.stringify(context)}`)
 
-      const systemPromptContent = await this._constructSystemPrompt(context)
-      const systemPrompt: ChatMessage = { role: 'system', content: systemPromptContent }
-
-      let messagesHistory: ChatMessage[] = [...(chat.messages || []), ...(newMessages || [])]
+      let messagesHistory: CompletionMessage[] = [
+        ...(chat.messages.map((m) => m.completionMesage) || []),
+        ...(newMessages.map((m) => m.completionMesage) || []),
+      ]
       if (messagesHistory.length > MESSAGES_TO_SEND) {
         messagesHistory.splice(0, messagesHistory.length - MESSAGES_TO_SEND)
       }
-      // Build provider messages with attachments folded into content for tool discovery
       const providerMessages = this._withAttachmentsAsMentions(messagesHistory)
-      let currentMessages: ChatMessage[] = [systemPrompt, ...providerMessages]
+      const systemPrompt = await this.getDefaultPrompt(context)
+      let currentMessages: CompletionMessage[] = [
+        { role: 'system', content: systemPrompt },
+        ...providerMessages,
+      ]
 
-      const repoRoot = this.projectRoot
-      const appSettings = this.settingsManager.getAppSettings()
-      const webSearchApiKeys = appSettings?.webSearchApiKeys
-      const dbConnectionString = appSettings?.database?.connectionString
+      const { model, provider } = config
+      const completion = createCompletionClient(config)
 
-      const { tools, callTool } = buildChatTools({
-        repoRoot,
-        projectId: context.projectId,
-        webSearchApiKeys,
-        dbConnectionString,
-      })
-      const model = config.model
-      const completion = createCompletionClient(config, false)
+      const res = await completion({ model, messages: currentMessages })
 
-      let rawResponses: string[] = []
-      while (true) {
-        const startedAt = new Date()
-        const res = await completion({ model, messages: currentMessages, tools })
-        const _durationMs = new Date().getTime() - startedAt.getTime()
+      const message: ChatMessage = { completionMesage: res.message, model: { model, provider } }
+      await this.tools.addChatMessages(context, [message])
 
-        const agentResponse = parseAgentResponse(res.message.content) as any
-
-        rawResponses.push(JSON.stringify(res.message))
-
-        if (!agentResponse || !agentResponse.tool_calls || agentResponse.tool_calls.length === 0) {
-          const newSettings = { ...(chat.settings || {}), ...config }
-          return await storage?.saveChat(
-            context,
-            [...(chat.messages || []), ...(newMessages || []), res.message],
-            [...(chat.rawResponses ?? []), rawResponses],
-            newSettings,
-          )
-        }
-
-        currentMessages.push(res.message)
-
-        const toolOutputs: any[] = []
-        for (const toolCall of agentResponse.tool_calls as ToolCall[]) {
-          const toolName = toolCall.tool_name
-          const args = normalizeTool(toolCall.arguments, toolName)
-
-          const t0 = Date.now()
-          const result = await callTool(toolName, args)
-          const durationMs = Date.now() - t0
-          toolOutputs.push({ name: toolName, result, durationMs })
-        }
-        const content = JSON.stringify(toolOutputs)
-        const toolResultMsg: ChatMessage = { role: 'user', content }
-        currentMessages.push(toolResultMsg)
-      }
+      //TODO: thefactory-tools needs to provide a way of orchestrating a multi-tool completion turn
     } catch (error: any) {
       const details = [
         error?.message,
@@ -307,35 +214,7 @@ export default class ChatsManager extends BaseManager {
         .filter(Boolean)
         .join('\n')
       console.error('Error in chat completion:', details)
-
-      if (storage) {
-        const chat: any = await storage.getChat(context)
-        if (chat) {
-          const errorMessage: ChatMessage = {
-            role: 'assistant',
-            content: `An error occurred while processing your request.`,
-            error: {
-              message: details,
-            },
-          }
-          return await storage.saveChat(
-            context,
-            [...(chat.messages || []), ...(newMessages || []), errorMessage],
-            chat.rawResponses ?? [],
-            chat.settings,
-          )
-        }
-      }
-
       throw new Error('Failed to get completion and save error state.')
-    }
-  }
-
-  async listModels(_config?: ChatConfig): Promise<string[]> {
-    try {
-      return []
-    } catch (error) {
-      throw error
     }
   }
 }

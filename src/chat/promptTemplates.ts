@@ -62,6 +62,6 @@ export const defaultContextPrompts = {
   project: `You are an AI assistant helping with a software project. You have access to the project's details. Your task is to answer questions and provide assistance related to this project.`,
   story: `You are an AI assistant helping with a user story within a software project. You have access to the project and story details. Your task is to answer questions and provide assistance related to this user story.`,
   feature: `You are an AI assistant helping with a feature within a user story. You have access to the project, story, and feature details. Your task is to answer questions and provide assistance related to this feature.`,
-  tests: `You are an AI assistant helping with the tests for a software project. Your task is to help create, manage, and understand tests.`,
-  agents: `You are an AI assistant helping with the agents for a software project. Your task is to help create, manage, and understand agents.`,
+  agentRun: `You are an AI assistant helping with the agents for a software project. Your task is to help create, manage, and understand tests.`,
+  projectTopic: `You are an AI assistant helping with the tests for a software project. Your task is to help create, manage, and understand a particular project topic.`,
 }
