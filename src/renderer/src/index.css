@@ -15,6 +15,7 @@
 @import './styles/components/cards.css';
 @import './styles/components/segmented.css';
 @import './styles/components/file-display.css';
+@import './styles/components/file-mentions.css';
 @import './styles/components/chat.css';
 
 /* Layout */
@@ -26,6 +27,9 @@
 @import './styles/screens/board.css';
 @import './styles/screens/docs.css';
 @import './styles/screens/settings.css';
+
+/* Semantic utilities (bridge for token-based classes) */
+@import './styles/utilities/semantic-utilities.css';
 
 @import 'tailwindcss/preflight';
 @import 'tailwindcss/utilities';
