@@ -1,5 +1,5 @@
 import { NotificationCategory } from 'src/types/notifications'
-import { GithubCredentials, WebSearchApiKeys } from 'thefactory-tools'
+import { WebSearchApiKeys } from 'thefactory-tools'
 
 export type ShortcutsModifier = 'meta' | 'ctrl'
 

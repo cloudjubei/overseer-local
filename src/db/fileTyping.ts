@@ -58,7 +58,7 @@ const DEFAULT_CODE_EXTS = new Set([
   'svelte',
 ])
 
-export function isCodeFile(ext, relPath) {
+export function isCodeFile(ext: string, relPath: string) {
   if (!ext) {
     // try derive from relPath basename
     const i = relPath?.lastIndexOf('.') ?? -1
@@ -73,6 +73,6 @@ export function isCodeFile(ext, relPath) {
   return special.includes(base)
 }
 
-export function classifyDocumentType(ext, relPath) {
+export function classifyDocumentType(ext: string, relPath: string) {
   return isCodeFile(ext, relPath) ? 'project_code' : 'project_file'
 }

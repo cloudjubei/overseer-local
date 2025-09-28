@@ -1,36 +1,45 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureForm'
-import { useToast } from '../components/ui/Toast'
-import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useStories } from '../contexts/StoriesContext'
-import { useActiveProject } from '../contexts/ProjectContext'
-import ChatSidebar from '../components/Chat/ChatSidebar'
-import { IconChat } from '../components/ui/Icons'
-import type { ChatContext } from 'src/chat/ChatsManager'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ChatSidebar } from '../../components/Chat'
+import StoryForm, { StoryFormValues } from '../../components/Stories/StoryForm'
+import { IconChat } from '../../components/ui/Icons'
+import { AlertDialog, Modal } from '../../components/ui/Modal'
+import { useToast } from '../../components/ui/Toast'
+import { useActiveProject } from '../../contexts/ProjectContext'
+import { useStories } from '../../contexts/StoriesContext'
+import { useNavigator } from '../../navigation/Navigator'
+import { ChatContext, Story } from 'thefactory-tools'
 
-export default function FeatureCreateView({
+export default function StoryEditView({
   storyId,
   onRequestClose,
-  initialValues,
-  focusDescription = false,
 }: {
   storyId: string
   onRequestClose?: () => void
-  initialValues?: Partial<FeatureFormValues>
-  focusDescription?: boolean
 }) {
   const { toast } = useToast()
+  const navigator = useNavigator()
+  const [initialValues, setInitialValues] = useState<Story | null>(null)
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const titleRef = useRef<HTMLInputElement>(null)
-  const { addFeature } = useStories()
+  const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const { storiesById, updateStory, deleteStory } = useStories()
   const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatWidth, setChatWidth] = useState<number>(340)
+  const [chatWidth, setChatWidth] = useState<number>(380)
   const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
+
+  useEffect(() => {
+    if (storyId && storiesById) {
+      const t = storiesById[storyId]
+      setInitialValues(t)
+    } else {
+      setInitialValues(null)
+    }
+  }, [storyId, storiesById])
 
   const doClose = () => {
     onRequestClose?.()
@@ -45,38 +54,38 @@ export default function FeatureCreateView({
     doClose()
   }
 
-  const onSubmit = useCallback(
-    async (values: FeatureFormValues) => {
-      if (!storyId) {
-        setAlertMessage('No valid Story ID provided.')
-        setShowAlert(true)
-        return
-      }
-      setSubmitting(true)
-      try {
-        await addFeature(storyId, {
-          ...values,
-          description: values.description ?? '',
-        })
-        toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
-        doClose()
-      } catch (e: any) {
-        setAlertMessage(`Failed to create feature: ${e?.message || String(e)}`)
-        setShowAlert(true)
-      } finally {
-        setSubmitting(false)
-      }
-    },
-    [storyId, toast, addFeature],
-  )
-
-  if (!storyId) {
-    return <div>Error: No Story ID provided.</div>
+  const onSubmit = async (values: StoryFormValues) => {
+    setSubmitting(true)
+    try {
+      await updateStory(storyId, values)
+      toast({ title: 'Success', description: 'Story updated successfully', variant: 'success' })
+      doClose()
+    } catch (e: any) {
+      setAlertMessage(`Failed to update story: ${e?.message || String(e)}`)
+      setShowAlert(true)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const formId = 'feature-form-create'
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false)
+    setDeleting(true)
+    try {
+      await deleteStory(storyId)
+      toast({ title: 'Success', description: 'Story deleted successfully', variant: 'success' })
+      navigator.navigateView('Home')
+      doClose()
+    } catch (e: any) {
+      setAlertMessage(`Failed to delete story: ${e.message || String(e)}`)
+      setShowAlert(true)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const context = useMemo(
-    (): ChatContext => ({ type: 'story', projectId: projectId!, storyId }),
+    (): ChatContext => ({ type: 'STORY', projectId: projectId!, storyId }),
     [projectId, storyId],
   )
 
@@ -106,11 +115,10 @@ export default function FeatureCreateView({
   return (
     <>
       <Modal
-        title="Create New Feature"
+        title="Edit Story"
         onClose={attemptClose}
         isOpen={true}
-        size={isChatOpen ? 'xl' : 'lg'}
-        initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+        size={isChatOpen ? 'xl' : undefined}
         headerActions={
           <button
             className="btn-secondary btn-icon"
@@ -123,43 +131,29 @@ export default function FeatureCreateView({
           </button>
         }
         contentClassName="flex-grow overflow-hidden p-0"
-        footer={
-          <div className="flex justify-between gap-2">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={attemptClose}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn"
-              form={formId}
-              disabled={submitting}
-              aria-keyshortcuts="Control+Enter Meta+Enter"
-              title="Cmd/Ctrl+Enter to submit"
-            >
-              Create Feature
-            </button>
-          </div>
-        }
       >
         <div className="w-full h-full flex">
           <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-            <FeatureForm
-              onSubmit={onSubmit}
-              onCancel={attemptClose}
-              submitting={submitting}
-              titleRef={titleRef}
-              storyId={storyId}
-              hideActions
-              formId={formId}
-              onDirtyChange={setHasChanges}
-              initialValues={initialValues}
-              focusDescription={focusDescription}
-            />
+            {initialValues ? (
+              <StoryForm
+                id={`${initialValues.id}`}
+                initialValues={{
+                  status: initialValues.status,
+                  title: initialValues.title,
+                  description: initialValues.description,
+                }}
+                onSubmit={onSubmit}
+                onCancel={attemptClose}
+                submitting={submitting || deleting}
+                isCreate={false}
+                onDelete={() => setShowDeleteConfirm(true)}
+                onDirtyChange={setHasChanges}
+              />
+            ) : (
+              <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
+                Loading story…
+              </div>
+            )}
           </div>
           <div
             className="relative flex-shrink-0 border-l border-border bg-surface-base"
@@ -184,9 +178,7 @@ export default function FeatureCreateView({
                 pointerEvents: isChatOpen ? 'auto' : 'none',
               }}
             >
-              {isChatOpen && (
-                <ChatSidebar context={context} chatContextTitle="Story Chat (New Feature)" />
-              )}
+              {isChatOpen && <ChatSidebar context={context} chatContextTitle="Story Chat" />}
             </div>
           </div>
         </div>
@@ -203,6 +195,14 @@ export default function FeatureCreateView({
           setShowAlert(false)
           doClose()
         }}
+      />
+      <AlertDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Story"
+        description="Are you sure you want to delete this story? This will also remove any features and blockers referencing it. This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
       />
     </>
   )

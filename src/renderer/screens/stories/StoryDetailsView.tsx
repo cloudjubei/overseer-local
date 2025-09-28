@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigator } from '../navigation/Navigator'
-import DependencyBullet from '../components/stories/DependencyBullet'
-import StatusControl from '../components/stories/StatusControl'
-import { useActiveProject } from '../contexts/ProjectContext'
-import { useAgents } from '../contexts/AgentsContext'
-import AgentRunBullet from '../components/agents/AgentRunBullet'
+import { useNavigator } from '../../navigation/Navigator'
+import DependencyBullet from '../../components/Stories/DependencyBullet'
+import StatusControl from '../../components/Stories/StatusControl'
+import { useActiveProject } from '../../contexts/ProjectContext'
+import { useAgents } from '../../contexts/AgentsContext'
+import AgentRunBullet from '../../components/Agents/AgentRunBullet'
 import { Feature, Status, Story } from 'thefactory-tools'
-import { IconBack, IconChat, IconChevron, IconEdit, IconPlus } from '../components/ui/Icons'
-import ExclamationChip from '../components/stories/ExclamationChip'
-import RunAgentButton from '../components/stories/RunAgentButton'
-import { RichText } from '../components/ui/RichText'
-import ModelChip from '../components/agents/ModelChip'
-import { StatusPicker, statusKey, STATUS_LABELS } from '../components/stories/StatusControl'
-import { gitMonitorService } from '../services/gitMonitorService'
-import { Button } from '../components/ui/Button'
-import { useStories } from '../contexts/StoriesContext'
-import { ChatSidebar } from '../components/Chat'
+import { IconBack, IconChat, IconChevron, IconEdit, IconPlus } from '../../components/ui/Icons'
+import ExclamationChip from '../../components/Stories/ExclamationChip'
+import RunAgentButton from '../../components/Stories/RunAgentButton'
+import { RichText } from '../../components/ui/RichText'
+import ModelChip from '../../components/Agents/ModelChip'
+import { StatusPicker, statusKey, STATUS_LABELS } from '../../components/Stories/StatusControl'
+import { gitMonitorService } from '../../services/gitMonitorService'
+import { Button } from '../../components/ui/Button'
+import { useStories } from '../../contexts/StoriesContext'
+import { ChatSidebar } from '../../components/Chat'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -753,7 +753,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                                   None
                                 </span>
                               ) : (
-                                blockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
+                                blockers.map((d) => (
+                                  <DependencyBullet key={d.id} dependency={d.id} />
+                                ))
                               )}
                             </div>
                             <div className="chips-list">

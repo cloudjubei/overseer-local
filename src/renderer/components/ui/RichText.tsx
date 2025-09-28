@@ -1,7 +1,7 @@
 import React from 'react'
 import FileDisplay from './FileDisplay'
 import { useFiles } from '../../contexts/FilesContext'
-import DependencyBullet from '../stories/DependencyBullet'
+import DependencyBullet from '../Stories/DependencyBullet'
 import { FileMeta } from 'thefactory-tools'
 
 // Renders text into rich content:
@@ -99,7 +99,8 @@ export function RichText({
           pos = end
 
           const isEditing = !!(
-            inputEditRange && Math.max(start, inputEditRange.start) < Math.min(end, inputEditRange.end)
+            inputEditRange &&
+            Math.max(start, inputEditRange.start) < Math.min(end, inputEditRange.end)
           )
 
           if (isEditing) {

@@ -52,8 +52,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     mainWindow,
     projectsManager,
     storiesManager,
-    filesManager,
-    settingsManager,
+    factoryAgentRunManager,
   )
   documentIngestionManager = new DocumentIngestionManager(
     projectRoot,

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useFiles, DirNode } from '../contexts/FilesContext'
-import { MarkdownEditor } from '../components/files/MarkdownEditor'
-import BasicFileViewer from '../components/files/BasicFileViewer'
-import { goToFile, parseFileFromHash } from '../navigation/filesNavigation'
+import { MarkdownEditor } from '../components/Files/MarkdownEditor'
+import BasicFileViewer from '../components/Files/BasicFileViewer'
+import { goToFile, parseFileFromHash } from '../navigation/FilesNavigation'
 import { IconChevron, IconDocument, IconFolder, IconFolderOpen } from '../components/ui/Icons'
 import { FileMeta } from 'thefactory-tools'
 

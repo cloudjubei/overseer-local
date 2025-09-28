@@ -5,8 +5,8 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import { Entity } from 'thefactory-db'
 import { EntityInput } from 'thefactory-db/dist/types'
-import StorySummaryCallout from '../components/stories/StorySummaryCallout'
-import FeatureSummaryCallout from '../components/stories/FeatureSummaryCallout'
+import StorySummaryCallout from '../components/Stories/StorySummaryCallout'
+import FeatureSummaryCallout from '../components/Stories/FeatureSummaryCallout'
 import { useNavigator } from '../navigation/Navigator'
 import { Switch } from '../components/ui/Switch'
 
@@ -259,7 +259,11 @@ export default function ProjectTimelineView() {
   const displayedFeatures = useMemo(() => {
     return displayedStories
       .flatMap((t: any) =>
-        (t.features || []).map((f: Feature) => ({ ...f, storyProjectId: t.projectId, storyId: t.id })),
+        (t.features || []).map((f: Feature) => ({
+          ...f,
+          storyProjectId: t.projectId,
+          storyId: t.id,
+        })),
       )
       .filter((f) => !!f.completedAt)
   }, [displayedStories])

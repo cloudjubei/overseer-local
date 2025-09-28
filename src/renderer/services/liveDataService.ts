@@ -1,4 +1,4 @@
-import { LiveDataProvider, LiveDataProviderStatus } from 'src/live-data/LiveDataTypes'
+import { LiveDataProvider, LiveDataProviderStatus } from 'src/types/liveDataTypes'
 
 export type LiveDataService = {
   subscribe: (callback: (statuses: LiveDataProviderStatus[]) => void) => () => void

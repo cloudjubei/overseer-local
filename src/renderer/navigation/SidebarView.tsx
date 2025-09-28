@@ -16,7 +16,7 @@ import { MAIN_PROJECT, useProjectContext } from '../contexts/ProjectContext'
 import type { NavigationView } from '../types'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useAgents } from '../contexts/AgentsContext'
-import NotificationBadge from '../components/stories/NotificationBadge'
+import NotificationBadge from '../components/Stories/NotificationBadge'
 import { ProjectSpec } from 'thefactory-tools'
 import {
   IconHome,

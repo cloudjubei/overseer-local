@@ -1,27 +1,27 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigator } from '../navigation/Navigator'
+import { useNavigator } from '../../navigation/Navigator'
 import BoardView from './BoardView'
-import SegmentedControl from '../components/ui/SegmentedControl'
-import { useActiveProject } from '../contexts/ProjectContext'
-import DependencyBullet from '../components/stories/DependencyBullet'
+import SegmentedControl from '../../components/ui/SegmentedControl'
+import { useActiveProject } from '../../contexts/ProjectContext'
+import DependencyBullet from '../../components/Stories/DependencyBullet'
 import StatusControl, {
   STATUS_LABELS,
   StatusPicker,
   statusKey,
-} from '../components/stories/StatusControl'
-import { StoryListViewSorting, StoryViewMode, StoryListStatusFilter } from '../../types/settings'
-import { useAgents } from '../contexts/AgentsContext'
+} from '../../components/Stories/StatusControl'
+import { useAgents } from '../../contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
-import ExclamationChip from '../components/stories/ExclamationChip'
-import { IconBoard, IconEdit, IconPlus, IconList, IconChat } from '../components/ui/Icons'
-import AgentRunBullet from '../components/agents/AgentRunBullet'
-import RunAgentButton from '../components/stories/RunAgentButton'
-import { RichText } from '../components/ui/RichText'
-import ModelChip from '../components/agents/ModelChip'
-import Skeleton, { SkeletonText } from '../components/ui/Skeleton'
-import { useAppSettings } from '../contexts/AppSettingsContext'
-import { useStories } from '../contexts/StoriesContext'
-import { ChatSidebar } from '../components/Chat'
+import ExclamationChip from '../../components/Stories/ExclamationChip'
+import { IconBoard, IconEdit, IconPlus, IconList, IconChat } from '../../components/ui/Icons'
+import AgentRunBullet from '../../components/Agents/AgentRunBullet'
+import RunAgentButton from '../../components/Stories/RunAgentButton'
+import { RichText } from '../../components/ui/RichText'
+import ModelChip from '../../components/Agents/ModelChip'
+import Skeleton, { SkeletonText } from '../../components/ui/Skeleton'
+import { useAppSettings } from '../../contexts/AppSettingsContext'
+import { useStories } from '../../contexts/StoriesContext'
+import { ChatSidebar } from '../../components/Chat'
+import { StoryListStatusFilter, StoryListViewSorting, StoryViewMode } from '../../../types/settings'
 
 function countFeatures(story: Story) {
   const features = Array.isArray(story.features) ? story.features : []
@@ -632,7 +632,7 @@ export default function StoriesListView() {
       {isChatOpen && projectId && (
         <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
           <ChatSidebar
-            context={{ projectId, type: 'project' }}
+            context={{ projectId, type: 'PROJECT' }}
             chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
           />
         </div>

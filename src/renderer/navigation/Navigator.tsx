@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { NavigationView } from '../types'
-import type { FeatureFormValues } from '../components/stories/FeatureForm'
+import type { FeatureFormValues } from '../components/Stories/FeatureForm'
 
 export type StoriesRoute =
   | { name: 'list' }

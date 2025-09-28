@@ -1,26 +1,35 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
-import StoryForm, { StoryFormValues } from '../components/stories/StoryForm'
-import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useToast } from '../components/ui/Toast'
-import { useStories } from '../contexts/StoriesContext'
-import { StoryCreateInput } from 'thefactory-tools'
-import { useActiveProject } from '../contexts/ProjectContext'
-import ChatSidebar from '../components/Chat/ChatSidebar'
-import { IconChat } from '../components/ui/Icons'
-import type { ChatContext } from 'src/chat/ChatsManager'
+import FeatureForm, { FeatureFormValues } from '../../components/Stories/FeatureForm'
+import { useToast } from '../../components/ui/Toast'
+import { AlertDialog, Modal } from '../../components/ui/Modal'
+import { useStories } from '../../contexts/StoriesContext'
+import { useActiveProject } from '../../contexts/ProjectContext'
+import ChatSidebar from '../../components/Chat/ChatSidebar'
+import { IconChat } from '../../components/ui/Icons'
+import { ChatContext } from 'thefactory-tools'
 
-export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
+export default function FeatureCreateView({
+  storyId,
+  onRequestClose,
+  initialValues,
+  focusDescription = false,
+}: {
+  storyId: string
+  onRequestClose?: () => void
+  initialValues?: Partial<FeatureFormValues>
+  focusDescription?: boolean
+}) {
   const { toast } = useToast()
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
-  const { createStory } = useStories()
+  const { addFeature } = useStories()
   const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatWidth, setChatWidth] = useState<number>(360)
+  const [chatWidth, setChatWidth] = useState<number>(340)
   const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const doClose = () => {
@@ -37,26 +46,38 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
   }
 
   const onSubmit = useCallback(
-    async (values: StoryFormValues) => {
+    async (values: FeatureFormValues) => {
+      if (!storyId) {
+        setAlertMessage('No valid Story ID provided.')
+        setShowAlert(true)
+        return
+      }
       setSubmitting(true)
       try {
-        await createStory({ ...values } as StoryCreateInput)
-        toast({ title: 'Success', description: 'Story created successfully', variant: 'success' })
+        await addFeature(storyId, {
+          ...values,
+          description: values.description ?? '',
+        })
+        toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
         doClose()
       } catch (e: any) {
-        setAlertMessage(`Failed to create story: ${e?.message || String(e)}`)
+        setAlertMessage(`Failed to create feature: ${e?.message || String(e)}`)
         setShowAlert(true)
       } finally {
         setSubmitting(false)
       }
     },
-    [toast, createStory],
+    [storyId, toast, addFeature],
   )
 
-  // While creating a story, we don't yet have a storyId; use project-level chat context.
+  if (!storyId) {
+    return <div>Error: No Story ID provided.</div>
+  }
+
+  const formId = 'feature-form-create'
   const context = useMemo(
-    (): ChatContext => ({ type: 'project-chat', projectId: projectId! }),
-    [projectId],
+    (): ChatContext => ({ type: 'STORY', projectId: projectId!, storyId }),
+    [projectId, storyId],
   )
 
   // Resize handlers
@@ -85,10 +106,10 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
   return (
     <>
       <Modal
-        title="Create New Story"
+        title="Create New Feature"
         onClose={attemptClose}
         isOpen={true}
-        size={isChatOpen ? 'xl' : 'md'}
+        size={isChatOpen ? 'xl' : 'lg'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         headerActions={
           <button
@@ -102,18 +123,42 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
           </button>
         }
         contentClassName="flex-grow overflow-hidden p-0"
+        footer={
+          <div className="flex justify-between gap-2">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={attemptClose}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn"
+              form={formId}
+              disabled={submitting}
+              aria-keyshortcuts="Control+Enter Meta+Enter"
+              title="Cmd/Ctrl+Enter to submit"
+            >
+              Create Feature
+            </button>
+          </div>
+        }
       >
         <div className="w-full h-full flex">
           <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-            <StoryForm
-              id="-1"
-              initialValues={{}}
+            <FeatureForm
               onSubmit={onSubmit}
               onCancel={attemptClose}
               submitting={submitting}
-              isCreate={true}
               titleRef={titleRef}
+              storyId={storyId}
+              hideActions
+              formId={formId}
               onDirtyChange={setHasChanges}
+              initialValues={initialValues}
+              focusDescription={focusDescription}
             />
           </div>
           <div
@@ -140,7 +185,7 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
               }}
             >
               {isChatOpen && (
-                <ChatSidebar context={context} chatContextTitle="Project Chat (New Story)" />
+                <ChatSidebar context={context} chatContextTitle="Story Chat (New Feature)" />
               )}
             </div>
           </div>

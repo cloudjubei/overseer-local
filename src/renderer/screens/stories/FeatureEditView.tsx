@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertDialog, Modal } from '../components/ui/Modal'
-import { useToast } from '../components/ui/Toast'
-import type { Feature } from 'thefactory-tools'
-import { useStories } from '../contexts/StoriesContext'
-import FeatureForm, { FeatureFormValues } from '../components/stories/FeatureForm'
-import { Button } from '../components/ui/Button'
-import { IconChat, IconDelete } from '../components/ui/Icons'
-import { useActiveProject } from '../contexts/ProjectContext'
-import ChatSidebar from '../components/Chat/ChatSidebar'
-import type { ChatContext } from 'src/chat/ChatsManager'
+import { ChatSidebar } from '../../components/Chat'
+import FeatureForm, { FeatureFormValues } from '../../components/Stories/FeatureForm'
+import { Button } from '../../components/ui/Button'
+import { IconChat, IconDelete } from '../../components/ui/Icons'
+import { AlertDialog, Modal } from '../../components/ui/Modal'
+import { useToast } from '../../components/ui/Toast'
+import { useActiveProject } from '../../contexts/ProjectContext'
+import { useStories } from '../../contexts/StoriesContext'
+import type { ChatContext, Feature } from 'thefactory-tools'
 
 export default function FeatureEditView({
   storyId,
@@ -90,7 +89,7 @@ export default function FeatureEditView({
   const formId = 'feature-form-edit'
   const context = useMemo(
     (): ChatContext => ({
-      type: 'feature',
+      type: 'FEATURE',
       projectId: projectId!,
       storyId,
       featureId,

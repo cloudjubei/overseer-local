@@ -48,9 +48,7 @@ export default class DocumentIngestionManager extends BaseManager {
 
   async ingestAll(): Promise<void> {
     const projects = await this.projectsManager.listProjects()
-    for (const p of projects) {
-      await this.ingestProject(p.id)
-    }
+    await Promise.all(projects.map((p) => this.ingestProject(p.id)))
   }
 
   async ingestProject(projectId: string): Promise<void> {
@@ -83,7 +81,7 @@ export default class DocumentIngestionManager extends BaseManager {
       }
     }
     try {
-      await this.databaseManager.upsertDocuments(documentsToUpsert)
+      // await this.databaseManager.upsertDocuments(documentsToUpsert)
     } catch (e) {
       console.warn('[DocumentIngestion] file ingest failed in batch. Error: ', e)
     }

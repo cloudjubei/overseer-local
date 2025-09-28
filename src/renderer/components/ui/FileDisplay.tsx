@@ -1,6 +1,6 @@
 import React from 'react'
 import Tooltip from './Tooltip'
-import { goToFile } from '../../navigation/filesNavigation'
+import { goToFile } from '../../navigation/FilesNavigation'
 import { useFiles, inferFileType } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
 

@@ -13,7 +13,7 @@ import type {
   LiveDataProvider,
   LiveDataProviderScope,
   LiveDataProviderStatus,
-} from '../../live-data/LiveDataTypes'
+} from '../../types/liveDataTypes'
 
 function formatLastUpdated(ts: number | undefined | null) {
   if (!ts) return 'never'

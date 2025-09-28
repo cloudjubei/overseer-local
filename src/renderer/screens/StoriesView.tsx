@@ -1,7 +1,7 @@
 import React from 'react'
-import StoryDetailsView from '../stories/StoryDetailsView'
-import StoriesListView from '../stories/StoriesListView'
 import { useNavigator } from '../navigation/Navigator'
+import StoryDetailsView from './stories/StoryDetailsView'
+import StoriesListView from './stories/StoriesListView'
 
 const StoriesView: React.FC = () => {
   const { storiesRoute } = useNavigator()
