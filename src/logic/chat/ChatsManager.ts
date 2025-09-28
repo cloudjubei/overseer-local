@@ -116,7 +116,7 @@ export default class ChatsManager extends BaseManager {
         const project = await this.projectsManager.getProject(c.projectId)
         const story = await this.storiesManager.getStory(c.projectId, c.storyId)
         const feature = await this.storiesManager.getFeature(c.projectId, c.storyId, c.featureId)
-        return defaultContextPrompts.story
+        return defaultContextPrompts.feature
           .replace('@@project_title@@', project!.title)
           .replace('@@project_description@@', project!.description)
           .replace('@@story_title@@', story!.title)
@@ -135,7 +135,7 @@ export default class ChatsManager extends BaseManager {
           .replace('@@project_description@@', project!.description)
           .replace('@@story_title@@', story!.title)
           .replace('@@story_description@@', story!.description)
-          .replace('@@agen_type@@', agentRun!.agentType)
+          .replace('@@agent_type@@', agentRun!.agentType)
           .replace('@@agent_conversations@@', JSON.stringify(conversations))
       }
       case 'PROJECT_TOPIC': {

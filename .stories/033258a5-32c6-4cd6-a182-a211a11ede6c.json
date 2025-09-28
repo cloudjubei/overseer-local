@@ -161,7 +161,7 @@
     },
     {
       "id": "92ea6113-9709-4f89-9e62-24a5c7c5b4ee",
-      "status": "-",
+      "status": "?",
       "title": "The input box needs improving",
       "description": "In the @src/renderer/components/Chat/ChatInput.tsx the send button should be an icon -  create one in @src/renderer/components/ui/Icons.tsx . There should also be an appropriate icon for the Attach button.\nBoth of the buttons should be part of the input view (in the footer with the hints) so that it can take as much space horizontally as possible with just a little bit of padding. The input box should only grow to 30% of the total chat view - no matter where it is used.",
       "context": [
@@ -170,7 +170,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T00:42:13.695Z",
-      "updatedAt": "2025-09-25T13:22:54.381Z"
+      "updatedAt": "2025-09-28T01:43:16.184Z"
     },
     {
       "id": "e30f1aae-50de-416d-8f67-05c6f7687590",
@@ -200,37 +200,37 @@
     },
     {
       "id": "95c7a067-9e9b-4e54-b786-6d3997dfff30",
-      "status": "-",
+      "status": "?",
       "title": "Improve the chat sidebar ui on screens",
       "description": "TODO",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:33.055Z",
-      "updatedAt": "2025-09-25T13:24:33.055Z"
+      "updatedAt": "2025-09-28T01:43:20.270Z"
     },
     {
       "id": "f50d7e7c-034c-4455-8772-81afac6c660c",
-      "status": "-",
+      "status": "?",
       "title": "Improve the chat UI on popups",
       "description": "",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:43.049Z",
-      "updatedAt": "2025-09-25T13:24:43.049Z"
+      "updatedAt": "2025-09-28T01:43:31.047Z"
     },
     {
       "id": "c3804c5f-ec19-410e-b866-3d0229cb354a",
-      "status": "-",
+      "status": "?",
       "title": "Improve the top buttons in ChatSidebar",
       "description": "",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-25T13:29:28.459Z",
-      "updatedAt": "2025-09-25T13:29:28.459Z"
+      "updatedAt": "2025-09-28T01:43:26.302Z"
     },
     {
       "id": "4fdbae23-ff2f-4616-a7cf-61d831dc8377",
-      "status": "-",
+      "status": "?",
       "title": "no need to mention Shift+Enter for newline",
       "description": "In @src/renderer/components/Chat/ChatInput.tsx no need to mention Shift+Enter as normal Enter creates a newline.",
       "context": [
@@ -238,7 +238,34 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:34:26.711Z",
-      "updatedAt": "2025-09-25T13:34:26.711Z"
+      "updatedAt": "2025-09-28T01:43:23.584Z"
+    },
+    {
+      "id": "35267358-0316-4f6e-a5d0-aafaec8b04c0",
+      "status": "+",
+      "title": "Make the default prompts be fillable with data",
+      "description": "in @src/logic/chat/ChatsManager.ts there's `getContextPrompt` and it uses a pattern replacement system for the prompts. The prompts in @src/logic/chat/promptTemplates.ts need to be updated to accommodate for these.",
+      "context": [
+        "src/logic/chat/ChatsManager.ts",
+        "src/logic/chat/promptTemplates.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-28T01:44:37.135Z",
+      "updatedAt": "2025-09-28T01:49:33.659Z",
+      "completedAt": "2025-09-28T01:49:33.659Z"
+    },
+    {
+      "id": "7d6e9811-8e3a-4e0a-abc9-fd5846858d84",
+      "status": "-",
+      "title": "ChatSidebar needs fixing",
+      "description": "@src/renderer/src/contexts/ChatsContext.tsx was updated to use `thefactory-tools` contextual chats implementation, now the @src/renderer/src/components/chat/ChatSidebar.tsx needs to be updated to accomodate for the changes.",
+      "context": [
+        "src/renderer/src/contexts/ChatsContext.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-28T01:46:00.994Z",
+      "updatedAt": "2025-09-28T01:46:00.994Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -254,12 +281,14 @@
     "02b401c9-5219-48ee-8fca-174c6702ff2f": 10,
     "ba16d671-5c40-496f-b887-7c9d94694711": 11,
     "860c56c9-61e0-476f-8459-f7ccc4838ef3": 12,
-    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 13,
-    "95c7a067-9e9b-4e54-b786-6d3997dfff30": 14,
-    "f50d7e7c-034c-4455-8772-81afac6c660c": 15,
-    "c3804c5f-ec19-410e-b866-3d0229cb354a": 16,
-    "4fdbae23-ff2f-4616-a7cf-61d831dc8377": 17,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 18
+    "35267358-0316-4f6e-a5d0-aafaec8b04c0": 13,
+    "7d6e9811-8e3a-4e0a-abc9-fd5846858d84": 14,
+    "92ea6113-9709-4f89-9e62-24a5c7c5b4ee": 15,
+    "95c7a067-9e9b-4e54-b786-6d3997dfff30": 16,
+    "f50d7e7c-034c-4455-8772-81afac6c660c": 17,
+    "c3804c5f-ec19-410e-b866-3d0229cb354a": 18,
+    "4fdbae23-ff2f-4616-a7cf-61d831dc8377": 19,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 20
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-24T17:17:30.489Z"
