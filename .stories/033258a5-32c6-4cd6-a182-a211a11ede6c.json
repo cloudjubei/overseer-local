@@ -256,7 +256,7 @@
     },
     {
       "id": "7d6e9811-8e3a-4e0a-abc9-fd5846858d84",
-      "status": "-",
+      "status": "+",
       "title": "ChatSidebar needs fixing",
       "description": "@src/renderer/src/contexts/ChatsContext.tsx was updated to use `thefactory-tools` contextual chats implementation, now the @src/renderer/src/components/chat/ChatSidebar.tsx needs to be updated to accomodate for the changes.",
       "context": [
@@ -265,7 +265,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-28T01:46:00.994Z",
-      "updatedAt": "2025-09-28T01:46:00.994Z"
+      "updatedAt": "2025-09-28T01:51:20.496Z",
+      "completedAt": "2025-09-28T01:51:20.496Z"
     }
   ],
   "featureIdToDisplayIndex": {

@@ -1,158 +1,172 @@
-// import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-// import { useLLMConfig } from '../../contexts/LLMConfigContext'
-// import { useNavigator } from '../../navigation/Navigator'
-// import { useChats } from '../../contexts/ChatsContext'
-// import { factoryToolsService } from '../../services/factoryToolsService'
-// import { ChatInput, MessageList } from '.'
-// import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
-// import { Switch } from '../ui/Switch'
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
-import { ChatContext } from 'thefactory-tools'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLLMConfig } from '../../contexts/LLMConfigContext'
+import { useNavigator } from '../../navigation/Navigator'
+import { useChats, getChatContextPath } from '../../contexts/ChatsContext'
+import { factoryToolsService } from '../../services/factoryToolsService'
+import { ChatInput, MessageList } from '.'
+import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
+import { Switch } from '../ui/Switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
+import type { Chat, ChatContext } from 'thefactory-tools'
 
 // Internal tool toggle type for UI
-// type ToolToggle = { id: string; name: string; enabled: boolean }
+type ToolToggle = { id: string; name: string; enabled: boolean }
 
 export type ChatSidebarProps = {
   context: ChatContext
   chatContextTitle: string
 }
 
-// function parseProjectIdFromContext(context: ChatContext): string | undefined {
-//   return context?.projectId
-// }
+function parseProjectIdFromContext(context: ChatContext): string | undefined {
+  if (context && 'projectId' in context) {
+    return context.projectId
+  }
+  return undefined
+}
 
-//TODO: fix
 export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
-  // const { chats, chatsByProjectId, getChat, sendMessage, restartChat } = useChats()
+  const { chats, getChat, sendMessage } = useChats()
 
-  console.log('chat context:', context, ' title: ', chatContextTitle)
-  // const { chat, isThinking } = getChat(context)
+  const chatKey = useMemo(() => getChatContextPath(context), [context])
+  const chatState = chats[chatKey]
 
-  // useEffect(() => {
-  //   refreshChat(context)
-  // }, [context, refreshChat])
+  useEffect(() => {
+    getChat(context)
+  }, [context, getChat])
 
-  // const { configs, activeConfig, setActive } = useLLMConfig()
-  // const { navigateView } = useNavigator()
+  const chat: Chat | undefined = chatState?.chat
+  const isThinking = chatState?.isThinking || false
+  const settings = chat?.settings
 
-  // const settings = chat?.settings
+  const { configs, activeConfig, setActive } = useLLMConfig()
+  const { navigateView } = useNavigator()
 
   // Determine selected model/config
-  // const selectedModel: string | undefined = settings?.model
-  // const selectedConfig = useMemo(() => {
-  //   if (selectedModel) {
-  //     const byModel = configs.find((c) => c.model === selectedModel)
-  //     if (byModel) return byModel
-  //   }
-  //   if (activeConfig) return activeConfig
-  //   return configs[0]
-  // }, [configs, activeConfig, selectedModel])
+  const selectedModel: string | undefined = settings?.model
+  const selectedConfig = useMemo(() => {
+    if (selectedModel) {
+      const byModel = configs.find((c) => c.model === selectedModel)
+      if (byModel) return byModel
+    }
+    if (activeConfig) return activeConfig
+    return configs[0]
+  }, [configs, activeConfig, selectedModel])
 
-  // const selectedConfigId = selectedConfig?.id
-  // const isConfigured = !!selectedConfig?.apiKey
+  const selectedConfigId = selectedConfig?.id
+  const isConfigured = !!selectedConfig?.apiKey
 
-  // const handleSend = useCallback(
-  //   async (message: string, attachments: string[]) => {
-  //     if (!selectedConfig) return
-  //     tryResumeAudioContext()
-  //     playSendSound()
-  //     await sendMessage(context, message, selectedConfig, attachments)
-  //   },
-  //   [context, selectedConfig, sendMessage],
-  // )
+  const [allowedTools, setAllowedTools] = useState(settings?.allowedTools)
+  const [autoToolCall, setAutoToolCall] = useState(!!settings?.autoToolCall)
 
-  // const handleConfigChange = useCallback(
-  //   async (configId: string) => {
-  //     const cfg = configs.find((c) => c.id === configId)
-  //     if (!cfg) return
-  //     // Persist model choice into chat settings for this context and align global active
-  //     // await saveChatSettings(context, { model: cfg.model })
-  //     setActive(configId)
-  //   },
-  //   [context, configs, saveChatSettings, setActive],
-  // )
+  useEffect(() => {
+    setAllowedTools(settings?.allowedTools)
+    setAutoToolCall(!!settings?.autoToolCall)
+  }, [settings])
 
-  // // Tools management (allowedTools is an allowlist; undefined => all allowed)
-  // const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
-  // const projectId = parseProjectIdFromContext(context)
-  // useEffect(() => {
-  //   let isMounted = true
-  //   async function loadTools() {
-  //     if (!projectId) return
-  //     try {
-  //       const list = await factoryToolsService.listTools(projectId)
-  //       const allowed = settings?.allowedTools
-  //       const mapped: ToolToggle[] = list.map((t: any) => ({
-  //         id: t.name,
-  //         name: t.name,
-  //         enabled: !allowed ? true : allowed.includes(t.name),
-  //       }))
-  //       if (isMounted) setTools(mapped)
-  //     } catch (e) {
-  //       if (isMounted) setTools([])
-  //     }
-  //   }
-  //   loadTools()
-  //   return () => {
-  //     isMounted = false
-  //   }
-  // }, [projectId, settings?.allowedTools])
+  const handleSend = useCallback(
+    async (message: string, attachments: string[]) => {
+      if (!selectedConfig) return
+      tryResumeAudioContext()
+      playSendSound()
+      const configWithSettings = {
+        ...selectedConfig,
+        allowedTools,
+        autoToolCall,
+      }
+      await sendMessage(context, message, configWithSettings, attachments)
+    },
+    [context, selectedConfig, sendMessage, allowedTools, autoToolCall],
+  )
 
-  // const handleToolToggle = useCallback(
-  //   async (toolId: string) => {
-  //     const allowed = new Set(settings?.allowedTools || [])
-  //     // If no explicit allowlist yet, initialize as all current enabled tools from UI
-  //     if (!settings?.allowedTools && tools) {
-  //       tools.forEach((t) => t.enabled && allowed.add(t.id))
-  //     }
-  //     if (allowed.has(toolId)) {
-  //       allowed.delete(toolId)
-  //     } else {
-  //       allowed.add(toolId)
-  //     }
-  //     await saveChatSettings(context, { allowedTools: Array.from(allowed) })
-  //   },
-  //   [context, settings?.allowedTools, tools, saveChatSettings],
-  // )
+  const handleConfigChange = useCallback(
+    (configId: string) => {
+      const cfg = configs.find((c) => c.id === configId)
+      if (!cfg) return
+      setActive(configId)
+    },
+    [configs, setActive],
+  )
 
-  // const handleAutoApproveChange = useCallback(
-  //   async (checked: boolean) => {
-  //     await saveChatSettings(context, { autoToolCall: checked })
-  //   },
-  //   [context, saveChatSettings],
-  // )
+  // Tools management (allowedTools is an allowlist; undefined => all allowed)
+  const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
+  const projectId = parseProjectIdFromContext(context)
+  useEffect(() => {
+    let isMounted = true
+    async function loadTools() {
+      if (!projectId) {
+        if (isMounted) setTools([])
+        return
+      }
+      try {
+        const list = await factoryToolsService.listTools(projectId)
+        const allowed = allowedTools
+        const mapped: ToolToggle[] = list.map((t: any) => ({
+          id: t.name,
+          name: t.name,
+          enabled: !allowed ? true : allowed.includes(t.name),
+        }))
+        if (isMounted) setTools(mapped)
+      } catch (e) {
+        if (isMounted) setTools([])
+      }
+    }
+    loadTools()
+    return () => {
+      isMounted = false
+    }
+  }, [projectId, allowedTools])
 
-  // // Settings dropdown UI state
-  // const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  // const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
-  // const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const handleToolToggle = useCallback(
+    (toolId: string) => {
+      const currentAllowed = allowedTools || tools?.map((t) => t.id) || []
+      const newAllowed = new Set(currentAllowed)
 
-  // useEffect(() => {
-  //   function onDocClick(e: MouseEvent) {
-  //     const t = e.target as Node
-  //     if (!isSettingsOpen) return
-  //     if (dropdownRef.current && dropdownRef.current.contains(t)) return
-  //     if (settingsBtnRef.current && settingsBtnRef.current.contains(t)) return
-  //     setIsSettingsOpen(false)
-  //   }
-  //   function onKey(e: KeyboardEvent) {
-  //     if (!isSettingsOpen) return
-  //     if (e.key === 'Escape') setIsSettingsOpen(false)
-  //   }
-  //   document.addEventListener('mousedown', onDocClick)
-  //   document.addEventListener('keydown', onKey)
-  //   return () => {
-  //     document.removeEventListener('mousedown', onDocClick)
-  //     document.removeEventListener('keydown', onKey)
-  //   }
-  // }, [isSettingsOpen])
+      if (newAllowed.has(toolId)) {
+        newAllowed.delete(toolId)
+      } else {
+        newAllowed.add(toolId)
+      }
+      setAllowedTools(Array.from(newAllowed))
+    },
+    [allowedTools, tools],
+  )
+
+  const handleAutoApproveChange = useCallback((checked: boolean) => {
+    setAutoToolCall(checked)
+  }, [])
+
+  // Settings dropdown UI state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      const t = e.target as Node
+      if (!isSettingsOpen) return
+      if (dropdownRef.current && dropdownRef.current.contains(t)) return
+      if (settingsBtnRef.current && settingsBtnRef.current.contains(t)) return
+      setIsSettingsOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (!isSettingsOpen) return
+      if (e.key === 'Escape') setIsSettingsOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDocClick)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [isSettingsOpen])
 
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
-      {/* <header className="relative flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3"> */}
-      {/* <div className="flex items-center gap-3 min-w-0">
+      <header className="relative flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-            {chatContextTitle} {chat ? `(${new Date(chat.updateDate).toLocaleString()})` : ''}
+            {chatContextTitle}{' '}
+            {chat ? `(${new Date(chat.updatedAt).toLocaleString()})` : ''}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -250,7 +264,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
                     </div>
                   </div>
                   <Switch
-                    checked={!!settings?.autoToolCall}
+                    checked={autoToolCall}
                     onCheckedChange={handleAutoApproveChange}
                     label="Auto-approve"
                   />
@@ -277,9 +291,13 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
         </div>
       )}
 
-      <MessageList chatId={chat?.id} messages={chat?.messages || []} isThinking={isThinking} />
+      <MessageList
+        chatId={chatKey}
+        messages={chat?.messages || []}
+        isThinking={isThinking}
+      />
 
-      <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} /> */}
+      <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
     </section>
   )
 }
