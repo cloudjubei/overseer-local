@@ -1,5 +1,5 @@
-import { NotificationCategory } from 'src/types/notifications'
-import { WebSearchApiKeys } from 'thefactory-tools'
+import type { NotificationCategory } from './notifications'
+import type { WebSearchApiKeys } from 'thefactory-tools'
 
 export type ShortcutsModifier = 'meta' | 'ctrl'
 
@@ -10,33 +10,6 @@ export type ShortcutsConfig = {
   addUiFeature: string // e.g., 'Mod+Shift+F'
 }
 
-export const DEFAULT_APP_SETTINGS: AppSettings = {
-  userPreferences: {
-    lastActiveProjectId: 'main',
-    storiesViewMode: 'list',
-    storiesListViewSorting: 'index_desc',
-    storiesListViewStatusFilter: 'all',
-    sidebarCollapsed: false,
-    shortcutsModifier:
-      navigator.platform.toLowerCase().includes('mac') ||
-      navigator.userAgent.toLowerCase().includes('mac')
-        ? 'meta'
-        : 'ctrl',
-    shortcuts: {
-      commandMenu: 'Mod+K',
-      newStory: 'Mod+N',
-      help: 'Mod+/',
-      addUiFeature: 'Mod+Shift+F',
-    },
-  },
-  notificationSystemSettings: {
-    osNotificationsEnabled: true,
-    soundsEnabled: true,
-    displayDuration: 5,
-  },
-  webSearchApiKeys: {},
-  database: {},
-}
 export interface AppSettings {
   userPreferences: UserPreferences
   notificationSystemSettings: NotificationSystemSettings
@@ -64,18 +37,6 @@ export interface UserPreferences {
 export type StoryViewMode = 'list' | 'board'
 export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
-export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
-  notifications: {
-    categoriesEnabled: {
-      general: true,
-      files: true,
-      chat: true,
-      stories: true,
-      system: true,
-      updates: true,
-    },
-  },
-}
 export interface NotificationProjectSettings {
   categoriesEnabled: Record<NotificationCategory, boolean>
 }
