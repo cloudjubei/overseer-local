@@ -195,9 +195,7 @@ export default function FeatureForm({
 
   // Choose scroll behavior: if actions are hidden, let parent handle scrolling.
   // If actions are shown, make content area independently scrollable so actions stay visible.
-  const contentWrapperClass = hideActions
-    ? 'space-y-4'
-    : 'flex-1 min-h-0 overflow-y-auto space-y-4'
+  const contentWrapperClass = hideActions ? 'space-y-4' : 'flex-1 min-h-0 overflow-y-auto space-y-4'
 
   return (
     <form
@@ -324,7 +322,7 @@ export default function FeatureForm({
                 className="chip chip--ok"
                 title="Add context files"
               >
-                <IconPlus className="w-3 h-3" />
+                <IconPlus className="w-3 h-6" />
                 <span>Add</span>
               </button>
             </div>

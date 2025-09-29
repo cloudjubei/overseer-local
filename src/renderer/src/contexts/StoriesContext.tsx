@@ -7,7 +7,7 @@ import {
   storiesService,
 } from '../services/storiesService'
 import { projectsService } from '../services/projectsService'
-import { useActiveProject, useProjectContext } from './ProjectContext'
+import { useProjectContext } from './ProjectContext'
 import {
   Feature,
   ProjectSpec,
