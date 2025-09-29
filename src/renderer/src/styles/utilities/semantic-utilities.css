@@ -1,0 +1,19 @@
+/* Semantic utility bridges for token-based classes.
+   Ensures stable colors even if Tailwind utility generation changes. */
+
+/* Backgrounds */
+.bg-surface-base { background: var(--surface-base) !important; }
+.bg-surface-raised { background: var(--surface-raised) !important; }
+.bg-surface-overlay { background: var(--surface-overlay) !important; }
+
+/* Text colors */
+.text-text-primary { color: var(--text-primary) !important; }
+.text-text-secondary { color: var(--text-secondary) !important; }
+.text-text-muted { color: var(--text-muted) !important; }
+.text-text-inverted { color: var(--text-inverted) !important; }
+
+/* Border colors */
+.border-border { border-color: var(--border-default) !important; }
+.border-border-subtle { border-color: var(--border-subtle) !important; }
+.border-border-strong { border-color: var(--border-strong) !important; }
+.border-border-focus { border-color: var(--border-focus) !important; }

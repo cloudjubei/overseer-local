@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1886,7 +1886,7 @@
     },
     {
       "id": "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431",
-      "status": "-",
+      "status": "+",
       "title": "after upgrading to new Electron version - modal css/colors are missing",
       "description": "When displaying a popup like @src/renderer/src/screens/stories/FeatureCreateView.tsx the background is missing the right color (whitish). Inside the \n@src/renderer/src/components/stories/FeatureForm.tsx the file chips are also not displaying properly like they used to.",
       "context": [
@@ -1895,7 +1895,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-28T01:10:09.731Z",
-      "updatedAt": "2025-09-28T01:21:40.120Z"
+      "updatedAt": "2025-09-28T01:46:47.076Z",
+      "completedAt": "2025-09-28T01:46:47.076Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2024,5 +2025,6 @@
     "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431": 123
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z",
+  "completedAt": "2025-09-28T01:46:47.077Z"
 }

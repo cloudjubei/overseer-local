@@ -20,7 +20,7 @@ export default function ContextFileChip({
   }, [path])
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1 rounded-md border bg-surface-raised border-border relative">
+    <div className="inline-file-chip relative">
       {warn ? (
         <div className="absolute -top-1 -left-1">
           <WarningChip
