@@ -1,7 +1,13 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import { openDatabase, TheFactoryDb } from 'thefactory-db'
-import type { DocumentInput, MatchParams, Document, DocumentWithScore } from 'thefactory-db'
+import type {
+  DocumentInput,
+  MatchParams,
+  Document,
+  DocumentWithScore,
+  DocumentUpsertInput,
+} from 'thefactory-db'
 import BaseManager from '../BaseManager'
 
 export default class DatabaseManager extends BaseManager {
@@ -112,10 +118,10 @@ export default class DatabaseManager extends BaseManager {
   async getDocumentBySrc(projectId: string, src: string): Promise<Document | undefined> {
     return await this._dbClient?.getDocumentBySrc(projectId, src)
   }
-  async upsertDocuments(inputs: Partial<DocumentInput>[]): Promise<Document[]> {
+  async upsertDocuments(inputs: DocumentUpsertInput[]): Promise<Document[]> {
     return (await this._dbClient?.upsertDocuments(inputs)) ?? []
   }
-  async upsertDocument(input: Partial<DocumentInput>): Promise<Document | undefined> {
+  async upsertDocument(input: DocumentUpsertInput): Promise<Document | undefined> {
     return await this._dbClient?.upsertDocument(input)
   }
   async updateDocument(id: string, patch: Partial<DocumentInput>): Promise<Document | undefined> {

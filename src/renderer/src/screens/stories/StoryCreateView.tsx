@@ -79,21 +79,17 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
             <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName="flex-grow overflow-hidden p-0"
+        contentClassName="p-4 min-h-0 overflow-y-auto"
       >
-        <div className="w-full h-full flex">
-          <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-            <StoryForm
-              initialValues={{}}
-              onSubmit={onSubmit}
-              onCancel={attemptClose}
-              submitting={submitting}
-              isCreate={true}
-              titleRef={titleRef}
-              onDirtyChange={setHasChanges}
-            />
-          </div>
-        </div>
+        <StoryForm
+          initialValues={{}}
+          onSubmit={onSubmit}
+          onCancel={attemptClose}
+          submitting={submitting}
+          isCreate={true}
+          titleRef={titleRef}
+          onDirtyChange={setHasChanges}
+        />
       </Modal>
 
       <ChatSidebarOverlay

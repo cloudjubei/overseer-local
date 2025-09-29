@@ -104,31 +104,27 @@ export default function StoryEditView({
             <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName="flex-grow overflow-hidden p-0"
+        contentClassName="p-4 min-h-0 overflow-y-auto"
       >
-        <div className="w-full h-full flex">
-          <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
-            {initialValues ? (
-              <StoryForm
-                initialValues={{
-                  status: initialValues.status,
-                  title: initialValues.title,
-                  description: initialValues.description,
-                }}
-                onSubmit={onSubmit}
-                onCancel={attemptClose}
-                submitting={submitting || deleting}
-                isCreate={false}
-                onDelete={() => setShowDeleteConfirm(true)}
-                onDirtyChange={setHasChanges}
-              />
-            ) : (
-              <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
-                Loading story…
-              </div>
-            )}
+        {initialValues ? (
+          <StoryForm
+            initialValues={{
+              status: initialValues.status,
+              title: initialValues.title,
+              description: initialValues.description,
+            }}
+            onSubmit={onSubmit}
+            onCancel={attemptClose}
+            submitting={submitting || deleting}
+            isCreate={false}
+            onDelete={() => setShowDeleteConfirm(true)}
+            onDirtyChange={setHasChanges}
+          />
+        ) : (
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
+            Loading story…
           </div>
-        </div>
+        )}
       </Modal>
 
       <ChatSidebarOverlay

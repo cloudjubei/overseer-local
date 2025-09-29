@@ -112,7 +112,6 @@ export default function FeatureEditView({
             <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName="flex-grow overflow-hidden p-0 min-h-0"
         footer={
           <div className="flex justify-between gap-2">
             {!initialValues ? (
@@ -152,29 +151,26 @@ export default function FeatureEditView({
             </div>
           </div>
         }
+        contentClassName="p-4 min-h-0 overflow-y-auto"
       >
-        <div className="w-full h-full flex min-h-0">
-          <div className="flex-1 min-w-0 min-h-0 h-full flex">
-            {initialValues ? (
-              <FeatureForm
-                initialValues={initialValues}
-                onSubmit={onSubmit}
-                onCancel={attemptClose}
-                onDelete={() => setShowDeleteConfirm(true)}
-                submitting={submitting}
-                storyId={storyId}
-                featureId={featureId}
-                hideActions
-                formId={formId}
-                onDirtyChange={setHasChanges}
-              />
-            ) : (
-              <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
-                Loading feature…
-              </div>
-            )}
+        {initialValues ? (
+          <FeatureForm
+            initialValues={initialValues}
+            onSubmit={onSubmit}
+            onCancel={attemptClose}
+            onDelete={() => setShowDeleteConfirm(true)}
+            submitting={submitting}
+            storyId={storyId}
+            featureId={featureId}
+            hideActions
+            formId={formId}
+            onDirtyChange={setHasChanges}
+          />
+        ) : (
+          <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
+            Loading feature…
           </div>
-        </div>
+        )}
       </Modal>
 
       <ChatSidebarOverlay

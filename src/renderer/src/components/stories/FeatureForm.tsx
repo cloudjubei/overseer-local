@@ -202,171 +202,169 @@ export default function FeatureForm({
       aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}
     >
       {/* Content area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
-        <div className="grid grid-cols-1 gap-3">
-          <StatusControl status={status} onChange={setStatus} />
-          <div className="flex items-center gap-3">
-            <label
-              htmlFor="feature-title"
-              className="text-xs flex-1"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Title
-            </label>
+      <div className="grid grid-cols-1 gap-3">
+        <StatusControl status={status} onChange={setStatus} />
+        <div className="flex items-center gap-3">
+          <label
+            htmlFor="feature-title"
+            className="text-xs flex-1"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Title
+          </label>
+        </div>
+        <input
+          id="feature-title"
+          ref={combinedTitleRef}
+          type="text"
+          placeholder="What is this feature?"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={submitting}
+          className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+          style={{
+            background: 'var(--surface-raised)',
+            borderColor: error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+            color: 'var(--text-primary)',
+          }}
+          aria-invalid={!!error}
+          aria-describedby={error ? 'feature-title-error' : undefined}
+        />
+        {error ? (
+          <div
+            id="feature-title-error"
+            className="text-xs"
+            style={{ color: 'var(--status-stuck-fg)' }}
+          >
+            {error}
           </div>
-          <input
-            id="feature-title"
-            ref={combinedTitleRef}
-            type="text"
-            placeholder="What is this feature?"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+        ) : null}
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="feature-description"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Description
+          </label>
+          <FileMentionsTextarea
+            id="feature-description"
+            rows={4}
+            placeholder="Optional details or acceptance criteria. Tip: @ to reference files, # to reference stories/features"
+            value={description}
+            onChange={setDescription}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
               background: 'var(--surface-raised)',
-              borderColor: error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+              borderColor: 'var(--border-default)',
               color: 'var(--text-primary)',
             }}
-            aria-invalid={!!error}
-            aria-describedby={error ? 'feature-title-error' : undefined}
+            ariaLabel="Feature description"
+            onFileMentionSelected={handleFileMentionSelected}
+            onReferenceSelected={handleReferenceSelected}
+            inputRef={descriptionRef}
           />
-          {error ? (
-            <div
-              id="feature-title-error"
-              className="text-xs"
-              style={{ color: 'var(--status-stuck-fg)' }}
-            >
-              {error}
-            </div>
-          ) : null}
+        </div>
 
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="feature-description"
-              className="text-xs"
-              style={{ color: 'var(--text-secondary)' }}
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="feature-rejection"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Rejection Reason
+          </label>
+          <FileMentionsTextarea
+            id="feature-rejection"
+            rows={3}
+            placeholder="Optional reason for rejection (leave blank to remove). Tip: @ files, # stories/features"
+            value={rejection}
+            onChange={setRejection}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)',
+            }}
+            ariaLabel="Feature rejection reason"
+            onFileMentionSelected={handleFileMentionSelected}
+            onReferenceSelected={handleReferenceSelected}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            Context Files
+          </label>
+          <div
+            className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2"
+            style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
+          >
+            {context.map((p, idx) => (
+              <ContextFileChip
+                key={p}
+                path={p}
+                onRemove={() => removeContextAt(idx)}
+                warn={!mentionedPaths.has(p)}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={() => setShowFileSelector(true)}
+              className="chip chip--ok"
+              title="Add context files"
             >
-              Description
-            </label>
-            <FileMentionsTextarea
-              id="feature-description"
-              rows={4}
-              placeholder="Optional details or acceptance criteria. Tip: @ to reference files, # to reference stories/features"
-              value={description}
-              onChange={setDescription}
-              disabled={submitting}
-              className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-              style={{
-                background: 'var(--surface-raised)',
-                borderColor: 'var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
-              ariaLabel="Feature description"
-              onFileMentionSelected={handleFileMentionSelected}
-              onReferenceSelected={handleReferenceSelected}
-              inputRef={descriptionRef}
-            />
+              <IconPlus className="w-3 h-6" />
+              <span>Add</span>
+            </button>
           </div>
-
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="feature-rejection"
-              className="text-xs"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Rejection Reason
-            </label>
-            <FileMentionsTextarea
-              id="feature-rejection"
-              rows={3}
-              placeholder="Optional reason for rejection (leave blank to remove). Tip: @ files, # stories/features"
-              value={rejection}
-              onChange={setRejection}
-              disabled={submitting}
-              className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
-              style={{
-                background: 'var(--surface-raised)',
-                borderColor: 'var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
-              ariaLabel="Feature rejection reason"
-              onFileMentionSelected={handleFileMentionSelected}
-              onReferenceSelected={handleReferenceSelected}
-            />
+          <div className="text-xs text-text-muted">
+            Select any files across the project that provide useful context for this feature. Tip:
+            type @ in description to quickly reference files.
           </div>
+        </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              Context Files
-            </label>
-            <div
-              className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2"
-              style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
-            >
-              {context.map((p, idx) => (
-                <ContextFileChip
-                  key={p}
-                  path={p}
-                  onRemove={() => removeContextAt(idx)}
-                  warn={!mentionedPaths.has(p)}
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="feature-blockers"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Blockers
+          </label>
+          <div
+            id="feature-blockers"
+            className="chips-list border rounded-md min-h-[3rem] p-2"
+            style={{
+              borderColor: 'var(--border-default)',
+              background: 'var(--surface-raised)',
+            }}
+          >
+            {blockers.map((dep, idx) => {
+              return (
+                <DependencyBullet
+                  key={dep}
+                  dependency={dep}
+                  onRemove={() => removeBlockerAt(idx)}
                 />
-              ))}
-              <button
-                type="button"
-                onClick={() => setShowFileSelector(true)}
-                className="chip chip--ok"
-                title="Add context files"
-              >
-                <IconPlus className="w-3 h-6" />
-                <span>Add</span>
-              </button>
-            </div>
-            <div className="text-xs text-text-muted">
-              Select any files across the project that provide useful context for this feature. Tip:
-              type @ in description to quickly reference files.
-            </div>
+              )
+            })}
+            <button
+              type="button"
+              onClick={() => setShowSelector(true)}
+              className="chip chip--ok"
+              title="Add blocker"
+            >
+              <IconPlus className="w-3 h-3" />
+              <span>Add</span>
+            </button>
           </div>
-
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="feature-blockers"
-              className="text-xs"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Blockers
-            </label>
-            <div
-              id="feature-blockers"
-              className="chips-list border rounded-md min-h-[3rem] p-2"
-              style={{
-                borderColor: 'var(--border-default)',
-                background: 'var(--surface-raised)',
-              }}
-            >
-              {blockers.map((dep, idx) => {
-                return (
-                  <DependencyBullet
-                    key={dep}
-                    dependency={dep}
-                    onRemove={() => removeBlockerAt(idx)}
-                  />
-                )
-              })}
-              <button
-                type="button"
-                onClick={() => setShowSelector(true)}
-                className="chip chip--ok"
-                title="Add blocker"
-              >
-                <IconPlus className="w-3 h-3" />
-                <span>Add</span>
-              </button>
-            </div>
-            <div className="text-xs text-text-muted">
-              Tip: Type # to quickly reference a story or feature; it will be added as a blocker
-              automatically.
-            </div>
+          <div className="text-xs text-text-muted">
+            Tip: Type # to quickly reference a story or feature; it will be added as a blocker
+            automatically.
           </div>
         </div>
       </div>
