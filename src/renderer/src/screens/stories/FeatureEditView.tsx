@@ -58,12 +58,18 @@ export default function FeatureEditView({
     async (values: FeatureFormValues) => {
       setSubmitting(true)
       try {
-        await updateFeature(storyId, featureId, values)
-        toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
+        const p = updateFeature(storyId, featureId, values)
+        // Optimistic: close immediately and show background toast
+        toast({ title: 'Saving changes…', description: 'Updating in background', variant: 'info' })
         doClose()
+        await p
+        toast({ title: 'Success', description: 'Feature updated successfully', variant: 'success' })
       } catch (e: any) {
-        setAlertMessage(`Failed to update feature: ${e?.message || String(e)}`)
-        setShowAlert(true)
+        toast({
+          title: 'Failed to update feature',
+          description: e?.message || String(e),
+          variant: 'error',
+        })
       } finally {
         setSubmitting(false)
       }
@@ -75,12 +81,17 @@ export default function FeatureEditView({
     setShowDeleteConfirm(false)
     setSubmitting(true)
     try {
-      await deleteFeature(storyId, featureId)
-      toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
+      const p = deleteFeature(storyId, featureId)
+      toast({ title: 'Deleting feature…', description: 'Removing in background', variant: 'info' })
       doClose()
+      await p
+      toast({ title: 'Success', description: 'Feature deleted successfully', variant: 'success' })
     } catch (e: any) {
-      setAlertMessage(`Failed to delete feature: ${e.message || String(e)}`)
-      setShowAlert(true)
+      toast({
+        title: 'Failed to delete feature',
+        description: e?.message || String(e),
+        variant: 'error',
+      })
     } finally {
       setSubmitting(false)
     }

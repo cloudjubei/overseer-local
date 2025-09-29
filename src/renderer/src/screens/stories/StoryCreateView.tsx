@@ -39,12 +39,17 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
     async (values: StoryFormValues) => {
       setSubmitting(true)
       try {
-        await createStory({ ...values } as StoryCreateInput)
-        toast({ title: 'Success', description: 'Story created successfully', variant: 'success' })
+        const p = createStory({ ...values } as StoryCreateInput)
+        toast({ title: 'Creating story…', description: 'Saving in background', variant: 'info' })
         doClose()
+        await p
+        toast({ title: 'Success', description: 'Story created successfully', variant: 'success' })
       } catch (e: any) {
-        setAlertMessage(`Failed to create story: ${e?.message || String(e)}`)
-        setShowAlert(true)
+        toast({
+          title: 'Failed to create story',
+          description: e?.message || String(e),
+          variant: 'error',
+        })
       } finally {
         setSubmitting(false)
       }

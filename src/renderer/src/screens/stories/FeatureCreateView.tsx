@@ -54,15 +54,22 @@ export default function FeatureCreateView({
       }
       setSubmitting(true)
       try {
-        await addFeature(storyId, {
+        const p = addFeature(storyId, {
           ...values,
           description: values.description ?? '',
         })
-        toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
+        // Optimistic: close immediately and notify background action
+        toast({ title: 'Creating feature…', description: 'Saving changes in background', variant: 'info' })
         doClose()
+        await p
+        toast({ title: 'Success', description: 'Feature created successfully', variant: 'success' })
       } catch (e: any) {
-        setAlertMessage(`Failed to create feature: ${e?.message || String(e)}`)
-        setShowAlert(true)
+        // Show error via toast (form is closed already)
+        toast({
+          title: 'Failed to create feature',
+          description: e?.message || String(e),
+          variant: 'error',
+        })
       } finally {
         setSubmitting(false)
       }

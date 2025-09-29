@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1985,7 +1985,7 @@
     },
     {
       "id": "cc444241-f834-463f-bf98-91c98dd1b706",
-      "status": "-",
+      "status": "+",
       "title": "Deleting/updating/creating features/stories should be optimistic",
       "description": "When using @src/renderer/src/components/stories/FeatureForm.tsx in @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx , as well as @src/renderer/src/components/stories/StoryForm.tsx in @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx - all the changes should be optimistic as the backend changes might take a a little bit of time to update, whereas the user should have immediate visual feedback.",
       "context": [
@@ -1998,7 +1998,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T13:55:24.590Z",
-      "updatedAt": "2025-09-29T13:55:24.590Z"
+      "updatedAt": "2025-09-29T14:08:42.094Z",
+      "completedAt": "2025-09-29T14:08:42.094Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2134,5 +2135,6 @@
     "cc444241-f834-463f-bf98-91c98dd1b706": 130
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z",
+  "completedAt": "2025-09-29T14:08:42.094Z"
 }

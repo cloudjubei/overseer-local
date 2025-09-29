@@ -57,12 +57,17 @@ export default function StoryEditView({
   const onSubmit = async (values: StoryFormValues) => {
     setSubmitting(true)
     try {
-      await updateStory(storyId, values)
-      toast({ title: 'Success', description: 'Story updated successfully', variant: 'success' })
+      const p = updateStory(storyId, values)
+      toast({ title: 'Saving changes…', description: 'Updating in background', variant: 'info' })
       doClose()
+      await p
+      toast({ title: 'Success', description: 'Story updated successfully', variant: 'success' })
     } catch (e: any) {
-      setAlertMessage(`Failed to update story: ${e?.message || String(e)}`)
-      setShowAlert(true)
+      toast({
+        title: 'Failed to update story',
+        description: e?.message || String(e),
+        variant: 'error',
+      })
     } finally {
       setSubmitting(false)
     }
@@ -72,13 +77,19 @@ export default function StoryEditView({
     setShowDeleteConfirm(false)
     setDeleting(true)
     try {
-      await deleteStory(storyId)
-      toast({ title: 'Success', description: 'Story deleted successfully', variant: 'success' })
+      const p = deleteStory(storyId)
+      toast({ title: 'Deleting story…', description: 'Removing in background', variant: 'info' })
+      // Optimistic: navigate and close immediately
       navigator.navigateView('Home')
       doClose()
+      await p
+      toast({ title: 'Success', description: 'Story deleted successfully', variant: 'success' })
     } catch (e: any) {
-      setAlertMessage(`Failed to delete story: ${e.message || String(e)}`)
-      setShowAlert(true)
+      toast({
+        title: 'Failed to delete story',
+        description: e?.message || String(e),
+        variant: 'error',
+      })
     } finally {
       setDeleting(false)
     }
