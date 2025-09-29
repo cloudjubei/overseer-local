@@ -7,7 +7,7 @@ import {
   storiesService,
 } from '../services/storiesService'
 import { projectsService } from '../services/projectsService'
-import { useActiveProject } from './ProjectContext'
+import { useActiveProject, useProjectContext } from './ProjectContext'
 import {
   Feature,
   ProjectSpec,
@@ -88,7 +88,7 @@ type InternalStoryUpdate = {
 }
 
 export function StoriesProvider({ children }: { children: React.ReactNode }) {
-  const { project } = useActiveProject()
+  const { activeProject, reorderStory: reorderProjectStory } = useProjectContext()
 
   const [storyIdsByProject, setStoryIdsByProject] = useState<Record<string, string[]>>({})
   const [storiesById, setStoriesById] = useState<Record<string, Story>>({})
@@ -264,7 +264,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
 
   const normalizeDependency = useCallback(
     (dependency: string): string => {
-      if (!project) return dependency
+      if (!activeProject) return dependency
       return normalizeDependencyInternal(
         storyDisplayToId,
         featureDisplayToIdByStory,
@@ -272,12 +272,12 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
         dependency,
       )
     },
-    [project, storyDisplayToId, featureDisplayToIdByStory, storiesById, featuresById],
+    [activeProject, storyDisplayToId, featureDisplayToIdByStory, storiesById, featuresById],
   )
 
   const resolveDependency = useCallback(
     (dependency: string): ResolvedRef | InvalidRefError => {
-      if (!project) {
+      if (!activeProject) {
         return { id: dependency, code: 'EMPTY', message: "Story wasn't found" }
       }
 
@@ -305,7 +305,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
           featureId: parts[1],
           story,
           feature,
-          display: `${project.storyIdToDisplayIndex[story.id]}.${story.featureIdToDisplayIndex[feature.id]}`,
+          display: `${activeProject.storyIdToDisplayIndex[story.id]}.${story.featureIdToDisplayIndex[feature.id]}`,
         } as ResolvedFeatureRef
       }
       return {
@@ -313,61 +313,103 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
         id: normalized,
         storyId: parts[0],
         story,
-        display: `${project.storyIdToDisplayIndex[story.id]}`,
+        display: `${activeProject.storyIdToDisplayIndex[story.id]}`,
       } as ResolvedStoryRef
     },
-    [project, storyDisplayToId, featureDisplayToIdByStory, storiesById, featuresById],
+    [activeProject, storyDisplayToId, featureDisplayToIdByStory, storiesById, featuresById],
   )
 
   const createStory = useCallback(
     async (updates: StoryCreateInput): Promise<Story | undefined> => {
-      if (project) {
+      if (activeProject) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
           normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
         }
-        return await storiesService.createStory(project.id, normalized)
+        const story = await storiesService.createStory(activeProject.id, normalized)
+
+        updateStories([
+          {
+            storyId: story.id,
+            projectId: activeProject.id,
+            isDelete: false,
+            story,
+            project: activeProject,
+          },
+        ])
       }
       return
     },
-    [project, normalizeDependency],
+    [activeProject, normalizeDependency],
   )
 
   const updateStory = useCallback(
     async (storyId: string, updates: StoryEditInput): Promise<Story | undefined> => {
-      if (project) {
+      if (activeProject) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
           normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
         }
-        return await storiesService.updateStory(project.id, storyId, normalized)
+
+        const s = await storiesService.updateStory(activeProject.id, storyId, normalized)
+        if (s) {
+          updateStories([
+            {
+              storyId: s.id,
+              projectId: activeProject.id,
+              isDelete: false,
+              story: s,
+              project: activeProject,
+            },
+          ])
+        }
       }
       return
     },
-    [project, normalizeDependency],
+    [activeProject, normalizeDependency],
   )
 
   const deleteStory = useCallback(
     async (storyId: string): Promise<void> => {
-      if (project) {
-        return await storiesService.deleteStory(project.id, storyId)
+      if (activeProject) {
+        await storiesService.deleteStory(activeProject.id, storyId)
+        updateStories([
+          {
+            storyId,
+            projectId: activeProject.id,
+            isDelete: true,
+            story: undefined,
+            project: activeProject,
+          },
+        ])
       }
     },
-    [project],
+    [activeProject],
   )
 
   const addFeature = useCallback(
     async (storyId: string, updates: FeatureCreateInput): Promise<Story | undefined> => {
-      if (project) {
+      if (activeProject) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
           normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
         }
-        return await storiesService.addFeature(project.id, storyId, normalized)
+        const s = await storiesService.addFeature(activeProject.id, storyId, normalized)
+        if (s) {
+          updateStories([
+            {
+              storyId: s.id,
+              projectId: activeProject.id,
+              isDelete: false,
+              story: s,
+              project: activeProject,
+            },
+          ])
+        }
       }
       return
     },
-    [project, normalizeDependency],
+    [activeProject, normalizeDependency],
   )
 
   const updateFeature = useCallback(
@@ -376,47 +418,83 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       featureId: string,
       updates: FeatureEditInput,
     ): Promise<Story | undefined> => {
-      if (project) {
+      if (activeProject) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {
           normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
         }
-        return await storiesService.updateFeature(project.id, storyId, featureId, normalized)
+        const s = await storiesService.updateFeature(
+          activeProject.id,
+          storyId,
+          featureId,
+          normalized,
+        )
+        if (s) {
+          updateStories([
+            {
+              storyId: s.id,
+              projectId: activeProject.id,
+              isDelete: false,
+              story: s,
+              project: activeProject,
+            },
+          ])
+        }
       }
       return
     },
-    [project, normalizeDependency],
+    [activeProject, normalizeDependency],
   )
 
   const deleteFeature = useCallback(
     async (storyId: string, featureId: string): Promise<Story | undefined> => {
-      if (project) {
-        return await storiesService.deleteFeature(project.id, storyId, featureId)
+      if (activeProject) {
+        const s = await storiesService.deleteFeature(activeProject.id, storyId, featureId)
+        if (s) {
+          updateStories([
+            {
+              storyId: s.id,
+              projectId: activeProject.id,
+              isDelete: false,
+              story: s,
+              project: activeProject,
+            },
+          ])
+        }
       }
       return
     },
-    [project],
+    [activeProject],
   )
 
   const reorderFeatures = useCallback(
     async (storyId: string, payload: ReorderPayload): Promise<Story | undefined> => {
-      if (project) {
-        return await storiesService.reorderFeatures(project.id, storyId, payload)
+      if (activeProject) {
+        const s = await storiesService.reorderFeatures(activeProject.id, storyId, payload)
+        if (s) {
+          updateStories([
+            {
+              storyId: s.id,
+              projectId: activeProject.id,
+              isDelete: false,
+              story: s,
+              project: activeProject,
+            },
+          ])
+        }
       }
       return
     },
-    [project],
+    [activeProject],
   )
-
   const reorderStory = useCallback(
     async (payload: ReorderPayload): Promise<ProjectSpec | undefined> => {
-      if (project) {
-        const p = await projectsService.reorderStory(project.id, payload)
-        return p
+      if (activeProject) {
+        return await reorderProjectStory(activeProject.id, payload)
       }
       return
     },
-    [project],
+    [activeProject, reorderProjectStory],
   )
 
   const getBlockers = useCallback(

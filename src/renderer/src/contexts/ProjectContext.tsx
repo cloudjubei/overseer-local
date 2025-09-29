@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ProjectSpec, ProjectUpdate } from 'thefactory-tools'
+import type { ProjectSpec, ProjectUpdate, ReorderPayload } from 'thefactory-tools'
 import { projectsService } from '../services/projectsService'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 
@@ -13,6 +13,7 @@ export type ProjectContextValue = {
 
   setActiveProjectId: (id: string) => void
   getProjectById: (id: string) => ProjectSpec | undefined
+  reorderStory: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec | undefined>
 }
 
 const ProjectContext = createContext<ProjectContextValue | null>(null)
@@ -104,6 +105,17 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return getProjectById(activeProjectId)
   }, [projects, activeProjectId, getProjectById])
 
+  const reorderStory = async (
+    projectId: string,
+    payload: ReorderPayload,
+  ): Promise<ProjectSpec | undefined> => {
+    const newProject = await projectsService.reorderStory(projectId, payload)
+    if (newProject) {
+      setProjects((prev) => prev.map((p) => (p.id !== projectId ? p : newProject)))
+    }
+    return newProject
+  }
+
   const value = useMemo<ProjectContextValue>(
     () => ({
       activeProjectId,
@@ -111,8 +123,9 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       setActiveProjectId,
       projects,
       getProjectById,
+      reorderStory,
     }),
-    [activeProjectId, activeProject, setActiveProjectId, projects, getProjectById],
+    [activeProjectId, activeProject, setActiveProjectId, projects, getProjectById, reorderStory],
   )
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
