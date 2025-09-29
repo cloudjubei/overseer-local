@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1942,7 +1942,7 @@
     },
     {
       "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
-      "status": "+",
+      "status": "-",
       "title": "The Feature form is not scrollable",
       "description": "The @src/renderer/src/components/stories/FeatureForm.tsx inside @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx is not scrollable - it should be.",
       "context": [
@@ -1952,9 +1952,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T11:40:32.221Z",
-      "updatedAt": "2025-09-29T19:12:44.902Z",
-      "rejection": "Still isn't scrollable - this is extremely frustrating, this is the 4th attempt. DO BETTER analysing the issue.",
-      "completedAt": "2025-09-29T19:12:44.902Z"
+      "updatedAt": "2025-09-29T20:10:54.608Z",
+      "rejection": "Still isn't scrollable - this is extremely frustrating, this is the nth attempt. Really scrutinize the issue, make a solid plan to fix and GO. Write a document `docs/SCROLL_FIX.md` that will explain what you're doing and why it wasn't working. This should be a fairly standard component that just requires some scrolling."
     },
     {
       "id": "9770df69-0ac3-4fcd-99ea-c3af72bfe37b",
@@ -2025,6 +2024,20 @@
       "createdAt": "2025-09-29T14:09:50.870Z",
       "updatedAt": "2025-09-29T15:40:20.522Z",
       "completedAt": "2025-09-29T15:40:20.522Z"
+    },
+    {
+      "id": "31bad08b-59b0-468b-a154-7814251bd4cb",
+      "status": "-",
+      "title": "File context chips show \"file not found\" and wrong time and size",
+      "description": "The @src/renderer/src/components/stories/ContextFileChip.tsx shows file not found - even though a correct file path is being fed to it that came from @src/renderer/src/hooks/useFilesAutocomplete.ts .\nAlso, when displaying the full one in a form like @src/renderer/src/components/stories/FeatureForm.tsx - it doesn't show the size or last update time correctly.",
+      "context": [
+        "src/renderer/src/components/stories/ContextFileChip.tsx",
+        "src/renderer/src/hooks/useFilesAutocomplete.ts",
+        "src/renderer/src/components/stories/FeatureForm.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T20:10:01.766Z",
+      "updatedAt": "2025-09-29T20:10:01.766Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2159,9 +2172,9 @@
     "d15eda55-d79c-4dff-8228-8a7e745a1fac": 129,
     "cc444241-f834-463f-bf98-91c98dd1b706": 130,
     "ba50781e-aa29-4dfe-b159-825f9ed88f88": 131,
-    "02c446d1-4969-4057-8fb6-2e957b2205aa": 132
+    "02c446d1-4969-4057-8fb6-2e957b2205aa": 132,
+    "31bad08b-59b0-468b-a154-7814251bd4cb": 133
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-29T14:40:07.339Z",
-  "completedAt": "2025-09-29T19:12:44.902Z"
+  "updatedAt": "2025-09-29T14:40:07.339Z"
 }
