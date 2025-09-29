@@ -476,6 +476,15 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
     .filter(Boolean)
     .join(' ')
 
+  // Fixed column widths so ICON and CLOSE take the same amount of space
+  const sideColStyle: React.CSSProperties = {
+    flex: '0 0 28px',
+    width: 28,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
   return (
     <Tooltip
       content={<FilePreviewCard file={file} />}
@@ -501,24 +510,38 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
                   : undefined
               : undefined
           }
+          // Ensure a predictable horizontal layout
+          style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}
           {...(dataAttrs as Record<string, string>)}
         >
-          <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
-          <div className="fd-content">
-            <div className="fd-row fd-row--top">
-              <div className="fd-name" title={file.absolutePath || file.name}>
+          <div className="fd-leading" style={sideColStyle}>
+            {leadingVisual ?? defaultIconFor(file)}
+          </div>
+
+          <div className="fd-content" style={{ minWidth: 0, flex: '1 1 auto' }}>
+            <div className="fd-row fd-row--top" style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+              <div
+                className="fd-name"
+                title={file.absolutePath || file.name}
+                style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
                 {file.name}
               </div>
-              {trailing ? <div className="fd-trailing">{trailing}</div> : null}
             </div>
             {showMeta && (
-              <div className="fd-meta">
+              <div className="fd-meta" style={{ color: 'var(--text-muted)' }}>
                 {sizeLabel ? <span className="fd-size">{sizeLabel}</span> : null}
                 {sizeLabel && dateLabel ? <span className="fd-sep"> • </span> : null}
                 {dateLabel ? <span className="fd-date">{dateLabel}</span> : null}
               </div>
             )}
           </div>
+
+          {trailing ? (
+            <div className="fd-actions" style={sideColStyle}>
+              {trailing}
+            </div>
+          ) : null}
         </div>
       )}
     </Tooltip>

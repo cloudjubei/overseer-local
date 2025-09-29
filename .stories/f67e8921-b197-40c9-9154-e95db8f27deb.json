@@ -1927,7 +1927,7 @@
     },
     {
       "id": "1d8e24a8-ca9e-4e85-b852-800d1350a6dd",
-      "status": "-",
+      "status": "+",
       "title": "The Files don't display",
       "description": "For instance in @src/renderer/src/components/stories/FeatureForm.tsx it uses the @src/renderer/src/components/stories/ContextFileChip.tsx which in turn uses @src/renderer/src/components/ui/FileDisplay.tsx , which is a `FilePreviewCard` wrapped in a @src/renderer/src/components/ui/Tooltip.tsx . When these are displayed in the @src/renderer/src/components/stories/FeatureForm.tsx for some files - they don't show at all - just the 'x' (the delete button) shows.\nWhen debugging it seems that the Tooltip never gets to render the `FilePreviewCard` so there must be some bug in there.",
       "context": [
@@ -1938,8 +1938,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:15:39.638Z",
-      "updatedAt": "2025-09-29T12:16:02.173Z",
-      "rejection": "FileDisplay doesn't display the 'x' close button on the right correctly - it gets displayed between the title and the size/date label.\nThe display should be:\n| ICON | LABELS | CLOSE |\n\nThe icon and close should take up the same amount of space."
+      "updatedAt": "2025-09-29T12:28:07.232Z",
+      "rejection": "FileDisplay doesn't display the 'x' close button on the right correctly - it gets displayed between the title and the size/date label.\nThe display should be:\n| ICON | LABELS | CLOSE |\n\nThe icon and close should take up the same amount of space.",
+      "completedAt": "2025-09-29T12:28:07.232Z"
     },
     {
       "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
