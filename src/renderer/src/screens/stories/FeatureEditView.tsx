@@ -250,6 +250,8 @@ export default function FeatureEditView({
         title="Delete Feature"
         description="Are you sure you want to delete this feature? This action cannot be undone."
         confirmText="Delete"
+        destructiveConfirm
+        disableOutsideClose
         onConfirm={handleDelete}
       />
     </>
