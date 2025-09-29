@@ -12,7 +12,14 @@ import StatusControl, {
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
-import { IconBoard, IconEdit, IconPlus, IconList, IconChat, IconHome } from '@renderer/components/ui/Icons'
+import {
+  IconBoard,
+  IconEdit,
+  IconPlus,
+  IconList,
+  IconChat,
+  IconHome,
+} from '@renderer/components/ui/Icons'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -329,14 +336,8 @@ export default function StoriesListView() {
         role="region"
         aria-labelledby="stories-view-heading"
       >
-        {/* Top menubar: always visible */}
         <div className="stories-menubar shrink-0">
-          <div className="left">
-            <div className="flex items-center gap-2 text-sm font-medium" aria-label="Current view">
-              <IconHome />
-              <span>Home</span>
-            </div>
-          </div>
+          <div className="left"></div>
           <div className="center">
             <SegmentedControl
               ariaLabel="Toggle between list and board views"
