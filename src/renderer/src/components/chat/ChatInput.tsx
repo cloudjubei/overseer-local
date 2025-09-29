@@ -95,9 +95,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
       ref={chatInputRef}
       className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]"
     >
-      <div className="p-3">
-        <div className="relative flex items-end gap-2">
-          <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
+      <div className="p-2">
+        <div className="relative">
+          <div className="bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
             <div className="relative p-1">
               <FileMentionsTextarea
                 value={input}
@@ -110,53 +110,53 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 ariaLabel="Message input"
                 inputRef={textareaRef}
                 onKeyDown={handleTextareaKeyDown}
-                // renderChipsInInput={true}
               />
             </div>
 
-            <div className="px-3 py-1.5 border-t border-[var(--border-subtle)]">
+            <div className="px-2 py-1.5 border-t border-[var(--border-subtle)]">
               <AttachmentList
                 attachments={pendingAttachments}
                 onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
                 disabled={isThinking}
               />
-              <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
-                <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline">
+              <div className="flex items-center justify-between gap-2 text-[12px] text-[var(--text-muted)]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="hidden sm:inline truncate">
                     Tip: Use @ for files • Use # for stories and features
                   </span>
                 </div>
-                <span>Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
+                <div className="flex items-center gap-3 flex-1 justify-center text-center">
+                  <span className="truncate">Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="btn-icon"
+                    aria-label="Attach a document"
+                    type="button"
+                    disabled={isThinking}
+                  >
+                    <IconAttach className="w-5 h-5" />
+                  </button>
+                  <input
+                    type="file"
+                    accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileUpload}
+                  />
+
+                  <button
+                    onClick={handleSend}
+                    className="btn-icon"
+                    disabled={!canSend || isThinking}
+                    aria-label="Send message"
+                  >
+                    <IconSend className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5 self-stretch">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="btn-icon"
-              aria-label="Attach a document"
-              type="button"
-              disabled={isThinking}
-            >
-              <IconAttach className="w-5 h-5" />
-            </button>
-            <input
-              type="file"
-              accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleFileUpload}
-            />
-
-            <button
-              onClick={handleSend}
-              className="btn-icon flex-1"
-              disabled={!canSend || isThinking}
-              aria-label="Send message"
-            >
-              <IconSend className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </div>
