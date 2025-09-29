@@ -147,7 +147,7 @@ export default function FeatureCreateView({
         }
       >
         <div className="w-full h-full flex min-h-0">
-          <div className="flex-1 min-w-0 min-h-0 h-full">
+          <div className="flex-1 min-w-0 min-h-0 h-full flex">
             <FeatureForm
               onSubmit={onSubmit}
               onCancel={attemptClose}
