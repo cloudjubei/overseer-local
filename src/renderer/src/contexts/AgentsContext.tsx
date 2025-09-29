@@ -40,43 +40,69 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     setRunsHistory(history)
   }
 
-  const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
-    switch (agentRunUpdate.type) {
-      case 'add': {
-        const run =
-          agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
-        if (run) {
-          setRunsHistory((prev) => [...prev, run])
-        }
-        break
-      }
-      case 'delete': {
-        setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
-        break
-      }
-      case 'change': {
-        const run =
-          agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
-        if (run) {
-          setRunsHistory((prev) => {
-            const prevRunIndex = prev.findIndex((r) => r.id === agentRunUpdate.runId)
-            if (prevRunIndex) {
-              const newPrev = [...prev]
-              const prevRun = newPrev[prevRunIndex]
-              const isRunning = run.state === 'running' || run.state === 'created'
-              if ((prevRun.state === 'running' || prevRun.state === 'created') && !isRunning) {
-                fireCompletionNotification(run)
-              }
-              newPrev[prevRunIndex] = run
-              return newPrev
-            }
-            return prev
-          })
-        }
-        break
-      }
+  const fireCompletionNotification = useCallback(async (run: AgentRunHistory) => {
+    try {
+      const baseTitle = 'Agent finished'
+      const parts: string[] = []
+      parts.push(`Agent ${run.agentType}`)
+      parts.push(`story ${run.storyId}`)
+      const message = parts.join(' • ')
+
+      await notificationsService.create(run.projectId, {
+        type: 'success',
+        category: 'agentRun',
+        title: baseTitle,
+        message,
+        metadata: { runId: run.id },
+      } as any)
+    } catch (err) {
+      console.warn(
+        '[AgentsContext] Failed to create completion notifications',
+        (err as any)?.message || err,
+      )
     }
-  }
+  }, [])
+
+  const onAgentRunUpdate = useCallback(
+    async (agentRunUpdate: AgentRunUpdate) => {
+      switch (agentRunUpdate.type) {
+        case 'add': {
+          const run =
+            agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
+          if (run) {
+            setRunsHistory((prev) => [...prev, run])
+          }
+          break
+        }
+        case 'delete': {
+          setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
+          break
+        }
+        case 'change': {
+          const run =
+            agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
+          if (run) {
+            setRunsHistory((prev) => {
+              const prevRunIndex = prev.findIndex((r) => r.id === agentRunUpdate.runId)
+              if (prevRunIndex > -1) {
+                const newPrev = [...prev]
+                const prevRun = newPrev[prevRunIndex]
+                const isRunning = run.state === 'running' || run.state === 'created'
+                if ((prevRun.state === 'running' || prevRun.state === 'created') && !isRunning) {
+                  fireCompletionNotification(run)
+                }
+                newPrev[prevRunIndex] = run
+                return newPrev
+              }
+              return prev
+            })
+          }
+          break
+        }
+      }
+    },
+    [fireCompletionNotification],
+  )
 
   useEffect(() => {
     const unsubscribe = factoryAgentRunService.subscribeRuns(onAgentRunUpdate)
@@ -84,6 +110,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       unsubscribe()
     }
   }, [onAgentRunUpdate])
+
   useEffect(() => {
     update()
   }, [])
@@ -134,7 +161,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         webSearchApiKeys: appSettings.webSearchApiKeys,
       })
     },
-    [activeConfig, appSettings],
+    [activeConfig, appSettings, activeCredentials],
   )
 
   const cancelRun = useCallback(
@@ -165,29 +192,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       console.warn('[AgentsContext] rateRun failed', (err as any)?.message || err)
     }
   }, [])
-
-  const fireCompletionNotification = async (run: AgentRunHistory) => {
-    try {
-      const baseTitle = 'Agent finished'
-      const parts: string[] = []
-      parts.push(`Agent ${run.agentType}`)
-      parts.push(`story ${run.storyId}`)
-      const message = parts.join(' • ')
-
-      await notificationsService.create(run.projectId, {
-        type: 'success',
-        category: 'agentRun',
-        title: baseTitle,
-        message,
-        metadata: { runId: run.id },
-      } as any)
-    } catch (err) {
-      console.warn(
-        '[AgentsContext] Failed to create completion notifications',
-        (err as any)?.message || err,
-      )
-    }
-  }
 
   const value = useMemo<AgentsContextValue>(
     () => ({
