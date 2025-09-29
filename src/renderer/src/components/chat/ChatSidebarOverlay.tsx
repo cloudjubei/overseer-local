@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import ChatSidebar from './ChatSidebar'
 import type { ChatContext } from 'thefactory-tools'
@@ -28,10 +28,10 @@ export default function ChatSidebarOverlay({
     }
   }
   const MIN_W = getMinWidth()
-  const MAX_W = Math.floor(window.innerWidth * 0.5)
 
-  const [width, setWidth] = useState<number>(Math.max(MIN_W, Math.min(MAX_W, initialWidth)))
-  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
+  // Mounted state to allow close animation before unmounting
+  const [mounted, setMounted] = useState<boolean>(isOpen)
+  const [visible, setVisible] = useState<boolean>(false)
 
   // Track modal container/panel
   const [modalContainer, setModalContainer] = useState<HTMLElement | null>(null)
@@ -42,53 +42,64 @@ export default function ChatSidebarOverlay({
     null,
   )
 
-  // Slide-in animation state for viewport-fixed fallback
-  const [entered, setEntered] = useState(false)
+  // Width state/resize handling
+  const [width, setWidth] = useState<number>(() => {
+    const maxByViewport = Math.floor(window.innerWidth * 0.5)
+    return Math.max(MIN_W, Math.min(maxByViewport, initialWidth))
+  })
+  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
+
+  // Open/close lifecycle with animation
   useEffect(() => {
     if (isOpen) {
-      // Next tick to allow transition
-      const id = requestAnimationFrame(() => setEntered(true))
+      if (!mounted) setMounted(true)
+      // next tick so transition can apply
+      const id = requestAnimationFrame(() => setVisible(true))
       return () => cancelAnimationFrame(id)
     } else {
-      setEntered(false)
+      // start close animation
+      setVisible(false)
+      // after transition, unmount
+      const t = setTimeout(() => setMounted(false), 220)
+      return () => clearTimeout(t)
     }
-  }, [isOpen])
+  }, [isOpen, mounted])
 
-  // Find modal anchors when open
+  // Find modal anchors when mounted (not just when isOpen) so close animation still positions correctly
   useEffect(() => {
-    if (!isOpen) return
+    if (!mounted) return
     const container = document.querySelector<HTMLElement>('.tf-modal-container')
     const panel = document.querySelector<HTMLElement>('.tf-modal-panel')
     setModalContainer(container)
     setModalPanel(panel)
-  }, [isOpen])
+    return () => {
+      setModalContainer(null)
+      setModalPanel(null)
+    }
+  }, [mounted])
 
   // Observe size/position changes of the modal panel
   useEffect(() => {
-    if (!isOpen || !modalPanel) return
+    if (!mounted || !modalPanel) return
 
-    const ro = new ResizeObserver(() => {
-      const rect = modalPanel.getBoundingClientRect()
-      setPanelRect({ top: rect.top, right: rect.right, height: rect.height })
-    })
-
-    // Initial measure
-    const rect = modalPanel.getBoundingClientRect()
-    setPanelRect({ top: rect.top, right: rect.right, height: rect.height })
-
-    ro.observe(modalPanel)
-
-    const onWinResize = () => {
+    const updateRect = () => {
       const r = modalPanel.getBoundingClientRect()
       setPanelRect({ top: r.top, right: r.right, height: r.height })
     }
-    window.addEventListener('resize', onWinResize)
+
+    const ro = new ResizeObserver(() => updateRect())
+
+    // Initial measure
+    updateRect()
+
+    ro.observe(modalPanel)
+    window.addEventListener('resize', updateRect)
 
     return () => {
       ro.disconnect()
-      window.removeEventListener('resize', onWinResize)
+      window.removeEventListener('resize', updateRect)
     }
-  }, [isOpen, modalPanel])
+  }, [mounted, modalPanel])
 
   // Clean up any global listeners from resize drag
   useEffect(() => {
@@ -99,11 +110,10 @@ export default function ChatSidebarOverlay({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Calculate available width next to modal (if any)
+  // Calculate available width next to modal (if any) - no gap between panel and sidebar
   const availableNextToModal = useMemo(() => {
     if (!panelRect) return undefined
-    const margin = 8 // small gap to the right of modal
-    const available = Math.max(0, window.innerWidth - panelRect.right - margin)
+    const available = Math.max(0, window.innerWidth - panelRect.right)
     return available
   }, [panelRect])
 
@@ -113,14 +123,11 @@ export default function ChatSidebarOverlay({
     const maxByContext = availableNextToModal
       ? Math.min(maxByViewport, availableNextToModal)
       : maxByViewport
-    setWidth((w) => {
-      const clamped = Math.max(MIN_W, Math.min(maxByContext, w))
-      return clamped
-    })
+    setWidth((w) => Math.max(MIN_W, Math.min(maxByContext, w)))
   }, [availableNextToModal, MIN_W])
 
   const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isOpen) return
+    if (!mounted) return
     e.preventDefault()
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     resizingRef.current = { startX: e.clientX, startWidth: width }
@@ -150,31 +157,41 @@ export default function ChatSidebarOverlay({
     onWidthChange?.(width, true)
   }
 
-  if (!isOpen) return null
+  if (!mounted) return null
+
+  const transition = 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms'
 
   const isModal = !!modalContainer
   const baseClass =
     (isModal
       ? 'absolute z-[5] border-l border-border bg-surface-base shadow-xl'
       : 'fixed z-[1100] border-l border-border bg-surface-base shadow-xl') +
-    ' will-change-transform'
+    ' will-change-transform overflow-hidden'
+
+  // Shared rounded left corners
+  const roundedLeft: React.CSSProperties = {
+    borderTopLeftRadius: 'var(--radius-3)',
+    borderBottomLeftRadius: 'var(--radius-3)',
+  }
 
   const style: React.CSSProperties = isModal && panelRect
     ? {
         top: panelRect.top,
-        left: Math.min(panelRect.right + 8, window.innerWidth),
+        left: Math.min(panelRect.right, window.innerWidth), // no gap
         height: panelRect.height,
         width: Math.min(width, availableNextToModal || width),
-        transition: 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms',
-        transform: 'translateX(0)',
+        transition,
+        transform: visible ? 'translateX(0)' : 'translateX(104%)',
+        ...roundedLeft,
       }
     : {
         top: 0,
         right: 0,
         bottom: 0,
         width,
-        transition: 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms',
-        transform: entered ? 'translateX(0)' : 'translateX(100%)',
+        transition,
+        transform: visible ? 'translateX(0)' : 'translateX(104%)',
+        ...roundedLeft,
       }
 
   const SidebarContent = (
@@ -193,7 +210,7 @@ export default function ChatSidebarOverlay({
     </div>
   )
 
-  // If we have a modal container, render inside it so we can sit between the overlay and panel
+  // If we have a modal container, render inside it so we can sit adjacent to the panel
   if (modalContainer) {
     return createPortal(SidebarContent, modalContainer)
   }
