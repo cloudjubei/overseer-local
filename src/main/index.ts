@@ -8,7 +8,6 @@ let mainWindow
 
 const getAppIcon = () => {
   // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
-  console.log('process.cwd: ', process.cwd())
   const iconPath = join(process.cwd(), 'resources/icon.png')
   const image = nativeImage.createFromPath(iconPath)
   return image

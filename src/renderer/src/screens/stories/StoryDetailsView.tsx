@@ -463,15 +463,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             </div>
             <div className="spacer" />
             <div className="flex items-center gap-3">
-              <Button
-                className="btn-secondary btn-icon"
-                onClick={() => setIsChatOpen(!isChatOpen)}
-                aria-label="Toggle chat"
-              >
-                <IconChat className="w-4 h-4" />
-              </Button>
-              <ModelChip editable />
-              {/* Replace RunAgentButton space with AgentRunBullet when active */}
               <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
                 {storyRun ? (
                   <AgentRunBullet
@@ -491,6 +482,14 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   />
                 )}
               </div>
+              <ModelChip editable />
+              <Button
+                className="btn-secondary btn-icon"
+                onClick={() => setIsChatOpen(!isChatOpen)}
+                aria-label="Toggle chat"
+              >
+                <IconChat className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </header>

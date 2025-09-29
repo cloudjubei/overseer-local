@@ -72,15 +72,14 @@ const CHATS_API = {
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, listener)
   },
   listChats: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST, { projectId }),
-  createChat: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE, { projectId }),
-  getChat: (projectId, chatId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { projectId, chatId }),
-  deleteChat: (projectId, chatId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { projectId, chatId }),
-  getCompletion: (projectId, chatId, newMessages, config) =>
+  createChat: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE, { input }),
+  getChat: (context) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { context }),
+  updateChat: (context, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { context, patch }),
+  deleteChat: (context) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { context }),
+  getCompletion: (context, newMessages, config) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, {
-      projectId,
-      chatId,
+      context,
       newMessages,
       config,
     }),

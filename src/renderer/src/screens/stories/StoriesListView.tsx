@@ -388,17 +388,6 @@ export default function StoriesListView() {
             </div>
           </div>
           <div className="right">
-            <button
-              type="button"
-              className="btn-secondary btn-icon"
-              aria-label="Toggle chat"
-              onClick={() => setIsChatOpen((v) => !v)}
-              disabled={!projectId}
-              title={isChatOpen ? 'Hide chat' : 'Show chat'}
-            >
-              <IconChat className="h-[16px] w-[16px]" />
-            </button>
-            <ModelChip editable className="mr-2" />
             <SegmentedControl
               ariaLabel="Toggle between list and board views"
               options={[
@@ -409,6 +398,17 @@ export default function StoriesListView() {
               onChange={(v) => setView(v as 'list' | 'board')}
               size="sm"
             />
+            <ModelChip editable className="mr-2" />
+            <button
+              type="button"
+              className="btn-secondary btn-icon"
+              aria-label="Toggle chat"
+              onClick={() => setIsChatOpen((v) => !v)}
+              disabled={!projectId}
+              title={isChatOpen ? 'Hide chat' : 'Show chat'}
+            >
+              <IconChat className="h-[16px] w-[16px]" />
+            </button>
           </div>
         </div>
         <div className="stories-toolbar shrink-0">

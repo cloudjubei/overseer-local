@@ -1,14 +1,24 @@
-import { Chat, ChatContext, ChatMessage, ChatSettings, LLMConfig } from 'thefactory-tools'
+import {
+  Chat,
+  ChatContext,
+  ChatCreateInput,
+  ChatEditInput,
+  ChatMessage,
+  ChatSettings,
+  ChatUpdate,
+  LLMConfig,
+} from 'thefactory-tools'
 
 export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom'
 
 export type ChatsService = {
-  listModels: (config: LLMConfig) => Promise<string[]>
+  // listModels: (config: LLMConfig) => Promise<string[]>
 
-  subscribe: (callback: (chats: Chat[]) => void) => () => void
+  subscribe: (callback: (chatUpdate: ChatUpdate) => void) => () => void
   listChats: (projectId?: string) => Promise<Chat[]>
-  createChat: (context: ChatContext) => Promise<Chat>
+  createChat: (input: ChatCreateInput) => Promise<Chat>
   getChat: (context: ChatContext) => Promise<Chat>
+  updateChat: (context: ChatContext, input: ChatEditInput) => Promise<Chat | undefined>
   deleteChat: (context: ChatContext) => Promise<void>
   saveSettings: (context: ChatContext, settings: Partial<ChatSettings>) => Promise<ChatSettings>
 

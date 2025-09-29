@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
-import { useChats, getChatContextPath } from '../../contexts/ChatsContext'
+import { useChats, ChatState } from '../../contexts/ChatsContext'
 import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
-import type { Chat, ChatContext } from 'thefactory-tools'
+import type { ChatContext } from 'thefactory-tools'
 
-// Internal tool toggle type for UI
-type ToolToggle = { id: string; name: string; enabled: boolean }
+type ToolToggle = { name: string; description: string; enabled: boolean }
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -25,24 +24,25 @@ function parseProjectIdFromContext(context: ChatContext): string | undefined {
 }
 
 export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
-  const { chats, getChat, sendMessage } = useChats()
-
-  const chatKey = useMemo(() => getChatContextPath(context), [context])
-  const chatState = chats[chatKey]
+  const { getChat, sendMessage } = useChats()
+  const [chat, setChat] = useState<ChatState | undefined>(undefined)
 
   useEffect(() => {
-    getChat(context)
+    const loadChat = async () => {
+      const c = await getChat(context)
+      setChat(c)
+    }
+    loadChat()
   }, [context, getChat])
 
-  const chat: Chat | undefined = chatState?.chat
-  const isThinking = chatState?.isThinking || false
-  const settings = chat?.settings
+  const isThinking = chat?.isThinking || false
+  const settings = chat?.chat.settings
 
   const { configs, activeConfig, setActive } = useLLMConfig()
   const { navigateView } = useNavigator()
 
   // Determine selected model/config
-  const selectedModel: string | undefined = settings?.model
+  const selectedModel: string | undefined = activeConfig?.model
   const selectedConfig = useMemo(() => {
     if (selectedModel) {
       const byModel = configs.find((c) => c.model === selectedModel)
@@ -56,11 +56,11 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
   const isConfigured = !!selectedConfig?.apiKey
 
   const [allowedTools, setAllowedTools] = useState(settings?.allowedTools)
-  const [autoToolCall, setAutoToolCall] = useState(!!settings?.autoToolCall)
+  const [autoCallTools, setAutoCallTools] = useState(settings?.autoCallTools)
 
   useEffect(() => {
     setAllowedTools(settings?.allowedTools)
-    setAutoToolCall(!!settings?.autoToolCall)
+    setAutoCallTools(settings?.autoCallTools)
   }, [settings])
 
   const handleSend = useCallback(
@@ -71,11 +71,11 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       const configWithSettings = {
         ...selectedConfig,
         allowedTools,
-        autoToolCall,
+        autoCallTools,
       }
       await sendMessage(context, message, configWithSettings, attachments)
     },
-    [context, selectedConfig, sendMessage, allowedTools, autoToolCall],
+    [context, selectedConfig, sendMessage, allowedTools, autoCallTools],
   )
 
   const handleConfigChange = useCallback(
@@ -100,11 +100,14 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       try {
         const list = await factoryToolsService.listTools(projectId)
         const allowed = allowedTools
-        const mapped: ToolToggle[] = list.map((t: any) => ({
-          id: t.name,
-          name: t.name,
-          enabled: !allowed ? true : allowed.includes(t.name),
-        }))
+        const mapped: ToolToggle[] = list.map(
+          (t) =>
+            ({
+              name: t.function.name,
+              description: t.function.description,
+              enabled: !allowed ? true : allowed.includes(t.function.name),
+            }) as ToolToggle,
+        )
         if (isMounted) setTools(mapped)
       } catch (e) {
         if (isMounted) setTools([])
@@ -118,7 +121,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
 
   const handleToolToggle = useCallback(
     (toolId: string) => {
-      const currentAllowed = allowedTools || tools?.map((t) => t.id) || []
+      const currentAllowed = allowedTools || tools?.map((t) => t.name) || []
       const newAllowed = new Set(currentAllowed)
 
       if (newAllowed.has(toolId)) {
@@ -130,10 +133,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     },
     [allowedTools, tools],
   )
-
-  const handleAutoApproveChange = useCallback((checked: boolean) => {
-    setAutoToolCall(checked)
-  }, [])
 
   // Settings dropdown UI state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -165,8 +164,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       <header className="relative flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-            {chatContextTitle}{' '}
-            {chat ? `(${new Date(chat.updatedAt).toLocaleString()})` : ''}
+            {chatContextTitle} {chat ? `(${new Date(chat.chat.updatedAt).toLocaleString()})` : ''}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -209,22 +207,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
               </div>
 
               <div className="p-3 space-y-4 max-h-[60vh] overflow-auto">
-                <div className="space-y-1">
-                  <div className="text-xs font-medium text-[var(--text-secondary)]">Model</div>
-                  <Select value={selectedConfigId || ''} onValueChange={handleConfigChange}>
-                    <SelectTrigger className="ui-select w-full">
-                      <SelectValue placeholder="Select Model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {configs.map((cfg) => (
-                        <SelectItem key={cfg.id} value={cfg.id!}>
-                          {cfg.name} ({cfg.model})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {tools ? (
                   <div className="space-y-2">
                     <div className="text-xs font-medium text-[var(--text-secondary)]">Tools</div>
@@ -236,15 +218,20 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
                       ) : (
                         tools.map((tool) => (
                           <div
-                            key={tool.id}
+                            key={tool.name}
                             className="flex items-center justify-between px-2 py-2"
                           >
-                            <div className="text-sm text-[var(--text-primary)] truncate pr-2">
-                              {tool.name}
+                            <div className="flex flex-col">
+                              <span className="text-sm text-[var(--text-primary)] truncate pr-2">
+                                {tool.name}
+                              </span>
+                              <span className="text-xs text-neutral-500 font-light">
+                                {tool.description}
+                              </span>
                             </div>
                             <Switch
                               checked={tool.enabled}
-                              onCheckedChange={() => handleToolToggle(tool.id)}
+                              onCheckedChange={() => handleToolToggle(tool.name)}
                               label=""
                             />
                           </div>
@@ -253,22 +240,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
                     </div>
                   </div>
                 ) : null}
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-[var(--text-primary)]">
-                      Auto-approve tool calls
-                    </div>
-                    <div className="text-xs text-[var(--text-secondary)]">
-                      When enabled, the agent can invoke tools without asking for confirmation.
-                    </div>
-                  </div>
-                  <Switch
-                    checked={autoToolCall}
-                    onCheckedChange={handleAutoApproveChange}
-                    label="Auto-approve"
-                  />
-                </div>
               </div>
             </div>
           )}
@@ -292,8 +263,8 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       )}
 
       <MessageList
-        chatId={chatKey}
-        messages={chat?.messages || []}
+        chatId={chat?.key}
+        messages={chat?.chat.messages || []}
         isThinking={isThinking}
       />
 

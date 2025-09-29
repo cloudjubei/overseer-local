@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1897,6 +1897,45 @@
       "createdAt": "2025-09-28T01:10:09.731Z",
       "updatedAt": "2025-09-28T01:46:47.076Z",
       "completedAt": "2025-09-28T01:46:47.076Z"
+    },
+    {
+      "id": "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34",
+      "status": "-",
+      "title": "Mobile/Small UI improvements",
+      "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx some things need to be shifted.\nThe blockers incoming/outgoing at the top should be in a section between the title section and the search section (so an entirely new section). This should only show if there's a blocker either outgoing or incoming.\nThe add feature button (with the plus) should be in the top right of the `Features` section - horizontally leveled with the title of that section. The edit button (for the whole story) should be in the top right of the `Overview` section - horizontally leveled with the tile of that section.\nNow the search secton will have 3 elements left - the search bar, that status filter and the ordering selection. The latter 2 should be pushed to a 2nd row if the screen becomes small enough so that in the mobile version it shows the search bar at the top and status filter + ordering selection below it.",
+      "context": [
+        "src/renderer/src/screens/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T10:09:33.896Z",
+      "updatedAt": "2025-09-29T10:09:33.896Z"
+    },
+    {
+      "id": "898404db-c466-4a60-8bd3-52e33785c563",
+      "status": "-",
+      "title": "StoriesListView UI update",
+      "description": "When the screen becomes small @src/renderer/src/screens/stories/StoriesListView.tsx gets a menu bar at the top. We actually want that to be visible all the time, and to show Home to the left like it does in the mobile version.\nThe bar should have the List | Board switch in the middle of it and the model selection chip + chat button to the right.\nThe search section will then contain 3 elements - the search bar, the status filer and the ordering selection. When the screen becomes small enough ,the latter two need to be pushed to a 2nd row, so in the mobile version there will be the search bar visible on one row and the status filer and ordering selection visible on the 2nd row.",
+      "context": [
+        "src/renderer/src/screens/stories/StoriesListView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T10:13:41.477Z",
+      "updatedAt": "2025-09-29T10:13:41.477Z"
+    },
+    {
+      "id": "1d8e24a8-ca9e-4e85-b852-800d1350a6dd",
+      "status": "-",
+      "title": "The Files don't display",
+      "description": "For instance in @src/renderer/src/components/stories/FeatureForm.tsx it uses the @src/renderer/src/components/stories/ContextFileChip.tsx which in turn uses @src/renderer/src/components/ui/FileDisplay.tsx , which is a `FilePreviewCard` wrapped in a @src/renderer/src/components/ui/Tooltip.tsx . When these are displayed in the @src/renderer/src/components/stories/FeatureForm.tsx for some files - they don't show at all - just the 'x' (the delete button) shows.\nWhen debugging it seems that the Tooltip never gets to render the `FilePreviewCard` so there must be some bug in there.",
+      "context": [
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/components/stories/ContextFileChip.tsx",
+        "src/renderer/src/components/ui/FileDisplay.tsx",
+        "src/renderer/src/components/ui/Tooltip.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T10:15:39.638Z",
+      "updatedAt": "2025-09-29T10:16:28.741Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2022,9 +2061,11 @@
     "fae23bb4-639b-41c1-ab9a-a9ab8f56ea29": 120,
     "36a5ae63-4c86-48d3-b7ca-788cd5327671": 121,
     "23e11a4c-977b-4c11-9088-34103071ba5c": 122,
-    "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431": 123
+    "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431": 123,
+    "1d8e24a8-ca9e-4e85-b852-800d1350a6dd": 124,
+    "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34": 125,
+    "898404db-c466-4a60-8bd3-52e33785c563": 126
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z",
-  "completedAt": "2025-09-28T01:46:47.077Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z"
 }

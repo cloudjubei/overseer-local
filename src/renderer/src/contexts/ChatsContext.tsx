@@ -9,7 +9,9 @@ import type {
   ChatContextFeature,
   ChatContextAgentRun,
   ChatContextProjectTopic,
+  ChatUpdate,
 } from 'thefactory-tools'
+// import { getChatContextPath } from 'thefactory-tools'
 import { chatsService } from '../services/chatsService'
 import { projectsService } from '../services/projectsService'
 
@@ -45,6 +47,7 @@ export function getChatContextPath(context: ChatContext): string {
 }
 
 export type ChatState = {
+  key: string
   chat: Chat
   isLoading: boolean
   isThinking: boolean
@@ -94,11 +97,16 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           try {
             projectChats = await chatsService.listChats(project.id)
             const chatStates: ChatState[] = projectChats.map((chat) => {
-              return { chat, isLoading: false, isThinking: false }
+              return {
+                key: getChatContextPath(chat.context),
+                chat,
+                isLoading: false,
+                isThinking: false,
+              }
             })
             chatsByProjectId[project.id] = chatStates
             for (const c of chatStates) {
-              allChats[getChatContextPath(c.chat.context)] = c
+              allChats[c.key] = c
             }
           } catch (e) {
             console.error(`Failed to list chats for project ${project.id}`, e)
@@ -114,17 +122,21 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = chatsService.subscribe((updatedChats: Chat[]) => {
+    const unsubscribe = chatsService.subscribe((chatUpdate: ChatUpdate) => {
       setChats((prev) => {
         const newChats = { ...prev }
-        for (const chat of updatedChats) {
-          const key = getChatContextPath(chat.context)
+        const key = getChatContextPath(chatUpdate.context)
+        if (chatUpdate.type === 'delete') {
+          delete newChats[key]
+        } else if (chatUpdate.type === 'change') {
           newChats[key] = {
             ...(newChats[key] || {}),
-            chat: chat,
+            chat: chatUpdate.chat!,
             isLoading: false,
             isThinking: false,
           }
+        } else {
+          newChats[key] = { key, chat: chatUpdate.chat!, isLoading: false, isThinking: false }
         }
         return newChats
       })
@@ -140,7 +152,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const c = chats[key]
       if (c) return c
       const chat = await chatsService.getChat(context)
-      const chatState: ChatState = { chat, isLoading: false, isThinking: false }
+      const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
       updateChatState(key, chatState)
       return chatState
     },
@@ -186,8 +198,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       isLoading: false,
       isThinking: false,
     })
-    const chat = await chatsService.createChat(context)
-    const state = { chat, isLoading: false, isThinking: false }
+    const chat = await chatsService.createChat({ context, messages: [] })
+    const state = { key, chat, isLoading: false, isThinking: false }
     updateChatState(key, state)
     return state
   }, [])

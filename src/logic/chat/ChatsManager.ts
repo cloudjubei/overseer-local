@@ -197,7 +197,7 @@ export default class ChatsManager extends BaseManager {
       ]
 
       const { model, provider } = config
-      const completion = createCompletionClient(config)
+      const completion = createCompletionClient(config, false)
 
       const res = await completion({ model, messages: currentMessages })
 

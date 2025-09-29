@@ -177,22 +177,16 @@ export const components: Partial<Components> = {
   },
 }
 
-interface ExtendedOptions extends Options {
-  className?: string
-}
-
-export const MemoizedReactMarkdown: FC<ExtendedOptions> = memo(
-  ReactMarkdown as FC<ExtendedOptions>,
-  (prevProps, nextProps) =>
-    prevProps.children === nextProps.children && prevProps.className === nextProps.className,
+export const MemoizedReactMarkdown: FC<Options> = memo(
+  ReactMarkdown as FC<Options>,
+  (prevProps, nextProps) => prevProps.children === nextProps.children,
 )
 
-export default function Markdown({ text, className }: { text: string; className?: string }) {
+export default function Markdown({ text }: { text: string }) {
   const containsLaTeX = isContainingLaTeX(text)
   const processedText = containsLaTeX ? preprocessLaTeX(text || '') : text
   return (
     <MemoizedReactMarkdown
-      className={className}
       rehypePlugins={[
         rehypeRaw,
         [rehypeExternalLinks, { target: '_blank' }],
