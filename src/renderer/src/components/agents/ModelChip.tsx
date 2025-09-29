@@ -108,9 +108,22 @@ export type ModelChipProps = {
   model?: string
   className?: string
   editable?: boolean // false by default
+  // New: allow consumer to control selection and handle picking without changing global active config
+  selectedConfigId?: string
+  onPickConfigId?: (configId: string) => void
 }
 
-function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => void }) {
+function Picker({
+  anchorEl,
+  onClose,
+  selectedConfigId,
+  onPickConfigId,
+}: {
+  anchorEl: HTMLElement
+  onClose: () => void
+  selectedConfigId?: string
+  onPickConfigId?: (configId: string) => void
+}) {
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [coords, setCoords] = useState<{
     top: number
@@ -156,7 +169,10 @@ function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => v
         e.preventDefault()
         if (activeIndex < recentConfigs.length) {
           const cfg = recentConfigs[activeIndex]
-          if (cfg) setActive(cfg.id!)
+          if (cfg) {
+            if (onPickConfigId) onPickConfigId(cfg.id!)
+            else setActive(cfg.id!)
+          }
           onClose()
         } else {
           navigateView('Settings')
@@ -166,9 +182,11 @@ function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => v
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [activeIndex, onClose, recentConfigs, setActive])
+  }, [activeIndex, onClose, recentConfigs, setActive, onPickConfigId])
 
   if (!coords) return null
+
+  const activeId = selectedConfigId || activeConfigId
 
   return createPortal(
     <div
@@ -191,7 +209,7 @@ function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => v
       }}
     >
       {recentConfigs.map((cfg, i) => {
-        const isActive = cfg.id === activeConfigId
+        const isActive = cfg.id === activeId
         const dot = providerDotClasses(cfg.provider)
         return (
           <button
@@ -201,7 +219,8 @@ function Picker({ anchorEl, onClose }: { anchorEl: HTMLElement; onClose: () => v
             className="standard-picker__item"
             onClick={(e) => {
               e.stopPropagation()
-              setActive(cfg.id!)
+              if (onPickConfigId) onPickConfigId(cfg.id!)
+              else setActive(cfg.id!)
               onClose()
             }}
             onMouseEnter={() => setActiveIndex(i)}
@@ -238,15 +257,32 @@ export default function ModelChip({
   model,
   className,
   editable = false,
+  selectedConfigId,
+  onPickConfigId,
 }: ModelChipProps) {
   const containerRef = useRef<HTMLSpanElement>(null)
   const [open, setOpen] = useState(false)
   const { configs, activeConfig } = useLLMConfig()
   const { navigateView } = useNavigator()
 
-  // Determine display based on props or active config
-  const prov = providerLabel(provider || activeConfig?.provider)
-  const displayModel = model || activeConfig?.model
+  // Determine display based on props or selected id or active config
+  let prov = providerLabel(provider)
+  let displayModel = model
+
+  const selectedCfg = selectedConfigId
+    ? configs.find((c) => c.id === selectedConfigId)
+    : undefined
+
+  if ((!prov || !displayModel) && selectedCfg) {
+    prov = providerLabel(selectedCfg.provider)
+    displayModel = selectedCfg.model
+  }
+
+  if ((!prov || !displayModel) && !selectedCfg) {
+    prov = providerLabel(activeConfig?.provider)
+    displayModel = displayModel || activeConfig?.model
+  }
+
   const parts = [prov || undefined, displayModel || undefined].filter(Boolean)
   const label = parts.join(' · ')
   const title = label || (editable ? 'Select model' : 'Unknown model')
@@ -308,7 +344,12 @@ export default function ModelChip({
     <>
       {chipEl}
       {editable && open && containerRef.current && (
-        <Picker anchorEl={containerRef.current} onClose={() => setOpen(false)} />
+        <Picker
+          anchorEl={containerRef.current}
+          onClose={() => setOpen(false)}
+          selectedConfigId={selectedConfigId}
+          onPickConfigId={onPickConfigId}
+        />
       )}
     </>
   )
