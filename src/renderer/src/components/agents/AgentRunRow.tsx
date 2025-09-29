@@ -67,7 +67,6 @@ export interface AgentRunRowProps {
   showActions?: boolean
   showProject?: boolean
   showModel?: boolean
-  // New display controls
   showStatus?: boolean // default true
   showFeaturesInsteadOfTurn?: boolean // default true
   showThinking?: boolean // default false
@@ -106,6 +105,7 @@ export default function AgentRunRow({
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
+
   const costUSD = useMemo(
     () =>
       (run.price.inputPerMTokensUSD * prompt) / 1_000_000 +
@@ -119,8 +119,8 @@ export default function AgentRunRow({
       className="border-t border-neutral-200 dark:border-neutral-800 group"
     >
       <td className="px-3 py-2 leading-tight">
-        <div>{formatDate(run.startedAt)}</div>
-        <div className="text-neutral-500">{formatTime(run.startedAt)}</div>
+        <div>{formatDate(run.createdAt)}</div>
+        <div className="text-neutral-500">{formatTime(run.createdAt)}</div>
       </td>
       {showProject ? (
         <td className="px-3 py-2">

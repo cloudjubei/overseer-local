@@ -1,8 +1,8 @@
 import type { BrowserWindow } from 'electron'
 import { createPricingManager, PricingManager } from 'thefactory-tools'
-import { PricingState } from 'thefactory-tools/dist/pricing'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import BaseManager from '../BaseManager'
+import type { PricingState } from 'thefactory-tools'
 
 export default class FactoryLLMPricingManager extends BaseManager {
   private pricingManager?: PricingManager
