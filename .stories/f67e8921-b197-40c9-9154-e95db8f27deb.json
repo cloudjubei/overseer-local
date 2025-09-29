@@ -1967,6 +1967,35 @@
       "blockers": [],
       "createdAt": "2025-09-29T13:30:00.678Z",
       "updatedAt": "2025-09-29T13:30:00.678Z"
+    },
+    {
+      "id": "d15eda55-d79c-4dff-8228-8a7e745a1fac",
+      "status": "-",
+      "title": "DocumentIngestionManager should check for text files",
+      "description": "When calling `ingestProject` @src/logic/document_ingestion/DocumentIngestionManager.ts should make sure that only text files are passed onto the database manager as only those are processed.",
+      "context": [
+        "src/logic/document_ingestion/DocumentIngestionManager.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T13:53:17.464Z",
+      "updatedAt": "2025-09-29T13:53:17.464Z"
+    },
+    {
+      "id": "cc444241-f834-463f-bf98-91c98dd1b706",
+      "status": "-",
+      "title": "Deleting/updating/creating features/stories should be optimistic",
+      "description": "When using @src/renderer/src/components/stories/FeatureForm.tsx in @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx , as well as @src/renderer/src/components/stories/StoryForm.tsx in @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx - all the changes should be optimistic as the backend changes might take a a little bit of time to update, whereas the user should have immediate visual feedback.",
+      "context": [
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx",
+        "src/renderer/src/components/stories/StoryForm.tsx",
+        "src/renderer/src/screens/stories/StoryCreateView.tsx",
+        "src/renderer/src/screens/stories/StoryEditView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T13:55:24.590Z",
+      "updatedAt": "2025-09-29T13:55:24.590Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2097,7 +2126,9 @@
     "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34": 125,
     "898404db-c466-4a60-8bd3-52e33785c563": 126,
     "c7cf3d3f-b368-4c00-8e79-1072f213b2c0": 127,
-    "9770df69-0ac3-4fcd-99ea-c3af72bfe37b": 128
+    "9770df69-0ac3-4fcd-99ea-c3af72bfe37b": 128,
+    "d15eda55-d79c-4dff-8228-8a7e745a1fac": 129,
+    "cc444241-f834-463f-bf98-91c98dd1b706": 130
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-23T22:02:16.498Z"

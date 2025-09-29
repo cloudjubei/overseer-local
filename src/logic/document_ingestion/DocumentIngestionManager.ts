@@ -81,7 +81,7 @@ export default class DocumentIngestionManager extends BaseManager {
       }
     }
     try {
-      // await this.databaseManager.upsertDocuments(documentsToUpsert)
+      await this.databaseManager.upsertDocuments(documentsToUpsert)
     } catch (e) {
       console.warn('[DocumentIngestion] file ingest failed in batch. Error: ', e)
     }
