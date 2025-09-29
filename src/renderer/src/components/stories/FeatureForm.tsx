@@ -193,21 +193,22 @@ export default function FeatureForm({
     setBlockers((prev) => (prev.includes(canonical) ? prev : [...prev, canonical]))
   }
 
+  // Choose scroll behavior: if actions are hidden, let parent handle scrolling.
+  // If actions are shown, make content area independently scrollable so actions stay visible.
+  const contentWrapperClass = hideActions
+    ? 'space-y-4'
+    : 'flex-1 min-h-0 overflow-y-auto space-y-4'
+
   return (
     <form
       id={formId}
       onSubmit={handleSubmit}
       onKeyDown={onKeyDown}
-      // Make the form capable of being its own scroll container
-      className="flex flex-col h-full min-h-0"
+      className="flex flex-col min-h-0"
       aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}
-      style={{
-        // Allow parent containers to control overscroll; prevent background scroll chaining
-        overscrollBehavior: 'contain',
-      }}
     >
-      {/* Scrollable content area */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
+      {/* Content area (scrollable only when actions are inline) */}
+      <div className={contentWrapperClass}>
         <div className="grid grid-cols-1 gap-3">
           <StatusControl status={status} onChange={setStatus} />
           <div className="flex items-center gap-3">

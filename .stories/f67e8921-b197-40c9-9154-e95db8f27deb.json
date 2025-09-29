@@ -1942,7 +1942,7 @@
     },
     {
       "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
-      "status": "-",
+      "status": "+",
       "title": "The Feature form is not scrollable",
       "description": "The @src/renderer/src/components/stories/FeatureForm.tsx inside @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx is not scrollable - it should be.",
       "context": [
@@ -1952,8 +1952,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T11:40:32.221Z",
-      "updatedAt": "2025-09-29T12:54:14.541Z",
-      "rejection": "Still isn't scrollable. The issue seems to lie in @src/renderer/src/components/stories/FeatureForm.tsx itself."
+      "updatedAt": "2025-09-29T13:58:47.426Z",
+      "rejection": "Still isn't scrollable. The issue seems to lie in @src/renderer/src/components/stories/FeatureForm.tsx itself.",
+      "completedAt": "2025-09-29T13:58:47.426Z"
     },
     {
       "id": "9770df69-0ac3-4fcd-99ea-c3af72bfe37b",
