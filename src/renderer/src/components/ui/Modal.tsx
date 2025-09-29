@@ -135,7 +135,7 @@ export function Modal({
   const contentClasses = contentClassName || 'flex-grow overflow-y-auto p-4'
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center" aria-hidden={false}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center tf-modal-container" aria-hidden={false}>
       <div
         ref={overlayRef}
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 animate-in fade-in"
@@ -144,7 +144,7 @@ export function Modal({
       <div
         ref={panelRef}
         className={
-          `relative z-10 w-full flex flex-col ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh]` +
+          `relative z-10 w-full flex flex-col ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh] tf-modal-panel` +
           ' border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95'
         }
         role="dialog"

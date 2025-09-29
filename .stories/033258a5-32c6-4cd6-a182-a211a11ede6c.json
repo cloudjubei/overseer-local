@@ -201,7 +201,7 @@
     },
     {
       "id": "95c7a067-9e9b-4e54-b786-6d3997dfff30",
-      "status": "-",
+      "status": "+",
       "title": "Improve the chat sidebar ui on normal screen",
       "description": "So in @src/renderer/src/screens/stories/StoryDetailsView.tsx , @src/renderer/src/screens/stories/StoriesListView.tsx , @src/renderer/src/screens/TestsView.tsx and @src/renderer/src/screens/AgentsView.tsx - the chat button is in the top right and it makes the chat appear - this should slide out in a nice animation. It should also out collapse the @src/renderer/src/navigation/SidebarView.tsx  as to give more room to the @src/renderer/src/components/chat/ChatSidebar.tsx .\nThe whole area/window where the ChatSidebar is should be draggable up to a certain point (50% of the screen) so that it can be expanded or shrunk (up to a certain meaningful minimum - similar to the width the Sidebar is, so. that they are symmetrical). This width setting should be recorded and whenever such a chat is open this width should be resumed.",
       "context": [
@@ -214,11 +214,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:33.055Z",
-      "updatedAt": "2025-09-29T20:16:49.238Z"
+      "updatedAt": "2025-09-29T20:49:24.539Z",
+      "completedAt": "2025-09-29T20:49:24.539Z"
     },
     {
       "id": "f50d7e7c-034c-4455-8772-81afac6c660c",
-      "status": "-",
+      "status": "+",
       "title": "Improve the chat UI on popups",
       "description": "In @src/renderer/src/screens/stories/FeatureCreateView.tsx , @src/renderer/src/screens/stories/FeatureEditView.tsx , @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx - the chat button at the top opens the chat sidebar in the middle. That's not correct. The way it should be, it's as if the chat sidebar is a 2nd popup that slides out of the current popup to the maximum right the screen has available without changing the popup it slides from. Currently the input box doesn't show in all of these popups when chat is open - it has to be showing.",
       "context": [
@@ -229,12 +230,13 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:43.049Z",
-      "updatedAt": "2025-09-29T20:15:31.634Z",
-      "rejection": "The chat sidebar when showing should appear sliding from under the popup and to the right - its height should be the height of the popup.\nAlso, it now covers the popup - it shouldn't."
+      "updatedAt": "2025-09-29T20:38:51.743Z",
+      "rejection": "The chat sidebar when showing should appear sliding from under the popup and to the right - its height should be the height of the popup.\nAlso, it now covers the popup - it shouldn't.",
+      "completedAt": "2025-09-29T20:38:51.743Z"
     },
     {
       "id": "c3804c5f-ec19-410e-b866-3d0229cb354a",
-      "status": "-",
+      "status": "+",
       "title": "Improve the top buttons in ChatSidebar",
       "description": "When the chat is showing in the sidebar, we don't need to display the title but instead we should show a circular \"i\" icon, that when clicked will show a tooltip that will show the current context (project, story, feature etc). This should be a reusable component.\nThe Chat Model selection is currently saving the setting as the overall app model - these two should be separate. The chat model selection should use the same component as elsewhere i.e. like in @src/renderer/src/screens/stories/StoriesListView.tsx the @src/renderer/src/components/agents/ModelChip.tsx is used. It should just have a blue border to separate it from the agent config.\nThe settings button should be an icon button with the `IconSettings` image.",
       "context": [
@@ -243,11 +245,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:29:28.459Z",
-      "updatedAt": "2025-09-29T20:16:28.113Z"
+      "updatedAt": "2025-09-29T20:43:52.398Z",
+      "completedAt": "2025-09-29T20:43:52.398Z"
     },
     {
       "id": "4fdbae23-ff2f-4616-a7cf-61d831dc8377",
-      "status": "-",
+      "status": "+",
       "title": "ChatInput bottom area",
       "description": "In @src/renderer/components/Chat/ChatInput.tsx no need to mention Shift+Enter as normal Enter creates a newline. There should be a little round info button (i) below the send button, that when clicked will show a tooltip of all such shortcuts and helpers that are available in the chat input (which there will be more in the future). The bottom area should hide after over 3 lines have been typed in, making more space for the text. It should reappear if the text is back to 3 lines or less.\nThe info that is displayed in the area should be always displaying 1 hint per line, where the area can have at most 4 such infos (top left, top right, bottom left, bottom right). Or if there's just one info shown on one side then it would show it centered.\nFor now we want to show:\n\"Use @ for file references\" and \"Use # for stories & features\" on the left and on the right just \"CMD/Ctrl + Enter to send\" where CMD/CTRL is replaced with the appropriate icon for the system.",
       "context": [
@@ -255,8 +258,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:34:26.711Z",
-      "updatedAt": "2025-09-29T20:13:37.434Z",
-      "rejection": "The buttons: |ATTACH FILE| SEND| INFO| Should be in a vertical section to the right of the chat input box - they should not be a part of the bottom area.\nWhen clicking the (i) button - the tooltip is currently showing to the bottom and cannot be seen - it should always show to the top left (as the button is in the bottom right corner of the screen)."
+      "updatedAt": "2025-09-29T20:31:36.733Z",
+      "rejection": "The buttons: |ATTACH FILE| SEND| INFO| Should be in a vertical section to the right of the chat input box - they should not be a part of the bottom area.\nWhen clicking the (i) button - the tooltip is currently showing to the bottom and cannot be seen - it should always show to the top left (as the button is in the bottom right corner of the screen).",
+      "completedAt": "2025-09-29T20:31:36.733Z"
     },
     {
       "id": "35267358-0316-4f6e-a5d0-aafaec8b04c0",

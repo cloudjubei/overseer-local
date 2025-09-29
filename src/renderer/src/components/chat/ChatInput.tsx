@@ -152,125 +152,123 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     >
       <div className="p-2">
         <div className="relative">
-          <div className="bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
-            <div className="relative p-1">
-              <FileMentionsTextarea
-                value={input}
-                onChange={(val) => {
-                  setInput(val)
-                }}
-                placeholder={placeholderText}
-                rows={1}
-                disabled={isThinking}
-                className="w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]"
-                style={{ ...maxHeightStyle, overflowY: 'auto' }}
-                ariaLabel="Message input"
-                inputRef={textareaRef}
-                onKeyDown={handleTextareaKeyDown}
-              />
-            </div>
-
-            <div className="px-2 py-1.5 border-t border-[var(--border-subtle)]">
-              <AttachmentList
-                attachments={pendingAttachments}
-                onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
-                disabled={isThinking}
-              />
-
-              <div className="flex items-center justify-between gap-2 text-[12px] text-[var(--text-muted)] mt-1">
-                <div className="flex items-center gap-2 min-w-0">
-                  {/* Left-side actions (currently none besides attachment button) */}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="btn-icon"
-                    aria-label="Attach a document"
-                    type="button"
-                    disabled={isThinking}
-                  >
-                    <IconAttach className="w-5 h-5" />
-                  </button>
-                  <input
-                    type="file"
-                    accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileUpload}
-                  />
-
-                  <button
-                    onClick={handleSend}
-                    className="btn-icon"
-                    disabled={!canSend || isThinking}
-                    aria-label="Send message"
-                  >
-                    <IconSend className="w-5 h-5" />
-                  </button>
-                </div>
+          <div className="flex gap-2">
+            {/* Main input box */}
+            <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
+              <div className="relative p-1">
+                <FileMentionsTextarea
+                  value={input}
+                  onChange={(val) => {
+                    setInput(val)
+                  }}
+                  placeholder={placeholderText}
+                  rows={1}
+                  disabled={isThinking}
+                  className="w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]"
+                  style={{ ...maxHeightStyle, overflowY: 'auto' }}
+                  ariaLabel="Message input"
+                  inputRef={textareaRef}
+                  onKeyDown={handleTextareaKeyDown}
+                />
               </div>
 
-              {showHintsArea && (
-                <div className="mt-2 relative">
-                  <div className="grid grid-cols-2 gap-4 text-[12px] text-[var(--text-muted)]">
-                    {/* Left column hints */}
-                    <div className={`flex flex-col ${leftHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
-                      {leftHints.length > 1 ? (
-                        <>
+              {/* Attachments and bottom info area (no action buttons here) */}
+              <div className="px-2 py-1.5 border-t border-[var(--border-subtle)]">
+                <AttachmentList
+                  attachments={pendingAttachments}
+                  onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
+                  disabled={isThinking}
+                />
+
+                {showHintsArea && (
+                  <div className="mt-2">
+                    <div className="grid grid-cols-2 gap-4 text-[12px] text-[var(--text-muted)]">
+                      {/* Left column hints */}
+                      <div className={`flex flex-col ${leftHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
+                        {leftHints.length > 1 ? (
+                          <>
+                            <div className="truncate">{leftHints[0]}</div>
+                            <div className="truncate">{leftHints[1]}</div>
+                          </>
+                        ) : (
                           <div className="truncate">{leftHints[0]}</div>
-                          <div className="truncate">{leftHints[1]}</div>
-                        </>
-                      ) : (
-                        <div className="truncate">{leftHints[0]}</div>
-                      )}
-                    </div>
+                        )}
+                      </div>
 
-                    {/* Right column hints */}
-                    <div className={`flex flex-col items-end ${rightHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
-                      {rightHints.length > 1 ? (
-                        <>
+                      {/* Right column hints */}
+                      <div className={`flex flex-col items-end ${rightHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
+                        {rightHints.length > 1 ? (
+                          <>
+                            <div className="truncate">{rightHints[0]}</div>
+                            <div className="truncate">{rightHints[1]}</div>
+                          </>
+                        ) : (
                           <div className="truncate">{rightHints[0]}</div>
-                          <div className="truncate">{rightHints[1]}</div>
-                        </>
-                      ) : (
-                        <div className="truncate">{rightHints[0]}</div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
 
-                  {/* Info button below the send button (bottom-right) */}
-                  <div className="mt-2 flex justify-end">
-                    <button
-                      id="chat-input-info-btn"
-                      type="button"
-                      onClick={() => setInfoOpen((v) => !v)}
-                      className="w-6 h-6 rounded-full border border-[var(--border-subtle)] text-[10px] leading-6 text-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]"
-                      aria-haspopup="dialog"
-                      aria-expanded={infoOpen}
-                      aria-label="Show chat input tips"
-                    >
-                      i
-                    </button>
+            {/* Right-side vertical controls */}
+            <div className="flex flex-col items-center gap-2 w-10">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="btn-icon"
+                aria-label="Attach a document"
+                type="button"
+                disabled={isThinking}
+              >
+                <IconAttach className="w-5 h-5" />
+              </button>
+              <input
+                type="file"
+                accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleFileUpload}
+              />
+
+              <button
+                onClick={handleSend}
+                className="btn-icon"
+                disabled={!canSend || isThinking}
+                aria-label="Send message"
+              >
+                <IconSend className="w-5 h-5" />
+              </button>
+
+              {/* Info button with top-left tooltip */}
+              <div className="relative">
+                <button
+                  id="chat-input-info-btn"
+                  type="button"
+                  onClick={() => setInfoOpen((v) => !v)}
+                  className="w-6 h-6 rounded-full border border-[var(--border-subtle)] text-[10px] leading-6 text-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]"
+                  aria-haspopup="dialog"
+                  aria-expanded={infoOpen}
+                  aria-label="Show chat input tips"
+                >
+                  i
+                </button>
+
+                {infoOpen && (
+                  <div
+                    ref={infoPopoverRef}
+                    role="dialog"
+                    className="absolute bottom-full right-full mb-2 mr-2 z-10 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
+                  >
+                    <div className="font-medium mb-1 text-[var(--text-secondary)]">Shortcuts & helpers</div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Use @ for file references</li>
+                      <li>Use # for stories & features</li>
+                      <li>{modifierSymbol} + Enter to send</li>
+                    </ul>
                   </div>
-
-                  {infoOpen && (
-                    <div
-                      ref={infoPopoverRef}
-                      role="dialog"
-                      className="absolute right-0 z-10 mt-1 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
-                    >
-                      <div className="font-medium mb-1 text-[var(--text-secondary)]">Shortcuts & helpers</div>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Use @ for file references</li>
-                        <li>Use # for stories & features</li>
-                        <li>
-                          {modifierSymbol} + Enter to send
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

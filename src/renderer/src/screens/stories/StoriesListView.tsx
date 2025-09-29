@@ -20,7 +20,7 @@ import ModelChip from '@renderer/components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '@renderer/components/ui/Skeleton'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { ChatSidebar } from '@renderer/components/chat'
+import { ChatSidebarOverlay } from '@renderer/components/chat'
 import { StoryListStatusFilter, StoryListViewSorting, StoryViewMode } from 'src/types/settings'
 
 function countFeatures(story: Story) {
@@ -94,6 +94,23 @@ export default function StoriesListView() {
   const { runsActive, startAgent } = useAgents()
 
   const [isChatOpen, setIsChatOpen] = useState(false)
+
+  // Collapse/restore sidebar when chat toggles
+  const prevSidebarCollapsedRef = useRef<boolean | null>(null)
+  useEffect(() => {
+    if (!isAppSettingsLoaded) return
+    if (isChatOpen) {
+      if (prevSidebarCollapsedRef.current == null) {
+        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
+      }
+      if (appSettings.userPreferences.sidebarCollapsed !== true) {
+        setUserPreferences({ sidebarCollapsed: true })
+      }
+    } else if (prevSidebarCollapsedRef.current != null) {
+      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
+      prevSidebarCollapsedRef.current = null
+    }
+  }, [isChatOpen, isAppSettingsLoaded])
 
   useEffect(() => {
     const storyIds = storyIdsByProject[projectId] ?? []
@@ -644,12 +661,15 @@ export default function StoriesListView() {
       </section>
 
       {isChatOpen && projectId && (
-        <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ChatSidebar
-            context={{ projectId, type: 'PROJECT' }}
-            chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
-          />
-        </div>
+        <ChatSidebarOverlay
+          isOpen={isChatOpen}
+          context={{ projectId, type: 'PROJECT' }}
+          chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
+          initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
+          onWidthChange={(w, final) => {
+            if (final) setUserPreferences({ chatSidebarWidth: Math.round(w) })
+          }}
+        />
       )}
     </div>
   )

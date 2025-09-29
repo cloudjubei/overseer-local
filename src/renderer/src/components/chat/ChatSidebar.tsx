@@ -6,8 +6,13 @@ import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
 import type { ChatContext } from 'thefactory-tools'
+import ContextInfoButton from '../ui/ContextInfoButton'
+import ModelChip from '../agents/ModelChip'
+import { IconSettings } from '../ui/Icons'
+
+// Keep local Select imports removed since we now use ModelChip
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
 
 type ToolToggle = { name: string; description: string; enabled: boolean }
 
@@ -38,21 +43,27 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
   const isThinking = chat?.isThinking || false
   const settings = chat?.chat.settings
 
-  const { configs, activeConfig, setActive } = useLLMConfig()
+  const { configs, activeConfig } = useLLMConfig()
   const { navigateView } = useNavigator()
 
-  // Determine selected model/config
-  const selectedModel: string | undefined = activeConfig?.model
-  const selectedConfig = useMemo(() => {
-    if (selectedModel) {
-      const byModel = configs.find((c) => c.model === selectedModel)
-      if (byModel) return byModel
-    }
-    if (activeConfig) return activeConfig
-    return configs[0]
-  }, [configs, activeConfig, selectedModel])
+  // Chat-specific selected config id (separate from global app model)
+  const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
+    (settings as any)?.llmConfigId,
+  )
 
-  const selectedConfigId = selectedConfig?.id
+  useEffect(() => {
+    setSelectedConfigId((settings as any)?.llmConfigId)
+  }, [settings])
+
+  const selectedConfig = useMemo(() => {
+    if (selectedConfigId) {
+      const byId = configs.find((c) => c.id === selectedConfigId)
+      if (byId) return byId
+    }
+    // fallback to active config if chat-specific not set
+    return activeConfig || configs[0]
+  }, [configs, activeConfig, selectedConfigId])
+
   const isConfigured = !!selectedConfig?.apiKey
 
   const [allowedTools, setAllowedTools] = useState(settings?.allowedTools)
@@ -78,13 +89,17 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     [context, selectedConfig, sendMessage, allowedTools, autoCallTools],
   )
 
-  const handleConfigChange = useCallback(
-    (configId: string) => {
-      const cfg = configs.find((c) => c.id === configId)
-      if (!cfg) return
-      setActive(configId)
+  const handlePickConfig = useCallback(
+    async (configId: string) => {
+      setSelectedConfigId(configId)
+      try {
+        // Persist chat-specific setting (llmConfigId)
+        await (window as any).chatsService.saveSettings(context, { llmConfigId: configId })
+      } catch (e) {
+        console.error('Failed to save chat model setting', e)
+      }
     },
-    [configs, setActive],
+    [context],
   )
 
   // Tools management (allowedTools is an allowlist; undefined => all allowed)
@@ -161,41 +176,36 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
 
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
-      <header className="relative flex-shrink-0 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <h1 className="m-0 text-[var(--text-primary)] text-[18px] leading-tight font-semibold truncate">
-            {chatContextTitle} {chat ? `(${new Date(chat.chat.updatedAt).toLocaleString()})` : ''}
-          </h1>
+      <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Replaced title with context info icon */}
+          <ContextInfoButton context={context} label={chatContextTitle} />
         </div>
         <div className="flex items-center gap-2">
-          <Select value={selectedConfigId || ''} onValueChange={handleConfigChange}>
-            <SelectTrigger className="ui-select w-[220px]">
-              <SelectValue placeholder="Select Model" />
-            </SelectTrigger>
-            <SelectContent>
-              {configs.map((cfg) => (
-                <SelectItem key={cfg.id} value={cfg.id!}>
-                  {cfg.name} ({cfg.model})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Chat-specific model selector using ModelChip with blue border */}
+          <ModelChip
+            editable
+            selectedConfigId={selectedConfigId}
+            onPickConfigId={handlePickConfig}
+            className="border-blue-500"
+          />
 
           <button
             ref={settingsBtnRef}
             onClick={() => setIsSettingsOpen((v) => !v)}
-            className="btn-secondary"
+            className="btn-secondary btn-icon"
             aria-haspopup="menu"
             aria-expanded={isSettingsOpen}
             aria-label="Open Chat Settings"
+            title="Chat settings"
           >
-            Settings
+            <IconSettings className="h-[16px] w-[16px]" />
           </button>
 
           {isSettingsOpen && (
             <div
               ref={dropdownRef}
-              className="absolute top-full right-4 mt-2 w-[360px] rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
+              className="absolute top-full right-3 mt-2 w-[360px] rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
               role="menu"
               aria-label="Chat Settings"
             >
