@@ -29,12 +29,28 @@ export default function ContextFileChip({
           />
         </div>
       ) : null}
-      <FileDisplay file={file} density="normal" showPreviewOnHover interactive />
-      {onRemove && (
-        <button type="button" className="btn-ghost text-xs" onClick={onRemove} title="Remove file">
-          ✕
-        </button>
-      )}
+      <FileDisplay
+        file={file}
+        density="normal"
+        showPreviewOnHover
+        interactive={false}
+        trailing={
+          onRemove ? (
+            <button
+              type="button"
+              className="btn-ghost text-xs"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove?.()
+              }}
+              title="Remove file"
+              aria-label="Remove file"
+            >
+              ✕
+            </button>
+          ) : undefined
+        }
+      />
     </div>
   )
 }

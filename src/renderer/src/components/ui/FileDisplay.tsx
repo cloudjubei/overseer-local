@@ -505,14 +505,19 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
         >
           <div className="fd-leading">{leadingVisual ?? defaultIconFor(file)}</div>
           <div className="fd-content">
-            <div className="fd-name" title={file.absolutePath || file.name}>
-              {file.name}
+            <div className="fd-row fd-row--top">
+              <div className="fd-name" title={file.absolutePath || file.name}>
+                {file.name}
+              </div>
+              {trailing ? <div className="fd-trailing">{trailing}</div> : null}
             </div>
-            {showMeta && sizeLabel && <div className="fd-size">{sizeLabel}</div>}
-          </div>
-          <div className="fd-right">
-            {showMeta && dateLabel && <div className="fd-date">{dateLabel}</div>}
-            {trailing ? <div className="fd-trailing">{trailing}</div> : null}
+            {showMeta && (
+              <div className="fd-meta">
+                {sizeLabel ? <span className="fd-size">{sizeLabel}</span> : null}
+                {sizeLabel && dateLabel ? <span className="fd-sep"> • </span> : null}
+                {dateLabel ? <span className="fd-date">{dateLabel}</span> : null}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1925,7 +1925,7 @@
     },
     {
       "id": "1d8e24a8-ca9e-4e85-b852-800d1350a6dd",
-      "status": "-",
+      "status": "+",
       "title": "The Files don't display",
       "description": "For instance in @src/renderer/src/components/stories/FeatureForm.tsx it uses the @src/renderer/src/components/stories/ContextFileChip.tsx which in turn uses @src/renderer/src/components/ui/FileDisplay.tsx , which is a `FilePreviewCard` wrapped in a @src/renderer/src/components/ui/Tooltip.tsx . When these are displayed in the @src/renderer/src/components/stories/FeatureForm.tsx for some files - they don't show at all - just the 'x' (the delete button) shows.\nWhen debugging it seems that the Tooltip never gets to render the `FilePreviewCard` so there must be some bug in there.",
       "context": [
@@ -1936,8 +1936,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:15:39.638Z",
-      "updatedAt": "2025-09-29T11:46:09.553Z",
-      "rejection": "The @src/renderer/src/components/ui/FileDisplay.tsx should show the filename in bold at the top row (similar to how it does now) and below show: `file size - update time` with a nice dot separator in between.\nThe close button should be to the right of the labels (part of the chip itself), if it's included.\nFileDisplay already includes a `interactive` option - in the FeatureForm it shouldn't be interactive."
+      "updatedAt": "2025-09-29T11:53:29.225Z",
+      "rejection": "The @src/renderer/src/components/ui/FileDisplay.tsx should show the filename in bold at the top row (similar to how it does now) and below show: `file size - update time` with a nice dot separator in between.\nThe close button should be to the right of the labels (part of the chip itself), if it's included.\nFileDisplay already includes a `interactive` option - in the FeatureForm it shouldn't be interactive.",
+      "completedAt": "2025-09-29T11:53:29.225Z"
     },
     {
       "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",

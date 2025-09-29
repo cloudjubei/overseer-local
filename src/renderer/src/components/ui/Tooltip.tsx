@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState, useId } from 'reac
 import { createPortal } from 'react-dom'
 
 export type TooltipProps = {
-  children: React.ReactElement
+  children: React.ReactNode
   content: React.ReactNode
   placement?: 'top' | 'bottom' | 'left' | 'right'
   delayMs?: number
@@ -23,7 +23,11 @@ export default function Tooltip({
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const tooltipId = useId()
 
-  const child = React.Children.only(children)
+  // Ensure we always have a concrete element to attach events/refs to.
+  // If children is not a single valid React element (e.g., text, fragment, array), wrap it in a span.
+  const baseChild = React.isValidElement(children) && children.type !== React.Fragment
+    ? (children as React.ReactElement)
+    : React.createElement('span', null, children)
 
   useEffect(() => {
     return () => {
@@ -134,31 +138,31 @@ export default function Tooltip({
 
   return (
     <>
-      {React.cloneElement(child, {
+      {React.cloneElement(baseChild, {
         ref: (el: HTMLElement) => {
-          const anyChild: any = child as any
+          const anyChild: any = baseChild as any
           if (typeof anyChild.ref === 'function') anyChild.ref(el)
           else if (anyChild.ref) (anyChild.ref as any).current = el
           anchorRef.current = el
         },
         onMouseEnter: (e: any) => {
-          child.props.onMouseEnter?.(e)
+          ;(baseChild.props as any)?.onMouseEnter?.(e)
           show()
         },
         onMouseLeave: (e: any) => {
-          child.props.onMouseLeave?.(e)
+          ;(baseChild.props as any)?.onMouseLeave?.(e)
           hide()
         },
         onFocus: (e: any) => {
-          child.props.onFocus?.(e)
+          ;(baseChild.props as any)?.onFocus?.(e)
           show()
         },
         onBlur: (e: any) => {
-          child.props.onBlur?.(e)
+          ;(baseChild.props as any)?.onBlur?.(e)
           hide()
         },
         onKeyDown: (e: any) => {
-          child.props.onKeyDown?.(e)
+          ;(baseChild.props as any)?.onKeyDown?.(e)
           if (e.key === 'Escape') hide()
         },
         'aria-describedby': open ? tooltipId : undefined,
