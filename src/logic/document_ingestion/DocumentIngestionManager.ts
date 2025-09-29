@@ -1,10 +1,10 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import { classifyDocumentType, isTextForIngestion } from '../db/fileTyping'
 import type DatabaseManager from '../db/DatabaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
 import { FileMeta } from 'thefactory-tools'
+import { classifyDocumentType, isLikelyText } from 'thefactory-tools/utils'
 import { Document, DocumentInput } from 'thefactory-db'
 import path from 'path'
 import BaseManager from '../BaseManager'
@@ -72,7 +72,7 @@ export default class DocumentIngestionManager extends BaseManager {
       try {
         const relPath: string = f.relativePath!
         const stats = await this.filesManager.getFileStats(projectId, relPath)
-        if (!stats || !isTextForIngestion(stats.absolutePath, stats.ext, stats.type)) continue
+        if (!stats || !isLikelyText(stats.absolutePath, stats.ext, stats.type)) continue
 
         const content = await this.filesManager.readFile(projectId, relPath)
         if (content) {
@@ -94,7 +94,7 @@ export default class DocumentIngestionManager extends BaseManager {
   private async handleFileAdded(projectId: string, relPath: string) {
     try {
       const stats = await this.filesManager.getFileStats(projectId, relPath)
-      if (!stats || !isTextForIngestion(stats.absolutePath, stats.ext, stats.type)) return
+      if (!stats || !isLikelyText(stats.absolutePath, stats.ext, stats.type)) return
 
       const content = await this.filesManager.readFile(projectId, relPath)
       if (content) {
@@ -124,7 +124,7 @@ export default class DocumentIngestionManager extends BaseManager {
     content: string,
     stats: FileMeta,
   ): DocumentInput {
-    const type = classifyDocumentType(stats.ext, relPath)
+    const type = classifyDocumentType(relPath, stats.ext)
 
     const name = path.basename(relPath)
     const src = toRelUnix(relPath)

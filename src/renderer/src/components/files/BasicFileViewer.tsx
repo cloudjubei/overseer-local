@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useFiles, isLikelyText, guessLanguageFromExt } from '../../contexts/FilesContext'
+import { useFiles } from '../../contexts/FilesContext'
+import { isLikelyText, guessLanguageFromExt } from 'thefactory-tools/utils'
 import { FileMeta } from 'thefactory-tools'
 
 export type BasicFileViewerProps = {
@@ -15,7 +16,7 @@ const BasicFileViewer: React.FC<BasicFileViewerProps> = ({ file }) => {
     let mounted = true
     setLoading(true)
     setContent(null)
-    if (isLikelyText(file)) {
+    if (isLikelyText(file.absolutePath, file.ext, file.type)) {
       readFile(file.relativePath!).then((txt) => {
         if (!mounted) return
         if (txt) {
