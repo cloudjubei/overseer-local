@@ -33,7 +33,7 @@ export default function ChatSidebarOverlay({
   const [mounted, setMounted] = useState<boolean>(isOpen)
   const [visible, setVisible] = useState<boolean>(false)
 
-  // Track modal container/panel
+  // Track modal container/panel (for popups). If present we render adjacent to the modal and KEEP overlay behavior.
   const [modalContainer, setModalContainer] = useState<HTMLElement | null>(null)
   const [modalPanel, setModalPanel] = useState<HTMLElement | null>(null)
 
@@ -53,14 +53,11 @@ export default function ChatSidebarOverlay({
   useEffect(() => {
     if (isOpen) {
       if (!mounted) setMounted(true)
-      // next tick so transition can apply
       const id = requestAnimationFrame(() => setVisible(true))
       return () => cancelAnimationFrame(id)
     } else {
-      // start close animation
       setVisible(false)
-      // after transition, unmount
-      const t = setTimeout(() => setMounted(false), 220)
+      const t = setTimeout(() => setMounted(false), 240)
       return () => clearTimeout(t)
     }
   }, [isOpen, mounted])
@@ -89,7 +86,6 @@ export default function ChatSidebarOverlay({
 
     const ro = new ResizeObserver(() => updateRect())
 
-    // Initial measure
     updateRect()
 
     ro.observe(modalPanel)
@@ -110,7 +106,7 @@ export default function ChatSidebarOverlay({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Calculate available width next to modal (if any) - no gap between panel and sidebar
+  // Calculate available width next to modal (if any)
   const availableNextToModal = useMemo(() => {
     if (!panelRect) return undefined
     const available = Math.max(0, window.innerWidth - panelRect.right)
@@ -139,7 +135,7 @@ export default function ChatSidebarOverlay({
     if (!resizingRef.current) return
     const { startX, startWidth } = resizingRef.current
     const dx = e.clientX - startX
-    // handle is on the left edge; moving left increases width
+    // handle is on the left edge; moving left increases width (dx negative => wider)
     const next = startWidth - dx
     const maxByViewport = Math.floor(window.innerWidth * 0.5)
     const maxByContext = availableNextToModal
@@ -159,62 +155,108 @@ export default function ChatSidebarOverlay({
 
   if (!mounted) return null
 
-  const transition = 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms'
+  const transitionInOut = '200ms cubic-bezier(0.2, 0.8, 0.2, 1)'
 
   const isModal = !!modalContainer
-  const baseClass =
-    (isModal
-      ? 'absolute z-[5] border-l border-border bg-surface-base shadow-xl'
-      : 'fixed z-[1100] border-l border-border bg-surface-base shadow-xl') +
-    ' will-change-transform overflow-hidden'
 
-  // Shared rounded left corners
-  const roundedLeft: React.CSSProperties = {
-    borderTopLeftRadius: 'var(--radius-3)',
-    borderBottomLeftRadius: 'var(--radius-3)',
+  // ===========================
+  // Modal/popup behavior (unchanged): overlay next to modal, sliding over it
+  // ===========================
+  if (isModal) {
+    const baseClass = 'absolute z-[5] border-l border-border bg-surface-base shadow-xl will-change-transform overflow-hidden'
+    const roundedLeft: React.CSSProperties = {
+      borderTopLeftRadius: 'var(--radius-3)',
+      borderBottomLeftRadius: 'var(--radius-3)',
+    }
+
+    const style: React.CSSProperties = panelRect
+      ? {
+          top: panelRect.top,
+          left: Math.min(panelRect.right, window.innerWidth), // no gap
+          height: panelRect.height,
+          width: Math.min(width, availableNextToModal || width),
+          transition: `transform ${transitionInOut}, opacity ${transitionInOut}`,
+          transform: visible ? 'translateX(0)' : 'translateX(104%)',
+          ...roundedLeft,
+        }
+      : {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width,
+          transition: `transform ${transitionInOut}, opacity ${transitionInOut}`,
+          transform: visible ? 'translateX(0)' : 'translateX(104%)',
+          ...roundedLeft,
+        }
+
+    return createPortal(
+      <div className={baseClass} style={style} role="complementary" aria-label="Chat">
+        {/* Minimal resize handle for modal (keep unobtrusive) */}
+        <div
+          onPointerDown={onResizeStart}
+          className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
+          aria-label="Resize chat sidebar"
+          role="separator"
+          aria-orientation="vertical"
+        />
+        <div className="absolute inset-0 overflow-hidden">
+          <ChatSidebar context={context} chatContextTitle={chatContextTitle} />
+        </div>
+      </div>,
+      modalContainer!,
+    )
   }
 
-  const style: React.CSSProperties = isModal && panelRect
-    ? {
-        top: panelRect.top,
-        left: Math.min(panelRect.right, window.innerWidth), // no gap
-        height: panelRect.height,
-        width: Math.min(width, availableNextToModal || width),
-        transition,
-        transform: visible ? 'translateX(0)' : 'translateX(104%)',
-        ...roundedLeft,
-      }
-    : {
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width,
-        transition,
-        transform: visible ? 'translateX(0)' : 'translateX(104%)',
-        ...roundedLeft,
-      }
+  // ===========================
+  // Normal screens: PUSH layout by occupying width in flex row
+  // ===========================
 
-  const SidebarContent = (
-    <div className={baseClass} style={style} role="complementary" aria-label="Chat">
-      {/* Resize handle on the left edge */}
+  // Outer container participates in layout; width animates between 0 and target width
+  const outerStyle: React.CSSProperties = {
+    width: visible ? width : 0,
+    transition: `width ${transitionInOut}`,
+    borderLeft: '1px solid var(--border-border, var(--border-default))',
+    background: 'var(--surface-base)',
+    position: 'relative',
+    overflow: 'hidden',
+  }
+
+  // Inner slides in to feel like a drawer while the outer pushes layout
+  const innerStyle: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    transform: visible ? 'translateX(0)' : 'translateX(16px)',
+    transition: `transform ${transitionInOut}, opacity ${transitionInOut}`,
+    opacity: visible ? 1 : 0,
+  }
+
+  return (
+    <div style={outerStyle} role="complementary" aria-label="Chat sidebar">
+      {/* Visible drag handle centered on left edge (normal screens only) */}
       <div
         onPointerDown={onResizeStart}
-        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
-        aria-label="Resize chat sidebar"
+        className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize group"
         role="separator"
         aria-orientation="vertical"
-      />
-      <div className="absolute inset-0 overflow-hidden">
+        aria-label="Resize chat sidebar"
+        style={{ display: visible ? 'block' : 'none' }}
+      >
+        <div
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center justify-center"
+          style={{ width: 22, height: 44 }}
+          aria-hidden
+        >
+          <div
+            className="h-full w-[6px] rounded-md bg-[var(--surface-raised)] border border-[var(--border-default)] shadow-sm group-hover:bg-[color-mix(in_srgb,_var(--accent-primary)_16%,_var(--surface-raised))]"
+          >
+            <div className="w-[2px] h-[60%] mx-auto my-[20%] rounded bg-[var(--border-subtle)]" />
+          </div>
+        </div>
+      </div>
+
+      <div style={innerStyle}>
         <ChatSidebar context={context} chatContextTitle={chatContextTitle} />
       </div>
     </div>
   )
-
-  // If we have a modal container, render inside it so we can sit adjacent to the panel
-  if (modalContainer) {
-    return createPortal(SidebarContent, modalContainer)
-  }
-
-  // Fallback: fixed to the viewport right edge
-  return SidebarContent
 }
