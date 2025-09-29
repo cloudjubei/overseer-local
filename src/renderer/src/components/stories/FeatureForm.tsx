@@ -198,7 +198,7 @@ export default function FeatureForm({
       id={formId}
       onSubmit={handleSubmit}
       onKeyDown={onKeyDown}
-      className="flex flex-col min-h-0"
+      className="flex flex-1 flex-col min-h-0"
       aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}
     >
       {/* Content area */}

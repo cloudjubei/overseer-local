@@ -1,0 +1,11 @@
+{"thoughts":"The user wants to add a settings system for different chat types. The settings (systemPrompt, availableTools, autoCallTools) should be stored in `.factory/settings/chats.json`. The settings are per chat type (`ChatContextType`) and subtype (`ChatContextProjectTopicType` or `ChatContextStoryTopicType`). Defaults should be provided in `@src/chats/utils.ts` and `ChatsTools.ts` should ensure the settings file is created on initialization.
+
+My plan is as follows:
+1.  Inspect `src/chats/types.ts` to understand the existing chat context types.
+2.  Define the new types for chat settings (`ChatSettings`, `ChatSettingsDefinition`, etc.) in `src/chats/types.ts`. This will include `ChatContextProjectTopicType` and `ChatContextStoryTopicType` enums as requested.
+3.  Define the default settings in `src/chats/utils.ts` as constants. This will include creating good system prompts for `create_story` and `create_feature`.
+4.  Modify `src/chats/ChatsTools.ts` to create the `.factory/settings/chats.json` file with default settings if it doesn't exist during initialization. This will involve adding new helper functions to manage settings.
+5.  I will also need to update the `Chat` type in `src/chats/types.ts` to potentially include a reference to its settings, though the prompt doesn't explicitly state this, it seems logical. The description says "Each chat type ... needs to be able to store settings". This might mean the settings are associated with the chat, not stored *in* the chat object itself. The file-based approach seems to confirm this.
+6.  Finally, I will expose a way to get settings for a given chat context. This will likely be a new function in `ChatsTools.ts`.
+
+I'll start by listing files in `src/chats` to locate `types.ts`.","tool_calls":[{"tool_name":"list_files","arguments":{"path":"src/chats"}}]}
