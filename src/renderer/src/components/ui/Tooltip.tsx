@@ -9,22 +9,37 @@ export type TooltipProps = {
   disabled?: boolean
 }
 
-export default function Tooltip({ content, placement = 'right' }: TooltipProps) {
-  const [open, _] = useState(false)
+export default function Tooltip({
+  children,
+  content,
+  placement = 'right',
+  delayMs = 300,
+  disabled = false,
+}: TooltipProps) {
+  const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const timerRef = useRef<number | null>(null)
   const anchorRef = useRef<HTMLElement | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const tooltipId = useId()
 
-  // const child = React.Children.only(children)
+  const child = React.Children.only(children)
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current)
-    },
-    [],
-  )
+    }
+  }, [])
+
+  const show = () => {
+    if (disabled) return
+    if (timerRef.current) window.clearTimeout(timerRef.current)
+    timerRef.current = window.setTimeout(() => setOpen(true), delayMs) as any
+  }
+  const hide = () => {
+    if (timerRef.current) window.clearTimeout(timerRef.current)
+    setOpen(false)
+  }
 
   useLayoutEffect(() => {
     if (!open) {
@@ -47,7 +62,7 @@ export default function Tooltip({ content, placement = 'right' }: TooltipProps) 
     const viewportHeight = window.innerHeight
     const spacing = 8
 
-    const calcPos = (pl: string) => {
+    const calcPos = (pl: 'top' | 'bottom' | 'left' | 'right') => {
       let t = 0,
         l = 0
       switch (pl) {
@@ -80,7 +95,6 @@ export default function Tooltip({ content, placement = 'right' }: TooltipProps) 
       )
     }
 
-    // let bestPlacement = placement
     let pos = calcPos(placement)
 
     if (!fits(pos)) {
@@ -92,7 +106,6 @@ export default function Tooltip({ content, placement = 'right' }: TooltipProps) 
 
       const oppPos = calcPos(opposite)
       if (fits(oppPos)) {
-        // bestPlacement = opposite
         pos = oppPos
       }
     }
@@ -107,20 +120,21 @@ export default function Tooltip({ content, placement = 'right' }: TooltipProps) 
     })
   }, [open, position, placement])
 
-  //TODO: FIX this + cloneElement below
-  // const show = () => {
-  //   if (disabled) return
-  //   if (timerRef.current) window.clearTimeout(timerRef.current)
-  //   timerRef.current = window.setTimeout(() => setOpen(true), delayMs) as any
-  // }
-  // const hide = () => {
-  //   if (timerRef.current) window.clearTimeout(timerRef.current)
-  //   setOpen(false)
-  // }
+  // Keep position updated if window resizes while open
+  useEffect(() => {
+    if (!open) return
+    const handle = () => setPosition({ top: -9999, left: -9999 })
+    window.addEventListener('resize', handle)
+    window.addEventListener('scroll', handle, true)
+    return () => {
+      window.removeEventListener('resize', handle)
+      window.removeEventListener('scroll', handle, true)
+    }
+  }, [open])
 
   return (
     <>
-      {/* {React.cloneElement(child, {
+      {React.cloneElement(child, {
         ref: (el: HTMLElement) => {
           const anyChild: any = child as any
           if (typeof anyChild.ref === 'function') anyChild.ref(el)
@@ -145,14 +159,11 @@ export default function Tooltip({ content, placement = 'right' }: TooltipProps) 
         },
         onKeyDown: (e: any) => {
           child.props.onKeyDown?.(e)
-          if (e.key === 'Escape') {
-            hide()
-          }
+          if (e.key === 'Escape') hide()
         },
         'aria-describedby': open ? tooltipId : undefined,
-      })} */}
-      {open &&
-        position &&
+      })}
+      {open && !disabled && position &&
         createPortal(
           <div
             className="ui-tooltip"
