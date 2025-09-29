@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -1946,7 +1946,7 @@
     },
     {
       "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
-      "status": "-",
+      "status": "+",
       "title": "The Feature form is not scrollable",
       "description": "The @src/renderer/src/components/stories/FeatureForm.tsx inside @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx is not scrollable - it should be.",
       "context": [
@@ -1956,8 +1956,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T11:40:32.221Z",
-      "updatedAt": "2025-09-29T12:17:10.582Z",
-      "rejection": "Still isn't scrollable. The issue seems to lie in @src/renderer/src/components/stories/FeatureForm.tsx itself."
+      "updatedAt": "2025-09-29T12:39:53.112Z",
+      "rejection": "Still isn't scrollable. The issue seems to lie in @src/renderer/src/components/stories/FeatureForm.tsx itself.",
+      "completedAt": "2025-09-29T12:39:53.112Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2090,5 +2091,6 @@
     "c7cf3d3f-b368-4c00-8e79-1072f213b2c0": 127
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-23T22:02:16.498Z"
+  "updatedAt": "2025-09-23T22:02:16.498Z",
+  "completedAt": "2025-09-29T12:39:53.112Z"
 }
