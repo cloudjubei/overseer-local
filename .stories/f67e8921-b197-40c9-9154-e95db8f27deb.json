@@ -1942,7 +1942,7 @@
     },
     {
       "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
-      "status": "+",
+      "status": "-",
       "title": "The Feature form is not scrollable",
       "description": "The @src/renderer/src/components/stories/FeatureForm.tsx inside @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx is not scrollable - it should be.",
       "context": [
@@ -1952,9 +1952,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T11:40:32.221Z",
-      "updatedAt": "2025-09-29T15:37:50.354Z",
-      "rejection": "Still isn't scrollable - this is extremely frustrating, this is like the 3rd attempt.",
-      "completedAt": "2025-09-29T15:37:50.354Z"
+      "updatedAt": "2025-09-29T15:43:20.847Z",
+      "rejection": "Still isn't scrollable - this is extremely frustrating, this is the 4th attempt. DO BETTER analysing the issue."
     },
     {
       "id": "9770df69-0ac3-4fcd-99ea-c3af72bfe37b",
@@ -2002,16 +2001,17 @@
     },
     {
       "id": "ba50781e-aa29-4dfe-b159-825f9ed88f88",
-      "status": "+",
+      "status": "-",
       "title": "The AlertDialog when showing the destructiveConfirm doesn't display anything",
       "description": "The button in AlertDialog (which is in @src/renderer/src/components/ui/Modal.tsx ) is not visible.",
       "context": [
-        "src/renderer/src/components/ui/Modal.tsx"
+        "src/renderer/src/components/ui/Modal.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-29T14:08:52.851Z",
-      "updatedAt": "2025-09-29T15:38:56.570Z",
-      "completedAt": "2025-09-29T15:38:56.570Z"
+      "updatedAt": "2025-09-29T15:45:04.812Z",
+      "rejection": "Now the button shows but not in red like it did before - it should be the exact same as the `Delete` button at the bottom of the @src/renderer/src/screens/stories/FeatureEditView.tsx"
     },
     {
       "id": "02c446d1-4969-4057-8fb6-2e957b2205aa",
