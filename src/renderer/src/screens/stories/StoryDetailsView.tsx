@@ -37,7 +37,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [saving, setSaving] = useState(false)
   const { openModal, navigateView, storiesRoute, navigateAgentRun } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
-  const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
 
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
