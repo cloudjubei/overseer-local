@@ -12,14 +12,7 @@ import StatusControl, {
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
-import {
-  IconBoard,
-  IconEdit,
-  IconPlus,
-  IconList,
-  IconChat,
-  IconHome,
-} from '@renderer/components/ui/Icons'
+import { IconBoard, IconEdit, IconPlus, IconList, IconChat } from '@renderer/components/ui/Icons'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'

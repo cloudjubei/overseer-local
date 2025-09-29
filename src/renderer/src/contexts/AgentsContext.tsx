@@ -42,30 +42,39 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const onAgentRunUpdate = async (agentRunUpdate: AgentRunUpdate) => {
     switch (agentRunUpdate.type) {
-      case 'add':
+      case 'add': {
         const run =
           agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
         if (run) {
           setRunsHistory((prev) => [...prev, run])
         }
         break
-      case 'delete':
+      }
+      case 'delete': {
         setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
         break
-      case 'change':
-        const run2 =
+      }
+      case 'change': {
+        const run =
           agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
-        if (run2) {
+        if (run) {
           setRunsHistory((prev) => {
-            const prevRun = prev.find((r) => r.id === agentRunUpdate.runId)
-            const isRunning = run2.state === 'running' || run2.state === 'created'
-            if ((prevRun?.state === 'running' || prevRun?.state === 'created') && !isRunning) {
-              fireCompletionNotification(run2)
+            const prevRunIndex = prev.findIndex((r) => r.id === agentRunUpdate.runId)
+            if (prevRunIndex) {
+              const newPrev = [...prev]
+              const prevRun = newPrev[prevRunIndex]
+              const isRunning = run.state === 'running' || run.state === 'created'
+              if ((prevRun.state === 'running' || prevRun.state === 'created') && !isRunning) {
+                fireCompletionNotification(run)
+              }
+              newPrev[prevRunIndex] = run
+              return newPrev
             }
-            return prev.map((r) => (r.id !== agentRunUpdate.runId ? r : run2))
+            return prev
           })
         }
         break
+      }
     }
   }
 

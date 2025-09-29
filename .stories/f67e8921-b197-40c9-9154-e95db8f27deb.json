@@ -1938,8 +1938,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:15:39.638Z",
-      "updatedAt": "2025-09-29T12:28:07.232Z",
-      "rejection": "FileDisplay doesn't display the 'x' close button on the right correctly - it gets displayed between the title and the size/date label.\nThe display should be:\n| ICON | LABELS | CLOSE |\n\nThe icon and close should take up the same amount of space.",
+      "updatedAt": "2025-09-29T12:36:13.973Z",
       "completedAt": "2025-09-29T12:28:07.232Z"
     },
     {
