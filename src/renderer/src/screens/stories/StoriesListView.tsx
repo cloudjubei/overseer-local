@@ -85,7 +85,7 @@ export default function StoriesListView() {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
-  const { openModal, navigateStoryDetails, navigateAgentRun } = useNavigator()
+  const { openModal, navigateStoryDetails, navigateAgentRun, navigateView } = useNavigator()
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
@@ -337,7 +337,18 @@ export default function StoriesListView() {
         aria-labelledby="stories-view-heading"
       >
         <div className="stories-menubar shrink-0">
-          <div className="left"></div>
+          <div className="left">
+            <button
+              type="button"
+              className="btn-secondary flex items-center gap-2"
+              onClick={() => navigateView('Home')}
+              aria-label="Go to Home"
+              title="Home"
+            >
+              <IconHome className="h-[16px] w-[16px]" />
+              <span className="hidden sm:inline">Home</span>
+            </button>
+          </div>
           <div className="center">
             <SegmentedControl
               ariaLabel="Toggle between list and board views"
@@ -367,8 +378,8 @@ export default function StoriesListView() {
 
         {/* Search and filters toolbar (wraps to two rows on small screens) */}
         <div className="stories-toolbar stories-searchbar shrink-0">
-          <div className="left">
-            <div className="control search-wrapper">
+          <div className="left flex flex-wrap items-center gap-2 w-full">
+            <div className="control search-wrapper min-w-0 flex-1 basis-full sm:basis-auto">
               <input
                 id="stories-search-input"
                 type="search"
@@ -378,50 +389,55 @@ export default function StoriesListView() {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <div className="control">
-              <div
-                ref={statusFilterRef}
-                className="status-filter-btn ui-select gap-2"
-                role="button"
-                aria-haspopup="menu"
-                aria-expanded={openFilter}
-                aria-label="Filter by status"
-                tabIndex={0}
-                onClick={() => setOpenFilter(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
-                }}
-              >
-                <span className={`status-bullet status-bullet--${k}`} aria-hidden />
-                <span className="standard-picker__label">{currentFilterLabel}</span>
-              </div>
-              {openFilter && statusFilterRef.current && (
-                <StatusPicker
-                  anchorEl={statusFilterRef.current}
-                  value={statusFilter as any}
-                  isAllAllowed={true}
-                  includeNotDone={true}
-                  onSelect={(val) => {
-                    setStatusFilter(val as StoryListStatusFilter)
-                    setOpenFilter(false)
+
+            {/* Group status filter and sort so they wrap to a second row on small screens */}
+            <div className="flex gap-2 basis-full sm:basis-auto">
+              <div className="control flex-1 sm:flex-none basis-1/2 sm:basis-auto">
+                <div
+                  ref={statusFilterRef}
+                  className="status-filter-btn ui-select gap-2"
+                  role="button"
+                  aria-haspopup="menu"
+                  aria-expanded={openFilter}
+                  aria-label="Filter by status"
+                  tabIndex={0}
+                  onClick={() => setOpenFilter(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
                   }}
-                  onClose={() => setOpenFilter(false)}
-                />
-              )}
-            </div>
-            <div className="control">
-              <select
-                className="ui-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                aria-label="Sort by"
-                disabled={!isAppSettingsLoaded}
-              >
-                <option value="index_asc">Ascending ↓</option>
-                <option value="index_desc">Descending ↑</option>
-                <option value="status_asc">Status ↓</option>
-                <option value="status_desc">Status ↑</option>
-              </select>
+                >
+                  <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+                  <span className="standard-picker__label">{currentFilterLabel}</span>
+                </div>
+                {openFilter && statusFilterRef.current && (
+                  <StatusPicker
+                    anchorEl={statusFilterRef.current}
+                    value={statusFilter as any}
+                    isAllAllowed={true}
+                    includeNotDone={true}
+                    onSelect={(val) => {
+                      setStatusFilter(val as StoryListStatusFilter)
+                      setOpenFilter(false)
+                    }}
+                    onClose={() => setOpenFilter(false)}
+                  />
+                )}
+              </div>
+
+              <div className="control flex-1 sm:flex-none basis-1/2 sm:basis-auto">
+                <select
+                  className="ui-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  aria-label="Sort by"
+                  disabled={!isAppSettingsLoaded}
+                >
+                  <option value="index_asc">Ascending ↓</option>
+                  <option value="index_desc">Descending ↑</option>
+                  <option value="status_asc">Status ↓</option>
+                  <option value="status_desc">Status ↑</option>
+                </select>
+              </div>
             </div>
           </div>
           <div className="right" />
