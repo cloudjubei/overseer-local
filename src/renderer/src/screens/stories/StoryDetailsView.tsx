@@ -87,6 +87,47 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [storyId, storiesById])
 
+  //TODO: logic needs to be cleand up
+  // useEffect(() => {
+  //   let disposed = false
+  //
+  //   async function check() {
+  //     if (!story) {
+  //       setHasUnmerged(false)
+  //       return
+  //     }
+  //     setCheckingMerge(true)
+  //     try {
+  //       const status = await gitMonitorService.getStatus()
+  //       const base = status.currentBranch || null
+  //       setGitBaseBranch(base)
+  //       const branchName = `features/${story.id}`
+  //       if (!base) {
+  //         setHasUnmerged(false)
+  //         return
+  //       }
+  //       const res = await gitMonitorService.hasUnmerged(branchName, base)
+  //       if (!disposed) {
+  //         setHasUnmerged(!!res.ok && !!res.hasUnmerged)
+  //       }
+  //     } catch (e) {
+  //       if (!disposed) setHasUnmerged(false)
+  //     } finally {
+  //       if (!disposed) setCheckingMerge(false)
+  //     }
+  //   }
+  //
+  //   check()
+  //   const unsubscribe = gitMonitorService.subscribe((_s) => {
+  //     // Re-check on git status updates
+  //     check()
+  //   })
+  //   return () => {
+  //     disposed = true
+  //     unsubscribe?.()
+  //   }
+  // }, [story])
+
   const sortedFeaturesBase = useMemo(() => {
     if (!story) {
       return []
@@ -258,6 +299,28 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       }
     }
   }, [highlightStoryFlag])
+
+  // const onClickMerge = async () => {
+  //   if (!story) return
+  //   setMergeError(null)
+  //   setMerging(true)
+  //   try {
+  //     const status = await gitMonitorService.getStatus()
+  //     const base = status.currentBranch
+  //     const branchName = `features/${story.id}`
+  //     if (!base) throw new Error('No base branch detected')
+  //     const res = await gitMonitorService.mergeBranch(branchName, base)
+  //     if (!res.ok) throw new Error(res.error || 'Merge failed')
+  //     // Refresh and update button state
+  //     await gitMonitorService.triggerPoll()
+  //     const check = await gitMonitorService.hasUnmerged(branchName, base)
+  //     setHasUnmerged(!!check.ok && !!check.hasUnmerged)
+  //   } catch (e: any) {
+  //     setMergeError(e?.message || String(e))
+  //   } finally {
+  //     setMerging(false)
+  //   }
+  // }
 
   if (!story) {
     return (

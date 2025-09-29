@@ -1900,7 +1900,7 @@
     },
     {
       "id": "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34",
-      "status": "+",
+      "status": "-",
       "title": "Mobile/Small UI improvements",
       "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx some things need to be shifted.\nThe blockers incoming/outgoing at the top should be in a section between the title section and the search section (so an entirely new section). This should only show if there's a blocker either outgoing or incoming.\nThe add feature button (with the plus) should be in the top right of the `Features` section - horizontally leveled with the title of that section. The edit button (for the whole story) should be in the top right of the `Overview` section - horizontally leveled with the tile of that section.\nNow the search secton will have 3 elements left - the search bar, that status filter and the ordering selection. The latter 2 should be pushed to a 2nd row if the screen becomes small enough so that in the mobile version it shows the search bar at the top and status filter + ordering selection below it.",
       "context": [
@@ -1908,8 +1908,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:09:33.896Z",
-      "updatedAt": "2025-09-29T11:33:21.407Z",
-      "completedAt": "2025-09-29T11:33:21.407Z"
+      "updatedAt": "2025-09-29T11:38:29.627Z",
+      "rejection": "The edit button and add feature buttons are not on the right side of their section - they are clinging to the title.\nWhen the screen becomes smaller, the status filter goes on the 2nd row and the sort options go on the 3rd row - they should go on the 2nd row together.\nAlso, when going into mobile mode - the items at the very top right (run, model chip, chat button) - should go below the title section."
     },
     {
       "id": "898404db-c466-4a60-8bd3-52e33785c563",
@@ -1925,7 +1925,7 @@
     },
     {
       "id": "1d8e24a8-ca9e-4e85-b852-800d1350a6dd",
-      "status": "+",
+      "status": "-",
       "title": "The Files don't display",
       "description": "For instance in @src/renderer/src/components/stories/FeatureForm.tsx it uses the @src/renderer/src/components/stories/ContextFileChip.tsx which in turn uses @src/renderer/src/components/ui/FileDisplay.tsx , which is a `FilePreviewCard` wrapped in a @src/renderer/src/components/ui/Tooltip.tsx . When these are displayed in the @src/renderer/src/components/stories/FeatureForm.tsx for some files - they don't show at all - just the 'x' (the delete button) shows.\nWhen debugging it seems that the Tooltip never gets to render the `FilePreviewCard` so there must be some bug in there.",
       "context": [
@@ -1936,8 +1936,22 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:15:39.638Z",
-      "updatedAt": "2025-09-29T11:29:44.991Z",
-      "completedAt": "2025-09-29T11:29:44.991Z"
+      "updatedAt": "2025-09-29T11:46:09.553Z",
+      "rejection": "The @src/renderer/src/components/ui/FileDisplay.tsx should show the filename in bold at the top row (similar to how it does now) and below show: `file size - update time` with a nice dot separator in between.\nThe close button should be to the right of the labels (part of the chip itself), if it's included.\nFileDisplay already includes a `interactive` option - in the FeatureForm it shouldn't be interactive."
+    },
+    {
+      "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
+      "status": "-",
+      "title": "The Feature form is not scrollable",
+      "description": "The @src/renderer/src/components/stories/FeatureForm.tsx inside @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx is not scrollable - it should be.",
+      "context": [
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T11:40:32.221Z",
+      "updatedAt": "2025-09-29T11:40:32.221Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2066,7 +2080,8 @@
     "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431": 123,
     "1d8e24a8-ca9e-4e85-b852-800d1350a6dd": 124,
     "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34": 125,
-    "898404db-c466-4a60-8bd3-52e33785c563": 126
+    "898404db-c466-4a60-8bd3-52e33785c563": 126,
+    "c7cf3d3f-b368-4c00-8e79-1072f213b2c0": 127
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-23T22:02:16.498Z"
