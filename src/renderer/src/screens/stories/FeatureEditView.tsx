@@ -181,7 +181,7 @@ export default function FeatureEditView({
         }
       >
         <div className="w-full h-full flex">
-          <div className="flex-1 min-w-0 max-h-full overflow-y-auto p-4">
+          <div className="flex-1 min-w-0 min-h-0 h-full overflow-y-auto p-4">
             {initialValues ? (
               <FeatureForm
                 initialValues={initialValues}
