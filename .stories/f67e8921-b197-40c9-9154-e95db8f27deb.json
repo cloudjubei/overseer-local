@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2015,7 +2015,7 @@
     },
     {
       "id": "02c446d1-4969-4057-8fb6-2e957b2205aa",
-      "status": "-",
+      "status": "+",
       "title": "when an agent finishes two notifications show",
       "description": "there must be a bug somewhere in @src/renderer/src/contexts/AgentsContext.tsx",
       "context": [
@@ -2023,7 +2023,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T14:09:50.870Z",
-      "updatedAt": "2025-09-29T14:09:50.870Z"
+      "updatedAt": "2025-09-29T15:40:20.522Z",
+      "completedAt": "2025-09-29T15:40:20.522Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2161,5 +2162,6 @@
     "02c446d1-4969-4057-8fb6-2e957b2205aa": 132
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-29T14:40:07.339Z"
+  "updatedAt": "2025-09-29T14:40:07.339Z",
+  "completedAt": "2025-09-29T15:40:20.522Z"
 }
