@@ -12,7 +12,7 @@ import StatusControl, {
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
-import { IconBoard, IconEdit, IconPlus, IconList, IconChat } from '@renderer/components/ui/Icons'
+import { IconBoard, IconEdit, IconPlus, IconList, IconChat, IconHome } from '@renderer/components/ui/Icons'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -329,7 +329,43 @@ export default function StoriesListView() {
         role="region"
         aria-labelledby="stories-view-heading"
       >
-        <div className="stories-toolbar shrink-0">
+        {/* Top menubar: always visible */}
+        <div className="stories-menubar shrink-0">
+          <div className="left">
+            <div className="flex items-center gap-2 text-sm font-medium" aria-label="Current view">
+              <IconHome />
+              <span>Home</span>
+            </div>
+          </div>
+          <div className="center">
+            <SegmentedControl
+              ariaLabel="Toggle between list and board views"
+              options={[
+                { value: 'list', label: 'List', icon: <IconList /> },
+                { value: 'board', label: 'Board', icon: <IconBoard /> },
+              ]}
+              value={view}
+              onChange={(v) => setView(v as 'list' | 'board')}
+              size="sm"
+            />
+          </div>
+          <div className="right">
+            <ModelChip editable className="mr-2" />
+            <button
+              type="button"
+              className="btn-secondary btn-icon"
+              aria-label="Toggle chat"
+              onClick={() => setIsChatOpen((v) => !v)}
+              disabled={!projectId}
+              title={isChatOpen ? 'Hide chat' : 'Show chat'}
+            >
+              <IconChat className="h-[16px] w-[16px]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Search and filters toolbar (wraps to two rows on small screens) */}
+        <div className="stories-toolbar stories-searchbar shrink-0">
           <div className="left">
             <div className="control search-wrapper">
               <input
@@ -387,30 +423,9 @@ export default function StoriesListView() {
               </select>
             </div>
           </div>
-          <div className="right">
-            <SegmentedControl
-              ariaLabel="Toggle between list and board views"
-              options={[
-                { value: 'list', label: 'List', icon: <IconList /> },
-                { value: 'board', label: 'Board', icon: <IconBoard /> },
-              ]}
-              value={view}
-              onChange={(v) => setView(v as 'list' | 'board')}
-              size="sm"
-            />
-            <ModelChip editable className="mr-2" />
-            <button
-              type="button"
-              className="btn-secondary btn-icon"
-              aria-label="Toggle chat"
-              onClick={() => setIsChatOpen((v) => !v)}
-              disabled={!projectId}
-              title={isChatOpen ? 'Hide chat' : 'Show chat'}
-            >
-              <IconChat className="h-[16px] w-[16px]" />
-            </button>
-          </div>
+          <div className="right" />
         </div>
+
         <div className="stories-toolbar shrink-0">
           <div className="left">
             <div id="stories-count" className="stories-count shrink-0" aria-live="polite">

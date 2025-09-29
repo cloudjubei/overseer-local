@@ -1914,7 +1914,7 @@
     },
     {
       "id": "898404db-c466-4a60-8bd3-52e33785c563",
-      "status": "-",
+      "status": "+",
       "title": "StoriesListView UI update",
       "description": "When the screen becomes small @src/renderer/src/screens/stories/StoriesListView.tsx gets a menu bar at the top. We actually want that to be visible all the time, and to show Home to the left like it does in the mobile version.\nThe bar should have the List | Board switch in the middle of it and the model selection chip + chat button to the right.\nThe search section will then contain 3 elements - the search bar, the status filer and the ordering selection. When the screen becomes small enough ,the latter two need to be pushed to a 2nd row, so in the mobile version there will be the search bar visible on one row and the status filer and ordering selection visible on the 2nd row.",
       "context": [
@@ -1922,7 +1922,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:13:41.477Z",
-      "updatedAt": "2025-09-29T10:13:41.477Z"
+      "updatedAt": "2025-09-29T12:03:57.380Z",
+      "completedAt": "2025-09-29T12:03:57.380Z"
     },
     {
       "id": "1d8e24a8-ca9e-4e85-b852-800d1350a6dd",
