@@ -366,7 +366,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             </h1>
 
             {/* Right-side controls: on mobile these wrap below the title */}
-            <div className="flex items-center gap-3 order-3 basis-full sm:order-3 sm:basis-auto sm:ml-auto">
+            <div className="flex items-center gap-3 order-3 basis-full justify-end sm:order-3 sm:basis-auto sm:ml-auto">
               <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
                 {storyRun ? (
                   <AgentRunBullet
