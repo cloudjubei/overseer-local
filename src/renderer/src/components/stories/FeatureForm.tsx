@@ -193,20 +193,16 @@ export default function FeatureForm({
     setBlockers((prev) => (prev.includes(canonical) ? prev : [...prev, canonical]))
   }
 
-  // Choose scroll behavior: if actions are hidden, let parent handle scrolling.
-  // If actions are shown, make content area independently scrollable so actions stay visible.
-  const contentWrapperClass = hideActions ? 'space-y-4' : 'flex-1 min-h-0 overflow-y-auto space-y-4'
-
   return (
     <form
       id={formId}
       onSubmit={handleSubmit}
       onKeyDown={onKeyDown}
-      className="flex flex-col min-h-0"
+      className="flex flex-col h-full"
       aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}
     >
-      {/* Content area (scrollable only when actions are inline) */}
-      <div className={contentWrapperClass}>
+      {/* Content area */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
         <div className="grid grid-cols-1 gap-3">
           <StatusControl status={status} onChange={setStatus} />
           <div className="flex items-center gap-3">
@@ -377,7 +373,7 @@ export default function FeatureForm({
 
       {/* Inline actions (non-modal footer). Kept outside scroll area so they remain visible */}
       {!hideActions && (
-        <div className="flex justify-between gap-2 pt-2">
+        <div className="flex-shrink-0 flex justify-between gap-2 p-4 border-t border-border">
           {onDelete && !isCreate ? (
             <Button
               className="btn-secondary"
