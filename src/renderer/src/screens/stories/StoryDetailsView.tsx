@@ -66,13 +66,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
-  // Git merge UI state
-  // const [gitBaseBranch, setGitBaseBranch] = useState<string | null>(null)
-  // const [hasUnmerged, setHasUnmerged] = useState<boolean>(false)
-  // const [checkingMerge, setCheckingMerge] = useState<boolean>(false)
-  // const [merging, setMerging] = useState<boolean>(false)
-  // const [mergeError, setMergeError] = useState<string | null>(null)
-
   const chatContext: ChatContext | undefined = useMemo(() => {
     if (!projectId || !storyId) return undefined
     return { type: 'STORY', projectId, storyId }
@@ -87,47 +80,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [storyId, storiesById])
 
-  //TODO: logic needs to be cleand up
-  // useEffect(() => {
-  //   let disposed = false
-  //
-  //   async function check() {
-  //     if (!story) {
-  //       setHasUnmerged(false)
-  //       return
-  //     }
-  //     setCheckingMerge(true)
-  //     try {
-  //       const status = await gitMonitorService.getStatus()
-  //       const base = status.currentBranch || null
-  //       setGitBaseBranch(base)
-  //       const branchName = `features/${story.id}`
-  //       if (!base) {
-  //         setHasUnmerged(false)
-  //         return
-  //       }
-  //       const res = await gitMonitorService.hasUnmerged(branchName, base)
-  //       if (!disposed) {
-  //         setHasUnmerged(!!res.ok && !!res.hasUnmerged)
-  //       }
-  //     } catch (e) {
-  //       if (!disposed) setHasUnmerged(false)
-  //     } finally {
-  //       if (!disposed) setCheckingMerge(false)
-  //     }
-  //   }
-  //
-  //   check()
-  //   const unsubscribe = gitMonitorService.subscribe((_s) => {
-  //     // Re-check on git status updates
-  //     check()
-  //   })
-  //   return () => {
-  //     disposed = true
-  //     unsubscribe?.()
-  //   }
-  // }, [story])
-
   const sortedFeaturesBase = useMemo(() => {
     if (!story) {
       return []
@@ -140,7 +92,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const featuresSorted = useMemo(() => {
     let arr = [...sortedFeaturesBase]
     if (sortBy === 'index_asc') {
-      // already asc
       return arr
     } else if (sortBy === 'index_desc') {
       return arr.slice().reverse()
@@ -300,33 +251,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [highlightStoryFlag])
 
-  // const onClickMerge = async () => {
-  //   if (!story) return
-  //   setMergeError(null)
-  //   setMerging(true)
-  //   try {
-  //     const status = await gitMonitorService.getStatus()
-  //     const base = status.currentBranch
-  //     const branchName = `features/${story.id}`
-  //     if (!base) throw new Error('No base branch detected')
-  //     const res = await gitMonitorService.mergeBranch(branchName, base)
-  //     if (!res.ok) throw new Error(res.error || 'Merge failed')
-  //     // Refresh and update button state
-  //     await gitMonitorService.triggerPoll()
-  //     const check = await gitMonitorService.hasUnmerged(branchName, base)
-  //     setHasUnmerged(!!check.ok && !!check.hasUnmerged)
-  //   } catch (e: any) {
-  //     setMergeError(e?.message || String(e))
-  //   } finally {
-  //     setMerging(false)
-  //   }
-  // }
-
   if (!story) {
     return (
       <div className="story-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
         <header className="details-header shrink-0">
-          <div className="details-header__bar">
+          <div className="details-header__bar flex items-center gap-3">
             <Button
               className="btn-secondary"
               onClick={() => {
@@ -403,9 +332,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         aria-labelledby="story-details-heading"
       >
         <header className="details-header shrink-0">
-          <div className="details-header__bar">
+          <div className="details-header__bar flex flex-wrap items-start gap-3">
             <Button
-              className="btn-secondary w-9 "
+              className="btn-secondary w-9"
               onClick={() => {
                 navigateView('Home')
               }}
@@ -415,7 +344,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             </Button>
 
             <div
-              className="col col-id flex flex-col items-center gap-1"
+              className="col col-id flex flex-col items-center gap-1 order-1"
               style={{ gridRow: '1 / 4', alignSelf: 'center' }}
             >
               {hasRejectedFeatures && (
@@ -432,12 +361,12 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               />
             </div>
 
-            <h1 id="story-details-heading" className="details-title">
+            <h1 id="story-details-heading" className="details-title flex-1 min-w-0 order-2">
               <RichText text={story.title || `Story ${storyDisplayIndex}`} />
             </h1>
 
-            <div className="spacer" />
-            <div className="flex items-center gap-3">
+            {/* Right-side controls: on mobile these wrap below the title */}
+            <div className="flex items-center gap-3 order-3 basis-full sm:order-3 sm:basis-auto sm:ml-auto">
               <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
                 {storyRun ? (
                   <AgentRunBullet
@@ -499,9 +428,10 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </section>
         )}
 
-        {/* Top toolbar: search/filter/sort only; status+sort wrap under search on small screens */}
+        {/* Top toolbar: search/filter/sort only; status+sort wrap together under search on small screens */}
         <div className="stories-toolbar shrink-0">
           <div className="left flex flex-wrap items-center gap-2 w-full">
+            {/* Search occupies first row full-width on small screens */}
             <div className="control search-wrapper min-w-0 flex-1 basis-full sm:basis-auto">
               <input
                 type="search"
@@ -511,49 +441,54 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <div className="control basis-1/2 sm:basis-auto">
-              <div
-                ref={statusFilterRef}
-                className="status-filter-btn ui-select gap-2"
-                role="button"
-                aria-haspopup="menu"
-                aria-expanded={openFilter}
-                aria-label="Filter by status"
-                tabIndex={0}
-                onClick={() => setOpenFilter(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
-                }}
-              >
-                <span className={`status-bullet status-bullet--${k}`} aria-hidden />
-                <span className="standard-picker__label">{currentFilterLabel}</span>
-              </div>
-              {openFilter && statusFilterRef.current && (
-                <StatusPicker
-                  anchorEl={statusFilterRef.current}
-                  value={statusFilter}
-                  isAllAllowed={true}
-                  includeNotDone={true}
-                  onSelect={(val) => {
-                    setStatusFilter(val as any)
-                    setOpenFilter(false)
+
+            {/* Group filter + sort so they move as a pair to the second row on small screens */}
+            <div className="flex gap-2 basis-full sm:basis-auto">
+              <div className="control flex-1 sm:flex-none basis-1/2 sm:basis-auto">
+                <div
+                  ref={statusFilterRef}
+                  className="status-filter-btn ui-select gap-2"
+                  role="button"
+                  aria-haspopup="menu"
+                  aria-expanded={openFilter}
+                  aria-label="Filter by status"
+                  tabIndex={0}
+                  onClick={() => setOpenFilter(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setOpenFilter(true)
                   }}
-                  onClose={() => setOpenFilter(false)}
-                />
-              )}
-            </div>
-            <div className="control basis-1/2 sm:basis-auto">
-              <select
-                className="ui-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as FeatureSort)}
-                aria-label="Sort features by"
-              >
-                <option value="index_asc">Ascending ↓</option>
-                <option value="index_desc">Descending ↑</option>
-                <option value="status_asc">Status ↓</option>
-                <option value="status_desc">Status ↑</option>
-              </select>
+                >
+                  <span className={`status-bullet status-bullet--${k}`} aria-hidden />
+                  <span className="standard-picker__label">{currentFilterLabel}</span>
+                </div>
+                {openFilter && statusFilterRef.current && (
+                  <StatusPicker
+                    anchorEl={statusFilterRef.current}
+                    value={statusFilter}
+                    isAllAllowed={true}
+                    includeNotDone={true}
+                    onSelect={(val) => {
+                      setStatusFilter(val as any)
+                      setOpenFilter(false)
+                    }}
+                    onClose={() => setOpenFilter(false)}
+                  />
+                )}
+              </div>
+
+              <div className="control flex-1 sm:flex-none basis-1/2 sm:basis-auto">
+                <select
+                  className="ui-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as FeatureSort)}
+                  aria-label="Sort features by"
+                >
+                  <option value="index_asc">Ascending ↓</option>
+                  <option value="index_desc">Descending ↑</option>
+                  <option value="status_asc">Status ↓</option>
+                  <option value="status_desc">Status ↑</option>
+                </select>
+              </div>
             </div>
           </div>
           {/* Keep right container for layout consistency, but no controls now */}
@@ -562,7 +497,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
         <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
           <section className="panel shrink-0">
-            <div className="section-header">
+            <div className="section-header flex items-center gap-2">
               <button
                 type="button"
                 className="collapse-toggle btn-icon"
@@ -575,7 +510,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 />
               </button>
               <h2 className="section-title">Overview</h2>
-              <div className="spacer" />
+              <div className="ml-auto" />
               <button
                 type="button"
                 className="btn-secondary btn-icon"
@@ -596,9 +531,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </section>
 
           <section className="panel flex flex-col flex-1 min-h-0">
-            <div className="section-header shrink-0">
+            <div className="section-header shrink-0 flex items-center gap-2">
               <h2 className="section-title">Features</h2>
-              <div className="spacer" />
+              <div className="ml-auto" />
               <button
                 type="button"
                 className="btn btn-icon"
@@ -665,7 +600,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           preventDragFromNoDragRef.current = false
                         }}
                         onDragStart={(e) => {
-                          // If the initial pointer down started on a non-draggable UI (e.g., action buttons), block row drag
                           if (preventDragFromNoDragRef.current) {
                             e.preventDefault()
                             e.stopPropagation()
@@ -673,7 +607,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                             return
                           }
                           if (!dndEnabled) return
-                          // Fallback: if somehow target is within .no-drag, block as well
                           const target = e.target as HTMLElement | null
                           if (target && target.closest('.no-drag')) {
                             e.preventDefault()
@@ -693,7 +626,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                         }}
                         onKeyDown={(e) => onRowKeyDown(e, f.id)}
                         onClick={(e) => {
-                          // Ignore clicks if we were dragging or if clicking on specific action areas
                           if (dragging) return
                           const t = e.target as HTMLElement | null
                           if (t && t.closest('.no-drag')) return
