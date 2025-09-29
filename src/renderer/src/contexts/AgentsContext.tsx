@@ -146,8 +146,26 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     await factoryAgentRunService.deleteRunHistory(runId)
   }, [])
 
+  // Optimistic rating update with rollback on failure
   const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
-    await factoryAgentRunService.rateRun(runId, rating)
+    // snapshot for rollback
+    let prevSnapshot: AgentRunHistory[] | null = null
+    setRunsHistory((prev) => {
+      prevSnapshot = prev
+      return prev.map((r) => {
+        if (r.id !== runId) return r
+        // Optimistically set/clear rating
+        return { ...r, rating: rating ? { score: rating.score } : undefined }
+      })
+    })
+    try {
+      await factoryAgentRunService.rateRun(runId, rating)
+      // Live update should reconcile actual server state; otherwise our optimistic value stands.
+    } catch (err) {
+      // Rollback on failure
+      if (prevSnapshot) setRunsHistory(prevSnapshot)
+      console.warn('[AgentsContext] rateRun failed', (err as any)?.message || err)
+    }
   }, [])
 
   const fireCompletionNotification = async (run: AgentRunHistory) => {
