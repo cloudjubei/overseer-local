@@ -242,6 +242,7 @@ export function AlertDialog({
               onClose()
             }}
             variant={destructiveConfirm ? 'danger' : 'primary'}
+            className={destructiveConfirm ? 'btn-secondary' : undefined}
           >
             {confirmText}
           </Button>
