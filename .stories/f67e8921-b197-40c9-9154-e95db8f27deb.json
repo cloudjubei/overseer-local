@@ -2002,7 +2002,7 @@
     },
     {
       "id": "ba50781e-aa29-4dfe-b159-825f9ed88f88",
-      "status": "-",
+      "status": "+",
       "title": "The AlertDialog when showing the destructiveConfirm doesn't display anything",
       "description": "The button in AlertDialog (which is in @src/renderer/src/components/ui/Modal.tsx ) is not visible.",
       "context": [
@@ -2010,7 +2010,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T14:08:52.851Z",
-      "updatedAt": "2025-09-29T14:08:52.851Z"
+      "updatedAt": "2025-09-29T15:38:56.570Z",
+      "completedAt": "2025-09-29T15:38:56.570Z"
     },
     {
       "id": "02c446d1-4969-4057-8fb6-2e957b2205aa",

@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useId } from 'react'
+import { Button } from './Button'
 
 export type ModalProps = {
   isOpen: boolean
@@ -231,27 +232,19 @@ export function AlertDialog({
       closeOnOverlayClick={!disableOutsideClose}
       footer={
         <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm bg-surface-raised text-text-primary hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2"
-          >
+          <Button onClick={onClose} variant="secondary">
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
             ref={confirmRef as React.RefObject<HTMLButtonElement>}
             onClick={() => {
               onConfirm?.()
               onClose()
             }}
-            className={
-              'inline-flex items-center rounded-md px-3 py-1.5 text-sm focus-visible:ring-2 ' +
-              (destructiveConfirm
-                ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-brand-600 text-text-inverted hover:bg-brand-700')
-            }
+            variant={destructiveConfirm ? 'danger' : 'primary'}
           >
             {confirmText}
-          </button>
+          </Button>
         </div>
       }
     >
