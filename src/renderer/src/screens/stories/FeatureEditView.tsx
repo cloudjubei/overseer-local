@@ -7,7 +7,7 @@ import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/Fea
 import { Button } from '@renderer/components/ui/Button'
 import { IconChat, IconDelete } from '@renderer/components/ui/Icons'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import ChatSidebar from '@renderer/components/chat/ChatSidebar'
+import { ChatSidebarOverlay } from '@renderer/components/chat'
 
 export default function FeatureEditView({
   storyId,
@@ -29,8 +29,6 @@ export default function FeatureEditView({
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatWidth, setChatWidth] = useState<number>(380)
-  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const doClose = () => {
     onRequestClose?.()
@@ -97,37 +95,12 @@ export default function FeatureEditView({
     [projectId, storyId, featureId],
   )
 
-  // Resize handlers
-  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isChatOpen) return
-    e.preventDefault()
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    resizingRef.current = { startX: e.clientX, startWidth: chatWidth }
-    window.addEventListener('pointermove', onResizeMove)
-    window.addEventListener('pointerup', onResizeEnd)
-  }
-  const onResizeMove = (e: PointerEvent) => {
-    if (!resizingRef.current) return
-    const { startX, startWidth } = resizingRef.current
-    const dx = e.clientX - startX
-    // Handle is on the left edge; moving left (dx < 0) increases width
-    const next = startWidth - dx
-    const clamped = Math.max(280, Math.min(640, next))
-    setChatWidth(clamped)
-  }
-  const onResizeEnd = (_e: PointerEvent) => {
-    resizingRef.current = null
-    window.removeEventListener('pointermove', onResizeMove)
-    window.removeEventListener('pointerup', onResizeEnd)
-  }
-
   return (
     <>
       <Modal
         title="Edit Feature"
         onClose={attemptClose}
         isOpen={true}
-        size={isChatOpen ? 'xl' : undefined}
         headerActions={
           <button
             className="btn-secondary btn-icon"
@@ -201,36 +174,16 @@ export default function FeatureEditView({
               </div>
             )}
           </div>
-          {/* Animated, resizable chat sidebar */}
-          <div
-            className="relative flex-shrink-0 border-l border-border bg-surface-base"
-            style={{ width: isChatOpen ? chatWidth : 0, transition: 'width 240ms ease' }}
-            aria-hidden={!isChatOpen}
-          >
-            {/* Resize handle at the left edge */}
-            {isChatOpen && (
-              <div
-                onPointerDown={onResizeStart}
-                className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
-                style={{ zIndex: 1 }}
-                aria-label="Resize chat sidebar"
-                role="separator"
-                aria-orientation="vertical"
-              />
-            )}
-            <div
-              className="absolute inset-0 overflow-hidden"
-              style={{
-                opacity: isChatOpen ? 1 : 0,
-                transition: 'opacity 200ms ease 80ms',
-                pointerEvents: isChatOpen ? 'auto' : 'none',
-              }}
-            >
-              {isChatOpen && <ChatSidebar context={context} chatContextTitle="Feature Chat" />}
-            </div>
-          </div>
         </div>
       </Modal>
+
+      <ChatSidebarOverlay
+        isOpen={isChatOpen}
+        context={context}
+        chatContextTitle="Feature Chat"
+        initialWidth={380}
+      />
+
       <AlertDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}

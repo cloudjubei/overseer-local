@@ -5,7 +5,7 @@ import { useToast } from '@renderer/components/ui/Toast'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, StoryCreateInput } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import ChatSidebar from '@renderer/components/chat/ChatSidebar'
+import { ChatSidebarOverlay } from '@renderer/components/chat'
 import { IconChat } from '@renderer/components/ui/Icons'
 
 export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
@@ -19,8 +19,6 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
 
   const [hasChanges, setHasChanges] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatWidth, setChatWidth] = useState<number>(360)
-  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const doClose = () => {
     onRequestClose?.()
@@ -62,36 +60,13 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
     [projectId],
   )
 
-  // Resize handlers
-  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isChatOpen) return
-    e.preventDefault()
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    resizingRef.current = { startX: e.clientX, startWidth: chatWidth }
-    window.addEventListener('pointermove', onResizeMove)
-    window.addEventListener('pointerup', onResizeEnd)
-  }
-  const onResizeMove = (e: PointerEvent) => {
-    if (!resizingRef.current) return
-    const { startX, startWidth } = resizingRef.current
-    const dx = e.clientX - startX
-    const next = startWidth - dx
-    const clamped = Math.max(280, Math.min(640, next))
-    setChatWidth(clamped)
-  }
-  const onResizeEnd = (_e: PointerEvent) => {
-    resizingRef.current = null
-    window.removeEventListener('pointermove', onResizeMove)
-    window.removeEventListener('pointerup', onResizeEnd)
-  }
-
   return (
     <>
       <Modal
         title="Create New Story"
         onClose={attemptClose}
         isOpen={true}
-        size={isChatOpen ? 'xl' : 'md'}
+        size={'md'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         headerActions={
           <button
@@ -118,36 +93,16 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
               onDirtyChange={setHasChanges}
             />
           </div>
-          <div
-            className="relative flex-shrink-0 border-l border-border bg-surface-base"
-            style={{ width: isChatOpen ? chatWidth : 0, transition: 'width 240ms ease' }}
-            aria-hidden={!isChatOpen}
-          >
-            {isChatOpen && (
-              <div
-                onPointerDown={onResizeStart}
-                className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--border-subtle)]"
-                style={{ zIndex: 1 }}
-                aria-label="Resize chat sidebar"
-                role="separator"
-                aria-orientation="vertical"
-              />
-            )}
-            <div
-              className="absolute inset-0 overflow-hidden"
-              style={{
-                opacity: isChatOpen ? 1 : 0,
-                transition: 'opacity 200ms ease 80ms',
-                pointerEvents: isChatOpen ? 'auto' : 'none',
-              }}
-            >
-              {isChatOpen && (
-                <ChatSidebar context={context} chatContextTitle="Project Chat (New Story)" />
-              )}
-            </div>
-          </div>
         </div>
       </Modal>
+
+      <ChatSidebarOverlay
+        isOpen={isChatOpen}
+        context={context}
+        chatContextTitle="Project Chat (New Story)"
+        initialWidth={360}
+      />
+
       <AlertDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
