@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useRef as useRef2 } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
 import StatusControl from '@renderer/components/stories/StatusControl'
@@ -14,7 +14,8 @@ import ModelChip from '@renderer/components/agents/ModelChip'
 import { StatusPicker, statusKey, STATUS_LABELS } from '@renderer/components/stories/StatusControl'
 import { Button } from '@renderer/components/ui/Button'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { ChatSidebar } from '@renderer/components/chat'
+import { ChatSidebarOverlay } from '@renderer/components/chat'
+import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -39,6 +40,25 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+
+  const prevSidebarCollapsedRef = useRef<boolean | null>(null)
+  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
+
+  useEffect(() => {
+    if (!isAppSettingsLoaded) return
+    // When chat opens, collapse sidebar; when closes, restore
+    if (isChatOpen) {
+      if (prevSidebarCollapsedRef.current == null) {
+        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
+      }
+      if (appSettings.userPreferences.sidebarCollapsed !== true) {
+        setUserPreferences({ sidebarCollapsed: true })
+      }
+    } else if (prevSidebarCollapsedRef.current != null) {
+      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
+      prevSidebarCollapsedRef.current = null
+    }
+  }, [isChatOpen, isAppSettingsLoaded])
 
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -733,13 +753,17 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </div>
         )}
       </div>
+
       {isChatOpen && chatContext && (
-        <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ChatSidebar
-            context={chatContext}
-            chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
-          />
-        </div>
+        <ChatSidebarOverlay
+          isOpen={isChatOpen}
+          context={chatContext}
+          chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
+          initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
+          onWidthChange={(w, final) => {
+            if (final) setUserPreferences({ chatSidebarWidth: Math.round(w) })
+          }}
+        />
       )}
     </div>
   )

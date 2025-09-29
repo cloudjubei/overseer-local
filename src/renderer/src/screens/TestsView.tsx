@@ -9,8 +9,9 @@ import { useNavigator } from '../navigation/Navigator'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 import { IconChat } from '../components/ui/Icons'
-import { ChatSidebar } from '../components/chat'
+import { ChatSidebarOverlay } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
+import { useAppSettings } from '../contexts/AppSettingsContext'
 // import { timeAgo } from '../utils/time'
 
 // function TimeAgo({ ts }: { ts: number }) {
@@ -26,6 +27,24 @@ import { ChatContext } from 'thefactory-tools'
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
   const [isChatOpen, setIsChatOpen] = React.useState(false)
+
+  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
+  const prevSidebarCollapsedRef = React.useRef<boolean | null>(null)
+
+  React.useEffect(() => {
+    if (!isAppSettingsLoaded) return
+    if (isChatOpen) {
+      if (prevSidebarCollapsedRef.current == null) {
+        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
+      }
+      if (appSettings.userPreferences.sidebarCollapsed !== true) {
+        setUserPreferences({ sidebarCollapsed: true })
+      }
+    } else if (prevSidebarCollapsedRef.current != null) {
+      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
+      prevSidebarCollapsedRef.current = null
+    }
+  }, [isChatOpen, isAppSettingsLoaded])
 
   const {
     isRunningTests,
@@ -222,9 +241,15 @@ function TestsInner() {
       </div>
 
       {isChatOpen && chatContext && (
-        <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ChatSidebar context={chatContext} chatContextTitle="Tests chat" />
-        </div>
+        <ChatSidebarOverlay
+          isOpen={isChatOpen}
+          context={chatContext}
+          chatContextTitle="Tests chat"
+          initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
+          onWidthChange={(w, final) => {
+            if (final) setUserPreferences({ chatSidebarWidth: Math.round(w) })
+          }}
+        />
       )}
     </div>
   )

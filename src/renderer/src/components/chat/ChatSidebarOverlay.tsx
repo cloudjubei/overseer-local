@@ -8,13 +8,29 @@ export default function ChatSidebarOverlay({
   context,
   chatContextTitle,
   initialWidth = 380,
+  onWidthChange,
 }: {
   isOpen: boolean
   context: ChatContext
   chatContextTitle: string
   initialWidth?: number
+  // Called during resize (continuous) and on release (final)
+  onWidthChange?: (width: number, isFinal: boolean) => void
 }) {
-  const [width, setWidth] = useState<number>(initialWidth)
+  // Resolve min width from CSS var --sidebar-w to keep symmetry with main sidebar
+  const getMinWidth = () => {
+    try {
+      const v = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w')
+      const n = parseInt(v.trim().replace('px', ''), 10)
+      return Number.isFinite(n) && n > 0 ? n : 260
+    } catch {
+      return 260
+    }
+  }
+  const MIN_W = getMinWidth()
+  const MAX_W = Math.floor(window.innerWidth * 0.5)
+
+  const [width, setWidth] = useState<number>(Math.max(MIN_W, Math.min(MAX_W, initialWidth)))
   const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   // Track modal container/panel
@@ -25,6 +41,18 @@ export default function ChatSidebarOverlay({
   const [panelRect, setPanelRect] = useState<{ top: number; right: number; height: number } | null>(
     null,
   )
+
+  // Slide-in animation state for viewport-fixed fallback
+  const [entered, setEntered] = useState(false)
+  useEffect(() => {
+    if (isOpen) {
+      // Next tick to allow transition
+      const id = requestAnimationFrame(() => setEntered(true))
+      return () => cancelAnimationFrame(id)
+    } else {
+      setEntered(false)
+    }
+  }, [isOpen])
 
   // Find modal anchors when open
   useEffect(() => {
@@ -80,10 +108,16 @@ export default function ChatSidebarOverlay({
   }, [panelRect])
 
   useEffect(() => {
-    if (!availableNextToModal) return
-    // Clamp current width into available space
-    setWidth((w) => Math.max(280, Math.min(Math.min(720, availableNextToModal), w)))
-  }, [availableNextToModal])
+    // Clamp current width into constraints when environment changes
+    const maxByViewport = Math.floor(window.innerWidth * 0.5)
+    const maxByContext = availableNextToModal
+      ? Math.min(maxByViewport, availableNextToModal)
+      : maxByViewport
+    setWidth((w) => {
+      const clamped = Math.max(MIN_W, Math.min(maxByContext, w))
+      return clamped
+    })
+  }, [availableNextToModal, MIN_W])
 
   const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isOpen) return
@@ -100,48 +134,51 @@ export default function ChatSidebarOverlay({
     const dx = e.clientX - startX
     // handle is on the left edge; moving left increases width
     const next = startWidth - dx
-    const maxByContext = availableNextToModal ? Math.min(720, availableNextToModal) : 720
-    const clamped = Math.max(280, Math.min(maxByContext, next))
+    const maxByViewport = Math.floor(window.innerWidth * 0.5)
+    const maxByContext = availableNextToModal
+      ? Math.min(maxByViewport, availableNextToModal)
+      : maxByViewport
+    const clamped = Math.max(MIN_W, Math.min(maxByContext, next))
     setWidth(clamped)
+    onWidthChange?.(clamped, false)
   }
 
   const onResizeEnd = (_e: PointerEvent) => {
     resizingRef.current = null
     window.removeEventListener('pointermove', onResizeMove)
     window.removeEventListener('pointerup', onResizeEnd)
+    onWidthChange?.(width, true)
   }
 
   if (!isOpen) return null
 
+  const isModal = !!modalContainer
+  const baseClass =
+    (isModal
+      ? 'absolute z-[5] border-l border-border bg-surface-base shadow-xl'
+      : 'fixed z-[1100] border-l border-border bg-surface-base shadow-xl') +
+    ' will-change-transform'
+
+  const style: React.CSSProperties = isModal && panelRect
+    ? {
+        top: panelRect.top,
+        left: Math.min(panelRect.right + 8, window.innerWidth),
+        height: panelRect.height,
+        width: Math.min(width, availableNextToModal || width),
+        transition: 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms',
+        transform: 'translateX(0)',
+      }
+    : {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width,
+        transition: 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms',
+        transform: entered ? 'translateX(0)' : 'translateX(100%)',
+      }
+
   const SidebarContent = (
-    <div
-      className={
-        // When inside modal container, we use lower z so the modal panel stays on top.
-        // When global (no modal), we use a high z to appear above content.
-        (modalContainer
-          ? 'absolute z-[5] border-l border-border bg-surface-base shadow-xl'
-          : 'fixed z-[1100] border-l border-border bg-surface-base shadow-xl') + ' will-change-transform'
-      }
-      style={
-        modalContainer && panelRect
-          ? {
-              top: panelRect.top,
-              left: Math.min(panelRect.right + 8, window.innerWidth),
-              height: panelRect.height,
-              width: Math.min(width, availableNextToModal || width),
-              transition: 'transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms',
-              transform: 'translateX(0)'
-            }
-          : {
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width,
-            }
-      }
-      role="complementary"
-      aria-label="Chat"
-    >
+    <div className={baseClass} style={style} role="complementary" aria-label="Chat">
       {/* Resize handle on the left edge */}
       <div
         onPointerDown={onResizeStart}

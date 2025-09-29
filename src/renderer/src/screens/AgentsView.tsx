@@ -6,8 +6,9 @@ import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
 import { useActiveProject } from '../contexts/ProjectContext'
 import { IconChat } from '../components/ui/Icons'
-import { ChatSidebar } from '../components/chat'
+import { ChatSidebarOverlay } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
+import { useAppSettings } from '../contexts/AppSettingsContext'
 
 function formatTime(iso?: string) {
   if (!iso) return ''
@@ -1027,6 +1028,25 @@ export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
   const [isChatOpen, setIsChatOpen] = useState(false)
   const { projectId } = useActiveProject()
+  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
+
+  // Collapse/restore sidebar when chat toggles (current view only)
+  const prevSidebarCollapsedRef = useState<boolean | null>(null)[0] as React.MutableRefObject<boolean | null>
+
+  useEffect(() => {
+    if (!isAppSettingsLoaded) return
+    if (viewMode === 'current' && isChatOpen) {
+      if (prevSidebarCollapsedRef.current == null) {
+        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
+      }
+      if (appSettings.userPreferences.sidebarCollapsed !== true) {
+        setUserPreferences({ sidebarCollapsed: true })
+      }
+    } else if (prevSidebarCollapsedRef.current != null && (!isChatOpen || viewMode !== 'current')) {
+      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
+      prevSidebarCollapsedRef.current = null
+    }
+  }, [isChatOpen, viewMode, isAppSettingsLoaded])
 
   const chatContext: ChatContext | undefined = useMemo(() => {
     if (!projectId) return undefined
@@ -1085,9 +1105,15 @@ export default function AgentsView() {
         </div>
       </div>
       {viewMode === 'current' && isChatOpen && chatContext && (
-        <div className="flex-shrink-0 w-[450px] border-l border-[var(--border-subtle)]">
-          <ChatSidebar context={chatContext} chatContextTitle="Agents chat" />
-        </div>
+        <ChatSidebarOverlay
+          isOpen={isChatOpen}
+          context={chatContext}
+          chatContextTitle="Agents chat"
+          initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
+          onWidthChange={(w, final) => {
+            if (final) setUserPreferences({ chatSidebarWidth: Math.round(w) })
+          }}
+        />
       )}
     </div>
   )

@@ -31,6 +31,8 @@ export interface UserPreferences {
   storiesListViewSorting: StoryListViewSorting
   storiesListViewStatusFilter: StoryListStatusFilter
   sidebarCollapsed: boolean
+  // Preferred width of the right chat sidebar (pixels)
+  chatSidebarWidth?: number
   shortcutsModifier: ShortcutsModifier
   shortcuts: ShortcutsConfig
 }
