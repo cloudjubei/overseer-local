@@ -89,6 +89,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
                 const prevRun = newPrev[prevRunIndex]
                 const isRunning = run.state === 'running' || run.state === 'created'
                 if ((prevRun.state === 'running' || prevRun.state === 'created') && !isRunning) {
+                  console.log('FIRING NOTIFICATION prev: ', prevRun)
+                  console.log('FIRING NOTIFICATION run: ', run)
                   fireCompletionNotification(run)
                 }
                 newPrev[prevRunIndex] = run
