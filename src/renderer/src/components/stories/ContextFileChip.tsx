@@ -14,10 +14,10 @@ export default function ContextFileChip({
   onRemove?: () => void
   warn?: boolean
 }) {
-  const { files } = useFiles()
+  const { filesByPath } = useFiles()
 
   const file: FileMeta = React.useMemo(() => {
-    const foundFile = files.find((f) => f.relativePath === path)
+    const foundFile = filesByPath[path]
     if (foundFile) {
       return foundFile
     }
@@ -25,8 +25,16 @@ export default function ContextFileChip({
     // Fallback for when file is not found in the project's file list
     const parts = path.split('/')
     const name = parts[parts.length - 1] || path
-    return { name, absolutePath: path, relativePath: path, type: inferFileType(path), size: 0, ctime: 0, mtime: 0 }
-  }, [path, files])
+    return {
+      name,
+      absolutePath: path,
+      relativePath: path,
+      type: inferFileType(path),
+      size: 0,
+      ctime: 0,
+      mtime: 0,
+    }
+  }, [path, filesByPath])
 
   return (
     <div className="inline-file-chip relative">

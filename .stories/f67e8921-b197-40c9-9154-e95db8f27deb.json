@@ -1952,8 +1952,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T11:40:32.221Z",
-      "updatedAt": "2025-09-29T20:31:51.962Z",
-      "rejection": "Still isn't scrollable - this is extremely frustrating, this is the nth attempt. Slowly analyse the issue, scrutinise your solution and then provide it.\nCreate a document in `docs/SCROLLING_FIX.md` that will explain the problem and why it's taking so many attempts to fix.",
+      "updatedAt": "2025-09-29T23:22:33.614Z",
       "completedAt": "2025-09-29T20:31:51.962Z"
     },
     {

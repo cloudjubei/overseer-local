@@ -77,6 +77,9 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     let newFilesByPath: Record<string, FileMeta> = {}
     for (const f of files) {
       newFilesByPath[f.absolutePath] = f
+      if (f.relativePath) {
+        newFilesByPath[f.relativePath] = f
+      }
     }
     setFilesByPath(newFilesByPath)
   }
