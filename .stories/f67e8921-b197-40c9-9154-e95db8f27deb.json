@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2028,7 +2028,7 @@
     },
     {
       "id": "31bad08b-59b0-468b-a154-7814251bd4cb",
-      "status": "-",
+      "status": "+",
       "title": "File context chips show \"file not found\" and wrong time and size",
       "description": "The @src/renderer/src/components/stories/ContextFileChip.tsx shows file not found - even though a correct file path is being fed to it that came from @src/renderer/src/hooks/useFilesAutocomplete.ts .\nAlso, when displaying the full one in a form like @src/renderer/src/components/stories/FeatureForm.tsx - it doesn't show the size or last update time correctly.",
       "context": [
@@ -2038,7 +2038,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T20:10:01.766Z",
-      "updatedAt": "2025-09-29T20:10:01.766Z"
+      "updatedAt": "2025-09-29T20:33:30.257Z",
+      "completedAt": "2025-09-29T20:33:30.257Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2177,5 +2178,6 @@
     "31bad08b-59b0-468b-a154-7814251bd4cb": 133
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-29T14:40:07.339Z"
+  "updatedAt": "2025-09-29T14:40:07.339Z",
+  "completedAt": "2025-09-29T20:33:30.257Z"
 }
