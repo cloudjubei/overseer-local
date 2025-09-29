@@ -35,14 +35,12 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const computeVisibleLines = () => {
     const el = textareaRef.current
     if (!el) return
-    // Temporarily ensure height reflects full content to get scrollHeight
     const prevHeight = el.style.height
     el.style.height = 'auto'
     const computed = window.getComputedStyle(el)
     const lineHeightPx = parseFloat(computed.lineHeight || '0')
     const lineHeight = Number.isFinite(lineHeightPx) && lineHeightPx > 0 ? lineHeightPx : 20
     const lines = Math.max(1, Math.round(el.scrollHeight / lineHeight))
-    // Restore height will be set by autoSizeTextarea
     el.style.height = prevHeight
     if (lines !== visibleLines) setVisibleLines(lines)
   }
@@ -145,6 +143,35 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     `${modifierSymbol} + Enter to send`,
   ], [modifierSymbol])
 
+  // Precompute grid content slots (top-left, top-right, bottom-left, bottom-right)
+  const renderHintsGrid = () => {
+    return (
+      <div className="grid grid-cols-2 grid-rows-2 gap-x-4 text-[12px] text-[var(--text-muted)]">
+        {/* Left side */}
+        {leftHints.length <= 1 ? (
+          <div className="col-start-1 row-span-2 self-center truncate">{leftHints[0]}</div>
+        ) : (
+          <>
+            <div className="col-start-1 row-start-1 truncate">{leftHints[0]}</div>
+            <div className="col-start-1 row-start-2 truncate">{leftHints[1]}</div>
+          </>
+        )}
+
+        {/* Right side */}
+        {rightHints.length <= 1 ? (
+          <div className="col-start-2 row-span-2 self-center text-right truncate">
+            {rightHints[0]}
+          </div>
+        ) : (
+          <>
+            <div className="col-start-2 row-start-1 text-right truncate">{rightHints[0]}</div>
+            <div className="col-start-2 row-start-2 text-right truncate">{rightHints[1]}</div>
+          </>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div
       ref={chatInputRef}
@@ -172,7 +199,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 />
               </div>
 
-              {/* Attachments and bottom info area (no action buttons here) */}
+              {/* Attachments and bottom info area (hints) */}
               <div className="px-2 py-1.5 border-t border-[var(--border-subtle)]">
                 <AttachmentList
                   attachments={pendingAttachments}
@@ -180,94 +207,92 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   disabled={isThinking}
                 />
 
-                {showHintsArea && (
-                  <div className="mt-2">
-                    <div className="grid grid-cols-2 gap-4 text-[12px] text-[var(--text-muted)]">
-                      {/* Left column hints */}
-                      <div className={`flex flex-col ${leftHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
-                        {leftHints.length > 1 ? (
-                          <>
-                            <div className="truncate">{leftHints[0]}</div>
-                            <div className="truncate">{leftHints[1]}</div>
-                          </>
-                        ) : (
-                          <div className="truncate">{leftHints[0]}</div>
-                        )}
-                      </div>
-
-                      {/* Right column hints */}
-                      <div className={`flex flex-col items-end ${rightHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
-                        {rightHints.length > 1 ? (
-                          <>
-                            <div className="truncate">{rightHints[0]}</div>
-                            <div className="truncate">{rightHints[1]}</div>
-                          </>
-                        ) : (
-                          <div className="truncate">{rightHints[0]}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {/* Hints area with fade and collapse animation */}
+                <div
+                  className="overflow-hidden transition-all duration-200 ease-out"
+                  style={{
+                    maxHeight: showHintsArea ? 80 : 0,
+                    opacity: showHintsArea ? 1 : 0,
+                    marginTop: showHintsArea ? 8 : 0,
+                  }}
+                  aria-hidden={!showHintsArea}
+                >
+                  {renderHintsGrid()}
+                </div>
               </div>
             </div>
 
-            {/* Right-side vertical controls */}
-            <div className="flex flex-col items-center gap-2 w-10">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="btn-icon"
-                aria-label="Attach a document"
-                type="button"
-                disabled={isThinking}
-              >
-                <IconAttach className="w-5 h-5" />
-              </button>
-              <input
-                type="file"
-                accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleFileUpload}
-              />
-
-              <button
-                onClick={handleSend}
-                className="btn-icon"
-                disabled={!canSend || isThinking}
-                aria-label="Send message"
-              >
-                <IconSend className="w-5 h-5" />
-              </button>
-
-              {/* Info button with top-left tooltip */}
-              <div className="relative">
+            {/* Right-side vertical controls anchored top/middle/bottom */}
+            <div className="relative w-10">
+              {/* Attach (top) */}
+              <div className="absolute top-0 left-0 right-0 flex items-start justify-center">
                 <button
-                  id="chat-input-info-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-icon"
+                  aria-label="Attach a document"
                   type="button"
-                  onClick={() => setInfoOpen((v) => !v)}
-                  className="w-6 h-6 rounded-full border border-[var(--border-subtle)] text-[10px] leading-6 text-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]"
-                  aria-haspopup="dialog"
-                  aria-expanded={infoOpen}
-                  aria-label="Show chat input tips"
+                  disabled={isThinking}
                 >
-                  i
+                  <IconAttach className="w-5 h-5" />
                 </button>
+                <input
+                  type="file"
+                  accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleFileUpload}
+                />
+              </div>
 
-                {infoOpen && (
-                  <div
-                    ref={infoPopoverRef}
-                    role="dialog"
-                    className="absolute bottom-full right-full mb-2 mr-2 z-10 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
+              {/* Send (middle) */}
+              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                <button
+                  onClick={handleSend}
+                  className="btn-icon"
+                  disabled={!canSend || isThinking}
+                  aria-label="Send message"
+                >
+                  <IconSend className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Info (bottom) */}
+              <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center">
+                <div className="relative">
+                  <button
+                    id="chat-input-info-btn"
+                    type="button"
+                    onClick={() => setInfoOpen((v) => !v)}
+                    className={[
+                      'inline-flex items-center justify-center w-6 h-6 rounded-full',
+                      'border border-pink-500 text-pink-600 bg-transparent',
+                      'hover:bg-pink-50 dark:hover:bg-pink-900/20',
+                      'focus:outline-none focus:ring-2 focus:ring-pink-500/50',
+                      'no-drag',
+                    ].join(' ')}
+                    aria-haspopup="dialog"
+                    aria-expanded={infoOpen}
+                    aria-label="Show chat input tips"
+                    title="Chat input tips"
                   >
-                    <div className="font-medium mb-1 text-[var(--text-secondary)]">Shortcuts & helpers</div>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Use @ for file references</li>
-                      <li>Use # for stories & features</li>
-                      <li>{modifierSymbol} + Enter to send</li>
-                    </ul>
-                  </div>
-                )}
+                    <span className="text-[11px] font-semibold">i</span>
+                  </button>
+
+                  {infoOpen && (
+                    <div
+                      ref={infoPopoverRef}
+                      role="dialog"
+                      className="absolute bottom-full right-full mb-2 mr-2 z-10 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
+                    >
+                      <div className="font-medium mb-1 text-[var(--text-secondary)]">Shortcuts & helpers</div>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Use @ for file references</li>
+                        <li>Use # for stories & features</li>
+                        <li>{modifierSymbol} + Enter to send</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

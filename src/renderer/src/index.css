@@ -17,6 +17,7 @@
 @import './styles/components/file-display.css';
 @import './styles/components/file-mentions.css';
 @import './styles/components/chat.css';
+@import './styles/components/standard-picker.css';
 
 /* Layout */
 @import './styles/layout/nav.css';

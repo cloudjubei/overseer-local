@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useAgents } from '../contexts/AgentsContext'
 import ChatConversation from '../components/agents/ChatConversation'
 import AgentRunRow from '../components/agents/AgentRunRow'
@@ -210,7 +210,7 @@ const CurrentProjectView = () => {
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Story</th>
-                    <th className="text-left px-3 py-2">Status</th>
+                    <th className="text-left px-3 py-2">Status</h2>
                     <th className="text-left px-3 py-2">Model</th>
                     <th className="text-left px-3 py-2">Features</th>
                     <th className="text-left px-3 py-2">Cost</th>
@@ -1031,7 +1031,7 @@ export default function AgentsView() {
   const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
 
   // Collapse/restore sidebar when chat toggles (current view only)
-  const prevSidebarCollapsedRef = useState<boolean | null>(null)[0] as React.MutableRefObject<boolean | null>
+  const prevSidebarCollapsedRef = useRef<boolean | null>(null)
 
   useEffect(() => {
     if (!isAppSettingsLoaded) return
