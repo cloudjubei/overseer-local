@@ -249,7 +249,7 @@
     },
     {
       "id": "4fdbae23-ff2f-4616-a7cf-61d831dc8377",
-      "status": "-",
+      "status": "+",
       "title": "ChatInput bottom area",
       "description": "In @src/renderer/components/Chat/ChatInput.tsx no need to mention Shift+Enter as normal Enter creates a newline. There should be a little round info button (i) below the send button, that when clicked will show a tooltip of all such shortcuts and helpers that are available in the chat input (which there will be more in the future). The bottom area should hide after over 3 lines have been typed in, making more space for the text. It should reappear if the text is back to 3 lines or less.\nThe info that is displayed in the area should be always displaying 1 hint per line, where the area can have at most 4 such infos (top left, top right, bottom left, bottom right). Or if there's just one info shown on one side then it would show it centered.\nFor now we want to show:\n\"Use @ for file references\" and \"Use # for stories & features\" on the left and on the right just \"CMD/Ctrl + Enter to send\" where CMD/CTRL is replaced with the appropriate icon for the system.\n\nThe buttons: |ATTACH FILE| SEND| INFO| Should be in a vertical section to the right of the chat input box - they should not be a part of the bottom area.",
       "context": [
@@ -257,8 +257,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:34:26.711Z",
-      "updatedAt": "2025-09-29T22:53:25.851Z",
-      "rejection": "The ATTACH FILE button should be anchored to the top, the SEND to the middle and INFO to the bottom - right now they are all going up once the text area starts growing.\nWhen the bottom info area hides - there's still a little bit of it left to see - it should completely disappear. And it should do so in a fadeout animation. When appearing it should fade in.\nThe INFO button has a different style than the one in the sidebar at the top left - they should be the same style, but the one in the bottom bar should be pink."
+      "updatedAt": "2025-09-29T23:06:51.556Z",
+      "rejection": "The ATTACH FILE button should be anchored to the top, the SEND to the middle and INFO to the bottom - right now they are all going up once the text area starts growing.\nWhen the bottom info area hides - there's still a little bit of it left to see - it should completely disappear. And it should do so in a fadeout animation. When appearing it should fade in.\nThe INFO button has a different style than the one in the sidebar at the top left - they should be the same style, but the one in the bottom bar should be pink.",
+      "completedAt": "2025-09-29T23:06:51.556Z"
     },
     {
       "id": "35267358-0316-4f6e-a5d0-aafaec8b04c0",
