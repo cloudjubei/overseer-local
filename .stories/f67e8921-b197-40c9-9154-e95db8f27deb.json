@@ -1972,7 +1972,7 @@
     },
     {
       "id": "d15eda55-d79c-4dff-8228-8a7e745a1fac",
-      "status": "-",
+      "status": "+",
       "title": "DocumentIngestionManager should check for text files",
       "description": "When calling `ingestProject` @src/logic/document_ingestion/DocumentIngestionManager.ts should make sure that only text files are passed onto the database manager as only those are processed.",
       "context": [
@@ -1980,7 +1980,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T13:53:17.464Z",
-      "updatedAt": "2025-09-29T13:53:17.464Z"
+      "updatedAt": "2025-09-29T14:04:36.354Z",
+      "completedAt": "2025-09-29T14:04:36.354Z"
     },
     {
       "id": "cc444241-f834-463f-bf98-91c98dd1b706",
