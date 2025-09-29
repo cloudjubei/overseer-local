@@ -1,8 +1,9 @@
 import React from 'react'
 import Tooltip from './Tooltip'
 import { goToFile } from '../../navigation/FilesNavigation'
-import { useFiles, inferFileType } from '../../contexts/FilesContext'
+import { useFiles } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
+import { inferFileType } from 'thefactory-tools/utils'
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown'
 
@@ -341,7 +342,8 @@ const textLikeTypes = new Set([
 ])
 
 function isTextLike(file: FileMeta): boolean {
-  const t = (file.type || inferFileType(file.absolutePath || file.name)).toString().toLowerCase()
+  const t = (file.type || inferFileType(file.absolutePath || file.name))?.toString().toLowerCase()
+  if (!t) return false
   return textLikeTypes.has(t)
 }
 
@@ -386,7 +388,8 @@ function useFilePreviewContent(file: FileMeta) {
 function FilePreviewCard({ file }: { file: FileMeta }) {
   const sizeLabel = formatBytes(file.size ?? null)
   const dateLabel = formatDate(file.mtime ?? null)
-  const typeLabel = (file.type || inferFileType(file.absolutePath || file.name)).toString()
+  const typeLabel =
+    (file.type || inferFileType(file.absolutePath || file.name))?.toString() ?? 'unknown'
   const relPath = file.relativePath
   const { loading, error, text } = useFilePreviewContent(file)
 
@@ -519,11 +522,19 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({
           </div>
 
           <div className="fd-content" style={{ minWidth: 0, flex: '1 1 auto' }}>
-            <div className="fd-row fd-row--top" style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+            <div
+              className="fd-row fd-row--top"
+              style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}
+            >
               <div
                 className="fd-name"
                 title={file.absolutePath || file.name}
-                style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                style={{
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
               >
                 {file.name}
               </div>

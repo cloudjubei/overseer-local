@@ -1,5 +1,6 @@
 import FileDisplay from '../ui/FileDisplay'
-import { useFiles, inferFileType } from '../../contexts/FilesContext'
+import { useFiles } from '../../contexts/FilesContext'
+import { inferFileType } from 'thefactory-tools/utils'
 
 export interface MenuPosition {
   left: number

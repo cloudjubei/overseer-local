@@ -5,10 +5,11 @@ import FileDisplay from '../ui/FileDisplay'
 import RichText from '../ui/RichText'
 import TypewriterText from '../ui/TypewriterText'
 import ToolCallCard from './ToolCallCard'
-import { inferFileType, useFiles } from '../../contexts/FilesContext'
+import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
 import { ChatMessage } from 'thefactory-tools'
+import { inferFileType } from 'thefactory-tools/utils'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -235,7 +236,7 @@ export default function MessageList({
                   >
                     AI
                   </div>
-                  <div className="max-w-[72%] min-w-0 min-w-[80px] flex flex-col items-start">
+                  <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
                     <ErrorBubble error={msg.error} />
                   </div>
                 </div>
@@ -390,7 +391,7 @@ export default function MessageList({
               >
                 AI
               </div>
-              <div className="max-w-[72%] min-w-0 min-w-[80px] flex flex-col items-start">
+              <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
                 <div className="overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
                   <Spinner />
                 </div>

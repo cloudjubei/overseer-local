@@ -1,4 +1,5 @@
-import { useFiles, inferFileType } from '../../contexts/FilesContext'
+import { inferFileType } from 'thefactory-tools/utils'
+import { useFiles } from '../../contexts/FilesContext'
 import FileDisplay from '../ui/FileDisplay'
 
 export default function AttachmentList({

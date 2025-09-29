@@ -1,8 +1,8 @@
 import React from 'react'
 import FileDisplay from '../ui/FileDisplay'
 import WarningChip from './WarningChip'
-import { inferFileType } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
+import { inferFileType } from 'thefactory-tools/utils'
 
 export default function ContextFileChip({
   path,
