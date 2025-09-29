@@ -356,7 +356,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               <span className="id-chip">{storyDisplayIndex}</span>
               <StatusControl
                 status={story.status}
-                className="ml-2"
                 onChange={(next) => handleStoryStatusChange(story.id, next)}
               />
             </div>
@@ -365,7 +364,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               <RichText text={story.title || `Story ${storyDisplayIndex}`} />
             </h1>
 
-            {/* Right-side controls: on mobile these wrap below the title */}
             <div className="flex items-center gap-3 order-3 basis-full justify-end sm:order-3 sm:basis-auto sm:ml-auto">
               <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
                 {storyRun ? (
@@ -400,7 +398,10 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
         {/* New Blockers section between header and search toolbar (only if any blockers) */}
         {showStoryBlockersSection && (
-          <section className="panel shrink-0" aria-label={`Blockers for Story ${storyDisplayIndex}`}>
+          <section
+            className="panel shrink-0"
+            aria-label={`Blockers for Story ${storyDisplayIndex}`}
+          >
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="chips-list">
                 <span className="chips-sub__label">Blockers</span>

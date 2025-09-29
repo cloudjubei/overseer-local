@@ -78,7 +78,7 @@ export default function StoriesListView() {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
   const ulRef = useRef<HTMLUListElement>(null)
-  const { openModal, navigateStoryDetails, navigateAgentRun, navigateView } = useNavigator()
+  const { openModal, navigateStoryDetails, navigateAgentRun } = useNavigator()
   const [openFilter, setOpenFilter] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
@@ -330,18 +330,7 @@ export default function StoriesListView() {
         aria-labelledby="stories-view-heading"
       >
         <div className="stories-menubar shrink-0">
-          <div className="left">
-            <button
-              type="button"
-              className="btn-secondary flex items-center gap-2"
-              onClick={() => navigateView('Home')}
-              aria-label="Go to Home"
-              title="Home"
-            >
-              <IconHome className="h-[16px] w-[16px]" />
-              <span className="hidden sm:inline">Home</span>
-            </button>
-          </div>
+          <div className="left"></div>
           <div className="center">
             <SegmentedControl
               ariaLabel="Toggle between list and board views"
