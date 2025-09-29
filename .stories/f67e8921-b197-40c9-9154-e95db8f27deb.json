@@ -1996,6 +1996,30 @@
       "blockers": [],
       "createdAt": "2025-09-29T13:55:24.590Z",
       "updatedAt": "2025-09-29T13:55:24.590Z"
+    },
+    {
+      "id": "ba50781e-aa29-4dfe-b159-825f9ed88f88",
+      "status": "-",
+      "title": "The AlertDialog when showing the destructiveConfirm doesn't display anything",
+      "description": "The button in AlertDialog (which is in @src/renderer/src/components/ui/Modal.tsx ) is not visible.",
+      "context": [
+        "src/renderer/src/components/ui/Modal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T14:08:52.851Z",
+      "updatedAt": "2025-09-29T14:08:52.851Z"
+    },
+    {
+      "id": "02c446d1-4969-4057-8fb6-2e957b2205aa",
+      "status": "-",
+      "title": "when an agent finishes two notifications show",
+      "description": "there must be a bug somewhere in @src/renderer/src/contexts/AgentsContext.tsx",
+      "context": [
+        "src/renderer/src/contexts/AgentsContext.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T14:09:50.870Z",
+      "updatedAt": "2025-09-29T14:09:50.870Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2128,7 +2152,9 @@
     "c7cf3d3f-b368-4c00-8e79-1072f213b2c0": 127,
     "9770df69-0ac3-4fcd-99ea-c3af72bfe37b": 128,
     "d15eda55-d79c-4dff-8228-8a7e745a1fac": 129,
-    "cc444241-f834-463f-bf98-91c98dd1b706": 130
+    "cc444241-f834-463f-bf98-91c98dd1b706": 130,
+    "ba50781e-aa29-4dfe-b159-825f9ed88f88": 131,
+    "02c446d1-4969-4057-8fb6-2e957b2205aa": 132
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-23T22:02:16.498Z"
