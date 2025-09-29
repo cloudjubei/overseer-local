@@ -1952,12 +1952,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T11:40:32.221Z",
-      "updatedAt": "2025-09-29T12:54:14.541Z",
-      "rejection": "Still isn't scrollable. The issue seems to lie in @src/renderer/src/components/stories/FeatureForm.tsx itself."
+      "updatedAt": "2025-09-29T14:32:26.666Z",
+      "rejection": "Still isn't scrollable - this is extremely frustrating, this is like the 3rd attempt."
     },
     {
       "id": "9770df69-0ac3-4fcd-99ea-c3af72bfe37b",
-      "status": "-",
+      "status": "+",
       "title": "When rating an agent run - make it an optimistic local update and show an animation",
       "description": "In @src/renderer/src/screens/AgentsView.tsx , when clicking one of the ratings on an @src/renderer/src/components/agents/AgentRunRow.tsx - this operation might take a while to complete, which means that right now it takes a while before the UI updates.\nWe need to make it be an optimistic update (so ui updates immediately) and show a nice popping animation of the icon with it rotating and emitting sparks. There are many references to a similar animation to how games do it - this should be similar.\nWhile animating - the rating buttons should be disabled.",
       "context": [
@@ -1966,11 +1966,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T13:30:00.678Z",
-      "updatedAt": "2025-09-29T13:30:00.678Z"
+      "updatedAt": "2025-09-29T14:02:14.369Z",
+      "completedAt": "2025-09-29T14:02:14.369Z"
     },
     {
       "id": "d15eda55-d79c-4dff-8228-8a7e745a1fac",
-      "status": "-",
+      "status": "+",
       "title": "DocumentIngestionManager should check for text files",
       "description": "When calling `ingestProject` @src/logic/document_ingestion/DocumentIngestionManager.ts should make sure that only text files are passed onto the database manager as only those are processed.",
       "context": [
@@ -1978,7 +1979,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T13:53:17.464Z",
-      "updatedAt": "2025-09-29T13:53:17.464Z"
+      "updatedAt": "2025-09-29T14:04:36.354Z",
+      "completedAt": "2025-09-29T14:04:36.354Z"
     },
     {
       "id": "cc444241-f834-463f-bf98-91c98dd1b706",

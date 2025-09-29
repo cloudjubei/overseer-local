@@ -1,6 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import { classifyDocumentType } from '../db/fileTyping'
+import { classifyDocumentType, isTextForIngestion } from '../db/fileTyping'
 import type DatabaseManager from '../db/DatabaseManager'
 import type ProjectsManager from '../projects/ProjectsManager'
 import type FilesManager from '../files/FilesManager'
@@ -71,9 +71,11 @@ export default class DocumentIngestionManager extends BaseManager {
     for (const f of files) {
       try {
         const relPath: string = f.relativePath!
-        const content = await this.filesManager.readFile(projectId, relPath)
         const stats = await this.filesManager.getFileStats(projectId, relPath)
-        if (content && stats) {
+        if (!stats || !isTextForIngestion(stats.absolutePath, stats.ext, stats.type)) continue
+
+        const content = await this.filesManager.readFile(projectId, relPath)
+        if (content) {
           documentsToUpsert.push(this.createDocumentInput(projectId, relPath, content, stats))
         }
       } catch (e) {
@@ -81,7 +83,9 @@ export default class DocumentIngestionManager extends BaseManager {
       }
     }
     try {
-      await this.databaseManager.upsertDocuments(documentsToUpsert)
+      if (documentsToUpsert.length > 0) {
+        await this.databaseManager.upsertDocuments(documentsToUpsert)
+      }
     } catch (e) {
       console.warn('[DocumentIngestion] file ingest failed in batch. Error: ', e)
     }
@@ -89,9 +93,11 @@ export default class DocumentIngestionManager extends BaseManager {
 
   private async handleFileAdded(projectId: string, relPath: string) {
     try {
-      const content = await this.filesManager.readFile(projectId, relPath)
       const stats = await this.filesManager.getFileStats(projectId, relPath)
-      if (content && stats) {
+      if (!stats || !isTextForIngestion(stats.absolutePath, stats.ext, stats.type)) return
+
+      const content = await this.filesManager.readFile(projectId, relPath)
+      if (content) {
         await this.__handleFileAdded(projectId, relPath, content, stats)
       }
     } catch (e) {

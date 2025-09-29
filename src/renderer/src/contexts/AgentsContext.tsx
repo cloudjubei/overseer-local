@@ -147,7 +147,23 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
-    await factoryAgentRunService.rateRun(runId, rating)
+    setRunsHistory((prev) =>
+      [...prev].map((r) =>
+        r.id === runId
+          ? {
+              ...r,
+              rating: rating
+                ? { score: rating.score, createdAt: new Date().toISOString() }
+                : undefined,
+            }
+          : r,
+      ),
+    )
+    try {
+      await factoryAgentRunService.rateRun(runId, rating)
+    } catch (err) {
+      console.warn('[AgentsContext] rateRun failed', (err as any)?.message || err)
+    }
   }, [])
 
   const fireCompletionNotification = async (run: AgentRunHistory) => {

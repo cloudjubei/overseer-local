@@ -53,3 +53,114 @@
     background-position: -200% 0;
   }
 }
+
+/* Rating pop + sparkles animation (thumbs up/down) */
+.rating-effect {
+  position: relative;
+}
+.rating-pop {
+  animation: rating-pop-keyframes 700ms cubic-bezier(0.12, 0.8, 0.24, 1);
+  transform-origin: center;
+}
+.rating-pop--up {
+  --rating-rotate: -18deg;
+}
+.rating-pop--down {
+  --rating-rotate: 18deg;
+}
+@keyframes rating-pop-keyframes {
+  0% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+  }
+  35% {
+    transform: scale(1.25) rotate(var(--rating-rotate, 0deg));
+    filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--accent-primary) 25%, transparent));
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+  }
+}
+
+.rating-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.rating-sparkles::before,
+.rating-sparkles::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+  transform: translate(-50%, -50%);
+}
+/* create additional spark particles using multiple box-shadows */
+.rating-sparkles::before {
+  box-shadow:
+    /* angle 0..315 */
+    0 -12px 0 0 currentColor,
+    10px -6px 0 0 currentColor,
+    12px 0 0 0 currentColor,
+    10px 6px 0 0 currentColor,
+    0 12px 0 0 currentColor,
+    -10px 6px 0 0 currentColor,
+    -12px 0 0 0 currentColor,
+    -10px -6px 0 0 currentColor;
+  animation: spark-out 700ms ease-out forwards;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 40%, transparent));
+}
+.rating-sparkles::after {
+  width: 3px;
+  height: 3px;
+  box-shadow:
+    0 -18px 0 0 currentColor,
+    14px -10px 0 0 currentColor,
+    18px 0 0 0 currentColor,
+    14px 10px 0 0 currentColor,
+    0 18px 0 0 currentColor,
+    -14px 10px 0 0 currentColor,
+    -18px 0 0 0 currentColor,
+    -14px -10px 0 0 currentColor;
+  animation: spark-fade 700ms ease-out forwards;
+}
+
+/* Color context inherited from button: we keep up/down matching */
+.rating-sparkles--up { color: var(--success-9, #059669); }
+.rating-sparkles--down { color: var(--danger-9, #dc2626); }
+
+@keyframes spark-out {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+  }
+}
+@keyframes spark-fade {
+  0% { opacity: 0.9; }
+  60% { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rating-pop {
+    animation-duration: 300ms;
+  }
+  .rating-sparkles::before,
+  .rating-sparkles::after {
+    animation-duration: 300ms;
+  }
+}

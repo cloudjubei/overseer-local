@@ -168,6 +168,7 @@ const textExts = new Set([
   'env',
 ])
 
+//TODO: these should be part of thefactory-tools and the file tools
 export function isLikelyText(meta: FileMeta): boolean {
   if (meta.ext && textExts.has(meta.ext)) return true
   if (meta.type) {

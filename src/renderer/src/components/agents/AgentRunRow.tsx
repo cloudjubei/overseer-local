@@ -89,6 +89,23 @@ export default function AgentRunRow({
 }: AgentRunRowProps) {
   const { total, completed } = useConversationCounts(run)
   const { duration, thinking } = useDurationTimers(run)
+
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [animKind, setAnimKind] = useState<'up' | 'down' | null>(null)
+
+  const handleRate = (rating: AgentRunRatingPatch | undefined) => {
+    if (onRate) {
+      setIsAnimating(true)
+      setAnimKind((rating ?? run.rating)?.score === 1 ? 'up' : 'down')
+
+      window.setTimeout(() => {
+        setIsAnimating(false)
+        setAnimKind(null)
+      }, 700)
+      onRate?.(run.id, rating)
+    }
+  }
+
   const prompt = useMemo(
     () =>
       run.conversations
@@ -170,38 +187,70 @@ export default function AgentRunRow({
           {!run.rating ? (
             <div className="flex flex-col items-center gap-1">
               <button
-                className="hover:text-emerald-600 group"
+                className={`hover:text-emerald-600 group relative ${isAnimating ? 'opacity-60 pointer-events-none' : ''}`}
                 title="Thumbs up"
-                onClick={() => onRate?.(run.id, { score: 1 })}
+                onClick={() => handleRate({ score: 1 })}
+                disabled={isAnimating}
               >
-                <IconThumbUp className="w-5 h-5 transition-colors" />
+                <span
+                  className={`inline-flex items-center justify-center rating-effect ${isAnimating && animKind === 'up' ? 'rating-pop rating-pop--up' : ''}`}
+                >
+                  <IconThumbUp className="w-5 h-5 transition-colors" />
+                  {isAnimating && animKind === 'up' ? (
+                    <span aria-hidden className="rating-sparkles rating-sparkles--up" />
+                  ) : null}
+                </span>
               </button>
               <button
-                className="hover:text-rose-600 group"
+                className={`hover:text-rose-600 group relative ${isAnimating ? 'opacity-60 pointer-events-none' : ''}`}
                 title="Thumbs down"
-                onClick={() => onRate?.(run.id, { score: 0 })}
+                onClick={() => handleRate({ score: 0 })}
+                disabled={isAnimating}
               >
-                <IconThumbDown className="w-5 h-5 mr-1.5 transition-colors" />
+                <span
+                  className={`inline-flex items-center justify-center rating-effect ${isAnimating && animKind === 'down' ? 'rating-pop rating-pop--down' : ''}`}
+                >
+                  <IconThumbDown className="w-5 h-5 mr-1.5 transition-colors" />
+                  {isAnimating && animKind === 'down' ? (
+                    <span aria-hidden className="rating-sparkles rating-sparkles--down" />
+                  ) : null}
+                </span>
               </button>
             </div>
           ) : run.rating.score === 1 ? (
             <div className="flex items-center justify-center">
               <button
-                className=" text-emerald-600 hover:opacity-80"
+                className={`text-emerald-600 hover:opacity-80 relative ${isAnimating ? 'opacity-60 pointer-events-none' : ''}`}
                 title="Remove rating"
-                onClick={() => onRate?.(run.id, undefined)}
+                onClick={() => handleRate(undefined)}
+                disabled={isAnimating}
               >
-                <IconThumbUp className="w-5 h-5" filled />
+                <span
+                  className={`inline-flex items-center justify-center rating-effect ${isAnimating && animKind === 'up' ? 'rating-pop rating-pop--up' : ''}`}
+                >
+                  <IconThumbUp className="w-5 h-5" filled />
+                  {isAnimating && animKind === 'up' ? (
+                    <span aria-hidden className="rating-sparkles rating-sparkles--up" />
+                  ) : null}
+                </span>
               </button>
             </div>
           ) : (
             <div className="flex items-center justify-center">
               <button
-                className=" text-rose-600 hover:opacity-80"
+                className={`text-rose-600 hover:opacity-80 relative ${isAnimating ? 'opacity-60 pointer-events-none' : ''}`}
                 title="Remove rating"
-                onClick={() => onRate?.(run.id, undefined)}
+                onClick={() => handleRate(undefined)}
+                disabled={isAnimating}
               >
-                <IconThumbDown className="w-5 h-5 mr-1.5" filled />
+                <span
+                  className={`inline-flex items-center justify-center rating-effect ${isAnimating && animKind === 'down' ? 'rating-pop rating-pop--down' : ''}`}
+                >
+                  <IconThumbDown className="w-5 h-5 mr-1.5" filled />
+                  {isAnimating && animKind === 'down' ? (
+                    <span aria-hidden className="rating-sparkles rating-sparkles--down" />
+                  ) : null}
+                </span>
               </button>
             </div>
           )}
