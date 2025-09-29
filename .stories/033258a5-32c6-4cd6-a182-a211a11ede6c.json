@@ -234,7 +234,7 @@
     },
     {
       "id": "c3804c5f-ec19-410e-b866-3d0229cb354a",
-      "status": "-",
+      "status": "?",
       "title": "Improve the top buttons in ChatSidebar",
       "description": "When the chat is showing in the sidebar, we don't need to display the title but instead we should show a circular \"i\" icon, that when clicked will show a tooltip that will show the current context (project, story, feature etc). This should be a reusable component.\nThe Chat Model selection is currently saving the setting as the overall app model - these two should be separate. The chat model selection should use the same component as elsewhere i.e. like in @src/renderer/src/screens/stories/StoriesListView.tsx the @src/renderer/src/components/agents/ModelChip.tsx is used. It should just have a blue border to separate it from the agent config.\nThe settings button should be an icon button with the `IconSettings` image.",
       "context": [
@@ -243,7 +243,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:29:28.459Z",
-      "updatedAt": "2025-09-29T18:30:47.544Z"
+      "updatedAt": "2025-09-29T19:15:51.781Z",
+      "rejection": "Blocked: Agent loop failed: {\"message\":\"Received no toolCalls. Original message: {\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"{\\\\\\\"thoughts\\\\\\\":\\\\\\\"The tool did not yet return results; I will wait for tool output to proceed with implementing changes.\\\\\\\",\\\\\\\"tool_calls\\\\\\\":[]}\\\"}\",\"stacktrace\":\"Error: Received no toolCalls. Original message: {\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"{\\\\\\\"thoughts\\\\\\\":\\\\\\\"The tool did not yet return results; I will wait for tool output to proceed with implementing changes.\\\\\\\",\\\\\\\"tool_calls\\\\\\\":[]}\\\"}\\n    at runConversation (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:254:23)\\n    at async runAgentOnFeature (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:351:5)\\n    at async runOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:413:9)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:448:9)\\n    at async file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:71:17\"}"
     },
     {
       "id": "4fdbae23-ff2f-4616-a7cf-61d831dc8377",
