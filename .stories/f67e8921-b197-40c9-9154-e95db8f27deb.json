@@ -1900,7 +1900,7 @@
     },
     {
       "id": "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34",
-      "status": "-",
+      "status": "+",
       "title": "Mobile/Small UI improvements",
       "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx some things need to be shifted.\nThe blockers incoming/outgoing at the top should be in a section between the title section and the search section (so an entirely new section). This should only show if there's a blocker either outgoing or incoming.\nThe add feature button (with the plus) should be in the top right of the `Features` section - horizontally leveled with the title of that section. The edit button (for the whole story) should be in the top right of the `Overview` section - horizontally leveled with the tile of that section.\nNow the search secton will have 3 elements left - the search bar, that status filter and the ordering selection. The latter 2 should be pushed to a 2nd row if the screen becomes small enough so that in the mobile version it shows the search bar at the top and status filter + ordering selection below it.",
       "context": [
@@ -1908,7 +1908,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-29T10:09:33.896Z",
-      "updatedAt": "2025-09-29T10:09:33.896Z"
+      "updatedAt": "2025-09-29T11:33:21.407Z",
+      "completedAt": "2025-09-29T11:33:21.407Z"
     },
     {
       "id": "898404db-c466-4a60-8bd3-52e33785c563",

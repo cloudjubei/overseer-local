@@ -87,47 +87,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [storyId, storiesById])
 
-  //TODO: logic needs to be cleand up
-  // useEffect(() => {
-  //   let disposed = false
-  //
-  //   async function check() {
-  //     if (!story) {
-  //       setHasUnmerged(false)
-  //       return
-  //     }
-  //     setCheckingMerge(true)
-  //     try {
-  //       const status = await gitMonitorService.getStatus()
-  //       const base = status.currentBranch || null
-  //       setGitBaseBranch(base)
-  //       const branchName = `features/${story.id}`
-  //       if (!base) {
-  //         setHasUnmerged(false)
-  //         return
-  //       }
-  //       const res = await gitMonitorService.hasUnmerged(branchName, base)
-  //       if (!disposed) {
-  //         setHasUnmerged(!!res.ok && !!res.hasUnmerged)
-  //       }
-  //     } catch (e) {
-  //       if (!disposed) setHasUnmerged(false)
-  //     } finally {
-  //       if (!disposed) setCheckingMerge(false)
-  //     }
-  //   }
-  //
-  //   check()
-  //   const unsubscribe = gitMonitorService.subscribe((_s) => {
-  //     // Re-check on git status updates
-  //     check()
-  //   })
-  //   return () => {
-  //     disposed = true
-  //     unsubscribe?.()
-  //   }
-  // }, [story])
-
   const sortedFeaturesBase = useMemo(() => {
     if (!story) {
       return []
@@ -300,28 +259,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [highlightStoryFlag])
 
-  // const onClickMerge = async () => {
-  //   if (!story) return
-  //   setMergeError(null)
-  //   setMerging(true)
-  //   try {
-  //     const status = await gitMonitorService.getStatus()
-  //     const base = status.currentBranch
-  //     const branchName = `features/${story.id}`
-  //     if (!base) throw new Error('No base branch detected')
-  //     const res = await gitMonitorService.mergeBranch(branchName, base)
-  //     if (!res.ok) throw new Error(res.error || 'Merge failed')
-  //     // Refresh and update button state
-  //     await gitMonitorService.triggerPoll()
-  //     const check = await gitMonitorService.hasUnmerged(branchName, base)
-  //     setHasUnmerged(!!check.ok && !!check.hasUnmerged)
-  //   } catch (e: any) {
-  //     setMergeError(e?.message || String(e))
-  //   } finally {
-  //     setMerging(false)
-  //   }
-  // }
-
   if (!story) {
     return (
       <div className="story-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
@@ -393,6 +330,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         ? 'queued'
         : statusKey(statusFilter as Status)
 
+  const showStoryBlockersSection = storyBlockers.length > 0 || storyBlockersOutbound.length > 0
+
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
       <div
@@ -434,33 +373,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               <RichText text={story.title || `Story ${storyDisplayIndex}`} />
             </h1>
 
-            <div
-              className="flex flex-col gap-2 ml-2"
-              aria-label={`Blockers for Story ${storyDisplayIndex}`}
-            >
-              <div className="chips-list">
-                <span className="chips-sub__label">Blockers</span>
-                {storyBlockers.length === 0 ? (
-                  <span className="chips-sub__label" title="No dependencies">
-                    None
-                  </span>
-                ) : (
-                  storyBlockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
-                )}
-              </div>
-              <div className="chips-list">
-                <span className="chips-sub__label">Blocks</span>
-                {storyBlockersOutbound.length === 0 ? (
-                  <span className="chips-sub__label" title="No dependents">
-                    None
-                  </span>
-                ) : (
-                  storyBlockersOutbound.map((d) => (
-                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                  ))
-                )}
-              </div>
-            </div>
             <div className="spacer" />
             <div className="flex items-center gap-3">
               <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
@@ -494,10 +406,40 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </div>
         </header>
 
-        {/* Top toolbars similar to StoriesListView: search/filter/sort and count/add */}
+        {/* New Blockers section between header and search toolbar (only if any blockers) */}
+        {showStoryBlockersSection && (
+          <section className="panel shrink-0" aria-label={`Blockers for Story ${storyDisplayIndex}`}>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="chips-list">
+                <span className="chips-sub__label">Blockers</span>
+                {storyBlockers.length === 0 ? (
+                  <span className="chips-sub__label" title="No dependencies">
+                    None
+                  </span>
+                ) : (
+                  storyBlockers.map((d) => <DependencyBullet key={d.id} dependency={d.id} />)
+                )}
+              </div>
+              <div className="chips-list">
+                <span className="chips-sub__label">Blocks</span>
+                {storyBlockersOutbound.length === 0 ? (
+                  <span className="chips-sub__label" title="No dependents">
+                    None
+                  </span>
+                ) : (
+                  storyBlockersOutbound.map((d) => (
+                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                  ))
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Top toolbar: search/filter/sort only; status+sort wrap under search on small screens */}
         <div className="stories-toolbar shrink-0">
-          <div className="left">
-            <div className="control search-wrapper">
+          <div className="left flex flex-wrap items-center gap-2 w-full">
+            <div className="control search-wrapper min-w-0 flex-1 basis-full sm:basis-auto">
               <input
                 type="search"
                 placeholder="Search by id, title, or description"
@@ -506,7 +448,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <div className="control">
+            <div className="control basis-1/2 sm:basis-auto">
               <div
                 ref={statusFilterRef}
                 className="status-filter-btn ui-select gap-2"
@@ -537,7 +479,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 />
               )}
             </div>
-            <div className="control">
+            <div className="control basis-1/2 sm:basis-auto">
               <select
                 className="ui-select"
                 value={sortBy}
@@ -551,24 +493,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               </select>
             </div>
           </div>
-          <div className="right">
-            <button
-              type="button"
-              className="btn-secondary btn-icon"
-              aria-label="Edit story"
-              onClick={handleEditStory}
-            >
-              <IconEdit className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              className="btn btn-icon"
-              aria-label="Add feature"
-              onClick={handleAddFeature}
-            >
-              <IconPlus className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Keep right container for layout consistency, but no controls now */}
+          <div className="right" />
         </div>
 
         <main className="details-content flex flex-col flex-1 min-h-0 overflow-hidden">
@@ -586,6 +512,15 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 />
               </button>
               <h2 className="section-title">Overview</h2>
+              <div className="spacer" />
+              <button
+                type="button"
+                className="btn-secondary btn-icon"
+                aria-label="Edit story"
+                onClick={handleEditStory}
+              >
+                <IconEdit className="w-4 h-4" />
+              </button>
             </div>
             <div
               id="overview-content"
@@ -600,6 +535,15 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           <section className="panel flex flex-col flex-1 min-h-0">
             <div className="section-header shrink-0">
               <h2 className="section-title">Features</h2>
+              <div className="spacer" />
+              <button
+                type="button"
+                className="btn btn-icon"
+                aria-label="Add feature"
+                onClick={handleAddFeature}
+              >
+                <IconPlus className="w-4 h-4" />
+              </button>
             </div>
 
             {featuresFiltered.length === 0 ? (
