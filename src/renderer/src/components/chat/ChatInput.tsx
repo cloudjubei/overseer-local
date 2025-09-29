@@ -13,11 +13,39 @@ interface ChatInputProps {
 export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInputProps) {
   const [input, setInput] = useState<string>('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
+  const [visibleLines, setVisibleLines] = useState<number>(1)
+  const [infoOpen, setInfoOpen] = useState<boolean>(false)
+
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const chatInputRef = useRef<HTMLDivElement>(null)
+  const infoPopoverRef = useRef<HTMLDivElement>(null)
 
   const { uploadFile } = useFiles()
+
+  const isMac = useMemo(() => {
+    const nav = typeof navigator !== 'undefined' ? navigator : ({} as any)
+    const platform = (nav.platform || '').toLowerCase()
+    const ua = (nav.userAgent || '').toLowerCase()
+    return platform.includes('mac') || ua.includes('mac')
+  }, [])
+
+  const modifierSymbol = isMac ? '⌘' : 'Ctrl'
+
+  const computeVisibleLines = () => {
+    const el = textareaRef.current
+    if (!el) return
+    // Temporarily ensure height reflects full content to get scrollHeight
+    const prevHeight = el.style.height
+    el.style.height = 'auto'
+    const computed = window.getComputedStyle(el)
+    const lineHeightPx = parseFloat(computed.lineHeight || '0')
+    const lineHeight = Number.isFinite(lineHeightPx) && lineHeightPx > 0 ? lineHeightPx : 20
+    const lines = Math.max(1, Math.round(el.scrollHeight / lineHeight))
+    // Restore height will be set by autoSizeTextarea
+    el.style.height = prevHeight
+    if (lines !== visibleLines) setVisibleLines(lines)
+  }
 
   const autoSizeTextarea = () => {
     const el = textareaRef.current
@@ -29,6 +57,8 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     el.style.height = 'auto'
     const next = Math.min(el.scrollHeight, maxHeight)
     el.style.height = next + 'px'
+
+    computeVisibleLines()
   }
 
   useEffect(() => {
@@ -39,11 +69,25 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     }
   }, [input])
 
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!infoOpen) return
+      const pop = infoPopoverRef.current
+      const btn = document.getElementById('chat-input-info-btn')
+      if (pop && (pop === e.target || pop.contains(e.target as Node))) return
+      if (btn && (btn === e.target || btn.contains(e.target as Node))) return
+      setInfoOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [infoOpen])
+
   const handleSend = () => {
     if (!input.trim() && pendingAttachments.length === 0) return
     onSend(input, pendingAttachments)
     setInput('')
     setPendingAttachments([])
+    setInfoOpen(false)
     requestAnimationFrame(() => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto'
@@ -90,6 +134,17 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     return { maxHeight: parentHeight * 0.3 }
   }, [chatInputRef.current])
 
+  const showHintsArea = visibleLines <= 3
+
+  const leftHints = useMemo(() => [
+    'Use @ for file references',
+    'Use # for stories & features',
+  ], [])
+
+  const rightHints = useMemo(() => [
+    `${modifierSymbol} + Enter to send`,
+  ], [modifierSymbol])
+
   return (
     <div
       ref={chatInputRef}
@@ -101,7 +156,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
             <div className="relative p-1">
               <FileMentionsTextarea
                 value={input}
-                onChange={setInput}
+                onChange={(val) => {
+                  setInput(val)
+                }}
                 placeholder={placeholderText}
                 rows={1}
                 disabled={isThinking}
@@ -119,14 +176,10 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
                 disabled={isThinking}
               />
-              <div className="flex items-center justify-between gap-2 text-[12px] text-[var(--text-muted)]">
+
+              <div className="flex items-center justify-between gap-2 text-[12px] text-[var(--text-muted)] mt-1">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="hidden sm:inline truncate">
-                    Tip: Use @ for files • Use # for stories and features
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 flex-1 justify-center text-center">
-                  <span className="truncate">Cmd/Ctrl+Enter to send • Shift+Enter for newline</span>
+                  {/* Left-side actions (currently none besides attachment button) */}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
@@ -156,6 +209,68 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   </button>
                 </div>
               </div>
+
+              {showHintsArea && (
+                <div className="mt-2 relative">
+                  <div className="grid grid-cols-2 gap-4 text-[12px] text-[var(--text-muted)]">
+                    {/* Left column hints */}
+                    <div className={`flex flex-col ${leftHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
+                      {leftHints.length > 1 ? (
+                        <>
+                          <div className="truncate">{leftHints[0]}</div>
+                          <div className="truncate">{leftHints[1]}</div>
+                        </>
+                      ) : (
+                        <div className="truncate">{leftHints[0]}</div>
+                      )}
+                    </div>
+
+                    {/* Right column hints */}
+                    <div className={`flex flex-col items-end ${rightHints.length > 1 ? 'justify-between' : 'justify-center'} min-h-[40px]`}>
+                      {rightHints.length > 1 ? (
+                        <>
+                          <div className="truncate">{rightHints[0]}</div>
+                          <div className="truncate">{rightHints[1]}</div>
+                        </>
+                      ) : (
+                        <div className="truncate">{rightHints[0]}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Info button below the send button (bottom-right) */}
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      id="chat-input-info-btn"
+                      type="button"
+                      onClick={() => setInfoOpen((v) => !v)}
+                      className="w-6 h-6 rounded-full border border-[var(--border-subtle)] text-[10px] leading-6 text-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]"
+                      aria-haspopup="dialog"
+                      aria-expanded={infoOpen}
+                      aria-label="Show chat input tips"
+                    >
+                      i
+                    </button>
+                  </div>
+
+                  {infoOpen && (
+                    <div
+                      ref={infoPopoverRef}
+                      role="dialog"
+                      className="absolute right-0 z-10 mt-1 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
+                    >
+                      <div className="font-medium mb-1 text-[var(--text-secondary)]">Shortcuts & helpers</div>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Use @ for file references</li>
+                        <li>Use # for stories & features</li>
+                        <li>
+                          {modifierSymbol} + Enter to send
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
