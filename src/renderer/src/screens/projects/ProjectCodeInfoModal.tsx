@@ -18,7 +18,7 @@ import {
   KNOWN_FRAMEWORKS_BY_LANGUAGE,
   KNOWN_LANGUAGES,
   KNOWN_TEST_FRAMEWORKS_BY_LANGUAGE,
-} from '@renderer/services/projectsService'
+} from 'thefactory-tools/constants'
 
 interface ProjectCodeInfoModalProps {
   codeInfo?: Partial<ProjectCodeInfo>

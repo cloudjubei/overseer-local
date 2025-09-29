@@ -1,50 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type {
-  LLMConfig,
-  ChatContext,
-  Chat,
-  ChatMessage,
-  ChatContextProject,
-  ChatContextStory,
-  ChatContextFeature,
-  ChatContextAgentRun,
-  ChatContextProjectTopic,
-  ChatUpdate,
-} from 'thefactory-tools'
-// import { getChatContextPath } from 'thefactory-tools'
+import type { LLMConfig, ChatContext, Chat, ChatMessage, ChatUpdate } from 'thefactory-tools'
+import { getChatContextPath } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
 import { projectsService } from '../services/projectsService'
-
-//TODO: this two methods should be available to import
-export function getChatsProjectsFolder(projectId: string) {
-  // console.log('getChatContextFromFilename: ', newFuncToTest(projectId))
-  return '/projects/' + projectId
-}
-export function getChatContextPath(context: ChatContext): string {
-  switch (context.type) {
-    case 'PROJECT': {
-      const c = context as ChatContextProject
-      return `${getChatsProjectsFolder(c.projectId)}.json`
-    }
-    case 'STORY': {
-      const c = context as ChatContextStory
-      return `${getChatsProjectsFolder(c.projectId)}/stories/${c.storyId}.json`
-    }
-    case 'FEATURE': {
-      const c = context as ChatContextFeature
-      return `${getChatsProjectsFolder(c.projectId)}/stories/${c.storyId}/features/${c.featureId}.json`
-    }
-    case 'AGENT_RUN': {
-      const c = context as ChatContextAgentRun
-      return `${getChatsProjectsFolder(c.projectId)}/stories/${c.storyId}/agents/${c.agentRunId}.json`
-    }
-    case 'PROJECT_TOPIC': {
-      const c = context as ChatContextProjectTopic
-      return `${getChatsProjectsFolder(c.projectId)}/${c.projectTopic}.json`
-    }
-  }
-  return `general_${context.timestamp!}.json`
-}
 
 export type ChatState = {
   key: string
