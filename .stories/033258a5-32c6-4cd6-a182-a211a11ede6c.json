@@ -218,7 +218,7 @@
     },
     {
       "id": "f50d7e7c-034c-4455-8772-81afac6c660c",
-      "status": "-",
+      "status": "+",
       "title": "Improve the chat UI on popups",
       "description": "In @src/renderer/src/screens/stories/FeatureCreateView.tsx , @src/renderer/src/screens/stories/FeatureEditView.tsx , @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx - the chat button at the top opens the chat sidebar in the middle. That's not correct. The way it should be, it's as if the chat sidebar is a 2nd popup that slides out of the current popup to the maximum right the screen has available without changing the popup it slides from. Currently the input box doesn't show in all of these popups when chat is open - it has to be showing.",
       "context": [
@@ -229,8 +229,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:43.049Z",
-      "updatedAt": "2025-09-29T20:15:31.634Z",
-      "rejection": "The chat sidebar when showing should appear sliding from under the popup and to the right - its height should be the height of the popup.\nAlso, it now covers the popup - it shouldn't."
+      "updatedAt": "2025-09-29T20:38:51.743Z",
+      "rejection": "The chat sidebar when showing should appear sliding from under the popup and to the right - its height should be the height of the popup.\nAlso, it now covers the popup - it shouldn't.",
+      "completedAt": "2025-09-29T20:38:51.743Z"
     },
     {
       "id": "c3804c5f-ec19-410e-b866-3d0229cb354a",
