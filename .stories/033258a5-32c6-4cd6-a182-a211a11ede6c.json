@@ -511,6 +511,18 @@
       "blockers": [],
       "createdAt": "2025-09-30T14:19:23.142Z",
       "updatedAt": "2025-09-30T14:19:23.142Z"
+    },
+    {
+      "id": "9bb36711-da11-46c3-8de5-2ac2ce899f74",
+      "status": "-",
+      "title": "In ChatSidebar the typewriter effect should only trigger for an assistant message that just came in",
+      "description": "While the user has the @src/renderer/src/components/chat/ChatSidebar.tsx  open and the assistant message comes in - then trigger the typerwiter effect. Right now it triggers on the last assistant message no matter when the sidebar opens.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T14:26:24.197Z",
+      "updatedAt": "2025-09-30T14:26:24.197Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -547,9 +559,10 @@
     "db36287c-c9a7-44c9-94e9-76c6e57bd685": 31,
     "986bae36-acc0-4be4-93c0-05c9dd672b59": 32,
     "a8a2d902-820b-4d02-8783-43861075e090": 33,
-    "5ed64b40-dc70-453a-a52b-e427ae983ba3": 34,
-    "e5e46d3f-3ea6-41ec-bed3-8f49cbae352b": 35,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 36
+    "e5e46d3f-3ea6-41ec-bed3-8f49cbae352b": 34,
+    "5ed64b40-dc70-453a-a52b-e427ae983ba3": 35,
+    "9bb36711-da11-46c3-8de5-2ac2ce899f74": 36,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 37
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
