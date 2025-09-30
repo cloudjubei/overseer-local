@@ -290,7 +290,7 @@
     },
     {
       "id": "d5fb1e96-fbb4-44c4-be63-6f008cd29918",
-      "status": "+",
+      "status": "-",
       "title": "The chat sidebar on normal screens should be a mirror of the regular sidebar",
       "description": "What it means is that the @src/renderer/src/components/chat/ChatSidebar.tsx on screens like @src/renderer/src/screens/stories/StoryDetailsView.tsx, @src/renderer/src/screens/stories/StoriesListView.tsx , @src/renderer/src/screens/TestsView.tsx or @src/renderer/src/screens/AgentsView.tsx should be in a vertical panel when collapsed (just like the @src/renderer/src/navigation/SidebarView.tsx when it's collapsed) and expanded the same way as it is now.\nThe opening button when collapsed should have a left chevron icon - it should be placed analogously to how the opening for the Sidebar is.\nWhen opened, the chat button should transform into a close button - it should be the chevron pointing down.\nWhen the chat area is collapsed - there should be a chat button in the middle of it that will open the chat sidebar.",
       "context": [
@@ -303,12 +303,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:53:12.441Z",
-      "updatedAt": "2025-09-30T01:07:28.434Z",
-      "completedAt": "2025-09-30T01:07:28.434Z"
+      "updatedAt": "2025-09-30T01:18:04.066Z",
+      "rejection": "The sidebar doesn't show a at all on all the screens above.\n\nWhat's worse - the close chat sidebar button appears in popups, and there it slides to close correctly. We can actually have this functionality in popups but with 2 improvements:\n1) the chat bar needs to show next to the popup at all times (similar to how it's meant to show for regular screens on the right)\n2) when it's collapsed only the bar is shown - no weird gray background under where the chat sidebar will expand into."
     },
     {
       "id": "9621b87e-23b2-48cd-be7f-454543d6b212",
-      "status": "+",
+      "status": "-",
       "title": "ChatsManager should utilise 'thefactory-tools'",
       "description": "'thefactory-tools' now exposes saving chat settings and getting prompts - @src/logic/chat/ChatsManager.ts should use it and pass it via IPC using  @src/preload/ipcHandlersKeys.ts and @src/renderer/src/services/chatsService.ts , so that finally @src/renderer/src/contexts/ChatsContext.tsx can have the functionality which can be used inside @src/renderer/src/components/chat/ChatSidebar.tsx and the settings panel in there.\nAll the necessary files from 'thefactory-tools' can be found under the path `node_modules/thefactory-tools/src/chats`",
       "context": [
@@ -320,8 +320,20 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:55:34.058Z",
-      "updatedAt": "2025-09-30T01:09:43.273Z",
-      "completedAt": "2025-09-30T01:09:43.273Z"
+      "updatedAt": "2025-09-30T01:14:41.946Z",
+      "rejection": "This is not done at all."
+    },
+    {
+      "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",
+      "status": "-",
+      "title": "The Chat screen needs an overhaul",
+      "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats should be split into two sections - at the top will be the type selection (so a scrollable list with tiles representing the different Context Type combinations) and at the bottom the list of chats for that type. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:20:42.316Z",
+      "updatedAt": "2025-09-30T01:20:42.316Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -346,7 +358,8 @@
     "95c7a067-9e9b-4e54-b786-6d3997dfff30": 19,
     "d5fb1e96-fbb4-44c4-be63-6f008cd29918": 20,
     "9621b87e-23b2-48cd-be7f-454543d6b212": 21,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 22
+    "4115f6ec-a85b-4a5d-bf23-14df6314c7c7": 22,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 23
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"

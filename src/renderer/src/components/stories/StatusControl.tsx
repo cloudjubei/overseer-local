@@ -4,7 +4,7 @@ import type { Status } from 'thefactory-tools'
 
 export const STATUS_LABELS = {
   '+': 'Done',
-  '~': 'In Progress',
+  '~': 'Crunching',
   '-': 'Pending',
   '?': 'Blocked',
   '=': 'Deferred',
@@ -32,7 +32,7 @@ function mapStatusToSemantic(status: Status | string): { key: string; label: str
     case '+':
       return { key: 'done', label: 'Done' }
     case '~':
-      return { key: 'working', label: 'In Progress' }
+      return { key: 'working', label: 'Crunching' }
     case '-':
       return { key: 'queued', label: 'Pending' }
     case '?':

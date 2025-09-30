@@ -7,7 +7,7 @@ except ImportError:
 
 Status = Literal[
     "+", # Done
-    "~", # In Progress
+    "~", # Crunching
     "-", # Pending
     "?", # Blocked
     "=" # Deferred
