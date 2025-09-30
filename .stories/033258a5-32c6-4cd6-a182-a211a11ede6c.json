@@ -352,13 +352,14 @@
     },
     {
       "id": "dbe43cbc-d659-42b8-9bb8-c11a9251a50f",
-      "status": "-",
+      "status": "+",
       "title": "ChatPanel buttons",
       "description": "The buttons should be horizontally centered, the close button at the top and the chat button in the middle.\nTh background should stretch all the way to the bottom (right now it gets clipped some way below the chat button).",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-30T10:26:34.764Z",
-      "updatedAt": "2025-09-30T10:26:34.764Z"
+      "updatedAt": "2025-09-30T12:09:19.228Z",
+      "completedAt": "2025-09-30T12:09:19.228Z"
     },
     {
       "id": "1232c0ac-6074-4c02-88eb-f9266eac85ba",

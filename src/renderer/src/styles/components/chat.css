@@ -55,18 +55,22 @@
 
 .chat-collapsed-panel {
   display: grid;
-  grid-template-rows: 1fr auto 1fr;
-  align-items: center;
+  grid-template-rows: 1fr auto 1fr; /* ensures middle is centered with top/bottom flex space */
+  align-items: center; /* center items within their rows by default */
   padding: 10px;
   gap: 8px;
   background: var(--surface-base);
+  height: 100%; /* stretch background to the bottom */
 }
 .chat-collapsed-panel .top {
-  justify-self: start;
+  justify-self: center; /* horizontally centered */
+  align-self: start;    /* pinned to the top */
 }
 .chat-collapsed-panel .center {
-  justify-self: center;
+  justify-self: center; /* horizontally centered */
+  align-self: center;    /* centered vertically within the middle row */
 }
 .chat-collapsed-panel .bottom {
-  justify-self: end;
+  justify-self: center;
+  align-self: end;       /* ensures any bottom content sits at the bottom */
 }
