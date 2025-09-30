@@ -91,6 +91,27 @@ export default function MessageList({
     prevCountRef.current = messages.length
   }, [messages, chatId])
 
+  // Visibility tracking: only animate when visible (sidebar open and rendered)
+  const messageListRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState<boolean>(false)
+  const wasVisibleRef = useRef<boolean>(false)
+  useEffect(() => {
+    const el = messageListRef.current
+    if (!el) return
+
+    // If element is display:none initially, IO will fire when it becomes visible
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          setIsVisible(entry.isIntersecting)
+        }
+      },
+      { root: null, threshold: 0.05 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   // Animate assistant typing for the latest assistant message
   const [animateAssistantIdx, setAnimateAssistantIdx] = useState<number | null>(null)
   const prevLenForAnimRef = useRef<number>(messages.length)
@@ -100,11 +121,27 @@ export default function MessageList({
     animationChatChangedRef.current = true
   }, [chatId])
 
+  // When visibility toggles from hidden to visible, clear any pending animation and sync counters
+  useEffect(() => {
+    if (!wasVisibleRef.current && isVisible) {
+      // Just became visible: do not animate existing messages
+      setAnimateAssistantIdx(null)
+      prevLenForAnimRef.current = messages.length
+    }
+    wasVisibleRef.current = isVisible
+  }, [isVisible, messages.length])
+
   useEffect(() => {
     if (animationChatChangedRef.current) {
       animationChatChangedRef.current = false
       prevLenForAnimRef.current = messages.length
       setAnimateAssistantIdx(null)
+      return
+    }
+    // Only set animation when visible to user
+    if (!isVisible) {
+      // Keep the counter updated but do not set animation while hidden
+      prevLenForAnimRef.current = messages.length
       return
     }
     if (messages.length > prevLenForAnimRef.current) {
@@ -117,7 +154,7 @@ export default function MessageList({
       }
     }
     prevLenForAnimRef.current = messages.length
-  }, [messages])
+  }, [messages, isVisible])
 
   // User pop animation
   const prevLenForUserAnimRef = useRef<number>(messages.length)
@@ -143,7 +180,6 @@ export default function MessageList({
 
   // Scrolling behavior
   const isAtBottomRef = useRef<boolean>(true)
-  const messageListRef = useRef<HTMLDivElement>(null)
   const prevLenForScrollRef = useRef<number>(messages.length)
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const el = e.currentTarget
