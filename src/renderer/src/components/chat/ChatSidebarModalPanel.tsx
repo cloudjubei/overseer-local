@@ -132,30 +132,28 @@ export default function ChatSidebarModalPanel({
 
   if (!modalContainer) return null
 
-  // Rounded corners for the modal-attached panel (no border)
-  const roundedLeft: React.CSSProperties = {
-    borderTopLeftRadius: 'var(--radius-3)',
-    borderBottomLeftRadius: 'var(--radius-3)',
-  }
-
   if (collapsed) {
-    // Slim bar attached to the right of modal
-    const style: React.CSSProperties = panelRect
+    let style: React.CSSProperties = {
+      position: 'absolute',
+      width: COLLAPSED_W,
+      borderRadius: 'var(--radius-3)',
+    }
+    style = panelRect
       ? {
-          position: 'absolute',
+          ...style,
           top: panelRect.top,
           left: Math.min(panelRect.right, window.innerWidth),
           height: panelRect.height,
-          width: COLLAPSED_W,
-          ...roundedLeft,
         }
-      : { position: 'absolute', top: 0, right: 0, bottom: 0, width: COLLAPSED_W, ...roundedLeft }
+      : {
+          ...style,
+          top: 0,
+          right: 0,
+          bottom: 0,
+        }
 
     return createPortal(
-      <aside
-        className="chat-collapsed-panel z-[5] bg-surface-base"
-        style={style}
-      >
+      <aside className="chat-collapsed-panel z-[5] bg-surface-base" style={style}>
         <button
           type="button"
           onClick={() => setCollapsed(false)}
@@ -177,29 +175,35 @@ export default function ChatSidebarModalPanel({
       modalContainer,
     )
   }
+  let style: React.CSSProperties = {
+    transition: `width ${transitionInOut}`,
+    borderTopLeftRadius: 'var(--radius-3)',
+    borderBottomLeftRadius: 'var(--radius-3)',
+  }
 
-  const baseClass = 'absolute z-[5] bg-surface-base overflow-hidden'
-
-  const style: React.CSSProperties = panelRect
+  style = panelRect
     ? {
+        ...style,
         top: panelRect.top,
         left: Math.min(panelRect.right, window.innerWidth),
         height: panelRect.height,
         width: Math.min(effectiveWidth, availableNextToModal || effectiveWidth),
-        transition: `width ${transitionInOut}`,
-        ...roundedLeft,
       }
     : {
+        ...style,
         top: 0,
         right: 0,
         bottom: 0,
         width: effectiveWidth,
-        transition: `width ${transitionInOut}`,
-        ...roundedLeft,
       }
 
   return createPortal(
-    <div className={baseClass} style={style} role="complementary" aria-label="Chat">
+    <div
+      className="absolute z-[5] bg-surface-base overflow-hidden"
+      style={style}
+      role="complementary"
+      aria-label="Chat"
+    >
       <div
         onPointerDown={onResizeStart}
         className="absolute left-0 top-0 bottom-0 w-5 cursor-col-resize group"
@@ -207,7 +211,6 @@ export default function ChatSidebarModalPanel({
         role="separator"
         aria-orientation="vertical"
       >
-        {/* Visible grab handle that protrudes to the right (inside the panel) */}
         <div
           className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-start"
           style={{ width: 34, height: 56 }}

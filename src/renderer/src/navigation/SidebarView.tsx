@@ -378,7 +378,6 @@ export default function SidebarView({}: SidebarProps) {
         </button>
       </div>
 
-      {/* Scrollable middle content */}
       <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {

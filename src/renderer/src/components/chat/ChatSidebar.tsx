@@ -43,32 +43,12 @@ export default function ChatSidebar({
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { runsHistory } = useAgents()
-
-  const [chat, setChat] = useState<ChatState | undefined>(undefined)
-
-  useEffect(() => {
-    const loadChat = async () => {
-      const c = await getChat(context)
-      setChat(c)
-    }
-    loadChat()
-  }, [context, getChat])
-
-  const isThinking = chat?.isThinking || false
-
   const { configs, activeConfig } = useLLMConfig()
   const { navigateView } = useNavigator()
 
+  const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(undefined)
-  const selectedConfig = useMemo(() => {
-    if (selectedConfigId) {
-      const byId = configs.find((c) => c.id === selectedConfigId)
-      if (byId) return byId
-    }
-    return activeConfig || configs[0]
-  }, [configs, activeConfig, selectedConfigId])
-
-  const isConfigured = !!selectedConfig?.apiKey
+  const [effectivePrompt, setEffectivePrompt] = useState<string>('')
 
   const currentSettings = useMemo(
     () => getSettingsForContext(context),
@@ -80,6 +60,26 @@ export default function ChatSidebar({
   const [autoCallTools, setAutoCallTools] = useState<string[] | undefined>(
     currentSettings?.autoCallTools,
   )
+
+  useEffect(() => {
+    const loadChat = async () => {
+      const c = await getChat(context)
+      setChat(c)
+    }
+    loadChat()
+  }, [context, getChat])
+
+  const isThinking = chat?.isThinking || false
+
+  const selectedConfig = useMemo(() => {
+    if (selectedConfigId) {
+      const byId = configs.find((c) => c.id === selectedConfigId)
+      if (byId) return byId
+    }
+    return activeConfig || configs[0]
+  }, [configs, activeConfig, selectedConfigId])
+
+  const isConfigured = !!selectedConfig?.apiKey
 
   const [draftPrompt, setDraftPrompt] = useState<string>('')
 
@@ -221,27 +221,31 @@ export default function ChatSidebar({
     return args
   }, [context, storiesById, featuresById, runsHistory, getProjectById])
 
-  const [effectivePrompt, setEffectivePrompt] = useState<string>('')
   useEffect(() => {
-    let cancelled = false
-    const refreshPrompt = async () => {
+    const update = async () => {
       try {
-        const prompt = await getSettingsPrompt(contextArguments)
-        if (!cancelled) setEffectivePrompt(prompt)
+        const p = await getSettingsPrompt(contextArguments)
+        setEffectivePrompt(p)
+        setDraftPrompt(p)
       } catch {
         try {
           const def = await getDefaultPrompt(context)
-          if (!cancelled) setEffectivePrompt(def)
+          setEffectivePrompt(def)
+          setDraftPrompt(def)
         } catch {
-          if (!cancelled) setEffectivePrompt('')
+          setEffectivePrompt('')
+          setDraftPrompt('')
         }
       }
     }
-    refreshPrompt()
-    return () => {
-      cancelled = true
-    }
-  }, [context, contextArguments, getSettingsPrompt, getDefaultPrompt])
+    update()
+  }, [
+    context,
+    contextArguments,
+    currentSettings?.systemPrompt,
+    getSettingsPrompt,
+    getDefaultPrompt,
+  ])
 
   // Seed draft prompt whenever effective or settings change
   useEffect(() => {
@@ -252,6 +256,7 @@ export default function ChatSidebar({
   // Build messages array with system prompt as the first message when present
   const messagesWithSystem: ChatMessage[] = useMemo(() => {
     const original = chat?.chat.messages || []
+    if (original.length > 0) return original
     const systemMsg: ChatMessage | null = effectivePrompt
       ? ({
           completionMesage: {
@@ -263,7 +268,6 @@ export default function ChatSidebar({
       : null
 
     if (!systemMsg) return original
-    if (original.length > 0 && original[0]?.completionMesage?.role === 'system') return original
     return [systemMsg, ...original]
   }, [chat?.chat.messages, effectivePrompt])
 
@@ -274,25 +278,6 @@ export default function ChatSidebar({
   ]
     .filter(Boolean)
     .join(' ')
-
-  const hasAnyMessages = (chat?.chat.messages?.length || 0) > 0
-
-  const refreshEffectivePromptFromSettings = useCallback(async () => {
-    try {
-      const p = await getSettingsPrompt(contextArguments)
-      setEffectivePrompt(p)
-      setDraftPrompt(p)
-    } catch {
-      try {
-        const def = await getDefaultPrompt(context)
-        setEffectivePrompt(def)
-        setDraftPrompt(def)
-      } catch {
-        setEffectivePrompt('')
-        setDraftPrompt('')
-      }
-    }
-  }, [context, contextArguments, getSettingsPrompt, getDefaultPrompt])
 
   return (
     <section className={sectionClass}>
@@ -362,16 +347,6 @@ export default function ChatSidebar({
                       className="btn"
                       onClick={async () => {
                         await persistSettings({ systemPrompt: draftPrompt })
-                        // Only update the effective system prompt if no messages have been sent yet
-                        if (!hasAnyMessages) {
-                          const trimmed = draftPrompt?.trim() ?? ''
-                          if (trimmed.length > 0) {
-                            setEffectivePrompt(trimmed)
-                          } else {
-                            // If cleared, fall back to default/settings-derived prompt
-                            await refreshEffectivePromptFromSettings()
-                          }
-                        }
                       }}
                     >
                       Save prompt
@@ -380,23 +355,6 @@ export default function ChatSidebar({
                       className="btn-secondary"
                       onClick={async () => {
                         await resetSettingsForContext(context)
-                        // After reset, refresh prompts; only apply to effectivePrompt if no messages
-                        if (!hasAnyMessages) {
-                          await refreshEffectivePromptFromSettings()
-                        } else {
-                          // Refresh only the draft prompt in UI without changing the effective system prompt
-                          try {
-                            const p = await getSettingsPrompt(contextArguments)
-                            setDraftPrompt(p)
-                          } catch {
-                            try {
-                              const def = await getDefaultPrompt(context)
-                              setDraftPrompt(def)
-                            } catch {
-                              setDraftPrompt('')
-                            }
-                          }
-                        }
                       }}
                     >
                       Reset to defaults
