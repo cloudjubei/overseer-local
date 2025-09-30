@@ -17,6 +17,8 @@ type Props = {
   titleRef?: React.RefObject<HTMLInputElement | null>
   onDelete?: () => void
   onDirtyChange?: (dirty: boolean) => void
+  formId?: string
+  hideActions?: boolean
 }
 
 export default function StoryForm({
@@ -28,6 +30,8 @@ export default function StoryForm({
   titleRef,
   onDelete,
   onDirtyChange,
+  formId,
+  hideActions,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
@@ -99,6 +103,7 @@ export default function StoryForm({
 
   return (
     <form
+      id={formId}
       onSubmit={handleSubmit}
       onKeyDown={onKeyDown}
       className="space-y-4"
@@ -167,39 +172,41 @@ export default function StoryForm({
           />
         </div>
       </div>
-      <div className="flex justify-end gap-2 pt-2">
-        {onDelete && (
+      {!hideActions && (
+        <div className="flex justify-end gap-2 pt-2">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={submitting}
+              className="btn"
+              style={{
+                background: 'var(--status-stuck-bg)',
+                color: 'var(--status-stuck-fg)',
+              }}
+            >
+              Delete
+            </button>
+          )}
           <button
             type="button"
-            onClick={onDelete}
+            className="btn-secondary"
+            onClick={() => onCancel()}
             disabled={submitting}
-            className="btn"
-            style={{
-              background: 'var(--status-stuck-bg)',
-              color: 'var(--status-stuck-fg)',
-            }}
           >
-            Delete
+            Cancel
           </button>
-        )}
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => onCancel()}
-          disabled={submitting}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="btn"
-          disabled={!canSubmit}
-          aria-keyshortcuts="Control+Enter Meta+Enter"
-          title="Cmd/Ctrl+Enter to submit"
-        >
-          {isCreate ? 'Create Story' : 'Save Changes'}
-        </button>
-      </div>
+          <button
+            type="submit"
+            className="btn"
+            disabled={!canSubmit}
+            aria-keyshortcuts="Control+Enter Meta+Enter"
+            title="Cmd/Ctrl+Enter to submit"
+          >
+            {isCreate ? 'Create Story' : 'Save Changes'}
+          </button>
+        </div>
+      )}
     </form>
   )
 }
