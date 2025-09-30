@@ -336,7 +336,7 @@
     },
     {
       "id": "b5acbe79-2d92-438c-9850-15cee05fbea9",
-      "status": "-",
+      "status": "+",
       "title": "ChatSidebar rework",
       "description": "The @src/renderer/src/components/chat/ChatSidebar.tsx doesn't work properly - it stays collapsed in the panel - in @src/renderer/src/components/chat/ChatSidebarOverlay.tsx . The way to solve it, is that ChatSidebar must get a parameter `isCollapsible` passed in - then it would display its own collapse button which would via callback call the setCollapse of whoever is calling it. For instance in @src/renderer/src/screens/ChatView.tsx it won't be passed in because there it stays fully open and taking up the whole screen.\nChatSidebarOverlay needs to be renamed to ChatSidebarPanel and it will control the `setCollapsed`. It should be further split/refactored to a separate component ChatSidebarModalPanel that will only contain the logic for handling Modals/popups as used for instance in @src/renderer/src/screens/stories/FeatureEditView.tsx .",
       "context": [
@@ -347,7 +347,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T09:27:46.491Z",
-      "updatedAt": "2025-09-30T09:27:46.491Z"
+      "updatedAt": "2025-09-30T10:25:21.044Z",
+      "completedAt": "2025-09-30T10:25:21.044Z"
     }
   ],
   "featureIdToDisplayIndex": {

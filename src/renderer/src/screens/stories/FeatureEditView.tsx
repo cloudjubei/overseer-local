@@ -7,7 +7,7 @@ import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/Fea
 import { Button } from '@renderer/components/ui/Button'
 import { IconChat, IconDelete } from '@renderer/components/ui/Icons'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import { ChatSidebarOverlay } from '@renderer/components/chat'
+import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
 export default function FeatureEditView({
   storyId,
@@ -173,7 +173,7 @@ export default function FeatureEditView({
         )}
       </Modal>
 
-      <ChatSidebarOverlay
+      <ChatSidebarModalPanel
         isOpen={isChatOpen}
         context={context}
         chatContextTitle="Feature Chat"
