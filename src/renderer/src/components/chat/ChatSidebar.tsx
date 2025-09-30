@@ -104,12 +104,17 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
         const list = await factoryToolsService.listTools(projectId)
         const allowed = availableTools
         const auto = autoCallTools
-        const mapped: ToolToggle[] = list.map((t) => ({
-          name: t.function.name,
-          description: t.function.description,
-          available: !allowed ? true : allowed.includes(t.function.name),
-          autoCall: !!auto && auto.includes(t.function.name),
-        }))
+        const mapped: ToolToggle[] = list.map((t) => {
+          const toolName = t.function.name
+          const isAvail = !allowed ? true : allowed.includes(toolName)
+          const isAuto = isAvail && !!auto && auto.includes(toolName)
+          return {
+            name: toolName,
+            description: t.function.description,
+            available: isAvail,
+            autoCall: isAuto,
+          }
+        })
         if (isMounted) setTools(mapped)
       } catch (e) {
         if (isMounted) setTools([])
@@ -124,14 +129,23 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
   const toggleAvailable = useCallback(
     async (toolName: string) => {
       const currentAllowed = availableTools || tools?.map((t) => t.name) || []
-      const set = new Set(currentAllowed)
-      if (set.has(toolName)) set.delete(toolName)
-      else set.add(toolName)
-      const next = Array.from(set)
-      setAvailableTools(next)
-      await persistSettings({ availableTools: next })
+      const allowedSet = new Set(currentAllowed)
+      const willDisable = allowedSet.has(toolName)
+      if (willDisable) allowedSet.delete(toolName)
+      else allowedSet.add(toolName)
+      const nextAvailable = Array.from(allowedSet)
+      setAvailableTools(nextAvailable)
+
+      if (willDisable) {
+        const currentAuto = autoCallTools || []
+        const nextAuto = currentAuto.filter((n) => n !== toolName)
+        setAutoCallTools(nextAuto)
+        await persistSettings({ availableTools: nextAvailable, autoCallTools: nextAuto })
+      } else {
+        await persistSettings({ availableTools: nextAvailable })
+      }
     },
-    [availableTools, tools, persistSettings],
+    [availableTools, autoCallTools, tools, persistSettings],
   )
 
   const toggleAutoCall = useCallback(
@@ -310,9 +324,10 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                                 <div className="flex flex-col items-center space-y-px">
                                   <span className="text-[10px] text-[var(--text-secondary)]">Auto-call</span>
                                   <Switch
-                                    checked={tool.autoCall}
+                                    checked={tool.available ? tool.autoCall : false}
                                     onCheckedChange={() => toggleAutoCall(tool.name)}
                                     label=""
+                                    disabled={!tool.available}
                                   />
                                 </div>
                               </div>
