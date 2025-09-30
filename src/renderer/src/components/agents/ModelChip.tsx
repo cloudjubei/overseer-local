@@ -319,7 +319,7 @@ export default function ModelChip({
       onClick={(e) => {
         if (!editable) return
         e.stopPropagation()
-        setOpen(true)
+        setOpen((o) => !o)
       }}
       onMouseDown={(e) => {
         if (!editable) return
