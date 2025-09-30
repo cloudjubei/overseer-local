@@ -4,7 +4,6 @@ import { useToast } from '@renderer/components/ui/Toast'
 import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import { IconChat } from '@renderer/components/ui/Icons'
 import { ChatContext } from 'thefactory-tools'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
@@ -28,7 +27,6 @@ export default function FeatureCreateView({
   const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -86,39 +84,6 @@ export default function FeatureCreateView({
         isOpen={true}
         size={'lg'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
-        headerActions={
-          <button
-            className="btn-secondary btn-icon"
-            onClick={() => setIsChatOpen((v) => !v)}
-            aria-pressed={isChatOpen}
-            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
-            title={isChatOpen ? 'Close chat' : 'Open chat'}
-          >
-            <IconChat className="w-4 h-4" />
-          </button>
-        }
-        footer={
-          <div className="flex justify-between gap-2">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={attemptClose}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn"
-              form={formId}
-              disabled={submitting}
-              aria-keyshortcuts="Control+Enter Meta+Enter"
-              title="Cmd/Ctrl+Enter to submit"
-            >
-              Create Feature
-            </button>
-          </div>
-        }
         contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         <FeatureForm
@@ -135,8 +100,8 @@ export default function FeatureCreateView({
         />
       </Modal>
 
+      {/* Always mount the chat panel; it starts collapsed by default */}
       <ChatSidebarModalPanel
-        isOpen={isChatOpen}
         context={context}
         chatContextTitle="Story Chat (New Feature)"
         initialWidth={360}

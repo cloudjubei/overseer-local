@@ -433,7 +433,7 @@
     },
     {
       "id": "de5208f4-4f5b-464f-99b1-abeb9daa903e",
-      "status": "-",
+      "status": "+",
       "title": "Modal chat sidebar improvements",
       "description": "All the modals that use @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx should have the collapsed panel showing by default and they should no longer show the open chat button in the top right.\n\nAdditionally, some of these modals can be very small and the @src/renderer/src/components/chat/ChatInput.tsx at the bottom ends up not showing. The top and bottom of the @src/renderer/src/components/chat/ChatSidebar.tsx should always show, the top having always a constant size, and the bottom can have the maximum constrained to 40% of the total parent size.",
       "context": [
@@ -443,7 +443,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T12:52:58.329Z",
-      "updatedAt": "2025-09-30T12:52:58.329Z"
+      "updatedAt": "2025-09-30T13:32:11.484Z",
+      "completedAt": "2025-09-30T13:32:11.484Z"
     },
     {
       "id": "db36287c-c9a7-44c9-94e9-76c6e57bd685",

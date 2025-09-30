@@ -216,6 +216,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
 
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
+      {/* Top header: constant size */}
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {isCollapsible ? (
@@ -344,39 +345,46 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
         </div>
       </header>
 
-      {!isConfigured && (
-        <div
-          className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
-          style={{
-            background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
-            color: 'var(--text-primary)',
-          }}
-          role="status"
-        >
-          <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
-          <button className="btn" onClick={() => navigateView('Settings')}>
-            Configure
-          </button>
-        </div>
-      )}
-
-      {/* Effective prompt display before any messages are sent */}
-      {(!chat?.chat.messages || chat.chat.messages.length === 0) && effectivePrompt && (
-        <div className="mx-4 my-3 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3 text-[13px] text-[var(--text-secondary)]">
-          <div className="text-[12px] uppercase font-semibold tracking-wide mb-1 text-[var(--text-muted)]">
-            Prompt
+      {/* Middle content area: scrollable; ensures header and footer remain visible */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        {!isConfigured && (
+          <div
+            className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
+            style={{
+              background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
+              color: 'var(--text-primary)',
+            }}
+            role="status"
+          >
+            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+            <button className="btn" onClick={() => navigateView('Settings')}>
+              Configure
+            </button>
           </div>
-          <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">{effectivePrompt}</pre>
-        </div>
-      )}
+        )}
 
-      <MessageList
-        chatId={chat?.key}
-        messages={chat?.chat.messages || []}
-        isThinking={isThinking}
-      />
+        {/* Effective prompt display before any messages are sent */}
+        {(!chat?.chat.messages || chat.chat.messages.length === 0) && effectivePrompt && (
+          <div className="flex-shrink-0 mx-4 my-3 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3 text-[13px] text-[var(--text-secondary)]">
+            <div className="text-[12px] uppercase font-semibold tracking-wide mb-1 text-[var(--text-muted)]">
+              Prompt
+            </div>
+            <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">{effectivePrompt}</pre>
+          </div>
+        )}
 
-      <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
+        {/* Messages list consumes remaining space and handles its own scrolling */}
+        <MessageList
+          chatId={chat?.key}
+          messages={chat?.chat.messages || []}
+          isThinking={isThinking}
+        />
+      </div>
+
+      {/* Bottom input area: max 40% height, scrolls internally if needed to remain visible */}
+      <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
+        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
+      </div>
     </section>
   )
 }
