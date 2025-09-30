@@ -114,7 +114,7 @@ export default function SettingsLLMConfigModal({
     setModelsLoading(true)
     setModelsError(null)
     try {
-      const models = await chatsService.listModels(form as any)
+      const models = await chatsService.listModels(form)
       setAvailableModels(models)
       if (!models.includes(form.model)) {
         setForm((prev) => ({ ...prev, model: '' }))

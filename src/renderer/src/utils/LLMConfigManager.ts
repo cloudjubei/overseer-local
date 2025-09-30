@@ -106,12 +106,10 @@ export class LLMConfigManager {
     // Repoint active IDs if they referenced the removed config
     if (this.getActiveId() === id) {
       this.setActiveId(configs[0]?.id || '')
-    }
-    if (this.getActiveChatId() === id) {
+    } else if (this.getActiveChatId() === id) {
       this.setActiveChatId(configs[0]?.id || '')
-    } else {
-      this.notify()
     }
+    this.notify()
   }
 
   isConfigured(): boolean {
