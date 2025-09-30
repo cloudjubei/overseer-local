@@ -65,7 +65,7 @@ function computePosition(
   const viewportW = window.innerWidth
   const viewportH = window.innerHeight
 
-  const panelW = panel ? panel.offsetWidth : Math.max(160, ar.width)
+  const panelW = panel ? panel.offsetWidth : Math.max(180, ar.width)
   const panelH = panel ? panel.offsetHeight : 180
 
   const spaceBelow = viewportH - ar.bottom
@@ -78,8 +78,17 @@ function computePosition(
     top = ar.top + scrollY - panelH - gap
   }
 
-  let left = ar.left + scrollX
-  const padding = 8
+  const padding = 12 // A bit more padding
+
+  let left: number
+  // If aligning left would push it off-screen, align right instead.
+  if (ar.left + panelW > viewportW - padding) {
+    left = ar.right - panelW + scrollX
+  } else {
+    left = ar.left + scrollX
+  }
+
+  // Final clamping to ensure it's always on screen.
   const maxLeft = scrollX + viewportW - panelW - padding
   const minLeft = scrollX + padding
   left = clamp(left, minLeft, maxLeft)

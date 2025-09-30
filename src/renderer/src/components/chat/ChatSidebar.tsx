@@ -205,7 +205,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
           {isSettingsOpen && (
             <div
               ref={dropdownRef}
-              className="absolute top-full right-3 mt-2 w-[360px] rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
+              className="absolute top-full right-3 left-3 mt-2 w-auto max-w-[360px] ml-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
               role="menu"
               aria-label="Chat Settings"
             >
