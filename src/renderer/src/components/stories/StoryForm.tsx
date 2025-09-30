@@ -11,27 +11,21 @@ export type StoryFormValues = {
 type Props = {
   initialValues?: Partial<StoryFormValues>
   onSubmit: (values: StoryFormValues) => void | Promise<void>
-  onCancel: () => void
   submitting?: boolean
   isCreate?: boolean
   titleRef?: React.RefObject<HTMLInputElement | null>
-  onDelete?: () => void
   onDirtyChange?: (dirty: boolean) => void
   formId?: string
-  hideActions?: boolean
 }
 
 export default function StoryForm({
   initialValues,
   onSubmit,
-  onCancel,
   submitting = false,
   isCreate = false,
   titleRef,
-  onDelete,
   onDirtyChange,
   formId,
-  hideActions,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
@@ -172,41 +166,6 @@ export default function StoryForm({
           />
         </div>
       </div>
-      {!hideActions && (
-        <div className="flex justify-end gap-2 pt-2">
-          {onDelete && (
-            <button
-              type="button"
-              onClick={onDelete}
-              disabled={submitting}
-              className="btn"
-              style={{
-                background: 'var(--status-stuck-bg)',
-                color: 'var(--status-stuck-fg)',
-              }}
-            >
-              Delete
-            </button>
-          )}
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => onCancel()}
-            disabled={submitting}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="btn"
-            disabled={!canSubmit}
-            aria-keyshortcuts="Control+Enter Meta+Enter"
-            title="Cmd/Ctrl+Enter to submit"
-          >
-            {isCreate ? 'Create Story' : 'Save Changes'}
-          </button>
-        </div>
-      )}
     </form>
   )
 }

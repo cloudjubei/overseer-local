@@ -144,13 +144,10 @@ export default function StoryEditView({
               description: initialValues.description,
             }}
             onSubmit={onSubmit}
-            onCancel={attemptClose}
             submitting={submitting || deleting}
             isCreate={false}
-            onDelete={() => setShowDeleteConfirm(true)}
             onDirtyChange={setHasChanges}
             formId={formId}
-            hideActions
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">
@@ -160,11 +157,7 @@ export default function StoryEditView({
       </Modal>
 
       {/* Always mount the chat panel; it starts collapsed by default */}
-      <ChatSidebarModalPanel
-        context={context}
-        chatContextTitle="Story Chat"
-        initialWidth={380}
-      />
+      <ChatSidebarModalPanel context={context} chatContextTitle="Story Chat" initialWidth={380} />
 
       <AlertDialog
         isOpen={showAlert}

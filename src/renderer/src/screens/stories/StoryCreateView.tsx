@@ -95,13 +95,11 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         <StoryForm
           initialValues={{}}
           onSubmit={onSubmit}
-          onCancel={attemptClose}
           submitting={submitting}
           isCreate={true}
           titleRef={titleRef}
           onDirtyChange={setHasChanges}
           formId={formId}
-          hideActions
         />
       </Modal>
 
