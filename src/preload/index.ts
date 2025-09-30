@@ -213,12 +213,16 @@ const FACTORY_TESTS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TEST, { projectId, path }),
   runTests: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId, path }),
+  runTestsE2E: (projectId, command) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_E2E, { projectId, command }),
   runCoverage: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE, { projectId, path }),
   runCoverages: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES, { projectId, path }),
   getLastResult: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT, { projectId }),
+  getLastResultE2E: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_E2E, { projectId }),
   getLastCoverage: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE, { projectId }),
 }
