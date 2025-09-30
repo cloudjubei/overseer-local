@@ -500,7 +500,7 @@
     },
     {
       "id": "e5e46d3f-3ea6-41ec-bed3-8f49cbae352b",
-      "status": "-",
+      "status": "+",
       "title": "ChatView sidebar should be collapsible",
       "description": "In @src/renderer/src/screens/ChatView.tsx the sidebar which contains the list of chats should be collapsible with a button in the top left of it (similar to how the sidebar works like in @src/renderer/src/screens/SettingsView.tsx ). The title should be gone from the top and the `Create Chat` button should be a `+` button like in @src/renderer/src/screens/stories/StoryDetailsView.tsx for creating features.",
       "context": [
@@ -510,7 +510,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T14:19:23.142Z",
-      "updatedAt": "2025-09-30T14:19:23.142Z"
+      "updatedAt": "2025-09-30T14:26:46.984Z",
+      "completedAt": "2025-09-30T14:26:46.984Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -547,8 +548,8 @@
     "db36287c-c9a7-44c9-94e9-76c6e57bd685": 31,
     "986bae36-acc0-4be4-93c0-05c9dd672b59": 32,
     "a8a2d902-820b-4d02-8783-43861075e090": 33,
-    "5ed64b40-dc70-453a-a52b-e427ae983ba3": 34,
-    "e5e46d3f-3ea6-41ec-bed3-8f49cbae352b": 35,
+    "e5e46d3f-3ea6-41ec-bed3-8f49cbae352b": 34,
+    "5ed64b40-dc70-453a-a52b-e427ae983ba3": 35,
     "e30f1aae-50de-416d-8f67-05c6f7687590": 36
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
