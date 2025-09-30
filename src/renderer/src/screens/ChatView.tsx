@@ -28,13 +28,17 @@ function titleForContext(context: ChatContext, projectTitle?: string): string {
     }
     case 'PROJECT_TOPIC': {
       const topic = (context as any).projectTopic || 'topic'
-      const pretty = String(topic).replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase())
+      const pretty = String(topic)
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (m) => m.toUpperCase())
       return `Project ${pretty} Chat${projectTitle ? ' — ' + projectTitle : ''}`
     }
     case 'STORY_TOPIC': {
       const topic = (context as any).storyTopic || 'topic'
       const storyId = (context as any).storyId || ''
-      const pretty = String(topic).replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase())
+      const pretty = String(topic)
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (m) => m.toUpperCase())
       return `Story ${pretty} Chat — ${storyId}`
     }
     case 'AGENT_RUN': {
@@ -118,7 +122,8 @@ export default function ChatView() {
       // If previous no longer matches selected type, switch
       if (prev.type !== selectedType) return first
       // If previous was PROJECT but projectId changed
-      if (prev.type === 'PROJECT' && 'projectId' in prev && prev.projectId !== projectId) return first
+      if (prev.type === 'PROJECT' && 'projectId' in prev && prev.projectId !== projectId)
+        return first
       // Otherwise keep selection
       return prev
     })
@@ -211,7 +216,10 @@ export default function ChatView() {
       {/* Main chat area: selected chat */}
       <div className="flex-1 min-w-0 min-h-0">
         {selectedContext ? (
-          <ChatSidebar context={selectedContext} chatContextTitle={titleForContext(selectedContext, project?.title)} />
+          <ChatSidebar
+            context={selectedContext}
+            chatContextTitle={titleForContext(selectedContext, project?.title)}
+          />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">
             Select a chat to begin.
