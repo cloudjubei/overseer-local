@@ -214,7 +214,6 @@ export default function ChatSidebar({
     const refreshPrompt = async () => {
       try {
         const prompt = await getSettingsPrompt(context)
-        console.log('prompt from tools: ', prompt)
         if (!cancelled) setEffectivePrompt(prompt)
       } catch {
         try {
@@ -241,13 +240,13 @@ export default function ChatSidebar({
   const messagesWithSystem: ChatMessage[] = useMemo(() => {
     const original = chat?.chat.messages || []
     const systemMsg: ChatMessage | null = effectivePrompt
-      ? {
+      ? ({
           completionMesage: {
             role: 'system',
             content: effectivePrompt,
             files: [],
           },
-        } as ChatMessage
+        } as ChatMessage)
       : null
 
     if (!systemMsg) return original
@@ -415,11 +414,7 @@ export default function ChatSidebar({
         )}
 
         {/* Messages list consumes remaining space and handles its own scrolling */}
-        <MessageList
-          chatId={chat?.key}
-          messages={messagesWithSystem}
-          isThinking={isThinking}
-        />
+        <MessageList chatId={chat?.key} messages={messagesWithSystem} isThinking={isThinking} />
       </div>
 
       {/* Bottom input area: max 40% height, scrolls internally if needed to remain visible */}
