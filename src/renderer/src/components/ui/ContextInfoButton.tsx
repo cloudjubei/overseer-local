@@ -34,7 +34,7 @@ export default function ContextInfoButton({
   const content = useMemo(() => formatContext(context), [context])
 
   return (
-    <Tooltip content={content} placement="right" openOnClick>
+    <Tooltip content={content} placement="right">
       <button
         type="button"
         className={[

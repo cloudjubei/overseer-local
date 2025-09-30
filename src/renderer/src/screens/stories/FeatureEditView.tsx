@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
 import { useToast } from '@renderer/components/ui/Toast'
 import type { ChatContext, Feature } from 'thefactory-tools'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'
 import { Button } from '@renderer/components/ui/Button'
-import { IconChat, IconDelete } from '@renderer/components/ui/Icons'
+import { IconDelete } from '@renderer/components/ui/Icons'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
@@ -28,7 +28,6 @@ export default function FeatureEditView({
   const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -101,17 +100,6 @@ export default function FeatureEditView({
         title="Edit Feature"
         onClose={attemptClose}
         isOpen={true}
-        headerActions={
-          <button
-            className="btn-secondary btn-icon"
-            onClick={() => setIsChatOpen((v) => !v)}
-            aria-pressed={isChatOpen}
-            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
-            title={isChatOpen ? 'Close chat' : 'Open chat'}
-          >
-            <IconChat className="w-4 h-4" />
-          </button>
-        }
         footer={
           <div className="flex justify-between gap-2">
             {!initialValues ? (
@@ -173,8 +161,8 @@ export default function FeatureEditView({
         )}
       </Modal>
 
+      {/* Always mount the chat panel; it starts collapsed by default */}
       <ChatSidebarModalPanel
-        isOpen={isChatOpen}
         context={context}
         chatContextTitle="Feature Chat"
         initialWidth={380}

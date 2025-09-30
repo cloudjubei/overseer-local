@@ -104,12 +104,17 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
         const list = await factoryToolsService.listTools(projectId)
         const allowed = availableTools
         const auto = autoCallTools
-        const mapped: ToolToggle[] = list.map((t) => ({
-          name: t.function.name,
-          description: t.function.description,
-          available: !allowed ? true : allowed.includes(t.function.name),
-          autoCall: !!auto && auto.includes(t.function.name),
-        }))
+        const mapped: ToolToggle[] = list.map((t) => {
+          const toolName = t.function.name
+          const isAvail = !allowed ? true : allowed.includes(toolName)
+          const isAuto = isAvail && !!auto && auto.includes(toolName)
+          return {
+            name: toolName,
+            description: t.function.description,
+            available: isAvail,
+            autoCall: isAuto,
+          }
+        })
         if (isMounted) setTools(mapped)
       } catch (e) {
         if (isMounted) setTools([])
@@ -124,14 +129,23 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
   const toggleAvailable = useCallback(
     async (toolName: string) => {
       const currentAllowed = availableTools || tools?.map((t) => t.name) || []
-      const set = new Set(currentAllowed)
-      if (set.has(toolName)) set.delete(toolName)
-      else set.add(toolName)
-      const next = Array.from(set)
-      setAvailableTools(next)
-      await persistSettings({ availableTools: next })
+      const allowedSet = new Set(currentAllowed)
+      const willDisable = allowedSet.has(toolName)
+      if (willDisable) allowedSet.delete(toolName)
+      else allowedSet.add(toolName)
+      const nextAvailable = Array.from(allowedSet)
+      setAvailableTools(nextAvailable)
+
+      if (willDisable) {
+        const currentAuto = autoCallTools || []
+        const nextAuto = currentAuto.filter((n) => n !== toolName)
+        setAutoCallTools(nextAuto)
+        await persistSettings({ availableTools: nextAvailable, autoCallTools: nextAuto })
+      } else {
+        await persistSettings({ availableTools: nextAvailable })
+      }
     },
-    [availableTools, tools, persistSettings],
+    [availableTools, autoCallTools, tools, persistSettings],
   )
 
   const toggleAutoCall = useCallback(
@@ -202,6 +216,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
 
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
+      {/* Top header: constant size */}
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {isCollapsible ? (
@@ -310,9 +325,10 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                                 <div className="flex flex-col items-center space-y-px">
                                   <span className="text-[10px] text-[var(--text-secondary)]">Auto-call</span>
                                   <Switch
-                                    checked={tool.autoCall}
+                                    checked={tool.available ? tool.autoCall : false}
                                     onCheckedChange={() => toggleAutoCall(tool.name)}
                                     label=""
+                                    disabled={!tool.available}
                                   />
                                 </div>
                               </div>
@@ -329,39 +345,46 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
         </div>
       </header>
 
-      {!isConfigured && (
-        <div
-          className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
-          style={{
-            background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
-            color: 'var(--text-primary)',
-          }}
-          role="status"
-        >
-          <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
-          <button className="btn" onClick={() => navigateView('Settings')}>
-            Configure
-          </button>
-        </div>
-      )}
-
-      {/* Effective prompt display before any messages are sent */}
-      {(!chat?.chat.messages || chat.chat.messages.length === 0) && effectivePrompt && (
-        <div className="mx-4 my-3 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3 text-[13px] text-[var(--text-secondary)]">
-          <div className="text-[12px] uppercase font-semibold tracking-wide mb-1 text-[var(--text-muted)]">
-            Prompt
+      {/* Middle content area: scrollable; ensures header and footer remain visible */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        {!isConfigured && (
+          <div
+            className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
+            style={{
+              background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
+              color: 'var(--text-primary)',
+            }}
+            role="status"
+          >
+            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+            <button className="btn" onClick={() => navigateView('Settings')}>
+              Configure
+            </button>
           </div>
-          <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">{effectivePrompt}</pre>
-        </div>
-      )}
+        )}
 
-      <MessageList
-        chatId={chat?.key}
-        messages={chat?.chat.messages || []}
-        isThinking={isThinking}
-      />
+        {/* Effective prompt display before any messages are sent */}
+        {(!chat?.chat.messages || chat.chat.messages.length === 0) && effectivePrompt && (
+          <div className="flex-shrink-0 mx-4 my-3 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3 text-[13px] text-[var(--text-secondary)]">
+            <div className="text-[12px] uppercase font-semibold tracking-wide mb-1 text-[var(--text-muted)]">
+              Prompt
+            </div>
+            <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">{effectivePrompt}</pre>
+          </div>
+        )}
 
-      <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
+        {/* Messages list consumes remaining space and handles its own scrolling */}
+        <MessageList
+          chatId={chat?.key}
+          messages={chat?.chat.messages || []}
+          isThinking={isThinking}
+        />
+      </div>
+
+      {/* Bottom input area: max 40% height, scrolls internally if needed to remain visible */}
+      <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
+        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
+      </div>
     </section>
   )
 }

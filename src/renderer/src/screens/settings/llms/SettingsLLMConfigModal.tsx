@@ -39,7 +39,7 @@ export default function SettingsLLMConfigModal({
   id?: string
   onRequestClose: () => void
 }) {
-  const { configs, addConfig, updateConfig } = useLLMConfig()
+  const { configs, addConfig, updateConfig, activeChatConfigId, setActiveChat } = useLLMConfig()
   const { toast } = useToast()
   const isEdit = mode === 'edit'
   const existing = isEdit ? configs.find((c) => c.id === id) || null : null
@@ -151,12 +151,30 @@ export default function SettingsLLMConfigModal({
     return availableModels
   }, [form.provider, availableModels])
 
+  const isChatActive = isEdit && existing ? activeChatConfigId === existing.id : false
+
   return (
     <Modal
       isOpen={true}
       onClose={onRequestClose}
       title={isEdit ? 'Edit LLM Configuration' : 'Add LLM Configuration'}
     >
+      {isEdit && existing && (
+        <div className="mb-3 flex items-center justify-between">
+          <div className="text-sm">
+            Chat status: {isChatActive ? (
+              <span className="badge badge--soft badge--info">Chat Active</span>
+            ) : (
+              <span className="text-[var(--text-secondary)]">Not chat active</span>
+            )}
+          </div>
+          {!isChatActive && (
+            <Button variant="outline" onClick={() => setActiveChat(existing.id!)}>
+              Set as Chat Active
+            </Button>
+          )}
+        </div>
+      )}
       <form className="space-y-3" onSubmit={onSubmit}>
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-1">

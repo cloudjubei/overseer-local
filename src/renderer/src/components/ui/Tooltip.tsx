@@ -20,18 +20,11 @@ export default function Tooltip({
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const timerRef = useRef<number | null>(null)
   const hideTimerRef = useRef<number | null>(null)
-  const anchorRef = useRef<HTMLElement | null>(null)
+  const anchorRef = useRef<HTMLSpanElement | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const tooltipId = useId()
 
-  const CLOSE_DELAY = 120 // small delay to allow cursor to move between anchor and tooltip without flicker
-
-  // Ensure we always have a concrete element to attach events/refs to.
-  // If children is not a single valid React element (e.g., text, fragment, array), wrap it in a span.
-  const baseChild =
-    React.isValidElement(children) && children.type !== React.Fragment
-      ? (children as React.ReactElement)
-      : React.createElement('span', null, children)
+  const CLOSE_DELAY = 160 // small delay to allow cursor to move between anchor and tooltip without flicker
 
   useEffect(() => {
     return () => {
@@ -99,7 +92,6 @@ export default function Tooltip({
   useEffect(() => {
     if (open) addOutsideHandlers()
     else removeOutsideHandlers()
-    // cleanup handled by unmount or when open changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
@@ -196,41 +188,25 @@ export default function Tooltip({
 
   return (
     <>
-      {React.cloneElement(baseChild, {
-        ref: (el: HTMLElement) => {
-          const anyChild: any = baseChild as any
-          if (typeof anyChild.ref === 'function') anyChild.ref(el)
-          else if (anyChild.ref) (anyChild.ref as any).current = el
-          anchorRef.current = el
-        },
-        onMouseEnter: (e: any) => {
-          ;(baseChild.props as any)?.onMouseEnter?.(e)
-          show()
-        },
-        onMouseLeave: (e: any) => {
-          ;(baseChild.props as any)?.onMouseLeave?.(e)
-          hide()
-        },
-        onFocus: (e: any) => {
-          ;(baseChild.props as any)?.onFocus?.(e)
-          show(true) // show immediately on focus for accessibility
-        },
-        onBlur: (e: any) => {
-          ;(baseChild.props as any)?.onBlur?.(e)
-          hide(true)
-        },
-        onKeyDown: (e: any) => {
-          ;(baseChild.props as any)?.onKeyDown?.(e)
+      <span
+        ref={anchorRef}
+        style={{ display: 'inline-block' }}
+        onMouseEnter={() => show()}
+        onMouseLeave={() => hide()}
+        onFocus={() => show(true)}
+        onBlur={() => hide(true)}
+        onKeyDown={(e) => {
           if (e.key === 'Escape') hide(true)
-        },
-        onClick: (e: any) => {
+        }}
+        onClick={() => {
           if (disabled) return
-          // Toggle tooltip immediately on click
           setOpen((v) => !v)
-        },
-        'aria-describedby': open ? tooltipId : undefined,
-        'aria-expanded': open ? true : undefined,
-      })}
+        }}
+        aria-describedby={open ? tooltipId : undefined}
+        aria-expanded={open ? true : undefined}
+      >
+        {children}
+      </span>
       {open &&
         !disabled &&
         position &&

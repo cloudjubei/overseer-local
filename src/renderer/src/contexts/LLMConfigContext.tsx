@@ -14,6 +14,10 @@ export type LLMConfigContextValue = {
   configs: LLMConfig[]
   activeConfigId: string | null
   activeConfig?: LLMConfig
+  // Separate active config for Chats
+  activeChatConfigId: string | null
+  activeChatConfig?: LLMConfig
+
   isConfigured: boolean
   recentConfigs: LLMConfig[]
   recentIds: string[]
@@ -22,6 +26,7 @@ export type LLMConfigContextValue = {
   updateConfig: (id: string, updates: Partial<LLMConfig>) => void
   removeConfig: (id: string) => void
   setActive: (id: string) => void
+  setActiveChat: (id: string) => void
 }
 
 const LLMConfigContext = createContext<LLMConfigContextValue | null>(null)
@@ -30,6 +35,7 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
   const managerRef = useRef<LLMConfigManager>(new LLMConfigManager())
   const [configs, setConfigs] = useState<LLMConfig[]>([])
   const [activeConfigId, setActiveConfigId] = useState<string | null>(null)
+  const [activeChatConfigId, setActiveChatConfigId] = useState<string | null>(null)
   const [recentIds, setRecentIds] = useState<string[]>([])
 
   const refresh = useCallback(() => {
@@ -39,6 +45,11 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
       setRecentIds(managerRef.current.getRecentIds())
     } catch {
       setRecentIds([])
+    }
+    try {
+      setActiveChatConfigId(managerRef.current.getActiveChatId())
+    } catch {
+      setActiveChatConfigId(null)
     }
   }, [])
 
@@ -55,6 +66,13 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     }
     return
   }, [configs, activeConfigId])
+
+  const activeChatConfig: LLMConfig | undefined = useMemo(() => {
+    if (activeChatConfigId) {
+      return configs.find((c) => c.id === activeChatConfigId)
+    }
+    return
+  }, [configs, activeChatConfigId])
 
   const isConfigured = useMemo(() => !!activeConfig?.apiKey, [activeConfig])
 
@@ -90,6 +108,14 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     [refresh],
   )
 
+  const setActiveChat = useCallback(
+    (id: string) => {
+      managerRef.current.setActiveChatId(id)
+      refresh()
+    },
+    [refresh],
+  )
+
   const recentConfigs: LLMConfig[] = useMemo(() => {
     const map = new Map(configs.map((c) => [c.id, c] as const))
     const items = recentIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
@@ -102,11 +128,14 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
       configs,
       activeConfigId,
       activeConfig,
+      activeChatConfigId,
+      activeChatConfig,
       isConfigured,
       addConfig,
       updateConfig,
       removeConfig,
       setActive,
+      setActiveChat,
       recentConfigs,
       recentIds,
     }),
@@ -114,11 +143,14 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
       configs,
       activeConfigId,
       activeConfig,
+      activeChatConfigId,
+      activeChatConfig,
       isConfigured,
       addConfig,
       updateConfig,
       removeConfig,
       setActive,
+      setActiveChat,
       recentConfigs,
       recentIds,
     ],
