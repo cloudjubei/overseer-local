@@ -223,7 +223,8 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="btn-icon"
-                  aria-label="Attach a document"
+                  aria-label="Attach Files"
+                  title="Attach Files"
                   type="button"
                   disabled={isThinking}
                 >
@@ -245,6 +246,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   className="btn-icon"
                   disabled={!canSend || isThinking}
                   aria-label="Send message"
+                  title="Send"
                 >
                   <IconSend className="w-5 h-5" />
                 </button>
@@ -252,7 +254,11 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
 
               {/* Info (bottom) */}
               <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center">
-                <div className="relative">
+                <div
+                  className="relative"
+                  onMouseEnter={() => setInfoOpen(true)}
+                  onMouseLeave={() => setInfoOpen(false)}
+                >
                   <button
                     id="chat-input-info-btn"
                     type="button"

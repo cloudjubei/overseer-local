@@ -389,7 +389,7 @@
     },
     {
       "id": "265cce60-2d86-4e84-9ba4-e8bec45598da",
-      "status": "-",
+      "status": "+",
       "title": "The bottom right ChatInput info button should work on hover",
       "description": "In @src/renderer/src/components/chat/ChatInput.tsx the (i) button only works when clicking on it - it should work on hover too.\n\nAdditionally, when hovering over the Attach files button - it should show \"Attach Files\", and the send message button should show \"Send\".",
       "context": [
@@ -397,7 +397,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:11:11.499Z",
-      "updatedAt": "2025-09-30T11:11:11.499Z"
+      "updatedAt": "2025-09-30T12:16:59.492Z",
+      "completedAt": "2025-09-30T12:16:59.492Z"
     },
     {
       "id": "3285d7d6-0883-4b47-a4a0-72a6473d5924",
