@@ -462,7 +462,7 @@
     },
     {
       "id": "986bae36-acc0-4be4-93c0-05c9dd672b59",
-      "status": "-",
+      "status": "+",
       "title": "The drag handle must be more distinct and wider",
       "description": "In the @src/renderer/src/components/chat/ChatSidebar.tsx the drag handle might be very close to another screens scroll bars thus making it almost invisible. The handle should protrude to the right (so short on the left and wide on the right) and be of a teal hue to make it stand out from scrollbars. The handle should have vertical bars illustrating that it's a drag handle.",
       "context": [
@@ -470,7 +470,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T13:29:28.662Z",
-      "updatedAt": "2025-09-30T13:29:28.662Z"
+      "updatedAt": "2025-09-30T14:00:59.064Z",
+      "completedAt": "2025-09-30T14:00:59.064Z"
     },
     {
       "id": "a8a2d902-820b-4d02-8783-43861075e090",
