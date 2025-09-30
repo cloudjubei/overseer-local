@@ -449,7 +449,7 @@
     },
     {
       "id": "db36287c-c9a7-44c9-94e9-76c6e57bd685",
-      "status": "-",
+      "status": "+",
       "title": "System prompt display",
       "description": "When there are no messages the @src/renderer/src/components/chat/ChatSidebar.tsx is displaying the system prompt at the top. Right now this can be very big, so it should be a special bubble that is centered (similar in style to the user/assistant message bubbles - but in a different gray - color scheme). It should be constrained to always have a certain max size (30% of the container size) and min size (showing 3 lines), and it should thus be vertically scrollable if need be.\nWhen there are messages, we should always show this system prompt as the first message.",
       "context": [
@@ -457,7 +457,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T12:57:16.524Z",
-      "updatedAt": "2025-09-30T12:57:16.524Z"
+      "updatedAt": "2025-09-30T13:55:22.473Z",
+      "completedAt": "2025-09-30T13:55:22.473Z"
     },
     {
       "id": "986bae36-acc0-4be4-93c0-05c9dd672b59",

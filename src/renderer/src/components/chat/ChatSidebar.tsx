@@ -6,7 +6,7 @@ import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import type { ChatContext } from 'thefactory-tools'
+import type { ChatContext, ChatMessage } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
 import { IconSettings, IconChevron } from '../ui/Icons'
@@ -214,6 +214,24 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     setDraftPrompt(custom && custom.length > 0 ? custom : effectivePrompt)
   }, [effectivePrompt, currentSettings])
 
+  // Build messages array with system prompt as the first message when present
+  const messagesWithSystem: ChatMessage[] = useMemo(() => {
+    const original = chat?.chat.messages || []
+    const systemMsg: ChatMessage | null = effectivePrompt
+      ? {
+          completionMesage: {
+            role: 'system',
+            content: effectivePrompt,
+            files: [],
+          },
+        } as ChatMessage
+      : null
+
+    if (!systemMsg) return original
+    if (original.length > 0 && original[0]?.completionMesage?.role === 'system') return original
+    return [systemMsg, ...original]
+  }, [chat?.chat.messages, effectivePrompt])
+
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
       {/* Top header: constant size */}
@@ -363,20 +381,10 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
           </div>
         )}
 
-        {/* Effective prompt display before any messages are sent */}
-        {(!chat?.chat.messages || chat.chat.messages.length === 0) && effectivePrompt && (
-          <div className="flex-shrink-0 mx-4 my-3 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-3 text-[13px] text-[var(--text-secondary)]">
-            <div className="text-[12px] uppercase font-semibold tracking-wide mb-1 text-[var(--text-muted)]">
-              Prompt
-            </div>
-            <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">{effectivePrompt}</pre>
-          </div>
-        )}
-
         {/* Messages list consumes remaining space and handles its own scrolling */}
         <MessageList
           chatId={chat?.key}
-          messages={chat?.chat.messages || []}
+          messages={messagesWithSystem}
           isThinking={isThinking}
         />
       </div>
