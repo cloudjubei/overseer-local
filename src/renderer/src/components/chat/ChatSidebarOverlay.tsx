@@ -221,7 +221,7 @@ export default function ChatSidebarOverlay({
     borderLeft: '1px solid var(--border-border, var(--border-default))',
     background: 'var(--surface-base)',
     position: 'relative',
-    overflow: 'hidden',
+    overflow: 'visible', // Allow handle to overflow
   }
 
   // Inner slides in to feel like a drawer while the outer pushes layout
@@ -242,7 +242,7 @@ export default function ChatSidebarOverlay({
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize chat sidebar"
-        style={{ display: visible ? 'block' : 'none' }}
+        style={{ display: visible ? 'block' : 'none', zIndex: 10 }}
       >
         <div
           className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center justify-center"

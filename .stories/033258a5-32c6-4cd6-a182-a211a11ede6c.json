@@ -201,7 +201,7 @@
     },
     {
       "id": "95c7a067-9e9b-4e54-b786-6d3997dfff30",
-      "status": "-",
+      "status": "+",
       "title": "Improve the chat sidebar ui on normal screen",
       "description": "So in @src/renderer/src/screens/stories/StoryDetailsView.tsx , @src/renderer/src/screens/stories/StoriesListView.tsx , @src/renderer/src/screens/TestsView.tsx and @src/renderer/src/screens/AgentsView.tsx - the chat button is in the top right and it makes the chat appear - this should slide out in a nice animation. It should also out collapse the @src/renderer/src/navigation/SidebarView.tsx  as to give more room to the @src/renderer/src/components/chat/ChatSidebar.tsx .\nThe whole area/window where the ChatSidebar is should be draggable up to a certain point (50% of the screen) so that it can be expanded or shrunk (up to a certain meaningful minimum - similar to the width the Sidebar is, so. that they are symmetrical). This width setting should be recorded and whenever such a chat is open this width should be resumed.",
       "context": [
@@ -214,8 +214,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:33.055Z",
-      "updatedAt": "2025-09-29T23:50:21.795Z",
-      "rejection": "When the chat opens - the ChatInput is max height it can be - that shouldn't be the case, it should be the standard small size.\nThe window is still not draggable - there's no drag handle visible."
+      "updatedAt": "2025-09-30T00:29:56.487Z",
+      "rejection": "When the chat opens - the ChatInput is max height it can be - that shouldn't be the case, it should be the standard small size.\nThe window is still not draggable - there's no drag handle visible.",
+      "completedAt": "2025-09-30T00:29:56.487Z"
     },
     {
       "id": "f50d7e7c-034c-4455-8772-81afac6c660c",
