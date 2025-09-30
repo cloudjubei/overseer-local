@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-09-23T14:13:33.191Z",
+  "updatedAt": "2025-09-30T14:15:55.784Z",
   "prices": [
     {
       "provider": "openai",
@@ -578,8 +578,8 @@
     {
       "provider": "openai",
       "model": "gpt-3.5-turbo",
-      "inputPerMTokensUSD": 1.5,
-      "outputPerMTokensUSD": 2,
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 1.5,
       "currency": "USD"
     },
     {
@@ -9638,6 +9638,237 @@
       "model": "wandb/microsoft/Phi-4-mini-instruct",
       "inputPerMTokensUSD": 8000,
       "outputPerMTokensUSD": 35000,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-5-codex",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD"
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD"
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5-20250929",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD"
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 1.7,
+      "currency": "USD"
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-reasoner",
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 1.7,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "deepseek.v3-v1:0",
+      "inputPerMTokensUSD": 0.58,
+      "outputPerMTokensUSD": 1.68,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini-2.5-flash-lite-preview-09-2025",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini-2.5-flash-preview-09-2025",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-2.5-flash-lite-preview-09-2025",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-2.5-flash-preview-09-2025",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-flash-latest",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-flash-lite-latest",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5-codex",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD"
+    },
+    {
+      "provider": "ollama",
+      "model": "ollama/deepseek-v3.1:671b-cloud",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "ollama",
+      "model": "ollama/gpt-oss:120b-cloud",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "ollama",
+      "model": "ollama/gpt-oss:20b-cloud",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "ollama",
+      "model": "ollama/qwen3-coder:480b-cloud",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/openai/gpt-5-codex",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/openai/gpt-5",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "qwen.qwen3-coder-480b-a35b-v1:0",
+      "inputPerMTokensUSD": 0.22,
+      "outputPerMTokensUSD": 1.7999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "qwen.qwen3-235b-a22b-2507-v1:0",
+      "inputPerMTokensUSD": 0.22,
+      "outputPerMTokensUSD": 0.88,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "qwen.qwen3-coder-30b-a3b-v1:0",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0.6,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "qwen.qwen3-32b-v1:0",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0.6,
+      "currency": "USD"
+    },
+    {
+      "provider": "sambanova",
+      "model": "sambanova/DeepSeek-V3.1",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 4.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "sambanova",
+      "model": "sambanova/gpt-oss-120b",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 4.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-anthropic_models",
+      "model": "vertex_ai/claude-sonnet-4-5",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-anthropic_models",
+      "model": "vertex_ai/claude-sonnet-4-5@20250929",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-deepseek_models",
+      "model": "vertex_ai/deepseek-ai/deepseek-v3.1-maas",
+      "inputPerMTokensUSD": 1.35,
+      "outputPerMTokensUSD": 5.4,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-qwen_models",
+      "model": "vertex_ai/qwen/qwen3-next-80b-a3b-instruct-maas",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 1.2,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-qwen_models",
+      "model": "vertex_ai/qwen/qwen3-next-80b-a3b-thinking-maas",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 1.2,
+      "currency": "USD"
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4-fast-reasoning",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4-fast-non-reasoning",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.5,
       "currency": "USD"
     }
   ]
