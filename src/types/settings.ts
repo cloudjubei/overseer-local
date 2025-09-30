@@ -32,6 +32,7 @@ export interface UserPreferences {
   storiesListViewStatusFilter: StoryListStatusFilter
   sidebarCollapsed: boolean
   // Preferred width of the right chat sidebar (pixels)
+  chatSidebarCollapsed: boolean
   chatSidebarWidth?: number
   shortcutsModifier: ShortcutsModifier
   shortcuts: ShortcutsConfig

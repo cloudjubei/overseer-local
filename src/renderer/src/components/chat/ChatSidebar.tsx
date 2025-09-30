@@ -176,29 +176,26 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
   if (collapsed) {
     return (
       <aside
-        className="relative z-30 flex h-full shrink-0 flex-col overflow-hidden bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed"
+        className="chat-collapsed-panel z-30 xh-full bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed"
         style={{ width: 'var(--sidebar-w-collapsed)' }}
       >
         <button
           type="button"
           onClick={() => setCollapsed(false)}
-          className="nav-toggle absolute top-2 left-2"
+          className="btn-secondary btn-icon top"
           aria-label={'Expand chat sidebar'}
           title={'Expand chat sidebar'}
         >
-          <span aria-hidden>
-            <IconChevron className="w-4 h-4" style={{ transform: 'rotate(180deg)' }} />
-          </span>
+          <IconChevron className="w-4 h-4" style={{ transform: 'rotate(180deg)' }} />
         </button>
-        <div className="flex flex-col items-center justify-center flex-1">
-          <button
-            className="btn-secondary btn-icon"
-            onClick={() => setCollapsed(false)}
-            aria-label="Open chat"
-          >
-            <IconChat className="w-5 h-5" />
-          </button>
-        </div>
+        <button
+          className="btn-secondary btn-icon center"
+          onClick={() => setCollapsed(false)}
+          aria-label="Open chat"
+        >
+          <IconChat className="w-5 h-5" />
+        </button>
+        <div className="bottom"></div>
       </aside>
     )
   }
@@ -207,6 +204,15 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
+          <button
+            type="button"
+            onClick={() => setCollapsed(true)}
+            className="btn-secondary btn-icon"
+            aria-label={'Collapse chat sidebar'}
+            title={'Collapse chat sidebar'}
+          >
+            <IconChevron className="w-4 h-4" style={{ transform: 'rotate(90deg)' }} />
+          </button>
           <ContextInfoButton context={context} label={chatContextTitle} />
         </div>
         <div className="flex items-center gap-2">
@@ -227,17 +233,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
             title="Chat settings"
           >
             <IconSettings className="h-[16px] w-[16px]" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setCollapsed(true)}
-            className="btn-secondary btn-icon"
-            aria-label={'Collapse chat sidebar'}
-            title={'Collapse chat sidebar'}
-          >
-            <span aria-hidden>
-              <IconChevron className="w-4 h-4" style={{ transform: 'rotate(90deg)' }} />
-            </span>
           </button>
 
           {isSettingsOpen && (

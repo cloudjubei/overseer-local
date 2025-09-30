@@ -52,3 +52,21 @@
     transition: none;
   }
 }
+
+.chat-collapsed-panel {
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  align-items: center;
+  padding: 10px;
+  gap: 8px;
+  background: var(--surface-base);
+}
+.chat-collapsed-panel .top {
+  justify-self: start;
+}
+.chat-collapsed-panel .center {
+  justify-self: center;
+}
+.chat-collapsed-panel .bottom {
+  justify-self: end;
+}
