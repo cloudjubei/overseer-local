@@ -377,7 +377,7 @@
     },
     {
       "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
-      "status": "-",
+      "status": "+",
       "title": "Hovering or clicking the (i) button at the top flashes",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx , the top (i) bar strangely flashes instead of showing the information the whole time - but this only seems to happen when the hover comes from the right side and not when it comes from the left.\nClicking it should also show the tooltip.",
       "context": [
@@ -385,8 +385,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:09:29.804Z",
-      "updatedAt": "2025-09-30T12:47:54.648Z",
-      "rejection": "In tooltip there's an error on line 200, the code:\n`ref: (el: HTMLElement) => {`\nthe error:\nNo overload matches this call.\n  The last overload gave the following error.\n    Object literal may only specify known properties, and 'ref' does not exist in type 'Partial<unknown> & Attributes'."
+      "updatedAt": "2025-09-30T13:19:58.836Z",
+      "rejection": "In tooltip there's an error on line 200, the code:\n`ref: (el: HTMLElement) => {`\nthe error:\nNo overload matches this call.\n  The last overload gave the following error.\n    Object literal may only specify known properties, and 'ref' does not exist in type 'Partial<unknown> & Attributes'.",
+      "completedAt": "2025-09-30T13:19:58.836Z"
     },
     {
       "id": "265cce60-2d86-4e84-9ba4-e8bec45598da",
