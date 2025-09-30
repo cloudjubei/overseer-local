@@ -5,13 +5,6 @@ import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
 import type { ChatContext } from 'thefactory-tools'
 
-// Top-level tile selection types for the overhauled ChatView
-// GENERAL aggregates project chats across all projects
-// STORIES and TOPICS refer to the active project
-const TILE_TYPES = ['GENERAL', 'STORIES', 'TOPICS'] as const
-
-type TileType = (typeof TILE_TYPES)[number]
-
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
   return String(topic)
@@ -72,12 +65,13 @@ export default function ChatView() {
     })
   }
 
-  // Compute lists by tile type
+  // GENERAL: aggregate project chats across all projects
   const generalChats = useMemo(() => {
     const list = allChatStates.filter((s) => s.chat.context.type === 'PROJECT')
     return sortByUpdated(list)
   }, [allChatStates])
 
+  // STORIES and FEATURES for the active project
   const storyChats = useMemo(() => {
     const list = (chatsByProjectId[activeProjectId] || []).filter(
       (s) => s.chat.context.type === 'STORY',
@@ -92,6 +86,7 @@ export default function ChatView() {
     return sortByUpdated(list)
   }, [chatsByProjectId, activeProjectId])
 
+  // TOPICS for the active project
   const projectTopicChats = useMemo(() => {
     const list = (chatsByProjectId[activeProjectId] || []).filter(
       (s) => s.chat.context.type === 'PROJECT_TOPIC',
@@ -139,28 +134,24 @@ export default function ChatView() {
     return entries
   }, [storyTopicChats])
 
-  const [selectedTile, setSelectedTile] = useState<TileType>('GENERAL')
-
   // Selected context state
   const [selectedContext, setSelectedContext] = useState<ChatContext | undefined>(undefined)
   useEffect(() => {
-    // choose the first available chat in the current tile if none selected yet
+    // choose the first available chat across sections if none selected yet
     let first: ChatContext | undefined
-    if (selectedTile === 'GENERAL') {
-      first = generalChats[0]?.chat.context
-    } else if (selectedTile === 'STORIES') {
-      first = (storyChats[0] || featureChats[0])?.chat.context
-    } else if (selectedTile === 'TOPICS') {
-      first = (projectTopicChats[0] || storyTopicChats[0])?.chat.context
-    }
+    first = generalChats[0]?.chat.context
+    if (!first) first = storyChats[0]?.chat.context
+    if (!first) first = featureChats[0]?.chat.context
+    if (!first) first = projectTopicChats[0]?.chat.context
+    if (!first) first = storyTopicChats[0]?.chat.context
+
     setSelectedContext((prev) => prev || first)
-  }, [selectedTile, generalChats, storyChats, featureChats, projectTopicChats, storyTopicChats])
+  }, [generalChats, storyChats, featureChats, projectTopicChats, storyTopicChats])
 
   const handleNewChat = async () => {
     // New General chat: restart the PROJECT chat for current active project
     const context: ChatContext = { type: 'PROJECT', projectId: activeProjectId }
     await restartChat(context)
-    setSelectedTile('GENERAL')
     setSelectedContext(context)
   }
 
@@ -196,7 +187,7 @@ export default function ChatView() {
 
   return (
     <div className="flex flex-1 min-h-0 w-full overflow-hidden">
-      {/* Left sidebar: type tiles + chats list */}
+      {/* Left sidebar: sections + chats list */}
       <aside className="w-[360px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-base)] flex flex-col min-h-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)]">
           <div className="text-sm font-semibold text-[var(--text-primary)]">Chats</div>
@@ -205,173 +196,140 @@ export default function ChatView() {
           </button>
         </div>
 
-        {/* Type selection tiles */}
-        <div className="p-2 overflow-auto">
-          <div className="grid grid-cols-3 gap-2">
-            {TILE_TYPES.map((t) => {
-              const isActive = t === selectedTile
-              const count =
-                t === 'GENERAL'
-                  ? generalChats.length
-                  : t === 'STORIES'
-                  ? storyChats.length + featureChats.length
-                  : projectTopicChats.length + storyTopicChats.length
-              return (
-                <button
-                  key={t}
-                  className={[
-                    'rounded-md px-2 py-3 text-left border',
-                    isActive
-                      ? 'border-blue-500 ring-1 ring-blue-500/50 bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
-                  ].join(' ')}
-                  onClick={() => setSelectedTile(t)}
-                >
-                  <div className="text-[12px] font-semibold text-[var(--text-primary)]">{t}</div>
-                  <div className="text-[11px] text-[var(--text-secondary)]">{count} item(s)</div>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Sections list for selected tile */}
+        {/* Sections list: GENERAL, STORIES, TOPICS */}
         <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-2">
-          {selectedTile === 'GENERAL' && (
+          {/* GENERAL */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+              onClick={() => setGeneralOpen((v) => !v)}
+            >
+              <span>GENERAL</span>
+              <span>{isGeneralOpen ? '−' : '+'}</span>
+            </button>
+            {isGeneralOpen && (
+              <div className="space-y-1">
+                {generalChats.length === 0 ? (
+                  <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                    No general chats yet.
+                  </div>
+                ) : (
+                  generalChats.map((c) => renderChatButton(c.chat.context, c.key))
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* STORIES (with nested FEATURES) */}
+          <div className="space-y-2">
             <div>
               <button
                 className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                onClick={() => setGeneralOpen((v) => !v)}
+                onClick={() => setStoriesOpen((v) => !v)}
               >
-                <span>GENERAL</span>
-                <span>{isGeneralOpen ? '−' : '+'}</span>
+                <span>STORIES</span>
+                <span>{isStoriesOpen ? '−' : '+'}</span>
               </button>
-              {isGeneralOpen && (
+              {isStoriesOpen && (
                 <div className="space-y-1">
-                  {generalChats.length === 0 ? (
+                  {storyChats.length === 0 ? (
                     <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                      No general chats yet.
+                      No story chats yet.
                     </div>
                   ) : (
-                    generalChats.map((c) => renderChatButton(c.chat.context, c.key))
+                    storyChats.map((c) => renderChatButton(c.chat.context, c.key))
                   )}
                 </div>
               )}
             </div>
-          )}
 
-          {selectedTile === 'STORIES' && (
-            <div className="space-y-2">
-              <div>
-                <button
-                  className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                  onClick={() => setStoriesOpen((v) => !v)}
-                >
-                  <span>STORIES</span>
-                  <span>{isStoriesOpen ? '−' : '+'}</span>
-                </button>
-                {isStoriesOpen && (
-                  <div className="space-y-1">
-                    {storyChats.length === 0 ? (
-                      <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                        No story chats yet.
-                      </div>
-                    ) : (
-                      storyChats.map((c) => renderChatButton(c.chat.context, c.key))
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <button
-                  className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                  onClick={() => setFeaturesOpen((v) => !v)}
-                >
-                  <span>FEATURES</span>
-                  <span>{isFeaturesOpen ? '−' : '+'}</span>
-                </button>
-                {isFeaturesOpen && (
-                  <div className="space-y-1">
-                    {featureChats.length === 0 ? (
-                      <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                        No feature chats yet.
-                      </div>
-                    ) : (
-                      featureChats.map((c) => renderChatButton(c.chat.context, c.key))
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {selectedTile === 'TOPICS' && (
-            <div className="space-y-2">
-              <div>
-                <button
-                  className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                  onClick={() => setTopicsOpen((v) => !v)}
-                >
-                  <span>TOPICS</span>
-                  <span>{isTopicsOpen ? '−' : '+'}</span>
-                </button>
-                {isTopicsOpen && (
-                  <div className="space-y-2">
-                    {/* Project Topics */}
-                    <div>
-                      <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                        Project Topics
-                      </div>
-                      <div className="space-y-2">
-                        {projectTopicsGrouped.length === 0 ? (
-                          <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                            No project topic chats yet.
-                          </div>
-                        ) : (
-                          projectTopicsGrouped.map(([topic, items]) => (
-                            <div key={topic} className="pl-1">
-                              <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                                {prettyTopicName(topic)}
-                              </div>
-                              <div className="space-y-1">
-                                {items.map((c) => renderChatButton(c.chat.context, c.key))}
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
+            <div>
+              <button
+                className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+                onClick={() => setFeaturesOpen((v) => !v)}
+              >
+                <span>FEATURES</span>
+                <span>{isFeaturesOpen ? '−' : '+'}</span>
+              </button>
+              {isFeaturesOpen && (
+                <div className="space-y-1">
+                  {featureChats.length === 0 ? (
+                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                      No feature chats yet.
                     </div>
+                  ) : (
+                    featureChats.map((c) => renderChatButton(c.chat.context, c.key))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
-                    {/* Story Topics */}
-                    <div>
-                      <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                        Story Topics
-                      </div>
-                      <div className="space-y-2">
-                        {storyTopicsGrouped.length === 0 ? (
-                          <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                            No story topic chats yet.
-                          </div>
-                        ) : (
-                          storyTopicsGrouped.map(([topic, items]) => (
-                            <div key={topic} className="pl-1">
-                              <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                                {prettyTopicName(topic)}
-                              </div>
-                              <div className="space-y-1">
-                                {items.map((c) => renderChatButton(c.chat.context, c.key))}
-                              </div>
+          {/* TOPICS */}
+          <div className="space-y-2">
+            <div>
+              <button
+                className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+                onClick={() => setTopicsOpen((v) => !v)}
+              >
+                <span>TOPICS</span>
+                <span>{isTopicsOpen ? '−' : '+'}</span>
+              </button>
+              {isTopicsOpen && (
+                <div className="space-y-2">
+                  {/* Project Topics */}
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                      Project Topics
+                    </div>
+                    <div className="space-y-2">
+                      {projectTopicsGrouped.length === 0 ? (
+                        <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                          No project topic chats yet.
+                        </div>
+                      ) : (
+                        projectTopicsGrouped.map(([topic, items]) => (
+                          <div key={topic} className="pl-1">
+                            <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                              {prettyTopicName(topic)}
                             </div>
-                          ))
-                        )}
-                      </div>
+                            <div className="space-y-1">
+                              {items.map((c) => renderChatButton(c.chat.context, c.key))}
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
+
+                  {/* Story Topics */}
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                      Story Topics
+                    </div>
+                    <div className="space-y-2">
+                      {storyTopicsGrouped.length === 0 ? (
+                        <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                          No story topic chats yet.
+                        </div>
+                      ) : (
+                        storyTopicsGrouped.map(([topic, items]) => (
+                          <div key={topic} className="pl-1">
+                            <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                              {prettyTopicName(topic)}
+                            </div>
+                            <div className="space-y-1">
+                              {items.map((c) => renderChatButton(c.chat.context, c.key))}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </aside>
 
