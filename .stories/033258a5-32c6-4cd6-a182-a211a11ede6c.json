@@ -324,7 +324,7 @@
     },
     {
       "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",
-      "status": "-",
+      "status": "+",
       "title": "The Chat screen needs an overhaul",
       "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats should be split into two sections - at the top will be the type selection (so a scrollable list with tiles representing the different Context Type combinations) and at the bottom the list of chats for that type. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.\n\nThe way the sections in the ChatView should work is the following:\n|GENERAL|\n-----------\n|project chat|\n|STORIES|\n|TOPICS|\n\nGENERAL, STORIES and TOPICS are sections that can open up to reveal either chats (listed first) or sections within (like STORIES -> FEATURES or TOPICS -> TESTS).\nGENERAL needs to show all the general chats across all projects.\nAll the chats in a given section are sorted by the last update date.",
       "context": [
@@ -332,7 +332,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T01:20:42.316Z",
-      "updatedAt": "2025-09-30T11:55:00.171Z"
+      "updatedAt": "2025-09-30T12:06:33.528Z",
+      "completedAt": "2025-09-30T12:06:33.528Z"
     },
     {
       "id": "b5acbe79-2d92-438c-9850-15cee05fbea9",
