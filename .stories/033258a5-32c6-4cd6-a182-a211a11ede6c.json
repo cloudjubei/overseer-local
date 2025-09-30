@@ -542,7 +542,7 @@
     },
     {
       "id": "b88ca6b3-bff8-4d59-8fd7-6bd06f2aaf8f",
-      "status": "-",
+      "status": "+",
       "title": "The chat modal panel should have no border and have rounded corners",
       "description": "The @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx",
       "context": [
@@ -550,7 +550,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T20:48:10.428Z",
-      "updatedAt": "2025-09-30T20:48:10.428Z"
+      "updatedAt": "2025-09-30T21:10:48.021Z",
+      "completedAt": "2025-09-30T21:10:48.021Z"
     }
   ],
   "featureIdToDisplayIndex": {

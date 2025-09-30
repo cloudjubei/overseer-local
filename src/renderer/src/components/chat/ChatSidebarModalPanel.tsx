@@ -132,6 +132,12 @@ export default function ChatSidebarModalPanel({
 
   if (!modalContainer) return null
 
+  // Rounded corners for the modal-attached panel (no border)
+  const roundedLeft: React.CSSProperties = {
+    borderTopLeftRadius: 'var(--radius-3)',
+    borderBottomLeftRadius: 'var(--radius-3)',
+  }
+
   if (collapsed) {
     // Slim bar attached to the right of modal
     const style: React.CSSProperties = panelRect
@@ -141,12 +147,13 @@ export default function ChatSidebarModalPanel({
           left: Math.min(panelRect.right, window.innerWidth),
           height: panelRect.height,
           width: COLLAPSED_W,
+          ...roundedLeft,
         }
-      : { position: 'absolute', top: 0, right: 0, bottom: 0, width: COLLAPSED_W }
+      : { position: 'absolute', top: 0, right: 0, bottom: 0, width: COLLAPSED_W, ...roundedLeft }
 
     return createPortal(
       <aside
-        className="chat-collapsed-panel z-[5] bg-white dark:bg-neutral-900 dark:border-neutral-800 border-l"
+        className="chat-collapsed-panel z-[5] bg-surface-base"
         style={style}
       >
         <button
@@ -171,11 +178,7 @@ export default function ChatSidebarModalPanel({
     )
   }
 
-  const baseClass = 'absolute z-[5] border-l border-border bg-surface-base overflow-hidden'
-  const roundedLeft: React.CSSProperties = {
-    borderTopLeftRadius: 'var(--radius-3)',
-    borderBottomLeftRadius: 'var(--radius-3)',
-  }
+  const baseClass = 'absolute z-[5] bg-surface-base overflow-hidden'
 
   const style: React.CSSProperties = panelRect
     ? {
