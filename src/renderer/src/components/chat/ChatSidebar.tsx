@@ -175,7 +175,10 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
 
   if (collapsed) {
     return (
-      <aside className="relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-l bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed w-12">
+      <aside
+        className="relative z-30 flex h-full shrink-0 flex-col overflow-hidden bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed"
+        style={{ width: 'var(--sidebar-w-collapsed)' }}
+      >
         <button
           type="button"
           onClick={() => setCollapsed(false)}
@@ -233,7 +236,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
             title={'Collapse chat sidebar'}
           >
             <span aria-hidden>
-              <IconChevron className="w-4 h-4" />
+              <IconChevron className="w-4 h-4" style={{ transform: 'rotate(90deg)' }} />
             </span>
           </button>
 
