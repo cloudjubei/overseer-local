@@ -26,8 +26,21 @@ function parseProjectIdFromContext(context: ChatContext): string | undefined {
   return undefined
 }
 
-export default function ChatSidebar({ context, chatContextTitle, isCollapsible, onCollapse }: ChatSidebarProps) {
-  const { getChat, sendMessage, getSettingsForContext, updateSettingsForContext, resetSettingsForContext, getSettingsPrompt, getDefaultPrompt } = useChats()
+export default function ChatSidebar({
+  context,
+  chatContextTitle,
+  isCollapsible,
+  onCollapse,
+}: ChatSidebarProps) {
+  const {
+    getChat,
+    sendMessage,
+    getSettingsForContext,
+    updateSettingsForContext,
+    resetSettingsForContext,
+    getSettingsPrompt,
+    getDefaultPrompt,
+  } = useChats()
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
 
   useEffect(() => {
@@ -55,9 +68,16 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
   const isConfigured = !!selectedConfig?.apiKey
 
   // Settings state
-  const currentSettings = useMemo(() => getSettingsForContext(context), [getSettingsForContext, context])
-  const [availableTools, setAvailableTools] = useState<string[] | undefined>(currentSettings?.availableTools)
-  const [autoCallTools, setAutoCallTools] = useState<string[] | undefined>(currentSettings?.autoCallTools)
+  const currentSettings = useMemo(
+    () => getSettingsForContext(context),
+    [getSettingsForContext, context],
+  )
+  const [availableTools, setAvailableTools] = useState<string[] | undefined>(
+    currentSettings?.availableTools,
+  )
+  const [autoCallTools, setAutoCallTools] = useState<string[] | undefined>(
+    currentSettings?.autoCallTools,
+  )
 
   // Local editable prompt state that reflects either custom or effective default for this context
   const [draftPrompt, setDraftPrompt] = useState<string>('')
@@ -68,9 +88,14 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     setAutoCallTools(currentSettings?.autoCallTools)
   }, [currentSettings])
 
-  const persistSettings = useCallback(async (patch: Partial<{ availableTools: string[]; autoCallTools: string[]; systemPrompt: string }>) => {
-    await updateSettingsForContext(context, patch as any)
-  }, [context, updateSettingsForContext])
+  const persistSettings = useCallback(
+    async (
+      patch: Partial<{ availableTools: string[]; autoCallTools: string[]; systemPrompt: string }>,
+    ) => {
+      await updateSettingsForContext(context, patch as any)
+    },
+    [context, updateSettingsForContext],
+  )
 
   const handleSend = useCallback(
     async (message: string, attachments: string[]) => {
@@ -82,13 +107,10 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     [context, selectedConfig, sendMessage],
   )
 
-  const handlePickConfig = useCallback(
-    async (configId: string) => {
-      setSelectedConfigId(configId)
-      // Model selection is not persisted per-chat in ChatSettings; user controls active model via LLM settings
-    },
-    [],
-  )
+  const handlePickConfig = useCallback(async (configId: string) => {
+    setSelectedConfigId(configId)
+    // Model selection is not persisted per-chat in ChatSettings; user controls active model via LLM settings
+  }, [])
 
   type ToolToggle = { name: string; description: string; available: boolean; autoCall: boolean }
   const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
@@ -192,6 +214,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     const refreshPrompt = async () => {
       try {
         const prompt = await getSettingsPrompt(context)
+        console.log('prompt from tools: ', prompt)
         if (!cancelled) setEffectivePrompt(prompt)
       } catch {
         try {
@@ -268,7 +291,9 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
 
               <div className="p-3 space-y-4 max-h-[70vh] overflow-auto">
                 <div className="space-y-2">
-                  <div className="text-xs font-medium text-[var(--text-secondary)]">System Prompt</div>
+                  <div className="text-xs font-medium text-[var(--text-secondary)]">
+                    System Prompt
+                  </div>
                   <textarea
                     value={draftPrompt}
                     onChange={(e) => setDraftPrompt(e.target.value)}
@@ -308,14 +333,18 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                           <div key={tool.name} className="px-2 py-2 space-y-1">
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex-1 min-w-0 pr-2">
-                                <div className="text-sm text-[var(--text-primary)] truncate">{tool.name}</div>
+                                <div className="text-sm text-[var(--text-primary)] truncate">
+                                  {tool.name}
+                                </div>
                                 <div className="text-xs text-neutral-500 font-light truncate">
                                   {tool.description}
                                 </div>
                               </div>
                               <div className="flex flex-col items-center gap-1">
                                 <div className="flex flex-col items-center space-y-px">
-                                  <span className="text-[10px] text-[var(--text-secondary)]">Available</span>
+                                  <span className="text-[10px] text-[var(--text-secondary)]">
+                                    Available
+                                  </span>
                                   <Switch
                                     checked={tool.available}
                                     onCheckedChange={() => toggleAvailable(tool.name)}
@@ -323,7 +352,9 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                                   />
                                 </div>
                                 <div className="flex flex-col items-center space-y-px">
-                                  <span className="text-[10px] text-[var(--text-secondary)]">Auto-call</span>
+                                  <span className="text-[10px] text-[var(--text-secondary)]">
+                                    Auto-call
+                                  </span>
                                   <Switch
                                     checked={tool.available ? tool.autoCall : false}
                                     onCheckedChange={() => toggleAutoCall(tool.name)}
@@ -356,7 +387,9 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
             }}
             role="status"
           >
-            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+            <span>
+              LLM not configured. Set your API key in Settings to enable sending messages.
+            </span>
             <button className="btn" onClick={() => navigateView('Settings')}>
               Configure
             </button>
@@ -369,7 +402,9 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
             <div className="text-[12px] uppercase font-semibold tracking-wide mb-1 text-[var(--text-muted)]">
               Prompt
             </div>
-            <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">{effectivePrompt}</pre>
+            <pre className="whitespace-pre-wrap break-words text-[var(--text-primary)]">
+              {effectivePrompt}
+            </pre>
           </div>
         )}
 

@@ -7,6 +7,7 @@ import type {
   ChatUpdate,
   ChatsSettings,
   ChatSettings,
+  ChatContextArguments,
 } from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
@@ -44,7 +45,7 @@ export type ChatsContextValue = {
   resetSettingsForContext: (context: ChatContext) => Promise<ChatSettings | undefined>
 
   getDefaultPrompt: (chatContext: ChatContext) => Promise<string>
-  getSettingsPrompt: (chatContext: ChatContext) => Promise<string>
+  getSettingsPrompt: (contextArguments: ChatContextArguments) => Promise<string>
 }
 
 const ChatsContext = createContext<ChatsContextValue | null>(null)
@@ -269,15 +270,24 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const getSettingsPrompt = useCallback(async (chatContext: ChatContext): Promise<string> => {
-    try {
-      // The main process can enrich context arguments as needed
-      return await chatsService.getSettingsPrompt(chatContext as any)
-    } catch (e) {
-      console.error('Failed to get settings prompt', e)
-      return ''
-    }
-  }, [])
+  // export interface ChatContextArguments extends ChatContext {
+  //     project?: ProjectSpec;
+  //     story?: Story;
+  //     feature?: Feature;
+  //     run?: AgentRunHistory;
+  // }
+  const getSettingsPrompt = useCallback(
+    async (contextArguments: ChatContextArguments): Promise<string> => {
+      try {
+        // The main process can enrich context arguments as needed
+        return await chatsService.getSettingsPrompt(contextArguments)
+      } catch (e) {
+        console.error('Failed to get settings prompt', e)
+        return ''
+      }
+    },
+    [],
+  )
 
   const value = useMemo<ChatsContextValue>(
     () => ({

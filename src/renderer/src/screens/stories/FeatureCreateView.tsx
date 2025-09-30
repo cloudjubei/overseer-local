@@ -84,6 +84,31 @@ export default function FeatureCreateView({
         isOpen={true}
         size={'lg'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+        footer={
+          <div className="flex justify-between gap-2">
+            <span />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={attemptClose}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn"
+                form={formId}
+                disabled={submitting}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                title="Cmd/Ctrl+Enter to submit"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        }
         contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         <FeatureForm
