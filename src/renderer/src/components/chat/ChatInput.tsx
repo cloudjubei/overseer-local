@@ -10,6 +10,8 @@ interface ChatInputProps {
   isConfigured: boolean
 }
 
+const MAX_INPUT_HEIGHT_PX = 250
+
 export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInputProps) {
   const [input, setInput] = useState<string>('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
@@ -47,13 +49,10 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
 
   const autoSizeTextarea = () => {
     const el = textareaRef.current
-    if (!el || !chatInputRef.current) return
-
-    const parentHeight = chatInputRef.current.parentElement?.clientHeight || 0
-    const maxHeight = parentHeight * 0.3
+    if (!el) return
 
     el.style.height = 'auto'
-    const next = Math.min(el.scrollHeight, maxHeight)
+    const next = Math.min(el.scrollHeight, MAX_INPUT_HEIGHT_PX)
     el.style.height = next + 'px'
 
     computeVisibleLines()
@@ -127,10 +126,8 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   )
 
   const maxHeightStyle = useMemo(() => {
-    if (!chatInputRef.current) return { maxHeight: '30vh' } // Fallback
-    const parentHeight = chatInputRef.current.parentElement?.clientHeight || 0
-    return { maxHeight: parentHeight * 0.3 }
-  }, [chatInputRef.current])
+    return { maxHeight: MAX_INPUT_HEIGHT_PX }
+  }, [])
 
   const showHintsArea = visibleLines <= 3
 

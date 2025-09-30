@@ -163,7 +163,8 @@ export default function ChatSidebarOverlay({
   // Modal/popup behavior (unchanged): overlay next to modal, sliding over it
   // ===========================
   if (isModal) {
-    const baseClass = 'absolute z-[5] border-l border-border bg-surface-base shadow-xl will-change-transform overflow-hidden'
+    const baseClass =
+      'absolute z-[5] border-l border-border bg-surface-base shadow-xl will-change-transform overflow-hidden'
     const roundedLeft: React.CSSProperties = {
       borderTopLeftRadius: 'var(--radius-3)',
       borderBottomLeftRadius: 'var(--radius-3)',
@@ -176,7 +177,8 @@ export default function ChatSidebarOverlay({
           height: panelRect.height,
           width: Math.min(width, availableNextToModal || width),
           transition: `transform ${transitionInOut}, opacity ${transitionInOut}`,
-          transform: visible ? 'translateX(0)' : 'translateX(104%)',
+          transform: visible ? 'translateX(0)' : 'translateX(-100%)',
+          opacity: visible ? 1 : 0,
           ...roundedLeft,
         }
       : {
@@ -185,7 +187,8 @@ export default function ChatSidebarOverlay({
           bottom: 0,
           width,
           transition: `transform ${transitionInOut}, opacity ${transitionInOut}`,
-          transform: visible ? 'translateX(0)' : 'translateX(104%)',
+          transform: visible ? 'translateX(0)' : 'translateX(-100%)',
+          opacity: visible ? 1 : 0,
           ...roundedLeft,
         }
 
@@ -218,7 +221,7 @@ export default function ChatSidebarOverlay({
     borderLeft: '1px solid var(--border-border, var(--border-default))',
     background: 'var(--surface-base)',
     position: 'relative',
-    overflow: 'hidden',
+    overflow: 'visible', // Allow handle to overflow
   }
 
   // Inner slides in to feel like a drawer while the outer pushes layout
@@ -239,7 +242,7 @@ export default function ChatSidebarOverlay({
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize chat sidebar"
-        style={{ display: visible ? 'block' : 'none' }}
+        style={{ display: visible ? 'block' : 'none', zIndex: 10 }}
       >
         <div
           className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center justify-center"
