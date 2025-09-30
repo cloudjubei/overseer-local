@@ -376,7 +376,7 @@
     },
     {
       "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
-      "status": "-",
+      "status": "+",
       "title": "Hovering or clicking the (i) button at the top flashes",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx , the top (i) bar strangely flashes instead of showing the information the whole time - but this only seems to happen when the hover comes from the right side and not when it comes from the left.\nClicking it should also show the tooltip.",
       "context": [
@@ -384,7 +384,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:09:29.804Z",
-      "updatedAt": "2025-09-30T11:48:42.696Z"
+      "updatedAt": "2025-09-30T12:15:18.929Z",
+      "completedAt": "2025-09-30T12:15:18.929Z"
     },
     {
       "id": "265cce60-2d86-4e84-9ba4-e8bec45598da",
