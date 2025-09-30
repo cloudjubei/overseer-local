@@ -4,7 +4,14 @@ import { useLLMConfig } from '../../../contexts/LLMConfigContext'
 import { useNavigator } from '../../../navigation/Navigator'
 
 export default function LLMSettings() {
-  const { configs, activeConfigId, removeConfig, setActive } = useLLMConfig()
+  const {
+    configs,
+    activeConfigId,
+    activeChatConfigId,
+    removeConfig,
+    setActive,
+    setActiveChat,
+  } = useLLMConfig()
   const { openModal } = useNavigator()
 
   return (
@@ -27,10 +34,13 @@ export default function LLMSettings() {
             className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between"
           >
             <div className="min-w-0">
-              <div className="font-medium truncate">
-                {cfg.name}{' '}
+              <div className="font-medium truncate flex items-center gap-2">
+                <span className="truncate">{cfg.name}</span>
                 {activeConfigId === cfg.id ? (
                   <span className="badge badge--soft badge--done">Active</span>
+                ) : null}
+                {activeChatConfigId === cfg.id ? (
+                  <span className="badge badge--soft badge--info">Chat Active</span>
                 ) : null}
               </div>
               <div className="text-sm text-gray-600 truncate">
@@ -40,6 +50,11 @@ export default function LLMSettings() {
             <div className="flex items-center gap-2 shrink-0">
               {activeConfigId !== cfg.id && (
                 <Button onClick={() => setActive(cfg.id!)}>Set Active</Button>
+              )}
+              {activeChatConfigId !== cfg.id && (
+                <Button variant="outline" onClick={() => setActiveChat(cfg.id!)}>
+                  Set Chat Active
+                </Button>
               )}
               <Button
                 onClick={() => openModal({ type: 'llm-config-edit', id: cfg.id! })}

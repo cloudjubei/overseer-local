@@ -416,7 +416,7 @@
     },
     {
       "id": "c6e1cbe2-6b73-4982-9dca-83eb9b3741bf",
-      "status": "-",
+      "status": "+",
       "title": "LLMConfig setting",
       "description": "Chats need to have the LLMConfig stored separately from the AgentRun LLMConfig. In @src/renderer/src/screens/settings/llms/LLMSettings.tsx and @src/renderer/src/contexts/LLMConfigContext.tsx there should simply be another field for the activeChatConfig .\nThe @src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx needs to be updated to have a button showing which config is the Chat active one and allow setting it via that screen.",
       "context": [
@@ -426,11 +426,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T12:01:17.827Z",
-      "updatedAt": "2025-09-30T12:01:17.827Z"
+      "updatedAt": "2025-09-30T13:24:21.382Z",
+      "completedAt": "2025-09-30T13:24:21.382Z"
     },
     {
       "id": "de5208f4-4f5b-464f-99b1-abeb9daa903e",
-      "status": "-",
+      "status": "+",
       "title": "Modal chat sidebar improvements",
       "description": "All the modals that use @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx should have the collapsed panel showing by default and they should no longer show the open chat button in the top right.\n\nAdditionally, some of these modals can be very small and the @src/renderer/src/components/chat/ChatInput.tsx at the bottom ends up not showing. The top and bottom of the @src/renderer/src/components/chat/ChatSidebar.tsx should always show, the top having always a constant size, and the bottom can have the maximum constrained to 40% of the total parent size.",
       "context": [
@@ -440,7 +441,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T12:52:58.329Z",
-      "updatedAt": "2025-09-30T12:52:58.329Z"
+      "updatedAt": "2025-09-30T13:32:11.484Z",
+      "completedAt": "2025-09-30T13:32:11.484Z"
     },
     {
       "id": "db36287c-c9a7-44c9-94e9-76c6e57bd685",
