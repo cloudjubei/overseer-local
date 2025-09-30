@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2055,23 +2055,36 @@
     },
     {
       "id": "19d8f95a-353c-4fc0-a1e6-07d39861c4bc",
-      "status": "-",
+      "status": "?",
       "title": "Double story entries",
       "description": "TODO",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-30T10:27:06.169Z",
-      "updatedAt": "2025-09-30T10:27:06.169Z"
+      "updatedAt": "2025-09-30T13:16:32.808Z"
     },
     {
       "id": "cf861042-23a2-41b1-a75b-3783a2b6a2bf",
-      "status": "-",
+      "status": "?",
       "title": "Double notifications",
       "description": "TODO",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-30T10:27:15.324Z",
-      "updatedAt": "2025-09-30T10:27:15.324Z"
+      "updatedAt": "2025-09-30T13:16:34.352Z"
+    },
+    {
+      "id": "bb76a798-869f-45ba-9902-25812ab58166",
+      "status": "-",
+      "title": "Test tools allow running e2e tests",
+      "description": "@src/renderer/src/services/factoryTestsService.ts exposes a new interface to run E2E tests and to get the latest result of those.\nThese should be able to be triggered via @src/renderer/src/screens/TestsView.tsx just like normal tests. There should be another option in the toggle to switch to E2E and then run them.\nthe `command` parameter in the `runTestsE2E` function is for the user to be able to supply their own command to pass to the run tests execution command. By default the system finds out the command assigned in `package.json` to `tests:e2e` - information about this should be provided to the user and in this new E2E section they should be shown an in put where they can provide a different command (if not provided undefined should be passed to the function).",
+      "context": [
+        "src/renderer/src/services/factoryTestsService.ts",
+        "src/renderer/src/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T13:19:11.943Z",
+      "updatedAt": "2025-09-30T13:19:11.943Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2210,7 +2223,8 @@
     "31bad08b-59b0-468b-a154-7814251bd4cb": 133,
     "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134,
     "19d8f95a-353c-4fc0-a1e6-07d39861c4bc": 135,
-    "cf861042-23a2-41b1-a75b-3783a2b6a2bf": 136
+    "cf861042-23a2-41b1-a75b-3783a2b6a2bf": 136,
+    "bb76a798-869f-45ba-9902-25812ab58166": 137
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-09-29T14:40:07.339Z"
