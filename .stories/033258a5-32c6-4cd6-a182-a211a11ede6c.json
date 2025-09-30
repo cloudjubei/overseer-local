@@ -373,6 +373,18 @@
       "blockers": [],
       "createdAt": "2025-09-30T10:26:34.764Z",
       "updatedAt": "2025-09-30T10:26:34.764Z"
+    },
+    {
+      "id": "1232c0ac-6074-4c02-88eb-f9266eac85ba",
+      "status": "-",
+      "title": "ChatSidebar settings panel",
+      "description": "The settings panel in @src/renderer/src/components/chat/ChatSidebar.tsx is not displaying the prompt for the given chatContext.\n\nThe tools that are displayed should have the toggles displayed in this way:\n|TOGGLE1|TOGGLE2| where they are vertically stacked on the right with a small gap between. One of the toggles has the following display:\n|LABEL|SWITCH| where they are vertically stacked and the label is of a small font size just above the switch (minimal gap of 1px).",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T10:54:00.598Z",
+      "updatedAt": "2025-09-30T10:54:00.598Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -401,7 +413,8 @@
     "4115f6ec-a85b-4a5d-bf23-14df6314c7c7": 23,
     "8c670818-5898-4407-92a7-df91015bbbf2": 24,
     "dbe43cbc-d659-42b8-9bb8-c11a9251a50f": 25,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 26
+    "1232c0ac-6074-4c02-88eb-f9266eac85ba": 26,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 27
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
