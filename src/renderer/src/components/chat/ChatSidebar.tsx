@@ -66,11 +66,11 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
 
   const isConfigured = !!selectedConfig?.apiKey
 
-  const [allowedTools, setAllowedTools] = useState(settings?.allowedTools)
+  const [availableTools, setAvailableTools] = useState(settings?.availableTools)
   const [autoCallTools, setAutoCallTools] = useState(settings?.autoCallTools)
 
   useEffect(() => {
-    setAllowedTools(settings?.allowedTools)
+    setAvailableTools(settings?.availableTools)
     setAutoCallTools(settings?.autoCallTools)
   }, [settings])
 
@@ -81,12 +81,12 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       playSendSound()
       const configWithSettings = {
         ...selectedConfig,
-        allowedTools,
+        availableTools,
         autoCallTools,
       }
       await sendMessage(context, message, configWithSettings, attachments)
     },
-    [context, selectedConfig, sendMessage, allowedTools, autoCallTools],
+    [context, selectedConfig, sendMessage, availableTools, autoCallTools],
   )
 
   const handlePickConfig = useCallback(
@@ -114,7 +114,7 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       }
       try {
         const list = await factoryToolsService.listTools(projectId)
-        const allowed = allowedTools
+        const allowed = availableTools
         const mapped: ToolToggle[] = list.map(
           (t) =>
             ({
@@ -132,11 +132,11 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     return () => {
       isMounted = false
     }
-  }, [projectId, allowedTools])
+  }, [projectId, availableTools])
 
   const handleToolToggle = useCallback(
     (toolId: string) => {
-      const currentAllowed = allowedTools || tools?.map((t) => t.name) || []
+      const currentAllowed = availableTools || tools?.map((t) => t.name) || []
       const newAllowed = new Set(currentAllowed)
 
       if (newAllowed.has(toolId)) {
@@ -144,9 +144,9 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       } else {
         newAllowed.add(toolId)
       }
-      setAllowedTools(Array.from(newAllowed))
+      setAvailableTools(Array.from(newAllowed))
     },
-    [allowedTools, tools],
+    [availableTools, tools],
   )
 
   // Settings dropdown UI state
