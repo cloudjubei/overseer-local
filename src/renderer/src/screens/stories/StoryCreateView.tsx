@@ -58,6 +58,8 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
     [projectId],
   )
 
+  const formId = 'story-create-form'
+
   return (
     <>
       <Modal
@@ -67,6 +69,28 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         size={'md'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         contentClassName="p-4 min-h-0 overflow-y-auto"
+        footer={
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={attemptClose}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn"
+              form={formId}
+              disabled={submitting}
+              aria-keyshortcuts="Control+Enter Meta+Enter"
+              title="Cmd/Ctrl+Enter to submit"
+            >
+              Create Story
+            </button>
+          </div>
+        }
       >
         <StoryForm
           initialValues={{}}
@@ -76,6 +100,8 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
           isCreate={true}
           titleRef={titleRef}
           onDirtyChange={setHasChanges}
+          formId={formId}
+          hideActions
         />
       </Modal>
 

@@ -7,6 +7,8 @@ import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, Story } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
+import { Button } from '@renderer/components/ui/Button'
+import { IconDelete } from '@renderer/components/ui/Icons'
 
 export default function StoryEditView({
   storyId,
@@ -85,6 +87,8 @@ export default function StoryEditView({
     [projectId, storyId],
   )
 
+  const formId = 'story-edit-form'
+
   return (
     <>
       <Modal
@@ -92,6 +96,45 @@ export default function StoryEditView({
         onClose={attemptClose}
         isOpen={true}
         contentClassName="p-4 min-h-0 overflow-y-auto"
+        footer={
+          <div className="flex justify-between gap-2">
+            {!initialValues ? (
+              <span />
+            ) : (
+              <Button
+                className="btn-secondary"
+                variant="danger"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={submitting || deleting}
+              >
+                <div className="flex items-center gap-2">
+                  <IconDelete className="w-4 h-4" />
+                  Delete
+                </div>
+              </Button>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={attemptClose}
+                disabled={submitting || deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn"
+                form={formId}
+                disabled={submitting || deleting}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                title="Cmd/Ctrl+Enter to submit"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        }
       >
         {initialValues ? (
           <StoryForm
@@ -106,6 +149,8 @@ export default function StoryEditView({
             isCreate={false}
             onDelete={() => setShowDeleteConfirm(true)}
             onDirtyChange={setHasChanges}
+            formId={formId}
+            hideActions
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">

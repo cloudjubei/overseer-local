@@ -2089,7 +2089,7 @@
     },
     {
       "id": "fb5a75f9-a460-4382-b369-420836ca265e",
-      "status": "-",
+      "status": "+",
       "title": "StoryCreateView and StoryEditView should use footer buttons",
       "description": "Following @src/renderer/src/screens/stories/FeatureEditView.tsx , @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx should have it use the modal footer in the same way instead of creating their own buttons in the form.",
       "context": [
@@ -2099,7 +2099,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T14:01:58.314Z",
-      "updatedAt": "2025-09-30T14:01:58.314Z"
+      "updatedAt": "2025-09-30T14:19:01.769Z",
+      "completedAt": "2025-09-30T14:19:01.769Z"
     }
   ],
   "featureIdToDisplayIndex": {

@@ -370,8 +370,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T10:54:00.598Z",
-      "updatedAt": "2025-09-30T13:45:44.800Z",
-      "rejection": "Disabled and turned off switches don't look any different",
+      "updatedAt": "2025-09-30T14:16:15.820Z",
       "completedAt": "2025-09-30T13:45:44.800Z"
     },
     {
@@ -437,14 +436,11 @@
       "context": [
         "src/renderer/src/components/chat/ChatSidebarModalPanel.tsx",
         "src/renderer/src/components/chat/ChatInput.tsx",
-        "src/renderer/src/components/chat/ChatSidebar.tsx",
-        "src/renderer/src/screens/stories/StoryEditView.tsx",
-        "src/renderer/src/screens/stories/StoryCreateView.tsx"
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-30T12:52:58.329Z",
-      "updatedAt": "2025-09-30T13:47:18.550Z",
-      "rejection": "@src/renderer/src/screens/stories/StoryEditView.tsx and @src/renderer/src/screens/stories/StoryCreateView.tsx also use the modal chat and should be updated too.",
+      "updatedAt": "2025-09-30T14:16:55.901Z",
       "completedAt": "2025-09-30T13:47:18.550Z"
     },
     {
