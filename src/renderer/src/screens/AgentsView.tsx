@@ -210,7 +210,7 @@ const CurrentProjectView = () => {
                   <tr>
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Story</th>
-                    <th className="text-left px-3 py-2">Status</h2>
+                    <th className="text-left px-3 py-2">Status</th>
                     <th className="text-left px-3 py-2">Model</th>
                     <th className="text-left px-3 py-2">Features</th>
                     <th className="text-left px-3 py-2">Cost</th>
@@ -958,7 +958,7 @@ const AllProjectsView = () => {
                       )}
                     </td>
                     <td className="px-3 py-2">
-                      {a.lowestRated ? (
+                      {a.lowestRated && (
                         <div className="flex flex-col items-start gap-1">
                           <ModelChip
                             provider={a.lowestRated.provider}
@@ -966,8 +966,6 @@ const AllProjectsView = () => {
                           />
                           <span className="text-neutral-500 text-xs">{`${(a.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
                         </div>
-                      ) : (
-                        '\u2014'
                       )}
                     </td>
                   </tr>

@@ -97,7 +97,6 @@ export default function FeatureCreateView({
             <IconChat className="w-4 h-4" />
           </button>
         }
-        contentClassName="p-0 min-h-0 overflow-y-auto"
         footer={
           <div className="flex justify-between gap-2">
             <button
@@ -120,6 +119,7 @@ export default function FeatureCreateView({
             </button>
           </div>
         }
+        contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         <FeatureForm
           onSubmit={onSubmit}

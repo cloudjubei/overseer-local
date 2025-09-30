@@ -201,7 +201,7 @@
     },
     {
       "id": "95c7a067-9e9b-4e54-b786-6d3997dfff30",
-      "status": "?",
+      "status": "-",
       "title": "Improve the chat sidebar ui on normal screen",
       "description": "So in @src/renderer/src/screens/stories/StoryDetailsView.tsx , @src/renderer/src/screens/stories/StoriesListView.tsx , @src/renderer/src/screens/TestsView.tsx and @src/renderer/src/screens/AgentsView.tsx - the chat button is in the top right and it makes the chat appear - this should slide out in a nice animation. It should also out collapse the @src/renderer/src/navigation/SidebarView.tsx  as to give more room to the @src/renderer/src/components/chat/ChatSidebar.tsx .\nThe whole area/window where the ChatSidebar is should be draggable up to a certain point (50% of the screen) so that it can be expanded or shrunk (up to a certain meaningful minimum - similar to the width the Sidebar is, so. that they are symmetrical). This width setting should be recorded and whenever such a chat is open this width should be resumed.",
       "context": [
@@ -214,12 +214,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:33.055Z",
-      "updatedAt": "2025-09-29T23:26:42.445Z",
-      "rejection": "Blocked: Agent loop failed: {\"message\":\"fetch failed\",\"stacktrace\":\"TypeError: fetch failed\\n    at node:internal/deps/undici/undici:13510:13\\n    at async file:///Users/cloud/Documents/Work/thefactory-tools/dist/completion.js:125:21\\n    at async runConversation (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:231:25)\\n    at async runAgentOnFeature (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:355:5)\\n    at async runOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:417:9)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:452:9)\\n    at async file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:73:17\",\"cause\":{\"name\":\"HeadersTimeoutError\",\"code\":\"UND_ERR_HEADERS_TIMEOUT\",\"message\":\"Headers Timeout Error\"}}"
+      "updatedAt": "2025-09-29T23:50:21.795Z",
+      "rejection": "When the chat opens - the ChatInput is max height it can be - that shouldn't be the case, it should be the standard small size.\nThe window is still not draggable - there's no drag handle visible."
     },
     {
       "id": "f50d7e7c-034c-4455-8772-81afac6c660c",
-      "status": "+",
+      "status": "-",
       "title": "Improve the chat UI on popups",
       "description": "In @src/renderer/src/screens/stories/FeatureCreateView.tsx , @src/renderer/src/screens/stories/FeatureEditView.tsx , @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx - the chat button at the top opens the chat sidebar in the middle. That's not correct. The way it should be, it's as if the chat sidebar is a 2nd popup that slides out of the current popup to the maximum right the screen has available without changing the popup it slides from. Currently the input box doesn't show in all of these popups when chat is open - it has to be showing.\nThe chat sidebar when showing should appear sliding from under the popup and to the right - its height should be the height of the popup.",
       "context": [
@@ -230,13 +230,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:43.049Z",
-      "updatedAt": "2025-09-29T23:11:28.451Z",
-      "rejection": "Right now when the chat sidebar appears for the first time it animates - after that it doesn't. It should also animate to close.\nThere should be no gap between the sidebar and the popup.\nThe sidebar should have rounded corners on the left.",
-      "completedAt": "2025-09-29T23:11:28.451Z"
+      "updatedAt": "2025-09-29T23:42:36.161Z",
+      "rejection": "The animation for disappearing is cool, but for appearing it doesn't feel good. They should be the reverse of each other."
     },
     {
       "id": "c3804c5f-ec19-410e-b866-3d0229cb354a",
-      "status": "+",
+      "status": "-",
       "title": "Improve the top buttons in ChatSidebar",
       "description": "When the chat is showing in the sidebar, we don't need to display the title but instead we should show a circular \"i\" icon, that when clicked will show a tooltip that will show the current context (project, story, feature etc). This should be a reusable component.\nThe Chat Model selection is currently saving the setting as the overall app model - these two should be separate. The chat model selection should use the same component as elsewhere i.e. like in @src/renderer/src/screens/stories/StoriesListView.tsx the @src/renderer/src/components/agents/ModelChip.tsx is used. It should just have a blue border to separate it from the agent config.\nThe settings button should be an icon button with the `IconSettings` image.",
       "context": [
@@ -245,9 +244,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:29:28.459Z",
-      "updatedAt": "2025-09-29T23:13:45.642Z",
-      "rejection": "Right now the ModelChip doesn't work when clicked - nothing shows, but only when the click happens inside the ChatSidebar that is in the screens - in popups it works.",
-      "completedAt": "2025-09-29T23:13:45.642Z"
+      "updatedAt": "2025-09-29T23:46:34.920Z",
+      "rejection": "When the ModelChip opens it should not collide with the right side of the app - right now it goes slightly over and gets clipped. it should always have a few pixels padding away from the edge.\nWhen settings is clicked - the popover with all the settings should have left and right padding. Right now it can go over the left side if it's bigger than the chat - this shouldn't happen."
     },
     {
       "id": "4fdbae23-ff2f-4616-a7cf-61d831dc8377",
@@ -259,8 +257,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:34:26.711Z",
-      "updatedAt": "2025-09-29T23:06:51.556Z",
-      "rejection": "The ATTACH FILE button should be anchored to the top, the SEND to the middle and INFO to the bottom - right now they are all going up once the text area starts growing.\nWhen the bottom info area hides - there's still a little bit of it left to see - it should completely disappear. And it should do so in a fadeout animation. When appearing it should fade in.\nThe INFO button has a different style than the one in the sidebar at the top left - they should be the same style, but the one in the bottom bar should be pink.",
+      "updatedAt": "2025-09-29T23:41:45.924Z",
       "completedAt": "2025-09-29T23:06:51.556Z"
     },
     {

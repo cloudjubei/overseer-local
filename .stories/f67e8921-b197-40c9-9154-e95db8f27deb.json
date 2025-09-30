@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2039,6 +2039,18 @@
       "createdAt": "2025-09-29T20:10:01.766Z",
       "updatedAt": "2025-09-29T20:33:30.257Z",
       "completedAt": "2025-09-29T20:33:30.257Z"
+    },
+    {
+      "id": "888e6d6a-8be0-4ba7-9275-c1e5b364dadc",
+      "status": "-",
+      "title": "Clicking an open ModelChip should close it",
+      "description": "A @src/renderer/src/components/agents/ModelChip.tsx that is clicked once it's been opened should close.",
+      "context": [
+        "src/renderer/src/components/agents/ModelChip.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T23:49:38.336Z",
+      "updatedAt": "2025-09-29T23:49:38.336Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2174,9 +2186,9 @@
     "cc444241-f834-463f-bf98-91c98dd1b706": 130,
     "ba50781e-aa29-4dfe-b159-825f9ed88f88": 131,
     "02c446d1-4969-4057-8fb6-2e957b2205aa": 132,
-    "31bad08b-59b0-468b-a154-7814251bd4cb": 133
+    "31bad08b-59b0-468b-a154-7814251bd4cb": 133,
+    "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-29T14:40:07.339Z",
-  "completedAt": "2025-09-29T20:33:30.257Z"
+  "updatedAt": "2025-09-29T14:40:07.339Z"
 }

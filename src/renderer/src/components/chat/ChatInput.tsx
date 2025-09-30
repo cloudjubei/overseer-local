@@ -121,7 +121,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const placeholderText = useMemo(
     () =>
       isConfigured
-        ? 'Type your message… Use @ for files and # for stories/features'
+        ? 'Type your message…'
         : 'You can compose a message and reference files (@) and stories/features (#) even before configuring. Configure LLM to send.',
     [isConfigured],
   )
@@ -134,14 +134,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
 
   const showHintsArea = visibleLines <= 3
 
-  const leftHints = useMemo(() => [
-    'Use @ for file references',
-    'Use # for stories & features',
-  ], [])
+  const leftHints = useMemo(() => ['Use @ for file references', 'Use # for stories & features'], [])
 
-  const rightHints = useMemo(() => [
-    `${modifierSymbol} + Enter to send`,
-  ], [modifierSymbol])
+  const rightHints = useMemo(() => [`${modifierSymbol} + Enter to send`], [modifierSymbol])
 
   // Precompute grid content slots (top-left, top-right, bottom-left, bottom-right)
   const renderHintsGrid = () => {
@@ -203,7 +198,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
               <div className="px-2 py-1.5 border-t border-[var(--border-subtle)]">
                 <AttachmentList
                   attachments={pendingAttachments}
-                  onRemove={(path) => setPendingAttachments((prev) => prev.filter((p) => p !== path))}
+                  onRemove={(path) =>
+                    setPendingAttachments((prev) => prev.filter((p) => p !== path))
+                  }
                   disabled={isThinking}
                 />
 
@@ -284,7 +281,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                       role="dialog"
                       className="absolute bottom-full right-full mb-2 mr-2 z-10 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
                     >
-                      <div className="font-medium mb-1 text-[var(--text-secondary)]">Shortcuts & helpers</div>
+                      <div className="font-medium mb-1 text-[var(--text-secondary)]">
+                        Shortcuts & helpers
+                      </div>
                       <ul className="list-disc pl-5 space-y-1">
                         <li>Use @ for file references</li>
                         <li>Use # for stories & features</li>
