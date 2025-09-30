@@ -23,6 +23,7 @@ export type AgentsContextValue = {
 }
 
 const AgentsContext = createContext<AgentsContextValue | null>(null)
+const notificationsFired = new Set<string>()
 
 export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { appSettings } = useAppSettings()
@@ -40,7 +41,12 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     setRunsHistory(history)
   }
 
-  const fireCompletionNotification = useCallback(async (run: AgentRunHistory) => {
+  const fireCompletionNotification = async (run: AgentRunHistory) => {
+    console.log('FIRING NOTIFICATION run: ', run.id)
+    if (notificationsFired.has(run.id)) {
+      return
+    }
+    notificationsFired.add(run.id)
     try {
       const baseTitle = 'Agent finished'
       const parts: string[] = []
@@ -50,18 +56,18 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
       await notificationsService.create(run.projectId, {
         type: 'success',
-        category: 'agentRun',
+        category: 'agent_run',
         title: baseTitle,
         message,
         metadata: { runId: run.id },
-      } as any)
+      })
     } catch (err) {
       console.warn(
         '[AgentsContext] Failed to create completion notifications',
         (err as any)?.message || err,
       )
     }
-  }, [])
+  }
 
   const onAgentRunUpdate = useCallback(
     async (agentRunUpdate: AgentRunUpdate) => {
@@ -91,8 +97,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
                 const prevRun = newPrev[prevRunIndex]
                 const isRunning = run.state === 'running' || run.state === 'created'
                 if ((prevRun.state === 'running' || prevRun.state === 'created') && !isRunning) {
-                  console.log('FIRING NOTIFICATION prev: ', prevRun)
-                  console.log('FIRING NOTIFICATION run: ', run)
                   fireCompletionNotification(run)
                 }
                 newPrev[prevRunIndex] = run

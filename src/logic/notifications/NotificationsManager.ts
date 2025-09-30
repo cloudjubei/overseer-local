@@ -112,6 +112,7 @@ export default class NotificationsManager extends BaseManager {
         title: data.title,
         body: data.message,
         silent: !data.soundsEnabled,
+        icon: 'resources/icon.png',
         timeoutType: data.displayDuration > 0 ? 'default' : 'never',
       })
 

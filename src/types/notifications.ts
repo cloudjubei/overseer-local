@@ -12,7 +12,14 @@ export type NotificationType =
   | 'chat'
   | 'files'
 
-export type NotificationCategory = 'general' | 'stories' | 'chat' | 'files' | 'system' | 'updates'
+export type NotificationCategory =
+  | 'general'
+  | 'stories'
+  | 'chat'
+  | 'files'
+  | 'system'
+  | 'updates'
+  | 'agent_run'
 
 export interface NotificationMetadata {
   [key: string]: any
