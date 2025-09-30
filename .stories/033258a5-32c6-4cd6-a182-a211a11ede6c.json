@@ -308,7 +308,7 @@
     },
     {
       "id": "9621b87e-23b2-48cd-be7f-454543d6b212",
-      "status": "-",
+      "status": "+",
       "title": "ChatsManager should utilise 'thefactory-tools'",
       "description": "'thefactory-tools' now exposes saving chat settings and getting prompts - @src/logic/chat/ChatsManager.ts should use it and pass it via IPC using  @src/preload/ipcHandlersKeys.ts and @src/renderer/src/services/chatsService.ts , so that finally @src/renderer/src/contexts/ChatsContext.tsx can have the functionality which can be used inside @src/renderer/src/components/chat/ChatSidebar.tsx and the settings panel in there.\nAll the necessary files from 'thefactory-tools' can be found under the path `node_modules/thefactory-tools/src/chats`",
       "context": [
@@ -320,7 +320,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:55:34.058Z",
-      "updatedAt": "2025-09-30T00:58:14.819Z"
+      "updatedAt": "2025-09-30T01:09:43.273Z",
+      "completedAt": "2025-09-30T01:09:43.273Z"
     }
   ],
   "featureIdToDisplayIndex": {
