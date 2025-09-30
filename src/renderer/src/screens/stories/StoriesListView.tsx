@@ -12,7 +12,7 @@ import StatusControl, {
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
-import { IconBoard, IconEdit, IconPlus, IconList, IconChat } from '@renderer/components/ui/Icons'
+import { IconBoard, IconEdit, IconPlus, IconList } from '@renderer/components/ui/Icons'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -93,25 +93,6 @@ export default function StoriesListView() {
   } = useStories()
   const { runsActive, startAgent } = useAgents()
 
-  const [isChatOpen, setIsChatOpen] = useState(false)
-
-  // Collapse/restore sidebar when chat toggles
-  const prevSidebarCollapsedRef = useRef<boolean | null>(null)
-  useEffect(() => {
-    if (!isAppSettingsLoaded) return
-    if (isChatOpen) {
-      if (prevSidebarCollapsedRef.current == null) {
-        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
-      }
-      if (appSettings.userPreferences.sidebarCollapsed !== true) {
-        setUserPreferences({ sidebarCollapsed: true })
-      }
-    } else if (prevSidebarCollapsedRef.current != null) {
-      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
-      prevSidebarCollapsedRef.current = null
-    }
-  }, [isChatOpen, isAppSettingsLoaded])
-
   useEffect(() => {
     const storyIds = storyIdsByProject[projectId] ?? []
     const stories = storyIds.map((s) => storiesById[s]).filter((s) => s !== undefined)
@@ -135,7 +116,7 @@ export default function StoriesListView() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [openModal])
+  }, [openModal, view])
 
   const storyIdToDisplayIndex: Record<string, number> = useMemo(() => {
     return project?.storyIdToDisplayIndex ?? {}
@@ -362,16 +343,6 @@ export default function StoriesListView() {
           </div>
           <div className="right">
             <ModelChip editable className="mr-2" />
-            <button
-              type="button"
-              className="btn-secondary btn-icon"
-              aria-label="Toggle chat"
-              onClick={() => setIsChatOpen((v) => !v)}
-              disabled={!projectId}
-              title={isChatOpen ? 'Hide chat' : 'Show chat'}
-            >
-              <IconChat className="h-[16px] w-[16px]" />
-            </button>
           </div>
         </div>
 
@@ -660,9 +631,8 @@ export default function StoriesListView() {
         )}
       </section>
 
-      {isChatOpen && projectId && (
+      {projectId && (
         <ChatSidebarOverlay
-          isOpen={isChatOpen}
           context={{ projectId, type: 'PROJECT' }}
           chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

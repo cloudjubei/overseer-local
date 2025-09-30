@@ -290,7 +290,7 @@
     },
     {
       "id": "d5fb1e96-fbb4-44c4-be63-6f008cd29918",
-      "status": "-",
+      "status": "+",
       "title": "The chat sidebar on normal screens should be a mirror of the regular sidebar",
       "description": "What it means is that the @src/renderer/src/components/chat/ChatSidebar.tsx on screens like @src/renderer/src/screens/stories/StoryDetailsView.tsx, @src/renderer/src/screens/stories/StoriesListView.tsx , @src/renderer/src/screens/TestsView.tsx or @src/renderer/src/screens/AgentsView.tsx should be in a vertical panel when collapsed (just like the @src/renderer/src/navigation/SidebarView.tsx when it's collapsed) and expanded the same way as it is now.\nThe opening button when collapsed should have a left chevron icon - it should be placed analogously to how the opening for the Sidebar is.\nWhen opened, the chat button should transform into a close button - it should be the chevron pointing down.\nWhen the chat area is collapsed - there should be a chat button in the middle of it that will open the chat sidebar.",
       "context": [
@@ -303,7 +303,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:53:12.441Z",
-      "updatedAt": "2025-09-30T00:53:12.441Z"
+      "updatedAt": "2025-09-30T01:07:28.434Z",
+      "completedAt": "2025-09-30T01:07:28.434Z"
     },
     {
       "id": "9621b87e-23b2-48cd-be7f-454543d6b212",

@@ -9,10 +9,8 @@ import { Switch } from '../ui/Switch'
 import type { ChatContext } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings } from '../ui/Icons'
-
-// Keep local Select imports removed since we now use ModelChip
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
+import { IconSettings, IconChevron, IconChat } from '../ui/Icons'
+import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 
 type ToolToggle = { name: string; description: string; enabled: boolean }
 
@@ -31,6 +29,12 @@ function parseProjectIdFromContext(context: ChatContext): string | undefined {
 export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
   const { getChat, sendMessage } = useChats()
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
+  const { appSettings, setUserPreferences } = useAppSettings()
+  const [collapsed, setCollapsed] = useState(appSettings.userPreferences.chatSidebarCollapsed)
+
+  useEffect(() => {
+    setUserPreferences({ chatSidebarCollapsed: collapsed })
+  }, [collapsed])
 
   useEffect(() => {
     const loadChat = async () => {
@@ -46,7 +50,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
   const { configs, activeConfig } = useLLMConfig()
   const { navigateView } = useNavigator()
 
-  // Chat-specific selected config id (separate from global app model)
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
     (settings as any)?.llmConfigId,
   )
@@ -60,7 +63,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
       const byId = configs.find((c) => c.id === selectedConfigId)
       if (byId) return byId
     }
-    // fallback to active config if chat-specific not set
     return activeConfig || configs[0]
   }, [configs, activeConfig, selectedConfigId])
 
@@ -93,7 +95,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     async (configId: string) => {
       setSelectedConfigId(configId)
       try {
-        // Persist chat-specific setting (llmConfigId)
         await (window as any).chatsService.saveSettings(context, { llmConfigId: configId })
       } catch (e) {
         console.error('Failed to save chat model setting', e)
@@ -102,7 +103,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     [context],
   )
 
-  // Tools management (allowedTools is an allowlist; undefined => all allowed)
   const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
   const projectId = parseProjectIdFromContext(context)
   useEffect(() => {
@@ -149,7 +149,6 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     [availableTools, tools],
   )
 
-  // Settings dropdown UI state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
@@ -174,15 +173,40 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
     }
   }, [isSettingsOpen])
 
+  if (collapsed) {
+    return (
+      <aside className="relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-l bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed w-12">
+        <button
+          type="button"
+          onClick={() => setCollapsed(false)}
+          className="nav-toggle absolute top-2 left-2"
+          aria-label={'Expand chat sidebar'}
+          title={'Expand chat sidebar'}
+        >
+          <span aria-hidden>
+            <IconChevron className="w-4 h-4" style={{ transform: 'rotate(180deg)' }} />
+          </span>
+        </button>
+        <div className="flex flex-col items-center justify-center flex-1">
+          <button
+            className="btn-secondary btn-icon"
+            onClick={() => setCollapsed(false)}
+            aria-label="Open chat"
+          >
+            <IconChat className="w-5 h-5" />
+          </button>
+        </div>
+      </aside>
+    )
+  }
+
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          {/* Replaced title with context info icon */}
           <ContextInfoButton context={context} label={chatContextTitle} />
         </div>
         <div className="flex items-center gap-2">
-          {/* Chat-specific model selector using ModelChip with blue border */}
           <ModelChip
             editable
             selectedConfigId={selectedConfigId}
@@ -200,6 +224,17 @@ export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarPr
             title="Chat settings"
           >
             <IconSettings className="h-[16px] w-[16px]" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setCollapsed(true)}
+            className="btn-secondary btn-icon"
+            aria-label={'Collapse chat sidebar'}
+            title={'Collapse chat sidebar'}
+          >
+            <span aria-hidden>
+              <IconChevron className="w-4 h-4" />
+            </span>
           </button>
 
           {isSettingsOpen && (

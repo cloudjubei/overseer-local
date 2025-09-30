@@ -5,7 +5,6 @@ import AgentRunRow from '../components/agents/AgentRunRow'
 import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
 import { useActiveProject } from '../contexts/ProjectContext'
-import { IconChat } from '../components/ui/Icons'
 import { ChatSidebarOverlay } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
@@ -61,11 +60,12 @@ const CurrentProjectView = () => {
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
       const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs = r.finishedAt
-        ? new Date(r.finishedAt).getTime()
-        : r.updatedAt
-          ? new Date(r.updatedAt).getTime()
-          : Date.now()
+      const finishedMs =
+        r.finishedAt
+          ? new Date(r.finishedAt).getTime()
+          : r.updatedAt
+            ? new Date(r.updatedAt).getTime()
+            : Date.now()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs) ? Math.max(0, finishedMs - startedMs) : 0
       const totalFeatures = conversations.length
@@ -293,11 +293,12 @@ const AllProjectsView = () => {
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
       const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs = r.finishedAt
-        ? new Date(r.finishedAt).getTime()
-        : r.updatedAt
-          ? new Date(r.updatedAt).getTime()
-          : Date.now()
+      const finishedMs =
+        r.finishedAt
+          ? new Date(r.finishedAt).getTime()
+          : r.updatedAt
+            ? new Date(r.updatedAt).getTime()
+            : Date.now()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs)
           ? Math.max(0, finishedMs - startedMs)
@@ -1024,27 +1025,8 @@ const AllProjectsView = () => {
 
 export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
-  const [isChatOpen, setIsChatOpen] = useState(false)
   const { projectId } = useActiveProject()
-  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
-
-  // Collapse/restore sidebar when chat toggles (current view only)
-  const prevSidebarCollapsedRef = useRef<boolean | null>(null)
-
-  useEffect(() => {
-    if (!isAppSettingsLoaded) return
-    if (viewMode === 'current' && isChatOpen) {
-      if (prevSidebarCollapsedRef.current == null) {
-        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
-      }
-      if (appSettings.userPreferences.sidebarCollapsed !== true) {
-        setUserPreferences({ sidebarCollapsed: true })
-      }
-    } else if (prevSidebarCollapsedRef.current != null && (!isChatOpen || viewMode !== 'current')) {
-      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
-      prevSidebarCollapsedRef.current = null
-    }
-  }, [isChatOpen, viewMode, isAppSettingsLoaded])
+  const { appSettings, setUserPreferences } = useAppSettings()
 
   const chatContext: ChatContext | undefined = useMemo(() => {
     if (!projectId) return undefined
@@ -1086,25 +1068,14 @@ export default function AgentsView() {
                 All Projects
               </button>
             </div>
-            {viewMode === 'current' && (
-              <button
-                className="btn-secondary btn-icon"
-                onClick={() => setIsChatOpen((v) => !v)}
-                aria-label="Toggle chat"
-                title="Chat"
-              >
-                <IconChat className="w-4 h-4" />
-              </button>
-            )}
           </div>
         </div>
         <div className="flex-1 overflow-auto">
           {viewMode === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
         </div>
       </div>
-      {viewMode === 'current' && isChatOpen && chatContext && (
+      {viewMode === 'current' && chatContext && (
         <ChatSidebarOverlay
-          isOpen={isChatOpen}
           context={chatContext}
           chatContextTitle="Agents chat"
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

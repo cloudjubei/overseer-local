@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useRef as useRef2 } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
 import StatusControl from '@renderer/components/stories/StatusControl'
@@ -6,7 +6,7 @@ import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import { ChatContext, Feature, Status, Story } from 'thefactory-tools'
-import { IconBack, IconChat, IconChevron, IconEdit, IconPlus } from '@renderer/components/ui/Icons'
+import { IconBack, IconChevron, IconEdit, IconPlus } from '@renderer/components/ui/Icons'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -39,26 +39,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const { openModal, navigateView, storiesRoute, navigateAgentRun } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
-  const prevSidebarCollapsedRef = useRef<boolean | null>(null)
-  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
-
-  useEffect(() => {
-    if (!isAppSettingsLoaded) return
-    // When chat opens, collapse sidebar; when closes, restore
-    if (isChatOpen) {
-      if (prevSidebarCollapsedRef.current == null) {
-        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
-      }
-      if (appSettings.userPreferences.sidebarCollapsed !== true) {
-        setUserPreferences({ sidebarCollapsed: true })
-      }
-    } else if (prevSidebarCollapsedRef.current != null) {
-      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
-      prevSidebarCollapsedRef.current = null
-    }
-  }, [isChatOpen, isAppSettingsLoaded])
+  const { appSettings, setUserPreferences } = useAppSettings()
 
   const [dragFeatureId, setDragFeatureId] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -405,13 +387,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 )}
               </div>
               <ModelChip editable />
-              <Button
-                className="btn-secondary btn-icon"
-                onClick={() => setIsChatOpen(!isChatOpen)}
-                aria-label="Toggle chat"
-              >
-                <IconChat className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </header>
@@ -754,9 +729,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         )}
       </div>
 
-      {isChatOpen && chatContext && (
+      {chatContext && (
         <ChatSidebarOverlay
-          isOpen={isChatOpen}
           context={chatContext}
           chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

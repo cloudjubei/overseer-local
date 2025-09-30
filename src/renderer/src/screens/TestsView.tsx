@@ -8,43 +8,13 @@ import { TestsProvider, useTests } from '../contexts/TestsContext'
 import { useNavigator } from '../navigation/Navigator'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
-import { IconChat } from '../components/ui/Icons'
 import { ChatSidebarOverlay } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-// import { timeAgo } from '../utils/time'
-
-// function TimeAgo({ ts }: { ts: number }) {
-//   const [now, setNow] = React.useState(Date.now())
-//   React.useEffect(() => {
-//     const id = setInterval(() => setNow(Date.now()), 30000)
-//     return () => clearInterval(id)
-//   }, [])
-//   const text = timeAgo(now, ts)
-//   return <span>{text}</span>
-// }
 
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
-  const [isChatOpen, setIsChatOpen] = React.useState(false)
-
-  const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
-  const prevSidebarCollapsedRef = React.useRef<boolean | null>(null)
-
-  React.useEffect(() => {
-    if (!isAppSettingsLoaded) return
-    if (isChatOpen) {
-      if (prevSidebarCollapsedRef.current == null) {
-        prevSidebarCollapsedRef.current = appSettings.userPreferences.sidebarCollapsed
-      }
-      if (appSettings.userPreferences.sidebarCollapsed !== true) {
-        setUserPreferences({ sidebarCollapsed: true })
-      }
-    } else if (prevSidebarCollapsedRef.current != null) {
-      setUserPreferences({ sidebarCollapsed: prevSidebarCollapsedRef.current })
-      prevSidebarCollapsedRef.current = null
-    }
-  }, [isChatOpen, isAppSettingsLoaded])
+  const { appSettings, setUserPreferences } = useAppSettings()
 
   const {
     isRunningTests,
@@ -148,16 +118,7 @@ function TestsInner() {
                 Run tests and view coverage
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="btn-secondary btn-icon"
-                onClick={() => setIsChatOpen((v) => !v)}
-                aria-label="Toggle chat"
-                title="Chat"
-              >
-                <IconChat className="w-4 h-4" />
-              </button>
-            </div>
+            <div className="flex items-center gap-2"></div>
           </div>
         </div>
 
@@ -240,9 +201,8 @@ function TestsInner() {
         </div>
       </div>
 
-      {isChatOpen && chatContext && (
+      {chatContext && (
         <ChatSidebarOverlay
-          isOpen={isChatOpen}
           context={chatContext}
           chatContextTitle="Tests chat"
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
