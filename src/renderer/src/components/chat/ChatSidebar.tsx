@@ -58,13 +58,14 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
   const currentSettings = useMemo(() => getSettingsForContext(context), [getSettingsForContext, context])
   const [availableTools, setAvailableTools] = useState<string[] | undefined>(currentSettings?.availableTools)
   const [autoCallTools, setAutoCallTools] = useState<string[] | undefined>(currentSettings?.autoCallTools)
-  const [systemPrompt, setSystemPrompt] = useState<string>(currentSettings?.systemPrompt || '')
+
+  // Local editable prompt state that reflects either custom or effective default for this context
+  const [draftPrompt, setDraftPrompt] = useState<string>('')
 
   // Keep local settings in sync when context changes or global settings update
   useEffect(() => {
     setAvailableTools(currentSettings?.availableTools)
     setAutoCallTools(currentSettings?.autoCallTools)
-    setSystemPrompt(currentSettings?.systemPrompt || '')
   }, [currentSettings])
 
   const persistSettings = useCallback(async (patch: Partial<{ availableTools: string[]; autoCallTools: string[]; systemPrompt: string }>) => {
@@ -170,7 +171,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     }
   }, [isSettingsOpen])
 
-  // Effective prompt display (before any messages)
+  // Effective prompt display (before any messages) and to seed settings textarea
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
   useEffect(() => {
     let cancelled = false
@@ -191,7 +192,13 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     return () => {
       cancelled = true
     }
-  }, [context, currentSettings, getSettingsPrompt, getDefaultPrompt])
+  }, [context, getSettingsPrompt, getDefaultPrompt])
+
+  // Seed draft prompt whenever effective or settings change
+  useEffect(() => {
+    const custom = currentSettings?.systemPrompt
+    setDraftPrompt(custom && custom.length > 0 ? custom : effectivePrompt)
+  }, [effectivePrompt, currentSettings])
 
   return (
     <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
@@ -248,8 +255,8 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                 <div className="space-y-2">
                   <div className="text-xs font-medium text-[var(--text-secondary)]">System Prompt</div>
                   <textarea
-                    value={systemPrompt}
-                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    value={draftPrompt}
+                    onChange={(e) => setDraftPrompt(e.target.value)}
                     className="w-full min-h-[100px] p-2 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-md text-sm"
                     placeholder="Custom system prompt for this chat context..."
                   />
@@ -257,7 +264,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                     <button
                       className="btn"
                       onClick={async () => {
-                        await persistSettings({ systemPrompt })
+                        await persistSettings({ systemPrompt: draftPrompt })
                       }}
                     >
                       Save prompt
@@ -291,23 +298,23 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
                                   {tool.description}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-3">
-                                <label className="flex items-center gap-1 text-xs">
-                                  <span>Available</span>
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="flex flex-col items-center space-y-px">
+                                  <span className="text-[10px] text-[var(--text-secondary)]">Available</span>
                                   <Switch
                                     checked={tool.available}
                                     onCheckedChange={() => toggleAvailable(tool.name)}
                                     label=""
                                   />
-                                </label>
-                                <label className="flex items-center gap-1 text-xs">
-                                  <span>Auto-call</span>
+                                </div>
+                                <div className="flex flex-col items-center space-y-px">
+                                  <span className="text-[10px] text-[var(--text-secondary)]">Auto-call</span>
                                   <Switch
                                     checked={tool.autoCall}
                                     onCheckedChange={() => toggleAutoCall(tool.name)}
                                     label=""
                                   />
-                                </label>
+                                </div>
                               </div>
                             </div>
                           </div>

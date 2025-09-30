@@ -34,7 +34,7 @@ export default function ContextInfoButton({
   const content = useMemo(() => formatContext(context), [context])
 
   return (
-    <Tooltip content={content} placement="right">
+    <Tooltip content={content} placement="right" openOnClick>
       <button
         type="button"
         className={[
@@ -45,7 +45,6 @@ export default function ContextInfoButton({
           'no-drag',
           className || '',
         ].join(' ')}
-        title={label || 'Chat context'}
         aria-label={label || 'Chat context information'}
       >
         <span className="text-[11px] font-semibold">i</span>

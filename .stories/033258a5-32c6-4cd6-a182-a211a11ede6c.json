@@ -326,13 +326,14 @@
       "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",
       "status": "-",
       "title": "The Chat screen needs an overhaul",
-      "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats should be split into two sections - at the top will be the type selection (so a scrollable list with tiles representing the different Context Type combinations) and at the bottom the list of chats for that type. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.\n\nThe way the sections in the ChatView should work is the following:\n|GENERAL|\n-----------\n|project chat|\n|STORIES|\n|TOPICS|\n\nGENERAL, STORIES and TOPICS are sections that can open up to reveal either chats (listed first) or sections within (like STORIES -> FEATURES or TOPICS -> TESTS).\nGENERAL needs to show all the general chats across all projects.\nAll the chats in a given section are sorted by the last update date.",
+      "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats, so a scrollable list with tiles representing the different Context Type combinations. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.\n\nThe way the sections in the ChatView sidebar should work is the following:\n|GENERAL|\n-----------\n|project chat|\n|STORIES|\n|TOPICS|\n\nGENERAL, STORIES and TOPICS are sections that can open up to reveal either chats (listed first) or sections within (like STORIES -> FEATURES or TOPICS -> TESTS).\nGENERAL needs to show all the general chats across all projects.\nAll the chats in a given section are sorted by the last update date.",
       "context": [
         "src/renderer/src/screens/ChatView.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-30T01:20:42.316Z",
-      "updatedAt": "2025-09-30T11:55:00.171Z"
+      "updatedAt": "2025-09-30T12:45:47.019Z",
+      "rejection": "The sections are not displayed correctly as specified in the description."
     },
     {
       "id": "b5acbe79-2d92-438c-9850-15cee05fbea9",
@@ -351,25 +352,26 @@
     },
     {
       "id": "dbe43cbc-d659-42b8-9bb8-c11a9251a50f",
-      "status": "-",
+      "status": "+",
       "title": "ChatPanel buttons",
       "description": "The buttons should be horizontally centered, the close button at the top and the chat button in the middle.\nTh background should stretch all the way to the bottom (right now it gets clipped some way below the chat button).",
       "context": [],
       "blockers": [],
       "createdAt": "2025-09-30T10:26:34.764Z",
-      "updatedAt": "2025-09-30T10:26:34.764Z"
+      "updatedAt": "2025-09-30T12:09:19.228Z",
+      "completedAt": "2025-09-30T12:09:19.228Z"
     },
     {
       "id": "1232c0ac-6074-4c02-88eb-f9266eac85ba",
       "status": "-",
       "title": "ChatSidebar settings panel",
-      "description": "The settings panel in @src/renderer/src/components/chat/ChatSidebar.tsx is not displaying the prompt for the given chatContext.\n\nThe tools that are displayed should have the toggles displayed in this way:\n|TOGGLE1|TOGGLE2| where they are vertically stacked on the right with a small gap between. One of the toggles has the following display:\n|LABEL|SWITCH| where they are vertically stacked and the label is of a small font size just above the switch (minimal gap of 1px).",
+      "description": "The settings panel in @src/renderer/src/components/chat/ChatSidebar.tsx is not displaying the prompt for the given chatContext.\n\nThe tools that are displayed should have the toggles displayed in this way:\n|TOGGLE1|TOGGLE2| where they are vertically stacked on the right with a small gap between. One of the toggles has the following display:\n|LABEL|SWITCH| where they are vertically stacked and the label is of a small font size just above the switch (minimal gap of 1px).\n\nWhen a available tool is turned off then the auto-call one is turned off by default and disabled.",
       "context": [
         "src/renderer/src/components/chat/ChatSidebar.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-30T10:54:00.598Z",
-      "updatedAt": "2025-09-30T10:54:00.598Z"
+      "updatedAt": "2025-09-30T12:47:30.809Z"
     },
     {
       "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
@@ -381,11 +383,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:09:29.804Z",
-      "updatedAt": "2025-09-30T11:48:42.696Z"
+      "updatedAt": "2025-09-30T12:47:54.648Z",
+      "rejection": "In tooltip there's an error on line 200, the code:\n`ref: (el: HTMLElement) => {`\nthe error:\nNo overload matches this call.\n  The last overload gave the following error.\n    Object literal may only specify known properties, and 'ref' does not exist in type 'Partial<unknown> & Attributes'."
     },
     {
       "id": "265cce60-2d86-4e84-9ba4-e8bec45598da",
-      "status": "-",
+      "status": "+",
       "title": "The bottom right ChatInput info button should work on hover",
       "description": "In @src/renderer/src/components/chat/ChatInput.tsx the (i) button only works when clicking on it - it should work on hover too.\n\nAdditionally, when hovering over the Attach files button - it should show \"Attach Files\", and the send message button should show \"Send\".",
       "context": [
@@ -393,11 +396,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:11:11.499Z",
-      "updatedAt": "2025-09-30T11:11:11.499Z"
+      "updatedAt": "2025-09-30T12:16:59.492Z",
+      "completedAt": "2025-09-30T12:16:59.492Z"
     },
     {
       "id": "3285d7d6-0883-4b47-a4a0-72a6473d5924",
-      "status": "-",
+      "status": "+",
       "title": "When opening a modal chat it crashes",
       "description": "For instance in @src/renderer/src/screens/stories/FeatureEditView.tsx when opening the @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx it crashes with the following error:\n\nChatSidebarModalPanel.tsx:37 React has detected a change in the order of Hooks called by ChatSidebarModalPanel. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n1. useState                   useState\n2. undefined                  useState",
       "context": [
@@ -406,7 +410,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:56:48.368Z",
-      "updatedAt": "2025-09-30T11:56:48.368Z"
+      "updatedAt": "2025-09-30T11:56:48.368Z",
+      "completedAt": "2025-09-30T12:19:24.939Z"
     },
     {
       "id": "c6e1cbe2-6b73-4982-9dca-83eb9b3741bf",
@@ -421,6 +426,32 @@
       "blockers": [],
       "createdAt": "2025-09-30T12:01:17.827Z",
       "updatedAt": "2025-09-30T12:01:17.827Z"
+    },
+    {
+      "id": "de5208f4-4f5b-464f-99b1-abeb9daa903e",
+      "status": "-",
+      "title": "Modal chat sidebar improvements",
+      "description": "All the modals that use @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx should have the collapsed panel showing by default and they should no longer show the open chat button in the top right.\n\nAdditionally, some of these modals can be very small and the @src/renderer/src/components/chat/ChatInput.tsx at the bottom ends up not showing. The top and bottom of the @src/renderer/src/components/chat/ChatSidebar.tsx should always show, the top having always a constant size, and the bottom can have the maximum constrained to 40% of the total parent size.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebarModalPanel.tsx",
+        "src/renderer/src/components/chat/ChatInput.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T12:52:58.329Z",
+      "updatedAt": "2025-09-30T12:52:58.329Z"
+    },
+    {
+      "id": "db36287c-c9a7-44c9-94e9-76c6e57bd685",
+      "status": "-",
+      "title": "System prompt display",
+      "description": "When there are no messages the @src/renderer/src/components/chat/ChatSidebar.tsx is displaying the system prompt at the top. Right now this can be very big, so it should be a special bubble that is centered (similar in style to the user/assistant message bubbles - but in a different gray - color scheme). It should be constrained to always have a certain max size (30% of the container size) and min size (showing 3 lines), and it should thus be vertically scrollable if need be.\nWhen there are messages, we should always show this system prompt as the first message.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T12:57:16.524Z",
+      "updatedAt": "2025-09-30T12:57:16.524Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -453,7 +484,9 @@
     "265cce60-2d86-4e84-9ba4-e8bec45598da": 27,
     "3285d7d6-0883-4b47-a4a0-72a6473d5924": 28,
     "c6e1cbe2-6b73-4982-9dca-83eb9b3741bf": 29,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 30
+    "de5208f4-4f5b-464f-99b1-abeb9daa903e": 30,
+    "db36287c-c9a7-44c9-94e9-76c6e57bd685": 31,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 32
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"

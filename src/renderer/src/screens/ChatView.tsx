@@ -1,146 +1,203 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ChatSidebar } from '@renderer/components/chat'
-import { useActiveProject } from '@renderer/contexts/ProjectContext'
+import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
+import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
 import type { ChatContext } from 'thefactory-tools'
 
-// Supported high-level categories for the type tiles
-// Tiles represent ChatContext.type values (PROJECT_TOPIC/STORY_TOPIC are grouped by type)
-const TYPE_ORDER: Array<ChatContext['type']> = [
-  'PROJECT',
-  'STORY',
-  'FEATURE',
-  'PROJECT_TOPIC',
-  'STORY_TOPIC',
-  'AGENT_RUN',
-]
+// Top-level tile selection types for the overhauled ChatView
+// GENERAL aggregates project chats across all projects
+// STORIES and TOPICS refer to the active project
+const TILE_TYPES = ['GENERAL', 'STORIES', 'TOPICS'] as const
 
-function titleForContext(context: ChatContext, projectTitle?: string): string {
+type TileType = (typeof TILE_TYPES)[number]
+
+function prettyTopicName(topic?: string): string {
+  if (!topic) return 'Topic'
+  return String(topic)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+}
+
+function titleForContext(
+  context: ChatContext,
+  opts: {
+    getProjectTitle: (id?: string) => string
+    getStoryTitle: (id?: string) => string
+    getFeatureTitle: (id?: string) => string
+  },
+): string {
   switch (context.type) {
     case 'PROJECT':
-      return projectTitle ? `Project Chat — ${projectTitle}` : 'Project Chat'
+      return `Project Chat — ${opts.getProjectTitle((context as any).projectId)}`
     case 'STORY':
-      return `Story Chat — ${'storyId' in context ? (context as any).storyId : ''}`
-    case 'FEATURE': {
-      const storyId = 'storyId' in context ? (context as any).storyId : undefined
-      const featureId = 'featureId' in context ? (context as any).featureId : undefined
-      return `Feature Chat — ${storyId ? storyId + ' / ' : ''}${featureId ?? ''}`
-    }
-    case 'PROJECT_TOPIC': {
-      const topic = (context as any).projectTopic || 'topic'
-      const pretty = String(topic)
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (m) => m.toUpperCase())
-      return `Project ${pretty} Chat${projectTitle ? ' — ' + projectTitle : ''}`
-    }
-    case 'STORY_TOPIC': {
-      const topic = (context as any).storyTopic || 'topic'
-      const storyId = (context as any).storyId || ''
-      const pretty = String(topic)
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (m) => m.toUpperCase())
-      return `Story ${pretty} Chat — ${storyId}`
-    }
-    case 'AGENT_RUN': {
-      const id = (context as any).agentRunId || ''
-      return `Agent Run Chat — ${id}`
-    }
+      return `Story Chat — ${opts.getStoryTitle((context as any).storyId)}`
+    case 'FEATURE':
+      return `Feature Chat — ${opts.getStoryTitle((context as any).storyId)} / ${opts.getFeatureTitle((context as any).featureId)}`
+    case 'PROJECT_TOPIC':
+      return `Project ${prettyTopicName((context as any).projectTopic)} — ${opts.getProjectTitle((context as any).projectId)}`
+    case 'STORY_TOPIC':
+      return `Story ${prettyTopicName((context as any).storyTopic)} — ${opts.getStoryTitle((context as any).storyId)}`
+    case 'AGENT_RUN':
+      return `Agent Run Chat — ${(context as any).agentRunId || ''}`
     default:
       return 'Chat'
   }
 }
 
-function labelForType(t: ChatContext['type']): string {
-  switch (t) {
-    case 'PROJECT':
-      return 'Project'
-    case 'STORY':
-      return 'Stories'
-    case 'FEATURE':
-      return 'Features'
-    case 'PROJECT_TOPIC':
-      return 'Project Topics'
-    case 'STORY_TOPIC':
-      return 'Story Topics'
-    case 'AGENT_RUN':
-      return 'Agent Runs'
-    default:
-      return t
-  }
-}
-
-function listByType(contexts: ChatContext[], type: ChatContext['type']): ChatContext[] {
-  return contexts.filter((c) => c.type === type)
-}
-
 export default function ChatView() {
-  const { projectId, project } = useActiveProject()
-  const { chatsByProjectId, restartChat } = useChats()
+  const { projectId: activeProjectId } = useActiveProject()
+  const { projects } = useProjectContext()
+  const { storiesById, featuresById } = useStories()
+  const { chats, chatsByProjectId, restartChat } = useChats()
 
-  // All chat contexts for the active project
-  const projectChats = chatsByProjectId[projectId] || []
-  const allContexts: ChatContext[] = useMemo(
-    () => projectChats.map((c) => c.chat.context),
-    [projectChats],
-  )
+  // Helpers for titles
+  const getProjectTitle = (id?: string) => {
+    if (!id) return ''
+    const p = projects.find((prj) => prj.id === id)
+    return p?.title || id
+  }
+  const getStoryTitle = (id?: string) => (id ? storiesById[id]?.title || id : '')
+  const getFeatureTitle = (id?: string) => (id ? featuresById[id]?.title || id : '')
 
-  // Determine available types for tiles (always include PROJECT)
-  const availableTypes = useMemo(() => {
-    const set = new Set<ChatContext['type']>()
-    set.add('PROJECT')
-    for (const c of allContexts) set.add(c.type)
-    // Keep stable order per TYPE_ORDER
-    return TYPE_ORDER.filter((t) => set.has(t))
-  }, [allContexts])
+  // Flatten all chats across all projects
+  const allChatStates = useMemo(() => Object.values(chats || {}), [chats])
 
-  const [selectedType, setSelectedType] = useState<ChatContext['type']>('PROJECT')
+  // Sorting helper by updatedAt desc then createdAt desc
+  function sortByUpdated<T extends { chat: { updatedAt?: string; createdAt?: string } }>(arr: T[]) {
+    return [...arr].sort((a, b) => {
+      const au = a.chat.updatedAt || a.chat.createdAt || ''
+      const bu = b.chat.updatedAt || b.chat.createdAt || ''
+      return bu.localeCompare(au)
+    })
+  }
 
-  useEffect(() => {
-    // Ensure selected type is valid when available types change
-    if (!availableTypes.includes(selectedType)) {
-      setSelectedType(availableTypes[0] || 'PROJECT')
+  // Compute lists by tile type
+  const generalChats = useMemo(() => {
+    const list = allChatStates.filter((s) => s.chat.context.type === 'PROJECT')
+    return sortByUpdated(list)
+  }, [allChatStates])
+
+  const storyChats = useMemo(() => {
+    const list = (chatsByProjectId[activeProjectId] || []).filter(
+      (s) => s.chat.context.type === 'STORY',
+    )
+    return sortByUpdated(list)
+  }, [chatsByProjectId, activeProjectId])
+
+  const featureChats = useMemo(() => {
+    const list = (chatsByProjectId[activeProjectId] || []).filter(
+      (s) => s.chat.context.type === 'FEATURE',
+    )
+    return sortByUpdated(list)
+  }, [chatsByProjectId, activeProjectId])
+
+  const projectTopicChats = useMemo(() => {
+    const list = (chatsByProjectId[activeProjectId] || []).filter(
+      (s) => s.chat.context.type === 'PROJECT_TOPIC',
+    )
+    return sortByUpdated(list)
+  }, [chatsByProjectId, activeProjectId])
+
+  const storyTopicChats = useMemo(() => {
+    const list = (chatsByProjectId[activeProjectId] || []).filter(
+      (s) => s.chat.context.type === 'STORY_TOPIC',
+    )
+    return sortByUpdated(list)
+  }, [chatsByProjectId, activeProjectId])
+
+  // Group topic chats by topic name
+  const projectTopicsGrouped = useMemo(() => {
+    const byTopic: Record<string, typeof projectTopicChats> = {}
+    for (const s of projectTopicChats) {
+      const topic = (s.chat.context as any).projectTopic || 'general'
+      if (!byTopic[topic]) byTopic[topic] = []
+      byTopic[topic].push(s)
     }
-  }, [availableTypes.join('|')])
+    for (const k of Object.keys(byTopic)) byTopic[k] = sortByUpdated(byTopic[k])
+    const entries = Object.entries(byTopic).sort((a, b) => {
+      const au = a[1][0]?.chat.updatedAt || a[1][0]?.chat.createdAt || ''
+      const bu = b[1][0]?.chat.updatedAt || b[1][0]?.chat.createdAt || ''
+      return bu.localeCompare(au)
+    })
+    return entries
+  }, [projectTopicChats])
 
-  // For PROJECT, ensure we can always pick a context even if none exists yet
-  const contextsForSelectedType: ChatContext[] = useMemo(() => {
-    const filtered = listByType(allContexts, selectedType)
-    if (selectedType === 'PROJECT') {
-      if (filtered.length === 0) {
-        return [{ type: 'PROJECT', projectId } as ChatContext]
-      }
+  const storyTopicsGrouped = useMemo(() => {
+    const byTopic: Record<string, typeof storyTopicChats> = {}
+    for (const s of storyTopicChats) {
+      const topic = (s.chat.context as any).storyTopic || 'general'
+      if (!byTopic[topic]) byTopic[topic] = []
+      byTopic[topic].push(s)
     }
-    return filtered
-  }, [allContexts, selectedType, projectId])
+    for (const k of Object.keys(byTopic)) byTopic[k] = sortByUpdated(byTopic[k])
+    const entries = Object.entries(byTopic).sort((a, b) => {
+      const au = a[1][0]?.chat.updatedAt || a[1][0]?.chat.createdAt || ''
+      const bu = b[1][0]?.chat.updatedAt || b[1][0]?.chat.createdAt || ''
+      return bu.localeCompare(au)
+    })
+    return entries
+  }, [storyTopicChats])
 
-  // Selected context state - default to first entry for the selected type
+  const [selectedTile, setSelectedTile] = useState<TileType>('GENERAL')
+
+  // Selected context state
   const [selectedContext, setSelectedContext] = useState<ChatContext | undefined>(undefined)
   useEffect(() => {
-    const first = contextsForSelectedType[0]
-    setSelectedContext((prev) => {
-      if (!prev) return first
-      // If previous no longer matches selected type, switch
-      if (prev.type !== selectedType) return first
-      // If previous was PROJECT but projectId changed
-      if (prev.type === 'PROJECT' && 'projectId' in prev && prev.projectId !== projectId)
-        return first
-      // Otherwise keep selection
-      return prev
-    })
-  }, [contextsForSelectedType.map((c) => JSON.stringify(c)).join('|'), selectedType, projectId])
+    // choose the first available chat in the current tile if none selected yet
+    let first: ChatContext | undefined
+    if (selectedTile === 'GENERAL') {
+      first = generalChats[0]?.chat.context
+    } else if (selectedTile === 'STORIES') {
+      first = (storyChats[0] || featureChats[0])?.chat.context
+    } else if (selectedTile === 'TOPICS') {
+      first = (projectTopicChats[0] || storyTopicChats[0])?.chat.context
+    }
+    setSelectedContext((prev) => prev || first)
+  }, [selectedTile, generalChats, storyChats, featureChats, projectTopicChats, storyTopicChats])
 
   const handleNewChat = async () => {
-    // Create/Restart a General (Project) chat with current timestamp
-    const context: ChatContext = { type: 'PROJECT', projectId }
+    // New General chat: restart the PROJECT chat for current active project
+    const context: ChatContext = { type: 'PROJECT', projectId: activeProjectId }
     await restartChat(context)
-    setSelectedType('PROJECT')
+    setSelectedTile('GENERAL')
     setSelectedContext(context)
+  }
+
+  // Collapsible sections state
+  const [isGeneralOpen, setGeneralOpen] = useState(true)
+  const [isStoriesOpen, setStoriesOpen] = useState(true)
+  const [isFeaturesOpen, setFeaturesOpen] = useState(true)
+  const [isTopicsOpen, setTopicsOpen] = useState(true)
+
+  const renderChatButton = (ctx: ChatContext, key: string) => {
+    const isActive = selectedContext && JSON.stringify(selectedContext) === JSON.stringify(ctx)
+    const label = titleForContext(ctx, {
+      getProjectTitle,
+      getStoryTitle,
+      getFeatureTitle,
+    })
+    return (
+      <button
+        key={key}
+        className={[
+          'w-full text-left rounded-md px-3 py-2 border',
+          isActive
+            ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]'
+            : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
+        ].join(' ')}
+        onClick={() => setSelectedContext(ctx)}
+        title={label}
+      >
+        <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
+      </button>
+    )
   }
 
   return (
     <div className="flex flex-1 min-h-0 w-full overflow-hidden">
       {/* Left sidebar: type tiles + chats list */}
-      <aside className="w-[320px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-base)] flex flex-col min-h-0">
+      <aside className="w-[360px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-base)] flex flex-col min-h-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)]">
           <div className="text-sm font-semibold text-[var(--text-primary)]">Chats</div>
           <button className="btn" onClick={handleNewChat} title="New General chat">
@@ -150,9 +207,15 @@ export default function ChatView() {
 
         {/* Type selection tiles */}
         <div className="p-2 overflow-auto">
-          <div className="grid grid-cols-2 gap-2">
-            {availableTypes.map((t) => {
-              const isActive = t === selectedType
+          <div className="grid grid-cols-3 gap-2">
+            {TILE_TYPES.map((t) => {
+              const isActive = t === selectedTile
+              const count =
+                t === 'GENERAL'
+                  ? generalChats.length
+                  : t === 'STORIES'
+                  ? storyChats.length + featureChats.length
+                  : projectTopicChats.length + storyTopicChats.length
               return (
                 <button
                   key={t}
@@ -162,53 +225,152 @@ export default function ChatView() {
                       ? 'border-blue-500 ring-1 ring-blue-500/50 bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]'
                       : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
                   ].join(' ')}
-                  onClick={() => setSelectedType(t)}
+                  onClick={() => setSelectedTile(t)}
                 >
-                  <div className="text-[12px] font-semibold text-[var(--text-primary)]">
-                    {labelForType(t)}
-                  </div>
-                  <div className="text-[11px] text-[var(--text-secondary)]">
-                    {listByType(allContexts, t).length} item(s)
-                  </div>
+                  <div className="text-[12px] font-semibold text-[var(--text-primary)]">{t}</div>
+                  <div className="text-[11px] text-[var(--text-secondary)]">{count} item(s)</div>
                 </button>
               )
             })}
           </div>
         </div>
 
-        <div className="px-3 pb-2 text-[11px] text-[var(--text-muted)] uppercase tracking-wide">
-          {labelForType(selectedType)}
-        </div>
-
-        {/* Chats list for selected type */}
-        <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-1">
-          {contextsForSelectedType.length === 0 ? (
-            <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-              No chats for this type.
+        {/* Sections list for selected tile */}
+        <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-2">
+          {selectedTile === 'GENERAL' && (
+            <div>
+              <button
+                className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+                onClick={() => setGeneralOpen((v) => !v)}
+              >
+                <span>GENERAL</span>
+                <span>{isGeneralOpen ? '−' : '+'}</span>
+              </button>
+              {isGeneralOpen && (
+                <div className="space-y-1">
+                  {generalChats.length === 0 ? (
+                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                      No general chats yet.
+                    </div>
+                  ) : (
+                    generalChats.map((c) => renderChatButton(c.chat.context, c.key))
+                  )}
+                </div>
+              )}
             </div>
-          ) : (
-            contextsForSelectedType.map((ctx, idx) => {
-              const isActive =
-                selectedContext && JSON.stringify(selectedContext) === JSON.stringify(ctx)
-              const label = titleForContext(ctx, project?.title)
-              return (
+          )}
+
+          {selectedTile === 'STORIES' && (
+            <div className="space-y-2">
+              <div>
                 <button
-                  key={idx}
-                  className={[
-                    'w-full text-left rounded-md px-3 py-2 border',
-                    isActive
-                      ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
-                  ].join(' ')}
-                  onClick={() => setSelectedContext(ctx)}
-                  title={label}
+                  className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+                  onClick={() => setStoriesOpen((v) => !v)}
                 >
-                  <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
-                    {label}
-                  </div>
+                  <span>STORIES</span>
+                  <span>{isStoriesOpen ? '−' : '+'}</span>
                 </button>
-              )
-            })
+                {isStoriesOpen && (
+                  <div className="space-y-1">
+                    {storyChats.length === 0 ? (
+                      <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                        No story chats yet.
+                      </div>
+                    ) : (
+                      storyChats.map((c) => renderChatButton(c.chat.context, c.key))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+                  onClick={() => setFeaturesOpen((v) => !v)}
+                >
+                  <span>FEATURES</span>
+                  <span>{isFeaturesOpen ? '−' : '+'}</span>
+                </button>
+                {isFeaturesOpen && (
+                  <div className="space-y-1">
+                    {featureChats.length === 0 ? (
+                      <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                        No feature chats yet.
+                      </div>
+                    ) : (
+                      featureChats.map((c) => renderChatButton(c.chat.context, c.key))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {selectedTile === 'TOPICS' && (
+            <div className="space-y-2">
+              <div>
+                <button
+                  className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+                  onClick={() => setTopicsOpen((v) => !v)}
+                >
+                  <span>TOPICS</span>
+                  <span>{isTopicsOpen ? '−' : '+'}</span>
+                </button>
+                {isTopicsOpen && (
+                  <div className="space-y-2">
+                    {/* Project Topics */}
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                        Project Topics
+                      </div>
+                      <div className="space-y-2">
+                        {projectTopicsGrouped.length === 0 ? (
+                          <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                            No project topic chats yet.
+                          </div>
+                        ) : (
+                          projectTopicsGrouped.map(([topic, items]) => (
+                            <div key={topic} className="pl-1">
+                              <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                                {prettyTopicName(topic)}
+                              </div>
+                              <div className="space-y-1">
+                                {items.map((c) => renderChatButton(c.chat.context, c.key))}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Story Topics */}
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                        Story Topics
+                      </div>
+                      <div className="space-y-2">
+                        {storyTopicsGrouped.length === 0 ? (
+                          <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                            No story topic chats yet.
+                          </div>
+                        ) : (
+                          storyTopicsGrouped.map(([topic, items]) => (
+                            <div key={topic} className="pl-1">
+                              <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                                {prettyTopicName(topic)}
+                              </div>
+                              <div className="space-y-1">
+                                {items.map((c) => renderChatButton(c.chat.context, c.key))}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </aside>
@@ -218,7 +380,11 @@ export default function ChatView() {
         {selectedContext ? (
           <ChatSidebar
             context={selectedContext}
-            chatContextTitle={titleForContext(selectedContext, project?.title)}
+            chatContextTitle={titleForContext(selectedContext, {
+              getProjectTitle,
+              getStoryTitle,
+              getFeatureTitle,
+            })}
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">

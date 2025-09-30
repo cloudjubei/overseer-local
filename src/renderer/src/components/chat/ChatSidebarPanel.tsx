@@ -79,7 +79,7 @@ export default function ChatSidebarPanel({
   if (collapsed) {
     return (
       <aside
-        className="chat-collapsed-panel z-30 xh-full bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed"
+        className="chat-collapsed-panel z-30 h-full bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed"
         style={{ width: COLLAPSED_W }}
       >
         <button

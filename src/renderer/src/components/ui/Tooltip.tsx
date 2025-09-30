@@ -19,31 +19,89 @@ export default function Tooltip({
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const timerRef = useRef<number | null>(null)
+  const hideTimerRef = useRef<number | null>(null)
   const anchorRef = useRef<HTMLElement | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const tooltipId = useId()
 
+  const CLOSE_DELAY = 120 // small delay to allow cursor to move between anchor and tooltip without flicker
+
   // Ensure we always have a concrete element to attach events/refs to.
   // If children is not a single valid React element (e.g., text, fragment, array), wrap it in a span.
-  const baseChild = React.isValidElement(children) && children.type !== React.Fragment
-    ? (children as React.ReactElement)
-    : React.createElement('span', null, children)
+  const baseChild =
+    React.isValidElement(children) && children.type !== React.Fragment
+      ? (children as React.ReactElement)
+      : React.createElement('span', null, children)
 
   useEffect(() => {
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current)
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current)
+      removeOutsideHandlers()
     }
   }, [])
 
-  const show = () => {
+  const clearOpenTimer = () => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }
+  const clearHideTimer = () => {
+    if (hideTimerRef.current) {
+      window.clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = null
+    }
+  }
+
+  const show = (immediate = false) => {
     if (disabled) return
-    if (timerRef.current) window.clearTimeout(timerRef.current)
+    clearHideTimer()
+    if (immediate) {
+      clearOpenTimer()
+      setOpen(true)
+      return
+    }
+    clearOpenTimer()
     timerRef.current = window.setTimeout(() => setOpen(true), delayMs) as any
   }
-  const hide = () => {
-    if (timerRef.current) window.clearTimeout(timerRef.current)
-    setOpen(false)
+  const hide = (immediate = false) => {
+    clearOpenTimer()
+    clearHideTimer()
+    if (immediate) {
+      setOpen(false)
+      return
+    }
+    hideTimerRef.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY) as any
   }
+
+  // Outside click / Escape to close when open via click
+  const onDocMouseDown = (e: MouseEvent) => {
+    if (!open) return
+    const t = e.target as Node
+    if (anchorRef.current && anchorRef.current.contains(t)) return
+    if (tooltipRef.current && tooltipRef.current.contains(t)) return
+    hide(true)
+  }
+  const onDocKeyDown = (e: KeyboardEvent) => {
+    if (!open) return
+    if (e.key === 'Escape') hide(true)
+  }
+  const addOutsideHandlers = () => {
+    document.addEventListener('mousedown', onDocMouseDown)
+    document.addEventListener('keydown', onDocKeyDown)
+  }
+  const removeOutsideHandlers = () => {
+    document.removeEventListener('mousedown', onDocMouseDown)
+    document.removeEventListener('keydown', onDocKeyDown)
+  }
+
+  useEffect(() => {
+    if (open) addOutsideHandlers()
+    else removeOutsideHandlers()
+    // cleanup handled by unmount or when open changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   useLayoutEffect(() => {
     if (!open) {
@@ -155,25 +213,35 @@ export default function Tooltip({
         },
         onFocus: (e: any) => {
           ;(baseChild.props as any)?.onFocus?.(e)
-          show()
+          show(true) // show immediately on focus for accessibility
         },
         onBlur: (e: any) => {
           ;(baseChild.props as any)?.onBlur?.(e)
-          hide()
+          hide(true)
         },
         onKeyDown: (e: any) => {
           ;(baseChild.props as any)?.onKeyDown?.(e)
-          if (e.key === 'Escape') hide()
+          if (e.key === 'Escape') hide(true)
+        },
+        onClick: (e: any) => {
+          if (disabled) return
+          // Toggle tooltip immediately on click
+          setOpen((v) => !v)
         },
         'aria-describedby': open ? tooltipId : undefined,
+        'aria-expanded': open ? true : undefined,
       })}
-      {open && !disabled && position &&
+      {open &&
+        !disabled &&
+        position &&
         createPortal(
           <div
             className="ui-tooltip"
             role="tooltip"
             id={tooltipId}
             ref={tooltipRef}
+            onMouseEnter={() => show(true)}
+            onMouseLeave={() => hide()}
             style={{ position: 'absolute', top: position.top, left: position.left }}
           >
             <div className="ui-tooltip__content">{content}</div>
