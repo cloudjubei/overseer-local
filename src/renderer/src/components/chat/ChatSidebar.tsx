@@ -275,6 +275,25 @@ export default function ChatSidebar({
     .filter(Boolean)
     .join(' ')
 
+  const hasAnyMessages = (chat?.chat.messages?.length || 0) > 0
+
+  const refreshEffectivePromptFromSettings = useCallback(async () => {
+    try {
+      const p = await getSettingsPrompt(contextArguments)
+      setEffectivePrompt(p)
+      setDraftPrompt(p)
+    } catch {
+      try {
+        const def = await getDefaultPrompt(context)
+        setEffectivePrompt(def)
+        setDraftPrompt(def)
+      } catch {
+        setEffectivePrompt('')
+        setDraftPrompt('')
+      }
+    }
+  }, [context, contextArguments, getSettingsPrompt, getDefaultPrompt])
+
   return (
     <section className={sectionClass}>
       {/* Top header: constant size */}
@@ -343,6 +362,16 @@ export default function ChatSidebar({
                       className="btn"
                       onClick={async () => {
                         await persistSettings({ systemPrompt: draftPrompt })
+                        // Only update the effective system prompt if no messages have been sent yet
+                        if (!hasAnyMessages) {
+                          const trimmed = draftPrompt?.trim() ?? ''
+                          if (trimmed.length > 0) {
+                            setEffectivePrompt(trimmed)
+                          } else {
+                            // If cleared, fall back to default/settings-derived prompt
+                            await refreshEffectivePromptFromSettings()
+                          }
+                        }
                       }}
                     >
                       Save prompt
@@ -351,6 +380,23 @@ export default function ChatSidebar({
                       className="btn-secondary"
                       onClick={async () => {
                         await resetSettingsForContext(context)
+                        // After reset, refresh prompts; only apply to effectivePrompt if no messages
+                        if (!hasAnyMessages) {
+                          await refreshEffectivePromptFromSettings()
+                        } else {
+                          // Refresh only the draft prompt in UI without changing the effective system prompt
+                          try {
+                            const p = await getSettingsPrompt(contextArguments)
+                            setDraftPrompt(p)
+                          } catch {
+                            try {
+                              const def = await getDefaultPrompt(context)
+                              setDraftPrompt(def)
+                            } catch {
+                              setDraftPrompt('')
+                            }
+                          }
+                        }
                       }}
                     >
                       Reset to defaults

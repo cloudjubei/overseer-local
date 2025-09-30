@@ -529,7 +529,7 @@
     },
     {
       "id": "570e7b4a-fe99-425d-a7e3-b492bc601863",
-      "status": "-",
+      "status": "+",
       "title": "Saving the prompt doesn't auto update the prompt display",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when saving the prompt in the settings panel - it doesn't auto update the prompt to send (it should only do this when there haven't been any messages yet sent).",
       "context": [
@@ -537,7 +537,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T20:46:41.160Z",
-      "updatedAt": "2025-09-30T20:46:41.160Z"
+      "updatedAt": "2025-09-30T21:09:06.375Z",
+      "completedAt": "2025-09-30T21:09:06.375Z"
     },
     {
       "id": "b88ca6b3-bff8-4d59-8fd7-6bd06f2aaf8f",
