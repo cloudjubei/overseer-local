@@ -121,19 +121,24 @@ export default function ChatSidebarPanel({
     <div style={outerStyle} role="complementary" aria-label="Chat sidebar">
       <div
         onPointerDown={onResizeStart}
-        className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize group"
+        className="absolute left-0 top-0 bottom-0 w-5 cursor-col-resize group"
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize chat sidebar"
         style={{ zIndex: 10 }}
       >
+        {/* Visible grab handle that protrudes to the right (inside the panel) */}
         <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center justify-center"
-          style={{ width: 22, height: 44 }}
+          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-start"
+          style={{ width: 34, height: 56 }}
           aria-hidden
         >
-          <div className="h-full w-[6px] rounded-md bg-[var(--surface-raised)] border border-[var(--border-default)] shadow-sm group-hover:bg-[color-mix(in_srgb,_var(--accent-primary)_16%,_var(--surface-raised))]">
-            <div className="w-[2px] h-[60%] mx-auto my-[20%] rounded bg-[var(--border-subtle)]" />
+          <div className="h-full w-[14px] rounded-r-md bg-teal-500/20 border border-teal-500 shadow-md">
+            <div className="h-full w-full flex flex-row items-center justify-center gap-[3px]">
+              <div className="w-[2px] h-[30px] rounded-sm bg-teal-600" />
+              <div className="w-[2px] h-[30px] rounded-sm bg-teal-600" />
+              <div className="w-[2px] h-[30px] rounded-sm bg-teal-600" />
+            </div>
           </div>
         </div>
       </div>

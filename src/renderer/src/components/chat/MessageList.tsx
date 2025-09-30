@@ -207,6 +207,21 @@ export default function MessageList({
     })
   }, [isThinking])
 
+  // Track container height to size system prompt bubble (max 30% of container height)
+  const [systemMaxHeight, setSystemMaxHeight] = useState<number | undefined>(undefined)
+  useEffect(() => {
+    const container = messageListRef.current
+    if (!container) return
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const h = entry.contentRect.height
+        setSystemMaxHeight(Math.max(0, Math.floor(h * 0.3)))
+      }
+    })
+    ro.observe(container)
+    return () => ro.disconnect()
+  }, [])
+
   return (
     <div
       ref={messageListRef}
@@ -248,8 +263,19 @@ export default function MessageList({
             if (isSystem) {
               return (
                 <div key={index} className="flex justify-center">
-                  <div className="text:[12px] text-[var(--text-muted)] italic bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-full px-3 py-1">
-                    <RichText text={msg.completionMesage.content} />
+                  <div
+                    className={[
+                      'overflow-y-auto max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow border',
+                      'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]',
+                      'chat-bubble',
+                    ].join(' ')}
+                    style={{
+                      maxHeight: systemMaxHeight ? `${systemMaxHeight}px` : undefined,
+                      minHeight: '3.5em',
+                    }}
+                    aria-label="System prompt"
+                  >
+                    <Markdown text={msg.completionMesage.content} />
                   </div>
                 </div>
               )
