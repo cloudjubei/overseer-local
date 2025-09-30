@@ -47,13 +47,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   settingsManager = new SettingsManager(projectRoot, mainWindow)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMPricingManager)
-  chatsManager = new ChatsManager(
-    projectRoot,
-    mainWindow,
-    projectsManager,
-    storiesManager,
-    factoryAgentRunManager,
-  )
+  chatsManager = new ChatsManager(projectRoot, mainWindow)
   documentIngestionManager = new DocumentIngestionManager(
     projectRoot,
     mainWindow,

@@ -303,8 +303,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:53:12.441Z",
-      "updatedAt": "2025-09-30T01:52:06.548Z",
-      "rejection": "The sidebar doesn't show a at all on all the screens above.\n\nWhat's worse - the close chat sidebar button appears in popups, and there it slides to close correctly. We can actually have this functionality in popups but with 2 improvements:\n1) the chat bar needs to show next to the popup at all times (similar to how it's meant to show for regular screens on the right)\n2) when it's collapsed only the bar is shown - no weird gray background under where the chat sidebar will expand into.",
+      "updatedAt": "2025-09-30T09:24:15.747Z",
       "completedAt": "2025-09-30T01:52:06.548Z"
     },
     {
@@ -337,6 +336,21 @@
       "createdAt": "2025-09-30T01:20:42.316Z",
       "updatedAt": "2025-09-30T02:00:19.330Z",
       "rejection": "Blocked: Agent loop failed: {\"message\":\"Received no toolCalls. Original message: {\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"{\\\\\\\"thoughts\\\\\\\":\\\\\\\"The tool returned nothing yet; likely large content will come. I must wait for the tool response before proceeding.\\\\\\\",\\\\\\\"tool_calls\\\\\\\":[]}\\\"}\",\"stacktrace\":\"Error: Received no toolCalls. Original message: {\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"{\\\\\\\"thoughts\\\\\\\":\\\\\\\"The tool returned nothing yet; likely large content will come. I must wait for the tool response before proceeding.\\\\\\\",\\\\\\\"tool_calls\\\\\\\":[]}\\\"}\\n    at runConversation (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:258:23)\\n    at async runAgentOnFeature (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:355:5)\\n    at async runOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:417:9)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:452:9)\\n    at async file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:73:17\"}"
+    },
+    {
+      "id": "b5acbe79-2d92-438c-9850-15cee05fbea9",
+      "status": "-",
+      "title": "ChatSidebar rework",
+      "description": "The @src/renderer/src/components/chat/ChatSidebar.tsx doesn't work properly - it stays collapsed in the panel - in @src/renderer/src/components/chat/ChatSidebarOverlay.tsx . The way to solve it, is that ChatSidebar must get a parameter `isCollapsible` passed in - then it would display its own collapse button which would via callback call the setCollapse of whoever is calling it. For instance in @src/renderer/src/screens/ChatView.tsx it won't be passed in because there it stays fully open and taking up the whole screen.\nChatSidebarOverlay needs to be renamed to ChatSidebarPanel and it will control the `setCollapsed`. It should be further split/refactored to a separate component ChatSidebarModalPanel that will only contain the logic for handling Modals/popups as used for instance in @src/renderer/src/screens/stories/FeatureEditView.tsx .",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/ChatSidebarOverlay.tsx",
+        "src/renderer/src/screens/ChatView.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T09:27:46.491Z",
+      "updatedAt": "2025-09-30T09:27:46.491Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -360,9 +374,10 @@
     "c3804c5f-ec19-410e-b866-3d0229cb354a": 18,
     "95c7a067-9e9b-4e54-b786-6d3997dfff30": 19,
     "d5fb1e96-fbb4-44c4-be63-6f008cd29918": 20,
-    "9621b87e-23b2-48cd-be7f-454543d6b212": 21,
-    "4115f6ec-a85b-4a5d-bf23-14df6314c7c7": 22,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 23
+    "b5acbe79-2d92-438c-9850-15cee05fbea9": 21,
+    "9621b87e-23b2-48cd-be7f-454543d6b212": 22,
+    "4115f6ec-a85b-4a5d-bf23-14df6314c7c7": 23,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 24
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"

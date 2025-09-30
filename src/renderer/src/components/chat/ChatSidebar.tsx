@@ -29,12 +29,7 @@ function parseProjectIdFromContext(context: ChatContext): string | undefined {
 export default function ChatSidebar({ context, chatContextTitle }: ChatSidebarProps) {
   const { getChat, sendMessage } = useChats()
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
-  const { appSettings, setUserPreferences } = useAppSettings()
-  const [collapsed, setCollapsed] = useState(appSettings.userPreferences.chatSidebarCollapsed)
-
-  useEffect(() => {
-    setUserPreferences({ chatSidebarCollapsed: collapsed })
-  }, [collapsed])
+  const [collapsed, setCollapsed] = useState(true)
 
   useEffect(() => {
     const loadChat = async () => {

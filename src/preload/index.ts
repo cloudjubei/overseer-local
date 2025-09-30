@@ -65,6 +65,12 @@ const STORIES_API = {
 }
 
 const CHATS_API = {
+  getCompletion: (context, newMessages, config) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, {
+      context,
+      newMessages,
+      config,
+    }),
   // listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, { config }),
   subscribe: (callback) => {
     const listener = (_event, payload) => callback(payload)
@@ -73,16 +79,21 @@ const CHATS_API = {
   },
   listChats: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST, { projectId }),
   createChat: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE, { input }),
-  getChat: (context) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { context }),
-  updateChat: (context, patch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { context, patch }),
-  deleteChat: (context) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { context }),
-  getCompletion: (context, newMessages, config) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, {
-      context,
-      newMessages,
-      config,
-    }),
+  getChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { chatContext }),
+  updateChat: (chatContext, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { chatContext, patch }),
+  deleteChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { chatContext }),
+
+  getChatSettings: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_SETTINGS),
+  updateChatSettings: (chatContext, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE_SETTINGS, { chatContext, patch }),
+  resetChatSettings: (chatContext) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_RESET_SETTINGS, { chatContext }),
+
+  getSettingsPrompt: (contextArguments) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_SETTINGS_PROMPT, { contextArguments }),
+  getDefaultPrompt: (chatContext) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_DEFAULT_PROMPT, { chatContext }),
 }
 
 const NOTIFICATIONS_API = {

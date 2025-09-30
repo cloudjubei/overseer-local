@@ -1,7 +1,5 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import type ProjectsManager from '../projects/ProjectsManager'
-import type StoriesManager from '../stories/StoriesManager'
 import { createCompletionClient, createChatsTools } from 'thefactory-tools'
 import type {
   ChatMessage,
@@ -10,44 +8,29 @@ import type {
   ChatContext,
   ChatCreateInput,
   ChatEditInput,
-  ChatContextProject,
-  ChatContextStory,
-  ChatContextFeature,
-  ChatContextAgentRun,
-  ChatContextProjectTopic,
   CompletionMessage,
   LLMConfig,
+  ChatSettings,
+  ChatsSettings,
+  ChatContextArguments,
 } from 'thefactory-tools'
-import { getSystemPrompt, defaultContextPrompts } from './promptTemplates'
-import FactoryAgentRunManager from '../factory/FactoryAgentRunManager'
 import BaseManager from '../BaseManager'
+import { getDefaultChatPrompt } from 'thefactory-tools/utils'
 
 const MESSAGES_TO_SEND = 10
 
 export default class ChatsManager extends BaseManager {
   private tools: ChatsTools
-  private projectsManager: ProjectsManager
-  private storiesManager: StoriesManager
-  private factoryAgentRunManager: FactoryAgentRunManager
+  private chatSettings: ChatsSettings | undefined
 
-  constructor(
-    projectRoot: string,
-    window: BrowserWindow,
-    projectsManager: ProjectsManager,
-    storiesManager: StoriesManager,
-    factoryAgentRunManager: FactoryAgentRunManager,
-  ) {
+  constructor(projectRoot: string, window: BrowserWindow) {
     super(projectRoot, window)
-
-    this.projectsManager = projectsManager
-    this.storiesManager = storiesManager
-    this.factoryAgentRunManager = factoryAgentRunManager
 
     this.tools = createChatsTools(this.projectRoot)
   }
 
   async init(): Promise<void> {
-    await this.tools.init()
+    this.chatSettings = await this.tools.init()
     this.tools.subscribe(async (chatUpdate) => {
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, chatUpdate)
@@ -64,10 +47,22 @@ export default class ChatsManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) => this.listChats(projectId)
     handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ input }) => this.createChat(input)
-    handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ context }) => this.getChat(context)
-    handlers[IPC_HANDLER_KEYS.CHATS_UPDATE] = async ({ context, patch }) =>
-      this.updateChat(context, patch)
-    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ context }) => this.deleteChat(context)
+    handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ chatContext }) => this.getChat(chatContext)
+    handlers[IPC_HANDLER_KEYS.CHATS_UPDATE] = async ({ chatContext, patch }) =>
+      this.updateChat(chatContext, patch)
+    handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ chatContext }) =>
+      this.deleteChat(chatContext)
+
+    handlers[IPC_HANDLER_KEYS.CHATS_GET_SETTINGS] = async () => this.getSettings()
+    handlers[IPC_HANDLER_KEYS.CHATS_UPDATE_SETTINGS] = async ({ chatContext, patch }) =>
+      this.updateSettings(chatContext, patch)
+    handlers[IPC_HANDLER_KEYS.CHATS_RESET_SETTINGS] = async ({ chatContext }) =>
+      this.resetSettings(chatContext)
+
+    handlers[IPC_HANDLER_KEYS.CHATS_GET_DEFAULT_PROMPT] = async ({ chatContext }) =>
+      this.getDefaultPrompt(chatContext)
+    handlers[IPC_HANDLER_KEYS.CHATS_GET_SETTINGS_PROMPT] = async ({ contextArguments }) =>
+      this.getSettingsPrompt(contextArguments)
 
     return handlers
   }
@@ -90,86 +85,41 @@ export default class ChatsManager extends BaseManager {
     })
   }
 
-  private async getContextPrompt(context: ChatContext): Promise<string> {
-    switch (context.type) {
-      case 'GENERAL':
-        return 'GENERIC TODO' //TODO:
-      case 'PROJECT': {
-        const c = context as ChatContextProject
-        const project = await this.projectsManager.getProject(c.projectId)
-        return defaultContextPrompts.project
-          .replace('@@project_title@@', project!.title)
-          .replace('@@project_description@@', project!.description)
-      }
-      case 'STORY': {
-        const c = context as ChatContextStory
-        const project = await this.projectsManager.getProject(c.projectId)
-        const story = await this.storiesManager.getStory(c.projectId, c.storyId)
-        return defaultContextPrompts.story
-          .replace('@@project_title@@', project!.title)
-          .replace('@@project_description@@', project!.description)
-          .replace('@@story_title@@', story!.title)
-          .replace('@@story_description@@', story!.description)
-      }
-      case 'FEATURE': {
-        const c = context as ChatContextFeature
-        const project = await this.projectsManager.getProject(c.projectId)
-        const story = await this.storiesManager.getStory(c.projectId, c.storyId)
-        const feature = await this.storiesManager.getFeature(c.projectId, c.storyId, c.featureId)
-        return defaultContextPrompts.feature
-          .replace('@@project_title@@', project!.title)
-          .replace('@@project_description@@', project!.description)
-          .replace('@@story_title@@', story!.title)
-          .replace('@@story_description@@', story!.description)
-          .replace('@@feature_title@@', feature!.title)
-          .replace('@@feature_description@@', feature!.description)
-      }
-      case 'AGENT_RUN': {
-        const c = context as ChatContextAgentRun
-        const project = await this.projectsManager.getProject(c.projectId)
-        const story = await this.storiesManager.getStory(c.projectId, c.storyId)
-        const agentRun = await this.factoryAgentRunManager.getRun(c.agentRunId)
-        const conversations = agentRun!.conversations.map((c) => c.messages)
-        return defaultContextPrompts.agentRun
-          .replace('@@project_title@@', project!.title)
-          .replace('@@project_description@@', project!.description)
-          .replace('@@story_title@@', story!.title)
-          .replace('@@story_description@@', story!.description)
-          .replace('@@agent_type@@', agentRun!.agentType)
-          .replace('@@agent_conversations@@', JSON.stringify(conversations))
-      }
-      case 'PROJECT_TOPIC': {
-        const c = context as ChatContextProjectTopic
-        const project = await this.projectsManager.getProject(c.projectId)
-        const topic = c.projectTopic
-        return defaultContextPrompts.projectTopic
-          .replace('@@project_title@@', project!.title)
-          .replace('@@project_description@@', project!.description)
-          .replace('@@project_topic@@', topic)
-      }
-    }
-    return 'UNKNOWN CONTEXT'
-  }
-
-  async getDefaultPrompt(context: ChatContext): Promise<string> {
-    const contextPrompt = await this.getContextPrompt(context)
-    return getSystemPrompt({ additionalContext: contextPrompt })
-  }
-
   async listChats(projectId?: string): Promise<Chat[]> {
     return await this.tools.listChats(projectId)
   }
-  async getChat(context: ChatContext): Promise<Chat> {
-    return await this.tools.getChat(context)
+  async getChat(chatContext: ChatContext): Promise<Chat> {
+    return await this.tools.getChat(chatContext)
   }
   async createChat(input: ChatCreateInput): Promise<Chat> {
     return await this.tools.createChat(input)
   }
-  async updateChat(context: ChatContext, patch: ChatEditInput): Promise<Chat | undefined> {
-    return await this.tools.updateChat(context, patch)
+  async updateChat(chatContext: ChatContext, patch: ChatEditInput): Promise<Chat | undefined> {
+    return await this.tools.updateChat(chatContext, patch)
   }
-  async deleteChat(context: ChatContext): Promise<void> {
-    return await this.tools.deleteChat(context)
+  async deleteChat(chatContext: ChatContext): Promise<void> {
+    return await this.tools.deleteChat(chatContext)
+  }
+
+  getSettings(): ChatsSettings {
+    return this.chatSettings!
+  }
+
+  async updateSettings(
+    chatContext: ChatContext,
+    patch: Partial<ChatSettings>,
+  ): Promise<ChatsSettings> {
+    return this.tools.updateChatSettings(this.getSettings(), chatContext, patch)
+  }
+  async resetSettings(chatContext: ChatContext): Promise<ChatsSettings> {
+    return this.tools.resetChatSettings(this.getSettings(), chatContext)
+  }
+
+  getDefaultPrompt(chatContext: ChatContext): string {
+    return getDefaultChatPrompt(chatContext)
+  }
+  async getSettingsPrompt(contextArguments: ChatContextArguments): Promise<string> {
+    return this.tools.getSettingsPrompt(contextArguments, this.getSettings())
   }
 
   async getCompletion(

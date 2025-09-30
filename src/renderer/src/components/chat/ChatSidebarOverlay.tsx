@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import ChatSidebar from './ChatSidebar'
 import type { ChatContext } from 'thefactory-tools'
-import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 
 export default function ChatSidebarOverlay({
   isOpen = true,
@@ -18,8 +17,7 @@ export default function ChatSidebarOverlay({
   // Called during resize (continuous) and on release (final)
   onWidthChange?: (width: number, isFinal: boolean) => void
 }) {
-  const { appSettings } = useAppSettings()
-  const collapsed = appSettings.userPreferences.chatSidebarCollapsed
+  const [collapsed, setCollapsed] = useState(true)
 
   // Resolve min/collapsed width from CSS vars to mirror main sidebar
   const getMetricPx = (name: string, fallback: number) => {
@@ -234,9 +232,7 @@ export default function ChatSidebarOverlay({
             style={{ width: 22, height: 44 }}
             aria-hidden
           >
-            <div
-              className="h-full w-[6px] rounded-md bg-[var(--surface-raised)] border border-[var(--border-default)] shadow-sm group-hover:bg-[color-mix(in_srgb,_var(--accent-primary)_16%,_var(--surface-raised))]"
-            >
+            <div className="h-full w-[6px] rounded-md bg-[var(--surface-raised)] border border-[var(--border-default)] shadow-sm group-hover:bg-[color-mix(in_srgb,_var(--accent-primary)_16%,_var(--surface-raised))]">
               <div className="w-[2px] h-[60%] mx-auto my-[20%] rounded bg-[var(--border-subtle)]" />
             </div>
           </div>
