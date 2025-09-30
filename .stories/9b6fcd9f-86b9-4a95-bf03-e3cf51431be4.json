@@ -1,7 +1,7 @@
 {
   "id": "9b6fcd9f-86b9-4a95-bf03-e3cf51431be4",
-  "status": "?",
-  "title": "Monitor a story/feature as it's running and update information based off of git commits",
+  "status": "-",
+  "title": "Git Monitor and version control in-app",
   "description": "The status of the stories isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's stories/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the story) with a given featureId specified, it should be possible to see the story.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.\nThe non-renderer code should be placed under src/git-monitor whereas renderer related things under src/renderer/services/getService.ts and in appropriate screens/components",
   "features": [
     {
@@ -86,15 +86,15 @@
     },
     {
       "id": "dca334a0-9739-4026-9980-765ec6423b79",
-      "status": "?",
-      "title": "Use the GitMonitor in UI",
-      "description": "Work out how to use the git merger etc",
+      "status": "-",
+      "title": "Create Sourcetree replacement - a popular version control management app",
+      "description": "We want a user to not have the need to switch between this app and an app like SourceTree to perform all the tasks needed with merging, resolving conflicts, seeing updates, seeing diffs and seeing diff tests.",
       "plan": "",
       "context": [],
       "acceptance": [],
       "blockers": [],
       "createdAt": "2025-09-16T13:05:37.980Z",
-      "updatedAt": "2025-09-16T13:05:37.980Z"
+      "updatedAt": "2025-09-30T12:21:24.530Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -107,5 +107,5 @@
     "dca334a0-9739-4026-9980-765ec6423b79": 7
   },
   "createdAt": "2025-09-16T13:05:37.980Z",
-  "updatedAt": "2025-09-16T13:05:37.980Z"
+  "updatedAt": "2025-09-30T12:21:52.382Z"
 }

@@ -407,6 +407,20 @@
       "blockers": [],
       "createdAt": "2025-09-30T11:56:48.368Z",
       "updatedAt": "2025-09-30T11:56:48.368Z"
+    },
+    {
+      "id": "c6e1cbe2-6b73-4982-9dca-83eb9b3741bf",
+      "status": "-",
+      "title": "LLMConfig setting",
+      "description": "Chats need to have the LLMConfig stored separately from the AgentRun LLMConfig. In @src/renderer/src/screens/settings/llms/LLMSettings.tsx and @src/renderer/src/contexts/LLMConfigContext.tsx there should simply be another field for the activeChatConfig .\nThe @src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx needs to be updated to have a button showing which config is the Chat active one and allow setting it via that screen.",
+      "context": [
+        "src/renderer/src/screens/settings/llms/LLMSettings.tsx",
+        "src/renderer/src/contexts/LLMConfigContext.tsx",
+        "src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T12:01:17.827Z",
+      "updatedAt": "2025-09-30T12:01:17.827Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -437,8 +451,9 @@
     "1232c0ac-6074-4c02-88eb-f9266eac85ba": 25,
     "f0564d60-694d-480c-9d28-bdf8e3942992": 26,
     "265cce60-2d86-4e84-9ba4-e8bec45598da": 27,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 28,
-    "3285d7d6-0883-4b47-a4a0-72a6473d5924": 29
+    "3285d7d6-0883-4b47-a4a0-72a6473d5924": 28,
+    "c6e1cbe2-6b73-4982-9dca-83eb9b3741bf": 29,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 30
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
