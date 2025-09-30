@@ -14,7 +14,7 @@ import ModelChip from '@renderer/components/agents/ModelChip'
 import { StatusPicker, statusKey, STATUS_LABELS } from '@renderer/components/stories/StatusControl'
 import { Button } from '@renderer/components/ui/Button'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { ChatSidebarOverlay } from '@renderer/components/chat'
+import { ChatSidebarPanel } from '@renderer/components/chat'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
@@ -730,7 +730,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       </div>
 
       {chatContext && (
-        <ChatSidebarOverlay
+        <ChatSidebarPanel
           context={chatContext}
           chatContextTitle={story.title || `Story ${storyDisplayIndex}`}
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

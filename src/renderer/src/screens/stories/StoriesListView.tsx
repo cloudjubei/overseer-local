@@ -20,7 +20,7 @@ import ModelChip from '@renderer/components/agents/ModelChip'
 import Skeleton, { SkeletonText } from '@renderer/components/ui/Skeleton'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { ChatSidebarOverlay } from '@renderer/components/chat'
+import { ChatSidebarPanel } from '@renderer/components/chat'
 import { StoryListStatusFilter, StoryListViewSorting, StoryViewMode } from 'src/types/settings'
 
 function countFeatures(story: Story) {
@@ -632,7 +632,7 @@ export default function StoriesListView() {
       </section>
 
       {projectId && (
-        <ChatSidebarOverlay
+        <ChatSidebarPanel
           context={{ projectId, type: 'PROJECT' }}
           chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

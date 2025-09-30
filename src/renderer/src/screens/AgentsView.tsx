@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAgents } from '../contexts/AgentsContext'
 import ChatConversation from '../components/agents/ChatConversation'
 import AgentRunRow from '../components/agents/AgentRunRow'
 import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
 import { useActiveProject } from '../contexts/ProjectContext'
-import { ChatSidebarOverlay } from '../components/chat'
+import { ChatSidebarPanel } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 
@@ -60,12 +60,11 @@ const CurrentProjectView = () => {
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
       const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs =
-        r.finishedAt
-          ? new Date(r.finishedAt).getTime()
-          : r.updatedAt
-            ? new Date(r.updatedAt).getTime()
-            : Date.now()
+      const finishedMs = r.finishedAt
+        ? new Date(r.finishedAt).getTime()
+        : r.updatedAt
+          ? new Date(r.updatedAt).getTime()
+          : Date.now()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs) ? Math.max(0, finishedMs - startedMs) : 0
       const totalFeatures = conversations.length
@@ -293,12 +292,11 @@ const AllProjectsView = () => {
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
       const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs =
-        r.finishedAt
-          ? new Date(r.finishedAt).getTime()
-          : r.updatedAt
-            ? new Date(r.updatedAt).getTime()
-            : Date.now()
+      const finishedMs = r.finishedAt
+        ? new Date(r.finishedAt).getTime()
+        : r.updatedAt
+          ? new Date(r.updatedAt).getTime()
+          : Date.now()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs)
           ? Math.max(0, finishedMs - startedMs)
@@ -1075,7 +1073,7 @@ export default function AgentsView() {
         </div>
       </div>
       {viewMode === 'current' && chatContext && (
-        <ChatSidebarOverlay
+        <ChatSidebarPanel
           context={chatContext}
           chatContextTitle="Agents chat"
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

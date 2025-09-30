@@ -4,9 +4,9 @@ import { useToast } from '@renderer/components/ui/Toast'
 import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import { ChatSidebarOverlay } from '@renderer/components/chat'
 import { IconChat } from '@renderer/components/ui/Icons'
 import { ChatContext } from 'thefactory-tools'
+import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
 export default function FeatureCreateView({
   storyId,
@@ -135,7 +135,7 @@ export default function FeatureCreateView({
         />
       </Modal>
 
-      <ChatSidebarOverlay
+      <ChatSidebarModalPanel
         isOpen={isChatOpen}
         context={context}
         chatContextTitle="Story Chat (New Feature)"

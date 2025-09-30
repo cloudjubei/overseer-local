@@ -8,7 +8,7 @@ import { TestsProvider, useTests } from '../contexts/TestsContext'
 import { useNavigator } from '../navigation/Navigator'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
-import { ChatSidebarOverlay } from '../components/chat'
+import { ChatSidebarPanel } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 
@@ -202,7 +202,7 @@ function TestsInner() {
       </div>
 
       {chatContext && (
-        <ChatSidebarOverlay
+        <ChatSidebarPanel
           context={chatContext}
           chatContextTitle="Tests chat"
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}

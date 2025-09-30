@@ -6,7 +6,7 @@ import { useNavigator } from '@renderer/navigation/Navigator'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, Story } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import { ChatSidebarOverlay } from '@renderer/components/chat'
+import { ChatSidebarModalPanel } from '@renderer/components/chat'
 import { IconChat } from '@renderer/components/ui/Icons'
 
 export default function StoryEditView({
@@ -127,7 +127,7 @@ export default function StoryEditView({
         )}
       </Modal>
 
-      <ChatSidebarOverlay
+      <ChatSidebarModalPanel
         isOpen={isChatOpen}
         context={context}
         chatContextTitle="Story Chat"
