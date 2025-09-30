@@ -6,10 +6,13 @@ import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import type { ChatContext, ChatMessage } from 'thefactory-tools'
+import type { ChatContext, ChatMessage, ChatContextArguments } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
 import { IconSettings, IconChevron } from '../ui/Icons'
+import { useProjectContext } from '../../contexts/ProjectContext'
+import { useStories } from '../../contexts/StoriesContext'
+import { useAgents } from '../../contexts/AgentsContext'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -23,13 +26,18 @@ export type ChatSidebarProps = {
 
 function parseProjectIdFromContext(context: ChatContext): string | undefined {
   if (context && 'projectId' in context) {
-    return context.projectId
+    return (context as any).projectId
   }
+  if (context && (context as any).projectId) return (context as any).projectId
   return undefined
 }
 
 export default function ChatSidebar({ context, chatContextTitle, isCollapsible, onCollapse, showLeftBorder }: ChatSidebarProps) {
   const { getChat, sendMessage, getSettingsForContext, updateSettingsForContext, resetSettingsForContext, getSettingsPrompt, getDefaultPrompt } = useChats()
+  const { getProjectById } = useProjectContext()
+  const { storiesById, featuresById } = useStories()
+  const { runsHistory } = useAgents()
+
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
 
   useEffect(() => {
@@ -196,13 +204,70 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     }
   }, [isSettingsOpen])
 
+  // Build enriched context arguments for settings prompt
+  const contextArguments: ChatContextArguments = useMemo(() => {
+    const args: any = { ...(context as any) }
+    const pid = parseProjectIdFromContext(context)
+    if (pid) {
+      const proj = getProjectById(pid)
+      if (proj) args.project = proj
+    }
+
+    switch (context.type) {
+      case 'PROJECT':
+      case 'PROJECT_TOPIC': {
+        // Only project is needed; already attached
+        break
+      }
+      case 'STORY':
+      case 'STORY_TOPIC':
+      case 'FEATURE':
+      case 'AGENT_RUN': {
+        const storyId = (context as any).storyId as string | undefined
+        if (storyId && !args.story) {
+          const s = storiesById[storyId]
+          if (s) args.story = s
+        }
+        if (context.type === 'FEATURE') {
+          const featureId = (context as any).featureId as string | undefined
+          if (featureId) {
+            const f = featuresById[featureId]
+            if (f) args.feature = f
+          }
+        }
+        if (context.type === 'AGENT_RUN') {
+          const runId = (context as any).agentRunId as string | undefined
+          if (runId) {
+            const run = runsHistory.find((r) => r.id === runId)
+            if (run) {
+              args.run = run
+              if (!args.story && run.storyId) {
+                const s2 = storiesById[run.storyId]
+                if (s2) args.story = s2
+              }
+              if (!args.project && run.projectId) {
+                const p2 = getProjectById(run.projectId)
+                if (p2) args.project = p2
+              }
+            }
+          }
+        }
+        break
+      }
+      default:
+        break
+    }
+
+    return args as ChatContextArguments
+  }, [context, storiesById, featuresById, runsHistory, getProjectById])
+
   // Effective prompt display (before any messages) and to seed settings textarea
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
   useEffect(() => {
     let cancelled = false
     const refreshPrompt = async () => {
       try {
-        const prompt = await getSettingsPrompt(context)
+        const prompt = await getSettingsPrompt(contextArguments)
         if (!cancelled) setEffectivePrompt(prompt)
       } catch {
         try {
@@ -217,7 +282,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     return () => {
       cancelled = true
     }
-  }, [context, getSettingsPrompt, getDefaultPrompt])
+  }, [context, contextArguments, getSettingsPrompt, getDefaultPrompt])
 
   // Seed draft prompt whenever effective or settings change
   useEffect(() => {
