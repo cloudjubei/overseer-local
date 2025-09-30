@@ -362,7 +362,7 @@
     },
     {
       "id": "1232c0ac-6074-4c02-88eb-f9266eac85ba",
-      "status": "-",
+      "status": "+",
       "title": "ChatSidebar settings panel",
       "description": "The settings panel in @src/renderer/src/components/chat/ChatSidebar.tsx is not displaying the prompt for the given chatContext.\n\nThe tools that are displayed should have the toggles displayed in this way:\n|TOGGLE1|TOGGLE2| where they are vertically stacked on the right with a small gap between. One of the toggles has the following display:\n|LABEL|SWITCH| where they are vertically stacked and the label is of a small font size just above the switch (minimal gap of 1px).\n\nWhen a available tool is turned off then the auto-call one is turned off by default and disabled.\nWhen a switch is disabled it should be distinctly different than a turned off switch.",
       "context": [
@@ -370,8 +370,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T10:54:00.598Z",
-      "updatedAt": "2025-09-30T13:23:26.242Z",
-      "rejection": "Disabled and turned off switches don't look any different"
+      "updatedAt": "2025-09-30T13:45:44.800Z",
+      "rejection": "Disabled and turned off switches don't look any different",
+      "completedAt": "2025-09-30T13:45:44.800Z"
     },
     {
       "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
@@ -383,8 +384,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:09:29.804Z",
-      "updatedAt": "2025-09-30T13:19:58.836Z",
-      "rejection": "In tooltip there's an error on line 200, the code:\n`ref: (el: HTMLElement) => {`\nthe error:\nNo overload matches this call.\n  The last overload gave the following error.\n    Object literal may only specify known properties, and 'ref' does not exist in type 'Partial<unknown> & Attributes'.",
+      "updatedAt": "2025-09-30T13:44:30.983Z",
       "completedAt": "2025-09-30T13:19:58.836Z"
     },
     {
