@@ -319,8 +319,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:55:34.058Z",
-      "updatedAt": "2025-09-30T10:32:38.885Z",
-      "rejection": "This is not done at all.",
+      "updatedAt": "2025-09-30T11:12:29.925Z",
       "completedAt": "2025-09-30T10:32:38.885Z"
     },
     {
@@ -352,19 +351,6 @@
       "updatedAt": "2025-09-30T09:27:46.491Z"
     },
     {
-      "id": "8c670818-5898-4407-92a7-df91015bbbf2",
-      "status": "-",
-      "title": "ChatInput bot resizing issues",
-      "description": "When the @src/renderer/src/components/chat/ChatSidebar.tsx opens, the bottom @src/renderer/src/components/chat/ChatInput.tsx shows at its maximum size (even though the input area is empty). Once the user types in something, it resizes correctly. But if there's nothing in - it's max size (wrong).",
-      "context": [
-        "src/renderer/src/components/chat/ChatSidebar.tsx",
-        "src/renderer/src/components/chat/ChatInput.tsx"
-      ],
-      "blockers": [],
-      "createdAt": "2025-09-30T10:25:34.331Z",
-      "updatedAt": "2025-09-30T10:25:34.331Z"
-    },
-    {
       "id": "dbe43cbc-d659-42b8-9bb8-c11a9251a50f",
       "status": "-",
       "title": "ChatPanel buttons",
@@ -385,6 +371,30 @@
       "blockers": [],
       "createdAt": "2025-09-30T10:54:00.598Z",
       "updatedAt": "2025-09-30T10:54:00.598Z"
+    },
+    {
+      "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
+      "status": "-",
+      "title": "Hovering or clicking the (i) button at the top flashes",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx , the top (i) bar strangely flashes instead of showing the information the whole time.\nAfter a while when doing the same it works fine.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:09:29.804Z",
+      "updatedAt": "2025-09-30T11:09:57.108Z"
+    },
+    {
+      "id": "265cce60-2d86-4e84-9ba4-e8bec45598da",
+      "status": "-",
+      "title": "The bottom right ChatInput info button should work on hover",
+      "description": "In @src/renderer/src/components/chat/ChatInput.tsx the (i) button only works when clicking on it - it should work on hover too.\n\nAdditionally, when hovering over the Attach files button - it should show \"Attach Files\", and the send message button should show \"Send\".",
+      "context": [
+        "src/renderer/src/components/chat/ChatInput.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:11:11.499Z",
+      "updatedAt": "2025-09-30T11:11:11.499Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -411,10 +421,11 @@
     "b5acbe79-2d92-438c-9850-15cee05fbea9": 21,
     "9621b87e-23b2-48cd-be7f-454543d6b212": 22,
     "4115f6ec-a85b-4a5d-bf23-14df6314c7c7": 23,
-    "8c670818-5898-4407-92a7-df91015bbbf2": 24,
-    "dbe43cbc-d659-42b8-9bb8-c11a9251a50f": 25,
-    "1232c0ac-6074-4c02-88eb-f9266eac85ba": 26,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 27
+    "dbe43cbc-d659-42b8-9bb8-c11a9251a50f": 24,
+    "1232c0ac-6074-4c02-88eb-f9266eac85ba": 25,
+    "f0564d60-694d-480c-9d28-bdf8e3942992": 26,
+    "265cce60-2d86-4e84-9ba4-e8bec45598da": 27,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 28
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
