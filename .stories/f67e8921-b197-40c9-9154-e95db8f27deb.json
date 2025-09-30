@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2052,6 +2052,26 @@
       "createdAt": "2025-09-29T23:49:38.336Z",
       "updatedAt": "2025-09-30T00:24:43.193Z",
       "completedAt": "2025-09-30T00:24:43.193Z"
+    },
+    {
+      "id": "19d8f95a-353c-4fc0-a1e6-07d39861c4bc",
+      "status": "-",
+      "title": "Double story entries",
+      "description": "TODO",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-30T10:27:06.169Z",
+      "updatedAt": "2025-09-30T10:27:06.169Z"
+    },
+    {
+      "id": "cf861042-23a2-41b1-a75b-3783a2b6a2bf",
+      "status": "-",
+      "title": "Double notifications",
+      "description": "TODO",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-30T10:27:15.324Z",
+      "updatedAt": "2025-09-30T10:27:15.324Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2188,9 +2208,10 @@
     "ba50781e-aa29-4dfe-b159-825f9ed88f88": 131,
     "02c446d1-4969-4057-8fb6-2e957b2205aa": 132,
     "31bad08b-59b0-468b-a154-7814251bd4cb": 133,
-    "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134
+    "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134,
+    "19d8f95a-353c-4fc0-a1e6-07d39861c4bc": 135,
+    "cf861042-23a2-41b1-a75b-3783a2b6a2bf": 136
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-29T14:40:07.339Z",
-  "completedAt": "2025-09-30T00:24:43.193Z"
+  "updatedAt": "2025-09-29T14:40:07.339Z"
 }

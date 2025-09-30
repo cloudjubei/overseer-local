@@ -348,6 +348,29 @@
       "blockers": [],
       "createdAt": "2025-09-30T09:27:46.491Z",
       "updatedAt": "2025-09-30T09:27:46.491Z"
+    },
+    {
+      "id": "8c670818-5898-4407-92a7-df91015bbbf2",
+      "status": "-",
+      "title": "ChatInput bot resizing issues",
+      "description": "When the @src/renderer/src/components/chat/ChatSidebar.tsx opens, the bottom @src/renderer/src/components/chat/ChatInput.tsx shows at its maximum size (even though the input area is empty). Once the user types in something, it resizes correctly. But if there's nothing in - it's max size (wrong).",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/ChatInput.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T10:25:34.331Z",
+      "updatedAt": "2025-09-30T10:25:34.331Z"
+    },
+    {
+      "id": "dbe43cbc-d659-42b8-9bb8-c11a9251a50f",
+      "status": "-",
+      "title": "ChatPanel buttons",
+      "description": "The buttons should be horizontally centered, the close button at the top and the chat button in the middle.\nTh background should stretch all the way to the bottom (right now it gets clipped some way below the chat button).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-30T10:26:34.764Z",
+      "updatedAt": "2025-09-30T10:26:34.764Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -374,7 +397,9 @@
     "b5acbe79-2d92-438c-9850-15cee05fbea9": 21,
     "9621b87e-23b2-48cd-be7f-454543d6b212": 22,
     "4115f6ec-a85b-4a5d-bf23-14df6314c7c7": 23,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 24
+    "8c670818-5898-4407-92a7-df91015bbbf2": 24,
+    "dbe43cbc-d659-42b8-9bb8-c11a9251a50f": 25,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 26
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
