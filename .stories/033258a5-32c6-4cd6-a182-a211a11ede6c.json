@@ -324,16 +324,15 @@
     },
     {
       "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",
-      "status": "+",
+      "status": "-",
       "title": "The Chat screen needs an overhaul",
-      "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats should be split into two sections - at the top will be the type selection (so a scrollable list with tiles representing the different Context Type combinations) and at the bottom the list of chats for that type. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.",
+      "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats should be split into two sections - at the top will be the type selection (so a scrollable list with tiles representing the different Context Type combinations) and at the bottom the list of chats for that type. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.\n\nThe way the sections in the ChatView should work is the following:\n|GENERAL|\n-----------\n|project chat|\n|STORIES|\n|TOPICS|\n\nGENERAL, STORIES and TOPICS are sections that can open up to reveal either chats (listed first) or sections within (like STORIES -> FEATURES or TOPICS -> TESTS).\nGENERAL needs to show all the general chats across all projects.\nAll the chats in a given section are sorted by the last update date.",
       "context": [
         "src/renderer/src/screens/ChatView.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-30T01:20:42.316Z",
-      "updatedAt": "2025-09-30T10:36:34.528Z",
-      "completedAt": "2025-09-30T10:36:34.528Z"
+      "updatedAt": "2025-09-30T11:55:00.171Z"
     },
     {
       "id": "b5acbe79-2d92-438c-9850-15cee05fbea9",
@@ -376,13 +375,13 @@
       "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
       "status": "-",
       "title": "Hovering or clicking the (i) button at the top flashes",
-      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx , the top (i) bar strangely flashes instead of showing the information the whole time.\nAfter a while when doing the same it works fine.",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx , the top (i) bar strangely flashes instead of showing the information the whole time - but this only seems to happen when the hover comes from the right side and not when it comes from the left.\nClicking it should also show the tooltip.",
       "context": [
         "src/renderer/src/components/chat/ChatSidebar.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:09:29.804Z",
-      "updatedAt": "2025-09-30T11:09:57.108Z"
+      "updatedAt": "2025-09-30T11:48:42.696Z"
     },
     {
       "id": "265cce60-2d86-4e84-9ba4-e8bec45598da",
@@ -395,6 +394,19 @@
       "blockers": [],
       "createdAt": "2025-09-30T11:11:11.499Z",
       "updatedAt": "2025-09-30T11:11:11.499Z"
+    },
+    {
+      "id": "3285d7d6-0883-4b47-a4a0-72a6473d5924",
+      "status": "-",
+      "title": "When opening a modal chat it crashes",
+      "description": "For instance in @src/renderer/src/screens/stories/FeatureEditView.tsx when opening the @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx it crashes with the following error:\n\nChatSidebarModalPanel.tsx:37 React has detected a change in the order of Hooks called by ChatSidebarModalPanel. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n1. useState                   useState\n2. undefined                  useState",
+      "context": [
+        "src/renderer/src/screens/stories/FeatureEditView.tsx",
+        "src/renderer/src/components/chat/ChatSidebarModalPanel.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:56:48.368Z",
+      "updatedAt": "2025-09-30T11:56:48.368Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -425,7 +437,8 @@
     "1232c0ac-6074-4c02-88eb-f9266eac85ba": 25,
     "f0564d60-694d-480c-9d28-bdf8e3942992": 26,
     "265cce60-2d86-4e84-9ba4-e8bec45598da": 27,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 28
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 28,
+    "3285d7d6-0883-4b47-a4a0-72a6473d5924": 29
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
