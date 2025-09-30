@@ -475,7 +475,7 @@
     },
     {
       "id": "a8a2d902-820b-4d02-8783-43861075e090",
-      "status": "-",
+      "status": "+",
       "title": "The chat panel should have a left border similar to Sidebar's",
       "description": "The @src/renderer/src/navigation/SidebarView.tsx has a border on the right, @src/renderer/src/components/chat/ChatSidebarPanel.tsx  should have the same on the left. When a @src/renderer/src/components/chat/ChatSidebar.tsx is collapsible, it should also have the same border.",
       "context": [
@@ -485,7 +485,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T13:30:30.727Z",
-      "updatedAt": "2025-09-30T13:30:30.727Z"
+      "updatedAt": "2025-09-30T14:11:59.609Z",
+      "completedAt": "2025-09-30T14:11:59.609Z"
     }
   ],
   "featureIdToDisplayIndex": {

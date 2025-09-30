@@ -225,6 +225,7 @@ export default function ChatSidebarModalPanel({
           context={context}
           chatContextTitle={chatContextTitle}
           isCollapsible
+          showLeftBorder={false}
           onCollapse={() => setCollapsed(true)}
         />
       </div>
