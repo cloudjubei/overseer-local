@@ -11,7 +11,7 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { ChatSidebarPanel } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import Input from '../components/ui/Input'
+import { Input } from '../components/ui/Input'
 
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'e2e' | 'coverage'>('results')
@@ -112,7 +112,7 @@ function TestsInner() {
     </Button>
   ) : isE2E ? (
     <Button
-      onClick={() => runTestsE2E('.', e2eCommand || undefined)}
+      onClick={() => runTestsE2E(e2eCommand.length > 0 ? e2eCommand : undefined)}
       loading={isRunningE2ETests}
       variant="primary"
       size="lg"
@@ -194,7 +194,10 @@ function TestsInner() {
             <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
               <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
                 <p className="mb-2">Run End-to-End (E2E) tests.</p>
-                <p className='text-xs mb-2'>By default, this will run the `test:e2e` script from your project's `package.json`.</p>
+                <p className="text-xs mb-2">
+                  By default, this will run the `test:e2e` script from your project's
+                  `package.json`.
+                </p>
                 <Input
                   placeholder="Override command (optional)"
                   value={e2eCommand}

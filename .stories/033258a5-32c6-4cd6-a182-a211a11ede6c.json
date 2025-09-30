@@ -324,7 +324,7 @@
     },
     {
       "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",
-      "status": "+",
+      "status": "=",
       "title": "The Chat screen needs an overhaul",
       "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats, so a scrollable list with tiles representing the different Context Type combinations. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.\n\nThe way the sections in the ChatView sidebar should work is the following:\n|GENERAL|\n-----------\n|project chat|\n|STORIES|\n|TOPICS|\n\nGENERAL, STORIES and TOPICS are sections that can open up to reveal either chats (listed first) or sections within (like STORIES -> FEATURES or TOPICS -> TESTS).\nGENERAL needs to show all the general chats across all projects.\nAll the chats in a given section are sorted by the last update date.",
       "context": [
@@ -332,9 +332,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T01:20:42.316Z",
-      "updatedAt": "2025-09-30T13:12:24.388Z",
-      "rejection": "The sections are not displayed correctly as specified in the description.",
-      "completedAt": "2025-09-30T13:12:24.388Z"
+      "updatedAt": "2025-09-30T13:30:50.364Z"
     },
     {
       "id": "b5acbe79-2d92-438c-9850-15cee05fbea9",
@@ -364,16 +362,16 @@
     },
     {
       "id": "1232c0ac-6074-4c02-88eb-f9266eac85ba",
-      "status": "+",
+      "status": "-",
       "title": "ChatSidebar settings panel",
-      "description": "The settings panel in @src/renderer/src/components/chat/ChatSidebar.tsx is not displaying the prompt for the given chatContext.\n\nThe tools that are displayed should have the toggles displayed in this way:\n|TOGGLE1|TOGGLE2| where they are vertically stacked on the right with a small gap between. One of the toggles has the following display:\n|LABEL|SWITCH| where they are vertically stacked and the label is of a small font size just above the switch (minimal gap of 1px).\n\nWhen a available tool is turned off then the auto-call one is turned off by default and disabled.",
+      "description": "The settings panel in @src/renderer/src/components/chat/ChatSidebar.tsx is not displaying the prompt for the given chatContext.\n\nThe tools that are displayed should have the toggles displayed in this way:\n|TOGGLE1|TOGGLE2| where they are vertically stacked on the right with a small gap between. One of the toggles has the following display:\n|LABEL|SWITCH| where they are vertically stacked and the label is of a small font size just above the switch (minimal gap of 1px).\n\nWhen a available tool is turned off then the auto-call one is turned off by default and disabled.\nWhen a switch is disabled it should be distinctly different than a turned off switch.",
       "context": [
         "src/renderer/src/components/chat/ChatSidebar.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-09-30T10:54:00.598Z",
-      "updatedAt": "2025-09-30T13:15:32.330Z",
-      "completedAt": "2025-09-30T13:15:32.330Z"
+      "updatedAt": "2025-09-30T13:23:26.242Z",
+      "rejection": "Disabled and turned off switches don't look any different"
     },
     {
       "id": "f0564d60-694d-480c-9d28-bdf8e3942992",
@@ -455,6 +453,32 @@
       "blockers": [],
       "createdAt": "2025-09-30T12:57:16.524Z",
       "updatedAt": "2025-09-30T12:57:16.524Z"
+    },
+    {
+      "id": "986bae36-acc0-4be4-93c0-05c9dd672b59",
+      "status": "-",
+      "title": "The drag handle must be more distinct and wider",
+      "description": "In the @src/renderer/src/components/chat/ChatSidebar.tsx the drag handle might be very close to another screens scroll bars thus making it almost invisible. The handle should protrude to the right (so short on the left and wide on the right) and be of a teal hue to make it stand out from scrollbars. The handle should have vertical bars illustrating that it's a drag handle.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T13:29:28.662Z",
+      "updatedAt": "2025-09-30T13:29:28.662Z"
+    },
+    {
+      "id": "a8a2d902-820b-4d02-8783-43861075e090",
+      "status": "-",
+      "title": "The chat panel should have a left border similar to Sidebar's",
+      "description": "The @src/renderer/src/navigation/SidebarView.tsx has a border on the right, @src/renderer/src/components/chat/ChatSidebarPanel.tsx  should have the same on the left. When a @src/renderer/src/components/chat/ChatSidebar.tsx is collapsible, it should also have the same border.",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx",
+        "src/renderer/src/components/chat/ChatSidebarPanel.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T13:30:30.727Z",
+      "updatedAt": "2025-09-30T13:30:30.727Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -489,7 +513,9 @@
     "c6e1cbe2-6b73-4982-9dca-83eb9b3741bf": 29,
     "de5208f4-4f5b-464f-99b1-abeb9daa903e": 30,
     "db36287c-c9a7-44c9-94e9-76c6e57bd685": 31,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 32
+    "986bae36-acc0-4be4-93c0-05c9dd672b59": 32,
+    "a8a2d902-820b-4d02-8783-43861075e090": 33,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 34
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"

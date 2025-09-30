@@ -11,11 +11,7 @@ export type FactoryTestsService = {
   listTests: (projectId: string) => Promise<FileMeta[]>
   runTest: (projectId: string, path: string) => Promise<TestResult | undefined>
   runTests: (projectId: string, path?: string) => Promise<TestsResult | undefined>
-  runTestsE2E: (
-    projectId: string,
-    path?: string,
-    overrideCommand?: string,
-  ) => Promise<TestsResult | undefined>
+  runTestsE2E: (projectId: string, command?: string) => Promise<TestsResult | undefined>
   runCoverage: (projectId: string, path: string) => Promise<CoverageResult | undefined>
   runCoverages: (projectId: string, path?: string) => Promise<CoverageResult | undefined>
   getLastResult: (projectId: string) => Promise<TestsResult | undefined>
