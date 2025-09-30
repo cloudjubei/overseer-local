@@ -327,7 +327,7 @@
     },
     {
       "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",
-      "status": "-",
+      "status": "?",
       "title": "The Chat screen needs an overhaul",
       "description": "The @src/renderer/src/screens/ChatView.tsx needs to now list chats according to context so a user can easily find all chats based on the different contexts.\nThe sidebar showing the different chats should be split into two sections - at the top will be the type selection (so a scrollable list with tiles representing the different Context Type combinations) and at the bottom the list of chats for that type. Clicking on a chat will open it in the main area.\nCreating a new chat, always creates a new General chat with the current timestamp.",
       "context": [
@@ -335,7 +335,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T01:20:42.316Z",
-      "updatedAt": "2025-09-30T01:20:42.316Z"
+      "updatedAt": "2025-09-30T02:00:19.330Z",
+      "rejection": "Blocked: Agent loop failed: {\"message\":\"Received no toolCalls. Original message: {\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"{\\\\\\\"thoughts\\\\\\\":\\\\\\\"The tool returned nothing yet; likely large content will come. I must wait for the tool response before proceeding.\\\\\\\",\\\\\\\"tool_calls\\\\\\\":[]}\\\"}\",\"stacktrace\":\"Error: Received no toolCalls. Original message: {\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"{\\\\\\\"thoughts\\\\\\\":\\\\\\\"The tool returned nothing yet; likely large content will come. I must wait for the tool response before proceeding.\\\\\\\",\\\\\\\"tool_calls\\\\\\\":[]}\\\"}\\n    at runConversation (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:258:23)\\n    at async runAgentOnFeature (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:355:5)\\n    at async runOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:417:9)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:452:9)\\n    at async file:///Users/cloud/Documents/Work/thefactory-tools/dist/orchestrator.js:73:17\"}"
     }
   ],
   "featureIdToDisplayIndex": {
