@@ -7,6 +7,7 @@ export class LLMConfigManager {
   private storageKey = 'llmConfigs'
   private activeKey = 'activeLlmConfigId'
   private recentKey = 'recentLlmConfigIds'
+  private chatActiveKey = 'activeChatLlmConfigId'
 
   private notify() {
     try {
@@ -48,13 +49,33 @@ export class LLMConfigManager {
     return configs.find((c) => c.id === activeId) || null
   }
 
+  // Chat active config (separate from agent-run active config)
+  getActiveChatId(): string | null {
+    return localStorage.getItem(this.chatActiveKey)
+  }
+
+  setActiveChatId(id: string): void {
+    localStorage.setItem(this.chatActiveKey, id)
+    // bump recents order as well
+    this.bumpRecent(id)
+    this.notify()
+  }
+
+  getActiveChatConfig(): LLMConfig | null {
+    const configs = this.getConfigs()
+    const activeId = this.getActiveChatId()
+    return configs.find((c) => c.id === activeId) || null
+  }
+
   addConfig(config: Omit<LLMConfig, 'id'>): LLMConfig {
     const newConfig: LLMConfig = { ...config, id: uuidv4() }
     const configs = this.getConfigs()
     configs.push(newConfig)
     this.saveConfigs(configs)
     if (configs.length === 1) {
+      // If this is the first config, set both actives to it
       this.setActiveId(newConfig.id!)
+      this.setActiveChatId(newConfig.id!)
     } else {
       this.notify()
     }
@@ -81,8 +102,13 @@ export class LLMConfigManager {
       const ids = this.getRecentIds().filter((x) => x !== id)
       localStorage.setItem(this.recentKey, JSON.stringify(ids))
     } catch {}
+
+    // Repoint active IDs if they referenced the removed config
     if (this.getActiveId() === id) {
       this.setActiveId(configs[0]?.id || '')
+    }
+    if (this.getActiveChatId() === id) {
+      this.setActiveChatId(configs[0]?.id || '')
     } else {
       this.notify()
     }
