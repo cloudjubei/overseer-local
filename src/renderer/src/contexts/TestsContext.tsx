@@ -8,11 +8,14 @@ export type TestsCatalogItem = { value: string; label: string }
 export type TestsContextValue = {
   isRunningTests: boolean
   isRunningCoverage: boolean
+  isRunningE2ETests: boolean
 
   results?: TestsResult
+  resultsE2E?: TestsResult
   coverage?: CoverageResult
 
   testsError: string | null
+  testsErrorE2E: string | null
   coverageError: string | null
 
   isLoadingCatalog: boolean
@@ -20,8 +23,10 @@ export type TestsContextValue = {
   refreshTestsCatalog: () => Promise<void>
 
   runTests: (path?: string) => Promise<void>
+  runTestsE2E: (path?: string, overrideCommand?: string) => Promise<void>
   runCoverage: (path?: string) => Promise<void>
   resetTests: () => void
+  resetTestsE2E: () => void
   resetCoverage: () => void
 }
 
@@ -31,13 +36,16 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
 
   const [isRunningTests, setIsRunningTests] = useState(false)
+  const [isRunningE2ETests, setIsRunningE2ETests] = useState(false)
   const [isRunningCoverage, setIsRunningCoverage] = useState(false)
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
 
   const [results, setResults] = useState<TestsResult | undefined>(undefined)
+  const [resultsE2E, setResultsE2E] = useState<TestsResult | undefined>(undefined)
   const [coverage, setCoverage] = useState<CoverageResult | undefined>(undefined)
 
   const [testsError, setTestsError] = useState<string | null>(null)
+  const [testsErrorE2E, setTestsErrorE2E] = useState<string | null>(null)
   const [coverageError, setCoverageError] = useState<string | null>(null)
 
   const [testsCatalog, setTestsCatalog] = useState<TestsCatalogItem[]>([])
@@ -47,13 +55,15 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     async function load() {
       if (!projectId) return
       try {
-        const [lastRes, lastCov] = await Promise.all([
+        const [lastRes, lastCov, lastE2ERes] = await Promise.all([
           factoryTestsService.getLastResult(projectId),
           factoryTestsService.getLastCoverage(projectId),
+          factoryTestsService.getLastResultE2E(projectId),
         ])
         if (cancelled) return
         setResults(lastRes)
         setCoverage(lastCov)
+        setResultsE2E(lastE2ERes)
       } catch (_) {
         // ignore preload errors on initial load
       }
@@ -105,6 +115,11 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     setTestsError(null)
   }, [])
 
+  const resetTestsE2E = useCallback(() => {
+    setResultsE2E(undefined)
+    setTestsErrorE2E(null)
+  }, [])
+
   const resetCoverage = useCallback(() => {
     setCoverage(undefined)
     setCoverageError(null)
@@ -123,6 +138,28 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
         setTestsError(e?.message || String(e))
       } finally {
         setIsRunningTests(false)
+      }
+    },
+    [projectId],
+  )
+
+  const runTestsE2E = useCallback(
+    async (path?: string, overrideCommand?: string) => {
+      if (!projectId) return
+      setIsRunningE2ETests(true)
+      setTestsErrorE2E(null)
+      setResultsE2E(undefined)
+      try {
+        const res = await factoryTestsService.runTestsE2E(
+          projectId,
+          path?.trim() || '.', 
+          overrideCommand,
+        )
+        setResultsE2E(res)
+      } catch (e: any) {
+        setTestsErrorE2E(e?.message || String(e))
+      } finally {
+        setIsRunningE2ETests(false)
       }
     },
     [projectId],
@@ -150,31 +187,41 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isRunningTests,
       isRunningCoverage,
+      isRunningE2ETests,
       isLoadingCatalog,
       results,
+      resultsE2E,
       coverage,
       testsError,
+      testsErrorE2E,
       coverageError,
       testsCatalog,
       refreshTestsCatalog,
       runTests,
+      runTestsE2E,
       runCoverage,
       resetTests,
+      resetTestsE2E,
       resetCoverage,
     }),
     [
       isRunningTests,
       isRunningCoverage,
+      isRunningE2ETests,
       isLoadingCatalog,
       results,
+      resultsE2E,
       coverage,
       testsError,
+      testsErrorE2E,
       coverageError,
       testsCatalog,
       refreshTestsCatalog,
       runTests,
+      runTestsE2E,
       runCoverage,
       resetTests,
+      resetTestsE2E,
       resetCoverage,
     ],
   )

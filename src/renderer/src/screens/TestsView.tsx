@@ -11,19 +11,26 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { ChatSidebarPanel } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
+import Input from '../components/ui/Input'
 
 function TestsInner() {
-  const [activeTab, setActiveTab] = React.useState<'results' | 'coverage'>('results')
+  const [activeTab, setActiveTab] = React.useState<'results' | 'e2e' | 'coverage'>('results')
+  const [e2eCommand, setE2ECommand] = React.useState<string>('')
+
   const { appSettings, setUserPreferences } = useAppSettings()
 
   const {
     isRunningTests,
+    isRunningE2ETests,
     isRunningCoverage,
     results,
+    resultsE2E,
     coverage,
     testsError,
+    testsErrorE2E,
     coverageError,
     runTests,
+    runTestsE2E,
     runCoverage,
     testsCatalog,
     isLoadingCatalog,
@@ -96,10 +103,21 @@ function TestsInner() {
     !testsError
 
   const isResults = activeTab === 'results'
+  const isE2E = activeTab === 'e2e'
+  const isCoverage = activeTab === 'coverage'
 
   const actionButton = isResults ? (
     <Button onClick={() => runTests()} loading={isRunningTests} variant="primary" size="lg">
       Run Tests
+    </Button>
+  ) : isE2E ? (
+    <Button
+      onClick={() => runTestsE2E('.', e2eCommand || undefined)}
+      loading={isRunningE2ETests}
+      variant="primary"
+      size="lg"
+    >
+      Run E2E Tests
     </Button>
   ) : (
     <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary" size="lg">
@@ -127,9 +145,10 @@ function TestsInner() {
             <SegmentedControl
               ariaLabel="Tests view tabs"
               value={activeTab}
-              onChange={(v) => setActiveTab(v as 'results' | 'coverage')}
+              onChange={(v) => setActiveTab(v as 'results' | 'e2e' | 'coverage')}
               options={[
                 { value: 'results', label: 'Test Results' },
+                { value: 'e2e', label: 'E2E Tests' },
                 { value: 'coverage', label: 'Test Coverage' },
               ]}
             />
@@ -171,7 +190,42 @@ function TestsInner() {
             </div>
           )}
 
-          {!isResults && (
+          {isE2E && (
+            <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
+              <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mb-2">Run End-to-End (E2E) tests.</p>
+                <p className='text-xs mb-2'>By default, this will run the `test:e2e` script from your project's `package.json`.</p>
+                <Input
+                  placeholder="Override command (optional)"
+                  value={e2eCommand}
+                  onChange={(e) => setE2ECommand(e.target.value)}
+                />
+              </div>
+              <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">
+                {testsErrorE2E ? (
+                  <div className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                    {testsErrorE2E}
+                  </div>
+                ) : null}
+
+                {isRunningE2ETests && (
+                  <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <Spinner size={14} label="Running E2E tests..." />
+                  </div>
+                )}
+
+                {!isRunningE2ETests && !testsErrorE2E && resultsE2E && (
+                  <TestResultsView results={resultsE2E} />
+                )}
+
+                {!isRunningE2ETests && !testsErrorE2E && !resultsE2E && (
+                  <div className="text-sm text-neutral-500">Click "Run E2E Tests" to start.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {isCoverage && (
             <div className="flex-1 min-h-0 min-w-0 flex flex-col">
               <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
                 {coverageError ? (
