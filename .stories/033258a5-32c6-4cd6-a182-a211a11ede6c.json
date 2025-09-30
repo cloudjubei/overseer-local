@@ -383,8 +383,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:09:29.804Z",
-      "updatedAt": "2025-09-30T13:19:58.836Z",
-      "rejection": "In tooltip there's an error on line 200, the code:\n`ref: (el: HTMLElement) => {`\nthe error:\nNo overload matches this call.\n  The last overload gave the following error.\n    Object literal may only specify known properties, and 'ref' does not exist in type 'Partial<unknown> & Attributes'.",
+      "updatedAt": "2025-09-30T13:44:30.983Z",
       "completedAt": "2025-09-30T13:19:58.836Z"
     },
     {
