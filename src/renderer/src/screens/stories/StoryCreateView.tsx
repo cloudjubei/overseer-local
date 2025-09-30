@@ -6,7 +6,6 @@ import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, StoryCreateInput } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
-import { IconChat } from '@renderer/components/ui/Icons'
 
 export default function StoryCreateView({ onRequestClose }: { onRequestClose?: () => void }) {
   const { toast } = useToast()
@@ -18,7 +17,6 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
   const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -68,17 +66,6 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         isOpen={true}
         size={'md'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
-        headerActions={
-          <button
-            className="btn-secondary btn-icon"
-            onClick={() => setIsChatOpen((v) => !v)}
-            aria-pressed={isChatOpen}
-            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
-            title={isChatOpen ? 'Close chat' : 'Open chat'}
-          >
-            <IconChat className="w-4 h-4" />
-          </button>
-        }
         contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         <StoryForm
@@ -92,8 +79,8 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         />
       </Modal>
 
+      {/* Always mount the chat panel; it starts collapsed by default */}
       <ChatSidebarModalPanel
-        isOpen={isChatOpen}
         context={context}
         chatContextTitle="Project Chat (New Story)"
         initialWidth={360}

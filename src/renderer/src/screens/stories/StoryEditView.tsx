@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import StoryForm, { StoryFormValues } from '@renderer/components/stories/StoryForm'
 import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
 import { useToast } from '@renderer/components/ui/Toast'
@@ -7,7 +7,6 @@ import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, Story } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
-import { IconChat } from '@renderer/components/ui/Icons'
 
 export default function StoryEditView({
   storyId,
@@ -28,7 +27,6 @@ export default function StoryEditView({
   const { projectId } = useActiveProject()
 
   const [hasChanges, setHasChanges] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
   useEffect(() => {
     if (storyId && storiesById) {
@@ -93,17 +91,6 @@ export default function StoryEditView({
         title="Edit Story"
         onClose={attemptClose}
         isOpen={true}
-        headerActions={
-          <button
-            className="btn-secondary btn-icon"
-            onClick={() => setIsChatOpen((v) => !v)}
-            aria-pressed={isChatOpen}
-            aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
-            title={isChatOpen ? 'Close chat' : 'Open chat'}
-          >
-            <IconChat className="w-4 h-4" />
-          </button>
-        }
         contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         {initialValues ? (
@@ -127,8 +114,8 @@ export default function StoryEditView({
         )}
       </Modal>
 
+      {/* Always mount the chat panel; it starts collapsed by default */}
       <ChatSidebarModalPanel
-        isOpen={isChatOpen}
         context={context}
         chatContextTitle="Story Chat"
         initialWidth={380}
