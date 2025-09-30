@@ -308,7 +308,7 @@
     },
     {
       "id": "9621b87e-23b2-48cd-be7f-454543d6b212",
-      "status": "-",
+      "status": "+",
       "title": "ChatsManager should utilise 'thefactory-tools'",
       "description": "'thefactory-tools' now exposes saving chat settings and getting prompts - @src/logic/chat/ChatsManager.ts is already exposing the appropriate APIs and so is @src/renderer/src/services/chatsService.ts . Now @src/renderer/src/contexts/ChatsContext.tsx can have the functionality which can be used inside @src/renderer/src/components/chat/ChatSidebar.tsx and the settings panel in there to toggle tools to be available or not, and to be auto called or not (via 2 separate toggles). The settings panel must also give the option to edit the prompt that is assigned to that ChatContext and inside @src/renderer/src/components/chat/ChatSidebar.tsx to show it before any messages are sent.\nAll the necessary files from 'thefactory-tools' can be found under the path `node_modules/thefactory-tools/src/chats`",
       "context": [
@@ -319,8 +319,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T00:55:34.058Z",
-      "updatedAt": "2025-09-30T10:12:20.839Z",
-      "rejection": "This is not done at all."
+      "updatedAt": "2025-09-30T10:32:38.885Z",
+      "rejection": "This is not done at all.",
+      "completedAt": "2025-09-30T10:32:38.885Z"
     },
     {
       "id": "4115f6ec-a85b-4a5d-bf23-14df6314c7c7",

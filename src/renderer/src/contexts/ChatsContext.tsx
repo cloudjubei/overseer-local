@@ -1,5 +1,13 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { LLMConfig, ChatContext, Chat, ChatMessage, ChatUpdate } from 'thefactory-tools'
+import type {
+  LLMConfig,
+  ChatContext,
+  Chat,
+  ChatMessage,
+  ChatUpdate,
+  ChatsSettings,
+  ChatSettings,
+} from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
 import { projectsService } from '../services/projectsService'
@@ -25,13 +33,51 @@ export type ChatsContextValue = {
   getChat: (context: ChatContext) => Promise<ChatState>
   restartChat: (context: ChatContext) => Promise<ChatState>
   deleteChat: (context: ChatContext) => Promise<void>
+
+  // Settings APIs
+  getAllChatSettings: () => ChatsSettings | undefined
+  getSettingsForContext: (context: ChatContext) => ChatSettings | undefined
+  updateSettingsForContext: (
+    context: ChatContext,
+    patch: Partial<ChatSettings>,
+  ) => Promise<ChatSettings | undefined>
+  resetSettingsForContext: (context: ChatContext) => Promise<ChatSettings | undefined>
+
+  getDefaultPrompt: (chatContext: ChatContext) => Promise<string>
+  getSettingsPrompt: (chatContext: ChatContext) => Promise<string>
 }
 
 const ChatsContext = createContext<ChatsContextValue | null>(null)
 
+function extractSettingsForContext(
+  all?: ChatsSettings,
+  context?: ChatContext,
+): ChatSettings | undefined {
+  if (!all || !context) return undefined
+  switch (context.type) {
+    case 'GENERAL':
+      return all.GENERAL
+    case 'PROJECT':
+      return all.PROJECT
+    case 'STORY':
+      return all.STORY
+    case 'FEATURE':
+      return all.FEATURE
+    case 'AGENT_RUN':
+      return all.AGENT_RUN
+    case 'PROJECT_TOPIC':
+      return all.PROJECT_TOPIC[context.projectTopic!]
+    case 'STORY_TOPIC':
+      return all.STORY_TOPIC[context.storyTopic!]
+    default:
+      return undefined
+  }
+}
+
 export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
+  const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
 
   const updateChatState = useCallback((key: string, updates: Partial<ChatState>) => {
     setChats((prev) => ({
@@ -43,40 +89,40 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     }))
   }, [])
 
-  // load all chats on startup
+  // load all chats and settings on startup
   useEffect(() => {
-    const loadAllChats = async () => {
+    const loadAll = async () => {
       try {
-        const projects = await projectsService.listProjects()
-        const chatsByProjectId: Record<string, ChatState[]> = {}
-        const allChats: Record<string, ChatState> = {}
+        const [projects, settings] = await Promise.all([
+          projectsService.listProjects(),
+          chatsService.getChatSettings(),
+        ])
+        setAllChatSettings(settings)
+
+        const byProject: Record<string, ChatState[]> = {}
+        const all: Record<string, ChatState> = {}
         for (const project of projects) {
-          let projectChats: Chat[] = []
           try {
-            projectChats = await chatsService.listChats(project.id)
-            const chatStates: ChatState[] = projectChats.map((chat) => {
-              return {
-                key: getChatContextPath(chat.context),
-                chat,
-                isLoading: false,
-                isThinking: false,
-              }
-            })
-            chatsByProjectId[project.id] = chatStates
-            for (const c of chatStates) {
-              allChats[c.key] = c
-            }
+            const projectChats = await chatsService.listChats(project.id)
+            const chatStates: ChatState[] = projectChats.map((chat) => ({
+              key: getChatContextPath(chat.context),
+              chat,
+              isLoading: false,
+              isThinking: false,
+            }))
+            byProject[project.id] = chatStates
+            for (const c of chatStates) all[c.key] = c
           } catch (e) {
             console.error(`Failed to list chats for project ${project.id}`, e)
           }
         }
-        setChats(allChats)
-        setChatsByProjectId(chatsByProjectId)
+        setChats(all)
+        setChatsByProjectId(byProject)
       } catch (e) {
-        console.error('Failed to load projects to load chats', e)
+        console.error('Failed to load chats/settings', e)
       }
     }
-    loadAllChats()
+    loadAll()
   }, [])
 
   useEffect(() => {
@@ -114,7 +160,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       updateChatState(key, chatState)
       return chatState
     },
-    [chats],
+    [chats, updateChatState],
   )
 
   const sendMessage = useCallback(
@@ -144,7 +190,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         updateChatState(key, { isThinking: false })
       }
     },
-    [chats, updateChatState],
+    [getChat, updateChatState],
   )
 
   const restartChat = useCallback(async (context: ChatContext): Promise<ChatState> => {
@@ -160,7 +206,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     const state = { key, chat, isLoading: false, isThinking: false }
     updateChatState(key, state)
     return state
-  }, [])
+  }, [updateChatState])
 
   const deleteChat = useCallback(async (context: ChatContext) => {
     const key = getChatContextPath(context)
@@ -173,6 +219,68 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     await chatsService.deleteChat(context)
   }, [])
 
+  // Settings helpers
+  const getAllChatSettings = useCallback((): ChatsSettings | undefined => allChatSettings, [
+    allChatSettings,
+  ])
+
+  const getSettingsForContext = useCallback(
+    (context: ChatContext): ChatSettings | undefined => {
+      return extractSettingsForContext(allChatSettings, context)
+    },
+    [allChatSettings],
+  )
+
+  const updateSettingsForContext = useCallback(
+    async (
+      context: ChatContext,
+      patch: Partial<ChatSettings>,
+    ): Promise<ChatSettings | undefined> => {
+      try {
+        const updated = await chatsService.updateChatSettings(context, patch)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)
+      } catch (e) {
+        console.error('Failed to update chat settings', e)
+        return extractSettingsForContext(allChatSettings, context)
+      }
+    },
+    [allChatSettings],
+  )
+
+  const resetSettingsForContext = useCallback(
+    async (context: ChatContext): Promise<ChatSettings | undefined> => {
+      try {
+        const updated = await chatsService.resetChatSettings(context)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)
+      } catch (e) {
+        console.error('Failed to reset chat settings', e)
+        return extractSettingsForContext(allChatSettings, context)
+      }
+    },
+    [allChatSettings],
+  )
+
+  const getDefaultPrompt = useCallback(async (chatContext: ChatContext): Promise<string> => {
+    try {
+      return await chatsService.getDefaultPrompt(chatContext)
+    } catch (e) {
+      console.error('Failed to get default prompt', e)
+      return ''
+    }
+  }, [])
+
+  const getSettingsPrompt = useCallback(async (chatContext: ChatContext): Promise<string> => {
+    try {
+      // The main process can enrich context arguments as needed
+      return await chatsService.getSettingsPrompt(chatContext as any)
+    } catch (e) {
+      console.error('Failed to get settings prompt', e)
+      return ''
+    }
+  }, [])
+
   const value = useMemo<ChatsContextValue>(
     () => ({
       chats,
@@ -181,8 +289,27 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       getChat,
       restartChat,
       deleteChat,
+      getAllChatSettings,
+      getSettingsForContext,
+      updateSettingsForContext,
+      resetSettingsForContext,
+      getDefaultPrompt,
+      getSettingsPrompt,
     }),
-    [chats, chatsByProjectId, sendMessage, getChat, restartChat, deleteChat],
+    [
+      chats,
+      chatsByProjectId,
+      sendMessage,
+      getChat,
+      restartChat,
+      deleteChat,
+      getAllChatSettings,
+      getSettingsForContext,
+      updateSettingsForContext,
+      resetSettingsForContext,
+      getDefaultPrompt,
+      getSettingsPrompt,
+    ],
   )
   return <ChatsContext.Provider value={value}>{children}</ChatsContext.Provider>
 }
