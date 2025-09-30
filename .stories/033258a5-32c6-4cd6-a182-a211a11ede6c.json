@@ -402,7 +402,7 @@
     },
     {
       "id": "3285d7d6-0883-4b47-a4a0-72a6473d5924",
-      "status": "-",
+      "status": "+",
       "title": "When opening a modal chat it crashes",
       "description": "For instance in @src/renderer/src/screens/stories/FeatureEditView.tsx when opening the @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx it crashes with the following error:\n\nChatSidebarModalPanel.tsx:37 React has detected a change in the order of Hooks called by ChatSidebarModalPanel. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n1. useState                   useState\n2. undefined                  useState",
       "context": [
@@ -411,7 +411,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-30T11:56:48.368Z",
-      "updatedAt": "2025-09-30T11:56:48.368Z"
+      "updatedAt": "2025-09-30T12:19:24.939Z",
+      "completedAt": "2025-09-30T12:19:24.939Z"
     }
   ],
   "featureIdToDisplayIndex": {

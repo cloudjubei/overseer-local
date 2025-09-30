@@ -17,9 +17,10 @@ export default function ChatSidebarModalPanel({
   initialWidth?: number
   onWidthChange?: (width: number, isFinal: boolean) => void
 }) {
-  const [collapsed, setCollapsed] = useState(true)
-
+  // Early return BEFORE any hooks to keep hook order consistent across renders
   if (!isOpen) return null
+
+  const [collapsed, setCollapsed] = useState(true)
 
   // Resolve metrics from CSS
   const getMetricPx = (name: string, fallback: number) => {
