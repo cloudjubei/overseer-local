@@ -17,6 +17,8 @@ export type ChatSidebarProps = {
   // When provided, ChatSidebar shows a collapse button and calls this to request collapse
   isCollapsible?: boolean
   onCollapse?: () => void
+  // Controls whether ChatSidebar renders a left border when collapsible; default true
+  showLeftBorder?: boolean
 }
 
 function parseProjectIdFromContext(context: ChatContext): string | undefined {
@@ -26,21 +28,8 @@ function parseProjectIdFromContext(context: ChatContext): string | undefined {
   return undefined
 }
 
-export default function ChatSidebar({
-  context,
-  chatContextTitle,
-  isCollapsible,
-  onCollapse,
-}: ChatSidebarProps) {
-  const {
-    getChat,
-    sendMessage,
-    getSettingsForContext,
-    updateSettingsForContext,
-    resetSettingsForContext,
-    getSettingsPrompt,
-    getDefaultPrompt,
-  } = useChats()
+export default function ChatSidebar({ context, chatContextTitle, isCollapsible, onCollapse, showLeftBorder }: ChatSidebarProps) {
+  const { getChat, sendMessage, getSettingsForContext, updateSettingsForContext, resetSettingsForContext, getSettingsPrompt, getDefaultPrompt } = useChats()
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
 
   useEffect(() => {
@@ -254,8 +243,16 @@ export default function ChatSidebar({
     return [systemMsg, ...original]
   }, [chat?.chat.messages, effectivePrompt])
 
+  const shouldBorder = isCollapsible && (showLeftBorder ?? true)
+  const sectionClass = [
+    'flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden',
+    shouldBorder ? 'border-l dark:border-neutral-800' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <section className="flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden">
+    <section className={sectionClass}>
       {/* Top header: constant size */}
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">

@@ -79,7 +79,7 @@ export default function ChatSidebarPanel({
   if (collapsed) {
     return (
       <aside
-        className="chat-collapsed-panel z-30 h-full bg-white dark:bg-neutral-900 dark:border-neutral-800 collapsed"
+        className="chat-collapsed-panel z-30 h-full bg-white dark:bg-neutral-900 border-l dark:border-neutral-800 collapsed"
         style={{ width: COLLAPSED_W }}
       >
         <button
@@ -106,7 +106,6 @@ export default function ChatSidebarPanel({
   const outerStyle: React.CSSProperties = {
     width: effectiveWidth,
     transition: `width ${transitionInOut}`,
-    borderLeft: '1px solid var(--border-border, var(--border-default))',
     background: 'var(--surface-base)',
     position: 'relative',
     overflow: 'visible',
@@ -118,7 +117,7 @@ export default function ChatSidebarPanel({
   }
 
   return (
-    <div style={outerStyle} role="complementary" aria-label="Chat sidebar">
+    <div className="h-full border-l dark:border-neutral-800" style={outerStyle} role="complementary" aria-label="Chat sidebar">
       <div
         onPointerDown={onResizeStart}
         className="absolute left-0 top-0 bottom-0 w-5 cursor-col-resize group"
@@ -148,6 +147,7 @@ export default function ChatSidebarPanel({
           context={context}
           chatContextTitle={chatContextTitle}
           isCollapsible
+          showLeftBorder={false}
           onCollapse={() => setCollapsed(true)}
         />
       </div>
