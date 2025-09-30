@@ -525,6 +525,30 @@
       "blockers": [],
       "createdAt": "2025-09-30T14:26:24.197Z",
       "updatedAt": "2025-09-30T14:26:24.197Z"
+    },
+    {
+      "id": "570e7b4a-fe99-425d-a7e3-b492bc601863",
+      "status": "-",
+      "title": "Saving the prompt doesn't auto update the prompt display",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when saving the prompt in the settings panel - it doesn't auto update the prompt to send (it should only do this when there haven't been any messages yet sent).",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T20:46:41.160Z",
+      "updatedAt": "2025-09-30T20:46:41.160Z"
+    },
+    {
+      "id": "b88ca6b3-bff8-4d59-8fd7-6bd06f2aaf8f",
+      "status": "-",
+      "title": "The chat modal panel should have no border and have rounded corners",
+      "description": "The @src/renderer/src/components/chat/ChatSidebarModalPanel.tsx",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebarModalPanel.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T20:48:10.428Z",
+      "updatedAt": "2025-09-30T20:48:10.428Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -564,7 +588,9 @@
     "e5e46d3f-3ea6-41ec-bed3-8f49cbae352b": 34,
     "5ed64b40-dc70-453a-a52b-e427ae983ba3": 35,
     "9bb36711-da11-46c3-8de5-2ac2ce899f74": 36,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 37
+    "570e7b4a-fe99-425d-a7e3-b492bc601863": 37,
+    "b88ca6b3-bff8-4d59-8fd7-6bd06f2aaf8f": 38,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 39
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
