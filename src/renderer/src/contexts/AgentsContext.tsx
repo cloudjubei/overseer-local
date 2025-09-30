@@ -65,6 +65,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const onAgentRunUpdate = useCallback(
     async (agentRunUpdate: AgentRunUpdate) => {
+      console.log('AgentsContenxt agentRunUpdate: ', agentRunUpdate)
       switch (agentRunUpdate.type) {
         case 'add': {
           const run =
@@ -81,6 +82,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         case 'change': {
           const run =
             agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
+          console.log('AgentsContenxt agentRunUpdate CHANGE: ', agentRunUpdate.runId)
           if (run) {
             setRunsHistory((prev) => {
               const prevRunIndex = prev.findIndex((r) => r.id === agentRunUpdate.runId)

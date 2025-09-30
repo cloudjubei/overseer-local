@@ -214,8 +214,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:33.055Z",
-      "updatedAt": "2025-09-30T00:29:56.487Z",
-      "rejection": "When the chat opens - the ChatInput is max height it can be - that shouldn't be the case, it should be the standard small size.\nThe window is still not draggable - there's no drag handle visible.",
+      "updatedAt": "2025-09-30T00:44:12.067Z",
       "completedAt": "2025-09-30T00:29:56.487Z"
     },
     {
@@ -231,8 +230,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:24:43.049Z",
-      "updatedAt": "2025-09-30T00:26:05.355Z",
-      "rejection": "The animation for disappearing is cool, but for appearing it doesn't feel good. They should be the reverse of each other.",
+      "updatedAt": "2025-09-30T00:41:10.219Z",
       "completedAt": "2025-09-30T00:26:05.355Z"
     },
     {
@@ -246,8 +244,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-09-25T13:29:28.459Z",
-      "updatedAt": "2025-09-30T00:28:03.178Z",
-      "rejection": "When the ModelChip opens it should not collide with the right side of the app - right now it goes slightly over and gets clipped. it should always have a few pixels padding away from the edge.\nWhen settings is clicked - the popover with all the settings should have left and right padding. Right now it can go over the left side if it's bigger than the chat - this shouldn't happen.",
+      "updatedAt": "2025-09-30T00:42:35.491Z",
       "completedAt": "2025-09-30T00:28:03.178Z"
     },
     {
@@ -290,6 +287,39 @@
       "createdAt": "2025-09-28T01:46:00.994Z",
       "updatedAt": "2025-09-28T01:51:20.496Z",
       "completedAt": "2025-09-28T01:51:20.496Z"
+    },
+    {
+      "id": "d5fb1e96-fbb4-44c4-be63-6f008cd29918",
+      "status": "-",
+      "title": "The chat sidebar on normal screens should be a mirror of the regular sidebar",
+      "description": "What it means is that the @src/renderer/src/components/chat/ChatSidebar.tsx on screens like @src/renderer/src/screens/stories/StoryDetailsView.tsx, @src/renderer/src/screens/stories/StoriesListView.tsx , @src/renderer/src/screens/TestsView.tsx or @src/renderer/src/screens/AgentsView.tsx should be in a vertical panel when collapsed (just like the @src/renderer/src/navigation/SidebarView.tsx when it's collapsed) and expanded the same way as it is now.\nThe opening button when collapsed should have a left chevron icon - it should be placed analogously to how the opening for the Sidebar is.\nWhen opened, the chat button should transform into a close button - it should be the chevron pointing down.\nWhen the chat area is collapsed - there should be a chat button in the middle of it that will open the chat sidebar.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/screens/stories/StoryDetailsView.tsx",
+        "src/renderer/src/screens/stories/StoriesListView.tsx",
+        "src/renderer/src/screens/TestsView.tsx",
+        "src/renderer/src/screens/AgentsView.tsx",
+        "src/renderer/src/navigation/SidebarView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T00:53:12.441Z",
+      "updatedAt": "2025-09-30T00:53:12.441Z"
+    },
+    {
+      "id": "9621b87e-23b2-48cd-be7f-454543d6b212",
+      "status": "-",
+      "title": "ChatsManager should utilise 'thefactory-tools'",
+      "description": "'thefactory-tools' now exposes saving chat settings and getting prompts - @src/logic/chat/ChatsManager.ts should use it and pass it via IPC using  @src/preload/ipcHandlersKeys.ts and @src/renderer/src/services/chatsService.ts , so that finally @src/renderer/src/contexts/ChatsContext.tsx can have the functionality which can be used inside @src/renderer/src/components/chat/ChatSidebar.tsx and the settings panel in there.\nAll the necessary files from 'thefactory-tools' can be found under the path `node_modules/thefactory-tools/src/chats`",
+      "context": [
+        "src/logic/chat/ChatsManager.ts",
+        "src/preload/ipcHandlersKeys.ts",
+        "src/renderer/src/services/chatsService.ts",
+        "src/renderer/src/contexts/ChatsContext.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T00:55:34.058Z",
+      "updatedAt": "2025-09-30T00:58:14.819Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -312,7 +342,9 @@
     "f50d7e7c-034c-4455-8772-81afac6c660c": 17,
     "c3804c5f-ec19-410e-b866-3d0229cb354a": 18,
     "95c7a067-9e9b-4e54-b786-6d3997dfff30": 19,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 20
+    "d5fb1e96-fbb4-44c4-be63-6f008cd29918": 20,
+    "9621b87e-23b2-48cd-be7f-454543d6b212": 21,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 22
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"

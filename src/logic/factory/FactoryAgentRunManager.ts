@@ -38,6 +38,7 @@ export default class FactoryAgentRunManager extends BaseManager {
   async init(): Promise<void> {
     this.agentRunTools = createAgentRunTools(this.projectRoot)
     this.agentRunTools!.subscribe(async (agentRunUpdate) => {
+      console.log('AGENT RUN UPDATE: ', agentRunUpdate.type)
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, agentRunUpdate)
       }
