@@ -135,42 +135,42 @@ export const components: Partial<Components> = {
   },
   h1: ({ node, children, ...props }) => {
     return (
-      <h1 className="text-3xl font-bold mt-8 mb-4 pb-1 border-b" {...props}>
+      <h1 className="text-2xl font-bold mt-4 mb-2 pb-1 border-b" {...props}>
         {children}
       </h1>
     )
   },
   h2: ({ node, children, ...props }) => {
     return (
-      <h2 className="text-2xl font-semibold mt-8 mb-3 pb-1 border-b" {...props}>
+      <h2 className="text-1xl font-semibold mt-4 mb-2 pb-1 border-b" {...props}>
         {children}
       </h2>
     )
   },
   h3: ({ node, children, ...props }) => {
     return (
-      <h3 className="text-xl font-semibold mt-6 mb-3" {...props}>
+      <h3 className="text-xl font-semibold" {...props}>
         {children}
       </h3>
     )
   },
   h4: ({ node, children, ...props }) => {
     return (
-      <h4 className="text-lg font-semibold mt-6 mb-3" {...props}>
+      <h4 className="text-lg font-semibold" {...props}>
         {children}
       </h4>
     )
   },
   h5: ({ node, children, ...props }) => {
     return (
-      <h5 className="text-base font-semibold mt-5 mb-2" {...props}>
+      <h5 className="text-base font-semibold" {...props}>
         {children}
       </h5>
     )
   },
   h6: ({ node, children, ...props }) => {
     return (
-      <h6 className="text-sm font-semibold mt-5 mb-2" {...props}>
+      <h6 className="text-sm font-semibold" {...props}>
         {children}
       </h6>
     )

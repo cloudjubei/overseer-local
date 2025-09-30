@@ -7,7 +7,7 @@ import TypewriterText from '../ui/TypewriterText'
 import ToolCallCard from './ToolCallCard'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
-import Markdown from '../ui/Markdown'
+import Markdown, { MarkdownMessage } from '../ui/Markdown'
 import { ChatMessage } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
 
@@ -215,12 +215,21 @@ export default function MessageList({
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const h = entry.contentRect.height
-        setSystemMaxHeight(Math.max(0, Math.floor(h * 0.3)))
+        setSystemMaxHeight(Math.max(0, Math.floor(h * 0.5)))
       }
     })
     ro.observe(container)
     return () => ro.disconnect()
   }, [])
+
+  const systemMessage = useMemo(() => {
+    return enhancedMessages.length === 1 && enhancedMessages[0].completionMesage.role === 'system'
+      ? enhancedMessages[0]
+      : undefined
+  }, [enhancedMessages])
+  const messagesToDisplay = useMemo(() => {
+    return systemMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
+  }, [enhancedMessages, systemMessage])
 
   return (
     <div
@@ -228,204 +237,199 @@ export default function MessageList({
       className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
       onScroll={handleScroll}
     >
-      {enhancedMessages.length === 0 && !isThinking ? (
-        <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
-          <div className="text-[18px] font-medium">Start chatting about the project</div>
-          <div className="text-[13px] mt-2">
-            Tip: Use Cmd/Ctrl+Enter to send • Shift+Enter for newline
-          </div>
-          <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
-            Attach markdown or text files to give context. Mention files with @, and reference
-            stories/features with #.
+      {systemMessage && (
+        <div className="flex justify-center">
+          <div
+            className={[
+              'overflow-y-auto max-w-full px-3 py-2 rounded-2xl break-words shadow border',
+              'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]',
+              'chat-bubble',
+            ].join(' ')}
+            style={{
+              maxHeight: systemMaxHeight ? `${systemMaxHeight}px` : undefined,
+              minHeight: '3.5em',
+            }}
+            aria-label="System prompt"
+          >
+            {/* <MarkdownMessage text={systemMessage.completionMesage.content} /> */}
+            <Markdown text={systemMessage.completionMesage.content} />
           </div>
         </div>
-      ) : (
-        <div className="mx-auto max-w-[960px] space-y-3">
-          {enhancedMessages.map((msg, index) => {
-            if (msg.error) {
-              return (
-                <div key={index} className="flex items-start gap-2 flex-row">
-                  <div
-                    className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
-                    aria-hidden="true"
-                  >
-                    AI
-                  </div>
-                  <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
-                    <ErrorBubble error={msg.error} />
-                  </div>
-                </div>
-              )
-            }
-            const isUser = msg.completionMesage.role === 'user'
-            const isSystem = msg.completionMesage.role === 'system'
+      )}
 
-            if (isSystem) {
-              return (
-                <div key={index} className="flex justify-center">
-                  <div
-                    className={[
-                      'overflow-y-auto max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow border',
-                      'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]',
-                      'chat-bubble',
-                    ].join(' ')}
-                    style={{
-                      maxHeight: systemMaxHeight ? `${systemMaxHeight}px` : undefined,
-                      minHeight: '3.5em',
-                    }}
-                    aria-label="System prompt"
-                  >
-                    <Markdown text={msg.completionMesage.content} />
-                  </div>
-                </div>
-              )
-            }
-
-            const isNewUserBubble =
-              isUser &&
-              index === enhancedMessages.length - 1 &&
-              messages.length > prevLenForUserAnimRef.current
-
-            const parsedAssistant = !isUser ? parseAssistant(msg.completionMesage.content) : null
-            const hasToolCalls = !!parsedAssistant?.tool_calls?.length
-            let toolResults: Array<{ name: string; result: any; durationMs?: number }> = []
-            if (hasToolCalls) {
-              const nextMsg = messages[index + 1]
-              if (nextMsg && nextMsg.completionMesage.role === 'user') {
-                toolResults = parseToolResultsObjects(nextMsg.completionMesage.content)
-              }
-            }
-
+      {(enhancedMessages.length === 0 || systemMessage != undefined) && !isThinking && (
+        <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
+          <div className="text-[18px] font-medium">Start chatting about the project</div>
+          <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
+            Attach text files to give context
+            <br />
+            Mention files with @<br />
+            Reference stories/features with #
+          </div>
+        </div>
+      )}
+      <div className="mx-auto max-w-[960px] space-y-3">
+        {messagesToDisplay.map((msg, index) => {
+          if (msg.error) {
             return (
-              <div
-                key={index}
-                ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
-                className={[
-                  'flex items-start gap-2',
-                  isUser ? 'flex-row-reverse' : 'flex-row',
-                ].join(' ')}
-              >
+              <div key={index} className="flex items-start gap-2 flex-row">
                 <div
-                  className={[
-                    'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
-                    isUser
-                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
-                      : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
-                  ].join(' ')}
+                  className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
                   aria-hidden="true"
                 >
-                  {isUser ? 'You' : 'AI'}
+                  AI
                 </div>
-
-                <div
-                  className={[
-                    'max-w-[85%] min-w-0 flex flex-col',
-                    isUser ? 'items-end' : 'items-start',
-                  ].join(' ')}
-                >
-                  {!isUser && msg.showModel && msg.model && (
-                    <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
-                      {msg.model.model}
-                    </div>
-                  )}
-
-                  <div
-                    className={[
-                      'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow',
-                      isUser
-                        ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                        : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                      msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
-                      'chat-bubble',
-                      isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
-                    ].join(' ')}
-                  >
-                    {isUser ? (
-                      <RichText text={msg.completionMesage.content} />
-                    ) : index === animateAssistantIdx ? (
-                      <TypewriterText text={msg.completionMesage.content} renderer="markdown" />
-                    ) : (
-                      <Markdown text={msg.completionMesage.content} />
-                    )}
-                  </div>
-
-                  {!isUser && hasToolCalls && (
-                    <div className="mt-2 w-full space-y-2">
-                      {parsedAssistant!.tool_calls!.map((call: any, i: number) => {
-                        const name = call.tool_name || call.name || 'tool'
-                        const args = call.arguments ?? {}
-                        const res = toolResults[i]
-                        return (
-                          <ToolCallCard
-                            key={`tool-${index}-${i}`}
-                            index={i}
-                            toolName={name}
-                            args={args}
-                            result={res?.result}
-                            durationMs={res?.durationMs}
-                          />
-                        )
-                      })}
-                    </div>
-                  )}
-
-                  {msg.completionMesage.files && msg.completionMesage.files.length > 0 && (
-                    <div
-                      className={[
-                        'mt-1 flex flex-wrap gap-1',
-                        isUser ? 'justify-end' : 'justify-start',
-                      ].join(' ')}
-                    >
-                      {msg.completionMesage.files.map((path, i) => {
-                        const meta = filesByPath[path]
-                        const name = meta?.name || path.split('/').pop() || path
-                        const type = meta?.type || inferFileType(path)
-                        const size = meta?.size ?? undefined
-                        const mtime = meta?.mtime ?? undefined
-                        const ctime = meta?.ctime ?? undefined
-                        return (
-                          <FileDisplay
-                            key={`${index}-att-${i}-${path}`}
-                            file={{
-                              name,
-                              absolutePath: path,
-                              relativePath: path,
-                              type,
-                              size,
-                              mtime,
-                              ctime,
-                            }}
-                            density="compact"
-                            interactive
-                            showPreviewOnHover
-                          />
-                        )
-                      })}
-                    </div>
-                  )}
+                <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+                  <ErrorBubble error={msg.error} />
                 </div>
               </div>
             )
-          })}
+          }
 
-          {isThinking && (
-            <div className="flex items-start gap-2 flex-row">
+          const isUser = msg.completionMesage.role === 'user'
+          const isNewUserBubble =
+            isUser &&
+            index === enhancedMessages.length - 1 &&
+            messages.length > prevLenForUserAnimRef.current
+
+          const parsedAssistant = !isUser ? parseAssistant(msg.completionMesage.content) : null
+          const hasToolCalls = !!parsedAssistant?.tool_calls?.length
+          let toolResults: Array<{ name: string; result: any; durationMs?: number }> = []
+          if (hasToolCalls) {
+            const nextMsg = messages[index + 1]
+            if (nextMsg && nextMsg.completionMesage.role === 'user') {
+              toolResults = parseToolResultsObjects(nextMsg.completionMesage.content)
+            }
+          }
+
+          return (
+            <div
+              key={index}
+              ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
+              className={['flex items-start gap-2', isUser ? 'flex-row-reverse' : 'flex-row'].join(
+                ' ',
+              )}
+            >
               <div
-                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                className={[
+                  'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                  isUser
+                    ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                    : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                ].join(' ')}
                 aria-hidden="true"
               >
-                AI
+                {isUser ? 'You' : 'AI'}
               </div>
-              <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
-                <div className="overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
-                  <Spinner />
+
+              <div
+                className={[
+                  'max-w-[85%] min-w-0 flex flex-col',
+                  isUser ? 'items-end' : 'items-start',
+                ].join(' ')}
+              >
+                {!isUser && msg.showModel && msg.model && (
+                  <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                    {msg.model.model}
+                  </div>
+                )}
+
+                <div
+                  className={[
+                    'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                    isUser
+                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
+                      : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                    msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                    'chat-bubble',
+                    isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
+                  ].join(' ')}
+                >
+                  {isUser ? (
+                    <RichText text={msg.completionMesage.content} />
+                  ) : index === animateAssistantIdx ? (
+                    <TypewriterText text={msg.completionMesage.content} renderer="markdown" />
+                  ) : (
+                    <Markdown text={msg.completionMesage.content} />
+                  )}
                 </div>
+
+                {!isUser && hasToolCalls && (
+                  <div className="mt-2 w-full space-y-2">
+                    {parsedAssistant!.tool_calls!.map((call: any, i: number) => {
+                      const name = call.tool_name || call.name || 'tool'
+                      const args = call.arguments ?? {}
+                      const res = toolResults[i]
+                      return (
+                        <ToolCallCard
+                          key={`tool-${index}-${i}`}
+                          index={i}
+                          toolName={name}
+                          args={args}
+                          result={res?.result}
+                          durationMs={res?.durationMs}
+                        />
+                      )
+                    })}
+                  </div>
+                )}
+
+                {msg.completionMesage.files && msg.completionMesage.files.length > 0 && (
+                  <div
+                    className={[
+                      'mt-1 flex flex-wrap gap-1',
+                      isUser ? 'justify-end' : 'justify-start',
+                    ].join(' ')}
+                  >
+                    {msg.completionMesage.files.map((path, i) => {
+                      const meta = filesByPath[path]
+                      const name = meta?.name || path.split('/').pop() || path
+                      const type = meta?.type || inferFileType(path)
+                      const size = meta?.size ?? undefined
+                      const mtime = meta?.mtime ?? undefined
+                      const ctime = meta?.ctime ?? undefined
+                      return (
+                        <FileDisplay
+                          key={`${index}-att-${i}-${path}`}
+                          file={{
+                            name,
+                            absolutePath: path,
+                            relativePath: path,
+                            type,
+                            size,
+                            mtime,
+                            ctime,
+                          }}
+                          density="compact"
+                          interactive
+                          showPreviewOnHover
+                        />
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
-      )}
+          )
+        })}
+
+        {isThinking && (
+          <div className="flex items-start gap-2 flex-row">
+            <div
+              className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+              aria-hidden="true"
+            >
+              AI
+            </div>
+            <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+              <div className="overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
+                <Spinner />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

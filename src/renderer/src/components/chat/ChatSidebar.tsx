@@ -6,10 +6,13 @@ import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import type { ChatContext, ChatMessage } from 'thefactory-tools'
+import type { ChatContext, ChatMessage, ChatContextArguments, ChatSettings } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
 import { IconSettings, IconChevron } from '../ui/Icons'
+import { useProjectContext } from '../../contexts/ProjectContext'
+import { useStories } from '../../contexts/StoriesContext'
+import { useAgents } from '../../contexts/AgentsContext'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -21,15 +24,26 @@ export type ChatSidebarProps = {
   showLeftBorder?: boolean
 }
 
-function parseProjectIdFromContext(context: ChatContext): string | undefined {
-  if (context && 'projectId' in context) {
-    return context.projectId
-  }
-  return undefined
-}
+export default function ChatSidebar({
+  context,
+  chatContextTitle,
+  isCollapsible,
+  onCollapse,
+  showLeftBorder,
+}: ChatSidebarProps) {
+  const {
+    getChat,
+    sendMessage,
+    getSettingsForContext,
+    updateSettingsForContext,
+    resetSettingsForContext,
+    getSettingsPrompt,
+    getDefaultPrompt,
+  } = useChats()
+  const { getProjectById } = useProjectContext()
+  const { storiesById, featuresById } = useStories()
+  const { runsHistory } = useAgents()
 
-export default function ChatSidebar({ context, chatContextTitle, isCollapsible, onCollapse, showLeftBorder }: ChatSidebarProps) {
-  const { getChat, sendMessage, getSettingsForContext, updateSettingsForContext, resetSettingsForContext, getSettingsPrompt, getDefaultPrompt } = useChats()
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
 
   useEffect(() => {
@@ -56,7 +70,6 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
 
   const isConfigured = !!selectedConfig?.apiKey
 
-  // Settings state
   const currentSettings = useMemo(
     () => getSettingsForContext(context),
     [getSettingsForContext, context],
@@ -68,20 +81,16 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     currentSettings?.autoCallTools,
   )
 
-  // Local editable prompt state that reflects either custom or effective default for this context
   const [draftPrompt, setDraftPrompt] = useState<string>('')
 
-  // Keep local settings in sync when context changes or global settings update
   useEffect(() => {
     setAvailableTools(currentSettings?.availableTools)
     setAutoCallTools(currentSettings?.autoCallTools)
   }, [currentSettings])
 
   const persistSettings = useCallback(
-    async (
-      patch: Partial<{ availableTools: string[]; autoCallTools: string[]; systemPrompt: string }>,
-    ) => {
-      await updateSettingsForContext(context, patch as any)
+    async (patch: Partial<ChatSettings>) => {
+      await updateSettingsForContext(context, patch)
     },
     [context, updateSettingsForContext],
   )
@@ -98,12 +107,11 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
 
   const handlePickConfig = useCallback(async (configId: string) => {
     setSelectedConfigId(configId)
-    // Model selection is not persisted per-chat in ChatSettings; user controls active model via LLM settings
   }, [])
 
   type ToolToggle = { name: string; description: string; available: boolean; autoCall: boolean }
   const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
-  const projectId = parseProjectIdFromContext(context)
+  const projectId = context.projectId
   useEffect(() => {
     let isMounted = true
     async function loadTools() {
@@ -196,13 +204,29 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     }
   }, [isSettingsOpen])
 
-  // Effective prompt display (before any messages) and to seed settings textarea
+  const contextArguments: ChatContextArguments = useMemo(() => {
+    const args: ChatContextArguments = { ...context }
+    if (context.projectId) {
+      args.project = getProjectById(context.projectId)
+    }
+    if (context.storyId) {
+      args.story = storiesById[context.storyId]
+    }
+    if (context.featureId) {
+      args.feature = featuresById[context.featureId]
+    }
+    if (context.agentRunId) {
+      args.run = runsHistory.find((r) => r.id === context.agentRunId)
+    }
+    return args
+  }, [context, storiesById, featuresById, runsHistory, getProjectById])
+
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
   useEffect(() => {
     let cancelled = false
     const refreshPrompt = async () => {
       try {
-        const prompt = await getSettingsPrompt(context)
+        const prompt = await getSettingsPrompt(contextArguments)
         if (!cancelled) setEffectivePrompt(prompt)
       } catch {
         try {
@@ -217,7 +241,7 @@ export default function ChatSidebar({ context, chatContextTitle, isCollapsible, 
     return () => {
       cancelled = true
     }
-  }, [context, getSettingsPrompt, getDefaultPrompt])
+  }, [context, contextArguments, getSettingsPrompt, getDefaultPrompt])
 
   // Seed draft prompt whenever effective or settings change
   useEffect(() => {

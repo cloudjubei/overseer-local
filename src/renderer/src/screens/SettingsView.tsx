@@ -56,12 +56,14 @@ export default function SettingsView() {
       headerTitle="Categories"
       headerSubtitle=""
     >
-      {activeCategory === 'visual' && <VisualSettings />}
-      {activeCategory === 'llms' && <LLMSettings />}
-      {activeCategory === 'notifications' && <NotificationSettings />}
-      {activeCategory === 'github' && <GitHubSettings />}
-      {activeCategory === 'websearch' && <WebSearchSettings />}
-      {activeCategory === 'database' && <DatabaseSettings />}
+      <div className="p-4">
+        {activeCategory === 'visual' && <VisualSettings />}
+        {activeCategory === 'llms' && <LLMSettings />}
+        {activeCategory === 'notifications' && <NotificationSettings />}
+        {activeCategory === 'github' && <GitHubSettings />}
+        {activeCategory === 'websearch' && <WebSearchSettings />}
+        {activeCategory === 'database' && <DatabaseSettings />}
+      </div>
     </CollapsibleSidebar>
   )
 }

@@ -4,6 +4,8 @@ import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectC
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
 import type { ChatContext } from 'thefactory-tools'
+import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
+import { IconPlus } from '../components/ui/Icons'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -185,171 +187,178 @@ export default function ChatView() {
     )
   }
 
-  return (
-    <div className="flex flex-1 min-h-0 w-full overflow-hidden">
-      {/* Left sidebar: sections + chats list */}
-      <aside className="w-[360px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-base)] flex flex-col min-h-0">
-        <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)]">
-          <div className="text-sm font-semibold text-[var(--text-primary)]">Chats</div>
-          <button className="btn" onClick={handleNewChat} title="New General chat">
-            New chat
-          </button>
-        </div>
-
-        {/* Sections list: GENERAL, STORIES, TOPICS */}
-        <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-2">
-          {/* GENERAL */}
-          <div>
-            <button
-              className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-              onClick={() => setGeneralOpen((v) => !v)}
-            >
-              <span>GENERAL</span>
-              <span>{isGeneralOpen ? '−' : '+'}</span>
-            </button>
-            {isGeneralOpen && (
-              <div className="space-y-1">
-                {generalChats.length === 0 ? (
-                  <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                    No general chats yet.
-                  </div>
-                ) : (
-                  generalChats.map((c) => renderChatButton(c.chat.context, c.key))
-                )}
+  const navContent = (
+    <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-2">
+      {/* GENERAL */}
+      <div>
+        <button
+          className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+          onClick={() => setGeneralOpen((v) => !v)}
+        >
+          <span>GENERAL</span>
+          <span>{isGeneralOpen ? '−' : '+'}</span>
+        </button>
+        {isGeneralOpen && (
+          <div className="space-y-1">
+            {generalChats.length === 0 ? (
+              <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                No general chats yet.
               </div>
+            ) : (
+              generalChats.map((c) => renderChatButton(c.chat.context, c.key))
             )}
-          </div>
-
-          {/* STORIES (with nested FEATURES) */}
-          <div className="space-y-2">
-            <div>
-              <button
-                className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                onClick={() => setStoriesOpen((v) => !v)}
-              >
-                <span>STORIES</span>
-                <span>{isStoriesOpen ? '−' : '+'}</span>
-              </button>
-              {isStoriesOpen && (
-                <div className="space-y-1">
-                  {storyChats.length === 0 ? (
-                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                      No story chats yet.
-                    </div>
-                  ) : (
-                    storyChats.map((c) => renderChatButton(c.chat.context, c.key))
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <button
-                className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                onClick={() => setFeaturesOpen((v) => !v)}
-              >
-                <span>FEATURES</span>
-                <span>{isFeaturesOpen ? '−' : '+'}</span>
-              </button>
-              {isFeaturesOpen && (
-                <div className="space-y-1">
-                  {featureChats.length === 0 ? (
-                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                      No feature chats yet.
-                    </div>
-                  ) : (
-                    featureChats.map((c) => renderChatButton(c.chat.context, c.key))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* TOPICS */}
-          <div className="space-y-2">
-            <div>
-              <button
-                className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
-                onClick={() => setTopicsOpen((v) => !v)}
-              >
-                <span>TOPICS</span>
-                <span>{isTopicsOpen ? '−' : '+'}</span>
-              </button>
-              {isTopicsOpen && (
-                <div className="space-y-2">
-                  {/* Project Topics */}
-                  <div>
-                    <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                      Project Topics
-                    </div>
-                    <div className="space-y-2">
-                      {projectTopicsGrouped.length === 0 ? (
-                        <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                          No project topic chats yet.
-                        </div>
-                      ) : (
-                        projectTopicsGrouped.map(([topic, items]) => (
-                          <div key={topic} className="pl-1">
-                            <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                              {prettyTopicName(topic)}
-                            </div>
-                            <div className="space-y-1">
-                              {items.map((c) => renderChatButton(c.chat.context, c.key))}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Story Topics */}
-                  <div>
-                    <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                      Story Topics
-                    </div>
-                    <div className="space-y-2">
-                      {storyTopicsGrouped.length === 0 ? (
-                        <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
-                          No story topic chats yet.
-                        </div>
-                      ) : (
-                        storyTopicsGrouped.map(([topic, items]) => (
-                          <div key={topic} className="pl-1">
-                            <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
-                              {prettyTopicName(topic)}
-                            </div>
-                            <div className="space-y-1">
-                              {items.map((c) => renderChatButton(c.chat.context, c.key))}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main chat area: selected chat */}
-      <div className="flex-1 min-w-0 min-h-0">
-        {selectedContext ? (
-          <ChatSidebar
-            context={selectedContext}
-            chatContextTitle={titleForContext(selectedContext, {
-              getProjectTitle,
-              getStoryTitle,
-              getFeatureTitle,
-            })}
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">
-            Select a chat to begin.
           </div>
         )}
       </div>
+
+      {/* STORIES (with nested FEATURES) */}
+      <div className="space-y-2">
+        <div>
+          <button
+            className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+            onClick={() => setStoriesOpen((v) => !v)}
+          >
+            <span>STORIES</span>
+            <span>{isStoriesOpen ? '−' : '+'}</span>
+          </button>
+          {isStoriesOpen && (
+            <div className="space-y-1">
+              {storyChats.length === 0 ? (
+                <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                  No story chats yet.
+                </div>
+              ) : (
+                storyChats.map((c) => renderChatButton(c.chat.context, c.key))
+              )}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <button
+            className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+            onClick={() => setFeaturesOpen((v) => !v)}
+          >
+            <span>FEATURES</span>
+            <span>{isFeaturesOpen ? '−' : '+'}</span>
+          </button>
+          {isFeaturesOpen && (
+            <div className="space-y-1">
+              {featureChats.length === 0 ? (
+                <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                  No feature chats yet.
+                </div>
+              ) : (
+                featureChats.map((c) => renderChatButton(c.chat.context, c.key))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* TOPICS */}
+      <div className="space-y-2">
+        <div>
+          <button
+            className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+            onClick={() => setTopicsOpen((v) => !v)}
+          >
+            <span>TOPICS</span>
+            <span>{isTopicsOpen ? '−' : '+'}</span>
+          </button>
+          {isTopicsOpen && (
+            <div className="space-y-2">
+              {/* Project Topics */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                  Project Topics
+                </div>
+                <div className="space-y-2">
+                  {projectTopicsGrouped.length === 0 ? (
+                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                      No project topic chats yet.
+                    </div>
+                  ) : (
+                    projectTopicsGrouped.map(([topic, items]) => (
+                      <div key={topic} className="pl-1">
+                        <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                          {prettyTopicName(topic)}
+                        </div>
+                        <div className="space-y-1">
+                          {items.map((c) => renderChatButton(c.chat.context, c.key))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Story Topics */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                  Story Topics
+                </div>
+                <div className="space-y-2">
+                  {storyTopicsGrouped.length === 0 ? (
+                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                      No story topic chats yet.
+                    </div>
+                  ) : (
+                    storyTopicsGrouped.map(([topic, items]) => (
+                      <div key={topic} className="pl-1">
+                        <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                          {prettyTopicName(topic)}
+                        </div>
+                        <div className="space-y-1">
+                          {items.map((c) => renderChatButton(c.chat.context, c.key))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
+  )
+
+  return (
+    <CollapsibleSidebar
+      items={[]}
+      activeId={''}
+      onSelect={() => {}}
+      storageKey="chatview-sidebar-collapsed"
+      headerTitle=""
+      headerSubtitle=""
+      headerAction={
+        <button
+          type="button"
+          className="btn btn-icon"
+          aria-label="Create chat"
+          onClick={handleNewChat}
+          title="Create chat"
+        >
+          <IconPlus className="w-4 h-4" />
+        </button>
+      }
+      navContent={navContent}
+    >
+      {selectedContext ? (
+        <ChatSidebar
+          context={selectedContext}
+          chatContextTitle={titleForContext(selectedContext, {
+            getProjectTitle,
+            getStoryTitle,
+            getFeatureTitle,
+          })}
+        />
+      ) : (
+        <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">
+          Select a chat to begin.
+        </div>
+      )}
+    </CollapsibleSidebar>
   )
 }

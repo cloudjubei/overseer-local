@@ -259,7 +259,7 @@ export default function CollapsibleSidebar(props: Props) {
             </div>
           </>
         )}
-        <div className="flex-1 min-w-0 min-h-0 overflow-auto p-4">{children}</div>
+        <div className="flex-1 min-w-0 min-h-0 overflow-auto">{children}</div>
       </div>
     )
   } else {
@@ -270,7 +270,7 @@ export default function CollapsibleSidebar(props: Props) {
           setCollapsed={setCollapsed}
           className={sidebarClassName}
         />
-        <main className="flex-1 min-w-0 min-h-0 overflow-auto p-4">{children}</main>
+        <main className="flex-1 min-w-0 min-h-0 overflow-auto">{children}</main>
       </div>
     )
   }

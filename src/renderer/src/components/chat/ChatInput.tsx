@@ -3,6 +3,7 @@ import { useFiles } from '../../contexts/FilesContext'
 import AttachmentList from './AttachmentList'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
 import { IconAttach, IconSend } from '../ui/Icons'
+import Tooltip from '../ui/Tooltip'
 
 interface ChatInputProps {
   onSend: (message: string, attachments: string[]) => void
@@ -254,15 +255,23 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
 
               {/* Info (bottom) */}
               <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center">
-                <div
-                  className="relative"
-                  onMouseEnter={() => setInfoOpen(true)}
-                  onMouseLeave={() => setInfoOpen(false)}
+                <Tooltip
+                  content={
+                    <div className="p-2">
+                      <div className="font-medium mb-1 text-[var(--text-secondary)]">
+                        Shortcuts & helpers
+                      </div>
+                      <ul className="list-disc pl-5 space-y-1 text-sm">
+                        <li>Use @ for file references</li>
+                        <li>Use # for stories & features</li>
+                        <li>{modifierSymbol} + Enter to send</li>
+                      </ul>
+                    </div>
+                  }
+                  placement="top"
                 >
                   <button
-                    id="chat-input-info-btn"
                     type="button"
-                    onClick={() => setInfoOpen((v) => !v)}
                     className={[
                       'inline-flex items-center justify-center w-6 h-6 rounded-full',
                       'border border-pink-500 text-pink-600 bg-transparent',
@@ -270,31 +279,10 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                       'focus:outline-none focus:ring-2 focus:ring-pink-500/50',
                       'no-drag',
                     ].join(' ')}
-                    aria-haspopup="dialog"
-                    aria-expanded={infoOpen}
-                    aria-label="Show chat input tips"
-                    title="Chat input tips"
                   >
                     <span className="text-[11px] font-semibold">i</span>
                   </button>
-
-                  {infoOpen && (
-                    <div
-                      ref={infoPopoverRef}
-                      role="dialog"
-                      className="absolute bottom-full right-full mb-2 mr-2 z-10 w-64 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] shadow-lg p-2 text-[12px] text-[var(--text-primary)]"
-                    >
-                      <div className="font-medium mb-1 text-[var(--text-secondary)]">
-                        Shortcuts & helpers
-                      </div>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Use @ for file references</li>
-                        <li>Use # for stories & features</li>
-                        <li>{modifierSymbol} + Enter to send</li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                </Tooltip>
               </div>
             </div>
           </div>
