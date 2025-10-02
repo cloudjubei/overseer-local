@@ -50,7 +50,7 @@
       "id": "0964b90b-396a-43b0-9f4a-a60d0034360e",
       "status": "+",
       "title": "Make an Agent run chat display prettier",
-      "description": "make the thoughts as a bubble, and then the tool calls as expandable rows to view the details (mainly for read_files & write_file - the rest of the tools are short enough that they can always display).\nSame goes for the responses to the LLM - apply a similar view as above.",
+      "description": "make the message as a bubble, and then the tool calls as expandable rows to view the details (mainly for read_files & write_file - the rest of the tools are short enough that they can always display).\nSame goes for the responses to the LLM - apply a similar view as above.",
       "plan": "",
       "context": [
         "src/renderer/screens/AgentsView.tsx",

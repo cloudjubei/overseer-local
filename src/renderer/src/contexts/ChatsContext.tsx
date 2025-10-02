@@ -199,7 +199,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         completionMessage: {
           ...completionMessage,
           usage: { promptTokens: 0, completionTokens: 0 },
-          askedAt: now,
+          startedAt: now,
           completedAt: now,
           durationMs: 0,
         },

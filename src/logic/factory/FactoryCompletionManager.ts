@@ -117,7 +117,7 @@ export default class FactoryCompletionManager extends BaseManager {
         completionMessage: {
           ...completionMessage,
           usage: { promptTokens: 0, completionTokens: 0 },
-          askedAt: now,
+          startedAt: now,
           completedAt: now,
           durationMs: 0,
         },
@@ -144,7 +144,7 @@ export default class FactoryCompletionManager extends BaseManager {
     ): Promise<void> => {
       console.log('responseReceivedCallback turn: ', turn, ' response: ', response)
       let m: ChatMessage = {
-        completionMessage: { ...response, content: agentResponse?.thoughts ?? response.content },
+        completionMessage: { ...response, content: agentResponse?.message ?? response.content },
         toolCalls: agentResponse?.toolCalls,
         model: { model: config.model, provider: config.provider },
       }
@@ -162,7 +162,7 @@ export default class FactoryCompletionManager extends BaseManager {
           completionMessage: {
             role: 'user',
             content: '',
-            askedAt: response.toolResults.startedAt,
+            startedAt: response.toolResults.startedAt,
             completedAt: response.toolResults.completedAt,
             durationMs: response.toolResults.durationMs,
             usage: { promptTokens: 0, completionTokens: 0 },
@@ -195,7 +195,7 @@ export default class FactoryCompletionManager extends BaseManager {
           role: 'assistant',
           content: 'Error',
           usage: { promptTokens: 0, completionTokens: 0 },
-          askedAt: now,
+          startedAt: now,
           completedAt: now,
           durationMs: 0,
         },

@@ -260,7 +260,7 @@ export default function ChatSidebar({
         role: 'system',
         content: effectivePrompt,
         usage: { promptTokens: 0, completionTokens: 0 },
-        askedAt: '',
+        startedAt: '',
         completedAt: '',
         durationMs: 0,
       },

@@ -129,7 +129,7 @@
       "id": "92caffb1-e207-4cb0-a774-0e69e8d719ea",
       "status": "+",
       "title": "The @orchestrator.ts should use the @logger.ts to be able to limit the number of data in the console",
-      "description": "There's a lot of meta information sent in a conversation with an LLM - that needs to be recorded and stored but in the console we just need the most relevant information:\n- llm's 'thoughts'\n- llm's tool calls \n- time it took to respond\n\nUpdate @logger.ts to be able to be configurable for factory-ts .\nWe want to be able to have an admin (running in dev mode) set these configs later.",
+      "description": "There's a lot of meta information sent in a conversation with an LLM - that needs to be recorded and stored but in the console we just need the most relevant information:\n- llm's 'message'\n- llm's tool calls \n- time it took to respond\n\nUpdate @logger.ts to be able to be configurable for factory-ts .\nWe want to be able to have an admin (running in dev mode) set these configs later.",
       "plan": "",
       "context": [
         "packages/factory-ts/src/types.ts",

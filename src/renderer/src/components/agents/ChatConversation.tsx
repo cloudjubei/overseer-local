@@ -10,7 +10,7 @@ import type {
 } from 'thefactory-tools'
 import { formatHmsCompact } from '../../utils/time'
 
-// Parse assistant JSON response to extract thoughts and tool calls safely
+// Parse assistant JSON response to extract message and tool calls safely
 function parseAssistant(content: string): AgentResponse | null {
   try {
     const obj = JSON.parse(content)
@@ -190,11 +190,11 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
         turn++
       }
 
-      const askedAt = a.askedAt ? new Date(a.askedAt).getTime() : NaN
+      const startedAt = a.startedAt ? new Date(a.startedAt).getTime() : NaN
       const createdAt = a.completedAt ? new Date(a.completedAt).getTime() : NaN
       let thinkingTime: number | undefined = undefined
-      if (!isNaN(askedAt) && !isNaN(createdAt)) {
-        thinkingTime = Math.max(0, createdAt - askedAt)
+      if (!isNaN(startedAt) && !isNaN(createdAt)) {
+        thinkingTime = Math.max(0, createdAt - startedAt)
       }
 
       latestTurn = { assistant: a, index: turn, thinkingTime }
@@ -263,7 +263,7 @@ function FeatureContent({
         //TODO: if parsed is not AgentResponse - show some standard display
         const toolCalls: ToolCall[] = parsed?.toolCalls || []
         const resultsObjs = parseToolResultsObjects(t.tools)
-        const hasThoughts = parsed?.thoughts && parsed.thoughts.trim().length > 0
+        const hasMessage = parsed?.message && parsed.message.trim().length > 0
         const isFinal = t.isFinal || toolCalls.length === 0
 
         const isLatestTurn = idx === turns.length - 1
@@ -283,8 +283,8 @@ function FeatureContent({
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    {hasThoughts ? (
-                      <AssistantBubble text={parsed!.thoughts!} />
+                    {hasMessage ? (
+                      <AssistantBubble text={parsed!.message!} />
                     ) : (
                       <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
                     )}

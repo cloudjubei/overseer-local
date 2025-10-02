@@ -51,7 +51,6 @@ export class LLMConfigManager {
     return localStorage.getItem(this.activeAgentRunKey) ?? ''
   }
   setAgentRunActiveId(id: string): void {
-    console.log('LLMConfigManager setAgentRunActiveId id: ', id)
     localStorage.setItem(this.activeAgentRunKey, id)
     this.bumpAgentRunRecent(id)
     this.notify()
@@ -66,7 +65,6 @@ export class LLMConfigManager {
     return localStorage.getItem(this.activeChatKey) ?? ''
   }
   setChatActiveId(id: string): void {
-    console.log('LLMConfigManager setChatActiveId id: ', id)
     localStorage.setItem(this.activeChatKey, id)
     this.bumpChatRecent(id)
     this.notify()
@@ -120,7 +118,6 @@ export class LLMConfigManager {
     }
   }
   bumpAgentRunRecent(id: string) {
-    console.log('LLMConfigManager bumpAgentRunRecent id: ', id)
     try {
       const ids = this.getAgentRunRecentIds()
       const next = [id, ...ids.filter((x) => x !== id)]
@@ -148,7 +145,6 @@ export class LLMConfigManager {
       const ids = this.getChatRecentIds()
       const next = [id, ...ids.filter((x) => x !== id)]
       this.saveChatRecentIds(next.slice(0, 10))
-      console.log('LLMConfigManager bumpChatRecent id: ', id)
     } catch {}
   }
 }
