@@ -11,25 +11,49 @@ import Markdown from '../ui/Markdown'
 import { ChatMessage, ToolCall } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
 
+// export type ToolCall = {
+//     name: string;
+//     arguments?: any;
+// };
+// export type ToolResultNew = {
+//     call: ToolCall;
+//     result: string;
+//     type: ToolResultType;
+// };
+// export type ToolResultType = 'require_confirmation' | 'not_allowed' | 'errored' | 'aborted' | 'success';
+// export type CompletionToolResult = {
+//     result: ToolResultNew;
+//     durationMs: number;
+// };
+// export interface ChatMessage {
+//     completionMessage: CompletionResponse;
+//     toolCalls?: ToolCall[];
+//     toolResults?: CompletionToolResult[];
+//     model?: LLMModel;
+//     error?: {
+//         message: string;
+//     };
+// }
+// export type CompletionMessageRole = 'system' | 'user' | 'assistant';
+// export type CompletionMessage = {
+//     role: CompletionMessageRole;
+//     content: string;
+//     files?: string[];
+// };
+// export type CompletionUsage = {
+//     promptTokens: number;
+//     completionTokens: number;
+// };
+// export interface CompletionResponse extends CompletionMessage {
+//     usage: CompletionUsage;
+//     raw?: any;
+//     startedAt: string;
+//     completedAt: string;
+//     durationMs: number;
+// }
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
   isFirstInGroup?: boolean
-}
-
-function parseToolResultsObjects(
-  text?: string,
-): Array<{ name: string; result: any; durationMs?: number }> {
-  const trimmed = (text || '').trim()
-  if (!trimmed) return []
-  try {
-    const arr = JSON.parse(trimmed)
-    if (Array.isArray(arr)) {
-      return arr.filter(
-        (x) => x && typeof x === 'object' && typeof x.name === 'string' && 'result' in x,
-      )
-    }
-  } catch {}
-  return []
 }
 
 export default function MessageList({

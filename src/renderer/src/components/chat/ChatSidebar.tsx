@@ -20,6 +20,15 @@ import { useAgents } from '../../contexts/AgentsContext'
 import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
 import { Button } from '../ui/Button'
 
+// export type CompletionSettings = {
+//   numberMessagesToSend: number
+//   maxTurns: number
+//   allowNoCallResponses: boolean
+//   finishTurnOnErrors: boolean
+//   availableTools: string[]
+//   autoCallTools: string[]
+// }
+
 export type ChatSidebarProps = {
   context: ChatContext
   chatContextTitle: string
@@ -42,6 +51,7 @@ export default function ChatSidebar({
     getChat,
     restartChat,
     sendMessage,
+    resumeTools,
     getSettings,
     resetSettings,
     updateCompletionSettings,

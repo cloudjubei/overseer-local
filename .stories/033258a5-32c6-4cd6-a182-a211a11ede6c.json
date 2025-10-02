@@ -566,6 +566,45 @@
       "createdAt": "2025-10-02T15:45:39.668Z",
       "updatedAt": "2025-10-02T15:50:54.736Z",
       "completedAt": "2025-10-02T15:50:54.736Z"
+    },
+    {
+      "id": "d2076d76-651a-4a84-a464-11d95f98c784",
+      "status": "-",
+      "title": "MessageList needs to display all tool calls",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx and then in @src/renderer/src/components/chat/MessageList.tsx various messages are displayed, usually alternating messages from assistant and user.\nThe assistant messages are sometimes followed by 'user' messages that are actually just tool call results, for ease of handling in @src/renderer/src/components/chat/MessageList.tsx their role is changed to 'system' .\nThese messages, might have multiple tool calls + results inside, as defined in the structure `ChatMessage` and the field `toolResults` . Each tool result has a type `ToolResultType` - and we want to nicely display all of these statuses.\nSuccess is currently handled - it just displays, but the rest are not.\nErrored, aborted and not_allowed should display the tool call in red/orange/black respectively with an appropriate icon.\n`require_confirmation` is one that requires user input - a user must be able to toggle all such tool calls in the LAST message only (otherwise they can be treated as 'aborted' ), and if they toggle more than 1 they should be able to call the `resumeTools` of @src/renderer/src/contexts/ChatsContext.tsx with the list of ids of these tool results (the id is the value inside `CompletionToolResult.result.result` ). A button should show below the tool calls allowing the user to do this. It should be disabled if there are none selected, and green saying:\n\"Resume X/Y Tools\" where X is the toggled tools, and Y is how many could be toggled.\n\nAll the needed interfaces are listed in comment inside @src/renderer/src/components/chat/MessageList.tsx .",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/MessageList.tsx",
+        "src/renderer/src/contexts/ChatsContext.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-02T23:48:42.369Z",
+      "updatedAt": "2025-10-02T23:53:15.500Z"
+    },
+    {
+      "id": "8fe33379-179d-4590-aece-405b5b35a48a",
+      "status": "-",
+      "title": "Chat input shows pending when the agent is thinking",
+      "description": "The user can input a message into the @src/renderer/src/components/chat/ChatInput.tsx inside the @src/renderer/src/components/chat/ChatSidebar.tsx , but cannot send it while the agent is still thinking. This should be represented by turning the send button into a STOP button (an icon) surrounded by a spinning ring. If the user presses the STOP button that means calling the AbortController that was created when sending the last message to trigger and AbortSignal.\nThe user cannot send the message by any means - it must not be possible to do so by pressing ctrl/cmd + enter either - there should be a red border flash of the ChatInput indicating that it cannot be done.\nIf the user presses the STOP button - first they should be shown an alert to confirm.",
+      "context": [
+        "src/renderer/src/components/chat/ChatInput.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-02T23:52:09.896Z",
+      "updatedAt": "2025-10-02T23:52:09.896Z"
+    },
+    {
+      "id": "44da30b5-bf91-46d6-abc3-e579c9a7b556",
+      "status": "-",
+      "title": "ChatSidebar needs to show new settings",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when opening a chat's settings, the new CompletionSettings need to be shown for maxTurns, numberMesasgesToSend and finishTurnOnErrors (the CompletionSettings is provided in a comment at the top of @src/renderer/src/components/chat/ChatSidebar.tsx ).\nmaxTurns should be displayed as a horizontal drag between 1 and 100.\nnumberMessagesToSend similar but between 3 and 20.\nfinishTurnOnErrors - as a switch.\nAll of these row by row below the system prompt and above the tools.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-02T23:57:01.237Z",
+      "updatedAt": "2025-10-02T23:57:01.237Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -607,8 +646,11 @@
     "9bb36711-da11-46c3-8de5-2ac2ce899f74": 36,
     "570e7b4a-fe99-425d-a7e3-b492bc601863": 37,
     "b88ca6b3-bff8-4d59-8fd7-6bd06f2aaf8f": 38,
-    "e30f1aae-50de-416d-8f67-05c6f7687590": 39,
-    "84c70df2-1ba8-4e95-b310-d0cae565e4dd": 40
+    "84c70df2-1ba8-4e95-b310-d0cae565e4dd": 39,
+    "d2076d76-651a-4a84-a464-11d95f98c784": 40,
+    "8fe33379-179d-4590-aece-405b5b35a48a": 41,
+    "44da30b5-bf91-46d6-abc3-e579c9a7b556": 42,
+    "e30f1aae-50de-416d-8f67-05c6f7687590": 43
   },
   "createdAt": "2025-09-18T23:01:33.481Z",
   "updatedAt": "2025-09-29T13:57:25.137Z"
