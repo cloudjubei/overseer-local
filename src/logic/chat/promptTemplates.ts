@@ -57,11 +57,3 @@ export const getSystemPrompt = ({ additionalContext = '' }: { additionalContext?
     additionalContext.trim(),
   ].join('\n\n')
 }
-
-export const defaultContextPrompts = {
-  project: `You are an AI assistant helping with a software project. You have access to the project's details. Your task is to answer questions and provide assistance related to this project.\n\n# Project: @@project_title@@\n@@project_description@@`,
-  story: `You are an AI assistant helping with a user story within a software project. You have access to the project and story details. Your task is to answer questions and provide assistance related to this user story.\n\n# Project: @@project_title@@\n@@project_description@@\n\n## Story: @@story_title@@\n@@story_description@@`,
-  feature: `You are an AI assistant helping with a feature within a user story. You have access to the project, story, and feature details. Your task is to answer questions and provide assistance related to this feature.\n\n# Project: @@project_title@@\n@@project_description@@\n\n## Story: @@story_title@@\n@@story_description@@\n\n### Feature: @@feature_title@@\n@@feature_description@@`,
-  agentRun: `You are an AI assistant helping with the agents for a software project. Your task is to help create, manage, and understand agent runs.\n\n# Project: @@project_title@@\n@@project_description@@\n\n## Story: @@story_title@@\n@@story_description@@\n\n### Agent Run: @@agent_type@@\n@@agent_conversations@@`,
-  projectTopic: `You are an AI assistant helping with a particular topic for a software project. Your task is to help create, manage, and understand this topic.\n\n# Project: @@project_title@@\n@@project_description@@\n\n## Topic: @@project_topic@@`,
-}

@@ -1,22 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { AgentToolChatSchema } from 'thefactory-tools'
+import { AgentToolSchema } from 'thefactory-tools'
 import { factoryToolsService } from '../services/factoryToolsService'
 import { useActiveProject } from '../contexts/ProjectContext'
+import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
 
-// Define a type for the grouped tools
-// Key is a group label; value is array of ChatTool
 type GroupedTools = {
-  [group: string]: AgentToolChatSchema[]
+  [group: string]: AgentToolSchema[]
 }
 
-// Best-effort basename helper
-function basename(path: string): string {
-  if (!path) return 'Misc'
-  const parts = path.split(/[\\/]/)
-  return parts[parts.length - 1] || path
-}
-
-// Fallback grouping based on name when no source present
 function getGroupFromName(name: string): string {
   const dotIdx = name.indexOf('.')
   const underIdx = name.indexOf('_')
@@ -31,34 +22,6 @@ function getGroupFromName(name: string): string {
   return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
-// Primary grouping by the source file if available in the tool schema
-function getGroupFromTool(tool: AgentToolChatSchema): string {
-  const anyTool = tool as any
-  // Try common locations/keys where source metadata might be stored
-  const possible =
-    anyTool?.meta?.source?.file ||
-    anyTool?.meta?.source ||
-    anyTool?.source?.file ||
-    anyTool?.source?.path ||
-    anyTool?.source ||
-    anyTool?.origin?.file ||
-    anyTool?.origin ||
-    anyTool?.filePath ||
-    anyTool?.file ||
-    anyTool?.module
-
-  if (typeof possible === 'string') {
-    return basename(possible)
-  }
-  if (possible && typeof possible === 'object') {
-    const str = possible.file || possible.path || possible.name
-    if (typeof str === 'string' && str.length > 0) return basename(str)
-  }
-
-  const name = tool.function?.name ?? 'unknown'
-  return getGroupFromName(name)
-}
-
 const ToolsScreen: React.FC = () => {
   const { projectId } = useActiveProject()
 
@@ -68,28 +31,25 @@ const ToolsScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
-  // State for tool execution
-  const [selectedTool, setSelectedTool] = useState<AgentToolChatSchema | null>(null)
+  const [selectedTool, setSelectedTool] = useState<AgentToolSchema | null>(null)
   const [args, setArgs] = useState<{ [key: string]: any }>({})
   const [isExecuting, setIsExecuting] = useState<boolean>(false)
   const [executionResult, setExecutionResult] = useState<any | null>(null)
   const [executionError, setExecutionError] = useState<string | null>(null)
 
-  // Flatten tool schemas once loaded for search convenience
   const allTools = useMemo(() => Object.values(groupedTools).flat(), [groupedTools])
 
   useEffect(() => {
     const fetchTools = async () => {
       try {
         setLoading(true)
-        const tools = await factoryToolsService.listTools(projectId)
-
-        const groups: GroupedTools = tools.reduce((acc, tool) => {
-          const group = getGroupFromTool(tool)
-          if (!acc[group]) acc[group] = []
-          acc[group].push(tool)
-          return acc
-        }, {} as GroupedTools)
+        let groups: GroupedTools = {}
+        for (const k of Object.keys(TOOL_SCHEMAS)) {
+          const tool = TOOL_SCHEMAS[k]
+          const group = getGroupFromName(tool.name)
+          if (!groups[group]) groups[group] = []
+          groups[group].push(tool)
+        }
 
         setGroupedTools(groups)
         setError(null)
@@ -114,11 +74,9 @@ const ToolsScreen: React.FC = () => {
     const filtered: GroupedTools = {}
     for (const group in groupedTools) {
       const tools = groupedTools[group].filter((tool) => {
-        const name = tool.function?.name ?? ''
-        const description = tool.function?.description ?? ''
         return (
-          name.toLowerCase().includes(q) ||
-          description.toLowerCase().includes(q) ||
+          tool.name.toLowerCase().includes(q) ||
+          tool.description.toLowerCase().includes(q) ||
           group.toLowerCase().includes(q)
         )
       })
@@ -127,7 +85,7 @@ const ToolsScreen: React.FC = () => {
     setFilteredGroupedTools(filtered)
   }, [searchQuery, groupedTools])
 
-  const handleSelectTool = (tool: AgentToolChatSchema) => {
+  const handleSelectTool = (tool: AgentToolSchema) => {
     setSelectedTool(tool)
     setArgs({}) // Reset args when a new tool is selected
     setExecutionResult(null)
@@ -184,11 +142,7 @@ const ToolsScreen: React.FC = () => {
     setExecutionError(null)
 
     try {
-      const result = await factoryToolsService.executeTool(
-        projectId,
-        selectedTool.function.name,
-        args,
-      )
+      const result = await factoryToolsService.executeTool(projectId, selectedTool.name, args)
       setExecutionResult(result)
     } catch (err: any) {
       console.error('Failed to execute tool:', err)
@@ -201,7 +155,7 @@ const ToolsScreen: React.FC = () => {
   const renderArgInput = (key: string, schema: any) => {
     const type = schema?.type || 'string'
     const description = schema?.description || key
-    const required = (selectedTool?.function.parameters?.required || []).includes(key)
+    const required = (selectedTool?.parameters?.required || []).includes(key)
 
     if (schema && Array.isArray(schema.enum)) {
       return (
@@ -305,7 +259,7 @@ const ToolsScreen: React.FC = () => {
     )
   }
 
-  const selectedToolParams = selectedTool?.function?.parameters
+  const selectedToolParams = selectedTool?.parameters
   const selectedToolProps = selectedToolParams?.properties || {}
 
   return (
@@ -331,17 +285,17 @@ const ToolsScreen: React.FC = () => {
               <div className="grid grid-cols-1 gap-2">
                 {tools.map((tool) => (
                   <div
-                    key={tool.function.name}
+                    key={tool.name}
                     className={`bg-gray-800 p-3 rounded-lg shadow cursor-pointer ${
-                      selectedTool?.function.name === tool.function.name
+                      selectedTool?.name === tool.name
                         ? 'ring-2 ring-blue-500'
                         : 'hover:bg-gray-700'
                     }`}
                     onClick={() => handleSelectTool(tool)}
                   >
-                    <h3 className="font-bold text-md">{tool.function.name}</h3>
+                    <h3 className="font-bold text-md">{tool.name}</h3>
                     <p className="text-gray-400 text-sm mt-1">
-                      {tool.function.description || 'No description provided.'}
+                      {tool.description || 'No description provided.'}
                     </p>
                   </div>
                 ))}
@@ -352,9 +306,9 @@ const ToolsScreen: React.FC = () => {
         <div className="w-2/3 overflow-y-auto pl-2 flex flex-col">
           {selectedTool ? (
             <div className="bg-gray-800 p-4 rounded-lg flex flex-col flex-grow">
-              <h2 className="text-xl font-bold mb-2">{selectedTool.function.name}</h2>
+              <h2 className="text-xl font-bold mb-2">{selectedTool.name}</h2>
               <p className="text-gray-400 mb-4">
-                {selectedTool.function.description || 'No description provided.'}
+                {selectedTool.description || 'No description provided.'}
               </p>
 
               <div className="space-y-4 mb-4">

@@ -1,6 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import { createCompletionTools } from 'thefactory-tools'
+import { callCompletionTools, createCompletionTools } from 'thefactory-tools'
 import type {
   CompletionMessage,
   LLMConfig,
@@ -12,8 +12,9 @@ import type {
   CompletionResponseTurns,
   ChatContext,
   ChatMessage,
+  CompletionToolResult,
+  Chat,
 } from 'thefactory-tools'
-import { COMPLETION_TOOLS_PLACEHOLDER } from 'thefactory-tools/constants'
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
 import ChatsManager from '../chat/ChatsManager'
@@ -37,14 +38,14 @@ export default class FactoryCompletionManager extends BaseManager {
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    handlers[IPC_HANDLER_KEYS.COMPLETION_SIMPLE] = async ({
+    handlers[IPC_HANDLER_KEYS.COMPLETION_SEND] = async ({
       messages,
       systemPrompt,
       config,
       onAbortControllerCreated,
-    }) => this.getCompletion(messages, systemPrompt, config, onAbortControllerCreated)
+    }) => this.sendCompletion(messages, systemPrompt, config, onAbortControllerCreated)
 
-    handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS] = async ({
+    handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS_SEND] = async ({
       projectId,
       chatContext,
       completionMessage,
@@ -53,10 +54,29 @@ export default class FactoryCompletionManager extends BaseManager {
       config,
       onAbortControllerCreated,
     }) =>
-      this.getCompletionTools(
+      this.sendCompletionTools(
         projectId,
         chatContext,
         completionMessage,
+        systemPrompt,
+        settings,
+        config,
+        onAbortControllerCreated,
+      )
+
+    handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS_RESUME] = async ({
+      projectId,
+      chatContext,
+      toolsGranted,
+      systemPrompt,
+      settings,
+      config,
+      onAbortControllerCreated,
+    }) =>
+      this.resumeCompletionTools(
+        projectId,
+        chatContext,
+        toolsGranted,
         systemPrompt,
         settings,
         config,
@@ -71,6 +91,16 @@ export default class FactoryCompletionManager extends BaseManager {
     return (messages || []).map((c) => {
       const m = c.completionMessage
 
+      if (c.toolResults?.length) {
+        const toolResults = c.toolResults.map((r) => ({
+          name: r.result.call.name,
+          result: r.result.result,
+        }))
+        return {
+          role: 'user',
+          content: JSON.stringify(toolResults),
+        }
+      }
       if (Array.isArray(m.files) && m.files.length) {
         const unique = Array.from(new Set(m.files.filter(Boolean)))
         const attachText = unique.map((p) => `@${p}`).join('\n')
@@ -84,13 +114,13 @@ export default class FactoryCompletionManager extends BaseManager {
     })
   }
 
-  async getCompletion(
+  async sendCompletion(
     messages: CompletionMessage[],
     systemPrompt: string,
     config: LLMConfig,
     onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponse> {
-    const completion = createCompletionTools(config, false)
+    const completion = createCompletionTools(config)
 
     const request: CompletionRequest = {
       systemPrompt,
@@ -100,7 +130,73 @@ export default class FactoryCompletionManager extends BaseManager {
     return await completion.sendCompletion(request)
   }
 
-  async getCompletionTools(
+  async resumeCompletionTools(
+    projectId: string,
+    chatContext: ChatContext,
+    toolsGranted: string[],
+    systemPrompt: string,
+    settings: CompletionSettings,
+    config: LLMConfig,
+    onAbortControllerCreated?: (abortController: AbortController) => void,
+  ): Promise<CompletionResponseTurns> {
+    const chat = await this.chatsManager.getChat(chatContext)
+    if (!chat) throw new Error('CHAT NOT FOUND')
+    if (chat.messages.length < 1) throw new Error("CHAT DOESN'T HAVE MESSAGES")
+    const lastMessage = chat.messages[chat.messages.length - 1]
+    if (!lastMessage.toolResults || lastMessage.toolResults.length < 1)
+      throw new Error("CHAT DOESN'T HAVE A TOOL RESULT MESSAGE")
+
+    const toolsCheck = new Set<string>(toolsGranted)
+    const toolsRequiringConfirmation = lastMessage.toolResults.filter(
+      (r) => r.result.type === 'require_confirmation',
+    )
+    if (toolsRequiringConfirmation.length < 1)
+      throw new Error("CHAT DOESN'T HAVE A TOOL REQUIRING CONFIRMATION THAT HAD IT GRANTED")
+    const toolsAllowed = toolsRequiringConfirmation.filter((r) => toolsCheck.has(r.result.result))
+
+    const callTool = async (toolName: string, args: any): Promise<string> => {
+      const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
+      return JSON.stringify(result)
+    }
+
+    const agentResponse: AgentResponse = { toolCalls: toolsAllowed.map((t) => t.result.call) }
+    const availableTools = toolsAllowed.map((t) => t.result.call.name)
+
+    const toolResults = await callCompletionTools(
+      agentResponse,
+      availableTools,
+      availableTools,
+      settings.finishTurnOnErrors,
+      callTool,
+    ) //TODO: abort signal handle
+
+    const mapToolResults: Record<string, CompletionToolResult> = {}
+    for (let i = 0; i < toolResults.results.length; i++) {
+      const r = toolResults.results[i]
+      mapToolResults[toolsAllowed[i].result.result] = r
+    }
+
+    let newLastMessage = { ...lastMessage }
+    newLastMessage.toolResults = lastMessage.toolResults.map((t) =>
+      mapToolResults[t.result.result] ? mapToolResults[t.result.result] : t,
+    )
+
+    const newMessages = [...chat.messages]
+    newMessages[newMessages.length - 1] = newLastMessage
+    const newChat = await this.chatsManager.saveChat({ ...chat, messages: newMessages })
+
+    return await this.runCompletionTools(
+      projectId,
+      chatContext,
+      newChat,
+      systemPrompt,
+      settings,
+      config,
+      onAbortControllerCreated,
+    )
+  }
+
+  async sendCompletionTools(
     projectId: string,
     chatContext: ChatContext,
     completionMessage: CompletionMessage,
@@ -109,7 +205,6 @@ export default class FactoryCompletionManager extends BaseManager {
     config: LLMConfig,
     onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns> {
-    console.log('MANAGER getCompletionTools ', ' chatContext: ', chatContext)
     const now = new Date().toISOString()
 
     const chat = await this.chatsManager.addChatMessages(chatContext, [
@@ -125,16 +220,36 @@ export default class FactoryCompletionManager extends BaseManager {
     ])
     if (!chat) throw new Error('CHAT NOT FOUND')
 
-    const completion = createCompletionTools(config, false)
+    return await this.runCompletionTools(
+      projectId,
+      chatContext,
+      chat,
+      systemPrompt,
+      settings,
+      config,
+      onAbortControllerCreated,
+    )
+  }
+
+  async runCompletionTools(
+    projectId: string,
+    chatContext: ChatContext,
+    chat: Chat,
+    systemPrompt: string,
+    settings: CompletionSettings,
+    config: LLMConfig,
+    onAbortControllerCreated?: (abortController: AbortController) => void,
+  ) {
+    const completion = createCompletionTools(config)
 
     const messages = this.processChatMessagesForCompletion(chat.messages)
 
     const request: CompletionRequest = {
-      systemPrompt: systemPrompt + '\n\n' + COMPLETION_TOOLS_PLACEHOLDER,
+      systemPrompt,
       messages,
     }
     const callTool = async (toolName: string, args: any): Promise<string> => {
-      const result = this.factoryToolsManager.executeTool(projectId, toolName, args)
+      const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
       return JSON.stringify(result)
     }
     const responseReceivedCallback = async (
@@ -142,13 +257,12 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      console.log('responseReceivedCallback turn: ', turn, ' response: ', response)
+      // console.log('responseReceivedCallback turn: ', turn, ' response: ', response)
       let m: ChatMessage = {
         completionMessage: { ...response, content: agentResponse?.message ?? response.content },
         toolCalls: agentResponse?.toolCalls,
         model: { model: config.model, provider: config.provider },
       }
-      //TODO: this update should bubble up via subscriber
       await this.chatsManager.addChatMessages(chatContext, [m])
     }
 
@@ -156,7 +270,12 @@ export default class FactoryCompletionManager extends BaseManager {
       turn: number,
       response: CompletionResponseWithTools,
     ): Promise<boolean> => {
-      console.log('turnFinishedCallback turn: ', turn, ' response: ', response)
+      // console.log(
+      //   'turnFinishedCallback turn: ',
+      //   turn,
+      //   ' message: ',
+      //   response.agentResponse?.message,
+      // )
       if (response.toolResults.results.length > 0) {
         let m: ChatMessage = {
           completionMessage: {
@@ -169,7 +288,6 @@ export default class FactoryCompletionManager extends BaseManager {
           },
           toolResults: response.toolResults.results,
         }
-        //TODO: this update should bubble up via subscriber
         await this.chatsManager.addChatMessages(chatContext, [m])
       }
       return (
@@ -180,7 +298,6 @@ export default class FactoryCompletionManager extends BaseManager {
       )
     }
 
-    //TODO: include abortController as callback here
     const c = await completion.sendCompletionWithTools(
       request,
       settings,

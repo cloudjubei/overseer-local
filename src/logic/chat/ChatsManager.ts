@@ -77,6 +77,9 @@ export default class ChatsManager extends BaseManager {
   async updateChat(chatContext: ChatContext, patch: ChatEditInput): Promise<Chat | undefined> {
     return await this.tools.updateChat(chatContext, patch)
   }
+  async saveChat(chat: Chat): Promise<Chat> {
+    return await this.tools.saveChat(chat)
+  }
   async deleteChat(chatContext: ChatContext): Promise<void> {
     return await this.tools.deleteChat(chatContext)
   }

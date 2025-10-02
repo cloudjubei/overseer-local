@@ -27,8 +27,9 @@ const IPC_HANDLER_KEYS = {
   CHATS_RESET_SETTINGS_PROMPT: 'chats:reset-settings-prompt',
 
   // Completion
-  COMPLETION_TOOLS: 'completion:tools',
-  COMPLETION_SIMPLE: 'completion:simple',
+  COMPLETION_TOOLS_SEND: 'completion:tools-send',
+  COMPLETION_TOOLS_RESUME: 'completion:tools-resume',
+  COMPLETION_SEND: 'completion:send',
 
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',

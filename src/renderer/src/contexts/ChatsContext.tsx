@@ -38,6 +38,14 @@ export type ChatsContextValue = {
     files?: string[],
     abortSignal?: AbortSignal,
   ) => Promise<void>
+  resumeTools: (
+    context: ChatContext,
+    toolsGranted: string[],
+    prompt: string,
+    settings: ChatSettings,
+    config: LLMConfig,
+    abortSignal?: AbortSignal,
+  ) => Promise<void>
 
   getChat: (context: ChatContext) => Promise<ChatState>
   restartChat: (context: ChatContext) => Promise<ChatState>
@@ -215,7 +223,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       const chatProjectId = context.projectId ?? projectId
       try {
-        await completionService.getCompletionTools(
+        await completionService.sendCompletionTools(
           chatProjectId,
           context,
           completionMessage,
@@ -226,6 +234,48 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         )
       } catch (e) {
         console.error('completionService.getCompletionTools:', e)
+      } finally {
+        updateChatState(key, { isThinking: false })
+      }
+    },
+    [projectId, getChat, updateChatState],
+  )
+
+  const resumeTools = useCallback(
+    async (
+      context: ChatContext,
+      toolsGranted: string[],
+      prompt: string,
+      settings: ChatSettings,
+      config: LLMConfig,
+    ) => {
+      // Optimistic local update with the user message
+      const key = getChatContextPath(context)
+      const chatState = await getChat(context)
+
+      //DO NOT ALLOW  WHILE AGENT IS THINKING
+      if (chatState.isThinking) return
+
+      updateChatState(key, {
+        chat: {
+          ...chatState.chat,
+        },
+        isThinking: true,
+      })
+
+      const chatProjectId = context.projectId ?? projectId
+      try {
+        await completionService.resumeCompletionTools(
+          chatProjectId,
+          context,
+          toolsGranted,
+          prompt,
+          settings.completionSettings,
+          config,
+          // onAbortControllerCreated,
+        )
+      } catch (e) {
+        console.error('completionService.resumeCompletionTools:', e)
       } finally {
         updateChatState(key, { isThinking: false })
       }
@@ -352,6 +402,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       chats,
       chatsByProjectId,
       sendMessage,
+      resumeTools,
       getChat,
       restartChat,
       deleteChat,
@@ -368,6 +419,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       chats,
       chatsByProjectId,
       sendMessage,
+      resumeTools,
       getChat,
       restartChat,
       deleteChat,
