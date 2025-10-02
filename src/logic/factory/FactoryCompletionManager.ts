@@ -203,5 +203,6 @@ export default class FactoryCompletionManager extends BaseManager {
       }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     }
+    return c
   }
 }

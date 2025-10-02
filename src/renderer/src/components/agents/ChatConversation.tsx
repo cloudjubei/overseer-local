@@ -83,7 +83,7 @@ function ToolCallRow({
   resultText?: string
   index: number
 }) {
-  const name = call.tool_name
+  const name = call.name
   const args = call.arguments ?? {}
   const isHeavy = name === 'read_files' || name === 'write_file'
 
@@ -261,7 +261,7 @@ function FeatureContent({
       {turns.map((t, idx) => {
         const parsed = parseAssistant(t.assistant.content)
         //TODO: if parsed is not AgentResponse - show some standard display
-        const toolCalls: ToolCall[] = parsed?.tool_calls || []
+        const toolCalls: ToolCall[] = parsed?.toolCalls || []
         const resultsObjs = parseToolResultsObjects(t.tools)
         const hasThoughts = parsed?.thoughts && parsed.thoughts.trim().length > 0
         const isFinal = t.isFinal || toolCalls.length === 0

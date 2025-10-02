@@ -3,7 +3,12 @@ import { useNavigator } from '../../navigation/Navigator'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 
 export default function AgentModelQuickSelect({ className = '' }: { className?: string }) {
-  const { recentConfigs, activeConfigId, setActive, configs } = useLLMConfig()
+  const {
+    recentConfigs,
+    activeAgentRunConfigId: activeConfigId,
+    setActive,
+    configs,
+  } = useLLMConfig()
   const { navigateView } = useNavigator()
 
   if (!configs || configs.length === 0) {

@@ -117,7 +117,12 @@ export default function ChatSidebarPanel({
   }
 
   return (
-    <div className="h-full border-l dark:border-neutral-800" style={outerStyle} role="complementary" aria-label="Chat sidebar">
+    <div
+      className="h-full border-l dark:border-neutral-800"
+      style={outerStyle}
+      role="complementary"
+      aria-label="Chat sidebar"
+    >
       <div
         onPointerDown={onResizeStart}
         className="absolute left-0 top-0 bottom-0 w-5 cursor-col-resize group"
@@ -126,7 +131,6 @@ export default function ChatSidebarPanel({
         aria-label="Resize chat sidebar"
         style={{ zIndex: 10 }}
       >
-        {/* Visible grab handle that protrudes to the right (inside the panel) */}
         <div
           className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-start"
           style={{ width: 34, height: 56 }}

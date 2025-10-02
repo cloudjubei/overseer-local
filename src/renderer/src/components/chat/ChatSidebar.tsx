@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import { useChats, ChatState } from '../../contexts/ChatsContext'
-import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
@@ -54,11 +53,10 @@ export default function ChatSidebar({
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { runsHistory } = useAgents()
-  const { configs, activeConfig } = useLLMConfig()
+  const { activeChatConfig, isChatConfigured } = useLLMConfig()
   const { navigateView } = useNavigator()
 
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
-  const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
@@ -79,21 +77,11 @@ export default function ChatSidebar({
 
   const isThinking = chat?.isThinking || false
 
-  const selectedConfig = useMemo(() => {
-    if (selectedConfigId) {
-      const byId = configs.find((c) => c.id === selectedConfigId)
-      if (byId) return byId
-    }
-    return activeConfig || configs[0]
-  }, [configs, activeConfig, selectedConfigId])
-
-  const isConfigured = !!selectedConfig?.apiKey
-
   const [draftPrompt, setDraftPrompt] = useState<string>('')
 
   const handleSend = useCallback(
     async (message: string, attachments: string[]) => {
-      if (!selectedConfig || !currentSettings) return
+      if (!isChatConfigured || !activeChatConfig || !currentSettings) return
       tryResumeAudioContext()
       playSendSound()
       await sendMessage(
@@ -101,16 +89,12 @@ export default function ChatSidebar({
         message,
         effectivePrompt,
         currentSettings,
-        selectedConfig,
+        activeChatConfig,
         attachments,
       )
     },
-    [context, effectivePrompt, selectedConfig, currentSettings, sendMessage],
+    [context, effectivePrompt, activeChatConfig, currentSettings, sendMessage],
   )
-
-  const handlePickConfig = useCallback(async (configId: string) => {
-    setSelectedConfigId(configId)
-  }, [])
 
   const [tools, setTools] = useState<ToolToggle[]>([])
 
@@ -319,12 +303,7 @@ export default function ChatSidebar({
           >
             <IconDelete className="w-4 h-4" />
           </Button>
-          <ModelChip
-            editable
-            selectedConfigId={selectedConfigId}
-            onPickConfigId={handlePickConfig}
-            className="border-blue-500"
-          />
+          <ModelChip editable className="border-blue-500" mode="chat" />
 
           <button
             ref={settingsBtnRef}
@@ -440,7 +419,7 @@ export default function ChatSidebar({
       </header>
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        {!isConfigured && (
+        {!isChatConfigured && (
           <div
             className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
             style={{
@@ -462,7 +441,7 @@ export default function ChatSidebar({
       </div>
 
       <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
-        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
+        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isChatConfigured} />
       </div>
     </section>
   )

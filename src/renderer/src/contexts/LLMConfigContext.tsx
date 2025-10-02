@@ -12,21 +12,22 @@ import type { LLMConfig } from 'thefactory-tools'
 
 export type LLMConfigContextValue = {
   configs: LLMConfig[]
-  activeConfigId: string | null
-  activeConfig?: LLMConfig
-  // Separate active config for Chats
-  activeChatConfigId: string | null
-  activeChatConfig?: LLMConfig
 
-  isConfigured: boolean
-  recentConfigs: LLMConfig[]
-  recentIds: string[]
+  activeAgentRunConfigId?: string
+  activeAgentRunConfig?: LLMConfig
+  isAgentRunConfigured: boolean
+  setActiveAgentRun: (id: string) => void
+  recentAgentRunConfigs: LLMConfig[]
+
+  activeChatConfigId?: string
+  activeChatConfig?: LLMConfig
+  isChatConfigured: boolean
+  setActiveChat: (id: string) => void
+  recentChatConfigs: LLMConfig[]
 
   addConfig: (config: Omit<LLMConfig, 'id'>) => void
   updateConfig: (id: string, updates: Partial<LLMConfig>) => void
   removeConfig: (id: string) => void
-  setActive: (id: string) => void
-  setActiveChat: (id: string) => void
 }
 
 const LLMConfigContext = createContext<LLMConfigContextValue | null>(null)
@@ -34,23 +35,19 @@ const LLMConfigContext = createContext<LLMConfigContextValue | null>(null)
 export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
   const managerRef = useRef<LLMConfigManager>(new LLMConfigManager())
   const [configs, setConfigs] = useState<LLMConfig[]>([])
-  const [activeConfigId, setActiveConfigId] = useState<string | null>(null)
-  const [activeChatConfigId, setActiveChatConfigId] = useState<string | null>(null)
-  const [recentIds, setRecentIds] = useState<string[]>([])
+
+  const [activeAgentRunConfigId, setActiveAgentRunConfigId] = useState<string>('')
+  const [recentAgentRunIds, setRecentAgentRunIds] = useState<string[]>([])
+
+  const [activeChatConfigId, setActiveChatConfigId] = useState<string>('')
+  const [recentChatIds, setRecentChatIds] = useState<string[]>([])
 
   const refresh = useCallback(() => {
     setConfigs(managerRef.current.getConfigs())
-    setActiveConfigId(managerRef.current.getActiveId())
-    try {
-      setRecentIds(managerRef.current.getRecentIds())
-    } catch {
-      setRecentIds([])
-    }
-    try {
-      setActiveChatConfigId(managerRef.current.getActiveChatId())
-    } catch {
-      setActiveChatConfigId(null)
-    }
+    setActiveAgentRunConfigId(managerRef.current.getAgentRunActiveId())
+    setRecentAgentRunIds(managerRef.current.getAgentRunRecentIds())
+    setActiveChatConfigId(managerRef.current.getChatActiveId())
+    setRecentChatIds(managerRef.current.getChatRecentIds())
   }, [])
 
   useEffect(() => {
@@ -60,12 +57,29 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener(LLM_CONFIGS_CHANGED_EVENT, handler as EventListener)
   }, [refresh])
 
-  const activeConfig: LLMConfig | undefined = useMemo(() => {
-    if (activeConfigId) {
-      return configs.find((c) => c.id === activeConfigId)
+  const activeAgentRunConfig: LLMConfig | undefined = useMemo(() => {
+    if (activeAgentRunConfigId) {
+      return configs.find((c) => c.id === activeAgentRunConfigId)
     }
     return
-  }, [configs, activeConfigId])
+  }, [configs, activeAgentRunConfigId])
+
+  const isAgentRunConfigured = useMemo(() => !!activeAgentRunConfig?.apiKey, [activeAgentRunConfig])
+
+  const recentAgentRunConfigs: LLMConfig[] = useMemo(() => {
+    const map = new Map(configs.map((c) => [c.id, c] as const))
+    const items = recentAgentRunIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
+    const base = items.length > 0 ? items : configs
+    return base.slice(0, 5)
+  }, [configs, recentAgentRunIds])
+
+  const setActiveAgentRun = useCallback(
+    (id: string) => {
+      managerRef.current.setAgentRunActiveId(id)
+      refresh()
+    },
+    [refresh],
+  )
 
   const activeChatConfig: LLMConfig | undefined = useMemo(() => {
     if (activeChatConfigId) {
@@ -74,7 +88,22 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     return
   }, [configs, activeChatConfigId])
 
-  const isConfigured = useMemo(() => !!activeConfig?.apiKey, [activeConfig])
+  const isChatConfigured = useMemo(() => !!activeChatConfig?.apiKey, [activeChatConfig])
+
+  const recentChatConfigs: LLMConfig[] = useMemo(() => {
+    const map = new Map(configs.map((c) => [c.id, c] as const))
+    const items = recentChatIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
+    const base = items.length > 0 ? items : configs
+    return base.slice(0, 5)
+  }, [configs, recentChatIds])
+
+  const setActiveChat = useCallback(
+    (id: string) => {
+      managerRef.current.setChatActiveId(id)
+      refresh()
+    },
+    [refresh],
+  )
 
   const addConfig = useCallback(
     (config: Omit<LLMConfig, 'id'>) => {
@@ -83,7 +112,6 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     },
     [refresh],
   )
-
   const updateConfig = useCallback(
     (id: string, updates: Partial<LLMConfig>) => {
       managerRef.current.updateConfig(id, updates)
@@ -91,7 +119,6 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     },
     [refresh],
   )
-
   const removeConfig = useCallback(
     (id: string) => {
       managerRef.current.removeConfig(id)
@@ -100,59 +127,42 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     [refresh],
   )
 
-  const setActive = useCallback(
-    (id: string) => {
-      managerRef.current.setActiveId(id)
-      refresh()
-    },
-    [refresh],
-  )
-
-  const setActiveChat = useCallback(
-    (id: string) => {
-      managerRef.current.setActiveChatId(id)
-      refresh()
-    },
-    [refresh],
-  )
-
-  const recentConfigs: LLMConfig[] = useMemo(() => {
-    const map = new Map(configs.map((c) => [c.id, c] as const))
-    const items = recentIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
-    const base = items.length > 0 ? items : configs
-    return base.slice(0, 5)
-  }, [configs, recentIds])
-
   const value = useMemo<LLMConfigContextValue>(
     () => ({
-      configs,
-      activeConfigId,
-      activeConfig,
+      activeAgentRunConfigId,
+      activeAgentRunConfig,
+      isAgentRunConfigured,
+      setActiveAgentRun,
+      recentAgentRunConfigs,
+
       activeChatConfigId,
       activeChatConfig,
-      isConfigured,
+      isChatConfigured,
+      setActiveChat,
+      recentChatConfigs,
+
+      configs,
       addConfig,
       updateConfig,
       removeConfig,
-      setActive,
-      setActiveChat,
-      recentConfigs,
-      recentIds,
     }),
     [
-      configs,
-      activeConfigId,
-      activeConfig,
+      activeAgentRunConfigId,
+      activeAgentRunConfig,
+      isAgentRunConfigured,
+      setActiveAgentRun,
+      recentAgentRunConfigs,
+
       activeChatConfigId,
       activeChatConfig,
-      isConfigured,
+      isChatConfigured,
+      setActiveChat,
+      recentChatConfigs,
+
+      configs,
       addConfig,
       updateConfig,
       removeConfig,
-      setActive,
-      setActiveChat,
-      recentConfigs,
-      recentIds,
     ],
   )
 

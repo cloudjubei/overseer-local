@@ -5,9 +5,12 @@ export const LLM_CONFIGS_CHANGED_EVENT = 'llm-configs-changed'
 
 export class LLMConfigManager {
   private storageKey = 'llmConfigs'
-  private activeKey = 'activeLlmConfigId'
-  private recentKey = 'recentLlmConfigIds'
-  private chatActiveKey = 'activeChatLlmConfigId'
+
+  private activeAgentRunKey = 'activeAgentRunConfigId'
+  private recentAgentRunKey = 'recentAgentRunConfigIds'
+
+  private activeChatKey = 'activeChatConfigId'
+  private recentChatKey = 'recentChatConfigIds'
 
   private notify() {
     try {
@@ -22,49 +25,56 @@ export class LLMConfigManager {
 
   saveConfigs(configs: LLMConfig[]): void {
     localStorage.setItem(this.storageKey, JSON.stringify(configs))
-    // Clean recents to only include existing IDs
     try {
-      const ids = this.getRecentIds()
-      const set = new Set(configs.map((c) => c.id))
-      const cleaned = ids.filter((id) => set.has(id))
-      localStorage.setItem(this.recentKey, JSON.stringify(cleaned))
+      const presentIds = new Set(configs.map((c) => c.id))
+
+      const idsAgentRun = this.getAgentRunRecentIds()
+      this.saveAgentRunRecentIds(idsAgentRun.filter((id) => presentIds.has(id)))
+
+      const agentRunActiveId = this.getAgentRunActiveId()
+      if (agentRunActiveId && !presentIds.has(agentRunActiveId)) {
+        this.setAgentRunActiveId(configs[0]?.id || '')
+      }
+
+      const idsChat = this.getChatRecentIds()
+      this.saveChatRecentIds(idsChat.filter((id) => presentIds.has(id)))
+
+      const chatActiveId = this.getChatActiveId()
+      if (chatActiveId && !presentIds.has(chatActiveId)) {
+        this.setChatActiveId(configs[0]?.id || '')
+      }
     } catch {}
     this.notify()
   }
 
-  getActiveId(): string | null {
-    return localStorage.getItem(this.activeKey)
+  getAgentRunActiveId(): string {
+    return localStorage.getItem(this.activeAgentRunKey) ?? ''
   }
-
-  setActiveId(id: string): void {
-    localStorage.setItem(this.activeKey, id)
-    // bump recents order
-    this.bumpRecent(id)
+  setAgentRunActiveId(id: string): void {
+    console.log('LLMConfigManager setAgentRunActiveId id: ', id)
+    localStorage.setItem(this.activeAgentRunKey, id)
+    this.bumpAgentRunRecent(id)
     this.notify()
   }
-
-  getActiveConfig(): LLMConfig | null {
+  getAgentRunActiveConfig(): LLMConfig | undefined {
     const configs = this.getConfigs()
-    const activeId = this.getActiveId()
-    return configs.find((c) => c.id === activeId) || null
+    const activeId = this.getAgentRunActiveId()
+    return configs.find((c) => c.id === activeId)
   }
 
-  // Chat active config (separate from agent-run active config)
-  getActiveChatId(): string | null {
-    return localStorage.getItem(this.chatActiveKey)
+  getChatActiveId(): string {
+    return localStorage.getItem(this.activeChatKey) ?? ''
   }
-
-  setActiveChatId(id: string): void {
-    localStorage.setItem(this.chatActiveKey, id)
-    // bump recents order as well
-    this.bumpRecent(id)
+  setChatActiveId(id: string): void {
+    console.log('LLMConfigManager setChatActiveId id: ', id)
+    localStorage.setItem(this.activeChatKey, id)
+    this.bumpChatRecent(id)
     this.notify()
   }
-
-  getActiveChatConfig(): LLMConfig | null {
+  getChatActiveConfig(): LLMConfig | undefined {
     const configs = this.getConfigs()
-    const activeId = this.getActiveChatId()
-    return configs.find((c) => c.id === activeId) || null
+    const activeId = this.getChatActiveId()
+    return configs.find((c) => c.id === activeId)
   }
 
   addConfig(config: Omit<LLMConfig, 'id'>): LLMConfig {
@@ -73,11 +83,8 @@ export class LLMConfigManager {
     configs.push(newConfig)
     this.saveConfigs(configs)
     if (configs.length === 1) {
-      // If this is the first config, set both actives to it
-      this.setActiveId(newConfig.id!)
-      this.setActiveChatId(newConfig.id!)
-    } else {
-      this.notify()
+      this.setAgentRunActiveId(newConfig.id!)
+      this.setChatActiveId(newConfig.id!)
     }
     return newConfig
   }
@@ -88,8 +95,6 @@ export class LLMConfigManager {
     if (index !== -1) {
       configs[index] = { ...configs[index], ...updates }
       this.saveConfigs(configs)
-    } else {
-      this.notify()
     }
   }
 
@@ -97,28 +102,16 @@ export class LLMConfigManager {
     let configs = this.getConfigs()
     configs = configs.filter((c) => c.id !== id)
     this.saveConfigs(configs)
-    // remove from recents if present
+  }
+
+  private saveAgentRunRecentIds(ids: string[]) {
     try {
-      const ids = this.getRecentIds().filter((x) => x !== id)
-      localStorage.setItem(this.recentKey, JSON.stringify(ids))
+      localStorage.setItem(this.recentAgentRunKey, JSON.stringify(ids))
     } catch {}
-
-    // Repoint active IDs if they referenced the removed config
-    if (this.getActiveId() === id) {
-      this.setActiveId(configs[0]?.id || '')
-    } else if (this.getActiveChatId() === id) {
-      this.setActiveChatId(configs[0]?.id || '')
-    }
-    this.notify()
   }
-
-  isConfigured(): boolean {
-    return !!this.getActiveConfig()?.apiKey
-  }
-
-  getRecentIds(): string[] {
+  getAgentRunRecentIds(): string[] {
     try {
-      const raw = localStorage.getItem(this.recentKey)
+      const raw = localStorage.getItem(this.recentAgentRunKey)
       const arr = raw ? JSON.parse(raw) : []
       if (!Array.isArray(arr)) return []
       return arr.filter((x) => typeof x === 'string')
@@ -126,19 +119,36 @@ export class LLMConfigManager {
       return []
     }
   }
-
-  private saveRecentIds(ids: string[]) {
+  bumpAgentRunRecent(id: string) {
+    console.log('LLMConfigManager bumpAgentRunRecent id: ', id)
     try {
-      localStorage.setItem(this.recentKey, JSON.stringify(ids))
+      const ids = this.getAgentRunRecentIds()
+      const next = [id, ...ids.filter((x) => x !== id)]
+      this.saveAgentRunRecentIds(next.slice(0, 10))
     } catch {}
   }
 
-  bumpRecent(id: string) {
+  private saveChatRecentIds(ids: string[]) {
     try {
-      const ids = this.getRecentIds()
+      localStorage.setItem(this.recentChatKey, JSON.stringify(ids))
+    } catch {}
+  }
+  getChatRecentIds(): string[] {
+    try {
+      const raw = localStorage.getItem(this.recentChatKey)
+      const arr = raw ? JSON.parse(raw) : []
+      if (!Array.isArray(arr)) return []
+      return arr.filter((x) => typeof x === 'string')
+    } catch {
+      return []
+    }
+  }
+  bumpChatRecent(id: string) {
+    try {
+      const ids = this.getChatRecentIds()
       const next = [id, ...ids.filter((x) => x !== id)]
-      // keep a reasonable history
-      this.saveRecentIds(next.slice(0, 10))
+      this.saveChatRecentIds(next.slice(0, 10))
+      console.log('LLMConfigManager bumpChatRecent id: ', id)
     } catch {}
   }
 }

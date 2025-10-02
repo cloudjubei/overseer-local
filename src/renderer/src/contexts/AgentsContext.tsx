@@ -27,7 +27,7 @@ const notificationsFired = new Set<string>()
 
 export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { appSettings } = useAppSettings()
-  const { activeConfig } = useLLMConfig()
+  const { activeAgentRunConfig: activeConfig } = useLLMConfig()
   const { activeProject } = useProjectContext()
   const { getCredentials } = useGitHubCredentials()
   const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])

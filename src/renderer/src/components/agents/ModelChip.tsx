@@ -1,7 +1,8 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
+import type { LLMConfig } from 'thefactory-tools'
 
 function providerLabel(p?: string) {
   if (!p) return ''
@@ -112,26 +113,18 @@ function useOutsideClick(refs: React.RefObject<HTMLElement | null>[], onOutside:
   }, [refs, onOutside])
 }
 
-export type ModelChipProps = {
-  provider?: string
-  model?: string
-  className?: string
-  editable?: boolean // false by default
-  // New: allow consumer to control selection and handle picking without changing global active config
-  selectedConfigId?: string
-  onPickConfigId?: (configId: string) => void
-}
-
 function Picker({
   anchorEl,
   onClose,
   selectedConfigId,
   onPickConfigId,
+  recentConfigIds,
 }: {
   anchorEl: HTMLElement
   onClose: () => void
   selectedConfigId?: string
-  onPickConfigId?: (configId: string) => void
+  onPickConfigId: (configId: string) => void
+  recentConfigIds: string[]
 }) {
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [coords, setCoords] = useState<{
@@ -140,7 +133,7 @@ function Picker({
     minWidth: number
     side: 'top' | 'bottom'
   } | null>(null)
-  const { recentConfigs, activeConfigId, setActive } = useLLMConfig()
+  const { configs } = useLLMConfig()
   const { navigateView } = useNavigator()
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -157,6 +150,14 @@ function Picker({
 
   useOutsideClick([panelRef], onClose)
 
+  const recents: LLMConfig[] = React.useMemo(() => {
+    if (recentConfigIds && recentConfigIds.length) {
+      const map = new Map(configs.map((c) => [c.id, c] as const))
+      return recentConfigIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
+    }
+    return []
+  }, [recentConfigIds, configs])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!panelRef.current) return
@@ -167,20 +168,18 @@ function Picker({
       }
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault()
-        setActiveIndex((i) => (i + 1) % Math.max(1, recentConfigs.length + 1))
+        setActiveIndex((i) => (i + 1) % Math.max(1, recents.length + 1))
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault()
         setActiveIndex(
-          (i) =>
-            (i - 1 + Math.max(1, recentConfigs.length + 1)) % Math.max(1, recentConfigs.length + 1),
+          (i) => (i - 1 + Math.max(1, recents.length + 1)) % Math.max(1, recents.length + 1),
         )
       } else if (e.key === 'Enter') {
         e.preventDefault()
-        if (activeIndex < recentConfigs.length) {
-          const cfg = recentConfigs[activeIndex]
+        if (activeIndex < recents.length) {
+          const cfg = recents[activeIndex]
           if (cfg) {
-            if (onPickConfigId) onPickConfigId(cfg.id!)
-            else setActive(cfg.id!)
+            onPickConfigId(cfg.id!)
           }
           onClose()
         } else {
@@ -191,11 +190,9 @@ function Picker({
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [activeIndex, onClose, recentConfigs, setActive, onPickConfigId])
+  }, [activeIndex, onClose, recents, onPickConfigId, navigateView])
 
   if (!coords) return null
-
-  const activeId = selectedConfigId || activeConfigId
 
   return createPortal(
     <div
@@ -217,8 +214,8 @@ function Picker({
         e.preventDefault()
       }}
     >
-      {recentConfigs.map((cfg, i) => {
-        const isActive = cfg.id === activeId
+      {recents.map((cfg, i) => {
+        const isActive = cfg.id === selectedConfigId
         const dot = providerDotClasses(cfg.provider)
         return (
           <button
@@ -228,8 +225,7 @@ function Picker({
             className="standard-picker__item"
             onClick={(e) => {
               e.stopPropagation()
-              if (onPickConfigId) onPickConfigId(cfg.id!)
-              else setActive(cfg.id!)
+              onPickConfigId(cfg.id!)
               onClose()
             }}
             onMouseEnter={() => setActiveIndex(i)}
@@ -252,7 +248,7 @@ function Picker({
           navigateView('Settings')
           onClose()
         }}
-        onMouseEnter={() => setActiveIndex(recentConfigs.length)}
+        onMouseEnter={() => setActiveIndex(recents.length)}
       >
         <span className="standard-picker__label">Manage LLM Configurations…</span>
       </button>
@@ -261,42 +257,59 @@ function Picker({
   )
 }
 
+export type ModelChipProps = {
+  provider?: string
+  model?: string
+  className?: string
+  editable?: boolean // false by default
+  mode?: 'agentRun' | 'chat'
+}
+
 export default function ModelChip({
   provider,
   model,
   className,
   editable = false,
-  selectedConfigId,
-  onPickConfigId,
+  mode = 'agentRun',
 }: ModelChipProps) {
   const containerRef = useRef<HTMLSpanElement>(null)
   const [open, setOpen] = useState(false)
-  const { configs, activeConfig } = useLLMConfig()
+  const {
+    configs,
+    activeAgentRunConfig,
+    recentAgentRunConfigs,
+    setActiveAgentRun,
+    activeChatConfig,
+    recentChatConfigs,
+    setActiveChat,
+  } = useLLMConfig()
   const { navigateView } = useNavigator()
 
-  // Determine display based on props or selected id or active config
+  const setActiveId = useCallback(
+    (id: string) => (mode === 'chat' ? setActiveChat(id) : setActiveAgentRun(id)),
+    [mode, setActiveChat, setActiveAgentRun],
+  )
+  const activeConfig = useMemo(
+    () => (mode === 'chat' ? activeChatConfig : activeAgentRunConfig),
+    [mode, activeChatConfig, activeAgentRunConfig],
+  )
+  const recentConfigs = useMemo(
+    () => (mode === 'chat' ? recentChatConfigs : recentAgentRunConfigs),
+    [mode, recentAgentRunConfigs, recentChatConfigs],
+  )
+
   let prov = providerLabel(provider)
   let displayModel = model
 
-  const selectedCfg = selectedConfigId
-    ? configs.find((c) => c.id === selectedConfigId)
-    : undefined
-
-  if ((!prov || !displayModel) && selectedCfg) {
-    prov = providerLabel(selectedCfg.provider)
-    displayModel = selectedCfg.model
-  }
-
-  if ((!prov || !displayModel) && !selectedCfg) {
-    prov = providerLabel(activeConfig?.provider)
-    displayModel = displayModel || activeConfig?.model
+  if ((!prov || !displayModel) && activeConfig) {
+    prov = providerLabel(activeConfig.provider)
+    displayModel = activeConfig.model
   }
 
   const parts = [prov || undefined, displayModel || undefined].filter(Boolean)
   const label = parts.join(' · ')
   const title = label || (editable ? 'Select model' : 'Unknown model')
 
-  // No configs case: mirror AgentModelQuickSelect behavior
   if (editable && (!configs || configs.length === 0)) {
     return (
       <button
@@ -316,8 +329,10 @@ export default function ModelChip({
       ref={containerRef}
       className={[
         'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs',
-        'bg-neutral-100 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200',
-        'border-neutral-200 dark:border-neutral-700',
+        ' text-neutral-800  dark:text-neutral-200',
+        mode === 'chat'
+          ? 'bg-teal-500/20 border-teal-600 dark:border-teal-700  dark:bg-teal-800/60 '
+          : 'bg-neutral-100 border-neutral-200 dark:border-neutral-700  dark:bg-neutral-800/60 ',
         editable ? 'cursor-pointer hover:bg-neutral-100/80 dark:hover:bg-neutral-800' : '',
         'no-drag',
         className || '',
@@ -332,7 +347,6 @@ export default function ModelChip({
       }}
       onMouseDown={(e) => {
         if (!editable) return
-        // prevent accidental drag selection etc
         e.stopPropagation()
       }}
     >
@@ -356,8 +370,9 @@ export default function ModelChip({
         <Picker
           anchorEl={containerRef.current}
           onClose={() => setOpen(false)}
-          selectedConfigId={selectedConfigId}
-          onPickConfigId={onPickConfigId}
+          selectedConfigId={activeConfig?.id}
+          onPickConfigId={setActiveId}
+          recentConfigIds={recentConfigs.map((c) => c.id).filter((c) => c !== undefined)}
         />
       )}
     </>

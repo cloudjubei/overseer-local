@@ -6,10 +6,10 @@ import { useNavigator } from '../../../navigation/Navigator'
 export default function LLMSettings() {
   const {
     configs,
-    activeConfigId,
+    activeAgentRunConfigId,
     activeChatConfigId,
     removeConfig,
-    setActive,
+    setActiveAgentRun,
     setActiveChat,
   } = useLLMConfig()
   const { openModal } = useNavigator()
@@ -36,7 +36,7 @@ export default function LLMSettings() {
             <div className="min-w-0">
               <div className="font-medium truncate flex items-center gap-2">
                 <span className="truncate">{cfg.name}</span>
-                {activeConfigId === cfg.id ? (
+                {activeAgentRunConfigId === cfg.id ? (
                   <span className="badge badge--soft badge--done">Active</span>
                 ) : null}
                 {activeChatConfigId === cfg.id ? (
@@ -48,8 +48,8 @@ export default function LLMSettings() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {activeConfigId !== cfg.id && (
-                <Button onClick={() => setActive(cfg.id!)}>Set Active</Button>
+              {activeAgentRunConfigId !== cfg.id && (
+                <Button onClick={() => setActiveAgentRun(cfg.id!)}>Set Active</Button>
               )}
               {activeChatConfigId !== cfg.id && (
                 <Button variant="outline" onClick={() => setActiveChat(cfg.id!)}>

@@ -555,7 +555,7 @@
     },
     {
       "id": "84c70df2-1ba8-4e95-b310-d0cae565e4dd",
-      "status": "-",
+      "status": "+",
       "title": "The chat model selection isn't saved - it always uses the agent run one at start",
       "description": "In the @src/renderer/src/components/chat/ChatSidebar.tsx there's a @src/renderer/src/components/agents/ModelChip.tsx that allows the selection of which LLM config to use. This needs to be persisted, with a recents list persisted too.\nWhenever this ModelChip is displayed, it has to use the chat's recent list and the chat's llm selection. There's also a general Agent Run LLM config - that's for running agents elsewhere and should not be used here.",
       "context": [
@@ -564,7 +564,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-02T15:45:39.668Z",
-      "updatedAt": "2025-10-02T15:45:39.668Z"
+      "updatedAt": "2025-10-02T15:50:54.736Z",
+      "completedAt": "2025-10-02T15:50:54.736Z"
     }
   ],
   "featureIdToDisplayIndex": {
