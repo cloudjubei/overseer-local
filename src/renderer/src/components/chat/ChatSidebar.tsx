@@ -6,7 +6,12 @@ import { factoryToolsService } from '../../services/factoryToolsService'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import type { ChatContext, ChatMessage, ChatContextArguments, ChatSettings } from 'thefactory-tools'
+import type {
+  ChatContext,
+  ChatMessage,
+  ChatContextArguments,
+  CompletionSettings,
+} from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
 import { IconSettings, IconChevron } from '../ui/Icons'
@@ -23,6 +28,7 @@ export type ChatSidebarProps = {
   // Controls whether ChatSidebar renders a left border when collapsible; default true
   showLeftBorder?: boolean
 }
+type ToolToggle = { name: string; description: string; available: boolean; autoCall: boolean }
 
 export default function ChatSidebar({
   context,
@@ -34,11 +40,13 @@ export default function ChatSidebar({
   const {
     getChat,
     sendMessage,
-    getSettingsForContext,
-    updateSettingsForContext,
-    resetSettingsForContext,
-    getSettingsPrompt,
+    getSettings,
+    resetSettings,
+    updateCompletionSettings,
     getDefaultPrompt,
+    getSettingsPrompt,
+    updateSettingsPrompt,
+    resetSettingsPrompt,
   } = useChats()
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
@@ -50,15 +58,12 @@ export default function ChatSidebar({
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
 
-  const currentSettings = useMemo(
-    () => getSettingsForContext(context),
-    [getSettingsForContext, context],
-  )
-  const [availableTools, setAvailableTools] = useState<string[] | undefined>(
-    currentSettings?.availableTools,
-  )
-  const [autoCallTools, setAutoCallTools] = useState<string[] | undefined>(
-    currentSettings?.autoCallTools,
+  const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
+  const persistSettings = useCallback(
+    async (patch: Partial<CompletionSettings>) => {
+      await updateCompletionSettings(context, patch)
+    },
+    [context, updateCompletionSettings],
   )
 
   useEffect(() => {
@@ -83,101 +88,106 @@ export default function ChatSidebar({
 
   const [draftPrompt, setDraftPrompt] = useState<string>('')
 
-  useEffect(() => {
-    setAvailableTools(currentSettings?.availableTools)
-    setAutoCallTools(currentSettings?.autoCallTools)
-  }, [currentSettings])
-
-  const persistSettings = useCallback(
-    async (patch: Partial<ChatSettings>) => {
-      await updateSettingsForContext(context, patch)
-    },
-    [context, updateSettingsForContext],
-  )
-
   const handleSend = useCallback(
     async (message: string, attachments: string[]) => {
-      if (!selectedConfig) return
+      if (!selectedConfig || !currentSettings) return
       tryResumeAudioContext()
       playSendSound()
-      await sendMessage(context, message, selectedConfig, attachments)
+      await sendMessage(context, message, currentSettings, selectedConfig, attachments)
     },
-    [context, selectedConfig, sendMessage],
+    [context, selectedConfig, currentSettings, sendMessage],
   )
 
   const handlePickConfig = useCallback(async (configId: string) => {
     setSelectedConfigId(configId)
   }, [])
 
-  type ToolToggle = { name: string; description: string; available: boolean; autoCall: boolean }
-  const [tools, setTools] = useState<ToolToggle[] | undefined>(undefined)
-  const projectId = context.projectId
+  const [tools, setTools] = useState<ToolToggle[]>([])
+
   useEffect(() => {
-    let isMounted = true
     async function loadTools() {
-      if (!projectId) {
-        if (isMounted) setTools([])
+      const availableTools = currentSettings?.completionSettings.availableTools
+      const autoCallTools = currentSettings?.completionSettings.autoCallTools
+      if (!availableTools || !autoCallTools || !context.projectId) {
+        setTools([])
         return
       }
       try {
-        const list = await factoryToolsService.listTools(projectId)
-        const allowed = availableTools
-        const auto = autoCallTools
-        const mapped: ToolToggle[] = list.map((t) => {
+        const allTools = await factoryToolsService.listTools(context.projectId)
+
+        const availableSet = new Set(availableTools)
+        const autoSet = new Set(autoCallTools)
+
+        const mapped: ToolToggle[] = allTools.map((t) => {
           const toolName = t.function.name
-          const isAvail = !allowed ? true : allowed.includes(toolName)
-          const isAuto = isAvail && !!auto && auto.includes(toolName)
           return {
             name: toolName,
             description: t.function.description,
-            available: isAvail,
-            autoCall: isAuto,
+            available: availableSet.has(toolName),
+            autoCall: autoSet.has(toolName),
           }
         })
-        if (isMounted) setTools(mapped)
+        setTools(mapped)
       } catch (e) {
-        if (isMounted) setTools([])
+        setTools([])
       }
     }
     loadTools()
-    return () => {
-      isMounted = false
-    }
-  }, [projectId, availableTools, autoCallTools])
+  }, [context.projectId])
 
   const toggleAvailable = useCallback(
-    async (toolName: string) => {
-      const currentAllowed = availableTools || tools?.map((t) => t.name) || []
-      const allowedSet = new Set(currentAllowed)
-      const willDisable = allowedSet.has(toolName)
-      if (willDisable) allowedSet.delete(toolName)
-      else allowedSet.add(toolName)
-      const nextAvailable = Array.from(allowedSet)
-      setAvailableTools(nextAvailable)
+    async (tool: ToolToggle) => {
+      const availableTools = currentSettings?.completionSettings.availableTools
+      const autoCallTools = currentSettings?.completionSettings.autoCallTools
+      if (!availableTools || !autoCallTools) {
+        return
+      }
+      const newTool = { ...tool, available: !tool.available }
+      setTools((prev) => prev.map((t) => (t.name === tool.name ? newTool : t)))
 
-      if (willDisable) {
-        const currentAuto = autoCallTools || []
-        const nextAuto = currentAuto.filter((n) => n !== toolName)
-        setAutoCallTools(nextAuto)
-        await persistSettings({ availableTools: nextAvailable, autoCallTools: nextAuto })
+      const availableSet = new Set(availableTools)
+      const autoSet = new Set(autoCallTools)
+
+      if (tool.available) {
+        availableSet.delete(tool.name)
+        autoSet.delete(tool.name)
+        await persistSettings({
+          availableTools: Array.from(availableSet),
+          autoCallTools: Array.from(autoSet),
+        })
       } else {
-        await persistSettings({ availableTools: nextAvailable })
+        availableSet.add(tool.name)
+        await persistSettings({ availableTools: Array.from(availableSet) })
       }
     },
-    [availableTools, autoCallTools, tools, persistSettings],
+    [
+      tools,
+      persistSettings,
+      currentSettings?.completionSettings.availableTools,
+      currentSettings?.completionSettings.autoCallTools,
+    ],
   )
 
   const toggleAutoCall = useCallback(
-    async (toolName: string) => {
-      const current = autoCallTools || []
-      const set = new Set(current)
-      if (set.has(toolName)) set.delete(toolName)
-      else set.add(toolName)
-      const next = Array.from(set)
-      setAutoCallTools(next)
-      await persistSettings({ autoCallTools: next })
+    async (tool: ToolToggle) => {
+      if (!tool.available) return
+      const autoCallTools = currentSettings?.completionSettings.autoCallTools
+      if (!autoCallTools) {
+        return
+      }
+      const newTool = { ...tool, autoCall: !tool.autoCall }
+      setTools((prev) => prev.map((t) => (t.name === tool.name ? newTool : t)))
+
+      const autoSet = new Set(autoCallTools)
+
+      if (tool.autoCall) {
+        autoSet.delete(tool.name)
+      } else {
+        autoSet.add(tool.name)
+      }
+      await persistSettings({ autoCallTools: Array.from(autoSet) })
     },
-    [autoCallTools, persistSettings],
+    [tools, persistSettings, currentSettings?.completionSettings.autoCallTools],
   )
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -247,28 +257,27 @@ export default function ChatSidebar({
     getDefaultPrompt,
   ])
 
-  // Seed draft prompt whenever effective or settings change
+  //TODO:
   useEffect(() => {
     const custom = currentSettings?.systemPrompt
-    setDraftPrompt(custom && custom.length > 0 ? custom : effectivePrompt)
-  }, [effectivePrompt, currentSettings])
+    setDraftPrompt(custom ? custom : effectivePrompt)
+  }, [effectivePrompt, currentSettings?.systemPrompt])
 
   // Build messages array with system prompt as the first message when present
   const messagesWithSystem: ChatMessage[] = useMemo(() => {
     const original = chat?.chat.messages || []
-    if (original.length > 0) return original
-    const systemMsg: ChatMessage | null = effectivePrompt
-      ? ({
-          completionMesage: {
-            role: 'system',
-            content: effectivePrompt,
-            files: [],
-          },
-        } as ChatMessage)
-      : null
-
-    if (!systemMsg) return original
-    return [systemMsg, ...original]
+    if (original.length > 0 || !effectivePrompt) return original
+    const systemMessage: ChatMessage = {
+      completionMessage: {
+        role: 'system',
+        content: effectivePrompt,
+        usage: { promptTokens: 0, completionTokens: 0 },
+        askedAt: '',
+        completedAt: '',
+        durationMs: 0,
+      },
+    }
+    return [systemMessage, ...original]
   }, [chat?.chat.messages, effectivePrompt])
 
   const shouldBorder = isCollapsible && (showLeftBorder ?? true)
@@ -346,7 +355,7 @@ export default function ChatSidebar({
                     <button
                       className="btn"
                       onClick={async () => {
-                        await persistSettings({ systemPrompt: draftPrompt })
+                        await updateSettingsPrompt(context, draftPrompt)
                       }}
                     >
                       Save prompt
@@ -354,7 +363,7 @@ export default function ChatSidebar({
                     <button
                       className="btn-secondary"
                       onClick={async () => {
-                        await resetSettingsForContext(context)
+                        await resetSettingsPrompt(context)
                       }}
                     >
                       Reset to defaults
@@ -389,7 +398,7 @@ export default function ChatSidebar({
                                   </span>
                                   <Switch
                                     checked={tool.available}
-                                    onCheckedChange={() => toggleAvailable(tool.name)}
+                                    onCheckedChange={() => toggleAvailable(tool)}
                                     label=""
                                   />
                                 </div>
@@ -399,7 +408,7 @@ export default function ChatSidebar({
                                   </span>
                                   <Switch
                                     checked={tool.available ? tool.autoCall : false}
-                                    onCheckedChange={() => toggleAutoCall(tool.name)}
+                                    onCheckedChange={() => toggleAutoCall(tool)}
                                     label=""
                                     disabled={!tool.available}
                                   />
@@ -418,7 +427,6 @@ export default function ChatSidebar({
         </div>
       </header>
 
-      {/* Middle content area: scrollable; ensures header and footer remain visible */}
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {!isConfigured && (
           <div
@@ -438,11 +446,9 @@ export default function ChatSidebar({
           </div>
         )}
 
-        {/* Messages list consumes remaining space and handles its own scrolling */}
         <MessageList chatId={chat?.key} messages={messagesWithSystem} isThinking={isThinking} />
       </div>
 
-      {/* Bottom input area: max 40% height, scrolls internally if needed to remain visible */}
       <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
         <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isConfigured} />
       </div>

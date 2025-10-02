@@ -8,16 +8,21 @@ import type {
   ChatsSettings,
   ChatSettings,
   ChatContextArguments,
+  CompletionMessage,
+  CompletionSettings,
 } from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
 import { projectsService } from '../services/projectsService'
+import { useActiveProject } from './ProjectContext'
+import { completionService } from '@renderer/services/completionService'
 
 export type ChatState = {
   key: string
   chat: Chat
   isLoading: boolean
   isThinking: boolean
+  abortController?: AbortController
 }
 
 export type ChatsContextValue = {
@@ -27,8 +32,10 @@ export type ChatsContextValue = {
   sendMessage: (
     context: ChatContext,
     message: string,
+    settings: ChatSettings,
     config: LLMConfig,
-    attachments?: string[],
+    files?: string[],
+    abortSignal?: AbortSignal,
   ) => Promise<void>
 
   getChat: (context: ChatContext) => Promise<ChatState>
@@ -37,15 +44,18 @@ export type ChatsContextValue = {
 
   // Settings APIs
   allChatSettings: ChatsSettings | undefined
-  getSettingsForContext: (context: ChatContext) => ChatSettings | undefined
-  updateSettingsForContext: (
+  getSettings: (context: ChatContext) => ChatSettings | undefined
+  resetSettings: (context: ChatContext) => Promise<ChatSettings | undefined>
+
+  updateCompletionSettings: (
     context: ChatContext,
-    patch: Partial<ChatSettings>,
+    patch: Partial<CompletionSettings>,
   ) => Promise<ChatSettings | undefined>
-  resetSettingsForContext: (context: ChatContext) => Promise<ChatSettings | undefined>
 
   getDefaultPrompt: (chatContext: ChatContext) => Promise<string>
   getSettingsPrompt: (contextArguments: ChatContextArguments) => Promise<string>
+  updateSettingsPrompt: (context: ChatContext, prompt: string) => Promise<string | undefined>
+  resetSettingsPrompt: (context: ChatContext) => Promise<string | undefined>
 }
 
 const ChatsContext = createContext<ChatsContextValue | null>(null)
@@ -56,8 +66,6 @@ function extractSettingsForContext(
 ): ChatSettings | undefined {
   if (!all || !context) return undefined
   switch (context.type) {
-    case 'GENERAL':
-      return all.GENERAL
     case 'PROJECT':
       return all.PROJECT
     case 'STORY':
@@ -71,11 +79,12 @@ function extractSettingsForContext(
     case 'STORY_TOPIC':
       return all.STORY_TOPIC[context.storyTopic!]
     default:
-      return undefined
+      return all.GENERAL
   }
 }
 
 export function ChatsProvider({ children }: { children: React.ReactNode }) {
+  const { projectId } = useActiveProject()
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
   const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
@@ -135,10 +144,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           delete newChats[key]
         } else if (chatUpdate.type === 'change') {
           newChats[key] = {
-            ...(newChats[key] || {}),
+            ...(newChats[key] || { isLoading: false, isThinking: false }),
             chat: chatUpdate.chat!,
-            isLoading: false,
-            isThinking: false,
           }
         } else {
           newChats[key] = { key, chat: chatUpdate.chat!, isLoading: false, isThinking: false }
@@ -165,33 +172,63 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const sendMessage = useCallback(
-    async (context: ChatContext, message: string, config: LLMConfig, files?: string[]) => {
+    async (
+      context: ChatContext,
+      message: string,
+      settings: ChatSettings,
+      config: LLMConfig,
+      files?: string[],
+    ) => {
+      const completionMessage: CompletionMessage = {
+        role: 'user',
+        content: message,
+        files: files && files.length ? files : undefined,
+      }
+
+      // Optimistic local update with the user message
       const key = getChatContextPath(context)
       const chatState = await getChat(context)
 
-      const newMessages: ChatMessage[] = [
-        {
-          completionMesage: {
-            role: 'user',
-            content: message,
-            files: files && files.length ? files : undefined,
-          },
-        },
-      ]
+      //DO NOT ALLOW MULTI MESSAGES WHILE AGENT IS THINKING
+      if (chatState.isThinking) return
 
-      // Optimistic local update with the user message
+      const now = new Date().toISOString()
+      const m: ChatMessage = {
+        completionMessage: {
+          ...completionMessage,
+          usage: { promptTokens: 0, completionTokens: 0 },
+          askedAt: now,
+          completedAt: now,
+          durationMs: 0,
+        },
+      }
+      const chatMessages = [...chatState.chat.messages, m]
+      const abortController = new AbortController()
       updateChatState(key, {
-        chat: { ...chatState.chat, messages: [...chatState.chat.messages, ...newMessages] },
+        chat: {
+          ...chatState.chat,
+          messages: chatMessages,
+        },
         isThinking: true,
+        abortController,
       })
 
+      const chatProjectId = context.projectId ?? projectId
       try {
-        await chatsService.getCompletion(context, newMessages, config)
+        await completionService.getCompletionTools(
+          chatProjectId,
+          context,
+          completionMessage,
+          settings.systemPrompt,
+          settings.completionSettings,
+          config,
+          abortController.signal,
+        )
       } finally {
         updateChatState(key, { isThinking: false })
       }
     },
-    [getChat, updateChatState],
+    [projectId, getChat, updateChatState],
   )
 
   const restartChat = useCallback(
@@ -223,31 +260,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     await chatsService.deleteChat(context)
   }, [])
 
-  const getSettingsForContext = useCallback(
+  const getSettings = useCallback(
     (context: ChatContext): ChatSettings | undefined => {
       return extractSettingsForContext(allChatSettings, context)
     },
     [allChatSettings],
   )
 
-  const updateSettingsForContext = useCallback(
-    async (
-      context: ChatContext,
-      patch: Partial<ChatSettings>,
-    ): Promise<ChatSettings | undefined> => {
-      try {
-        const updated = await chatsService.updateChatSettings(context, patch)
-        setAllChatSettings(updated)
-        return extractSettingsForContext(updated, context)
-      } catch (e) {
-        console.error('Failed to update chat settings', e)
-        return extractSettingsForContext(allChatSettings, context)
-      }
-    },
-    [allChatSettings],
-  )
-
-  const resetSettingsForContext = useCallback(
+  const resetSettings = useCallback(
     async (context: ChatContext): Promise<ChatSettings | undefined> => {
       try {
         const updated = await chatsService.resetChatSettings(context)
@@ -255,6 +275,23 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         return extractSettingsForContext(updated, context)
       } catch (e) {
         console.error('Failed to reset chat settings', e)
+        return extractSettingsForContext(allChatSettings, context)
+      }
+    },
+    [allChatSettings],
+  )
+
+  const updateCompletionSettings = useCallback(
+    async (
+      context: ChatContext,
+      patch: Partial<CompletionSettings>,
+    ): Promise<ChatSettings | undefined> => {
+      try {
+        const updated = await chatsService.updateChatCompletionSettings(context, patch)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)
+      } catch (e) {
+        console.error('Failed to update chat settings', e)
         return extractSettingsForContext(allChatSettings, context)
       }
     },
@@ -281,6 +318,32 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     },
     [],
   )
+  const updateSettingsPrompt = useCallback(
+    async (context: ChatContext, prompt: string): Promise<string | undefined> => {
+      try {
+        const updated = await chatsService.updateSettingsPrompt(context, prompt)
+        setAllChatSettings(updated)
+        const s = extractSettingsForContext(updated, context)
+        return s?.systemPrompt
+      } catch (e) {
+        console.error('Failed to get settings prompt', e)
+      }
+    },
+    [],
+  )
+  const resetSettingsPrompt = useCallback(
+    async (context: ChatContext): Promise<string | undefined> => {
+      try {
+        const updated = await chatsService.resetSettingsPrompt(context)
+        setAllChatSettings(updated)
+        const s = extractSettingsForContext(updated, context)
+        return s?.systemPrompt
+      } catch (e) {
+        console.error('Failed to get settings prompt', e)
+      }
+    },
+    [],
+  )
 
   const value = useMemo<ChatsContextValue>(
     () => ({
@@ -291,11 +354,13 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       restartChat,
       deleteChat,
       allChatSettings,
-      getSettingsForContext,
-      updateSettingsForContext,
-      resetSettingsForContext,
+      getSettings,
+      resetSettings,
+      updateCompletionSettings,
       getDefaultPrompt,
       getSettingsPrompt,
+      updateSettingsPrompt,
+      resetSettingsPrompt,
     }),
     [
       chats,
@@ -305,11 +370,13 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       restartChat,
       deleteChat,
       allChatSettings,
-      getSettingsForContext,
-      updateSettingsForContext,
-      resetSettingsForContext,
+      getSettings,
+      resetSettings,
+      updateCompletionSettings,
       getDefaultPrompt,
       getSettingsPrompt,
+      updateSettingsPrompt,
+      resetSettingsPrompt,
     ],
   )
   return <ChatsContext.Provider value={value}>{children}</ChatsContext.Provider>

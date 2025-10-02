@@ -7,23 +7,13 @@ import TypewriterText from '../ui/TypewriterText'
 import ToolCallCard from './ToolCallCard'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
-import Markdown, { MarkdownMessage } from '../ui/Markdown'
-import { ChatMessage } from 'thefactory-tools'
+import Markdown from '../ui/Markdown'
+import { ChatMessage, ToolCall } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
   isFirstInGroup?: boolean
-}
-
-function parseAssistant(content: string): { thoughts?: string; tool_calls?: any[] } | null {
-  try {
-    const obj = JSON.parse(content)
-    if (obj && typeof obj === 'object') return obj as any
-    return null
-  } catch {
-    return null
-  }
 }
 
 function parseToolResultsObjects(
@@ -53,26 +43,28 @@ export default function MessageList({
 }) {
   const { filesByPath } = useFiles()
 
-  // Enhanced messages to group and mark model changes
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
-    return messages.map((msg, index) => {
+    return messages.map((m, index) => {
       let showModel = false
-      if (msg.completionMesage.role === 'assistant' && msg.model) {
+      if (m.completionMessage.role === 'assistant' && m.model) {
         const prevAssistant = [...messages.slice(0, index)]
           .reverse()
-          .find((m) => m.completionMesage.role === 'assistant')
-        showModel = !prevAssistant || prevAssistant.model !== msg.model
+          .find((m) => m.completionMessage.role === 'assistant')
+        showModel = !prevAssistant || prevAssistant.model !== m.model
+      }
+      let effectiveMessage = { ...m }
+      if (m.toolResults?.length) {
+        effectiveMessage.completionMessage.role = 'system'
       }
       const prev = messages[index - 1]
       const isFirstInGroup =
         !prev ||
-        prev.completionMesage.role !== msg.completionMesage.role ||
-        msg.completionMesage.role === 'system'
-      return { ...msg, showModel, isFirstInGroup }
+        prev.completionMessage.role !== effectiveMessage.completionMessage.role ||
+        effectiveMessage.completionMessage.role === 'system'
+      return { ...effectiveMessage, showModel, isFirstInGroup }
     })
   }, [messages])
 
-  // Sounds: play receive only when a new assistant message arrives and not on chat switch
   const prevCountRef = useRef<number>(messages.length)
   const lastChatIdRef = useRef<string | undefined>(chatId)
   useEffect(() => {
@@ -84,7 +76,7 @@ export default function MessageList({
     }
     if (messages.length > prevCountRef.current) {
       const last = messages[messages.length - 1]
-      if (last?.completionMesage.role === 'assistant' && !last.error) {
+      if (last?.completionMessage.role === 'assistant' && !last.error) {
         playReceiveSound()
       }
     }
@@ -147,7 +139,7 @@ export default function MessageList({
     if (messages.length > prevLenForAnimRef.current) {
       const lastIdx = messages.length - 1
       const lastMsg = messages[lastIdx]
-      if (lastMsg && lastMsg.completionMesage.role === 'assistant' && !lastMsg.error) {
+      if (lastMsg && lastMsg.completionMessage.role === 'assistant' && !lastMsg.error) {
         setAnimateAssistantIdx(lastIdx)
       } else {
         setAnimateAssistantIdx(null)
@@ -162,7 +154,7 @@ export default function MessageList({
   useEffect(() => {
     const increased = messages.length > prevLenForUserAnimRef.current
     const last = messages[messages.length - 1]
-    const isNewUser = increased && last && last.completionMesage.role === 'user'
+    const isNewUser = increased && last && last.completionMessage.role === 'user'
 
     if (animationChatChangedRef.current) {
       prevLenForUserAnimRef.current = messages.length
@@ -258,14 +250,14 @@ export default function MessageList({
     return () => ro.disconnect()
   }, [])
 
-  const systemMessage = useMemo(() => {
-    return enhancedMessages.length === 1 && enhancedMessages[0].completionMesage.role === 'system'
+  const systemPromptMessage = useMemo(() => {
+    return enhancedMessages.length === 1 && enhancedMessages[0].completionMessage.role === 'system'
       ? enhancedMessages[0]
       : undefined
   }, [enhancedMessages])
   const messagesToDisplay = useMemo(() => {
-    return systemMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
-  }, [enhancedMessages, systemMessage])
+    return systemPromptMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
+  }, [enhancedMessages, systemPromptMessage])
 
   return (
     <div
@@ -273,7 +265,7 @@ export default function MessageList({
       className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
       onScroll={handleScroll}
     >
-      {systemMessage && (
+      {systemPromptMessage && (
         <div className="flex justify-center">
           <div
             className={[
@@ -287,13 +279,13 @@ export default function MessageList({
             }}
             aria-label="System prompt"
           >
-            {/* <MarkdownMessage text={systemMessage.completionMesage.content} /> */}
-            <Markdown text={systemMessage.completionMesage.content} />
+            {/* <MarkdownMessage text={systemMessage.completionMessage.content} /> */}
+            <Markdown text={systemPromptMessage.completionMessage.content} />
           </div>
         </div>
       )}
 
-      {(enhancedMessages.length === 0 || systemMessage != undefined) && !isThinking && (
+      {(enhancedMessages.length === 0 || systemPromptMessage != undefined) && !isThinking && (
         <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
           <div className="text-[18px] font-medium">Start chatting about the project</div>
           <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
@@ -322,21 +314,12 @@ export default function MessageList({
             )
           }
 
-          const isUser = msg.completionMesage.role === 'user'
+          const isSystem = msg.completionMessage.role === 'system' //system messages here indicate tool results
+          const isUser = msg.completionMessage.role === 'user'
           const isNewUserBubble =
             isUser &&
             index === enhancedMessages.length - 1 &&
             messages.length > prevLenForUserAnimRef.current
-
-          const parsedAssistant = !isUser ? parseAssistant(msg.completionMesage.content) : null
-          const hasToolCalls = !!parsedAssistant?.tool_calls?.length
-          let toolResults: Array<{ name: string; result: any; durationMs?: number }> = []
-          if (hasToolCalls) {
-            const nextMsg = messages[index + 1]
-            if (nextMsg && nextMsg.completionMesage.role === 'user') {
-              toolResults = parseToolResultsObjects(nextMsg.completionMesage.content)
-            }
-          }
 
           return (
             <div
@@ -351,20 +334,22 @@ export default function MessageList({
                   'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
                   isUser
                     ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
-                    : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                    : isSystem
+                      ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                      : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
                 ].join(' ')}
                 aria-hidden="true"
               >
-                {isUser ? 'You' : 'AI'}
+                {isUser ? 'You' : isSystem ? 'TOOLS' : 'AI'}
               </div>
 
               <div
                 className={[
                   'max-w-[85%] min-w-0 flex flex-col',
-                  isUser ? 'items-end' : 'items-start',
+                  isUser ? 'items-end' : isSystem ? 'items-center' : 'items-start',
                 ].join(' ')}
               >
-                {!isUser && msg.showModel && msg.model && (
+                {msg.showModel && msg.model && (
                   <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
                     {msg.model.model}
@@ -376,27 +361,29 @@ export default function MessageList({
                     'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                     isUser
                       ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                      : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                      : isSystem
+                        ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                        : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
                     msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
                     'chat-bubble',
                     isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
                   ].join(' ')}
                 >
                   {isUser ? (
-                    <RichText text={msg.completionMesage.content} />
+                    <RichText text={msg.completionMessage.content} />
                   ) : index === animateAssistantIdx ? (
-                    <TypewriterText text={msg.completionMesage.content} renderer="markdown" />
+                    <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
                   ) : (
-                    <Markdown text={msg.completionMesage.content} />
+                    !isSystem && <Markdown text={msg.completionMessage.content} />
                   )}
                 </div>
 
-                {!isUser && hasToolCalls && (
+                {!!msg.toolCalls && (
                   <div className="mt-2 w-full space-y-2">
-                    {parsedAssistant!.tool_calls!.map((call: any, i: number) => {
-                      const name = call.tool_name || call.name || 'tool'
+                    {msg.toolCalls.map((call: ToolCall, i: number) => {
+                      const name = call.name
                       const args = call.arguments ?? {}
-                      const res = toolResults[i]
+                      const res = msg.toolResults?.[i]
                       return (
                         <ToolCallCard
                           key={`tool-${index}-${i}`}
@@ -411,14 +398,14 @@ export default function MessageList({
                   </div>
                 )}
 
-                {msg.completionMesage.files && msg.completionMesage.files.length > 0 && (
+                {msg.completionMessage.files && msg.completionMessage.files.length > 0 && (
                   <div
                     className={[
                       'mt-1 flex flex-wrap gap-1',
                       isUser ? 'justify-end' : 'justify-start',
                     ].join(' ')}
                   >
-                    {msg.completionMesage.files.map((path, i) => {
+                    {msg.completionMessage.files.map((path, i) => {
                       const meta = filesByPath[path]
                       const name = meta?.name || path.split('/').pop() || path
                       const type = meta?.type || inferFileType(path)

@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "?",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2054,16 +2054,6 @@
       "completedAt": "2025-09-30T00:24:43.193Z"
     },
     {
-      "id": "19d8f95a-353c-4fc0-a1e6-07d39861c4bc",
-      "status": "?",
-      "title": "Double story entries",
-      "description": "TODO",
-      "context": [],
-      "blockers": [],
-      "createdAt": "2025-09-30T10:27:06.169Z",
-      "updatedAt": "2025-09-30T13:16:32.808Z"
-    },
-    {
       "id": "bb76a798-869f-45ba-9902-25812ab58166",
       "status": "+",
       "title": "Test tools allow running e2e tests",
@@ -2229,9 +2219,9 @@
     "31bad08b-59b0-468b-a154-7814251bd4cb": 133,
     "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134,
     "bb76a798-869f-45ba-9902-25812ab58166": 135,
-    "19d8f95a-353c-4fc0-a1e6-07d39861c4bc": 136,
-    "fb5a75f9-a460-4382-b369-420836ca265e": 137
+    "fb5a75f9-a460-4382-b369-420836ca265e": 136
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-09-29T14:40:07.339Z"
+  "updatedAt": "2025-10-01T00:34:27.858Z",
+  "completedAt": "2025-10-01T00:34:27.858Z"
 }

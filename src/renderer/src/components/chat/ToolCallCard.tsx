@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import JsonView from '../ui/JsonView'
+import { ToolResultNew } from 'thefactory-tools'
 
 function isLargeJson(value: any) {
   try {
@@ -54,7 +55,7 @@ export default function ToolCallCard({
   index: number
   toolName: string
   args: any
-  result?: any
+  result?: ToolResultNew
   durationMs?: number
 }) {
   const isHeavy =

@@ -64,13 +64,35 @@ const STORIES_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURES_REORDER, { projectId, storyId, payload }),
 }
 
-const CHATS_API = {
-  getCompletion: (context, newMessages, config) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_COMPLETION, {
-      context,
-      newMessages,
+const COMPLETION_API = {
+  getCompletion: (messages, systemPrompt, config, abortSignal) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_SIMPLE, {
+      messages,
+      systemPrompt,
       config,
+      abortSignal,
     }),
+  getCompletionTools: (
+    projectId,
+    chatContext,
+    completionMessage,
+    systemPrompt,
+    settings,
+    config,
+    abortSignal,
+  ) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_TOOLS, {
+      projectId,
+      chatContext,
+      completionMessage,
+      systemPrompt,
+      settings,
+      config,
+      abortSignal,
+    }),
+}
+
+const CHATS_API = {
   // listModels: (config) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST_MODELS, { config }),
   subscribe: (callback) => {
     const listener = (_event, payload) => callback(payload)
@@ -85,15 +107,19 @@ const CHATS_API = {
   deleteChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { chatContext }),
 
   getChatSettings: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_SETTINGS),
-  updateChatSettings: (chatContext, patch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE_SETTINGS, { chatContext, patch }),
   resetChatSettings: (chatContext) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_RESET_SETTINGS, { chatContext }),
+  updateChatCompletionSettings: (chatContext, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE_COMPLETION_SETTINGS, { chatContext, patch }),
 
-  getSettingsPrompt: (contextArguments) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_SETTINGS_PROMPT, { contextArguments }),
   getDefaultPrompt: (chatContext) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_DEFAULT_PROMPT, { chatContext }),
+  getSettingsPrompt: (contextArguments) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_SETTINGS_PROMPT, { contextArguments }),
+  updateSettingsPrompt: (chatContext, prompt) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE_SETTINGS_PROMPT, { chatContext, prompt }),
+  resetSettingsPrompt: (chatContext) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_RESET_SETTINGS_PROMPT, { chatContext }),
 }
 
 const NOTIFICATIONS_API = {
@@ -288,6 +314,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
     contextBridge.exposeInMainWorld('filesService', FILES_API)
     contextBridge.exposeInMainWorld('chatsService', CHATS_API)
+    contextBridge.exposeInMainWorld('completionService', COMPLETION_API)
     contextBridge.exposeInMainWorld('notificationsService', NOTIFICATIONS_API)
     contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API)
     contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)

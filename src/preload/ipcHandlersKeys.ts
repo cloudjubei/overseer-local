@@ -10,7 +10,6 @@ const IPC_HANDLER_KEYS = {
 
   // Chats
   CHATS_SUBSCRIBE: 'chats:subscribe',
-  CHATS_COMPLETION: 'chats:completion',
   CHATS_LIST: 'chats:list',
   CHATS_GET: 'chats:get',
   CHATS_CREATE: 'chats:create',
@@ -18,11 +17,18 @@ const IPC_HANDLER_KEYS = {
   CHATS_DELETE: 'chats:delete',
 
   CHATS_GET_SETTINGS: 'chats:get-settings',
-  CHATS_UPDATE_SETTINGS: 'chats:update-settings',
   CHATS_RESET_SETTINGS: 'chats:reset-settings',
+
+  CHATS_UPDATE_COMPLETION_SETTINGS: 'chats:update-completion-settings',
 
   CHATS_GET_DEFAULT_PROMPT: 'chats:get-default-prompt',
   CHATS_GET_SETTINGS_PROMPT: 'chats:get-settings-prompt',
+  CHATS_UPDATE_SETTINGS_PROMPT: 'chats:update-settings-prompt',
+  CHATS_RESET_SETTINGS_PROMPT: 'chats:reset-settings-prompt',
+
+  // Completion
+  COMPLETION_TOOLS: 'completion:tools',
+  COMPLETION_SIMPLE: 'completion:simple',
 
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',
