@@ -1,0 +1,143 @@
+Of course. Let's break down the "Git Monitor and version control in-app" story. This is a powerful but complex feature, so clarifying the details is crucial.
+
+Here is a detailed analysis focusing on your requests.
+
+### 1. Clarification of Goals
+
+The overall goal is to create a seamless feedback loop between the work being done by an "Agent" (likely a development process) and the "Overseer Local" application. This starts with simple status synchronization and evolves into a full-fledged Git integration for monitoring and merging feature branches directly from the UI.
+
+This can be broken down into three distinct, incremental phases:
+1.  **MVP (Local File Sync):** Automatically update story statuses in Overseer Local when the Agent modifies local story files.
+2.  **Phase 2 (Git Read-Only Monitoring):** Detect new commits on feature branches, parse them for story information, and update the story in Overseer Local with data from the commit.
+3.  **Phase 3 (Git Write/Action):** Allow the user to perform a `git merge` operation on a detected feature branch with a single click in the UI.
+
+---
+
+### 2. Acceptance Criteria
+
+Here are specific, testable acceptance criteria for each phase.
+
+#### Phase 1: Local File Sync (MVP)
+*   **Given** the Overseer Local application is running.
+*   **And** it is monitoring a project directory where an Agent operates.
+*   **When** the Agent modifies the content of a `story.json` file (e.g., changes `status` from `in-progress` to `done`).
+*   **Then** the corresponding story's status in the Overseer Local UI updates automatically within a few seconds without requiring a manual refresh.
+
+#### Phase 2: Git Commit Monitoring
+*   **Given** a feature branch exists in the local git repository that follows a defined naming convention (e.g., `feature/ST-123-new-login-flow`).
+*   **And** a new commit is made on that branch.
+*   **And** the commit message contains a specific identifier (e.g., `featureId: ST-123`).
+*   **And** the commit includes changes to a `story.json` file.
+*   **When** the Git Monitor service runs its check.
+*   **Then** Overseer Local identifies the commit and the associated story (ST-123).
+*   **And** it updates the story's data (e.g., status, description) based on the contents of `story.json` *from that specific commit*.
+*   **And** the UI displays an indicator that the story has unmerged changes on a feature branch.
+
+#### Phase 3: 1-Click Merge
+*   **Given** a story has been identified as having updates on a feature branch (as per Phase 2).
+*   **Then** a "Merge" button is visible and enabled for that story in the UI.
+*   **When** the user clicks the "Merge" button.
+*   **Then** the application executes a `git merge` of the feature branch into a pre-configured target branch (e.g., `main` or `develop`).
+*   **And** the user receives a notification indicating success or failure.
+*   **If successful,** the "Merge" button should become disabled or hidden.
+*   **If it fails (due to merge conflicts),** the user should be notified of the failure and instructed to resolve the conflicts manually.
+
+---
+
+### 3. Missing Details, Questions, and Risks
+
+This is where we identify ambiguities and potential problems.
+
+#### Missing Details & Questions:
+1.  **Sync Mechanism (Phase 1):** How exactly does the "Agent" update its local copy? Is it a separate process writing to files? We need to know the exact path to monitor. Is polling the filesystem acceptable, or should we use a more efficient file-watching library (like `chokidar`)?
+2.  **Git Location:** How does the app know where the `.git` repository is? Do we assume it's at the root of the opened project? What if it's in a parent directory?
+3.  **Branching Strategy:**
+    *   What is the exact branch naming convention? `feature/<story-id>`? `story/<story-id>-<description>`? This needs to be firm.
+    *   What is the target branch for the 1-click merge? `main`? `develop`? Should this be configurable in the project settings?
+4.  **Commit Message Format:** What is the precise format for the `featureId`? `featureId: ST-123`? `[ST-123]`? A consistent format is essential for reliable parsing.
+5.  **UI/UX:**
+    *   How should the "unmerged changes" be represented? A git icon next to the story? A new column?
+    *   What feedback does the user get during the merge process? A loading spinner on the button?
+    *   How are merge conflict errors presented? A simple toast notification ("Merge failed due to conflicts") is the easiest, but a more detailed modal could be better.
+6.  **Error Handling:** What happens if `git` is not installed on the user's machine? What if a git command fails for an unexpected reason (e.g., permissions)?
+
+#### Risks:
+*   **Performance:** Constantly running `git log` or polling the filesystem can be resource-intensive, especially on large repositories. The polling interval needs to be configurable and reasonable.
+*   **Complexity of Merge Conflicts:** Handling merge conflicts programmatically is extremely difficult. The scope should be limited to *reporting* the conflict, not resolving it. Attempting to auto-resolve is a huge risk.
+*   **Destructive Operations:** A bug in the merge logic could lead to a broken git state. The feature must be implemented carefully, and perhaps require a user confirmation before merging.
+*   **Platform Dependencies:** Git commands and file system behavior can have subtle differences between Windows, macOS, and Linux. Using a reliable library abstracts this away, but it's a risk to be aware of.
+
+---
+
+### 4. Implementation Approach & Suggested Files
+
+This follows your architectural guidelines (`src/git-monitor` for backend, `src/renderer` for frontend).
+
+#### Backend / Main Process (`src/git-monitor`)
+
+This will be a service that runs in the Electron main process, handling all git and file system interactions.
+
+*   **Technology:** I recommend using the `simple-git` library. It's a robust wrapper around the Git command-line interface, making it easy to perform complex operations. For file watching, `chokidar` is the standard and is very efficient.
+*   **Event Communication:** Use Electron's `ipcMain` and `ipcRenderer` to communicate between the backend service and the renderer (UI).
+
+**Suggested Files:**
+
+*   `src/git-monitor/index.ts`:
+    *   The main service orchestrator.
+    *   Initializes and starts the `FileWatcherService` and `GitPollingService`.
+    *   Listens for `ipcMain.handle('git-merge-story', ...)` events from the renderer to trigger a merge.
+
+*   `src/git-monitor/fileWatcherService.ts`:
+    *   Implements the Phase 1 MVP.
+    *   Uses `chokidar` to watch for changes to `story.json` files.
+    *   When a change is detected, it reads the file and sends an event to the renderer (`win.webContents.send('story-updated', storyData)`).
+
+*   `src/git-monitor/gitPollingService.ts`:
+    *   Implements Phase 2 and 3 logic.
+    *   Contains a `setInterval` loop to periodically perform a `git fetch`.
+    *   After fetching, it runs `git log` on branches matching the feature branch pattern.
+    *   Parses commit messages to find `featureId`.
+    *   For new commits, it uses `git show <commit-hash>:<path/to/story.json>` to get the story content from that commit.
+    *   Sends `story-updated-from-git` events to the renderer.
+    *   Contains the `mergeStory(storyId)` function which finds the branch and runs `git merge`. It should handle success and failure cases (especially conflicts).
+
+#### Frontend / Renderer Process (`src/renderer`)
+
+This will handle displaying the data and user interactions.
+
+**Suggested Files:**
+
+*   `src/main/preload.ts`:
+    *   Securely expose the IPC channels between the main and renderer processes. E.g., `contextBridge.exposeInMainWorld('git', { merge: (storyId) => ipcRenderer.invoke('git-merge-story', storyId), ... })`.
+
+*   `src/renderer/services/gitService.ts`:
+    *   A central place for frontend components to interact with the Git Monitor.
+    *   It will listen for events like `story-updated` sent from the main process using `ipcRenderer.on(...)`.
+    *   When an event is received, it updates the application's state (e.g., calling a method on a Zustand/Redux store).
+    *   It will expose functions like `mergeStory(storyId)` that components can call, which in turn calls the `ipcRenderer.invoke` function defined in the preload script.
+
+*   `src/renderer/components/stories/StoryRow.tsx` (or similar):
+    *   Modify this component to display the new Git-related information.
+    *   Conditionally render a git icon or status badge.
+    *   Conditionally render the "Merge" button and handle its `onClick` event by calling `gitService.mergeStory(story.id)`.
+    *   Manage the button's disabled/loading state.
+
+---
+
+### 5. Testing Strategy
+
+*   **Unit Tests (`jest`):**
+    *   Test the commit message parser in isolation. Give it various message strings and assert that it extracts the `featureId` correctly or returns null.
+    *   Test any utility functions for generating git commands or parsing git output.
+*   **Integration Tests (`src/git-monitor`):**
+    *   This is critical. Write tests that use `simple-git` to create a temporary, local git repository on the filesystem during the test run.
+    *   Your test should:
+        1.  `git init` a temporary directory.
+        2.  Create and commit a base `story.json`.
+        3.  Create and check out a feature branch.
+        4.  Modify the `story.json` and commit it with a correctly formatted message.
+        5.  Run your `GitPollingService` against this temporary repo.
+        6.  Assert that your service correctly detects the change and extracts the story data.
+        7.  Test the merge functionality, including a test case where you deliberately create a merge conflict and assert that it is handled gracefully.
+*   **E2E Tests (`Playwright` or `Spectron`):**
+    *   Simulate the full user flow. The test would need to manipulate files on the disk or a test git repository, and then verify that the UI of the running application updates correctly and that clicking the "Merge" button produces the expected result.

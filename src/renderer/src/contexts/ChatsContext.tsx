@@ -32,6 +32,7 @@ export type ChatsContextValue = {
   sendMessage: (
     context: ChatContext,
     message: string,
+    prompt: string,
     settings: ChatSettings,
     config: LLMConfig,
     files?: string[],
@@ -175,6 +176,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     async (
       context: ChatContext,
       message: string,
+      prompt: string,
       settings: ChatSettings,
       config: LLMConfig,
       files?: string[],
@@ -203,27 +205,29 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         },
       }
       const chatMessages = [...chatState.chat.messages, m]
-      const abortController = new AbortController()
       updateChatState(key, {
         chat: {
           ...chatState.chat,
           messages: chatMessages,
         },
         isThinking: true,
-        abortController,
       })
 
       const chatProjectId = context.projectId ?? projectId
       try {
+        console.log('completionService.getCompletionTools')
         await completionService.getCompletionTools(
           chatProjectId,
           context,
           completionMessage,
-          settings.systemPrompt,
+          prompt,
           settings.completionSettings,
           config,
-          abortController.signal,
+          // onAbortControllerCreated,
         )
+        console.log('ChatsContext finished completionService.getCompletionTools')
+      } catch (e) {
+        console.error('completionService.getCompletionTools:', e)
       } finally {
         updateChatState(key, { isThinking: false })
       }

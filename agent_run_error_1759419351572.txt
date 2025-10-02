@@ -1,0 +1,15 @@
+I have access to the following tools to help work on this project:
+
+*   **`list_stories()`**: Lists all the user stories in the current "Overseer Local" project.
+*   **`get_story_reference(reference: str, projectId: str)`**: Fetches the details of a specific story or feature using its reference ID.
+*   **`list_files(path: str)`**: Lists all files and directories within a specified path in the project's file system (e.g., `list_files('src/renderer')`).
+*   **`search_files(query: str, path: str)`**: Searches for files by name or content within a given path. For example, I could use this to find all files mentioning `story.json`.
+*   **`read_files(paths: list[str])`**: Reads the contents of one or more files.
+*   **`write_file(name: str, content: str)`**: Creates a new file or overwrites an existing one with new content. This is how I will write code, tests, or documentation.
+*   **`rename_path(path: str, new_path: str)`**: Renames or moves a file or directory.
+*   **`delete_path(path: str)`**: Deletes a file or directory.
+*   **`run_test(path: str)`**: Executes a single test file to verify its correctness.
+*   **`run_tests(path: str)`**: Executes all tests within a specified directory.
+*   **`run_test_coverage(path: str)`**: Runs a single test file and calculates code coverage.
+*   **`run_tests_coverage(path: str)`**: Runs all tests in a directory and calculates code coverage.
+*   **`web_search(query: str, limit: number, providers: list[str])`**: Performs a web search to find information, for example, about specific Git libraries or implementation patterns.

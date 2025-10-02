@@ -190,7 +190,6 @@ export default function Tooltip({
     <>
       <span
         ref={anchorRef}
-        style={{ display: 'inline-block' }}
         onMouseEnter={() => show()}
         onMouseLeave={() => hide()}
         onFocus={() => show(true)}

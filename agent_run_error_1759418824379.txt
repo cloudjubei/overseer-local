@@ -1,0 +1,118 @@
+Of course. I can help you break down this user story for the "Overseer Local" project. My goal is to help you clarify the requirements, identify potential issues, and outline a clear path for implementation.
+
+First, I have access to the following tools to help analyze your project and fulfill your request:
+
+*   `list_stories()`: List all stories in the current project.
+*   `get_story_reference(reference: str, projectId: str)`: Get a story or feature by its reference in the current project.
+*   `list_files(path: str)`: List files and directories at a relative path from the project root.
+*   `search_files(query: str, path: str)`: Search for files by name or textual content under a given path.
+*   `read_files(paths: list[str])`: Read the content of one or more files.
+*   `write_file(name: str, content: str)`: Create or overwrite a file.
+*   `rename_path(path: str, new_path: str)`: Rename or move a file/directory.
+*   `delete_path(path: str)`: Delete a file or directory.
+*   `run_test(path: str)`: Execute a single test file.
+*   `run_tests(path: str)`: Execute a test directory.
+*   `run_test_coverage(path: str)`: Execute a test with coverage.
+*   `run_tests_coverage(path: str)`: Execute a directory with coverage.
+*   `web_search(query: str, limit: number, providers: list[str])`: Perform a web search.
+
+Based on the story description, here is a breakdown to help you move forward.
+
+### 1. Clarifying Questions & Missing Details
+
+To define the scope clearly, we need to answer a few questions:
+
+*   **Agent's "Local Copy":** Where exactly does the Agent write its status updates? Is it a single file, a directory of files, or a database? What is the file format (e.g., JSON, YAML)? Knowing the exact path is critical.
+*   **Trigger Mechanism:** For the initial status update, should the application watch for file changes in real-time (e.g., using a file watcher like `chokidar`), or should it check periodically (e.g., every few seconds)?
+*   **Git Branch Naming Convention:** The story mentions "appropriate branch (named after the story)". We need to define this convention precisely. Is it `feature/<story-id>`, `story/<story-name>`, or something else?
+*   **`story.json` Content:** What is the exact structure of the `story.json` file? We need to know which fields to read to update the status in Overseer Local.
+*   **Merge Conflicts:** How should the "1-click merge" handle potential merge conflicts? Should it fail and notify the user, or attempt an auto-resolve strategy? The safest initial approach is to fail and inform the user.
+*   **Authentication:** Does accessing the git repository require any authentication (e.g., SSH keys, tokens)? The monitor will need access to these credentials.
+
+### 2. Proposed Acceptance Criteria
+
+Let's break the story into distinct, testable criteria.
+
+#### Phase 1: Local Status Sync
+
+*   **AC1.1:** When the Agent modifies a story file in its local directory, the status of the corresponding story in the Overseer Local UI is updated within 5 seconds.
+*   **AC1.2:** The application correctly identifies the path to the Agent's local story files based on a configuration setting.
+*   **AC1.3:** The file monitoring service starts automatically when the application launches and stops gracefully when it quits.
+
+#### Phase 2: Git Commit Observation
+
+*   **AC2.1:** The application can scan local git branches that follow the convention `feature/<story-id>`.
+*   **AC2.2:** When a new commit appears on a monitored branch, the system checks for the existence of a `story.json` file within that commit's tree.
+*   **AC2.3:** If a `story.json` file containing a matching `featureId` is found, the story's details (e.g., status, description) in Overseer Local are updated with the information from that file.
+*   **AC2.4:** A visual indicator (e.g., a "New Commit" badge) appears next to the story in the UI.
+
+#### Phase 3: 1-Click Merge
+
+*   **AC3.1:** A "Merge" button is visible for stories that have new commits on their feature branch.
+*   **AC3.2:** Clicking the "Merge" button executes a `git merge` of the feature branch into the main/current branch.
+*   **AC3.3:** The user is notified of a successful merge.
+*   **AC3.4:** If the merge fails (e.g., due to a conflict), the user is shown an error message with details, and the merge process is aborted cleanly.
+
+### 3. Potential Risks
+
+*   **Performance:** A file watcher or frequent git polling on a large project could consume significant CPU/memory. We should ensure the process is efficient and possibly configurable.
+*   **Race Conditions:** Multiple rapid updates from the Agent or git could lead to race conditions. The update mechanism must be robust, potentially using a queue to process changes sequentially.
+*   **Git Errors:** The system needs to handle various git command failures gracefully (e.g., repo not found, branch doesn't exist, detached HEAD state).
+*   **Security:** Executing git commands from an application carries risks. We must ensure that commands are not susceptible to injection attacks and that the application has the correct, limited permissions.
+
+### 4. Implementation Approach & File Suggestions
+
+Based on the architectural guidance, here's a possible plan.
+
+**Step 1: Project Structure & Initial Setup**
+
+First, I'll verify the existence of the proposed directories.
+
+```bash
+list_files(path="src/")
+```
+
+If `src/git-monitor` doesn't exist, we'll need to create it. For the renderer, we'll need to find where services are located.
+
+**Step 2: Backend (`src/git-monitor`)**
+
+1.  **File Watcher (`src/git-monitor/file-watcher.ts`):**
+    *   Use a library like `chokidar` to monitor the Agent's directory.
+    *   On file change, it should read the file, parse it, and emit an event (e.g., via Electron's `ipcMain`) with the updated story data.
+
+2.  **Git Polling Service (`src/git-monitor/git-service.ts`):**
+    *   Use a library like `simple-git` to interact with the local git repository.
+    *   Implement a function to periodically fetch updates: `setInterval(async () => { ... }, 30000)`.
+    *   Inside the loop:
+        *   List all branches matching the defined pattern (`git branch -a --list 'feature/*'`).
+        *   For each branch, check the latest commit hash and compare it with a stored value to see if it's new.
+        *   If new, check out the `story.json` from that commit (`git show <commit-hash>:story.json`).
+        *   Parse the file and emit an IPC event to the renderer process with the commit details and story data.
+
+3.  **Merge Logic (`src/git-monitor/git-service.ts`):**
+    *   Expose a function that can be called via `ipcMain.handle`.
+    *   This function will take a branch name as an argument.
+    *   It will execute `git merge <branch-name>` and handle the success or failure cases, returning the result to the renderer.
+
+**Step 3: Renderer (`src/renderer/`)**
+
+1.  **Git Service (`src/renderer/services/gitService.ts`):**
+    *   This file will contain functions that listen for IPC events from the `git-monitor` backend.
+    *   Example: `window.electron.ipcRenderer.on('story-updated-from-git', (data) => { ... })`.
+    *   It will update the application's state (e.g., using a state management library like Redux, Zustand, or a React Context).
+    *   It will also have a function to trigger the merge: `triggerMerge(branchName)` which will call `window.electron.ipcRenderer.invoke('git-merge', branchName)`.
+
+2.  **UI Components:**
+    *   Modify the existing Story component to display the new status indicators and the "Merge" button.
+    *   The component will get its data from the central state, which is updated by `gitService.ts`.
+
+### 5. Suggested Tests
+
+*   **Unit Tests (`/tests` or `__tests__`):**
+    *   `file-watcher.spec.ts`: Test the logic for parsing Agent files.
+    *   `git-service.spec.ts`: Mock the git command runner (`simple-git`) to test the branch scanning, commit checking, and merge logic without actually running git.
+*   **Integration Tests:**
+    *   Test the full flow from a file change being detected by `chokidar` to the `ipcMain` event being emitted.
+    *   Test the full IPC flow for the merge action, from the renderer `invoke` to the backend handler.
+
+Would you like me to start by listing the files in the `src/` directory to confirm the project structure?

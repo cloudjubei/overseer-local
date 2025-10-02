@@ -12,12 +12,16 @@ import type {
   ChatContextArguments,
   CompletionSettings,
 } from 'thefactory-tools'
+import { getChatContextPath } from 'thefactory-tools/utils'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron } from '../ui/Icons'
+import { IconSettings, IconChevron, IconDelete } from '../ui/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
+import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
+import { Button } from '../ui/Button'
+import ChatLLMSelectionManager from '../../utils/ChatLLMSelectionManager'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -39,6 +43,7 @@ export default function ChatSidebar({
 }: ChatSidebarProps) {
   const {
     getChat,
+    restartChat,
     sendMessage,
     getSettings,
     resetSettings,
@@ -51,12 +56,28 @@ export default function ChatSidebar({
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { runsHistory } = useAgents()
-  const { configs, activeConfig } = useLLMConfig()
+  const { configs, activeChatConfig } = useLLMConfig()
   const { navigateView } = useNavigator()
 
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
+
+  const chatKey = useMemo(() => getChatContextPath(context), [context])
+
+  // Initialize selected config from per-chat storage
+  useEffect(() => {
+    const validIds = new Set((configs || []).map((c) => c.id!))
+    // Clean up invalid ids for this chat
+    ChatLLMSelectionManager.clearInvalid(chatKey, validIds)
+    const stored = ChatLLMSelectionManager.getSelectedId(chatKey) || undefined
+    if (stored && validIds.has(stored)) {
+      setSelectedConfigId(stored)
+    } else {
+      // Fallback to active chat config or first config (do not use agent-run active)
+      setSelectedConfigId(activeChatConfig?.id || configs[0]?.id)
+    }
+  }, [chatKey, configs, activeChatConfig?.id])
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
   const persistSettings = useCallback(
@@ -81,8 +102,9 @@ export default function ChatSidebar({
       const byId = configs.find((c) => c.id === selectedConfigId)
       if (byId) return byId
     }
-    return activeConfig || configs[0]
-  }, [configs, activeConfig, selectedConfigId])
+    // Prefer active chat config; do NOT fallback to agent-run active config here
+    return activeChatConfig || configs[0]
+  }, [configs, activeChatConfig, selectedConfigId])
 
   const isConfigured = !!selectedConfig?.apiKey
 
@@ -93,47 +115,50 @@ export default function ChatSidebar({
       if (!selectedConfig || !currentSettings) return
       tryResumeAudioContext()
       playSendSound()
-      await sendMessage(context, message, currentSettings, selectedConfig, attachments)
+      await sendMessage(
+        context,
+        message,
+        effectivePrompt,
+        currentSettings,
+        selectedConfig,
+        attachments,
+      )
     },
-    [context, selectedConfig, currentSettings, sendMessage],
+    [context, effectivePrompt, selectedConfig, currentSettings, sendMessage],
   )
 
   const handlePickConfig = useCallback(async (configId: string) => {
     setSelectedConfigId(configId)
-  }, [])
+    // Persist per-chat selection and recents
+    ChatLLMSelectionManager.setSelectedId(chatKey, configId)
+  }, [chatKey])
 
   const [tools, setTools] = useState<ToolToggle[]>([])
 
   useEffect(() => {
-    async function loadTools() {
-      const availableTools = currentSettings?.completionSettings.availableTools
-      const autoCallTools = currentSettings?.completionSettings.autoCallTools
-      if (!availableTools || !autoCallTools || !context.projectId) {
-        setTools([])
-        return
-      }
-      try {
-        const allTools = await factoryToolsService.listTools(context.projectId)
-
-        const availableSet = new Set(availableTools)
-        const autoSet = new Set(autoCallTools)
-
-        const mapped: ToolToggle[] = allTools.map((t) => {
-          const toolName = t.function.name
-          return {
-            name: toolName,
-            description: t.function.description,
-            available: availableSet.has(toolName),
-            autoCall: autoSet.has(toolName),
-          }
-        })
-        setTools(mapped)
-      } catch (e) {
-        setTools([])
-      }
+    const availableTools = currentSettings?.completionSettings.availableTools
+    const autoCallTools = currentSettings?.completionSettings.autoCallTools
+    if (!availableTools || !autoCallTools || !context.projectId) {
+      setTools([])
+      return
     }
-    loadTools()
-  }, [context.projectId])
+    const allTools = Object.keys(TOOL_SCHEMAS)
+
+    const availableSet = new Set(availableTools)
+    const autoSet = new Set(autoCallTools)
+
+    const mapped: ToolToggle[] = allTools.map((t) => {
+      const schema = TOOL_SCHEMAS[t]
+      const toolName = schema.name
+      return {
+        name: toolName,
+        description: schema.description,
+        available: availableSet.has(toolName),
+        autoCall: autoSet.has(toolName),
+      }
+    })
+    setTools(mapped)
+  }, [context.projectId, currentSettings])
 
   const toggleAvailable = useCallback(
     async (tool: ToolToggle) => {
@@ -288,6 +313,8 @@ export default function ChatSidebar({
     .filter(Boolean)
     .join(' ')
 
+  const recentConfigIds = useMemo(() => ChatLLMSelectionManager.getRecentIds(chatKey), [chatKey])
+
   return (
     <section className={sectionClass}>
       {/* Top header: constant size */}
@@ -307,11 +334,20 @@ export default function ChatSidebar({
           <ContextInfoButton context={context} label={chatContextTitle} />
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            className="btn-secondary w-[34px]"
+            variant="danger"
+            aria-label="Delete"
+            onClick={() => restartChat(context)}
+          >
+            <IconDelete className="w-4 h-4" />
+          </Button>
           <ModelChip
             editable
             selectedConfigId={selectedConfigId}
             onPickConfigId={handlePickConfig}
             className="border-blue-500"
+            recentConfigIds={recentConfigIds}
           />
 
           <button
@@ -323,7 +359,7 @@ export default function ChatSidebar({
             aria-label="Open Chat Settings"
             title="Chat settings"
           >
-            <IconSettings className="h-[16px] w-[16px]" />
+            <IconSettings className="w-4 h-4" />
           </button>
 
           {isSettingsOpen && (

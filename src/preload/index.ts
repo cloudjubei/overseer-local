@@ -65,12 +65,12 @@ const STORIES_API = {
 }
 
 const COMPLETION_API = {
-  getCompletion: (messages, systemPrompt, config, abortSignal) =>
+  getCompletion: (messages, systemPrompt, config, onAbortControllerCreated) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_SIMPLE, {
       messages,
       systemPrompt,
       config,
-      abortSignal,
+      onAbortControllerCreated,
     }),
   getCompletionTools: (
     projectId,
@@ -79,7 +79,7 @@ const COMPLETION_API = {
     systemPrompt,
     settings,
     config,
-    abortSignal,
+    onAbortControllerCreated,
   ) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_TOOLS, {
       projectId,
@@ -88,7 +88,7 @@ const COMPLETION_API = {
       systemPrompt,
       settings,
       config,
-      abortSignal,
+      onAbortControllerCreated,
     }),
 }
 
@@ -223,7 +223,6 @@ const FACTORY_AGENT_RUN_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 }
 const FACTORY_TOOLS_API = {
-  listTools: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST, { projectId }),
   executeTool: (projectId, toolName, args) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE, { projectId, toolName, args }),
 }
