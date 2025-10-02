@@ -14,10 +14,12 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron } from '../ui/Icons'
+import { IconSettings, IconChevron, IconDelete } from '../ui/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
+import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
+import { Button } from '../ui/Button'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -39,6 +41,7 @@ export default function ChatSidebar({
 }: ChatSidebarProps) {
   const {
     getChat,
+    restartChat,
     sendMessage,
     getSettings,
     resetSettings,
@@ -93,9 +96,16 @@ export default function ChatSidebar({
       if (!selectedConfig || !currentSettings) return
       tryResumeAudioContext()
       playSendSound()
-      await sendMessage(context, message, currentSettings, selectedConfig, attachments)
+      await sendMessage(
+        context,
+        message,
+        effectivePrompt,
+        currentSettings,
+        selectedConfig,
+        attachments,
+      )
     },
-    [context, selectedConfig, currentSettings, sendMessage],
+    [context, effectivePrompt, selectedConfig, currentSettings, sendMessage],
   )
 
   const handlePickConfig = useCallback(async (configId: string) => {
@@ -105,35 +115,29 @@ export default function ChatSidebar({
   const [tools, setTools] = useState<ToolToggle[]>([])
 
   useEffect(() => {
-    async function loadTools() {
-      const availableTools = currentSettings?.completionSettings.availableTools
-      const autoCallTools = currentSettings?.completionSettings.autoCallTools
-      if (!availableTools || !autoCallTools || !context.projectId) {
-        setTools([])
-        return
-      }
-      try {
-        const allTools = await factoryToolsService.listTools(context.projectId)
-
-        const availableSet = new Set(availableTools)
-        const autoSet = new Set(autoCallTools)
-
-        const mapped: ToolToggle[] = allTools.map((t) => {
-          const toolName = t.function.name
-          return {
-            name: toolName,
-            description: t.function.description,
-            available: availableSet.has(toolName),
-            autoCall: autoSet.has(toolName),
-          }
-        })
-        setTools(mapped)
-      } catch (e) {
-        setTools([])
-      }
+    const availableTools = currentSettings?.completionSettings.availableTools
+    const autoCallTools = currentSettings?.completionSettings.autoCallTools
+    if (!availableTools || !autoCallTools || !context.projectId) {
+      setTools([])
+      return
     }
-    loadTools()
-  }, [context.projectId])
+    const allTools = Object.keys(TOOL_SCHEMAS)
+
+    const availableSet = new Set(availableTools)
+    const autoSet = new Set(autoCallTools)
+
+    const mapped: ToolToggle[] = allTools.map((t) => {
+      const schema = TOOL_SCHEMAS[t]
+      const toolName = schema.name
+      return {
+        name: toolName,
+        description: schema.description,
+        available: availableSet.has(toolName),
+        autoCall: autoSet.has(toolName),
+      }
+    })
+    setTools(mapped)
+  }, [context.projectId, currentSettings])
 
   const toggleAvailable = useCallback(
     async (tool: ToolToggle) => {
@@ -307,6 +311,14 @@ export default function ChatSidebar({
           <ContextInfoButton context={context} label={chatContextTitle} />
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            className="btn-secondary w-[34px]"
+            variant="danger"
+            aria-label="Delete"
+            onClick={() => restartChat(context)}
+          >
+            <IconDelete className="w-4 h-4" />
+          </Button>
           <ModelChip
             editable
             selectedConfigId={selectedConfigId}
@@ -323,7 +335,7 @@ export default function ChatSidebar({
             aria-label="Open Chat Settings"
             title="Chat settings"
           >
-            <IconSettings className="h-[16px] w-[16px]" />
+            <IconSettings className="w-4 h-4" />
           </button>
 
           {isSettingsOpen && (

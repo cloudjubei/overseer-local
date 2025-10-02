@@ -35,6 +35,7 @@ import {
 import { notificationsService } from '../services/notificationsService'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 import { NavigationView } from '@renderer/types'
+import { hideScrollStyle } from '@renderer/utils/hideScrollStyle'
 
 export type SidebarProps = {}
 
@@ -378,7 +379,11 @@ export default function SidebarView({}: SidebarProps) {
         </button>
       </div>
 
-      <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
+      <nav
+        className="nav flex-1 min-h-0 overflow-y-auto"
+        style={hideScrollStyle}
+        onKeyDown={onKeyDownList}
+      >
         <ul className="nav-list" role="list">
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view

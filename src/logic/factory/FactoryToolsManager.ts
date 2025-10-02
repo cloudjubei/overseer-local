@@ -3,7 +3,7 @@ import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import BaseManager from '../BaseManager'
 import ProjectsManager from '../projects/ProjectsManager'
 import SettingsManager from '../settings/SettingsManager'
-import { AgentToolChatSchema, AgentTools, createAgentTools, createTools } from 'thefactory-tools'
+import { AgentTools, createAgentTools, createTools } from 'thefactory-tools'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
@@ -29,16 +29,10 @@ export default class FactoryToolsManager extends BaseManager {
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_LIST] = ({ projectId }) => this.listTools(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE] = ({ projectId, toolName, args }) =>
       this.executeTool(projectId, toolName, args)
 
     return handlers
-  }
-
-  async listTools(projectId: string): Promise<AgentToolChatSchema[]> {
-    const tools = await this.__getTools(projectId)
-    return tools?.getSchemas() ?? []
   }
 
   async executeTool(projectId: string, toolName: string, args: any): Promise<any> {

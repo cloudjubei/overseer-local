@@ -9,7 +9,7 @@ interface TypewriterTextProps {
   renderer?: 'rich' | 'markdown'
 }
 
-const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 5, renderer = 'rich' }) => {
+const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 2, renderer = 'rich' }) => {
   const displayText = useTypewriter(text, speed)
 
   if (renderer === 'markdown') {

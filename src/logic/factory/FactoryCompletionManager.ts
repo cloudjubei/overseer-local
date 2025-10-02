@@ -41,8 +41,8 @@ export default class FactoryCompletionManager extends BaseManager {
       messages,
       systemPrompt,
       config,
-      abortSignal,
-    }) => this.getCompletion(messages, systemPrompt, config, abortSignal)
+      onAbortControllerCreated,
+    }) => this.getCompletion(messages, systemPrompt, config, onAbortControllerCreated)
 
     handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS] = async ({
       projectId,
@@ -51,7 +51,7 @@ export default class FactoryCompletionManager extends BaseManager {
       systemPrompt,
       settings,
       config,
-      abortSignal,
+      onAbortControllerCreated,
     }) =>
       this.getCompletionTools(
         projectId,
@@ -60,7 +60,7 @@ export default class FactoryCompletionManager extends BaseManager {
         systemPrompt,
         settings,
         config,
-        abortSignal,
+        onAbortControllerCreated,
       )
 
     return handlers
@@ -88,14 +88,14 @@ export default class FactoryCompletionManager extends BaseManager {
     messages: CompletionMessage[],
     systemPrompt: string,
     config: LLMConfig,
-    abortSignal?: AbortSignal,
+    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponse> {
     const completion = createCompletionTools(config, false)
 
     const request: CompletionRequest = {
       systemPrompt,
       messages,
-      abortSignal,
+      // abortSignal: abortController.signal,
     }
     return await completion.sendCompletion(request)
   }
@@ -107,9 +107,11 @@ export default class FactoryCompletionManager extends BaseManager {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    abortSignal?: AbortSignal,
+    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns> {
+    console.log('MANAGER getCompletionTools ', ' chatContext: ', chatContext)
     const now = new Date().toISOString()
+
     const chat = await this.chatsManager.addChatMessages(chatContext, [
       {
         completionMessage: {
@@ -123,12 +125,13 @@ export default class FactoryCompletionManager extends BaseManager {
     ])
     if (!chat) throw new Error('CHAT NOT FOUND')
 
+    const completion = createCompletionTools(config, false)
+
     const messages = this.processChatMessagesForCompletion(chat.messages)
 
     const request: CompletionRequest = {
       systemPrompt: systemPrompt + '\n\n' + COMPLETION_TOOLS_PLACEHOLDER,
       messages,
-      abortSignal,
     }
     const callTool = async (toolName: string, args: any): Promise<string> => {
       const result = this.factoryToolsManager.executeTool(projectId, toolName, args)
@@ -139,6 +142,7 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
+      console.log('responseReceivedCallback turn: ', turn, ' response: ', response)
       let m: ChatMessage = {
         completionMessage: { ...response, content: agentResponse?.thoughts ?? response.content },
         toolCalls: agentResponse?.toolCalls,
@@ -152,6 +156,7 @@ export default class FactoryCompletionManager extends BaseManager {
       turn: number,
       response: CompletionResponseWithTools,
     ): Promise<boolean> => {
+      console.log('turnFinishedCallback turn: ', turn, ' response: ', response)
       if (response.toolResults.results.length > 0) {
         let m: ChatMessage = {
           completionMessage: {
@@ -175,14 +180,28 @@ export default class FactoryCompletionManager extends BaseManager {
       )
     }
 
-    const completion = createCompletionTools(config, false)
-
-    return await completion.sendCompletionWithTools(
+    //TODO: include abortController as callback here
+    const c = await completion.sendCompletionWithTools(
       request,
       settings,
       callTool,
       responseReceivedCallback,
       turnFinishedCallback,
     )
+    if (c.resultType === 'errored') {
+      const now = new Date().toISOString()
+      const errorMessage: ChatMessage = {
+        completionMessage: {
+          role: 'assistant',
+          content: 'Error',
+          usage: { promptTokens: 0, completionTokens: 0 },
+          askedAt: now,
+          completedAt: now,
+          durationMs: 0,
+        },
+        error: c.error,
+      }
+      await this.chatsManager.addChatMessages(chatContext, [errorMessage])
+    }
   }
 }

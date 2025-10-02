@@ -1,24 +1,24 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 import { filesService } from '../../services/filesService'
-import { useActiveProject } from '../../contexts/ProjectContext'
 import Spinner from '../ui/Spinner'
 import { TestFailure, TestResult, TestsResult } from 'thefactory-tools'
 
 function CodeSnippet({
+  projectId,
   relPath,
   line,
   column,
 }: {
+  projectId: string
   relPath: string
   line?: number | null
   column?: number | null
 }) {
-  const { projectId } = useActiveProject()
-  const [state, setState] = React.useState<{ loading: boolean; text?: string; error?: string }>({
+  const [state, setState] = useState<{ loading: boolean; text?: string; error?: string }>({
     loading: true,
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
@@ -48,7 +48,7 @@ function CodeSnippet({
     return () => {
       cancelled = true
     }
-  }, [projectId, relPath, line, column])
+  }, [])
 
   if (state.loading) return <Spinner size={14} label="Loading snippet..." />
   if (state.error)
@@ -60,7 +60,15 @@ function CodeSnippet({
   )
 }
 
-function FailureItem({ test, failure }: { test: TestResult; failure: TestFailure }) {
+function FailureItem({
+  projectId,
+  test,
+  failure,
+}: {
+  projectId: string
+  test: TestResult
+  failure: TestFailure
+}) {
   const rel = test.filePath
   return (
     <div className="rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-2">
@@ -83,7 +91,12 @@ function FailureItem({ test, failure }: { test: TestResult; failure: TestFailure
       </div>
 
       {failure.line && failure.column && (
-        <CodeSnippet relPath={rel} line={failure.line} column={failure.column} />
+        <CodeSnippet
+          projectId={projectId}
+          relPath={rel}
+          line={failure.line}
+          column={failure.column}
+        />
       )}
       {!failure.line && !failure.column && failure.stack && (
         <details className="mt-1">
@@ -165,7 +178,13 @@ function RawOutput({ t }: { t: TestResult }) {
   )
 }
 
-export default function TestResultsView({ results }: { results: TestsResult }) {
+export default function TestResultsView({
+  projectId,
+  results,
+}: {
+  projectId: string
+  results: TestsResult
+}) {
   const tests = Array.isArray(results.tests) ? results.tests : []
 
   const failing = tests.filter((t) => (t.failures?.length || 0) > 0 || t.status === 'fail')
@@ -224,7 +243,7 @@ export default function TestResultsView({ results }: { results: TestsResult }) {
               <FileHeader t={t} />
               <div className="space-y-2">
                 {(t.failures || []).map((f, i) => (
-                  <FailureItem key={i} test={t} failure={f} />
+                  <FailureItem key={i} projectId={projectId} test={t} failure={f} />
                 ))}
               </div>
               <SkipsList t={t} />

@@ -97,7 +97,6 @@ const IPC_HANDLER_KEYS = {
   FACTORY_PRICING_REFRESH: 'factory:pricing:refresh',
 
   // Factory tools
-  FACTORY_TOOLS_LIST: 'factory:tools:list',
   FACTORY_TOOLS_EXECUTE: 'factory:tools:execute',
 
   // Factory Tests

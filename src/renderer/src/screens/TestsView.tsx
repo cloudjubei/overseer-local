@@ -181,7 +181,9 @@ function TestsInner() {
                   </div>
                 )}
 
-                {!isRunningTests && !testsError && results && <TestResultsView results={results} />}
+                {!isRunningTests && !testsError && results && (
+                  <TestResultsView projectId={projectId} results={results} />
+                )}
 
                 {!isRunningTests && !testsError && !results && !showNoTestsCta && (
                   <div className="text-sm text-neutral-500">Click "Run Tests" to start.</div>
@@ -218,7 +220,7 @@ function TestsInner() {
                 )}
 
                 {!isRunningE2ETests && !testsErrorE2E && resultsE2E && (
-                  <TestResultsView results={resultsE2E} />
+                  <TestResultsView projectId={projectId} results={resultsE2E} />
                 )}
 
                 {!isRunningE2ETests && !testsErrorE2E && !resultsE2E && (

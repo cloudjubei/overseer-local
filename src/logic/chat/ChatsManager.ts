@@ -7,7 +7,6 @@ import type {
   ChatContext,
   ChatCreateInput,
   ChatEditInput,
-  ChatSettings,
   ChatsSettings,
   ChatContextArguments,
   ChatMessage,

@@ -11,7 +11,7 @@ export type CompletionService = {
     messages: CompletionMessage[],
     systemPrompt: string,
     config: LLMConfig,
-    abortSignal?: AbortSignal,
+    onAbortControllerCreated?: (abortController: AbortController) => void,
   ) => Promise<void>
 
   getCompletionTools(
@@ -21,7 +21,7 @@ export type CompletionService = {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    abortSignal?: AbortSignal,
+    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns>
 }
 

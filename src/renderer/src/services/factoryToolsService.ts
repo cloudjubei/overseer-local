@@ -1,7 +1,4 @@
-import { AgentToolChatSchema } from 'thefactory-tools'
-
 export type FactoryToolsService = {
-  listTools: (projectId: string) => Promise<AgentToolChatSchema[]>
   executeTool: (projectId: string, toolName: string, args: any) => Promise<any>
 }
 
