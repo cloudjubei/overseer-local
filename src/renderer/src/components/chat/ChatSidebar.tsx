@@ -20,24 +20,14 @@ import { useAgents } from '../../contexts/AgentsContext'
 import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
 import { Button } from '../ui/Button'
 
-// export type CompletionSettings = {
-//   numberMessagesToSend: number
-//   maxTurns: number
-//   allowNoCallResponses: boolean
-//   finishTurnOnErrors: boolean
-//   availableTools: string[]
-//   autoCallTools: string[]
-// }
-
 export type ChatSidebarProps = {
   context: ChatContext
   chatContextTitle: string
-  // When provided, ChatSidebar shows a collapse button and calls this to request collapse
   isCollapsible?: boolean
   onCollapse?: () => void
-  // Controls whether ChatSidebar renders a left border when collapsible; default true
   showLeftBorder?: boolean
 }
+
 type ToolToggle = { name: string; description: string; available: boolean; autoCall: boolean }
 
 export default function ChatSidebar({
@@ -59,6 +49,7 @@ export default function ChatSidebar({
     getSettingsPrompt,
     updateSettingsPrompt,
     resetSettingsPrompt,
+    abortInFlight,
   } = useChats()
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
@@ -105,6 +96,10 @@ export default function ChatSidebar({
     },
     [context, effectivePrompt, activeChatConfig, currentSettings, sendMessage],
   )
+
+  const handleAbort = useCallback(() => {
+    abortInFlight(context)
+  }, [abortInFlight, context])
 
   const [tools, setTools] = useState<ToolToggle[]>([])
 
@@ -255,13 +250,11 @@ export default function ChatSidebar({
     getDefaultPrompt,
   ])
 
-  //TODO:
   useEffect(() => {
     const custom = currentSettings?.systemPrompt
     setDraftPrompt(custom ? custom : effectivePrompt)
   }, [effectivePrompt, currentSettings?.systemPrompt])
 
-  // Build messages array with system prompt as the first message when present
   const messagesWithSystem: ChatMessage[] = useMemo(() => {
     const original = chat?.chat.messages || []
     if (original.length > 0 || !effectivePrompt) return original
@@ -288,7 +281,6 @@ export default function ChatSidebar({
 
   return (
     <section className={sectionClass}>
-      {/* Top header: constant size */}
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {isCollapsible ? (
@@ -451,7 +443,12 @@ export default function ChatSidebar({
       </div>
 
       <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
-        <ChatInput onSend={handleSend} isThinking={isThinking} isConfigured={isChatConfigured} />
+        <ChatInput
+          onSend={handleSend}
+          onAbort={handleAbort}
+          isThinking={isThinking}
+          isConfigured={isChatConfigured}
+        />
       </div>
     </section>
   )

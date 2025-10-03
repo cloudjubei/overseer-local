@@ -7,17 +7,19 @@ import Tooltip from '../ui/Tooltip'
 
 interface ChatInputProps {
   onSend: (message: string, attachments: string[]) => void
+  onAbort: () => void
   isThinking: boolean
   isConfigured: boolean
 }
 
 const MAX_INPUT_HEIGHT_PX = 250
 
-export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInputProps) {
+export default function ChatInput({ onSend, onAbort, isThinking, isConfigured }: ChatInputProps) {
   const [input, setInput] = useState<string>('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const [visibleLines, setVisibleLines] = useState<number>(1)
   const [infoOpen, setInfoOpen] = useState<boolean>(false)
+  const [flashBlocked, setFlashBlocked] = useState(false)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -80,7 +82,16 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [infoOpen])
 
+  const triggerBlockedFlash = () => {
+    setFlashBlocked(true)
+    window.setTimeout(() => setFlashBlocked(false), 300)
+  }
+
   const handleSend = () => {
+    if (isThinking) {
+      triggerBlockedFlash()
+      return
+    }
     if (!input.trim() && pendingAttachments.length === 0) return
     onSend(input, pendingAttachments)
     setInput('')
@@ -112,6 +123,10 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
   const handleTextareaKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault()
+      if (isThinking) {
+        triggerBlockedFlash()
+        return
+      }
       handleSend()
     }
   }
@@ -136,11 +151,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
 
   const rightHints = useMemo(() => [`${modifierSymbol} + Enter to send`], [modifierSymbol])
 
-  // Precompute grid content slots (top-left, top-right, bottom-left, bottom-right)
   const renderHintsGrid = () => {
     return (
       <div className="grid grid-cols-2 grid-rows-2 gap-x-4 text-[12px] text-[var(--text-muted)]">
-        {/* Left side */}
         {leftHints.length <= 1 ? (
           <div className="col-start-1 row-span-2 self-center truncate">{leftHints[0]}</div>
         ) : (
@@ -150,7 +163,6 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
           </>
         )}
 
-        {/* Right side */}
         {rightHints.length <= 1 ? (
           <div className="col-start-2 row-span-2 self-center text-right truncate">
             {rightHints[0]}
@@ -174,7 +186,13 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
         <div className="relative">
           <div className="flex gap-2">
             {/* Main input box */}
-            <div className="flex-1 bg-[var(--surface-base)] border border-[var(--border-default)] rounded-md focus-within:ring-2 focus-within:ring-[var(--focus-ring)]">
+            <div
+              className={[
+                'flex-1 bg-[var(--surface-base)] border rounded-md focus-within:ring-2',
+                'border-[var(--border-default)] focus-within:ring-[var(--focus-ring)]',
+                flashBlocked ? 'border-red-500 ring-2 ring-red-500/60' : '',
+              ].join(' ')}
+            >
               <div className="relative p-1">
                 <FileMentionsTextarea
                   value={input}
@@ -183,7 +201,8 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   }}
                   placeholder={placeholderText}
                   rows={1}
-                  disabled={isThinking}
+                  // Allow typing while thinking
+                  disabled={false}
                   className="w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]"
                   style={{ ...maxHeightStyle, overflowY: 'auto' }}
                   ariaLabel="Message input"
@@ -199,10 +218,9 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   onRemove={(path) =>
                     setPendingAttachments((prev) => prev.filter((p) => p !== path))
                   }
-                  disabled={isThinking}
+                  disabled={false}
                 />
 
-                {/* Hints area with fade and collapse animation */}
                 <div
                   className="overflow-hidden transition-all duration-200 ease-out"
                   style={{
@@ -227,7 +245,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   aria-label="Attach Files"
                   title="Attach Files"
                   type="button"
-                  disabled={isThinking}
+                  disabled={false}
                 >
                   <IconAttach className="w-5 h-5" />
                 </button>
@@ -240,17 +258,38 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                 />
               </div>
 
-              {/* Send (middle) */}
+              {/* Middle: Send or Stop */}
               <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                <button
-                  onClick={handleSend}
-                  className="btn-icon"
-                  disabled={!canSend || isThinking}
-                  aria-label="Send message"
-                  title="Send"
-                >
-                  <IconSend className="w-5 h-5" />
-                </button>
+                {!isThinking ? (
+                  <button
+                    onClick={handleSend}
+                    className="btn-icon"
+                    disabled={!canSend}
+                    aria-label="Send message"
+                    title="Send"
+                  >
+                    <IconSend className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const should = window.confirm('Stop the assistant? This will cancel the current response.')
+                      if (!should) return
+                      onAbort()
+                    }}
+                    className="relative btn-icon"
+                    aria-label="Stop response"
+                    title="Stop"
+                  >
+                    {/* Spinner ring */}
+                    <span
+                      className="absolute inset-0 m-auto block w-7 h-7 rounded-full border-2 border-[var(--text-muted)] border-t-transparent animate-spin"
+                      aria-hidden
+                    />
+                    {/* Stop glyph using a small square */}
+                    <span className="relative z-10 block w-3.5 h-3.5 bg-[var(--text-primary)] rounded-[2px]" />
+                  </button>
+                )}
               </div>
 
               {/* Info (bottom) */}
@@ -271,6 +310,7 @@ export default function ChatInput({ onSend, isThinking, isConfigured }: ChatInpu
                   placement="top"
                 >
                   <button
+                    id="chat-input-info-btn"
                     type="button"
                     className={[
                       'inline-flex items-center justify-center w-6 h-6 rounded-full',
