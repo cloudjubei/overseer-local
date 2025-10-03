@@ -11,7 +11,6 @@ export type CompletionService = {
     messages: CompletionMessage[],
     systemPrompt: string,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
   ) => Promise<void>
 
   sendCompletionTools(
@@ -21,7 +20,6 @@ export type CompletionService = {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns>
 
   resumeCompletionTools(
@@ -31,8 +29,9 @@ export type CompletionService = {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns>
+
+  abortCompletion(chatContext: ChatContext): Promise<void>
 }
 
 export const completionService: CompletionService = { ...window.completionService }

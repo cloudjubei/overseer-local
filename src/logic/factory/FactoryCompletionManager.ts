@@ -18,10 +18,13 @@ import type {
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
 import ChatsManager from '../chat/ChatsManager'
+import { getChatContextPath } from 'thefactory-tools/utils'
 
 export default class FactoryCompletionManager extends BaseManager {
   private chatsManager: ChatsManager
   private factoryToolsManager: FactoryToolsManager
+
+  private abortControllers: Record<string, AbortController> = {}
 
   constructor(
     projectRoot: string,
@@ -38,12 +41,8 @@ export default class FactoryCompletionManager extends BaseManager {
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    handlers[IPC_HANDLER_KEYS.COMPLETION_SEND] = async ({
-      messages,
-      systemPrompt,
-      config,
-      onAbortControllerCreated,
-    }) => this.sendCompletion(messages, systemPrompt, config, onAbortControllerCreated)
+    handlers[IPC_HANDLER_KEYS.COMPLETION_SEND] = async ({ messages, systemPrompt, config }) =>
+      this.sendCompletion(messages, systemPrompt, config)
 
     handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS_SEND] = async ({
       projectId,
@@ -52,7 +51,6 @@ export default class FactoryCompletionManager extends BaseManager {
       systemPrompt,
       settings,
       config,
-      onAbortControllerCreated,
     }) =>
       this.sendCompletionTools(
         projectId,
@@ -61,7 +59,6 @@ export default class FactoryCompletionManager extends BaseManager {
         systemPrompt,
         settings,
         config,
-        onAbortControllerCreated,
       )
 
     handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS_RESUME] = async ({
@@ -71,7 +68,6 @@ export default class FactoryCompletionManager extends BaseManager {
       systemPrompt,
       settings,
       config,
-      onAbortControllerCreated,
     }) =>
       this.resumeCompletionTools(
         projectId,
@@ -80,8 +76,10 @@ export default class FactoryCompletionManager extends BaseManager {
         systemPrompt,
         settings,
         config,
-        onAbortControllerCreated,
       )
+
+    handlers[IPC_HANDLER_KEYS.COMPLETION_ABORT] = async ({ chatContext }) =>
+      this.abortCompletion(chatContext)
 
     return handlers
   }
@@ -118,14 +116,12 @@ export default class FactoryCompletionManager extends BaseManager {
     messages: CompletionMessage[],
     systemPrompt: string,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponse> {
     const completion = createCompletionTools(config)
 
     const request: CompletionRequest = {
       systemPrompt,
       messages,
-      // abortSignal: abortController.signal,
     }
     return await completion.sendCompletion(request)
   }
@@ -137,7 +133,6 @@ export default class FactoryCompletionManager extends BaseManager {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns> {
     const chat = await this.chatsManager.getChat(chatContext)
     if (!chat) throw new Error('CHAT NOT FOUND')
@@ -168,7 +163,8 @@ export default class FactoryCompletionManager extends BaseManager {
       availableTools,
       settings.finishTurnOnErrors,
       callTool,
-    ) //TODO: abort signal handle
+      this.createAbortSignal(chatContext),
+    )
 
     const mapToolResults: Record<string, CompletionToolResult> = {}
     for (let i = 0; i < toolResults.results.length; i++) {
@@ -192,7 +188,7 @@ export default class FactoryCompletionManager extends BaseManager {
       systemPrompt,
       settings,
       config,
-      onAbortControllerCreated,
+      this.createAbortSignal(chatContext),
     )
   }
 
@@ -203,7 +199,6 @@ export default class FactoryCompletionManager extends BaseManager {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
   ): Promise<CompletionResponseTurns> {
     const now = new Date().toISOString()
 
@@ -227,7 +222,7 @@ export default class FactoryCompletionManager extends BaseManager {
       systemPrompt,
       settings,
       config,
-      onAbortControllerCreated,
+      this.createAbortSignal(chatContext),
     )
   }
 
@@ -238,7 +233,7 @@ export default class FactoryCompletionManager extends BaseManager {
     systemPrompt: string,
     settings: CompletionSettings,
     config: LLMConfig,
-    onAbortControllerCreated?: (abortController: AbortController) => void,
+    abortSignal?: AbortSignal,
   ) {
     const completion = createCompletionTools(config)
 
@@ -247,6 +242,7 @@ export default class FactoryCompletionManager extends BaseManager {
     const request: CompletionRequest = {
       systemPrompt,
       messages,
+      abortSignal,
     }
     const callTool = async (toolName: string, args: any): Promise<string> => {
       const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
@@ -320,6 +316,30 @@ export default class FactoryCompletionManager extends BaseManager {
       }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     }
+    this.cleanupAbort(chatContext)
     return c
+  }
+
+  async abortCompletion(chatContext: ChatContext): Promise<void> {
+    const path = getChatContextPath(chatContext)
+    const abortController = this.abortControllers[path]
+    if (abortController) {
+      abortController.abort()
+      this.cleanupAbort(chatContext)
+    }
+  }
+
+  private createAbortSignal(chatContext: ChatContext): AbortSignal {
+    const abortController = new AbortController()
+
+    const path = getChatContextPath(chatContext)
+    this.abortControllers[path] = abortController
+
+    return abortController.signal
+  }
+
+  private cleanupAbort(chatContext: ChatContext) {
+    const path = getChatContextPath(chatContext)
+    delete this.abortControllers[path]
   }
 }

@@ -2116,6 +2116,25 @@
       "blockers": [],
       "createdAt": "2025-10-03T00:27:25.636Z",
       "updatedAt": "2025-10-03T00:27:25.636Z"
+    },
+    {
+      "id": "c713a8f1-d3af-428d-9f29-f03250b2db5c",
+      "status": "-",
+      "title": "Add ProjectChip + StoryChip to forms",
+      "description": "There are 2 story forms @src/renderer/src/components/stories/StoryForm.tsx  used in @src/renderer/src/screens/stories/StoryCreateView.tsx , @src/renderer/src/screens/stories/StoryEditView.tsx , and and 2 feature forms @src/renderer/src/components/stories/FeatureForm.tsx used in @src/renderer/src/screens/stories/FeatureEditView.tsx and @src/renderer/src/screens/stories/FeatureCreateView.tsx .\nUnder the title all of these need to display a project chip info (that cannot be clicked) aligned to the left with the title. The project chip is @src/renderer/src/components/agents/ProjectChip.tsx .\n\nThe feature views also need to display a @src/renderer/src/components/stories/DependencyBullet.tsx where the dependency is the `storyId` to the right of the form aligned with the Status display.",
+      "context": [
+        "src/renderer/src/components/stories/StoryForm.tsx",
+        "src/renderer/src/screens/stories/StoryCreateView.tsx",
+        "src/renderer/src/screens/stories/StoryEditView.tsx",
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx",
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/components/agents/ProjectChip.tsx",
+        "src/renderer/src/components/stories/DependencyBullet.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T08:51:12.257Z",
+      "updatedAt": "2025-10-03T08:51:12.257Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2255,9 +2274,10 @@
     "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134,
     "bb76a798-869f-45ba-9902-25812ab58166": 135,
     "fb5a75f9-a460-4382-b369-420836ca265e": 136,
-    "eb1cc27e-7bae-484e-95f0-fb59e98e285d": 137,
-    "4dbdca35-53b9-402a-b1ea-5e4f7401e04e": 138,
-    "fc159580-49ca-4602-ac15-5060897a320d": 139
+    "c713a8f1-d3af-428d-9f29-f03250b2db5c": 137,
+    "eb1cc27e-7bae-484e-95f0-fb59e98e285d": 138,
+    "4dbdca35-53b9-402a-b1ea-5e4f7401e04e": 139,
+    "fc159580-49ca-4602-ac15-5060897a320d": 140
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

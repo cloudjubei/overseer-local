@@ -30,6 +30,7 @@ const IPC_HANDLER_KEYS = {
   COMPLETION_TOOLS_SEND: 'completion:tools-send',
   COMPLETION_TOOLS_RESUME: 'completion:tools-resume',
   COMPLETION_SEND: 'completion:send',
+  COMPLETION_ABORT: 'complation:abort',
 
   // Files
   FILES_SUBSCRIBE: 'files:subscribe',

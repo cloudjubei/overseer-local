@@ -108,6 +108,11 @@ const COMPLETION_API = {
       config,
       onAbortControllerCreated,
     }),
+
+  abortCompletion: (chatContext) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_ABORT, {
+      chatContext,
+    }),
 }
 
 const CHATS_API = {

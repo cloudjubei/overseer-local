@@ -42,6 +42,7 @@ export default function ChatSidebar({
     restartChat,
     sendMessage,
     resumeTools,
+    abortMessage,
     getSettings,
     resetSettings,
     updateCompletionSettings,
@@ -49,7 +50,6 @@ export default function ChatSidebar({
     getSettingsPrompt,
     updateSettingsPrompt,
     resetSettingsPrompt,
-    abortInFlight,
   } = useChats()
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
@@ -98,8 +98,8 @@ export default function ChatSidebar({
   )
 
   const handleAbort = useCallback(() => {
-    abortInFlight(context)
-  }, [abortInFlight, context])
+    abortMessage(context)
+  }, [abortMessage, context])
 
   const [tools, setTools] = useState<ToolToggle[]>([])
 
@@ -226,19 +226,13 @@ export default function ChatSidebar({
 
   useEffect(() => {
     const update = async () => {
-      try {
-        const p = await getSettingsPrompt(contextArguments)
-        setEffectivePrompt(p)
-        setDraftPrompt(p)
-      } catch {
-        try {
-          const def = await getDefaultPrompt(context)
-          setEffectivePrompt(def)
-          setDraftPrompt(def)
-        } catch {
-          setEffectivePrompt('')
-          setDraftPrompt('')
-        }
+      const p = await getSettingsPrompt(contextArguments)
+      setEffectivePrompt(p)
+      if (currentSettings?.systemPrompt) {
+        setDraftPrompt(currentSettings?.systemPrompt)
+      } else {
+        const def = await getDefaultPrompt(context)
+        setDraftPrompt(def)
       }
     }
     update()
@@ -252,8 +246,10 @@ export default function ChatSidebar({
 
   useEffect(() => {
     const custom = currentSettings?.systemPrompt
-    setDraftPrompt(custom ? custom : effectivePrompt)
-  }, [effectivePrompt, currentSettings?.systemPrompt])
+    if (custom) {
+      setDraftPrompt(custom)
+    }
+  }, [currentSettings?.systemPrompt])
 
   const messagesWithSystem: ChatMessage[] = useMemo(() => {
     const original = chat?.chat.messages || []
@@ -370,12 +366,15 @@ export default function ChatSidebar({
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium text-[var(--text-secondary)]" htmlFor="maxTurns">
-                          Max turns per run
+                        <label
+                          className="text-xs font-medium text-[var(--text-secondary)]"
+                          htmlFor="maxTurns"
+                        >
+                          Max turns per run:
+                          <span className="pl-4 text-[14px] text-[var(--text-secondary)]">
+                            {completion.maxTurns ?? ''}
+                          </span>
                         </label>
-                        <span className="text-[10px] text-[var(--text-secondary)]">
-                          {completion.maxTurns ?? ''}
-                        </span>
                       </div>
                       <input
                         id="maxTurns"
@@ -395,12 +394,15 @@ export default function ChatSidebar({
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium text-[var(--text-secondary)]" htmlFor="numberMessagesToSend">
-                          Number of messages to send
+                        <label
+                          className="text-xs font-medium text-[var(--text-secondary)]"
+                          htmlFor="numberMessagesToSend"
+                        >
+                          Number of messages to send:
+                          <span className="pl-4 text-[14px] text-[var(--text-secondary)]">
+                            {completion.numberMessagesToSend ?? ''}
+                          </span>
                         </label>
-                        <span className="text-[10px] text-[var(--text-secondary)]">
-                          {completion.numberMessagesToSend ?? ''}
-                        </span>
                       </div>
                       <input
                         id="numberMessagesToSend"
@@ -434,7 +436,6 @@ export default function ChatSidebar({
                         onCheckedChange={(checked) =>
                           persistSettings({ finishTurnOnErrors: !!checked })
                         }
-                        label="Finish turn on errors"
                       />
                     </div>
                   </div>

@@ -22,7 +22,6 @@ export type ChatState = {
   chat: Chat
   isLoading: boolean
   isThinking: boolean
-  abortController?: AbortController
 }
 
 export type ChatsContextValue = {
@@ -36,7 +35,6 @@ export type ChatsContextValue = {
     settings: ChatSettings,
     config: LLMConfig,
     files?: string[],
-    abortSignal?: AbortSignal,
   ) => Promise<void>
   resumeTools: (
     context: ChatContext,
@@ -44,10 +42,9 @@ export type ChatsContextValue = {
     prompt: string,
     settings: ChatSettings,
     config: LLMConfig,
-    abortSignal?: AbortSignal,
   ) => Promise<void>
 
-  abortInFlight: (context: ChatContext) => void
+  abortMessage: (context: ChatContext) => Promise<void>
 
   getChat: (context: ChatContext) => Promise<ChatState>
   restartChat: (context: ChatContext) => Promise<ChatState>
@@ -221,7 +218,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           messages: chatMessages,
         },
         isThinking: true,
-        abortController: undefined,
       })
 
       const chatProjectId = context.projectId ?? projectId
@@ -233,14 +229,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           prompt,
           settings.completionSettings,
           config,
-          (abortController) => {
-            updateChatState(key, { abortController })
-          },
         )
       } catch (e) {
         console.error('completionService.getCompletionTools:', e)
       } finally {
-        updateChatState(key, { isThinking: false, abortController: undefined })
+        updateChatState(key, { isThinking: false })
       }
     },
     [projectId, getChat, updateChatState],
@@ -266,7 +259,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           ...chatState.chat,
         },
         isThinking: true,
-        abortController: undefined,
       })
 
       const chatProjectId = context.projectId ?? projectId
@@ -278,27 +270,22 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           prompt,
           settings.completionSettings,
           config,
-          (abortController) => {
-            updateChatState(key, { abortController })
-          },
         )
       } catch (e) {
         console.error('completionService.resumeCompletionTools:', e)
       } finally {
-        updateChatState(key, { isThinking: false, abortController: undefined })
+        updateChatState(key, { isThinking: false })
       }
     },
     [projectId, getChat, updateChatState],
   )
 
-  const abortInFlight = useCallback(
-    (context: ChatContext) => {
-      const key = getChatContextPath(context)
-      const current = chats[key]
+  const abortMessage = useCallback(
+    async (context: ChatContext) => {
       try {
-        current?.abortController?.abort()
+        await completionService.abortCompletion(context)
       } catch (e) {
-        console.warn('Abort failed or not available for chat', key, e)
+        console.warn('Abort failed or not available for chat', e)
       }
     },
     [chats],
@@ -313,7 +300,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         chat: { context, messages: [], createdAt: now, updatedAt: now },
         isLoading: false,
         isThinking: false,
-        abortController: undefined,
       })
       const chat = await chatsService.createChat({ context, messages: [] })
       const state = { key, chat, isLoading: false, isThinking: false } as ChatState
@@ -425,7 +411,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       chatsByProjectId,
       sendMessage,
       resumeTools,
-      abortInFlight,
+      abortMessage,
       getChat,
       restartChat,
       deleteChat,
@@ -443,7 +429,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       chatsByProjectId,
       sendMessage,
       resumeTools,
-      abortInFlight,
+      abortMessage,
       getChat,
       restartChat,
       deleteChat,
