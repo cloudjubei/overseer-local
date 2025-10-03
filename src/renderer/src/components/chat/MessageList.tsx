@@ -386,7 +386,7 @@ export default function MessageList({
                   isUser
                     ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
                     : isSystem
-                      ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                      ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
                       : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
                 ].join(' ')}
                 aria-hidden="true"
@@ -397,7 +397,7 @@ export default function MessageList({
               <div
                 className={[
                   'max-w-[85%] min-w-0 flex flex-col',
-                  isUser ? 'items-end' : isSystem ? 'items-center' : 'items-start',
+                  isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
                 ].join(' ')}
               >
                 {msg.showModel && msg.model && (
@@ -407,34 +407,40 @@ export default function MessageList({
                   </div>
                 )}
 
-                <div
-                  className={[
-                    'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
-                    isUser
-                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                      : isSystem
-                        ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                        : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                    msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
-                    'chat-bubble',
-                    isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
-                  ].join(' ')}
-                >
-                  {isUser ? (
-                    <RichText text={msg.completionMessage.content} />
-                  ) : index === animateAssistantIdx ? (
-                    <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
-                  ) : isSystem ? (
-                    toggleableCount > 0 ? (
-                      <div className="text-sm">
-                        The assistant wants to run tools. Please grant permission for the tools you
-                        want to allow.
-                      </div>
-                    ) : null
-                  ) : (
-                    <Markdown text={msg.completionMessage.content} />
-                  )}
-                </div>
+                {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
+                  <div
+                    className={[
+                      'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                      isUser
+                        ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
+                        : isSystem
+                          ? toggleableCount > 0
+                            ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
+                            : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                          : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                      msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                      'chat-bubble',
+                      isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
+                    ].join(' ')}
+                  >
+                    {isUser ? (
+                      <RichText text={msg.completionMessage.content} />
+                    ) : index === animateAssistantIdx ? (
+                      <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
+                    ) : isSystem ? (
+                      toggleableCount > 0 ? (
+                        <div className="text-sm">
+                          The assistant wants to run tools. Please grant permission for the tools you
+                          want to allow.
+                        </div>
+                      ) : (
+                        <Markdown text={msg.completionMessage.content} />
+                      )
+                    ) : (
+                      <Markdown text={msg.completionMessage.content} />
+                    )}
+                  </div>
+                ) : null}
 
                 {!!msg.toolCalls && (
                   <div className="mt-2 w-full space-y-2">
@@ -451,7 +457,8 @@ export default function MessageList({
                         | undefined
                       const isRequireConfirm = rawType === 'require_confirmation'
                       const thisId = (res as any)?.result?.result
-                      const selectable = !!(isSystem && isLast && isRequireConfirm && typeof thisId !== 'undefined')
+                      const selectable =
+                        !!(isSystem && isLast && isRequireConfirm && typeof thisId !== 'undefined')
 
                       const effectiveStatus = (() => {
                         if (isRequireConfirm) {
@@ -501,7 +508,9 @@ export default function MessageList({
                           disabled={selectedCount === 0 || !onResumeTools}
                           onClick={() => {
                             if (!onResumeTools) return
-                            const validSelected = selectedToolIds.filter((id) => toggleableIds.includes(id))
+                            const validSelected = selectedToolIds.filter((id) =>
+                              toggleableIds.includes(id),
+                            )
                             onResumeTools(validSelected)
                           }}
                         >
