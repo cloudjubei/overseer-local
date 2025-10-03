@@ -7,11 +7,12 @@
     {
       "id": "e8a7a520-3047-48ab-b0e8-5c060241c239",
       "status": "-",
-      "title": "Git service: extend IPC to support staging/commit/push/pull/checkout",
-      "description": "Augment the main-process gitHelper and GitMonitorManager IPC handlers to enable core VCS workflows beyond listing/merge:\n- Add IPC handlers and gitHelper functions for: status porcelain with staged/unstaged changes, list remotes, fetch, pull, push, add (stage by path), reset (unstage by path), discard changes (checkout -- <path>), create branch, checkout branch, delete branch (safe only), rename branch, set upstream.\n- Ensure all commands use timeouts and return structured { ok, ... } responses; errors are captured without throwing.\n- Update preload (GIT_MONITOR_API) and renderer service (gitMonitorService) types with new methods.\n- Maintain safe checks: refuse destructive ops when working tree dirty where appropriate; confirm branch existence.\n- Keep polling behavior unchanged; only extend APIs.\nAcceptance: unit tests for gitHelper new methods with mocked exec; IPC handlers reachable via preload; types updated.",
+      "title": "Git service: extend IPC to support GitTools",
+      "description": "Augment the main-process gitHelper and GitMonitorManager IPC handlers to enable core VCS workflows - utilise GitTools from `thefactory-tools` which offers all required git functions.\n\nUpdate preload (GIT_MONITOR_API) and renderer service (gitMonitorService) types with new methods.\nKeep polling behavior unchanged; only extend APIs.\n\nAcceptance: unit tests for gitHelper new methods with mocked exec; IPC handlers reachable via preload; types updated.",
       "context": [],
       "createdAt": "2025-10-03T09:50:20.835Z",
-      "updatedAt": "2025-10-03T09:50:20.835Z"
+      "updatedAt": "2025-10-03T11:21:31.150Z",
+      "blockers": []
     },
     {
       "id": "6936778c-98ea-4019-9f61-f70eba42195c",

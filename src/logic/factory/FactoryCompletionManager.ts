@@ -315,6 +315,19 @@ export default class FactoryCompletionManager extends BaseManager {
         error: c.error,
       }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
+    } else if (c.resultType === 'max_turns_reached') {
+      const now = new Date().toISOString()
+      const errorMessage: ChatMessage = {
+        completionMessage: {
+          role: 'system',
+          content: 'Max Turns Reached',
+          usage: { promptTokens: 0, completionTokens: 0 },
+          startedAt: now,
+          completedAt: now,
+          durationMs: 0,
+        },
+      }
+      await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     }
     this.cleanupAbort(chatContext)
     return c
