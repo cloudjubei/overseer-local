@@ -569,7 +569,7 @@
     },
     {
       "id": "d2076d76-651a-4a84-a464-11d95f98c784",
-      "status": "-",
+      "status": "+",
       "title": "MessageList needs to display all tool calls",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx and then in @src/renderer/src/components/chat/MessageList.tsx various messages are displayed, usually alternating messages from assistant and user.\nThe assistant messages are sometimes followed by 'user' messages that are actually just tool call results, for ease of handling in @src/renderer/src/components/chat/MessageList.tsx their role is changed to 'system' .\nThese messages, might have multiple tool calls + results inside, as defined in the structure `ChatMessage` and the field `toolResults` . Each tool result has a type `ToolResultType` - and we want to nicely display all of these statuses.\nSuccess is currently handled - it just displays, but the rest are not.\nErrored, aborted and not_allowed should display the tool call in red/orange/black respectively with an appropriate icon.\n\n`require_confirmation` is one that requires user input - a user must be able to toggle all such tool calls in the LAST message only (otherwise they can be treated as 'aborted' ), and if they toggle more than 1 they should be able to call the `resumeTools` of @src/renderer/src/contexts/ChatsContext.tsx with the list of ids of these tool results (the id is the value inside `CompletionToolResult.result.result` ). A button should show below the tool calls allowing the user to do this. It should be disabled if there are none selected, and teal saying:\n\"Resume X/Y Tools\" where X is the toggled tools, and Y is how many could be toggled. Each tool that requires confirmation should be also shown with a teal border and have a switch in the top right corner.\n\n\nAll the needed interfaces are listed in comment inside @src/renderer/src/components/chat/MessageList.tsx .",
       "context": [
@@ -579,8 +579,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-02T23:48:42.369Z",
-      "updatedAt": "2025-10-03T14:06:03.287Z",
-      "rejection": "Still there is no toggle shown for tools requiring confirmation - they also don't have a teal border like requested. \nThe message below these tools is also not how the description specifies."
+      "updatedAt": "2025-10-03T16:48:46.160Z",
+      "completedAt": "2025-10-03T16:48:46.160Z"
     },
     {
       "id": "8fe33379-179d-4590-aece-405b5b35a48a",

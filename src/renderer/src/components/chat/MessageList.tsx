@@ -8,8 +8,9 @@ import ToolCallCard from './ToolCallCard'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
-import { ChatMessage, ToolCall } from 'thefactory-tools'
+import { ChatMessage, CompletionToolResult, ToolCall, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
+import { IconToolbox } from '../ui/Icons'
 
 // export type ToolCall = {
 //     name: string;
@@ -350,7 +351,16 @@ export default function MessageList({
 
           const isSystem = msg.completionMessage.role === 'system' //system messages here indicate tool results
           const isUser = msg.completionMessage.role === 'user'
+          const isAssistant = msg.completionMessage.role === 'assistant'
+
           const isLast = index === messagesToDisplay.length - 1
+
+          const isShowingToolCalls =
+            isAssistant &&
+            (isLast || messagesToDisplay[index + 1].toolResults === undefined) &&
+            !!msg.toolCalls?.length
+          const isShowingToolResults = isSystem && !!msg.toolResults?.length
+
           const isNewUserBubble =
             isUser &&
             index === enhancedMessages.length - 1 &&
@@ -364,7 +374,8 @@ export default function MessageList({
             for (const r of results) {
               const t = (r as any)?.result?.type
               const idVal = (r as any)?.result?.result
-              if (t === 'require_confirmation' && typeof idVal !== 'undefined') ids.push(String(idVal))
+              if (t === 'require_confirmation' && typeof idVal !== 'undefined')
+                ids.push(String(idVal))
             }
             return ids
           })()
@@ -391,7 +402,7 @@ export default function MessageList({
                 ].join(' ')}
                 aria-hidden="true"
               >
-                {isUser ? 'You' : isSystem ? 'TOOLS' : 'AI'}
+                {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
               </div>
 
               <div
@@ -430,8 +441,8 @@ export default function MessageList({
                     ) : isSystem ? (
                       toggleableCount > 0 ? (
                         <div className="text-sm">
-                          The assistant wants to run tools. Please grant permission for the tools you
-                          want to allow.
+                          The assistant wants to run tools. Please grant permission for the tools
+                          you want to allow.
                         </div>
                       ) : (
                         <Markdown text={msg.completionMessage.content} />
@@ -442,50 +453,51 @@ export default function MessageList({
                   </div>
                 ) : null}
 
-                {!!msg.toolCalls && (
+                {isShowingToolCalls && (
                   <div className="mt-2 w-full space-y-2">
-                    {msg.toolCalls.map((call: ToolCall, i: number) => {
-                      const name = call.name
-                      const args = call.arguments ?? {}
-                      const res = msg.toolResults?.[i]
-                      const rawType = (res as any)?.result?.type as
-                        | 'require_confirmation'
-                        | 'not_allowed'
-                        | 'errored'
-                        | 'aborted'
-                        | 'success'
-                        | undefined
-                      const isRequireConfirm = rawType === 'require_confirmation'
-                      const thisId = (res as any)?.result?.result
+                    {msg.toolCalls!.map((call: ToolCall, i: number) => {
+                      return (
+                        <ToolCallCard
+                          key={`tool-${index}-${i}`}
+                          index={i}
+                          toolCall={call}
+                          selectable={false}
+                          disabled={true}
+                        />
+                      )
+                    })}
+                  </div>
+                )}
+                {isShowingToolResults && (
+                  <div className="mt-2 w-full space-y-2">
+                    {msg.toolResults!.map((c: CompletionToolResult, i: number) => {
+                      const result = c.result
+                      const resultType = result.type
+                      const isRequireConfirm = resultType === 'require_confirmation'
+                      const resultId = result.result
                       const selectable =
-                        !!(isSystem && isLast && isRequireConfirm && typeof thisId !== 'undefined')
+                        isSystem && isLast && isRequireConfirm && resultId !== undefined
 
-                      const effectiveStatus = (() => {
-                        if (isRequireConfirm) {
-                          return isLast ? 'require_confirmation' : 'aborted'
-                        }
-                        return rawType
-                      })()
+                      const effectiveResultType: ToolResultType | undefined =
+                        isRequireConfirm && !isLast ? 'aborted' : resultType
 
                       return (
                         <ToolCallCard
                           key={`tool-${index}-${i}`}
                           index={i}
-                          toolName={name}
-                          args={args}
-                          result={res?.result as any}
-                          durationMs={res?.durationMs}
-                          status={effectiveStatus as any}
+                          toolCall={result.call}
+                          result={result.result}
+                          resultType={effectiveResultType}
+                          durationMs={c.durationMs}
                           selectable={selectable}
-                          selected={selectable ? selectedToolIds.includes(String(thisId)) : false}
+                          selected={selectable ? selectedToolIds.includes(resultId) : false}
                           onToggleSelect={
                             selectable
                               ? () => {
-                                  const idStr = String(thisId)
                                   setSelectedToolIds((prev) =>
-                                    prev.includes(idStr)
-                                      ? prev.filter((x) => x !== idStr)
-                                      : [...prev, idStr],
+                                    prev.includes(resultId)
+                                      ? prev.filter((x) => x !== resultId)
+                                      : [...prev, resultId],
                                   )
                                 }
                               : undefined

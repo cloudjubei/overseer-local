@@ -1,39 +1,73 @@
 import {
-  IconCheckmarkCircle, //missing
+  IconCheckmarkCircle,
   IconError,
-  IconStop, //missing
-  IconNotAllowed, //missing
-  IconHourglass, //missing
+  IconStop,
+  IconNotAllowed,
+  IconHourglass,
   IconChevron,
 } from '../ui/Icons'
-import Code from '../ui/Code' //missing
+import Code from '../ui/Code'
 import { useState } from 'react'
 import { Switch } from '../ui/Switch'
 import JsonView from '../ui/JsonView'
-
-type ToolResultType = 'require_confirmation' | 'not_allowed' | 'errored' | 'aborted' | 'success'
+import { ToolCall, ToolResultType } from 'thefactory-tools'
 
 export type ToolCallCardProps = {
   index: number
-  toolName: string
-  args: Record<string, unknown>
-  result?: {
-    type: ToolResultType
-    result: string | number | boolean | Record<string, unknown> | Array<unknown>
-  }
+  toolCall: ToolCall
+  result?: string
+  resultType?: ToolResultType
   durationMs?: number
-  status?: ToolResultType
   selectable?: boolean
   selected?: boolean
   onToggleSelect?: () => void
   disabled?: boolean
 }
+function isLargeJson(value: any) {
+  try {
+    const s = typeof value === 'string' ? value : JSON.stringify(value)
+    return s.length > 600
+  } catch {
+    return false
+  }
+}
+function Collapsible({
+  title,
+  children,
+  defaultOpen = false,
+  className,
+  innerClassName,
+}: {
+  title: React.ReactNode
+  children: React.ReactNode
+  defaultOpen?: boolean
+  className?: string
+  innerClassName?: string
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div
+      className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}
+    >
+      <button
+        className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[var(--surface-raised)]"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="text-xs font-medium truncate pr-2">{title}</span>
+        <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
+      </button>
+      {open ? (
+        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>
+          {children}
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
-function StatusIcon({ status }: { status?: ToolResultType }) {
+function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
   const size = 'w-4 h-4'
-  switch (status) {
-    case 'success':
-      return <IconCheckmarkCircle className={`${size} text-green-500`} />
+  switch (resultType) {
     case 'errored':
       return <IconError className={`${size} text-red-500`} />
     case 'aborted':
@@ -43,15 +77,16 @@ function StatusIcon({ status }: { status?: ToolResultType }) {
     case 'require_confirmation':
       return <IconHourglass className={`${size} text-teal-500`} />
     default:
-      return <IconHourglass className={`${size} text-neutral-500`} />
+      return <IconCheckmarkCircle className={`${size} text-green-500`} />
   }
 }
 
-function StatusPill({ status }: { status?: ToolResultType }) {
-  if (!status) return null
-  const base = 'text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded-full'
+function StatusPill({ resultType }: { resultType?: ToolResultType }) {
+  if (!resultType) return null
+  const base =
+    'text-[10px] text-center uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded-full'
   let colors = ''
-  switch (status) {
+  switch (resultType) {
     case 'success':
       colors = 'bg-green-500/20 text-green-600 dark:text-green-400'
       break
@@ -65,28 +100,29 @@ function StatusPill({ status }: { status?: ToolResultType }) {
       colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
       break
     case 'require_confirmation':
-      colors = 'bg-teal-500/20 text-teal-600 dark:text-teal-400'
+      colors = 'bg-neutral-500/20 text-teal-600 dark:text-teal-400'
       break
     default:
       colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
       break
   }
-  return <div className={`${base} ${colors}`}>{status.replace('_', ' ')}</div>
+  return <div className={`${base} ${colors}`}>{resultType.replace('_', ' ')}</div>
 }
 
 export default function ToolCallCard({
-  toolName,
-  args,
+  index,
+  toolCall,
   result,
+  resultType,
   durationMs,
-  status,
   selectable,
   selected,
   onToggleSelect,
 }: ToolCallCardProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isCallExpanded, setIsCallExpanded] = useState(true)
 
-  const isRequireConfirm = status === 'require_confirmation'
+  const showResult = resultType === 'success'
+  const isRequireConfirm = resultType === 'require_confirmation'
 
   return (
     <div
@@ -97,37 +133,45 @@ export default function ToolCallCard({
           : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]',
       ].join(' ')}
     >
-      <div className="flex items-center justify-between px-3 py-2">
+      <div className="flex items-center justify-between px-3 pt-2">
         <div className="flex items-center gap-2">
-          <StatusIcon status={status} />
-          <span className="font-semibold">{toolName}</span>
+          <StatusIcon resultType={resultType} />
+          <span className="font-semibold">{toolCall.name}</span>
+          {(durationMs ?? 0) > 0 && <span className="font-light text-xs ">{durationMs}ms</span>}
         </div>
         <div className="flex items-center gap-2">
-          {durationMs !== undefined && (
-            <span className="text-xs text-[var(--text-secondary)]">{durationMs}ms</span>
-          )}
-          <StatusPill status={status} />
-          {selectable && onToggleSelect && (
-            <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
-          )}
           <button
             type="button"
             className="btn-icon"
-            onClick={() => setIsExpanded((v) => !v)}
-            aria-expanded={isExpanded}
+            onClick={() => setIsCallExpanded((v) => !v)}
+            aria-expanded={isCallExpanded}
           >
             <IconChevron
               className="w-4 h-4 transition-transform"
-              style={{ transform: `rotate(${isExpanded ? 0 : -90}deg)` }}
+              style={{ transform: `rotate(${isCallExpanded ? 90 : 0}deg)` }}
             />
           </button>
         </div>
       </div>
-      {isExpanded && (
+      <div className="flex items-center justify-between px-3 py-2">
+        <StatusPill resultType={resultType} />
+        {selectable && onToggleSelect && (
+          <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
+        )}
+      </div>
+      {isCallExpanded && (
         <div className="px-3 pb-2">
-          <Code language="json" code={JSON.stringify({ args, result }, null, 2)} />
+          <Code language="json" code={JSON.stringify(toolCall.arguments ?? {}, null, 2)} />
           {/* <JsonView value={result} /> */}
         </div>
+      )}{' '}
+      {showResult && (
+        <Collapsible title={<span>View result</span>}>
+          <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
+            <Code language="json" code={JSON.stringify(JSON.parse(result!), null, 2)} />
+            {/* <JsonView value={result} /> */}
+          </div>
+        </Collapsible>
       )}
     </div>
   )
