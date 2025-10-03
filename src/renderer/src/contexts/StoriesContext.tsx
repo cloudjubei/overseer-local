@@ -99,6 +99,12 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     Record<string, Record<string, string>>
   >({})
 
+  useEffect(() => {
+    if (Object.keys(storyIdsByProject).length == 0) {
+      console.log('LLELELE storyIdsByProject GOT RESET!!!!')
+    }
+  }, [storyIdsByProject])
+
   //TODO: resolve blockers properly
   // const updateBlockersOutbound = useCallback((project: ProjectSpec, stories: Story[]) => {
   //   const outbound: Record<string, ResolvedRef[]> = {}

@@ -2136,6 +2136,40 @@
       "createdAt": "2025-10-03T08:51:12.257Z",
       "updatedAt": "2025-10-03T09:12:46.169Z",
       "completedAt": "2025-10-03T09:12:46.169Z"
+    },
+    {
+      "id": "76b04544-7d06-4f64-8648-95a46b569056",
+      "status": "-",
+      "title": "In chats there should be a small indicator to the side showing the cut off point for assistant messages",
+      "description": "in @src/renderer/src/components/chat/ChatSidebar.tsx the ChatSettings and the CompletionSettings inside, have a `numberMessagesToSend` which is the amount of messages the LLM will be given. This could be nicely indicated to the user as a little notch on the side, that when hovered will explain that this is the cut off point. The notch must take into account that a user will probably send a message - so it should be always -1 from the number (this should also be explaind in the tooltip).",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T21:28:33.845Z",
+      "updatedAt": "2025-10-03T21:28:33.845Z"
+    },
+    {
+      "id": "4eb23f4e-deba-496d-9c27-ee4c052da03c",
+      "status": "-",
+      "title": "Show the actual system prompt",
+      "description": "In the @src/renderer/src/components/chat/ChatSidebar.tsx next to the info button, we want to show another button that will have a scroll icon, that will show the current system prompt that the agent will get - this is the effective prompt with arguments placed in - not the template.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T21:30:52.373Z",
+      "updatedAt": "2025-10-03T21:30:52.373Z"
+    },
+    {
+      "id": "f4c58b41-f321-4c7a-a4d3-247cc2eb157f",
+      "status": "-",
+      "title": "on clicking agent run start - sometimes all projects + stories disappear",
+      "description": "T",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-03T21:35:49.978Z",
+      "updatedAt": "2025-10-03T21:35:49.978Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2277,8 +2311,11 @@
     "fb5a75f9-a460-4382-b369-420836ca265e": 136,
     "c713a8f1-d3af-428d-9f29-f03250b2db5c": 137,
     "eb1cc27e-7bae-484e-95f0-fb59e98e285d": 138,
-    "4dbdca35-53b9-402a-b1ea-5e4f7401e04e": 139,
-    "fc159580-49ca-4602-ac15-5060897a320d": 140
+    "4eb23f4e-deba-496d-9c27-ee4c052da03c": 139,
+    "76b04544-7d06-4f64-8648-95a46b569056": 140,
+    "4dbdca35-53b9-402a-b1ea-5e4f7401e04e": 141,
+    "fc159580-49ca-4602-ac15-5060897a320d": 142,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 143
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
