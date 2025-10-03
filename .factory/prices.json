@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-09-30T14:15:55.784Z",
+  "updatedAt": "2025-10-03T22:03:20.023Z",
   "prices": [
     {
       "provider": "openai",
@@ -9869,6 +9869,62 @@
       "model": "xai/grok-4-fast-non-reasoning",
       "inputPerMTokensUSD": 0.19999999999999998,
       "outputPerMTokensUSD": 0.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/grok-4",
+      "inputPerMTokensUSD": 5.5,
+      "outputPerMTokensUSD": 27.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/grok-4-fast-non-reasoning",
+      "inputPerMTokensUSD": 5,
+      "outputPerMTokensUSD": 2500,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/grok-4-fast-reasoning",
+      "inputPerMTokensUSD": 5.800000000000001,
+      "outputPerMTokensUSD": 2900,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/grok-code-fast-1",
+      "inputPerMTokensUSD": 3.5,
+      "outputPerMTokensUSD": 17.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "lemonade",
+      "model": "lemonade/Qwen3-Coder-30B-A3B-Instruct-GGUF",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "groq",
+      "model": "groq/moonshotai/kimi-k2-instruct-0905",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 3,
+      "currency": "USD"
+    },
+    {
+      "provider": "nvidia_nim",
+      "model": "nvidia_nim/nvidia/nv-rerankqa-mistral-4b-v3",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "nvidia_nim",
+      "model": "nvidia_nim/nvidia/llama-3_2-nv-rerankqa-1b-v2",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
       "currency": "USD"
     }
   ]

@@ -225,11 +225,11 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log('newStoryIdsByProject: ', newStoryIdsByProject)
-    setStoryIdsByProject(newStoryIdsByProject)
-    setStoriesById(newStoriesById)
-    setFeaturesById(newFeaturesById)
-    setStoryDisplayToId(newStoryDisplayToId)
-    setFeatureDisplayToIdByStory(newFeatureDisplayToIdByStory)
+    setStoryIdsByProject((prev) => ({ ...prev, ...newStoryIdsByProject }))
+    setStoriesById((prev) => ({ ...prev, ...newStoriesById }))
+    setFeaturesById((prev) => ({ ...prev, ...newFeaturesById }))
+    setStoryDisplayToId((prev) => ({ ...prev, ...newStoryDisplayToId }))
+    setFeatureDisplayToIdByStory((prev) => ({ ...prev, ...newFeatureDisplayToIdByStory }))
   }
 
   const onStoryUpdate = useCallback(
