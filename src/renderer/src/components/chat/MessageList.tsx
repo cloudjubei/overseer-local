@@ -60,10 +60,12 @@ export default function MessageList({
   chatId,
   messages,
   isThinking,
+  onResumeTools,
 }: {
   chatId?: string
   messages: ChatMessage[]
   isThinking: boolean
+  onResumeTools?: (toolIds: string[]) => void
 }) {
   const { filesByPath } = useFiles()
 
@@ -283,6 +285,14 @@ export default function MessageList({
     return systemPromptMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
   }, [enhancedMessages, systemPromptMessage])
 
+  // Selection state for 'require_confirmation' tools on the last message
+  const [selectedToolIds, setSelectedToolIds] = useState<string[]>([])
+
+  // Reset selection when chat changes or messages set changes
+  useEffect(() => {
+    setSelectedToolIds([])
+  }, [chatId, messagesToDisplay.length])
+
   return (
     <div
       ref={messageListRef}
@@ -340,10 +350,27 @@ export default function MessageList({
 
           const isSystem = msg.completionMessage.role === 'system' //system messages here indicate tool results
           const isUser = msg.completionMessage.role === 'user'
+          const isLast = index === messagesToDisplay.length - 1
           const isNewUserBubble =
             isUser &&
             index === enhancedMessages.length - 1 &&
             messages.length > prevLenForUserAnimRef.current
+
+          // Compute toggleable tool ids for the last system message
+          const toggleableIds: string[] = (() => {
+            if (!(isSystem && isLast)) return []
+            const results = msg.toolResults || []
+            const ids: string[] = []
+            for (const r of results) {
+              const t = (r as any)?.result?.type
+              const idVal = (r as any)?.result?.result
+              if (t === 'require_confirmation' && typeof idVal !== 'undefined') ids.push(String(idVal))
+            }
+            return ids
+          })()
+
+          const toggleableCount = toggleableIds.length
+          const selectedCount = selectedToolIds.filter((id) => toggleableIds.includes(id)).length
 
           return (
             <div
@@ -408,17 +435,73 @@ export default function MessageList({
                       const name = call.name
                       const args = call.arguments ?? {}
                       const res = msg.toolResults?.[i]
+                      const rawType = (res as any)?.result?.type as
+                        | 'require_confirmation'
+                        | 'not_allowed'
+                        | 'errored'
+                        | 'aborted'
+                        | 'success'
+                        | undefined
+                      const isRequireConfirm = rawType === 'require_confirmation'
+                      const thisId = (res as any)?.result?.result
+                      const selectable = !!(isSystem && isLast && isRequireConfirm && typeof thisId !== 'undefined')
+
+                      const effectiveStatus = (() => {
+                        if (isRequireConfirm) {
+                          return isLast ? 'require_confirmation' : 'aborted'
+                        }
+                        return rawType
+                      })()
+
                       return (
                         <ToolCallCard
                           key={`tool-${index}-${i}`}
                           index={i}
                           toolName={name}
                           args={args}
-                          result={res?.result}
+                          result={res?.result as any}
                           durationMs={res?.durationMs}
+                          status={effectiveStatus as any}
+                          selectable={selectable}
+                          selected={selectable ? selectedToolIds.includes(String(thisId)) : false}
+                          onToggleSelect={
+                            selectable
+                              ? () => {
+                                  const idStr = String(thisId)
+                                  setSelectedToolIds((prev) =>
+                                    prev.includes(idStr)
+                                      ? prev.filter((x) => x !== idStr)
+                                      : [...prev, idStr],
+                                  )
+                                }
+                              : undefined
+                          }
+                          disabled={!selectable}
                         />
                       )
                     })}
+
+                    {toggleableCount > 0 && isSystem && isLast ? (
+                      <div className="pt-1 flex items-center justify-end">
+                        <button
+                          type="button"
+                          className={[
+                            'btn',
+                            selectedCount > 0
+                              ? 'bg-green-600 hover:bg-green-700 text-white border-transparent'
+                              : 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)] cursor-not-allowed opacity-70',
+                          ].join(' ')}
+                          disabled={selectedCount === 0 || !onResumeTools}
+                          onClick={() => {
+                            if (!onResumeTools) return
+                            const validSelected = selectedToolIds.filter((id) => toggleableIds.includes(id))
+                            onResumeTools(validSelected)
+                          }}
+                        >
+                          {`Resume ${selectedCount}/${toggleableCount} Tools`}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
