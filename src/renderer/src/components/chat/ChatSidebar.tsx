@@ -279,6 +279,8 @@ export default function ChatSidebar({
     .filter(Boolean)
     .join(' ')
 
+  const completion = currentSettings?.completionSettings
+
   return (
     <section className={sectionClass}>
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
@@ -363,6 +365,80 @@ export default function ChatSidebar({
                     </button>
                   </div>
                 </div>
+
+                {completion ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-medium text-[var(--text-secondary)]" htmlFor="maxTurns">
+                          Max turns per run
+                        </label>
+                        <span className="text-[10px] text-[var(--text-secondary)]">
+                          {completion.maxTurns ?? ''}
+                        </span>
+                      </div>
+                      <input
+                        id="maxTurns"
+                        type="range"
+                        min={1}
+                        max={100}
+                        step={1}
+                        value={completion.maxTurns ?? 1}
+                        onChange={(e) => persistSettings({ maxTurns: Number(e.target.value) })}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-[10px] text-[var(--text-tertiary)]">
+                        <span>1</span>
+                        <span>100</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-medium text-[var(--text-secondary)]" htmlFor="numberMessagesToSend">
+                          Number of messages to send
+                        </label>
+                        <span className="text-[10px] text-[var(--text-secondary)]">
+                          {completion.numberMessagesToSend ?? ''}
+                        </span>
+                      </div>
+                      <input
+                        id="numberMessagesToSend"
+                        type="range"
+                        min={3}
+                        max={20}
+                        step={1}
+                        value={completion.numberMessagesToSend ?? 3}
+                        onChange={(e) =>
+                          persistSettings({ numberMessagesToSend: Number(e.target.value) })
+                        }
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-[10px] text-[var(--text-tertiary)]">
+                        <span>3</span>
+                        <span>20</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-medium text-[var(--text-secondary)]">
+                          Finish turn on errors
+                        </span>
+                        <span className="text-[10px] text-[var(--text-tertiary)]">
+                          When enabled, the agent ends the current turn if a tool call errors
+                        </span>
+                      </div>
+                      <Switch
+                        checked={!!completion.finishTurnOnErrors}
+                        onCheckedChange={(checked) =>
+                          persistSettings({ finishTurnOnErrors: !!checked })
+                        }
+                        label="Finish turn on errors"
+                      />
+                    </div>
+                  </div>
+                ) : null}
 
                 {tools ? (
                   <div className="space-y-2">

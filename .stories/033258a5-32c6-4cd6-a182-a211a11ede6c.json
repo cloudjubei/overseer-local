@@ -597,7 +597,7 @@
     },
     {
       "id": "44da30b5-bf91-46d6-abc3-e579c9a7b556",
-      "status": "-",
+      "status": "+",
       "title": "ChatSidebar needs to show new settings",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when opening a chat's settings, the new CompletionSettings need to be shown for maxTurns, numberMesasgesToSend and finishTurnOnErrors (the CompletionSettings is provided in a comment at the top of @src/renderer/src/components/chat/ChatSidebar.tsx ).\nmaxTurns should be displayed as a horizontal drag between 1 and 100.\nnumberMessagesToSend similar but between 3 and 20.\nfinishTurnOnErrors - as a switch.\nAll of these row by row below the system prompt and above the tools.",
       "context": [
@@ -605,7 +605,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-02T23:57:01.237Z",
-      "updatedAt": "2025-10-02T23:57:01.237Z"
+      "updatedAt": "2025-10-03T01:25:06.265Z",
+      "completedAt": "2025-10-03T01:25:06.265Z"
     }
   ],
   "featureIdToDisplayIndex": {
