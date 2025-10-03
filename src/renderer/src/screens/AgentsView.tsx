@@ -86,7 +86,7 @@ const CurrentProjectView = () => {
           (r) => r.projectId === projectId && (r.state === 'created' || r.state === 'running'),
         )
         .slice()
-        .sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || '')),
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [runsHistory, projectId],
   )
 
@@ -97,9 +97,7 @@ const CurrentProjectView = () => {
           (r) => r.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
         )
         .slice()
-        .sort((a, b) =>
-          (b.finishedAt || b.updatedAt || '').localeCompare(a.finishedAt || a.updatedAt || ''),
-        ),
+        .sort((a, b) => new Date(b.finishedAt!).getTime() - new Date(a.finishedAt!).getTime()),
     [runsHistory, projectId],
   )
 
@@ -292,11 +290,7 @@ const AllProjectsView = () => {
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
       const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs = r.finishedAt
-        ? new Date(r.finishedAt).getTime()
-        : r.updatedAt
-          ? new Date(r.updatedAt).getTime()
-          : Date.now()
+      const finishedMs = r.finishedAt ? new Date(r.finishedAt).getTime() : Date.now()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs)
           ? Math.max(0, finishedMs - startedMs)

@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2081,6 +2081,41 @@
       "createdAt": "2025-09-30T14:01:58.314Z",
       "updatedAt": "2025-09-30T14:19:01.769Z",
       "completedAt": "2025-09-30T14:19:01.769Z"
+    },
+    {
+      "id": "4dbdca35-53b9-402a-b1ea-5e4f7401e04e",
+      "status": "-",
+      "title": "Agents need to display the new updated AgentRun Messages",
+      "description": "in @src/renderer/src/screens/AgentsView.tsx the @src/renderer/src/components/agents/ChatConversation.tsx needs to show the new updated results correctly",
+      "context": [
+        "src/renderer/src/screens/AgentsView.tsx",
+        "src/renderer/src/components/agents/ChatConversation.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T00:11:20.779Z",
+      "updatedAt": "2025-10-03T00:11:20.779Z"
+    },
+    {
+      "id": "eb1cc27e-7bae-484e-95f0-fb59e98e285d",
+      "status": "-",
+      "title": "Clicking ctrl/cmd+F adds a default Ongoing Improvements - but not always",
+      "description": "When a different project other than 'main' is selected and the user does cmd+f to create an \"ongoing improvements\" feature - the success toast shows, but the feature isn't created.\nDue to reading the `activeProject` in @src/renderer/src/contexts/StoriesContext.tsx it only works when the main project is selected.\nTo fix this we need two improvements:\n- 1st, ctrl/cmd+f should create the feature in the given project in that projects 'ongoing improvements' story. If it doesn't exist it should simply be created and recorded.\n- 2nd, ctrl/cmd+g should create the feature in 'main' NO MATTER WHICH is the active project.",
+      "context": [
+        "src/renderer/src/contexts/StoriesContext.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T00:26:36.757Z",
+      "updatedAt": "2025-10-03T00:26:36.757Z"
+    },
+    {
+      "id": "fc159580-49ca-4602-ac15-5060897a320d",
+      "status": "-",
+      "title": "Agents need to display running agents correctly",
+      "description": "After a single turn an agent disappears. The schema has changed.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-03T00:27:25.636Z",
+      "updatedAt": "2025-10-03T00:27:25.636Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2219,9 +2254,11 @@
     "31bad08b-59b0-468b-a154-7814251bd4cb": 133,
     "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134,
     "bb76a798-869f-45ba-9902-25812ab58166": 135,
-    "fb5a75f9-a460-4382-b369-420836ca265e": 136
+    "fb5a75f9-a460-4382-b369-420836ca265e": 136,
+    "eb1cc27e-7bae-484e-95f0-fb59e98e285d": 137,
+    "4dbdca35-53b9-402a-b1ea-5e4f7401e04e": 138,
+    "fc159580-49ca-4602-ac15-5060897a320d": 139
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-10-01T00:34:27.858Z",
-  "completedAt": "2025-10-01T00:34:27.858Z"
+  "updatedAt": "2025-10-01T00:34:27.858Z"
 }

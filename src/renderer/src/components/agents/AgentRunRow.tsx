@@ -136,8 +136,8 @@ export default function AgentRunRow({
       className="border-t border-neutral-200 dark:border-neutral-800 group"
     >
       <td className="px-3 py-2 leading-tight">
-        <div>{formatDate(run.createdAt)}</div>
-        <div className="text-neutral-500">{formatTime(run.createdAt)}</div>
+        <div>{formatDate(run.finishedAt || run.createdAt)}</div>
+        <div className="text-neutral-500">{formatTime(run.finishedAt || run.createdAt)}</div>
       </td>
       {showProject ? (
         <td className="px-3 py-2">
