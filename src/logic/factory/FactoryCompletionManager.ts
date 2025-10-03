@@ -266,12 +266,6 @@ export default class FactoryCompletionManager extends BaseManager {
       turn: number,
       response: CompletionResponseWithTools,
     ): Promise<boolean> => {
-      // console.log(
-      //   'turnFinishedCallback turn: ',
-      //   turn,
-      //   ' message: ',
-      //   response.agentResponse?.message,
-      // )
       if (response.toolResults.results.length > 0) {
         let m: ChatMessage = {
           completionMessage: {

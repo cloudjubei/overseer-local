@@ -110,7 +110,7 @@
       "id": "c53d5f00-cd0e-47f7-bcde-6f74d5081850",
       "status": "+",
       "title": "Render File and Story/Feature Mentions as Chips",
-      "description": "Update the message rendering logic to detect `@<file_path>` and `#<storyId>.<feature_id>` mentions in message content. These mentions should be displayed as styled, non-interactive 'chips' within the message bubble for better readability. This will likely involve modifying the @src/renderer/components/ui/RichText.tsx  component.",
+      "description": "Update the message rendering logic to detect `@<file_path>` and `#<storyId>.<featureId>` mentions in message content. These mentions should be displayed as styled, non-interactive 'chips' within the message bubble for better readability. This will likely involve modifying the @src/renderer/components/ui/RichText.tsx  component.",
       "context": [
         "src/renderer/components/ui/RichText.tsx"
       ],
