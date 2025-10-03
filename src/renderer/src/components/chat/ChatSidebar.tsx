@@ -13,12 +13,13 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconDelete } from '../ui/Icons'
+import { IconSettings, IconChevron, IconDelete, IconScroll } from '../ui/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
 import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
 import { Button } from '../ui/Button'
+import Modal from '../ui/Modal'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -59,6 +60,7 @@ export default function ChatSidebar({
 
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
   const persistSettings = useCallback(
@@ -301,6 +303,14 @@ export default function ChatSidebar({
             </button>
           ) : null}
           <ContextInfoButton context={context} label={chatContextTitle} />
+          <button
+            onClick={() => setIsPromptModalOpen(true)}
+            className="btn-secondary btn-icon"
+            aria-label="View System Prompt"
+            title="View System Prompt"
+          >
+            <IconScroll className="w-4 h-4" />
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -540,6 +550,15 @@ export default function ChatSidebar({
           isConfigured={isChatConfigured}
         />
       </div>
+      <Modal
+        isOpen={isPromptModalOpen}
+        onClose={() => setIsPromptModalOpen(false)}
+        title="System Prompt"
+      >
+        <div className="p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto">
+          <pre className="whitespace-pre-wrap font-sans">{effectivePrompt}</pre>
+        </div>
+      </Modal>
     </section>
   )
 }
