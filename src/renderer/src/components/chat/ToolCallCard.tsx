@@ -27,7 +27,9 @@ function Collapsible({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}>
+    <div
+      className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}
+    >
       <button
         className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[var(--surface-raised)]"
         onClick={() => setOpen((v) => !v)}
@@ -36,7 +38,9 @@ function Collapsible({
         <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
-        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>{children}</div>
+        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>
+          {children}
+        </div>
       ) : null}
     </div>
   )
@@ -48,35 +52,45 @@ function StatusBadge({ status }: { status?: ToolResultType }) {
   switch (status) {
     case 'success':
       return (
-        <span className={`${base} text-green-600 border-green-600 bg-[color-mix(in_srgb,#10B981_10%,transparent)]`}>
+        <span
+          className={`${base} text-green-600 border-green-600 bg-[color-mix(in_srgb,#10B981_10%,transparent)]`}
+        >
           <IconCheckCircle className="w-3 h-3" />
           success
         </span>
       )
     case 'errored':
       return (
-        <span className={`${base} text-red-500 border-red-500 bg-[color-mix(in_srgb,#EF4444_10%,transparent)]`}>
+        <span
+          className={`${base} text-red-500 border-red-500 bg-[color-mix(in_srgb,#EF4444_10%,transparent)]`}
+        >
           <IconXCircle className="w-3 h-3" />
           errored
         </span>
       )
     case 'aborted':
       return (
-        <span className={`${base} text-orange-500 border-orange-500 bg-[color-mix(in_srgb,#F59E0B_10%,transparent)]`}>
+        <span
+          className={`${base} text-orange-500 border-orange-500 bg-[color-mix(in_srgb,#F59E0B_10%,transparent)]`}
+        >
           <IconWarningTriangle className="w-3 h-3" />
           aborted
         </span>
       )
     case 'not_allowed':
       return (
-        <span className={`${base} text-black border-black bg-[color-mix(in_srgb,black_6%,transparent)] dark:text-white dark:border-neutral-400 dark:bg-[color-mix(in_srgb,white_6%,transparent)]`}>
+        <span
+          className={`${base} text-black border-black bg-[color-mix(in_srgb,black_6%,transparent)] dark:text-white dark:border-neutral-400 dark:bg-[color-mix(in_srgb,white_6%,transparent)]`}
+        >
           <IconStopCircle className="w-3 h-3" />
           not allowed
         </span>
       )
     case 'require_confirmation':
       return (
-        <span className={`${base} text-amber-600 border-amber-600 bg-[color-mix(in_srgb,#F59E0B_10%,transparent)]`}>
+        <span
+          className={`${base} text-amber-600 border-amber-600 bg-[color-mix(in_srgb,#F59E0B_10%,transparent)]`}
+        >
           <IconWarningTriangle className="w-3 h-3" />
           requires confirmation
         </span>
@@ -109,11 +123,12 @@ export default function ToolCallCard({
   onToggleSelect?: () => void
   disabled?: boolean
 }) {
+  const resultValue = result?.result
   const isHeavy =
     toolName === 'read_files' ||
     toolName === 'write_file' ||
     isLargeJson(args) ||
-    isLargeJson(result)
+    isLargeJson(resultValue)
   const durationText = typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
 
   const statusBorderClass = (() => {
@@ -124,14 +139,34 @@ export default function ToolCallCard({
         return 'border-orange-500'
       case 'not_allowed':
         return 'border-black dark:border-neutral-400'
+      case 'require_confirmation':
+        return 'border-amber-600'
       default:
         return 'border-[var(--border-subtle)]'
     }
   })()
 
+  const statusHeaderClass = (() => {
+    switch (status) {
+      case 'errored':
+        return 'bg-red-500/10'
+      case 'aborted':
+        return 'bg-orange-500/10'
+      case 'not_allowed':
+        return 'bg-black/5 dark:bg-white/5'
+      case 'require_confirmation':
+        return 'bg-amber-500/10'
+      default:
+        return ''
+    }
+  })()
+
+  const showResult =
+    typeof resultValue !== 'undefined' && (status === 'success' || status === 'errored')
+
   return (
     <div className={`rounded-md border ${statusBorderClass} bg-[var(--surface-base)]`}>
-      <div className="px-3 py-2 flex items-start justify-between gap-3">
+      <div className={`px-3 py-2 flex items-start justify-between gap-3 ${statusHeaderClass}`}>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <div className="text-xs font-semibold truncate">
@@ -143,7 +178,11 @@ export default function ToolCallCard({
         </div>
         <div className="flex items-center gap-2">
           {selectable ? (
-            <label className={`inline-flex items-center gap-1 text-xs ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <label
+              className={`inline-flex items-center gap-1 text-xs ${
+                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              }`}
+            >
               <input
                 type="checkbox"
                 className="accent-[var(--accent-primary)]"
@@ -174,18 +213,22 @@ export default function ToolCallCard({
           </div>
         )}
       </div>
-      {typeof result !== 'undefined' && (
+      {showResult && (
         <div className="px-3 pb-3">
           <div className="text-[11px] text-[var(--text-secondary)] mb-1">Result</div>
-          {isHeavy ? (
+          {status === 'errored' ? (
+            <div className="rounded bg-[var(--surface-raised)] border border-red-500/50 p-2 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
+              <pre className="font-sans text-red-500">{String(resultValue)}</pre>
+            </div>
+          ) : isHeavy ? (
             <Collapsible title={<span>View result</span>}>
               <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
-                <JsonView value={result} />
+                <JsonView value={resultValue} />
               </div>
             </Collapsible>
           ) : (
             <div className="rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] p-2 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-              <JsonView value={result} />
+              <JsonView value={resultValue} />
             </div>
           )}
         </div>
