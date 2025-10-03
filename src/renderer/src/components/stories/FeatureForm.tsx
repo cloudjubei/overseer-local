@@ -10,6 +10,7 @@ import FileMentionsTextarea from '../ui/FileMentionsTextarea'
 import { useStories } from '../../contexts/StoriesContext'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
+import ProjectChip from '../agents/ProjectChip'
 
 export type FeatureFormValues = {
   title: string
@@ -37,6 +38,7 @@ type Props = {
   onDirtyChange?: (dirty: boolean) => void
   // If true, focus the Description textarea and place caret at the end on mount
   focusDescription?: boolean
+  projectId?: string
 }
 
 export default function FeatureForm({
@@ -52,6 +54,7 @@ export default function FeatureForm({
   formId,
   onDirtyChange,
   focusDescription = false,
+  projectId,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [description, setDescription] = useState<string>(initialValues?.description ?? '')
@@ -203,7 +206,13 @@ export default function FeatureForm({
     >
       {/* Content area */}
       <div className="grid grid-cols-1 gap-3">
-        <StatusControl status={status} onChange={setStatus} />
+        <div className="flex justify-between items-center">
+          <div>{projectId && <ProjectChip projectId={projectId} nonActionable />}</div>
+          <div className="flex items-center gap-2">
+            <DependencyBullet dependency={storyId} />
+            <StatusControl status={status} onChange={setStatus} />
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           <label
             htmlFor="feature-title"

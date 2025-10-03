@@ -100,6 +100,7 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
           titleRef={titleRef}
           onDirtyChange={setHasChanges}
           formId={formId}
+          projectId={projectId}
         />
       </Modal>
 

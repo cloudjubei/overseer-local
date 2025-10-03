@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Status } from 'thefactory-tools'
 import StatusControl from './StatusControl'
+import ProjectChip from '../agents/ProjectChip'
 
 export type StoryFormValues = {
   title: string
@@ -16,6 +17,7 @@ type Props = {
   titleRef?: React.RefObject<HTMLInputElement | null>
   onDirtyChange?: (dirty: boolean) => void
   formId?: string
+  projectId?: string
 }
 
 export default function StoryForm({
@@ -26,6 +28,7 @@ export default function StoryForm({
   titleRef,
   onDirtyChange,
   formId,
+  projectId,
 }: Props) {
   const [title, setTitle] = useState<string>(initialValues?.title ?? '')
   const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
@@ -104,7 +107,10 @@ export default function StoryForm({
       aria-label={isCreate ? 'Create Story' : 'Edit Story'}
     >
       <div className="grid grid-cols-1 gap-3">
-        <StatusControl status={status} onChange={setStatus} />
+        <div className="flex justify-between items-center">
+          <div>{projectId && <ProjectChip projectId={projectId} nonActionable />}</div>
+          <StatusControl status={status} onChange={setStatus} />
+        </div>
         <div className="flex flex-col gap-1">
           <label
             htmlFor="story-title"

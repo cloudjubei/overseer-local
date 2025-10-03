@@ -2119,7 +2119,7 @@
     },
     {
       "id": "c713a8f1-d3af-428d-9f29-f03250b2db5c",
-      "status": "-",
+      "status": "+",
       "title": "Add ProjectChip + StoryChip to forms",
       "description": "There are 2 story forms @src/renderer/src/components/stories/StoryForm.tsx  used in @src/renderer/src/screens/stories/StoryCreateView.tsx , @src/renderer/src/screens/stories/StoryEditView.tsx , and and 2 feature forms @src/renderer/src/components/stories/FeatureForm.tsx used in @src/renderer/src/screens/stories/FeatureEditView.tsx and @src/renderer/src/screens/stories/FeatureCreateView.tsx .\nUnder the title all of these need to display a project chip info (that cannot be clicked) aligned to the left with the title. The project chip is @src/renderer/src/components/agents/ProjectChip.tsx .\n\nThe feature views also need to display a @src/renderer/src/components/stories/DependencyBullet.tsx where the dependency is the `storyId` to the right of the form aligned with the Status display.",
       "context": [
@@ -2134,7 +2134,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-03T08:51:12.257Z",
-      "updatedAt": "2025-10-03T08:51:12.257Z"
+      "updatedAt": "2025-10-03T09:12:46.169Z",
+      "completedAt": "2025-10-03T09:12:46.169Z"
     }
   ],
   "featureIdToDisplayIndex": {

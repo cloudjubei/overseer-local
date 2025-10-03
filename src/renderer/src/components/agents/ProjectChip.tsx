@@ -6,9 +6,11 @@ import { useNavigator } from '../../navigation/Navigator'
 export default function ProjectChip({
   projectId,
   className,
+  nonActionable = false,
 }: {
   projectId?: string | null
   className?: string
+  nonActionable?: boolean
 }) {
   const { projects, setActiveProjectId } = useProjectContext()
   const { navigateView } = useNavigator()
@@ -32,32 +34,49 @@ export default function ProjectChip({
 
   const onClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    if (!projectId) return
+    if (nonActionable || !projectId) return
     setActiveProjectId(projectId)
     navigateView('Home')
   }
 
-  const chip = (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
-        'bg-neutral-50 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200',
-        'border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        className || '',
-      ].join(' ')}
-      title={label}
-    >
+  const chipContent = (
+    <>
       <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" aria-hidden />
       <span className="truncate max-w-[18ch]" style={{ lineHeight: 1 }}>
         {label}
       </span>
+    </>
+  )
+
+  const commonClassNames = [
+    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
+    'bg-neutral-50 text-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-200',
+    'border-neutral-200 dark:border-neutral-700',
+    className || '',
+  ].join(' ')
+
+  const chip = nonActionable ? (
+    <div className={commonClassNames} title={label}>
+      {chipContent}
+    </div>
+  ) : (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        commonClassNames,
+        'hover:bg-neutral-100 dark:hover:bg-neutral-800',
+        'disabled:opacity-70 disabled:cursor-not-allowed',
+      ].join(' ')}
+      title={label}
+      disabled={!projectId}
+    >
+      {chipContent}
     </button>
   )
 
   return (
-    <Tooltip content={content} placement="top" disabled={!projectId}>
+    <Tooltip content={content} placement="top" disabled={!projectId || nonActionable}>
       {chip}
     </Tooltip>
   )

@@ -148,6 +148,7 @@ export default function StoryEditView({
             isCreate={false}
             onDirtyChange={setHasChanges}
             formId={formId}
+            projectId={projectId}
           />
         ) : (
           <div className="py-8 text-center text-sm text-neutral-600 dark:text-neutral-300">

@@ -122,6 +122,7 @@ export default function FeatureCreateView({
           onDirtyChange={setHasChanges}
           initialValues={initialValues}
           focusDescription={focusDescription}
+          projectId={projectId}
         />
       </Modal>
 
