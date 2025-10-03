@@ -1,8 +1,8 @@
 {
   "id": "9b6fcd9f-86b9-4a95-bf03-e3cf51431be4",
-  "status": "-",
+  "status": "+",
   "title": "Git Monitor and version control in-app",
-  "description": "The status of the stories isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's stories/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the story) with a given featureId specified, it should be possible to see the story.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.\nThe non-renderer code should be placed under src/git-monitor whereas renderer related things under src/renderer/services/getService.ts and in appropriate screens/components",
+  "description": "The status of the stories isn't updated\nWhen the Agent runs it updates the status in its own local copy.\nThis project's stories/features statuses should update too.\nAs a later part, we also want to be observing git commits - if there's a commit in the appropriate branch (named after the story) with a given featureId specified, it should be possible to see the story.json inside there and update info HERE in this project based off it.\nAs a further improvement - we can make a 1-click merge solution so that the commit tied to the feature will get merged with the current code base.",
   "features": [
     {
       "id": "9de723a2-db03-4ff0-aab8-8615b9473664",
@@ -83,18 +83,6 @@
       "createdAt": "2025-09-16T13:05:37.980Z",
       "completedAt": "2025-09-16T17:40:03.645Z",
       "updatedAt": "2025-09-16T13:05:37.980Z"
-    },
-    {
-      "id": "dca334a0-9739-4026-9980-765ec6423b79",
-      "status": "-",
-      "title": "Create Sourcetree replacement - a popular version control management app",
-      "description": "We want a user to not have the need to switch between this app and an app like SourceTree to perform all the tasks needed with merging, resolving conflicts, seeing updates, seeing diffs and seeing diff tests.",
-      "plan": "",
-      "context": [],
-      "acceptance": [],
-      "blockers": [],
-      "createdAt": "2025-09-16T13:05:37.980Z",
-      "updatedAt": "2025-09-30T12:21:24.530Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -103,9 +91,9 @@
     "db4124ad-21e9-460b-854c-f4a885688400": 3,
     "7b9c8ad9-05ec-4281-bbc4-11354a121ecb": 4,
     "f75ee4d1-8928-4634-bb6d-56b2f2f63ad2": 5,
-    "2e442f2c-e7db-445a-8cfd-755260749820": 6,
-    "dca334a0-9739-4026-9980-765ec6423b79": 7
+    "2e442f2c-e7db-445a-8cfd-755260749820": 6
   },
   "createdAt": "2025-09-16T13:05:37.980Z",
-  "updatedAt": "2025-09-30T12:21:52.382Z"
+  "updatedAt": "2025-10-03T00:49:28.425Z",
+  "completedAt": "2025-10-03T00:49:28.425Z"
 }

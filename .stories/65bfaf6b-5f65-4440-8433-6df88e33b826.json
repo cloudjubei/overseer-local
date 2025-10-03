@@ -1,0 +1,10 @@
+{
+  "id": "65bfaf6b-5f65-4440-8433-6df88e33b826",
+  "status": "-",
+  "title": "Create Sourcetree replacement - a popular version control management app",
+  "description": "We want a user to not have the need to switch between this app and an app like SourceTree to perform all the tasks needed with merging, resolving conflicts, seeing updates, seeing diffs and seeing diff tests.",
+  "features": [],
+  "featureIdToDisplayIndex": {},
+  "createdAt": "2025-10-03T00:49:01.279Z",
+  "updatedAt": "2025-10-03T00:49:16.122Z"
+}
