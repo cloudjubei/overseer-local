@@ -2173,7 +2173,7 @@
     },
     {
       "id": "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1",
-      "status": "-",
+      "status": "+",
       "title": "the title in modals isn't centered vertically with the close button",
       "description": "@src/renderer/src/components/ui/Modal.tsx doesn't correctly vertically center the title to be exactly aligned with the close button - it should.",
       "context": [
@@ -2181,7 +2181,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-03T21:48:18.571Z",
-      "updatedAt": "2025-10-03T21:48:18.571Z"
+      "updatedAt": "2025-10-03T22:09:55.804Z",
+      "completedAt": "2025-10-03T22:09:55.804Z"
     }
   ],
   "featureIdToDisplayIndex": {
