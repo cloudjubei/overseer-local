@@ -207,11 +207,9 @@ export default function FeatureForm({
       {/* Content area */}
       <div className="grid grid-cols-1 gap-3">
         <div className="flex justify-between items-center">
+          <StatusControl status={status} onChange={setStatus} />
           <div>{projectId && <ProjectChip projectId={projectId} nonActionable />}</div>
-          <div className="flex items-center gap-2">
-            <DependencyBullet dependency={storyId} />
-            <StatusControl status={status} onChange={setStatus} />
-          </div>
+          <DependencyBullet dependency={storyId} interactive={false} />
         </div>
         <div className="flex items-center gap-3">
           <label
@@ -358,6 +356,7 @@ export default function FeatureForm({
                   key={dep}
                   dependency={dep}
                   onRemove={() => removeBlockerAt(idx)}
+                  interactive={false}
                 />
               )
             })}

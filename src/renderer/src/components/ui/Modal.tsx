@@ -135,7 +135,10 @@ export function Modal({
   const contentClasses = contentClassName || 'flex-grow overflow-y-auto p-4'
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center tf-modal-container" aria-hidden={false}>
+    <div
+      className="fixed inset-0 z-[1000] flex items-center justify-center tf-modal-container"
+      aria-hidden={false}
+    >
       <div
         ref={overlayRef}
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 animate-in fade-in"
@@ -153,8 +156,8 @@ export function Modal({
         aria-describedby={descriptionId}
         onKeyDown={onKeyDown}
       >
-        <div className="flex items-start justify-between gap-4 border-b p-4 shrink-0 border-border">
-          <div className="text-base font-semibold" id={titleId}>
+        <div className="flex items-start justify-between gap-4 border-b pb-2 pt-2 pl-4 pr-4 shrink-0 border-border">
+          <div className="flex items-center text-base font-semibold " id={titleId}>
             {title}
           </div>
           <div className="flex items-center gap-2">

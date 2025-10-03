@@ -108,8 +108,9 @@ export default function StoryForm({
     >
       <div className="grid grid-cols-1 gap-3">
         <div className="flex justify-between items-center">
-          <div>{projectId && <ProjectChip projectId={projectId} nonActionable />}</div>
           <StatusControl status={status} onChange={setStatus} />
+          <div>{projectId && <ProjectChip projectId={projectId} nonActionable />}</div>
+          <div className="w-6"></div>
         </div>
         <div className="flex flex-col gap-1">
           <label
