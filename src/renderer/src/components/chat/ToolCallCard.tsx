@@ -1,14 +1,15 @@
 import {
-  IconCheckmarkCircle,
+  // IconCheckmarkCircle, //missing
   IconError,
-  IconStop,
-  IconNotAllowed,
-  IconHourglass,
+  // IconStop, //missing
+  // IconNotAllowed, //missing
+  // IconHourglass, //missing
   IconChevron,
 } from '../ui/Icons'
-import Code from '../ui/Code'
+// import Code from '../ui/Code' //missing
 import { useState } from 'react'
 import { Switch } from '../ui/Switch'
+import JsonView from '../ui/JsonView'
 
 type ToolResultType = 'require_confirmation' | 'not_allowed' | 'errored' | 'aborted' | 'success'
 
@@ -32,17 +33,18 @@ function StatusIcon({ status }: { status?: ToolResultType }) {
   const size = 'w-4 h-4'
   switch (status) {
     case 'success':
-      return <IconCheckmarkCircle className={`${size} text-green-500`} />
+    // return <IconCheckmarkCircle className={`${size} text-green-500`} />
     case 'errored':
-      return <IconError className={`${size} text-red-500`} />
+    // return <IconError className={`${size} text-red-500`} />
     case 'aborted':
-      return <IconStop className={`${size} text-orange-500`} />
+    // return <IconStop className={`${size} text-orange-500`} />
     case 'not_allowed':
-      return <IconNotAllowed className={`${size} text-neutral-500`} />
+    // return <IconNotAllowed className={`${size} text-neutral-500`} />
     case 'require_confirmation':
-      return <IconHourglass className={`${size} text-teal-500`} />
+    // return <IconHourglass className={`${size} text-teal-500`} />
     default:
-      return <IconHourglass className={`${size} text-neutral-500`} />
+      // return <IconHourglass className={`${size} text-neutral-500`} />
+      return <IconError className={`${size} text-red-500`} />
   }
 }
 
@@ -107,7 +109,7 @@ export default function ToolCallCard({
           )}
           <StatusPill status={status} />
           {selectable && onToggleSelect && (
-            <Switch checked={selected} onCheckedChange={onToggleSelect} label="" />
+            <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
           )}
           <button
             type="button"
@@ -124,7 +126,8 @@ export default function ToolCallCard({
       </div>
       {isExpanded && (
         <div className="px-3 pb-2">
-          <Code language="json" code={JSON.stringify({ args, result }, null, 2)} />
+          {/* <Code language="json" code={JSON.stringify({ args, result }, null, 2)} /> */}
+          <JsonView value={result} />
         </div>
       )}
     </div>
