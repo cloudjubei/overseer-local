@@ -424,8 +424,15 @@ export default function MessageList({
                     <RichText text={msg.completionMessage.content} />
                   ) : index === animateAssistantIdx ? (
                     <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
+                  ) : isSystem ? (
+                    toggleableCount > 0 ? (
+                      <div className="text-sm">
+                        The assistant wants to run tools. Please grant permission for the tools you
+                        want to allow.
+                      </div>
+                    ) : null
                   ) : (
-                    !isSystem && <Markdown text={msg.completionMessage.content} />
+                    <Markdown text={msg.completionMessage.content} />
                   )}
                 </div>
 
