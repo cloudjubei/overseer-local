@@ -2151,7 +2151,7 @@
     },
     {
       "id": "4eb23f4e-deba-496d-9c27-ee4c052da03c",
-      "status": "-",
+      "status": "+",
       "title": "Show the actual system prompt",
       "description": "In the @src/renderer/src/components/chat/ChatSidebar.tsx next to the info button, we want to show another button that will have a scroll icon, that will show the current system prompt that the agent will get - this is the effective prompt with arguments placed in - not the template.",
       "context": [
@@ -2159,7 +2159,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-03T21:30:52.373Z",
-      "updatedAt": "2025-10-03T21:30:52.373Z"
+      "updatedAt": "2025-10-03T22:38:47.930Z",
+      "completedAt": "2025-10-03T22:38:47.930Z"
     },
     {
       "id": "f4c58b41-f321-4c7a-a4d3-247cc2eb157f",
