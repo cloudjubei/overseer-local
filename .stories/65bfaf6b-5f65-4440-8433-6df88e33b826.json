@@ -2,7 +2,7 @@
   "id": "65bfaf6b-5f65-4440-8433-6df88e33b826",
   "status": "-",
   "title": "Create Sourcetree replacement - a popular version control management app",
-  "description": "We want a user to not have the need to switch between this app and an app like SourceTree to perform all the tasks needed with merging, resolving conflicts, seeing updates, seeing diffs and seeing diff tests.",
+  "description": "Goal\nProvide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts.\n\nScope for this iteration\n- Navigation and views:\n  - Add a Git section with two subviews: 'Current project' and 'All projects'.\n  - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx).\n- Pending operations definition:\n  - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId.\n- Merge flow:\n  - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI.\n- Integration notes:\n  - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects.\n  - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer.\n  - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing.\n\nOut of scope for this iteration\n- Remote PR management, stash workflows, and hunk-level staging (planned separately).\n\nAcceptance (high level)\n- Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.",
   "features": [
     {
       "id": "e8a7a520-3047-48ab-b0e8-5c060241c239",
@@ -94,6 +94,42 @@
       "context": [],
       "createdAt": "2025-10-03T09:50:20.852Z",
       "updatedAt": "2025-10-03T09:50:20.852Z"
+    },
+    {
+      "id": "2ef261bd-666a-4331-861f-170130a15c1d",
+      "status": "-",
+      "title": "Sidebar Git: Current vs All Projects navigation",
+      "description": "Add a Git entry to the sidebar with two subviews and routing/state handling.\n- Implement GitView with tabs: 'Current project' and 'All projects'.\n- Wire to ProjectContext for discovering all known projects and the active project.\n- Show loading/empty/error states; display counts of pending operations in tab labels/badges.\n- Ensure selection state matches app patterns; do not disrupt AgentsView.\nAcceptance:\n- Sidebar shows Git entry; switching between Current and All Projects works.\n- Current project displays content for the active repo; All projects lists projects with pending counts and allows drill-in to that project's Current view.",
+      "context": [],
+      "createdAt": "2025-10-03T17:14:46.339Z",
+      "updatedAt": "2025-10-03T17:14:46.339Z"
+    },
+    {
+      "id": "81ddc766-11a8-4fd7-9fa1-cfdd187dac9c",
+      "status": "-",
+      "title": "Pending Git operations aggregation across projects",
+      "description": "Provide a PendingOps service that aggregates feature branches and ahead/behind across all projects.\n- Compose data from gitMonitorService per project and ProjectContext to enumerate repos.\n- Detect feature branches via storyBranchNaming.isFeatureBranchName and map to storyId via branchNameToStoryId.\n- Compute ahead counts with rev-list base..branch (default base = current branch); include behind if available.\n- Emit a typed structure for renderer views and update on GitMonitor subscribe events.\nAcceptance:\n- Given a repo with a feature branch ahead of base, it appears in the pending list with ahead count.\n- After merging into base, the item disappears within one polling cycle.\n- Grouping by storyId is accurate for branches named 'features/<storyId>'.",
+      "context": [],
+      "createdAt": "2025-10-03T17:14:46.341Z",
+      "updatedAt": "2025-10-03T17:14:46.341Z"
+    },
+    {
+      "id": "26b442b1-b9be-4472-995a-87925c75d93b",
+      "status": "-",
+      "title": "Merge popup with per-file diffs and analysis stubs",
+      "description": "Implement a modal opened from a pending row that shows branch vs base details and diffs.\n- Context header: project, story, branch, base (default current).\n- File list with inline diffs (reuse diff viewer feature for rendering per-file diffs, lazy-loaded).\n- Analysis placeholders:\n  - Compile impact (compileImpactService): pass/warn/fail with summary.\n  - Tests impact (testImpactService): run tests for changed files and show latest results.\n  - Diff coverage (diffCoverageService): % of changed lines covered; placeholder for JS/TS adapter (diff-cover/Istanbul) and a generic fallback.\n- Actions: Merge (uses gitMonitorService.mergeBranch) and Close; on conflict, deep-link into Merge UX.\nAcceptance:\n- Opening the modal loads diffs and shows placeholder analysis when real data unavailable.\n- Merge succeeds for a clean merge; conflicts route to the conflict resolution UI without auto-abort.",
+      "context": [],
+      "createdAt": "2025-10-03T17:14:46.342Z",
+      "updatedAt": "2025-10-03T17:14:46.342Z"
+    },
+    {
+      "id": "5fea9099-adbc-4aa6-872c-af48615c3bb2",
+      "status": "-",
+      "title": "Branch-to-story mapping resolver exposure",
+      "description": "Ensure branch-to-story mapping is available across the app and configurable.\n- Reuse src/logic/git-monitor/storyBranchNaming.js to identify feature branches and derive storyId from 'features/<storyId>'.\n- Expose these functions to the renderer (via preload/service or a thin TS wrapper) for consistent grouping.\n- Add an optional project-level registry (e.g., .overseer/branches.json) to support future naming variants; fallback to naming heuristic when registry absent.\nAcceptance:\n- Renderer can resolve storyId from a branch consistently with main-process logic.\n- If a branch does not match the pattern and no registry entry exists, show a clear 'unmapped' indicator without blocking operations.",
+      "context": [],
+      "createdAt": "2025-10-03T17:14:46.344Z",
+      "updatedAt": "2025-10-03T17:14:46.344Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -106,8 +142,12 @@
     "57fef2ab-628b-4663-8ee0-06de1b7ba2f8": 7,
     "22d14df9-0703-477d-b7d2-774a5a34be26": 8,
     "5d67d81a-7c35-4629-9705-a780f2a24031": 9,
-    "5d20ed31-a317-440b-8a1b-6191a95c580a": 10
+    "5d20ed31-a317-440b-8a1b-6191a95c580a": 10,
+    "2ef261bd-666a-4331-861f-170130a15c1d": 11,
+    "81ddc766-11a8-4fd7-9fa1-cfdd187dac9c": 12,
+    "26b442b1-b9be-4472-995a-87925c75d93b": 13,
+    "5fea9099-adbc-4aa6-872c-af48615c3bb2": 14
   },
   "createdAt": "2025-10-03T00:49:01.279Z",
-  "updatedAt": "2025-10-03T00:49:16.122Z"
+  "updatedAt": "2025-10-03T17:14:46.335Z"
 }

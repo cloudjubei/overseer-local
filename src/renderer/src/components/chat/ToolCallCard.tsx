@@ -1,8 +1,28 @@
-import React, { useState } from 'react'
+import {
+  IconCheckmarkCircle,
+  IconError,
+  IconStop,
+  IconNotAllowed,
+  IconHourglass,
+  IconChevron,
+} from '../ui/Icons'
+import Code from '../ui/Code'
+import { useState } from 'react'
+import { Switch } from '../ui/Switch'
 import JsonView from '../ui/JsonView'
-import { ToolResultNew, ToolResultType } from 'thefactory-tools'
-import { IconCheckCircle, IconWarningTriangle, IconXCircle, IconStopCircle } from '../ui/Icons'
+import { ToolCall, ToolResultType } from 'thefactory-tools'
 
+export type ToolCallCardProps = {
+  index: number
+  toolCall: ToolCall
+  result?: string
+  resultType?: ToolResultType
+  durationMs?: number
+  selectable?: boolean
+  selected?: boolean
+  onToggleSelect?: () => void
+  disabled?: boolean
+}
 function isLargeJson(value: any) {
   try {
     const s = typeof value === 'string' ? value : JSON.stringify(value)
@@ -11,7 +31,6 @@ function isLargeJson(value: any) {
     return false
   }
 }
-
 function Collapsible({
   title,
   children,
@@ -27,7 +46,9 @@ function Collapsible({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}>
+    <div
+      className={`${className ?? ''} border rounded-md border-[var(--border-subtle)] bg-[var(--surface-overlay)]`}
+    >
       <button
         className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[var(--surface-raised)]"
         onClick={() => setOpen((v) => !v)}
@@ -36,159 +57,121 @@ function Collapsible({
         <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
       </button>
       {open ? (
-        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>{children}</div>
+        <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>
+          {children}
+        </div>
       ) : null}
     </div>
   )
 }
 
-function StatusBadge({ status }: { status?: ToolResultType }) {
-  if (!status) return null
-  const base = 'inline-flex items-center gap-1 rounded-full px-2 py-[2px] text-[10px] border'
-  switch (status) {
-    case 'success':
-      return (
-        <span className={`${base} text-green-600 border-green-600 bg-[color-mix(in_srgb,#10B981_10%,transparent)]`}>
-          <IconCheckCircle className="w-3 h-3" />
-          success
-        </span>
-      )
+function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
+  const size = 'w-4 h-4'
+  switch (resultType) {
     case 'errored':
-      return (
-        <span className={`${base} text-red-500 border-red-500 bg-[color-mix(in_srgb,#EF4444_10%,transparent)]`}>
-          <IconXCircle className="w-3 h-3" />
-          errored
-        </span>
-      )
+      return <IconError className={`${size} text-red-500`} />
     case 'aborted':
-      return (
-        <span className={`${base} text-orange-500 border-orange-500 bg-[color-mix(in_srgb,#F59E0B_10%,transparent)]`}>
-          <IconWarningTriangle className="w-3 h-3" />
-          aborted
-        </span>
-      )
+      return <IconStop className={`${size} text-orange-500`} />
     case 'not_allowed':
-      return (
-        <span className={`${base} text-black border-black bg-[color-mix(in_srgb,black_6%,transparent)] dark:text-white dark:border-neutral-400 dark:bg-[color-mix(in_srgb,white_6%,transparent)]`}>
-          <IconStopCircle className="w-3 h-3" />
-          not allowed
-        </span>
-      )
+      return <IconNotAllowed className={`${size} text-neutral-500`} />
     case 'require_confirmation':
-      return (
-        <span className={`${base} text-amber-600 border-amber-600 bg-[color-mix(in_srgb,#F59E0B_10%,transparent)]`}>
-          <IconWarningTriangle className="w-3 h-3" />
-          requires confirmation
-        </span>
-      )
+      return <IconHourglass className={`${size} text-teal-500`} />
     default:
-      return null
+      return <IconCheckmarkCircle className={`${size} text-green-500`} />
   }
+}
+
+function StatusPill({ resultType }: { resultType?: ToolResultType }) {
+  if (!resultType) return null
+  const base =
+    'text-[10px] text-center uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded-full'
+  let colors = ''
+  switch (resultType) {
+    case 'success':
+      colors = 'bg-green-500/20 text-green-600 dark:text-green-400'
+      break
+    case 'errored':
+      colors = 'bg-red-500/20 text-red-600 dark:text-red-400'
+      break
+    case 'aborted':
+      colors = 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+      break
+    case 'not_allowed':
+      colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
+      break
+    case 'require_confirmation':
+      colors = 'bg-neutral-500/20 text-teal-600 dark:text-teal-400'
+      break
+    default:
+      colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
+      break
+  }
+  return <div className={`${base} ${colors}`}>{resultType.replace('_', ' ')}</div>
 }
 
 export default function ToolCallCard({
   index,
-  toolName,
-  args,
+  toolCall,
   result,
+  resultType,
   durationMs,
-  status,
   selectable,
   selected,
   onToggleSelect,
-  disabled,
-}: {
-  index: number
-  toolName: string
-  args: any
-  result?: ToolResultNew
-  durationMs?: number
-  status?: ToolResultType
-  selectable?: boolean
-  selected?: boolean
-  onToggleSelect?: () => void
-  disabled?: boolean
-}) {
-  const isHeavy =
-    toolName === 'read_files' ||
-    toolName === 'write_file' ||
-    isLargeJson(args) ||
-    isLargeJson(result)
-  const durationText = typeof durationMs === 'number' ? `${(durationMs / 1000).toFixed(2)}s` : undefined
+}: ToolCallCardProps) {
+  const [isCallExpanded, setIsCallExpanded] = useState(true)
 
-  const statusBorderClass = (() => {
-    switch (status) {
-      case 'errored':
-        return 'border-red-500'
-      case 'aborted':
-        return 'border-orange-500'
-      case 'not_allowed':
-        return 'border-black dark:border-neutral-400'
-      default:
-        return 'border-[var(--border-subtle)]'
-    }
-  })()
+  const showResult = resultType === 'success'
+  const isRequireConfirm = resultType === 'require_confirmation'
 
   return (
-    <div className={`rounded-md border ${statusBorderClass} bg-[var(--surface-base)]`}>
-      <div className="px-3 py-2 flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <div className="text-xs font-semibold truncate">
-              {index + 1}. {toolName}
-            </div>
-            <StatusBadge status={status} />
-          </div>
-          <div className="text-[11px] text-[var(--text-secondary)]">Arguments</div>
+    <div
+      className={[
+        'rounded-md border text-sm text-[var(--text-primary)] relative',
+        isRequireConfirm
+          ? 'bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
+          : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]',
+      ].join(' ')}
+    >
+      <div className="flex items-center justify-between px-3 pt-2">
+        <div className="flex items-center gap-2">
+          <StatusIcon resultType={resultType} />
+          <span className="font-semibold">{toolCall.name}</span>
+          {(durationMs ?? 0) > 0 && <span className="font-light text-xs ">{durationMs}ms</span>}
         </div>
         <div className="flex items-center gap-2">
-          {selectable ? (
-            <label className={`inline-flex items-center gap-1 text-xs ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-              <input
-                type="checkbox"
-                className="accent-[var(--accent-primary)]"
-                checked={!!selected}
-                onChange={() => !disabled && onToggleSelect && onToggleSelect()}
-                disabled={disabled}
-              />
-              Allow
-            </label>
-          ) : null}
-          {durationText && (
-            <div className="flex-shrink-0 bg-[var(--surface-overlay)] rounded-full px-2 py-0.5 text-xs text-[var(--text-secondary)] whitespace-nowrap border border-[var(--border-subtle)]">
-              {durationText}
-            </div>
-          )}
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={() => setIsCallExpanded((v) => !v)}
+            aria-expanded={isCallExpanded}
+          >
+            <IconChevron
+              className="w-4 h-4 transition-transform"
+              style={{ transform: `rotate(${isCallExpanded ? 90 : 0}deg)` }}
+            />
+          </button>
         </div>
       </div>
-      <div className="px-3 pb-2">
-        {isHeavy ? (
-          <Collapsible title={<span>View arguments</span>}>
-            <div className="p-2 max-h-64 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
-              <JsonView value={args} />
-            </div>
-          </Collapsible>
-        ) : (
-          <div className="rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] p-2 max-h-60 overflow-auto">
-            <JsonView value={args} />
-          </div>
+      <div className="flex items-center justify-between px-3 py-2">
+        <StatusPill resultType={resultType} />
+        {selectable && onToggleSelect && (
+          <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
         )}
       </div>
-      {typeof result !== 'undefined' && (
-        <div className="px-3 pb-3">
-          <div className="text-[11px] text-[var(--text-secondary)] mb-1">Result</div>
-          {isHeavy ? (
-            <Collapsible title={<span>View result</span>}>
-              <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
-                <JsonView value={result} />
-              </div>
-            </Collapsible>
-          ) : (
-            <div className="rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] p-2 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-              <JsonView value={result} />
-            </div>
-          )}
+      {isCallExpanded && (
+        <div className="px-3 pb-2">
+          <Code language="json" code={JSON.stringify(toolCall.arguments ?? {}, null, 2)} />
+          {/* <JsonView value={result} /> */}
         </div>
+      )}{' '}
+      {showResult && (
+        <Collapsible title={<span>View result</span>}>
+          <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
+            <Code language="json" code={JSON.stringify(JSON.parse(result!), null, 2)} />
+            {/* <JsonView value={result} /> */}
+          </div>
+        </Collapsible>
       )}
     </div>
   )

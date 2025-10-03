@@ -277,6 +277,14 @@ export default function ChatSidebar({
 
   const completion = currentSettings?.completionSettings
 
+  const handleResumeTools = useCallback(
+    async (toolIds: string[]) => {
+      if (!isChatConfigured || !activeChatConfig || !currentSettings) return
+      await resumeTools(context, toolIds, effectivePrompt, currentSettings, activeChatConfig)
+    },
+    [isChatConfigured, activeChatConfig, currentSettings, resumeTools, context, effectivePrompt],
+  )
+
   return (
     <section className={sectionClass}>
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
@@ -516,7 +524,12 @@ export default function ChatSidebar({
           </div>
         )}
 
-        <MessageList chatId={chat?.key} messages={messagesWithSystem} isThinking={isThinking} />
+        <MessageList
+          chatId={chat?.key}
+          messages={messagesWithSystem}
+          isThinking={isThinking}
+          onResumeTools={handleResumeTools}
+        />
       </div>
 
       <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">

@@ -8,8 +8,9 @@ import ToolCallCard from './ToolCallCard'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
-import { ChatMessage, ToolCall } from 'thefactory-tools'
+import { ChatMessage, CompletionToolResult, ToolCall, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
+import { IconToolbox } from '../ui/Icons'
 
 // export type ToolCall = {
 //     name: string;
@@ -60,10 +61,12 @@ export default function MessageList({
   chatId,
   messages,
   isThinking,
+  onResumeTools,
 }: {
   chatId?: string
   messages: ChatMessage[]
   isThinking: boolean
+  onResumeTools?: (toolIds: string[]) => void
 }) {
   const { filesByPath } = useFiles()
 
@@ -283,6 +286,14 @@ export default function MessageList({
     return systemPromptMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
   }, [enhancedMessages, systemPromptMessage])
 
+  // Selection state for 'require_confirmation' tools on the last message
+  const [selectedToolIds, setSelectedToolIds] = useState<string[]>([])
+
+  // Reset selection when chat changes or messages set changes
+  useEffect(() => {
+    setSelectedToolIds([])
+  }, [chatId, messagesToDisplay.length])
+
   return (
     <div
       ref={messageListRef}
@@ -340,10 +351,37 @@ export default function MessageList({
 
           const isSystem = msg.completionMessage.role === 'system' //system messages here indicate tool results
           const isUser = msg.completionMessage.role === 'user'
+          const isAssistant = msg.completionMessage.role === 'assistant'
+
+          const isLast = index === messagesToDisplay.length - 1
+
+          const isShowingToolCalls =
+            isAssistant &&
+            (isLast || messagesToDisplay[index + 1].toolResults === undefined) &&
+            !!msg.toolCalls?.length
+          const isShowingToolResults = isSystem && !!msg.toolResults?.length
+
           const isNewUserBubble =
             isUser &&
             index === enhancedMessages.length - 1 &&
             messages.length > prevLenForUserAnimRef.current
+
+          // Compute toggleable tool ids for the last system message
+          const toggleableIds: string[] = (() => {
+            if (!(isSystem && isLast)) return []
+            const results = msg.toolResults || []
+            const ids: string[] = []
+            for (const r of results) {
+              const t = (r as any)?.result?.type
+              const idVal = (r as any)?.result?.result
+              if (t === 'require_confirmation' && typeof idVal !== 'undefined')
+                ids.push(String(idVal))
+            }
+            return ids
+          })()
+
+          const toggleableCount = toggleableIds.length
+          const selectedCount = selectedToolIds.filter((id) => toggleableIds.includes(id)).length
 
           return (
             <div
@@ -359,18 +397,18 @@ export default function MessageList({
                   isUser
                     ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
                     : isSystem
-                      ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                      ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
                       : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
                 ].join(' ')}
                 aria-hidden="true"
               >
-                {isUser ? 'You' : isSystem ? 'TOOLS' : 'AI'}
+                {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
               </div>
 
               <div
                 className={[
                   'max-w-[85%] min-w-0 flex flex-col',
-                  isUser ? 'items-end' : isSystem ? 'items-center' : 'items-start',
+                  isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
                 ].join(' ')}
               >
                 {msg.showModel && msg.model && (
@@ -380,45 +418,118 @@ export default function MessageList({
                   </div>
                 )}
 
-                <div
-                  className={[
-                    'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
-                    isUser
-                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                      : isSystem
-                        ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                        : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                    msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
-                    'chat-bubble',
-                    isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
-                  ].join(' ')}
-                >
-                  {isUser ? (
-                    <RichText text={msg.completionMessage.content} />
-                  ) : index === animateAssistantIdx ? (
-                    <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
-                  ) : (
-                    !isSystem && <Markdown text={msg.completionMessage.content} />
-                  )}
-                </div>
+                {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
+                  <div
+                    className={[
+                      'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                      isUser
+                        ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
+                        : isSystem
+                          ? toggleableCount > 0
+                            ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
+                            : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                          : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                      msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                      'chat-bubble',
+                      isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
+                    ].join(' ')}
+                  >
+                    {isUser ? (
+                      <RichText text={msg.completionMessage.content} />
+                    ) : index === animateAssistantIdx ? (
+                      <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
+                    ) : isSystem ? (
+                      toggleableCount > 0 ? (
+                        <div className="text-sm">
+                          The assistant wants to run tools. Please grant permission for the tools
+                          you want to allow.
+                        </div>
+                      ) : (
+                        <Markdown text={msg.completionMessage.content} />
+                      )
+                    ) : (
+                      <Markdown text={msg.completionMessage.content} />
+                    )}
+                  </div>
+                ) : null}
 
-                {!!msg.toolCalls && (
+                {isShowingToolCalls && (
                   <div className="mt-2 w-full space-y-2">
-                    {msg.toolCalls.map((call: ToolCall, i: number) => {
-                      const name = call.name
-                      const args = call.arguments ?? {}
-                      const res = msg.toolResults?.[i]
+                    {msg.toolCalls!.map((call: ToolCall, i: number) => {
                       return (
                         <ToolCallCard
                           key={`tool-${index}-${i}`}
                           index={i}
-                          toolName={name}
-                          args={args}
-                          result={res?.result}
-                          durationMs={res?.durationMs}
+                          toolCall={call}
+                          selectable={false}
+                          disabled={true}
                         />
                       )
                     })}
+                  </div>
+                )}
+                {isShowingToolResults && (
+                  <div className="mt-2 w-full space-y-2">
+                    {msg.toolResults!.map((c: CompletionToolResult, i: number) => {
+                      const result = c.result
+                      const resultType = result.type
+                      const isRequireConfirm = resultType === 'require_confirmation'
+                      const resultId = result.result
+                      const selectable =
+                        isSystem && isLast && isRequireConfirm && resultId !== undefined
+
+                      const effectiveResultType: ToolResultType | undefined =
+                        isRequireConfirm && !isLast ? 'aborted' : resultType
+
+                      return (
+                        <ToolCallCard
+                          key={`tool-${index}-${i}`}
+                          index={i}
+                          toolCall={result.call}
+                          result={result.result}
+                          resultType={effectiveResultType}
+                          durationMs={c.durationMs}
+                          selectable={selectable}
+                          selected={selectable ? selectedToolIds.includes(resultId) : false}
+                          onToggleSelect={
+                            selectable
+                              ? () => {
+                                  setSelectedToolIds((prev) =>
+                                    prev.includes(resultId)
+                                      ? prev.filter((x) => x !== resultId)
+                                      : [...prev, resultId],
+                                  )
+                                }
+                              : undefined
+                          }
+                          disabled={!selectable}
+                        />
+                      )
+                    })}
+
+                    {toggleableCount > 0 && isSystem && isLast ? (
+                      <div className="pt-1 flex items-center justify-end">
+                        <button
+                          type="button"
+                          className={[
+                            'btn',
+                            selectedCount > 0
+                              ? 'bg-green-600 hover:bg-green-700 text-white border-transparent'
+                              : 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)] cursor-not-allowed opacity-70',
+                          ].join(' ')}
+                          disabled={selectedCount === 0 || !onResumeTools}
+                          onClick={() => {
+                            if (!onResumeTools) return
+                            const validSelected = selectedToolIds.filter((id) =>
+                              toggleableIds.includes(id),
+                            )
+                            onResumeTools(validSelected)
+                          }}
+                        >
+                          {`Resume ${selectedCount}/${toggleableCount} Tools`}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
