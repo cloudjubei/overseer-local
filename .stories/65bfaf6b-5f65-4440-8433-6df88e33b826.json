@@ -3,8 +3,110 @@
   "status": "-",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "We want a user to not have the need to switch between this app and an app like SourceTree to perform all the tasks needed with merging, resolving conflicts, seeing updates, seeing diffs and seeing diff tests.",
-  "features": [],
-  "featureIdToDisplayIndex": {},
+  "features": [
+    {
+      "id": "e8a7a520-3047-48ab-b0e8-5c060241c239",
+      "status": "-",
+      "title": "Git service: extend IPC to support staging/commit/push/pull/checkout",
+      "description": "Augment the main-process gitHelper and GitMonitorManager IPC handlers to enable core VCS workflows beyond listing/merge:\n- Add IPC handlers and gitHelper functions for: status porcelain with staged/unstaged changes, list remotes, fetch, pull, push, add (stage by path), reset (unstage by path), discard changes (checkout -- <path>), create branch, checkout branch, delete branch (safe only), rename branch, set upstream.\n- Ensure all commands use timeouts and return structured { ok, ... } responses; errors are captured without throwing.\n- Update preload (GIT_MONITOR_API) and renderer service (gitMonitorService) types with new methods.\n- Maintain safe checks: refuse destructive ops when working tree dirty where appropriate; confirm branch existence.\n- Keep polling behavior unchanged; only extend APIs.\nAcceptance: unit tests for gitHelper new methods with mocked exec; IPC handlers reachable via preload; types updated.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.835Z",
+      "updatedAt": "2025-10-03T09:50:20.835Z"
+    },
+    {
+      "id": "6936778c-98ea-4019-9f61-f70eba42195c",
+      "status": "-",
+      "title": "Renderer: Git panel with repo status, branches, and actions",
+      "description": "Implement a left-side Git panel screen in React (renderer/src/renderer) to surface:\n- Repo header: current branch, remote tracking, last fetch time, buttons: Fetch, Pull, Push.\n- Branches list: local branches (from GitMonitorStatus), quick filters (current, feature branches), context menu: checkout, create, rename, delete, set upstream; indicator for ahead/behind (compute via git rev-list base..branch & branch..base via new API; or optional lazy call per branch).\n- Per-branch actions: 'Has unmerged?' badge (uses hasUnmerged IPC) and Merge into base.\n- Loading/error states and toasts. Respect app shortkeys provider where relevant.\nAcceptance: UI renders with mock data; wired to gitMonitorService; actions trigger IPC and update on subscribe.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.837Z",
+      "updatedAt": "2025-10-03T09:50:20.837Z"
+    },
+    {
+      "id": "010046f3-aeaa-4d06-87f9-c6cf633a45eb",
+      "status": "-",
+      "title": "Diff viewer: file list, inline diff, and hunk selection",
+      "description": "Add a diff view showing working tree and index:\n- Top segment: tabs for 'Working Tree', 'Staged', 'Commit <sha>' compare (later), and selector for base (HEAD, other branch/commit).\n- File changes list grouped by added/modified/deleted/renamed with badges; clicking loads an inline unified diff for the file using 'git diff' via new IPC.\n- Support binary file message and image diff placeholder (show before/after thumbnails if feasible later; for now show binary notice).\n- Hunk selection: enable stage/unstage per file (MVP: stage/unstage entire file; optional follow-up for hunk-level staging planned separately).\n- Provide discard changes per file.\nAcceptance: Selecting a file loads diff text; stage/unstage file updates status; discard prompts confirmation and updates list.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.838Z",
+      "updatedAt": "2025-10-03T09:50:20.838Z"
+    },
+    {
+      "id": "dec97afd-cb7e-4bf0-b837-d619c8e1e22b",
+      "status": "-",
+      "title": "Commit composer: staged summary, message box, and commit execution",
+      "description": "Implement a commit composer in the Git panel:\n- Shows staged file count and list; commit message input with subject/body; optional co-authors trailer support.\n- Buttons: Commit, Commit and Push; disabled when nothing is staged or message empty.\n- On commit: call new IPC commit method; handle errors (e.g., pre-commit hook failure) and surface stderr.\n- After commit, clear message (configurable) and refresh status.\nAcceptance: Committing staged file creates a new commit (verified by HEAD change via API) and UI updates appropriately.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.839Z",
+      "updatedAt": "2025-10-03T09:50:20.839Z"
+    },
+    {
+      "id": "b95a26de-5276-42d9-a809-14334da15b8f",
+      "status": "-",
+      "title": "Merge UX: guided merge with conflict detection and resolution UI",
+      "description": "Upgrade merge flow beyond current mergeBranchIntoBase that aborts on conflict:\n- New main-process function to attempt merge and, on conflict, do not abort automatically; instead, return conflict metadata: list of conflicted files and conflict markers via 'git status --porcelain -z' and 'git diff --name-only --diff-filter=U'.\n- Add IPC handlers: startMerge, getMergeState, abortMerge, continueMerge (after conflicts resolved), resolveFileChoice (ours/theirs), and markFileResolved (after manual edit).\n- Renderer merge view: shows conflicted files, per-file diff with 3-way or 2-way inline view; provide buttons to accept ours/theirs; allow open-in-editor path; show instructions to edit and then mark resolved.\n- Visual indicators on the file tree for conflicts; block other operations during an in-progress merge.\nAcceptance: Simulate conflicts in a test repo; UI lists conflicts; resolving by selecting ours/theirs and continuing completes the merge and updates HEAD.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.841Z",
+      "updatedAt": "2025-10-03T09:50:20.841Z"
+    },
+    {
+      "id": "2b53abfd-994b-461e-83a5-7dcc8fce184a",
+      "status": "-",
+      "title": "Diff against other branches/commits",
+      "description": "Enable selection of a comparison target beyond HEAD:\n- New IPC to compute diff and file list between two refs/commits (git diff --name-status and git diff for each file on demand).\n- UI control to pick target: branch dropdown, recent commits search box; persist last selection per project.\n- Show ahead/behind counts for the chosen pair.\nAcceptance: Selecting a different target updates file list and diff; performance acceptable for typical repos (lazy-load diffs per file).",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.842Z",
+      "updatedAt": "2025-10-03T09:50:20.842Z"
+    },
+    {
+      "id": "57fef2ab-628b-4663-8ee0-06de1b7ba2f8",
+      "status": "-",
+      "title": "Tests integration: run tests for changed files and show diff of test results",
+      "description": "Integrate with existing factoryTestsService to surface tests contextually:\n- Detect changed test files and related tests (heuristic: files matching *test.* or *spec.*; optional mapping from source to tests via naming convention).\n- Provide 'Run tests for changed files' button; stream results (subscribe to testsService events) in a side panel next to diffs.\n- For snapshot tests (Jest-like), parse failure output and render inline 'expected vs received' text diffs; show button to update snapshots (new IPC to run with --updateSnapshot if applicable command exists in project settings).\n- Persist last test run outcome; badge files with failing tests.\nAcceptance: Changing a test file and running shows results; snapshot diff text displayed; update snapshots triggers rerun and passes when expected.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.846Z",
+      "updatedAt": "2025-10-03T09:50:20.846Z"
+    },
+    {
+      "id": "22d14df9-0703-477d-b7d2-774a5a34be26",
+      "status": "-",
+      "title": "Status bar and notifications for Git operations",
+      "description": "Add a global status bar indicator for ongoing Git operations (fetch/pull/push/merge/test runs) and OS/app notifications on completion/failure using notificationsService.\n- Show spinners and last action result; provide quick 'view details' link that focuses the Git panel.\nAcceptance: Starting a fetch/pull shows activity; failure produces a notification with error details.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.848Z",
+      "updatedAt": "2025-10-03T09:50:20.848Z"
+    },
+    {
+      "id": "5d67d81a-7c35-4629-9705-a780f2a24031",
+      "status": "-",
+      "title": "Shortcuts and command palette for Git actions",
+      "description": "Wire common shortcuts via useShortcuts and add entries to the command palette (if available) for: Fetch, Pull, Push, Stage All, Unstage All, Commit, Toggle Git panel, Run tests for changed files.\nAcceptance: Shortcuts execute corresponding actions without interfering with text input fields.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.851Z",
+      "updatedAt": "2025-10-03T09:50:20.851Z"
+    },
+    {
+      "id": "5d20ed31-a317-440b-8a1b-6191a95c580a",
+      "status": "-",
+      "title": "Docs: update FILE_ORGANISATION and add Git UX README",
+      "description": "Update docs/FILE_ORGANISATION.md to mention new git UI components/services and any new major dirs (e.g., renderer/components/git/).\nAdd docs/ui/git/README.md explaining the Git panel structure, IPC contracts, and development tips.\nAcceptance: Docs render, paths accurate, and no mention of file-level inventories.",
+      "context": [],
+      "createdAt": "2025-10-03T09:50:20.852Z",
+      "updatedAt": "2025-10-03T09:50:20.852Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "e8a7a520-3047-48ab-b0e8-5c060241c239": 1,
+    "6936778c-98ea-4019-9f61-f70eba42195c": 2,
+    "010046f3-aeaa-4d06-87f9-c6cf633a45eb": 3,
+    "dec97afd-cb7e-4bf0-b837-d619c8e1e22b": 4,
+    "b95a26de-5276-42d9-a809-14334da15b8f": 5,
+    "2b53abfd-994b-461e-83a5-7dcc8fce184a": 6,
+    "57fef2ab-628b-4663-8ee0-06de1b7ba2f8": 7,
+    "22d14df9-0703-477d-b7d2-774a5a34be26": 8,
+    "5d67d81a-7c35-4629-9705-a780f2a24031": 9,
+    "5d20ed31-a317-440b-8a1b-6191a95c580a": 10
+  },
   "createdAt": "2025-10-03T00:49:01.279Z",
   "updatedAt": "2025-10-03T00:49:16.122Z"
 }
