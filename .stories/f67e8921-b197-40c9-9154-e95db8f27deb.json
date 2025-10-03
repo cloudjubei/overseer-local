@@ -2097,7 +2097,7 @@
     },
     {
       "id": "eb1cc27e-7bae-484e-95f0-fb59e98e285d",
-      "status": "-",
+      "status": "=",
       "title": "Clicking ctrl/cmd+F adds a default Ongoing Improvements - but not always",
       "description": "When a different project other than 'main' is selected and the user does cmd+f to create an \"ongoing improvements\" feature - the success toast shows, but the feature isn't created.\nDue to reading the `activeProject` in @src/renderer/src/contexts/StoriesContext.tsx it only works when the main project is selected.\nTo fix this we need two improvements:\n- 1st, ctrl/cmd+f should create the feature in the given project in that projects 'ongoing improvements' story. If it doesn't exist it should simply be created and recorded.\n- 2nd, ctrl/cmd+g should create the feature in 'main' NO MATTER WHICH is the active project.",
       "context": [
@@ -2105,7 +2105,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-03T00:26:36.757Z",
-      "updatedAt": "2025-10-03T00:26:36.757Z"
+      "updatedAt": "2025-10-03T09:56:10.392Z"
     },
     {
       "id": "fc159580-49ca-4602-ac15-5060897a320d",
