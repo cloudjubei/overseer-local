@@ -2162,6 +2162,19 @@
       "createdAt": "2025-10-03T21:48:18.571Z",
       "updatedAt": "2025-10-03T22:09:55.804Z",
       "completedAt": "2025-10-03T22:09:55.804Z"
+    },
+    {
+      "id": "2dc1b4b3-8376-44d0-937f-f6c18778622b",
+      "status": "+",
+      "title": "ChatConversation doesn't display tool results",
+      "description": "in @src/renderer/src/components/agents/ChatConversation.tsx strangely doesn't display the tool results. This only seems to not work in a ChatConversation for a running agent - even though, that's absolutely no different than for one that has finished.\n\nIf you find anything interesting create a doc about it.",
+      "context": [
+        "src/renderer/src/components/agents/ChatConversation.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-04T02:22:58.355Z",
+      "updatedAt": "2025-10-04T02:31:21.633Z",
+      "completedAt": "2025-10-04T02:31:21.633Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2306,7 +2319,8 @@
     "4eb23f4e-deba-496d-9c27-ee4c052da03c": 139,
     "76b04544-7d06-4f64-8648-95a46b569056": 140,
     "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1": 141,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 142
+    "2dc1b4b3-8376-44d0-937f-f6c18778622b": 142,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 143
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
