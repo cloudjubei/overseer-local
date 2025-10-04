@@ -93,7 +93,7 @@ const CurrentProjectView = () => {
           (r) => r.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
         )
         .slice()
-        .sort((a, b) => new Date(b.finishedAt!).getTime() - new Date(a.finishedAt!).getTime()),
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [runsHistory, projectId],
   )
 
