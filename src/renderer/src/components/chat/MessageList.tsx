@@ -368,7 +368,7 @@ export default function MessageList({
             : ''
 
           return (
-            <React.Fragment key={index}>
+            <div>
               {showCutoff && (
                 <div className="relative text-center my-4 group" title={tooltipText}>
                   <hr className="border-dashed border-neutral-300 dark:border-neutral-700" />
@@ -378,209 +378,191 @@ export default function MessageList({
                 </div>
               )}
               <div
-                ref={index === messagesToDisplay.length - 1 ? lastMessageRef : null}
+                key={index}
+                ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
                 className={[
                   'flex items-start gap-2',
                   isUser ? 'flex-row-reverse' : 'flex-row',
                 ].join(' ')}
               >
-                {msg.error ? (
-                  <>
-                    <div
-                      className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
-                      aria-hidden="true"
-                    >
-                      AI
+                <div
+                  className={[
+                    'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                    isUser
+                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                      : isSystem
+                        ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
+                        : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                  ].join(' ')}
+                  aria-hidden="true"
+                >
+                  {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
+                </div>
+
+                <div
+                  className={[
+                    'max-w-[85%] min-w-0 flex flex-col',
+                    isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
+                  ].join(' ')}
+                >
+                  {msg.showModel && msg.model && (
+                    <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                      {msg.model.model}
                     </div>
-                    <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
-                      <ErrorBubble error={msg.error} />
-                    </div>
-                  </>
-                ) : (
-                  <>
+                  )}
+
+                  {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
                     <div
                       className={[
-                        'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                        'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                         isUser
-                          ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                          ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                           : isSystem
-                            ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
-                            : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
-                      ].join(' ')}
-                      aria-hidden="true"
-                    >
-                      {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
-                    </div>
-
-                    <div
-                      className={[
-                        'max-w-[85%] min-w-0 flex flex-col',
-                        isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
+                            ? toggleableCount > 0
+                              ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
+                              : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                            : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                        msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                        'chat-bubble',
+                        isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
                       ].join(' ')}
                     >
-                      {msg.showModel && msg.model && (
-                        <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
-                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
-                          {msg.model.model}
-                        </div>
+                      {isUser ? (
+                        <RichText text={msg.completionMessage.content} />
+                      ) : index === animateAssistantIdx ? (
+                        <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
+                      ) : isSystem ? (
+                        toggleableCount > 0 ? (
+                          <div className="text-sm">
+                            The assistant wants to run tools. Please grant permission for the tools
+                            you want to allow.
+                          </div>
+                        ) : (
+                          <Markdown text={msg.completionMessage.content} />
+                        )
+                      ) : (
+                        <Markdown text={msg.completionMessage.content} />
                       )}
+                    </div>
+                  ) : null}
 
-                      {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
-                        <div
-                          className={[
-                            'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
-                            isUser
-                              ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                              : isSystem
-                                ? toggleableCount > 0
-                                  ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
-                                  : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                                : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                            msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
-                            'chat-bubble',
-                            isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
-                          ].join(' ')}
-                        >
-                          {isUser ? (
-                            <RichText text={msg.completionMessage.content} />
-                          ) : index === animateAssistantIdx ? (
-                            <TypewriterText
-                              text={msg.completionMessage.content}
-                              renderer="markdown"
-                            />
-                          ) : isSystem ? (
-                            toggleableCount > 0 ? (
-                              <div className="text-sm">
-                                The assistant wants to run tools. Please grant permission for the
-                                tools you want to allow.
-                              </div>
-                            ) : (
-                              <Markdown text={msg.completionMessage.content} />
-                            )
-                          ) : (
-                            <Markdown text={msg.completionMessage.content} />
-                          )}
+                  {isShowingToolCalls && (
+                    <div className="mt-2 w-full space-y-2">
+                      {msg.toolCalls!.map((call: ToolCall, i: number) => {
+                        return (
+                          <ToolCallCard
+                            key={`tool-${index}-${i}`}
+                            index={i}
+                            toolCall={call}
+                            selectable={false}
+                            disabled={true}
+                          />
+                        )
+                      })}
+                    </div>
+                  )}
+                  {isShowingToolResults && (
+                    <div className="mt-2 w-full space-y-2">
+                      {msg.toolResults!.map((result: ToolResult, i: number) => {
+                        const resultType = result.type
+                        const isRequireConfirm = resultType === 'require_confirmation'
+                        const resultId = result.result
+                        const selectable =
+                          isSystem && isLast && isRequireConfirm && resultId !== undefined
+
+                        const effectiveResultType: ToolResultType | undefined =
+                          isRequireConfirm && !isLast ? 'aborted' : resultType
+
+                        return (
+                          <ToolCallCard
+                            key={`tool-${index}-${i}`}
+                            index={i}
+                            toolCall={result.call}
+                            result={result.result}
+                            resultType={effectiveResultType}
+                            durationMs={result.durationMs}
+                            selectable={selectable}
+                            selected={selectable ? selectedToolIds.includes(resultId) : false}
+                            onToggleSelect={
+                              selectable
+                                ? () => {
+                                    setSelectedToolIds((prev) =>
+                                      prev.includes(resultId)
+                                        ? prev.filter((x) => x !== resultId)
+                                        : [...prev, resultId],
+                                    )
+                                  }
+                                : undefined
+                            }
+                            disabled={!selectable}
+                          />
+                        )
+                      })}
+
+                      {toggleableCount > 0 && isSystem && isLast ? (
+                        <div className="pt-1 flex items-center justify-end">
+                          <button
+                            type="button"
+                            className={[
+                              'btn',
+                              selectedCount > 0
+                                ? 'bg-green-600 hover:bg-green-700 text-white border-transparent'
+                                : 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)] cursor-not-allowed opacity-70',
+                            ].join(' ')}
+                            disabled={selectedCount === 0 || !onResumeTools}
+                            onClick={() => {
+                              if (!onResumeTools) return
+                              const validSelected = selectedToolIds.filter((id) =>
+                                toggleableIds.includes(id),
+                              )
+                              onResumeTools(validSelected)
+                            }}
+                          >
+                            {`Resume ${selectedCount}/${toggleableCount} Tools`}
+                          </button>
                         </div>
                       ) : null}
-
-                      {isShowingToolCalls && (
-                        <div className="mt-2 w-full space-y-2">
-                          {msg.toolCalls!.map((call: ToolCall, i: number) => {
-                            return (
-                              <ToolCallCard
-                                key={`tool-${index}-${i}`}
-                                index={i}
-                                toolCall={call}
-                                selectable={false}
-                                disabled={true}
-                              />
-                            )
-                          })}
-                        </div>
-                      )}
-                      {isShowingToolResults && (
-                        <div className="mt-2 w-full space-y-2">
-                          {msg.toolResults!.map((result: ToolResult, i: number) => {
-                            const resultType = result.type
-                            const isRequireConfirm = resultType === 'require_confirmation'
-                            const resultId = result.result
-                            const selectable =
-                              isSystem && isLast && isRequireConfirm && resultId !== undefined
-
-                            const effectiveResultType: ToolResultType | undefined =
-                              isRequireConfirm && !isLast ? 'aborted' : resultType
-
-                            return (
-                              <ToolCallCard
-                                key={`tool-${index}-${i}`}
-                                index={i}
-                                toolCall={result.call}
-                                result={result.result}
-                                resultType={effectiveResultType}
-                                durationMs={result.durationMs}
-                                selectable={selectable}
-                                selected={selectable ? selectedToolIds.includes(resultId) : false}
-                                onToggleSelect={
-                                  selectable
-                                    ? () => {
-                                        setSelectedToolIds((prev) =>
-                                          prev.includes(resultId)
-                                            ? prev.filter((x) => x !== resultId)
-                                            : [...prev, resultId],
-                                        )
-                                      }
-                                    : undefined
-                                }
-                                disabled={!selectable}
-                              />
-                            )
-                          })}
-
-                          {toggleableCount > 0 && isSystem && isLast ? (
-                            <div className="pt-1 flex items-center justify-end">
-                              <button
-                                type="button"
-                                className={[
-                                  'btn',
-                                  selectedCount > 0
-                                    ? 'bg-green-600 hover:bg-green-700 text-white border-transparent'
-                                    : 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)] cursor-not-allowed opacity-70',
-                                ].join(' ')}
-                                disabled={selectedCount === 0 || !onResumeTools}
-                                onClick={() => {
-                                  if (!onResumeTools) return
-                                  const validSelected = selectedToolIds.filter((id) =>
-                                    toggleableIds.includes(id),
-                                  )
-                                  onResumeTools(validSelected)
-                                }}
-                              >
-                                {`Resume ${selectedCount}/${toggleableCount} Tools`}
-                              </button>
-                            </div>
-                          ) : null}
-                        </div>
-                      )}
-
-                      {msg.completionMessage.files && msg.completionMessage.files.length > 0 && (
-                        <div
-                          className={[
-                            'mt-1 flex flex-wrap gap-1',
-                            isUser ? 'justify-end' : 'justify-start',
-                          ].join(' ')}
-                        >
-                          {msg.completionMessage.files.map((path, i) => {
-                            const meta = filesByPath[path]
-                            const name = meta?.name || path.split('/').pop() || path
-                            const type = meta?.type || inferFileType(path)
-                            const size = meta?.size ?? undefined
-                            const mtime = meta?.mtime ?? undefined
-                            const ctime = meta?.ctime ?? undefined
-                            return (
-                              <FileDisplay
-                                key={`${index}-att-${i}-${path}`}
-                                file={{
-                                  name,
-                                  absolutePath: path,
-                                  relativePath: path,
-                                  type,
-                                  size,
-                                  mtime,
-                                  ctime,
-                                }}
-                                density="compact"
-                                interactive
-                                showPreviewOnHover
-                              />
-                            )
-                          })}
-                        </div>
-                      )}
                     </div>
-                  </>
-                )}
+                  )}
+
+                  {msg.completionMessage.files && msg.completionMessage.files.length > 0 && (
+                    <div
+                      className={[
+                        'mt-1 flex flex-wrap gap-1',
+                        isUser ? 'justify-end' : 'justify-start',
+                      ].join(' ')}
+                    >
+                      {msg.completionMessage.files.map((path, i) => {
+                        const meta = filesByPath[path]
+                        const name = meta?.name || path.split('/').pop() || path
+                        const type = meta?.type || inferFileType(path)
+                        const size = meta?.size ?? undefined
+                        const mtime = meta?.mtime ?? undefined
+                        const ctime = meta?.ctime ?? undefined
+                        return (
+                          <FileDisplay
+                            key={`${index}-att-${i}-${path}`}
+                            file={{
+                              name,
+                              absolutePath: path,
+                              relativePath: path,
+                              type,
+                              size,
+                              mtime,
+                              ctime,
+                            }}
+                            density="compact"
+                            interactive
+                            showPreviewOnHover
+                          />
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
-            </React.Fragment>
+            </div>
           )
         })}
 
