@@ -8,27 +8,7 @@ import CostChip from './CostChip'
 import TokensChip from './TokensChip'
 import { AgentRunHistory, AgentRunRatingPatch } from 'thefactory-tools'
 import { Button } from '../ui/Button'
-import { formatHmsCompact } from '../../utils/time'
-
-function formatTime(iso?: string) {
-  if (!iso) return ''
-  try {
-    const d = new Date(iso)
-    return d.toLocaleTimeString()
-  } catch {
-    return iso ?? ''
-  }
-}
-
-function formatDate(iso?: string) {
-  if (!iso) return ''
-  try {
-    const d = new Date(iso)
-    return d.toLocaleDateString()
-  } catch {
-    return iso ?? ''
-  }
-}
+import { formatDate, formatHmsCompact, formatTime } from '../../utils/time'
 
 function useConversationCounts(run: AgentRunHistory) {
   return useMemo(() => {
@@ -110,7 +90,7 @@ export default function AgentRunRow({
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.promptTokens ?? 0)
+        .map((c) => c.completionMessage.usage.promptTokens ?? 0)
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
@@ -118,7 +98,7 @@ export default function AgentRunRow({
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.completionTokens ?? 0)
+        .map((c) => c.completionMessage.usage.completionTokens ?? 0)
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )

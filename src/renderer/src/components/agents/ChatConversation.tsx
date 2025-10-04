@@ -6,20 +6,12 @@ import type {
   ToolCall,
   AgentRunHistory,
   AgentRunConversation,
-  AgentRunMessage,
+  ChatMessage,
+  ToolResult,
 } from 'thefactory-tools'
 import { formatHmsCompact } from '../../utils/time'
-
-// Parse assistant JSON response to extract message and tool calls safely
-function parseAssistant(content: string): AgentResponse | null {
-  try {
-    const obj = JSON.parse(content)
-    if (obj && typeof obj === 'object') return obj as AgentResponse
-    return null
-  } catch {
-    return null
-  }
-}
+import Code from '../ui/Code'
+import JsonView from '../ui/JsonView'
 
 function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number }) {
   const str = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
@@ -85,7 +77,6 @@ function ToolCallRow({
 }) {
   const name = call.name
   const args = call.arguments ?? {}
-  const isHeavy = name === 'read_files' || name === 'write_file'
 
   return (
     <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40">
@@ -94,48 +85,22 @@ function ToolCallRow({
           <div className="text-xs font-semibold">
             {index + 1}. {name}
           </div>
-          <div className="text-[11px] text-neutral-600 dark:text-neutral-400">Arguments</div>
         </div>
       </div>
       <div className="px-3 pb-2">
-        {isHeavy ? (
-          <Collapsible title={<span>View arguments</span>}>
-            <JsonPreview value={args} maxChars={500} />
-          </Collapsible>
-        ) : (
-          <div className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 max-h-60 overflow-auto">
-            <JsonPreview value={args} maxChars={400} />
-          </div>
-        )}
+        <Collapsible title={<span>View arguments</span>}>
+          <Code language="json" code={JSON.stringify(args, null, 2)} />
+        </Collapsible>
       </div>
-      {resultText != null && (
+      {resultText && (
         <div className="px-3 pb-3">
-          <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mb-1">Result</div>
-          {isHeavy ? (
-            <Collapsible title={<span>View result</span>}>
-              <div className="text-xs whitespace-pre-wrap break-words">
-                <SafeText text={resultText} />
-              </div>
-            </Collapsible>
-          ) : (
-            <div className="rounded bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-2 text-xs whitespace-pre-wrap break-words max-h-60 overflow-auto">
-              <SafeText text={resultText} />
-            </div>
-          )}
+          <Collapsible title={<span>View result</span>}>
+            <Code language="json" code={JSON.stringify(JSON.parse(resultText), null, 2)} />
+          </Collapsible>
         </div>
       )}
     </div>
   )
-}
-
-export type ParsedToolResult = { name: string; result: any }
-
-function parseToolResultsObjects(tools?: AgentRunMessage): ParsedToolResult[] {
-  const text = tools?.content.trim() ?? '[]'
-  try {
-    return JSON.parse(text) as ParsedToolResult[]
-  } catch {}
-  return []
 }
 
 function isLargeText(text?: string) {
@@ -155,24 +120,16 @@ function ScrollableTextBox({ text, className }: { text: string; className?: stri
   )
 }
 
-function isToolMsg(m: AgentRunMessage | undefined) {
-  if (!m) return false
-  if (m.source === 'tools') return true
-  return false
-}
-
 type TurnMessages = {
-  assistant: AgentRunMessage
-  tools?: AgentRunMessage
+  assistant: ChatMessage
+  toolResults?: ToolResult[]
   index: number
-  isFinal?: boolean
-  thinkingTime?: number
 }
 
-function buildFeatureTurns(messages: AgentRunMessage[]) {
+function buildFeatureTurns(messages: ChatMessage[]) {
   const turns: TurnMessages[] = []
   if (!messages || messages.length === 0)
-    return { initial: undefined as AgentRunMessage | undefined, turns }
+    return { initial: undefined as ChatMessage | undefined, turns }
 
   const initial = messages[0]
 
@@ -184,31 +141,24 @@ function buildFeatureTurns(messages: AgentRunMessage[]) {
     const a = messages[idx]
     idx++
 
-    if (a.role === 'assistant') {
+    if (a.completionMessage.role === 'assistant') {
       if (latestTurn) {
         turns.push(latestTurn)
         turn++
       }
 
-      const startedAt = a.startedAt ? new Date(a.startedAt).getTime() : NaN
-      const createdAt = a.completedAt ? new Date(a.completedAt).getTime() : NaN
-      let thinkingTime: number | undefined = undefined
-      if (!isNaN(startedAt) && !isNaN(createdAt)) {
-        thinkingTime = Math.max(0, createdAt - startedAt)
-      }
-
-      latestTurn = { assistant: a, index: turn, thinkingTime }
+      latestTurn = { assistant: a, index: turn }
       continue
     }
-
-    if (latestTurn && isToolMsg(a)) {
-      latestTurn.tools = a
+    console.log('NON ASSISTANT a: ', a)
+    if (latestTurn) {
+      latestTurn.toolResults = a.toolResults
     }
   }
   if (latestTurn) {
-    latestTurn.isFinal = true
     turns.push(latestTurn)
   }
+  console.log('turns: ', turns)
   return { initial, turns }
 }
 
@@ -236,7 +186,7 @@ function FeatureContent({
   isLatestFeature: boolean
   latestTurnRef?: React.RefObject<HTMLDivElement | null>
 }) {
-  // Recompute on every render to reflect in-place mutations of log.messages
+  console.log('conversation is : ', conversation)
   const { initial, turns } = buildFeatureTurns(conversation.messages || [])
 
   return (
@@ -246,11 +196,11 @@ function FeatureContent({
           title={<span className="flex items-center1">Initial prompt</span>}
           defaultOpen={false}
         >
-          {isLargeText(initial.content || '') ? (
-            <ScrollableTextBox text={initial.content || ''} />
+          {isLargeText(initial.completionMessage.content) ? (
+            <ScrollableTextBox text={initial.completionMessage.content} />
           ) : (
             <div className="p-2 text-xs whitespace-pre-wrap break-words">
-              <RichText text={initial.content || ''} />
+              <RichText text={initial.completionMessage.content} />
             </div>
           )}
         </Collapsible>
@@ -259,12 +209,8 @@ function FeatureContent({
       )}
 
       {turns.map((t, idx) => {
-        const parsed = parseAssistant(t.assistant.content)
-        //TODO: if parsed is not AgentResponse - show some standard display
-        const toolCalls: ToolCall[] = parsed?.toolCalls || []
-        const resultsObjs = parseToolResultsObjects(t.tools)
-        const hasMessage = parsed?.message && parsed.message.trim().length > 0
-        const isFinal = t.isFinal || toolCalls.length === 0
+        const toolCalls: ToolCall[] = t.assistant.toolCalls ?? []
+        const toolResults = t.toolResults ?? []
 
         const isLatestTurn = idx === turns.length - 1
         const defaultOpen = isLatestFeature && isLatestTurn
@@ -273,27 +219,20 @@ function FeatureContent({
           <div key={idx} ref={defaultOpen && latestTurnRef ? latestTurnRef : undefined}>
             <Collapsible
               innerClassName="p-2"
-              title={
-                <span className="flex items-center gap-2">
-                  {isFinal ? 'Final' : `Turn ${idx + 1}`}
-                </span>
-              }
+              title={<span className="flex items-center gap-2">{`Turn ${idx + 1}`}</span>}
               defaultOpen={defaultOpen}
             >
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    {hasMessage ? (
-                      <AssistantBubble text={parsed!.message!} />
-                    ) : (
-                      <AssistantBubble title="Assistant" text={t.assistant?.content || ''} />
-                    )}
+                    <AssistantBubble
+                      title="Assistant"
+                      text={t.assistant.completionMessage.content}
+                    />
                   </div>
-                  {t.thinkingTime != null && (
-                    <div className="flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 rounded-full px-2 py-0.5 text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap mt-1">
-                      {formatHmsCompact(t.thinkingTime)}
-                    </div>
-                  )}
+                  <div className="flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 rounded-full px-2 py-0.5 text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap mt-1">
+                    {formatHmsCompact(t.assistant.completionMessage.durationMs)}
+                  </div>
                 </div>
 
                 {toolCalls.length > 0 && (
@@ -304,8 +243,8 @@ function FeatureContent({
                         call={call}
                         index={i}
                         resultText={
-                          resultsObjs[i]?.result
-                            ? JSON.stringify(resultsObjs[i]?.result)
+                          toolResults[i]?.result
+                            ? JSON.stringify(toolResults[i]?.result)
                             : undefined
                         }
                       />

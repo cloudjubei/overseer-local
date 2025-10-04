@@ -8,7 +8,7 @@ import ToolCallCard from './ToolCallCard'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
-import { ChatMessage, CompletionToolResult, ToolCall, ToolResultType } from 'thefactory-tools'
+import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
 import { IconToolbox } from '../ui/Icons'
 
@@ -470,8 +470,7 @@ export default function MessageList({
                 )}
                 {isShowingToolResults && (
                   <div className="mt-2 w-full space-y-2">
-                    {msg.toolResults!.map((c: CompletionToolResult, i: number) => {
-                      const result = c.result
+                    {msg.toolResults!.map((result: ToolResult, i: number) => {
                       const resultType = result.type
                       const isRequireConfirm = resultType === 'require_confirmation'
                       const resultId = result.result
@@ -488,7 +487,7 @@ export default function MessageList({
                           toolCall={result.call}
                           result={result.result}
                           resultType={effectiveResultType}
-                          durationMs={c.durationMs}
+                          durationMs={result.durationMs}
                           selectable={selectable}
                           selected={selectable ? selectedToolIds.includes(resultId) : false}
                           onToggleSelect={

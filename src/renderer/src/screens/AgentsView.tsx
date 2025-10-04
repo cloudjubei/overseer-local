@@ -8,16 +8,8 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { ChatSidebarPanel } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-
-function formatTime(iso?: string) {
-  if (!iso) return ''
-  try {
-    const d = new Date(iso)
-    return d.toLocaleTimeString()
-  } catch {
-    return iso ?? ''
-  }
-}
+import StatusChip from '@renderer/components/agents/StatusChip'
+import { formatDate, formatTime } from '@renderer/utils/time'
 
 function formatUSD(n?: number) {
   if (n == null || !isFinite(n)) return '\u2014'
@@ -54,8 +46,12 @@ const CurrentProjectView = () => {
     const runCalcs = projectRuns.map((r) => {
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
-      const prompt = messages.map((m) => m.promptTokens ?? 0).reduce((a, b) => a + b, 0)
-      const completion = messages.map((m) => m.completionTokens ?? 0).reduce((a, b) => a + b, 0)
+      const prompt = messages
+        .map((m) => m.completionMessage.usage.promptTokens ?? 0)
+        .reduce((a, b) => a + b, 0)
+      const completion = messages
+        .map((m) => m.completionMessage.usage.completionTokens ?? 0)
+        .reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
@@ -254,8 +250,10 @@ const CurrentProjectView = () => {
                     provider={selectedRun.llmConfig.provider}
                     model={selectedRun.llmConfig.model}
                   />
+                  <StatusChip state={selectedRun.state} />
                   <span>
-                    {selectedRun.state} Updated {formatTime(selectedRun.updatedAt)}
+                    Updated {formatDate(selectedRun.updatedAt)} •{' '}
+                    {formatTime(selectedRun.updatedAt)}
                   </span>
                 </div>
               </div>
@@ -284,8 +282,12 @@ const AllProjectsView = () => {
     const runCalcs = allRuns.map((r) => {
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
-      const prompt = messages.map((m) => m.promptTokens ?? 0).reduce((a, b) => a + b, 0)
-      const completion = messages.map((m) => m.completionTokens ?? 0).reduce((a, b) => a + b, 0)
+      const prompt = messages
+        .map((m) => m.completionMessage.usage.promptTokens ?? 0)
+        .reduce((a, b) => a + b, 0)
+      const completion = messages
+        .map((m) => m.completionMessage.usage.completionTokens ?? 0)
+        .reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000

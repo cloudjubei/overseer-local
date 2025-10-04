@@ -18,8 +18,8 @@ import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
 import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
-import { Button } from '../ui/Button'
-import Modal from '../ui/Modal'
+import { Button } from '@renderer/components/ui/Button'
+import { Modal } from '@renderer/components/ui/Modal'
 
 export type ChatSidebarProps = {
   context: ChatContext

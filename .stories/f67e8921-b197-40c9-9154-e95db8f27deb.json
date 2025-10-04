@@ -2083,19 +2083,6 @@
       "completedAt": "2025-09-30T14:19:01.769Z"
     },
     {
-      "id": "4dbdca35-53b9-402a-b1ea-5e4f7401e04e",
-      "status": "-",
-      "title": "Agents need to display the new updated AgentRun Messages",
-      "description": "in @src/renderer/src/screens/AgentsView.tsx the @src/renderer/src/components/agents/ChatConversation.tsx needs to show the new updated results correctly",
-      "context": [
-        "src/renderer/src/screens/AgentsView.tsx",
-        "src/renderer/src/components/agents/ChatConversation.tsx"
-      ],
-      "blockers": [],
-      "createdAt": "2025-10-03T00:11:20.779Z",
-      "updatedAt": "2025-10-03T00:11:20.779Z"
-    },
-    {
       "id": "eb1cc27e-7bae-484e-95f0-fb59e98e285d",
       "status": "=",
       "title": "Clicking ctrl/cmd+F adds a default Ongoing Improvements - but not always",
@@ -2328,9 +2315,8 @@
     "4eb23f4e-deba-496d-9c27-ee4c052da03c": 139,
     "76b04544-7d06-4f64-8648-95a46b569056": 140,
     "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1": 141,
-    "4dbdca35-53b9-402a-b1ea-5e4f7401e04e": 142,
-    "fc159580-49ca-4602-ac15-5060897a320d": 143,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 144
+    "fc159580-49ca-4602-ac15-5060897a320d": 142,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 143
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

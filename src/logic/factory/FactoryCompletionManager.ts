@@ -12,8 +12,8 @@ import type {
   CompletionResponseTurns,
   ChatContext,
   ChatMessage,
-  CompletionToolResult,
   Chat,
+  ToolResult,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
@@ -91,8 +91,8 @@ export default class FactoryCompletionManager extends BaseManager {
 
       if (c.toolResults?.length) {
         const toolResults = c.toolResults.map((r) => ({
-          name: r.result.call.name,
-          result: r.result.result,
+          name: r.call.name,
+          result: r.result,
         }))
         return {
           role: 'user',
@@ -143,19 +143,19 @@ export default class FactoryCompletionManager extends BaseManager {
 
     const toolsCheck = new Set<string>(toolsGranted)
     const toolsRequiringConfirmation = lastMessage.toolResults.filter(
-      (r) => r.result.type === 'require_confirmation',
+      (r) => r.type === 'require_confirmation',
     )
     if (toolsRequiringConfirmation.length < 1)
       throw new Error("CHAT DOESN'T HAVE A TOOL REQUIRING CONFIRMATION THAT HAD IT GRANTED")
-    const toolsAllowed = toolsRequiringConfirmation.filter((r) => toolsCheck.has(r.result.result))
+    const toolsAllowed = toolsRequiringConfirmation.filter((r) => toolsCheck.has(r.result))
 
     const callTool = async (toolName: string, args: any): Promise<string> => {
       const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
       return JSON.stringify(result)
     }
 
-    const agentResponse: AgentResponse = { toolCalls: toolsAllowed.map((t) => t.result.call) }
-    const availableTools = toolsAllowed.map((t) => t.result.call.name)
+    const agentResponse: AgentResponse = { toolCalls: toolsAllowed.map((t) => t.call) }
+    const availableTools = toolsAllowed.map((t) => t.call.name)
 
     const toolResults = await callCompletionTools(
       agentResponse,
@@ -166,15 +166,15 @@ export default class FactoryCompletionManager extends BaseManager {
       this.createAbortSignal(chatContext),
     )
 
-    const mapToolResults: Record<string, CompletionToolResult> = {}
+    const mapToolResults: Record<string, ToolResult> = {}
     for (let i = 0; i < toolResults.results.length; i++) {
       const r = toolResults.results[i]
-      mapToolResults[toolsAllowed[i].result.result] = r
+      mapToolResults[toolsAllowed[i].result] = r
     }
 
     let newLastMessage = { ...lastMessage }
     newLastMessage.toolResults = lastMessage.toolResults.map((t) =>
-      mapToolResults[t.result.result] ? mapToolResults[t.result.result] : t,
+      mapToolResults[t.result] ? mapToolResults[t.result] : t,
     )
 
     const newMessages = [...chat.messages]

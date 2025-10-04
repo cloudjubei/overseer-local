@@ -21,3 +21,23 @@ export function timeAgo(from: number, to: number) {
   if (hours === 1) return '1 hour ago'
   return `${hours} hours ago`
 }
+
+export function formatTime(iso?: string) {
+  if (!iso) return ''
+  try {
+    const d = new Date(iso)
+    return d.toLocaleTimeString()
+  } catch {
+    return iso ?? ''
+  }
+}
+
+export function formatDate(iso?: string) {
+  if (!iso) return ''
+  try {
+    const d = new Date(iso)
+    return d.toLocaleDateString()
+  } catch {
+    return iso ?? ''
+  }
+}
