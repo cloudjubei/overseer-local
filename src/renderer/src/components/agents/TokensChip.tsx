@@ -8,7 +8,7 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.promptTokens ?? 0)
+        .map((c) => c.completionMessage.usage.promptTokens ?? 0)
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
@@ -16,16 +16,18 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.completionTokens ?? 0)
+        .map((c) => c.completionMessage.usage.completionTokens ?? 0)
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
 
   const { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg } = useMemo(() => {
     const messages = run.conversations.flatMap((c) => c.messages)
-    const userCount = messages.filter((m) => (m.role || '').toLowerCase() === 'user').length
+    const userCount = messages.filter(
+      (m) => m.completionMessage.role.toLowerCase() === 'user',
+    ).length
     const assistantCount = messages.filter(
-      (m) => (m.role || '').toLowerCase() === 'assistant',
+      (m) => m.completionMessage.role.toLowerCase() === 'assistant',
     ).length
     const avgPromptPerMsg = userCount > 0 ? Math.round(prompt / userCount) : undefined
     const avgCompletionPerMsg =

@@ -242,9 +242,7 @@ const CurrentProjectView = () => {
           <div className="relative bg-white dark:bg-neutral-950 rounded-lg shadow-xl w-[92vw] max-w-5xl max-h-[90vh] border border-neutral-200 dark:border-neutral-800">
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">
-                  Run #{selectedRun.id.slice(0, 8)} {selectedRun.storyId ?? 'Story'}
-                </div>
+                <div className="font-semibold text-sm truncate">Run #{selectedRun.id}</div>
                 <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
                   <ModelChip
                     provider={selectedRun.llmConfig.provider}

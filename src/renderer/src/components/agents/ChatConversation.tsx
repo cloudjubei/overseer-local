@@ -133,29 +133,35 @@ function buildFeatureTurns(messages: ChatMessage[]) {
 
   const initial = messages[0]
 
-  let idx = 1
+  // let idx = 1
   let turn = 1
   let latestTurn: TurnMessages | undefined = undefined
 
-  while (idx < messages.length) {
+  for (let idx = 1; idx < messages.length; idx++) {
+    // while (idx < messages.length) {
     const a = messages[idx]
-    idx++
+    // idx++
+    if (idx == 2) {
+      console.log('message: ', a)
+      console.log('latestTurn: ', latestTurn)
+    } else if (idx == 3) {
+      console.log('latestTurn AFTER: ', latestTurn)
+    }
 
     if (a.completionMessage.role === 'assistant') {
-      if (latestTurn) {
+      if (latestTurn !== undefined) {
         turns.push(latestTurn)
         turn++
       }
 
-      latestTurn = { assistant: a, index: turn }
+      latestTurn = { assistant: a, index: turn, toolResults: undefined }
       continue
     }
-    console.log('NON ASSISTANT a: ', a)
-    if (latestTurn) {
+    if (latestTurn !== undefined) {
       latestTurn.toolResults = a.toolResults
     }
   }
-  if (latestTurn) {
+  if (latestTurn !== undefined) {
     turns.push(latestTurn)
   }
   console.log('turns: ', turns)

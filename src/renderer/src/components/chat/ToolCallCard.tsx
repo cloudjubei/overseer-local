@@ -119,7 +119,7 @@ export default function ToolCallCard({
   selected,
   onToggleSelect,
 }: ToolCallCardProps) {
-  const [isCallExpanded, setIsCallExpanded] = useState(true)
+  const [isCallExpanded, setIsCallExpanded] = useState(false)
 
   const showResult = resultType === 'success'
   const isRequireConfirm = resultType === 'require_confirmation'

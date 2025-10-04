@@ -2095,16 +2095,6 @@
       "updatedAt": "2025-10-03T09:56:10.392Z"
     },
     {
-      "id": "fc159580-49ca-4602-ac15-5060897a320d",
-      "status": "-",
-      "title": "Agents need to display running agents correctly",
-      "description": "After a single turn an agent disappears. The schema has changed.",
-      "context": [],
-      "blockers": [],
-      "createdAt": "2025-10-03T00:27:25.636Z",
-      "updatedAt": "2025-10-03T00:27:25.636Z"
-    },
-    {
       "id": "c713a8f1-d3af-428d-9f29-f03250b2db5c",
       "status": "+",
       "title": "Add ProjectChip + StoryChip to forms",
@@ -2316,8 +2306,7 @@
     "4eb23f4e-deba-496d-9c27-ee4c052da03c": 139,
     "76b04544-7d06-4f64-8648-95a46b569056": 140,
     "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1": 141,
-    "fc159580-49ca-4602-ac15-5060897a320d": 142,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 143
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 142
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

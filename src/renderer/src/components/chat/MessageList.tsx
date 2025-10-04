@@ -310,7 +310,23 @@ export default function MessageList({
       )}
       <div className="mx-auto max-w-[960px] space-y-3">
         {messagesToDisplay.map((msg, index) => {
-          const isSystem = msg.completionMessage.role === 'system'
+          if (msg.error) {
+            return (
+              <div key={index} className="flex items-start gap-2 flex-row">
+                <div
+                  className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                  aria-hidden="true"
+                >
+                  AI
+                </div>
+                <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
+                  <ErrorBubble error={msg.error} />
+                </div>
+              </div>
+            )
+          }
+
+          const isSystem = msg.completionMessage.role === 'system' //system messages here indicate tool results
           const isUser = msg.completionMessage.role === 'user'
           const isAssistant = msg.completionMessage.role === 'assistant'
 
@@ -363,9 +379,10 @@ export default function MessageList({
               )}
               <div
                 ref={index === messagesToDisplay.length - 1 ? lastMessageRef : null}
-                className={['flex items-start gap-2', isUser ? 'flex-row-reverse' : 'flex-row'].join(
-                  ' ',
-                )}
+                className={[
+                  'flex items-start gap-2',
+                  isUser ? 'flex-row-reverse' : 'flex-row',
+                ].join(' ')}
               >
                 {msg.error ? (
                   <>
@@ -427,7 +444,10 @@ export default function MessageList({
                           {isUser ? (
                             <RichText text={msg.completionMessage.content} />
                           ) : index === animateAssistantIdx ? (
-                            <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
+                            <TypewriterText
+                              text={msg.completionMessage.content}
+                              renderer="markdown"
+                            />
                           ) : isSystem ? (
                             toggleableCount > 0 ? (
                               <div className="text-sm">

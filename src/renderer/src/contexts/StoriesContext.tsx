@@ -179,7 +179,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
   // }, [])
 
   const updateStories = (stories: InternalStoryUpdate[]) => {
-    console.log('updateStories stories: ', stories)
+    console.log('updateStories stories: ', stories, ' storyIdsByProject: ', storyIdsByProject)
     const newStoryIdsByProject: Record<string, string[]> = { ...storyIdsByProject }
     const newStoriesById: Record<string, Story> = { ...storiesById }
     const newFeaturesById: Record<string, Feature> = { ...featuresById }

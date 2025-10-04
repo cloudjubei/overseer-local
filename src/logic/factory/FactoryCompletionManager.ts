@@ -149,9 +149,9 @@ export default class FactoryCompletionManager extends BaseManager {
       throw new Error("CHAT DOESN'T HAVE A TOOL REQUIRING CONFIRMATION THAT HAD IT GRANTED")
     const toolsAllowed = toolsRequiringConfirmation.filter((r) => toolsCheck.has(r.result))
 
-    const callTool = async (toolName: string, args: any): Promise<string> => {
-      const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
-      return JSON.stringify(result)
+    const callTool = async (toolName: string, args: any): Promise<any> => {
+      return await this.factoryToolsManager.executeTool(projectId, toolName, args)
+      // return JSON.stringify(result)
     }
 
     const agentResponse: AgentResponse = { toolCalls: toolsAllowed.map((t) => t.call) }
@@ -248,6 +248,7 @@ export default class FactoryCompletionManager extends BaseManager {
       const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
       return JSON.stringify(result)
     }
+    const promptPreparedCallback = async (systemPrompt: string) => {}
     const responseReceivedCallback = async (
       turn: number,
       response: CompletionResponse,
@@ -292,6 +293,7 @@ export default class FactoryCompletionManager extends BaseManager {
       request,
       settings,
       callTool,
+      promptPreparedCallback,
       responseReceivedCallback,
       turnFinishedCallback,
     )
