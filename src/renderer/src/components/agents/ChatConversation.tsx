@@ -66,29 +66,13 @@ function Collapsible({
   )
 }
 
-function ToolCallRow({
-  call,
-  resultText,
-  index,
-}: {
-  call: ToolCall
-  resultText?: string
-  index: number
-}) {
+function ToolCallRow({ call, result, index }: { call: ToolCall; result?: any; index: number }) {
   const name = call.name
   const args = call.arguments ?? {}
-
-  // Prepare a safe, pretty representation of the result
-  let displayResult: string | undefined
-  if (resultText) {
-    try {
-      // If it's valid JSON, pretty-print it
-      displayResult = JSON.stringify(JSON.parse(resultText), null, 2)
-    } catch {
-      // Otherwise, render the raw string
-      displayResult = resultText
-    }
-  }
+  const displayResult =
+    result && typeof result !== 'string'
+      ? JSON.stringify(JSON.parse(JSON.stringify(result)), null, 2)
+      : result
 
   return (
     <div className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40">
@@ -145,30 +129,14 @@ function buildFeatureTurns(messages: ChatMessage[]) {
 
   const initial = messages[0]
 
-  let turn = 1
-  let latestTurn: TurnMessages | undefined = undefined
-
-  for (let idx = 1; idx < messages.length; idx++) {
-    const a = messages[idx]
-
-    if (a.completionMessage.role === 'assistant') {
-      if (latestTurn !== undefined) {
-        turns.push(latestTurn)
-      }
-      latestTurn = { assistant: a, index: turn }
-      turn++
+  for (const m of messages) {
+    if (m.completionMessage.role === 'assistant') {
+      turns.push({ assistant: m, index: turns.length + 1 })
       continue
     }
-
-    // Only attach tool results if this message actually has them
-    if (a.toolResults && a.toolResults.length > 0) {
-      if (latestTurn !== undefined) {
-        latestTurn.toolResults = a.toolResults
-      }
+    if (turns.length > 0) {
+      turns[turns.length - 1] = { ...turns[turns.length - 1], toolResults: m.toolResults }
     }
-  }
-  if (latestTurn !== undefined) {
-    turns.push(latestTurn)
   }
   return { initial, turns }
 }
@@ -197,6 +165,10 @@ function FeatureContent({
   isLatestFeature: boolean
   latestTurnRef?: React.RefObject<HTMLDivElement | null>
 }) {
+  // const { initial, turns } = useMemo(
+  //   () => buildFeatureTurns(conversation.messages || []),
+  //   [conversation.messages],
+  // )
   const { initial, turns } = buildFeatureTurns(conversation.messages || [])
 
   return (
@@ -248,11 +220,13 @@ function FeatureContent({
                 {toolCalls.length > 0 && (
                   <div className="space-y-2">
                     {toolCalls.map((call, i) => {
-                      const res = toolResults[i]?.result as any
-                      const resultText =
-                        res !== undefined ? (typeof res === 'string' ? res : JSON.stringify(res)) : undefined
                       return (
-                        <ToolCallRow key={i} call={call} index={i} resultText={resultText} />
+                        <ToolCallRow
+                          key={i}
+                          call={call}
+                          index={i}
+                          result={toolResults[i]?.result}
+                        />
                       )
                     })}
                   </div>
