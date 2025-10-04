@@ -133,20 +133,11 @@ function buildFeatureTurns(messages: ChatMessage[]) {
 
   const initial = messages[0]
 
-  // let idx = 1
   let turn = 1
   let latestTurn: TurnMessages | undefined = undefined
 
   for (let idx = 1; idx < messages.length; idx++) {
-    // while (idx < messages.length) {
     const a = messages[idx]
-    // idx++
-    if (idx == 2) {
-      console.log('message: ', a)
-      console.log('latestTurn: ', latestTurn)
-    } else if (idx == 3) {
-      console.log('latestTurn AFTER: ', latestTurn)
-    }
 
     if (a.completionMessage.role === 'assistant') {
       if (latestTurn !== undefined) {
@@ -164,7 +155,6 @@ function buildFeatureTurns(messages: ChatMessage[]) {
   if (latestTurn !== undefined) {
     turns.push(latestTurn)
   }
-  console.log('turns: ', turns)
   return { initial, turns }
 }
 
@@ -192,7 +182,6 @@ function FeatureContent({
   isLatestFeature: boolean
   latestTurnRef?: React.RefObject<HTMLDivElement | null>
 }) {
-  console.log('conversation is : ', conversation)
   const { initial, turns } = buildFeatureTurns(conversation.messages || [])
 
   return (
