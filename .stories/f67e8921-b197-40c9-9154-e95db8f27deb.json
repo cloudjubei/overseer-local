@@ -2126,7 +2126,7 @@
     },
     {
       "id": "76b04544-7d06-4f64-8648-95a46b569056",
-      "status": "-",
+      "status": "+",
       "title": "In chats there should be a small indicator to the side showing the cut off point for assistant messages",
       "description": "in @src/renderer/src/components/chat/ChatSidebar.tsx the ChatSettings and the CompletionSettings inside, have a `numberMessagesToSend` which is the amount of messages the LLM will be given. This could be nicely indicated to the user as a little notch on the side, that when hovered will explain that this is the cut off point. The notch must take into account that a user will probably send a message - so it should be always -1 from the number (this should also be explaind in the tooltip).",
       "context": [
@@ -2134,7 +2134,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-03T21:28:33.845Z",
-      "updatedAt": "2025-10-03T21:28:33.845Z"
+      "updatedAt": "2025-10-04T00:40:14.818Z",
+      "completedAt": "2025-10-04T00:40:14.818Z"
     },
     {
       "id": "4eb23f4e-deba-496d-9c27-ee4c052da03c",

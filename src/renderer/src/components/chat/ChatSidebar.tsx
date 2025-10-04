@@ -539,6 +539,7 @@ export default function ChatSidebar({
           messages={messagesWithSystem}
           isThinking={isThinking}
           onResumeTools={handleResumeTools}
+          numberMessagesToSend={completion?.numberMessagesToSend}
         />
       </div>
 
