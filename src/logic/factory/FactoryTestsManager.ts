@@ -54,7 +54,7 @@ export default class FactoryTestsManager extends BaseManager {
     return handlers
   }
 
-  async listTests(projectId: string): Promise<FileMeta[]> {
+  async listTests(projectId: string): Promise<string[]> {
     const tools = await this.__getTools(projectId)
     return (await tools?.listTests()) ?? []
   }

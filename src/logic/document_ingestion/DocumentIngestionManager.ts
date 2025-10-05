@@ -65,7 +65,7 @@ export default class DocumentIngestionManager extends BaseManager {
       return
     }
 
-    const files = ((await this.filesManager.getAllFileStats(projectId)) || []) as FileMeta[]
+    const files: FileMeta[] = (await this.filesManager.getAllFileStats(projectId)) || []
 
     const documentsToUpsert: DocumentInput[] = []
     for (const f of files) {
