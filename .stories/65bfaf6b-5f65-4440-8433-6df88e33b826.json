@@ -8,11 +8,17 @@
       "id": "e8a7a520-3047-48ab-b0e8-5c060241c239",
       "status": "-",
       "title": "Git service: extend IPC to support GitTools",
-      "description": "Augment the main-process gitHelper and GitMonitorManager IPC handlers to enable core VCS workflows - utilise GitTools from `thefactory-tools` which offers all required git functions.\n\nUpdate preload (GIT_MONITOR_API) and renderer service (gitMonitorService) types with new methods.\nKeep polling behavior unchanged; only extend APIs.\n\nAcceptance: unit tests for gitHelper new methods with mocked exec; IPC handlers reachable via preload; types updated.",
-      "context": [],
+      "description": "Augment the main-process @src/logic/git-monitor/GitMonitorManager.ts  IPC handlers to enable core VCS workflows - utilise GitTools from `thefactory-tools` which offers all required git functions.\n\nUpdate @src/preload/index.ts  (GIT_MONITOR_API) and @src/renderer/src/services/gitMonitorService.ts  types with new methods.\nKeep polling behavior unchanged; only extend APIs.\n\nAcceptance: unit tests for gitHelper new methods with mocked exec; IPC handlers reachable via preload; types updated.\n\nThe types for GitTools from `thefactory-tools` are included at the bottom of @src/logic/git-monitor/GitMonitorManager.ts",
+      "context": [
+        "src/logic/git-monitor/GitMonitorManager.ts",
+        "src/preload/index.ts",
+        "src/renderer/src/services/gitMonitorService.ts"
+      ],
       "createdAt": "2025-10-03T09:50:20.835Z",
-      "updatedAt": "2025-10-03T11:21:31.150Z",
-      "blockers": []
+      "updatedAt": "2025-10-05T01:50:32.411Z",
+      "blockers": [
+        "65bfaf6b-5f65-4440-8433-6df88e33b826.87d743d0-b16c-46f9-ab68-2dd31959d188"
+      ]
     },
     {
       "id": "6936778c-98ea-4019-9f61-f70eba42195c",
@@ -21,7 +27,10 @@
       "description": "Implement a left-side Git panel screen in React (renderer/src/renderer) to surface:\n- Repo header: current branch, remote tracking, last fetch time, buttons: Fetch, Pull, Push.\n- Branches list: local branches (from GitMonitorStatus), quick filters (current, feature branches), context menu: checkout, create, rename, delete, set upstream; indicator for ahead/behind (compute via git rev-list base..branch & branch..base via new API; or optional lazy call per branch).\n- Per-branch actions: 'Has unmerged?' badge (uses hasUnmerged IPC) and Merge into base.\n- Loading/error states and toasts. Respect app shortkeys provider where relevant.\nAcceptance: UI renders with mock data; wired to gitMonitorService; actions trigger IPC and update on subscribe.",
       "context": [],
       "createdAt": "2025-10-03T09:50:20.837Z",
-      "updatedAt": "2025-10-03T09:50:20.837Z"
+      "updatedAt": "2025-10-05T01:49:58.396Z",
+      "blockers": [
+        "65bfaf6b-5f65-4440-8433-6df88e33b826.e8a7a520-3047-48ab-b0e8-5c060241c239"
+      ]
     },
     {
       "id": "010046f3-aeaa-4d06-87f9-c6cf633a45eb",
@@ -30,7 +39,10 @@
       "description": "Add a diff view showing working tree and index:\n- Top segment: tabs for 'Working Tree', 'Staged', 'Commit <sha>' compare (later), and selector for base (HEAD, other branch/commit).\n- File changes list grouped by added/modified/deleted/renamed with badges; clicking loads an inline unified diff for the file using 'git diff' via new IPC.\n- Support binary file message and image diff placeholder (show before/after thumbnails if feasible later; for now show binary notice).\n- Hunk selection: enable stage/unstage per file (MVP: stage/unstage entire file; optional follow-up for hunk-level staging planned separately).\n- Provide discard changes per file.\nAcceptance: Selecting a file loads diff text; stage/unstage file updates status; discard prompts confirmation and updates list.",
       "context": [],
       "createdAt": "2025-10-03T09:50:20.838Z",
-      "updatedAt": "2025-10-03T09:50:20.838Z"
+      "updatedAt": "2025-10-05T01:50:59.326Z",
+      "blockers": [
+        "65bfaf6b-5f65-4440-8433-6df88e33b826.6936778c-98ea-4019-9f61-f70eba42195c"
+      ]
     },
     {
       "id": "dec97afd-cb7e-4bf0-b837-d619c8e1e22b",
@@ -39,7 +51,10 @@
       "description": "Implement a commit composer in the Git panel:\n- Shows staged file count and list; commit message input with subject/body; optional co-authors trailer support.\n- Buttons: Commit, Commit and Push; disabled when nothing is staged or message empty.\n- On commit: call new IPC commit method; handle errors (e.g., pre-commit hook failure) and surface stderr.\n- After commit, clear message (configurable) and refresh status.\nAcceptance: Committing staged file creates a new commit (verified by HEAD change via API) and UI updates appropriately.",
       "context": [],
       "createdAt": "2025-10-03T09:50:20.839Z",
-      "updatedAt": "2025-10-03T09:50:20.839Z"
+      "updatedAt": "2025-10-05T01:51:08.188Z",
+      "blockers": [
+        "65bfaf6b-5f65-4440-8433-6df88e33b826.010046f3-aeaa-4d06-87f9-c6cf633a45eb"
+      ]
     },
     {
       "id": "b95a26de-5276-42d9-a809-14334da15b8f",
@@ -48,7 +63,10 @@
       "description": "Upgrade merge flow beyond current mergeBranchIntoBase that aborts on conflict:\n- New main-process function to attempt merge and, on conflict, do not abort automatically; instead, return conflict metadata: list of conflicted files and conflict markers via 'git status --porcelain -z' and 'git diff --name-only --diff-filter=U'.\n- Add IPC handlers: startMerge, getMergeState, abortMerge, continueMerge (after conflicts resolved), resolveFileChoice (ours/theirs), and markFileResolved (after manual edit).\n- Renderer merge view: shows conflicted files, per-file diff with 3-way or 2-way inline view; provide buttons to accept ours/theirs; allow open-in-editor path; show instructions to edit and then mark resolved.\n- Visual indicators on the file tree for conflicts; block other operations during an in-progress merge.\nAcceptance: Simulate conflicts in a test repo; UI lists conflicts; resolving by selecting ours/theirs and continuing completes the merge and updates HEAD.",
       "context": [],
       "createdAt": "2025-10-03T09:50:20.841Z",
-      "updatedAt": "2025-10-03T09:50:20.841Z"
+      "updatedAt": "2025-10-05T01:51:20.000Z",
+      "blockers": [
+        "65bfaf6b-5f65-4440-8433-6df88e33b826.dec97afd-cb7e-4bf0-b837-d619c8e1e22b"
+      ]
     },
     {
       "id": "2b53abfd-994b-461e-83a5-7dcc8fce184a",
@@ -130,23 +148,39 @@
       "context": [],
       "createdAt": "2025-10-03T17:14:46.344Z",
       "updatedAt": "2025-10-03T17:14:46.344Z"
+    },
+    {
+      "id": "87d743d0-b16c-46f9-ab68-2dd31959d188",
+      "status": "-",
+      "title": "Wire up GitMonitorManager same way as DocumentIngestionManager",
+      "description": "@src/logic/document_ingestion/DocumentIngestionManager.ts is started in @src/renderer/src/screens/LoadingScreen.tsx , the same should be the case for @src/logic/git-monitor/GitMonitorManager.ts  - it should follow the same scheme.\nThe only difference is that the @src/logic/git-monitor/GitMonitorManager.ts will be per projectId (as they can have different configurations and different credentials) - so it should have the gitTools from `thefactory-tools` stored in the same way as @src/logic/stories/StoriesManager.ts .\n\nThe types for GitTools from `thefactory-tools` are included at the bottom of @src/logic/git-monitor/GitMonitorManager.ts",
+      "context": [
+        "src/logic/document_ingestion/DocumentIngestionManager.ts",
+        "src/renderer/src/screens/LoadingScreen.tsx",
+        "src/logic/git-monitor/GitMonitorManager.ts",
+        "src/logic/stories/StoriesManager.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T01:46:53.361Z",
+      "updatedAt": "2025-10-05T01:49:16.098Z"
     }
   ],
   "featureIdToDisplayIndex": {
-    "e8a7a520-3047-48ab-b0e8-5c060241c239": 1,
-    "6936778c-98ea-4019-9f61-f70eba42195c": 2,
-    "010046f3-aeaa-4d06-87f9-c6cf633a45eb": 3,
-    "dec97afd-cb7e-4bf0-b837-d619c8e1e22b": 4,
-    "b95a26de-5276-42d9-a809-14334da15b8f": 5,
-    "2b53abfd-994b-461e-83a5-7dcc8fce184a": 6,
-    "57fef2ab-628b-4663-8ee0-06de1b7ba2f8": 7,
-    "22d14df9-0703-477d-b7d2-774a5a34be26": 8,
-    "5d67d81a-7c35-4629-9705-a780f2a24031": 9,
-    "5d20ed31-a317-440b-8a1b-6191a95c580a": 10,
-    "2ef261bd-666a-4331-861f-170130a15c1d": 11,
-    "81ddc766-11a8-4fd7-9fa1-cfdd187dac9c": 12,
-    "26b442b1-b9be-4472-995a-87925c75d93b": 13,
-    "5fea9099-adbc-4aa6-872c-af48615c3bb2": 14
+    "87d743d0-b16c-46f9-ab68-2dd31959d188": 1,
+    "e8a7a520-3047-48ab-b0e8-5c060241c239": 2,
+    "6936778c-98ea-4019-9f61-f70eba42195c": 3,
+    "010046f3-aeaa-4d06-87f9-c6cf633a45eb": 4,
+    "dec97afd-cb7e-4bf0-b837-d619c8e1e22b": 5,
+    "b95a26de-5276-42d9-a809-14334da15b8f": 6,
+    "2b53abfd-994b-461e-83a5-7dcc8fce184a": 7,
+    "57fef2ab-628b-4663-8ee0-06de1b7ba2f8": 8,
+    "22d14df9-0703-477d-b7d2-774a5a34be26": 9,
+    "5d67d81a-7c35-4629-9705-a780f2a24031": 10,
+    "5d20ed31-a317-440b-8a1b-6191a95c580a": 11,
+    "2ef261bd-666a-4331-861f-170130a15c1d": 12,
+    "81ddc766-11a8-4fd7-9fa1-cfdd187dac9c": 13,
+    "26b442b1-b9be-4472-995a-87925c75d93b": 14,
+    "5fea9099-adbc-4aa6-872c-af48615c3bb2": 15
   },
   "createdAt": "2025-10-03T00:49:01.279Z",
   "updatedAt": "2025-10-03T17:14:46.335Z"

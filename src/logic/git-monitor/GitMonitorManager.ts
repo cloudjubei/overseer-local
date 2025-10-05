@@ -5,6 +5,7 @@ import { analyzeBranchHeadForStory } from './CommitAnalyzer'
 import { updateLocalStoryStateFromCommit } from './updateLocalStoryStateFromCommit'
 import { isFeatureBranchName, branchNameToStoryId } from './storyBranchNaming'
 import BaseManager from '../BaseManager'
+import { GitTools, createGitTools } from 'thefactory-tools'
 
 /**
  * GitMonitorManager
@@ -34,6 +35,8 @@ export default class GitMonitorManager extends BaseManager {
   async init(): Promise<void> {
     await super.init()
     await this.__startWatching()
+
+    // this.tools = createGitTools(this.projectRoot, repoUrl, credentials)
   }
 
   async stopWatching(): Promise<void> {
@@ -149,3 +152,57 @@ export default class GitMonitorManager extends BaseManager {
     }
   }
 }
+
+// export type GitOpResult = {
+//     ok: true;
+//     stdout?: string;
+// } | {
+//     ok: false;
+//     error: string;
+//     stderr?: string;
+//     stdout?: string;
+//     code?: number;
+// };
+// export type GitStatusPorcelain = {
+//     staged: string[];
+//     unstaged: string[];
+//     untracked: string[];
+// };
+// export type GitBranchInfo = {
+//     name: string;
+//     current?: boolean;
+// };
+// export type GitTools = {
+//     init(): Promise<void>;
+//     status(): Promise<GitOpResult & {
+//         status?: GitStatusPorcelain;
+//     }>;
+//     listRemotes(): Promise<GitOpResult & {
+//         remotes?: string[];
+//     }>;
+//     fetch(remote?: string): Promise<GitOpResult>;
+//     pull(remote?: string, branch?: string): Promise<GitOpResult>;
+//     push(remote?: string, branch?: string): Promise<GitOpResult>;
+//     stage(path: string): Promise<GitOpResult>;
+//     stageAll(): Promise<GitOpResult>;
+//     reset(path: string): Promise<GitOpResult>;
+//     discard(path: string): Promise<GitOpResult>;
+//     pushAll(message: string): Promise<void>;
+//     createBranch(name: string, checkoutAfter?: boolean): Promise<GitOpResult>;
+//     checkoutBranch(name: string, create: boolean): Promise<GitOpResult>;
+//     deleteBranch(name: string): Promise<GitOpResult>;
+//     renameBranch(oldName: string, newName: string): Promise<GitOpResult>;
+//     setUpstream(remote?: string, branch?: string): Promise<GitOpResult>;
+//     listBranches(): Promise<GitOpResult & {
+//         branches?: GitBranchInfo[];
+//     }>;
+//     getCurrentBranch(): Promise<GitOpResult & {
+//         branch?: string;
+//     }>;
+// };
+// export type GithubCredentials = {
+//     name: string;
+//     username: string;
+//     email: string;
+//     token: string;
+// };
