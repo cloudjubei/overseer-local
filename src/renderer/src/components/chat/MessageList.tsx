@@ -347,10 +347,11 @@ export default function MessageList({
           const toggleableIds: string[] = (() => {
             if (!(isSystem && isLast)) return []
             const results = msg.toolResults || []
+            console.log('results: ', results)
             const ids: string[] = []
             for (const r of results) {
-              const t = (r as any)?.result?.type
-              const idVal = (r as any)?.result?.result
+              const t = r.type
+              const idVal = r.result
               if (t === 'require_confirmation' && typeof idVal !== 'undefined')
                 ids.push(String(idVal))
             }
@@ -366,6 +367,7 @@ export default function MessageList({
                 numberMessagesToSend - 1
               } previous messages will be sent.`
             : ''
+          toggleableCount > 0 && isSystem && isLast
 
           return (
             <div>

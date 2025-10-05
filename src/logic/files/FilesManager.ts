@@ -70,7 +70,7 @@ export default class FilesManager extends BaseManager {
 
   async listFiles(projectId: string, relPath: string = '.'): Promise<string[]> {
     const tools = await this.__getTools(projectId)
-    return (await tools?.listFiles(relPath)) ?? []
+    return (await tools?.listContents(relPath)) ?? []
   }
   async readFile(
     projectId: string,

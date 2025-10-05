@@ -43,4 +43,4 @@ export type GitMonitorService = {
   }>
 }
 
-export const gitMonitorService: GitMonitorService = { ...(window as any).gitMonitorService }
+export const gitMonitorService: GitMonitorService = { ...window.gitMonitorService }

@@ -72,7 +72,7 @@ export function useReferencesAutocomplete(params: {
       'width',
     ] as const
     stylesToCopy.forEach((key) => {
-      ;(mirror.style as any)[key] = (style as any)[key]
+      mirror.style[key] = style[key]
     })
     mirror.style.overflowWrap = 'break-word'
     mirror.style.whiteSpace = 'pre-wrap'

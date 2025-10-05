@@ -258,7 +258,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
       const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
       stickToBottomRef.current = atBottom
     }
-    el.addEventListener('scroll', onScroll, { passive: true } as any)
+    el.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => el.removeEventListener('scroll', onScroll)
   }, [])

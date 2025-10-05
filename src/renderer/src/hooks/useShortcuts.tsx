@@ -124,7 +124,7 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
       const target = e.target as HTMLElement | null
       const tag = (target?.tagName || '').toLowerCase()
       const isEditable =
-        (target && (target as any).isContentEditable) ||
+        (target && target.isContentEditable) ||
         tag === 'input' ||
         tag === 'textarea' ||
         tag === 'select'
@@ -148,7 +148,7 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
       }
     }
     window.addEventListener('keydown', onKey, { capture: true })
-    return () => window.removeEventListener('keydown', onKey, { capture: true } as any)
+    return () => window.removeEventListener('keydown', onKey, { capture: true })
   }, [])
 
   const api = useMemo(

@@ -3,7 +3,15 @@ import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
-import type { ChatContext } from 'thefactory-tools'
+import type {
+  ChatContext,
+  ChatContextAgentRun,
+  ChatContextFeature,
+  ChatContextProject,
+  ChatContextProjectTopic,
+  ChatContextStory,
+  ChatContextStoryTopic,
+} from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { IconPlus } from '../components/ui/Icons'
 
@@ -24,17 +32,23 @@ function titleForContext(
 ): string {
   switch (context.type) {
     case 'PROJECT':
-      return `Project Chat — ${opts.getProjectTitle((context as any).projectId)}`
+      return `Project Chat — ${opts.getProjectTitle((context as ChatContextProject).projectId)}`
     case 'STORY':
-      return `Story Chat — ${opts.getStoryTitle((context as any).storyId)}`
-    case 'FEATURE':
-      return `Feature Chat — ${opts.getStoryTitle((context as any).storyId)} / ${opts.getFeatureTitle((context as any).featureId)}`
-    case 'PROJECT_TOPIC':
-      return `Project ${prettyTopicName((context as any).projectTopic)} — ${opts.getProjectTitle((context as any).projectId)}`
-    case 'STORY_TOPIC':
-      return `Story ${prettyTopicName((context as any).storyTopic)} — ${opts.getStoryTitle((context as any).storyId)}`
+      return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
+    case 'FEATURE': {
+      const c = context as ChatContextFeature
+      return `Feature Chat — ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
+    }
+    case 'PROJECT_TOPIC': {
+      const c = context as ChatContextProjectTopic
+      return `Project ${prettyTopicName(c.projectTopic)} — ${opts.getProjectTitle(c.projectId)}`
+    }
+    case 'STORY_TOPIC': {
+      const c = context as ChatContextStoryTopic
+      return `Story ${prettyTopicName(c.storyTopic)} — ${opts.getStoryTitle(c.storyId)}`
+    }
     case 'AGENT_RUN':
-      return `Agent Run Chat — ${(context as any).agentRunId || ''}`
+      return `Agent Run Chat — ${(context as ChatContextAgentRun).agentRunId || ''}`
     default:
       return 'Chat'
   }
@@ -107,7 +121,7 @@ export default function ChatView() {
   const projectTopicsGrouped = useMemo(() => {
     const byTopic: Record<string, typeof projectTopicChats> = {}
     for (const s of projectTopicChats) {
-      const topic = (s.chat.context as any).projectTopic || 'general'
+      const topic = (s.chat.context as ChatContextProjectTopic).projectTopic || 'general'
       if (!byTopic[topic]) byTopic[topic] = []
       byTopic[topic].push(s)
     }
@@ -123,7 +137,7 @@ export default function ChatView() {
   const storyTopicsGrouped = useMemo(() => {
     const byTopic: Record<string, typeof storyTopicChats> = {}
     for (const s of storyTopicChats) {
-      const topic = (s.chat.context as any).storyTopic || 'general'
+      const topic = (s.chat.context as ChatContextStoryTopic).storyTopic || 'general'
       if (!byTopic[topic]) byTopic[topic] = []
       byTopic[topic].push(s)
     }

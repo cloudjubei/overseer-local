@@ -40,8 +40,8 @@ export default function ChatSidebarPanel({
 
   useEffect(() => {
     return () => {
-      window.removeEventListener('pointermove', onResizeMove as any)
-      window.removeEventListener('pointerup', onResizeEnd as any)
+      window.removeEventListener('pointermove', onResizeMove)
+      window.removeEventListener('pointerup', onResizeEnd)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

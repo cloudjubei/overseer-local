@@ -15,7 +15,7 @@ import { ToolCall, ToolResultType } from 'thefactory-tools'
 export type ToolCallCardProps = {
   index: number
   toolCall: ToolCall
-  result?: string
+  result?: any
   resultType?: ToolResultType
   durationMs?: number
   selectable?: boolean
@@ -121,7 +121,10 @@ export default function ToolCallCard({
 }: ToolCallCardProps) {
   const [isCallExpanded, setIsCallExpanded] = useState(false)
 
-  const showResult = resultType === 'success'
+  const resultString =
+    resultType === 'success' && result
+      ? JSON.stringify(typeof result === 'string' ? JSON.parse(result ?? '{}') : result, null, 2)
+      : undefined
   const isRequireConfirm = resultType === 'require_confirmation'
 
   return (
@@ -165,10 +168,10 @@ export default function ToolCallCard({
           {/* <JsonView value={result} /> */}
         </div>
       )}{' '}
-      {showResult && (
+      {resultString && (
         <Collapsible title={<span>View result</span>}>
           <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
-            <Code language="json" code={JSON.stringify(JSON.parse(result!), null, 2)} />
+            <Code language="json" code={resultString} />
             {/* <JsonView value={result} /> */}
           </div>
         </Collapsible>

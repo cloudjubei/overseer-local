@@ -215,7 +215,7 @@ export default function SidebarView({}: SidebarProps) {
 
   useEffect(() => {
     // Subscribe to notification changes; update affected project only
-    const unsubscribe = notificationsService.subscribe((payload?: any) => {
+    const unsubscribe = notificationsService.subscribe((payload) => {
       const pid = payload?.projectId
       if (pid) refreshUnreadFor(pid)
       else {
@@ -613,7 +613,7 @@ export default function SidebarView({}: SidebarProps) {
               />
               <div className="fixed inset-y-0 left-0 z-30" style={{ width: 260 }}>
                 {React.cloneElement(Aside, {
-                  className: `${(Aside as any).props.className} drawer-open`,
+                  className: `${Aside.props.className} drawer-open`,
                   'data-collapsed': 'false',
                 })}
               </div>

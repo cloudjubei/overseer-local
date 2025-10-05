@@ -3,7 +3,7 @@ import { useNavigator } from '../../navigation/Navigator'
 import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
 import { Button } from '../ui/Button'
-import { CoverageResult } from 'thefactory-tools'
+import { CoverageFileStats, CoverageResult } from 'thefactory-tools'
 import { IconDoubleUp } from '../ui/Icons'
 
 function pctColor(p: number) {
@@ -132,17 +132,8 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
       lines_covered: number | null
       uncovered_lines: number[]
     }[] = []
-    for (const [file, v] of Object.entries<any>(data?.files || {})) {
+    for (const [file, v] of Object.entries<CoverageFileStats>(data?.files || {})) {
       const rel = normalizePath(file)
-      const pct_lines = typeof (v as any).pct_lines === 'number' ? (v as any).pct_lines : 0
-      const pct_statements =
-        typeof (v as any).pct_statements === 'number' ? (v as any).pct_statements : 0
-      const pct_branch = typeof (v as any).pct_branch === 'number' ? (v as any).pct_branch : null
-      const pct_functions =
-        typeof (v as any).pct_functions === 'number' ? (v as any).pct_functions : null
-      const uncovered_lines: number[] = Array.isArray((v as any).uncovered_lines)
-        ? (v as any).uncovered_lines
-        : []
 
       // Try to find totals/covered counts if provided by the backend
       const statements_total = findTotal(v, 'statements')
@@ -155,17 +146,14 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
       let lines_covered = findCovered(v, 'lines')
 
       // If lines covered not provided but total is, approximate from uncovered_lines
-      if (lines_total !== null && lines_covered === null && Array.isArray(uncovered_lines)) {
-        lines_covered = Math.max(0, lines_total - uncovered_lines.length)
+      if (lines_total !== null && lines_covered === null && Array.isArray(v.uncovered_lines)) {
+        lines_covered = Math.max(0, lines_total - v.uncovered_lines.length)
       }
 
       list.push({
+        ...v,
         file,
         rel,
-        pct_lines,
-        pct_statements,
-        pct_branch,
-        pct_functions,
         statements_total,
         statements_covered,
         branches_total,
@@ -174,7 +162,6 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
         functions_covered,
         lines_total,
         lines_covered,
-        uncovered_lines,
       })
     }
     // Sort depth-first by path segments, alphabetically
@@ -210,7 +197,7 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
         title: 'TESTING',
         description: 'Ongoing Testing improvements',
         status: '-',
-      } as any)
+      })
       return created?.id
     } catch (e) {
       console.error('Failed to create TESTING story', e)

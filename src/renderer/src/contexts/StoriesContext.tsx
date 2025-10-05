@@ -330,9 +330,9 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
   const createStory = useCallback(
     async (updates: StoryCreateInput): Promise<Story | undefined> => {
       if (activeProject) {
-        const normalized: any = { ...updates }
-        if (Array.isArray((updates as any).blockers)) {
-          normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
+        const normalized = { ...updates }
+        if (Array.isArray(updates.blockers)) {
+          normalized.blockers = updates.blockers.map((d: string) => normalizeDependency(d))
         }
         const story = await storiesService.createStory(activeProject.id, normalized)
 

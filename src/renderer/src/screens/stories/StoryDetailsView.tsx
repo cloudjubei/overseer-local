@@ -464,7 +464,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                     isAllAllowed={true}
                     includeNotDone={true}
                     onSelect={(val) => {
-                      setStatusFilter(val as any)
+                      setStatusFilter(val)
                       setOpenFilter(false)
                     }}
                     onClose={() => setOpenFilter(false)}

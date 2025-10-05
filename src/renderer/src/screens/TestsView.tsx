@@ -61,7 +61,7 @@ function TestsInner() {
         title: 'TESTING',
         description: 'Ongoing Testing improvements',
         status: '-',
-      } as any)
+      })
       return created?.id
     } catch (e) {
       console.error('Failed to create TESTING story', e)

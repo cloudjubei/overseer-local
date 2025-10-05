@@ -258,10 +258,10 @@ export default function ProjectTimelineView() {
 
   const displayedFeatures = useMemo(() => {
     return displayedStories
-      .flatMap((t: any) =>
+      .flatMap((t) =>
         (t.features || []).map((f: Feature) => ({
           ...f,
-          storyProjectId: t.projectId,
+          storyProjectId: projectId,
           storyId: t.id,
         })),
       )
@@ -454,7 +454,7 @@ export default function ProjectTimelineView() {
 
   // Build rows for features (day) or stories (week/month) and user-defined label rows
   const featureRows = useMemo(() => {
-    const items: RowItem[] = displayedFeatures.map((f: any) => ({
+    const items: RowItem[] = displayedFeatures.map((f) => ({
       id: f.id,
       title: f.title,
       timestamp: f.completedAt ?? new Date().toISOString(),

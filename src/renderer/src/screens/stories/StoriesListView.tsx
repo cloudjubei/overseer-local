@@ -44,8 +44,7 @@ function matchesQuery(story: Story, q: string) {
 
 function filterStories(stories: Story[], { query, status }: { query: string; status: string }) {
   return stories.filter((t) => {
-    const hasRejectedFeatures =
-      Array.isArray(t.features) && t.features.some((f: any) => !!f.rejection)
+    const hasRejectedFeatures = Array.isArray(t.features) && t.features.some((f) => !!f.rejection)
     const byStatus =
       !status || status === 'all'
         ? true
@@ -382,7 +381,7 @@ export default function StoriesListView() {
                 {openFilter && statusFilterRef.current && (
                   <StatusPicker
                     anchorEl={statusFilterRef.current}
-                    value={statusFilter as any}
+                    value={statusFilter}
                     isAllAllowed={true}
                     includeNotDone={true}
                     onSelect={(val) => {
