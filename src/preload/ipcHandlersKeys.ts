@@ -146,6 +146,25 @@ const IPC_HANDLER_KEYS = {
   GIT_MONITOR_MERGE_BRANCH: 'git-monitor:merge-branch',
   GIT_MONITOR_START_ALL: 'git-monitor:start-all',
   GIT_MONITOR_START_PROJECT: 'git-monitor:start-project',
+
+  // Git tools (main-process GitTools via GitMonitorManager)
+  GIT_MONITOR_GIT_STATUS: 'git-monitor:git:status',
+  GIT_MONITOR_GIT_LIST_REMOTES: 'git-monitor:git:list-remotes',
+  GIT_MONITOR_GIT_FETCH: 'git-monitor:git:fetch',
+  GIT_MONITOR_GIT_PULL: 'git-monitor:git:pull',
+  GIT_MONITOR_GIT_PUSH: 'git-monitor:git:push',
+  GIT_MONITOR_GIT_STAGE: 'git-monitor:git:stage',
+  GIT_MONITOR_GIT_STAGE_ALL: 'git-monitor:git:stage-all',
+  GIT_MONITOR_GIT_RESET: 'git-monitor:git:reset',
+  GIT_MONITOR_GIT_DISCARD: 'git-monitor:git:discard',
+  GIT_MONITOR_GIT_PUSH_ALL: 'git-monitor:git:push-all',
+  GIT_MONITOR_GIT_CREATE_BRANCH: 'git-monitor:git:create-branch',
+  GIT_MONITOR_GIT_CHECKOUT_BRANCH: 'git-monitor:git:checkout-branch',
+  GIT_MONITOR_GIT_DELETE_BRANCH: 'git-monitor:git:delete-branch',
+  GIT_MONITOR_GIT_RENAME_BRANCH: 'git-monitor:git:rename-branch',
+  GIT_MONITOR_GIT_SET_UPSTREAM: 'git-monitor:git:set-upstream',
+  GIT_MONITOR_GIT_LIST_BRANCHES: 'git-monitor:git:list-branches',
+  GIT_MONITOR_GIT_GET_CURRENT_BRANCH: 'git-monitor:git:get-current-branch',
 }
 
 export default IPC_HANDLER_KEYS

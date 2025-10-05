@@ -1,0 +1,1 @@
+This directory contains unit tests for selected modules.\n\nRunning tests:\n- Install dependencies: `npm install`\n- Run: `npm run test`\n\nWe use Vitest (Vite-native test runner) to execute tests with ESM support.\n

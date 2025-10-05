@@ -1,20 +1,28 @@
-import { execFile } from 'node:child_process'
+import { execFile as cpExecFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import path from 'node:path'
 import fs from 'node:fs'
 
-const execFileAsync = promisify(execFile)
+const defaultExecFileAsync = promisify(cpExecFile)
+let __execFileAsync = defaultExecFileAsync
+
+// Testing hook: allow overriding exec implementation
+export function __setExecImplForTests(mockImpl) {
+  if (typeof mockImpl === 'function') {
+    __execFileAsync = async (cmd, args, options) => await mockImpl(cmd, args, options)
+  }
+}
 
 export async function safeExec(cmd, args, options) {
   try {
-    return await execFileAsync(cmd, args, { timeout: 20_000, ...options })
+    return await __execFileAsync(cmd, args, { timeout: 20_000, ...options })
   } catch (e) {
     return { stdout: '', stderr: e?.message || String(e) }
   }
 }
 
 export async function exec(cmd, args, options) {
-  return await execFileAsync(cmd, args, { timeout: 60_000, ...options })
+  return await __execFileAsync(cmd, args, { timeout: 60_000, ...options })
 }
 
 export function resolveRepoRoot(projectRoot) {
@@ -185,6 +193,38 @@ export async function mergeBranchIntoBase(projectRoot, branchName, baseBranch) {
   }
 }
 
+// New helpers: ahead/behind and per-file diff between two refs
+export async function getAheadBehind(repoPath, branchName, baseBranch) {
+  if (!repoPath) return { ok: false, error: 'repoPath is required' }
+  if (!branchName) return { ok: false, error: 'branchName is required' }
+  const base = baseBranch || 'origin/' + branchName
+  const res = await safeExec('git', ['rev-list', '--left-right', '--count', `${base}...${branchName}`], {
+    cwd: repoPath,
+  })
+  const raw = (res.stdout || '').trim()
+  const [behindStr, aheadStr] = raw.split(/\s+/)
+  const behind = parseInt(behindStr || '0', 10)
+  const ahead = parseInt(aheadStr || '0', 10)
+  return { ok: true, base, branch: branchName, ahead: Number.isFinite(ahead) ? ahead : 0, behind: Number.isFinite(behind) ? behind : 0 }
+}
+
+export async function getDiffFilesBetween(repoPath, baseRef, headRef) {
+  if (!repoPath) return { ok: false, error: 'repoPath is required' }
+  if (!baseRef || !headRef) return { ok: false, error: 'baseRef and headRef are required' }
+  const res = await safeExec('git', ['diff', '--name-status', `${baseRef}..${headRef}`], { cwd: repoPath })
+  const out = (res.stdout || '').trim()
+  const files = out
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [status, ...rest] = line.split(/\s+/)
+      const filePath = rest.join(' ')
+      return { path: filePath, status }
+    })
+  return { ok: true, files }
+}
+
 export default {
   resolveRepoRoot,
   safeExec,
@@ -197,4 +237,6 @@ export default {
   branchExists,
   hasUnmergedCommits,
   mergeBranchIntoBase,
+  getAheadBehind,
+  getDiffFilesBetween,
 }

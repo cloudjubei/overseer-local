@@ -94,6 +94,77 @@ export default class GitMonitorManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_START_PROJECT] = async ({ projectId }) =>
       await this.startProject(projectId)
 
+    // New: GitTools-backed IPC methods
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_STATUS] = async ({ projectId }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.status()
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_LIST_REMOTES] = async ({ projectId }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.listRemotes()
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_FETCH] = async ({ projectId, remote }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.fetch(remote)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_PULL] = async ({ projectId, remote, branch }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.pull(remote, branch)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_PUSH] = async ({ projectId, remote, branch }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.push(remote, branch)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_STAGE] = async ({ projectId, path }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.stage(path)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_STAGE_ALL] = async ({ projectId }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.stageAll()
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_RESET] = async ({ projectId, path }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.reset(path)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_DISCARD] = async ({ projectId, path }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.discard(path)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_PUSH_ALL] = async ({ projectId, message }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      await tools?.pushAll(message)
+      return { ok: true }
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_CREATE_BRANCH] = async ({ projectId, name, checkoutAfter }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.createBranch(name, checkoutAfter)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_CHECKOUT_BRANCH] = async ({ projectId, name, create }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.checkoutBranch(name, create)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_DELETE_BRANCH] = async ({ projectId, name }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.deleteBranch(name)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_RENAME_BRANCH] = async ({ projectId, oldName, newName }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.renameBranch(oldName, newName)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_SET_UPSTREAM] = async ({ projectId, remote, branch }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.setUpstream(remote, branch)
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_LIST_BRANCHES] = async ({ projectId }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.listBranches()
+    }
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_GIT_GET_CURRENT_BRANCH] = async ({ projectId }) => {
+      const tools = await this.__getTools(projectId || 'main')
+      return await tools?.getCurrentBranch()
+    }
+
     return handlers
   }
 

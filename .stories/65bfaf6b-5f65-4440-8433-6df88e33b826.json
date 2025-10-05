@@ -6,7 +6,7 @@
   "features": [
     {
       "id": "e8a7a520-3047-48ab-b0e8-5c060241c239",
-      "status": "-",
+      "status": "+",
       "title": "Git service: extend IPC to support GitTools",
       "description": "Augment the main-process @src/logic/git-monitor/GitMonitorManager.ts  IPC handlers to enable core VCS workflows - utilise GitTools from `thefactory-tools` which offers all required git functions.\n\nUpdate @src/preload/index.ts  (GIT_MONITOR_API) and @src/renderer/src/services/gitMonitorService.ts  types with new methods.\nKeep polling behavior unchanged; only extend APIs.\n\nAcceptance: unit tests for gitHelper new methods with mocked exec; IPC handlers reachable via preload; types updated.\n\nThe types for GitTools from `thefactory-tools` are included at the bottom of @src/logic/git-monitor/GitMonitorManager.ts",
       "context": [
@@ -15,10 +15,11 @@
         "src/renderer/src/services/gitMonitorService.ts"
       ],
       "createdAt": "2025-10-03T09:50:20.835Z",
-      "updatedAt": "2025-10-05T01:50:32.411Z",
+      "updatedAt": "2025-10-05T02:31:07.290Z",
       "blockers": [
         "65bfaf6b-5f65-4440-8433-6df88e33b826.87d743d0-b16c-46f9-ab68-2dd31959d188"
-      ]
+      ],
+      "completedAt": "2025-10-05T02:31:07.290Z"
     },
     {
       "id": "6936778c-98ea-4019-9f61-f70eba42195c",

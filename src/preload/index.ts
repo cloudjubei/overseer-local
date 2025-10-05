@@ -300,7 +300,8 @@ const DB_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC, { projectId, src }),
   updateDocument: (id, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE, { id, patch }),
-  deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
+  deleteDocument: (id) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
   matchDocuments: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { options }),
   clearDocuments: (projectIds) =>
@@ -339,6 +340,35 @@ const GIT_MONITOR_API = {
   startAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START_ALL),
   startProject: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START_PROJECT, { projectId }),
+
+  // GitTools methods
+  gitStatus: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_STATUS, { projectId }),
+  listRemotes: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_LIST_REMOTES, { projectId }),
+  fetch: (projectId, remote) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_FETCH, { projectId, remote }),
+  pull: (projectId, remote, branch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_PULL, { projectId, remote, branch }),
+  push: (projectId, remote, branch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_PUSH, { projectId, remote, branch }),
+  stage: (projectId, path) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_STAGE, { projectId, path }),
+  stageAll: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_STAGE_ALL, { projectId }),
+  reset: (projectId, path) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_RESET, { projectId, path }),
+  discard: (projectId, path) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_DISCARD, { projectId, path }),
+  pushAll: (projectId, message) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_PUSH_ALL, { projectId, message }),
+  createBranch: (projectId, name, checkoutAfter) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_CREATE_BRANCH, { projectId, name, checkoutAfter }),
+  checkoutBranch: (projectId, name, create) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_CHECKOUT_BRANCH, { projectId, name, create }),
+  deleteBranch: (projectId, name) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_DELETE_BRANCH, { projectId, name }),
+  renameBranch: (projectId, oldName, newName) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_RENAME_BRANCH, { projectId, oldName, newName }),
+  setUpstream: (projectId, remote, branch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_SET_UPSTREAM, { projectId, remote, branch }),
+  listBranches: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_LIST_BRANCHES, { projectId }),
+  getCurrentBranch: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GIT_GET_CURRENT_BRANCH, { projectId }),
 }
 
 if (process.contextIsolated) {
