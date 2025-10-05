@@ -151,7 +151,7 @@
     },
     {
       "id": "87d743d0-b16c-46f9-ab68-2dd31959d188",
-      "status": "-",
+      "status": "+",
       "title": "Wire up GitMonitorManager same way as DocumentIngestionManager",
       "description": "@src/logic/document_ingestion/DocumentIngestionManager.ts is started in @src/renderer/src/screens/LoadingScreen.tsx , the same should be the case for @src/logic/git-monitor/GitMonitorManager.ts  - it should follow the same scheme.\nThe only difference is that the @src/logic/git-monitor/GitMonitorManager.ts will be per projectId (as they can have different configurations and different credentials) - so it should have the gitTools from `thefactory-tools` stored in the same way as @src/logic/stories/StoriesManager.ts .\n\nThe types for GitTools from `thefactory-tools` are included at the bottom of @src/logic/git-monitor/GitMonitorManager.ts",
       "context": [
@@ -162,7 +162,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-05T01:46:53.361Z",
-      "updatedAt": "2025-10-05T01:49:16.098Z"
+      "updatedAt": "2025-10-05T02:21:25.999Z",
+      "completedAt": "2025-10-05T02:21:25.999Z"
     }
   ],
   "featureIdToDisplayIndex": {

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { dbService } from '../services/dbService'
 import { documentIngestionService } from '../services/documentIngestionService'
+import { gitMonitorService } from '../services/gitMonitorService'
 
 interface LoadingScreenProps {
   onLoaded: () => void
@@ -38,6 +39,13 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
     try {
       setStatusText('Indexing project files…')
       await documentIngestionService.ingestAllProjects()
+      // Start Git monitor across all projects (non-blocking)
+      try {
+        setStatusText('Starting Git monitors…')
+        await gitMonitorService.startAllProjects()
+      } catch (e) {
+        console.warn('[LoadingScreen] Git monitor start failed:', (e as any)?.message || e)
+      }
       setIsIngestionComplete(true)
       setStatusText('Ready')
     } catch (e) {

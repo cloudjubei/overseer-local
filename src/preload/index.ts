@@ -318,14 +318,27 @@ const GIT_MONITOR_API = {
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, listener)
   },
-  getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS),
-  triggerPoll: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL),
+  getStatus: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS, { projectId }),
+  triggerPoll: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL, { projectId }),
   setPollInterval: (ms) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL, { ms }),
-  hasUnmerged: (branchName, baseBranch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_HAS_UNMERGED, { branchName, baseBranch }),
-  mergeBranch: (branchName, baseBranch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH, { branchName, baseBranch }),
+  hasUnmerged: (branchName, baseBranch, projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_HAS_UNMERGED, {
+      branchName,
+      baseBranch,
+      projectId,
+    }),
+  mergeBranch: (branchName, baseBranch, projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH, {
+      branchName,
+      baseBranch,
+      projectId,
+    }),
+  startAllProjects: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START_ALL),
+  startProject: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START_PROJECT, { projectId }),
 }
 
 if (process.contextIsolated) {

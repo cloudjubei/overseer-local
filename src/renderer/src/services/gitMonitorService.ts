@@ -11,16 +11,18 @@ export type GitMonitorStatus = {
   currentBranch: string | null
   lastFetchAt: string | null
   lastUpdatedAt: string
+  projectId?: string
 }
 
 export type GitMonitorService = {
   subscribe: (callback: (status: GitMonitorStatus) => void) => () => void
-  getStatus: () => Promise<GitMonitorStatus>
-  triggerPoll: () => Promise<GitMonitorStatus>
+  getStatus: (projectId?: string) => Promise<GitMonitorStatus>
+  triggerPoll: (projectId?: string) => Promise<GitMonitorStatus>
   setPollInterval: (ms: number) => Promise<void>
   hasUnmerged: (
     branchName: string,
     baseBranch?: string | null,
+    projectId?: string,
   ) => Promise<{
     ok: boolean
     hasUnmerged?: boolean
@@ -32,6 +34,7 @@ export type GitMonitorService = {
   mergeBranch: (
     branchName: string,
     baseBranch?: string | null,
+    projectId?: string,
   ) => Promise<{
     ok: boolean
     merged?: boolean
@@ -41,6 +44,8 @@ export type GitMonitorService = {
     reason?: string
     error?: string
   }>
+  startAllProjects: () => Promise<void>
+  startProject: (projectId: string) => Promise<void>
 }
 
 export const gitMonitorService: GitMonitorService = { ...(window as any).gitMonitorService }
