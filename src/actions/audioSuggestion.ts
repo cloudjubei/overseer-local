@@ -22,7 +22,7 @@ async function downloadTelegramFile(
   // Try to derive filename from URL
   const urlObj = new URL(fileUrl)
   const pathname = urlObj.pathname
-  const base = pathname.substring(pathname.lastIndexOf('/') + 1) || 'voice.oga'
+  const base = pathname.substring(pathname.lastIndexOf('/') + 1) || 'voice.ogg'
   const contentType = res.headers.get('content-type') || undefined
 
   return { blob, filename: base, mimeType: contentType || 'audio/ogg' }
@@ -51,10 +51,10 @@ export default async function audioSuggestionAction(
   // Accept Telegram voice notes (msg.voice) and general audio (msg.audio)
   const voice = msg.voice
   const audio = msg.audio
-  console.log('LELELE audioSuggestionAction voice: ', voice)
   if (!voice && !audio) {
     return false
   }
+  console.log('LELELE audioSuggestionAction voice: ', voice)
 
   // Ensure backend auth configured
   await ensureBackendConfigured()

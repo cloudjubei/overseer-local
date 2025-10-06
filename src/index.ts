@@ -31,6 +31,7 @@ import {
   sendTypeKeyboardMessage,
 } from './common/keyboards'
 import { initScheduler } from './lib/scheduler'
+import profileAction from './actions/profile'
 
 // Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
@@ -45,109 +46,10 @@ bot.setMyCommands(
     { command: 'micro', description: 'Create a Micro Goal suggestion via AI (text) V1' },
     { command: 'macro', description: 'Create a Macro Goal suggestion via AI (text) V2' },
     { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
+    { command: 'profile', description: 'Setup your profile' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
-
-// Helper to start a backend conversation flow and process the initial response
-async function startBackendFlow(params: {
-  userId: string
-  chatId: number
-  flowId: string
-  externalId?: string
-}) {
-  const { userId, chatId, flowId, externalId } = params
-
-  await ensureBackendConfigured()
-  ensureAccessTokenForUser(userId)
-
-  const req: StartFlowDto = {
-    flow: flowId,
-    channel: StartFlowDto.channel.TELEGRAM,
-    externalId,
-  }
-
-  try {
-    const res = await ConversationsService.conversationsControllerStart({ requestBody: req })
-
-    const flow = res.flow
-    const sessionId = res.sessionId
-    const now = Math.floor(Date.now() / 1000)
-
-    switch (res.type) {
-      case ConversationResponseDto.type.PROMPT: {
-        // Persist conversation state
-        const prev = getSession(userId)
-        setSession({
-          ...(prev || { userId }),
-          conversationState: {
-            lastAction: '',
-            flowId: flow,
-            context: { sessionId },
-            lastUpdatedAt: now,
-          },
-          accessToken: prev?.accessToken || '',
-          idToken: prev?.idToken,
-          refreshToken: prev?.refreshToken,
-          expiresAt: prev?.expiresAt,
-        })
-        if (res.prompt) {
-          await renderBackendPrompt(res.prompt, bot, chatId)
-        }
-        break
-      }
-      case ConversationResponseDto.type.SUCCESS: {
-        // Clear conversation state and show success message if provided
-        const prev = getSession(userId)
-        setSession({
-          ...(prev || { userId }),
-          conversationState: null,
-          accessToken: prev?.accessToken || '',
-          idToken: prev?.idToken,
-          refreshToken: prev?.refreshToken,
-          expiresAt: prev?.expiresAt,
-        })
-        const text = (res.success as any)?.message || 'Done.'
-        await bot.sendMessage(chatId, text)
-        break
-      }
-      case ConversationResponseDto.type.ERROR: {
-        // Decide whether to keep conversation based on retry flag
-        const retry = !!(res.error as any)?.retry
-        const prev = getSession(userId)
-        setSession({
-          ...(prev || { userId }),
-          conversationState: retry
-            ? {
-                lastAction: '',
-                flowId: flow,
-                context: { sessionId },
-                lastUpdatedAt: now,
-              }
-            : null,
-          accessToken: prev?.accessToken || '',
-          idToken: prev?.idToken,
-          refreshToken: prev?.refreshToken,
-          expiresAt: prev?.expiresAt,
-        })
-        const msg = (res.error as any)?.message || 'Something went wrong.'
-        await bot.sendMessage(chatId, msg)
-        break
-      }
-      default: {
-        await bot.sendMessage(chatId, 'Unexpected response while starting the flow.')
-        break
-      }
-    }
-  } catch (err: any) {
-    // Minimal user-facing error message
-    console.error('startBackendFlow error', err?.response?.data || err?.message || err)
-    await bot.sendMessage(
-      chatId,
-      'Sorry, failed to start the conversation. Please try again later.',
-    )
-  }
-}
 
 // Message handler
 bot.on('message', async (msg: Message) => {
@@ -183,6 +85,9 @@ bot.on('message', async (msg: Message) => {
     if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
+    if (await profileAction(bot, chat, from, rawText, msg)) {
+      return
+    }
 
     const userId = String(from.id)
     const session = getSession(userId)
@@ -204,29 +109,17 @@ bot.on('message', async (msg: Message) => {
       }
     }
 
-    // /profile -> start profile update flow via backend conversations
-    if (/^\/(profile)(@\w+)?$/i.test(rawText)) {
-      const PROFILE_UPDATE_FLOW_ID = 'setup_profile' // Backend flow id for updating a profile
-      await startBackendFlow({
-        userId,
-        chatId: chat.id,
-        flowId: PROFILE_UPDATE_FLOW_ID,
-        externalId: userId,
-      })
-      return
-    }
-
-    // /newgoal -> start new goal flow via backend conversations
-    if (/^\/(newgoal)(@\w+)?$/i.test(rawText)) {
-      const NEW_GOAL_FLOW_ID = 'goals.new' // Backend flow id for creating a new goal
-      await startBackendFlow({
-        userId,
-        chatId: chat.id,
-        flowId: NEW_GOAL_FLOW_ID,
-        externalId: userId,
-      })
-      return
-    }
+    // // /newgoal -> start new goal flow via backend conversations
+    // if (/^\/(newgoal)(@\w+)?$/i.test(rawText)) {
+    //   const NEW_GOAL_FLOW_ID = 'goals.new' // Backend flow id for creating a new goal
+    //   await startBackendFlow({
+    //     userId,
+    //     chatId: chat.id,
+    //     flowId: NEW_GOAL_FLOW_ID,
+    //     externalId: userId,
+    //   })
+    //   return
+    // }
 
     // Other commands/messages can be handled here as needed
   } catch (err) {
