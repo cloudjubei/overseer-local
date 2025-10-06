@@ -347,7 +347,6 @@ export default function MessageList({
           const toggleableIds: string[] = (() => {
             if (!(isSystem && isLast)) return []
             const results = msg.toolResults || []
-            console.log('results: ', results)
             const ids: string[] = []
             for (const r of results) {
               const t = r.type
