@@ -2,18 +2,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CheckInDto } from '../models/CheckInDto'
-import type { CreateCheckInDto } from '../models/CreateCheckInDto'
-import type { ListCheckInsResultDto } from '../models/ListCheckInsResultDto'
-import type { StatusDto } from '../models/StatusDto'
-import type { UpdateCheckInDto } from '../models/UpdateCheckInDto'
+import type { CheckInCreateModel } from '../models/CheckInCreateModel'
+import type { CheckInModel } from '../models/CheckInModel'
+import type { CheckInsListResultModel } from '../models/CheckInsListResultModel'
+import type { CheckInUpdateModel } from '../models/CheckInUpdateModel'
+import type { StatusModel } from '../models/StatusModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class CheckInsService {
   /**
    * List check-ins for the current user
-   * @returns ListCheckInsResultDto
+   * @returns CheckInsListResultModel
    * @throws ApiError
    */
   public static checkInsControllerGetCheckIns({
@@ -25,7 +25,7 @@ export class CheckInsService {
      * Opaque pagination token
      */
     cursor?: string
-  }): CancelablePromise<ListCheckInsResultDto> {
+  }): CancelablePromise<CheckInsListResultModel> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/check-ins',
@@ -37,14 +37,14 @@ export class CheckInsService {
   }
   /**
    * Create a new check-in for the current user
-   * @returns CheckInDto
+   * @returns CheckInModel
    * @throws ApiError
    */
   public static checkInsControllerAddCheckIn({
     requestBody,
   }: {
-    requestBody: CreateCheckInDto
-  }): CancelablePromise<CheckInDto> {
+    requestBody: CheckInCreateModel
+  }): CancelablePromise<CheckInModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/check-ins',
@@ -54,7 +54,7 @@ export class CheckInsService {
   }
   /**
    * Update a check-in by id
-   * @returns CheckInDto
+   * @returns CheckInModel
    * @throws ApiError
    */
   public static checkInsControllerUpdateCheckIn({
@@ -62,8 +62,8 @@ export class CheckInsService {
     requestBody,
   }: {
     id: string
-    requestBody: UpdateCheckInDto
-  }): CancelablePromise<CheckInDto> {
+    requestBody: CheckInUpdateModel
+  }): CancelablePromise<CheckInModel> {
     return __request(OpenAPI, {
       method: 'PATCH',
       url: '/check-ins/{id}',
@@ -76,14 +76,14 @@ export class CheckInsService {
   }
   /**
    * Delete a check-in by id
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
   public static checkInsControllerDeleteCheckIn({
     id,
   }: {
     id: string
-  }): CancelablePromise<StatusDto> {
+  }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'DELETE',
       url: '/check-ins/{id}',

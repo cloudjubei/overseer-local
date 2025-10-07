@@ -2,23 +2,23 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ConversationResponseDto } from '../models/ConversationResponseDto'
-import type { HandleInputDto } from '../models/HandleInputDto'
-import type { StartFlowDto } from '../models/StartFlowDto'
+import type { ConversationResponseModel } from '../models/ConversationResponseModel'
+import type { HandleInputModel } from '../models/HandleInputModel'
+import type { StartFlowModel } from '../models/StartFlowModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class ConversationsService {
   /**
    * Start a conversation flow
-   * @returns ConversationResponseDto Returns the first prompt or immediate result
+   * @returns ConversationResponseModel Returns the first prompt or immediate result
    * @throws ApiError
    */
   public static conversationsControllerStart({
     requestBody,
   }: {
-    requestBody: StartFlowDto
-  }): CancelablePromise<ConversationResponseDto> {
+    requestBody: StartFlowModel
+  }): CancelablePromise<ConversationResponseModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/conversations/start',
@@ -28,14 +28,14 @@ export class ConversationsService {
   }
   /**
    * Handle a user response for a conversation flow
-   * @returns ConversationResponseDto Returns the next prompt or result
+   * @returns ConversationResponseModel Returns the next prompt or result
    * @throws ApiError
    */
   public static conversationsControllerHandle({
     requestBody,
   }: {
-    requestBody: HandleInputDto
-  }): CancelablePromise<ConversationResponseDto> {
+    requestBody: HandleInputModel
+  }): CancelablePromise<ConversationResponseModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/conversations/handle',

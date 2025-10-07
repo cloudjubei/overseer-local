@@ -2,19 +2,19 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateProfileDto } from '../models/CreateProfileDto'
-import type { UpdateProfileDto } from '../models/UpdateProfileDto'
-import type { UserProfileDto } from '../models/UserProfileDto'
+import type { ProfileCreateModel } from '../models/ProfileCreateModel'
+import type { ProfileUpdateModel } from '../models/ProfileUpdateModel'
+import type { UserProfileModel } from '../models/UserProfileModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class ProfilesService {
   /**
    * Get the current user profile
-   * @returns UserProfileDto
+   * @returns UserProfileModel
    * @throws ApiError
    */
-  public static profilesControllerMe(): CancelablePromise<UserProfileDto> {
+  public static profilesControllerMe(): CancelablePromise<UserProfileModel> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/profiles/me',
@@ -22,14 +22,14 @@ export class ProfilesService {
   }
   /**
    * Create the current user profile
-   * @returns UserProfileDto
+   * @returns UserProfileModel
    * @throws ApiError
    */
   public static profilesControllerCreate({
     requestBody,
   }: {
-    requestBody: CreateProfileDto
-  }): CancelablePromise<UserProfileDto> {
+    requestBody: ProfileCreateModel
+  }): CancelablePromise<UserProfileModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/profiles/me',
@@ -39,14 +39,14 @@ export class ProfilesService {
   }
   /**
    * Update the current user profile
-   * @returns UserProfileDto
+   * @returns UserProfileModel
    * @throws ApiError
    */
   public static profilesControllerUpdate({
     requestBody,
   }: {
-    requestBody: UpdateProfileDto
-  }): CancelablePromise<UserProfileDto> {
+    requestBody: ProfileUpdateModel
+  }): CancelablePromise<UserProfileModel> {
     return __request(OpenAPI, {
       method: 'PATCH',
       url: '/profiles/me',

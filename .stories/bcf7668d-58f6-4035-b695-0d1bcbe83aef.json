@@ -1,6 +1,6 @@
 {
   "id": "bcf7668d-58f6-4035-b695-0d1bcbe83aef",
-  "status": "=",
+  "status": "-",
   "title": "Ongoing Improvements",
   "description": "",
   "features": [
@@ -46,13 +46,24 @@
       "createdAt": "2025-09-19T15:47:29.689Z",
       "updatedAt": "2025-09-19T15:53:15.874Z",
       "completedAt": "2025-09-19T15:53:15.874Z"
+    },
+    {
+      "id": "481a2fd7-e86c-40e3-8fda-c0830035c6e5",
+      "status": "-",
+      "title": "Track all user actions with Mixpanel",
+      "description": "We want to track every single user message/action via Mixpanel - we should have a new TrackingService that will have a generic `track` function and inside the appropriate Mixpanel call will be used.\nWe need to handle user login appropriately to track a user session + an unauthenticated user too.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-06T23:16:18.665Z",
+      "updatedAt": "2025-10-06T23:16:18.665Z"
     }
   ],
   "featureIdToDisplayIndex": {
     "63d1fd97-2775-4404-be52-f193579bd689": 1,
     "fa10705f-a673-4649-ae33-853df72179b0": 2,
     "00b11270-6e08-4fce-bdda-11030f802da9": 3,
-    "1d4e6fd4-794a-4f3f-9dc1-39aa1e57f80c": 4
+    "1d4e6fd4-794a-4f3f-9dc1-39aa1e57f80c": 4,
+    "481a2fd7-e86c-40e3-8fda-c0830035c6e5": 5
   },
   "createdAt": "2025-09-18T12:16:23.163Z",
   "updatedAt": "2025-09-18T12:16:23.163Z"

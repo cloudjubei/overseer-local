@@ -2,28 +2,28 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { AiSuggestGoalsDto } from '../models/AiSuggestGoalsDto'
-import type { AiSuggestionsResultDto } from '../models/AiSuggestionsResultDto'
-import type { CreateGoalDto } from '../models/CreateGoalDto'
-import type { GoalDto } from '../models/GoalDto'
-import type { ListGoalsResultDto } from '../models/ListGoalsResultDto'
-import type { StatusDto } from '../models/StatusDto'
-import type { SuggestedGoalDto } from '../models/SuggestedGoalDto'
-import type { UpdateGoalDto } from '../models/UpdateGoalDto'
+import type { AiSuggestGoalsModel } from '../models/AiSuggestGoalsModel'
+import type { AiSuggestionsResultModel } from '../models/AiSuggestionsResultModel'
+import type { GoalCreateModel } from '../models/GoalCreateModel'
+import type { GoalModel } from '../models/GoalModel'
+import type { GoalsListModel } from '../models/GoalsListModel'
+import type { GoalSuggestedModel } from '../models/GoalSuggestedModel'
+import type { GoalUpdateModel } from '../models/GoalUpdateModel'
+import type { StatusModel } from '../models/StatusModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class GoalsService {
   /**
    * Create a new goal
-   * @returns GoalDto
+   * @returns GoalModel
    * @throws ApiError
    */
   public static goalsControllerCreate({
     requestBody,
   }: {
-    requestBody: CreateGoalDto
-  }): CancelablePromise<GoalDto> {
+    requestBody: GoalCreateModel
+  }): CancelablePromise<GoalModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/goals',
@@ -33,38 +33,49 @@ export class GoalsService {
   }
   /**
    * List goals for current user
-   * @returns ListGoalsResultDto
+   * @returns GoalsListModel
    * @throws ApiError
    */
   public static goalsControllerList({
     limit = 20,
-    cursor,
+    nextCursor,
   }: {
     limit?: number
     /**
-     * Opaque pagination token
+     * The cursor to use to fetch the next page of results.
      */
-    cursor?: string
-  }): CancelablePromise<ListGoalsResultDto> {
+    nextCursor?: string
+  }): CancelablePromise<GoalsListModel> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/goals',
       query: {
         limit: limit,
-        cursor: cursor,
+        nextCursor: nextCursor,
       },
     })
   }
   /**
+   * Mark the current active goal as done
+   * @returns GoalModel
+   * @throws ApiError
+   */
+  public static goalsControllerMarkCurrentDone(): CancelablePromise<GoalModel> {
+    return __request(OpenAPI, {
+      method: 'PATCH',
+      url: '/goals/current/done',
+    })
+  }
+  /**
    * Get AI-generated goal suggestions from text
-   * @returns AiSuggestionsResultDto
+   * @returns AiSuggestionsResultModel
    * @throws ApiError
    */
   public static goalsControllerAiSuggestions({
     requestBody,
   }: {
-    requestBody: AiSuggestGoalsDto
-  }): CancelablePromise<AiSuggestionsResultDto> {
+    requestBody: AiSuggestGoalsModel
+  }): CancelablePromise<AiSuggestionsResultModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/goals/ai/suggestions',
@@ -74,7 +85,7 @@ export class GoalsService {
   }
   /**
    * Get AI-generated goal suggestions from an uploaded audio file
-   * @returns AiSuggestionsResultDto
+   * @returns AiSuggestionsResultModel
    * @throws ApiError
    */
   public static goalsControllerAiSuggestionsFromAudio({
@@ -83,7 +94,7 @@ export class GoalsService {
     formData: {
       file: Blob
     }
-  }): CancelablePromise<AiSuggestionsResultDto> {
+  }): CancelablePromise<AiSuggestionsResultModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/goals/ai/suggestions/audio',
@@ -93,7 +104,7 @@ export class GoalsService {
   }
   /**
    * Get parameterized goal suggestions (non-AI)
-   * @returns SuggestedGoalDto
+   * @returns GoalSuggestedModel
    * @throws ApiError
    */
   public static goalsControllerParamSuggestions({
@@ -104,7 +115,7 @@ export class GoalsService {
     type: 'MACRO' | 'MICRO'
     category: 'FITNESS' | 'SLEEP' | 'FOCUS' | 'STRESS' | 'OTHER'
     difficulty?: 'EASY' | 'MEDIUM' | 'HARD'
-  }): CancelablePromise<Array<SuggestedGoalDto>> {
+  }): CancelablePromise<Array<GoalSuggestedModel>> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/goals/suggestions',
@@ -117,10 +128,10 @@ export class GoalsService {
   }
   /**
    * Get a goal by id
-   * @returns GoalDto
+   * @returns GoalModel
    * @throws ApiError
    */
-  public static goalsControllerGet({ id }: { id: string }): CancelablePromise<GoalDto> {
+  public static goalsControllerGet({ id }: { id: string }): CancelablePromise<GoalModel> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/goals/{id}',
@@ -131,7 +142,7 @@ export class GoalsService {
   }
   /**
    * Update a goal by id
-   * @returns GoalDto
+   * @returns GoalModel
    * @throws ApiError
    */
   public static goalsControllerUpdate({
@@ -139,8 +150,8 @@ export class GoalsService {
     requestBody,
   }: {
     id: string
-    requestBody: UpdateGoalDto
-  }): CancelablePromise<GoalDto> {
+    requestBody: GoalUpdateModel
+  }): CancelablePromise<GoalModel> {
     return __request(OpenAPI, {
       method: 'PATCH',
       url: '/goals/{id}',
@@ -153,10 +164,10 @@ export class GoalsService {
   }
   /**
    * Delete a goal by id
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
-  public static goalsControllerRemove({ id }: { id: string }): CancelablePromise<StatusDto> {
+  public static goalsControllerRemove({ id }: { id: string }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'DELETE',
       url: '/goals/{id}',

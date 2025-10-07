@@ -2,31 +2,31 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ChangePasswordDto } from '../models/ChangePasswordDto'
-import type { ConfirmForgotPasswordDto } from '../models/ConfirmForgotPasswordDto'
-import type { ConfirmSignUpDto } from '../models/ConfirmSignUpDto'
-import type { ForgotPasswordDto } from '../models/ForgotPasswordDto'
-import type { LoginDto } from '../models/LoginDto'
-import type { LoginResultDto } from '../models/LoginResultDto'
-import type { RegisterDto } from '../models/RegisterDto'
-import type { RegisterResultDto } from '../models/RegisterResultDto'
-import type { ResendConfirmationDto } from '../models/ResendConfirmationDto'
-import type { StatusDto } from '../models/StatusDto'
-import type { TelegramLoginDto } from '../models/TelegramLoginDto'
+import type { ChangePasswordModel } from '../models/ChangePasswordModel'
+import type { ConfirmForgotPasswordModel } from '../models/ConfirmForgotPasswordModel'
+import type { ConfirmSignUpModel } from '../models/ConfirmSignUpModel'
+import type { ForgotPasswordModel } from '../models/ForgotPasswordModel'
+import type { LoginModel } from '../models/LoginModel'
+import type { LoginResultModel } from '../models/LoginResultModel'
+import type { RegisterModel } from '../models/RegisterModel'
+import type { RegisterResultModel } from '../models/RegisterResultModel'
+import type { ResendConfirmationModel } from '../models/ResendConfirmationModel'
+import type { StatusModel } from '../models/StatusModel'
+import type { TelegramLoginModel } from '../models/TelegramLoginModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class AuthService {
   /**
    * Register a new user (Cognito or other default strategy)
-   * @returns RegisterResultDto
+   * @returns RegisterResultModel
    * @throws ApiError
    */
   public static authControllerRegister({
     requestBody,
   }: {
-    requestBody: RegisterDto
-  }): CancelablePromise<RegisterResultDto> {
+    requestBody: RegisterModel
+  }): CancelablePromise<RegisterResultModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/register',
@@ -36,14 +36,14 @@ export class AuthService {
   }
   /**
    * Confirm user registration using a verification code
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
   public static authControllerConfirmSignUp({
     requestBody,
   }: {
-    requestBody: ConfirmSignUpDto
-  }): CancelablePromise<StatusDto> {
+    requestBody: ConfirmSignUpModel
+  }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/confirm-signup',
@@ -53,14 +53,14 @@ export class AuthService {
   }
   /**
    * Login with username and password
-   * @returns LoginResultDto
+   * @returns LoginResultModel
    * @throws ApiError
    */
   public static authControllerLogin({
     requestBody,
   }: {
-    requestBody: LoginDto
-  }): CancelablePromise<LoginResultDto> {
+    requestBody: LoginModel
+  }): CancelablePromise<LoginResultModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/login',
@@ -70,14 +70,14 @@ export class AuthService {
   }
   /**
    * Login via Telegram using externalId + accessCode + secret
-   * @returns LoginResultDto
+   * @returns LoginResultModel
    * @throws ApiError
    */
   public static authControllerLoginTelegram({
     requestBody,
   }: {
-    requestBody: TelegramLoginDto
-  }): CancelablePromise<LoginResultDto> {
+    requestBody: TelegramLoginModel
+  }): CancelablePromise<LoginResultModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/login/telegram',
@@ -87,14 +87,14 @@ export class AuthService {
   }
   /**
    * Initiate forgot password flow
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
   public static authControllerForgotPassword({
     requestBody,
   }: {
-    requestBody: ForgotPasswordDto
-  }): CancelablePromise<StatusDto> {
+    requestBody: ForgotPasswordModel
+  }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/forgot-password',
@@ -104,14 +104,14 @@ export class AuthService {
   }
   /**
    * Complete password reset using confirmation code
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
   public static authControllerConfirmForgotPassword({
     requestBody,
   }: {
-    requestBody: ConfirmForgotPasswordDto
-  }): CancelablePromise<StatusDto> {
+    requestBody: ConfirmForgotPasswordModel
+  }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/confirm-forgot-password',
@@ -121,14 +121,14 @@ export class AuthService {
   }
   /**
    * Change password using current session access token
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
   public static authControllerChangePassword({
     requestBody,
   }: {
-    requestBody: ChangePasswordDto
-  }): CancelablePromise<StatusDto> {
+    requestBody: ChangePasswordModel
+  }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/change-password',
@@ -138,14 +138,14 @@ export class AuthService {
   }
   /**
    * Resend confirmation code for signup verification
-   * @returns StatusDto
+   * @returns StatusModel
    * @throws ApiError
    */
   public static authControllerResendConfirmation({
     requestBody,
   }: {
-    requestBody: ResendConfirmationDto
-  }): CancelablePromise<StatusDto> {
+    requestBody: ResendConfirmationModel
+  }): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/auth/resend-confirmation',

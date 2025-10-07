@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { LlmTestDto } from '../models/LlmTestDto'
+import type { LlmTestModel } from '../models/LlmTestModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
@@ -20,7 +20,7 @@ export class AiService {
      * Model/provider to use: openai | gemini | anthropic
      */
     model: 'openai' | 'gemini' | 'anthropic'
-    requestBody: LlmTestDto
+    requestBody: LlmTestModel
   }): CancelablePromise<string> {
     return __request(OpenAPI, {
       method: 'POST',

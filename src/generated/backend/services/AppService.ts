@@ -2,18 +2,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { MessageDto } from '../models/MessageDto'
-import type { StatusDto } from '../models/StatusDto'
+import type { MessageModel } from '../models/MessageModel'
+import type { StatusModel } from '../models/StatusModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class AppService {
   /**
    * Root endpoint
-   * @returns MessageDto Hello message
+   * @returns MessageModel Hello message
    * @throws ApiError
    */
-  public static appControllerGetHello(): CancelablePromise<MessageDto> {
+  public static appControllerGetHello(): CancelablePromise<MessageModel> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/',
@@ -21,10 +21,10 @@ export class AppService {
   }
   /**
    * Health check
-   * @returns StatusDto Health status
+   * @returns StatusModel Health status
    * @throws ApiError
    */
-  public static appControllerHealth(): CancelablePromise<StatusDto> {
+  public static appControllerHealth(): CancelablePromise<StatusModel> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/health',
