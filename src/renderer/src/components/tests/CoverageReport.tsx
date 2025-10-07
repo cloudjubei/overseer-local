@@ -212,8 +212,8 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
     const lines = formatUncoveredLines(uncovered)
     const title = `Add tests for ${rel}`
     const parts = [
-      `Improve test coverage for @${rel}.`,
-      lines && lines !== '—' ? `Target uncovered lines: ${lines}.` : undefined,
+      `Improve test coverage for @${rel} .`,
+      lines && lines !== '—' ? `Target uncovered lines: ${lines} .` : undefined,
       '',
     ].filter(Boolean)
     const description = parts.join('\n')
