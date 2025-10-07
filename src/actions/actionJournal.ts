@@ -14,7 +14,6 @@ export async function actionJournal(
   const prev = getSession(userId)
 
   const cmdMatch = rawText.match(/^\/journal(?:@\w+)?(?:\s+([\s\S]*))?$/i)
-  console.log('cmdMatch for actionJournal: ', cmdMatch)
   if (cmdMatch) {
     setSession({
       ...(prev || { userId }),

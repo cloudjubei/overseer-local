@@ -17,7 +17,6 @@ export async function textSuggestionActionMacro(
   const prev = getSession(userId)
 
   const cmdMatch = rawText.match(/^\/macro(?:@\w+)?(?:\s+([\s\S]*))?$/i)
-  console.log('cmdMatch for textSuggestionActionMacro: ', cmdMatch)
   if (cmdMatch) {
     setSession({
       ...(prev || { userId }),
@@ -95,7 +94,6 @@ export async function textSuggestionActionMicro(
   const prev = getSession(userId)
 
   const cmdMatch = rawText.match(/^\/micro(?:@\w+)?(?:\s+([\s\S]*))?$/i)
-  console.log('cmdMatch for text: ', cmdMatch)
   if (cmdMatch) {
     setSession({
       ...(prev || { userId }),

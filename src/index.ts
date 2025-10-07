@@ -23,6 +23,7 @@ import {
 import { initScheduler } from './lib/scheduler'
 import profileAction from './actions/profile'
 import actionJournalAudio, { actionJournal } from './actions/actionJournal'
+import { GoalModel } from './generated/backend'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -201,7 +202,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       }
 
       //start the flow again
-      await sendTypeKeyboardMessage(bot, chatId, true)
+
+      //TODO: skip typ for now
+      await sendCategoryKeyboardMessage(bot, chatId, GoalModel.type.MACRO, true)
+      // await sendTypeKeyboardMessage(bot, chatId, true)
       return
     }
 

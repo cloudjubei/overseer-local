@@ -56,7 +56,9 @@ export async function quickSuggestionAction2(
           await ensureBackendConfigured()
           ensureAccessTokenForUser(userId)
 
-          const type = Object.values(GoalSuggestedModel.type)[responses[0]]
+          //TODO: for now skip type
+          const type = GoalSuggestedModel.type.MACRO
+          // const type = Object.values(GoalSuggestedModel.type)[responses[0]]
           const category = Object.values(GoalSuggestedModel.category)[responses[1]]
           const difficulty = Object.values(GoalSuggestedModel.difficulty)[responses[2]]
 
@@ -106,7 +108,11 @@ export async function quickSuggestionAction2(
         refreshToken: prev?.refreshToken,
         expiresAt: prev?.expiresAt,
       })
-      const type = Object.values(GoalSuggestedModel.type)[responses[0]]
+
+      //TODO: for now skip type
+      // const type = Object.values(GoalSuggestedModel.type)[responses[0]]
+      const type = GoalSuggestedModel.type.MACRO
+
       if (responses.length == 2) {
         const category = Object.values(GoalSuggestedModel.category)[responses[1]]
         await sendDifficultyKeyboardMessage(bot, chat.id, type, category, false)
@@ -126,6 +132,7 @@ export async function quickSuggestionAction2(
     conversationState: {
       lastAction: 'q2',
       flowId: '',
+      responses: [0],
     },
     accessToken: prev?.accessToken || '',
     idToken: prev?.idToken,
@@ -133,7 +140,9 @@ export async function quickSuggestionAction2(
     expiresAt: prev?.expiresAt,
   })
 
-  await sendTypeKeyboardMessage(bot, chat.id, false)
+  //TODO; for now skip type
+  await sendCategoryKeyboardMessage(bot, chat.id, GoalSuggestedModel.type.MACRO, false)
+  // await sendTypeKeyboardMessage(bot, chat.id, false)
   return true
 }
 export default async function quickSuggestionAction(
@@ -161,7 +170,8 @@ export default async function quickSuggestionAction(
     expiresAt: prev?.expiresAt,
   })
 
-  await sendTypeKeyboardMessage(bot, chat.id, true)
+  await sendCategoryKeyboardMessage(bot, chat.id, GoalSuggestedModel.type.MACRO, true)
+  // await sendTypeKeyboardMessage(bot, chat.id, true)
   return true
 }
 
