@@ -1,7 +1,7 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { ensureAccessTokenForUser, ensureBackendConfigured } from '../lib/auth'
 import { JournalCreateTextModel, JournalsService } from '../generated/backend'
-import { getSession, setSession } from 'src/lib/sessionStore'
+import { clearConversationSession, getSession, setSession } from 'src/lib/sessionStore'
 import { downloadTelegramAudioFile } from 'src/lib/files'
 
 export async function actionJournal(
@@ -53,6 +53,8 @@ export async function actionJournal(
       label: 'telegram',
     }
     await JournalsService.journalsControllerCreateText({ requestBody: body })
+
+    clearConversationSession(userId, prev)
 
     try {
       await bot.deleteMessage(chat.id, waiting.message_id)
@@ -124,6 +126,7 @@ export default async function actionJournalAudio(
       formData: { file: blob },
     })
 
+    clearConversationSession(userId, prev)
     try {
       await bot.deleteMessage(chat.id, waiting.message_id)
     } catch {}

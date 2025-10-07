@@ -101,6 +101,18 @@ export function clearSession(userId: string) {
   }
 }
 
+export function clearConversationSession(userId: string, prev?: SessionData) {
+  const p = prev ?? getSession(userId) ?? { userId }
+  setSession({
+    ...p,
+    conversationState: null,
+    accessToken: prev?.accessToken || '',
+    idToken: prev?.idToken,
+    refreshToken: prev?.refreshToken,
+    expiresAt: prev?.expiresAt,
+  })
+}
+
 export function isAuthenticated(userId: string): boolean {
   const s = getSession(userId)
   if (!s || !s.accessToken) return false

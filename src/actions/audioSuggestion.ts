@@ -3,7 +3,7 @@ import { ensureAccessTokenForUser, ensureBackendConfigured, getTelegramUserId } 
 import { renderAiSuggestionResult } from './suggestionRenderer'
 import { GoalsService } from 'src/generated/backend/services/GoalsService'
 import { downloadTelegramAudioFile } from 'src/lib/files'
-import { getSession, setSession } from 'src/lib/sessionStore'
+import { clearConversationSession, getSession, setSession } from 'src/lib/sessionStore'
 
 export default async function audioSuggestionAction(
   bot: TelegramBot,
@@ -63,10 +63,9 @@ export default async function audioSuggestionAction(
       formData: { file: blob },
     })
 
-    // Render nicely following the mock style
     await renderAiSuggestionResult(bot, chat.id, result)
 
-    // Optionally remove the waiting message to reduce clutter
+    clearConversationSession(userId, prev)
     try {
       await bot.deleteMessage(chat.id, waiting.message_id)
     } catch {}

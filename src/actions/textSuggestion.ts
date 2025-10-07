@@ -37,7 +37,6 @@ export async function textSuggestionActionMacro(
     await bot.sendMessage(chat.id, header, { parse_mode: 'HTML' })
     return true
   }
-  console.log('textSuggestionActionMacro prev: ', prev)
 
   if (prev?.conversationState?.lastAction == 'macro') {
     if (hasResponse >= 0) {

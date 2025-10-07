@@ -12,7 +12,7 @@ import {
   GoalSuggestedModel,
 } from 'src/generated/backend'
 import { ensureAccessTokenForUser, ensureBackendConfigured } from 'src/lib/auth'
-import { getSession, setSession } from 'src/lib/sessionStore'
+import { clearConversationSession, getSession, setSession } from 'src/lib/sessionStore'
 import { renderParamSuggestions, renderParamSuggestionsKeyboard } from './suggestionRenderer'
 import { clearSuggestionsForMessage, getSuggestionsForMessage } from './suggestionState'
 
@@ -235,6 +235,8 @@ export async function chooseSuggestion(
     } catch {}
 
     clearSuggestionsForMessage(chatId, messageId)
+
+    clearConversationSession(userId)
 
     const confirm = `✅ Goal created: ${created.text}`
     await bot.sendMessage(chatId, confirm, {
