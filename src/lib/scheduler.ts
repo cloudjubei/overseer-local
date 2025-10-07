@@ -122,7 +122,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
     // Build request object
     const req = { limit: 100, cursor }
     try {
-      const res = await CheckInsService.checkInsControllerGetCheckIns(req as any)
+      const res = await CheckInsService.checkInsControllerGetCheckIns(req)
       const items: CheckInModel[] = res.items
 
       for (const ci of items) {

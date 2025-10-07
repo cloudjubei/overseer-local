@@ -1,4 +1,4 @@
-import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api'
+import TelegramBot, { CallbackQuery, ChatMemberUpdated, Message } from 'node-telegram-bot-api'
 import { config } from './config/env'
 import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser } from './lib/auth'
 import { getSession, setSession } from './lib/sessionStore'
@@ -14,7 +14,7 @@ import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { getSuggestionBundleForMessage } from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
-import { textSuggestionActionMicro, textSuggestionActionMacro } from './actions/textSuggestion'
+import { textSuggestionActionMacro } from './actions/textSuggestion'
 import {
   sendCategoryKeyboardMessage,
   sendDifficultyKeyboardMessage,
@@ -22,8 +22,8 @@ import {
 } from './common/keyboards'
 import { initScheduler } from './lib/scheduler'
 import profileAction from './actions/profile'
+import actionJournalAudio, { actionJournal } from './actions/actionJournal'
 
-// Initialize Telegram bot
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
 
@@ -33,15 +33,23 @@ bot.setMyCommands(
     // { command: 'help', description: 'Show the help message' },
     { command: 'q', description: 'Pick a suggestion from a list V1' },
     { command: 'q2', description: 'Pick a suggestion from a list V2' },
-    { command: 'micro', description: 'Create a Micro Goal suggestion via AI (text) V1' },
+    // { command: 'micro', description: 'Create a Micro Goal suggestion via AI (text) V1' },
     { command: 'macro', description: 'Create a Macro Goal suggestion via AI (text) V2' },
     { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
-    { command: 'profile', description: 'Setup your profile' },
+    { command: 'journal', description: 'Create a text journal note' },
+    { command: 'audio', description: 'Create an audio journal note' },
+    // { command: 'profile', description: 'Setup your profile' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
+bot.on('chat_member', async (member: ChatMemberUpdated) => {
+  console.log('chat_member updated: ', member)
+  //TODO: check check ins, if it's after check in time and the last message is the reminder -> ask if goal was completed
+})
+bot.on('my_chat_member', async (member: ChatMemberUpdated) => {
+  console.log('chat_member updated: ', member)
+})
 
-// Message handler
 bot.on('message', async (msg: Message) => {
   try {
     const { chat, from } = msg
@@ -69,15 +77,21 @@ bot.on('message', async (msg: Message) => {
     if (await textSuggestionActionMacro(bot, chat, from, rawText, msg.message_id, hasResponse)) {
       return
     }
-    if (await textSuggestionActionMicro(bot, chat, from, rawText)) {
-      return
-    }
+    // if (await textSuggestionActionMicro(bot, chat, from, rawText)) {
+    //   return
+    // }
     if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
-    if (await profileAction(bot, chat, from, rawText, msg)) {
+    if (await actionJournal(bot, chat, from, rawText)) {
       return
     }
+    if (await actionJournalAudio(bot, chat, from, rawText, msg)) {
+      return
+    }
+    // if (await profileAction(bot, chat, from, rawText, msg)) {
+    //   return
+    // }
 
     const userId = String(from.id)
     const session = getSession(userId)
@@ -119,7 +133,6 @@ bot.on('message', async (msg: Message) => {
   }
 })
 
-// Callback query handler: process suggestion selections and create goals
 bot.on('callback_query', async (cb: CallbackQuery) => {
   try {
     console.log('callback cb: ', cb)

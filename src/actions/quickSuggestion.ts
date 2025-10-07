@@ -196,18 +196,37 @@ export async function chooseSuggestion(
     }
 
     const created = await GoalsService.goalsControllerCreate({ requestBody: body })
+
+    const now = new Date()
+    const morningCheckIn = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0)
+    morningCheckIn.setDate(morningCheckIn.getDate() + 1)
+    const eveningCheckIn = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0)
+    if (now.getHours() > 12) {
+      eveningCheckIn.setDate(eveningCheckIn.getDate() + 1)
+    }
+
     await CheckInsService.checkInsControllerAddCheckIn({
       requestBody: {
-        start: new Date().toISOString(),
+        start: morningCheckIn.toISOString(),
         frequency: CheckInModel.frequency.DAILY,
         metadata: {
-          message: `<b>Check In!</b>\n<i>I hope you're on track of your goal:</i>\n${created.text}`,
+          message: `<b>Morning Reminder!</b>\n<i>Hope you're on track to complete your goal:</i>\n\n${created.text}`,
           chatId,
         },
       },
     })
 
-    // Remove keyboard to prevent duplicate submissions
+    await CheckInsService.checkInsControllerAddCheckIn({
+      requestBody: {
+        start: eveningCheckIn.toISOString(),
+        frequency: CheckInModel.frequency.DAILY,
+        metadata: {
+          message: `<b>Evening!</b>\n<i>Let me know any thoughts and how your current goal went:</i>\n\n${created.text}`,
+          chatId,
+        },
+      },
+    })
+
     try {
       await bot.editMessageReplyMarkup(
         { inline_keyboard: [] },
