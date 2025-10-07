@@ -1,12 +1,11 @@
 import type TelegramBot from 'node-telegram-bot-api'
-import type { AiSuggestionsResultDto } from '../generated/backend/models/AiSuggestionsResultDto'
-import type { SuggestedGoalDto } from '../generated/backend/models/SuggestedGoalDto'
 import { saveSuggestionsForMessage } from './suggestionState'
 import {
   buildSuggestionKeyboard,
   buildSuggestionKeyboardInline,
   difficultyStars,
 } from 'src/common/keyboards'
+import { AiSuggestionsResultModel, GoalSuggestedModel } from 'src/generated/backend'
 
 // Utilities
 function escapeHtml(s: string): string {
@@ -18,7 +17,7 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-export function difficultyToLabel(d: SuggestedGoalDto.difficulty | string | undefined): string {
+export function difficultyToLabel(d: GoalSuggestedModel.difficulty | string | undefined): string {
   switch (String(d || '').toUpperCase()) {
     case 'EASY':
       return 'Easy'
@@ -33,7 +32,7 @@ export function difficultyToLabel(d: SuggestedGoalDto.difficulty | string | unde
 
 export function buildSuggestionMessageText(params: {
   headerMessage?: string
-  suggestions: SuggestedGoalDto[]
+  suggestions: GoalSuggestedModel[]
 }): string {
   const { headerMessage, suggestions } = params
   const lines: string[] = []
@@ -58,7 +57,7 @@ export function buildSuggestionMessageText(params: {
 }
 
 // High-level helpers for actions to use
-export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
+export function buildAiSuggestionRender(payload: AiSuggestionsResultModel): {
   text: string
   options: TelegramBot.SendMessageOptions
 } {
@@ -83,7 +82,7 @@ export function buildAiSuggestionRender(payload: AiSuggestionsResultDto): {
 }
 
 export function buildParamSuggestionRender(
-  suggestions: SuggestedGoalDto[],
+  suggestions: GoalSuggestedModel[],
   header?: string,
 ): { text: string; options: TelegramBot.SendMessageOptions } {
   const text = buildSuggestionMessageText({
@@ -98,7 +97,7 @@ export function buildParamSuggestionRender(
 export async function renderAiSuggestionResult(
   bot: TelegramBot,
   chatId: number,
-  payload: AiSuggestionsResultDto,
+  payload: AiSuggestionsResultModel,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildAiSuggestionRender(payload)
   const sent = await bot.sendMessage(chatId, text, options)
@@ -112,7 +111,7 @@ export async function renderAiSuggestionResult(
 export async function renderAiSuggestionResultKeyboard(
   bot: TelegramBot,
   chatId: number,
-  payload: AiSuggestionsResultDto,
+  payload: AiSuggestionsResultModel,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildAiSuggestionRenderKeyboard(payload)
   const sent = await bot.sendMessage(chatId, text, options)
@@ -126,7 +125,7 @@ export async function renderAiSuggestionResultKeyboard(
 export async function renderParamSuggestions(
   bot: TelegramBot,
   chatId: number,
-  suggestions: SuggestedGoalDto[],
+  suggestions: GoalSuggestedModel[],
   header?: string,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildParamSuggestionRender(suggestions, header)
@@ -139,7 +138,7 @@ export async function renderParamSuggestions(
 export async function renderParamSuggestionsKeyboard(
   bot: TelegramBot,
   chatId: number,
-  suggestions: SuggestedGoalDto[],
+  suggestions: GoalSuggestedModel[],
   header?: string,
 ): Promise<TelegramBot.Message> {
   const { text, options } = buildParamSuggestionRenderKeyboard(suggestions, header)
@@ -149,7 +148,7 @@ export async function renderParamSuggestionsKeyboard(
   return sent
 }
 export function buildParamSuggestionRenderKeyboard(
-  suggestions: SuggestedGoalDto[],
+  suggestions: GoalSuggestedModel[],
   header?: string,
 ): { text: string; options: TelegramBot.SendMessageOptions } {
   const text = buildSuggestionMessageText({
@@ -162,7 +161,7 @@ export function buildParamSuggestionRenderKeyboard(
 }
 
 // High-level helpers for actions to use
-export function buildAiSuggestionRenderKeyboard(payload: AiSuggestionsResultDto): {
+export function buildAiSuggestionRenderKeyboard(payload: AiSuggestionsResultModel): {
   text: string
   options: TelegramBot.SendMessageOptions
 } {

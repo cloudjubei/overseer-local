@@ -1,9 +1,7 @@
 import type TelegramBot from 'node-telegram-bot-api'
-import type { ConversationPromptDto } from '../generated/backend/models/ConversationPromptDto'
-import type { PromptOptionDto } from '../generated/backend/models/PromptOptionDto'
-import type { PromptFieldDto } from '../generated/backend/models/PromptFieldDto'
+import { ConversationPromptModel, PromptFieldModel, PromptOptionModel } from 'src/generated/backend'
 
-function formatFields(fields: Array<PromptFieldDto> | undefined): string[] {
+function formatFields(fields: Array<PromptFieldModel> | undefined): string[] {
   if (!Array.isArray(fields) || fields.length === 0) return []
   const lines: string[] = []
   lines.push('Please provide:')
@@ -16,7 +14,7 @@ function formatFields(fields: Array<PromptFieldDto> | undefined): string[] {
 }
 
 function buildOptionsKeyboard(
-  options: Array<PromptOptionDto> | undefined,
+  options: Array<PromptOptionModel> | undefined,
   selectionName?: string,
 ): TelegramBot.InlineKeyboardMarkup | undefined {
   if (!Array.isArray(options) || options.length === 0) return undefined
@@ -35,7 +33,7 @@ function buildOptionsKeyboard(
   return { inline_keyboard: rows }
 }
 
-export function formatPromptMessage(prompt: ConversationPromptDto): string {
+export function formatPromptMessage(prompt: ConversationPromptModel): string {
   const lines: string[] = []
   const hasTitle = !!(prompt.title && prompt.title.trim().length > 0)
   const hasMessage = !!(prompt.message && prompt.message.trim().length > 0)
@@ -59,7 +57,7 @@ export function formatPromptMessage(prompt: ConversationPromptDto): string {
 }
 
 export async function renderBackendPrompt(
-  prompt: ConversationPromptDto,
+  prompt: ConversationPromptModel,
   bot: TelegramBot,
   chatId: number,
 ): Promise<TelegramBot.Message> {

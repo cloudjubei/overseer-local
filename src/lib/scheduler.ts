@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api'
 import { config } from '../config/env'
 import { getAllUserIds, getSession } from './sessionStore'
 import { configureBackendClient } from './backendClient'
-import { CheckInsService, CheckInDto } from '../generated/backend'
+import { CheckInModel, CheckInsService } from '../generated/backend'
 import { logger } from './logger'
 
 let scheduledTask: cron.ScheduledTask | null = null
@@ -95,7 +95,7 @@ function mergeTelegramChatMetadata(
   return base
 }
 
-async function ensureTelegramMetadata(ci: CheckInDto, chatId: number, userId: string) {
+async function ensureTelegramMetadata(ci: CheckInModel, chatId: number, userId: string) {
   try {
     if (!needsTelegramChatMetadata(ci.metadata as any, chatId, userId)) return
     const newMeta = mergeTelegramChatMetadata(ci.metadata as any, chatId, userId)
@@ -123,7 +123,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
     const req = { limit: 100, cursor }
     try {
       const res = await CheckInsService.checkInsControllerGetCheckIns(req as any)
-      const items: CheckInDto[] = res.items
+      const items: CheckInModel[] = res.items
 
       for (const ci of items) {
         // Parse start time; if invalid, skip

@@ -4,9 +4,6 @@ import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser } 
 import { getSession, setSession } from './lib/sessionStore'
 import { handleConversationMessage } from './conversations/conversationManager'
 import { renderBackendPrompt } from './conversations/promptRenderer'
-import { ConversationsService } from './generated/backend/services/ConversationsService'
-import { ConversationResponseDto } from './generated/backend/models/ConversationResponseDto'
-import { StartFlowDto } from './generated/backend/models/StartFlowDto'
 import testAction from './actions/test'
 import testLLMAction from './actions/testLLM'
 import quickSuggestionAction, {
@@ -15,17 +12,10 @@ import quickSuggestionAction, {
 } from './actions/quickSuggestion'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
-import { CreateGoalDto } from './generated/backend/models/CreateGoalDto'
-import {
-  clearSuggestionsForMessage,
-  getSuggestionsForMessage,
-  getSuggestionBundleForMessage,
-} from './actions/suggestionState'
+import { getSuggestionBundleForMessage } from './actions/suggestionState'
 import { renderParamSuggestions } from './actions/suggestionRenderer'
 import { textSuggestionActionMicro, textSuggestionActionMacro } from './actions/textSuggestion'
 import {
-  buildDifficultyKeyboard,
-  buildCategoryKeyboard,
   sendCategoryKeyboardMessage,
   sendDifficultyKeyboardMessage,
   sendTypeKeyboardMessage,

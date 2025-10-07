@@ -5,11 +5,11 @@ import {
   sendTypeKeyboardMessage,
 } from 'src/common/keyboards'
 import {
+  CheckInModel,
   CheckInsService,
-  CreateCheckInDto,
-  CreateGoalDto,
+  GoalCreateModel,
   GoalsService,
-  SuggestedGoalDto,
+  GoalSuggestedModel,
 } from 'src/generated/backend'
 import { ensureAccessTokenForUser, ensureBackendConfigured } from 'src/lib/auth'
 import { getSession, setSession } from 'src/lib/sessionStore'
@@ -56,9 +56,9 @@ export async function quickSuggestionAction2(
           await ensureBackendConfigured()
           ensureAccessTokenForUser(userId)
 
-          const type = Object.values(SuggestedGoalDto.type)[responses[0]]
-          const category = Object.values(SuggestedGoalDto.category)[responses[1]]
-          const difficulty = Object.values(SuggestedGoalDto.difficulty)[responses[2]]
+          const type = Object.values(GoalSuggestedModel.type)[responses[0]]
+          const category = Object.values(GoalSuggestedModel.category)[responses[1]]
+          const difficulty = Object.values(GoalSuggestedModel.difficulty)[responses[2]]
 
           const suggestions = await GoalsService.goalsControllerParamSuggestions({
             type: type,
@@ -106,9 +106,9 @@ export async function quickSuggestionAction2(
         refreshToken: prev?.refreshToken,
         expiresAt: prev?.expiresAt,
       })
-      const type = Object.values(SuggestedGoalDto.type)[responses[0]]
+      const type = Object.values(GoalSuggestedModel.type)[responses[0]]
       if (responses.length == 2) {
-        const category = Object.values(SuggestedGoalDto.category)[responses[1]]
+        const category = Object.values(GoalSuggestedModel.category)[responses[1]]
         await sendDifficultyKeyboardMessage(bot, chat.id, type, category, false)
       } else {
         await sendCategoryKeyboardMessage(bot, chat.id, type, false)
@@ -188,7 +188,7 @@ export async function chooseSuggestion(
     await ensureBackendConfigured()
     ensureAccessTokenForUser(userId)
 
-    const body: CreateGoalDto = {
+    const body: GoalCreateModel = {
       type: chosen.type as any,
       category: chosen.category as any,
       difficulty: chosen.difficulty as any,
@@ -199,7 +199,7 @@ export async function chooseSuggestion(
     await CheckInsService.checkInsControllerAddCheckIn({
       requestBody: {
         start: new Date().toISOString(),
-        frequency: CreateCheckInDto.frequency.DAILY,
+        frequency: CheckInModel.frequency.DAILY,
         metadata: {
           message: `<b>Check In!</b>\n<i>I hope you're on track of your goal:</i>\n${created.text}`,
           chatId,

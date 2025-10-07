@@ -1,12 +1,12 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import {
+  CheckInModel,
   CheckInsService,
-  ConversationResponseDto,
+  ConversationResponseModel,
   ConversationsService,
-  CreateCheckInDto,
-  CreateGoalDto,
+  GoalCreateModel,
   GoalsService,
-  StartFlowDto,
+  StartFlowModel,
 } from 'src/generated/backend'
 import { ensureAccessTokenForUser, ensureBackendConfigured } from 'src/lib/auth'
 import { clearSuggestionsForMessage, getSuggestionsForMessage } from './suggestionState'
@@ -78,7 +78,7 @@ export async function chooseSuggestion(
     await ensureBackendConfigured()
     ensureAccessTokenForUser(userId)
 
-    const body: CreateGoalDto = {
+    const body: GoalCreateModel = {
       type: chosen.type as any,
       category: chosen.category as any,
       difficulty: chosen.difficulty as any,
@@ -89,7 +89,7 @@ export async function chooseSuggestion(
     await CheckInsService.checkInsControllerAddCheckIn({
       requestBody: {
         start: new Date().toISOString(),
-        frequency: CreateCheckInDto.frequency.DAILY,
+        frequency: CheckInModel.frequency.DAILY,
         metadata: {
           message: `<b>Check In!</b>\n<i>I hope you're on track of your goal:</i>\n${created.text}`,
           chatId,
@@ -133,9 +133,9 @@ async function startBackendFlow(
   await ensureBackendConfigured()
   ensureAccessTokenForUser(userId)
 
-  const req: StartFlowDto = {
+  const req: StartFlowModel = {
     flow: flowId,
-    channel: StartFlowDto.channel.TELEGRAM,
+    channel: StartFlowModel.channel.TELEGRAM,
     externalId,
   }
 
@@ -147,7 +147,7 @@ async function startBackendFlow(
     const now = Math.floor(Date.now() / 1000)
 
     switch (res.type) {
-      case ConversationResponseDto.type.PROMPT: {
+      case ConversationResponseModel.type.PROMPT: {
         // Persist conversation state
         const prev = getSession(userId)
         setSession({
@@ -168,7 +168,7 @@ async function startBackendFlow(
         }
         break
       }
-      case ConversationResponseDto.type.SUCCESS: {
+      case ConversationResponseModel.type.SUCCESS: {
         // Clear conversation state and show success message if provided
         const prev = getSession(userId)
         setSession({
@@ -183,7 +183,7 @@ async function startBackendFlow(
         await bot.sendMessage(chatId, text)
         break
       }
-      case ConversationResponseDto.type.ERROR: {
+      case ConversationResponseModel.type.ERROR: {
         // Decide whether to keep conversation based on retry flag
         const retry = !!(res.error as any)?.retry
         const prev = getSession(userId)

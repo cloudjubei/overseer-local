@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api'
-import { SuggestedGoalDto } from 'src/generated/backend'
+import { GoalSuggestedModel } from 'src/generated/backend'
 
 export async function sendTypeKeyboardMessage(bot: TelegramBot, chatId: number, inline: boolean) {
   const prompt =
@@ -147,14 +147,14 @@ export function buildDifficultyKeyboard(): TelegramBot.ReplyKeyboardMarkup {
   return { keyboard: rows, resize_keyboard: true, is_persistent: true }
 }
 
-export function difficultyStars(d?: SuggestedGoalDto.difficulty | string): string {
+export function difficultyStars(d?: GoalSuggestedModel.difficulty | string): string {
   const diff = String(d || '').toUpperCase()
   const count = diff === 'MEDIUM' ? 2 : diff === 'HARD' ? 3 : 1
   return '★'.repeat(count)
 }
 
 export function buildSuggestionKeyboardInline(
-  suggestions: SuggestedGoalDto[],
+  suggestions: GoalSuggestedModel[],
   showExtraSuggestions: boolean = false,
 ): TelegramBot.InlineKeyboardMarkup {
   const rows: TelegramBot.InlineKeyboardButton[][] = []
@@ -197,7 +197,7 @@ export function buildSuggestionKeyboardInline(
 }
 
 export function buildSuggestionKeyboard(
-  suggestions: SuggestedGoalDto[],
+  suggestions: GoalSuggestedModel[],
   showExtraSuggestions: boolean = false,
 ): TelegramBot.ReplyKeyboardMarkup {
   const prep: string[] = []

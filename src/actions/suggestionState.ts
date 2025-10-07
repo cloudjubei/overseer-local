@@ -1,11 +1,11 @@
 // Simple in-memory registry to map Telegram messages to suggestion payloads
 // Key: `${chatId}:${messageId}` -> { suggestions, genericSuggestions }
 
-import type { SuggestedGoalDto } from '../generated/backend/models/SuggestedGoalDto'
+import { GoalSuggestedModel } from 'src/generated/backend'
 
 type SuggestionBundle = {
-  suggestions: SuggestedGoalDto[]
-  genericSuggestions: SuggestedGoalDto[]
+  suggestions: GoalSuggestedModel[]
+  genericSuggestions: GoalSuggestedModel[]
 }
 
 const registry = new Map<string, SuggestionBundle>()
@@ -17,8 +17,8 @@ function key(chatId: number, messageId: number): string {
 export function saveSuggestionsForMessage(
   chatId: number,
   messageId: number,
-  suggestions: SuggestedGoalDto[] | undefined | null,
-  genericSuggestions?: SuggestedGoalDto[] | undefined | null,
+  suggestions: GoalSuggestedModel[] | undefined | null,
+  genericSuggestions?: GoalSuggestedModel[] | undefined | null,
 ): void {
   const primary = Array.isArray(suggestions) ? suggestions : []
   const generic = Array.isArray(genericSuggestions) ? genericSuggestions : []
@@ -29,7 +29,7 @@ export function saveSuggestionsForMessage(
 export function getSuggestionsForMessage(
   chatId: number,
   messageId: number,
-): SuggestedGoalDto[] | undefined {
+): GoalSuggestedModel[] | undefined {
   return registry.get(key(chatId, messageId))?.suggestions
 }
 

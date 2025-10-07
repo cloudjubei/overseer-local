@@ -103,7 +103,6 @@ out/
 
 # APP SPECIFIC
 envs/
-old-system-reference/
 .factory/
 .sessions/
 .temp_sessions/

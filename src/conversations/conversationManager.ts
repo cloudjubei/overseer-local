@@ -1,18 +1,22 @@
 import type TelegramBot from 'node-telegram-bot-api'
-import { ConversationsService, ConversationResponseDto, HandleInputDto } from '../generated/backend'
+import {
+  ConversationResponseModel,
+  ConversationsService,
+  HandleInputModel,
+} from '../generated/backend'
 import { setSession, type SessionData } from '../lib/sessionStore'
 import { ensureBackendConfigured, ensureAccessTokenForUser } from '../lib/auth'
 import { logger } from '../lib/logger'
 
 export type ConversationHandleResult =
-  | { type: 'prompt'; flow: string; sessionId: string; prompt: ConversationResponseDto['prompt'] }
+  | { type: 'prompt'; flow: string; sessionId: string; prompt: ConversationResponseModel['prompt'] }
   | {
       type: 'success'
       flow: string
       sessionId: string
-      success: ConversationResponseDto['success']
+      success: ConversationResponseModel['success']
     }
-  | { type: 'error'; flow: string; sessionId: string; error: ConversationResponseDto['error'] }
+  | { type: 'error'; flow: string; sessionId: string; error: ConversationResponseModel['error'] }
 
 function extractExternalId(msg: TelegramBot.Message): string | undefined {
   const id = msg.from?.id
@@ -66,11 +70,11 @@ export async function handleConversationMessage(
   await ensureBackendConfigured()
   ensureAccessTokenForUser(session.userId)
 
-  const input: HandleInputDto = {
+  const input: HandleInputModel = {
     flow: convo.flowId,
     sessionId,
     input: buildInputFromMessage(msg),
-    channel: HandleInputDto.channel.TELEGRAM,
+    channel: HandleInputModel.channel.TELEGRAM,
     externalId,
   }
 
@@ -83,7 +87,7 @@ export async function handleConversationMessage(
     const newSessionId = typeof res?.sessionId === 'string' ? res.sessionId : sessionId
 
     switch (res?.type) {
-      case ConversationResponseDto.type.PROMPT: {
+      case ConversationResponseModel.type.PROMPT: {
         // Persist conversation for next step, store sessionId in context
         setSession({
           ...session,
@@ -96,7 +100,7 @@ export async function handleConversationMessage(
         })
         return { type: 'prompt', flow, sessionId: newSessionId, prompt: res.prompt }
       }
-      case ConversationResponseDto.type.SUCCESS: {
+      case ConversationResponseModel.type.SUCCESS: {
         // Clear conversation on success and send success message if available
         setSession({ ...session, conversationState: null })
         if (chatId) {
@@ -107,7 +111,7 @@ export async function handleConversationMessage(
         }
         return { type: 'success', flow, sessionId: newSessionId, success: res.success }
       }
-      case ConversationResponseDto.type.ERROR: {
+      case ConversationResponseModel.type.ERROR: {
         // Terminate the flow on error to avoid the user getting stuck in a broken state
         setSession({ ...session, conversationState: null })
         if (chatId) {
