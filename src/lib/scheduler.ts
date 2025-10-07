@@ -135,7 +135,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
           startDate = null
         }
         if (!startDate) continue
-        if (startDate.getTime() < now.getTime()) continue
+        if (startDate.getTime() > now.getTime()) continue
         if (!sameHourOfDay(startDate, now)) continue
         // if (now.getMinutes() % 2 != 0) continue //DEV
 
