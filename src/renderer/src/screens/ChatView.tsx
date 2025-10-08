@@ -6,6 +6,7 @@ import { useChats } from '@renderer/contexts/ChatsContext'
 import type {
   ChatContext,
   ChatContextAgentRun,
+  ChatContextAgentRunFeature,
   ChatContextFeature,
   ChatContextProject,
   ChatContextProjectTopic,
@@ -47,8 +48,14 @@ function titleForContext(
       const c = context as ChatContextStoryTopic
       return `Story ${prettyTopicName(c.storyTopic)} — ${opts.getStoryTitle(c.storyId)}`
     }
-    case 'AGENT_RUN':
-      return `Agent Run Chat — ${(context as ChatContextAgentRun).agentRunId || ''}`
+    case 'AGENT_RUN': {
+      const c = context as ChatContextAgentRun
+      return `Agent Story Run ${opts.getStoryTitle(c.storyId)}`
+    }
+    case 'AGENT_RUN_FEATURE': {
+      const c = context as ChatContextAgentRunFeature
+      return `Agent Feature Run ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
+    }
     default:
       return 'Chat'
   }
@@ -98,6 +105,20 @@ export default function ChatView() {
   const featureChats = useMemo(() => {
     const list = (chatsByProjectId[activeProjectId] || []).filter(
       (s) => s.chat.context.type === 'FEATURE',
+    )
+    return sortByUpdated(list)
+  }, [chatsByProjectId, activeProjectId])
+
+  const agentStoryRunChats = useMemo(() => {
+    const list = (chatsByProjectId[activeProjectId] || []).filter(
+      (s) => s.chat.context.type === 'AGENT_RUN',
+    )
+    return sortByUpdated(list)
+  }, [chatsByProjectId, activeProjectId])
+
+  const agentFeatureRunChats = useMemo(() => {
+    const list = (chatsByProjectId[activeProjectId] || []).filter(
+      (s) => s.chat.context.type === 'AGENT_RUN_FEATURE',
     )
     return sortByUpdated(list)
   }, [chatsByProjectId, activeProjectId])
@@ -158,11 +179,21 @@ export default function ChatView() {
     first = generalChats[0]?.chat.context
     if (!first) first = storyChats[0]?.chat.context
     if (!first) first = featureChats[0]?.chat.context
+    if (!first) first = agentStoryRunChats[0]?.chat.context
+    if (!first) first = agentFeatureRunChats[0]?.chat.context
     if (!first) first = projectTopicChats[0]?.chat.context
     if (!first) first = storyTopicChats[0]?.chat.context
 
     setSelectedContext((prev) => prev || first)
-  }, [generalChats, storyChats, featureChats, projectTopicChats, storyTopicChats])
+  }, [
+    generalChats,
+    storyChats,
+    featureChats,
+    agentStoryRunChats,
+    agentFeatureRunChats,
+    projectTopicChats,
+    storyTopicChats,
+  ])
 
   const handleNewChat = async () => {
     // New General chat: restart the PROJECT chat for current active project

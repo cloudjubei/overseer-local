@@ -82,6 +82,8 @@ function extractSettingsForContext(
       return all.FEATURE
     case 'AGENT_RUN':
       return all.AGENT_RUN
+    case 'AGENT_RUN_FEATURE':
+      return all.AGENT_RUN_FEATURE
     case 'PROJECT_TOPIC':
       return all.PROJECT_TOPIC[context.projectTopic!]
     case 'STORY_TOPIC':

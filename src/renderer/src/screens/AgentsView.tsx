@@ -1015,6 +1015,13 @@ const AllProjectsView = () => {
   )
 }
 
+const chatContextAgentRun = (projectId: string, storyId: string) => {
+  return { type: 'AGENT_RUN', projectId, storyId }
+}
+const chatContextAgentRunFeature = (projectId: string, storyId: string, featureId: string) => {
+  return { type: 'AGENT_RUN_FEATURE', projectId, storyId, featureId }
+}
+
 export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
   const { projectId } = useActiveProject()
