@@ -2175,6 +2175,20 @@
       "createdAt": "2025-10-04T02:22:58.355Z",
       "updatedAt": "2025-10-04T02:31:21.633Z",
       "completedAt": "2025-10-04T02:31:21.633Z"
+    },
+    {
+      "id": "c989b117-412c-4645-add9-57a9d426f054",
+      "status": "-",
+      "title": "Allow chatting i.e. continuing the conversation on an Agent Run",
+      "description": "Right now in @src/renderer/src/screens/AgentsView.tsx there's a way of viewing each agent run in a @src/renderer/src/components/agents/ChatConversation.tsx . Each AgentRun actually stores the ChatMessages which can be directly used in a chat via @src/renderer/src/components/chat/ChatSidebar.tsx .",
+      "context": [
+        "src/renderer/src/screens/AgentsView.tsx",
+        "src/renderer/src/components/agents/ChatConversation.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T22:56:24.172Z",
+      "updatedAt": "2025-10-08T22:56:24.172Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2320,7 +2334,8 @@
     "76b04544-7d06-4f64-8648-95a46b569056": 140,
     "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1": 141,
     "2dc1b4b3-8376-44d0-937f-f6c18778622b": 142,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 143
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 143,
+    "c989b117-412c-4645-add9-57a9d426f054": 144
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

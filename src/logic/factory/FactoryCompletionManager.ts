@@ -150,8 +150,12 @@ export default class FactoryCompletionManager extends BaseManager {
     const toolsAllowed = toolsRequiringConfirmation.filter((r) => toolsCheck.has(r.result))
 
     const callTool = async (toolName: string, args: any): Promise<any> => {
-      return await this.factoryToolsManager.executeTool(projectId, toolName, args)
-      // return JSON.stringify(result)
+      const updatedArgs = { ...args }
+      if (chatContext.storyId && !('storyId' in updatedArgs))
+        updatedArgs.storyId = chatContext.storyId
+      if (chatContext.featureId && !('featureId' in updatedArgs))
+        updatedArgs.featureId = chatContext.featureId
+      return await this.factoryToolsManager.executeTool(projectId, toolName, updatedArgs)
     }
 
     const agentResponse: AgentResponse = { toolCalls: toolsAllowed.map((t) => t.call) }
@@ -245,8 +249,12 @@ export default class FactoryCompletionManager extends BaseManager {
       abortSignal,
     }
     const callTool = async (toolName: string, args: any): Promise<string> => {
-      const result = await this.factoryToolsManager.executeTool(projectId, toolName, args)
-      return JSON.stringify(result)
+      const updatedArgs = { ...args }
+      if (chatContext.storyId && !('storyId' in updatedArgs))
+        updatedArgs.storyId = chatContext.storyId
+      if (chatContext.featureId && !('featureId' in updatedArgs))
+        updatedArgs.featureId = chatContext.featureId
+      return await this.factoryToolsManager.executeTool(projectId, toolName, updatedArgs)
     }
     const promptPreparedCallback = async (systemPrompt: string) => {}
     const responseReceivedCallback = async (

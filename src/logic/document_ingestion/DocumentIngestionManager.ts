@@ -59,7 +59,7 @@ export default class DocumentIngestionManager extends BaseManager {
       return
     }
 
-    const project = await this.projectsManager.getProject(projectId as any)
+    const project = await this.projectsManager.getProject(projectId)
     if (!project) {
       console.warn('[DocumentIngestion] missing project', projectId)
       return
