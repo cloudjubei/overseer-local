@@ -35,10 +35,14 @@ function formatDuration(ms?: number) {
   return parts.join(' ')
 }
 
-const CurrentProjectView = () => {
+type CurrentProjectViewProps = {
+  openRunId: string | null
+  setOpenRunId: (id: string | null) => void
+}
+
+const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps) => {
   const { runsHistory, cancelRun, deleteRunHistory, rateRun } = useAgents()
   const { projectId } = useActiveProject()
-  const [openRunId, setOpenRunId] = useState<string | null>(null)
 
   const projectKpis = useMemo(() => {
     const projectRuns = runsHistory.filter((r) => r.projectId === projectId)
@@ -1026,11 +1030,29 @@ export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
   const { projectId } = useActiveProject()
   const { appSettings, setUserPreferences } = useAppSettings()
+  const { runsHistory } = useAgents()
+
+  const [openRunId, setOpenRunId] = useState<string | null>(null)
+
+  const selectedRun = useMemo(() => {
+    if (!openRunId) return undefined
+    return runsHistory.find((r) => r.id === openRunId)
+  }, [openRunId, runsHistory])
 
   const chatContext: ChatContext | undefined = useMemo(() => {
+    if (selectedRun) {
+      if (selectedRun.featureId) {
+        return chatContextAgentRunFeature(
+          selectedRun.projectId,
+          selectedRun.storyId,
+          selectedRun.featureId,
+        )
+      }
+      return chatContextAgentRun(selectedRun.projectId, selectedRun.storyId)
+    }
     if (!projectId) return undefined
     return { type: 'PROJECT_TOPIC', projectId, projectTopic: 'agent_runs' }
-  }, [projectId])
+  }, [projectId, selectedRun])
 
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
@@ -1070,13 +1092,17 @@ export default function AgentsView() {
           </div>
         </div>
         <div className="flex-1 overflow-auto">
-          {viewMode === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
+          {viewMode === 'current' ? (
+            <CurrentProjectView openRunId={openRunId} setOpenRunId={setOpenRunId} />
+          ) : (
+            <AllProjectsView />
+          )}
         </div>
       </div>
       {viewMode === 'current' && chatContext && (
         <ChatSidebarPanel
           context={chatContext}
-          chatContextTitle="Agents chat"
+          chatContextTitle={selectedRun ? `Agent Run ${selectedRun.id}` : 'Agents chat'}
           initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
           onWidthChange={(w, final) => {
             if (final) setUserPreferences({ chatSidebarWidth: Math.round(w) })

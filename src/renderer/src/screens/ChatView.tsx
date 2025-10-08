@@ -207,6 +207,7 @@ export default function ChatView() {
   const [isStoriesOpen, setStoriesOpen] = useState(true)
   const [isFeaturesOpen, setFeaturesOpen] = useState(true)
   const [isTopicsOpen, setTopicsOpen] = useState(true)
+  const [isAgentRunsOpen, setAgentRunsOpen] = useState(true)
 
   const renderChatButton = (ctx: ChatContext, key: string) => {
     const isActive = selectedContext && JSON.stringify(selectedContext) === JSON.stringify(ctx)
@@ -296,6 +297,54 @@ export default function ChatView() {
               ) : (
                 featureChats.map((c) => renderChatButton(c.chat.context, c.key))
               )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* AGENT RUNS */}
+      <div className="space-y-2">
+        <div>
+          <button
+            className="w-full flex items-center justify-between text-left px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)]"
+            onClick={() => setAgentRunsOpen((v) => !v)}
+          >
+            <span>AGENT RUNS</span>
+            <span>{isAgentRunsOpen ? '−' : '+'}</span>
+          </button>
+          {isAgentRunsOpen && (
+            <div className="space-y-2">
+              {/* Story Runs */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                  Story Runs
+                </div>
+                <div className="space-y-1">
+                  {agentStoryRunChats.length === 0 ? (
+                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                      No story run chats yet.
+                    </div>
+                  ) : (
+                    agentStoryRunChats.map((c) => renderChatButton(c.chat.context, c.key))
+                  )}
+                </div>
+              </div>
+
+              {/* Feature Runs */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] px-2 py-1">
+                  Feature Runs
+                </div>
+                <div className="space-y-1">
+                  {agentFeatureRunChats.length === 0 ? (
+                    <div className="text-[13px] text-[var(--text-secondary)] px-2 py-3">
+                      No feature run chats yet.
+                    </div>
+                  ) : (
+                    agentFeatureRunChats.map((c) => renderChatButton(c.chat.context, c.key))
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>

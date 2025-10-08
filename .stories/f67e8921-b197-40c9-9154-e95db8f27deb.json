@@ -2178,7 +2178,7 @@
     },
     {
       "id": "c989b117-412c-4645-add9-57a9d426f054",
-      "status": "-",
+      "status": "+",
       "title": "Allow chatting i.e. continuing the conversation on an Agent Run",
       "description": "Right now in @src/renderer/src/screens/AgentsView.tsx there's a way of viewing each agent run in a @src/renderer/src/components/agents/ChatConversation.tsx . Each AgentRun actually stores the ChatMessages which can be directly used in a chat via @src/renderer/src/components/chat/ChatSidebar.tsx .\n\nThe appropriate contexts for agent runs that are for stories is included in @src/renderer/src/screens/AgentsView.tsx - `chatContextAgentRun` and the one for agent feature runs is: `chatContextAgentRunFeature`.\nThere's also a context map inside @src/renderer/src/screens/ChatView.tsx and the agentStoryRunChats and agentFeatureRunChats need to show as two tiles similar to Project Topics and Story  Topics. The tile for them should be Agent Runs.",
       "context": [
@@ -2189,7 +2189,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-08T22:56:24.172Z",
-      "updatedAt": "2025-10-08T23:47:02.223Z"
+      "updatedAt": "2025-10-08T23:58:05.232Z",
+      "completedAt": "2025-10-08T23:58:05.232Z"
     }
   ],
   "featureIdToDisplayIndex": {
