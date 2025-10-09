@@ -260,8 +260,8 @@ const FACTORY_TESTS_API = {
   listTests: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_LIST, { projectId }),
   runTest: (projectId, path) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TEST, { projectId, path }),
-  runTests: (projectId, path) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId, path }),
+  runTests: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId }),
   runTestsE2E: (projectId, command) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_E2E, { projectId, command }),
   runCoverage: (projectId, path) =>
