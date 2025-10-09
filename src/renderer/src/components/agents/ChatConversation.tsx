@@ -12,6 +12,7 @@ import type {
 import { formatHmsCompact } from '../../utils/time'
 import Code from '../ui/Code'
 import JsonView from '../ui/JsonView'
+import { IconChat } from '../ui/Icons'
 
 function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number }) {
   const str = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
@@ -291,51 +292,92 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
     }
   }, [contentSize])
 
+  const openStoryRunChat = () => {
+    const projectId = encodeURIComponent(run.projectId)
+    const storyId = encodeURIComponent(run.storyId)
+    window.location.hash = `#chat/agent-run/${projectId}/${storyId}`
+  }
+
+  const openFeatureRunChat = (featureId: string) => {
+    const projectId = encodeURIComponent(run.projectId)
+    const storyId = encodeURIComponent(run.storyId)
+    const fId = encodeURIComponent(featureId)
+    window.location.hash = `#chat/agent-run-feature/${projectId}/${storyId}/${fId}`
+  }
+
   return (
-    <ul
-      ref={containerRef}
-      className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3"
-      role="log"
-      aria-live="polite"
-    >
-      {run.conversations.length === 0 ? (
-        <div className="text-sm text-neutral-500">No conversations to display.</div>
-      ) : (
-        <>
-          {run.conversations.map((conversation) => {
-            const start = new Date(conversation.createdAt)
-            const end = conversation.finishedAt ? new Date(conversation.finishedAt) : undefined
-            const subtitle = [
-              start ? start.toLocaleString() : null,
-              end ? `→ ${end.toLocaleString()}` : null,
-            ]
-              .filter(Boolean)
-              .join(' ')
-            const isLatestFeature = conversation.featureId === latestFeatureId
-            return (
-              <li key={conversation.id}>
-                <Collapsible
-                  title={
-                    <span className="flex items-center">
-                      Feature: {conversation.featureId}
-                      {subtitle ? (
-                        <span className="text-neutral-500 text-[11px] px-3 py-2"> {subtitle}</span>
-                      ) : null}
-                    </span>
-                  }
-                  defaultOpen={isLatestFeature}
-                >
-                  <FeatureContent
-                    conversation={conversation}
-                    isLatestFeature={isLatestFeature}
-                    latestTurnRef={isLatestFeature ? latestTurnRef : undefined}
-                  />
-                </Collapsible>
-              </li>
-            )
-          })}
-        </>
-      )}
-    </ul>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-end px-1">
+        <button
+          type="button"
+          className="btn-secondary btn-icon"
+          title="Open story run chat"
+          aria-label="Open story run chat"
+          onClick={openStoryRunChat}
+        >
+          <IconChat className="w-4 h-4" />
+        </button>
+      </div>
+
+      <ul
+        ref={containerRef}
+        className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3"
+        role="log"
+        aria-live="polite"
+      >
+        {run.conversations.length === 0 ? (
+          <div className="text-sm text-neutral-500">No conversations to display.</div>
+        ) : (
+          <>
+            {run.conversations.map((conversation) => {
+              const start = new Date(conversation.createdAt)
+              const end = conversation.finishedAt ? new Date(conversation.finishedAt) : undefined
+              const subtitle = [
+                start ? start.toLocaleString() : null,
+                end ? `→ ${end.toLocaleString()}` : null,
+              ]
+                .filter(Boolean)
+                .join(' ')
+              const isLatestFeature = conversation.featureId === latestFeatureId
+              return (
+                <li key={conversation.id}>
+                  <Collapsible
+                    title={
+                      <span className="flex items-center gap-2">
+                        <span>
+                          Feature: {conversation.featureId}
+                          {subtitle ? (
+                            <span className="text-neutral-500 text-[11px] px-2"> {subtitle}</span>
+                          ) : null}
+                        </span>
+                        <span
+                          role="button"
+                          title="Open feature run chat"
+                          aria-label="Open feature run chat"
+                          className="btn-secondary btn-icon inline-flex"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openFeatureRunChat(conversation.featureId)
+                          }}
+                        >
+                          <IconChat className="w-4 h-4" />
+                        </span>
+                      </span>
+                    }
+                    defaultOpen={isLatestFeature}
+                  >
+                    <FeatureContent
+                      conversation={conversation}
+                      isLatestFeature={isLatestFeature}
+                      latestTurnRef={isLatestFeature ? latestTurnRef : undefined}
+                    />
+                  </Collapsible>
+                </li>
+              )
+            })}
+          </>
+        )}
+      </ul>
+    </div>
   )
 }
