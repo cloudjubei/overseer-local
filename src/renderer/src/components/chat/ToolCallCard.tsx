@@ -109,6 +109,16 @@ function StatusPill({ resultType }: { resultType?: ToolResultType }) {
   return <div className={`${base} ${colors}`}>{resultType.replace('_', ' ')}</div>
 }
 
+function getResultString(result: any): string {
+  let out = result
+  if (typeof result === 'string') {
+    try {
+      out = JSON.parse(result)
+    } catch {}
+  }
+  return JSON.stringify(out, null, 2)
+}
+
 export default function ToolCallCard({
   index,
   toolCall,
@@ -121,10 +131,7 @@ export default function ToolCallCard({
 }: ToolCallCardProps) {
   const [isCallExpanded, setIsCallExpanded] = useState(false)
 
-  const resultString =
-    resultType === 'success' && result
-      ? JSON.stringify(typeof result === 'string' ? JSON.parse(result ?? '{}') : result, null, 2)
-      : undefined
+  const resultString = resultType === 'success' ? getResultString(result) : undefined
   const isRequireConfirm = resultType === 'require_confirmation'
 
   return (
