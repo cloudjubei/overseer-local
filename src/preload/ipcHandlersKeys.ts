@@ -33,6 +33,7 @@ const IPC_HANDLER_KEYS = {
   COMPLETION_ABORT: 'complation:abort',
 
   // Files
+  FILES_UPDATE_ALL_TOOLS: 'files:update-all-tools',
   FILES_SUBSCRIBE: 'files:subscribe',
   FILES_LIST: 'files:list',
   FILES_READ_FILE: 'files:read-file',

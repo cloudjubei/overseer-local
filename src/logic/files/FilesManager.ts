@@ -38,14 +38,13 @@ export default class FilesManager extends BaseManager {
   }
 
   async updateTools(): Promise<void> {
-    for (const projectId in Object.keys(this.tools)) {
-      await this.updateTool(projectId)
-    }
+    await Promise.all(Object.keys(this.tools).map((projectId) => this.updateTool(projectId)))
   }
 
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
+    handlers[IPC_HANDLER_KEYS.FILES_UPDATE_ALL_TOOLS] = () => this.updateTools()
     handlers[IPC_HANDLER_KEYS.FILES_LIST] = ({ projectId, relPath }) =>
       this.listFiles(projectId, relPath)
     handlers[IPC_HANDLER_KEYS.FILES_READ_FILE] = ({ projectId, relPath, encoding }) =>

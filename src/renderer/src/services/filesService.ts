@@ -1,6 +1,7 @@
 import { FileMeta, FilesResult, FileUpdate } from 'thefactory-tools'
 
 export type FilesService = {
+  updateAllTools: () => Promise<void>
   subscribe: (callback: (fileUpdate: FileUpdate) => void) => () => void
   listFiles: (projectId: string) => Promise<string[]>
   readFile: (projectId: string, relPath: string, encoding?: string) => Promise<string | undefined>

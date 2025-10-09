@@ -11,19 +11,15 @@ import type {
 import BaseManager from '../BaseManager'
 
 export default class DatabaseManager extends BaseManager {
-  private _dbClient: TheFactoryDb | undefined
-  private _connectionString: string | undefined
-  private _status: { connected: boolean; lastError?: string }
+  private _dbClient: TheFactoryDb | undefined = undefined
+  private _connectionString: string | undefined = undefined
+  private _status: { connected: boolean; lastError?: string } = {
+    connected: false,
+    lastError: undefined,
+  }
 
   constructor(projectRoot: string, window: BrowserWindow) {
     super(projectRoot, window)
-
-    this._dbClient = undefined
-    this._connectionString = undefined
-    this._status = {
-      connected: false,
-      lastError: undefined,
-    }
   }
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
@@ -74,6 +70,7 @@ export default class DatabaseManager extends BaseManager {
       this._setConnected(false)
       console.error('[db] Failed to initialize thefactory-db:', err?.message || err)
     }
+
     return this.getStatus()
   }
 

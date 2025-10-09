@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { dbService } from '../services/dbService'
+import { filesService } from '../services/filesService'
 import { documentIngestionService } from '../services/documentIngestionService'
 
 interface LoadingScreenProps {
@@ -30,6 +31,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
         setIsIngestionComplete(true)
         return
       }
+      await filesService.updateAllTools()
     }
 
     setIsDBSetup(true)

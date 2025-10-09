@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import IPC_HANDLER_KEYS from './ipcHandlersKeys'
 
 const FILES_API = {
+  updateAllTools: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPDATE_ALL_TOOLS),
   subscribe: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.FILES_SUBSCRIBE, listener)
