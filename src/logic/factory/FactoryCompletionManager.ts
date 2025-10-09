@@ -172,8 +172,7 @@ export default class FactoryCompletionManager extends BaseManager {
 
     const mapToolResults: Record<string, ToolResult> = {}
     for (let i = 0; i < toolResults.results.length; i++) {
-      const r = toolResults.results[i]
-      mapToolResults[toolsAllowed[i].result] = r
+      mapToolResults[toolsAllowed[i].result] = toolResults.results[i]
     }
 
     let newLastMessage = { ...lastMessage }

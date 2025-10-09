@@ -63,8 +63,8 @@ function titleForContext(
 
 // Support deep-linking to specific chat contexts under the chat route
 // Formats:
-// - #chat/agent-run/<projectId>/<storyId>
-// - #chat/agent-run-feature/<projectId>/<storyId>/<featureId>
+// - #chat/agent-run/<projectId>/<storyId>/<agentRunId>
+// - #chat/agent-run-feature/<projectId>/<storyId>/<featureId>/<agentRunId>
 function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
   const raw = (hashRaw || '').replace(/^#/, '')
   if (!raw.startsWith('chat')) return undefined
@@ -77,18 +77,21 @@ function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
     if (seg === 'agent-run' && parts.length >= 3) {
       const projectId = decodeURIComponent(parts[1])
       const storyId = decodeURIComponent(parts[2])
-      const ctx: ChatContextAgentRun = { type: 'AGENT_RUN', projectId, storyId }
+      const agentRunId = decodeURIComponent(parts[3])
+      const ctx: ChatContextAgentRun = { type: 'AGENT_RUN', projectId, storyId, agentRunId }
       return ctx
     }
     if (seg === 'agent-run-feature' && parts.length >= 4) {
       const projectId = decodeURIComponent(parts[1])
       const storyId = decodeURIComponent(parts[2])
       const featureId = decodeURIComponent(parts[3])
+      const agentRunId = decodeURIComponent(parts[4])
       const ctx: ChatContextAgentRunFeature = {
         type: 'AGENT_RUN_FEATURE',
         projectId,
         storyId,
         featureId,
+        agentRunId,
       }
       return ctx
     }
