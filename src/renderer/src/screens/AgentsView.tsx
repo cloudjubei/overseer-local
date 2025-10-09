@@ -1019,14 +1019,14 @@ const AllProjectsView = () => {
   )
 }
 
-const chatContextAgentRun = (projectId: string, storyId: string, agentRunId?: string) => {
+const chatContextAgentRun = (projectId: string, storyId: string, agentRunId: string) => {
   return { type: 'AGENT_RUN', projectId, storyId, agentRunId }
 }
 const chatContextAgentRunFeature = (
   projectId: string,
   storyId: string,
   featureId: string,
-  agentRunId?: string,
+  agentRunId: string,
 ) => {
   return { type: 'AGENT_RUN_FEATURE', projectId, storyId, featureId, agentRunId }
 }
