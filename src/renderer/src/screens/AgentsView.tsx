@@ -1019,11 +1019,16 @@ const AllProjectsView = () => {
   )
 }
 
-const chatContextAgentRun = (projectId: string, storyId: string) => {
-  return { type: 'AGENT_RUN', projectId, storyId }
+const chatContextAgentRun = (projectId: string, storyId: string, agentRunId?: string) => {
+  return { type: 'AGENT_RUN', projectId, storyId, agentRunId }
 }
-const chatContextAgentRunFeature = (projectId: string, storyId: string, featureId: string) => {
-  return { type: 'AGENT_RUN_FEATURE', projectId, storyId, featureId }
+const chatContextAgentRunFeature = (
+  projectId: string,
+  storyId: string,
+  featureId: string,
+  agentRunId?: string,
+) => {
+  return { type: 'AGENT_RUN_FEATURE', projectId, storyId, featureId, agentRunId }
 }
 
 export default function AgentsView() {
@@ -1046,9 +1051,10 @@ export default function AgentsView() {
           selectedRun.projectId,
           selectedRun.storyId,
           selectedRun.featureId,
+          selectedRun.id,
         )
       }
-      return chatContextAgentRun(selectedRun.projectId, selectedRun.storyId)
+      return chatContextAgentRun(selectedRun.projectId, selectedRun.storyId, selectedRun.id)
     }
     if (!projectId) return undefined
     return { type: 'PROJECT_TOPIC', projectId, projectTopic: 'agent_runs' }

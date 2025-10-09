@@ -92,7 +92,7 @@ function ToolCallRow({ call, result, index }: { call: ToolCall; result?: any; in
       {displayResult && (
         <div className="px-3 pb-3">
           <Collapsible title={<span>View result</span>}>
-            <Code language="json" code={displayResult} />
+            <Code language="json" code={displayResult as string} />
           </Collapsible>
         </div>
       )}
@@ -166,10 +166,6 @@ function FeatureContent({
   isLatestFeature: boolean
   latestTurnRef?: React.RefObject<HTMLDivElement | null>
 }) {
-  // const { initial, turns } = useMemo(
-  //   () => buildFeatureTurns(conversation.messages || []),
-  //   [conversation.messages],
-  // )
   const { initial, turns } = buildFeatureTurns(conversation.messages || [])
 
   return (
@@ -295,19 +291,22 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
   const openStoryRunChat = () => {
     const projectId = encodeURIComponent(run.projectId)
     const storyId = encodeURIComponent(run.storyId)
-    window.location.hash = `#chat/agent-run/${projectId}/${storyId}`
+    const agentRunId = encodeURIComponent(run.id)
+    window.location.hash = `#chat/agent-run/${projectId}/${storyId}/${agentRunId}`
   }
 
   const openFeatureRunChat = (featureId: string) => {
     const projectId = encodeURIComponent(run.projectId)
     const storyId = encodeURIComponent(run.storyId)
     const fId = encodeURIComponent(featureId)
-    window.location.hash = `#chat/agent-run-feature/${projectId}/${storyId}/${fId}`
+    const agentRunId = encodeURIComponent(run.id)
+    window.location.hash = `#chat/agent-run-feature/${projectId}/${storyId}/${fId}/${agentRunId}`
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-end px-1">
+      {/* Story Run chat action aligned to the left of its label */}
+      <div className="flex items-center justify-start gap-2 px-1">
         <button
           type="button"
           className="btn-secondary btn-icon"
@@ -317,6 +316,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
         >
           <IconChat className="w-4 h-4" />
         </button>
+        <span className="text-xs text-neutral-700 dark:text-neutral-300">Story Run</span>
       </div>
 
       <ul
@@ -344,12 +344,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
                   <Collapsible
                     title={
                       <span className="flex items-center gap-2">
-                        <span>
-                          Feature: {conversation.featureId}
-                          {subtitle ? (
-                            <span className="text-neutral-500 text-[11px] px-2"> {subtitle}</span>
-                          ) : null}
-                        </span>
+                        {/* Chat button to the left of the feature title */}
                         <span
                           role="button"
                           title="Open feature run chat"
@@ -361,6 +356,12 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
                           }}
                         >
                           <IconChat className="w-4 h-4" />
+                        </span>
+                        <span>
+                          Feature: {conversation.featureId}
+                          {subtitle ? (
+                            <span className="text-neutral-500 text-[11px] px-2"> {subtitle}</span>
+                          ) : null}
                         </span>
                       </span>
                     }

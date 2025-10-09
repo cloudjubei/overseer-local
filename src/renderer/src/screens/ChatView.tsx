@@ -74,14 +74,14 @@ function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
 
   try {
     const seg = parts[0]
-    if (seg === 'agent-run' && parts.length >= 3) {
+    if (seg === 'agent-run' && parts.length >= 4) {
       const projectId = decodeURIComponent(parts[1])
       const storyId = decodeURIComponent(parts[2])
       const agentRunId = decodeURIComponent(parts[3])
       const ctx: ChatContextAgentRun = { type: 'AGENT_RUN', projectId, storyId, agentRunId }
       return ctx
     }
-    if (seg === 'agent-run-feature' && parts.length >= 4) {
+    if (seg === 'agent-run-feature' && parts.length >= 5) {
       const projectId = decodeURIComponent(parts[1])
       const storyId = decodeURIComponent(parts[2])
       const featureId = decodeURIComponent(parts[3])
