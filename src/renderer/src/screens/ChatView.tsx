@@ -61,11 +61,48 @@ function titleForContext(
   }
 }
 
+// Support deep-linking to specific chat contexts under the chat route
+// Formats:
+// - #chat/agent-run/<projectId>/<storyId>
+// - #chat/agent-run-feature/<projectId>/<storyId>/<featureId>
+function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
+  const raw = (hashRaw || '').replace(/^#/, '')
+  if (!raw.startsWith('chat')) return undefined
+  const withoutPrefix = raw.slice('chat'.length) // possibly like '/agent-run/...'
+  const parts = withoutPrefix.split('/').filter(Boolean)
+  if (parts.length === 0) return undefined
+
+  try {
+    const seg = parts[0]
+    if (seg === 'agent-run' && parts.length >= 3) {
+      const projectId = decodeURIComponent(parts[1])
+      const storyId = decodeURIComponent(parts[2])
+      const ctx: ChatContextAgentRun = { type: 'AGENT_RUN', projectId, storyId }
+      return ctx
+    }
+    if (seg === 'agent-run-feature' && parts.length >= 4) {
+      const projectId = decodeURIComponent(parts[1])
+      const storyId = decodeURIComponent(parts[2])
+      const featureId = decodeURIComponent(parts[3])
+      const ctx: ChatContextAgentRunFeature = {
+        type: 'AGENT_RUN_FEATURE',
+        projectId,
+        storyId,
+        featureId,
+      }
+      return ctx
+    }
+  } catch (e) {
+    console.warn('Failed to parse chat route from hash', e)
+  }
+  return undefined
+}
+
 export default function ChatView() {
   const { projectId: activeProjectId } = useActiveProject()
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
-  const { chats, chatsByProjectId, restartChat } = useChats()
+  const { chats, chatsByProjectId, restartChat, getChat } = useChats()
 
   // Helpers for titles
   const getProjectTitle = (id?: string) => {
@@ -173,8 +210,26 @@ export default function ChatView() {
 
   // Selected context state
   const [selectedContext, setSelectedContext] = useState<ChatContext | undefined>(undefined)
+
+  // Deep-link selection handler
+  useEffect(() => {
+    function applyFromHash(h: string) {
+      const ctx = parseChatRouteFromHash(h)
+      if (ctx) {
+        // ensure chat exists or is loaded
+        getChat(ctx).catch(() => {})
+        setSelectedContext(ctx)
+      }
+    }
+    applyFromHash(window.location.hash)
+    const onHash = () => applyFromHash(window.location.hash)
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [getChat])
+
   useEffect(() => {
     // choose the first available chat across sections if none selected yet
+    if (selectedContext) return
     let first: ChatContext | undefined
     first = generalChats[0]?.chat.context
     if (!first) first = storyChats[0]?.chat.context
@@ -186,6 +241,7 @@ export default function ChatView() {
 
     setSelectedContext((prev) => prev || first)
   }, [
+    selectedContext,
     generalChats,
     storyChats,
     featureChats,

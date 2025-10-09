@@ -2178,7 +2178,7 @@
     },
     {
       "id": "c989b117-412c-4645-add9-57a9d426f054",
-      "status": "-",
+      "status": "+",
       "title": "Allow chatting i.e. continuing the conversation on an Agent Run",
       "description": "Right now in @src/renderer/src/screens/AgentsView.tsx there's a way of viewing each agent run in a @src/renderer/src/components/agents/ChatConversation.tsx . Each AgentRun actually stores the ChatMessages which can be directly used in a chat via @src/renderer/src/components/chat/ChatSidebar.tsx .\n\nThe appropriate contexts for agent runs that are for stories is included in @src/renderer/src/screens/AgentsView.tsx - `chatContextAgentRun` and the one for agent feature runs is: `chatContextAgentRunFeature`.\n\n\nWhat we need is in @src/renderer/src/components/agents/ChatConversation.tsx is to have the possibility of redirecting to ChatView with the correct chat being open, when clicking a chat button that should show next to the name of each Agent Feature Run and the single Agent Story Run.",
       "context": [
@@ -2188,7 +2188,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-08T22:56:24.172Z",
-      "updatedAt": "2025-10-09T00:16:11.912Z"
+      "updatedAt": "2025-10-09T00:22:06.481Z",
+      "completedAt": "2025-10-09T00:22:06.481Z"
     }
   ],
   "featureIdToDisplayIndex": {
