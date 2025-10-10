@@ -5,6 +5,7 @@ import { getAllUserIds, getSession } from './sessionStore'
 import { configureBackendClient } from './backendClient'
 import { CheckInModel, CheckInsService } from '../generated/backend'
 import { logger } from './logger'
+import actionMicroGoalsGenerate from '../actions/actionMicroGoalsGenerate'
 
 let scheduledTask: cron.ScheduledTask | null = null
 let botRef: TelegramBot | null = null
@@ -109,6 +110,10 @@ async function ensureTelegramMetadata(ci: CheckInModel, chatId: number, userId: 
   }
 }
 
+function isMorningCheckInMessage(message: string): boolean {
+  return /\bmorning\b/i.test(message)
+}
+
 async function processUserCheckIns(userId: string, now: Date, nowHourStamp: string) {
   const session = getSession(userId)
   if (!session || !session.accessToken) return
@@ -137,7 +142,6 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         if (!startDate) continue
         if (startDate.getTime() > now.getTime()) continue
         if (!sameHourOfDay(startDate, now)) continue
-        // if (now.getMinutes() % 2 != 0) continue //DEV
 
         const message = getMessageFromMetadata(ci.metadata as any)
         if (!message) continue
@@ -155,19 +159,34 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         // Best-effort: persist telegram chat metadata so backend holds routing context
         ensureTelegramMetadata(ci, chatId, userId).catch(() => {})
 
-        // Send to the Telegram user
+        // If this is a morning check-in created by actionMacroGoal, trigger micro-goal generation instead of sending a plain message
+        if (isMorningCheckInMessage(message)) {
+          try {
+            if (!botRef) {
+              logger.warn('Scheduler bot reference is not initialized; cannot trigger micro-goal generation')
+            } else {
+              // Construct minimal chat/user/message objects; the action doesn't rely on their fields currently
+              const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
+              const from = { id: chatId, is_bot: false, first_name: 'User' } as unknown as TelegramBot.User
+              const fakeMsg = {
+                message_id: 0,
+                date: Math.floor(Date.now() / 1000),
+                chat: chat as any,
+                from: from as any,
+              } as unknown as TelegramBot.Message
+
+              await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg)
+            }
+            sentThisHour.add(dedupeKey)
+          } catch (err) {
+            logger.error(`Failed to trigger micro-goals generation for user ${userId}`, err)
+          }
+          continue
+        }
+
+        // Default behavior: send the check-in message to the Telegram user
         try {
-          //TODO:
-          //message:
-          // #MORNING!
-          // + actionMicroGoalsGenerate
-
-          // OR
-
-          //#EVENING CHECK IN
-          // + actionMicroGoalsCheck
-
-          // await botRef?.sendMessage(chatId, message, { parse_mode: 'HTML' })
+          await botRef?.sendMessage(chatId, message)
           sentThisHour.add(dedupeKey)
         } catch (err) {
           logger.error(`Failed to send check-in message to user ${userId}`, err)

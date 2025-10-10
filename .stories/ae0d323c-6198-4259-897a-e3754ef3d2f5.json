@@ -16,12 +16,13 @@
     },
     {
       "id": "f4a1057e-de30-4e5f-97fc-5694580948a1",
-      "status": "-",
+      "status": "+",
       "title": "Update scheduler to trigger morning micro-goal generation",
       "description": "Modify `src/lib/scheduler.ts`. The scheduler should identify the morning check-in created by `actionMacroGoal`. When this check-in is due for a user, instead of just sending a message, it must trigger the `actionMicroGoalsGenerate` flow for that user. This involves calling the appropriate function from `src/actions/actionMicroGoalsGenerate.ts`.",
       "context": [],
       "createdAt": "2025-10-10T20:27:02.937Z",
-      "updatedAt": "2025-10-10T20:27:02.937Z"
+      "updatedAt": "2025-10-10T20:46:22.277Z",
+      "completedAt": "2025-10-10T20:46:22.277Z"
     },
     {
       "id": "484e60ec-71ea-4cb8-b356-e0b54df76930",
