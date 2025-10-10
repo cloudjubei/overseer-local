@@ -215,6 +215,47 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       return
     }
 
+    // Handle lifestyle selections
+    if (data.startsWith('lifestyle:')) {
+      const userId = String(cb.from.id)
+      const parts = data.split(':')
+      const kind = parts[1] // 'active' | 'energy'
+      const valStr = parts[2]
+      const val = Math.max(1, Math.min(5, parseInt(valStr || '0', 10)))
+
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(userId)
+      } catch {}
+
+      const prev = getSession(userId)
+      const prevCtx = prev?.conversationState?.context || {}
+      const newCtx = { ...prevCtx }
+      if (kind === 'active') newCtx.lifestyleActive = val
+      if (kind === 'energy') newCtx.lifestyleEnergy = val
+
+      setSession({
+        ...(prev || { userId }),
+        accessToken: prev?.accessToken || '',
+        idToken: prev?.idToken,
+        refreshToken: prev?.refreshToken,
+        expiresAt: prev?.expiresAt,
+        conversationState: {
+          lastAction: 'lifestyle',
+          flowId: 'lifestyle',
+          ...(prev?.conversationState || {}),
+          context: newCtx,
+          lastUpdatedAt: Math.floor(Date.now() / 1000),
+        },
+      })
+
+      // Continue lifestyle flow
+      try {
+        await actionLifestyle(bot, message.chat, cb.from, '', message)
+      } catch {}
+      return
+    }
+
     // Handle /q param flow selections
     if (data.startsWith('q:')) {
       const userId = String(cb.from.id)

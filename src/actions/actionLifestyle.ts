@@ -1,28 +1,129 @@
-import TelegramBot, { Message } from 'node-telegram-bot-api'
+import TelegramBot, { Message, SendMessageOptions } from 'node-telegram-bot-api'
 import { ProfilesService, UserProfileLifestyleModel } from 'src/generated/backend'
+import actionMacroGoal from './actionMacroGoal'
+import { getSession, setSession, clearConversationSession } from 'src/lib/sessionStore'
+
+function buildActiveKeyboard() {
+  return {
+    inline_keyboard: [
+      [
+        { text: '1 🛋️ Very low', callback_data: 'lifestyle:active:1' },
+        { text: '2 🚶‍♂️ Light', callback_data: 'lifestyle:active:2' },
+      ],
+      [
+        { text: '3 🏃 Moderate', callback_data: 'lifestyle:active:3' },
+        { text: '4 💪 High', callback_data: 'lifestyle:active:4' },
+      ],
+      [{ text: '5 🔥 Very high', callback_data: 'lifestyle:active:5' }],
+    ],
+  }
+}
+
+function buildEnergyKeyboard() {
+  return {
+    inline_keyboard: [
+      [
+        { text: '1 😴 Very low', callback_data: 'lifestyle:energy:1' },
+        { text: '2 😐 Low', callback_data: 'lifestyle:energy:2' },
+      ],
+      [
+        { text: '3 🙂 Okay', callback_data: 'lifestyle:energy:3' },
+        { text: '4 😊 Good', callback_data: 'lifestyle:energy:4' },
+      ],
+      [{ text: '5 🤩 Great', callback_data: 'lifestyle:energy:5' }],
+    ],
+  }
+}
+
+function setLifestyleState(userId: string, patch: { activeLevel?: number; energyLevel?: number }) {
+  const prev = getSession(userId)
+  const prevCtx = prev?.conversationState?.context || {}
+  setSession({
+    ...(prev || { userId }),
+    accessToken: prev?.accessToken || '',
+    idToken: prev?.idToken,
+    refreshToken: prev?.refreshToken,
+    expiresAt: prev?.expiresAt,
+    conversationState: {
+      lastAction: 'lifestyle',
+      flowId: 'lifestyle',
+      ...(prev?.conversationState || {}),
+      context: {
+        ...prevCtx,
+        lifestyleActive: patch.activeLevel ?? prevCtx.lifestyleActive,
+        lifestyleEnergy: patch.energyLevel ?? prevCtx.lifestyleEnergy,
+      },
+      lastUpdatedAt: Math.floor(Date.now() / 1000),
+    },
+  })
+}
 
 export default async function actionLifestyle(
   bot: TelegramBot,
   chat: TelegramBot.Chat,
-  _from: TelegramBot.User,
-  rawText: string,
-  _msg: Message,
+  from: TelegramBot.User,
+  _rawText: string,
+  msg: Message,
 ) {
-  //IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles
+  const chatId = chat.id
+  const userId = String(from.id)
+
+  // 1) Skip if lifestyle already exists
   const userProfile = await ProfilesService.profilesControllerMe()
+  if (Array.isArray(userProfile.lifestyles) && userProfile.lifestyles.length >= 1) {
+    return false
+  }
 
-  // How active are you currently?
-  // 🛋️ Very low | 🚶‍♂️ Light | 🏃 Moderate | 💪 High | 🔥 Very high
-  // (numeric value 1–5 stored behind the scenes)
+  // 2) Read in-progress selections from session
+  const session = getSession(userId)
+  const ctx = session?.conversationState?.context || {}
+  const activeLevel = ctx?.lifestyleActive as number | undefined
+  const energyLevel = ctx?.lifestyleEnergy as number | undefined
 
-  // How’s your energy and wellbeing today?
-  // 😴 Very low | 😐 Low | 🙂 Okay | 😊 Good | 🤩 Great
-  // (same structure as above)
+  const opts: SendMessageOptions = { parse_mode: 'HTML' }
 
-  const newLifestyle: UserProfileLifestyleModel = { activeLevel: 0, energyLevel: 0 }
-  const update = await ProfilesService.profilesControllerAddLifestyle({ requestBody: newLifestyle })
+  // 3) If both values are present, persist and proceed
+  if (
+    typeof activeLevel === 'number' && activeLevel >= 1 && activeLevel <= 5 &&
+    typeof energyLevel === 'number' && energyLevel >= 1 && energyLevel <= 5
+  ) {
+    const newLifestyle: UserProfileLifestyleModel = {
+      activeLevel: activeLevel,
+      energyLevel: energyLevel,
+    }
+    try {
+      await ProfilesService.profilesControllerAddLifestyle({ requestBody: newLifestyle })
+      await bot.sendMessage(
+        chatId,
+        'Got it — saved your lifestyle preferences. We\'ll tailor your plan to match.',
+        opts,
+      )
+    } catch (e) {
+      await bot.sendMessage(chatId, 'Sorry, we could not save your lifestyle. Please try again.')
+      return true
+    }
 
-  // FLOW is complete - proceed to actionMacroGoal
+    // Clear conversation state and proceed to macro goal
+    clearConversationSession(userId, session)
+    await actionMacroGoal(bot, chat, from, '', msg, true)
+    return true
+  }
 
-  return false
+  // 4) If active level missing, prompt for it
+  if (!(typeof activeLevel === 'number' && activeLevel >= 1 && activeLevel <= 5)) {
+    setLifestyleState(userId, {})
+    await bot.sendMessage(chatId, '<b>How active are you currently?</b>', {
+      ...opts,
+      reply_markup: buildActiveKeyboard(),
+    })
+    return true
+  }
+
+  // 5) Active present, energy missing -> prompt for energy
+  setLifestyleState(userId, { activeLevel })
+  await bot.sendMessage(chatId, '<b>How’s your energy and wellbeing today?</b>', {
+    ...opts,
+    reply_markup: buildEnergyKeyboard(),
+  })
+  return true
 }

@@ -49,15 +49,16 @@
     },
     {
       "id": "c591d43a-05f0-4626-bb69-1cd1b649ae26",
-      "status": "-",
+      "status": "+",
       "title": "Action: Lifestyle - active and energy levels",
       "description": "Implement the lifestyle capture flow in @src/actions/actionLifestyle.ts .\n\nScope:\n- If userProfile.lifestyles is empty, prompt the user for two 1–5 scale inputs using inline keyboards with emoji labels:\n  1) 'How active are you currently?' options: 1 '🛋️ Very low', 2 '🚶‍♂️ Light', 3 '🏃 Moderate', 4 '💪 High', 5 '🔥 Very high'\n  2) 'How’s your energy and wellbeing today?' options: 1 '😴 Very low', 2 '😐 Low', 3 '🙂 Okay', 4 '😊 Good', 5 '🤩 Great'\n- Use namespaced callback data like 'lifestyle:active:1..5' and 'lifestyle:energy:1..5'.\n- Store both responses as a new lifestyle via ProfilesService.profilesControllerAddLifestyle({ activeLevel, energyLevel }).\n- Prevent duplicate submissions; if the user already has at least one lifestyle, skip this flow.\n- After saving, send a confirmation message and proceed to macro goal flow (invoke actionMacroGoal with firstGoal=true or allow runOnboardingIfNeeded to continue).\n- Clean up the inline keyboards after selection (editMessageReplyMarkup to empty).\n- Add callback_query handlers for 'lifestyle:*' in index.ts.\n\nAcceptance criteria:\n- Users see clearly labeled 1–5 options for each question via inline keyboards.\n- Selecting both values results in a single ProfilesService.profilesControllerAddLifestyle call with correct integers (1–5).\n- The flow does not re-ask if a lifestyle record already exists.\n- After completion, the user is guided to the macro goal step.",
       "context": [
         "src/actions/actionLifestyle.ts"
       ],
       "createdAt": "2025-10-10T20:59:06.991Z",
-      "updatedAt": "2025-10-10T20:59:55.040Z",
-      "blockers": []
+      "updatedAt": "2025-10-10T21:10:52.687Z",
+      "blockers": [],
+      "completedAt": "2025-10-10T21:10:52.687Z"
     },
     {
       "id": "afc6ffc2-2ba9-46e8-a66d-1aef17320ba7",
