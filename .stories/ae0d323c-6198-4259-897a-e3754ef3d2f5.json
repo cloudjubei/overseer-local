@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "+",
+  "status": "-",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -33,14 +33,91 @@
       "createdAt": "2025-10-10T20:27:02.938Z",
       "updatedAt": "2025-10-10T20:48:22.511Z",
       "completedAt": "2025-10-10T20:48:22.511Z"
+    },
+    {
+      "id": "d9454a91-fdfe-48df-8c4f-9504ba458aca",
+      "status": "-",
+      "title": "Action: Profile - interactive onboarding",
+      "description": "Implement the interactive profile setup flow in @src/actions/actionProfile.ts \n\nScope:\n- Detect missing fields: name, dob, gender, weight_raw or weight, height_raw or height via ProfilesService.profilesControllerMe().\n- Step-by-step prompts with HTML formatting (parse_mode: 'HTML'):\n  - Ask for name (free text). Validate non-empty; trim.\n  - Ask for DOB (YYYY-MM-DD). Validate 4-2-2 pattern and reasonable date. Echo back parsed result on success.\n  - Ask for gender with inline keyboard: 'Male', 'Female', 'Other'. Use callback_data starting with 'profile:gender:...'.\n  - Ask for weight (accept free-form like '82 kg, 180 lb, 11st 4lb'). Store into weight_raw.\n  - Ask for height (accept free-form like '175 cm, 1.75 m, 5\\'11\\''). Store into height_raw.\n- Persist after each step with ProfilesService.profilesControllerUpdate().\n- Maintain progress in session (lib/sessionStore) so the flow is resumable across messages.\n- Clean up old inline keyboards after selection to reduce clutter (editMessageReplyMarkup to empty).\n- On completion, send a short confirmation message and proceed to lifestyle flow by invoking actionLifestyle or by returning such that runOnboardingIfNeeded continues.\n- Add callback_query handlers for 'profile:gender:*' in index.ts, consistent with the existing handler style.\n\nAcceptance criteria:\n- When profile is incomplete, the bot guides the user through all missing steps only, in order.\n- Validations: name must be non-empty; DOB must match YYYY-MM-DD and be a valid date; gender must update via inline keyboard; weight/height captured as raw strings.\n- Each successful step updates the backend; on error (e.g., invalid DOB), the bot re-prompts with guidance.\n- Flow can resume if interrupted (progress stored in session).\n- After completion, next step in the onboarding (lifestyle) is triggered or allowed to proceed per runOnboardingIfNeeded.",
+      "context": [
+        "src/actions/actionProfile.ts"
+      ],
+      "createdAt": "2025-10-10T20:59:06.989Z",
+      "updatedAt": "2025-10-10T20:59:37.909Z",
+      "blockers": []
+    },
+    {
+      "id": "c591d43a-05f0-4626-bb69-1cd1b649ae26",
+      "status": "-",
+      "title": "Action: Lifestyle - active and energy levels",
+      "description": "Implement the lifestyle capture flow in @src/actions/actionLifestyle.ts .\n\nScope:\n- If userProfile.lifestyles is empty, prompt the user for two 1–5 scale inputs using inline keyboards with emoji labels:\n  1) 'How active are you currently?' options: 1 '🛋️ Very low', 2 '🚶‍♂️ Light', 3 '🏃 Moderate', 4 '💪 High', 5 '🔥 Very high'\n  2) 'How’s your energy and wellbeing today?' options: 1 '😴 Very low', 2 '😐 Low', 3 '🙂 Okay', 4 '😊 Good', 5 '🤩 Great'\n- Use namespaced callback data like 'lifestyle:active:1..5' and 'lifestyle:energy:1..5'.\n- Store both responses as a new lifestyle via ProfilesService.profilesControllerAddLifestyle({ activeLevel, energyLevel }).\n- Prevent duplicate submissions; if the user already has at least one lifestyle, skip this flow.\n- After saving, send a confirmation message and proceed to macro goal flow (invoke actionMacroGoal with firstGoal=true or allow runOnboardingIfNeeded to continue).\n- Clean up the inline keyboards after selection (editMessageReplyMarkup to empty).\n- Add callback_query handlers for 'lifestyle:*' in index.ts.\n\nAcceptance criteria:\n- Users see clearly labeled 1–5 options for each question via inline keyboards.\n- Selecting both values results in a single ProfilesService.profilesControllerAddLifestyle call with correct integers (1–5).\n- The flow does not re-ask if a lifestyle record already exists.\n- After completion, the user is guided to the macro goal step.",
+      "context": [
+        "src/actions/actionLifestyle.ts"
+      ],
+      "createdAt": "2025-10-10T20:59:06.991Z",
+      "updatedAt": "2025-10-10T20:59:55.040Z",
+      "blockers": []
+    },
+    {
+      "id": "afc6ffc2-2ba9-46e8-a66d-1aef17320ba7",
+      "status": "-",
+      "title": "Action: MacroGoal - suggestions, creation, and check-ins",
+      "description": "Implement macro goal creation in @src/actions/actionMacroGoal.ts , including suggestions UI and check-in scheduling.\n\nScope:\n- First-time entry (firstGoal=true): send a short intro like 'Got it — now let’s set your direction for the week.'\n- Prompt: ask the user to type a macro goal or send a voice message. Provide examples by fetching suggestions via GoalsService.goalsControllerGenerateMacroGoalSuggestions() and render them in a message with an inline keyboard to pick (callback namespace 'macro:suggest:<index>').\n- If the user sends audio/voice: download via downloadTelegramAudioFile and call GoalsService.goalsControllerCreateMacroGoalFromAudio.\n- If the user sends text or selects a suggestion: call GoalsService.goalsControllerCreateMacroGoalFromText.\n- While processing, send a 'Processing...' message to set expectations.\n- Clear old check-ins via CheckInsService.checkInsControllerClearCheckIns().\n- Schedule two daily check-ins via CheckInsService.checkInsControllerAddCheckIn():\n  - Morning: next 09:00 local (tomorrow if past 09:00 today) with metadata.message like '<b>Morning Reminder!</b>' and include metadata.chatId = chat.id.\n  - Evening: next 19:00 local (tomorrow if past 19:00 today) with metadata.message like '<b>Evening Check in!</b>' and include metadata.chatId = chat.id.\n- After scheduling, send a message explaining morning micro-goals and evening check-ins, then trigger actionMicroGoalsGenerate to produce the first set.\n- Ensure the undefined variable bug is fixed by using the actual chat.id for metadata.chatId.\n- Clean up any suggestion keyboards after selection.\n- Add callback_query handlers for 'macro:suggest:*' in index.ts.\n\nAcceptance criteria:\n- Users can pick a suggested macro goal, type their own, or send a voice note to create the macro goal; successful creation is acknowledged.\n- Existing check-ins are cleared and exactly two daily check-ins are created with the correct metadata (including chatId and messages containing 'Morning' or 'Evening').\n- After creation, the user receives onboarding messaging and immediately gets their micro goals for the day via actionMicroGoalsGenerate.\n- No usage of undefined variables; chat.id is correctly persisted in check-in metadata.",
+      "context": [
+        "src/actions/actionMacroGoal.ts"
+      ],
+      "createdAt": "2025-10-10T20:59:06.992Z",
+      "updatedAt": "2025-10-10T21:00:07.470Z",
+      "blockers": []
+    },
+    {
+      "id": "c4cad9c4-6d72-4ff7-8e55-2023187e26ca",
+      "status": "-",
+      "title": "Action: MicroGoalsGenerate - display today’s micro goals",
+      "description": "Implement micro goal generation messaging in @src/actions/actionMicroGoalsGenerate.ts .\n\nScope:\n- Call GoalsService.goalsControllerGenerateMicroGoals() and capture the returned goals.\n- Send a message: 'Here are your 3 micro goals for today.' and list each as a bullet with clear formatting (parse_mode 'HTML' optional).\n- Follow up with: 'We will check in with you in the evening...' and mention '/journal' for optional journaling.\n- Ensure the function returns true to indicate flow handled.\n\nAcceptance criteria:\n- After calling the action, the user sees exactly three micro goals listed in a readable format.\n- The informational follow-up message about evening check-in and journaling is sent.\n- The action is idempotent in the sense that running it twice immediately does not create duplicate UI keyboards or crash.",
+      "context": [
+        "src/actions/actionMicroGoalsGenerate.ts"
+      ],
+      "createdAt": "2025-10-10T20:59:06.992Z",
+      "updatedAt": "2025-10-10T21:00:18.468Z",
+      "blockers": []
+    },
+    {
+      "id": "d8f3b9c7-52c3-4dc6-be83-da280ef98c99",
+      "status": "-",
+      "title": "Action: MicroGoalsCheck - evening check-in UI",
+      "description": "Implement the evening micro-goals check-in flow in @src/actions/actionMicroGoalsCheck.ts .\n\nScope:\n- Fetch current day ACTIVE micro goals (e.g., via GoalsService.goalsControllerListMicroGoalsByState or equivalent).\n- Render a checklist-style message asking which were completed, with an inline keyboard row per goal showing toggle buttons (e.g., '✅ Done' / '❎ Not yet'), using callback data like 'microcheck:<goalId>:toggle'.\n- Upon each toggle, update the micro goal state via the appropriate GoalsService endpoint (e.g., mark complete/incomplete) and re-render the keyboard to reflect the new state.\n- When all three have been marked (or after the user indicates completion), send a message: 'Great! Thanks for these responses.' and optionally nudge journaling.\n- Clean up the keyboard after completion to reduce clutter.\n- Add callback_query handlers under 'microcheck:*' namespace in index.ts.\n\nAcceptance criteria:\n- The user receives an evening check-in prompt showing their three goals with per-goal toggle controls.\n- Toggling a goal updates backend state and UI reflects the change without creating duplicate buttons.\n- After all goals are addressed, the bot sends a closing message and removes the inline keyboard.",
+      "context": [
+        "src/actions/actionMicroGoalsCheck.ts"
+      ],
+      "createdAt": "2025-10-10T20:59:06.994Z",
+      "updatedAt": "2025-10-10T21:00:31.106Z",
+      "blockers": []
+    },
+    {
+      "id": "6347935a-e81f-4582-8247-8672c4d6d950",
+      "status": "-",
+      "title": "Scheduler: route macro goal check-ins to actions",
+      "description": "Finalize scheduler behavior in @src/lib/scheduler.ts  to act on check-ins created by actionMacroGoal.\n\nScope:\n- Parse CheckInModel items hourly and extract message and chatId from metadata.\n- If metadata.message contains 'Morning' (case-insensitive), trigger actionMicroGoalsGenerate for that user/chat instead of sending a plain text reminder.\n- If metadata.message contains 'Evening' (case-insensitive), trigger actionMicroGoalsCheck for that user/chat.\n- Use existing dedup mechanism to avoid multiple triggers within the same hour window.\n- Ensure chatId resolution: prefer metadata.chatId numeric; otherwise support metadata.chat_id or metadata.telegram.chatId or metadata.telegram.chat.id. If missing, persist telegram metadata via update for future runs (best-effort).\n- Maintain graceful error handling and continue processing other users.\n\nAcceptance criteria:\n- When actionMacroGoal schedules morning/evening check-ins, the scheduler recognizes them and invokes the correct actions at the scheduled hour.\n- No duplicate triggers occur within a single hour run.\n- If chatId is correctly stored by actionMacroGoal, the scheduler successfully routes without needing fallbacks.\n- Logs indicate skipped items when chatId cannot be determined, without crashing the scheduler.",
+      "context": [
+        "src/lib/scheduler.ts"
+      ],
+      "createdAt": "2025-10-10T20:59:06.995Z",
+      "updatedAt": "2025-10-10T21:00:45.633Z",
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
     "1e8110d5-74cb-4c7e-82e7-cae0f55bb62f": 1,
     "f4a1057e-de30-4e5f-97fc-5694580948a1": 2,
-    "484e60ec-71ea-4cb8-b356-e0b54df76930": 3
+    "484e60ec-71ea-4cb8-b356-e0b54df76930": 3,
+    "d9454a91-fdfe-48df-8c4f-9504ba458aca": 4,
+    "c591d43a-05f0-4626-bb69-1cd1b649ae26": 5,
+    "afc6ffc2-2ba9-46e8-a66d-1aef17320ba7": 6,
+    "c4cad9c4-6d72-4ff7-8e55-2023187e26ca": 7,
+    "d8f3b9c7-52c3-4dc6-be83-da280ef98c99": 8,
+    "6347935a-e81f-4582-8247-8672c4d6d950": 9
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:25:58.999Z",
-  "completedAt": "2025-10-10T20:48:22.511Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z"
 }
