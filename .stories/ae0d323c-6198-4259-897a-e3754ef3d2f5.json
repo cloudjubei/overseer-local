@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "-",
+  "status": "+",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -26,12 +26,13 @@
     },
     {
       "id": "484e60ec-71ea-4cb8-b356-e0b54df76930",
-      "status": "-",
+      "status": "+",
       "title": "Update scheduler to trigger evening micro-goal check-in",
       "description": "Modify `src/lib/scheduler.ts`. The scheduler should identify the evening check-in created by `actionMacroGoal`. When this check-in is due for a user, it must trigger the `actionMicroGoalsCheck` flow. This involves calling the appropriate function from `src/actions/actionMicroGoalsCheck.ts`.",
       "context": [],
       "createdAt": "2025-10-10T20:27:02.938Z",
-      "updatedAt": "2025-10-10T20:27:02.938Z"
+      "updatedAt": "2025-10-10T20:48:22.511Z",
+      "completedAt": "2025-10-10T20:48:22.511Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -40,5 +41,6 @@
     "484e60ec-71ea-4cb8-b356-e0b54df76930": 3
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:25:58.999Z"
+  "updatedAt": "2025-10-10T20:25:58.999Z",
+  "completedAt": "2025-10-10T20:48:22.511Z"
 }

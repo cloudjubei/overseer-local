@@ -6,6 +6,7 @@ import { configureBackendClient } from './backendClient'
 import { CheckInModel, CheckInsService } from '../generated/backend'
 import { logger } from './logger'
 import actionMicroGoalsGenerate from '../actions/actionMicroGoalsGenerate'
+import actionMicroGoalsCheck from '../actions/actionMicroGoalsCheck'
 
 let scheduledTask: cron.ScheduledTask | null = null
 let botRef: TelegramBot | null = null
@@ -114,6 +115,10 @@ function isMorningCheckInMessage(message: string): boolean {
   return /\bmorning\b/i.test(message)
 }
 
+function isEveningCheckInMessage(message: string): boolean {
+  return /\bevening\b/i.test(message)
+}
+
 async function processUserCheckIns(userId: string, now: Date, nowHourStamp: string) {
   const session = getSession(userId)
   if (!session || !session.accessToken) return
@@ -180,6 +185,30 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
             sentThisHour.add(dedupeKey)
           } catch (err) {
             logger.error(`Failed to trigger micro-goals generation for user ${userId}`, err)
+          }
+          continue
+        }
+
+        // If this is an evening check-in created by actionMacroGoal, trigger micro-goals check flow
+        if (isEveningCheckInMessage(message)) {
+          try {
+            if (!botRef) {
+              logger.warn('Scheduler bot reference is not initialized; cannot trigger micro-goal check')
+            } else {
+              const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
+              const from = { id: chatId, is_bot: false, first_name: 'User' } as unknown as TelegramBot.User
+              const fakeMsg = {
+                message_id: 0,
+                date: Math.floor(Date.now() / 1000),
+                chat: chat as any,
+                from: from as any,
+              } as unknown as TelegramBot.Message
+
+              await actionMicroGoalsCheck(botRef, chat, from, '', fakeMsg)
+            }
+            sentThisHour.add(dedupeKey)
+          } catch (err) {
+            logger.error(`Failed to trigger micro-goals check for user ${userId}`, err)
           }
           continue
         }
