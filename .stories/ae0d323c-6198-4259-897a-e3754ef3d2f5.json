@@ -88,15 +88,16 @@
     },
     {
       "id": "d8f3b9c7-52c3-4dc6-be83-da280ef98c99",
-      "status": "-",
+      "status": "+",
       "title": "Action: MicroGoalsCheck - evening check-in UI",
       "description": "Implement the evening micro-goals check-in flow in @src/actions/actionMicroGoalsCheck.ts .\n\nScope:\n- Fetch current day ACTIVE micro goals (e.g., via GoalsService.goalsControllerListMicroGoalsByState or equivalent).\n- Render a checklist-style message asking which were completed, with an inline keyboard row per goal showing toggle buttons (e.g., '✅ Done' / '❎ Not yet'), using callback data like 'microcheck:<goalId>:toggle'.\n- Upon each toggle, update the micro goal state via the appropriate GoalsService endpoint (e.g., mark complete/incomplete) and re-render the keyboard to reflect the new state.\n- When all three have been marked (or after the user indicates completion), send a message: 'Great! Thanks for these responses.' and optionally nudge journaling.\n- Clean up the keyboard after completion to reduce clutter.\n- Add callback_query handlers under 'microcheck:*' namespace in index.ts.\n\nAcceptance criteria:\n- The user receives an evening check-in prompt showing their three goals with per-goal toggle controls.\n- Toggling a goal updates backend state and UI reflects the change without creating duplicate buttons.\n- After all goals are addressed, the bot sends a closing message and removes the inline keyboard.",
       "context": [
         "src/actions/actionMicroGoalsCheck.ts"
       ],
       "createdAt": "2025-10-10T20:59:06.994Z",
-      "updatedAt": "2025-10-10T21:00:31.106Z",
-      "blockers": []
+      "updatedAt": "2025-10-10T21:20:08.746Z",
+      "blockers": [],
+      "completedAt": "2025-10-10T21:20:08.746Z"
     },
     {
       "id": "6347935a-e81f-4582-8247-8672c4d6d950",

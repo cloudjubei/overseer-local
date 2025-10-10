@@ -21,6 +21,15 @@ import actionMacroGoal, { clearMacroSuggestionsForMessage, getMacroSuggestionsFo
 import actionMicroGoalsGenerate from './actions/actionMicroGoalsGenerate'
 import { ProfilesService, UserProfileModel } from './generated/backend'
 import { GoalModel } from './generated/backend/models/GoalModel'
+import {
+  areAllGoalsAddressed,
+  buildMicroCheckKeyboard,
+  buildMicroCheckMessage,
+  clearStoredMicroCheck,
+  getStoredMicroCheck,
+  setStoredMicroCheck,
+  toggleMicroGoalState,
+} from './actions/actionMicroGoalsCheck'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -194,6 +203,91 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
 
       const chat = message.chat
       await processMacroInput(bot, chat, cb.from as any, '', message as any, picked.summary || picked.title || '')
+      return
+    }
+
+    // Handle micro goals evening check-in inline toggles
+    if (data.startsWith('microcheck:')) {
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(String(cb.from.id))
+      } catch {}
+
+      // microcheck:finish -> close the UI
+      if (data === 'microcheck:finish') {
+        try {
+          await bot.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chatId, message_id: message.message_id })
+        } catch {}
+        clearStoredMicroCheck(chatId, message.message_id)
+        await bot.sendMessage(chatId, 'Great! Thanks for these responses.')
+        return
+      }
+
+      // microcheck:<goalId>:toggle
+      const parts = data.split(':')
+      const goalId = parts[1]
+      if (!goalId) return
+
+      let store = getStoredMicroCheck(chatId, message.message_id)
+      // Best-effort reconstruction if store is missing
+      if (!store) {
+        try {
+          const active = await GoalsService.goalsControllerListMicroGoalsByState({ state: 'ACTIVE' })
+          const mapped = (active || []).slice(0, 3).map((g) => ({ id: g.id, text: g.text || '', state: g.state }))
+          // Ensure the toggled goal is present
+          if (!mapped.find((g) => g.id === goalId)) {
+            try {
+              const g = await GoalsService.goalsControllerGet({ id: goalId })
+              mapped.unshift({ id: g.id, text: g.text || '', state: g.state })
+            } catch {}
+          }
+          // Deduplicate and cap to 3
+          const unique: { [id: string]: boolean } = {}
+          const deduped = mapped.filter((g) => (unique[g.id] ? false : (unique[g.id] = true)))
+          store = deduped.slice(0, 3)
+          setStoredMicroCheck(chatId, message.message_id, store)
+        } catch {}
+      }
+
+      if (!store) {
+        await bot.sendMessage(chatId, 'This check-in is no longer active.')
+        return
+      }
+
+      const target = store.find((g) => g.id === goalId)
+      if (!target) {
+        await bot.sendMessage(chatId, 'This goal is no longer available for check-in.')
+        return
+      }
+
+      try {
+        const newState = await toggleMicroGoalState(target)
+        target.state = newState
+      } catch (err) {
+        await bot.sendMessage(chatId, 'Failed to update this goal. Please try again.')
+        return
+      }
+
+      // Re-render the same message with updated state
+      const newText = buildMicroCheckMessage(store)
+      const newKeyboard = buildMicroCheckKeyboard(store)
+      try {
+        await bot.editMessageText(newText, {
+          chat_id: chatId,
+          message_id: message.message_id,
+          parse_mode: 'HTML',
+          reply_markup: newKeyboard,
+        })
+      } catch {}
+
+      // If all are addressed (not ACTIVE), close the flow automatically
+      if (areAllGoalsAddressed(store)) {
+        try {
+          await bot.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chatId, message_id: message.message_id })
+        } catch {}
+        clearStoredMicroCheck(chatId, message.message_id)
+        await bot.sendMessage(chatId, 'Great! Thanks for these responses.')
+      }
       return
     }
 
