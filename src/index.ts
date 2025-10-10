@@ -1,7 +1,7 @@
 import TelegramBot, { CallbackQuery, ChatMemberUpdated, Message } from 'node-telegram-bot-api'
 import { config } from './config/env'
-import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser } from './lib/auth'
-import { getSession, setSession } from './lib/sessionStore'
+import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser, getTelegramUserId } from './lib/auth'
+import { getSession, setSession, isAuthenticated } from './lib/sessionStore'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { initScheduler } from './lib/scheduler'
@@ -128,7 +128,16 @@ bot.on('message', async (msg: Message) => {
     // const userId = String(from.id)
     // const session = getSession(userId)
 
-    if (await handleAuthMessage(bot, msg)) return
+    const handledAuth = await handleAuthMessage(bot, msg)
+    if (handledAuth) {
+      // If the message was handled by auth and the user is now authenticated, immediately start onboarding
+      const uid = getTelegramUserId(msg)
+      if (uid && isAuthenticated(uid)) {
+        const started = await runOnboardingIfNeeded(bot, msg, '')
+        if (started) return
+      }
+      return
+    }
 
     const handledOnboarding = await runOnboardingIfNeeded(bot, msg, rawText)
     if (handledOnboarding) return

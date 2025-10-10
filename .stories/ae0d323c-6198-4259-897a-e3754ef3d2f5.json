@@ -129,7 +129,7 @@
     },
     {
       "id": "96ecbf78-6789-4b6a-b8a2-7d6676d21fa6",
-      "status": "-",
+      "status": "+",
       "title": "When the onboarding profile is started - the user didn't get a message about setting their name",
       "description": "after authenticating for the first time and starting the onboarding flow and triggering @src/actions/actionProfile.ts the user should see a message:\n\"Please tell us your name\" \nRight now, after authenticating nothing is shown",
       "context": [
@@ -137,7 +137,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-10T22:54:00.410Z",
-      "updatedAt": "2025-10-10T22:54:00.410Z"
+      "updatedAt": "2025-10-10T23:10:42.522Z",
+      "completedAt": "2025-10-10T23:10:42.522Z"
     },
     {
       "id": "6fee9e97-ddb5-4e9b-9911-892845e90da6",
