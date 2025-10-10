@@ -30,7 +30,7 @@ async function scheduleDailyCheckIns(chatId: number) {
   const morning = nextLocalTime(9, 0)
   const evening = nextLocalTime(19, 0)
 
-  await CheckInsService.checkInsControllerClearCheckIns()
+  // Do not clear here; we already cleared in processMacroInput per acceptance criteria
 
   await CheckInsService.checkInsControllerAddCheckIn({
     requestBody: {
@@ -81,6 +81,14 @@ export default async function actionMacroGoal(
 ) {
   const chatId = chat.id
 
+  // If the current message already carries input (audio or text), process it immediately
+  const hasVoice = !!msg.voice || !!msg.audio
+  const hasText = !!rawText && rawText.trim().length > 0
+  if (hasVoice || hasText) {
+    await processMacroInput(bot, chat, from, rawText, msg)
+    return true
+  }
+
   if (firstGoal) {
     await bot.sendMessage(chatId, 'Got it — now let’s set your direction for the week.')
   }
@@ -98,17 +106,8 @@ export default async function actionMacroGoal(
   })
   macroSuggestionStore.set(keyFor(chatId, sent.message_id), suggestions)
 
-  // If the current message already carries input (audio or text), attempt to process it.
-  // Otherwise, we wait for user input or suggestion callback.
-  const hasVoice = !!msg.voice || !!msg.audio
-  const hasText = !!rawText && rawText.trim().length > 0
-  if (!hasVoice && !hasText) {
-    return false
-  }
-
-  // Process user-provided input immediately
-  await processMacroInput(bot, chat, from, rawText, msg)
-  return true
+  // No immediate input to process; wait for user reply or suggestion tap
+  return false
 }
 
 export async function processMacroInput(
@@ -126,18 +125,15 @@ export async function processMacroInput(
   try {
     // Always clear existing check-ins prior to creating a new macro context
     await CheckInsService.checkInsControllerClearCheckIns()
-    console.log('CLEARED CHECKINS')
 
     let created: GoalModel | null = null
 
     // Priority: if a suggestion text was provided via callback
     if (pickedSuggestionText && pickedSuggestionText.trim()) {
-      console.log('picking suggestion: ', pickedSuggestionText)
       created = await GoalsService.goalsControllerCreateMacroGoalFromText({
         requestBody: { text: pickedSuggestionText.trim() },
       })
     } else if (msg.voice || msg.audio) {
-      console.log('sending audio')
       const fileId = msg.voice?.file_id || msg.audio?.file_id
       if (!fileId) throw new Error('Missing audio file id')
       const { blob } = await downloadTelegramAudioFile(bot, fileId)
@@ -153,7 +149,7 @@ export async function processMacroInput(
     // Schedule morning and evening check-ins with correct metadata including chatId
     await scheduleDailyCheckIns(chatId)
 
-    // Acknowledge success to the user
+    // Acknowledge success to the user and explain flow
     await bot.sendMessage(
       chatId,
       'Every morning you will get a set of 3 new micro goals. In the evening, I will check in to see how things went.',
