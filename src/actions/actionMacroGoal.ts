@@ -126,18 +126,15 @@ export async function processMacroInput(
   try {
     // Always clear existing check-ins prior to creating a new macro context
     await CheckInsService.checkInsControllerClearCheckIns()
-    console.log('CLEARED CHECKINS')
 
     let created: GoalModel | null = null
 
     // Priority: if a suggestion text was provided via callback
     if (pickedSuggestionText && pickedSuggestionText.trim()) {
-      console.log('picking suggestion: ', pickedSuggestionText)
       created = await GoalsService.goalsControllerCreateMacroGoalFromText({
         requestBody: { text: pickedSuggestionText.trim() },
       })
     } else if (msg.voice || msg.audio) {
-      console.log('sending audio')
       const fileId = msg.voice?.file_id || msg.audio?.file_id
       if (!fileId) throw new Error('Missing audio file id')
       const { blob } = await downloadTelegramAudioFile(bot, fileId)

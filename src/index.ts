@@ -127,7 +127,6 @@ bot.on('message', async (msg: Message) => {
 
     // const userId = String(from.id)
     // const session = getSession(userId)
-
     if (await handleAuthMessage(bot, msg)) return
 
     const handledOnboarding = await runOnboardingIfNeeded(bot, msg, rawText)
