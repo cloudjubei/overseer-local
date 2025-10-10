@@ -69,9 +69,8 @@
         "src/actions/actionMacroGoal.ts"
       ],
       "createdAt": "2025-10-10T20:59:06.992Z",
-      "updatedAt": "2025-10-10T23:02:50.806Z",
+      "updatedAt": "2025-10-10T23:36:25.733Z",
       "blockers": [],
-      "rejection": "when the user sees the message with the suggestions, and then responds with either text, audio or by picking the suggestion - the whole flow is restarted, i.e. the first message is sent, new suggestions are shown and then it starts processing the input.\nThis shouldn't be the case - the input should be processed immediately.",
       "completedAt": "2025-10-10T23:02:50.806Z"
     },
     {
@@ -152,6 +151,19 @@
       "createdAt": "2025-10-10T22:59:26.512Z",
       "updatedAt": "2025-10-10T23:11:55.127Z",
       "completedAt": "2025-10-10T23:11:55.127Z"
+    },
+    {
+      "id": "2d6112c5-6de1-465b-ad20-0bcf9d939f02",
+      "status": "+",
+      "title": "In the actionMicroGoalsCheck the UI needs updating",
+      "description": "In @src/actions/actionMicroGoalsCheck.ts the user is shown a message and then 3 choice buttons and a Done button.\nThe buttons for marking a micro goal as completed - should say:\n\"1. Mark [tick]\"\n\"2. Mark [tick]\"\n\"3. Mark [tick]\"\nAnd if they are already done then the buttons change to:\n\"n. Mark [X]\"\n \nIn the message, each goal needs to have a \"n.\" in front of it, so that it's clear which is which.\nThe \"Done\" button also needs to change to \"Finish\".",
+      "context": [
+        "src/actions/actionMicroGoalsCheck.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T23:39:52.824Z",
+      "updatedAt": "2025-10-10T23:41:16.680Z",
+      "completedAt": "2025-10-10T23:41:16.680Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -166,9 +178,10 @@
     "6347935a-e81f-4582-8247-8672c4d6d950": 9,
     "21f43cb9-aa1f-4d49-a625-efb3f8a6a123": 10,
     "96ecbf78-6789-4b6a-b8a2-7d6676d21fa6": 11,
-    "6fee9e97-ddb5-4e9b-9911-892845e90da6": 12
+    "6fee9e97-ddb5-4e9b-9911-892845e90da6": 12,
+    "2d6112c5-6de1-465b-ad20-0bcf9d939f02": 13
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
   "updatedAt": "2025-10-10T20:54:15.932Z",
-  "completedAt": "2025-10-10T23:11:55.127Z"
+  "completedAt": "2025-10-10T23:41:16.680Z"
 }
