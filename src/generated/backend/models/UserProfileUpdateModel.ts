@@ -4,6 +4,10 @@
 /* eslint-disable */
 export type UserProfileUpdateModel = {
   /**
+   * Name
+   */
+  name?: string
+  /**
    * Date of birth (YYYY-MM-DD)
    */
   dob?: string
@@ -16,10 +20,6 @@ export type UserProfileUpdateModel = {
    * Raw user-entered height (e.g., "175 cm", "1.75 m", "5'11"", "71 in")
    */
   height_raw?: string
-  /**
-   * IANA timezone identifier
-   */
-  timezone?: string
 }
 export namespace UserProfileUpdateModel {
   export enum gender {

@@ -8,31 +8,20 @@ export default async function actionLifestyle(
   rawText: string,
   _msg: Message,
 ) {
-  //IF USER PROFILE IS MISSING ANY OF THE PIECES inside
+  //IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles
   const userProfile = await ProfilesService.profilesControllerMe()
-  // if (!userProfile.name)
-  // userProfile.dob
-  // userProfile.gender
-  // userProfile.weight
-  // userProfile.height
 
-  // Just a few quick questions to personalise your experience.
-  // Please tell us your name
-  // - input
+  // How active are you currently?
+  // 🛋️ Very low | 🚶‍♂️ Light | 🏃 Moderate | 💪 High | 🔥 Very high
+  // (numeric value 1–5 stored behind the scenes)
 
-  // Please tell us your date of birth (YYYY-MM-DD)
-  // - input
+  // How’s your energy and wellbeing today?
+  // 😴 Very low | 😐 Low | 🙂 Okay | 😊 Good | 🤩 Great
+  // (same structure as above)
 
-  // Please select your gender:
-  // Male | Female | Other
+  // update = await ProfilesService.profilesControllerAddLifestyle()
 
-  // Please tell us your weight (e.g., 82 kg, 180 lb, 11st 4lb)
-  // - input
-
-  // Please tell us your height (e.g., 175 cm, 1.75 m, 5'11")
-  // - input
-
-  // FLOW is complete
+  // FLOW is complete - proceed to actionMacroGoal
 
   return false
 }

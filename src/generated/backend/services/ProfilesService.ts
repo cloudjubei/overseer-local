@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { LifestyleModel } from '../models/LifestyleModel'
+import type { UserProfileLifestyleModel } from '../models/UserProfileLifestyleModel'
 import type { UserProfileModel } from '../models/UserProfileModel'
 import type { UserProfileUpdateModel } from '../models/UserProfileUpdateModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
@@ -45,7 +45,7 @@ export class ProfilesService {
   public static profilesControllerAddLifestyle({
     requestBody,
   }: {
-    requestBody: LifestyleModel
+    requestBody: UserProfileLifestyleModel
   }): CancelablePromise<UserProfileModel> {
     return __request(OpenAPI, {
       method: 'POST',

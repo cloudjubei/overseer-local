@@ -20,6 +20,8 @@ export default async function actionProfile(
   // Please tell us your name
   // - input
 
+  update = await ProfilesService.profilesControllerUpdate({ requestBody: { name: 'the name' } })
+
   // Please tell us your date of birth (YYYY-MM-DD)
   // - input
 
@@ -32,7 +34,7 @@ export default async function actionProfile(
   // Please tell us your height (e.g., 175 cm, 1.75 m, 5'11")
   // - input
 
-  // FLOW is complete
+  // FLOW is complete -> move onto actionLifestyle
 
   return false
 }
