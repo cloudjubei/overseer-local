@@ -16,7 +16,7 @@ import actionMacroGoal, {
 import actionMicroGoalsGenerate from './actions/actionMicroGoalsGenerate'
 import { ProfilesService, UserProfileModel } from './generated/backend'
 import { GoalModel } from './generated/backend/models/GoalModel'
-import {
+import actionMicroGoalsCheck, {
   areAllGoalsAddressed,
   buildMicroCheckKeyboard,
   buildMicroCheckMessage,
@@ -34,6 +34,7 @@ bot.setMyCommands(
     { command: 'start', description: 'Start the flow' },
     { command: 'journal', description: 'Create a text journal note' },
     { command: 'voice', description: 'Create an audio journal note' },
+    { command: 'test-evening', description: 'Trigger evening micro-goal check (test)' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
@@ -141,6 +142,16 @@ bot.on('message', async (msg: Message) => {
 
     const handledOnboarding = await runOnboardingIfNeeded(bot, msg, rawText)
     if (handledOnboarding) return
+
+    // Test command to trigger evening micro-goal check flow
+    if (rawText === '/test-evening' || rawText.startsWith('/test-evening ')) {
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(String(from.id))
+      } catch {}
+      await actionMicroGoalsCheck(bot, chat, from, rawText, msg)
+      return
+    }
 
     if (await actionJournal(bot, chat, from, rawText)) {
       return

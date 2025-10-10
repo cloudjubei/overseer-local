@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "-",
+  "status": "+",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -142,7 +142,7 @@
     },
     {
       "id": "6fee9e97-ddb5-4e9b-9911-892845e90da6",
-      "status": "-",
+      "status": "+",
       "title": "we need a test command to trigger an evening goal check",
       "description": "to be able to test the evening goal check, there should be a command like '/test-evening' that will trigger the same exact flow for the @src/lib/scheduler.ts as if the time has come for the evening check.",
       "context": [
@@ -150,7 +150,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-10T22:59:26.512Z",
-      "updatedAt": "2025-10-10T22:59:26.512Z"
+      "updatedAt": "2025-10-10T23:11:55.127Z",
+      "completedAt": "2025-10-10T23:11:55.127Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -168,5 +169,6 @@
     "6fee9e97-ddb5-4e9b-9911-892845e90da6": 12
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:54:15.932Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z",
+  "completedAt": "2025-10-10T23:11:55.127Z"
 }
