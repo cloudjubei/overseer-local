@@ -1,6 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import {
-  CheckInCreateModel,
   CheckInModel,
   CheckInsService,
   GoalModel,
@@ -8,91 +7,169 @@ import {
   GoalSuggestedModel,
 } from 'src/generated/backend'
 import { downloadTelegramAudioFile } from 'src/lib/files'
+import actionMicroGoalsGenerate from './actionMicroGoalsGenerate'
+
+// In-memory store to map suggestion lists per message for callback selections
+// Keyed by `${chatId}:${messageId}` -> suggestions array
+const macroSuggestionStore = new Map<string, GoalSuggestedModel[]>()
+
+function keyFor(chatId: number, messageId: number) {
+  return `${chatId}:${messageId}`
+}
+
+function nextLocalTime(hour: number, minute = 0): Date {
+  const now = new Date()
+  const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0)
+  if (now.getTime() >= target.getTime()) {
+    target.setDate(target.getDate() + 1)
+  }
+  return target
+}
+
+async function scheduleDailyCheckIns(chatId: number) {
+  const morning = nextLocalTime(9, 0)
+  const evening = nextLocalTime(19, 0)
+
+  await CheckInsService.checkInsControllerClearCheckIns()
+
+  await CheckInsService.checkInsControllerAddCheckIn({
+    requestBody: {
+      start: morning.toISOString(),
+      frequency: CheckInModel.frequency.DAILY,
+      metadata: {
+        message: '<b>Morning Reminder!</b>',
+        chatId: chatId,
+      },
+    },
+  })
+
+  await CheckInsService.checkInsControllerAddCheckIn({
+    requestBody: {
+      start: evening.toISOString(),
+      frequency: CheckInModel.frequency.DAILY,
+      metadata: {
+        message: '<b>Evening Check in!</b>',
+        chatId: chatId,
+      },
+    },
+  })
+}
+
+function buildMacroSuggestionKeyboard(suggestions: GoalSuggestedModel[]): TelegramBot.InlineKeyboardMarkup {
+  const rows: TelegramBot.InlineKeyboardButton[][] = []
+  suggestions.forEach((sug, idx) => {
+    const n = idx + 1
+    rows.push([
+      {
+        text: `${n} • ${sug.summary}`,
+        callback_data: `macro:suggest:${idx}`,
+      },
+    ])
+  })
+  return { inline_keyboard: rows }
+}
 
 export default async function actionMacroGoal(
   bot: TelegramBot,
   chat: TelegramBot.Chat,
-  _from: TelegramBot.User,
+  from: TelegramBot.User,
   rawText: string,
   msg: Message,
   firstGoal: boolean = false,
 ) {
+  const chatId = chat.id
+
   if (firstGoal) {
-    //SENT ONLY THE VERY FIRST TIME the user gets to generate a macro goal
-    // bot.sendMessage( 'Got it — now let’s set your direction for the week.')
+    await bot.sendMessage(chatId, 'Got it — now let’s set your direction for the week.')
   }
 
-  // What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?
-  // You can type it in or send a voice message.
+  const intro =
+    "What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?\nYou can type it in or send a voice message.\n\nHere are a few ideas if you need inspiration:"
 
-  // Here are a few ideas if you need inspiration:
-
+  // Fetch suggestions
   const suggestions: GoalSuggestedModel[] =
     await GoalsService.goalsControllerGenerateMacroGoalSuggestions()
 
-  // !!! EXAMPLE !!!
-  // 💪 Get back into a workout routine
-  // 😌 Reduce stress and feel calmer
-  // 🔋 Improve sleep and energy
+  // Send prompt with inline keyboard of suggestions
+  const sent = await bot.sendMessage(chatId, intro, {
+    reply_markup: buildMacroSuggestionKeyboard(suggestions),
+  })
+  macroSuggestionStore.set(keyFor(chatId, sent.message_id), suggestions)
 
-  // -- after user input:
-  // Processing - give us a few seconds please...
+  // If the current message already carries input (audio or text), attempt to process it.
+  // Otherwise, we wait for user input or suggestion callback.
+  const hasVoice = !!msg.voice || !!msg.audio
+  const hasText = !!rawText && rawText.trim().length > 0
+  if (!hasVoice && !hasText) {
+    return false
+  }
 
-  //first always
-  await CheckInsService.checkInsControllerClearCheckIns()
+  // Process user-provided input immediately
+  await processMacroInput(bot, chat, from, rawText, msg)
+  return true
+}
 
-  const voice = msg.voice
-  const audio = msg.audio
-  if (voice || audio) {
-    const fileId = voice?.file_id || audio?.file_id
-    if (!fileId) {
-      return
+export async function processMacroInput(
+  bot: TelegramBot,
+  chat: TelegramBot.Chat,
+  from: TelegramBot.User,
+  rawText: string,
+  msg: Message,
+  pickedSuggestionText?: string,
+) {
+  const chatId = chat.id
+  // Inform user we're processing
+  const processingMsg = await bot.sendMessage(chatId, 'Processing...')
+
+  try {
+    // Always clear existing check-ins prior to creating a new macro context
+    await CheckInsService.checkInsControllerClearCheckIns()
+
+    let created: GoalModel | null = null
+
+    // Priority: if a suggestion text was provided via callback
+    if (pickedSuggestionText && pickedSuggestionText.trim()) {
+      created = await GoalsService.goalsControllerCreateMacroGoalFromText({
+        requestBody: { text: pickedSuggestionText.trim() },
+      })
+    } else if (msg.voice || msg.audio) {
+      const fileId = msg.voice?.file_id || msg.audio?.file_id
+      if (!fileId) throw new Error('Missing audio file id')
+      const { blob } = await downloadTelegramAudioFile(bot, fileId)
+      created = await GoalsService.goalsControllerCreateMacroGoalFromAudio({
+        formData: { file: blob },
+      })
+    } else if (rawText && rawText.trim()) {
+      created = await GoalsService.goalsControllerCreateMacroGoalFromText({
+        requestBody: { text: rawText.trim() },
+      })
     }
 
-    const { blob, filename, mimeType } = await downloadTelegramAudioFile(bot, fileId)
-    const result: GoalModel = await GoalsService.goalsControllerCreateMacroGoalFromAudio({
-      formData: { file: blob },
-    })
-  } else {
-    const text: string = 'text input'
-    const result: GoalModel = await GoalsService.goalsControllerCreateMacroGoalFromText({
-      requestBody: { text },
-    })
+    // Schedule morning and evening check-ins with correct metadata including chatId
+    await scheduleDailyCheckIns(chatId)
+
+    // Acknowledge success to the user
+    await bot.sendMessage(
+      chatId,
+      'Every morning you will get a set of 3 new micro goals. In the evening, I will check in to see how things went.',
+    )
+
+    // Immediately generate the first set of micro goals
+    await actionMicroGoalsGenerate(bot, chat, from, '', msg)
+  } catch (err: any) {
+    await bot.sendMessage(chatId, 'Sorry, I could not create your macro goal. Please try again.')
+  } finally {
+    // Attempt to remove the 'Processing...' message
+    try {
+      await bot.deleteMessage(chatId, String(processingMsg.message_id))
+    } catch {}
   }
+}
 
-  const now = new Date()
-  const morningCheckIn = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0)
-  morningCheckIn.setDate(morningCheckIn.getDate() + 1)
-  const eveningCheckIn = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0)
-  if (now.getHours() > 12) {
-    eveningCheckIn.setDate(eveningCheckIn.getDate() + 1)
-  }
-
-  await CheckInsService.checkInsControllerAddCheckIn({
-    requestBody: {
-      start: morningCheckIn.toISOString(),
-      frequency: CheckInModel.frequency.DAILY,
-      metadata: {
-        message: `<b>Morning Reminder!</b>`,
-        chatId,
-      },
-    },
-  })
-
-  await CheckInsService.checkInsControllerAddCheckIn({
-    requestBody: {
-      start: eveningCheckIn.toISOString(),
-      frequency: CheckInModel.frequency.DAILY,
-      metadata: {
-        message: `<b>Evening Check in!</b>`,
-        chatId,
-      },
-    },
-  })
-
-  // bot.sendMessage( 'Every morning you will get a set of 3 new micro goals.')
-
-  // FLOW is complete - proceed to actionMicroGoalsGenerate
-
-  return true
+// Expose helpers for callback handlers
+export function getMacroSuggestionsForMessage(chatId: number, messageId: number) {
+  return macroSuggestionStore.get(keyFor(chatId, messageId)) || []
+}
+export function clearMacroSuggestionsForMessage(chatId: number, messageId: number) {
+  macroSuggestionStore.delete(keyFor(chatId, messageId))
 }

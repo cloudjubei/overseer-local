@@ -62,15 +62,16 @@
     },
     {
       "id": "afc6ffc2-2ba9-46e8-a66d-1aef17320ba7",
-      "status": "-",
+      "status": "+",
       "title": "Action: MacroGoal - suggestions, creation, and check-ins",
       "description": "Implement macro goal creation in @src/actions/actionMacroGoal.ts , including suggestions UI and check-in scheduling.\n\nScope:\n- First-time entry (firstGoal=true): send a short intro like 'Got it — now let’s set your direction for the week.'\n- Prompt: ask the user to type a macro goal or send a voice message. Provide examples by fetching suggestions via GoalsService.goalsControllerGenerateMacroGoalSuggestions() and render them in a message with an inline keyboard to pick (callback namespace 'macro:suggest:<index>').\n- If the user sends audio/voice: download via downloadTelegramAudioFile and call GoalsService.goalsControllerCreateMacroGoalFromAudio.\n- If the user sends text or selects a suggestion: call GoalsService.goalsControllerCreateMacroGoalFromText.\n- While processing, send a 'Processing...' message to set expectations.\n- Clear old check-ins via CheckInsService.checkInsControllerClearCheckIns().\n- Schedule two daily check-ins via CheckInsService.checkInsControllerAddCheckIn():\n  - Morning: next 09:00 local (tomorrow if past 09:00 today) with metadata.message like '<b>Morning Reminder!</b>' and include metadata.chatId = chat.id.\n  - Evening: next 19:00 local (tomorrow if past 19:00 today) with metadata.message like '<b>Evening Check in!</b>' and include metadata.chatId = chat.id.\n- After scheduling, send a message explaining morning micro-goals and evening check-ins, then trigger actionMicroGoalsGenerate to produce the first set.\n- Ensure the undefined variable bug is fixed by using the actual chat.id for metadata.chatId.\n- Clean up any suggestion keyboards after selection.\n- Add callback_query handlers for 'macro:suggest:*' in index.ts.\n\nAcceptance criteria:\n- Users can pick a suggested macro goal, type their own, or send a voice note to create the macro goal; successful creation is acknowledged.\n- Existing check-ins are cleared and exactly two daily check-ins are created with the correct metadata (including chatId and messages containing 'Morning' or 'Evening').\n- After creation, the user receives onboarding messaging and immediately gets their micro goals for the day via actionMicroGoalsGenerate.\n- No usage of undefined variables; chat.id is correctly persisted in check-in metadata.",
       "context": [
         "src/actions/actionMacroGoal.ts"
       ],
       "createdAt": "2025-10-10T20:59:06.992Z",
-      "updatedAt": "2025-10-10T21:00:07.470Z",
-      "blockers": []
+      "updatedAt": "2025-10-10T21:13:08.221Z",
+      "blockers": [],
+      "completedAt": "2025-10-10T21:13:08.221Z"
     },
     {
       "id": "c4cad9c4-6d72-4ff7-8e55-2023187e26ca",
