@@ -224,6 +224,8 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         ensureAccessTokenForUser(String(cb.from.id))
       } catch {}
 
+      const journalPrompt = 'Would you like to leave a short voice note or type a few words about how the day felt?'
+      
       // microcheck:finish -> close the UI
       if (data === 'microcheck:finish') {
         try {
@@ -233,7 +235,14 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           )
         } catch {}
         clearStoredMicroCheck(chatId, message.message_id)
-        await bot.sendMessage(chatId, 'Great! Thanks for these responses.')
+
+        const store = getStoredMicroCheck(chatId, message.message_id)
+        if (store && areAllGoalsAddressed(store)) {
+          await bot.sendMessage(chatId, journalPrompt)
+        } else {
+          await bot.sendMessage(chatId, 'Great! Thanks for these responses.')
+        }
+
         return
       }
 
@@ -246,12 +255,12 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       // Best-effort reconstruction if store is missing
       if (!store) {
         try {
-          const active = await GoalsService.goalsControllerListMicroGoalsByState({
-            state: 'ACTIVE',
-          })
-          const mapped = (active || [])
-            .slice(0, 3)
-            .map((g) => ({ id: g.id, text: g.text || '', state: g.state }))
+          const allMicroGoals = await GoalsService.goalsControllerListMicroGoals()
+          const mapped = (allMicroGoals || []).map((g) => ({
+            id: g.id,
+            text: g.text || '',
+            state: g.state,
+          }))
           // Ensure the toggled goal is present
           if (!mapped.find((g) => g.id === goalId)) {
             try {
@@ -259,10 +268,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
               mapped.unshift({ id: g.id, text: g.text || '', state: g.state })
             } catch {}
           }
-          // Deduplicate and cap to 3
+          // Deduplicate
           const unique: { [id: string]: boolean } = {}
           const deduped = mapped.filter((g) => (unique[g.id] ? false : (unique[g.id] = true)))
-          store = deduped.slice(0, 3)
+          store = deduped
           setStoredMicroCheck(chatId, message.message_id, store)
         } catch {}
       }
@@ -307,7 +316,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           )
         } catch {}
         clearStoredMicroCheck(chatId, message.message_id)
-        await bot.sendMessage(chatId, 'Great! Thanks for these responses.')
+        await bot.sendMessage(chatId, journalPrompt)
       }
       return
     }

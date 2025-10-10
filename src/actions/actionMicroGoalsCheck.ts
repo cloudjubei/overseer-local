@@ -87,7 +87,10 @@ export async function toggleMicroGoalState(goal: StoredMicroGoal): Promise<GoalM
 }
 
 export function areAllGoalsAddressed(goals: StoredMicroGoal[]): boolean {
-  return goals.every((g) => g.state !== GoalModel.state.ACTIVE)
+  if (!goals || !goals.length) {
+    return false
+  }
+  return goals.every((g) => g.state === GoalModel.state.SUCCESS)
 }
 
 export default async function actionMicroGoalsCheck(
@@ -99,11 +102,10 @@ export default async function actionMicroGoalsCheck(
 ) {
   const chatId = chat.id
   try {
-    // Initial fetch: current ACTIVE micro goals; limit to 3
-    const active = await GoalsService.goalsControllerListMicroGoalsByState({ state: 'ACTIVE' })
-    const list = (active || []).slice(0, 3)
+    // Initial fetch: all micro goals for the current macro goal
+    const list = await GoalsService.goalsControllerListMicroGoals()
 
-    if (!list.length) {
+    if (!list || !list.length) {
       await bot.sendMessage(
         chatId,
         'How did your day go? It looks like there are no micro goals to check right now.',
