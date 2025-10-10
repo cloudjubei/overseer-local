@@ -75,15 +75,16 @@
     },
     {
       "id": "c4cad9c4-6d72-4ff7-8e55-2023187e26ca",
-      "status": "-",
+      "status": "+",
       "title": "Action: MicroGoalsGenerate - display today’s micro goals",
       "description": "Implement micro goal generation messaging in @src/actions/actionMicroGoalsGenerate.ts .\n\nScope:\n- Call GoalsService.goalsControllerGenerateMicroGoals() and capture the returned goals.\n- Send a message: 'Here are your 3 micro goals for today.' and list each as a bullet with clear formatting (parse_mode 'HTML' optional).\n- Follow up with: 'We will check in with you in the evening...' and mention '/journal' for optional journaling.\n- Ensure the function returns true to indicate flow handled.\n\nAcceptance criteria:\n- After calling the action, the user sees exactly three micro goals listed in a readable format.\n- The informational follow-up message about evening check-in and journaling is sent.\n- The action is idempotent in the sense that running it twice immediately does not create duplicate UI keyboards or crash.",
       "context": [
         "src/actions/actionMicroGoalsGenerate.ts"
       ],
       "createdAt": "2025-10-10T20:59:06.992Z",
-      "updatedAt": "2025-10-10T21:00:18.468Z",
-      "blockers": []
+      "updatedAt": "2025-10-10T21:14:15.710Z",
+      "blockers": [],
+      "completedAt": "2025-10-10T21:14:15.710Z"
     },
     {
       "id": "d8f3b9c7-52c3-4dc6-be83-da280ef98c99",
