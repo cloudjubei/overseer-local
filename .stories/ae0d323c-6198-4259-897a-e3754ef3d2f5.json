@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "-",
+  "status": "+",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -101,15 +101,16 @@
     },
     {
       "id": "6347935a-e81f-4582-8247-8672c4d6d950",
-      "status": "-",
+      "status": "+",
       "title": "Scheduler: route macro goal check-ins to actions",
       "description": "Finalize scheduler behavior in @src/lib/scheduler.ts  to act on check-ins created by actionMacroGoal.\n\nScope:\n- Parse CheckInModel items hourly and extract message and chatId from metadata.\n- If metadata.message contains 'Morning' (case-insensitive), trigger actionMicroGoalsGenerate for that user/chat instead of sending a plain text reminder.\n- If metadata.message contains 'Evening' (case-insensitive), trigger actionMicroGoalsCheck for that user/chat.\n- Use existing dedup mechanism to avoid multiple triggers within the same hour window.\n- Ensure chatId resolution: prefer metadata.chatId numeric; otherwise support metadata.chat_id or metadata.telegram.chatId or metadata.telegram.chat.id. If missing, persist telegram metadata via update for future runs (best-effort).\n- Maintain graceful error handling and continue processing other users.\n\nAcceptance criteria:\n- When actionMacroGoal schedules morning/evening check-ins, the scheduler recognizes them and invokes the correct actions at the scheduled hour.\n- No duplicate triggers occur within a single hour run.\n- If chatId is correctly stored by actionMacroGoal, the scheduler successfully routes without needing fallbacks.\n- Logs indicate skipped items when chatId cannot be determined, without crashing the scheduler.",
       "context": [
         "src/lib/scheduler.ts"
       ],
       "createdAt": "2025-10-10T20:59:06.995Z",
-      "updatedAt": "2025-10-10T21:00:45.633Z",
-      "blockers": []
+      "updatedAt": "2025-10-10T21:21:20.639Z",
+      "blockers": [],
+      "completedAt": "2025-10-10T21:21:20.639Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -124,5 +125,6 @@
     "6347935a-e81f-4582-8247-8672c4d6d950": 9
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:54:15.932Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z",
+  "completedAt": "2025-10-10T21:21:20.639Z"
 }
