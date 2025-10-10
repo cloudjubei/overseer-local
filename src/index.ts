@@ -56,11 +56,12 @@ bot.on('my_chat_member', async (member: ChatMemberUpdated) => {
 
 function isProfileComplete(p: UserProfileModel | undefined | null): boolean {
   if (!p) return false
+  const hasName = !!(p.name && p.name.trim())
   const hasDob = !!p.dob
   const hasGender = !!p.gender
   const hasWeight = typeof p.weight === 'number' || !!p.weight_raw
   const hasHeight = typeof p.height === 'number' || !!p.height_raw
-  return hasDob && hasGender && hasWeight && hasHeight
+  return hasName && hasDob && hasGender && hasWeight && hasHeight
 }
 
 async function runOnboardingIfNeeded(
@@ -190,6 +191,29 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         { chat_id: chatId, message_id: message.message_id },
       )
     } catch {}
+
+    // Handle profile gender selection
+    if (data.startsWith('profile:gender:')) {
+      const genderKey = data.split(':')[2] as keyof typeof UserProfileModel.gender
+      const userId = String(cb.from.id)
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(userId)
+        // Update profile gender
+        await ProfilesService.profilesControllerUpdate({
+          requestBody: { gender: UserProfileModel.gender[genderKey] as any },
+        })
+        const pretty = genderKey.charAt(0) + genderKey.slice(1).toLowerCase()
+        await bot.sendMessage(chatId, `Gender set to ${pretty}.`)
+      } catch (err) {
+        await bot.sendMessage(chatId, 'Failed to update gender. Please try again.')
+      }
+      // Continue profile flow to next step
+      try {
+        await actionProfile(bot, message.chat, cb.from, '', message)
+      } catch {}
+      return
+    }
 
     // Handle /q param flow selections
     if (data.startsWith('q:')) {
