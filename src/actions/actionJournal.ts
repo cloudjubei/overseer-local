@@ -77,14 +77,14 @@ export default async function actionJournalAudio(
   const prev = getSession(userId)
 
   // Case 1: Command /s -> prompt user to record a voice memo
-  const cmdMatch = rawText.match(/^\/audio(?:@\w+)?(?:\s+([\s\S]*))?$/i)
+  const cmdMatch = rawText.match(/^\/voice(?:@\w+)?(?:\s+([\s\S]*))?$/i)
   console.log('LELELE actionJournalAudio cmdMatch: ', cmdMatch)
 
   if (cmdMatch) {
     setSession({
       ...(prev || { userId }),
       conversationState: {
-        lastAction: 'audio',
+        lastAction: 'voice',
         flowId: '',
       },
       accessToken: prev?.accessToken || '',
@@ -105,7 +105,7 @@ export default async function actionJournalAudio(
   // Accept Telegram voice notes (msg.voice) and general audio (msg.audio)
   const voice = msg.voice
   const audio = msg.audio
-  if (prev?.conversationState?.lastAction != 'audio' || (!voice && !audio)) {
+  if (prev?.conversationState?.lastAction != 'voice' || (!voice && !audio)) {
     return false
   }
   console.log('LELELE actionJournalAudio voice: ', voice)

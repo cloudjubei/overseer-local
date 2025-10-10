@@ -26,9 +26,7 @@ export default async function actionMicroGoalsGenerate(
 
     // Build the formatted message with exactly three bullets (if fewer returned, show what we have)
     const header = '<b>Here are your 3 micro goals for today.</b>'
-    const bullets = list
-      .map((g) => `• ${escapeHtml(g.text || '')}`)
-      .join('\n')
+    const bullets = list.map((g) => `• ${escapeHtml(g.text || '')}`).join('\n')
 
     const body = [header, '', bullets].join('\n')
 
@@ -41,8 +39,12 @@ export default async function actionMicroGoalsGenerate(
 
     await bot.sendMessage(chatId, followUp, { parse_mode: 'HTML' })
   } catch (err) {
+    console.error(err)
     // Minimal user-facing error; keep idempotent and non-blocking
-    await bot.sendMessage(chatId, 'Sorry, I could not generate today\'s micro goals. Please try again later.')
+    await bot.sendMessage(
+      chatId,
+      "Sorry, I could not generate today's micro goals. Please try again later.",
+    )
   }
 
   // FLOW is complete - user can use the app normally

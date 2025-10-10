@@ -84,26 +84,26 @@ export default async function actionLifestyle(
 
   // 3) If both values are present, persist and proceed
   if (
-    typeof activeLevel === 'number' && activeLevel >= 1 && activeLevel <= 5 &&
-    typeof energyLevel === 'number' && energyLevel >= 1 && energyLevel <= 5
+    typeof activeLevel === 'number' &&
+    activeLevel >= 1 &&
+    activeLevel <= 5 &&
+    typeof energyLevel === 'number' &&
+    energyLevel >= 1 &&
+    energyLevel <= 5
   ) {
     const newLifestyle: UserProfileLifestyleModel = {
-      activeLevel: activeLevel,
-      energyLevel: energyLevel,
+      activeLevel,
+      energyLevel,
     }
     try {
+      console.log('sending newLifestyle: ', newLifestyle)
       await ProfilesService.profilesControllerAddLifestyle({ requestBody: newLifestyle })
-      await bot.sendMessage(
-        chatId,
-        'Got it — saved your lifestyle preferences. We\'ll tailor your plan to match.',
-        opts,
-      )
     } catch (e) {
+      console.error(e)
       await bot.sendMessage(chatId, 'Sorry, we could not save your lifestyle. Please try again.')
       return true
     }
 
-    // Clear conversation state and proceed to macro goal
     clearConversationSession(userId, session)
     await actionMacroGoal(bot, chat, from, '', msg, true)
     return true

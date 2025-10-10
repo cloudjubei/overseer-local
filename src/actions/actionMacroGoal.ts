@@ -55,7 +55,9 @@ async function scheduleDailyCheckIns(chatId: number) {
   })
 }
 
-function buildMacroSuggestionKeyboard(suggestions: GoalSuggestedModel[]): TelegramBot.InlineKeyboardMarkup {
+function buildMacroSuggestionKeyboard(
+  suggestions: GoalSuggestedModel[],
+): TelegramBot.InlineKeyboardMarkup {
   const rows: TelegramBot.InlineKeyboardButton[][] = []
   suggestions.forEach((sug, idx) => {
     const n = idx + 1
@@ -84,7 +86,7 @@ export default async function actionMacroGoal(
   }
 
   const intro =
-    "What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?\nYou can type it in or send a voice message.\n\nHere are a few ideas if you need inspiration:"
+    'What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?\nYou can type it in or send a voice message.\n\nHere are a few ideas if you need inspiration:'
 
   // Fetch suggestions
   const suggestions: GoalSuggestedModel[] =
@@ -92,7 +94,7 @@ export default async function actionMacroGoal(
 
   // Send prompt with inline keyboard of suggestions
   const sent = await bot.sendMessage(chatId, intro, {
-    reply_markup: buildMacroSuggestionKeyboard(suggestions),
+    reply_markup: buildMacroSuggestionKeyboard(suggestions.slice(0, 3)),
   })
   macroSuggestionStore.set(keyFor(chatId, sent.message_id), suggestions)
 
@@ -124,15 +126,18 @@ export async function processMacroInput(
   try {
     // Always clear existing check-ins prior to creating a new macro context
     await CheckInsService.checkInsControllerClearCheckIns()
+    console.log('CLEARED CHECKINS')
 
     let created: GoalModel | null = null
 
     // Priority: if a suggestion text was provided via callback
     if (pickedSuggestionText && pickedSuggestionText.trim()) {
+      console.log('picking suggestion: ', pickedSuggestionText)
       created = await GoalsService.goalsControllerCreateMacroGoalFromText({
         requestBody: { text: pickedSuggestionText.trim() },
       })
     } else if (msg.voice || msg.audio) {
+      console.log('sending audio')
       const fileId = msg.voice?.file_id || msg.audio?.file_id
       if (!fileId) throw new Error('Missing audio file id')
       const { blob } = await downloadTelegramAudioFile(bot, fileId)
@@ -156,12 +161,13 @@ export async function processMacroInput(
 
     // Immediately generate the first set of micro goals
     await actionMicroGoalsGenerate(bot, chat, from, '', msg)
-  } catch (err: any) {
+  } catch (e) {
+    console.error('ActionMacroGoal error: ', e)
     await bot.sendMessage(chatId, 'Sorry, I could not create your macro goal. Please try again.')
   } finally {
     // Attempt to remove the 'Processing...' message
     try {
-      await bot.deleteMessage(chatId, String(processingMsg.message_id))
+      await bot.deleteMessage(chatId, processingMsg.message_id)
     } catch {}
   }
 }

@@ -168,11 +168,17 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         if (isMorningCheckInMessage(message)) {
           try {
             if (!botRef) {
-              logger.warn('Scheduler bot reference is not initialized; cannot trigger micro-goal generation')
+              logger.warn(
+                'Scheduler bot reference is not initialized; cannot trigger micro-goal generation',
+              )
             } else {
               // Construct minimal chat/user/message objects; the action doesn't rely on their fields currently
               const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
-              const from = { id: chatId, is_bot: false, first_name: 'User' } as unknown as TelegramBot.User
+              const from = {
+                id: chatId,
+                is_bot: false,
+                first_name: 'User',
+              } as unknown as TelegramBot.User
               const fakeMsg = {
                 message_id: 0,
                 date: Math.floor(Date.now() / 1000),
@@ -193,10 +199,16 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         if (isEveningCheckInMessage(message)) {
           try {
             if (!botRef) {
-              logger.warn('Scheduler bot reference is not initialized; cannot trigger micro-goal check')
+              logger.warn(
+                'Scheduler bot reference is not initialized; cannot trigger micro-goal check',
+              )
             } else {
               const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
-              const from = { id: chatId, is_bot: false, first_name: 'User' } as unknown as TelegramBot.User
+              const from = {
+                id: chatId,
+                is_bot: false,
+                first_name: 'User',
+              } as unknown as TelegramBot.User
               const fakeMsg = {
                 message_id: 0,
                 date: Math.floor(Date.now() / 1000),

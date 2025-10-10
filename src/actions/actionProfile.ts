@@ -4,7 +4,7 @@ import { getSession, setSession } from 'src/lib/sessionStore'
 import actionLifestyle from './actionLifestyle'
 
 // Profile onboarding steps in order
- type ProfileStep = 'name' | 'dob' | 'gender' | 'weight' | 'height' | 'done'
+type ProfileStep = 'name' | 'dob' | 'gender' | 'weight' | 'height' | 'done'
 
 function nextMissingStep(p: UserProfileModel | undefined | null): ProfileStep {
   if (!p) return 'name'
@@ -66,18 +66,19 @@ function isValidDateYYYYMMDD(input: string): boolean {
   const dt = new Date(input + 'T00:00:00Z')
   if (Number.isNaN(dt.getTime())) return false
   // Ensure month/day align (e.g., reject 2023-02-30)
-  return dt.getUTCFullYear() === y && dt.getUTCMonth() + 1 === m && dt.getUTCDate() === d && dt <= new Date()
+  return (
+    dt.getUTCFullYear() === y &&
+    dt.getUTCMonth() + 1 === m &&
+    dt.getUTCDate() === d &&
+    dt <= new Date()
+  )
 }
 
 async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep) {
   const opts: SendMessageOptions = { parse_mode: 'HTML' }
   switch (step) {
     case 'name':
-      await bot.sendMessage(
-        chatId,
-        '<b>Let\'s set up your profile</b>\nWhat\'s your name?',
-        opts,
-      )
+      await bot.sendMessage(chatId, "<b>Let's set up your profile</b>\nWhat's your name?", opts)
       return
     case 'dob':
       await bot.sendMessage(
@@ -112,7 +113,7 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
     case 'height':
       await bot.sendMessage(
         chatId,
-        '<b>Height</b>\nPlease tell us your height (e.g., 175 cm, 1.75 m, 5\'11\').',
+        "<b>Height</b>\nPlease tell us your height (e.g., 175 cm, 1.75 m, 5'11').",
         opts,
       )
       return
@@ -139,8 +140,6 @@ export default async function actionProfile(
   // If profile is complete, clear any profile session and move on
   if (step === 'done') {
     clearProfileStep(userId)
-    await bot.sendMessage(chat.id, 'All set! Your profile is complete.')
-    // Proceed to lifestyle step (next onboarding stage)
     await actionLifestyle(bot, chat, from, rawText, _msg)
     return true
   }
@@ -179,7 +178,7 @@ export default async function actionProfile(
     if (!isValidDateYYYYMMDD(text)) {
       await bot.sendMessage(
         chat.id,
-        '<b>That doesn\'t look right.</b>\nPlease enter your date in <code>YYYY-MM-DD</code> format (e.g., 1990-06-21).',
+        "<b>That doesn't look right.</b>\nPlease enter your date in <code>YYYY-MM-DD</code> format (e.g., 1990-06-21).",
         { parse_mode: 'HTML' },
       )
       return true
@@ -211,10 +210,16 @@ export default async function actionProfile(
       )
       return true
     }
-    await ProfilesService.profilesControllerUpdate({ requestBody: { weight_raw: weightRaw.trim() } })
-    await bot.sendMessage(chat.id, `Thanks — recorded weight: <b>${escapeHtml(weightRaw.trim())}</b>`, {
-      parse_mode: 'HTML',
+    await ProfilesService.profilesControllerUpdate({
+      requestBody: { weight_raw: weightRaw.trim() },
     })
+    await bot.sendMessage(
+      chat.id,
+      `Thanks — recorded weight: <b>${escapeHtml(weightRaw.trim())}</b>`,
+      {
+        parse_mode: 'HTML',
+      },
+    )
     // fall through to next prompt
   }
 
@@ -228,15 +233,21 @@ export default async function actionProfile(
     if (!heightRaw.trim()) {
       await bot.sendMessage(
         chat.id,
-        '<b>Please provide your height</b>\nExamples: 175 cm, 1.75 m, 5\'11\'.',
+        "<b>Please provide your height</b>\nExamples: 175 cm, 1.75 m, 5'11'.",
         { parse_mode: 'HTML' },
       )
       return true
     }
-    await ProfilesService.profilesControllerUpdate({ requestBody: { height_raw: heightRaw.trim() } })
-    await bot.sendMessage(chat.id, `Great — recorded height: <b>${escapeHtml(heightRaw.trim())}</b>`, {
-      parse_mode: 'HTML',
+    await ProfilesService.profilesControllerUpdate({
+      requestBody: { height_raw: heightRaw.trim() },
     })
+    await bot.sendMessage(
+      chat.id,
+      `Great — recorded height: <b>${escapeHtml(heightRaw.trim())}</b>`,
+      {
+        parse_mode: 'HTML',
+      },
+    )
   }
 
   // After handling a step, compute next and prompt once
@@ -244,7 +255,6 @@ export default async function actionProfile(
   const next = nextMissingStep(updated)
   if (next === 'done') {
     clearProfileStep(userId)
-    await bot.sendMessage(chat.id, 'All set! Your profile is complete.')
     await actionLifestyle(bot, chat, from, rawText, _msg)
     return true
   } else {

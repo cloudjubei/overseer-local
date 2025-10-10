@@ -6,9 +6,9 @@ export type UserProfileLifestyleModel = {
   /**
    * 1-5, Very Low to Very High
    */
-  activeLevel?: number
+  activeLevel: number
   /**
    * 1-5, Very Low to Very High
    */
-  energyLevel?: number
+  energyLevel: number
 }
