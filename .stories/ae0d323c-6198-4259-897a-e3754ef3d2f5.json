@@ -156,13 +156,23 @@
       "id": "2d6112c5-6de1-465b-ad20-0bcf9d939f02",
       "status": "-",
       "title": "In the actionMicroGoalsCheck the UI needs updating",
-      "description": "In @src/actions/actionMicroGoalsCheck.ts the user is shown a message and then 3 choice buttons and a Done button.\nThe buttons for marking a micro goal as completed - should say:\n\"1. Mark [tick]\"\n\"2. Mark [tick]\"\n\"3. Mark [tick]\"\nAnd if they are already done then the buttons change to:\n\"n. Mark [X]\"\n \nIn the message, each goal needs to have a \"n.\" in front of it, so that it's clear which is which.\nThe \"Done\" button also needs to change to \"Finish\".",
-      "context": [
-        "src/actions/actionMicroGoalsCheck.ts"
-      ],
+      "description": "First - always show all micro goals for the given macro goal - even if they've been marked as finished before.\n\nSecond - once the user marks all 3 goals, we should send this message:\n\n“Would you like to leave a short voice note or type a few words about how the day felt?”\n\nAnd now the user can reply with either text (behaving as if they triggered the /journal command) or a voice memo (behaving as if they triggered the /voice command).",
+      "context": [],
       "blockers": [],
       "createdAt": "2025-10-10T23:39:52.824Z",
-      "updatedAt": "2025-10-10T23:39:52.824Z"
+      "updatedAt": "2025-10-10T23:51:50.591Z"
+    },
+    {
+      "id": "99591769-058e-418d-910a-f19820eb95d5",
+      "status": "-",
+      "title": "There needs to be a new check in generated at the end of a week",
+      "description": "When generating a macro goal, apart from the morning and evening check-ins - there needs to be a checkin scheduled for a week ahead (so frequency weekly), an hour after the evening check in.\n\nthis should trigger a new flow that should be stored in its own file:\n\"actionWeeklyReset\" .\nThe user should be shown this message:\n\n    “This week you completed [X]% of your micro goals — great work 💪.\"\n\nWhere X will be the computed amount of all the micro goals for the given macro goal that is active.\n\nThen a 2nd message right after it should fire saying:\n\n\"Would you like to set a new weekly goal or continue building on this one?”\n\n    → Buttons: Continue | New Goal .\nContinue will then essentially do nothing functionally other than send the message:\n\"Great! Keep up the good work!\"\n\nand selectiong \"New Goal\" will trigger a new @src/actions/actionMacroGoal.ts",
+      "context": [
+        "src/actions/actionMacroGoal.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T23:55:56.095Z",
+      "updatedAt": "2025-10-10T23:55:56.095Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -178,7 +188,8 @@
     "21f43cb9-aa1f-4d49-a625-efb3f8a6a123": 10,
     "96ecbf78-6789-4b6a-b8a2-7d6676d21fa6": 11,
     "6fee9e97-ddb5-4e9b-9911-892845e90da6": 12,
-    "2d6112c5-6de1-465b-ad20-0bcf9d939f02": 13
+    "2d6112c5-6de1-465b-ad20-0bcf9d939f02": 13,
+    "99591769-058e-418d-910a-f19820eb95d5": 14
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
   "updatedAt": "2025-10-10T20:54:15.932Z"

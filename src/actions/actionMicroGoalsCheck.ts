@@ -43,7 +43,9 @@ export function clearStoredMicroCheck(chatId: number, messageId: number) {
 
 export function buildMicroCheckMessage(goals: StoredMicroGoal[]): string {
   const header = '<b>Evening check-in</b>\nHow did your day go? Which micro goals did you complete?'
-  const list = goals.map((g) => `${statusIcon(g.state)} ${escapeHtml(g.text || '')}`).join('\n')
+  const list = goals
+    .map((g, index) => `${index + 1}. ${statusIcon(g.state)} ${escapeHtml(g.text || '')}`)
+    .join('\n')
   return [header, '', list].join('\n')
 }
 
@@ -51,19 +53,20 @@ export function buildMicroCheckKeyboard(
   goals: StoredMicroGoal[],
 ): TelegramBot.InlineKeyboardMarkup {
   const rows: TelegramBot.InlineKeyboardButton[][] = []
-  for (const g of goals) {
+  goals.forEach((g, index) => {
     const isDone = g.state === GoalModel.state.SUCCESS
+    const buttonNumber = index + 1
     rows.push([
       {
-        text: isDone ? '✅ Done' : '❎ Not yet',
+        text: isDone ? `${buttonNumber}. Mark ❎` : `${buttonNumber}. Mark ✅`,
         callback_data: `microcheck:${g.id}:toggle`,
       },
     ])
-  }
+  })
   // Add a final row to let user finish explicitly
   rows.push([
     {
-      text: 'Done',
+      text: 'Finish',
       callback_data: 'microcheck:finish',
     },
   ])
