@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "1e8110d5-74cb-4c7e-82e7-cae0f55bb62f",
-      "status": "-",
+      "status": "+",
       "title": "Refactor `index.ts` to orchestrate the new user onboarding flow",
       "description": "Modify the main message handler in `index.ts`. Remove the command-based listeners for `/profile` and `/newgoal`. Implement a new, state-driven handler that, for every user message, checks the user's profile state and triggers the next required action in the onboarding sequence: `actionProfile`, `actionLifestyle`, `actionMacroGoal`, and `actionMicroGoalsGenerate`. The new flow should be the default behavior for any authenticated user who has not completed it.",
       "context": [],
       "createdAt": "2025-10-10T20:27:02.936Z",
-      "updatedAt": "2025-10-10T20:27:02.936Z"
+      "updatedAt": "2025-10-10T20:44:30.864Z",
+      "completedAt": "2025-10-10T20:44:30.864Z"
     },
     {
       "id": "f4a1057e-de30-4e5f-97fc-5694580948a1",

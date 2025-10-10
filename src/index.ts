@@ -21,11 +21,13 @@ import {
   sendTypeKeyboardMessage,
 } from './common/keyboards'
 import { initScheduler } from './lib/scheduler'
-import profileAction from './actions/actionProfile'
 import actionJournalAudio, { actionJournal } from './actions/actionJournal'
-import { GoalModel } from './generated/backend'
 import actionProfile from './actions/actionProfile'
 import actionLifestyle from './actions/actionLifestyle'
+import actionMacroGoal from './actions/actionMacroGoal'
+import actionMicroGoalsGenerate from './actions/actionMicroGoalsGenerate'
+import { ProfilesService, UserProfileModel } from './generated/backend'
+import { GoalModel } from './generated/backend/models/GoalModel'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -41,7 +43,7 @@ bot.setMyCommands(
     { command: 's', description: 'Create a Macro Goal suggestion via AI (sound)' },
     { command: 'journal', description: 'Create a text journal note' },
     { command: 'audio', description: 'Create an audio journal note' },
-    // { command: 'profile', description: 'Setup your profile' },
+    // NOTE: command-based /profile and /newgoal handlers removed per new spec
   ],
   { scope: { type: 'all_private_chats' } },
 )
@@ -51,6 +53,81 @@ bot.on('chat_member', async (member: ChatMemberUpdated) => {
 bot.on('my_chat_member', async (member: ChatMemberUpdated) => {
   console.log('chat_member updated: ', member)
 })
+
+function isProfileComplete(p: UserProfileModel | undefined | null): boolean {
+  if (!p) return false
+  const hasDob = !!p.dob
+  const hasGender = !!p.gender
+  const hasWeight = typeof p.weight === 'number' || !!p.weight_raw
+  const hasHeight = typeof p.height === 'number' || !!p.height_raw
+  return hasDob && hasGender && hasWeight && hasHeight
+}
+
+async function runOnboardingIfNeeded(
+  bot: TelegramBot,
+  msg: Message,
+  rawText: string,
+): Promise<boolean> {
+  const { chat, from } = msg
+  if (!from || !chat) return false
+  const userId = String(from.id)
+
+  // Ensure backend client is configured with current user's token
+  await ensureBackendConfigured()
+  ensureAccessTokenForUser(userId)
+
+  // 1) Profile completeness
+  try {
+    const profile = await ProfilesService.profilesControllerMe()
+
+    if (!isProfileComplete(profile)) {
+      // Trigger profile setup flow
+      await actionProfile(bot, chat, from, rawText, msg)
+      return true
+    }
+
+    // 2) Lifestyle: require at least 1
+    if (!Array.isArray(profile.lifestyles) || profile.lifestyles.length < 1) {
+      await actionLifestyle(bot, chat, from, rawText, msg)
+      return true
+    }
+  } catch (e) {
+    // If fetching profile fails, do not proceed with onboarding in this tick
+    return false
+  }
+
+  // 3) Macro goal: ensure there is an active MACRO goal
+  try {
+    const list = await GoalsService.goalsControllerList({ limit: 20 })
+    const hasActiveMacro = (list.items || []).some(
+      (g) => g.type === GoalModel.type.MACRO && g.state === GoalModel.state.ACTIVE,
+    )
+    if (!hasActiveMacro) {
+      await actionMacroGoal(bot, chat, from, rawText, msg, true)
+      return true
+    }
+  } catch (e) {
+    // If listing goals fails, do not proceed further here
+    return false
+  }
+
+  // 4) Micro goals: if no ACTIVE micro goals, generate new ones
+  try {
+    const activeMicro = await GoalsService.goalsControllerListMicroGoalsByState({
+      state: 'ACTIVE',
+    })
+    if (!activeMicro || activeMicro.length === 0) {
+      await actionMicroGoalsGenerate(bot, chat, from, rawText, msg)
+      return true
+    }
+  } catch (e) {
+    // If listing micro goals fails, do not block other handlers
+    return false
+  }
+
+  // Onboarding complete
+  return false
+}
 
 bot.on('message', async (msg: Message) => {
   try {
@@ -62,24 +139,17 @@ bot.on('message', async (msg: Message) => {
     const userId = String(from.id)
     const session = getSession(userId)
 
+    // 0) Handle authentication first
     if (await handleAuthMessage(bot, msg)) return
 
-    if (await actionProfile(bot, chat, from, rawText, msg)) {
-      return
-    }
-    if (await actionLifestyle(bot, chat, from, rawText, msg)) {
-      return
-    }
+    // New state-driven onboarding flow
+    const handledOnboarding = await runOnboardingIfNeeded(bot, msg, rawText)
+    if (handledOnboarding) return
 
     const hasResponse = rawText.lastIndexOf('‎')
     console.log('RAW TEXT: ', rawText)
-    // console.log('HAS RESPONSE: ', hasResponse)
-    // if (await quickSuggestionAction2(bot, chat, from, rawText, msg.message_id, hasResponse)) {
-    //   return
-    // }
-    // if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
-    //   return
-    // }
+
+    // Optional suggestion flows and journaling features
     if (await textSuggestionActionMacro(bot, chat, from, rawText, msg.message_id, hasResponse)) {
       return
     }
