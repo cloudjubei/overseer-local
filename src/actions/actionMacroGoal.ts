@@ -152,7 +152,7 @@ export async function processMacroInput(
     // Acknowledge success to the user and explain flow
     await bot.sendMessage(
       chatId,
-      'Every morning you will get a set of 3 new micro goals. In the evening, I will check in to see how things went.',
+      'Every morning you will get a set of 3 new micro goals.\n\nIn the evening, I will check in to see how things went.',
     )
 
     // Immediately generate the first set of micro goals
