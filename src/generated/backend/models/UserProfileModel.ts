@@ -8,6 +8,10 @@ export type UserProfileModel = {
    */
   id: string
   /**
+   * Name
+   */
+  name?: string
+  /**
    * Date of birth (YYYY-MM-DD)
    */
   dob?: string
@@ -32,6 +36,18 @@ export type UserProfileModel = {
    * IANA timezone identifier
    */
   timezone: string
+  /**
+   * User-entered lifestyle levels
+   */
+  lifestyles: Array<string>
+  /**
+   * ISO8601 timestamp when record was created
+   */
+  createdAt: string
+  /**
+   * ISO8601 timestamp when record was last updated
+   */
+  updatedAt: string
 }
 export namespace UserProfileModel {
   export enum gender {

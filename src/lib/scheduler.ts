@@ -157,7 +157,17 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
 
         // Send to the Telegram user
         try {
-          await botRef?.sendMessage(chatId, message, { parse_mode: 'HTML' })
+          //TODO:
+          //message:
+          // #MORNING!
+          // + actionMicroGoalsGenerate
+
+          // OR
+
+          //#EVENING CHECK IN
+          // + actionMicroGoalsCheck
+
+          // await botRef?.sendMessage(chatId, message, { parse_mode: 'HTML' })
           sentThisHour.add(dedupeKey)
         } catch (err) {
           logger.error(`Failed to send check-in message to user ${userId}`, err)

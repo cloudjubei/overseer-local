@@ -21,9 +21,11 @@ import {
   sendTypeKeyboardMessage,
 } from './common/keyboards'
 import { initScheduler } from './lib/scheduler'
-import profileAction from './actions/profile'
+import profileAction from './actions/actionProfile'
 import actionJournalAudio, { actionJournal } from './actions/actionJournal'
 import { GoalModel } from './generated/backend'
+import actionProfile from './actions/actionProfile'
+import actionLifestyle from './actions/actionLifestyle'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -45,7 +47,6 @@ bot.setMyCommands(
 )
 bot.on('chat_member', async (member: ChatMemberUpdated) => {
   console.log('chat_member updated: ', member)
-  //TODO: check check ins, if it's after check in time and the last message is the reminder -> ask if goal was completed
 })
 bot.on('my_chat_member', async (member: ChatMemberUpdated) => {
   console.log('chat_member updated: ', member)
@@ -57,30 +58,31 @@ bot.on('message', async (msg: Message) => {
     if (!from || !chat) return
 
     const rawText = (msg.text || '').trim()
-    const hasResponse = rawText.lastIndexOf('‎')
-    console.log('RAW TEXT: ', rawText)
-    console.log('HAS RESPONSE: ', hasResponse)
 
-    if (await testAction(bot, chat, rawText)) {
-      return
-    }
-    if (await testLLMAction(bot, chat, from, rawText, msg)) {
-      return
-    }
+    const userId = String(from.id)
+    const session = getSession(userId)
+
     if (await handleAuthMessage(bot, msg)) return
 
-    if (await quickSuggestionAction2(bot, chat, from, rawText, msg.message_id, hasResponse)) {
+    if (await actionProfile(bot, chat, from, rawText, msg)) {
       return
     }
-    if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
+    if (await actionLifestyle(bot, chat, from, rawText, msg)) {
       return
     }
+
+    const hasResponse = rawText.lastIndexOf('‎')
+    console.log('RAW TEXT: ', rawText)
+    // console.log('HAS RESPONSE: ', hasResponse)
+    // if (await quickSuggestionAction2(bot, chat, from, rawText, msg.message_id, hasResponse)) {
+    //   return
+    // }
+    // if (await quickSuggestionAction(bot, chat, from, rawText, msg)) {
+    //   return
+    // }
     if (await textSuggestionActionMacro(bot, chat, from, rawText, msg.message_id, hasResponse)) {
       return
     }
-    // if (await textSuggestionActionMicro(bot, chat, from, rawText)) {
-    //   return
-    // }
     if (await audioSuggestionAction(bot, chat, from, rawText, msg)) {
       return
     }
@@ -90,43 +92,6 @@ bot.on('message', async (msg: Message) => {
     if (await actionJournalAudio(bot, chat, from, rawText, msg)) {
       return
     }
-    // if (await profileAction(bot, chat, from, rawText, msg)) {
-    //   return
-    // }
-
-    const userId = String(from.id)
-    const session = getSession(userId)
-
-    // If an active backend-driven conversation exists, delegate to conversation manager
-    if (session?.conversationState) {
-      const convHandled = await handleConversationMessage(bot, msg, session)
-      if (convHandled) {
-        switch (convHandled.type) {
-          case 'prompt':
-            if (convHandled.prompt) await renderBackendPrompt(convHandled.prompt, bot, chat.id)
-            break
-          case 'success':
-          case 'error':
-            // Message already sent and state cleared by conversationManager
-            break
-        }
-        return // conversation consumed this message
-      }
-    }
-
-    // // /newgoal -> start new goal flow via backend conversations
-    // if (/^\/(newgoal)(@\w+)?$/i.test(rawText)) {
-    //   const NEW_GOAL_FLOW_ID = 'goals.new' // Backend flow id for creating a new goal
-    //   await startBackendFlow({
-    //     userId,
-    //     chatId: chat.id,
-    //     flowId: NEW_GOAL_FLOW_ID,
-    //     externalId: userId,
-    //   })
-    //   return
-    // }
-
-    // Other commands/messages can be handled here as needed
   } catch (err) {
     if (msg.chat?.id) {
       await bot.sendMessage(msg.chat.id, 'Sorry, something went wrong handling your message.')

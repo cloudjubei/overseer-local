@@ -4,7 +4,7 @@
 /* eslint-disable */
 import axios from 'axios'
 import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios'
-// import FormData from 'form-data';
+import FormData from 'form-data'
 
 import { ApiError } from './ApiError'
 import type { ApiRequestOptions } from './ApiRequestOptions'
@@ -152,6 +152,7 @@ export const resolve = async <T>(
 export const getHeaders = async (
   config: OpenAPIConfig,
   options: ApiRequestOptions,
+  formData?: FormData,
 ): Promise<Record<string, string>> => {
   const [token, username, password, additionalHeaders] = await Promise.all([
     resolve(options, config.TOKEN),
@@ -160,10 +161,13 @@ export const getHeaders = async (
     resolve(options, config.HEADERS),
   ])
 
+  const formHeaders = (typeof formData?.getHeaders === 'function' && formData?.getHeaders()) || {}
+
   const headers = Object.entries({
     Accept: 'application/json',
     ...additionalHeaders,
     ...options.headers,
+    ...formHeaders,
   })
     .filter(([_, value]) => isDefined(value))
     .reduce(
@@ -314,7 +318,7 @@ export const request = <T>(
       const url = getUrl(config, options)
       const formData = getFormData(options)
       const body = getRequestBody(options)
-      const headers = await getHeaders(config, options)
+      const headers = await getHeaders(config, options, formData)
 
       if (!onCancel.isCancelled) {
         const response = await sendRequest<T>(

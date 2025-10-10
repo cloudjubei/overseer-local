@@ -51,6 +51,9 @@ export async function handleAuthMessage(
     return true
   }
 
+  //TODO:
+  // Welcome to Compass — your daily check-in for clarity, wellbeing, and small wins.
+
   await ensureBackendConfigured()
 
   // If user replied with /cancel while pending, clear pending and acknowledge

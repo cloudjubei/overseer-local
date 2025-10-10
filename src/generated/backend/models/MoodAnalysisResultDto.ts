@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { AudioToneDto } from './AudioToneDto'
+import type { AudioToneModel } from './AudioToneModel'
 export type MoodAnalysisResultDto = {
   score: number
   label?: string
-  audioTone?: AudioToneDto
+  audioTone?: AudioToneModel
 }

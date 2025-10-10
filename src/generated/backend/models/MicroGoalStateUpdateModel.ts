@@ -2,14 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type GoalUpdateModel = {
-  state: GoalUpdateModel.state
-  /**
-   * ISO8601 timestamp when goal was completed
-   */
-  completedAt?: string
+export type MicroGoalStateUpdateModel = {
+  state: MicroGoalStateUpdateModel.state
 }
-export namespace GoalUpdateModel {
+export namespace MicroGoalStateUpdateModel {
   export enum state {
     ACTIVE = 'ACTIVE',
     CANCELLED = 'CANCELLED',

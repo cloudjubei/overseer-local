@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProfileUpdateModel = {
+export type UserProfileUpdateModel = {
   /**
    * Date of birth (YYYY-MM-DD)
    */
   dob?: string
-  gender?: ProfileUpdateModel.gender
+  gender?: UserProfileUpdateModel.gender
   /**
    * Raw user-entered weight (e.g., "82 kg", "180 lb", "11st 4lb")
    */
@@ -21,7 +21,7 @@ export type ProfileUpdateModel = {
    */
   timezone?: string
 }
-export namespace ProfileUpdateModel {
+export namespace UserProfileUpdateModel {
   export enum gender {
     MALE = 'MALE',
     FEMALE = 'FEMALE',

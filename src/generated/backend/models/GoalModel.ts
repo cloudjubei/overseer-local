@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { MoodAnalysisResultDto } from './MoodAnalysisResultDto'
 export type GoalModel = {
   /**
    * Goal id (UUID)
@@ -11,11 +12,16 @@ export type GoalModel = {
    * Owner user id
    */
   userId: string
+  /**
+   * Reference to another goal
+   */
+  referenceId: string
+  state: GoalModel.state
   type: GoalModel.type
-  category: GoalModel.category
-  difficulty: GoalModel.difficulty
+  category?: GoalModel.category
+  difficulty?: GoalModel.difficulty
   text: string
-  rating?: number
+  mood?: MoodAnalysisResultDto
   /**
    * ISO8601 timestamp
    */
@@ -28,9 +34,14 @@ export type GoalModel = {
    * ISO8601 timestamp when completed
    */
   completedAt?: string
-  state?: GoalModel.state
 }
 export namespace GoalModel {
+  export enum state {
+    ACTIVE = 'ACTIVE',
+    CANCELLED = 'CANCELLED',
+    FAIL = 'FAIL',
+    SUCCESS = 'SUCCESS',
+  }
   export enum type {
     MACRO = 'MACRO',
     MICRO = 'MICRO',
@@ -46,10 +57,5 @@ export namespace GoalModel {
     EASY = 'EASY',
     MEDIUM = 'MEDIUM',
     HARD = 'HARD',
-  }
-  export enum state {
-    ACTIVE = 'ACTIVE',
-    CANCELLED = 'CANCELLED',
-    DONE = 'DONE',
   }
 }

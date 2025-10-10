@@ -2,4 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ActivityLogModel = {}
+export type CreateMacroGoalModel = {
+  /**
+   * The text of the macro goal.
+   */
+  text: string
+}

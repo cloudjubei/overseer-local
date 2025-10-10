@@ -2,17 +2,22 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserProfileModel } from './UserProfileModel'
 export type UserModel = {
   /**
    * The unique identifier for the user.
    */
   id: string
   /**
-   * The user's name.
+   * The user's profile.
    */
-  name?: string
+  profile: UserProfileModel
   /**
    * The user's email address.
    */
   email?: string
+  /**
+   * The user's telegramId
+   */
+  telegramId?: string
 }

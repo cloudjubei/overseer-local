@@ -2,13 +2,16 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AudioToneDto = {
+export type AudioToneModel = {
   sentiment?: string
-  intensity?: AudioToneDto.intensity
+  intensity?: AudioToneModel.intensity
+  /**
+   * Confidence score 0..1
+   */
   confidence?: number
   notes?: string
 }
-export namespace AudioToneDto {
+export namespace AudioToneModel {
   export enum intensity {
     LOW = 'low',
     MEDIUM = 'medium',

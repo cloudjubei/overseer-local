@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ProfileCreateModel } from '../models/ProfileCreateModel'
-import type { ProfileUpdateModel } from '../models/ProfileUpdateModel'
+import type { LifestyleModel } from '../models/LifestyleModel'
 import type { UserProfileModel } from '../models/UserProfileModel'
+import type { UserProfileUpdateModel } from '../models/UserProfileUpdateModel'
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
@@ -21,23 +21,6 @@ export class ProfilesService {
     })
   }
   /**
-   * Create the current user profile
-   * @returns UserProfileModel
-   * @throws ApiError
-   */
-  public static profilesControllerCreate({
-    requestBody,
-  }: {
-    requestBody: ProfileCreateModel
-  }): CancelablePromise<UserProfileModel> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/profiles/me',
-      body: requestBody,
-      mediaType: 'application/json',
-    })
-  }
-  /**
    * Update the current user profile
    * @returns UserProfileModel
    * @throws ApiError
@@ -45,11 +28,28 @@ export class ProfilesService {
   public static profilesControllerUpdate({
     requestBody,
   }: {
-    requestBody: ProfileUpdateModel
+    requestBody: UserProfileUpdateModel
   }): CancelablePromise<UserProfileModel> {
     return __request(OpenAPI, {
       method: 'PATCH',
       url: '/profiles/me',
+      body: requestBody,
+      mediaType: 'application/json',
+    })
+  }
+  /**
+   * Add a new lifestyle entry to the current user profile
+   * @returns UserProfileModel
+   * @throws ApiError
+   */
+  public static profilesControllerAddLifestyle({
+    requestBody,
+  }: {
+    requestBody: LifestyleModel
+  }): CancelablePromise<UserProfileModel> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/profiles/me/lifestyle',
       body: requestBody,
       mediaType: 'application/json',
     })

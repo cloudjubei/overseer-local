@@ -95,7 +95,7 @@ export default async function actionJournalAudio(
 
     const header =
       '<b>Use this Journal for any thoughts</b>\n' +
-      '<i>Tap and hold the microphone to record a short voice message describing what how you feel.</i>'
+      '<i>Tap and hold the microphone to record a short voice message describing how you feel.</i>'
 
     await bot.sendMessage(chat.id, header, { parse_mode: 'HTML' })
     return true

@@ -13,11 +13,11 @@ import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class AdminService {
   /**
-   * List all user profiles
-   * @returns UsersListModel A paginated list of user profiles.
+   * List all users
+   * @returns UsersListModel A paginated list of users.
    * @throws ApiError
    */
-  public static adminControllerListUserProfiles({
+  public static adminControllerListUsers({
     nextCursor,
   }: {
     /**

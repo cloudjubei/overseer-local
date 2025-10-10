@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ActivityLogModel } from './ActivityLogModel'
+import type { UserActivityLogModel } from './UserActivityLogModel'
 export type UserActivityLogsListModel = {
-  items: Array<ActivityLogModel>
+  items: Array<UserActivityLogModel>
   /**
    * The cursor to use to fetch the next page of results.
    */
