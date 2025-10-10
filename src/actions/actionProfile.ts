@@ -78,7 +78,8 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
   const opts: SendMessageOptions = { parse_mode: 'HTML' }
   switch (step) {
     case 'name':
-      await bot.sendMessage(chatId, "<b>Let's set up your profile</b>\nWhat's your name?", opts)
+      // Updated per new spec: explicitly ask for the user's name
+      await bot.sendMessage(chatId, 'Please tell us your name', opts)
       return
     case 'dob':
       await bot.sendMessage(
@@ -269,6 +270,7 @@ function escapeHtml(input: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/\\"/g, '&quot;')
     .replace(/\"/g, '&quot;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')

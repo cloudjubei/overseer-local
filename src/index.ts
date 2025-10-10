@@ -1,7 +1,7 @@
 import TelegramBot, { CallbackQuery, ChatMemberUpdated, Message } from 'node-telegram-bot-api'
 import { config } from './config/env'
-import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser } from './lib/auth'
-import { getSession, setSession } from './lib/sessionStore'
+import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser, getTelegramUserId } from './lib/auth'
+import { getSession, setSession, isAuthenticated } from './lib/sessionStore'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { initScheduler } from './lib/scheduler'
@@ -16,7 +16,7 @@ import actionMacroGoal, {
 import actionMicroGoalsGenerate from './actions/actionMicroGoalsGenerate'
 import { ProfilesService, UserProfileModel } from './generated/backend'
 import { GoalModel } from './generated/backend/models/GoalModel'
-import {
+import actionMicroGoalsCheck, {
   areAllGoalsAddressed,
   buildMicroCheckKeyboard,
   buildMicroCheckMessage,
@@ -34,6 +34,7 @@ bot.setMyCommands(
     { command: 'start', description: 'Start the flow' },
     { command: 'journal', description: 'Create a text journal note' },
     { command: 'voice', description: 'Create an audio journal note' },
+    { command: 'test-evening', description: 'Trigger evening micro-goal check (test)' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
@@ -127,10 +128,30 @@ bot.on('message', async (msg: Message) => {
 
     // const userId = String(from.id)
     // const session = getSession(userId)
-    if (await handleAuthMessage(bot, msg)) return
+
+    const handledAuth = await handleAuthMessage(bot, msg)
+    if (handledAuth) {
+      // If the message was handled by auth and the user is now authenticated, immediately start onboarding
+      const uid = getTelegramUserId(msg)
+      if (uid && isAuthenticated(uid)) {
+        const started = await runOnboardingIfNeeded(bot, msg, '')
+        if (started) return
+      }
+      return
+    }
 
     const handledOnboarding = await runOnboardingIfNeeded(bot, msg, rawText)
     if (handledOnboarding) return
+
+    // Test command to trigger evening micro-goal check flow
+    if (rawText === '/test-evening' || rawText.startsWith('/test-evening ')) {
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(String(from.id))
+      } catch {}
+      await actionMicroGoalsCheck(bot, chat, from, rawText, msg)
+      return
+    }
 
     if (await actionJournal(bot, chat, from, rawText)) {
       return
@@ -351,6 +372,32 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           lastUpdatedAt: Math.floor(Date.now() / 1000),
         },
       })
+
+      // Echo the user's choice for clarity
+      const activityLabels: Record<number, { emoji: string; label: string }> = {
+        1: { emoji: '🛋️', label: 'Very low' },
+        2: { emoji: '🚶‍♂️', label: 'Light' },
+        3: { emoji: '🏃', label: 'Moderate' },
+        4: { emoji: '💪', label: 'High' },
+        5: { emoji: '🔥', label: 'Very high' },
+      }
+      const energyLabels: Record<number, { emoji: string; label: string }> = {
+        1: { emoji: '😴', label: 'Very low' },
+        2: { emoji: '😐', label: 'Low' },
+        3: { emoji: '🙂', label: 'Okay' },
+        4: { emoji: '😊', label: 'Good' },
+        5: { emoji: '🤩', label: 'Great' },
+      }
+
+      try {
+        if (kind === 'active') {
+          const m = activityLabels[val]
+          if (m) await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
+        } else if (kind === 'energy') {
+          const m = energyLabels[val]
+          if (m) await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+        }
+      } catch {}
 
       // Continue lifestyle flow
       try {
