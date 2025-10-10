@@ -10,12 +10,16 @@ export default async function actionMicroGoalsCheck(
 ) {
   // const result = await GoalsService.goalsControllerGet()
 
-  // Which of the 3 micro goals were completed?
+  // #EVENING CHECK IN#
+  // How did your day go? Which micro goals did you complete?
   // ✅ Goal 1 ❎
   // ✅ Goal 2 ❎
   // ✅ Goal 3 ❎
 
-  //call actionJournalNudge
+  // -- after user has updated all 3
+  // bot.sendMessage( 'Great! Thanks for these responses.')
+
+  // FLOW is complete - proceed to actionJournalNudge
 
   return true
 }

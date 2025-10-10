@@ -7,8 +7,13 @@ export default async function actionJournalNudge(
   rawText: string,
   msg: Message,
 ) {
-  // Would you like to record a short voice note about how today went?
-  // - input
+  // Would you like to leave a short voice note or type a few words about how the day felt?
+  // - input as text ->
+  // await JournalsService.journalsControllerCreateText()
+  // - input as audio ->
+  // await JournalsService.journalsControllerCreateAudio()
+  // -- before processing show a processing message similar to how `actionJournal` does it
+  // -- after, remove that and send below:
   // Thank you, have a great rest of the evening!
 
   return true

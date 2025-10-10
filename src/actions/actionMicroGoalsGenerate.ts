@@ -1,5 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { GoalsService } from 'src/generated/backend'
+import { GoalsService, JournalsService } from 'src/generated/backend'
 
 export default async function actionMicroGoalsGenerate(
   bot: TelegramBot,
@@ -16,17 +16,9 @@ export default async function actionMicroGoalsGenerate(
   // - goal3
 
   // We will check in with you in the evening to see how things went.
-  // At any time please feel free to use the journal function `/j` to send any thoughts you have about the goals or anything at all about your wellbeing.
+  // At any time please feel free to use the journal function `/journal` to send any thoughts you have about the goals or anything at all about your wellbeing.
 
-  // #EVENING CHECK IN#
-  // Which of the 3 micro goals were completed?
-  // ✅ Goal 1 ❎
-  // ✅ Goal 2 ❎
-  // ✅ Goal 3 ❎
-
-  // Would you like to record a short voice note about how today went?
-  // - input
-  // Thank you, have a great rest of the evening!
+  // FLOW is complete - user can use the app normally
 
   return true
 }

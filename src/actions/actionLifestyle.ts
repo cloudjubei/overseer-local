@@ -1,5 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { ProfilesService } from 'src/generated/backend'
+import { ProfilesService, UserProfileLifestyleModel } from 'src/generated/backend'
 
 export default async function actionLifestyle(
   bot: TelegramBot,
@@ -19,7 +19,8 @@ export default async function actionLifestyle(
   // 😴 Very low | 😐 Low | 🙂 Okay | 😊 Good | 🤩 Great
   // (same structure as above)
 
-  // update = await ProfilesService.profilesControllerAddLifestyle()
+  const newLifestyle: UserProfileLifestyleModel = { activeLevel: 0, energyLevel: 0 }
+  const update = await ProfilesService.profilesControllerAddLifestyle({ requestBody: newLifestyle })
 
   // FLOW is complete - proceed to actionMacroGoal
 
