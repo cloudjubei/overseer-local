@@ -53,6 +53,17 @@ export class CheckInsService {
     })
   }
   /**
+   * Clear all check-ins for user
+   * @returns void
+   * @throws ApiError
+   */
+  public static checkInsControllerClearCheckIns(): CancelablePromise<void> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/check-ins/all',
+    })
+  }
+  /**
    * Update a check-in by id
    * @returns CheckInModel
    * @throws ApiError
@@ -90,17 +101,6 @@ export class CheckInsService {
       path: {
         id: id,
       },
-    })
-  }
-  /**
-   * Clear all check-ins for user
-   * @returns void
-   * @throws ApiError
-   */
-  public static checkInsControllerClearCheckIns(): CancelablePromise<void> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/check-ins/all',
     })
   }
 }

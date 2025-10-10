@@ -13,6 +13,24 @@ import { OpenAPI } from '../core/OpenAPI'
 import { request as __request } from '../core/request'
 export class AdminService {
   /**
+   * Wipe all data for a specific user
+   * @returns void
+   * @throws ApiError
+   */
+  public static adminControllerWipeUserData({
+    userId,
+  }: {
+    userId: string
+  }): CancelablePromise<void> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/admin/users/{userId}',
+      path: {
+        userId: userId,
+      },
+    })
+  }
+  /**
    * List all users
    * @returns UsersListModel A paginated list of users.
    * @throws ApiError

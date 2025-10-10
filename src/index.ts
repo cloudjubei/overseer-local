@@ -1,6 +1,11 @@
 import TelegramBot, { CallbackQuery, ChatMemberUpdated, Message } from 'node-telegram-bot-api'
 import { config } from './config/env'
-import { handleAuthMessage, ensureBackendConfigured, ensureAccessTokenForUser, getTelegramUserId } from './lib/auth'
+import {
+  handleAuthMessage,
+  ensureBackendConfigured,
+  ensureAccessTokenForUser,
+  getTelegramUserId,
+} from './lib/auth'
 import { getSession, setSession, isAuthenticated } from './lib/sessionStore'
 import audioSuggestionAction from './actions/audioSuggestion'
 import { GoalsService } from './generated/backend/services/GoalsService'
@@ -392,10 +397,12 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       try {
         if (kind === 'active') {
           const m = activityLabels[val]
-          if (m) await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
+          if (m)
+            await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
         } else if (kind === 'energy') {
           const m = energyLabels[val]
-          if (m) await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+          if (m)
+            await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
         }
       } catch {}
 
