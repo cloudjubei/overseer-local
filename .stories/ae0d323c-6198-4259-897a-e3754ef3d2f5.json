@@ -115,7 +115,7 @@
     },
     {
       "id": "21f43cb9-aa1f-4d49-a625-efb3f8a6a123",
-      "status": "-",
+      "status": "+",
       "title": "when doing actionLifestyle - show user choices",
       "description": "as the user selects the options in @src/actions/actionLifestyle.ts after they've been selected - they disappear, so if the user looks back at the conversation they only see the bot messages.\nWe need to add the selection as a user message if possible, so they can see it clearly. If that's not possible - then the bot should send a message similar to how @src/actions/actionProfile.ts is done with Gender. (but if a message from the user can be sent - then we should do that instead for this case also. If the only way to do this is with the answers in the keyboard itself - let's do it).",
       "context": [
@@ -124,7 +124,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-10T22:52:14.143Z",
-      "updatedAt": "2025-10-10T22:52:14.143Z"
+      "updatedAt": "2025-10-10T23:05:19.623Z",
+      "completedAt": "2025-10-10T23:05:19.623Z"
     },
     {
       "id": "96ecbf78-6789-4b6a-b8a2-7d6676d21fa6",

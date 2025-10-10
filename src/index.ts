@@ -353,6 +353,32 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         },
       })
 
+      // Echo the user's choice for clarity
+      const activityLabels: Record<number, { emoji: string; label: string }> = {
+        1: { emoji: '🛋️', label: 'Very low' },
+        2: { emoji: '🚶‍♂️', label: 'Light' },
+        3: { emoji: '🏃', label: 'Moderate' },
+        4: { emoji: '💪', label: 'High' },
+        5: { emoji: '🔥', label: 'Very high' },
+      }
+      const energyLabels: Record<number, { emoji: string; label: string }> = {
+        1: { emoji: '😴', label: 'Very low' },
+        2: { emoji: '😐', label: 'Low' },
+        3: { emoji: '🙂', label: 'Okay' },
+        4: { emoji: '😊', label: 'Good' },
+        5: { emoji: '🤩', label: 'Great' },
+      }
+
+      try {
+        if (kind === 'active') {
+          const m = activityLabels[val]
+          if (m) await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
+        } else if (kind === 'energy') {
+          const m = energyLabels[val]
+          if (m) await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+        }
+      } catch {}
+
       // Continue lifestyle flow
       try {
         await actionLifestyle(bot, message.chat, cb.from, '', message)
