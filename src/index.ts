@@ -42,7 +42,7 @@ bot.setMyCommands(
     { command: 'start', description: 'Start the flow' },
     { command: 'journal', description: 'Create a text journal note' },
     { command: 'voice', description: 'Create an audio journal note' },
-    { command: 'testevening', description: 'Trigger evening micro-goal check (test)' },
+    // { command: 'testevening', description: 'Trigger evening micro-goal check (test)' },
   ],
   { scope: { type: 'all_private_chats' } },
 )
