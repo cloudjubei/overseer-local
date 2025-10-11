@@ -26,7 +26,7 @@ function nextLocalTime(hour: number, minute = 0): Date {
   return target
 }
 
-async function scheduleDailyCheckIns(chatId: number) {
+async function scheduleCheckIns(chatId: number) {
   const morning = nextLocalTime(9, 0)
   const evening = nextLocalTime(19, 0)
 
@@ -38,6 +38,7 @@ async function scheduleDailyCheckIns(chatId: number) {
       frequency: CheckInModel.frequency.DAILY,
       metadata: {
         message: '<b>Morning Reminder!</b>',
+        action: 'micro_goals_generate',
         chatId: chatId,
       },
     },
@@ -49,6 +50,22 @@ async function scheduleDailyCheckIns(chatId: number) {
       frequency: CheckInModel.frequency.DAILY,
       metadata: {
         message: '<b>Evening Check in!</b>',
+        action: 'micro_goals_check',
+        chatId: chatId,
+      },
+    },
+  })
+
+  const weeklyResetTime = new Date()
+  weeklyResetTime.setDate(weeklyResetTime.getDate() + 7)
+  weeklyResetTime.setHours(20, 0, 0, 0)
+
+  await CheckInsService.checkInsControllerAddCheckIn({
+    requestBody: {
+      start: weeklyResetTime.toISOString(),
+      frequency: CheckInModel.frequency.WEEKLY,
+      metadata: {
+        action: 'weekly_reset',
         chatId: chatId,
       },
     },
@@ -147,7 +164,7 @@ export async function processMacroInput(
     }
 
     // Schedule morning and evening check-ins with correct metadata including chatId
-    await scheduleDailyCheckIns(chatId)
+    await scheduleCheckIns(chatId)
 
     // Acknowledge success to the user and explain flow
     await bot.sendMessage(

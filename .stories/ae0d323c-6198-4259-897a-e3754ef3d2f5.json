@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "-",
+  "status": "+",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -165,7 +165,7 @@
     },
     {
       "id": "99591769-058e-418d-910a-f19820eb95d5",
-      "status": "-",
+      "status": "+",
       "title": "There needs to be a new check in generated at the end of a week",
       "description": "When generating a macro goal, apart from the morning and evening check-ins - there needs to be a checkin scheduled for a week ahead (so frequency weekly), an hour after the evening check in.\n\nthis should trigger a new flow that should be stored in its own file:\n\"actionWeeklyReset\" .\nThe user should be shown this message:\n\n    “This week you completed [X]% of your micro goals — great work 💪.\"\n\nWhere X will be the computed amount of all the micro goals for the given macro goal that is active.\n\nThen a 2nd message right after it should fire saying:\n\n\"Would you like to set a new weekly goal or continue building on this one?”\n\n    → Buttons: Continue | New Goal .\nContinue will then essentially do nothing functionally other than send the message:\n\"Great! Keep up the good work!\"\n\nand selectiong \"New Goal\" will trigger a new @src/actions/actionMacroGoal.ts",
       "context": [
@@ -173,7 +173,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-10T23:55:56.095Z",
-      "updatedAt": "2025-10-10T23:55:56.095Z"
+      "updatedAt": "2025-10-11T00:01:53.736Z",
+      "completedAt": "2025-10-11T00:01:53.736Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -193,5 +194,6 @@
     "99591769-058e-418d-910a-f19820eb95d5": 14
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:54:15.932Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z",
+  "completedAt": "2025-10-11T00:01:53.736Z"
 }

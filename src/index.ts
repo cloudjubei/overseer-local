@@ -29,6 +29,7 @@ import actionMicroGoalsCheck, {
   setStoredMicroCheck,
   toggleMicroGoalState,
 } from './actions/actionMicroGoalsCheck'
+import { handleWeeklyResetCallback } from './actions/actionWeeklyReset'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -318,6 +319,15 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         clearStoredMicroCheck(chatId, message.message_id)
         await bot.sendMessage(chatId, journalPrompt)
       }
+      return
+    }
+
+    if (data.startsWith('weekly_reset:')) {
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(String(cb.from.id))
+      } catch {}
+      await handleWeeklyResetCallback(bot, cb)
       return
     }
 

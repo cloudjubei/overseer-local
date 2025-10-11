@@ -7,6 +7,7 @@ import { CheckInModel, CheckInsService } from '../generated/backend'
 import { logger } from './logger'
 import actionMicroGoalsGenerate from '../actions/actionMicroGoalsGenerate'
 import actionMicroGoalsCheck from '../actions/actionMicroGoalsCheck'
+import actionWeeklyReset from '../actions/actionWeeklyReset'
 
 let scheduledTask: cron.ScheduledTask | null = null
 let botRef: TelegramBot | null = null
@@ -64,61 +65,6 @@ function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefin
   return undefined
 }
 
-function needsTelegramChatMetadata(
-  metadata: Record<string, any> | undefined,
-  chatId: number,
-  userId: string,
-): boolean {
-  // If there is already a top-level numeric chatId, we consider metadata sufficient and do not update.
-  // This matches the expectation that we shouldn't rewrite metadata when chatId is already present as number.
-  const topLevelChatId = (metadata as any)?.chatId
-  if (typeof topLevelChatId === 'number' && Number.isFinite(topLevelChatId)) return false
-
-  // Otherwise, we update if either the resolved chatId differs or telegram.userId is missing.
-  const existing = getChatIdFromMetadata(metadata)
-  if (existing !== chatId) return true
-  const hasUserId = !!(metadata as any)?.telegram?.userId
-  return !hasUserId
-}
-
-function mergeTelegramChatMetadata(
-  metadata: Record<string, any> | undefined,
-  chatId: number,
-  userId: string,
-): Record<string, any> {
-  const base: Record<string, any> = metadata && typeof metadata === 'object' ? { ...metadata } : {}
-  const telegram = { ...(base.telegram || {}) }
-  // Prefer a normalized structure
-  telegram.chatId = chatId
-  telegram.userId = userId
-  // also reflect at top-level for broader compatibility if consumers expect it
-  base.chatId = chatId
-  base.telegram = telegram
-  return base
-}
-
-async function ensureTelegramMetadata(ci: CheckInModel, chatId: number, userId: string) {
-  try {
-    if (!needsTelegramChatMetadata(ci.metadata as any, chatId, userId)) return
-    const newMeta = mergeTelegramChatMetadata(ci.metadata as any, chatId, userId)
-    await CheckInsService.checkInsControllerUpdateCheckIn({
-      id: ci.id,
-      requestBody: { metadata: newMeta },
-    })
-  } catch (err) {
-    // Non-fatal; continue sending
-    logger.warn(`Failed to update check-in metadata for ${ci.id}`, err)
-  }
-}
-
-function isMorningCheckInMessage(message: string): boolean {
-  return /\bmorning\b/i.test(message)
-}
-
-function isEveningCheckInMessage(message: string): boolean {
-  return /\bevening\b/i.test(message)
-}
-
 async function processUserCheckIns(userId: string, now: Date, nowHourStamp: string) {
   const session = getSession(userId)
   if (!session || !session.accessToken) return
@@ -148,89 +94,67 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         if (startDate.getTime() > now.getTime()) continue
         if (!sameHourOfDay(startDate, now)) continue
 
-        const message = getMessageFromMetadata(ci.metadata as any)
-        if (!message) continue
-
         const dedupeKey = `${userId}:${ci.id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
-        // Determine chatId strictly from metadata. If not present, skip.
-        const chatId = getChatIdFromMetadata(ci.metadata as any)
+        const metadata = ci.metadata as any
+        const action = metadata?.action
+        const message = getMessageFromMetadata(metadata)
+        const chatId = getChatIdFromMetadata(metadata)
+
+        if (!action && !message) continue
+
         if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
           logger.warn(`Skipping check-in ${ci.id} for user ${userId}: unable to determine chatId`)
           continue
         }
 
-        // Best-effort: persist telegram chat metadata so backend holds routing context
-        ensureTelegramMetadata(ci, chatId, userId).catch(() => {})
-
-        // If this is a morning check-in created by actionMacroGoal, trigger micro-goal generation instead of sending a plain message
-        if (isMorningCheckInMessage(message)) {
-          try {
-            if (!botRef) {
-              logger.warn(
-                'Scheduler bot reference is not initialized; cannot trigger micro-goal generation',
-              )
-            } else {
-              // Construct minimal chat/user/message objects; the action doesn't rely on their fields currently
-              const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
-              const from = {
-                id: chatId,
-                is_bot: false,
-                first_name: 'User',
-              } as unknown as TelegramBot.User
-              const fakeMsg = {
-                message_id: 0,
-                date: Math.floor(Date.now() / 1000),
-                chat: chat as any,
-                from: from as any,
-              } as unknown as TelegramBot.Message
-
-              await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg)
-            }
-            sentThisHour.add(dedupeKey)
-          } catch (err) {
-            logger.error(`Failed to trigger micro-goals generation for user ${userId}`, err)
-          }
+        if (!botRef) {
+          logger.warn('Scheduler bot reference is not initialized; cannot process check-in.')
           continue
         }
 
-        // If this is an evening check-in created by actionMacroGoal, trigger micro-goals check flow
-        if (isEveningCheckInMessage(message)) {
-          try {
-            if (!botRef) {
-              logger.warn(
-                'Scheduler bot reference is not initialized; cannot trigger micro-goal check',
-              )
-            } else {
-              const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
-              const from = {
-                id: chatId,
-                is_bot: false,
-                first_name: 'User',
-              } as unknown as TelegramBot.User
-              const fakeMsg = {
-                message_id: 0,
-                date: Math.floor(Date.now() / 1000),
-                chat: chat as any,
-                from: from as any,
-              } as unknown as TelegramBot.Message
-
-              await actionMicroGoalsCheck(botRef, chat, from, '', fakeMsg)
-            }
-            sentThisHour.add(dedupeKey)
-          } catch (err) {
-            logger.error(`Failed to trigger micro-goals check for user ${userId}`, err)
-          }
-          continue
-        }
-
-        // Default behavior: send the check-in message to the Telegram user
         try {
-          await botRef?.sendMessage(chatId, message)
+          if (action) {
+            const chat = { id: chatId, type: 'private' } as TelegramBot.Chat
+            const from = {
+              id: parseInt(userId, 10),
+              is_bot: false,
+              first_name: session.userProfile?.firstName || 'User',
+              username: session.userProfile?.username,
+            } as TelegramBot.User
+            const fakeMsg = {
+              message_id: 0, // Not used by actions
+              date: Math.floor(Date.now() / 1000),
+              chat,
+              from,
+            } as TelegramBot.Message
+
+            switch (action) {
+              case 'micro_goals_generate':
+                await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg)
+                break
+              case 'micro_goals_check':
+                await actionMicroGoalsCheck(botRef, chat, from, '', fakeMsg)
+                break
+              case 'weekly_reset':
+                await actionWeeklyReset(botRef, chatId, from)
+                break
+              default:
+                logger.warn(`Unknown check-in action '${action}' for user ${userId}`)
+                if (message) {
+                  await botRef.sendMessage(chatId, message, { parse_mode: 'HTML' })
+                }
+                break
+            }
+          } else if (message) {
+            // Fallback for check-ins without an action
+            await botRef.sendMessage(chatId, message, { parse_mode: 'HTML' })
+          }
+
           sentThisHour.add(dedupeKey)
         } catch (err) {
-          logger.error(`Failed to send check-in message to user ${userId}`, err)
+          logger.error(`Failed to process check-in ${ci.id} for user ${userId}`, err)
         }
       }
 
