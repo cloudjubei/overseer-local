@@ -154,7 +154,7 @@
     },
     {
       "id": "2d6112c5-6de1-465b-ad20-0bcf9d939f02",
-      "status": "-",
+      "status": "+",
       "title": "In the actionMicroGoalsCheck the UI needs updating",
       "description": "First - always show all micro goals for the given macro goal - even if they've been marked as finished before.\n\nSecond - once the user marks all 3 goals, we should send this message:\n\n“Would you like to leave a short voice note or type a few words about how the day felt?”\n\nAnd now the user can reply with either text (behaving as if they triggered the /journal command) or a voice memo (behaving as if they triggered the /voice command).",
       "context": [
@@ -162,8 +162,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-10T23:39:52.824Z",
-      "updatedAt": "2025-10-11T00:23:33.523Z",
-      "rejection": "After the journal prompt - if the user types in a message or sends a voice memo - send it as journal (i.e. follow the exact same way as the @src/actions/actionJournal.ts ). Currently nothing happens after typing text after the journal prompt shows."
+      "updatedAt": "2025-10-11T00:29:53.699Z",
+      "rejection": "After the journal prompt - if the user types in a message or sends a voice memo - send it as journal (i.e. follow the exact same way as the @src/actions/actionJournal.ts ). Currently nothing happens after typing text after the journal prompt shows.",
+      "completedAt": "2025-10-11T00:29:53.699Z"
     },
     {
       "id": "99591769-058e-418d-910a-f19820eb95d5",

@@ -95,9 +95,9 @@ export default async function actionMicroGoalsCheck(
 ) {
   const chatId = chat.id
   try {
-    // Initial fetch: current ACTIVE micro goals; limit to 3
-    const active = await GoalsService.goalsControllerListMicroGoalsByState({ state: 'ACTIVE' })
-    const list = (active || []).slice(0, 3)
+    // Fetch all micro goals for the current macro goal
+    const allMicroGoals = await GoalsService.goalsControllerListMicroGoals()
+    const list = allMicroGoals || []
 
     if (!list.length) {
       await bot.sendMessage(

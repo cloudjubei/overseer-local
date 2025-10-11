@@ -9,7 +9,11 @@ import {
 import { getSession, setSession, isAuthenticated } from './lib/sessionStore'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { initScheduler } from './lib/scheduler'
-import actionJournalAudio, { actionJournal } from './actions/actionJournal'
+import actionJournalAudio, {
+  actionJournal,
+  processAudioJournal,
+  processTextJournal,
+} from './actions/actionJournal'
 import actionProfile from './actions/actionProfile'
 import actionLifestyle from './actions/actionLifestyle'
 import actionMacroGoal, {
@@ -129,9 +133,18 @@ bot.on('message', async (msg: Message) => {
     if (!from || !chat) return
 
     const rawText = (msg.text || '').trim()
+    const userId = String(from.id)
+    const session = getSession(userId)
 
-    // const userId = String(from.id)
-    // const session = getSession(userId)
+    // Handle journal entry after micro-goals check-in
+    if (session?.conversationState?.lastAction === 'awaiting_journal_entry') {
+      if (msg.voice || msg.audio) {
+        await processAudioJournal(bot, chat, from, msg)
+      } else if (msg.text) {
+        await processTextJournal(bot, chat, from, rawText)
+      }
+      return // Handled
+    }
 
     const handledAuth = await handleAuthMessage(bot, msg)
     if (handledAuth) {
@@ -227,6 +240,22 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       const journalPrompt =
         'Would you like to leave a short voice note or type a few words about how the day felt?'
 
+      const setAwaitingJournalState = () => {
+        const userId = String(cb.from.id)
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId }),
+          conversationState: {
+            lastAction: 'awaiting_journal_entry',
+            flowId: '',
+          },
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+        })
+      }
+
       // microcheck:finish -> close the UI
       if (data === 'microcheck:finish') {
         try {
@@ -237,6 +266,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         } catch {}
         clearStoredMicroCheck(chatId, message.message_id)
         await bot.sendMessage(chatId, journalPrompt)
+        setAwaitingJournalState()
         return
       }
 
@@ -286,6 +316,26 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         target.state = newState
       } catch (err) {
         await bot.sendMessage(chatId, 'Failed to update this goal. Please try again.')
+        return
+      }
+
+      const allDone = store.every((g) => g.state === GoalModel.state.SUCCESS)
+
+      if (allDone) {
+        // All goals are checked, show prompt and set state
+        try {
+          const finalText = buildMicroCheckMessage(store)
+          await bot.editMessageText(finalText, {
+            chat_id: chatId,
+            message_id: message.message_id,
+            parse_mode: 'HTML',
+            reply_markup: { inline_keyboard: [] }, // remove keyboard
+          })
+        } catch {}
+
+        clearStoredMicroCheck(chatId, message.message_id)
+        await bot.sendMessage(chatId, journalPrompt)
+        setAwaitingJournalState()
         return
       }
 
