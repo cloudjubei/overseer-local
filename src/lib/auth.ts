@@ -45,6 +45,7 @@ export async function handleAuthMessage(
   // Returns true if this message was handled by auth flow (either processed or prompted), false otherwise
   const chatId = msg.chat.id
   const userId = getTelegramUserId(msg)
+  // clearSession(userId!)
   console.log('LELELE handleAuthMessage msg: ', msg)
   if (!userId) {
     await bot.sendMessage(chatId, 'Unable to determine your Telegram user id.')

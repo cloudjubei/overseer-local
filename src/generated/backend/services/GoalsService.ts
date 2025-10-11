@@ -63,14 +63,14 @@ export class GoalsService {
     })
   }
   /**
-   * Mark the current active goal as done
+   * Get the current active macro goal
    * @returns GoalModel
    * @throws ApiError
    */
-  public static goalsControllerMarkCurrentDone(): CancelablePromise<GoalModel> {
+  public static goalsControllerGetCurrentMacroGoal(): CancelablePromise<GoalModel> {
     return __request(OpenAPI, {
       method: 'PATCH',
-      url: '/goals/current/done',
+      url: '/goals/macro/current',
     })
   }
   /**
@@ -118,56 +118,6 @@ export class GoalsService {
       query: {
         limit: limit,
         nextCursor: nextCursor,
-      },
-    })
-  }
-  /**
-   * Get a goal by id
-   * @returns GoalModel
-   * @throws ApiError
-   */
-  public static goalsControllerGet({ id }: { id: string }): CancelablePromise<GoalModel> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/goals/{id}',
-      path: {
-        id: id,
-      },
-    })
-  }
-  /**
-   * Update a goal by id
-   * @returns GoalModel
-   * @throws ApiError
-   */
-  public static goalsControllerUpdate({
-    id,
-    requestBody,
-  }: {
-    id: string
-    requestBody: GoalUpdateModel
-  }): CancelablePromise<GoalModel> {
-    return __request(OpenAPI, {
-      method: 'PATCH',
-      url: '/goals/{id}',
-      path: {
-        id: id,
-      },
-      body: requestBody,
-      mediaType: 'application/json',
-    })
-  }
-  /**
-   * Delete a goal by id
-   * @returns StatusModel
-   * @throws ApiError
-   */
-  public static goalsControllerRemove({ id }: { id: string }): CancelablePromise<StatusModel> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/goals/{id}',
-      path: {
-        id: id,
       },
     })
   }
@@ -230,6 +180,74 @@ export class GoalsService {
       url: '/goals/micro/state/{state}',
       path: {
         state: state,
+      },
+    })
+  }
+  /**
+   * List micro goals for a specific macro goal
+   * @returns GoalModel
+   * @throws ApiError
+   */
+  public static goalsControllerListMicroGoalsForMacro({
+    id,
+  }: {
+    id: string
+  }): CancelablePromise<Array<GoalModel>> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/goals/macro/{id}/micro',
+      path: {
+        id: id,
+      },
+    })
+  }
+  /**
+   * Get a goal by id
+   * @returns GoalModel
+   * @throws ApiError
+   */
+  public static goalsControllerGet({ id }: { id: string }): CancelablePromise<GoalModel> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/goals/{id}',
+      path: {
+        id: id,
+      },
+    })
+  }
+  /**
+   * Update a goal by id
+   * @returns GoalModel
+   * @throws ApiError
+   */
+  public static goalsControllerUpdate({
+    id,
+    requestBody,
+  }: {
+    id: string
+    requestBody: GoalUpdateModel
+  }): CancelablePromise<GoalModel> {
+    return __request(OpenAPI, {
+      method: 'PATCH',
+      url: '/goals/{id}',
+      path: {
+        id: id,
+      },
+      body: requestBody,
+      mediaType: 'application/json',
+    })
+  }
+  /**
+   * Delete a goal by id
+   * @returns StatusModel
+   * @throws ApiError
+   */
+  public static goalsControllerRemove({ id }: { id: string }): CancelablePromise<StatusModel> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/goals/{id}',
+      path: {
+        id: id,
       },
     })
   }

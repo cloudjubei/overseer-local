@@ -2,6 +2,7 @@ import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { GoalsService } from 'src/generated/backend'
 import { GoalModel } from 'src/generated/backend/models/GoalModel'
 import { MicroGoalStateUpdateModel } from 'src/generated/backend/models/MicroGoalStateUpdateModel'
+import actionMacroGoal from './actionMacroGoal'
 
 // In-memory store mapping a message to its micro goals snapshot
 // Key: `${chatId}:${messageId}`
@@ -95,11 +96,13 @@ export default async function actionMicroGoalsCheck(
 ) {
   const chatId = chat.id
   try {
-    // Fetch all micro goals for the current macro goal
-    const allMicroGoals = await GoalsService.goalsControllerListMicroGoals()
-    const list = allMicroGoals || []
-
-    if (!list.length) {
+    const current = await GoalsService.goalsControllerGetCurrentMacroGoal()
+    if (!current) {
+      await actionMacroGoal(bot, chat, _from, _rawText, _msg)
+      return true
+    }
+    const microGoals = await GoalsService.goalsControllerListMicroGoalsForMacro({ id: current.id })
+    if (!microGoals.length) {
       await bot.sendMessage(
         chatId,
         'How did your day go? It looks like there are no micro goals to check right now.',
@@ -107,7 +110,7 @@ export default async function actionMicroGoalsCheck(
       return true
     }
 
-    const simplified: StoredMicroGoal[] = list.map((g) => ({
+    const simplified: StoredMicroGoal[] = microGoals.map((g) => ({
       id: g.id,
       text: g.text || '',
       state: g.state,
@@ -121,6 +124,7 @@ export default async function actionMicroGoalsCheck(
     // Persist the state snapshot for subsequent toggles
     setStoredMicroCheck(chatId, sent.message_id, simplified)
   } catch (err) {
+    console.log('err: ', err)
     await bot.sendMessage(
       chatId,
       'Sorry, I could not load your micro goals for check-in. Please try again later.',

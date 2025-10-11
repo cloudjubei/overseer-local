@@ -59,7 +59,10 @@ export default async function actionWeeklyReset(
     weeklyResetCallbackStore.set(keyFor(chatId, sent.message_id), { from })
   } catch (error) {
     console.error('actionWeeklyReset error:', error)
-    await bot.sendMessage(chatId, 'Something went wrong during the weekly review. Please try setting a new goal manually with /newgoal.')
+    await bot.sendMessage(
+      chatId,
+      'Something went wrong during the weekly review. Please try setting a new goal manually with /newgoal.',
+    )
   }
 }
 
@@ -75,7 +78,10 @@ export async function handleWeeklyResetCallback(
   const storedData = weeklyResetCallbackStore.get(keyFor(chatId, messageId))
   if (!storedData) {
     await bot.answerCallbackQuery(query.id)
-    await bot.editMessageText('This action has expired.', { chat_id: chatId, message_id: messageId })
+    await bot.editMessageText('This action has expired.', {
+      chat_id: chatId,
+      message_id: messageId,
+    })
     return
   }
   const { from } = storedData
