@@ -21,7 +21,6 @@ import actionMicroGoalsGenerate from './actions/actionMicroGoalsGenerate'
 import { ProfilesService, UserProfileModel } from './generated/backend'
 import { GoalModel } from './generated/backend/models/GoalModel'
 import actionMicroGoalsCheck, {
-  areAllGoalsAddressed,
   buildMicroCheckKeyboard,
   buildMicroCheckMessage,
   clearStoredMicroCheck,
@@ -225,8 +224,9 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         ensureAccessTokenForUser(String(cb.from.id))
       } catch {}
 
-      const journalPrompt = 'Would you like to leave a short voice note or type a few words about how the day felt?'
-      
+      const journalPrompt =
+        'Would you like to leave a short voice note or type a few words about how the day felt?'
+
       // microcheck:finish -> close the UI
       if (data === 'microcheck:finish') {
         try {
@@ -236,14 +236,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           )
         } catch {}
         clearStoredMicroCheck(chatId, message.message_id)
-
-        const store = getStoredMicroCheck(chatId, message.message_id)
-        if (store && areAllGoalsAddressed(store)) {
-          await bot.sendMessage(chatId, journalPrompt)
-        } else {
-          await bot.sendMessage(chatId, 'Great! Thanks for these responses.')
-        }
-
+        await bot.sendMessage(chatId, journalPrompt)
         return
       }
 
@@ -256,12 +249,12 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       // Best-effort reconstruction if store is missing
       if (!store) {
         try {
-          const allMicroGoals = await GoalsService.goalsControllerListMicroGoals()
-          const mapped = (allMicroGoals || []).map((g) => ({
-            id: g.id,
-            text: g.text || '',
-            state: g.state,
-          }))
+          const active = await GoalsService.goalsControllerListMicroGoalsByState({
+            state: 'ACTIVE',
+          })
+          const mapped = (active || [])
+            .slice(0, 3)
+            .map((g) => ({ id: g.id, text: g.text || '', state: g.state }))
           // Ensure the toggled goal is present
           if (!mapped.find((g) => g.id === goalId)) {
             try {
@@ -307,18 +300,6 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           reply_markup: newKeyboard,
         })
       } catch {}
-
-      // If all are addressed (not ACTIVE), close the flow automatically
-      if (areAllGoalsAddressed(store)) {
-        try {
-          await bot.editMessageReplyMarkup(
-            { inline_keyboard: [] },
-            { chat_id: chatId, message_id: message.message_id },
-          )
-        } catch {}
-        clearStoredMicroCheck(chatId, message.message_id)
-        await bot.sendMessage(chatId, journalPrompt)
-      }
       return
     }
 
