@@ -75,6 +75,77 @@ function dobFromAgeAsIso(age: number): string {
   return dt.toISOString()
 }
 
+function sanitizeChunk(s: string): string {
+  return s.replace(/\s+/g, ' ').trim()
+}
+
+function parseWeightHeightInput(text: string): { weightRaw: string; heightRaw: string } | null {
+  const input = (text || '').trim()
+  if (!input) return null
+
+  // 1) Comma-separated: '77 kg, 178 cm' (allow multiple commas in height)
+  if (input.includes(',')) {
+    const parts = input.split(',')
+    if (parts.length >= 2) {
+      const weightRaw = sanitizeChunk(parts[0])
+      const heightRaw = sanitizeChunk(parts.slice(1).join(','))
+      if (/\d/.test(weightRaw) && /\d/.test(heightRaw)) {
+        return { weightRaw, heightRaw }
+      }
+    }
+  }
+
+  // 2) Unit-aware extraction irrespective of order
+  const weightRegex = /(\d+[\d\.,]*)\s*(kg|kgs?|kilograms?|lb|lbs|pounds?)\b/i
+  const heightFtInCombinedRegex = /(\d+)\s*(?:ft|')\s*(\d+)?\s*(?:in|"|inches)?\b/i
+  const heightCmRegex = /(\d+[\d\.,]*)\s*(cm|m|meters?|meter)\b/i
+  const heightInRegex = /(\d+[\d\.,]*)\s*(in|inch|inches|"|”)+\b/i
+
+  const wMatch = input.match(weightRegex)
+  // Try multiple height formats
+  const hMatchFtIn = input.match(heightFtInCombinedRegex)
+  const hMatchCm = input.match(heightCmRegex)
+  const hMatchIn = input.match(heightInRegex)
+
+  let hMatch: RegExpMatchArray | null = null
+  if (hMatchFtIn) hMatch = hMatchFtIn
+  else if (hMatchCm) hMatch = hMatchCm
+  else if (hMatchIn) hMatch = hMatchIn
+
+  if (wMatch && hMatch) {
+    // Extract matched substrings as raw chunks
+    const weightRaw = sanitizeChunk(wMatch[0])
+    const heightRaw = sanitizeChunk(hMatch[0])
+    return { weightRaw, heightRaw }
+  }
+
+  // 3) Generic whitespace split by locating first and second numeric groups: '70kg 170cm', '150 lbs 6 "'
+  // Find first digit occurrence
+  const firstNumIdx = input.search(/\d/)
+  if (firstNumIdx === -1) return null
+  const afterFirst = input.slice(firstNumIdx + 1)
+  const secondRelIdx = afterFirst.search(/\b\d/)
+  if (secondRelIdx === -1) return null
+  const secondNumIdx = firstNumIdx + 1 + secondRelIdx
+
+  let weightRaw = sanitizeChunk(input.slice(firstNumIdx, secondNumIdx))
+  let heightRaw = sanitizeChunk(input.slice(secondNumIdx))
+
+  // Validate both chunks contain a digit
+  if (!/\d/.test(weightRaw) || !/\d/.test(heightRaw)) return null
+
+  // If units clearly indicate swapped order (e.g., first chunk has height-only units and second has weight units), reorder
+  const isWeightLike = (s: string) => /(kg|kgs?|kilograms?|lb|lbs|pounds?)/i.test(s)
+  const isHeightLike = (s: string) => /(cm|m|meters?|meter|ft|'|in|inch|inches|"|”)/i.test(s)
+  if (isHeightLike(weightRaw) && isWeightLike(heightRaw)) {
+    const tmp = weightRaw
+    weightRaw = heightRaw
+    heightRaw = tmp
+  }
+
+  return { weightRaw, heightRaw }
+}
+
 async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep) {
   const opts: SendMessageOptions = { parse_mode: 'HTML' }
   switch (step) {
@@ -205,29 +276,16 @@ export default async function actionProfile(
       return true
     }
 
-    // Expect two values separated by a comma, e.g., '77 kg, 178 cm'
-    const parts = text.split(',')
-    if (parts.length < 2) {
+    const parsed = parseWeightHeightInput(text)
+    if (!parsed) {
       await bot.sendMessage(
         chat.id,
-        'Please provide both weight and height separated by a comma, e.g., 77 kg, 178 cm.',
+        'Please provide both weight and height, e.g., 77 kg, 178 cm. You can also write 70kg 170cm or 150 lbs 6 ".',
       )
       return true
     }
 
-    const weightRaw = parts[0].trim()
-    const heightRaw = parts.slice(1).join(',').trim() // in case user had commas in height format, join back
-
-    const hasWeightNumber = /\d/.test(weightRaw)
-    const hasHeightNumber = /\d/.test(heightRaw)
-
-    if (!weightRaw || !heightRaw || !hasWeightNumber || !hasHeightNumber) {
-      await bot.sendMessage(
-        chat.id,
-        'Please provide both weight and height in a clear format, e.g., 77 kg, 178 cm.',
-      )
-      return true
-    }
+    const { weightRaw, heightRaw } = parsed
 
     await ProfilesService.profilesControllerUpdate({
       requestBody: { weight_raw: weightRaw, height_raw: heightRaw },
