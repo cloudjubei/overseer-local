@@ -265,7 +265,7 @@
     },
     {
       "id": "75dffb8b-a38a-43aa-978d-2accfaf86545",
-      "status": "-",
+      "status": "+",
       "title": "After the user sends the macro goal clear the keyboard",
       "description": "We are showing the keyboard to pick suggestions when a user has to choose a macro goal, this needs to be cleared once something gets submitted (be it text, a picked suggestion or an audio file). This is in\n@src/actions/actionMacroGoal.ts",
       "context": [
@@ -273,7 +273,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-14T15:07:35.839Z",
-      "updatedAt": "2025-10-14T15:07:35.839Z"
+      "updatedAt": "2025-10-14T15:10:11.723Z",
+      "completedAt": "2025-10-14T15:10:11.723Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -301,5 +302,6 @@
     "75dffb8b-a38a-43aa-978d-2accfaf86545": 22
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:54:15.932Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z",
+  "completedAt": "2025-10-14T15:10:11.723Z"
 }
