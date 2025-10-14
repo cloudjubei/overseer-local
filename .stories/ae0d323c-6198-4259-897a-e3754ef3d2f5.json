@@ -237,7 +237,7 @@
     },
     {
       "id": "6300ef47-155a-47e9-ba88-b5f216094025",
-      "status": "-",
+      "status": "+",
       "title": "When showing macro goal suggestions, use the non-inline keyboard",
       "description": "In @src/common/keyboards.ts we have keyboard uis made to accommodate user responses using them.\nIt uses this hidden character '‎' prepended to the front of the user presented input, and when the user selects it - we know how many of that character are present in the selection so we know how to proceed. If there's an easier way to do this in Telegram's methodology then we should do that, but if not, we should continue with this approach.\nFor this task @src/actions/actionMacroGoal.ts needs to change and show the 3 macro goal suggestions using this keyboard.",
       "context": [
@@ -246,7 +246,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-14T09:39:53.953Z",
-      "updatedAt": "2025-10-14T09:39:53.953Z"
+      "updatedAt": "2025-10-14T11:31:01.736Z",
+      "completedAt": "2025-10-14T11:31:01.736Z"
     },
     {
       "id": "404abdd3-1cff-4535-bae9-2f3af561a858",

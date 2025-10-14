@@ -9,10 +9,15 @@ import {
 import { downloadTelegramAudioFile } from 'src/lib/files'
 import actionMicroGoalsGenerate from './actionMicroGoalsGenerate'
 import { sleep } from 'src/lib/time'
+import { buildSuggestionKeyboard } from 'src/common/keyboards'
+import { buildSuggestionMessageText } from './suggestionRenderer'
 
 // In-memory store to map suggestion lists per message for callback selections
 // Keyed by `${chatId}:${messageId}` -> suggestions array
 const macroSuggestionStore = new Map<string, GoalSuggestedModel[]>()
+
+// In-memory store to map latest suggestion list per chat for non-inline keyboard selections
+const macroChatSuggestions = new Map<number, GoalSuggestedModel[]>()
 
 function keyFor(chatId: number, messageId: number) {
   return `${chatId}:${messageId}`
@@ -73,20 +78,12 @@ async function scheduleCheckIns(chatId: number) {
   })
 }
 
-function buildMacroSuggestionKeyboard(
-  suggestions: GoalSuggestedModel[],
-): TelegramBot.InlineKeyboardMarkup {
-  const rows: TelegramBot.InlineKeyboardButton[][] = []
-  suggestions.forEach((sug, idx) => {
-    const n = idx + 1
-    rows.push([
-      {
-        text: `${n} • ${sug.summary}`,
-        callback_data: `macro:suggest:${idx}`,
-      },
-    ])
-  })
-  return { inline_keyboard: rows }
+// Utility: count the number of hidden prefix characters used in our reply keyboards
+function countHiddenPrefix(text: string): number {
+  const HIDDEN = '‎' // U+200E LEFT-TO-RIGHT MARK
+  let i = 0
+  while (i < text.length && text[i] === HIDDEN) i++
+  return i
 }
 
 export default async function actionMacroGoal(
@@ -99,10 +96,38 @@ export default async function actionMacroGoal(
 ) {
   const chatId = chat.id
 
-  // If the current message already carries input (audio or text), process it immediately
+  // If the current message already carries input (audio) -> process immediately
   const hasVoice = !!msg.voice || !!msg.audio
   const hasText = !!rawText && rawText.trim().length > 0
-  if (hasVoice || hasText) {
+
+  // Handle selection from our non-inline suggestion keyboard
+  if (hasText) {
+    const hiddenCount = countHiddenPrefix(rawText)
+    if (hiddenCount > 0) {
+      const idx = hiddenCount - 1
+      const suggestions = macroChatSuggestions.get(chatId) || []
+      if (suggestions.length > 0) {
+        // Refine option is appended after N suggestions, so handle that explicitly
+        if (idx === suggestions.length) {
+          await bot.sendMessage(
+            chatId,
+            'Tell me a bit more about what you want to focus on. You can type or send a voice message.',
+          )
+          return true
+        }
+
+        const picked = suggestions[idx]
+        if (picked) {
+          await processMacroInput(bot, chat, from, '', msg, picked.summary)
+          return true
+        }
+      }
+      // If we had a hidden prefix but no stored suggestions, ignore and fall through to normal text handling
+    }
+  }
+
+  // If user sent free text or voice, treat as custom macro (skip suggestions)
+  if (hasVoice || (hasText && countHiddenPrefix(rawText) === 0)) {
     await processMacroInput(bot, chat, from, rawText, msg)
     return true
   }
@@ -113,20 +138,25 @@ export default async function actionMacroGoal(
     await sleep(2000)
   }
 
-  const intro =
+  const introHeader =
     'What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?\nYou can type it in or send a voice message.\n\nHere are a few ideas if you need inspiration:'
 
   // Fetch suggestions
-  const suggestions: GoalSuggestedModel[] =
+  const allSuggestions: GoalSuggestedModel[] =
     await GoalsService.goalsControllerGenerateMacroGoalSuggestions()
+  const suggestions = (allSuggestions || []).slice(0, 3)
 
-  // Send prompt with inline keyboard of suggestions
-  const sent = await bot.sendMessage(chatId, intro, {
-    reply_markup: buildMacroSuggestionKeyboard(suggestions.slice(0, 3)),
+  // Render message body listing options fully to avoid clipping, then show non-inline keyboard
+  const text = buildSuggestionMessageText({ headerMessage: introHeader, suggestions })
+  await bot.sendMessage(chatId, text, {
+    parse_mode: 'HTML',
+    reply_markup: buildSuggestionKeyboard(suggestions, false),
   })
-  macroSuggestionStore.set(keyFor(chatId, sent.message_id), suggestions)
 
-  // No immediate input to process; wait for user reply or suggestion tap
+  // Save for subsequent selection mapping
+  macroChatSuggestions.set(chatId, suggestions)
+
+  // No immediate input to process; wait for user reply/selection or voice/text
   return false
 }
 
@@ -148,7 +178,7 @@ export async function processMacroInput(
 
     let created: GoalModel | null = null
 
-    // Priority: if a suggestion text was provided via callback
+    // Priority: if a suggestion text was provided via selection
     if (pickedSuggestionText && pickedSuggestionText.trim()) {
       created = await GoalsService.goalsControllerCreateMacroGoalFromText({
         requestBody: { text: pickedSuggestionText.trim() },
@@ -161,8 +191,10 @@ export async function processMacroInput(
         formData: { file: blob },
       })
     } else if (rawText && rawText.trim()) {
+      // Strip any hidden-prefix characters if the user typed or pasted them accidentally
+      const cleaned = rawText.replace(/^‎+/, '')
       created = await GoalsService.goalsControllerCreateMacroGoalFromText({
-        requestBody: { text: rawText.trim() },
+        requestBody: { text: cleaned.trim() },
       })
     }
 
@@ -181,14 +213,14 @@ export async function processMacroInput(
     console.error('ActionMacroGoal error: ', e)
     await bot.sendMessage(chatId, 'Sorry, I could not create your macro goal. Please try again.')
   } finally {
-    // Attempt to remove the 'Processing...' message
+    // Attempt to remove the "Processing..." message
     try {
       await bot.deleteMessage(chatId, processingMsg.message_id)
     } catch {}
   }
 }
 
-// Expose helpers for callback handlers
+// Expose helpers for callback handlers (legacy inline support retained)
 export function getMacroSuggestionsForMessage(chatId: number, messageId: number) {
   return macroSuggestionStore.get(keyFor(chatId, messageId)) || []
 }
