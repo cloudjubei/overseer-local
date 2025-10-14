@@ -120,8 +120,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
             const from = {
               id: parseInt(userId, 10),
               is_bot: false,
-              first_name: session.userProfile?.firstName || 'User',
-              username: session.userProfile?.username,
+              first_name: 'User',
             } as TelegramBot.User
             const fakeMsg = {
               message_id: 0, // Not used by actions
@@ -132,7 +131,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
 
             switch (action) {
               case 'micro_goals_generate':
-                await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg)
+                await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg, false)
                 break
               case 'micro_goals_check':
                 await actionMicroGoalsCheck(botRef, chat, from, '', fakeMsg)

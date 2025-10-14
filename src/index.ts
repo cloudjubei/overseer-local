@@ -6,7 +6,7 @@ import {
   ensureAccessTokenForUser,
   getTelegramUserId,
 } from './lib/auth'
-import { getSession, setSession, isAuthenticated } from './lib/sessionStore'
+import { getSession, setSession, isAuthenticated, clearSession } from './lib/sessionStore'
 import { GoalsService } from './generated/backend/services/GoalsService'
 import { initScheduler } from './lib/scheduler'
 import actionJournalAudio, {
@@ -136,6 +136,7 @@ bot.on('message', async (msg: Message) => {
     const rawText = (msg.text || '').trim()
     const userId = String(from.id)
     const session = getSession(userId)
+    // clearSession(userId)
 
     // Handle journal entry after micro-goals check-in
     if (session?.conversationState?.lastAction === 'awaiting_journal_entry') {

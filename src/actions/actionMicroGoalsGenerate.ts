@@ -41,46 +41,55 @@ export default async function actionMicroGoalsGenerate(
   from: TelegramBot.User,
   _rawText: string,
   _msg: Message,
+  skipEnergyLevels: boolean = true,
 ) {
   const chatId = chat.id
   const userId = String(from?.id || chatId)
 
   // 1) Ensure we have today's energy first; if not, prompt and store pending state
-  try {
-    const session = getSession(userId)
-    const ctx = session?.conversationState?.context || {}
-    const energyValue = ctx?.morningEnergy as number | undefined
-    const energyDate = ctx?.morningEnergyDate as string | undefined
-    const today = todayStamp()
+  if (!skipEnergyLevels) {
+    try {
+      const session = getSession(userId)
+      const ctx = session?.conversationState?.context || {}
+      const energyValue = ctx?.morningEnergy as number | undefined
+      const energyDate = ctx?.morningEnergyDate as string | undefined
+      const today = todayStamp()
 
-    const hasTodayEnergy =
-      typeof energyValue === 'number' && energyValue >= 1 && energyValue <= 5 && energyDate === today
+      const hasTodayEnergy =
+        typeof energyValue === 'number' &&
+        energyValue >= 1 &&
+        energyValue <= 5 &&
+        energyDate === today
 
-    if (!hasTodayEnergy) {
-      // Set conversation state indicating we are awaiting morning energy
-      setSession({
-        ...(session || { userId }),
-        accessToken: session?.accessToken || '',
-        idToken: session?.idToken,
-        refreshToken: session?.refreshToken,
-        expiresAt: session?.expiresAt,
-        conversationState: {
-          lastAction: 'morning_energy',
-          flowId: 'morning_energy',
-          ...(session?.conversationState || {}),
-          context: {
-            ...(ctx || {}),
+      if (!hasTodayEnergy) {
+        // Set conversation state indicating we are awaiting morning energy
+        setSession({
+          ...(session || { userId }),
+          accessToken: session?.accessToken || '',
+          idToken: session?.idToken,
+          refreshToken: session?.refreshToken,
+          expiresAt: session?.expiresAt,
+          conversationState: {
+            lastAction: 'morning_energy',
+            flowId: 'morning_energy',
+            ...(session?.conversationState || {}),
+            context: {
+              ...(ctx || {}),
+            },
+            lastUpdatedAt: Math.floor(Date.now() / 1000),
           },
-          lastUpdatedAt: Math.floor(Date.now() / 1000),
-        },
-      })
+        })
 
-      const header = '<b>Before we plan today</b>\nHow’s your energy and wellbeing right now?'
-      await bot.sendMessage(chatId, header, { parse_mode: 'HTML', reply_markup: buildMorningEnergyKeyboard() })
-      return true
+        const header = '<b>Before we plan today</b>\nHow’s your energy and wellbeing right now?'
+        await bot.sendMessage(chatId, header, {
+          parse_mode: 'HTML',
+          reply_markup: buildMorningEnergyKeyboard(),
+        })
+        return true
+      }
+    } catch (e) {
+      // Non-blocking; if session read fails, we simply proceed to generation
     }
-  } catch (e) {
-    // Non-blocking; if session read fails, we simply proceed to generation
   }
 
   // 2) Generate micro goals now that energy has been captured (or if not required)
@@ -102,7 +111,7 @@ export default async function actionMicroGoalsGenerate(
     console.error(err)
     await bot.sendMessage(
       chatId,
-      'Sorry, I could not generate today\'s micro goals. Please try again later.',
+      "Sorry, I could not generate today's micro goals. Please try again later.",
     )
   }
 

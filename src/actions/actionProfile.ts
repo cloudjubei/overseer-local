@@ -154,11 +154,7 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
       await bot.sendMessage(chatId, 'Please tell us your name', opts)
       return
     case 'dob':
-      await bot.sendMessage(
-        chatId,
-        '<b>Age</b>\nWhat is your age? You can reply with just a number (e.g., <code>46</code>).',
-        opts,
-      )
+      await bot.sendMessage(chatId, '<b>Age</b>\nWhat is your age? (e.g. <code>46</code>).', opts)
       return
     case 'gender': {
       const keyboard = {
@@ -278,10 +274,7 @@ export default async function actionProfile(
 
     const parsed = parseWeightHeightInput(text)
     if (!parsed) {
-      await bot.sendMessage(
-        chat.id,
-        'Please provide both weight and height, e.g., 77 kg, 178 cm. You can also write 70kg 170cm or 150 lbs 6 ".',
-      )
+      await bot.sendMessage(chat.id, 'Please provide both weight and height, e.g., 77 kg, 178 cm.')
       return true
     }
 
