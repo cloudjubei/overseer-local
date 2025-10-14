@@ -54,23 +54,25 @@ function clearProfileStep(userId: string) {
   }
 }
 
-function isValidDateYYYYMMDD(input: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) return false
-  const [yStr, mStr, dStr] = input.split('-')
-  const y = Number(yStr)
-  const m = Number(mStr)
-  const d = Number(dStr)
-  if (y < 1900 || y > new Date().getFullYear()) return false
-  if (m < 1 || m > 12) return false
-  const dt = new Date(input + 'T00:00:00Z')
-  if (Number.isNaN(dt.getTime())) return false
-  // Ensure month/day align (e.g., reject 2023-02-30)
-  return (
-    dt.getUTCFullYear() === y &&
-    dt.getUTCMonth() + 1 === m &&
-    dt.getUTCDate() === d &&
-    dt <= new Date()
-  )
+function parseAge(input: string): number | null {
+  // Accept formats like: 46, 46y, 46yo, 46 yrs, 46 years, age 46, I'm 46
+  const trimmed = (input || '').toLowerCase().replace(/[,\.]/g, ' ').trim()
+  const match = trimmed.match(/\b(\d{1,3})\b/)
+  if (!match) return null
+  const age = parseInt(match[1], 10)
+  if (!Number.isFinite(age)) return null
+  if (age < 1 || age > 120) return null
+  return age
+}
+
+function dobFromAgeAsIso(age: number): string {
+  const now = new Date()
+  const y = now.getUTCFullYear() - age
+  const m = now.getUTCMonth() // 0-11
+  const d = now.getUTCDate() // 1-31
+  // Construct at midnight UTC to avoid TZ ambiguity
+  const dt = new Date(Date.UTC(y, m, d, 0, 0, 0, 0))
+  return dt.toISOString()
 }
 
 async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep) {
@@ -83,7 +85,7 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
     case 'dob':
       await bot.sendMessage(
         chatId,
-        '<b>Date of birth</b>\nPlease enter your date of birth in the format <code>YYYY-MM-DD</code>.',
+        '<b>Age</b>\nWhat is your age? You can reply with just a number (e.g., <code>46</code>).',
         opts,
       )
       return
@@ -168,16 +170,24 @@ export default async function actionProfile(
       await promptForStep(bot, chat.id, 'dob')
       return true
     }
-    if (!isValidDateYYYYMMDD(text)) {
+
+    const age = parseAge(text)
+    if (age === null) {
       await bot.sendMessage(
         chat.id,
-        "<b>That doesn't look right.</b>\nPlease enter your date in <code>YYYY-MM-DD</code> format (e.g., 1990-06-21).",
+        '<b>That does not look like an age.</b>\nPlease reply with a number like <code>46</code>.',
         { parse_mode: 'HTML' },
       )
       return true
     }
-    await ProfilesService.profilesControllerUpdate({ requestBody: { dob: text } })
-    await bot.sendMessage(chat.id, `Got it — DOB: <b>${text}</b>`, { parse_mode: 'HTML' })
+
+    const dobIso = dobFromAgeAsIso(age)
+
+    await ProfilesService.profilesControllerUpdate({ requestBody: { dob: dobIso } })
+    await bot.sendMessage(
+      chat.id,
+      `Got it — ${age}. Thanks, that helps me understand your stage in life 💪.`,
+    )
     // fall through to next prompt
   }
 

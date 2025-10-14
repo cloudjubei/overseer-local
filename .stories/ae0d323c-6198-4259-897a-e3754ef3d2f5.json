@@ -202,7 +202,7 @@
     },
     {
       "id": "55250382-a5c5-4778-8364-eb560ad09bed",
-      "status": "-",
+      "status": "+",
       "title": "Capture age instead of date of birth",
       "description": "In @src/index.ts we capture the date of birth, but this is hard for a user to type. So asking for age is easier. The backend input expects a date, so we simply record today's date and subtract the age of the user as the input and pass it as the dob field (the saved string needs to be an ISO timestamp).\nWhen the user submits, we confirm with (example for 46):\n\n“Got it — 46. Thanks, that helps me understand your stage in life 💪.”",
       "context": [
@@ -210,7 +210,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-14T09:02:19.863Z",
-      "updatedAt": "2025-10-14T11:13:20.937Z"
+      "updatedAt": "2025-10-14T11:21:15.581Z",
+      "completedAt": "2025-10-14T11:21:15.581Z"
     },
     {
       "id": "e2e560c3-eaa4-4318-aeec-ce4eddab8d63",
