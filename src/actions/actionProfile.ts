@@ -4,7 +4,7 @@ import { getSession, setSession } from 'src/lib/sessionStore'
 import actionLifestyle from './actionLifestyle'
 
 // Profile onboarding steps in order
-type ProfileStep = 'name' | 'dob' | 'gender' | 'weight' | 'height' | 'done'
+type ProfileStep = 'name' | 'dob' | 'gender' | 'metrics' | 'done'
 
 function nextMissingStep(p: UserProfileModel | undefined | null): ProfileStep {
   if (!p) return 'name'
@@ -12,9 +12,8 @@ function nextMissingStep(p: UserProfileModel | undefined | null): ProfileStep {
   if (!p.dob) return 'dob'
   if (!p.gender) return 'gender'
   const hasWeight = typeof p.weight === 'number' || !!p.weight_raw
-  if (!hasWeight) return 'weight'
   const hasHeight = typeof p.height === 'number' || !!p.height_raw
-  if (!hasHeight) return 'height'
+  if (!hasWeight || !hasHeight) return 'metrics'
   return 'done'
 }
 
@@ -104,18 +103,11 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
       })
       return
     }
-    case 'weight':
+    case 'metrics':
       await bot.sendMessage(
         chatId,
-        '<b>Weight</b>\nPlease tell us your weight (e.g., 82 kg, 180 lb, 11st 4lb).',
-        opts,
-      )
-      return
-    case 'height':
-      await bot.sendMessage(
-        chatId,
-        "<b>Height</b>\nPlease tell us your height (e.g., 175 cm, 1.75 m, 5'11').",
-        opts,
+        'Please tell me your weight and height (e.g., 77 kg, 178 cm).',
+        {},
       )
       return
     case 'done':
@@ -196,59 +188,42 @@ export default async function actionProfile(
     return true
   }
 
-  if (step === 'weight') {
+  if (step === 'metrics') {
     if (!text) {
-      setProfileStep(userId, 'weight')
-      await promptForStep(bot, chat.id, 'weight')
+      setProfileStep(userId, 'metrics')
+      await promptForStep(bot, chat.id, 'metrics')
       return true
     }
-    const weightRaw = text
-    if (!weightRaw.trim()) {
-      await bot.sendMessage(
-        chat.id,
-        '<b>Please provide your weight</b>\nExamples: 82 kg, 180 lb, 11st 4lb.',
-        { parse_mode: 'HTML' },
-      )
-      return true
-    }
-    await ProfilesService.profilesControllerUpdate({
-      requestBody: { weight_raw: weightRaw.trim() },
-    })
-    await bot.sendMessage(
-      chat.id,
-      `Thanks — recorded weight: <b>${escapeHtml(weightRaw.trim())}</b>`,
-      {
-        parse_mode: 'HTML',
-      },
-    )
-    // fall through to next prompt
-  }
 
-  if (step === 'height') {
-    if (!text) {
-      setProfileStep(userId, 'height')
-      await promptForStep(bot, chat.id, 'height')
-      return true
-    }
-    const heightRaw = text
-    if (!heightRaw.trim()) {
+    // Expect two values separated by a comma, e.g., '77 kg, 178 cm'
+    const parts = text.split(',')
+    if (parts.length < 2) {
       await bot.sendMessage(
         chat.id,
-        "<b>Please provide your height</b>\nExamples: 175 cm, 1.75 m, 5'11'.",
-        { parse_mode: 'HTML' },
+        'Please provide both weight and height separated by a comma, e.g., 77 kg, 178 cm.',
       )
       return true
     }
+
+    const weightRaw = parts[0].trim()
+    const heightRaw = parts.slice(1).join(',').trim() // in case user had commas in height format, join back
+
+    const hasWeightNumber = /\d/.test(weightRaw)
+    const hasHeightNumber = /\d/.test(heightRaw)
+
+    if (!weightRaw || !heightRaw || !hasWeightNumber || !hasHeightNumber) {
+      await bot.sendMessage(
+        chat.id,
+        'Please provide both weight and height in a clear format, e.g., 77 kg, 178 cm.',
+      )
+      return true
+    }
+
     await ProfilesService.profilesControllerUpdate({
-      requestBody: { height_raw: heightRaw.trim() },
+      requestBody: { weight_raw: weightRaw, height_raw: heightRaw },
     })
-    await bot.sendMessage(
-      chat.id,
-      `Great — recorded height: <b>${escapeHtml(heightRaw.trim())}</b>`,
-      {
-        parse_mode: 'HTML',
-      },
-    )
+
+    await bot.sendMessage(chat.id, `Got it — ${weightRaw} / ${heightRaw}.`)
   }
 
   // After handling a step, compute next and prompt once
