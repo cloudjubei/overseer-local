@@ -107,9 +107,7 @@ export async function actionJournal(
       expiresAt: prev?.expiresAt,
     })
 
-    const header =
-      '<b>Use this Journal for any thoughts</b>\n' +
-      '<i>Describe how you feel and anything else you want to get off your chest</i>'
+    const header = '<b>Take a minute to reflect - how’s today been so far?</b>\n' //+ '<i>You can talk or type</i>'
 
     await bot.sendMessage(chat.id, header, { parse_mode: 'HTML' })
     return true
@@ -148,9 +146,7 @@ export default async function actionJournalAudio(
       expiresAt: prev?.expiresAt,
     })
 
-    const header =
-      '<b>Use this Journal for any thoughts</b>\n' +
-      '<i>Tap and hold the microphone to record a short voice message describing how you feel.</i>'
+    const header = '<b>Take a minute to reflect - how’s today been so far?</b>\n' // + '<i>You can talk or type</i>'
 
     await bot.sendMessage(chat.id, header, { parse_mode: 'HTML' })
     return true

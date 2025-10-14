@@ -383,6 +383,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         })
         const pretty = genderKey.charAt(0) + genderKey.slice(1).toLowerCase()
         await bot.sendMessage(chatId, `Gender set to ${pretty}.`)
+        //TODO: add sleep of 2s
       } catch (err) {
         await bot.sendMessage(chatId, 'Failed to update gender. Please try again.')
       }
@@ -448,10 +449,12 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           const m = activityLabels[val]
           if (m)
             await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
+          //TODO: add sleep of 2s
         } else if (kind === 'energy') {
           const m = energyLabels[val]
           if (m)
             await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+          //TODO: add sleep of 2s
         }
       } catch {}
 

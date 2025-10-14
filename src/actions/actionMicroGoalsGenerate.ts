@@ -32,9 +32,8 @@ export default async function actionMicroGoalsGenerate(
 
     await bot.sendMessage(chatId, body, { parse_mode: 'HTML' })
 
-    // Follow-up informational message about evening check-in and journaling
     const followUp =
-      'At any time please feel free to use the journal function /journal to send any thoughts you have about the goals or anything at all about your wellbeing.'
+      'I’ll check in with you tonight at 8 PM — you can always journal or send a voice note before then.'
 
     await bot.sendMessage(chatId, followUp, { parse_mode: 'HTML' })
   } catch (err) {

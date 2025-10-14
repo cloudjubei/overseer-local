@@ -108,6 +108,7 @@ export default async function actionMacroGoal(
 
   if (firstGoal) {
     await bot.sendMessage(chatId, 'Got it — now let’s set your direction for the week.')
+    //TODO: add sleep of 2s
   }
 
   const intro =

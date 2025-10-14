@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AudioToneModel } from './AudioToneModel'
-export type MoodAnalysisResultDto = {
+export type MoodAnalysisResult = {
   score: number
   label?: string
   audioTone?: AudioToneModel

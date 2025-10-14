@@ -12,7 +12,7 @@ export type UserProfileModel = {
    */
   name?: string
   /**
-   * Date of birth (YYYY-MM-DD)
+   * ISO8601 timestamp. The user inputs their age and this field records it as if the user had their birthday on input day age years ago.
    */
   dob?: string
   gender?: UserProfileModel.gender

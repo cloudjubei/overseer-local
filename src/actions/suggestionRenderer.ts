@@ -5,7 +5,7 @@ import {
   buildSuggestionKeyboardInline,
   difficultyStars,
 } from 'src/common/keyboards'
-import { AiSuggestionsResultModel, GoalSuggestedModel } from 'src/generated/backend'
+import { GoalSuggestedModel } from 'src/generated/backend'
 
 // Utilities
 function escapeHtml(s: string): string {

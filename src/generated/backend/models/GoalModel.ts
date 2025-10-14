@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { MoodAnalysisResultDto } from './MoodAnalysisResultDto'
+import type { MoodAnalysisResult } from './MoodAnalysisResult'
 export type GoalModel = {
   /**
    * Goal id (UUID)
@@ -21,7 +21,7 @@ export type GoalModel = {
   category?: GoalModel.category
   difficulty?: GoalModel.difficulty
   text: string
-  mood?: MoodAnalysisResultDto
+  mood?: MoodAnalysisResult
   /**
    * ISO8601 timestamp
    */

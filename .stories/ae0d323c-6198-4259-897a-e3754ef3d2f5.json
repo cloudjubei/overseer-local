@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "+",
+  "status": "-",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -186,6 +186,76 @@
       "createdAt": "2025-10-11T00:22:13.909Z",
       "updatedAt": "2025-10-11T00:31:08.246Z",
       "completedAt": "2025-10-11T00:31:08.246Z"
+    },
+    {
+      "id": "31b62e6c-9736-4d1f-ab41-9500092df7da",
+      "status": "-",
+      "title": "Weight and Height needs to be captured in 1 message",
+      "description": "Currently in @src/index.ts we are capturing height and weight separately. This needs to be combined into 1 bot message and to be captured in 1 go from the user.\nThe message needs to say:\n“Please tell me your weight and height (e.g., 77 kg, 178 cm).”\nAnd when the user provides them (if there are no errors), we send back a confirmation:\n\"Got it — 77 kg / 178 cm.\"\nAnd then move onto to the next flow.",
+      "context": [
+        "src/index.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T08:59:17.981Z",
+      "updatedAt": "2025-10-14T08:59:17.981Z"
+    },
+    {
+      "id": "55250382-a5c5-4778-8364-eb560ad09bed",
+      "status": "-",
+      "title": "Capture age instead of date of birth",
+      "description": "In @src/index.ts we capture the date of birth, but this is hard for a user to type. So asking for age is easier. The backend input expects a date, so we simply record today's date - the age of the user as the input and pass it as the dob field.\nWhen the user submits, we confirm with (example for 46):\n\n“Got it — 46. Thanks, that helps me understand your stage in life 💪.”",
+      "context": [
+        "src/index.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:02:19.863Z",
+      "updatedAt": "2025-10-14T09:12:11.072Z"
+    },
+    {
+      "id": "e2e560c3-eaa4-4318-aeec-ce4eddab8d63",
+      "status": "-",
+      "title": "Journal entry saved user feedback",
+      "description": "After user posts a voice note:\n- Transcribe and summarise the key points (1–2 sentences). Send back something like:\n“You mentioned getting back into the gym and balancing that with time with your kids. Shall I record this, or do you want to re-record?”\nSo to get this done, the backend returns \"response\" that should be used as the first sentence and then we append the 2nd sentence.\n- Add buttons: [✅ Submit]  [🔁 Re-record]. If re-record → clear previous entry and re-prompt. If submit → confirm:\n“Journal entry saved ✅.”",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:14:40.832Z",
+      "updatedAt": "2025-10-14T09:14:40.832Z"
+    },
+    {
+      "id": "1af0659e-7a1d-4d4b-83ba-d7d488ee6982",
+      "status": "-",
+      "title": "Add sleep to sending messages",
+      "description": "In multiple places there's a \"TODO: add sleep of 2s\" - this needs to be added in the same way in all those places. This is because there are multiple messages being sent there at once and it feels like a cascade when the user receives them so we need to pace them appropriately.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:36:00.645Z",
+      "updatedAt": "2025-10-14T09:36:00.645Z"
+    },
+    {
+      "id": "6300ef47-155a-47e9-ba88-b5f216094025",
+      "status": "-",
+      "title": "When showing macro goal suggestions, use the non-inline keyboard",
+      "description": "In @src/common/keyboards.ts we have keyboard uis made to accommodate user responses using them.\nIt uses this hidden character '‎' prepended to the front of the user presented input, and when the user selects it - we know how many of that character are present in the selection so we know how to proceed. If there's an easier way to do this in Telegram's methodology then we should do that, but if not, we should continue with this approach.\nFor this task @src/actions/actionMacroGoal.ts needs to change and show the 3 macro goal suggestions using this keyboard.",
+      "context": [
+        "src/common/keyboards.ts",
+        "src/actions/actionMacroGoal.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:39:53.953Z",
+      "updatedAt": "2025-10-14T09:39:53.953Z"
+    },
+    {
+      "id": "404abdd3-1cff-4535-bae9-2f3af561a858",
+      "status": "-",
+      "title": "When doing the morning check in with the micro goals - first ask about the energy levels",
+      "description": "The same way as the user is asked about their energy levels and mood during onboarding, we need to ask the same before generating the new set of micro goals. This is so those micro goals can take into account the new energy levels.\nProbably @src/lib/scheduler.ts and @src/actions/actionMicroGoalsGenerate.ts needs to change.",
+      "context": [
+        "src/lib/scheduler.ts",
+        "src/actions/actionMicroGoalsGenerate.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:41:42.602Z",
+      "updatedAt": "2025-10-14T09:41:42.602Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -203,9 +273,14 @@
     "6fee9e97-ddb5-4e9b-9911-892845e90da6": 12,
     "2d6112c5-6de1-465b-ad20-0bcf9d939f02": 13,
     "99591769-058e-418d-910a-f19820eb95d5": 14,
-    "e09caa6e-801f-402c-99a6-cc25c486357f": 15
+    "e09caa6e-801f-402c-99a6-cc25c486357f": 15,
+    "31b62e6c-9736-4d1f-ab41-9500092df7da": 16,
+    "55250382-a5c5-4778-8364-eb560ad09bed": 17,
+    "e2e560c3-eaa4-4318-aeec-ce4eddab8d63": 18,
+    "1af0659e-7a1d-4d4b-83ba-d7d488ee6982": 19,
+    "6300ef47-155a-47e9-ba88-b5f216094025": 20,
+    "404abdd3-1cff-4535-bae9-2f3af561a858": 21
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:54:15.932Z",
-  "completedAt": "2025-10-11T00:31:08.246Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z"
 }
