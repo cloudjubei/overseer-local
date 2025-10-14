@@ -197,8 +197,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-14T08:59:17.981Z",
-      "updatedAt": "2025-10-14T12:34:42.964Z",
-      "rejection": "The input also needs to be processed if the user types in:\n70kg 170cm \nor\n150 lbs 6 \"\ni.e. no comma separation but just space in between the two sets",
+      "updatedAt": "2025-10-14T15:06:17.918Z",
       "completedAt": "2025-10-14T12:34:42.964Z"
     },
     {
@@ -263,6 +262,19 @@
       "createdAt": "2025-10-14T09:41:42.602Z",
       "updatedAt": "2025-10-14T11:34:09.459Z",
       "completedAt": "2025-10-14T11:34:09.459Z"
+    },
+    {
+      "id": "75dffb8b-a38a-43aa-978d-2accfaf86545",
+      "status": "+",
+      "title": "After the user sends the macro goal clear the keyboard",
+      "description": "We are showing the keyboard to pick suggestions when a user has to choose a macro goal, this needs to be cleared once something gets submitted (be it text, a picked suggestion or an audio file). This is in\n@src/actions/actionMacroGoal.ts",
+      "context": [
+        "src/actions/actionMacroGoal.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T15:07:35.839Z",
+      "updatedAt": "2025-10-14T15:10:11.723Z",
+      "completedAt": "2025-10-14T15:10:11.723Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -286,9 +298,10 @@
     "e2e560c3-eaa4-4318-aeec-ce4eddab8d63": 18,
     "1af0659e-7a1d-4d4b-83ba-d7d488ee6982": 19,
     "6300ef47-155a-47e9-ba88-b5f216094025": 20,
-    "404abdd3-1cff-4535-bae9-2f3af561a858": 21
+    "404abdd3-1cff-4535-bae9-2f3af561a858": 21,
+    "75dffb8b-a38a-43aa-978d-2accfaf86545": 22
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
   "updatedAt": "2025-10-10T20:54:15.932Z",
-  "completedAt": "2025-10-14T12:34:42.964Z"
+  "completedAt": "2025-10-14T15:10:11.723Z"
 }

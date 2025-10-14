@@ -27,7 +27,7 @@ function nextLocalTime(hour: number, minute = 0): Date {
   const now = new Date()
   const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0)
   if (now.getTime() >= target.getTime()) {
-    target.setDate(target.getDate() + 1)
+    target.setDate(target.setDate(now.getDate() + 1))
   }
   return target
 }
@@ -169,8 +169,10 @@ export async function processMacroInput(
   pickedSuggestionText?: string,
 ) {
   const chatId = chat.id
-  // Inform user we're processing
-  const processingMsg = await bot.sendMessage(chatId, 'Processing...')
+  // Inform user we're processing and remove the suggestion keyboard immediately
+  const processingMsg = await bot.sendMessage(chatId, 'Processing...', {
+    reply_markup: { remove_keyboard: true },
+  })
 
   try {
     // Always clear existing check-ins prior to creating a new macro context
