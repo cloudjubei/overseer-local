@@ -215,13 +215,14 @@
     },
     {
       "id": "e2e560c3-eaa4-4318-aeec-ce4eddab8d63",
-      "status": "-",
+      "status": "+",
       "title": "Journal entry saved user feedback",
       "description": "After user posts a voice note:\n- Transcribe and summarise the key points (1–2 sentences). Send back something like:\n“You mentioned getting back into the gym and balancing that with time with your kids. Shall I record this, or do you want to re-record?”\nSo to get this done, the backend returns \"response\" that should be used as the first sentence and then we append the 2nd sentence.\n- Add buttons: [✅ Submit]  [🔁 Re-record]. If re-record → clear previous entry and re-prompt. If submit → confirm:\n“Journal entry saved ✅.”",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-14T09:14:40.832Z",
-      "updatedAt": "2025-10-14T09:14:40.832Z"
+      "updatedAt": "2025-10-14T11:25:55.285Z",
+      "completedAt": "2025-10-14T11:25:55.285Z"
     },
     {
       "id": "1af0659e-7a1d-4d4b-83ba-d7d488ee6982",

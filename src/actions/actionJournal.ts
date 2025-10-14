@@ -61,17 +61,54 @@ export async function processAudioJournal(
 
     const { blob } = await downloadTelegramAudioFile(bot, fileId)
 
-    await JournalsService.journalsControllerCreateAudio({
+    const created = await JournalsService.journalsControllerCreateAudio({
       formData: { file: blob },
     })
 
-    const session = getSession(userId)
-    clearConversationSession(userId, session)
+    // Build confirmation message using backend-provided summary/confirmation text
+    const firstSentence =
+      created?.transcription?.confirmationText?.trim() ||
+      created?.transcription?.text?.trim() ||
+      'I captured your voice note.'
+
+    const confirmText = `${firstSentence} Shall I record this, or do you want to re-record?`
+
+    const keyboard: TelegramBot.InlineKeyboardMarkup = {
+      inline_keyboard: [
+        [
+          { text: '✅ Submit', callback_data: `journal:audio:submit:${created.id}` },
+          { text: '🔁 Re-record', callback_data: `journal:audio:rerecord:${created.id}` },
+        ],
+      ],
+    }
+
+    // Send confirmation with inline buttons
+    const sent = await bot.sendMessage(chat.id, confirmText, { reply_markup: keyboard })
+
+    // Store pending journal confirmation state in session
+    const prev = getSession(userId)
+    setSession({
+      ...(prev || { userId }),
+      accessToken: prev?.accessToken || '',
+      idToken: prev?.idToken,
+      refreshToken: prev?.refreshToken,
+      expiresAt: prev?.expiresAt,
+      conversationState: {
+        lastAction: 'journal_audio_confirm',
+        flowId: '',
+        context: {
+          pendingJournal: {
+            id: created.id,
+            messageId: sent.message_id,
+          },
+        },
+        lastUpdatedAt: Math.floor(Date.now() / 1000),
+      },
+    })
+
     try {
       await bot.deleteMessage(chat.id, waiting.message_id)
     } catch {}
-
-    await bot.sendMessage(chat.id, '🎙️📝 Journal entry recorded ✅')
   } catch (err: any) {
     console.log('ERROR FROM PROCESSING AUDIO: ', err)
     // Clean up waiting message

@@ -198,6 +198,59 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       await bot.answerCallbackQuery(cb.id)
     } catch {}
 
+    // Handle journal audio confirmation actions
+    if (data.startsWith('journal:audio:')) {
+      const userId = String(cb.from.id)
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(userId)
+      } catch {}
+
+      // Remove the inline keyboard from the confirmation message
+      try {
+        await bot.editMessageReplyMarkup(
+          { inline_keyboard: [] },
+          { chat_id: chatId, message_id: message.message_id },
+        )
+      } catch {}
+
+      if (data.includes(':submit:')) {
+        // Confirm saved and clear any pending state
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId }),
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+          conversationState: null,
+        })
+        await bot.sendMessage(chatId, 'Journal entry saved ✅.')
+        return
+      }
+
+      if (data.includes(':rerecord:')) {
+        // Prompt user to re-record and set state to accept new voice
+        const prev = getSession(userId)
+        setSession({
+          ...(prev || { userId }),
+          accessToken: prev?.accessToken || '',
+          idToken: prev?.idToken,
+          refreshToken: prev?.refreshToken,
+          expiresAt: prev?.expiresAt,
+          conversationState: {
+            lastAction: 'voice',
+            flowId: '',
+            lastUpdatedAt: Math.floor(Date.now() / 1000),
+          },
+        })
+
+        const header = '<b>Take a minute to reflect - how’s today been so far?</b>\n'
+        await bot.sendMessage(chatId, header, { parse_mode: 'HTML' })
+        return
+      }
+    }
+
     // For macro suggestion selections, we need to handle before clearing the keyboard to retain message_id for lookup
     if (data.startsWith('macro:suggest:')) {
       const idxStr = data.split(':')[2]
