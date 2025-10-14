@@ -1,6 +1,6 @@
 {
   "id": "ae0d323c-6198-4259-897a-e3754ef3d2f5",
-  "status": "+",
+  "status": "-",
   "title": "Adapt to new spec redesign and flow",
   "description": "The specification for the app has changed and we are changing the complete way in which users interact. There's no need for backward compatibility as everything is started from scratch.\n\nThe new general flow follows the following:\n1. authenticate - this is exactly the same as before\n2. set user profile:\n-  IF USER PROFILE IS MISSING ANY OF THE PIECES inside UserProfileModel (dob, gender, weight, height) then trigger `actionProfile`\n- the whole process is described in `actionProfile.ts`\n3. set user lifestyle\n- IF USER PROFILE doesn't have 1 lifestyle in userProfile.lifestyles then trigger 'actionLifestyle'\n- the whole process is described in `actionLifestyle.ts`\n4. generate a macro goal:\n- the whole process is described in `actionMacroGoal`\n5. generate micro goals:\n- the whole process is described in `actionMicroGoalsGenerate`\nOverall flow is complete.\nWhat's left is to update the `scheduler.ts` to send the two messages that `actionMacroGoal` generates for the checkins. The morning one triggers a new `actionMicroGoalsGenerate` and the evening one triggers a new `actionMicroGoalsCheck` .",
   "features": [
@@ -189,7 +189,7 @@
     },
     {
       "id": "31b62e6c-9736-4d1f-ab41-9500092df7da",
-      "status": "+",
+      "status": "-",
       "title": "Weight and Height needs to be captured in 1 message",
       "description": "Currently in @src/index.ts we are capturing height and weight separately. This needs to be combined into 1 bot message and to be captured in 1 go from the user.\nThe message needs to say:\n“Please tell me your weight and height (e.g., 77 kg, 178 cm).”\nAnd when the user provides them (if there are no errors), we send back a confirmation:\n\"Got it — 77 kg / 178 cm.\"\nAnd then move onto to the next flow.",
       "context": [
@@ -197,8 +197,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-14T08:59:17.981Z",
-      "updatedAt": "2025-10-14T11:19:15.855Z",
-      "completedAt": "2025-10-14T11:19:15.855Z"
+      "updatedAt": "2025-10-14T12:30:03.964Z",
+      "rejection": "The input also needs to be processed if the user types in:\n70kg 170cm \nor\n150 lbs 6 \"\ni.e. no comma separation but just space in between the two sets"
     },
     {
       "id": "55250382-a5c5-4778-8364-eb560ad09bed",
@@ -288,6 +288,5 @@
     "404abdd3-1cff-4535-bae9-2f3af561a858": 21
   },
   "createdAt": "2025-10-10T20:25:58.999Z",
-  "updatedAt": "2025-10-10T20:54:15.932Z",
-  "completedAt": "2025-10-14T11:34:09.459Z"
+  "updatedAt": "2025-10-10T20:54:15.932Z"
 }
