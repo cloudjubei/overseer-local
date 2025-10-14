@@ -133,7 +133,7 @@ export default async function actionMacroGoal(
   }
 
   if (firstGoal) {
-    await bot.sendMessage(chatId, 'Got it — now let’s set your direction for the week.')
+    await bot.sendMessage(chatId, 'Now let’s set your direction for the week.')
     // add sleep of 2s
     await sleep(2000)
   }

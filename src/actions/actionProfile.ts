@@ -2,6 +2,7 @@ import TelegramBot, { Message, SendMessageOptions } from 'node-telegram-bot-api'
 import { ProfilesService, UserProfileModel } from 'src/generated/backend'
 import { getSession, setSession } from 'src/lib/sessionStore'
 import actionLifestyle from './actionLifestyle'
+import { sleep } from 'src/lib/time'
 
 // Profile onboarding steps in order
 type ProfileStep = 'name' | 'dob' | 'gender' | 'metrics' | 'done'
@@ -151,6 +152,7 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
   switch (step) {
     case 'name':
       // Updated per new spec: explicitly ask for the user's name
+      await sleep(2000)
       await bot.sendMessage(chatId, 'Please tell us your name', opts)
       return
     case 'dob':
@@ -228,6 +230,7 @@ export default async function actionProfile(
     await bot.sendMessage(chat.id, `Nice to meet you, <b>${escapeHtml(name.trim())}</b>.`, {
       parse_mode: 'HTML',
     })
+    await sleep(2000)
     // fall through to next prompt
   }
 
@@ -255,6 +258,7 @@ export default async function actionProfile(
       chat.id,
       `Got it — ${age}. Thanks, that helps me understand your stage in life 💪.`,
     )
+    await sleep(2000)
     // fall through to next prompt
   }
 
@@ -285,6 +289,7 @@ export default async function actionProfile(
     })
 
     await bot.sendMessage(chat.id, `Got it — ${weightRaw} / ${heightRaw}.`)
+    await sleep(2000)
   }
 
   // After handling a step, compute next and prompt once

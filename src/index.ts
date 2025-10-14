@@ -326,7 +326,23 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
             { chat_id: chatId, message_id: message.message_id },
           )
         } catch {}
+        const allMicro = getStoredMicroCheck(chatId, message.message_id) ?? []
+        const doneMicro = allMicro.filter((g) => g.state === GoalModel.state.SUCCESS)
         clearStoredMicroCheck(chatId, message.message_id)
+
+        let goalsCompletionMessage = ` let's set our sights for tomorrow!`
+        if (doneMicro.length == 2) {
+          goalsCompletionMessage = ' almost perfect! Keep it up!'
+        } else if (doneMicro.length == 1) {
+          goalsCompletionMessage = ' good start! Tomorrow can only get better!'
+        }
+
+        await bot.sendMessage(
+          chatId,
+          `${doneMicro.length}/${allMicro.length} goals done - ${goalsCompletionMessage}`,
+        )
+        sleep(2000)
+
         await bot.sendMessage(chatId, journalPrompt)
         setAwaitingJournalState()
         return
@@ -396,6 +412,13 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         } catch {}
 
         clearStoredMicroCheck(chatId, message.message_id)
+
+        await bot.sendMessage(
+          chatId,
+          `${store.length}/${store.length} goals done - amazing work! Keep it up!`,
+        )
+        sleep(2000)
+
         await bot.sendMessage(chatId, journalPrompt)
         setAwaitingJournalState()
         return
@@ -464,17 +487,26 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       })
 
       const energyLabels: Record<number, { emoji: string; label: string }> = {
-        1: { emoji: '😴', label: 'Very low' },
-        2: { emoji: '😐', label: 'Low' },
-        3: { emoji: '🙂', label: 'Okay' },
-        4: { emoji: '😊', label: 'Good' },
-        5: { emoji: '🤩', label: 'Great' },
+        1: {
+          emoji: '😴',
+          label: 'Sounds like energy’s a little too low — let’s see if we can lift that this week.',
+        },
+        2: {
+          emoji: '😐',
+          label: 'Sounds like energy’s a little low — let’s see if we can lift that this week.',
+        },
+        3: {
+          emoji: '🙂',
+          label: 'You`re on the right track - let’s see if we can lift that this week.',
+        },
+        4: { emoji: '😊', label: 'Sounds great 😊' },
+        5: { emoji: '🤩', label: 'You sound pumped! Keep it up! 🤩' },
       }
 
       const m = energyLabels[val]
       if (m) {
         try {
-          await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+          await bot.sendMessage(chatId, `${m.label}`)
           await sleep(2000)
         } catch {}
       }
@@ -554,34 +586,42 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         },
       })
 
-      // Echo the user's choice for clarity
       const activityLabels: Record<number, { emoji: string; label: string }> = {
-        1: { emoji: '🛋️', label: 'Very low' },
-        2: { emoji: '🚶‍♂️', label: 'Light' },
-        3: { emoji: '🏃', label: 'Moderate' },
-        4: { emoji: '💪', label: 'High' },
-        5: { emoji: '🔥', label: 'Very high' },
+        1: { emoji: '🛋️', label: 'Thanks, that helps me understand you better 💪.' },
+        2: { emoji: '🚶‍♂️', label: 'Thanks, that helps me understand you better 💪.' },
+        3: { emoji: '🏃', label: 'Thanks, that helps me understand you better 💪.' },
+        4: { emoji: '💪', label: 'You sound in good shape already 👏.' },
+        5: { emoji: '🔥', label: 'You sound in amazing shape already 👏👏.' },
       }
       const energyLabels: Record<number, { emoji: string; label: string }> = {
-        1: { emoji: '😴', label: 'Very low' },
-        2: { emoji: '😐', label: 'Low' },
-        3: { emoji: '🙂', label: 'Okay' },
-        4: { emoji: '😊', label: 'Good' },
-        5: { emoji: '🤩', label: 'Great' },
+        1: {
+          emoji: '😴',
+          label: 'Sounds like energy’s a little too low — let’s see if we can lift that this week.',
+        },
+        2: {
+          emoji: '😐',
+          label: 'Sounds like energy’s a little low — let’s see if we can lift that this week.',
+        },
+        3: {
+          emoji: '🙂',
+          label: 'You`re on the right track - let’s see if we can lift that this week.',
+        },
+        4: { emoji: '😊', label: 'Sounds great 😊' },
+        5: { emoji: '🤩', label: 'You sound pumped! Keep it up! 🤩' },
       }
 
       try {
         if (kind === 'active') {
           const m = activityLabels[val]
           if (m) {
-            await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
+            await bot.sendMessage(chatId, `${m.label}`)
             // add sleep of 2s
             await sleep(2000)
           }
         } else if (kind === 'energy') {
           const m = energyLabels[val]
           if (m) {
-            await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+            await bot.sendMessage(chatId, `${m.label}.`)
             // add sleep of 2s
             await sleep(2000)
           }

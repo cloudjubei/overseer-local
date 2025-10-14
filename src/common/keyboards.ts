@@ -173,25 +173,25 @@ export function buildSuggestionKeyboardInline(
     ])
   })
 
-  if (showExtraSuggestions) {
-    rows.push([
-      {
-        text: '✏️ Refine',
-        callback_data: 'suggest:refine',
-      },
-      {
-        text: '📋 Select',
-        callback_data: 'suggest:select',
-      },
-    ])
-  } else {
-    rows.push([
-      {
-        text: '✏️ Refine',
-        callback_data: 'suggest:refine',
-      },
-    ])
-  }
+  // if (showExtraSuggestions) {
+  //   rows.push([
+  //     {
+  //       text: '✏️ Refine',
+  //       callback_data: 'suggest:refine',
+  //     },
+  //     {
+  //       text: '📋 Select',
+  //       callback_data: 'suggest:select',
+  //     },
+  //   ])
+  // } else {
+  //   rows.push([
+  //     {
+  //       text: '✏️ Refine',
+  //       callback_data: 'suggest:refine',
+  //     },
+  //   ])
+  // }
 
   return { inline_keyboard: rows }
 }
@@ -210,12 +210,12 @@ export function buildSuggestionKeyboard(
     prep.push(text)
   })
 
-  if (showExtraSuggestions) {
-    prep.push('📋 Select')
-    prep.push('✏️ Refine')
-  } else {
-    prep.push('✏️ Refine')
-  }
+  // if (showExtraSuggestions) {
+  //   prep.push('📋 Select')
+  //   prep.push('✏️ Refine')
+  // } else {
+  //   prep.push('✏️ Refine')
+  // }
 
   const keyboard: TelegramBot.KeyboardButton[][] = prep.map((text, index) => {
     return [
