@@ -184,6 +184,13 @@ bot.on('message', async (msg: Message) => {
   }
 })
 
+function todayStamp(d = new Date()): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}${m}${day}`
+}
+
 bot.on('callback_query', async (cb: CallbackQuery) => {
   try {
     console.log('callback cb: ', cb)
@@ -413,6 +420,69 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         ensureAccessTokenForUser(String(cb.from.id))
       } catch {}
       await handleWeeklyResetCallback(bot, cb)
+      return
+    }
+
+    // Handle morning energy selection prior to generating micro goals
+    if (data.startsWith('morning:energy:')) {
+      const userId = String(cb.from.id)
+      const parts = data.split(':')
+      const val = Math.max(1, Math.min(5, parseInt(parts[2] || '0', 10)))
+
+      try {
+        await ensureBackendConfigured()
+        ensureAccessTokenForUser(userId)
+      } catch {}
+
+      // Remove the inline keyboard on the energy prompt
+      try {
+        await bot.editMessageReplyMarkup(
+          { inline_keyboard: [] },
+          { chat_id: chatId, message_id: message.message_id },
+        )
+      } catch {}
+
+      const prev = getSession(userId)
+      const prevCtx = prev?.conversationState?.context || {}
+      const nowStamp = todayStamp()
+      const newCtx = { ...prevCtx, morningEnergy: val, morningEnergyDate: nowStamp }
+
+      setSession({
+        ...(prev || { userId }),
+        accessToken: prev?.accessToken || '',
+        idToken: prev?.idToken,
+        refreshToken: prev?.refreshToken,
+        expiresAt: prev?.expiresAt,
+        conversationState: {
+          lastAction: 'morning_energy',
+          flowId: 'morning_energy',
+          ...(prev?.conversationState || {}),
+          context: newCtx,
+          lastUpdatedAt: Math.floor(Date.now() / 1000),
+        },
+      })
+
+      const energyLabels: Record<number, { emoji: string; label: string }> = {
+        1: { emoji: '😴', label: 'Very low' },
+        2: { emoji: '😐', label: 'Low' },
+        3: { emoji: '🙂', label: 'Okay' },
+        4: { emoji: '😊', label: 'Good' },
+        5: { emoji: '🤩', label: 'Great' },
+      }
+
+      const m = energyLabels[val]
+      if (m) {
+        try {
+          await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
+          await sleep(2000)
+        } catch {}
+      }
+
+      // Continue with micro goal generation now that energy is set
+      try {
+        await actionMicroGoalsGenerate(bot, message.chat, cb.from, '', message)
+      } catch {}
+
       return
     }
 
