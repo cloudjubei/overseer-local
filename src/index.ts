@@ -341,7 +341,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           chatId,
           `${doneMicro.length}/${allMicro.length} goals done - ${goalsCompletionMessage}`,
         )
-        sleep(2000)
+        await sleep(2000)
 
         await bot.sendMessage(chatId, journalPrompt)
         setAwaitingJournalState()
@@ -417,7 +417,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           chatId,
           `${store.length}/${store.length} goals done - amazing work! Keep it up!`,
         )
-        sleep(2000)
+        await sleep(2000)
 
         await bot.sendMessage(chatId, journalPrompt)
         setAwaitingJournalState()
