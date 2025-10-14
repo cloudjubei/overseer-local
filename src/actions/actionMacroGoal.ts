@@ -8,6 +8,7 @@ import {
 } from 'src/generated/backend'
 import { downloadTelegramAudioFile } from 'src/lib/files'
 import actionMicroGoalsGenerate from './actionMicroGoalsGenerate'
+import { sleep } from 'src/lib/time'
 
 // In-memory store to map suggestion lists per message for callback selections
 // Keyed by `${chatId}:${messageId}` -> suggestions array
@@ -108,7 +109,8 @@ export default async function actionMacroGoal(
 
   if (firstGoal) {
     await bot.sendMessage(chatId, 'Got it — now let’s set your direction for the week.')
-    //TODO: add sleep of 2s
+    // add sleep of 2s
+    await sleep(2000)
   }
 
   const intro =

@@ -33,6 +33,7 @@ import actionMicroGoalsCheck, {
   toggleMicroGoalState,
 } from './actions/actionMicroGoalsCheck'
 import { handleWeeklyResetCallback } from './actions/actionWeeklyReset'
+import { sleep } from './lib/time'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -436,7 +437,8 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         })
         const pretty = genderKey.charAt(0) + genderKey.slice(1).toLowerCase()
         await bot.sendMessage(chatId, `Gender set to ${pretty}.`)
-        //TODO: add sleep of 2s
+        // add sleep of 2s
+        await sleep(2000)
       } catch (err) {
         await bot.sendMessage(chatId, 'Failed to update gender. Please try again.')
       }
@@ -500,14 +502,18 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       try {
         if (kind === 'active') {
           const m = activityLabels[val]
-          if (m)
+          if (m) {
             await bot.sendMessage(chatId, `Activity level set to ${val} — ${m.emoji} ${m.label}.`)
-          //TODO: add sleep of 2s
+            // add sleep of 2s
+            await sleep(2000)
+          }
         } else if (kind === 'energy') {
           const m = energyLabels[val]
-          if (m)
+          if (m) {
             await bot.sendMessage(chatId, `Energy level set to ${val} — ${m.emoji} ${m.label}.`)
-          //TODO: add sleep of 2s
+            // add sleep of 2s
+            await sleep(2000)
+          }
         }
       } catch {}
 

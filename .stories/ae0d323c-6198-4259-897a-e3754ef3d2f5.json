@@ -226,13 +226,14 @@
     },
     {
       "id": "1af0659e-7a1d-4d4b-83ba-d7d488ee6982",
-      "status": "-",
+      "status": "+",
       "title": "Add sleep to sending messages",
       "description": "In multiple places there's a \"TODO: add sleep of 2s\" - this needs to be added in the same way in all those places. This is because there are multiple messages being sent there at once and it feels like a cascade when the user receives them so we need to pace them appropriately.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-14T09:36:00.645Z",
-      "updatedAt": "2025-10-14T09:36:00.645Z"
+      "updatedAt": "2025-10-14T11:27:53.166Z",
+      "completedAt": "2025-10-14T11:27:53.166Z"
     },
     {
       "id": "6300ef47-155a-47e9-ba88-b5f216094025",
