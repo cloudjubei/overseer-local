@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Modal, AlertDialog } from '@renderer/components/ui/Modal'
 import { projectsService } from '@renderer/services/projectsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { Button } from '@renderer/components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
-import { IconDelete, IconEdit, IconPlus } from '@renderer/components/ui/Icons'
+import { IconDelete, IconEdit, IconPlus, IconArrowLeftMini, IconArrowRightMini } from '@renderer/components/ui/Icons'
 import {
   Select,
   SelectContent,
@@ -12,89 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@renderer/components/ui/Select'
-import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import { validateProjectClient } from './validateProject'
-import { Switch } from '@renderer/components/ui/Switch'
-import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
-import { CodeInfoChip } from './CodeInfoChip'
+import { ProjectEditorForm } from './ProjectEditorForm'
+import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 
-function TextInput({ label, value, onChange, placeholder, disabled }: any) {
-  const id = React.useId()
-  return (
-    <div className="form-row">
-      <label htmlFor={id}>{label}</label>
-      <input
-        id={id}
-        className="ui-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-      />
-    </div>
-  )
-}
-
-function TextArea({ label, value, onChange, placeholder }: any) {
-  const id = React.useId()
-  return (
-    <div className="form-row">
-      <label htmlFor={id}>{label}</label>
-      <textarea
-        id={id}
-        className="ui-textarea"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-      />
-    </div>
-  )
-}
-
-function IconPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
-  return (
-    <div className="form-row">
-      <label>Icon</label>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))',
-          gap: 6,
-        }}
-      >
-        {PROJECT_ICONS.map((opt) => {
-          const selected = value === opt.value
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              title={opt.label}
-              onClick={() => onChange(opt.value)}
-              aria-pressed={selected}
-              style={{
-                height: 36,
-                borderRadius: 6,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: selected
-                  ? '2px solid var(--accent-primary)'
-                  : '1px solid var(--border-default)',
-                background: selected
-                  ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)'
-                  : 'var(--surface-raised)',
-                cursor: 'pointer',
-                padding: 4,
-              }}
-            >
-              <span aria-hidden>{renderProjectIcon(opt.value)}</span>
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
+const ALL_GROUP_ID = '__all__'
+const UNCATEGORIZED_ID = '__uncategorized__'
 
 export default function ProjectManagerModal({
   onRequestClose,
@@ -106,7 +29,8 @@ export default function ProjectManagerModal({
   initialProjectId?: string
 }) {
   const { projects, getProjectById } = useProjectContext()
-  const { credentials } = useGitHubCredentials()
+  const { groups, getGroupForProject, reorderProject, reorderGroup, createGroup, updateGroupTitle, deleteGroup, setProjectGroup } =
+    useProjectsGroups()
   const [error, _] = useState<string | null>(null)
 
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')
@@ -122,14 +46,25 @@ export default function ProjectManagerModal({
     metadata: { icon: 'folder', githubCredentialsId: '' },
     codeInfo: undefined,
   })
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
+  const [initialGroupId, setInitialGroupId] = useState<string | null>(null)
+
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
-  const [isCodeInfoModalOpen, setIsCodeInfoModalOpen] = useState(false)
+
+  const [isGroupsEditorOpen, setIsGroupsEditorOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
   }
+
+  // Derive uncategorized list
+  const groupedProjectIds = useMemo(() => new Set(groups.flatMap((g) => g.projects || [])), [groups])
+  const uncategorized = useMemo(
+    () => projects.filter((p) => !groupedProjectIds.has(p.id)),
+    [projects, groupedProjectIds],
+  )
 
   useEffect(() => {
     // If we were asked to open in edit mode for a specific project, populate form
@@ -151,11 +86,14 @@ export default function ProjectManagerModal({
           },
         })
         setEditingId(id)
+        const g = getGroupForProject(id)
+        setSelectedGroupId(g?.id ?? null)
+        setInitialGroupId(g?.id ?? null)
         setMode('edit')
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialMode, initialProjectId, getProjectById])
+  }, [initialMode, initialProjectId, getProjectById, groups])
 
   const projectsList = useMemo(() => projects || [], [projects])
 
@@ -173,10 +111,16 @@ export default function ProjectManagerModal({
     setFormErrors([])
     setSaving(false)
     setEditingId(null)
+    setSelectedGroupId(null)
+    setInitialGroupId(null)
   }
 
   function startCreate() {
     resetForm()
+    // Default new project's group to currently selected group (if a real group)
+    if (currentGroupId && currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID) {
+      setSelectedGroupId(currentGroupId)
+    }
     setMode('create')
   }
 
@@ -194,6 +138,9 @@ export default function ProjectManagerModal({
         githubCredentialsId: p.metadata?.githubCredentialsId || '',
       },
     })
+    const g = getGroupForProject(p.id)
+    setSelectedGroupId(g?.id ?? null)
+    setInitialGroupId(g?.id ?? null)
     setEditingId(p.id)
     setMode('edit')
   }
@@ -231,85 +178,211 @@ export default function ProjectManagerModal({
     try {
       if (mode === 'create') {
         await projectsService.createProject(form)
+        // Assign to group if selected
+        await setProjectGroup(form.id, selectedGroupId)
       } else if (mode === 'edit' && editingId) {
         await projectsService.updateProject(editingId, form)
+        // Update group membership if changed
+        if (selectedGroupId !== initialGroupId) {
+          await setProjectGroup(editingId, selectedGroupId)
+        }
       }
     } catch (e: any) {
       setFormErrors([e?.message || String(e)])
-      return
-    } finally {
       setSaving(false)
+      return
     }
+    setSaving(false)
     setMode('list')
   }
 
   const formId = 'project-manager-form'
 
-  return (
-    <Modal
-      title="Manage Projects"
-      onClose={doClose}
-      isOpen={true}
-      size="lg"
-      initialFocusRef={titleRef as React.RefObject<HTMLElement>}
-      footer={
-        mode === 'create' || mode === 'edit' ? (
-          <div className="flex justify-end gap-2">
-            <button type="button" className="btn-secondary" onClick={() => setMode('list')}>
-              Cancel
-            </button>
-            <button type="submit" className="btn" form={formId} disabled={saving}>
-              {mode === 'create' ? 'Create' : 'Save'}
-            </button>
-          </div>
-        ) : null
-      }
-    >
-      {error && (
-        <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
-          Error: {error}
-        </div>
-      )}
+  // Group filter state (header)
+  const [currentGroupId, setCurrentGroupId] = useState<string>(ALL_GROUP_ID)
 
-      {isCodeInfoModalOpen && (
-        <ProjectCodeInfoModal
-          codeInfo={form.codeInfo}
-          onSave={(newCodeInfo) => {
-            setForm((s: any) => ({ ...s, codeInfo: newCodeInfo }))
-            setIsCodeInfoModalOpen(false)
-          }}
-          onClose={() => {
-            setIsCodeInfoModalOpen(false)
-            if (!form.codeInfo?.language) {
-              setForm((s: any) => ({ ...s, codeInfo: undefined }))
-            }
-          }}
-        />
-      )}
+  // Build options for header selector
+  const headerGroupsOptions = useMemo(() => {
+    return [
+      { id: ALL_GROUP_ID, title: 'All' },
+      { id: UNCATEGORIZED_ID, title: '--uncategorized--' },
+      ...groups.map((g) => ({ id: g.id, title: g.title })),
+    ]
+  }, [groups])
 
+  // Compute list to show in content based on currentGroupId
+  const visibleProjects = useMemo(() => {
+    if (currentGroupId === ALL_GROUP_ID) return projectsList
+    if (currentGroupId === UNCATEGORIZED_ID) return uncategorized
+    const group = groups.find((g) => g.id === currentGroupId)
+    if (!group) return []
+    const byId = new Map(projectsList.map((p) => [p.id, p]))
+    return group.projects.map((pid) => byId.get(pid)).filter(Boolean) as typeof projectsList
+  }, [currentGroupId, projectsList, groups, uncategorized])
+
+  // Reorder handlers for groups
+  const moveGroup = async (index: number, dir: -1 | 1) => {
+    const fromIndex = index
+    const toIndex = index + dir
+    if (toIndex < 0 || toIndex >= groups.length) return
+    await reorderGroup({ fromIndex, toIndex })
+  }
+
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      <Select value={currentGroupId} onValueChange={(v) => setCurrentGroupId(v)}>
+        <SelectTrigger className="ui-select min-w-[220px]">
+          <SelectValue placeholder="Select group" />
+        </SelectTrigger>
+        <SelectContent>
+          {headerGroupsOptions.map((g) => (
+            <SelectItem key={g.id} value={g.id}>
+              {g.title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button className="btn-secondary" onClick={() => setIsGroupsEditorOpen(true)} title="Edit groups">
+        <IconEdit className="w-4 h-4" />
+      </Button>
+    </div>
+  )
+
+  const listFooter = (
+    <div className="flex justify-end gap-2">
       {mode === 'list' && (
-        <div className="flex flex-col" style={{ gap: 12 }}>
-          <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ color: 'var(--text-secondary)' }}>Projects: {projectsList.length}</div>
-            <Button className="btn-primary" onClick={() => startCreate()}>
-              <IconPlus className="w-4 h-4" />
-            </Button>
+        <Button className="btn-primary" onClick={() => startCreate()}>
+          <IconPlus className="w-4 h-4" /> Add Project
+        </Button>
+      )}
+      {(mode === 'create' || mode === 'edit') && (
+        <>
+          <button type="button" className="btn-secondary" onClick={() => setMode('list')}>
+            Cancel
+          </button>
+          <button type="submit" className="btn" form={formId} disabled={saving}>
+            {mode === 'create' ? 'Create' : 'Save'}
+          </button>
+        </>
+      )}
+    </div>
+  )
+
+  // Groups editor modal content
+  const GroupsEditorModal = () => {
+    const [localGroups, setLocalGroups] = useState(groups)
+    useEffect(() => setLocalGroups(groups), [groups])
+
+    const onAddGroup = async () => {
+      const name = prompt('New group name?')?.trim()
+      if (!name) return
+      await createGroup(name)
+    }
+
+    const onRenameGroup = async (gId: string, currentTitle: string) => {
+      const name = prompt('Rename group', currentTitle)?.trim()
+      if (!name || name === currentTitle) return
+      await updateGroupTitle(gId, name)
+    }
+
+    const onDeleteGroup = async (gId: string) => {
+      if (!confirm('Delete this group? Projects will remain uncategorized.')) return
+      await deleteGroup(gId)
+    }
+
+    return (
+      <Modal
+        isOpen={isGroupsEditorOpen}
+        onClose={() => setIsGroupsEditorOpen(false)}
+        title="Edit Groups"
+        size="md"
+        footer={
+          <div className="flex justify-between w-full">
+            <div className="text-text-secondary text-sm">Drag order not implemented; use arrows</div>
+            <div className="flex gap-2">
+              <Button className="btn-secondary" onClick={() => setIsGroupsEditorOpen(false)}>
+                Close
+              </Button>
+              <Button className="btn-primary" onClick={onAddGroup}>
+                <IconPlus className="w-4 h-4" /> Add Group
+              </Button>
+            </div>
           </div>
-          <div>
-            {projectsList.length === 0 && <div className="empty">No child projects yet.</div>}
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {projectsList.map((p) => (
-                <li
-                  key={p.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border-subtle)',
-                    padding: '8px 0',
-                  }}
-                >
-                  <div className="flex flex-col gap-2" style={{ alignItems: 'flex-start' }}>
+        }
+      >
+        <div className="flex flex-col gap-2">
+          {localGroups.length === 0 && <div className="empty">No groups yet.</div>}
+          <ul className="divide-y divide-border" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {localGroups.map((g, idx) => (
+              <li key={g.id} className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <strong>{g.title}</strong>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button className="btn-secondary" onClick={() => moveGroup(idx, -1)} title="Move up">
+                    <IconArrowLeftMini className="w-4 h-4 rotate-90" />
+                  </Button>
+                  <Button className="btn-secondary" onClick={() => moveGroup(idx, +1)} title="Move down">
+                    <IconArrowRightMini className="w-4 h-4 rotate-90" />
+                  </Button>
+                  <Button className="btn-secondary" onClick={() => onRenameGroup(g.id, g.title)} title="Rename">
+                    <IconEdit className="w-4 h-4" />
+                  </Button>
+                  <Button className="btn-secondary" variant="danger" onClick={() => onDeleteGroup(g.id)} title="Delete">
+                    <IconDelete className="w-4 h-4" />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Modal>
+    )
+  }
+
+  // Reorder within selected group (not All/Uncategorized)
+  const onMoveProjectInGroup = async (index: number, dir: -1 | 1) => {
+    if (!currentGroupId || currentGroupId === ALL_GROUP_ID || currentGroupId === UNCATEGORIZED_ID) return
+    const group = groups.find((g) => g.id === currentGroupId)
+    if (!group) return
+    const toIndex = index + dir
+    if (toIndex < 0 || toIndex >= group.projects.length) return
+    await reorderProject(currentGroupId, { fromIndex: index, toIndex })
+  }
+
+  return (
+    <>
+      <Modal
+        title="Manage Projects"
+        onClose={doClose}
+        isOpen={true}
+        size="lg"
+        initialFocusRef={titleRef as React.RefObject<HTMLElement>}
+        headerActions={headerActions}
+        footer={listFooter}
+      >
+        {error && (
+          <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
+            Error: {error}
+          </div>
+        )}
+
+        {mode === 'list' && (
+          <div className="flex flex-col" style={{ gap: 12 }}>
+            <div>
+              {visibleProjects.length === 0 && <div className="empty">No projects.</div>}
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {visibleProjects.map((p, idx) => (
+                  <li
+                    key={p.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderBottom: '1px solid var(--border-subtle)',
+                      padding: '8px 0',
+                    }}
+                  >
                     <div className="flex items-center gap-2">
                       <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
                       <div>
@@ -319,154 +392,64 @@ export default function ProjectManagerModal({
                         </div>
                       </div>
                     </div>
-                    {p.codeInfo && (
-                      <div className="flex gap-2">
-                        <CodeInfoChip type="language" value={p.codeInfo.language} />
-                        {p.codeInfo.framework && (
-                          <CodeInfoChip type="framework" value={p.codeInfo.framework} />
-                        )}
-                        {p.codeInfo.testFramework && (
-                          <CodeInfoChip type="testFramework" value={p.codeInfo.testFramework} />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex" style={{ gap: 8 }}>
-                    <Button className="btn-secondary" onClick={() => startEdit(p)}>
-                      <IconEdit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      className="btn-secondary"
-                      disabled={saving}
-                      variant="danger"
-                      onClick={() => handleDelete(p.id)}
-                    >
-                      <IconDelete className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
 
-      {(mode === 'create' || mode === 'edit') && (
-        <form id={formId} className="story-form" onSubmit={handleSubmit}>
-          {formErrors.length > 0 && (
-            <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
-              {formErrors.map((e, i) => (
-                <div key={i}>• {e}</div>
-              ))}
-            </div>
-          )}
-          <TextInput
-            label="ID"
-            value={form.id}
-            onChange={(v: string) => setForm((s: any) => ({ ...s, id: v }))}
-            placeholder="unique-id"
-            disabled={mode === 'edit'}
-          />
-          <TextInput
-            label="Title"
-            value={form.title}
-            onChange={(v: string) => setForm((s: any) => ({ ...s, title: v }))}
-            placeholder="Project title"
-          />
-          <TextArea
-            label="Description"
-            value={form.description}
-            onChange={(v: string) => setForm((s: any) => ({ ...s, description: v }))}
-            placeholder="Short description"
-          />
-          <TextInput
-            label="Path (under projects/)"
-            value={form.path}
-            onChange={(v: string) => setForm((s: any) => ({ ...s, path: v }))}
-            placeholder="my-project"
-          />
-          <TextInput
-            label="Repository URL"
-            value={form.repo_url}
-            onChange={(v: string) => setForm((s: any) => ({ ...s, repo_url: v }))}
-            placeholder="https://github.com/org/repo"
-          />
+                    <div className="flex items-center" style={{ gap: 8 }}>
+                      {/* Reorder controls only when a specific group is selected */}
+                      {currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            className="btn-secondary"
+                            title="Move up"
+                            onClick={() => onMoveProjectInGroup(idx, -1)}
+                            disabled={idx === 0}
+                          >
+                            <IconArrowLeftMini className="w-4 h-4 rotate-90" />
+                          </Button>
+                          <Button
+                            className="btn-secondary"
+                            title="Move down"
+                            onClick={() => onMoveProjectInGroup(idx, +1)}
+                            disabled={idx === visibleProjects.length - 1}
+                          >
+                            <IconArrowRightMini className="w-4 h-4 rotate-90" />
+                          </Button>
+                        </div>
+                      )}
 
-          <div className="form-row">
-            <label>GitHub Credentials (optional)</label>
-            <Select
-              value={form.metadata.githubCredentialsId ?? '__none__'}
-              onValueChange={(v) =>
-                setForm((s: any) => ({
-                  ...s,
-                  metadata: { ...s.metadata, githubCredentialsId: v == '__none__' ? undefined : v },
-                }))
-              }
-            >
-              <SelectTrigger className="ui-select w-full max-w-md">
-                <SelectValue placeholder="Select credentials" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">None</SelectItem>
-                {credentials.map((c) => (
-                  <SelectItem key={c.id} value={c.id!}>
-                    {c.name} ({c.username})
-                  </SelectItem>
+                      <Button className="btn-secondary" onClick={() => startEdit(p)}>
+                        <IconEdit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        className="btn-secondary"
+                        disabled={saving}
+                        variant="danger"
+                        onClick={() => handleDelete(p.id)}
+                      >
+                        <IconDelete className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </li>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="form-row flex items-center gap-4">
-            <label htmlFor="coding-project-switch">Coding Project</label>
-            <Switch
-              checked={!!form.codeInfo}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  setIsCodeInfoModalOpen(true)
-                } else {
-                  setForm((s: any) => ({ ...s, codeInfo: undefined }))
-                }
-              }}
-            />
-          </div>
-
-          {form.codeInfo && (
-            <div className="form-row">
-              <label>Code Info</label>
-              <div className="flex gap-2">
-                <CodeInfoChip
-                  type="language"
-                  value={form.codeInfo.language}
-                  isInteractive
-                  onClick={() => setIsCodeInfoModalOpen(true)}
-                />
-                {form.codeInfo.framework && (
-                  <CodeInfoChip
-                    type="framework"
-                    value={form.codeInfo.framework}
-                    isInteractive
-                    onClick={() => setIsCodeInfoModalOpen(true)}
-                  />
-                )}
-                {form.codeInfo.testFramework && (
-                  <CodeInfoChip
-                    type="testFramework"
-                    value={form.codeInfo.testFramework}
-                    isInteractive
-                    onClick={() => setIsCodeInfoModalOpen(true)}
-                  />
-                )}
-              </div>
+              </ul>
             </div>
-          )}
+          </div>
+        )}
 
-          <IconPicker
-            value={form.metadata.icon}
-            onChange={(v) => setForm((s: any) => ({ ...s, metadata: { ...s.metadata, icon: v } }))}
+        {(mode === 'create' || mode === 'edit') && (
+          <ProjectEditorForm
+            mode={mode}
+            form={form}
+            setForm={setForm}
+            formErrors={formErrors}
+            formId={formId}
+            onSubmit={handleSubmit}
+            selectedGroupId={selectedGroupId}
+            onSelectedGroupIdChange={setSelectedGroupId}
           />
-        </form>
-      )}
-    </Modal>
+        )}
+      </Modal>
+
+      {isGroupsEditorOpen && <GroupsEditorModal />}
+    </>
   )
 }

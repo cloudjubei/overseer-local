@@ -64,7 +64,8 @@ export default class FactoryToolsManager extends BaseManager {
     const tools = createTools(
       projectId,
       projectRoot,
-      project.repo_url,
+      // project.repo_url,
+      // gitCredentials,
       webSearchApiKeys,
       dbConnectionString,
     )
