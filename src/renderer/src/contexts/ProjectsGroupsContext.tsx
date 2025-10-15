@@ -88,3 +88,31 @@ export function useProjectsGroups(): ProjectsGroupsContextValue {
   if (!ctx) throw new Error('useProjectsGroups must be used within ProjectsGroupsProvider')
   return ctx
 }
+
+// export type ProjectsGroups = ProjectsGroup[];
+// export interface ProjectsGroup {
+//     id: string;
+//     title: string;
+//     projects: string[];
+//     createdAt: string;
+//     updatedAt: string;
+// }
+// export interface ProjectsGroup {
+//     id: string;
+//     title: string;
+//     projects: string[];
+//     createdAt: string;
+//     updatedAt: string;
+// }
+// export type ProjectsGroupCreateInput = Pick<ProjectsGroup, 'title'>;
+// export type ProjectsGroupEditInput = Partial<ProjectsGroupCreateInput>;
+// export type ProjectsGroupUpdateType = 'change';
+// export type ProjectsGroupUpdate = {
+//     type: ProjectsGroupUpdateType;
+//     groups: ProjectsGroups;
+// };
+// export type ProjectsGroupChangeHandler = (update: ProjectsGroupUpdate) => Promise<void>;
+// export interface ReorderPayload {
+//     fromIndex: number;
+//     toIndex: number;
+// }
