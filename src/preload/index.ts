@@ -189,6 +189,27 @@ const PROJECTS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER, { projectId, payload }),
 }
 
+const PROJECTSGROUPS_API = {
+  subscribe: (callback) => {
+    const listener = (_event, payload) => callback(payload)
+    ipcRenderer.on(IPC_HANDLER_KEYS.PROJECTSGROUPS_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.PROJECTSGROUPS_SUBSCRIBE, listener)
+  },
+  listProjectsGroups: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_LIST),
+  getProjectsGroup: (groupId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_GET, { groupId }),
+  createProjectsGroup: (input) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_CREATE, { input }),
+  updateProjectsGroup: (groupId, patch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_UPDATE, { groupId, patch }),
+  deleteProjectsGroup: (groupId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_DELETE, { groupId }),
+  reorderProject: (groupId, payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_PROJECT_REORDER, { groupId, payload }),
+  reorderGroup: (payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTSGROUPS_GROUP_REORDER, { payload }),
+}
+
 const SCREENSHOT_API = {
   capture: (options) => ipcRenderer.invoke('screenshot:capture', options),
 }
@@ -335,6 +356,7 @@ if (process.contextIsolated) {
 
     contextBridge.exposeInMainWorld('storiesService', STORIES_API)
     contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
+    contextBridge.exposeInMainWorld('projectsGroupsService', PROJECTSGROUPS_API)
     contextBridge.exposeInMainWorld('filesService', FILES_API)
     contextBridge.exposeInMainWorld('chatsService', CHATS_API)
     contextBridge.exposeInMainWorld('completionService', COMPLETION_API)

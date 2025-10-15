@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import type { ProjectsGroupsService } from 'src/renderer/src/services/projectsGroupsService'
 import type { ProjectsService } from 'src/renderer/src/services/projectsService'
 import type { ChatsService } from 'src/renderer/src/services/chatsService'
 import type { FilesService } from 'src/renderer/src/services/filesService'
@@ -22,6 +23,7 @@ declare global {
     factoryToolsService: FactoryToolsService
     storiesService: StoriesService
     projectsService: ProjectsService
+    projectsGroupsService: ProjectsGroupsService
     filesService: FilesService
     chatsService: ChatsService
     completionService: CompletionService

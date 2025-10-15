@@ -1,0 +1,22 @@
+{
+  "id": "sprinter-ember",
+  "title": "Sprinter Ember",
+  "description": "AI-powered research assistant for analysing companies.\n",
+  "path": "../../SprinterEmber",
+  "repo_url": "https://github.com/SprinterHQ/ember",
+  "requirements": [],
+  "metadata": {
+    "icon": "edit",
+    "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
+  },
+  "codeInfo": {
+    "language": "typescript",
+    "framework": "nextjs",
+    "testFramework": "jest"
+  },
+  "storyIdToDisplayIndex": {
+    "0e98b738-aca9-4c0a-b13d-1275150a50c8": 1
+  },
+  "createdAt": "2025-10-09T22:29:20.873Z",
+  "updatedAt": "2025-10-09T22:30:58.669Z"
+}

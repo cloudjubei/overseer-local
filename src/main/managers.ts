@@ -3,6 +3,7 @@ import BaseManager from '../logic/BaseManager'
 import FactoryAgentRunManager from '../logic/factory/FactoryAgentRunManager'
 import FactoryToolsManager from '../logic/factory/FactoryToolsManager'
 import FilesManager from '../logic/files/FilesManager'
+import ProjectsGroupsManager from '../logic/projectsgroups/ProjectsGroupsManager'
 import ProjectsManager from '../logic/projects/ProjectsManager'
 import StoriesManager from '../logic/stories/StoriesManager'
 import ChatsManager from '../logic/chat/ChatsManager'
@@ -21,6 +22,7 @@ export let factoryLLMPricingManager: FactoryLLMPricingManager | undefined
 export let factoryAgentRunManager: FactoryAgentRunManager | undefined
 export let storiesManager: StoriesManager | undefined
 export let filesManager: FilesManager | undefined
+export let projectsGroupsManager: ProjectsGroupsManager | undefined
 export let projectsManager: ProjectsManager | undefined
 export let chatsManager: ChatsManager | undefined
 export let notificationsManager: NotificationsManager | undefined
@@ -43,6 +45,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryLLMPricingManager,
     databaseManager,
   )
+  projectsGroupsManager = new ProjectsGroupsManager(projectRoot, mainWindow)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
@@ -76,6 +79,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     databaseManager,
     factoryLLMPricingManager,
     factoryAgentRunManager,
+    projectsGroupsManager,
     projectsManager,
     storiesManager,
     filesManager,

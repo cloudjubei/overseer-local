@@ -8,6 +8,16 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_DELETE: 'projects:delete',
   PROJECTS_STORY_REORDER: 'projects:reorder-story',
 
+  // ProjectsGroups
+  PROJECTSGROUPS_SUBSCRIBE: 'projectsgroups:subscribe',
+  PROJECTSGROUPS_LIST: 'projectsgroups:list',
+  PROJECTSGROUPS_GET: 'projectsgroups:get',
+  PROJECTSGROUPS_CREATE: 'projectsgroups:create',
+  PROJECTSGROUPS_UPDATE: 'projectsgroups:update',
+  PROJECTSGROUPS_DELETE: 'projectsgroups:delete',
+  PROJECTSGROUPS_PROJECT_REORDER: 'projectsgroups:reorder-project',
+  PROJECTSGROUPS_GROUP_REORDER: 'projectsgroups:reorder-group',
+
   // Chats
   CHATS_SUBSCRIBE: 'chats:subscribe',
   CHATS_LIST: 'chats:list',
