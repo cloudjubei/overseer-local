@@ -2193,7 +2193,7 @@
     },
     {
       "id": "cd613bac-52f7-4f5d-a81a-4bacf77203b3",
-      "status": "-",
+      "status": "?",
       "title": "The icon selector in projects should be different",
       "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window. They could be loosely categorised in sections.\nWe also need to add far more icons. Go over the list in @src/renderer/src/components/ui/Icons.tsx and propose some new ones that match the style. We need at least 10 finance related ones, 10 medical ones, 10 business ones, 10 sport ones.",
       "context": [
@@ -2202,7 +2202,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:23:25.404Z",
-      "updatedAt": "2025-10-15T09:23:25.404Z"
+      "updatedAt": "2025-10-15T11:19:42.255Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
@@ -2218,7 +2219,7 @@
     },
     {
       "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",
-      "status": "-",
+      "status": "+",
       "title": "There needs to be a ProjectsGroupsContext",
       "description": "Just like we have @src/renderer/src/contexts/ProjectContext.tsx we need a @src/renderer/src/contexts/ProjectsGroupsContext.tsx that interfaces with @src/renderer/src/services/projectsGroupsService.ts . It needs to follow the same exact patterns as ProjectContext.",
       "context": [
@@ -2227,7 +2228,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T11:11:23.073Z",
-      "updatedAt": "2025-10-15T11:11:23.073Z"
+      "updatedAt": "2025-10-15T11:14:23.187Z",
+      "completedAt": "2025-10-15T11:14:23.187Z"
     }
   ],
   "featureIdToDisplayIndex": {
