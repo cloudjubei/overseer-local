@@ -18,7 +18,7 @@ export type ProjectsGroupsService = {
   ) => Promise<ProjectsGroup | undefined>
   deleteProjectsGroup: (groupId: string) => Promise<void>
   reorderProject: (groupId: string, payload: ReorderPayload) => Promise<ProjectsGroup | undefined>
-  reorderGroup: (payload: ReorderPayload) => Promise<ProjectsGroup | undefined>
+  reorderGroup: (payload: ReorderPayload) => Promise<ProjectsGroups>
 }
 
 export const projectsGroupsService: ProjectsGroupsService = { ...window.projectsGroupsService }

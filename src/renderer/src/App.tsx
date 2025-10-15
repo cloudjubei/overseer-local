@@ -6,6 +6,7 @@ import { NavigatorProvider } from './navigation/Navigator'
 import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts'
 import CommandMenu from './components/ui/CommandMenu'
 import ShortcutsHelp from './components/ui/ShortcutsHelp'
+import { ProjectsGroupsProvider } from './contexts/ProjectsGroupsContext'
 import { ProjectsProvider } from './contexts/ProjectContext'
 import { useTheme } from './hooks/useTheme'
 import useLiveData from './hooks/useLiveData'
@@ -33,30 +34,32 @@ function App() {
   return (
     <AppSettingsProvider>
       <ToastProvider>
-        <ProjectsProvider>
-          <StoriesProvider>
-            <FilesProvider>
-              <NavigatorProvider>
-                <ShortcutsProvider>
-                  <LLMConfigProvider>
-                    <GitHubCredentialsProvider>
-                      <ChatsProvider>
-                        <AgentsProvider>
-                          <ServicesBootstrap />
-                          <ShortcutsBootstrap />
-                          <NotificationClickHandler />
-                          <CommandMenu />
-                          <ShortcutsHelp />
-                          <MainApp />
-                        </AgentsProvider>
-                      </ChatsProvider>
-                    </GitHubCredentialsProvider>
-                  </LLMConfigProvider>
-                </ShortcutsProvider>
-              </NavigatorProvider>
-            </FilesProvider>
-          </StoriesProvider>
-        </ProjectsProvider>
+        <ProjectsGroupsProvider>
+          <ProjectsProvider>
+            <StoriesProvider>
+              <FilesProvider>
+                <NavigatorProvider>
+                  <ShortcutsProvider>
+                    <LLMConfigProvider>
+                      <GitHubCredentialsProvider>
+                        <ChatsProvider>
+                          <AgentsProvider>
+                            <ServicesBootstrap />
+                            <ShortcutsBootstrap />
+                            <NotificationClickHandler />
+                            <CommandMenu />
+                            <ShortcutsHelp />
+                            <MainApp />
+                          </AgentsProvider>
+                        </ChatsProvider>
+                      </GitHubCredentialsProvider>
+                    </LLMConfigProvider>
+                  </ShortcutsProvider>
+                </NavigatorProvider>
+              </FilesProvider>
+            </StoriesProvider>
+          </ProjectsProvider>
+        </ProjectsGroupsProvider>
       </ToastProvider>
     </AppSettingsProvider>
   )
