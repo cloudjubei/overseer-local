@@ -2194,7 +2194,7 @@
     },
     {
       "id": "cd613bac-52f7-4f5d-a81a-4bacf77203b3",
-      "status": "-",
+      "status": "?",
       "title": "The icon selector in projects should be different",
       "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window. They could be loosely categorised in sections.\nWe also need to add far more icons. Go over the list in @src/renderer/src/components/ui/Icons.tsx and propose some new ones that match the style. We need at least 10 finance related ones, 10 medical ones, 10 business ones, 10 sport ones.",
       "context": [
@@ -2203,7 +2203,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:23:25.404Z",
-      "updatedAt": "2025-10-15T11:56:59.882Z"
+      "updatedAt": "2025-10-15T12:40:17.857Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
