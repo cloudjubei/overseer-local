@@ -92,7 +92,7 @@ function ToolCallRow({ call, result, index }: { call: ToolCall; result?: any; in
       {displayResult && (
         <div className="px-3 pb-3">
           <Collapsible title={<span>View result</span>}>
-            <Code language="json" code={displayResult as string} />
+            <Code language="json" code={displayResult} />
           </Collapsible>
         </div>
       )}
