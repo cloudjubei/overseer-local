@@ -2178,7 +2178,7 @@
     },
     {
       "id": "c989b117-412c-4645-add9-57a9d426f054",
-      "status": "-",
+      "status": "?",
       "title": "Allow chatting i.e. continuing the conversation on an Agent Run",
       "description": "Right now in @src/renderer/src/screens/AgentsView.tsx there's a way of viewing each agent run in a @src/renderer/src/components/agents/ChatConversation.tsx . Each AgentRun actually stores the ChatMessages which can be directly used in a chat via @src/renderer/src/components/chat/ChatSidebar.tsx .\n\nThe appropriate contexts for agent runs that are for stories is included in @src/renderer/src/screens/AgentsView.tsx - `chatContextAgentRun` and the one for agent feature runs is: `chatContextAgentRunFeature`.\n\nWhen clicking the button, the user is taken to the ChatView, inside ChatView - `agentRunId` also needs to be passed. When in ChatView the conversation (`AgentRunConversation`) from inside the `AgentRunHistory` holds `messages: ChatMessage[]` which need to be taken and used to start the chat.\n\n\nWhat we need is in @src/renderer/src/components/agents/ChatConversation.tsx is to have the possibility of redirecting to ChatView with the correct chat being open, when clicking a chat button that should show to the left of the name of each Agent Feature Run and the single Agent Story Run.",
       "context": [
@@ -2188,7 +2188,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-08T22:56:24.172Z",
-      "updatedAt": "2025-10-09T11:20:21.728Z",
+      "updatedAt": "2025-10-15T11:11:44.274Z",
       "rejection": "In ChatView the chat isn't seeded with the starting messages from the AgentRunHistory's AgentRunConversation."
     },
     {
@@ -2206,7 +2206,7 @@
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
-      "status": "-",
+      "status": "?",
       "title": "The manage projects modal needs updating",
       "description": "The @src/renderer/src/screens/projects/ProjectManagerModal.tsx needs to update in the following way:\n- we need to add a header section that won't be scrollable. This section will have 'group control'. There needs to be a dropdown selector that allows selecting which group to show, by default a special ALL selection is on. To the right there should be an \"Edit\" button (Icon only). The Edit button shows an alert that will allow the user to move the groups' orders around, delete groups, add a group (very simple alert with name entry) and edit a group's name (same alert as Add - just prefilled).\n- the add project button needs to be in a footer at the bottom of the modal that isn't scrollable.\n- The middle section shows the current group's projects. They can be moved around to change their order within the group.\n- Apart from the \"ALL\" dropdown option, there needs to be a \"--uncategorized--\" one, which shows right after ALL (the first 2 options). All projects that don't have a group assigned need to be shown here.\n- The @src/renderer/src/screens/projects/ProjectManagerModal.tsx should have the actual project configuration view split away from it into a separate file. There needs to be a new dropdown under the ID that allows the selection of a group for a given project.",
       "context": [
@@ -2214,7 +2214,20 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:34:24.331Z",
-      "updatedAt": "2025-10-15T09:34:24.331Z"
+      "updatedAt": "2025-10-15T11:11:36.281Z"
+    },
+    {
+      "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",
+      "status": "-",
+      "title": "There needs to be a ProjectsGroupsContext",
+      "description": "Just like we have @src/renderer/src/contexts/ProjectContext.tsx we need a @src/renderer/src/contexts/ProjectsGroupsContext.tsx that interfaces with @src/renderer/src/services/projectsGroupsService.ts . It needs to follow the same exact patterns as ProjectContext.",
+      "context": [
+        "src/renderer/src/contexts/ProjectContext.tsx",
+        "src/renderer/src/services/projectsGroupsService.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T11:11:23.073Z",
+      "updatedAt": "2025-10-15T11:11:23.073Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2360,10 +2373,11 @@
     "76b04544-7d06-4f64-8648-95a46b569056": 140,
     "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1": 141,
     "2dc1b4b3-8376-44d0-937f-f6c18778622b": 142,
-    "c989b117-412c-4645-add9-57a9d426f054": 143,
+    "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c": 143,
     "cd613bac-52f7-4f5d-a81a-4bacf77203b3": 144,
     "940b5550-9f7a-463b-8621-1909e796ad60": 145,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 146
+    "c989b117-412c-4645-add9-57a9d426f054": 146,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 147
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
