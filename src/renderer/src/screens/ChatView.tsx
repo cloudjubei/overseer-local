@@ -258,25 +258,20 @@ export default function ChatView() {
     storyTopicChats,
   ])
 
-  // Seed chats for agent runs with the existing AgentRunConversation messages
   useEffect(() => {
     const maybeSeed = async () => {
       const ctx = selectedContext
       if (!ctx) return
       if (ctx.type !== 'AGENT_RUN' && ctx.type !== 'AGENT_RUN_FEATURE') return
 
-      // find the related agent run
-      const run = runsHistory.find((r) => r.id === (ctx as ChatContextAgentRun).agentRunId)
+      const run = runsHistory.find((r) => r.id === ctx.agentRunId)
       if (!run) return
 
       let seedMessages: ChatMessage[] | undefined
       if (ctx.type === 'AGENT_RUN') {
-        const first = run.conversations?.[0]
-        if (first && !first.featureId) seedMessages = first.messages || []
+        seedMessages = run.conversations[0]?.messages || []
       } else if (ctx.type === 'AGENT_RUN_FEATURE') {
-        const c = run.conversations?.find(
-          (conv) => conv.featureId && conv.featureId === (ctx as ChatContextAgentRunFeature).featureId,
-        )
+        const c = run.conversations.find((c) => c.featureId === ctx.featureId)
         if (c) seedMessages = c.messages || []
       }
 
