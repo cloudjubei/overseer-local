@@ -92,7 +92,7 @@ function ToolCallRow({ call, result, index }: { call: ToolCall; result?: any; in
       {displayResult && (
         <div className="px-3 pb-3">
           <Collapsible title={<span>View result</span>}>
-            <Code language="json" code={displayResult} />
+            <Code language="json" code={displayResult as string} />
           </Collapsible>
         </div>
       )}
@@ -252,6 +252,9 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
     return !!first && !first.featureId
   }, [run.conversations])
 
+  // Determine if the run is still active; only finished runs should allow chat
+  const isRunActive = run.state === 'created' || run.state === 'running'
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -334,8 +337,8 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
               const isStoryConversation = !conversation.featureId
               const titleNode = (
                 <span className="flex items-center gap-2">
-                  {/* Chat button to the left of the title */}
-                  {isStoryConversation ? (
+                  {/* Chat button to the left of the title; only when run is finished */}
+                  {(!isRunActive && isStoryConversation) ? (
                     isStoryOnlyRun ? (
                       <span
                         role="button"
@@ -350,7 +353,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
                         <IconChat className="w-4 h-4" />
                       </span>
                     ) : null
-                  ) : conversation.featureId ? (
+                  ) : (!isRunActive && conversation.featureId) ? (
                     <span
                       role="button"
                       title="Open feature run chat"
