@@ -2188,23 +2188,20 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-08T22:56:24.172Z",
-      "updatedAt": "2025-10-15T12:34:52.555Z",
-      "rejection": "The chat option should not be enabled until the agent has finished the run. So only non-active runs can have the chat.",
+      "updatedAt": "2025-10-15T12:43:55.924Z",
       "completedAt": "2025-10-15T12:34:52.555Z"
     },
     {
       "id": "cd613bac-52f7-4f5d-a81a-4bacf77203b3",
-      "status": "?",
+      "status": "-",
       "title": "The icon selector in projects should be different",
-      "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window. They could be loosely categorised in sections.\nWe also need to add far more icons. Go over the list in @src/renderer/src/components/ui/Icons.tsx and propose some new ones that match the style. We need at least 10 finance related ones, 10 medical ones, 10 business ones, 10 sport ones.",
+      "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window.",
       "context": [
-        "src/renderer/src/screens/projects/ProjectManagerModal.tsx",
-        "src/renderer/src/components/ui/Icons.tsx"
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:23:25.404Z",
-      "updatedAt": "2025-10-15T12:40:17.857Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-15T12:44:43.921Z"
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
@@ -2233,6 +2230,19 @@
       "createdAt": "2025-10-15T11:11:23.073Z",
       "updatedAt": "2025-10-15T11:14:23.187Z",
       "completedAt": "2025-10-15T11:14:23.187Z"
+    },
+    {
+      "id": "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9",
+      "status": "-",
+      "title": "New icons",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 finance related ones, 10 medical ones, 10 business ones, 10 sport ones, 10 construction ones and 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/Icons.tsx",
+        "src/renderer/src/screens/projects/projectIcons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T12:45:33.201Z",
+      "updatedAt": "2025-10-15T12:46:47.548Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2380,9 +2390,10 @@
     "2dc1b4b3-8376-44d0-937f-f6c18778622b": 142,
     "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c": 143,
     "c989b117-412c-4645-add9-57a9d426f054": 144,
-    "cd613bac-52f7-4f5d-a81a-4bacf77203b3": 145,
-    "940b5550-9f7a-463b-8621-1909e796ad60": 146,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 147
+    "940b5550-9f7a-463b-8621-1909e796ad60": 145,
+    "cd613bac-52f7-4f5d-a81a-4bacf77203b3": 146,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 147,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 148
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
