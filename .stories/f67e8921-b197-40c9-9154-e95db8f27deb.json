@@ -2206,7 +2206,7 @@
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
-      "status": "-",
+      "status": "?",
       "title": "The manage projects modal needs updating",
       "description": "The @src/renderer/src/screens/projects/ProjectManagerModal.tsx needs to update in the following way:\n- we need to add a header section that won't be scrollable. This section will have 'group control'. There needs to be a dropdown selector that allows selecting which group to show, by default a special ALL selection is on. To the right there should be an \"Edit\" button (Icon only). The Edit button shows an alert that will allow the user to move the groups' orders around, delete groups, add a group (very simple alert with name entry) and edit a group's name (same alert as Add - just prefilled).\n- the add project button needs to be in a footer at the bottom of the modal that isn't scrollable.\n- The middle section shows the current group's projects. They can be moved around to change their order within the group.\n- Apart from the \"ALL\" dropdown option, there needs to be a \"--uncategorized--\" one, which shows right after ALL (the first 2 options). All projects that don't have a group assigned need to be shown here.\n- The @src/renderer/src/screens/projects/ProjectManagerModal.tsx should have the actual project configuration view split away from it into a separate file. There needs to be a new dropdown under the ID that allows the selection of a group for a given project.\n\nThere's @src/renderer/src/contexts/ProjectsGroupsContext.tsx that should be used for this feature. If anything is missing from that file it should be updated so that it's the interface to talk with @src/renderer/src/services/projectsGroupsService.ts .",
       "context": [
@@ -2216,7 +2216,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:34:24.331Z",
-      "updatedAt": "2025-10-15T11:32:41.264Z"
+      "updatedAt": "2025-10-15T11:38:55.942Z",
+      "rejection": "Blocked: Missing domain type details for ReorderPayload and ProjectsGroup shape from 'thefactory-tools'. The UI requires filtering projects by group and reordering within groups, plus CRUD for groups. Without knowing the exact fields (e.g., group.id, group.name, projectIds or mapping) and the ReorderPayload format (e.g., fromIndex/toIndex or ids), I cannot correctly implement the logic. Please supply the types or guidance on payload/field names."
     },
     {
       "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",
