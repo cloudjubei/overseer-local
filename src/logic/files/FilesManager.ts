@@ -32,8 +32,6 @@ export default class FilesManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.__getTools('main')
-
     await super.init()
   }
 

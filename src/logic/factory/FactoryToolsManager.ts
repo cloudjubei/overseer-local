@@ -3,7 +3,7 @@ import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import BaseManager from '../BaseManager'
 import ProjectsManager from '../projects/ProjectsManager'
 import SettingsManager from '../settings/SettingsManager'
-import { AgentTools, createAgentTools, createTools } from 'thefactory-tools'
+import { AgentTools, createAgentTools, createTools, GithubCredentials } from 'thefactory-tools'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
@@ -22,7 +22,6 @@ export default class FactoryToolsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.__getTools('main')
     await super.init()
   }
 
@@ -51,11 +50,24 @@ export default class FactoryToolsManager extends BaseManager {
     if (!projectRoot) {
       return
     }
+    const project = await this.projectsManager.getProject(projectId)
+    if (!project) {
+      return
+    }
+    // const githubCredentialsId = project.metadata?.githubCredentialsId
+    // const gitCredentials : GithubCredentials = { name: '', username: '', email: '', token: ''} //TODO:
+
     const appSettings = this.settingsManager.getAppSettings()
     const webSearchApiKeys = appSettings?.webSearchApiKeys
     const dbConnectionString = appSettings?.database?.connectionString
 
-    const tools = createTools(projectId, projectRoot, webSearchApiKeys, dbConnectionString)
+    const tools = createTools(
+      projectId,
+      projectRoot,
+      project.repo_url,
+      webSearchApiKeys,
+      dbConnectionString,
+    )
     const agentTools = createAgentTools(tools)
 
     this.agentToolsMap[projectId] = agentTools
