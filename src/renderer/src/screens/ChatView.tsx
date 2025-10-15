@@ -3,6 +3,7 @@ import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
+import { useAgents } from '@renderer/contexts/AgentsContext'
 import type {
   ChatContext,
   ChatContextAgentRun,
@@ -12,9 +13,11 @@ import type {
   ChatContextProjectTopic,
   ChatContextStory,
   ChatContextStoryTopic,
+  ChatMessage,
 } from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { IconPlus } from '../components/ui/Icons'
+import { chatsService } from '@renderer/services/chatsService'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -106,6 +109,7 @@ export default function ChatView() {
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chats, chatsByProjectId, restartChat, getChat } = useChats()
+  const { runsHistory } = useAgents()
 
   // Helpers for titles
   const getProjectTitle = (id?: string) => {
@@ -253,6 +257,42 @@ export default function ChatView() {
     projectTopicChats,
     storyTopicChats,
   ])
+
+  // Seed chats for agent runs with the existing AgentRunConversation messages
+  useEffect(() => {
+    const maybeSeed = async () => {
+      const ctx = selectedContext
+      if (!ctx) return
+      if (ctx.type !== 'AGENT_RUN' && ctx.type !== 'AGENT_RUN_FEATURE') return
+
+      // find the related agent run
+      const run = runsHistory.find((r) => r.id === (ctx as ChatContextAgentRun).agentRunId)
+      if (!run) return
+
+      let seedMessages: ChatMessage[] | undefined
+      if (ctx.type === 'AGENT_RUN') {
+        const first = run.conversations?.[0]
+        if (first && !first.featureId) seedMessages = first.messages || []
+      } else if (ctx.type === 'AGENT_RUN_FEATURE') {
+        const c = run.conversations?.find(
+          (conv) => conv.featureId && conv.featureId === (ctx as ChatContextAgentRunFeature).featureId,
+        )
+        if (c) seedMessages = c.messages || []
+      }
+
+      if (!seedMessages || seedMessages.length === 0) return
+
+      try {
+        const chatState = await getChat(ctx)
+        const hasMessages = (chatState.chat.messages || []).length > 0
+        if (hasMessages) return
+        await chatsService.updateChat(ctx, { messages: seedMessages })
+      } catch (e) {
+        console.warn('Failed to seed agent run chat from history', e)
+      }
+    }
+    maybeSeed()
+  }, [selectedContext, runsHistory, getChat])
 
   const handleNewChat = async () => {
     // New General chat: restart the PROJECT chat for current active project

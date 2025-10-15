@@ -247,6 +247,11 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
     run.conversations.length > 0 ? run.conversations[run.conversations.length - 1] : undefined
   const latestFeatureId = latestFeature?.featureId
 
+  const isStoryOnlyRun = useMemo(() => {
+    const first = run.conversations?.[0]
+    return !!first && !first.featureId
+  }, [run.conversations])
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -305,20 +310,6 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Story Run chat action aligned to the left of its label */}
-      <div className="flex items-center justify-start gap-2 px-1">
-        <button
-          type="button"
-          className="btn-secondary btn-icon"
-          title="Open story run chat"
-          aria-label="Open story run chat"
-          onClick={openStoryRunChat}
-        >
-          <IconChat className="w-4 h-4" />
-        </button>
-        <span className="text-xs text-neutral-700 dark:text-neutral-300">Story Run</span>
-      </div>
-
       <ul
         ref={containerRef}
         className="h-[60vh] max-h-[70vh] overflow-auto bg-neutral-50 dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 space-y-3"
@@ -339,34 +330,52 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
                 .filter(Boolean)
                 .join(' ')
               const isLatestFeature = conversation.featureId === latestFeatureId
+
+              const isStoryConversation = !conversation.featureId
+              const titleNode = (
+                <span className="flex items-center gap-2">
+                  {/* Chat button to the left of the title */}
+                  {isStoryConversation ? (
+                    isStoryOnlyRun ? (
+                      <span
+                        role="button"
+                        title="Open story run chat"
+                        aria-label="Open story run chat"
+                        className="btn-secondary btn-icon inline-flex"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openStoryRunChat()
+                        }}
+                      >
+                        <IconChat className="w-4 h-4" />
+                      </span>
+                    ) : null
+                  ) : conversation.featureId ? (
+                    <span
+                      role="button"
+                      title="Open feature run chat"
+                      aria-label="Open feature run chat"
+                      className="btn-secondary btn-icon inline-flex"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openFeatureRunChat(conversation.featureId!)
+                      }}
+                    >
+                      <IconChat className="w-4 h-4" />
+                    </span>
+                  ) : null}
+                  <span>
+                    {isStoryConversation ? 'Story Run' : `Feature: ${conversation.featureId}`}
+                    {subtitle ? (
+                      <span className="text-neutral-500 text-[11px] px-2"> {subtitle}</span>
+                    ) : null}
+                  </span>
+                </span>
+              )
+
               return (
                 <li key={conversation.id}>
-                  <Collapsible
-                    title={
-                      <span className="flex items-center gap-2">
-                        {/* Chat button to the left of the feature title */}
-                        <span
-                          role="button"
-                          title="Open feature run chat"
-                          aria-label="Open feature run chat"
-                          className="btn-secondary btn-icon inline-flex"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            openFeatureRunChat(conversation.featureId)
-                          }}
-                        >
-                          <IconChat className="w-4 h-4" />
-                        </span>
-                        <span>
-                          Feature: {conversation.featureId}
-                          {subtitle ? (
-                            <span className="text-neutral-500 text-[11px] px-2"> {subtitle}</span>
-                          ) : null}
-                        </span>
-                      </span>
-                    }
-                    defaultOpen={isLatestFeature}
-                  >
+                  <Collapsible title={titleNode} defaultOpen={isLatestFeature}>
                     <FeatureContent
                       conversation={conversation}
                       isLatestFeature={isLatestFeature}
