@@ -2367,7 +2367,7 @@
     },
     {
       "id": "ad551afc-2b74-45e7-ac7b-9eac1faa8e26",
-      "status": "-",
+      "status": "+",
       "title": "Continue refactor of Icons",
       "description": "In @src/renderer/src/components/ui/icons/Icons.tsx we just need the exports for individual icons. Some of them have already been moved to their files. Do the rest.",
       "context": [
@@ -2375,7 +2375,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T19:28:18.570Z",
-      "updatedAt": "2025-10-16T19:28:18.570Z"
+      "updatedAt": "2025-10-16T19:42:32.625Z",
+      "completedAt": "2025-10-16T19:42:32.625Z"
     },
     {
       "id": "67302df0-716b-46ed-aee1-828cb60373d2",
