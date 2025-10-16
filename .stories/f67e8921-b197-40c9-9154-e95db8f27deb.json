@@ -2443,6 +2443,21 @@
       "createdAt": "2025-10-16T22:58:32.510Z",
       "updatedAt": "2025-10-16T23:02:43.903Z",
       "rejection": "ProjectEditorForm and ProjectManagerModal have not been updated."
+    },
+    {
+      "id": "c7a825c8-9791-4893-9b98-f89a9681e376",
+      "status": "-",
+      "title": "Chats sidebar update",
+      "description": "In @src/renderer/src/screens/ChatView.tsx the sidebar needs to be updated:\n- it should only show the single General chat for the active project\n- when opening the chat, all the categories should be closed apart from the last open chat (which should be selected) or the chat to be shown from context.\n- all sub categories should also be closed and follow the rules above.\n- there needs to be a stronger visual distinction between the categories,subcategories and chats.\n- for now we need to get rid off the \"plus/add\" button at the top right, we simply should always show the General chat tile for the given project and if the user clicks it but it wasn't yet created then it should be.\n- There needs to be a switch (similar to the one in @src/renderer/src/screens/stories/StoriesListView.tsx  for changing modes) that will allow switching between \"Categories\" and \"History\". Categories is the current view and History will simply show all chats in chronological order. If there are none then display an appropriate message.\n- it would be a very good idea for the whole sidebar to be a separate component in its own file, unfortunately there's already @src/renderer/src/components/chat/ChatSidebar.tsx  and @src/renderer/src/components/chat/ChatSidebarPanel.tsx so a new meaningful name needs to be created for this.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx",
+        "src/renderer/src/screens/stories/StoriesListView.tsx",
+        "src/renderer/src/components/chat/ChatSidebarPanel.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T23:24:04.989Z",
+      "updatedAt": "2025-10-16T23:24:04.989Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2594,21 +2609,22 @@
     "cd613bac-52f7-4f5d-a81a-4bacf77203b3": 146,
     "9b25e0f0-32d5-4320-b429-46120b06fbf3": 147,
     "c2f26371-082b-4b31-812a-e8c5955a4d4a": 148,
-    "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 149,
-    "92593266-d2ae-4d86-915a-0e82d71f625d": 150,
-    "a9a277d4-6662-4862-a11f-812af7355e20": 151,
-    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 152,
-    "ad551afc-2b74-45e7-ac7b-9eac1faa8e26": 153,
-    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 154,
-    "f4564269-341e-482e-9aa5-e06698cdb326": 155,
-    "4999628b-5040-40bc-b269-e6cf0823a07c": 156,
-    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 157,
-    "b5615d52-f0b8-4630-910a-e47f4b7db811": 158,
-    "afa9c03a-f251-410b-9510-3ea34b3eb374": 159,
-    "4cd9f6a6-4be9-4e76-b436-507636a05bfb": 160,
+    "4cd9f6a6-4be9-4e76-b436-507636a05bfb": 149,
+    "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 150,
+    "92593266-d2ae-4d86-915a-0e82d71f625d": 151,
+    "a9a277d4-6662-4862-a11f-812af7355e20": 152,
+    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 153,
+    "ad551afc-2b74-45e7-ac7b-9eac1faa8e26": 154,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 155,
+    "f4564269-341e-482e-9aa5-e06698cdb326": 156,
+    "4999628b-5040-40bc-b269-e6cf0823a07c": 157,
+    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 158,
+    "b5615d52-f0b8-4630-910a-e47f4b7db811": 159,
+    "afa9c03a-f251-410b-9510-3ea34b3eb374": 160,
     "67302df0-716b-46ed-aee1-828cb60373d2": 161,
     "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc": 162,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 163
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 163,
+    "c7a825c8-9791-4893-9b98-f89a9681e376": 164
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
