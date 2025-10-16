@@ -2262,7 +2262,7 @@
     },
     {
       "id": "bd197ab9-1da8-4e17-81e8-46c0e3b86290",
-      "status": "-",
+      "status": "+",
       "title": "Fix chat bottom scroll",
       "description": "In @src/renderer/src/screens/ChatView.tsx  when the user sends a chat message, there's a spinner showing for the assistant, but it's not fully scrolled down (there's a gap and the user can still scroll) - it should be. When opening a chat and the assistant is still thinking, the same thing happens.",
       "context": [
@@ -2270,8 +2270,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T17:47:54.765Z",
-      "updatedAt": "2025-10-16T22:27:38.063Z",
-      "rejection": "This is still not working"
+      "updatedAt": "2025-10-16T23:19:49.110Z",
+      "rejection": "This is still not working",
+      "completedAt": "2025-10-16T23:19:49.110Z"
     },
     {
       "id": "92593266-d2ae-4d86-915a-0e82d71f625d",
@@ -2409,7 +2410,7 @@
     },
     {
       "id": "4cd9f6a6-4be9-4e76-b436-507636a05bfb",
-      "status": "-",
+      "status": "+",
       "title": "Show a working agent in the Sidebar next to agents",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx just like we show a notification badge next to \"Notifications\", we need to show the same next to \"Agents\" when an agent is running. This is already showing in the Projects list - but we need it here too - same exact style.",
       "context": [
@@ -2417,8 +2418,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:12:53.921Z",
-      "updatedAt": "2025-10-16T22:59:57.731Z",
-      "rejection": "This badge needs to show the agents working for the CURRENT project - not for ALL projects."
+      "updatedAt": "2025-10-16T23:13:29.099Z",
+      "rejection": "This badge needs to show the agents working for the CURRENT project - not for ALL projects.",
+      "completedAt": "2025-10-16T23:13:29.099Z"
     },
     {
       "id": "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc",
@@ -2432,7 +2434,7 @@
     },
     {
       "id": "c2f26371-082b-4b31-812a-e8c5955a4d4a",
-      "status": "-",
+      "status": "+",
       "title": "Update projectIcons",
       "description": "Make sure that the const `PROJECT_ICONS` in @src/renderer/src/screens/projects/projectIcons.tsx is an object and not a list, so that it can be used more efficiently in @src/renderer/src/screens/projects/ProjectEditorForm.tsx and @src/renderer/src/screens/projects/ProjectManagerModal.tsx .",
       "context": [
@@ -2443,6 +2445,7 @@
       "createdAt": "2025-10-16T22:58:32.510Z",
       "updatedAt": "2025-10-16T23:02:43.903Z",
       "rejection": "ProjectEditorForm and ProjectManagerModal have not been updated."
+      "completedAt": "2025-10-16T23:10:23.823Z"
     },
     {
       "id": "c7a825c8-9791-4893-9b98-f89a9681e376",

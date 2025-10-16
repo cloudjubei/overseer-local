@@ -187,8 +187,8 @@ export default function SidebarView({}: SidebarProps) {
     return map
   }, [runsActive])
 
-  // Total active agent runs (across all projects) for Agents nav badge
-  const totalActiveRuns = runsActive.length
+  // Active agent runs for the current project for Agents nav badge
+  const activeRunsCurrentProject = activeCountByProject.get(activeProjectId) || 0
 
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
@@ -493,12 +493,12 @@ export default function SidebarView({}: SidebarProps) {
                   tooltipLabel={`${unreadCount} unread notifications`}
                 />
               )
-            } else if (item.view === 'Agents' && totalActiveRuns > 0) {
+            } else if (item.view === 'Agents' && activeRunsCurrentProject > 0) {
               badgeEl = (
                 <NotificationBadge
                   className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                  text={`${totalActiveRuns}`}
-                  tooltipLabel={`${totalActiveRuns} running agents`}
+                  text={`${activeRunsCurrentProject}`}
+                  tooltipLabel={`${activeRunsCurrentProject} running agents`}
                   isInformative
                 />
               )
