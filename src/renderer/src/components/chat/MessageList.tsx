@@ -11,6 +11,7 @@ import Markdown from '../ui/Markdown'
 import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
 import { IconToolbox } from '../ui/Icons'
+import { Switch } from '../ui/Switch'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -359,6 +360,7 @@ export default function MessageList({
 
           const toggleableCount = toggleableIds.length
           const selectedCount = selectedToolIds.filter((id) => toggleableIds.includes(id)).length
+          const allSelected = toggleableCount > 0 && toggleableIds.every((id) => selectedToolIds.includes(id))
 
           const showCutoff = cutoffIndex !== null && index === cutoffIndex
           const tooltipText = numberMessagesToSend
@@ -475,6 +477,8 @@ export default function MessageList({
                         const effectiveResultType: ToolResultType | undefined =
                           isRequireConfirm && !isLast ? 'aborted' : resultType
 
+                        const resultIdStr = String(resultId)
+
                         return (
                           <ToolCallCard
                             key={`tool-${index}-${i}`}
@@ -484,14 +488,14 @@ export default function MessageList({
                             resultType={effectiveResultType}
                             durationMs={result.durationMs}
                             selectable={selectable}
-                            selected={selectable ? selectedToolIds.includes(resultId) : false}
+                            selected={selectable ? selectedToolIds.includes(resultIdStr) : false}
                             onToggleSelect={
                               selectable
                                 ? () => {
                                     setSelectedToolIds((prev) =>
-                                      prev.includes(resultId)
-                                        ? prev.filter((x) => x !== resultId)
-                                        : [...prev, resultId],
+                                      prev.includes(resultIdStr)
+                                        ? prev.filter((x) => x !== resultIdStr)
+                                        : [...prev, resultIdStr],
                                     )
                                   }
                                 : undefined
@@ -502,7 +506,27 @@ export default function MessageList({
                       })}
 
                       {toggleableCount > 0 && isSystem && isLast ? (
-                        <div className="pt-1 flex items-center justify-end">
+                        <div className="pt-1 flex items-center justify-between">
+                          {toggleableCount > 1 ? (
+                            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
+                              <span>Toggle all</span>
+                              <Switch
+                                checked={allSelected}
+                                onCheckedChange={(checked) => {
+                                  setSelectedToolIds((prev) => {
+                                    if (checked) {
+                                      const set = new Set([...prev, ...toggleableIds])
+                                      return Array.from(set)
+                                    } else {
+                                      return prev.filter((id) => !toggleableIds.includes(id))
+                                    }
+                                  })
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div />
+                          )}
                           <button
                             type="button"
                             className={[

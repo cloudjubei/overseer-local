@@ -2250,7 +2250,7 @@
     },
     {
       "id": "9b25e0f0-32d5-4320-b429-46120b06fbf3",
-      "status": "-",
+      "status": "+",
       "title": "Allow toggling all tool calls at once",
       "description": "In @src/renderer/src/screens/ChatView.tsx  when agent is asking to trigger tools, show a toggle that allows toggling all tools if there are more than 1 tool to toggle.",
       "context": [
@@ -2258,7 +2258,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T17:46:39.648Z",
-      "updatedAt": "2025-10-16T17:46:39.648Z"
+      "updatedAt": "2025-10-16T18:07:00.691Z",
+      "completedAt": "2025-10-16T18:07:00.691Z"
     },
     {
       "id": "bd197ab9-1da8-4e17-81e8-46c0e3b86290",
