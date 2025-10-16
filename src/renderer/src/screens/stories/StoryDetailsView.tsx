@@ -295,9 +295,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         return
       }
       let toIndex = story.featureIdToDisplayIndex[targetFeature.id] ?? 1
-      if (dropPosition === 'after') {
-        toIndex = toIndex + 1
-      }
       handleMoveFeature(fromIndex, toIndex)
     }
     clearDndState()

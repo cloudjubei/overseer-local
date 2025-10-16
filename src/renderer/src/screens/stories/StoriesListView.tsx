@@ -246,9 +246,6 @@ export default function StoriesListView() {
         return
       }
       let toIndex = project.storyIdToDisplayIndex[toStory.id] ?? 1
-      if (dropPosition === 'after') {
-        toIndex = toIndex + 1
-      }
       if (toIndex !== fromIndex) {
         handleMoveStory(fromIndex, toIndex)
       }

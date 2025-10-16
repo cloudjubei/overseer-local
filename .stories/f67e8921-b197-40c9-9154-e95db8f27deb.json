@@ -2432,7 +2432,7 @@
     },
     {
       "id": "c2f26371-082b-4b31-812a-e8c5955a4d4a",
-      "status": "?",
+      "status": "-",
       "title": "Update projectIcons",
       "description": "Make sure that the const `PROJECT_ICONS` in @src/renderer/src/screens/projects/projectIcons.tsx is an object and not a list, so that it can be used more efficiently in @src/renderer/src/screens/projects/ProjectEditorForm.tsx and @src/renderer/src/screens/projects/ProjectManagerModal.tsx .",
       "context": [
@@ -2441,8 +2441,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:58:32.510Z",
-      "updatedAt": "2025-10-16T23:01:19.173Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-16T23:02:43.903Z",
+      "rejection": "ProjectEditorForm and ProjectManagerModal have not been updated."
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2597,16 +2597,16 @@
     "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 149,
     "92593266-d2ae-4d86-915a-0e82d71f625d": 150,
     "a9a277d4-6662-4862-a11f-812af7355e20": 151,
-    "67302df0-716b-46ed-aee1-828cb60373d2": 152,
-    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 153,
-    "ad551afc-2b74-45e7-ac7b-9eac1faa8e26": 154,
-    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 155,
-    "f4564269-341e-482e-9aa5-e06698cdb326": 156,
-    "4999628b-5040-40bc-b269-e6cf0823a07c": 157,
-    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 158,
-    "b5615d52-f0b8-4630-910a-e47f4b7db811": 159,
-    "afa9c03a-f251-410b-9510-3ea34b3eb374": 160,
-    "4cd9f6a6-4be9-4e76-b436-507636a05bfb": 161,
+    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 152,
+    "ad551afc-2b74-45e7-ac7b-9eac1faa8e26": 153,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 154,
+    "f4564269-341e-482e-9aa5-e06698cdb326": 155,
+    "4999628b-5040-40bc-b269-e6cf0823a07c": 156,
+    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 157,
+    "b5615d52-f0b8-4630-910a-e47f4b7db811": 158,
+    "afa9c03a-f251-410b-9510-3ea34b3eb374": 159,
+    "4cd9f6a6-4be9-4e76-b436-507636a05bfb": 160,
+    "67302df0-716b-46ed-aee1-828cb60373d2": 161,
     "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc": 162,
     "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 163
   },

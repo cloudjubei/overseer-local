@@ -1,6 +1,11 @@
 import * as Icons from '@renderer/components/ui/icons/Icons'
 import { JSX } from 'react'
 
+export type ProjectIcon = {
+  value: string
+  label: string
+}
+
 // Central registry: maps kebab-case names to icon components from Icons.tsx
 // Every icon exported by Icons.tsx should have an entry here to be accessible by name.
 // Naming convention: kebab-case of the component minus the 'Icon' prefix (e.g., IconCheckCircle -> 'check-circle').
