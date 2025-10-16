@@ -2437,7 +2437,7 @@
     },
     {
       "id": "c7a825c8-9791-4893-9b98-f89a9681e376",
-      "status": "+",
+      "status": "-",
       "title": "Chats sidebar update",
       "description": "In @src/renderer/src/screens/ChatView.tsx the sidebar needs to be updated:\n- it should only show the single General chat for the active project\n- when opening the chat, all the categories should be closed apart from the last open chat (which should be selected) or the chat to be shown from context.\n- all sub categories should also be closed and follow the rules above.\n- there needs to be a stronger visual distinction between the categories,subcategories and chats.\n- for now we need to get rid off the \"plus/add\" button at the top right, we simply should always show the General chat tile for the given project and if the user clicks it but it wasn't yet created then it should be.\n- There needs to be a switch (similar to the one in @src/renderer/src/screens/stories/StoriesListView.tsx  for changing modes) that will allow switching between \"Categories\" and \"History\". Categories is the current view and History will simply show all chats in chronological order. If there are none then display an appropriate message.\n- it would be a very good idea for the whole sidebar to be a separate component in its own file, unfortunately there's already @src/renderer/src/components/chat/ChatSidebar.tsx  and @src/renderer/src/components/chat/ChatSidebarPanel.tsx so a new meaningful name needs to be created for this.",
       "context": [
@@ -2448,8 +2448,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T23:24:04.989Z",
-      "updatedAt": "2025-10-16T23:35:04.536Z",
-      "completedAt": "2025-10-16T23:35:04.536Z"
+      "updatedAt": "2025-10-16T23:54:16.860Z",
+      "rejection": "Now under categories only the General chat shows - none of the categories/sub-categories show up."
     }
   ],
   "featureIdToDisplayIndex": {
