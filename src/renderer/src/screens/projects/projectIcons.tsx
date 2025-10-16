@@ -122,6 +122,21 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'money-transfer': Icons.IconMoneyTransfer,
   'percent': Icons.IconPercent,
   'pie-chart': Icons.IconPieChart,
+
+  // Medical icons
+  'stethoscope': Icons.IconStethoscope,
+  'syringe': Icons.IconSyringe,
+  'pill': Icons.IconPill,
+  'bandage': Icons.IconBandage,
+  'heartbeat': Icons.IconHeartbeat,
+  'heart-pulse': Icons.IconHeartPulse,
+  'first-aid-kit': Icons.IconFirstAidKit,
+  'hospital': Icons.IconHospital,
+  'thermometer': Icons.IconThermometer,
+  'ambulance': Icons.IconAmbulance,
+  'tooth': Icons.IconTooth,
+  'lungs': Icons.IconLungs,
+  'dna': Icons.IconDna,
 }
 
 export const PROJECT_ICON_NAMES = Object.keys(PROJECT_ICON_REGISTRY)
@@ -184,6 +199,13 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: 'compression', label: 'Compression' },
   { value: 'database', label: 'Database' },
   { value: 'palette', label: 'Palette' },
+
+  // Curated medical subset
+  { value: 'stethoscope', label: 'Stethoscope' },
+  { value: 'pill', label: 'Pill' },
+  { value: 'syringe', label: 'Syringe' },
+  { value: 'first-aid-kit', label: 'First Aid Kit' },
+  { value: 'hospital', label: 'Hospital' },
 ]
 
 export function renderProjectIcon(key?: string, className?: string) {
