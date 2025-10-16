@@ -2193,7 +2193,7 @@
     },
     {
       "id": "cd613bac-52f7-4f5d-a81a-4bacf77203b3",
-      "status": "-",
+      "status": "+",
       "title": "The icon selector in ProjectEditorForm should be different",
       "description": "In @src/renderer/src/screens/projects/ProjectEditorForm.tsx  the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window.",
       "context": [
@@ -2201,7 +2201,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:23:25.404Z",
-      "updatedAt": "2025-10-16T17:42:31.238Z"
+      "updatedAt": "2025-10-16T18:00:33.646Z",
+      "completedAt": "2025-10-16T18:00:33.646Z"
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",

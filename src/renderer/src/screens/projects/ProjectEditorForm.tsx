@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@renderer/components/ui/Select'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
+import { Modal } from '@renderer/components/ui/Modal'
 
 function TextInput({ label, value, onChange, placeholder, disabled, inputRef }: any) {
   const id = React.useId()
@@ -48,46 +49,69 @@ function TextArea({ label, value, onChange, placeholder }: any) {
 }
 
 function IconPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const current = React.useMemo(() => {
+    return (
+      PROJECT_ICONS.find((i) => i.value === value) || PROJECT_ICONS.find((i) => i.value === 'folder') || PROJECT_ICONS[0]
+    )
+  }, [value])
+
   return (
     <div className="form-row">
       <label>Icon</label>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))',
-          gap: 6,
-        }}
-      >
-        {PROJECT_ICONS.map((opt) => {
-          const selected = value === opt.value
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              title={opt.label}
-              onClick={() => onChange(opt.value)}
-              aria-pressed={selected}
-              style={{
-                height: 36,
-                borderRadius: 6,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: selected
-                  ? '2px solid var(--accent-primary)'
-                  : '1px solid var(--border-default)',
-                background: selected
-                  ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)'
-                  : 'var(--surface-raised)',
-                cursor: 'pointer',
-                padding: 4,
-              }}
-            >
-              <span aria-hidden>{renderProjectIcon(opt.value)}</span>
-            </button>
-          )
-        })}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label={current ? `Change icon (current: ${current.label})` : 'Change icon'}
+          title={current ? `Change icon (current: ${current.label})` : 'Change icon'}
+          onClick={() => setIsOpen(true)}
+          className="inline-flex items-center justify-center h-10 w-10 rounded-md border border-border bg-surface-raised hover:bg-surface-overlay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+        >
+          <span aria-hidden>{renderProjectIcon(current?.value, 'h-5 w-5')}</span>
+        </button>
+        {current && (
+          <span className="text-sm text-text-secondary">{current.label}</span>
+        )}
       </div>
+
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Choose icon" size="md">
+        <div className="max-h-[60vh]">
+          <div
+            role="listbox"
+            aria-label="Project icons"
+            className="grid gap-2"
+            style={{
+              gridTemplateColumns: 'repeat(auto-fill, minmax(48px, 1fr))',
+            }}
+          >
+            {PROJECT_ICONS.map((opt) => {
+              const selected = value === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  title={opt.label}
+                  onClick={() => {
+                    onChange(opt.value)
+                    setIsOpen(false)
+                  }}
+                  className={
+                    'inline-flex h-12 items-center justify-center rounded-md border text-sm ' +
+                    (selected
+                      ? 'border-brand-500 bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]'
+                      : 'border-border bg-surface-raised hover:bg-surface-overlay')
+                  }
+                >
+                  <span aria-hidden>{renderProjectIcon(opt.value, 'h-5 w-5')}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
