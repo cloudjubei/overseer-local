@@ -2378,7 +2378,7 @@
     },
     {
       "id": "67302df0-716b-46ed-aee1-828cb60373d2",
-      "status": "-",
+      "status": "+",
       "title": "Display groups of projects in sidebar",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx we want to display all the projects as ordered via their groups, as is specified in @src/renderer/src/contexts/ProjectsGroupsContext.tsx and controlled via @src/renderer/src/screens/projects/ProjectManagerModal.tsx .\nAll uncategorized projects are at the top.\nThen each group must have its own dropdown section that can be opened or closed.\nWhen opened it displays the list of all projects in that group.\nAll groups start being closed.",
       "context": [
@@ -2388,7 +2388,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T19:30:09.420Z",
-      "updatedAt": "2025-10-16T19:30:09.420Z"
+      "updatedAt": "2025-10-16T19:35:29.439Z",
+      "completedAt": "2025-10-16T19:35:29.439Z"
     }
   ],
   "featureIdToDisplayIndex": {

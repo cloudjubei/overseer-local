@@ -36,6 +36,7 @@ import { notificationsService } from '../services/notificationsService'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 import { NavigationView } from '@renderer/types'
 import { hideScrollStyle } from '@renderer/utils/hideScrollStyle'
+import { useProjectsGroups } from '../contexts/ProjectsGroupsContext'
 
 export type SidebarProps = {}
 
@@ -154,6 +155,7 @@ export default function SidebarView({}: SidebarProps) {
   const { activeProjectId, projects, setActiveProjectId } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
   const { runsActive } = useAgents()
+  const { groups } = useProjectsGroups()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -341,6 +343,95 @@ export default function SidebarView({}: SidebarProps) {
 
   const effectiveCollapsed = isMobile ? false : collapsed
 
+  // Expanded/collapsed state for project groups in sidebar (default closed)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+  useEffect(() => {
+    setOpenGroups((prev) => {
+      const next: Record<string, boolean> = { ...prev }
+      for (const g of groups) {
+        if (!(g.id in next)) next[g.id] = false // start closed
+      }
+      // Remove any no-longer-existing groups keys
+      const validIds = new Set(groups.map((g) => g.id))
+      for (const k of Object.keys(next)) {
+        if (!validIds.has(k)) delete next[k]
+      }
+      return next
+    })
+  }, [groups.map((g) => g.id).join('|')])
+
+  const groupedProjectIds = useMemo(() => new Set(groups.flatMap((g) => g.projects || [])), [groups])
+  const uncategorizedProjects = useMemo(
+    () => projects.filter((p) => !groupedProjectIds.has(p.id)),
+    [projects, groupedProjectIds],
+  )
+
+  const renderProjectItem = (p: ProjectSpec) => {
+    const isMain = p.id === MAIN_PROJECT
+    const active = activeProjectId === p.id
+    const accent = useAccentClass(p.id, isMain)
+    const activeCount = activeCountByProject.get(p.id) || 0
+    const unread = unreadByProject.get(p.id) || 0
+    const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
+    const projectIcon = renderProjectIcon(iconKey)
+    const hasAnyBadge = activeCount > 0 || unread > 0
+
+    const Btn = (
+      <button
+        className={classNames(
+          'nav-item flex-1',
+          accent,
+          active && 'nav-item--active',
+          effectiveCollapsed && 'nav-item--compact',
+        )}
+        aria-current={active ? 'true' : undefined}
+        onClick={() => handleProjectSwitch(p.id)}
+        title={p.title}
+      >
+        <span className="nav-item__icon" aria-hidden>
+          {projectIcon}
+        </span>
+        {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+
+        {hasAnyBadge && (
+          <span
+            className={classNames(
+              'nav-item__badges',
+              effectiveCollapsed && 'nav-item__badges--compact',
+            )}
+            aria-hidden
+          >
+            {activeCount > 0 && (
+              <NotificationBadge
+                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                text={`${activeCount}`}
+                tooltipLabel={`${activeCount} running agents`}
+                isInformative
+              />
+            )}
+            {unread > 0 && (
+              <NotificationBadge
+                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                text={`${unread}`}
+                tooltipLabel={`${unread} unread notifications`}
+              />
+            )}
+          </span>
+        )}
+      </button>
+    )
+
+    return (
+      <li className="nav-li" key={p.id}>
+        {effectiveCollapsed ? (
+          <Tooltip content={p.title} placement="right">{Btn}</Tooltip>
+        ) : (
+          Btn
+        )}
+      </li>
+    )
+  }
+
   // Sidebar element (shared for desktop and mobile drawer)
   const Aside = (
     <aside
@@ -469,6 +560,8 @@ export default function SidebarView({}: SidebarProps) {
             </div>
           </div>
         )}
+
+        {/* Projects listing: uncategorized first, then grouped with collapsible sections */}
         <ul className="nav-list" aria-label="Projects">
           {projects.length == 0 && (
             <li className="nav-li">
@@ -483,76 +576,48 @@ export default function SidebarView({}: SidebarProps) {
               </div>
             </li>
           )}
-          {projects.map((p: ProjectSpec) => {
-            const isMain = p.id === MAIN_PROJECT
-            const active = activeProjectId === p.id
-            const accent = useAccentClass(p.id, isMain)
-            const activeCount = activeCountByProject.get(p.id) || 0
-            const unread = unreadByProject.get(p.id) || 0
-            const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
-            const projectIcon = renderProjectIcon(iconKey)
-            const hasAnyBadge = activeCount > 0 || unread > 0
-            const Btn = (
-              <button
-                className={classNames(
-                  'nav-item flex-1',
-                  accent,
-                  active && 'nav-item--active',
-                  effectiveCollapsed && 'nav-item--compact',
-                )}
-                aria-current={active ? 'true' : undefined}
-                onClick={() => handleProjectSwitch(p.id)}
-                title={p.title}
-              >
-                <span className="nav-item__icon" aria-hidden>
-                  {projectIcon}
-                </span>
-                {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
 
-                {hasAnyBadge && (
-                  <span
-                    className={classNames(
-                      'nav-item__badges',
-                      effectiveCollapsed && 'nav-item__badges--compact',
-                    )}
-                    aria-hidden
+          {/* Uncategorized projects at the top */}
+          {uncategorizedProjects.map((p) => renderProjectItem(p))}
+
+          {/* Grouped projects as collapsible sections */}
+          {!effectiveCollapsed &&
+            groups.map((g) => {
+              const projectById = new Map(projects.map((p) => [p.id, p]))
+              const groupProjects = (g.projects || [])
+                .map((pid) => projectById.get(pid))
+                .filter(Boolean) as ProjectSpec[]
+              const isOpen = openGroups[g.id] || false
+              return (
+                <li key={g.id} className="nav-li">
+                  <button
+                    type="button"
+                    onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
+                    className={classNames('nav-item', 'nav-item--compact')}
+                    aria-expanded={isOpen}
+                    aria-controls={`group-${g.id}`}
+                    title={g.title}
                   >
-                    {activeCount > 0 && (
-                      <NotificationBadge
-                        className={
-                          effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                        }
-                        text={`${activeCount}`}
-                        tooltipLabel={`${activeCount} running agents`}
-                        isInformative
+                    <span className="nav-item__icon" aria-hidden>
+                      <IconChevron
+                        className="w-4 h-4"
+                        style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
                       />
-                    )}
-                    {unread > 0 && (
-                      <NotificationBadge
-                        className={
-                          effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                        }
-                        text={`${unread}`}
-                        tooltipLabel={`${unread} unread notifications`}
-                      />
-                    )}
-                  </span>
-                )}
-              </button>
-            )
+                    </span>
+                    <span className="nav-item__label flex-1 text-left">{g.title}</span>
+                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                      {groupProjects.length}
+                    </span>
+                  </button>
 
-            return (
-              <li className="nav-li" key={p.id}>
-                {effectiveCollapsed ? (
-                  <Tooltip content={p.title} placement="right">
-                    {Btn}
-                  </Tooltip>
-                ) : (
-                  Btn
-                )}
-              </li>
-            )
-          })}
+                  {isOpen && groupProjects.length > 0 && (
+                    <ul id={`group-${g.id}`} className="nav-list" aria-label={`${g.title} projects`}>
+                      {groupProjects.map((p) => renderProjectItem(p))}
+                    </ul>
+                  )}
+                </li>
+              )
+            })}
         </ul>
       </nav>
 
