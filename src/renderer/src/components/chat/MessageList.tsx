@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react'
 import Spinner from '../ui/Spinner'
 import ErrorBubble from '../ui/ErrorBubble'
 import FileDisplay from '../ui/FileDisplay'
@@ -75,6 +75,7 @@ export default function MessageList({
 
   // Visibility tracking: only animate when visible (sidebar open and rendered)
   const messageListRef = useRef<HTMLDivElement>(null)
+  const bottomAnchorRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState<boolean>(false)
   const wasVisibleRef = useRef<boolean>(false)
   useEffect(() => {
@@ -170,6 +171,14 @@ export default function MessageList({
   const isAtBottomRef = useRef<boolean>(true)
   const prevLenForScrollRef = useRef<number>(messages.length)
   const justSwitchedChatRef = useRef<boolean>(false)
+
+  const forceScrollToBottom = (behavior: ScrollBehavior = 'auto') => {
+    const c = messageListRef.current
+    if (!c) return
+    c.scrollTo({ top: c.scrollHeight, behavior })
+    isAtBottomRef.current = true
+  }
+
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const el = e.currentTarget
     const threshold = 10
@@ -181,10 +190,7 @@ export default function MessageList({
   useEffect(() => {
     justSwitchedChatRef.current = true
     requestAnimationFrame(() => {
-      const c = messageListRef.current
-      if (!c) return
-      c.scrollTo({ top: c.scrollHeight, behavior: 'auto' })
-      isAtBottomRef.current = true
+      forceScrollToBottom('auto')
       // Clear the switch flag after initial adjustment
       justSwitchedChatRef.current = false
     })
@@ -203,11 +209,8 @@ export default function MessageList({
     // If chat switched, jump to bottom
     if (animationChatChangedRef.current) {
       requestAnimationFrame(() => {
-        const c = messageListRef.current
-        if (!c) return
-        c.scrollTo({ top: c.scrollHeight, behavior: 'auto' })
+        forceScrollToBottom('auto')
         animationChatChangedRef.current = false
-        isAtBottomRef.current = true
       })
       return
     }
@@ -230,22 +233,38 @@ export default function MessageList({
   }, [messages])
 
   // When entering thinking state, ensure we are fully at the bottom so spinner is flush
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isThinking) return
-    const shouldForceToBottom = lastUserSentRef.current || justSwitchedChatRef.current
-    if (!shouldForceToBottom) return
-
-    requestAnimationFrame(() => {
-      const container = messageListRef.current
-      if (!container) return
-      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' })
-      isAtBottomRef.current = true
-      lastUserSentRef.current = false
-      justSwitchedChatRef.current = false
-    })
+    // Force to bottom immediately when thinking starts (send or resume)
+    forceScrollToBottom('auto')
   }, [isThinking])
 
-  // Track container height to size system prompt bubble (max 30% of container height)
+  // Keep pinned to bottom while DOM mutates only if user is at bottom
+  useEffect(() => {
+    const container = messageListRef.current
+    if (!container) return
+
+    const mo = new MutationObserver(() => {
+      if (isAtBottomRef.current) {
+        forceScrollToBottom('auto')
+      }
+    })
+    mo.observe(container, { childList: true, subtree: true, characterData: true })
+
+    const onResize = () => {
+      if (isAtBottomRef.current) {
+        forceScrollToBottom('auto')
+      }
+    }
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      mo.disconnect()
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
+
+  // Track container height to size system prompt bubble (max 50% of container height)
   const [systemMaxHeight, setSystemMaxHeight] = useState<number | undefined>(undefined)
   useEffect(() => {
     const container = messageListRef.current
@@ -628,6 +647,8 @@ export default function MessageList({
           </div>
         )}
       </div>
+      {/* Anchor at the very bottom to ensure flush scrolling when needed */}
+      <div ref={bottomAnchorRef} />
     </div>
   )
 }

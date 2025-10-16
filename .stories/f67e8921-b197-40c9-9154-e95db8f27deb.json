@@ -2262,7 +2262,7 @@
     },
     {
       "id": "bd197ab9-1da8-4e17-81e8-46c0e3b86290",
-      "status": "-",
+      "status": "+",
       "title": "Fix chat bottom scroll",
       "description": "In @src/renderer/src/screens/ChatView.tsx  when the user sends a chat message, there's a spinner showing for the assistant, but it's not fully scrolled down (there's a gap and the user can still scroll) - it should be. When opening a chat and the assistant is still thinking, the same thing happens.",
       "context": [
@@ -2270,8 +2270,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T17:47:54.765Z",
-      "updatedAt": "2025-10-16T22:27:38.063Z",
-      "rejection": "This is still not working"
+      "updatedAt": "2025-10-16T23:19:49.110Z",
+      "rejection": "This is still not working",
+      "completedAt": "2025-10-16T23:19:49.110Z"
     },
     {
       "id": "92593266-d2ae-4d86-915a-0e82d71f625d",
