@@ -288,14 +288,13 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       dropIndex != null &&
       dropPosition != null
     ) {
-      // Map from feature id/display index back to absolute indices within the story
-      const fromIndex = (story.featureIdToDisplayIndex[dragFeatureId] ?? 1) - 1
+      const fromIndex = story.featureIdToDisplayIndex[dragFeatureId] ?? 1
       const targetFeature = featuresFiltered[dropIndex]
       if (!targetFeature) {
         clearDndState()
         return
       }
-      let toIndex = (story.featureIdToDisplayIndex[targetFeature.id] ?? 1) - 1
+      let toIndex = story.featureIdToDisplayIndex[targetFeature.id] ?? 1
       if (dropPosition === 'after') {
         toIndex = toIndex + 1
       }
