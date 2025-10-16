@@ -93,6 +93,19 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'not-allowed': Icons.IconNotAllowed,
   'hourglass': Icons.IconHourglass,
   'scroll': Icons.IconScroll,
+
+  // New programming icons
+  'code': Icons.IconCode,
+  'terminal': Icons.IconTerminal,
+  'function': Icons.IconFunction,
+  'branch': Icons.IconBranch,
+  'commit': Icons.IconCommit,
+  'pull-request': Icons.IconPullRequest,
+  'merge': Icons.IconMerge,
+  'cpu': Icons.IconCpu,
+  'server': Icons.IconServer,
+  'shield': Icons.IconShield,
+  'key': Icons.IconKey,
 }
 
 export const PROJECT_ICON_NAMES = Object.keys(PROJECT_ICON_REGISTRY)

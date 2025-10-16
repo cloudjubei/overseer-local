@@ -2235,7 +2235,7 @@
     },
     {
       "id": "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9",
-      "status": "-",
+      "status": "+",
       "title": "New icons1",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2244,7 +2244,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T12:45:33.201Z",
-      "updatedAt": "2025-10-16T19:30:42.107Z"
+      "updatedAt": "2025-10-16T19:47:49.313Z",
+      "completedAt": "2025-10-16T19:47:49.313Z"
     },
     {
       "id": "9b25e0f0-32d5-4320-b429-46120b06fbf3",
