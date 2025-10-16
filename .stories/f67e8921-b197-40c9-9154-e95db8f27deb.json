@@ -2316,7 +2316,7 @@
     },
     {
       "id": "f4564269-341e-482e-9aa5-e06698cdb326",
-      "status": "-",
+      "status": "+",
       "title": "New Icons2",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 finance related ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2324,8 +2324,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:36:18.938Z",
-      "updatedAt": "2025-10-16T22:10:40.698Z",
-      "rejection": "These icons need to be split in their own files like the other Icons."
+      "updatedAt": "2025-10-16T22:18:20.109Z",
+      "rejection": "These icons need to be split in their own files like the other Icons.",
+      "completedAt": "2025-10-16T22:18:20.109Z"
     },
     {
       "id": "4999628b-5040-40bc-b269-e6cf0823a07c",
