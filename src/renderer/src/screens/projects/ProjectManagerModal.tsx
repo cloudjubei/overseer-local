@@ -4,7 +4,14 @@ import { projectsService } from '@renderer/services/projectsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { Button } from '@renderer/components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
-import { IconDelete, IconEdit, IconPlus, IconArrowLeftMini, IconArrowRightMini, IconBack } from '@renderer/components/ui/Icons'
+import {
+  IconDelete,
+  IconEdit,
+  IconPlus,
+  IconArrowLeftMini,
+  IconArrowRightMini,
+  IconBack,
+} from '@renderer/components/ui/icons/Icons'
 import {
   Select,
   SelectContent,
@@ -60,7 +67,10 @@ export default function ProjectManagerModal({
   }
 
   // Derive uncategorized list
-  const groupedProjectIds = useMemo(() => new Set(groups.flatMap((g) => g.projects || [])), [groups])
+  const groupedProjectIds = useMemo(
+    () => new Set(groups.flatMap((g) => g.projects || [])),
+    [groups],
+  )
   const uncategorized = useMemo(
     () => projects.filter((p) => !groupedProjectIds.has(p.id)),
     [projects, groupedProjectIds],
@@ -247,12 +257,19 @@ export default function ProjectManagerModal({
       {/* Left-side contextual controls */}
       <div className="flex items-center gap-2">
         {mode === 'groups' && (
-          <Button variant="secondary" size="icon" onClick={() => setMode('list')} title="Back to projects">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setMode('list')}
+            title="Back to projects"
+          >
             <IconBack className="w-4 h-4" />
           </Button>
         )}
         {(mode === 'create' || mode === 'edit') && (
-          <Button variant="secondary" onClick={() => setMode('list')}>Cancel</Button>
+          <Button variant="secondary" onClick={() => setMode('list')}>
+            Cancel
+          </Button>
         )}
       </div>
 
@@ -274,7 +291,8 @@ export default function ProjectManagerModal({
 
   // Reorder within selected group (not All/Uncategorized)
   const onMoveProjectInGroup = async (index: number, dir: -1 | 1) => {
-    if (!currentGroupId || currentGroupId === ALL_GROUP_ID || currentGroupId === UNCATEGORIZED_ID) return
+    if (!currentGroupId || currentGroupId === ALL_GROUP_ID || currentGroupId === UNCATEGORIZED_ID)
+      return
     const group = groups.find((g) => g.id === currentGroupId)
     if (!group) return
     const toIndex = index + dir
@@ -358,7 +376,12 @@ export default function ProjectManagerModal({
                         </div>
                       )}
 
-                      <Button variant="secondary" size="icon" onClick={() => startEdit(p)} title="Edit project">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => startEdit(p)}
+                        title="Edit project"
+                      >
                         <IconEdit className="w-4 h-4" />
                       </Button>
                       <Button

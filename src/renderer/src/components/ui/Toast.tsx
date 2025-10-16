@@ -8,7 +8,7 @@ import React, {
   useEffect,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { IconXCircle } from './Icons'
+import { IconXCircle } from './icons/Icons'
 
 type ToastVariant = 'default' | 'success' | 'error' | 'warning'
 

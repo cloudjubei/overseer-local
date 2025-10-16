@@ -16,7 +16,7 @@ import type {
   ChatMessage,
 } from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
-import { IconPlus } from '../components/ui/Icons'
+import { IconPlus } from '../components/ui/icons/Icons'
 import { chatsService } from '@renderer/services/chatsService'
 
 function prettyTopicName(topic?: string): string {

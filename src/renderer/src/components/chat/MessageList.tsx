@@ -10,7 +10,7 @@ import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
 import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
-import { IconToolbox } from '../ui/Icons'
+import { IconToolbox } from '../ui/icons/Icons'
 import { Switch } from '../ui/Switch'
 
 interface EnhancedMessage extends ChatMessage {
@@ -380,7 +380,8 @@ export default function MessageList({
 
           const toggleableCount = toggleableIds.length
           const selectedCount = selectedToolIds.filter((id) => toggleableIds.includes(id)).length
-          const allSelected = toggleableCount > 0 && toggleableIds.every((id) => selectedToolIds.includes(id))
+          const allSelected =
+            toggleableCount > 0 && toggleableIds.every((id) => selectedToolIds.includes(id))
 
           const showCutoff = cutoffIndex !== null && index === cutoffIndex
           const tooltipText = numberMessagesToSend

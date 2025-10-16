@@ -1,4 +1,4 @@
-import { IconExclamation } from '../ui/Icons'
+import { IconExclamation } from '../ui/icons/Icons'
 
 export default function ExclamationChip({ title, tooltip }: { title: string; tooltip: string }) {
   return (

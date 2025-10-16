@@ -1,6 +1,6 @@
 import React from 'react'
 import type { ProgrammingLanguage } from 'thefactory-tools'
-import { IconWrench } from '@renderer/components/ui/Icons'
+import { IconWrench } from '@renderer/components/ui/icons/Icons'
 
 function AbbrevIcon({
   bg,

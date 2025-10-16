@@ -4,7 +4,7 @@ import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
 import { Button } from '../ui/Button'
 import { CoverageFileStats, CoverageResult } from 'thefactory-tools'
-import { IconDoubleUp } from '../ui/Icons'
+import { IconDoubleUp } from '../ui/icons/Icons'
 
 function pctColor(p: number) {
   if (p >= 90) return 'text-green-700 dark:text-green-300'

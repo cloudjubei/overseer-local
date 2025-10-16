@@ -12,7 +12,7 @@ import type {
 import { formatHmsCompact } from '../../utils/time'
 import Code from '../ui/Code'
 import JsonView from '../ui/JsonView'
-import { IconChat } from '../ui/Icons'
+import { IconChat } from '../ui/icons/Icons'
 
 function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number }) {
   const str = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
@@ -338,7 +338,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
               const titleNode = (
                 <span className="flex items-center gap-2">
                   {/* Chat button to the left of the title; only when run is finished */}
-                  {(!isRunActive && isStoryConversation) ? (
+                  {!isRunActive && isStoryConversation ? (
                     isStoryOnlyRun ? (
                       <span
                         role="button"
@@ -353,7 +353,7 @@ export default function ChatConversation({ run }: { run: AgentRunHistory }) {
                         <IconChat className="w-4 h-4" />
                       </span>
                     ) : null
-                  ) : (!isRunActive && conversation.featureId) ? (
+                  ) : !isRunActive && conversation.featureId ? (
                     <span
                       role="button"
                       title="Open feature run chat"

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { IconMenu, IconChevron } from './Icons'
+import { IconMenu, IconChevron } from './icons/Icons'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 
 export type CollapsibleSidebarItem = {

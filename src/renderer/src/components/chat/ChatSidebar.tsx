@@ -13,7 +13,7 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconDelete, IconScroll } from '../ui/Icons'
+import { IconSettings, IconChevron, IconDelete, IconScroll } from '../ui/icons/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'

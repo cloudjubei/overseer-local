@@ -3,7 +3,7 @@ import { useFiles, DirNode } from '../contexts/FilesContext'
 import { MarkdownEditor } from '../components/files/MarkdownEditor'
 import BasicFileViewer from '../components/files/BasicFileViewer'
 import { goToFile, parseFileFromHash } from '../navigation/FilesNavigation'
-import { IconChevron, IconDocument, IconFolder, IconFolderOpen } from '../components/ui/Icons'
+import { IconChevron, IconDocument, IconFolder, IconFolderOpen } from '../components/ui/icons/Icons'
 import { FileMeta } from 'thefactory-tools'
 
 function isMarkdown(f: FileMeta) {

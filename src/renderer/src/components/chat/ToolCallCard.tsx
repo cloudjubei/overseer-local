@@ -5,7 +5,7 @@ import {
   IconNotAllowed,
   IconHourglass,
   IconChevron,
-} from '../ui/Icons'
+} from '../ui/icons/Icons'
 import Code from '../ui/Code'
 import { useState } from 'react'
 import { Switch } from '../ui/Switch'

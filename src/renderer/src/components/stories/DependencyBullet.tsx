@@ -5,7 +5,7 @@ import type { Status } from 'thefactory-tools'
 import StorySummaryCallout from './StorySummaryCallout'
 import FeatureSummaryCallout from './FeatureSummaryCallout'
 import { useStories } from '../../contexts/StoriesContext'
-import { IconXCircle } from '../ui/Icons'
+import { IconXCircle } from '../ui/icons/Icons'
 
 export interface DependencyBulletProps {
   className?: string

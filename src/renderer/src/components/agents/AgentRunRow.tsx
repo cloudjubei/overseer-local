@@ -2,7 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import DependencyBullet from '../stories/DependencyBullet'
 import StatusChip from './StatusChip'
 import ModelChip from './ModelChip'
-import { IconChevron, IconDelete, IconStopCircle, IconThumbDown, IconThumbUp } from '../ui/Icons'
+import {
+  IconChevron,
+  IconDelete,
+  IconStopCircle,
+  IconThumbDown,
+  IconThumbUp,
+} from '../ui/icons/Icons'
 import ProjectChip from './ProjectChip'
 import CostChip from './CostChip'
 import TokensChip from './TokensChip'

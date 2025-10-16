@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useFiles } from '../../contexts/FilesContext'
 import AttachmentList from './AttachmentList'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
-import { IconAttach, IconSend } from '../ui/Icons'
+import { IconAttach, IconSend } from '../ui/icons/Icons'
 import Tooltip from '../ui/Tooltip'
 
 interface ChatInputProps {
@@ -273,7 +273,9 @@ export default function ChatInput({ onSend, onAbort, isThinking, isConfigured }:
                 ) : (
                   <button
                     onClick={() => {
-                      const should = window.confirm('Stop the assistant? This will cancel the current response.')
+                      const should = window.confirm(
+                        'Stop the assistant? This will cancel the current response.',
+                      )
                       if (!should) return
                       onAbort()
                     }}

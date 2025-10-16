@@ -2,7 +2,13 @@ import React, { useRef, useState } from 'react'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
-import { IconArrowLeftMini, IconArrowRightMini, IconDelete, IconEdit, IconPlus } from '@renderer/components/ui/Icons'
+import {
+  IconArrowLeftMini,
+  IconArrowRightMini,
+  IconDelete,
+  IconEdit,
+  IconPlus,
+} from '@renderer/components/ui/icons/Icons'
 
 function GroupNameModal({
   title,
@@ -21,7 +27,13 @@ function GroupNameModal({
   const inputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <Modal isOpen={true} onClose={onClose} title={title} size="sm" initialFocusRef={inputRef as React.RefObject<HTMLElement>}>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={title}
+      size="sm"
+      initialFocusRef={inputRef as React.RefObject<HTMLElement>}
+    >
       <form
         className="flex flex-col gap-3"
         onSubmit={(e) => {

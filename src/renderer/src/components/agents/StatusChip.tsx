@@ -5,7 +5,7 @@ import {
   IconLoader,
   IconStopCircle,
   IconXCircle,
-} from '../ui/Icons'
+} from '../ui/icons/Icons'
 import Tooltip from '../ui/Tooltip'
 
 export function StatusIcon({ state, className }: { state: AgentRunState; className?: string }) {

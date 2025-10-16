@@ -1,5 +1,5 @@
 import React from 'react'
-import { IconError } from './Icons'
+import { IconError } from './icons/Icons'
 
 interface ErrorBubbleProps {
   error: {

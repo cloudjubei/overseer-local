@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { AgentType } from 'thefactory-tools'
-import { IconPlay } from '../ui/Icons'
+import { IconPlay } from '../ui/icons/Icons'
 import { Button } from '../ui/Button'
 
 const AGENTS_ORDER: AgentType[] = ['speccer', 'planner', 'contexter', 'tester', 'developer']

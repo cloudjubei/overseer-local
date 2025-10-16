@@ -2,7 +2,7 @@ import { useState } from 'react'
 import CollapsibleSidebar from '@renderer/components/ui/CollapsibleSidebar'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { Button } from '@renderer/components/ui/Button'
-import { IconBell, IconChat } from '@renderer/components/ui/Icons'
+import { IconBell, IconChat } from '@renderer/components/ui/icons/Icons'
 import { Notification } from 'src/types/notifications'
 
 const SECTIONS = [

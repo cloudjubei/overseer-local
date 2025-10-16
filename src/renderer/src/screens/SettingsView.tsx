@@ -15,7 +15,7 @@ import {
   IconGitHub,
   IconSearch,
   IconDatabase,
-} from '../components/ui/Icons'
+} from '../components/ui/icons/Icons'
 
 // Settings Categories
 const CATEGORIES = [

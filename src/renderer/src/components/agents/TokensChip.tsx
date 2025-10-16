@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import Tooltip from '../ui/Tooltip'
-import { IconArrowLeftMini, IconArrowRightMini } from '../ui/Icons'
+import { IconArrowLeftMini, IconArrowRightMini } from '../ui/icons/Icons'
 import { AgentRunHistory } from 'thefactory-tools'
 
 export default function TokensChip({ run }: { run: AgentRunHistory }) {

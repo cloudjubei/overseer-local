@@ -1,5 +1,5 @@
 import { Button } from '../../../components/ui/Button'
-import { IconEdit, IconDelete, IconPlus } from '../../../components/ui/Icons'
+import { IconEdit, IconDelete, IconPlus } from '../../../components/ui/icons/Icons'
 import { useNavigator } from '../../../navigation/Navigator'
 import { useGitHubCredentials } from '../../../contexts/GitHubCredentialsContext'
 

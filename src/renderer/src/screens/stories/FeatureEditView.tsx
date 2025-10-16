@@ -5,7 +5,7 @@ import type { ChatContext, Feature } from 'thefactory-tools'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'
 import { Button } from '@renderer/components/ui/Button'
-import { IconDelete } from '@renderer/components/ui/Icons'
+import { IconDelete } from '@renderer/components/ui/icons/Icons'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
@@ -163,11 +163,7 @@ export default function FeatureEditView({
       </Modal>
 
       {/* Always mount the chat panel; it starts collapsed by default */}
-      <ChatSidebarModalPanel
-        context={context}
-        chatContextTitle="Feature Chat"
-        initialWidth={380}
-      />
+      <ChatSidebarModalPanel context={context} chatContextTitle="Feature Chat" initialWidth={380} />
 
       <AlertDialog
         isOpen={showAlert}

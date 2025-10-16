@@ -2237,14 +2237,14 @@
       "id": "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9",
       "status": "-",
       "title": "New icons1",
-      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
-        "src/renderer/src/components/ui/Icons.tsx",
-        "src/renderer/src/screens/projects/projectIcons.tsx"
+        "src/renderer/src/screens/projects/projectIcons.tsx",
+        "src/renderer/src/components/ui/icons/Icons.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-15T12:45:33.201Z",
-      "updatedAt": "2025-10-16T18:38:03.880Z"
+      "updatedAt": "2025-10-16T19:30:42.107Z"
     },
     {
       "id": "9b25e0f0-32d5-4320-b429-46120b06fbf3",
@@ -2303,63 +2303,92 @@
       "id": "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e",
       "status": "-",
       "title": "All icons are accessible via projecticons",
-      "description": "We need all icons in @src/renderer/src/components/ui/Icons.tsx to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .\nThere should be a directive about it in @docs/FILE_ORGANISATION.md",
+      "description": "We need all icons in @src/renderer/src/components/ui/icons/Icons.tsx  to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .\nThat means that all icons can be referenced by name like in projectIcons.\nThere should be a directive about it in @docs/FILE_ORGANISATION.md",
       "context": [
-        "docs/FILE_ORGANISATION.md"
+        "docs/FILE_ORGANISATION.md",
+        "src/renderer/src/components/ui/icons/Icons.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:35:49.831Z",
-      "updatedAt": "2025-10-16T18:35:49.831Z"
+      "updatedAt": "2025-10-16T19:27:18.470Z"
     },
     {
       "id": "f4564269-341e-482e-9aa5-e06698cdb326",
       "status": "-",
       "title": "New Icons2",
-      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 finance related ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
-      "context": [],
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 finance related ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
       "blockers": [],
       "createdAt": "2025-10-16T18:36:18.938Z",
-      "updatedAt": "2025-10-16T18:36:18.938Z"
+      "updatedAt": "2025-10-16T19:30:59.920Z"
     },
     {
       "id": "4999628b-5040-40bc-b269-e6cf0823a07c",
-      "status": "-",
+      "status": "?",
       "title": "New Icons3",
       "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 medical ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-16T18:36:44.073Z",
-      "updatedAt": "2025-10-16T18:36:44.073Z"
+      "updatedAt": "2025-10-16T19:27:31.167Z"
     },
     {
       "id": "5da79673-ef5c-4c84-93d7-a715b5492bc0",
-      "status": "-",
+      "status": "?",
       "title": "New Icons4",
       "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 business ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:12.028Z",
-      "updatedAt": "2025-10-16T18:37:12.028Z"
+      "updatedAt": "2025-10-16T19:27:33.088Z"
     },
     {
       "id": "b5615d52-f0b8-4630-910a-e47f4b7db811",
-      "status": "-",
+      "status": "?",
       "title": "New Icons5",
       "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 sport ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:31.850Z",
-      "updatedAt": "2025-10-16T18:37:31.850Z"
+      "updatedAt": "2025-10-16T19:27:35.103Z"
     },
     {
       "id": "afa9c03a-f251-410b-9510-3ea34b3eb374",
-      "status": "-",
+      "status": "?",
       "title": "New Icons6",
       "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 construction ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:51.777Z",
-      "updatedAt": "2025-10-16T18:37:51.777Z"
+      "updatedAt": "2025-10-16T19:27:36.819Z"
+    },
+    {
+      "id": "ad551afc-2b74-45e7-ac7b-9eac1faa8e26",
+      "status": "-",
+      "title": "Continue refactor of Icons",
+      "description": "In @src/renderer/src/components/ui/icons/Icons.tsx we just need the exports for individual icons. Some of them have already been moved to their files. Do the rest.",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T19:28:18.570Z",
+      "updatedAt": "2025-10-16T19:28:18.570Z"
+    },
+    {
+      "id": "67302df0-716b-46ed-aee1-828cb60373d2",
+      "status": "-",
+      "title": "Display groups of projects in sidebar",
+      "description": "In the @src/renderer/src/navigation/SidebarView.tsx we want to display all the projects as ordered via their groups, as is specified in @src/renderer/src/contexts/ProjectsGroupsContext.tsx and controlled via @src/renderer/src/screens/projects/ProjectManagerModal.tsx .\nAll uncategorized projects are at the top.\nThen each group must have its own dropdown section that can be opened or closed.\nWhen opened it displays the list of all projects in that group.\nAll groups start being closed.",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx",
+        "src/renderer/src/contexts/ProjectsGroupsContext.tsx",
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T19:30:09.420Z",
+      "updatedAt": "2025-10-16T19:30:09.420Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2513,14 +2542,16 @@
     "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 148,
     "92593266-d2ae-4d86-915a-0e82d71f625d": 149,
     "a9a277d4-6662-4862-a11f-812af7355e20": 150,
-    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 151,
-    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 152,
-    "f4564269-341e-482e-9aa5-e06698cdb326": 153,
-    "4999628b-5040-40bc-b269-e6cf0823a07c": 154,
-    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 155,
-    "b5615d52-f0b8-4630-910a-e47f4b7db811": 156,
-    "afa9c03a-f251-410b-9510-3ea34b3eb374": 157,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 158
+    "67302df0-716b-46ed-aee1-828cb60373d2": 151,
+    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 152,
+    "ad551afc-2b74-45e7-ac7b-9eac1faa8e26": 153,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 154,
+    "f4564269-341e-482e-9aa5-e06698cdb326": 155,
+    "4999628b-5040-40bc-b269-e6cf0823a07c": 156,
+    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 157,
+    "b5615d52-f0b8-4630-910a-e47f4b7db811": 158,
+    "afa9c03a-f251-410b-9510-3ea34b3eb374": 159,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 160
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

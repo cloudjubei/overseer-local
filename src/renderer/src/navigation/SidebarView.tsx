@@ -31,7 +31,7 @@ import {
   IconTimeline,
   IconToolbox,
   IconTests,
-} from '../components/ui/Icons'
+} from '../components/ui/icons/Icons'
 import { notificationsService } from '../services/notificationsService'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 import { NavigationView } from '@renderer/types'

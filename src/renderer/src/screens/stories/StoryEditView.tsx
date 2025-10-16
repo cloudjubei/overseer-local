@@ -8,7 +8,7 @@ import { ChatContext, Story } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 import { Button } from '@renderer/components/ui/Button'
-import { IconDelete } from '@renderer/components/ui/Icons'
+import { IconDelete } from '@renderer/components/ui/icons/Icons'
 
 export default function StoryEditView({
   storyId,

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ChatSidebar from './ChatSidebar'
 import type { ChatContext } from 'thefactory-tools'
-import { IconChevron, IconChat } from '../ui/Icons'
+import { IconChevron, IconChat } from '../ui/icons/Icons'
 
 export default function ChatSidebarModalPanel({
   isOpen = true,

@@ -49,7 +49,7 @@ import {
   IconClamp,
   IconDatabase,
   IconPalette,
-} from '@renderer/components/ui/Icons'
+} from '@renderer/components/ui/icons/Icons'
 
 export type ProjectIcon = {
   value: string
