@@ -588,12 +588,35 @@ export default function SidebarView({}: SidebarProps) {
                 .map((pid) => projectById.get(pid))
                 .filter(Boolean) as ProjectSpec[]
               const isOpen = openGroups[g.id] || false
+
+              // Determine if the active project is within this group
+              const hasActive = !!groupProjects.find((p) => p.id === activeProjectId)
+              const accentClass = hasActive
+                ? useAccentClass(activeProjectId, activeProjectId === MAIN_PROJECT)
+                : ''
+
+              // Aggregate badges across group projects
+              const aggActive = (g.projects || []).reduce(
+                (sum, pid) => sum + (activeCountByProject.get(pid) || 0),
+                0,
+              )
+              const aggUnread = (g.projects || []).reduce(
+                (sum, pid) => sum + (unreadByProject.get(pid) || 0),
+                0,
+              )
+              const showAnyBadge = aggActive > 0 || aggUnread > 0
+
               return (
                 <li key={g.id} className="nav-li">
                   <button
                     type="button"
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
-                    className={classNames('nav-item', 'nav-item--compact')}
+                    className={classNames(
+                      'nav-item',
+                      'nav-item--compact',
+                      accentClass,
+                      hasActive && 'nav-item--active',
+                    )}
                     aria-expanded={isOpen}
                     aria-controls={`group-${g.id}`}
                     title={g.title}
@@ -605,9 +628,26 @@ export default function SidebarView({}: SidebarProps) {
                       />
                     </span>
                     <span className="nav-item__label flex-1 text-left">{g.title}</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
-                      {groupProjects.length}
-                    </span>
+
+                    {showAnyBadge && (
+                      <span className="nav-item__badges" aria-hidden>
+                        {aggActive > 0 && (
+                          <NotificationBadge
+                            className={''}
+                            text={`${aggActive}`}
+                            tooltipLabel={`${aggActive} running agents in group`}
+                            isInformative
+                          />
+                        )}
+                        {aggUnread > 0 && (
+                          <NotificationBadge
+                            className={''}
+                            text={`${aggUnread}`}
+                            tooltipLabel={`${aggUnread} unread notifications in group`}
+                          />
+                        )}
+                      </span>
+                    )}
                   </button>
 
                   {isOpen && groupProjects.length > 0 && (
