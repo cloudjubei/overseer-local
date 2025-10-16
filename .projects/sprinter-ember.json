@@ -6,7 +6,7 @@
   "repo_url": "https://github.com/SprinterHQ/ember",
   "requirements": [],
   "metadata": {
-    "icon": "edit",
+    "icon": "chart-up",
     "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
   },
   "codeInfo": {
@@ -18,5 +18,5 @@
     "0e98b738-aca9-4c0a-b13d-1275150a50c8": 1
   },
   "createdAt": "2025-10-09T22:29:20.873Z",
-  "updatedAt": "2025-10-16T19:17:34.717Z"
+  "updatedAt": "2025-10-16T22:55:00.035Z"
 }

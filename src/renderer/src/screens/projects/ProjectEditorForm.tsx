@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react'
-import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
+import { PROJECT_ICONS, PROJECT_ICON_REGISTRY, renderProjectIcon } from './projectIcons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 import { CodeInfoChip } from './CodeInfoChip'

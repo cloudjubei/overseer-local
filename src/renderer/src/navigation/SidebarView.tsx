@@ -187,6 +187,9 @@ export default function SidebarView({}: SidebarProps) {
     return map
   }, [runsActive])
 
+  // Total active agent runs (across all projects) for Agents nav badge
+  const totalActiveRuns = runsActive.length
+
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
 
@@ -479,7 +482,28 @@ export default function SidebarView({}: SidebarProps) {
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view
             const ref = i === 0 ? firstItemRef : undefined
-            const showBadge = item.view === 'Notifications' && unreadCount > 0
+
+            // Decide badge for Notifications or Agents
+            let badgeEl: React.ReactNode | null = null
+            if (item.view === 'Notifications' && unreadCount > 0) {
+              badgeEl = (
+                <NotificationBadge
+                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                  text={`${unreadCount}`}
+                  tooltipLabel={`${unreadCount} unread notifications`}
+                />
+              )
+            } else if (item.view === 'Agents' && totalActiveRuns > 0) {
+              badgeEl = (
+                <NotificationBadge
+                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                  text={`${totalActiveRuns}`}
+                  tooltipLabel={`${totalActiveRuns} running agents`}
+                  isInformative
+                />
+              )
+            }
+
             const Btn = (
               <button
                 ref={ref as any}
@@ -499,7 +523,7 @@ export default function SidebarView({}: SidebarProps) {
               >
                 <span className="nav-item__icon">{item.icon}</span>
                 {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-                {showBadge && (
+                {badgeEl && (
                   <span
                     className={classNames(
                       'nav-item__badges',
@@ -507,13 +531,7 @@ export default function SidebarView({}: SidebarProps) {
                     )}
                     aria-hidden
                   >
-                    <NotificationBadge
-                      className={
-                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                      }
-                      text={`${unreadCount}`}
-                      tooltipLabel={`${unreadCount} unread notifications`}
-                    />
+                    {badgeEl}
                   </span>
                 )}
               </button>
@@ -588,12 +606,35 @@ export default function SidebarView({}: SidebarProps) {
                 .map((pid) => projectById.get(pid))
                 .filter(Boolean) as ProjectSpec[]
               const isOpen = openGroups[g.id] || false
+
+              // Determine if the active project is within this group
+              const hasActive = !!groupProjects.find((p) => p.id === activeProjectId)
+              const accentClass = hasActive
+                ? useAccentClass(activeProjectId, activeProjectId === MAIN_PROJECT)
+                : ''
+
+              // Aggregate badges across group projects
+              const aggActive = (g.projects || []).reduce(
+                (sum, pid) => sum + (activeCountByProject.get(pid) || 0),
+                0,
+              )
+              const aggUnread = (g.projects || []).reduce(
+                (sum, pid) => sum + (unreadByProject.get(pid) || 0),
+                0,
+              )
+              const showAnyBadge = aggActive > 0 || aggUnread > 0
+
               return (
                 <li key={g.id} className="nav-li">
                   <button
                     type="button"
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
-                    className={classNames('nav-item', 'nav-item--compact')}
+                    className={classNames(
+                      'nav-item',
+                      'nav-item--compact',
+                      accentClass,
+                      hasActive && 'nav-item--active',
+                    )}
                     aria-expanded={isOpen}
                     aria-controls={`group-${g.id}`}
                     title={g.title}
@@ -605,9 +646,26 @@ export default function SidebarView({}: SidebarProps) {
                       />
                     </span>
                     <span className="nav-item__label flex-1 text-left">{g.title}</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
-                      {groupProjects.length}
-                    </span>
+
+                    {showAnyBadge && (
+                      <span className="nav-item__badges" aria-hidden>
+                        {aggActive > 0 && (
+                          <NotificationBadge
+                            className={''}
+                            text={`${aggActive}`}
+                            tooltipLabel={`${aggActive} running agents in group`}
+                            isInformative
+                          />
+                        )}
+                        {aggUnread > 0 && (
+                          <NotificationBadge
+                            className={''}
+                            text={`${aggUnread}`}
+                            tooltipLabel={`${aggUnread} unread notifications in group`}
+                          />
+                        )}
+                      </span>
+                    )}
                   </button>
 
                   {isOpen && groupProjects.length > 0 && (

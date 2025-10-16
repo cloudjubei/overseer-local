@@ -2316,7 +2316,7 @@
     },
     {
       "id": "f4564269-341e-482e-9aa5-e06698cdb326",
-      "status": "-",
+      "status": "+",
       "title": "New Icons2",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 finance related ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2324,12 +2324,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:36:18.938Z",
-      "updatedAt": "2025-10-16T22:10:40.698Z",
-      "rejection": "These icons need to be split in their own files like the other Icons."
+      "updatedAt": "2025-10-16T22:18:20.109Z",
+      "completedAt": "2025-10-16T22:18:20.109Z"
     },
     {
       "id": "4999628b-5040-40bc-b269-e6cf0823a07c",
-      "status": "-",
+      "status": "+",
       "title": "New Icons3",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 medical ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2337,11 +2337,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:36:44.073Z",
-      "updatedAt": "2025-10-16T22:10:56.270Z"
+      "updatedAt": "2025-10-16T22:20:12.652Z",
+      "completedAt": "2025-10-16T22:20:12.652Z"
     },
     {
       "id": "5da79673-ef5c-4c84-93d7-a715b5492bc0",
-      "status": "-",
+      "status": "+",
       "title": "New Icons4",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 business ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2349,11 +2350,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:12.028Z",
-      "updatedAt": "2025-10-16T22:11:09.019Z"
+      "updatedAt": "2025-10-16T22:24:50.244Z",
+      "completedAt": "2025-10-16T22:24:50.244Z"
     },
     {
       "id": "b5615d52-f0b8-4630-910a-e47f4b7db811",
-      "status": "-",
+      "status": "+",
       "title": "New Icons5",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 sport ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2361,11 +2363,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:31.850Z",
-      "updatedAt": "2025-10-16T22:11:20.680Z"
+      "updatedAt": "2025-10-16T22:30:01.792Z",
+      "completedAt": "2025-10-16T22:30:01.792Z"
     },
     {
       "id": "afa9c03a-f251-410b-9510-3ea34b3eb374",
-      "status": "-",
+      "status": "+",
       "title": "New Icons6",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 construction ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2373,7 +2376,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:51.777Z",
-      "updatedAt": "2025-10-16T22:11:33.286Z"
+      "updatedAt": "2025-10-16T22:34:46.230Z",
+      "completedAt": "2025-10-16T22:34:46.230Z"
     },
     {
       "id": "ad551afc-2b74-45e7-ac7b-9eac1faa8e26",
@@ -2400,12 +2404,13 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T19:30:09.420Z",
-      "updatedAt": "2025-10-16T22:10:21.649Z",
-      "rejection": "There's no need for the number of projects to be shown - just the name of the group."
+      "updatedAt": "2025-10-16T22:17:21.824Z",
+      "rejection": "There's no need for the number of projects to be shown - just the name of the group.",
+      "completedAt": "2025-10-16T22:17:21.824Z"
     },
     {
       "id": "4cd9f6a6-4be9-4e76-b436-507636a05bfb",
-      "status": "-",
+      "status": "+",
       "title": "Show a working agent in the Sidebar next to agents",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx just like we show a notification badge next to \"Notifications\", we need to show the same next to \"Agents\" when an agent is running. This is already showing in the Projects list - but we need it here too - same exact style.",
       "context": [
@@ -2413,7 +2418,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:12:53.921Z",
-      "updatedAt": "2025-10-16T22:12:53.921Z"
+      "updatedAt": "2025-10-16T22:38:21.520Z",
+      "completedAt": "2025-10-16T22:38:21.520Z"
     },
     {
       "id": "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc",
