@@ -2276,7 +2276,7 @@
     },
     {
       "id": "92593266-d2ae-4d86-915a-0e82d71f625d",
-      "status": "-",
+      "status": "+",
       "title": "Chat settings fix",
       "description": "In @src/renderer/src/screens/ChatView.tsx when changing the `Max turns per run` setting in Chat Settings, the `Number of messages to send` setting also changes (or gets reset to the default). This shouldn't happen - they should be independent of one another.",
       "context": [
@@ -2284,7 +2284,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T17:48:45.055Z",
-      "updatedAt": "2025-10-16T17:48:45.055Z"
+      "updatedAt": "2025-10-16T18:17:24.026Z",
+      "completedAt": "2025-10-16T18:17:24.026Z"
     }
   ],
   "featureIdToDisplayIndex": {

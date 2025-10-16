@@ -63,11 +63,15 @@ export default function ChatSidebar({
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
+
+  // Ensure we do not clobber unrelated completion settings fields when updating a single field.
   const persistSettings = useCallback(
     async (patch: Partial<CompletionSettings>) => {
-      await updateCompletionSettings(context, patch)
+      const prev = currentSettings?.completionSettings || {}
+      const merged: Partial<CompletionSettings> = { ...prev, ...patch }
+      await updateCompletionSettings(context, merged)
     },
-    [context, updateCompletionSettings],
+    [context, updateCompletionSettings, currentSettings?.completionSettings],
   )
 
   useEffect(() => {
