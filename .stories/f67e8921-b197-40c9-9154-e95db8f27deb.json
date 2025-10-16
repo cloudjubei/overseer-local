@@ -2205,7 +2205,7 @@
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
-      "status": "-",
+      "status": "+",
       "title": "The manage projects modal needs updating",
       "description": "The @src/renderer/src/screens/projects/ProjectManagerModal.tsx needs to update in the following way:\n- we need to add a header section that won't be scrollable. This section will have 'group control'. There needs to be a dropdown selector that allows selecting which group to show, by default a special ALL selection is on. To the right there should be an \"Edit\" button (Icon only). The Edit button takes the user to another view \"within\" the same modal that will allow the user to move the groups' orders around, delete groups, add a group (very simple alert with name entry) and edit a group's name (same alert as Add - just prefilled). This needs to work the same as editing a project.\n- the add project button needs to be in a footer at the bottom of the modal that isn't scrollable.\n- The middle section shows the current group's projects. They can be moved around to change their order within the group.\n- Apart from the \"ALL\" dropdown option, there needs to be a \"--uncategorized--\" one, which shows right after ALL (the first 2 options). All projects that don't have a group assigned need to be shown here.\n- The @src/renderer/src/screens/projects/ProjectManagerModal.tsx should have the actual project configuration view split away from it into a separate file. There needs to be a new dropdown under the ID that allows the selection of a group for a given project.\n\nThere's @src/renderer/src/contexts/ProjectsGroupsContext.tsx that should be used for this feature. If anything is missing from that file it should be updated so that it's the interface to talk with @src/renderer/src/services/projectsGroupsService.ts .\n\nAll the types needed from 'thefactory-tools' are listed at the bottom of @src/renderer/src/contexts/ProjectsGroupsContext.tsx",
       "context": [
@@ -2216,8 +2216,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:34:24.331Z",
-      "updatedAt": "2025-10-16T17:44:58.988Z",
-      "rejection": "The add group and add project buttons are not icon only - they have text - they shouldn't.\nWhen opening @src/renderer/src/screens/projects/ProjectEditorForm.tsx it still shows the header from the modal - it shouldn't.\nClicking edit groups should open a new view not an alert."
+      "updatedAt": "2025-10-16T17:58:24.459Z",
+      "rejection": "The add group and add project buttons are not icon only - they have text - they shouldn't.\nWhen opening @src/renderer/src/screens/projects/ProjectEditorForm.tsx it still shows the header from the modal - it shouldn't.\nClicking edit groups should open a new view not an alert.",
+      "completedAt": "2025-10-16T17:58:24.459Z"
     },
     {
       "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",

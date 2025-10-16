@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal, AlertDialog } from '@renderer/components/ui/Modal'
+import { Modal } from '@renderer/components/ui/Modal'
 import { projectsService } from '@renderer/services/projectsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { Button } from '@renderer/components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
-import { IconDelete, IconEdit, IconPlus, IconArrowLeftMini, IconArrowRightMini } from '@renderer/components/ui/Icons'
+import { IconDelete, IconEdit, IconPlus, IconArrowLeftMini, IconArrowRightMini, IconBack } from '@renderer/components/ui/Icons'
 import {
   Select,
   SelectContent,
@@ -18,6 +18,8 @@ import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 
 const ALL_GROUP_ID = '__all__'
 const UNCATEGORIZED_ID = '__uncategorized__'
+
+type ViewMode = 'list' | 'create' | 'edit' | 'groups'
 
 export default function ProjectManagerModal({
   onRequestClose,
@@ -33,7 +35,7 @@ export default function ProjectManagerModal({
     useProjectsGroups()
   const [error, _] = useState<string | null>(null)
 
-  const [mode, setMode] = useState<'list' | 'create' | 'edit'>(initialMode || 'list')
+  const [mode, setMode] = useState<ViewMode>(initialMode || 'list')
   const [editingId, setEditingId] = useState<string | null>(initialProjectId || null)
 
   const [form, setForm] = useState<any>({
@@ -52,8 +54,6 @@ export default function ProjectManagerModal({
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
-
-  const [isGroupsEditorOpen, setIsGroupsEditorOpen] = useState(false)
 
   const doClose = () => {
     onRequestClose?.()
@@ -228,7 +228,8 @@ export default function ProjectManagerModal({
     await reorderGroup({ fromIndex, toIndex })
   }
 
-  const headerActions = (
+  // Only show group controls in header when listing projects
+  const headerActions = mode === 'list' && (
     <div className="flex items-center gap-2">
       <Select value={currentGroupId} onValueChange={(v) => setCurrentGroupId(v)}>
         <SelectTrigger className="ui-select min-w-[220px]">
@@ -242,103 +243,51 @@ export default function ProjectManagerModal({
           ))}
         </SelectContent>
       </Select>
-      <Button className="btn-secondary" onClick={() => setIsGroupsEditorOpen(true)} title="Edit groups">
+      <Button variant="secondary" size="icon" onClick={() => setMode('groups')} title="Edit groups">
         <IconEdit className="w-4 h-4" />
       </Button>
     </div>
   )
 
-  const listFooter = (
-    <div className="flex justify-end gap-2">
-      {mode === 'list' && (
-        <Button className="btn-primary" onClick={() => startCreate()}>
-          <IconPlus className="w-4 h-4" /> Add Project
-        </Button>
-      )}
-      {(mode === 'create' || mode === 'edit') && (
-        <>
-          <button type="button" className="btn-secondary" onClick={() => setMode('list')}>
-            Cancel
-          </button>
-          <button type="submit" className="btn" form={formId} disabled={saving}>
+  // Footer content varies by view
+  const footer = (
+    <div className="flex justify-between items-center w-full">
+      {/* Left-side contextual controls */}
+      <div className="flex items-center gap-2">
+        {mode === 'groups' && (
+          <Button variant="secondary" size="icon" onClick={() => setMode('list')} title="Back to projects">
+            <IconBack className="w-4 h-4" />
+          </Button>
+        )}
+        {(mode === 'create' || mode === 'edit') && (
+          <Button variant="secondary" onClick={() => setMode('list')}>Cancel</Button>
+        )}
+      </div>
+
+      {/* Right-side primary actions */}
+      <div className="flex items-center gap-2">
+        {mode === 'list' && (
+          <Button variant="primary" size="icon" onClick={() => startCreate()} title="Add project">
+            <IconPlus className="w-4 h-4" />
+          </Button>
+        )}
+        {mode === 'groups' && (
+          <Button variant="primary" size="icon" onClick={async () => {
+            const name = prompt('New group name?')?.trim()
+            if (!name) return
+            await createGroup(name)
+          }} title="Add group">
+            <IconPlus className="w-4 h-4" />
+          </Button>
+        )}
+        {(mode === 'create' || mode === 'edit') && (
+          <Button type="submit" form={formId} disabled={saving}>
             {mode === 'create' ? 'Create' : 'Save'}
-          </button>
-        </>
-      )}
+          </Button>
+        )}
+      </div>
     </div>
   )
-
-  // Groups editor modal content
-  const GroupsEditorModal = () => {
-    const [localGroups, setLocalGroups] = useState(groups)
-    useEffect(() => setLocalGroups(groups), [groups])
-
-    const onAddGroup = async () => {
-      const name = prompt('New group name?')?.trim()
-      if (!name) return
-      await createGroup(name)
-    }
-
-    const onRenameGroup = async (gId: string, currentTitle: string) => {
-      const name = prompt('Rename group', currentTitle)?.trim()
-      if (!name || name === currentTitle) return
-      await updateGroupTitle(gId, name)
-    }
-
-    const onDeleteGroup = async (gId: string) => {
-      if (!confirm('Delete this group? Projects will remain uncategorized.')) return
-      await deleteGroup(gId)
-    }
-
-    return (
-      <Modal
-        isOpen={isGroupsEditorOpen}
-        onClose={() => setIsGroupsEditorOpen(false)}
-        title="Edit Groups"
-        size="md"
-        footer={
-          <div className="flex justify-between w-full">
-            <div className="text-text-secondary text-sm">Drag order not implemented; use arrows</div>
-            <div className="flex gap-2">
-              <Button className="btn-secondary" onClick={() => setIsGroupsEditorOpen(false)}>
-                Close
-              </Button>
-              <Button className="btn-primary" onClick={onAddGroup}>
-                <IconPlus className="w-4 h-4" /> Add Group
-              </Button>
-            </div>
-          </div>
-        }
-      >
-        <div className="flex flex-col gap-2">
-          {localGroups.length === 0 && <div className="empty">No groups yet.</div>}
-          <ul className="divide-y divide-border" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {localGroups.map((g, idx) => (
-              <li key={g.id} className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-2">
-                  <strong>{g.title}</strong>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button className="btn-secondary" onClick={() => moveGroup(idx, -1)} title="Move up">
-                    <IconArrowLeftMini className="w-4 h-4 rotate-90" />
-                  </Button>
-                  <Button className="btn-secondary" onClick={() => moveGroup(idx, +1)} title="Move down">
-                    <IconArrowRightMini className="w-4 h-4 rotate-90" />
-                  </Button>
-                  <Button className="btn-secondary" onClick={() => onRenameGroup(g.id, g.title)} title="Rename">
-                    <IconEdit className="w-4 h-4" />
-                  </Button>
-                  <Button className="btn-secondary" variant="danger" onClick={() => onDeleteGroup(g.id)} title="Delete">
-                    <IconDelete className="w-4 h-4" />
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Modal>
-    )
-  }
 
   // Reorder within selected group (not All/Uncategorized)
   const onMoveProjectInGroup = async (index: number, dir: -1 | 1) => {
@@ -350,16 +299,68 @@ export default function ProjectManagerModal({
     await reorderProject(currentGroupId, { fromIndex: index, toIndex })
   }
 
+  // Groups editor view content (within the same modal)
+  const GroupsEditorView = () => {
+    return (
+      <div className="flex flex-col gap-2">
+        {groups.length === 0 && <div className="empty">No groups yet.</div>}
+        <ul className="divide-y divide-border" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {groups.map((g, idx) => (
+            <li key={g.id} className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <strong>{g.title}</strong>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="secondary" size="icon" onClick={() => moveGroup(idx, -1)} title="Move up">
+                  <IconArrowLeftMini className="w-4 h-4 rotate-90" />
+                </Button>
+                <Button variant="secondary" size="icon" onClick={() => moveGroup(idx, +1)} title="Move down">
+                  <IconArrowRightMini className="w-4 h-4 rotate-90" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={async () => {
+                    const name = prompt('Rename group', g.title)?.trim()
+                    if (!name || name === g.title) return
+                    await updateGroupTitle(g.id, name)
+                  }}
+                  title="Rename group"
+                >
+                  <IconEdit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="danger"
+                  size="icon"
+                  onClick={async () => {
+                    if (!confirm('Delete this group? Projects will remain uncategorized.')) return
+                    await deleteGroup(g.id)
+                  }}
+                  title="Delete group"
+                >
+                  <IconDelete className="w-4 h-4" />
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  const hideHeader = mode === 'create' || mode === 'edit'
+
   return (
     <>
       <Modal
-        title="Manage Projects"
+        title={mode === 'groups' ? 'Edit Groups' : 'Manage Projects'}
         onClose={doClose}
         isOpen={true}
         size="lg"
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
-        headerActions={headerActions}
-        footer={listFooter}
+        headerActions={headerActions || undefined}
+        footer={footer}
+        hideHeader={hideHeader}
       >
         {error && (
           <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
@@ -398,7 +399,8 @@ export default function ProjectManagerModal({
                       {currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID && (
                         <div className="flex items-center gap-1">
                           <Button
-                            className="btn-secondary"
+                            variant="secondary"
+                            size="icon"
                             title="Move up"
                             onClick={() => onMoveProjectInGroup(idx, -1)}
                             disabled={idx === 0}
@@ -406,7 +408,8 @@ export default function ProjectManagerModal({
                             <IconArrowLeftMini className="w-4 h-4 rotate-90" />
                           </Button>
                           <Button
-                            className="btn-secondary"
+                            variant="secondary"
+                            size="icon"
                             title="Move down"
                             onClick={() => onMoveProjectInGroup(idx, +1)}
                             disabled={idx === visibleProjects.length - 1}
@@ -416,14 +419,15 @@ export default function ProjectManagerModal({
                         </div>
                       )}
 
-                      <Button className="btn-secondary" onClick={() => startEdit(p)}>
+                      <Button variant="secondary" size="icon" onClick={() => startEdit(p)} title="Edit project">
                         <IconEdit className="w-4 h-4" />
                       </Button>
                       <Button
-                        className="btn-secondary"
-                        disabled={saving}
                         variant="danger"
+                        size="icon"
+                        disabled={saving}
                         onClick={() => handleDelete(p.id)}
+                        title="Delete project"
                       >
                         <IconDelete className="w-4 h-4" />
                       </Button>
@@ -434,6 +438,8 @@ export default function ProjectManagerModal({
             </div>
           </div>
         )}
+
+        {mode === 'groups' && <GroupsEditorView />}
 
         {(mode === 'create' || mode === 'edit') && (
           <ProjectEditorForm
@@ -448,8 +454,6 @@ export default function ProjectManagerModal({
           />
         )}
       </Modal>
-
-      {isGroupsEditorOpen && <GroupsEditorModal />}
     </>
   )
 }

@@ -21,6 +21,8 @@ export type ModalProps = {
   headerActions?: React.ReactNode
   // Optional override for the content container className (defaults to a scrollable padded container)
   contentClassName?: string
+  // Optional: hide the header bar entirely (useful for embedded views without a top bar)
+  hideHeader?: boolean
 }
 
 function sizeClass(size?: ModalProps['size']) {
@@ -66,6 +68,7 @@ export function Modal({
   closeOnOverlayClick = true,
   headerActions,
   contentClassName,
+  hideHeader = false,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -156,38 +159,40 @@ export function Modal({
         aria-describedby={descriptionId}
         onKeyDown={onKeyDown}
       >
-        <div className="flex items-center justify-between gap-4 border-b pb-2 pt-2 pl-4 pr-4 shrink-0 border-border">
-          <div className="flex items-center text-base font-semibold " id={titleId}>
-            {title}
-          </div>
-          <div className="flex items-center gap-2">
-            {headerActions}
-            {!hideCloseButton && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-                aria-label="Close"
-                title="Close"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+        {!hideHeader && (
+          <div className="flex items-center justify-between gap-4 border-b pb-2 pt-2 pl-4 pr-4 shrink-0 border-border">
+            <div className="flex items-center text-base font-semibold " id={titleId}>
+              {title}
+            </div>
+            <div className="flex items-center gap-2">
+              {headerActions}
+              {!hideCloseButton && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                  aria-label="Close"
+                  title="Close"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            )}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         <div className={contentClasses}>{children}</div>
         {footer ? <div className="shrink-0 border-t p-3 border-border">{footer}</div> : null}
       </div>
