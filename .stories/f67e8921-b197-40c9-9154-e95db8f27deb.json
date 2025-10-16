@@ -2369,7 +2369,7 @@
     },
     {
       "id": "afa9c03a-f251-410b-9510-3ea34b3eb374",
-      "status": "-",
+      "status": "+",
       "title": "New Icons6",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 construction ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2377,7 +2377,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:51.777Z",
-      "updatedAt": "2025-10-16T22:11:33.286Z"
+      "updatedAt": "2025-10-16T22:34:46.230Z",
+      "completedAt": "2025-10-16T22:34:46.230Z"
     },
     {
       "id": "ad551afc-2b74-45e7-ac7b-9eac1faa8e26",

@@ -163,6 +163,18 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'golf': Icons.IconGolf,
   'runner': Icons.IconRunner,
   'dumbbell': Icons.IconDumbbell,
+
+  // Construction icons
+  'hard-hat': Icons.IconHardHat,
+  'crane': Icons.IconCrane,
+  'traffic-cone': Icons.IconTrafficCone,
+  'wheelbarrow': Icons.IconWheelbarrow,
+  'shovel': Icons.IconShovel,
+  'hammer': Icons.IconHammer,
+  'cement-mixer': Icons.IconCementMixer,
+  'excavator': Icons.IconExcavator,
+  'safety-vest': Icons.IconSafetyVest,
+  'blueprint': Icons.IconBlueprint,
 }
 
 export const PROJECT_ICON_NAMES = Object.keys(PROJECT_ICON_REGISTRY)
