@@ -2212,14 +2212,12 @@
       "context": [
         "src/renderer/src/screens/projects/ProjectManagerModal.tsx",
         "src/renderer/src/contexts/ProjectsGroupsContext.tsx",
-        "src/renderer/src/services/projectsGroupsService.ts",
-        "src/renderer/src/screens/projects/ProjectEditorForm.tsx"
+        "src/renderer/src/services/projectsGroupsService.ts"
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:34:24.331Z",
-      "updatedAt": "2025-10-16T17:58:24.459Z",
-      "rejection": "The add group and add project buttons are not icon only - they have text - they shouldn't.\nWhen opening @src/renderer/src/screens/projects/ProjectEditorForm.tsx it still shows the header from the modal - it shouldn't.\nClicking edit groups should open a new view not an alert.",
-      "completedAt": "2025-10-16T17:58:24.459Z"
+      "updatedAt": "2025-10-16T18:32:22.922Z",
+      "completedAt": "2025-10-16T18:32:22.922Z"
     },
     {
       "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",
@@ -2237,17 +2235,16 @@
     },
     {
       "id": "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9",
-      "status": "?",
-      "title": "New icons",
-      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 finance related ones, 10 medical ones, 10 business ones, 10 sport ones, 10 construction ones and 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "status": "-",
+      "title": "New icons1",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
         "src/renderer/src/components/ui/Icons.tsx",
         "src/renderer/src/screens/projects/projectIcons.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-15T12:45:33.201Z",
-      "updatedAt": "2025-10-16T18:22:27.599Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-16T18:38:03.880Z"
     },
     {
       "id": "9b25e0f0-32d5-4320-b429-46120b06fbf3",
@@ -2287,6 +2284,81 @@
       "createdAt": "2025-10-16T17:48:45.055Z",
       "updatedAt": "2025-10-16T18:17:24.026Z",
       "completedAt": "2025-10-16T18:17:24.026Z"
+    },
+    {
+      "id": "a9a277d4-6662-4862-a11f-812af7355e20",
+      "status": "-",
+      "title": "ProjectManagerModal update",
+      "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx a user can click edit group to look at all the groups and add new ones. This should be refactored into a separate file (similarly to how @src/renderer/src/screens/projects/ProjectEditorForm.tsx is).\nCurrently, when clicking add group inside this view nothing shows - we should use the same idea as when editing `project code info` inside ProjectEditorForm.\n\nAdditionally both ProjectEditorForm and this view this whole feature is about should have its own header with a title - so that all views within the ProjectManager flow have a header and footer.",
+      "context": [
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx",
+        "src/renderer/src/screens/projects/ProjectEditorForm.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:33:41.556Z",
+      "updatedAt": "2025-10-16T18:34:48.794Z"
+    },
+    {
+      "id": "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e",
+      "status": "-",
+      "title": "All icons are accessible via projecticons",
+      "description": "We need all icons in @src/renderer/src/components/ui/Icons.tsx to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .\nThere should be a directive about it in @docs/FILE_ORGANISATION.md",
+      "context": [
+        "docs/FILE_ORGANISATION.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:35:49.831Z",
+      "updatedAt": "2025-10-16T18:35:49.831Z"
+    },
+    {
+      "id": "f4564269-341e-482e-9aa5-e06698cdb326",
+      "status": "-",
+      "title": "New Icons2",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 finance related ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:36:18.938Z",
+      "updatedAt": "2025-10-16T18:36:18.938Z"
+    },
+    {
+      "id": "4999628b-5040-40bc-b269-e6cf0823a07c",
+      "status": "-",
+      "title": "New Icons3",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 medical ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:36:44.073Z",
+      "updatedAt": "2025-10-16T18:36:44.073Z"
+    },
+    {
+      "id": "5da79673-ef5c-4c84-93d7-a715b5492bc0",
+      "status": "-",
+      "title": "New Icons4",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 business ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:37:12.028Z",
+      "updatedAt": "2025-10-16T18:37:12.028Z"
+    },
+    {
+      "id": "b5615d52-f0b8-4630-910a-e47f4b7db811",
+      "status": "-",
+      "title": "New Icons5",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 sport ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:37:31.850Z",
+      "updatedAt": "2025-10-16T18:37:31.850Z"
+    },
+    {
+      "id": "afa9c03a-f251-410b-9510-3ea34b3eb374",
+      "status": "-",
+      "title": "New Icons6",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 construction ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:37:51.777Z",
+      "updatedAt": "2025-10-16T18:37:51.777Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2439,8 +2511,15 @@
     "9b25e0f0-32d5-4320-b429-46120b06fbf3": 147,
     "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 148,
     "92593266-d2ae-4d86-915a-0e82d71f625d": 149,
-    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 150,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 151
+    "a9a277d4-6662-4862-a11f-812af7355e20": 150,
+    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 151,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 152,
+    "f4564269-341e-482e-9aa5-e06698cdb326": 153,
+    "4999628b-5040-40bc-b269-e6cf0823a07c": 154,
+    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 155,
+    "b5615d52-f0b8-4630-910a-e47f4b7db811": 156,
+    "afa9c03a-f251-410b-9510-3ea34b3eb374": 157,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 158
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
