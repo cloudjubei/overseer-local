@@ -137,6 +137,20 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'tooth': Icons.IconTooth,
   'lungs': Icons.IconLungs,
   'dna': Icons.IconDna,
+
+  // Business icons
+  'handshake': Icons.IconHandshake,
+  'presentation': Icons.IconPresentation,
+  'calendar': Icons.IconCalendar,
+  'users': Icons.IconUsers,
+  'megaphone': Icons.IconMegaphone,
+  'headset': Icons.IconHeadset,
+  'shopping-cart': Icons.IconShoppingCart,
+  'store': Icons.IconStore,
+  'clipboard-check': Icons.IconClipboardCheck,
+  'contract': Icons.IconContract,
+  'bar-chart': Icons.IconBarChart,
+  'target-dollar': Icons.IconTargetDollar,
 }
 
 export const PROJECT_ICON_NAMES = Object.keys(PROJECT_ICON_REGISTRY)
