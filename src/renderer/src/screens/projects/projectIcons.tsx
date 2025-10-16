@@ -106,6 +106,22 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'server': Icons.IconServer,
   'shield': Icons.IconShield,
   'key': Icons.IconKey,
+
+  // Finance icons
+  'dollar': Icons.IconDollar,
+  'credit-card': Icons.IconCreditCard,
+  'wallet': Icons.IconWallet,
+  'bank': Icons.IconBank,
+  'chart-up': Icons.IconChartUp,
+  'chart-down': Icons.IconChartDown,
+  'piggy-bank': Icons.IconPiggyBank,
+  'receipt': Icons.IconReceipt,
+  'calculator': Icons.IconCalculator,
+  'coins': Icons.IconCoins,
+  'briefcase': Icons.IconBriefcase,
+  'money-transfer': Icons.IconMoneyTransfer,
+  'percent': Icons.IconPercent,
+  'pie-chart': Icons.IconPieChart,
 }
 
 export const PROJECT_ICON_NAMES = Object.keys(PROJECT_ICON_REGISTRY)

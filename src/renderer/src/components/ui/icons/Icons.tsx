@@ -76,3 +76,6 @@ export * from './IconCpu'
 export * from './IconServer'
 export * from './IconShield'
 export * from './IconKey'
+
+// New finance icons
+export * from './IconFinance'
