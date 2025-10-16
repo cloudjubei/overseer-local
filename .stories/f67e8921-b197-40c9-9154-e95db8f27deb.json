@@ -2411,7 +2411,7 @@
     },
     {
       "id": "4cd9f6a6-4be9-4e76-b436-507636a05bfb",
-      "status": "-",
+      "status": "+",
       "title": "Show a working agent in the Sidebar next to agents",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx just like we show a notification badge next to \"Notifications\", we need to show the same next to \"Agents\" when an agent is running. This is already showing in the Projects list - but we need it here too - same exact style.",
       "context": [
@@ -2419,7 +2419,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:12:53.921Z",
-      "updatedAt": "2025-10-16T22:12:53.921Z"
+      "updatedAt": "2025-10-16T22:38:21.520Z",
+      "completedAt": "2025-10-16T22:38:21.520Z"
     },
     {
       "id": "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc",

@@ -187,6 +187,9 @@ export default function SidebarView({}: SidebarProps) {
     return map
   }, [runsActive])
 
+  // Total active agent runs (across all projects) for Agents nav badge
+  const totalActiveRuns = runsActive.length
+
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
 
@@ -479,7 +482,28 @@ export default function SidebarView({}: SidebarProps) {
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view
             const ref = i === 0 ? firstItemRef : undefined
-            const showBadge = item.view === 'Notifications' && unreadCount > 0
+
+            // Decide badge for Notifications or Agents
+            let badgeEl: React.ReactNode | null = null
+            if (item.view === 'Notifications' && unreadCount > 0) {
+              badgeEl = (
+                <NotificationBadge
+                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                  text={`${unreadCount}`}
+                  tooltipLabel={`${unreadCount} unread notifications`}
+                />
+              )
+            } else if (item.view === 'Agents' && totalActiveRuns > 0) {
+              badgeEl = (
+                <NotificationBadge
+                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                  text={`${totalActiveRuns}`}
+                  tooltipLabel={`${totalActiveRuns} running agents`}
+                  isInformative
+                />
+              )
+            }
+
             const Btn = (
               <button
                 ref={ref as any}
@@ -499,7 +523,7 @@ export default function SidebarView({}: SidebarProps) {
               >
                 <span className="nav-item__icon">{item.icon}</span>
                 {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-                {showBadge && (
+                {badgeEl && (
                   <span
                     className={classNames(
                       'nav-item__badges',
@@ -507,13 +531,7 @@ export default function SidebarView({}: SidebarProps) {
                     )}
                     aria-hidden
                   >
-                    <NotificationBadge
-                      className={
-                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
-                      }
-                      text={`${unreadCount}`}
-                      tooltipLabel={`${unreadCount} unread notifications`}
-                    />
+                    {badgeEl}
                   </span>
                 )}
               </button>
