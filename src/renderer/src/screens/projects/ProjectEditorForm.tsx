@@ -107,7 +107,7 @@ function IconPicker({ value, onChange }: { value?: string; onChange: (v: string)
                 >
                   <span aria-hidden>{renderProjectIcon(opt.value, 'h-5 w-5')}</span>
                 </button>
-              )
+              )}
             })}
           </div>
         </div>
@@ -146,6 +146,11 @@ export function ProjectEditorForm({
 
   return (
     <form id={formId} className="story-form" onSubmit={onSubmit}>
+      {/* Local header to ensure consistent header inside the flow */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-base font-semibold">{mode === 'create' ? 'Create Project' : 'Edit Project'}</div>
+      </div>
+
       {formErrors.length > 0 && (
         <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
           {formErrors.map((e, i) => (

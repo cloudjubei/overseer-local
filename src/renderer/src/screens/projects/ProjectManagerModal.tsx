@@ -15,6 +15,7 @@ import {
 import { validateProjectClient } from './validateProject'
 import { ProjectEditorForm } from './ProjectEditorForm'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
+import { ProjectGroupsEditor } from './ProjectGroupsEditor'
 
 const ALL_GROUP_ID = '__all__'
 const UNCATEGORIZED_ID = '__uncategorized__'
@@ -31,8 +32,7 @@ export default function ProjectManagerModal({
   initialProjectId?: string
 }) {
   const { projects, getProjectById } = useProjectContext()
-  const { groups, getGroupForProject, reorderProject, reorderGroup, createGroup, updateGroupTitle, deleteGroup, setProjectGroup } =
-    useProjectsGroups()
+  const { groups, getGroupForProject, reorderProject, setProjectGroup } = useProjectsGroups()
   const [error, _] = useState<string | null>(null)
 
   const [mode, setMode] = useState<ViewMode>(initialMode || 'list')
@@ -220,14 +220,6 @@ export default function ProjectManagerModal({
     return group.projects.map((pid) => byId.get(pid)).filter(Boolean) as typeof projectsList
   }, [currentGroupId, projectsList, groups, uncategorized])
 
-  // Reorder handlers for groups
-  const moveGroup = async (index: number, dir: -1 | 1) => {
-    const fromIndex = index
-    const toIndex = index + dir
-    if (toIndex < 0 || toIndex >= groups.length) return
-    await reorderGroup({ fromIndex, toIndex })
-  }
-
   // Only show group controls in header when listing projects
   const headerActions = mode === 'list' && (
     <div className="flex items-center gap-2">
@@ -271,15 +263,6 @@ export default function ProjectManagerModal({
             <IconPlus className="w-4 h-4" />
           </Button>
         )}
-        {mode === 'groups' && (
-          <Button variant="primary" size="icon" onClick={async () => {
-            const name = prompt('New group name?')?.trim()
-            if (!name) return
-            await createGroup(name)
-          }} title="Add group">
-            <IconPlus className="w-4 h-4" />
-          </Button>
-        )}
         {(mode === 'create' || mode === 'edit') && (
           <Button type="submit" form={formId} disabled={saving}>
             {mode === 'create' ? 'Create' : 'Save'}
@@ -299,68 +282,24 @@ export default function ProjectManagerModal({
     await reorderProject(currentGroupId, { fromIndex: index, toIndex })
   }
 
-  // Groups editor view content (within the same modal)
-  const GroupsEditorView = () => {
-    return (
-      <div className="flex flex-col gap-2">
-        {groups.length === 0 && <div className="empty">No groups yet.</div>}
-        <ul className="divide-y divide-border" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {groups.map((g, idx) => (
-            <li key={g.id} className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <strong>{g.title}</strong>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="secondary" size="icon" onClick={() => moveGroup(idx, -1)} title="Move up">
-                  <IconArrowLeftMini className="w-4 h-4 rotate-90" />
-                </Button>
-                <Button variant="secondary" size="icon" onClick={() => moveGroup(idx, +1)} title="Move down">
-                  <IconArrowRightMini className="w-4 h-4 rotate-90" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={async () => {
-                    const name = prompt('Rename group', g.title)?.trim()
-                    if (!name || name === g.title) return
-                    await updateGroupTitle(g.id, name)
-                  }}
-                  title="Rename group"
-                >
-                  <IconEdit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="danger"
-                  size="icon"
-                  onClick={async () => {
-                    if (!confirm('Delete this group? Projects will remain uncategorized.')) return
-                    await deleteGroup(g.id)
-                  }}
-                  title="Delete group"
-                >
-                  <IconDelete className="w-4 h-4" />
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
+  const titleByMode: Record<ViewMode, string> = {
+    list: 'Manage Projects',
+    groups: 'Edit Groups',
+    create: 'Create Project',
+    edit: 'Edit Project',
   }
-
-  const hideHeader = mode === 'create' || mode === 'edit'
 
   return (
     <>
       <Modal
-        title={mode === 'groups' ? 'Edit Groups' : 'Manage Projects'}
+        title={titleByMode[mode]}
         onClose={doClose}
         isOpen={true}
         size="lg"
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         headerActions={headerActions || undefined}
         footer={footer}
-        hideHeader={hideHeader}
+        hideHeader={false}
       >
         {error && (
           <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
@@ -439,7 +378,7 @@ export default function ProjectManagerModal({
           </div>
         )}
 
-        {mode === 'groups' && <GroupsEditorView />}
+        {mode === 'groups' && <ProjectGroupsEditor />}
 
         {(mode === 'create' || mode === 'edit') && (
           <ProjectEditorForm

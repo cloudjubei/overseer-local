@@ -2287,7 +2287,7 @@
     },
     {
       "id": "a9a277d4-6662-4862-a11f-812af7355e20",
-      "status": "-",
+      "status": "+",
       "title": "ProjectManagerModal update",
       "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx a user can click edit group to look at all the groups and add new ones. This should be refactored into a separate file (similarly to how @src/renderer/src/screens/projects/ProjectEditorForm.tsx is).\nCurrently, when clicking add group inside this view nothing shows - we should use the same idea as when editing `project code info` inside ProjectEditorForm.\n\nAdditionally both ProjectEditorForm and this view this whole feature is about should have its own header with a title - so that all views within the ProjectManager flow have a header and footer.",
       "context": [
@@ -2296,7 +2296,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:33:41.556Z",
-      "updatedAt": "2025-10-16T18:34:48.794Z"
+      "updatedAt": "2025-10-16T18:44:49.493Z",
+      "completedAt": "2025-10-16T18:44:49.493Z"
     },
     {
       "id": "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e",
