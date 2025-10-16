@@ -1,11 +1,6 @@
 import * as Icons from '@renderer/components/ui/icons/Icons'
 import { JSX } from 'react'
 
-export type ProjectIcon = {
-  value: string
-  label: string
-}
-
 // Central registry: maps kebab-case names to icon components from Icons.tsx
 // Every icon exported by Icons.tsx should have an entry here to be accessible by name.
 // Naming convention: kebab-case of the component minus the 'Icon' prefix (e.g., IconCheckCircle -> 'check-circle').
@@ -177,13 +172,15 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   blueprint: Icons.IconBlueprint,
 }
 
-export const PROJECT_ICONS: ProjectIcon[] = Object.keys(PROJECT_ICON_REGISTRY).map((name) => ({
-  value: name,
-  label: name
-    .split('-')
-    .map((c) => c[0].toUpperCase() + c.slice(1))
-    .join(' '),
-}))
+export const PROJECT_ICONS: Record<string, string> = Object.fromEntries(
+  Object.keys(PROJECT_ICON_REGISTRY).map((name) => [
+    name,
+    name
+      .split('-')
+      .map((c) => c[0].toUpperCase() + c.slice(1))
+      .join(' '),
+  ]),
+)
 
 export function renderProjectIcon(key?: string, className?: string) {
   const name = key || 'folder'
