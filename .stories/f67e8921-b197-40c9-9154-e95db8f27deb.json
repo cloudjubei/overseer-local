@@ -2395,7 +2395,7 @@
     },
     {
       "id": "67302df0-716b-46ed-aee1-828cb60373d2",
-      "status": "=",
+      "status": "+",
       "title": "Display groups of projects in sidebar",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx we want to display all the projects as ordered via their groups, as is specified in @src/renderer/src/contexts/ProjectsGroupsContext.tsx and controlled via @src/renderer/src/screens/projects/ProjectManagerModal.tsx .\nAll uncategorized projects are at the top.\nThen each group must have its own dropdown section that can be opened or closed.\nWhen opened it displays the list of all projects in that group.\nAll groups start being closed.\nWhen a project is active in a group - that group tab needs to be selected with the same colour as that project.\nAdditionally, the group tab shows an aggregate of all badges on the right (so agents running and notificatiions) for all projects under it.",
       "context": [
@@ -2405,8 +2405,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T19:30:09.420Z",
-      "updatedAt": "2025-10-16T22:56:44.972Z",
-      "completedAt": "2025-10-16T22:17:21.824Z"
+      "updatedAt": "2025-10-16T23:29:56.203Z",
+      "completedAt": "2025-10-16T23:29:56.203Z"
     },
     {
       "id": "4cd9f6a6-4be9-4e76-b436-507636a05bfb",
@@ -2420,16 +2420,6 @@
       "createdAt": "2025-10-16T22:12:53.921Z",
       "updatedAt": "2025-10-16T23:29:06.611Z",
       "completedAt": "2025-10-16T23:13:29.099Z"
-    },
-    {
-      "id": "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc",
-      "status": "=",
-      "title": "Chat Sidebar rework",
-      "description": "",
-      "context": [],
-      "blockers": [],
-      "createdAt": "2025-10-16T22:13:36.847Z",
-      "updatedAt": "2025-10-16T22:13:36.847Z"
     },
     {
       "id": "c2f26371-082b-4b31-812a-e8c5955a4d4a",
@@ -2623,9 +2613,8 @@
     "b5615d52-f0b8-4630-910a-e47f4b7db811": 159,
     "afa9c03a-f251-410b-9510-3ea34b3eb374": 160,
     "67302df0-716b-46ed-aee1-828cb60373d2": 161,
-    "0495a4a5-93c0-4d6d-8828-1e5b349bbcfc": 162,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 163,
-    "c7a825c8-9791-4893-9b98-f89a9681e376": 164
+    "c7a825c8-9791-4893-9b98-f89a9681e376": 162,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 163
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
