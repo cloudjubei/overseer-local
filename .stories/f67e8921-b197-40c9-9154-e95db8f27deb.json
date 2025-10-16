@@ -2193,31 +2193,31 @@
     },
     {
       "id": "cd613bac-52f7-4f5d-a81a-4bacf77203b3",
-      "status": "+",
-      "title": "The icon selector in projects should be different",
-      "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window.",
+      "status": "-",
+      "title": "The icon selector in ProjectEditorForm should be different",
+      "description": "In @src/renderer/src/screens/projects/ProjectEditorForm.tsx  the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window.",
       "context": [
-        "src/renderer/src/screens/projects/ProjectManagerModal.tsx"
+        "src/renderer/src/screens/projects/ProjectEditorForm.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:23:25.404Z",
-      "updatedAt": "2025-10-15T12:58:27.871Z",
-      "completedAt": "2025-10-15T12:58:27.871Z"
+      "updatedAt": "2025-10-16T17:42:31.238Z"
     },
     {
       "id": "940b5550-9f7a-463b-8621-1909e796ad60",
-      "status": "+",
+      "status": "-",
       "title": "The manage projects modal needs updating",
-      "description": "The @src/renderer/src/screens/projects/ProjectManagerModal.tsx needs to update in the following way:\n- we need to add a header section that won't be scrollable. This section will have 'group control'. There needs to be a dropdown selector that allows selecting which group to show, by default a special ALL selection is on. To the right there should be an \"Edit\" button (Icon only). The Edit button shows an alert that will allow the user to move the groups' orders around, delete groups, add a group (very simple alert with name entry) and edit a group's name (same alert as Add - just prefilled).\n- the add project button needs to be in a footer at the bottom of the modal that isn't scrollable.\n- The middle section shows the current group's projects. They can be moved around to change their order within the group.\n- Apart from the \"ALL\" dropdown option, there needs to be a \"--uncategorized--\" one, which shows right after ALL (the first 2 options). All projects that don't have a group assigned need to be shown here.\n- The @src/renderer/src/screens/projects/ProjectManagerModal.tsx should have the actual project configuration view split away from it into a separate file. There needs to be a new dropdown under the ID that allows the selection of a group for a given project.\n\nThere's @src/renderer/src/contexts/ProjectsGroupsContext.tsx that should be used for this feature. If anything is missing from that file it should be updated so that it's the interface to talk with @src/renderer/src/services/projectsGroupsService.ts .\n\nAll the types needed from 'thefactory-tools' are listed at the bottom of @src/renderer/src/contexts/ProjectsGroupsContext.tsx",
+      "description": "The @src/renderer/src/screens/projects/ProjectManagerModal.tsx needs to update in the following way:\n- we need to add a header section that won't be scrollable. This section will have 'group control'. There needs to be a dropdown selector that allows selecting which group to show, by default a special ALL selection is on. To the right there should be an \"Edit\" button (Icon only). The Edit button takes the user to another view \"within\" the same modal that will allow the user to move the groups' orders around, delete groups, add a group (very simple alert with name entry) and edit a group's name (same alert as Add - just prefilled). This needs to work the same as editing a project.\n- the add project button needs to be in a footer at the bottom of the modal that isn't scrollable.\n- The middle section shows the current group's projects. They can be moved around to change their order within the group.\n- Apart from the \"ALL\" dropdown option, there needs to be a \"--uncategorized--\" one, which shows right after ALL (the first 2 options). All projects that don't have a group assigned need to be shown here.\n- The @src/renderer/src/screens/projects/ProjectManagerModal.tsx should have the actual project configuration view split away from it into a separate file. There needs to be a new dropdown under the ID that allows the selection of a group for a given project.\n\nThere's @src/renderer/src/contexts/ProjectsGroupsContext.tsx that should be used for this feature. If anything is missing from that file it should be updated so that it's the interface to talk with @src/renderer/src/services/projectsGroupsService.ts .\n\nAll the types needed from 'thefactory-tools' are listed at the bottom of @src/renderer/src/contexts/ProjectsGroupsContext.tsx",
       "context": [
         "src/renderer/src/screens/projects/ProjectManagerModal.tsx",
         "src/renderer/src/contexts/ProjectsGroupsContext.tsx",
-        "src/renderer/src/services/projectsGroupsService.ts"
+        "src/renderer/src/services/projectsGroupsService.ts",
+        "src/renderer/src/screens/projects/ProjectEditorForm.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-15T09:34:24.331Z",
-      "updatedAt": "2025-10-15T12:57:00.017Z",
-      "completedAt": "2025-10-15T12:57:00.017Z"
+      "updatedAt": "2025-10-16T17:44:58.988Z",
+      "rejection": "The add group and add project buttons are not icon only - they have text - they shouldn't.\nWhen opening @src/renderer/src/screens/projects/ProjectEditorForm.tsx it still shows the header from the modal - it shouldn't.\nClicking edit groups should open a new view not an alert."
     },
     {
       "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",
@@ -2232,6 +2232,55 @@
       "createdAt": "2025-10-15T11:11:23.073Z",
       "updatedAt": "2025-10-15T11:14:23.187Z",
       "completedAt": "2025-10-15T11:14:23.187Z"
+    },
+    {
+      "id": "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9",
+      "status": "-",
+      "title": "New icons",
+      "description": "We need new icons in @src/renderer/src/components/ui/Icons.tsx . We need at least 10 finance related ones, 10 medical ones, 10 business ones, 10 sport ones, 10 construction ones and 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/Icons.tsx",
+        "src/renderer/src/screens/projects/projectIcons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T12:45:33.201Z",
+      "updatedAt": "2025-10-15T12:46:47.548Z"
+    },
+    {
+      "id": "9b25e0f0-32d5-4320-b429-46120b06fbf3",
+      "status": "-",
+      "title": "Allow toggling all tool calls at once",
+      "description": "In @src/renderer/src/screens/ChatView.tsx  when agent is asking to trigger tools, show a toggle that allows toggling all tools if there are more than 1 tool to toggle.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T17:46:39.648Z",
+      "updatedAt": "2025-10-16T17:46:39.648Z"
+    },
+    {
+      "id": "bd197ab9-1da8-4e17-81e8-46c0e3b86290",
+      "status": "-",
+      "title": "Fix chat bottom scroll",
+      "description": "In @src/renderer/src/screens/ChatView.tsx  when the user sends a chat message, there's a spinner showing for the assistant, but it's not fully scrolled down (there's a gap and the user can still scroll) - it should be. When opening a chat and the assistant is still thinking, the same thing happens.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T17:47:54.765Z",
+      "updatedAt": "2025-10-16T17:47:54.765Z"
+    },
+    {
+      "id": "92593266-d2ae-4d86-915a-0e82d71f625d",
+      "status": "-",
+      "title": "Chat settings fix",
+      "description": "In @src/renderer/src/screens/ChatView.tsx when changing the `Max turns per run` setting in Chat Settings, the `Number of messages to send` setting also changes (or gets reset to the default). This shouldn't happen - they should be independent of one another.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T17:48:45.055Z",
+      "updatedAt": "2025-10-16T17:48:45.055Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2381,7 +2430,11 @@
     "c989b117-412c-4645-add9-57a9d426f054": 144,
     "940b5550-9f7a-463b-8621-1909e796ad60": 145,
     "cd613bac-52f7-4f5d-a81a-4bacf77203b3": 146,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 147
+    "9b25e0f0-32d5-4320-b429-46120b06fbf3": 147,
+    "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 148,
+    "92593266-d2ae-4d86-915a-0e82d71f625d": 149,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 150,
+    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 151
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

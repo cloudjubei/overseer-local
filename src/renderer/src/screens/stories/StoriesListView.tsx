@@ -238,18 +238,18 @@ export default function StoriesListView() {
 
   const onListDrop = () => {
     if (project != null && dragStoryId != null && dropIndex != null && dropPosition != null) {
-      const fromIndex = project.storyIdToDisplayIndex[dragStoryId] - 1
+      const fromIndex = project.storyIdToDisplayIndex[dragStoryId]
       // Use the item from the currently rendered list (filtered), not from the full sorted list by index
       const toStory = filtered[dropIndex]
       if (!toStory) {
         clearDndState()
         return
       }
-      let toIndex = (project.storyIdToDisplayIndex[toStory.id] ?? 1) - 1
+      let toIndex = project.storyIdToDisplayIndex[toStory.id] ?? 1
       if (dropPosition === 'after') {
         toIndex = toIndex + 1
       }
-      if (fromIndex !== -1 && toIndex !== fromIndex) {
+      if (toIndex !== fromIndex) {
         handleMoveStory(fromIndex, toIndex)
       }
     }
