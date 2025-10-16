@@ -8,7 +8,7 @@ Purpose
 Editing Rules (read before updating)
 
 - Only document major directories and subsystems. Do not list individual files.
-- Keep bullets short (one sentence) and avoid "New:" or historical notes.
+- Keep bullets short (one sentence) and avoid 'New:' or historical notes.
 - When adding/removing a major directory or moving a subsystem, update a single bullet here.
 - Prefer linking or pointing to deeper docs (README/OVERVIEW) rather than describing internals here.
 - Never document build related artifacts.
@@ -29,6 +29,8 @@ Top-Level Layout
     - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status and ingestion triggers, and new timelineService for features and labels).
     - hooks/useShortcuts: Keyboard shortcuts provider; respects user-selected modifier and avoids interfering with text input.
     - settings/: AppSettings React context provider used app-wide (singleton).
+    - components/ui/icons: Central SVG icons. All icon components are exported from `Icons.tsx` and are accessible by name via the registry in `screens/projects/projectIcons.tsx`.
+      - Directive: When adding an icon, export it from `Icons.tsx` and register it in `PROJECT_ICON_REGISTRY` using kebab-case of the component name without the 'Icon' prefix (e.g., `IconCheckCircle` -> `check-circle`). Render with `renderProjectIcon('check-circle', className)`.
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).
   - tests/: Main process tests manager bridging thefactory-tools test runner via IPC (exposed to renderer as testsService).

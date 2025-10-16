@@ -2301,7 +2301,7 @@
     },
     {
       "id": "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e",
-      "status": "-",
+      "status": "+",
       "title": "All icons are accessible via projecticons",
       "description": "We need all icons in @src/renderer/src/components/ui/icons/Icons.tsx  to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .\nThat means that all icons can be referenced by name like in projectIcons.\nThere should be a directive about it in @docs/FILE_ORGANISATION.md",
       "context": [
@@ -2310,7 +2310,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:35:49.831Z",
-      "updatedAt": "2025-10-16T19:27:18.470Z"
+      "updatedAt": "2025-10-16T19:38:46.481Z",
+      "completedAt": "2025-10-16T19:38:46.481Z"
     },
     {
       "id": "f4564269-341e-482e-9aa5-e06698cdb326",
