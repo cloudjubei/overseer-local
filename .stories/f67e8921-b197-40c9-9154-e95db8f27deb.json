@@ -2418,8 +2418,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:12:53.921Z",
-      "updatedAt": "2025-10-16T23:13:29.099Z",
-      "rejection": "This badge needs to show the agents working for the CURRENT project - not for ALL projects.",
+      "updatedAt": "2025-10-16T23:29:06.611Z",
       "completedAt": "2025-10-16T23:13:29.099Z"
     },
     {
@@ -2443,8 +2442,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:58:32.510Z",
-      "updatedAt": "2025-10-16T23:02:43.903Z",
-      "rejection": "ProjectEditorForm and ProjectManagerModal have not been updated."
+      "updatedAt": "2025-10-16T23:28:07.551Z",
       "completedAt": "2025-10-16T23:10:23.823Z"
     },
     {
