@@ -2432,7 +2432,7 @@
     },
     {
       "id": "c2f26371-082b-4b31-812a-e8c5955a4d4a",
-      "status": "-",
+      "status": "?",
       "title": "Update projectIcons",
       "description": "Make sure that the const `PROJECT_ICONS` in @src/renderer/src/screens/projects/projectIcons.tsx is an object and not a list, so that it can be used more efficiently in @src/renderer/src/screens/projects/ProjectEditorForm.tsx and @src/renderer/src/screens/projects/ProjectManagerModal.tsx .",
       "context": [
@@ -2441,7 +2441,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T22:58:32.510Z",
-      "updatedAt": "2025-10-16T22:58:32.510Z"
+      "updatedAt": "2025-10-16T23:01:19.173Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     }
   ],
   "featureIdToDisplayIndex": {
