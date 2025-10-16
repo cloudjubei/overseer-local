@@ -83,9 +83,7 @@ export default function ProjectManagerModal({
       const p: any = getProjectById(id)
       if (p) {
         const existingIcon = p.metadata?.icon
-        const normalizedIcon = PROJECT_ICONS.some((opt) => opt.value === existingIcon)
-          ? existingIcon
-          : 'folder'
+        const normalizedIcon = existingIcon && PROJECT_ICONS[existingIcon] ? existingIcon : 'folder'
         setForm({
           ...p,
           requirements: Array.isArray(p.requirements) ? p.requirements : [],
@@ -136,9 +134,7 @@ export default function ProjectManagerModal({
 
   function startEdit(p: any) {
     const existingIcon = p.metadata?.icon
-    const normalizedIcon = PROJECT_ICONS.some((opt) => opt.value === existingIcon)
-      ? existingIcon
-      : 'folder'
+    const normalizedIcon = existingIcon && PROJECT_ICONS[existingIcon] ? existingIcon : 'folder'
     setForm({
       ...p,
       requirements: Array.isArray(p.requirements) ? p.requirements : [],

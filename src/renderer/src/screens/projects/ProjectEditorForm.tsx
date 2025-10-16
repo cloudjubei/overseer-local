@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react'
-import { PROJECT_ICONS, PROJECT_ICON_REGISTRY, renderProjectIcon } from './projectIcons'
+import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 import { CodeInfoChip } from './CodeInfoChip'
@@ -51,13 +51,13 @@ function TextArea({ label, value, onChange, placeholder }: any) {
 function IconPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const current = React.useMemo(() => {
-    return (
-      PROJECT_ICONS.find((i) => i.value === value) ||
-      PROJECT_ICONS.find((i) => i.value === 'folder') ||
-      PROJECT_ICONS[0]
-    )
+  const currentKey = React.useMemo(() => {
+    return value && PROJECT_ICONS[value] ? value : 'folder'
   }, [value])
+
+  const currentLabel = PROJECT_ICONS[currentKey] || 'Folder'
+
+  const iconEntries = React.useMemo(() => Object.entries(PROJECT_ICONS), [])
 
   return (
     <div className="form-row">
@@ -65,14 +65,14 @@ function IconPicker({ value, onChange }: { value?: string; onChange: (v: string)
       <div className="flex items-center gap-3">
         <button
           type="button"
-          aria-label={current ? `Change icon (current: ${current.label})` : 'Change icon'}
-          title={current ? `Change icon (current: ${current.label})` : 'Change icon'}
+          aria-label={`Change icon (current: ${currentLabel})`}
+          title={`Change icon (current: ${currentLabel})`}
           onClick={() => setIsOpen(true)}
           className="inline-flex items-center justify-center h-10 w-10 rounded-md border border-border bg-surface-raised hover:bg-surface-overlay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         >
-          <span aria-hidden>{renderProjectIcon(current?.value, 'h-5 w-5')}</span>
+          <span aria-hidden>{renderProjectIcon(currentKey, 'h-5 w-5')}</span>
         </button>
-        {current && <span className="text-sm text-text-secondary">{current.label}</span>}
+        <span className="text-sm text-text-secondary">{currentLabel}</span>
       </div>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Choose icon" size="md">
@@ -85,17 +85,17 @@ function IconPicker({ value, onChange }: { value?: string; onChange: (v: string)
               gridTemplateColumns: 'repeat(auto-fill, minmax(48px, 1fr))',
             }}
           >
-            {PROJECT_ICONS.map((opt) => {
-              const selected = value === opt.value
+            {iconEntries.map(([key, label]) => {
+              const selected = value === key
               return (
                 <button
-                  key={opt.value}
+                  key={key}
                   type="button"
                   role="option"
                   aria-selected={selected}
-                  title={opt.label}
+                  title={label}
                   onClick={() => {
-                    onChange(opt.value)
+                    onChange(key)
                     setIsOpen(false)
                   }}
                   className={
@@ -105,7 +105,7 @@ function IconPicker({ value, onChange }: { value?: string; onChange: (v: string)
                       : 'border-border bg-surface-raised hover:bg-surface-overlay')
                   }
                 >
-                  <span aria-hidden>{renderProjectIcon(opt.value, 'h-5 w-5')}</span>
+                  <span aria-hidden>{renderProjectIcon(key, 'h-5 w-5')}</span>
                 </button>
               )
             })}
