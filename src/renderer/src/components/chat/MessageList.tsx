@@ -138,9 +138,10 @@ export default function MessageList({
     prevLenForAnimRef.current = messages.length
   }, [messages, isVisible])
 
-  // User pop animation
+  // User pop animation and tracking of recent user send
   const prevLenForUserAnimRef = useRef<number>(messages.length)
   const lastMessageRef = useRef<HTMLDivElement>(null)
+  const lastUserSentRef = useRef<boolean>(false)
   useEffect(() => {
     const increased = messages.length > prevLenForUserAnimRef.current
     const last = messages[messages.length - 1]
@@ -148,6 +149,7 @@ export default function MessageList({
 
     if (animationChatChangedRef.current) {
       prevLenForUserAnimRef.current = messages.length
+      lastUserSentRef.current = false
       return
     }
     if (isNewUser) {
@@ -156,6 +158,10 @@ export default function MessageList({
         const bubble = wrapper?.querySelector('.chat-bubble') as HTMLElement | null
         if (bubble) bubble.classList.add('chat-bubble--in')
       })
+      lastUserSentRef.current = true
+    } else if (increased) {
+      // New non-user message: clear flag
+      lastUserSentRef.current = false
     }
     prevLenForUserAnimRef.current = messages.length
   }, [messages])
@@ -163,12 +169,26 @@ export default function MessageList({
   // Scrolling behavior
   const isAtBottomRef = useRef<boolean>(true)
   const prevLenForScrollRef = useRef<number>(messages.length)
+  const justSwitchedChatRef = useRef<boolean>(false)
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const el = e.currentTarget
     const threshold = 10
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
     isAtBottomRef.current = atBottom
   }
+
+  // On chat switch, ensure we start at the bottom (covers cases where spinner is visible on open)
+  useEffect(() => {
+    justSwitchedChatRef.current = true
+    requestAnimationFrame(() => {
+      const c = messageListRef.current
+      if (!c) return
+      c.scrollTo({ top: c.scrollHeight, behavior: 'auto' })
+      isAtBottomRef.current = true
+      // Clear the switch flag after initial adjustment
+      justSwitchedChatRef.current = false
+    })
+  }, [chatId])
 
   useEffect(() => {
     const container = messageListRef.current
@@ -209,19 +229,19 @@ export default function MessageList({
     })
   }, [messages])
 
-  // When entering thinking state and user is at bottom, reveal spinner gently
+  // When entering thinking state, ensure we are fully at the bottom so spinner is flush
   useEffect(() => {
-    const c = messageListRef.current
-    if (!c) return
     if (!isThinking) return
-    if (!isAtBottomRef.current) return
+    const shouldForceToBottom = lastUserSentRef.current || justSwitchedChatRef.current
+    if (!shouldForceToBottom) return
 
     requestAnimationFrame(() => {
       const container = messageListRef.current
       if (!container) return
-      const revealPadding = 24
-      const targetTop = Math.max(0, container.scrollHeight - container.clientHeight - revealPadding)
-      container.scrollTo({ top: targetTop, behavior: 'smooth' })
+      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' })
+      isAtBottomRef.current = true
+      lastUserSentRef.current = false
+      justSwitchedChatRef.current = false
     })
   }, [isThinking])
 
