@@ -151,6 +151,18 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'contract': Icons.IconContract,
   'bar-chart': Icons.IconBarChart,
   'target-dollar': Icons.IconTargetDollar,
+
+  // Sports icons
+  'basketball': Icons.IconBasketball,
+  'soccer-ball': Icons.IconSoccerBall,
+  'baseball': Icons.IconBaseball,
+  'football': Icons.IconFootball,
+  'tennis': Icons.IconTennis,
+  'volleyball': Icons.IconVolleyball,
+  'hockey': Icons.IconHockey,
+  'golf': Icons.IconGolf,
+  'runner': Icons.IconRunner,
+  'dumbbell': Icons.IconDumbbell,
 }
 
 export const PROJECT_ICON_NAMES = Object.keys(PROJECT_ICON_REGISTRY)
@@ -220,6 +232,18 @@ export const PROJECT_ICONS: ProjectIcon[] = [
   { value: 'syringe', label: 'Syringe' },
   { value: 'first-aid-kit', label: 'First Aid Kit' },
   { value: 'hospital', label: 'Hospital' },
+
+  // Curated sports subset
+  { value: 'basketball', label: 'Basketball' },
+  { value: 'soccer-ball', label: 'Soccer Ball' },
+  { value: 'baseball', label: 'Baseball' },
+  { value: 'football', label: 'Football' },
+  { value: 'tennis', label: 'Tennis' },
+  { value: 'volleyball', label: 'Volleyball' },
+  { value: 'hockey', label: 'Hockey' },
+  { value: 'golf', label: 'Golf' },
+  { value: 'runner', label: 'Runner' },
+  { value: 'dumbbell', label: 'Dumbbell' },
 ]
 
 export function renderProjectIcon(key?: string, className?: string) {

@@ -2356,7 +2356,7 @@
     },
     {
       "id": "b5615d52-f0b8-4630-910a-e47f4b7db811",
-      "status": "-",
+      "status": "+",
       "title": "New Icons5",
       "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 sport ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
       "context": [
@@ -2364,7 +2364,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T18:37:31.850Z",
-      "updatedAt": "2025-10-16T22:11:20.680Z"
+      "updatedAt": "2025-10-16T22:30:01.792Z",
+      "completedAt": "2025-10-16T22:30:01.792Z"
     },
     {
       "id": "afa9c03a-f251-410b-9510-3ea34b3eb374",
