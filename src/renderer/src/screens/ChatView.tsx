@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
@@ -18,6 +18,7 @@ import type {
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { chatsService } from '@renderer/services/chatsService'
 import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSidebar'
+import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -123,6 +124,15 @@ export default function ChatView() {
   // Selected context state
   const [selectedContext, setSelectedContext] = useState<ChatContext | undefined>(undefined)
 
+  // Sidebar mode state (categories | history)
+  const [mode, setMode] = useState<'categories' | 'history'>(() => {
+    const saved = localStorage.getItem('chat-sidebar-mode')
+    return saved === 'history' ? 'history' : 'categories'
+  })
+  useEffect(() => {
+    localStorage.setItem('chat-sidebar-mode', mode)
+  }, [mode])
+
   // Persist/restore last selected chat
   useEffect(() => {
     const applyFromHash = async (h: string) => {
@@ -192,11 +202,22 @@ export default function ChatView() {
     maybeSeed()
   }, [selectedContext, runsHistory, getChat])
 
-  // Build header values
-  const headerTitle = 'Chats'
-  const headerSubtitle = selectedContext
-    ? titleForContext(selectedContext, { getProjectTitle, getStoryTitle, getFeatureTitle })
-    : ''
+  // Header action: Categories | History switch
+  const headerAction = useMemo(
+    () => (
+      <SegmentedControl
+        ariaLabel={'Toggle chat list mode'}
+        options={[
+          { value: 'categories', label: 'Categories' },
+          { value: 'history', label: 'History' },
+        ]}
+        value={mode}
+        onChange={(v) => setMode(v as 'categories' | 'history')}
+        size='sm'
+      />
+    ),
+    [mode],
+  )
 
   return (
     <CollapsibleSidebar
@@ -204,13 +225,14 @@ export default function ChatView() {
       activeId={''}
       onSelect={() => {}}
       storageKey="chatview-sidebar-collapsed"
-      headerTitle={headerTitle}
-      headerSubtitle={headerSubtitle}
-      headerAction={null}
+      headerTitle={''}
+      headerSubtitle={''}
+      headerAction={headerAction}
       navContent={
         <ChatsNavigationSidebar
           selectedContext={selectedContext}
           onSelectContext={(ctx) => setSelectedContext(ctx)}
+          mode={mode}
         />
       }
     >

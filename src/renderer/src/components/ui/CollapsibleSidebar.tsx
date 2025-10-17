@@ -113,6 +113,8 @@ export default function CollapsibleSidebar(props: Props) {
       [items.length],
     )
 
+    const hasHeaderText = !!(headerTitle && headerTitle.trim()) || !!(headerSubtitle && headerSubtitle.trim())
+
     return (
       <aside
         className={`sidebar relative z-30 flex h-full shrink-0 flex-col border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${collapsed ? 'collapsed' : ''} ${className}`}
@@ -122,13 +124,13 @@ export default function CollapsibleSidebar(props: Props) {
         <div
           className={`mb-2 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}
         >
-          {!collapsed && (
+          {!collapsed && hasHeaderText && (
             <div className="px-1">
               <div className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-                {headerTitle ?? 'Sections'}
+                {headerTitle || ''}
               </div>
               <div className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                {headerSubtitle ?? ''}
+                {headerSubtitle || ''}
               </div>
             </div>
           )}

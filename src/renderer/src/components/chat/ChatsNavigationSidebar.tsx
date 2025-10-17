@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import SegmentedControl from '@renderer/components/ui/SegmentedControl'
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
@@ -44,15 +43,37 @@ function titleForContext(
 export type ChatsNavigationSidebarProps = {
   selectedContext?: ChatContext
   onSelectContext: (ctx: ChatContext) => void
+  mode: 'categories' | 'history'
 }
 
 type OpenState = Record<string, boolean>
 
+type StoryGroup = {
+  storyId: string
+  storyTitle: string
+  storyIndex?: number
+  storyChat?: { ctx: ChatContext; label: string; key: string; updatedAt: string }
+  topics: { ctx: ChatContext; label: string; key: string; updatedAt: string }[]
+  runs: { ctx: ChatContext; label: string; key: string; updatedAt: string }[]
+  features: Record<
+    string,
+    {
+      featureId: string
+      featureTitle: string
+      featureChat?: { ctx: ChatContext; label: string; key: string; updatedAt: string }
+      runs: { ctx: ChatContext; label: string; key: string; updatedAt: string }[]
+      updatedAt: string
+    }
+  >
+  updatedAt: string
+}
+
 export default function ChatsNavigationSidebar({
   selectedContext,
   onSelectContext,
+  mode,
 }: ChatsNavigationSidebarProps) {
-  const { projectId: activeProjectId } = useActiveProject()
+  const { projectId: activeProjectId, project } = useActiveProject()
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId, getChat } = useChats()
@@ -64,14 +85,6 @@ export default function ChatsNavigationSidebar({
   }
   const getStoryTitle = (id?: string) => (id ? storiesById[id]?.title || id : '')
   const getFeatureTitle = (id?: string) => (id ? featuresById[id]?.title || id : '')
-
-  const [mode, setMode] = useState<'categories' | 'history'>(() => {
-    const saved = localStorage.getItem('chat-sidebar-mode')
-    return saved === 'history' ? 'history' : 'categories'
-  })
-  useEffect(() => {
-    localStorage.setItem('chat-sidebar-mode', mode)
-  }, [mode])
 
   const projectChats = useMemo(() => {
     return (chatsByProjectId[activeProjectId] || []).slice()
@@ -85,8 +98,9 @@ export default function ChatsNavigationSidebar({
     })
   }, [projectChats])
 
-  // Category open state: top-level and per story
+  // Category open state: top-level and per story/subcategory/feature
   const [open, setOpen] = useState<OpenState>({})
+  const didInitFromSelected = useRef(false)
 
   const isActive = useCallback(
     (ctx: ChatContext) => {
@@ -98,14 +112,10 @@ export default function ChatsNavigationSidebar({
 
   const ensureOpen = async (ctx: ChatContext) => {
     try {
-      await getChat(ctx) // ensures it exists; does not clear existing
+      await getChat(ctx) // ensure exists/created
     } catch (_) {}
     onSelectContext(ctx)
-    // When selecting a chat, collapse all and only open the relevant sections
-    const next: OpenState = {}
-    const catAndStory = computeKeysForContext(ctx)
-    catAndStory.forEach((k) => (next[k] = true))
-    setOpen(next)
+    // Do NOT reset open state after initialization phase
   }
 
   const generalContext: ChatContext = useMemo(
@@ -113,18 +123,15 @@ export default function ChatsNavigationSidebar({
     [activeProjectId],
   )
 
-  // Compute grouping for categories view
+  // Build hierarchical grouping for categories view
   const storiesGrouping = useMemo(() => {
-    type StoryGroup = {
-      storyId: string
-      storyTitle: string
-      items: { ctx: ChatContext; label: string; type: string; key: string; updatedAt: string }[]
-    }
     const byStory = new Map<string, StoryGroup>()
+
     for (const c of projectChats) {
       const ctx = c.chat.context
       const updatedAt = c.chat.updatedAt || c.chat.createdAt || ''
       const type = ctx.type
+
       if (
         type === 'STORY' ||
         type === 'FEATURE' ||
@@ -134,25 +141,66 @@ export default function ChatsNavigationSidebar({
       ) {
         const sid = (ctx as any).storyId as string | undefined
         if (!sid) continue
-        const group = byStory.get(sid) || {
-          storyId: sid,
-          storyTitle: getStoryTitle(sid),
-          items: [],
+        const storyTitle = getStoryTitle(sid)
+        const storyIndex = project?.storyIdToDisplayIndex?.[sid]
+        let group = byStory.get(sid)
+        if (!group) {
+          group = {
+            storyId: sid,
+            storyTitle,
+            storyIndex,
+            storyChat: undefined,
+            topics: [],
+            runs: [],
+            features: {},
+            updatedAt: updatedAt,
+          }
+          byStory.set(sid, group)
         }
-        const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
-        group.items.push({ ctx, label, type, key: c.key, updatedAt })
-        byStory.set(sid, group)
+        group.updatedAt = group.updatedAt.localeCompare(updatedAt) < 0 ? updatedAt : group.updatedAt
+
+        if (type === 'STORY') {
+          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          group.storyChat = { ctx, label, key: c.key, updatedAt }
+        } else if (type === 'STORY_TOPIC') {
+          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          group.topics.push({ ctx, label, key: c.key, updatedAt })
+        } else if (type === 'AGENT_RUN') {
+          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          group.runs.push({ ctx, label, key: c.key, updatedAt })
+        } else if (type === 'FEATURE' || type === 'AGENT_RUN_FEATURE') {
+          const fid = (ctx as any).featureId as string | undefined
+          if (!fid) continue
+          const ftitle = getFeatureTitle(fid)
+          let f = group.features[fid]
+          if (!f) {
+            f = { featureId: fid, featureTitle: ftitle, featureChat: undefined, runs: [], updatedAt }
+            group.features[fid] = f
+          }
+          f.updatedAt = f.updatedAt.localeCompare(updatedAt) < 0 ? updatedAt : f.updatedAt
+          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          if (type === 'FEATURE') f.featureChat = { ctx, label, key: c.key, updatedAt }
+          else f.runs.push({ ctx, label, key: c.key, updatedAt })
+        }
       }
     }
-    // sort items inside a story group by updated desc
+
+    // sort items inside a story group
     const groups = Array.from(byStory.values()).map((g) => ({
       ...g,
-      items: g.items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+      topics: g.topics.sort((a, b) => a.label.localeCompare(b.label)),
+      runs: g.runs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+      features: Object.fromEntries(
+        Object.entries(g.features)
+          .sort(([, a], [, b]) => a.featureTitle.localeCompare(b.featureTitle))
+          .map(([fid, f]) => [fid, { ...f, runs: f.runs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) }]),
+      ),
     }))
+
     // sort groups by story title
     groups.sort((a, b) => a.storyTitle.localeCompare(b.storyTitle))
     return groups
-  }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
+  }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle, project])
 
   const projectTopics = useMemo(() => {
     type TopicItem = { ctx: ChatContext; label: string; key: string; updatedAt: string }
@@ -173,26 +221,25 @@ export default function ChatsNavigationSidebar({
     return items
   }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
 
-  // When selectedContext changes (from deep link or restore), open only the relevant sections
+  // When selectedContext first becomes available (from deep link or restore), open only the relevant sections once
   useEffect(() => {
-    if (!selectedContext) return
+    if (!selectedContext || didInitFromSelected.current) return
     const next: OpenState = {}
     const keys = computeKeysForContext(selectedContext)
     keys.forEach((k) => (next[k] = true))
     setOpen(next)
+    didInitFromSelected.current = true
   }, [selectedContext])
 
   function computeKeysForContext(ctx: ChatContext): string[] {
     const keys: string[] = []
-    // Open corresponding top-level category and subcategory keys
+    // Top-level keys
+    const storiesKey = 'cat:stories'
+    const topicsKey = 'cat:project-topics'
+
     if (ctx.type === 'PROJECT') {
-      // nothing collapsible for General
       return keys
     }
-    // Stories cat key
-    const storiesKey = 'cat:stories'
-    // Topics cat key
-    const topicsKey = 'cat:project-topics'
 
     if (
       ctx.type === 'STORY' ||
@@ -201,20 +248,26 @@ export default function ChatsNavigationSidebar({
       ctx.type === 'AGENT_RUN' ||
       ctx.type === 'AGENT_RUN_FEATURE'
     ) {
+      const sid = (ctx as any).storyId as string
       keys.push(storiesKey)
-      if ((ctx as any).storyId) keys.push(`story:${(ctx as any).storyId}`)
+      keys.push(`story:${sid}`)
+      if (ctx.type === 'STORY_TOPIC') keys.push(`story:${sid}:topics`)
+      if (ctx.type === 'AGENT_RUN') keys.push(`story:${sid}:runs`)
+      if (ctx.type === 'FEATURE' || ctx.type === 'AGENT_RUN_FEATURE') {
+        keys.push(`story:${sid}:features`)
+        const fid = (ctx as any).featureId as string
+        keys.push(`feature:${fid}`)
+        if (ctx.type === 'AGENT_RUN_FEATURE') keys.push(`feature:${fid}:runs`)
+      }
     }
-    if (ctx.type === 'PROJECT_TOPIC') {
-      keys.push(topicsKey)
-    }
+    if (ctx.type === 'PROJECT_TOPIC') keys.push(topicsKey)
     return keys
   }
 
   const SectionHeader: React.FC<{
     title: string
     openKey?: string
-    defaultOpen?: boolean
-  }> = ({ title, openKey, defaultOpen }) => {
+  }> = ({ title, openKey }) => {
     const isOpen = openKey ? !!open[openKey] : true
     return (
       <button
@@ -232,25 +285,6 @@ export default function ChatsNavigationSidebar({
         )}
         <span className="font-semibold">{title}</span>
       </button>
-    )
-  }
-
-  const TypePill: React.FC<{ type: string }> = ({ type }) => {
-    const label =
-      type === 'FEATURE'
-        ? 'Feature'
-        : type === 'STORY'
-          ? 'Story'
-          : type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE'
-            ? 'Run'
-            : type === 'STORY_TOPIC'
-              ? 'Topic'
-              : ''
-    if (!label) return null
-    return (
-      <span className="ml-2 inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-overlay)] px-1.5 py-0.5 text-[10px] text-[var(--text-secondary)]">
-        {label}
-      </span>
     )
   }
 
@@ -272,21 +306,42 @@ export default function ChatsNavigationSidebar({
     </button>
   )
 
+  const StoryHeaderButton: React.FC<{
+    storyId: string
+    storyTitle: string
+    storyIndex?: number
+    openKey: string
+  }> = ({ storyId, storyTitle, storyIndex, openKey }) => {
+    const isOpen = !!open[openKey]
+    return (
+      <button
+        type="button"
+        className="w-full flex items-center justify-between rounded-md border bg-[var(--surface-raised)] px-3 py-2 text-left text-[12px] font-semibold text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
+        onClick={() => setOpen((prev) => ({ ...prev, [openKey]: !prev[openKey] }))}
+        aria-expanded={isOpen}
+        aria-controls={`${openKey}-section`
+        }
+        title={storyTitle}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <IconChevron
+            className="w-3 h-3"
+            style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+          />
+          <span className="truncate">{storyTitle}</span>
+        </div>
+        {typeof storyIndex === 'number' && (
+          <span className="ml-2 inline-flex items-center justify-center rounded-sm bg-[var(--surface-overlay)] text-[11px] text-[var(--text-secondary)] px-1.5 py-0.5 border border-[var(--border-subtle)] min-w-[22px]">
+            {storyIndex}
+          </span>
+        )}
+      </button>
+    )
+  }
+
   return (
     <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-3">
-      <div className="px-2 pt-2">
-        <SegmentedControl
-          ariaLabel="Toggle chat list mode"
-          options={[
-            { value: 'categories', label: 'Categories' },
-            { value: 'history', label: 'History' },
-          ]}
-          value={mode}
-          onChange={(v) => setMode(v as 'categories' | 'history')}
-          size="sm"
-        />
-      </div>
-
+      {/* Categories mode */}
       {mode === 'categories' ? (
         <div className="space-y-3">
           {/* General */}
@@ -341,33 +396,121 @@ export default function ChatsNavigationSidebar({
                     return (
                       <div key={g.storyId} className="space-y-1">
                         <div className="px-2">
-                          <button
-                            type="button"
-                            className="w-full flex items-center justify-between rounded-md border bg-[var(--surface-raised)] px-3 py-2 text-left text-[12px] font-semibold text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
-                            onClick={() => setOpen((prev) => ({ ...prev, [skey]: !prev[skey] }))}
-                            aria-expanded={isOpen}
-                            aria-controls={`${skey}-section`}
-                            title={g.storyTitle}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <IconChevron
-                                className="w-3 h-3"
-                                style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
-                              />
-                              <span className="truncate">{g.storyTitle}</span>
-                            </div>
-                          </button>
+                          <StoryHeaderButton
+                            storyId={g.storyId}
+                            storyTitle={g.storyTitle}
+                            storyIndex={g.storyIndex}
+                            openKey={skey}
+                          />
                         </div>
                         {isOpen && (
-                          <div id={`${skey}-section`} className="pl-4 pr-2 space-y-1">
-                            {g.items.map((it) => (
-                              <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
-                                <ChatButton ctx={it.ctx} label={it.label} />
-                                <div className="px-2 pb-1">
-                                  <TypePill type={it.type} />
-                                </div>
+                          <div id={`${skey}-section`} className="pl-4 pr-2 space-y-2">
+                            {/* Story Chat first if present */}
+                            {g.storyChat && (
+                              <div className="pl-2 border-l-2 border-[var(--border-subtle)]">
+                                <ChatButton ctx={g.storyChat.ctx} label={g.storyChat.label} />
                               </div>
-                            ))}
+                            )}
+
+                            {/* Topics subcategory */}
+                            {g.topics.length > 0 && (
+                              <div className="space-y-1">
+                                <div className="pl-2 pr-2">
+                                  <SectionHeader title="Topics" openKey={`story:${g.storyId}:topics`} />
+                                </div>
+                                {open[`story:${g.storyId}:topics`] && (
+                                  <div id={`story:${g.storyId}:topics-section`} className="pl-6 pr-2 space-y-1">
+                                    {g.topics.map((it) => (
+                                      <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
+                                        <ChatButton ctx={it.ctx} label={it.label} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Runs subcategory at story level */}
+                            {g.runs.length > 0 && (
+                              <div className="space-y-1">
+                                <div className="pl-2 pr-2">
+                                  <SectionHeader title="Agent Runs" openKey={`story:${g.storyId}:runs`} />
+                                </div>
+                                {open[`story:${g.storyId}:runs`] && (
+                                  <div id={`story:${g.storyId}:runs-section`} className="pl-6 pr-2 space-y-1">
+                                    {g.runs.map((it) => (
+                                      <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
+                                        <ChatButton ctx={it.ctx} label={it.label} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Features subcategory */}
+                            {Object.keys(g.features).length > 0 && (
+                              <div className="space-y-1">
+                                <div className="pl-2 pr-2">
+                                  <SectionHeader title="Features" openKey={`story:${g.storyId}:features`} />
+                                </div>
+                                {open[`story:${g.storyId}:features`] && (
+                                  <div id={`story:${g.storyId}:features-section`} className="pl-6 pr-2 space-y-2">
+                                    {Object.values(g.features).map((f) => {
+                                      const fkey = `feature:${f.featureId}`
+                                      const fOpen = !!open[fkey]
+                                      return (
+                                        <div key={f.featureId} className="space-y-1">
+                                          <div className="pl-2">
+                                            <button
+                                              type="button"
+                                              className="w-full flex items-center gap-2 rounded-md border bg-[var(--surface-overlay)] px-3 py-2 text-left text-[12px] font-medium text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
+                                              onClick={() => setOpen((prev) => ({ ...prev, [fkey]: !prev[fkey] }))}
+                                              aria-expanded={fOpen}
+                                              aria-controls={`${fkey}-section`}
+                                              title={f.featureTitle}
+                                            >
+                                              <IconChevron
+                                                className="w-3 h-3"
+                                                style={{ transform: fOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+                                              />
+                                              <span className="truncate">{f.featureTitle}</span>
+                                            </button>
+                                          </div>
+                                          {fOpen && (
+                                            <div id={`${fkey}-section`} className="pl-6 pr-2 space-y-1">
+                                              {/* Feature chat first if present */}
+                                              {f.featureChat && (
+                                                <div className="pl-2 border-l-2 border-[var(--border-subtle)]">
+                                                  <ChatButton ctx={f.featureChat.ctx} label={f.featureChat.label} />
+                                                </div>
+                                              )}
+                                              {/* Feature agent runs */}
+                                              {f.runs.length > 0 && (
+                                                <div className="space-y-1">
+                                                  <div className="pl-1 pr-2">
+                                                    <SectionHeader title="Agents" openKey={`feature:${f.featureId}:runs`} />
+                                                  </div>
+                                                  {open[`feature:${f.featureId}:runs`] && (
+                                                    <div id={`feature:${f.featureId}:runs-section`} className="pl-6 pr-2 space-y-1">
+                                                      {f.runs.map((it) => (
+                                                        <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
+                                                          <ChatButton ctx={it.ctx} label={it.label} />
+                                                        </div>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -399,6 +542,7 @@ export default function ChatsNavigationSidebar({
           </div>
         </div>
       ) : (
+        // History mode
         <div className="space-y-2">
           <div className="px-2 py-1 text-[11px] uppercase tracking-wider text-[var(--text-muted)]/90 border-b border-[var(--border-subtle)]">
             History

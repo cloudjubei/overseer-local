@@ -2448,9 +2448,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T23:24:04.989Z",
-      "updatedAt": "2025-10-17T00:00:48.957Z",
-      "rejection": "Now under categories only the General chat shows - none of the categories/sub-categories show up.",
-      "completedAt": "2025-10-17T00:00:48.957Z"
+      "updatedAt": "2025-10-17T00:36:57.532Z",
+      "rejection": "1) there's no need for the top title and subtitle - they can both be removed and just the Categories | History switch can be there.\n2) at weird times the categories close. They should ONLY stay closed on FIRST appear - after the user is navigating in the view, this no longer holds.\n3) the current Stories dropdown leads to tiles with Story names, they should also have the index number on the right (same as it is displayed in @src/renderer/src/screens/stories/StoriesListView.tsx )\n4) when a story tab is open, it can have more sub-categories under it (if there's features, topics or agent runs). The story chat should show first if it's there, and then these sub categories as further dropdown buttons. Then features could also have a dropdown button (as there could be agents), so we show the feature chat first and then the agents.",
+      "completedAt": "2025-10-17T00:36:57.532Z"
     }
   ],
   "featureIdToDisplayIndex": {
