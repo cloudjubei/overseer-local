@@ -70,7 +70,7 @@
     },
     {
       "id": "c05a8f27-8e3f-4a4e-80e0-5cf4b8486518",
-      "status": "-",
+      "status": "+",
       "title": "Confirm Energy and Activity Levels",
       "description": "Similarly to how Gender or Height/Weight is confirmed in @src/actions/actionProfile.ts  after user selection - we need to confirm Energy and Activity levels in @src/actions/actionLifestyle.ts",
       "context": [
@@ -78,7 +78,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T13:11:11.550Z",
-      "updatedAt": "2025-10-17T13:11:11.550Z"
+      "updatedAt": "2025-10-17T13:43:45.395Z",
+      "completedAt": "2025-10-17T13:43:45.395Z"
     }
   ],
   "featureIdToDisplayIndex": {
