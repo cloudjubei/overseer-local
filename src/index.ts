@@ -77,27 +77,22 @@ async function runOnboardingIfNeeded(
   await ensureBackendConfigured()
   ensureAccessTokenForUser(userId)
 
-  // 1) Profile completeness
   try {
     const profile = await ProfilesService.profilesControllerMe()
 
     if (!isProfileComplete(profile)) {
-      // Trigger profile setup flow
       await actionProfile(bot, chat, from, rawText, msg)
       return true
     }
 
-    // 2) Lifestyle: require at least 1
     if (!Array.isArray(profile.lifestyles) || profile.lifestyles.length < 1) {
       await actionLifestyle(bot, chat, from, rawText, msg)
       return true
     }
   } catch (e) {
-    // If fetching profile fails, do not proceed with onboarding in this tick
     return false
   }
 
-  // 3) Macro goal: ensure there is an active MACRO goal
   try {
     const list = await GoalsService.goalsControllerList({ limit: 20 })
     const hasActiveMacro = (list.items || []).some(

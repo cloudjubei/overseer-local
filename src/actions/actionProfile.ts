@@ -292,10 +292,10 @@ export default async function actionProfile(
     await sleep(2000)
   }
 
-  // After handling a step, compute next and prompt once
   const updated = await ProfilesService.profilesControllerMe()
   const next = nextMissingStep(updated)
   if (next === 'done') {
+    await bot.sendMessage(chat.id, '⚙️ Profile complete')
     clearProfileStep(userId)
     await actionLifestyle(bot, chat, from, rawText, _msg)
     return true

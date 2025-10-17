@@ -96,11 +96,9 @@ export default async function actionMacroGoal(
 ) {
   const chatId = chat.id
 
-  // If the current message already carries input (audio) -> process immediately
   const hasVoice = !!msg.voice || !!msg.audio
   const hasText = !!rawText && rawText.trim().length > 0
 
-  // Handle selection from our non-inline suggestion keyboard
   if (hasText) {
     const hiddenCount = countHiddenPrefix(rawText)
     if (hiddenCount > 0) {
@@ -132,11 +130,8 @@ export default async function actionMacroGoal(
     return true
   }
 
-  if (firstGoal) {
-    await bot.sendMessage(chatId, 'Now let’s set your direction for the week.')
-    // add sleep of 2s
-    await sleep(2000)
-  }
+  await bot.sendMessage(chatId, '🧭 Weekly direction')
+  await sleep(2000)
 
   const introHeader =
     'What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?\nYou can type it in or send a voice message.\n\nHere are a few ideas if you need inspiration:'

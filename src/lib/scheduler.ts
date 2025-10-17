@@ -8,6 +8,7 @@ import { logger } from './logger'
 import actionMicroGoalsGenerate from '../actions/actionMicroGoalsGenerate'
 import actionMicroGoalsCheck from '../actions/actionMicroGoalsCheck'
 import actionWeeklyReset from '../actions/actionWeeklyReset'
+import { sleep } from './time'
 
 let scheduledTask: cron.ScheduledTask | null = null
 let botRef: TelegramBot | null = null
@@ -131,9 +132,13 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
 
             switch (action) {
               case 'micro_goals_generate':
+                await botRef.sendMessage(chatId, '☀️ Morning wake-up')
+                await sleep(2000)
                 await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg, false)
                 break
               case 'micro_goals_check':
+                await botRef.sendMessage(chatId, '✨ Evening reflection')
+                await sleep(2000)
                 await actionMicroGoalsCheck(botRef, chat, from, '', fakeMsg)
                 break
               case 'weekly_reset':

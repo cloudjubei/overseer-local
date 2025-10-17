@@ -58,6 +58,40 @@ function setLifestyleState(userId: string, patch: { activeLevel?: number; energy
   })
 }
 
+function labelForActivity(val: number): string {
+  switch (val) {
+    case 1:
+      return 'Very low'
+    case 2:
+      return 'Light'
+    case 3:
+      return 'Moderate'
+    case 4:
+      return 'High'
+    case 5:
+      return 'Very high'
+    default:
+      return String(val)
+  }
+}
+
+function labelForEnergy(val: number): string {
+  switch (val) {
+    case 1:
+      return 'Very low'
+    case 2:
+      return 'Low'
+    case 3:
+      return 'Okay'
+    case 4:
+      return 'Good'
+    case 5:
+      return 'Great'
+    default:
+      return String(val)
+  }
+}
+
 export default async function actionLifestyle(
   bot: TelegramBot,
   chat: TelegramBot.Chat,
@@ -82,7 +116,7 @@ export default async function actionLifestyle(
 
   const opts: SendMessageOptions = { parse_mode: 'HTML' }
 
-  // 3) If both values are present, persist and proceed
+  // 3) If both values are present, confirm, persist and proceed
   if (
     typeof activeLevel === 'number' &&
     activeLevel >= 1 &&
@@ -91,12 +125,22 @@ export default async function actionLifestyle(
     energyLevel >= 1 &&
     energyLevel <= 5
   ) {
+    try {
+      // Confirmation message similar to profile confirmations
+      const activityLabel = labelForActivity(activeLevel)
+      const energyLabel = labelForEnergy(energyLevel)
+      await bot.sendMessage(
+        chatId,
+        `Got it — Activity: <b>${activityLabel}</b> (${activeLevel}/5), Energy: <b>${energyLabel}</b> (${energyLevel}/5).`,
+        opts,
+      )
+    } catch {}
+
     const newLifestyle: UserProfileLifestyleCreateModel = {
       activeLevel,
       energyLevel,
     }
     try {
-      console.log('sending newLifestyle: ', newLifestyle)
       await ProfilesService.profilesControllerAddLifestyle({ requestBody: newLifestyle })
     } catch (e) {
       console.error(e)
