@@ -255,7 +255,24 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       }
     }
 
-    // For macro suggestion selections, we need to handle before clearing the keyboard to retain message_id for lookup
+    // NEW: Handle macro voice entry trigger
+    if (data === 'macro:suggest:voice') {
+      // Remove inline keyboard from the suggestion message
+      try {
+        await bot.editMessageReplyMarkup(
+          { inline_keyboard: [] },
+          { chat_id: chatId, message_id: message.message_id },
+        )
+      } catch {}
+
+      await bot.sendMessage(
+        chatId,
+        'Great — tap and hold the mic to share a quick voice note about what you want to focus on this week. I\'ll turn it into a clear goal.',
+      )
+      return
+    }
+
+    // For macro suggestion selections, handle numeric choice
     if (data.startsWith('macro:suggest:')) {
       const idxStr = data.split(':')[2]
       const idx = Number.parseInt(idxStr, 10)
@@ -325,7 +342,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         const doneMicro = allMicro.filter((g) => g.state === GoalModel.state.SUCCESS)
         clearStoredMicroCheck(chatId, message.message_id)
 
-        let goalsCompletionMessage = ` let's set our sights for tomorrow!`
+        let goalsCompletionMessage = ` let\'s set our sights for tomorrow!`
         if (doneMicro.length == 2) {
           goalsCompletionMessage = ' almost perfect! Keep it up!'
         } else if (doneMicro.length == 1) {
