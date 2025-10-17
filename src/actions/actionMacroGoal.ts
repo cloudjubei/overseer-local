@@ -197,6 +197,13 @@ export async function processMacroInput(
       })
     }
 
+    const confirmation =
+      created?.confirmationText && created.confirmationText.trim().length > 0
+        ? created.confirmationText
+        : 'Perfect — I recorded your goal. I’ll keep you on track.'
+    await bot.sendMessage(chatId, confirmation)
+    await sleep(2000)
+
     await scheduleCheckIns(chatId)
 
     await bot.sendMessage(
