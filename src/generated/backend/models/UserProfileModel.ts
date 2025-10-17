@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserProfileLifestyleModel } from './UserProfileLifestyleModel'
 export type UserProfileModel = {
   /**
    * User id
@@ -39,7 +40,7 @@ export type UserProfileModel = {
   /**
    * User-entered lifestyle levels
    */
-  lifestyles: Array<string>
+  lifestyles: Array<UserProfileLifestyleModel>
   /**
    * ISO8601 timestamp when record was created
    */

@@ -66,6 +66,82 @@
       "blockers": [],
       "createdAt": "2025-10-17T12:46:37.998Z",
       "updatedAt": "2025-10-17T12:46:37.998Z"
+    },
+    {
+      "id": "c05a8f27-8e3f-4a4e-80e0-5cf4b8486518",
+      "status": "-",
+      "title": "Confirm Energy and Activity Levels",
+      "description": "Similarly to how Gender or Height/Weight is confirmed in @src/actions/actionProfile.ts  after user selection - we need to confirm Energy and Activity levels in @src/actions/actionLifestyle.ts",
+      "context": [
+        "src/actions/actionLifestyle.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T13:11:11.550Z",
+      "updatedAt": "2025-10-17T13:11:11.550Z"
+    },
+    {
+      "id": "2df34155-5e09-4615-ab54-dd786498c644",
+      "status": "-",
+      "title": "When doing the daily morning and evening check in - send 'motivationText'/'motivationTextEvening'",
+      "description": "@src/generated/backend/models/UserProfileLifestyleModel.ts now has new fields 'motivationText' and 'motivationTextEvening'.\nBefore the options for the Energy selection are shown (morning check in) - send 'motivationText' and proceed after the standard sleep delay.\nAfter the user completes the evening check in  (i.e. clicks Finish) - send 'motivationTextEvening'.",
+      "context": [
+        "src/generated/backend/models/UserProfileLifestyleModel.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T13:50:28.734Z",
+      "updatedAt": "2025-10-17T13:50:28.734Z"
+    },
+    {
+      "id": "417843c9-8444-4283-9c2f-bf1c393ee32a",
+      "status": "-",
+      "title": "UserProfileLifestyleModel has updated - update options",
+      "description": "@src/generated/backend/models/UserProfileLifestyleModel.ts has updated and there's a new @src/generated/backend/models/UserProfileLifestyleCreateModel.ts - there's only 3 levels to activity and energy levels. The options that are displayed to the user must be updated to reflect this. All options should show on 1 line.",
+      "context": [
+        "src/generated/backend/models/UserProfileLifestyleModel.ts",
+        "src/generated/backend/models/UserProfileLifestyleCreateModel.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T13:52:07.299Z",
+      "updatedAt": "2025-10-17T13:52:07.299Z"
+    },
+    {
+      "id": "2df5bdc9-c413-458c-aedb-e5f60f904e73",
+      "status": "-",
+      "title": "Update suggestions for macro goals",
+      "description": "In @src/actions/actionMacroGoal.ts don't call the backend to get the suggestions, but use the options below, these need to be shown in-line with 2 options per line. The last button should trigger the voice entry:\n\n    \"Get fitter 💪 | Sleep better 😴\" \n    \"Be more mindful 🧘 | Manage stress ⚡”\n    \"🎙️ Voice note (custom goal)\"",
+      "context": [
+        "src/actions/actionMacroGoal.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T13:57:30.388Z",
+      "updatedAt": "2025-10-17T13:58:07.606Z"
+    },
+    {
+      "id": "a10223db-97ee-4a96-81ef-95bf2a59cd44",
+      "status": "-",
+      "title": "Add Momentum message",
+      "description": "There's a new @src/generated/backend/models/UserMomentumModel.ts  which has 'motivationText` which can be gotten from @src/generated/backend/services/MomentumService.ts . If 'motivationText' is not undefined then we should send it as a message to the user at the end of the morning check in (which is scheduled by the @src/lib/scheduler.ts ).",
+      "context": [
+        "src/generated/backend/models/UserMomentumModel.ts",
+        "src/generated/backend/services/MomentumService.ts",
+        "src/lib/scheduler.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T14:01:46.634Z",
+      "updatedAt": "2025-10-17T14:01:46.634Z"
+    },
+    {
+      "id": "d1ab6a9d-84a0-437b-a5b5-3fc17e954931",
+      "status": "-",
+      "title": "After selecting or typing a macro goal, echo it back",
+      "description": "@src/generated/backend/models/GoalModel.ts now contains 'confirmationText' - if it's set we want to send it back to the user after the macro goal is created in @src/actions/actionMacroGoal.ts .\nIf it's not set the message should say:\n“Perfect — I recorded your goal. I’ll keep you on track.”",
+      "context": [
+        "src/generated/backend/models/GoalModel.ts",
+        "src/actions/actionMacroGoal.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T14:03:51.945Z",
+      "updatedAt": "2025-10-17T14:03:51.945Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -74,7 +150,13 @@
     "00b11270-6e08-4fce-bdda-11030f802da9": 3,
     "1d4e6fd4-794a-4f3f-9dc1-39aa1e57f80c": 4,
     "481a2fd7-e86c-40e3-8fda-c0830035c6e5": 5,
-    "a87424a5-1e31-4752-984f-6e294a569071": 6
+    "a87424a5-1e31-4752-984f-6e294a569071": 6,
+    "c05a8f27-8e3f-4a4e-80e0-5cf4b8486518": 7,
+    "417843c9-8444-4283-9c2f-bf1c393ee32a": 8,
+    "2df34155-5e09-4615-ab54-dd786498c644": 9,
+    "2df5bdc9-c413-458c-aedb-e5f60f904e73": 10,
+    "a10223db-97ee-4a96-81ef-95bf2a59cd44": 11,
+    "d1ab6a9d-84a0-437b-a5b5-3fc17e954931": 12
   },
   "createdAt": "2025-09-18T12:16:23.163Z",
   "updatedAt": "2025-09-18T12:16:23.163Z"

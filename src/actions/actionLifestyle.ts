@@ -1,5 +1,5 @@
 import TelegramBot, { Message, SendMessageOptions } from 'node-telegram-bot-api'
-import { ProfilesService, UserProfileLifestyleModel } from 'src/generated/backend'
+import { ProfilesService, UserProfileLifestyleCreateModel } from 'src/generated/backend'
 import actionMacroGoal from './actionMacroGoal'
 import { getSession, setSession, clearConversationSession } from 'src/lib/sessionStore'
 
@@ -91,7 +91,7 @@ export default async function actionLifestyle(
     energyLevel >= 1 &&
     energyLevel <= 5
   ) {
-    const newLifestyle: UserProfileLifestyleModel = {
+    const newLifestyle: UserProfileLifestyleCreateModel = {
       activeLevel,
       energyLevel,
     }
