@@ -68,6 +68,10 @@ type StoryGroup = {
   updatedAt: string
 }
 
+function storageKey(projectId?: string, mode?: 'categories' | 'history') {
+  return `chat-nav-open:${projectId || 'noproj'}:${mode || 'categories'}`
+}
+
 export default function ChatsNavigationSidebar({
   selectedContext,
   onSelectContext,
@@ -102,11 +106,36 @@ export default function ChatsNavigationSidebar({
   const [open, setOpen] = useState<OpenState>({})
   const didInitFromSelected = useRef(false)
 
-  // Reset open state on project switch (fresh appearance per project)
+  // Load persisted open state on project or mode change; if none, compute from selected context
   useEffect(() => {
-    setOpen({})
     didInitFromSelected.current = false
-  }, [activeProjectId])
+    let restored: OpenState | null = null
+    try {
+      const raw = localStorage.getItem(storageKey(activeProjectId, mode))
+      if (raw) restored = JSON.parse(raw)
+    } catch {}
+    if (restored && typeof restored === 'object') {
+      setOpen(restored)
+      didInitFromSelected.current = true
+    } else {
+      // fresh appearance: start closed except path to selected context (if any)
+      if (selectedContext) {
+        const next: OpenState = {}
+        const keys = computeKeysForContext(selectedContext)
+        keys.forEach((k) => (next[k] = true))
+        setOpen(next)
+      } else {
+        setOpen({})
+      }
+    }
+  }, [activeProjectId, mode])
+
+  // Persist open state whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey(activeProjectId, mode), JSON.stringify(open || {}))
+    } catch {}
+  }, [open, activeProjectId, mode])
 
   const isActive = useCallback(
     (ctx: ChatContext) => {
@@ -227,7 +256,7 @@ export default function ChatsNavigationSidebar({
     return items
   }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
 
-  // When selectedContext first becomes available (from deep link or restore), open only the relevant sections once
+  // When selectedContext becomes available for the first time after mount and we did not restore state, open only the relevant sections once
   useEffect(() => {
     if (!selectedContext || didInitFromSelected.current) return
     const next: OpenState = {}
@@ -475,6 +504,7 @@ export default function ChatsNavigationSidebar({
                                       const fOpen = !!open[fkey]
                                       return (
                                         <div key={f.featureId} className="space-y-1">
+                                          {/* Provide a minimal 4px left padding for feature headers as well */}
                                           <div className="pl-1">
                                             <button
                                               type="button"
@@ -553,9 +583,13 @@ export default function ChatsNavigationSidebar({
                     No project topic chats.
                   </div>
                 ) : (
-                  projectTopics.map((t) => (
-                    <ChatButton key={t.key} ctx={t.ctx} label={t.label} />
-                  ))
+                  <div className="pl-0 border-l border-[var(--border-subtle)]">
+                    {projectTopics.map((t) => (
+                      <div key={t.key} className="pl-1">
+                        <ChatButton ctx={t.ctx} label={t.label} />
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
