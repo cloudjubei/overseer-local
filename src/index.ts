@@ -324,7 +324,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       } catch {}
 
       const journalPrompt =
-        'Take a moment to reflect — how did today actually feel? You can share a few words or drop a quick voice note.'
+        '<b>Take a moment to reflect</b>\nHow did today actually feel?\nYou can share a few words or drop a quick voice note.\n<i>You can type or leave a quick voice note anytime with /voice — it helps me get a clearer sense of how you’re feeling.</i>'
 
       const setAwaitingJournalState = () => {
         const userId = String(cb.from.id)
@@ -365,6 +365,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           chatId,
           `${doneMicro.length}/${allMicro.length} goals done - ${goalsCompletionMessage}`,
         )
+        await sleep(2000)
 
         try {
           const profile = await ProfilesService.profilesControllerMe()
@@ -382,7 +383,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
 
         await sleep(2000)
 
-        await bot.sendMessage(chatId, journalPrompt)
+        await bot.sendMessage(chatId, journalPrompt, { parse_mode: 'HTML' })
         setAwaitingJournalState()
         return
       }
@@ -456,6 +457,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           chatId,
           `${store.length}/${store.length} goals done - amazing work! Keep it up!`,
         )
+        await sleep(2000)
 
         try {
           const profile = await ProfilesService.profilesControllerMe()
