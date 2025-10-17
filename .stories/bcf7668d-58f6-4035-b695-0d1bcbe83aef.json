@@ -83,7 +83,7 @@
     },
     {
       "id": "2df34155-5e09-4615-ab54-dd786498c644",
-      "status": "-",
+      "status": "+",
       "title": "When doing the daily morning and evening check in - send 'motivationText'/'motivationTextEvening'",
       "description": "@src/generated/backend/models/UserProfileLifestyleModel.ts now has new fields 'motivationText' and 'motivationTextEvening'.\nBefore the options for the Energy selection are shown (morning check in) - send 'motivationText' and proceed after the standard sleep delay.\nAfter the user completes the evening check in  (i.e. clicks Finish) - send 'motivationTextEvening'.",
       "context": [
@@ -91,7 +91,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T13:50:28.734Z",
-      "updatedAt": "2025-10-17T13:50:28.734Z"
+      "updatedAt": "2025-10-17T14:25:48.009Z",
+      "completedAt": "2025-10-17T14:25:48.009Z"
     },
     {
       "id": "417843c9-8444-4283-9c2f-bf1c393ee32a",
