@@ -300,7 +300,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       } catch {}
 
       const journalPrompt =
-        'Would you like to leave a short voice note or type a few words about how the day felt?'
+        'Take a moment to reflect — how did today actually feel? You can share a few words or drop a quick voice note.'
 
       const setAwaitingJournalState = () => {
         const userId = String(cb.from.id)

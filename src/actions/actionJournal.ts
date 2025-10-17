@@ -65,13 +65,12 @@ export async function processAudioJournal(
       formData: { file: blob },
     })
 
-    // Build confirmation message using backend-provided summary/confirmation text
-    const firstSentence =
-      created?.transcription?.confirmationText?.trim() ||
-      created?.transcription?.text?.trim() ||
-      'I captured your voice note.'
+    const userSentence =
+      created.transcription?.confirmationText?.trim() ||
+      created.transcription?.text?.trim() ||
+      created.text
 
-    const confirmText = `${firstSentence} Shall I record this, or do you want to re-record?`
+    const confirmText = ` <b>Here’s what I captured from your reflection — would you like to keep it or re-record?</b>\n<i>${userSentence}</i>`
 
     const keyboard: TelegramBot.InlineKeyboardMarkup = {
       inline_keyboard: [
@@ -83,7 +82,10 @@ export async function processAudioJournal(
     }
 
     // Send confirmation with inline buttons
-    const sent = await bot.sendMessage(chat.id, confirmText, { reply_markup: keyboard })
+    const sent = await bot.sendMessage(chat.id, confirmText, {
+      reply_markup: keyboard,
+      parse_mode: 'HTML',
+    })
 
     // Store pending journal confirmation state in session
     const prev = getSession(userId)

@@ -46,7 +46,6 @@ export default async function actionMicroGoalsGenerate(
   const chatId = chat.id
   const userId = String(from?.id || chatId)
 
-  // 1) Ensure we have today's energy first; if not, prompt and store pending state
   if (!skipEnergyLevels) {
     try {
       const session = getSession(userId)
@@ -62,7 +61,6 @@ export default async function actionMicroGoalsGenerate(
         energyDate === today
 
       if (!hasTodayEnergy) {
-        // Set conversation state indicating we are awaiting morning energy
         setSession({
           ...(session || { userId }),
           accessToken: session?.accessToken || '',
@@ -87,12 +85,9 @@ export default async function actionMicroGoalsGenerate(
         })
         return true
       }
-    } catch (e) {
-      // Non-blocking; if session read fails, we simply proceed to generation
-    }
+    } catch (e) {}
   }
 
-  // 2) Generate micro goals now that energy has been captured (or if not required)
   try {
     const goals = await GoalsService.goalsControllerGenerateMicroGoals()
     const list = (goals || []).slice(0, 3)
@@ -104,7 +99,7 @@ export default async function actionMicroGoalsGenerate(
     await bot.sendMessage(chatId, body, { parse_mode: 'HTML' })
 
     const followUp =
-      'I’ll check in with you tonight at 8 PM — you can always journal or send a voice note before then.'
+      'You’ve got this — just focus on getting moving again today. I’ll check in tonight to see how it felt 💫.'
 
     await bot.sendMessage(chatId, followUp, { parse_mode: 'HTML' })
   } catch (err) {
@@ -115,7 +110,6 @@ export default async function actionMicroGoalsGenerate(
     )
   }
 
-  // 3) Clear temporary morning energy state if active
   try {
     const session = getSession(userId)
     if (session?.conversationState?.lastAction === 'morning_energy') {

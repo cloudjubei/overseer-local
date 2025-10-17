@@ -21,6 +21,10 @@ export type GoalModel = {
   category?: GoalModel.category
   difficulty?: GoalModel.difficulty
   text: string
+  /**
+   * Short weekly-focus confirmation phrase derived from the goal text.
+   */
+  confirmationText?: string
   mood?: MoodAnalysisResult
   /**
    * ISO8601 timestamp

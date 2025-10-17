@@ -2,13 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type UserProfileLifestyleModel = {
+export type UserProfileLifestyleCreateModel = {
   /**
-   * 1-5, Very Low to Very High
+   * 1-Low, 2-Moderate, 3-High
    */
   activeLevel: number
   /**
-   * 1-5, Very Low to Very High
+   * 1-Low, 2-Medium, 3-High
    */
   energyLevel: number
 }

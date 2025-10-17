@@ -200,29 +200,24 @@ export async function processMacroInput(
       })
     }
 
-    // Schedule morning and evening check-ins with correct metadata including chatId
     await scheduleCheckIns(chatId)
 
-    // Acknowledge success to the user and explain flow
     await bot.sendMessage(
       chatId,
-      'Every morning you will get a set of 3 new micro goals.\n\nIn the evening, I will check in to see how things went.',
+      'Here’s the plan — I’ll share three tiny steps each morning to keep your momentum building.\n\nIn the evening, I’ll check in to see how things went.',
     )
 
-    // Immediately generate the first set of micro goals
     await actionMicroGoalsGenerate(bot, chat, from, '', msg)
   } catch (e) {
     console.error('ActionMacroGoal error: ', e)
     await bot.sendMessage(chatId, 'Sorry, I could not create your macro goal. Please try again.')
   } finally {
-    // Attempt to remove the "Processing..." message
     try {
       await bot.deleteMessage(chatId, processingMsg.message_id)
     } catch {}
   }
 }
 
-// Expose helpers for callback handlers (legacy inline support retained)
 export function getMacroSuggestionsForMessage(chatId: number, messageId: number) {
   return macroSuggestionStore.get(keyFor(chatId, messageId)) || []
 }

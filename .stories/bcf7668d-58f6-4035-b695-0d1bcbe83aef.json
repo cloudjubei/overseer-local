@@ -1,6 +1,6 @@
 {
   "id": "bcf7668d-58f6-4035-b695-0d1bcbe83aef",
-  "status": "-",
+  "status": "?",
   "title": "Ongoing Improvements",
   "description": "",
   "features": [
@@ -49,13 +49,23 @@
     },
     {
       "id": "481a2fd7-e86c-40e3-8fda-c0830035c6e5",
-      "status": "-",
+      "status": "?",
       "title": "Track all user actions with Mixpanel",
       "description": "We want to track every single user message/action via Mixpanel - we should have a new TrackingService that will have a generic `track` function and inside the appropriate Mixpanel call will be used.\nWe need to handle user login appropriately to track a user session + an unauthenticated user too.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-06T23:16:18.665Z",
-      "updatedAt": "2025-10-06T23:16:18.665Z"
+      "updatedAt": "2025-10-17T12:46:07.046Z"
+    },
+    {
+      "id": "a87424a5-1e31-4752-984f-6e294a569071",
+      "status": "-",
+      "title": "Add small dividers to visually segment stages",
+      "description": "-  “⚙️ Profile complete” end of onboarding\n- “🧭 Weekly direction”  when starting Macro goal setup\n- “☀️ Morning wake-up” when scheduled morning micro goals are about to show\n-  “✨ Evening reflection” when scheduled evening check in is about to show",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-17T12:46:37.998Z",
+      "updatedAt": "2025-10-17T12:46:37.998Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -63,7 +73,8 @@
     "fa10705f-a673-4649-ae33-853df72179b0": 2,
     "00b11270-6e08-4fce-bdda-11030f802da9": 3,
     "1d4e6fd4-794a-4f3f-9dc1-39aa1e57f80c": 4,
-    "481a2fd7-e86c-40e3-8fda-c0830035c6e5": 5
+    "481a2fd7-e86c-40e3-8fda-c0830035c6e5": 5,
+    "a87424a5-1e31-4752-984f-6e294a569071": 6
   },
   "createdAt": "2025-09-18T12:16:23.163Z",
   "updatedAt": "2025-09-18T12:16:23.163Z"
