@@ -3,6 +3,7 @@ import { ensureAccessTokenForUser, ensureBackendConfigured } from '../lib/auth'
 import { JournalCreateTextModel, JournalsService } from '../generated/backend'
 import { clearConversationSession, getSession, setSession } from 'src/lib/sessionStore'
 import { downloadTelegramAudioFile } from 'src/lib/files'
+import { sleep } from 'src/lib/time'
 
 export async function processTextJournal(
   bot: TelegramBot,
@@ -34,8 +35,7 @@ export async function processTextJournal(
     await bot.deleteMessage(chat.id, waiting.message_id)
   } catch {}
 
-  const ack = (created as any)?.acknowledgmentText?.trim()
-  await bot.sendMessage(chat.id, ack || '📝 Journal entry recorded ✅')
+  await bot.sendMessage(chat.id, created.acknowledgmentText.trim())
 }
 
 export async function processAudioJournal(
@@ -103,7 +103,7 @@ export async function processAudioJournal(
           pendingJournal: {
             id: created.id,
             messageId: sent.message_id,
-            acknowledgmentText: (created as any)?.acknowledgmentText?.trim?.() || '',
+            acknowledgmentText: created.acknowledgmentText.trim(),
           },
         },
         lastUpdatedAt: Math.floor(Date.now() / 1000),
