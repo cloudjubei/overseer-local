@@ -59,7 +59,7 @@ export async function handleConversationMessage(
   if (!convo || !convo.flowId) return null
 
   // Session id must be tracked in conversation context as provided by backend
-  const sessionId = String((convo.context as any)?.sessionId || '')
+  const sessionId = String(convo.context?.sessionId || '')
   if (!sessionId) {
     // Corrupt/missing state; clear to avoid user getting stuck
     setSession({ ...session, conversationState: null })
@@ -104,7 +104,7 @@ export async function handleConversationMessage(
         // Clear conversation on success and send success message if available
         setSession({ ...session, conversationState: null })
         if (chatId) {
-          const text = (res.success as any)?.message || 'Done.'
+          const text = res.success?.message || 'Done.'
           try {
             await bot.sendMessage(chatId, text)
           } catch {}

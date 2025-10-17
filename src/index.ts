@@ -357,8 +357,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         try {
           const profile = await ProfilesService.profilesControllerMe()
           const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
-          const latest =
-            lifestyles.length > 0 ? (lifestyles[lifestyles.length - 1] as any) : undefined
+          const latest = lifestyles.length > 0 ? lifestyles[lifestyles.length - 1] : undefined
           const motivationTextEvening =
             typeof latest?.motivationTextEvening === 'string'
               ? latest.motivationTextEvening.trim()
@@ -449,8 +448,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         try {
           const profile = await ProfilesService.profilesControllerMe()
           const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
-          const latest =
-            lifestyles.length > 0 ? (lifestyles[lifestyles.length - 1] as any) : undefined
+          const latest = lifestyles.length > 0 ? lifestyles[lifestyles.length - 1] : undefined
           const motivationTextEvening =
             typeof latest?.motivationTextEvening === 'string'
               ? latest.motivationTextEvening.trim()

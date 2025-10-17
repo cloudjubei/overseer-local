@@ -82,8 +82,7 @@ export default async function actionMicroGoalsGenerate(
         try {
           const profile = await ProfilesService.profilesControllerMe()
           const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
-          const latest =
-            lifestyles.length > 0 ? (lifestyles[lifestyles.length - 1] as any) : undefined
+          const latest = lifestyles.length > 0 ? lifestyles[lifestyles.length - 1] : undefined
           const motivationText =
             typeof latest?.motivationText === 'string' ? latest.motivationText.trim() : ''
           if (motivationText) {

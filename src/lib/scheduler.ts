@@ -37,7 +37,7 @@ export function getMessageFromMetadata(
   // Common keys we might support
   const candidates = ['message', 'text', 'content', 'msg']
   for (const k of candidates) {
-    const v = (metadata as any)[k]
+    const v = metadata[k]
     if (typeof v === 'string' && v.trim()) return v.trim()
   }
   return undefined
@@ -50,14 +50,14 @@ function getChatIdFromMetadata(metadata?: Record<string, any>): number | undefin
   // - metadata.chat_id
   // - metadata.telegram.chatId
   // - metadata.telegram.chat.id
-  const direct = (metadata as any).chatId ?? (metadata as any).chat_id
+  const direct = metadata.chatId ?? metadata.chat_id
   if (typeof direct === 'number' && Number.isFinite(direct)) return direct
   if (typeof direct === 'string' && direct.trim() && Number.isFinite(Number(direct))) {
     return Number(direct)
   }
-  const tg = (metadata as any).telegram
+  const tg = metadata.telegram
   if (tg && typeof tg === 'object') {
-    const tgChatId = (tg as any).chatId ?? (tg as any)?.chat?.id
+    const tgChatId = tg.chatId ?? tg?.chat?.id
     if (typeof tgChatId === 'number' && Number.isFinite(tgChatId)) return tgChatId
     if (typeof tgChatId === 'string' && tgChatId.trim() && Number.isFinite(Number(tgChatId))) {
       return Number(tgChatId)
@@ -98,7 +98,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         const dedupeKey = `${userId}:${ci.id}:${nowHourStamp}`
         if (sentThisHour.has(dedupeKey)) continue
 
-        const metadata = ci.metadata as any
+        const metadata = ci.metadata
         const action = metadata?.action
         const message = getMessageFromMetadata(metadata)
         const chatId = getChatIdFromMetadata(metadata)
@@ -147,7 +147,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
                     await botRef.sendMessage(chatId, motivationText)
                   }
                 } catch (e) {
-                  logger.debug?.('Momentum motivation fetch failed or unavailable', e as any)
+                  logger.debug('Momentum motivation fetch failed or unavailable', e)
                 }
                 break
               case 'micro_goals_check':
@@ -176,7 +176,7 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
         }
       }
 
-      cursor = (res as any)?.cursor || undefined
+      cursor = res.cursor
       if (!cursor) break
     } catch (err) {
       logger.error(`Scheduler: failed to fetch check-ins for user ${userId}`, err)
