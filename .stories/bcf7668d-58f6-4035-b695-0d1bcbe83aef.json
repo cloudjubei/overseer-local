@@ -123,7 +123,7 @@
     },
     {
       "id": "a10223db-97ee-4a96-81ef-95bf2a59cd44",
-      "status": "-",
+      "status": "+",
       "title": "Add Momentum message",
       "description": "There's a new @src/generated/backend/models/UserMomentumModel.ts  which has 'motivationText` which can be gotten from @src/generated/backend/services/MomentumService.ts . If 'motivationText' is not undefined then we should send it as a message to the user at the end of the morning check in (which is scheduled by the @src/lib/scheduler.ts ).",
       "context": [
@@ -133,7 +133,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T14:01:46.634Z",
-      "updatedAt": "2025-10-17T14:01:46.634Z"
+      "updatedAt": "2025-10-17T14:35:22.100Z",
+      "completedAt": "2025-10-17T14:35:22.100Z"
     },
     {
       "id": "d1ab6a9d-84a0-437b-a5b5-3fc17e954931",
