@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
@@ -80,6 +80,38 @@ function storageKey(projectId?: string, mode?: 'categories' | 'history') {
   return `chat-nav-open:${projectId || 'noproj'}:${mode || 'categories'}`
 }
 
+function computeKeysForContext(ctx: ChatContext): string[] {
+  const keys: string[] = []
+  const storiesKey = 'cat:stories'
+  const topicsKey = 'cat:project-topics'
+
+  if (ctx.type === 'PROJECT') {
+    return keys
+  }
+
+  if (
+    ctx.type === 'STORY' ||
+    ctx.type === 'FEATURE' ||
+    ctx.type === 'STORY_TOPIC' ||
+    ctx.type === 'AGENT_RUN' ||
+    ctx.type === 'AGENT_RUN_FEATURE'
+  ) {
+    const sid = (ctx as any).storyId as string
+    keys.push(storiesKey)
+    keys.push(`story:${sid}`)
+    if (ctx.type === 'STORY_TOPIC') keys.push(`story:${sid}:topics`)
+    if (ctx.type === 'AGENT_RUN') keys.push(`story:${sid}:runs`)
+    if (ctx.type === 'FEATURE' || ctx.type === 'AGENT_RUN_FEATURE') {
+      keys.push(`story:${sid}:features`)
+      const fid = (ctx as any).featureId as string
+      keys.push(`feature:${fid}`)
+      if (ctx.type === 'AGENT_RUN_FEATURE') keys.push(`feature:${fid}:runs`)
+    }
+  }
+  if (ctx.type === 'PROJECT_TOPIC') keys.push(topicsKey)
+  return keys
+}
+
 export default function ChatsNavigationSidebar({
   selectedContext,
   onSelectContext,
@@ -110,41 +142,52 @@ export default function ChatsNavigationSidebar({
     })
   }, [projectChats])
 
-  const [open, setOpen] = useState<OpenState>({})
-  const isInitialized = useRef(false)
-
-  useEffect(() => {
-    isInitialized.current = false
-    let restored: OpenState | null = null
+  const [open, setOpen] = useState<OpenState>(() => {
     try {
       const raw = localStorage.getItem(storageKey(activeProjectId, mode))
-      if (raw) restored = JSON.parse(raw)
-    } catch {}
-
-    if (restored && typeof restored === 'object') {
-      setOpen(restored)
-      isInitialized.current = true
-    } else {
-      setOpen({})
+      return raw ? JSON.parse(raw) : {}
+    } catch {
+      return {}
     }
+  })
+
+  useEffect(() => {
+    setOpen(() => {
+      try {
+        const raw = localStorage.getItem(storageKey(activeProjectId, mode))
+        return raw ? JSON.parse(raw) : {}
+      } catch {
+        return {}
+      }
+    })
   }, [activeProjectId, mode])
 
   useEffect(() => {
-    if (isInitialized.current || !selectedContext) return
-
-    const next: OpenState = {}
-    const keys = computeKeysForContext(selectedContext)
-    keys.forEach((k) => (next[k] = true))
-    setOpen(next)
-    isInitialized.current = true
-  }, [selectedContext])
+    try {
+      localStorage.setItem(storageKey(activeProjectId, mode), JSON.stringify(open))
+    } catch (e) {
+      console.error('Failed to save chat nav state', e)
+    }
+  }, [open, activeProjectId, mode])
 
   useEffect(() => {
-    if (!isInitialized.current) return
-    try {
-      localStorage.setItem(storageKey(activeProjectId, mode), JSON.stringify(open || {}))
-    } catch {}
-  }, [open, activeProjectId, mode])
+    if (!selectedContext) return
+
+    const keys = computeKeysForContext(selectedContext)
+    if (keys.length > 0) {
+      setOpen((prev) => {
+        const next = { ...prev }
+        let hasChanged = false
+        for (const key of keys) {
+          if (!next[key]) {
+            next[key] = true
+            hasChanged = true
+          }
+        }
+        return hasChanged ? next : prev
+      })
+    }
+  }, [selectedContext])
 
   const isActive = useCallback(
     (ctx: ChatContext) => {
@@ -263,38 +306,6 @@ export default function ChatsNavigationSidebar({
     items.sort((a, b) => a.label.localeCompare(b.label))
     return items
   }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
-
-  function computeKeysForContext(ctx: ChatContext): string[] {
-    const keys: string[] = []
-    const storiesKey = 'cat:stories'
-    const topicsKey = 'cat:project-topics'
-
-    if (ctx.type === 'PROJECT') {
-      return keys
-    }
-
-    if (
-      ctx.type === 'STORY' ||
-      ctx.type === 'FEATURE' ||
-      ctx.type === 'STORY_TOPIC' ||
-      ctx.type === 'AGENT_RUN' ||
-      ctx.type === 'AGENT_RUN_FEATURE'
-    ) {
-      const sid = (ctx as any).storyId as string
-      keys.push(storiesKey)
-      keys.push(`story:${sid}`)
-      if (ctx.type === 'STORY_TOPIC') keys.push(`story:${sid}:topics`)
-      if (ctx.type === 'AGENT_RUN') keys.push(`story:${sid}:runs`)
-      if (ctx.type === 'FEATURE' || ctx.type === 'AGENT_RUN_FEATURE') {
-        keys.push(`story:${sid}:features`)
-        const fid = (ctx as any).featureId as string
-        keys.push(`feature:${fid}`)
-        if (ctx.type === 'AGENT_RUN_FEATURE') keys.push(`feature:${fid}:runs`)
-      }
-    }
-    if (ctx.type === 'PROJECT_TOPIC') keys.push(topicsKey)
-    return keys
-  }
 
   const SectionHeader: React.FC<{
     title: string
