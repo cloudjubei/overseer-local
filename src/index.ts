@@ -221,6 +221,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       if (data.includes(':submit:')) {
         // Confirm saved and clear any pending state
         const prev = getSession(userId)
+        const ack = (prev?.conversationState as any)?.context?.pendingJournal?.acknowledgmentText
         setSession({
           ...(prev || { userId }),
           accessToken: prev?.accessToken || '',
@@ -229,7 +230,8 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           expiresAt: prev?.expiresAt,
           conversationState: null,
         })
-        await bot.sendMessage(chatId, 'Journal entry saved ✅.')
+        const finalAck = (typeof ack === 'string' ? ack.trim() : '') || '📝 Journal entry recorded ✅'
+        await bot.sendMessage(chatId, finalAck)
         return
       }
 
