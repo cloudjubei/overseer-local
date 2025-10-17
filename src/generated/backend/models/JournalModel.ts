@@ -8,6 +8,7 @@ export type JournalModel = {
   userId: string
   text: string
   source: JournalModel.source
+  acknowledgmentText: string
   createdAt: string
   updatedAt: string
   audio?: Record<string, any>
