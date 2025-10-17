@@ -9,15 +9,10 @@ import {
 import { downloadTelegramAudioFile } from 'src/lib/files'
 import actionMicroGoalsGenerate from './actionMicroGoalsGenerate'
 import { sleep } from 'src/lib/time'
-import { buildSuggestionKeyboard } from 'src/common/keyboards'
-import { buildSuggestionMessageText } from './suggestionRenderer'
 
 // In-memory store to map suggestion lists per message for callback selections
 // Keyed by `${chatId}:${messageId}` -> suggestions array
 const macroSuggestionStore = new Map<string, GoalSuggestedModel[]>()
-
-// In-memory store to map latest suggestion list per chat for non-inline keyboard selections
-const macroChatSuggestions = new Map<number, GoalSuggestedModel[]>()
 
 function keyFor(chatId: number, messageId: number) {
   return `${chatId}:${messageId}`
@@ -78,14 +73,6 @@ async function scheduleCheckIns(chatId: number) {
   })
 }
 
-// Utility: count the number of hidden prefix characters used in our reply keyboards
-function countHiddenPrefix(text: string): number {
-  const HIDDEN = '‎' // U+200E LEFT-TO-RIGHT MARK
-  let i = 0
-  while (i < text.length && text[i] === HIDDEN) i++
-  return i
-}
-
 export default async function actionMacroGoal(
   bot: TelegramBot,
   chat: TelegramBot.Chat,
@@ -99,33 +86,8 @@ export default async function actionMacroGoal(
   const hasVoice = !!msg.voice || !!msg.audio
   const hasText = !!rawText && rawText.trim().length > 0
 
-  if (hasText) {
-    const hiddenCount = countHiddenPrefix(rawText)
-    if (hiddenCount > 0) {
-      const idx = hiddenCount - 1
-      const suggestions = macroChatSuggestions.get(chatId) || []
-      if (suggestions.length > 0) {
-        // Refine option is appended after N suggestions, so handle that explicitly
-        if (idx === suggestions.length) {
-          await bot.sendMessage(
-            chatId,
-            'Tell me a bit more about what you want to focus on. You can type or send a voice message.',
-          )
-          return true
-        }
-
-        const picked = suggestions[idx]
-        if (picked) {
-          await processMacroInput(bot, chat, from, '', msg, picked.summary)
-          return true
-        }
-      }
-      // If we had a hidden prefix but no stored suggestions, ignore and fall through to normal text handling
-    }
-  }
-
   // If user sent free text or voice, treat as custom macro (skip suggestions)
-  if (hasVoice || (hasText && countHiddenPrefix(rawText) === 0)) {
+  if (hasVoice || hasText) {
     await processMacroInput(bot, chat, from, rawText, msg)
     return true
   }
@@ -133,23 +95,63 @@ export default async function actionMacroGoal(
   await bot.sendMessage(chatId, '🧭 Weekly direction')
   await sleep(2000)
 
-  const introHeader =
+  const header =
     'What’s something that really matters to you right now — maybe around your health, focus, or wellbeing?\nYou can type it in or send a voice message.\n\nHere are a few ideas if you need inspiration:'
 
-  // Fetch suggestions
-  const allSuggestions: GoalSuggestedModel[] =
-    await GoalsService.goalsControllerGenerateMacroGoalSuggestions()
-  const suggestions = (allSuggestions || []).slice(0, 3)
+  // Static suggestions (do not call backend)
+  const suggestions: GoalSuggestedModel[] = [
+    {
+      type: GoalSuggestedModel.type.MACRO,
+      category: GoalSuggestedModel.category.FITNESS,
+      difficulty: GoalSuggestedModel.difficulty.EASY,
+      text: 'Get fitter 💪',
+      summary: 'Get fitter 💪',
+    },
+    {
+      type: GoalSuggestedModel.type.MACRO,
+      category: GoalSuggestedModel.category.SLEEP,
+      difficulty: GoalSuggestedModel.difficulty.EASY,
+      text: 'Sleep better 😴',
+      summary: 'Sleep better 😴',
+    },
+    {
+      type: GoalSuggestedModel.type.MACRO,
+      category: GoalSuggestedModel.category.OTHER,
+      difficulty: GoalSuggestedModel.difficulty.EASY,
+      text: 'Be more mindful 🧘',
+      summary: 'Be more mindful 🧘',
+    },
+    {
+      type: GoalSuggestedModel.type.MACRO,
+      category: GoalSuggestedModel.category.STRESS,
+      difficulty: GoalSuggestedModel.difficulty.EASY,
+      text: 'Manage stress ⚡',
+      summary: 'Manage stress ⚡',
+    },
+  ]
 
-  // Render message body listing options fully to avoid clipping, then show non-inline keyboard
-  const text = buildSuggestionMessageText({ headerMessage: introHeader, suggestions })
-  await bot.sendMessage(chatId, text, {
+  // Build inline keyboard with 2 options per row and a final voice-note button
+  const rows: TelegramBot.InlineKeyboardButton[][] = []
+  // First two rows (2 per line)
+  for (let i = 0; i < 4; i += 2) {
+    const a = suggestions[i]
+    const b = suggestions[i + 1]
+    const row: TelegramBot.InlineKeyboardButton[] = [
+      { text: a.summary, callback_data: `macro:suggest:${i}` },
+    ]
+    if (b) row.push({ text: b.summary, callback_data: `macro:suggest:${i + 1}` })
+    rows.push(row)
+  }
+  // Final button to trigger voice entry
+  rows.push([{ text: '🎙️ Voice note (custom goal)', callback_data: 'macro:suggest:voice' }])
+
+  const sent = await bot.sendMessage(chatId, header, {
     parse_mode: 'HTML',
-    reply_markup: buildSuggestionKeyboard(suggestions, false),
+    reply_markup: { inline_keyboard: rows },
   })
 
-  // Save for subsequent selection mapping
-  macroChatSuggestions.set(chatId, suggestions)
+  // Save for subsequent selection mapping (used by callback handler)
+  macroSuggestionStore.set(keyFor(chatId, sent.message_id), suggestions)
 
   // No immediate input to process; wait for user reply/selection or voice/text
   return false

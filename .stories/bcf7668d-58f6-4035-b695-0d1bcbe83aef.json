@@ -110,7 +110,7 @@
     },
     {
       "id": "2df5bdc9-c413-458c-aedb-e5f60f904e73",
-      "status": "-",
+      "status": "+",
       "title": "Update suggestions for macro goals",
       "description": "In @src/actions/actionMacroGoal.ts don't call the backend to get the suggestions, but use the options below, these need to be shown in-line with 2 options per line. The last button should trigger the voice entry:\n\n    \"Get fitter 💪 | Sleep better 😴\" \n    \"Be more mindful 🧘 | Manage stress ⚡”\n    \"🎙️ Voice note (custom goal)\"",
       "context": [
@@ -118,7 +118,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T13:57:30.388Z",
-      "updatedAt": "2025-10-17T13:58:07.606Z"
+      "updatedAt": "2025-10-17T14:32:54.532Z",
+      "completedAt": "2025-10-17T14:32:54.532Z"
     },
     {
       "id": "a10223db-97ee-4a96-81ef-95bf2a59cd44",
