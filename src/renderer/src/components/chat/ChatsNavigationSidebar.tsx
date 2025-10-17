@@ -26,15 +26,23 @@ function titleForContext(
     case 'STORY':
       return `Story Chat — ${opts.getStoryTitle(context.storyId)}`
     case 'FEATURE':
-      return `Feature Chat — ${opts.getStoryTitle(context.storyId)} / ${opts.getFeatureTitle(context.featureId)}`
+      return `Feature Chat — ${opts.getStoryTitle(context.storyId)} / ${opts.getFeatureTitle(
+        context.featureId,
+      )}`
     case 'PROJECT_TOPIC':
-      return `Project ${prettyTopicName((context as any).projectTopic)} — ${opts.getProjectTitle(context.projectId)}`
+      return `Project ${prettyTopicName((context as any).projectTopic)} — ${opts.getProjectTitle(
+        context.projectId,
+      )}`
     case 'STORY_TOPIC':
-      return `Story ${prettyTopicName((context as any).storyTopic)} — ${opts.getStoryTitle(context.storyId)}`
+      return `Story ${prettyTopicName((context as any).storyTopic)} — ${opts.getStoryTitle(
+        context.storyId,
+      )}`
     case 'AGENT_RUN':
       return `Agent Story Run — ${opts.getStoryTitle(context.storyId)}`
     case 'AGENT_RUN_FEATURE':
-      return `Agent Feature Run — ${opts.getStoryTitle(context.storyId)} / ${opts.getFeatureTitle(context.featureId)}`
+      return `Agent Feature Run — ${opts.getStoryTitle(context.storyId)} / ${opts.getFeatureTitle(
+        context.featureId,
+      )}`
     default:
       return 'Chat'
   }
@@ -102,36 +110,37 @@ export default function ChatsNavigationSidebar({
     })
   }, [projectChats])
 
-  // Category open state: top-level and per story/subcategory/feature
   const [open, setOpen] = useState<OpenState>({})
-  const didInitFromSelected = useRef(false)
+  const isInitialized = useRef(false)
 
-  // Load persisted open state on project or mode change; if none, compute from selected context
   useEffect(() => {
-    didInitFromSelected.current = false
+    isInitialized.current = false
     let restored: OpenState | null = null
     try {
       const raw = localStorage.getItem(storageKey(activeProjectId, mode))
       if (raw) restored = JSON.parse(raw)
     } catch {}
+
     if (restored && typeof restored === 'object') {
       setOpen(restored)
-      didInitFromSelected.current = true
+      isInitialized.current = true
     } else {
-      // fresh appearance: start closed except path to selected context (if any)
-      if (selectedContext) {
-        const next: OpenState = {}
-        const keys = computeKeysForContext(selectedContext)
-        keys.forEach((k) => (next[k] = true))
-        setOpen(next)
-      } else {
-        setOpen({})
-      }
+      setOpen({})
     }
   }, [activeProjectId, mode])
 
-  // Persist open state whenever it changes
   useEffect(() => {
+    if (isInitialized.current || !selectedContext) return
+
+    const next: OpenState = {}
+    const keys = computeKeysForContext(selectedContext)
+    keys.forEach((k) => (next[k] = true))
+    setOpen(next)
+    isInitialized.current = true
+  }, [selectedContext])
+
+  useEffect(() => {
+    if (!isInitialized.current) return
     try {
       localStorage.setItem(storageKey(activeProjectId, mode), JSON.stringify(open || {}))
     } catch {}
@@ -147,10 +156,9 @@ export default function ChatsNavigationSidebar({
 
   const ensureOpen = async (ctx: ChatContext) => {
     try {
-      await getChat(ctx) // ensure exists/created
+      await getChat(ctx)
     } catch (_) {}
     onSelectContext(ctx)
-    // preserve current 'open' state (do not reset)
   }
 
   const generalContext: ChatContext = useMemo(
@@ -158,7 +166,6 @@ export default function ChatsNavigationSidebar({
     [activeProjectId],
   )
 
-  // Build hierarchical grouping for categories view
   const storiesGrouping = useMemo(() => {
     const byStory = new Map<string, StoryGroup>()
 
@@ -220,7 +227,6 @@ export default function ChatsNavigationSidebar({
       }
     }
 
-    // sort items inside a story group
     const groups = Array.from(byStory.values()).map((g) => ({
       ...g,
       topics: g.topics.sort((a, b) => a.label.localeCompare(b.label)),
@@ -228,11 +234,13 @@ export default function ChatsNavigationSidebar({
       features: Object.fromEntries(
         Object.entries(g.features)
           .sort(([, a], [, b]) => a.featureTitle.localeCompare(b.featureTitle))
-          .map(([fid, f]) => [fid, { ...f, runs: f.runs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) }]),
+          .map(([fid, f]) => [
+            fid,
+            { ...f, runs: f.runs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) },
+          ]),
       ),
     }))
 
-    // sort groups by story title
     groups.sort((a, b) => a.storyTitle.localeCompare(b.storyTitle))
     return groups
   }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle, project])
@@ -256,19 +264,8 @@ export default function ChatsNavigationSidebar({
     return items
   }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
 
-  // When selectedContext becomes available for the first time after mount and we did not restore state, open only the relevant sections once
-  useEffect(() => {
-    if (!selectedContext || didInitFromSelected.current) return
-    const next: OpenState = {}
-    const keys = computeKeysForContext(selectedContext)
-    keys.forEach((k) => (next[k] = true))
-    setOpen(next)
-    didInitFromSelected.current = true
-  }, [selectedContext])
-
   function computeKeysForContext(ctx: ChatContext): string[] {
     const keys: string[] = []
-    // Top-level keys
     const storiesKey = 'cat:stories'
     const topicsKey = 'cat:project-topics'
 
@@ -369,19 +366,15 @@ export default function ChatsNavigationSidebar({
           </span>
           <span className="truncate">{storyTitle}</span>
         </div>
-        {typeof storyIndex === 'number' && (
-          <span className="ml-2 id-chip">{storyIndex}</span>
-        )}
+        {typeof storyIndex === 'number' && <span className="ml-2 id-chip">{storyIndex}</span>}
       </button>
     )
   }
 
   return (
     <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-3">
-      {/* Categories mode */}
       {mode === 'categories' ? (
         <div className="space-y-3">
-          {/* General */}
           <div className="space-y-1">
             <div className="px-2">
               <SectionHeader title="General" />
@@ -415,7 +408,6 @@ export default function ChatsNavigationSidebar({
             </div>
           </div>
 
-          {/* Stories section */}
           <div className="space-y-1">
             <div className="px-2">
               <SectionHeader title="Stories" openKey="cat:stories" />
@@ -441,27 +433,26 @@ export default function ChatsNavigationSidebar({
                           />
                         </div>
                         {isOpen && (
-                          <div id={`${skey}-section`} className="pr-2 space-y-2">
-                            {/* Story Chat first if present */}
+                          <div id={`${skey}-section`} className="pl-4 space-y-2">
                             {g.storyChat && (
-                              <div className="pl-0 border-l border-[var(--border-subtle)]">
-                                <div className="pl-1">
+                              <div className="border-l border-[var(--border-subtle)]">
+                                <div className="pl-2">
                                   <ChatButton ctx={g.storyChat.ctx} label={g.storyChat.label} />
                                 </div>
                               </div>
                             )}
 
-                            {/* Topics subcategory */}
                             {g.topics.length > 0 && (
                               <div className="space-y-1">
-                                <div className="pl-1 pr-2">
-                                  <SectionHeader title="Topics" openKey={`story:${g.storyId}:topics`} />
-                                </div>
+                                <SectionHeader title="Topics" openKey={`story:${g.storyId}:topics`} />
                                 {open[`story:${g.storyId}:topics`] && (
-                                  <div id={`story:${g.storyId}:topics-section`} className="pr-2 space-y-1">
-                                    <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                  <div
+                                    id={`story:${g.storyId}:topics-section`}
+                                    className="pl-4 space-y-1"
+                                  >
+                                    <div className="border-l border-[var(--border-subtle)]">
                                       {g.topics.map((it) => (
-                                        <div key={it.key} className="pl-1">
+                                        <div key={it.key} className="pl-2">
                                           <ChatButton ctx={it.ctx} label={it.label} />
                                         </div>
                                       ))}
@@ -471,17 +462,20 @@ export default function ChatsNavigationSidebar({
                               </div>
                             )}
 
-                            {/* Runs subcategory at story level */}
                             {g.runs.length > 0 && (
                               <div className="space-y-1">
-                                <div className="pl-1 pr-2">
-                                  <SectionHeader title="Agent Runs" openKey={`story:${g.storyId}:runs`} />
-                                </div>
+                                <SectionHeader
+                                  title="Agent Runs"
+                                  openKey={`story:${g.storyId}:runs`}
+                                />
                                 {open[`story:${g.storyId}:runs`] && (
-                                  <div id={`story:${g.storyId}:runs-section`} className="pr-2 space-y-1">
-                                    <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                  <div
+                                    id={`story:${g.storyId}:runs-section`}
+                                    className="pl-4 space-y-1"
+                                  >
+                                    <div className="border-l border-[var(--border-subtle)]">
                                       {g.runs.map((it) => (
-                                        <div key={it.key} className="pl-1">
+                                        <div key={it.key} className="pl-2">
                                           <ChatButton ctx={it.ctx} label={it.label} />
                                         </div>
                                       ))}
@@ -491,60 +485,73 @@ export default function ChatsNavigationSidebar({
                               </div>
                             )}
 
-                            {/* Features subcategory */}
                             {Object.keys(g.features).length > 0 && (
                               <div className="space-y-1">
-                                <div className="pl-1 pr-2">
-                                  <SectionHeader title="Features" openKey={`story:${g.storyId}:features`} />
-                                </div>
+                                <SectionHeader
+                                  title="Features"
+                                  openKey={`story:${g.storyId}:features`}
+                                />
                                 {open[`story:${g.storyId}:features`] && (
-                                  <div id={`story:${g.storyId}:features-section`} className="pr-2 space-y-2">
+                                  <div
+                                    id={`story:${g.storyId}:features-section`}
+                                    className="pl-4 space-y-2"
+                                  >
                                     {Object.values(g.features).map((f) => {
                                       const fkey = `feature:${f.featureId}`
                                       const fOpen = !!open[fkey]
                                       return (
                                         <div key={f.featureId} className="space-y-1">
-                                          {/* Provide a minimal 4px left padding for feature headers as well */}
-                                          <div className="pl-1">
-                                            <button
-                                              type="button"
-                                              className="w-full flex items-center gap-2 rounded-md border bg-[var(--surface-overlay)] px-3 py-2 text-left text-[12px] font-medium text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
-                                              onClick={() => setOpen((prev) => ({ ...prev, [fkey]: !prev[fkey] }))}
-                                              aria-expanded={fOpen}
-                                              aria-controls={`${fkey}-section`}
-                                              title={f.featureTitle}
-                                            >
-                                              <span className="flex-none">
-                                                <IconChevron
-                                                  className="w-4 h-4"
-                                                  style={{ transform: fOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
-                                                />
-                                              </span>
-                                              <span className="truncate">{f.featureTitle}</span>
-                                            </button>
-                                          </div>
+                                          <button
+                                            type="button"
+                                            className="w-full flex items-center gap-2 rounded-md border bg-[var(--surface-overlay)] px-3 py-2 text-left text-[12px] font-medium text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
+                                            onClick={() =>
+                                              setOpen((prev) => ({ ...prev, [fkey]: !prev[fkey] }))
+                                            }
+                                            aria-expanded={fOpen}
+                                            aria-controls={`${fkey}-section`}
+                                            title={f.featureTitle}
+                                          >
+                                            <span className="flex-none">
+                                              <IconChevron
+                                                className="w-4 h-4"
+                                                style={{
+                                                  transform: fOpen ? 'rotate(90deg)' : 'none',
+                                                  transition: 'transform 0.15s ease',
+                                                }}
+                                              />
+                                            </span>
+                                            <span className="truncate">{f.featureTitle}</span>
+                                          </button>
                                           {fOpen && (
-                                            <div id={`${fkey}-section`} className="pr-2 space-y-1">
-                                              {/* Feature chat first if present */}
+                                            <div id={`${fkey}-section`} className="pl-4 space-y-1">
                                               {f.featureChat && (
-                                                <div className="pl-0 border-l border-[var(--border-subtle)]">
-                                                  <div className="pl-1">
-                                                    <ChatButton ctx={f.featureChat.ctx} label={f.featureChat.label} />
+                                                <div className="border-l border-[var(--border-subtle)]">
+                                                  <div className="pl-2">
+                                                    <ChatButton
+                                                      ctx={f.featureChat.ctx}
+                                                      label={f.featureChat.label}
+                                                    />
                                                   </div>
                                                 </div>
                                               )}
-                                              {/* Feature agent runs */}
                                               {f.runs.length > 0 && (
                                                 <div className="space-y-1">
-                                                  <div className="pl-1 pr-2">
-                                                    <SectionHeader title="Agents" openKey={`feature:${f.featureId}:runs`} />
-                                                  </div>
+                                                  <SectionHeader
+                                                    title="Agents"
+                                                    openKey={`feature:${f.featureId}:runs`}
+                                                  />
                                                   {open[`feature:${f.featureId}:runs`] && (
-                                                    <div id={`feature:${f.featureId}:runs-section`} className="pr-2 space-y-1">
-                                                      <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                                    <div
+                                                      id={`feature:${f.featureId}:runs-section`}
+                                                      className="pl-4 space-y-1"
+                                                    >
+                                                      <div className="border-l border-[var(--border-subtle)]">
                                                         {f.runs.map((it) => (
-                                                          <div key={it.key} className="pl-1">
-                                                            <ChatButton ctx={it.ctx} label={it.label} />
+                                                          <div key={it.key} className="pl-2">
+                                                            <ChatButton
+                                                              ctx={it.ctx}
+                                                              label={it.label}
+                                                            />
                                                           </div>
                                                         ))}
                                                       </div>
@@ -571,21 +578,20 @@ export default function ChatsNavigationSidebar({
             )}
           </div>
 
-          {/* Project Topics */}
           <div className="space-y-1">
             <div className="px-2">
               <SectionHeader title="Project Topics" openKey="cat:project-topics" />
             </div>
             {open['cat:project-topics'] && (
-              <div id="cat:project-topics-section" className="px-2 space-y-1">
+              <div id="cat:project-topics-section" className="pl-4 space-y-1">
                 {projectTopics.length === 0 ? (
                   <div className="text-[13px] text-[var(--text-secondary)] px-0 py-1">
                     No project topic chats.
                   </div>
                 ) : (
-                  <div className="pl-0 border-l border-[var(--border-subtle)]">
+                  <div className="border-l border-[var(--border-subtle)]">
                     {projectTopics.map((t) => (
-                      <div key={t.key} className="pl-1">
+                      <div key={t.key} className="pl-2">
                         <ChatButton ctx={t.ctx} label={t.label} />
                       </div>
                     ))}
@@ -596,7 +602,6 @@ export default function ChatsNavigationSidebar({
           </div>
         </div>
       ) : (
-        // History mode
         <div className="space-y-2">
           <div className="px-2 py-1 text-[11px] uppercase tracking-wider text-[var(--text-muted)]/90 border-b border-[var(--border-subtle)]">
             History
@@ -626,7 +631,9 @@ export default function ChatsNavigationSidebar({
                     onClick={() => onSelectContext(ctx)}
                     title={label}
                   >
-                    <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
+                    <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
+                      {label}
+                    </div>
                     <div className="text-[10px] text-[var(--text-tertiary)] truncate">
                       Updated {c.chat.updatedAt || c.chat.createdAt || ''}
                     </div>
