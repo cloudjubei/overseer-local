@@ -2448,8 +2448,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T23:24:04.989Z",
-      "updatedAt": "2025-10-17T11:39:10.717Z",
-      "rejection": "THE BELOW IS NOT DONE - SCRUTINISE THE CODE THOROUGHLY!!!\n\nthe categories keep closing when opening a chat (ie clicking one of the chat buttons) - they should ONLY START closed on FIRST appear - after the user is navigating in the view then however they change it that's the way these remain."
+      "updatedAt": "2025-10-17T11:49:25.082Z",
+      "rejection": "ONLY THE BELOW IS NOT DONE - SCRUTINISE THE CODE THOROUGHLY!!!\n\nWhen clicking a chat - ALL the categories close. this shouldn't happen."
     }
   ],
   "featureIdToDisplayIndex": {
