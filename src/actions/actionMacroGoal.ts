@@ -96,6 +96,16 @@ export default async function actionMacroGoal(
 ) {
   const chatId = chat.id
 
+  // Small dividers to segment stages
+  if (firstGoal) {
+    try {
+      await bot.sendMessage(chatId, '⚙️ Profile complete')
+    } catch {}
+  }
+  try {
+    await bot.sendMessage(chatId, '🧭 Weekly direction')
+  } catch {}
+
   // If the current message already carries input (audio) -> process immediately
   const hasVoice = !!msg.voice || !!msg.audio
   const hasText = !!rawText && rawText.trim().length > 0

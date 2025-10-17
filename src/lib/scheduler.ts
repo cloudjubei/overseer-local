@@ -129,6 +129,13 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
               from,
             } as TelegramBot.Message
 
+            // Small visual dividers before key stages
+            if (action === 'micro_goals_generate') {
+              await botRef.sendMessage(chatId, '☀️ Morning wake-up')
+            } else if (action === 'micro_goals_check') {
+              await botRef.sendMessage(chatId, '✨ Evening reflection')
+            }
+
             switch (action) {
               case 'micro_goals_generate':
                 await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg, false)
