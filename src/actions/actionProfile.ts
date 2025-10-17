@@ -164,8 +164,8 @@ async function promptForStep(bot: TelegramBot, chatId: number, step: ProfileStep
           [
             { text: 'Male', callback_data: 'profile:gender:MALE' },
             { text: 'Female', callback_data: 'profile:gender:FEMALE' },
-            { text: 'Prefer not to say', callback_data: 'profile:gender:OTHER' },
           ],
+          [{ text: 'Prefer not to say', callback_data: 'profile:gender:OTHER' }],
         ],
       }
       await bot.sendMessage(chatId, '<b>Gender</b>\nPlease select your gender:', {

@@ -222,7 +222,8 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         // Confirm saved and clear any pending state
         const prev = getSession(userId)
         const ack = prev?.conversationState?.context?.pendingJournal?.acknowledgmentText
-        const bullets: string[] | undefined = prev?.conversationState?.context?.pendingJournal?.summaryBulletpoints
+        const bullets: string[] | undefined =
+          prev?.conversationState?.context?.pendingJournal?.summaryBulletpoints
         setSession({
           ...(prev || { userId }),
           accessToken: prev?.accessToken || '',
@@ -234,11 +235,9 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         const finalAck =
           (typeof ack === 'string' ? ack.trim() : '') || '📝 Journal entry recorded ✅'
         await bot.sendMessage(chatId, finalAck)
+        await sleep(2000)
 
-        // Send the summary bullet points if available
-        const pretty = Array.isArray(bullets)
-          ? bullets.map((s) => (typeof s === 'string' ? s.trim() : '')).filter((s) => s.length > 0)
-          : []
+        const pretty = bullets?.map((s) => s.trim()).filter((s) => s.length > 0) ?? []
         if (pretty.length > 0) {
           const summaryMsg = `🧠 Summary from today’s reflection:\n${pretty.map((bp) => `• ${bp}`).join('\n')}`
           await bot.sendMessage(chatId, summaryMsg)
@@ -547,15 +546,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           label: 'Sounds like energy’s a little too low — let’s see if we can lift that this week.',
         },
         2: {
-          emoji: '😐',
-          label: 'Sounds like energy’s a little low — let’s see if we can lift that this week.',
-        },
-        3: {
           emoji: '🙂',
           label: 'You`re on the right track - let’s see if we can lift that this week.',
         },
-        4: { emoji: '😊', label: 'Sounds great 😊' },
-        5: { emoji: '🤩', label: 'You sound pumped! Keep it up! 🤩' },
+        3: { emoji: '🤩', label: 'You sound pumped! Keep it up! 🤩' },
       }
 
       const m = energyLabels[val]
@@ -662,14 +656,14 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         if (kind === 'active') {
           const m = activityLabels[val]
           if (m) {
-            await bot.sendMessage(chatId, `${m.label}`)
+            await bot.sendMessage(chatId, `${m.emoji} - ${m.label}`)
             // add sleep of 2s
             await sleep(2000)
           }
         } else if (kind === 'energy') {
           const m = energyLabels[val]
           if (m) {
-            await bot.sendMessage(chatId, `${m.label}.`)
+            await bot.sendMessage(chatId, `${m.emoji} - ${m.label}.`)
             // add sleep of 2s
             await sleep(2000)
           }

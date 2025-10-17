@@ -7,9 +7,9 @@ function buildActiveKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '1 🛋️ Low', callback_data: 'lifestyle:active:1' },
-        { text: '2 🚶 Moderate', callback_data: 'lifestyle:active:2' },
-        { text: '3 🏃 High', callback_data: 'lifestyle:active:3' },
+        { text: 'Low', callback_data: 'lifestyle:active:1' },
+        { text: 'Moderate', callback_data: 'lifestyle:active:2' },
+        { text: 'High', callback_data: 'lifestyle:active:3' },
       ],
     ],
   }
@@ -19,9 +19,9 @@ function buildEnergyKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '1 😴 Low', callback_data: 'lifestyle:energy:1' },
-        { text: '2 🙂 Medium', callback_data: 'lifestyle:energy:2' },
-        { text: '3 🤩 High', callback_data: 'lifestyle:energy:3' },
+        { text: '😴 Low', callback_data: 'lifestyle:energy:1' },
+        { text: '🙂 Okay', callback_data: 'lifestyle:energy:2' },
+        { text: '🤩 High', callback_data: 'lifestyle:energy:3' },
       ],
     ],
   }
@@ -48,32 +48,6 @@ function setLifestyleState(userId: string, patch: { activeLevel?: number; energy
       lastUpdatedAt: Math.floor(Date.now() / 1000),
     },
   })
-}
-
-function labelForActivity(val: number): string {
-  switch (val) {
-    case 1:
-      return 'Low'
-    case 2:
-      return 'Moderate'
-    case 3:
-      return 'High'
-    default:
-      return String(val)
-  }
-}
-
-function labelForEnergy(val: number): string {
-  switch (val) {
-    case 1:
-      return 'Low'
-    case 2:
-      return 'Medium'
-    case 3:
-      return 'High'
-    default:
-      return String(val)
-  }
 }
 
 export default async function actionLifestyle(
@@ -109,17 +83,6 @@ export default async function actionLifestyle(
     energyLevel >= 1 &&
     energyLevel <= 3
   ) {
-    try {
-      // Confirmation message similar to profile confirmations
-      const activityLabel = labelForActivity(activeLevel)
-      const energyLabel = labelForEnergy(energyLevel)
-      await bot.sendMessage(
-        chatId,
-        `Got it — Activity: <b>${activityLabel}</b> (${activeLevel}/3), Energy: <b>${energyLabel}</b> (${energyLevel}/3).`,
-        opts,
-      )
-    } catch {}
-
     const newLifestyle: UserProfileLifestyleCreateModel = {
       activeLevel,
       energyLevel,

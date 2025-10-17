@@ -130,9 +130,7 @@ export default async function actionMacroGoal(
     },
   ]
 
-  // Build inline keyboard with 2 options per row and a final voice-note button
   const rows: TelegramBot.InlineKeyboardButton[][] = []
-  // First two rows (2 per line)
   for (let i = 0; i < 4; i += 2) {
     const a = suggestions[i]
     const b = suggestions[i + 1]
@@ -142,7 +140,6 @@ export default async function actionMacroGoal(
     if (b) row.push({ text: b.summary, callback_data: `macro:suggest:${i + 1}` })
     rows.push(row)
   }
-  // Final button to trigger voice entry
   rows.push([{ text: '🎙️ Voice note (custom goal)', callback_data: 'macro:suggest:voice' }])
 
   const sent = await bot.sendMessage(chatId, header, {
@@ -150,10 +147,8 @@ export default async function actionMacroGoal(
     reply_markup: { inline_keyboard: rows },
   })
 
-  // Save for subsequent selection mapping (used by callback handler)
   macroSuggestionStore.set(keyFor(chatId, sent.message_id), suggestions)
 
-  // No immediate input to process; wait for user reply/selection or voice/text
   return false
 }
 
@@ -166,13 +161,11 @@ export async function processMacroInput(
   pickedSuggestionText?: string,
 ) {
   const chatId = chat.id
-  // Inform user we're processing and remove the suggestion keyboard immediately
   const processingMsg = await bot.sendMessage(chatId, 'Processing...', {
     reply_markup: { remove_keyboard: true },
   })
 
   try {
-    // Always clear existing check-ins prior to creating a new macro context
     await CheckInsService.checkInsControllerClearCheckIns()
 
     let created: GoalModel | null = null
@@ -197,28 +190,37 @@ export async function processMacroInput(
       })
     }
 
+    try {
+      await bot.deleteMessage(chatId, processingMsg.message_id)
+    } catch {}
+
     const confirmation =
       created?.confirmationText && created.confirmationText.trim().length > 0
         ? created.confirmationText
-        : 'Perfect — I recorded your goal. I’ll keep you on track.'
-    await bot.sendMessage(chatId, confirmation)
-    await sleep(2000)
+        : 'I’ll keep you on track.'
+    await bot.sendMessage(chatId, `<b>Perfect — I recorded your goal</b>\n${confirmation}`, {
+      parse_mode: 'HTML',
+    })
 
+    const startTime = new Date().getTime()
     await scheduleCheckIns(chatId)
+    const endTime = new Date().getTime()
+    const sleepTime = 2000 - (endTime - startTime)
+    if (sleepTime > 0) {
+      await sleep(sleepTime)
+    }
 
     await bot.sendMessage(
       chatId,
       'Here’s the plan — I’ll share three tiny steps each morning to keep your momentum building.\n\nIn the evening, I’ll check in to see how things went.',
     )
+    await sleep(2000)
 
     await actionMicroGoalsGenerate(bot, chat, from, '', msg)
   } catch (e) {
     console.error('ActionMacroGoal error: ', e)
     await bot.sendMessage(chatId, 'Sorry, I could not create your macro goal. Please try again.')
   } finally {
-    try {
-      await bot.deleteMessage(chatId, processingMsg.message_id)
-    } catch {}
   }
 }
 

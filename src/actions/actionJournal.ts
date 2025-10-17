@@ -90,9 +90,9 @@ export async function processAudioJournal(
 
     // Store pending journal confirmation state in session, including acknowledgment text and summary for final reply
     const prev = getSession(userId)
-    const summaryBulletpoints = Array.isArray(created.transcription?.summaryBulletpoints)
-      ? (created.transcription?.summaryBulletpoints || []).map((s) => (typeof s === 'string' ? s.trim() : '')).filter((s) => s.length > 0)
-      : undefined
+    const summaryBulletpoints = created.transcription?.summaryBulletpoints
+      ?.map((s) => s.trim())
+      .filter((s) => s.length > 0)
 
     setSession({
       ...(prev || { userId }),

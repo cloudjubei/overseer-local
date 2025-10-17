@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type UserProfileLifestyleCreateModel = {
   /**
-   * 1-Low, 2-Moderate, 3-High
+   * 1-Low, 2-Medium, 3-High
    */
   activeLevel: number
   /**
