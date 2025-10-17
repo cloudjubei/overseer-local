@@ -267,7 +267,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
 
       await bot.sendMessage(
         chatId,
-        'Great — tap and hold the mic to share a quick voice note about what you want to focus on this week. I\'ll turn it into a clear goal.',
+        "Great — tap and hold the mic to share a quick voice note about what you want to focus on this week. I'll turn it into a clear goal.",
       )
       return
     }

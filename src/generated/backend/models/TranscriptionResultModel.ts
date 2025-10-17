@@ -13,6 +13,10 @@ export type TranscriptionResultModel = {
    */
   confirmationText: string
   /**
+   * A summary with concise bulletpoints of the input text
+   */
+  summaryBulletpoints: Array<string>
+  /**
    * STT confidence 0..1 (may be undefined when provider does not provide it)
    */
   confidence?: number
