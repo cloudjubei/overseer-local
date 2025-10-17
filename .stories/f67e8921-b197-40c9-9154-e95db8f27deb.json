@@ -2448,8 +2448,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T23:24:04.989Z",
-      "updatedAt": "2025-10-17T08:59:13.527Z",
-      "rejection": "1)  the categories keep closing when opening a chat (ie clicking one of the chat buttons) - they should ONLY START closed on FIRST appear - after the user is navigating in the view then however they change it that's the way these remain. Of course on project switch it's the same as if it's first appearing.\n\n2) all the sub-items of any section require a minimal 4px left padding FROM THEIR parent. Currently it's ALL level and hard to tell the different depths."
+      "updatedAt": "2025-10-17T10:06:23.323Z",
+      "rejection": "THE BELOW ARE NOT DONE - SCRUTINISE THE CODE THOROUGHLY!!!\n\n1)  the categories keep closing when opening a chat (ie clicking one of the chat buttons) - they should ONLY START closed on FIRST appear - after the user is navigating in the view then however they change it that's the way these remain. Of course on project switch it's the same as if it's first appearing.\n\n2) all the sub-items of any section require a minimal 4px left padding FROM THEIR parent. Currently it's ALL level and hard to tell the different depths."
     }
   ],
   "featureIdToDisplayIndex": {
