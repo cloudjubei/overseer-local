@@ -197,6 +197,12 @@ export async function processMacroInput(
       })
     }
 
+    // Echo confirmation of the created macro goal using confirmationText when available
+    const confirmation = created?.confirmationText && created.confirmationText.trim().length > 0
+      ? created.confirmationText
+      : 'Perfect — I recorded your goal. I’ll keep you on track.'
+    await bot.sendMessage(chatId, confirmation)
+
     await scheduleCheckIns(chatId)
 
     await bot.sendMessage(

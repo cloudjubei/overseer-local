@@ -138,7 +138,7 @@
     },
     {
       "id": "d1ab6a9d-84a0-437b-a5b5-3fc17e954931",
-      "status": "-",
+      "status": "+",
       "title": "After selecting or typing a macro goal, echo it back",
       "description": "@src/generated/backend/models/GoalModel.ts now contains 'confirmationText' - if it's set we want to send it back to the user after the macro goal is created in @src/actions/actionMacroGoal.ts .\nIf it's not set the message should say:\n“Perfect — I recorded your goal. I’ll keep you on track.”",
       "context": [
@@ -147,7 +147,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T14:03:51.945Z",
-      "updatedAt": "2025-10-17T14:03:51.945Z"
+      "updatedAt": "2025-10-17T14:37:37.256Z",
+      "completedAt": "2025-10-17T14:37:37.256Z"
     }
   ],
   "featureIdToDisplayIndex": {
