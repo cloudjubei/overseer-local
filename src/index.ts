@@ -222,6 +222,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         // Confirm saved and clear any pending state
         const prev = getSession(userId)
         const ack = prev?.conversationState?.context?.pendingJournal?.acknowledgmentText
+        const bullets: string[] | undefined = prev?.conversationState?.context?.pendingJournal?.summaryBulletpoints
         setSession({
           ...(prev || { userId }),
           accessToken: prev?.accessToken || '',
@@ -233,6 +234,15 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         const finalAck =
           (typeof ack === 'string' ? ack.trim() : '') || '📝 Journal entry recorded ✅'
         await bot.sendMessage(chatId, finalAck)
+
+        // Send the summary bullet points if available
+        const pretty = Array.isArray(bullets)
+          ? bullets.map((s) => (typeof s === 'string' ? s.trim() : '')).filter((s) => s.length > 0)
+          : []
+        if (pretty.length > 0) {
+          const summaryMsg = `🧠 Summary from today’s reflection:\n${pretty.map((bp) => `• ${bp}`).join('\n')}`
+          await bot.sendMessage(chatId, summaryMsg)
+        }
         return
       }
 

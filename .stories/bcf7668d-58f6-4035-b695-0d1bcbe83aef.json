@@ -152,7 +152,7 @@
     },
     {
       "id": "be5876e1-cccc-478e-a41c-9ffb4b577b1f",
-      "status": "?",
+      "status": "+",
       "title": "Add acknowledgement text",
       "description": "Now @src/generated/backend/models/JournalModel.ts contains 'acknowledgementText' - this should be used as the message to send back to the user after they submit a journal - whether text or audio.",
       "context": [
@@ -160,12 +160,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T15:16:18.067Z",
-      "updatedAt": "2025-10-17T15:47:11.881Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-17T15:54:20.082Z",
+      "completedAt": "2025-10-17T15:54:20.082Z"
     },
     {
       "id": "9fd629d1-e182-4218-b5ab-8b42200dd456",
-      "status": "-",
+      "status": "+",
       "title": "Show audio summary",
       "description": "In @src/generated/backend/models/TranscriptionResultModel.ts there's a new `summaryBulletpoints`. This needs to be echoed back to the user in a message after they confirm the audio transcription in @src/actions/actionJournal.ts , specifically the method `processAudioJournal`. It should send back this message template: \n🧠 Summary from today’s reflection:\nsummaryBulletpoints\n\nWhere the bulletpoints should be shown nicely bulleted one below the other.",
       "context": [
@@ -174,7 +174,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T15:42:14.624Z",
-      "updatedAt": "2025-10-17T15:42:14.624Z"
+      "updatedAt": "2025-10-17T15:58:07.761Z",
+      "completedAt": "2025-10-17T15:58:07.761Z"
     }
   ],
   "featureIdToDisplayIndex": {
