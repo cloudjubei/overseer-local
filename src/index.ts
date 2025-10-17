@@ -553,7 +553,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       const parts = data.split(':')
       const kind = parts[1] // 'active' | 'energy'
       const valStr = parts[2]
-      const val = Math.max(1, Math.min(5, parseInt(valStr || '0', 10)))
+      const val = Math.max(1, Math.min(3, parseInt(valStr || '0', 10)))
 
       try {
         await ensureBackendConfigured()
@@ -584,25 +584,18 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
       const activityLabels: Record<number, { emoji: string; label: string }> = {
         1: { emoji: '🛋️', label: 'Thanks, that helps me understand you better 💪.' },
         2: { emoji: '🚶‍♂️', label: 'Thanks, that helps me understand you better 💪.' },
-        3: { emoji: '🏃', label: 'Thanks, that helps me understand you better 💪.' },
-        4: { emoji: '💪', label: 'You sound in good shape already 👏.' },
-        5: { emoji: '🔥', label: 'You sound in amazing shape already 👏👏.' },
+        3: { emoji: '🏃', label: 'You sound in good shape already 👏.' },
       }
       const energyLabels: Record<number, { emoji: string; label: string }> = {
         1: {
           emoji: '😴',
-          label: 'Sounds like energy’s a little too low — let’s see if we can lift that this week.',
-        },
-        2: {
-          emoji: '😐',
           label: 'Sounds like energy’s a little low — let’s see if we can lift that this week.',
         },
-        3: {
+        2: {
           emoji: '🙂',
           label: 'You`re on the right track - let’s see if we can lift that this week.',
         },
-        4: { emoji: '😊', label: 'Sounds great 😊' },
-        5: { emoji: '🤩', label: 'You sound pumped! Keep it up! 🤩' },
+        3: { emoji: '🤩', label: 'Sounds great 😊' },
       }
 
       try {
