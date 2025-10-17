@@ -25,7 +25,7 @@ export async function processTextJournal(
     text: journalText,
     label: 'telegram',
   }
-  await JournalsService.journalsControllerCreateText({ requestBody: body })
+  const created = await JournalsService.journalsControllerCreateText({ requestBody: body })
 
   const session = getSession(userId)
   clearConversationSession(userId, session)
@@ -34,7 +34,8 @@ export async function processTextJournal(
     await bot.deleteMessage(chat.id, waiting.message_id)
   } catch {}
 
-  await bot.sendMessage(chat.id, '📝 Journal entry recorded ✅')
+  const ack = (created as any)?.acknowledgmentText?.trim()
+  await bot.sendMessage(chat.id, ack || '📝 Journal entry recorded ✅')
 }
 
 export async function processAudioJournal(
@@ -87,7 +88,7 @@ export async function processAudioJournal(
       parse_mode: 'HTML',
     })
 
-    // Store pending journal confirmation state in session
+    // Store pending journal confirmation state in session, including acknowledgment text for final reply
     const prev = getSession(userId)
     setSession({
       ...(prev || { userId }),
@@ -102,6 +103,7 @@ export async function processAudioJournal(
           pendingJournal: {
             id: created.id,
             messageId: sent.message_id,
+            acknowledgmentText: (created as any)?.acknowledgmentText?.trim?.() || '',
           },
         },
         lastUpdatedAt: Math.floor(Date.now() / 1000),
