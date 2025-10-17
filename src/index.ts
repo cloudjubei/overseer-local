@@ -336,6 +336,22 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           chatId,
           `${doneMicro.length}/${allMicro.length} goals done - ${goalsCompletionMessage}`,
         )
+
+        try {
+          const profile = await ProfilesService.profilesControllerMe()
+          const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
+          const latest =
+            lifestyles.length > 0 ? (lifestyles[lifestyles.length - 1] as any) : undefined
+          const motivationTextEvening =
+            typeof latest?.motivationTextEvening === 'string'
+              ? latest.motivationTextEvening.trim()
+              : ''
+          if (motivationTextEvening) {
+            await bot.sendMessage(chatId, motivationTextEvening)
+            await sleep(2000)
+          }
+        } catch {}
+
         await sleep(2000)
 
         await bot.sendMessage(chatId, journalPrompt)
@@ -412,6 +428,22 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           chatId,
           `${store.length}/${store.length} goals done - amazing work! Keep it up!`,
         )
+
+        try {
+          const profile = await ProfilesService.profilesControllerMe()
+          const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
+          const latest =
+            lifestyles.length > 0 ? (lifestyles[lifestyles.length - 1] as any) : undefined
+          const motivationTextEvening =
+            typeof latest?.motivationTextEvening === 'string'
+              ? latest.motivationTextEvening.trim()
+              : ''
+          if (motivationTextEvening) {
+            await bot.sendMessage(chatId, motivationTextEvening)
+            await sleep(2000)
+          }
+        } catch {}
+
         await sleep(2000)
 
         await bot.sendMessage(chatId, journalPrompt)

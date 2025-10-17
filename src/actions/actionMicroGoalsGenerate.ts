@@ -1,6 +1,7 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { GoalsService } from 'src/generated/backend'
+import { GoalsService, ProfilesService } from 'src/generated/backend'
 import { clearConversationSession, getSession, setSession } from 'src/lib/sessionStore'
+import { sleep } from 'src/lib/time'
 
 function escapeHtml(input: string): string {
   return (input || '')
@@ -44,7 +45,7 @@ export default async function actionMicroGoalsGenerate(
   skipEnergyLevels: boolean = true,
 ) {
   const chatId = chat.id
-  const userId = String(from?.id || chatId)
+  const userId = String(from?.id || chat.id)
 
   if (!skipEnergyLevels) {
     try {
@@ -77,6 +78,19 @@ export default async function actionMicroGoalsGenerate(
             lastUpdatedAt: Math.floor(Date.now() / 1000),
           },
         })
+
+        try {
+          const profile = await ProfilesService.profilesControllerMe()
+          const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
+          const latest =
+            lifestyles.length > 0 ? (lifestyles[lifestyles.length - 1] as any) : undefined
+          const motivationText =
+            typeof latest?.motivationText === 'string' ? latest.motivationText.trim() : ''
+          if (motivationText) {
+            await bot.sendMessage(chatId, motivationText)
+            await sleep(2000)
+          }
+        } catch {}
 
         const header = '<b>Before we plan today</b>\nHow’s your energy and wellbeing right now?'
         await bot.sendMessage(chatId, header, {
