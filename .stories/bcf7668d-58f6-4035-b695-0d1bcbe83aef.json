@@ -95,7 +95,7 @@
     },
     {
       "id": "417843c9-8444-4283-9c2f-bf1c393ee32a",
-      "status": "-",
+      "status": "+",
       "title": "UserProfileLifestyleModel has updated - update options",
       "description": "@src/generated/backend/models/UserProfileLifestyleModel.ts has updated and there's a new @src/generated/backend/models/UserProfileLifestyleCreateModel.ts - there's only 3 levels to activity and energy levels. The options that are displayed to the user must be updated to reflect this. All options should show on 1 line.",
       "context": [
@@ -104,7 +104,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-17T13:52:07.299Z",
-      "updatedAt": "2025-10-17T13:52:07.299Z"
+      "updatedAt": "2025-10-17T14:18:56.973Z",
+      "completedAt": "2025-10-17T14:18:56.973Z"
     },
     {
       "id": "2df5bdc9-c413-458c-aedb-e5f60f904e73",

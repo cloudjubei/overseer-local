@@ -7,14 +7,10 @@ function buildActiveKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '1 🛋️ Very low', callback_data: 'lifestyle:active:1' },
-        { text: '2 🚶‍♂️ Light', callback_data: 'lifestyle:active:2' },
+        { text: '1 🛋️ Low', callback_data: 'lifestyle:active:1' },
+        { text: '2 🚶 Moderate', callback_data: 'lifestyle:active:2' },
+        { text: '3 🏃 High', callback_data: 'lifestyle:active:3' },
       ],
-      [
-        { text: '3 🏃 Moderate', callback_data: 'lifestyle:active:3' },
-        { text: '4 💪 High', callback_data: 'lifestyle:active:4' },
-      ],
-      [{ text: '5 🔥 Very high', callback_data: 'lifestyle:active:5' }],
     ],
   }
 }
@@ -23,14 +19,10 @@ function buildEnergyKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '1 😴 Very low', callback_data: 'lifestyle:energy:1' },
-        { text: '2 😐 Low', callback_data: 'lifestyle:energy:2' },
+        { text: '1 😴 Low', callback_data: 'lifestyle:energy:1' },
+        { text: '2 🙂 Medium', callback_data: 'lifestyle:energy:2' },
+        { text: '3 🤩 High', callback_data: 'lifestyle:energy:3' },
       ],
-      [
-        { text: '3 🙂 Okay', callback_data: 'lifestyle:energy:3' },
-        { text: '4 😊 Good', callback_data: 'lifestyle:energy:4' },
-      ],
-      [{ text: '5 🤩 Great', callback_data: 'lifestyle:energy:5' }],
     ],
   }
 }
@@ -61,15 +53,11 @@ function setLifestyleState(userId: string, patch: { activeLevel?: number; energy
 function labelForActivity(val: number): string {
   switch (val) {
     case 1:
-      return 'Very low'
+      return 'Low'
     case 2:
-      return 'Light'
-    case 3:
       return 'Moderate'
-    case 4:
+    case 3:
       return 'High'
-    case 5:
-      return 'Very high'
     default:
       return String(val)
   }
@@ -78,15 +66,11 @@ function labelForActivity(val: number): string {
 function labelForEnergy(val: number): string {
   switch (val) {
     case 1:
-      return 'Very low'
-    case 2:
       return 'Low'
+    case 2:
+      return 'Medium'
     case 3:
-      return 'Okay'
-    case 4:
-      return 'Good'
-    case 5:
-      return 'Great'
+      return 'High'
     default:
       return String(val)
   }
@@ -120,10 +104,10 @@ export default async function actionLifestyle(
   if (
     typeof activeLevel === 'number' &&
     activeLevel >= 1 &&
-    activeLevel <= 5 &&
+    activeLevel <= 3 &&
     typeof energyLevel === 'number' &&
     energyLevel >= 1 &&
-    energyLevel <= 5
+    energyLevel <= 3
   ) {
     try {
       // Confirmation message similar to profile confirmations
@@ -131,7 +115,7 @@ export default async function actionLifestyle(
       const energyLabel = labelForEnergy(energyLevel)
       await bot.sendMessage(
         chatId,
-        `Got it — Activity: <b>${activityLabel}</b> (${activeLevel}/5), Energy: <b>${energyLabel}</b> (${energyLevel}/5).`,
+        `Got it — Activity: <b>${activityLabel}</b> (${activeLevel}/3), Energy: <b>${energyLabel}</b> (${energyLevel}/3).`,
         opts,
       )
     } catch {}
@@ -154,7 +138,7 @@ export default async function actionLifestyle(
   }
 
   // 4) If active level missing, prompt for it
-  if (!(typeof activeLevel === 'number' && activeLevel >= 1 && activeLevel <= 5)) {
+  if (!(typeof activeLevel === 'number' && activeLevel >= 1 && activeLevel <= 3)) {
     setLifestyleState(userId, {})
     await bot.sendMessage(chatId, '<b>How active are you currently?</b>', {
       ...opts,
