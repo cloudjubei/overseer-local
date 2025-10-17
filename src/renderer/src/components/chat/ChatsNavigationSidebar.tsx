@@ -102,6 +102,12 @@ export default function ChatsNavigationSidebar({
   const [open, setOpen] = useState<OpenState>({})
   const didInitFromSelected = useRef(false)
 
+  // Reset open state on project switch (fresh appearance per project)
+  useEffect(() => {
+    setOpen({})
+    didInitFromSelected.current = false
+  }, [activeProjectId])
+
   const isActive = useCallback(
     (ctx: ChatContext) => {
       if (!selectedContext) return false
@@ -115,7 +121,7 @@ export default function ChatsNavigationSidebar({
       await getChat(ctx) // ensure exists/created
     } catch (_) {}
     onSelectContext(ctx)
-    // Do NOT reset open state after initialization phase
+    // preserve current 'open' state (do not reset)
   }
 
   const generalContext: ChatContext = useMemo(
@@ -267,21 +273,24 @@ export default function ChatsNavigationSidebar({
   const SectionHeader: React.FC<{
     title: string
     openKey?: string
-  }> = ({ title, openKey }) => {
+    className?: string
+  }> = ({ title, openKey, className }) => {
     const isOpen = openKey ? !!open[openKey] : true
     return (
       <button
         type="button"
-        className="w-full flex items-center gap-2 px-2 py-1 text-[11px] uppercase tracking-wider text-[var(--text-muted)]/90 border-b border-[var(--border-subtle)]"
+        className={`w-full flex items-center gap-2 px-2 py-1 text-[11px] uppercase tracking-wider text-[var(--text-muted)]/90 border-b border-[var(--border-subtle)] ${className ?? ''}`}
         onClick={() => openKey && setOpen((prev) => ({ ...prev, [openKey]: !prev[openKey] }))}
         aria-expanded={isOpen}
         aria-controls={openKey ? `${openKey}-section` : undefined}
       >
         {openKey && (
-          <IconChevron
-            className="w-3 h-3"
-            style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
-          />
+          <span className="flex-none">
+            <IconChevron
+              className="w-4 h-4"
+              style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+            />
+          </span>
         )}
         <span className="font-semibold">{title}</span>
       </button>
@@ -319,21 +328,20 @@ export default function ChatsNavigationSidebar({
         className="w-full flex items-center justify-between rounded-md border bg-[var(--surface-raised)] px-3 py-2 text-left text-[12px] font-semibold text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
         onClick={() => setOpen((prev) => ({ ...prev, [openKey]: !prev[openKey] }))}
         aria-expanded={isOpen}
-        aria-controls={`${openKey}-section`
-        }
+        aria-controls={`${openKey}-section`}
         title={storyTitle}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <IconChevron
-            className="w-3 h-3"
-            style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
-          />
+          <span className="flex-none">
+            <IconChevron
+              className="w-4 h-4"
+              style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+            />
+          </span>
           <span className="truncate">{storyTitle}</span>
         </div>
         {typeof storyIndex === 'number' && (
-          <span className="ml-2 inline-flex items-center justify-center rounded-sm bg-[var(--surface-overlay)] text-[11px] text-[var(--text-secondary)] px-1.5 py-0.5 border border-[var(--border-subtle)] min-w-[22px]">
-            {storyIndex}
-          </span>
+          <span className="ml-2 id-chip">{storyIndex}</span>
         )}
       </button>
     )
@@ -404,27 +412,31 @@ export default function ChatsNavigationSidebar({
                           />
                         </div>
                         {isOpen && (
-                          <div id={`${skey}-section`} className="pl-4 pr-2 space-y-2">
+                          <div id={`${skey}-section`} className="pr-2 space-y-2">
                             {/* Story Chat first if present */}
                             {g.storyChat && (
-                              <div className="pl-2 border-l-2 border-[var(--border-subtle)]">
-                                <ChatButton ctx={g.storyChat.ctx} label={g.storyChat.label} />
+                              <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                <div className="pl-1">
+                                  <ChatButton ctx={g.storyChat.ctx} label={g.storyChat.label} />
+                                </div>
                               </div>
                             )}
 
                             {/* Topics subcategory */}
                             {g.topics.length > 0 && (
                               <div className="space-y-1">
-                                <div className="pl-2 pr-2">
+                                <div className="pl-1 pr-2">
                                   <SectionHeader title="Topics" openKey={`story:${g.storyId}:topics`} />
                                 </div>
                                 {open[`story:${g.storyId}:topics`] && (
-                                  <div id={`story:${g.storyId}:topics-section`} className="pl-6 pr-2 space-y-1">
-                                    {g.topics.map((it) => (
-                                      <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
-                                        <ChatButton ctx={it.ctx} label={it.label} />
-                                      </div>
-                                    ))}
+                                  <div id={`story:${g.storyId}:topics-section`} className="pr-2 space-y-1">
+                                    <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                      {g.topics.map((it) => (
+                                        <div key={it.key} className="pl-1">
+                                          <ChatButton ctx={it.ctx} label={it.label} />
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -433,16 +445,18 @@ export default function ChatsNavigationSidebar({
                             {/* Runs subcategory at story level */}
                             {g.runs.length > 0 && (
                               <div className="space-y-1">
-                                <div className="pl-2 pr-2">
+                                <div className="pl-1 pr-2">
                                   <SectionHeader title="Agent Runs" openKey={`story:${g.storyId}:runs`} />
                                 </div>
                                 {open[`story:${g.storyId}:runs`] && (
-                                  <div id={`story:${g.storyId}:runs-section`} className="pl-6 pr-2 space-y-1">
-                                    {g.runs.map((it) => (
-                                      <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
-                                        <ChatButton ctx={it.ctx} label={it.label} />
-                                      </div>
-                                    ))}
+                                  <div id={`story:${g.storyId}:runs-section`} className="pr-2 space-y-1">
+                                    <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                      {g.runs.map((it) => (
+                                        <div key={it.key} className="pl-1">
+                                          <ChatButton ctx={it.ctx} label={it.label} />
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -451,17 +465,17 @@ export default function ChatsNavigationSidebar({
                             {/* Features subcategory */}
                             {Object.keys(g.features).length > 0 && (
                               <div className="space-y-1">
-                                <div className="pl-2 pr-2">
+                                <div className="pl-1 pr-2">
                                   <SectionHeader title="Features" openKey={`story:${g.storyId}:features`} />
                                 </div>
                                 {open[`story:${g.storyId}:features`] && (
-                                  <div id={`story:${g.storyId}:features-section`} className="pl-6 pr-2 space-y-2">
+                                  <div id={`story:${g.storyId}:features-section`} className="pr-2 space-y-2">
                                     {Object.values(g.features).map((f) => {
                                       const fkey = `feature:${f.featureId}`
                                       const fOpen = !!open[fkey]
                                       return (
                                         <div key={f.featureId} className="space-y-1">
-                                          <div className="pl-2">
+                                          <div className="pl-1">
                                             <button
                                               type="button"
                                               className="w-full flex items-center gap-2 rounded-md border bg-[var(--surface-overlay)] px-3 py-2 text-left text-[12px] font-medium text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
@@ -470,19 +484,23 @@ export default function ChatsNavigationSidebar({
                                               aria-controls={`${fkey}-section`}
                                               title={f.featureTitle}
                                             >
-                                              <IconChevron
-                                                className="w-3 h-3"
-                                                style={{ transform: fOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
-                                              />
+                                              <span className="flex-none">
+                                                <IconChevron
+                                                  className="w-4 h-4"
+                                                  style={{ transform: fOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+                                                />
+                                              </span>
                                               <span className="truncate">{f.featureTitle}</span>
                                             </button>
                                           </div>
                                           {fOpen && (
-                                            <div id={`${fkey}-section`} className="pl-6 pr-2 space-y-1">
+                                            <div id={`${fkey}-section`} className="pr-2 space-y-1">
                                               {/* Feature chat first if present */}
                                               {f.featureChat && (
-                                                <div className="pl-2 border-l-2 border-[var(--border-subtle)]">
-                                                  <ChatButton ctx={f.featureChat.ctx} label={f.featureChat.label} />
+                                                <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                                  <div className="pl-1">
+                                                    <ChatButton ctx={f.featureChat.ctx} label={f.featureChat.label} />
+                                                  </div>
                                                 </div>
                                               )}
                                               {/* Feature agent runs */}
@@ -492,12 +510,14 @@ export default function ChatsNavigationSidebar({
                                                     <SectionHeader title="Agents" openKey={`feature:${f.featureId}:runs`} />
                                                   </div>
                                                   {open[`feature:${f.featureId}:runs`] && (
-                                                    <div id={`feature:${f.featureId}:runs-section`} className="pl-6 pr-2 space-y-1">
-                                                      {f.runs.map((it) => (
-                                                        <div key={it.key} className="pl-2 border-l border-[var(--border-subtle)]">
-                                                          <ChatButton ctx={it.ctx} label={it.label} />
-                                                        </div>
-                                                      ))}
+                                                    <div id={`feature:${f.featureId}:runs-section`} className="pr-2 space-y-1">
+                                                      <div className="pl-0 border-l border-[var(--border-subtle)]">
+                                                        {f.runs.map((it) => (
+                                                          <div key={it.key} className="pl-1">
+                                                            <ChatButton ctx={it.ctx} label={it.label} />
+                                                          </div>
+                                                        ))}
+                                                      </div>
                                                     </div>
                                                   )}
                                                 </div>

@@ -219,6 +219,8 @@ export default function ChatView() {
     [mode],
   )
 
+  const collapsedLabel = mode === 'categories' ? 'CATEGORIES' : 'HISTORY'
+
   return (
     <CollapsibleSidebar
       items={[]}
@@ -228,6 +230,7 @@ export default function ChatView() {
       headerTitle={''}
       headerSubtitle={''}
       headerAction={headerAction}
+      collapsedLabel={collapsedLabel}
       navContent={
         <ChatsNavigationSidebar
           selectedContext={selectedContext}

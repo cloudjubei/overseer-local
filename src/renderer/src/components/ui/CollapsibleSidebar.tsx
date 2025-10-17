@@ -25,6 +25,7 @@ type Props = {
   children?: React.ReactNode
   sidebarClassName?: string
   navContent?: React.ReactNode
+  collapsedLabel?: string
 }
 
 function useMediaQuery(query: string) {
@@ -58,6 +59,7 @@ export default function CollapsibleSidebar(props: Props) {
     children,
     sidebarClassName,
     navContent,
+    collapsedLabel,
   } = props
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (!storageKey) return false
@@ -156,7 +158,17 @@ export default function CollapsibleSidebar(props: Props) {
         </div>
 
         <nav className="nav flex-1 min-h-0 overflow-y-auto" onKeyDown={onKeyDownList}>
-          {navContent || (
+          {collapsed && collapsedLabel ? (
+            <div className="h-full w-full flex items-center justify-center">
+              <div
+                className="text-[11px] font-semibold tracking-wider text-[var(--text-muted)]"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                aria-label={collapsedLabel}
+              >
+                {collapsedLabel}
+              </div>
+            </div>
+          ) : navContent || (
             <ul className="nav-list" role="list">
               {items.length === 0 && emptyMessage && (
                 <li key="empty" className="nav-li">
