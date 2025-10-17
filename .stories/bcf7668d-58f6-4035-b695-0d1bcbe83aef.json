@@ -144,6 +144,18 @@
       "blockers": [],
       "createdAt": "2025-10-17T14:03:51.945Z",
       "updatedAt": "2025-10-17T14:03:51.945Z"
+    },
+    {
+      "id": "be5876e1-cccc-478e-a41c-9ffb4b577b1f",
+      "status": "-",
+      "title": "Add acknowledgement text",
+      "description": "Now @src/generated/backend/models/JournalModel.ts contains 'acknowledgementText' - this should be used as the message to send back to the user after they submit a journal - whether text or audio.",
+      "context": [
+        "src/generated/backend/models/JournalModel.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T15:16:18.067Z",
+      "updatedAt": "2025-10-17T15:16:18.067Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -158,7 +170,8 @@
     "2df34155-5e09-4615-ab54-dd786498c644": 9,
     "2df5bdc9-c413-458c-aedb-e5f60f904e73": 10,
     "a10223db-97ee-4a96-81ef-95bf2a59cd44": 11,
-    "d1ab6a9d-84a0-437b-a5b5-3fc17e954931": 12
+    "d1ab6a9d-84a0-437b-a5b5-3fc17e954931": 12,
+    "be5876e1-cccc-478e-a41c-9ffb4b577b1f": 13
   },
   "createdAt": "2025-09-18T12:16:23.163Z",
   "updatedAt": "2025-09-18T12:16:23.163Z"
