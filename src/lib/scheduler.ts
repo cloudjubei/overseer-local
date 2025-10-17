@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api'
 import { config } from '../config/env'
 import { getAllUserIds, getSession } from './sessionStore'
 import { configureBackendClient } from './backendClient'
-import { CheckInModel, CheckInsService } from '../generated/backend'
+import { CheckInModel, CheckInsService, MomentumService } from '../generated/backend'
 import { logger } from './logger'
 import actionMicroGoalsGenerate from '../actions/actionMicroGoalsGenerate'
 import actionMicroGoalsCheck from '../actions/actionMicroGoalsCheck'
@@ -135,6 +135,16 @@ async function processUserCheckIns(userId: string, now: Date, nowHourStamp: stri
                 await botRef.sendMessage(chatId, '☀️ Morning wake-up')
                 await sleep(2000)
                 await actionMicroGoalsGenerate(botRef, chat, from, '', fakeMsg, false)
+                // After morning check-in completes, send momentum motivation text if available
+                try {
+                  const momentum = await MomentumService.momentumControllerGetMomentum()
+                  const motivationText = typeof momentum?.motivationText === 'string' ? momentum.motivationText.trim() : ''
+                  if (motivationText) {
+                    await botRef.sendMessage(chatId, motivationText)
+                  }
+                } catch (e) {
+                  logger.debug?.('Momentum motivation fetch failed or unavailable', e as any)
+                }
                 break
               case 'micro_goals_check':
                 await botRef.sendMessage(chatId, '✨ Evening reflection')
