@@ -79,20 +79,27 @@ function dobFromAgeAsIso(age: number): string {
 function sanitizeChunk(s: string): string {
   return s.replace(/\s+/g, ' ').trim()
 }
+function parseWeightHeightParts(parts: string[]): { weightRaw: string; heightRaw: string } | null {
+  if (parts.length >= 2) {
+    const weightRaw = sanitizeChunk(parts[0])
+    const heightRaw = sanitizeChunk(parts.slice(1).join(','))
+    if (/\d/.test(weightRaw) && /\d/.test(heightRaw)) {
+      return { weightRaw, heightRaw }
+    }
+  }
+  return null
+}
 
 function parseWeightHeightInput(text: string): { weightRaw: string; heightRaw: string } | null {
   const input = (text || '').trim()
   if (!input) return null
 
-  // 1) Comma-separated: '77 kg, 178 cm' (allow multiple commas in height)
-  if (input.includes(',')) {
-    const parts = input.split(',')
-    if (parts.length >= 2) {
-      const weightRaw = sanitizeChunk(parts[0])
-      const heightRaw = sanitizeChunk(parts.slice(1).join(','))
-      if (/\d/.test(weightRaw) && /\d/.test(heightRaw)) {
-        return { weightRaw, heightRaw }
-      }
+  // 1) X-separated: '77 kg, 178 cm' (allow multiple commas in height)
+  const separators = [',', '/', ';', '\\', '-', '+']
+  for (const separator of separators) {
+    if (input.includes(separator)) {
+      const out = parseWeightHeightParts(input.split(separator))
+      if (out) return out
     }
   }
 

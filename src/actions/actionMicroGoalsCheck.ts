@@ -43,7 +43,8 @@ export function clearStoredMicroCheck(chatId: number, messageId: number) {
 }
 
 export function buildMicroCheckMessage(goals: StoredMicroGoal[]): string {
-  const header = '<b>Evening check-in</b>\nHow did your day go? Which micro goals did you complete?'
+  const header =
+    '<b>Evening check-in</b>\nHow did your day go?\nWhich micro goals did you complete?'
   const list = goals
     .map((g, index) => `${index + 1}. ${statusIcon(g.state)} ${escapeHtml(g.text || '')}`)
     .join('\n')

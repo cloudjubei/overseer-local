@@ -36,6 +36,13 @@ export async function processTextJournal(
   } catch {}
 
   await bot.sendMessage(chat.id, created.acknowledgmentText.trim())
+  await sleep(2000)
+
+  const pretty = created.summaryBulletpoints.map((s) => s.trim()).filter((s) => s.length > 0) ?? []
+  if (pretty.length > 0) {
+    const summaryMsg = `🧠 Summary from today’s reflection:\n${pretty.map((bp) => `• ${bp}`).join('\n')}`
+    await bot.sendMessage(chat.id, summaryMsg)
+  }
 }
 
 export async function processAudioJournal(
@@ -81,17 +88,14 @@ export async function processAudioJournal(
         ],
       ],
     }
-
-    // Send confirmation with inline buttons
     const sent = await bot.sendMessage(chat.id, confirmText, {
       reply_markup: keyboard,
       parse_mode: 'HTML',
     })
 
-    // Store pending journal confirmation state in session, including acknowledgment text and summary for final reply
     const prev = getSession(userId)
-    const summaryBulletpoints = created.transcription?.summaryBulletpoints
-      ?.map((s) => s.trim())
+    const summaryBulletpoints = created.summaryBulletpoints
+      .map((s) => s.trim())
       .filter((s) => s.length > 0)
 
     setSession({

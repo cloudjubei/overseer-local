@@ -1,4 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
+import { buildMorningEnergyKeyboard } from 'src/common/keyboards'
 import { GoalsService, ProfilesService } from 'src/generated/backend'
 import { clearConversationSession, getSession, setSession } from 'src/lib/sessionStore'
 import { sleep } from 'src/lib/time'
@@ -18,22 +19,6 @@ function todayStamp(d = new Date()): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}${m}${day}`
-}
-
-function buildMorningEnergyKeyboard(): TelegramBot.InlineKeyboardMarkup {
-  return {
-    inline_keyboard: [
-      [
-        { text: '1 😴 Very low', callback_data: 'morning:energy:1' },
-        { text: '2 😐 Low', callback_data: 'morning:energy:2' },
-      ],
-      [
-        { text: '3 🙂 Okay', callback_data: 'morning:energy:3' },
-        { text: '4 😊 Good', callback_data: 'morning:energy:4' },
-      ],
-      [{ text: '5 🤩 Great', callback_data: 'morning:energy:5' }],
-    ],
-  }
 }
 
 export default async function actionMicroGoalsGenerate(
@@ -78,18 +63,6 @@ export default async function actionMicroGoalsGenerate(
             lastUpdatedAt: Math.floor(Date.now() / 1000),
           },
         })
-
-        try {
-          const profile = await ProfilesService.profilesControllerMe()
-          const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
-          const latest = lifestyles.length > 0 ? lifestyles[lifestyles.length - 1] : undefined
-          const motivationText =
-            typeof latest?.motivationText === 'string' ? latest.motivationText.trim() : ''
-          if (motivationText) {
-            await bot.sendMessage(chatId, motivationText)
-            await sleep(2000)
-          }
-        } catch {}
 
         const header = '<b>Before we plan today</b>\nHow’s your energy and wellbeing right now?'
         await bot.sendMessage(chatId, header, {

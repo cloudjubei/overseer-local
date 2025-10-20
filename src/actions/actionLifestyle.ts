@@ -2,30 +2,7 @@ import TelegramBot, { Message, SendMessageOptions } from 'node-telegram-bot-api'
 import { ProfilesService, UserProfileLifestyleCreateModel } from 'src/generated/backend'
 import actionMacroGoal from './actionMacroGoal'
 import { getSession, setSession, clearConversationSession } from 'src/lib/sessionStore'
-
-function buildActiveKeyboard() {
-  return {
-    inline_keyboard: [
-      [
-        { text: 'Low', callback_data: 'lifestyle:active:1' },
-        { text: 'Moderate', callback_data: 'lifestyle:active:2' },
-        { text: 'High', callback_data: 'lifestyle:active:3' },
-      ],
-    ],
-  }
-}
-
-function buildEnergyKeyboard() {
-  return {
-    inline_keyboard: [
-      [
-        { text: '😴 Low', callback_data: 'lifestyle:energy:1' },
-        { text: '🙂 Okay', callback_data: 'lifestyle:energy:2' },
-        { text: '🤩 High', callback_data: 'lifestyle:energy:3' },
-      ],
-    ],
-  }
-}
+import { buildActiveKeyboard, buildEnergyKeyboard } from 'src/common/keyboards'
 
 function setLifestyleState(userId: string, patch: { activeLevel?: number; energyLevel?: number }) {
   const prev = getSession(userId)

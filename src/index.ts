@@ -33,7 +33,8 @@ import actionMicroGoalsCheck, {
   toggleMicroGoalState,
 } from './actions/actionMicroGoalsCheck'
 import { handleWeeklyResetCallback } from './actions/actionWeeklyReset'
-import { sleep } from './lib/time'
+import { getDayOfYear, sleep } from './lib/time'
+import { activityLabels, energyLabels } from './common/responses'
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
 initScheduler(bot)
@@ -133,7 +134,6 @@ bot.on('message', async (msg: Message) => {
     const session = getSession(userId)
     // clearSession(userId)
 
-    // Handle journal entry after micro-goals check-in
     if (session?.conversationState?.lastAction === 'awaiting_journal_entry') {
       if (msg.voice || msg.audio) {
         await processAudioJournal(bot, chat, from, msg)
@@ -143,19 +143,12 @@ bot.on('message', async (msg: Message) => {
       return // Handled
     }
 
-    const handledAuth = await handleAuthMessage(bot, msg)
-    if (handledAuth) {
-      // If the message was handled by auth and the user is now authenticated, immediately start onboarding
+    if (await handleAuthMessage(bot, msg)) {
       const uid = getTelegramUserId(msg)
-      if (uid && isAuthenticated(uid)) {
-        const started = await runOnboardingIfNeeded(bot, msg, '')
-        if (started) return
-      }
-      return
+      if (!uid || !isAuthenticated(uid)) return
     }
 
-    const handledOnboarding = await runOnboardingIfNeeded(bot, msg, rawText)
-    if (handledOnboarding) return
+    if (await runOnboardingIfNeeded(bot, msg, rawText)) return
 
     // Test command to trigger evening micro-goal check flow
     if (rawText === '/testevening' || rawText.startsWith('/testevening ')) {
@@ -323,8 +316,9 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         ensureAccessTokenForUser(String(cb.from.id))
       } catch {}
 
-      const journalPrompt =
-        '<b>Take a moment to reflect</b>\nHow did today actually feel?\nYou can share a few words or drop a quick voice note.\n<i>You can type or leave a quick voice note anytime with /voice — it helps me get a clearer sense of how you’re feeling.</i>'
+      const showVoiceInfo = getDayOfYear() % 3 === 0
+
+      const journalPrompt = `<b>Take a moment to reflect</b>\nHow did today actually feel?\nYou can share a few words or drop a quick voice note.${showVoiceInfo ? '\n<i>You can type or leave a quick voice note anytime with /voice — it helps me get a clearer sense of how you’re feeling.</i>' : ''}`
 
       const setAwaitingJournalState = () => {
         const userId = String(cb.from.id)
@@ -367,21 +361,23 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         )
         await sleep(2000)
 
-        try {
-          const profile = await ProfilesService.profilesControllerMe()
-          const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
-          const latest = lifestyles.length > 0 ? lifestyles[lifestyles.length - 1] : undefined
-          const motivationTextEvening =
-            typeof latest?.motivationTextEvening === 'string'
-              ? latest.motivationTextEvening.trim()
-              : ''
-          if (motivationTextEvening) {
-            await bot.sendMessage(chatId, motivationTextEvening)
-            await sleep(2000)
-          }
-        } catch {}
+        if (doneMicro.length > 0) {
+          try {
+            const profile = await ProfilesService.profilesControllerMe()
+            const lifestyles = Array.isArray(profile?.lifestyles) ? profile.lifestyles : []
+            const latest = lifestyles.length > 0 ? lifestyles[lifestyles.length - 1] : undefined
+            const motivationTextEvening =
+              typeof latest?.motivationTextEvening === 'string'
+                ? latest.motivationTextEvening.trim()
+                : ''
+            if (motivationTextEvening) {
+              await bot.sendMessage(chatId, motivationTextEvening)
+              await sleep(2000)
+            }
+          } catch {}
 
-        await sleep(2000)
+          await sleep(2000)
+        }
 
         await bot.sendMessage(chatId, journalPrompt, { parse_mode: 'HTML' })
         setAwaitingJournalState()
@@ -507,7 +503,7 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
     if (data.startsWith('morning:energy:')) {
       const userId = String(cb.from.id)
       const parts = data.split(':')
-      const val = Math.max(1, Math.min(5, parseInt(parts[2] || '0', 10)))
+      const val = Math.max(1, Math.min(3, parseInt(parts[2] || '0', 10)))
 
       try {
         await ensureBackendConfigured()
@@ -542,22 +538,10 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
         },
       })
 
-      const energyLabels: Record<number, { emoji: string; label: string }> = {
-        1: {
-          emoji: '😴',
-          label: 'Sounds like energy’s a little too low — let’s see if we can lift that this week.',
-        },
-        2: {
-          emoji: '🙂',
-          label: 'You`re on the right track - let’s see if we can lift that this week.',
-        },
-        3: { emoji: '🤩', label: 'You sound pumped! Keep it up! 🤩' },
-      }
-
       const m = energyLabels[val]
       if (m) {
         try {
-          await bot.sendMessage(chatId, `${m.label}`)
+          await bot.sendMessage(chatId, `${m.emoji} - ${m.label}.`)
           await sleep(2000)
         } catch {}
       }
@@ -636,23 +620,6 @@ bot.on('callback_query', async (cb: CallbackQuery) => {
           lastUpdatedAt: Math.floor(Date.now() / 1000),
         },
       })
-
-      const activityLabels: Record<number, { emoji: string; label: string }> = {
-        1: { emoji: '🛋️', label: 'Thanks, that helps me understand you better 💪.' },
-        2: { emoji: '🏃', label: 'You sound in good shape already 👏.' },
-        3: { emoji: '🔥', label: 'You sound in amazing shape already 👏👏.' },
-      }
-      const energyLabels: Record<number, { emoji: string; label: string }> = {
-        1: {
-          emoji: '😴',
-          label: 'Sounds like energy’s a little low — let’s see if we can lift that this week.',
-        },
-        2: {
-          emoji: '🙂',
-          label: 'You`re on the right track - let’s see if we can lift that this week.',
-        },
-        3: { emoji: '🤩', label: 'Sounds great 😊' },
-      }
 
       try {
         if (kind === 'active') {

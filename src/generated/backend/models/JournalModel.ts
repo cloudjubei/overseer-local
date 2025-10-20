@@ -9,6 +9,10 @@ export type JournalModel = {
   text: string
   source: JournalModel.source
   acknowledgmentText: string
+  /**
+   * A summary with concise bulletpoints of the input text
+   */
+  summaryBulletpoints: Array<string>
   createdAt: string
   updatedAt: string
   audio?: Record<string, any>
