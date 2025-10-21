@@ -10,7 +10,6 @@ import type { FactoryAgentRunService } from 'src/renderer/src/services/factoryAg
 import type { FactoryToolsService } from 'src/renderer/src/services/factoryToolsService'
 import type { DBService } from 'src/renderer/src/services/dbService'
 import type { DocumentIngestionService } from 'src/renderer/src/services/documentIngestionService'
-import type { GitMonitorService } from 'src/renderer/src/services/gitMonitorService'
 import type { StoriesService } from 'src/renderer/src/services/storiesService'
 import type { FactoryTestsService } from 'src/renderer/src/services/factoryTestsService'
 import { CompletionService } from '@renderer/services/completionService'
@@ -31,7 +30,6 @@ declare global {
     settingsService: SettingsService
     liveDataService: LiveDataService
     documentIngestionService: DocumentIngestionService
-    gitMonitorService: GitMonitorService
     factoryTestsService: FactoryTestsService
   }
 }

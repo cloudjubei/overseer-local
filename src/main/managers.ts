@@ -12,7 +12,6 @@ import SettingsManager from '../logic/settings/SettingsManager'
 import LiveDataManager from '../logic/live-data/LiveDataManager'
 import DatabaseManager from '../logic/db/DatabaseManager'
 import DocumentIngestionManager from '../logic/document_ingestion/DocumentIngestionManager'
-import GitMonitorManager from '../logic/git-monitor/GitMonitorManager'
 import FactoryCompletionManager from '../logic/factory/FactoryCompletionManager'
 import FactoryLLMPricingManager from '../logic/factory/FactoryLLMPricingManager'
 import FactoryTestsManager from '../logic/factory/FactoryTestsManager'
@@ -29,7 +28,6 @@ export let notificationsManager: NotificationsManager | undefined
 export let settingsManager: SettingsManager | undefined
 export let liveDataManager: LiveDataManager | undefined
 export let documentIngestionManager: DocumentIngestionManager | undefined
-export let gitMonitorManager: GitMonitorManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
 export let factoryCompletionManager: FactoryCompletionManager | undefined
 export let factoryTestsManager: FactoryTestsManager | undefined
@@ -60,7 +58,6 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     projectsManager,
     filesManager,
   )
-  gitMonitorManager = new GitMonitorManager(projectRoot, mainWindow)
   factoryToolsManager = new FactoryToolsManager(
     projectRoot,
     mainWindow,
@@ -88,7 +85,6 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     settingsManager,
     liveDataManager,
     documentIngestionManager,
-    gitMonitorManager,
     factoryToolsManager,
     factoryCompletionManager,
     factoryTestsManager,

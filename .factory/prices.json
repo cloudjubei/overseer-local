@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-10-14T08:57:11.869Z",
+  "updatedAt": "2025-10-21T11:38:35.734Z",
   "prices": [
     {
       "provider": "openai",
@@ -116,8 +116,8 @@
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-3-8b-instruct",
-      "inputPerMTokensUSD": 200,
-      "outputPerMTokensUSD": 200,
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.19999999999999998,
       "currency": "USD"
     },
     {
@@ -10133,162 +10133,295 @@
     {
       "provider": "watsonx",
       "model": "watsonx/google/flan-t5-xl-3b",
-      "inputPerMTokensUSD": 100,
-      "outputPerMTokensUSD": 250,
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 0.6,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-13b-chat-v2",
-      "inputPerMTokensUSD": 500,
-      "outputPerMTokensUSD": 2000,
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 0.6,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-13b-instruct-v2",
-      "inputPerMTokensUSD": 500,
-      "outputPerMTokensUSD": 2000,
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 0.6,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-3-3-8b-instruct",
-      "inputPerMTokensUSD": 250,
-      "outputPerMTokensUSD": 1000,
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.19999999999999998,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-4-h-small",
-      "inputPerMTokensUSD": 625,
-      "outputPerMTokensUSD": 2500,
+      "inputPerMTokensUSD": 0.06,
+      "outputPerMTokensUSD": 0.25,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-guardian-3-2-2b",
-      "inputPerMTokensUSD": 150,
-      "outputPerMTokensUSD": 600,
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.09999999999999999,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-guardian-3-3-8b",
-      "inputPerMTokensUSD": 250,
-      "outputPerMTokensUSD": 1000,
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.19999999999999998,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-ttm-1024-96-r2",
-      "inputPerMTokensUSD": 625,
-      "outputPerMTokensUSD": 625,
+      "inputPerMTokensUSD": 0.38,
+      "outputPerMTokensUSD": 0.38,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-ttm-1536-96-r2",
-      "inputPerMTokensUSD": 625,
-      "outputPerMTokensUSD": 625,
+      "inputPerMTokensUSD": 0.38,
+      "outputPerMTokensUSD": 0.38,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-ttm-512-96-r2",
-      "inputPerMTokensUSD": 625,
-      "outputPerMTokensUSD": 625,
+      "inputPerMTokensUSD": 0.38,
+      "outputPerMTokensUSD": 0.38,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/ibm/granite-vision-3-2-2b",
-      "inputPerMTokensUSD": 150,
-      "outputPerMTokensUSD": 600,
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.09999999999999999,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-3-2-11b-vision-instruct",
-      "inputPerMTokensUSD": 250,
-      "outputPerMTokensUSD": 1000,
+      "inputPerMTokensUSD": 0.35,
+      "outputPerMTokensUSD": 0.35,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-3-2-1b-instruct",
-      "inputPerMTokensUSD": 100,
-      "outputPerMTokensUSD": 200,
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.09999999999999999,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-3-2-3b-instruct",
-      "inputPerMTokensUSD": 150,
-      "outputPerMTokensUSD": 600,
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0.15,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-3-2-90b-vision-instruct",
-      "inputPerMTokensUSD": 2000,
-      "outputPerMTokensUSD": 8000,
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 2,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-3-3-70b-instruct",
-      "inputPerMTokensUSD": 2000,
-      "outputPerMTokensUSD": 6000,
+      "inputPerMTokensUSD": 0.71,
+      "outputPerMTokensUSD": 0.71,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-4-maverick-17b",
-      "inputPerMTokensUSD": 500,
-      "outputPerMTokensUSD": 2000,
+      "inputPerMTokensUSD": 0.35,
+      "outputPerMTokensUSD": 1.4,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/meta-llama/llama-guard-3-11b-vision",
-      "inputPerMTokensUSD": 250,
-      "outputPerMTokensUSD": 1000,
+      "inputPerMTokensUSD": 0.35,
+      "outputPerMTokensUSD": 0.35,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/mistralai/mistral-medium-2505",
-      "inputPerMTokensUSD": 2250,
-      "outputPerMTokensUSD": 6750,
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 10,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/mistralai/mistral-small-2503",
-      "inputPerMTokensUSD": 200,
-      "outputPerMTokensUSD": 600,
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.3,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/mistralai/pixtral-12b-2409",
-      "inputPerMTokensUSD": 150,
-      "outputPerMTokensUSD": 150,
+      "inputPerMTokensUSD": 0.35,
+      "outputPerMTokensUSD": 0.35,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/openai/gpt-oss-120b",
-      "inputPerMTokensUSD": 4000,
-      "outputPerMTokensUSD": 16000,
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0.6,
       "currency": "USD"
     },
     {
       "provider": "watsonx",
       "model": "watsonx/sdaia/allam-1-13b-instruct",
-      "inputPerMTokensUSD": 500,
-      "outputPerMTokensUSD": 2000,
+      "inputPerMTokensUSD": 1.7999999999999998,
+      "outputPerMTokensUSD": 1.7999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "anthropic.claude-haiku-4-5@20251001",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "apac.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1.1,
+      "outputPerMTokensUSD": 5.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1.1,
+      "outputPerMTokensUSD": 5.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini-2.5-flash-image",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini/gemini-2.5-flash-image",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "lemonade",
+      "model": "lemonade/gpt-oss-20b-mxfp4-GGUF",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "lemonade",
+      "model": "lemonade/gpt-oss-120b-mxfp-GGUF",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "lemonade",
+      "model": "lemonade/Gemma-3-4b-it-GGUF",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "lemonade",
+      "model": "lemonade/Qwen3-4B-Instruct-2507-GGUF",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "jp.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1.1,
+      "outputPerMTokensUSD": 5.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock",
+      "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1.1,
+      "outputPerMTokensUSD": 5.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "au.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "inputPerMTokensUSD": 1.1,
+      "outputPerMTokensUSD": 5.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "vercel_ai_gateway",
+      "model": "vercel_ai_gateway/glm-4.6",
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 2.2,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-anthropic_models",
+      "model": "vertex_ai/claude-haiku-4-5@20251001",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "watsonx",
+      "model": "watsonx/mistralai/mistral-small-3-1-24b-instruct-2503",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.3,
       "currency": "USD"
     }
   ]

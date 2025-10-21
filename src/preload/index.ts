@@ -334,22 +334,6 @@ const DOCUMENT_INGESTION_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_PROJECT, { projectId }),
 }
 
-const GIT_MONITOR_API = {
-  subscribe: (callback) => {
-    const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, listener)
-    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.GIT_MONITOR_SUBSCRIBE, listener)
-  },
-  getStatus: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_GET_STATUS),
-  triggerPoll: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_TRIGGER_POLL),
-  setPollInterval: (ms) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_SET_POLL_INTERVAL, { ms }),
-  hasUnmerged: (branchName, baseBranch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_HAS_UNMERGED, { branchName, baseBranch }),
-  mergeBranch: (branchName, baseBranch) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_MERGE_BRANCH, { branchName, baseBranch }),
-}
-
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -369,7 +353,6 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('factoryTestsService', FACTORY_TESTS_API)
     contextBridge.exposeInMainWorld('dbService', DB_API)
     contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
-    contextBridge.exposeInMainWorld('gitMonitorService', GIT_MONITOR_API)
   } catch (error) {
     console.error(error)
   }

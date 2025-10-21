@@ -1,7 +1,7 @@
 {
   "id": "sprinter-ember",
   "title": "Sprinter Ember",
-  "description": "AI-powered research assistant for analysing companies.\n",
+  "description": "A Next.js app - an AI-powered research assistant for analysing companies.\n",
   "path": "../../SprinterEmber",
   "repo_url": "https://github.com/SprinterHQ/ember",
   "requirements": [],
@@ -15,8 +15,9 @@
     "testFramework": "jest"
   },
   "storyIdToDisplayIndex": {
-    "0e98b738-aca9-4c0a-b13d-1275150a50c8": 1
+    "0e98b738-aca9-4c0a-b13d-1275150a50c8": 1,
+    "42de2fcf-fd89-4f89-845c-855332bd651f": 2
   },
   "createdAt": "2025-10-09T22:29:20.873Z",
-  "updatedAt": "2025-10-16T22:55:00.035Z"
+  "updatedAt": "2025-10-21T11:49:59.521Z"
 }
