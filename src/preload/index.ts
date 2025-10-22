@@ -66,12 +66,11 @@ const STORIES_API = {
 }
 
 const COMPLETION_API = {
-  sendCompletion: (messages, systemPrompt, config, onAbortControllerCreated) =>
+  sendCompletion: (messages, systemPrompt, config) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_SEND, {
       messages,
       systemPrompt,
       config,
-      onAbortControllerCreated,
     }),
   sendCompletionTools: (
     projectId,
@@ -80,7 +79,6 @@ const COMPLETION_API = {
     systemPrompt,
     settings,
     config,
-    onAbortControllerCreated,
   ) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_TOOLS_SEND, {
       projectId,
@@ -89,17 +87,8 @@ const COMPLETION_API = {
       systemPrompt,
       settings,
       config,
-      onAbortControllerCreated,
     }),
-  resumeCompletionTools: (
-    projectId,
-    chatContext,
-    toolsGranted,
-    systemPrompt,
-    settings,
-    config,
-    onAbortControllerCreated,
-  ) =>
+  resumeCompletionTools: (projectId, chatContext, toolsGranted, systemPrompt, settings, config) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_TOOLS_RESUME, {
       projectId,
       chatContext,
@@ -107,7 +96,6 @@ const COMPLETION_API = {
       systemPrompt,
       settings,
       config,
-      onAbortControllerCreated,
     }),
 
   abortCompletion: (chatContext) =>
