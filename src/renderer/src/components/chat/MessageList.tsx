@@ -10,7 +10,7 @@ import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
 import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
-import { IconToolbox } from '../ui/icons/Icons'
+import { IconToolbox, IconDelete } from '../ui/icons/Icons'
 import { Switch } from '../ui/Switch'
 
 interface EnhancedMessage extends ChatMessage {
@@ -24,12 +24,14 @@ export default function MessageList({
   isThinking,
   onResumeTools,
   numberMessagesToSend,
+  onDeleteLastMessage,
 }: {
   chatId?: string
   messages: ChatMessage[]
   isThinking: boolean
   onResumeTools?: (toolIds: string[]) => void
   numberMessagesToSend?: number
+  onDeleteLastMessage?: () => void
 }) {
   const { filesByPath } = useFiles()
 
@@ -419,7 +421,7 @@ export default function MessageList({
           toggleableCount > 0 && isSystem && isLast
 
           return (
-            <div>
+            <div key={index}>
               {showCutoff && (
                 <div className="relative text-center my-4 group" title={tooltipText}>
                   <hr className="border-dashed border-neutral-300 dark:border-neutral-700" />
@@ -429,25 +431,41 @@ export default function MessageList({
                 </div>
               )}
               <div
-                key={index}
                 ref={index === enhancedMessages.length - 1 ? lastMessageRef : null}
                 className={[
                   'flex items-start gap-2',
                   isUser ? 'flex-row-reverse' : 'flex-row',
                 ].join(' ')}
               >
-                <div
-                  className={[
-                    'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
-                    isUser
-                      ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
-                      : isSystem
-                        ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
-                        : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
-                  ].join(' ')}
-                  aria-hidden="true"
-                >
-                  {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
+                <div className="flex flex-col items-center group">
+                  <div
+                    className={[
+                      'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
+                      isUser
+                        ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
+                        : isSystem
+                          ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
+                          : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
+                    ].join(' ')}
+                    aria-hidden="true"
+                  >
+                    {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
+                  </div>
+                  {isLast && (isUser || isAssistant) && onDeleteLastMessage ? (
+                    <button
+                      type="button"
+                      title="Delete last message"
+                      aria-label="Delete last message"
+                      className={[
+                        'mt-1 transition-opacity opacity-0 group-hover:opacity-100',
+                        'btn-secondary btn-icon w-6 h-6',
+                      ].join(' ')}
+                      onClick={() => onDeleteLastMessage()}
+                      disabled={isThinking}
+                    >
+                      <IconDelete className="w-3.5 h-3.5" />
+                    </button>
+                  ) : null}
                 </div>
 
                 <div

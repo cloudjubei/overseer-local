@@ -292,8 +292,6 @@ export default function ChatSidebar({
     [isChatConfigured, activeChatConfig, currentSettings, resumeTools, context, effectivePrompt],
   )
 
-  const hasDeletableMessage = (chat?.chat.messages?.length || 0) > 0
-
   return (
     <section className={sectionClass}>
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
@@ -320,16 +318,6 @@ export default function ChatSidebar({
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            className="btn-secondary w-[34px]"
-            variant="danger"
-            aria-label="Delete last message"
-            title="Delete last message"
-            disabled={isThinking || !hasDeletableMessage}
-            onClick={() => deleteLastMessage(context)}
-          >
-            <IconDelete className="w-4 h-4" />
-          </Button>
           <Button
             className="btn-secondary w-[34px]"
             variant="danger"
@@ -558,6 +546,7 @@ export default function ChatSidebar({
           isThinking={isThinking}
           onResumeTools={handleResumeTools}
           numberMessagesToSend={completion?.numberMessagesToSend}
+          onDeleteLastMessage={() => deleteLastMessage(context)}
         />
       </div>
 
