@@ -215,6 +215,14 @@ export default function MessageList({
       return
     }
 
+    // If the assistant is thinking (spinner will render), keep fully pinned to bottom
+    if (isThinking) {
+      requestAnimationFrame(() => {
+        forceScrollToBottom('auto')
+      })
+      return
+    }
+
     // Only partially scroll when user is at bottom
     if (!isAtBottomRef.current) return
 
@@ -230,7 +238,7 @@ export default function MessageList({
       if (targetTop < 0) targetTop = 0
       c.scrollTo({ top: targetTop, behavior: 'smooth' })
     })
-  }, [messages])
+  }, [messages, isThinking])
 
   // When entering thinking state, ensure we are fully at the bottom so spinner is flush
   useLayoutEffect(() => {
