@@ -174,6 +174,13 @@ export default function MessageList({
   const prevLenForScrollRef = useRef<number>(messages.length)
   const justSwitchedChatRef = useRef<boolean>(false)
 
+  const NEAR_BOTTOM_PX = 80
+  const computeIsNearBottom = (): boolean => {
+    const c = messageListRef.current
+    if (!c) return true
+    return c.scrollTop + c.clientHeight >= c.scrollHeight - NEAR_BOTTOM_PX
+  }
+
   const forceScrollToBottom = (behavior: ScrollBehavior = 'auto') => {
     const c = messageListRef.current
     if (!c) return
@@ -217,8 +224,8 @@ export default function MessageList({
       return
     }
 
-    // If the assistant is thinking (spinner will render), keep fully pinned to bottom
-    if (isThinking) {
+    // If the assistant is thinking (spinner will render), only pin to bottom when user is near bottom
+    if (isThinking && computeIsNearBottom()) {
       requestAnimationFrame(() => {
         forceScrollToBottom('auto')
       })
@@ -242,11 +249,12 @@ export default function MessageList({
     })
   }, [messages, isThinking])
 
-  // When entering thinking state, ensure we are fully at the bottom so spinner is flush
+  // When entering thinking state, ensure we are fully at the bottom only if user is near bottom
   useLayoutEffect(() => {
     if (!isThinking) return
-    // Force to bottom immediately when thinking starts (send or resume)
-    forceScrollToBottom('auto')
+    if (computeIsNearBottom()) {
+      forceScrollToBottom('auto')
+    }
   }, [isThinking])
 
   // Keep pinned to bottom while DOM mutates only if user is at bottom
