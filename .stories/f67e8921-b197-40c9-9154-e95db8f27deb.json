@@ -2453,7 +2453,7 @@
     },
     {
       "id": "dd9bb459-5225-4604-8d2f-6e50feaba098",
-      "status": "?",
+      "status": "+",
       "title": "Clicking a notification doesn't take the user to the correct place",
       "description": "In @src/renderer/src/screens/NotificationsView.tsx when clicking a notification (for an agent finished) it doesn't take the user to the Agents page and the appropriate run.",
       "context": [
@@ -2461,8 +2461,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-21T16:01:35.170Z",
-      "updatedAt": "2025-10-22T11:33:06.908Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-22T11:38:07.864Z",
+      "completedAt": "2025-10-22T11:38:07.864Z"
     },
     {
       "id": "8a6f2df4-3f7d-45da-b100-e216d46598e9",
