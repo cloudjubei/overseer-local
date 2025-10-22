@@ -4,6 +4,7 @@ import { useNotifications } from '@renderer/hooks/useNotifications'
 import { Button } from '@renderer/components/ui/Button'
 import { IconBell, IconChat } from '@renderer/components/ui/icons/Icons'
 import { Notification } from 'src/types/notifications'
+import { useNavigator } from '@renderer/navigation/Navigator'
 
 const SECTIONS = [
   { id: 'general', label: 'General', icon: <IconBell />, accent: 'brand' },
@@ -39,6 +40,21 @@ function getIconForType(type: Notification['type']): string {
 export default function NotificationsView() {
   const [activeSection, setActiveSection] = useState('general')
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications()
+  const nav = useNavigator()
+
+  const handleClick = (notification: Notification) => {
+    // Mark as read if needed
+    if (!notification.read) markAsRead(notification.id)
+
+    // Deep-link to Agent Run when available
+    const runId = notification.metadata?.runId
+    if (runId) {
+      nav.navigateAgentRun(runId)
+      return
+    }
+
+    // Future: handle other metadata targets if present (storyId, chatId, documentPath)
+  }
 
   return (
     <CollapsibleSidebar
@@ -75,7 +91,7 @@ export default function NotificationsView() {
                       <li
                         key={notification.id}
                         className={`p-3 rounded-md border ${notification.read ? 'bg-muted' : 'bg-background border-primary'}`}
-                        onClick={() => !notification.read && markAsRead(notification.id)}
+                        onClick={() => handleClick(notification)}
                         style={{ cursor: 'pointer' }}
                       >
                         <div className="flex items-start space-x-3">
