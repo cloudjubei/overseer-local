@@ -2464,7 +2464,7 @@
     },
     {
       "id": "8a6f2df4-3f7d-45da-b100-e216d46598e9",
-      "status": "-",
+      "status": "+",
       "title": "Make it possible to delete the last chat message.",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx",
       "context": [
@@ -2472,7 +2472,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-22T11:21:27.351Z",
-      "updatedAt": "2025-10-22T11:21:27.351Z"
+      "updatedAt": "2025-10-22T11:29:24.910Z",
+      "completedAt": "2025-10-22T11:29:24.910Z"
     }
   ],
   "featureIdToDisplayIndex": {

@@ -10,6 +10,7 @@ import type {
   ChatContextArguments,
   CompletionMessage,
   CompletionSettings,
+  ChatEditInput,
 } from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
@@ -49,6 +50,7 @@ export type ChatsContextValue = {
   getChat: (context: ChatContext) => Promise<ChatState>
   restartChat: (context: ChatContext) => Promise<ChatState>
   deleteChat: (context: ChatContext) => Promise<void>
+  deleteLastMessage: (context: ChatContext) => Promise<void>
 
   // Settings APIs
   allChatSettings: ChatsSettings | undefined
@@ -322,6 +324,37 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     await chatsService.deleteChat(context)
   }, [])
 
+  const deleteLastMessage = useCallback(async (context: ChatContext) => {
+    const key = getChatContextPath(context)
+    const chatState = await getChat(context)
+    const msgs = chatState.chat.messages
+    if (!msgs || msgs.length === 0) return
+    const trimmed = msgs.slice(0, msgs.length - 1)
+
+    // Optimistic update
+    updateChatState(key, {
+      chat: {
+        ...chatState.chat,
+        messages: trimmed,
+      },
+    })
+
+    // Persist via updateChat - rely on backend to broadcast change
+    const patch: ChatEditInput = { messages: trimmed }
+    try {
+      await chatsService.updateChat(context, patch)
+    } catch (e) {
+      console.error('Failed to delete last message', e)
+      // Revert by refetching
+      try {
+        const refreshed = await chatsService.getChat(context)
+        updateChatState(key, { chat: refreshed })
+      } catch (e2) {
+        console.error('Failed to refresh chat after delete error', e2)
+      }
+    }
+  }, [getChat, updateChatState])
+
   const getSettings = useCallback(
     (context: ChatContext): ChatSettings | undefined => {
       return extractSettingsForContext(allChatSettings, context)
@@ -417,6 +450,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       getChat,
       restartChat,
       deleteChat,
+      deleteLastMessage,
       allChatSettings,
       getSettings,
       resetSettings,
@@ -435,6 +469,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       getChat,
       restartChat,
       deleteChat,
+      deleteLastMessage,
       allChatSettings,
       getSettings,
       resetSettings,
