@@ -31,7 +31,7 @@ function TestsInner() {
     coverageError,
     runTests,
     runTestsE2E,
-    runCoverage,
+    runCoverages,
     testsCatalog,
     isLoadingCatalog,
   } = useTests()
@@ -120,7 +120,7 @@ function TestsInner() {
       Run E2E Tests
     </Button>
   ) : (
-    <Button onClick={() => runCoverage()} loading={isRunningCoverage} variant="primary" size="lg">
+    <Button onClick={() => runCoverages()} loading={isRunningCoverage} variant="primary" size="lg">
       Run Coverage
     </Button>
   )

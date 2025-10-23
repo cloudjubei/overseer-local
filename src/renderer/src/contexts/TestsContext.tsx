@@ -24,7 +24,7 @@ export type TestsContextValue = {
 
   runTests: () => Promise<void>
   runTestsE2E: (command?: string) => Promise<void>
-  runCoverage: (path?: string) => Promise<void>
+  runCoverages: () => Promise<void>
   resetTests: () => void
   resetTestsE2E: () => void
   resetCoverage: () => void
@@ -158,23 +158,20 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     [projectId],
   )
 
-  const runCoverage = useCallback(
-    async (path?: string) => {
-      if (!projectId) return
-      setIsRunningCoverage(true)
-      setCoverageError(null)
-      setCoverage(undefined)
-      try {
-        const res = await factoryTestsService.runCoverages(projectId, path?.trim() || '.')
-        setCoverage(res)
-      } catch (e: any) {
-        setCoverageError(e?.message || String(e))
-      } finally {
-        setIsRunningCoverage(false)
-      }
-    },
-    [projectId],
-  )
+  const runCoverages = useCallback(async () => {
+    if (!projectId) return
+    setIsRunningCoverage(true)
+    setCoverageError(null)
+    setCoverage(undefined)
+    try {
+      const res = await factoryTestsService.runCoverages(projectId)
+      setCoverage(res)
+    } catch (e: any) {
+      setCoverageError(e?.message || String(e))
+    } finally {
+      setIsRunningCoverage(false)
+    }
+  }, [projectId])
 
   const value = useMemo<TestsContextValue>(
     () => ({
@@ -192,7 +189,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       refreshTestsCatalog,
       runTests,
       runTestsE2E,
-      runCoverage,
+      runCoverages,
       resetTests,
       resetTestsE2E,
       resetCoverage,
@@ -212,7 +209,7 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       refreshTestsCatalog,
       runTests,
       runTestsE2E,
-      runCoverage,
+      runCoverages,
       resetTests,
       resetTestsE2E,
       resetCoverage,

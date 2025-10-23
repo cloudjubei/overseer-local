@@ -42,8 +42,8 @@ export default class FactoryTestsManager extends BaseManager {
       this.runTestsE2E(projectId, command)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE] = async ({ projectId, path }) =>
       this.runTestCoverage(projectId, path)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES] = async ({ projectId, path }) =>
-      this.runTestsCoverage(projectId, path)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES] = async ({ projectId }) =>
+      this.runTestsCoverage(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT] = async ({ projectId }) =>
       this.getLastResult(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_E2E] = async ({ projectId }) =>
@@ -76,12 +76,9 @@ export default class FactoryTestsManager extends BaseManager {
     const tools = await this.__getTools(projectId)
     return await tools?.runTestCoverage(path)
   }
-  async runTestsCoverage(
-    projectId: string,
-    path: string = '.',
-  ): Promise<CoverageResult | undefined> {
+  async runTestsCoverage(projectId: string): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    return await tools?.runTestsCoverage(path)
+    return await tools?.runTestsCoverage()
   }
 
   async getLastResult(projectId: string) {
