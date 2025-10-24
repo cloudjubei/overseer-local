@@ -16,12 +16,13 @@
     },
     {
       "id": "d318f7e4-4116-4f31-8813-15004bd380ff",
-      "status": "-",
+      "status": "+",
       "title": "Implement Backend Git Service for Repository Monitoring",
       "description": "Develop the core logic within `src/logic/git/GitManager.ts`. This service will monitor all project repositories. It will implement a `StoryResolver` function that parses branch names following the `features/<storyId>` convention to extract story IDs. This resolver will be used with the `resolveChangesToStories` method from `GitTools` to identify feature branches, calculate their ahead/behind status, and aggregate this data for the renderer.",
       "context": [],
       "createdAt": "2025-10-24T14:06:40.308Z",
-      "updatedAt": "2025-10-24T14:10:21.647Z"
+      "updatedAt": "2025-10-24T14:50:21.444Z",
+      "completedAt": "2025-10-24T14:50:21.444Z"
     },
     {
       "id": "5c721227-f437-4766-8160-addfc5fe08db",
