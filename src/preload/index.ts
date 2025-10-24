@@ -322,6 +322,10 @@ const DOCUMENT_INGESTION_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DOCUMENT_INGESTION_PROJECT, { projectId }),
 }
 
+const GIT_API = {
+  todo: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_TODO),
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -341,6 +345,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('factoryTestsService', FACTORY_TESTS_API)
     contextBridge.exposeInMainWorld('dbService', DB_API)
     contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
+    contextBridge.exposeInMainWorld('gitService', GIT_API)
   } catch (error) {
     console.error(error)
   }

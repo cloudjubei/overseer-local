@@ -5,7 +5,6 @@ import {
   TestTools,
   TestResult,
   CoverageResult,
-  FileMeta,
   TestsResult,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
@@ -24,8 +23,6 @@ export default class FactoryTestsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.__getTools('main')
-
     await super.init()
   }
 

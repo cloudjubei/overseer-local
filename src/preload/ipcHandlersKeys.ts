@@ -147,6 +147,9 @@ const IPC_HANDLER_KEYS = {
   // Document ingestion
   DOCUMENT_INGESTION_ALL: 'document-ingestion:all-projects',
   DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',
+
+  // GIT
+  GIT_TODO: 'git:todo',
 }
 
 export default IPC_HANDLER_KEYS
