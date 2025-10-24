@@ -12,7 +12,8 @@ import type { DBService } from 'src/renderer/src/services/dbService'
 import type { DocumentIngestionService } from 'src/renderer/src/services/documentIngestionService'
 import type { StoriesService } from 'src/renderer/src/services/storiesService'
 import type { FactoryTestsService } from 'src/renderer/src/services/factoryTestsService'
-import { CompletionService } from '@renderer/services/completionService'
+import type { CompletionService } from '@renderer/services/completionService'
+import type { GitService } from 'src/renderer/src/services/gitService'
 
 declare global {
   interface Window {
@@ -31,6 +32,7 @@ declare global {
     liveDataService: LiveDataService
     documentIngestionService: DocumentIngestionService
     factoryTestsService: FactoryTestsService
+    gitService: GitService
   }
 }
 export {}
