@@ -26,12 +26,13 @@
     },
     {
       "id": "5c721227-f437-4766-8160-addfc5fe08db",
-      "status": "-",
+      "status": "+",
       "title": "Establish IPC Layer for Git Service Communication",
       "description": "Create the necessary IPC channels to connect the backend `GitManager` service with the renderer. This involves defining channel keys in `src/preload/ipcHandlersKeys.ts`, implementing main process handlers, exposing the interface in `src/preload/index.ts`, and defining the service type in `src/renderer/src/services/gitService.ts`.",
       "context": [],
       "createdAt": "2025-10-24T14:06:40.311Z",
-      "updatedAt": "2025-10-24T14:06:40.311Z"
+      "updatedAt": "2025-10-24T14:51:47.921Z",
+      "completedAt": "2025-10-24T14:51:47.921Z"
     },
     {
       "id": "37dd96d8-3be1-46d0-a038-37a0901af4f7",
