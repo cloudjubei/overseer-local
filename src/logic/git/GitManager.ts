@@ -4,16 +4,19 @@ import { GitTools, createGitTools } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
 import BaseManager from '../BaseManager'
+import CredentialsManager from './CredentialsManager'
 
 export default class GitManager extends BaseManager {
   private toolsLock = new Mutex()
   private tools: Record<string, GitTools> = {}
   private projectsManager: ProjectsManager
+  private credentialsManager: CredentialsManager
 
-  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
+  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager, credentialsManager: CredentialsManager) {
     super(projectRoot, window)
 
     this.projectsManager = projectsManager
+    this.credentialsManager = credentialsManager
   }
 
   async init(): Promise<void> {
@@ -30,6 +33,7 @@ export default class GitManager extends BaseManager {
 
   async todo(projectId: string) {
     const tools = await this.__getTools(projectId)
+    return tools ? undefined : undefined
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {
@@ -43,7 +47,7 @@ export default class GitManager extends BaseManager {
     }
     const repoUrl = project.repo_url
 
-    const githubCredentials = undefined
+    const githubCredentials = this.credentialsManager.getDefault()
     if (!githubCredentials) {
       return
     }

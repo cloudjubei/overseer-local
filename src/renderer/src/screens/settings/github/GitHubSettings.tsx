@@ -18,7 +18,7 @@ export default function GitHubSettings() {
       <div className="border rounded-md divide-y">
         {credentials.length === 0 && (
           <div className="p-4 text-sm text-gray-600">
-            No credentials yet. Click "Add" to create one.
+            No credentials yet. Click 'Add' to create one.
           </div>
         )}
         {credentials.map((c) => (

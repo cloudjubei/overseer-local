@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "e507c3e6-bef1-48d3-a746-446a0f099584",
-      "status": "-",
+      "status": "+",
       "title": "Refactor Git credentials management to the main process",
       "description": "Move Git credentials logic from the renderer (`GitHubCredentialsContext.tsx`, `utils/GitHubCredentialsManager.ts`) to the main process. Create a new `CredentialsManager.ts` in `src/logic/git/` similar to `SettingsManager.ts`. This manager will handle storing and retrieving Git credentials securely. Expose its functionality to the renderer via IPC.",
       "context": [],
       "createdAt": "2025-10-24T14:04:15.877Z",
-      "updatedAt": "2025-10-24T14:04:15.877Z"
+      "updatedAt": "2025-10-24T14:47:00.620Z",
+      "completedAt": "2025-10-24T14:47:00.620Z"
     },
     {
       "id": "d318f7e4-4116-4f31-8813-15004bd380ff",

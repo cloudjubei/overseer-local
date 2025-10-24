@@ -34,6 +34,7 @@ Top-Level Layout
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).
   - tests/: Main process tests manager bridging thefactory-tools test runner via IPC (exposed to renderer as testsService).
+  - logic/git/CredentialsManager.ts: Main process GitHub credentials manager with IPC (credentialsService in preload) for CRUD and subscriptions.
   - main.js: Electron main process entry.
   - preload.js: Safe IPC surface exposed to the renderer (exposes live data API, db API, and new timelineService API).
 - Root config files: package.json, tsconfig.json, tailwind/postcss configs, vite configs, forge config, .env.

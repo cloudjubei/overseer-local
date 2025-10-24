@@ -150,6 +150,13 @@ const IPC_HANDLER_KEYS = {
 
   // GIT
   GIT_TODO: 'git:todo',
+
+  // Credentials (GitHub)
+  CREDENTIALS_SUBSCRIBE: 'credentials:subscribe',
+  CREDENTIALS_LIST: 'credentials:list',
+  CREDENTIALS_ADD: 'credentials:add',
+  CREDENTIALS_UPDATE: 'credentials:update',
+  CREDENTIALS_REMOVE: 'credentials:remove',
 }
 
 export default IPC_HANDLER_KEYS

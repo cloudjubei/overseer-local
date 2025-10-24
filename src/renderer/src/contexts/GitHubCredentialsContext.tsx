@@ -1,17 +1,6 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import {
-  GitHubCredentialsManager,
-  GITHUB_CREDS_CHANGED_EVENT,
-  GitHubCredentials,
-} from '../utils/GitHubCredentialsManager'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import type { GitHubCredentials } from '../services/credentialsService'
+import { credentialsService } from '../services/credentialsService'
 
 export type GitHubCredentialsContextValue = {
   credentials: GitHubCredentials[]
@@ -24,40 +13,45 @@ export type GitHubCredentialsContextValue = {
 const GitHubCredentialsContext = createContext<GitHubCredentialsContextValue | null>(null)
 
 export function GitHubCredentialsProvider({ children }: { children: React.ReactNode }) {
-  const managerRef = useRef(new GitHubCredentialsManager())
   const [credentials, setCreds] = useState<GitHubCredentials[]>([])
 
-  const refresh = useCallback(() => {
-    setCreds(managerRef.current.getAll())
+  const refresh = useCallback(async () => {
+    try {
+      const list = await credentialsService.list()
+      setCreds(list || [])
+    } catch {
+      setCreds([])
+    }
   }, [])
 
   useEffect(() => {
     refresh()
-    const handler = () => refresh()
-    window.addEventListener(GITHUB_CREDS_CHANGED_EVENT, handler as EventListener)
-    return () => window.removeEventListener(GITHUB_CREDS_CHANGED_EVENT, handler as EventListener)
+    const unsubscribe = credentialsService.subscribe(() => {
+      refresh()
+    })
+    return () => unsubscribe?.()
   }, [refresh])
 
   const addCredentials = useCallback(
-    (c: Omit<GitHubCredentials, 'id'>) => {
-      managerRef.current.add(c)
-      refresh()
+    async (c: Omit<GitHubCredentials, 'id'>) => {
+      await credentialsService.add(c)
+      await refresh()
     },
     [refresh],
   )
 
   const updateCredentials = useCallback(
-    (id: string, updates: Partial<GitHubCredentials>) => {
-      managerRef.current.update(id, updates)
-      refresh()
+    async (id: string, updates: Partial<GitHubCredentials>) => {
+      await credentialsService.update(id, updates)
+      await refresh()
     },
     [refresh],
   )
 
   const removeCredentials = useCallback(
-    (id: string) => {
-      managerRef.current.remove(id)
-      refresh()
+    async (id: string) => {
+      await credentialsService.remove(id)
+      await refresh()
     },
     [refresh],
   )
@@ -70,13 +64,7 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
   )
 
   const value = useMemo<GitHubCredentialsContextValue>(
-    () => ({
-      credentials,
-      addCredentials,
-      updateCredentials,
-      removeCredentials,
-      getCredentials,
-    }),
+    () => ({ credentials, addCredentials, updateCredentials, removeCredentials, getCredentials }),
     [credentials, addCredentials, updateCredentials, removeCredentials, getCredentials],
   )
 

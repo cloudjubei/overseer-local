@@ -326,6 +326,18 @@ const GIT_API = {
   todo: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_TODO),
 }
 
+const CREDENTIALS_API = {
+  subscribe: (callback) => {
+    const listener = (_event, _payload) => callback()
+    ipcRenderer.on(IPC_HANDLER_KEYS.CREDENTIALS_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.CREDENTIALS_SUBSCRIBE, listener)
+  },
+  list: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.CREDENTIALS_LIST),
+  add: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CREDENTIALS_ADD, { input }),
+  update: (id, patch) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CREDENTIALS_UPDATE, { id, patch }),
+  remove: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CREDENTIALS_REMOVE, { id }),
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -346,6 +358,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('dbService', DB_API)
     contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
     contextBridge.exposeInMainWorld('gitService', GIT_API)
+    contextBridge.exposeInMainWorld('credentialsService', CREDENTIALS_API)
   } catch (error) {
     console.error(error)
   }

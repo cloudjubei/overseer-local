@@ -15,6 +15,8 @@ import DocumentIngestionManager from '../logic/document_ingestion/DocumentIngest
 import FactoryCompletionManager from '../logic/factory/FactoryCompletionManager'
 import FactoryLLMPricingManager from '../logic/factory/FactoryLLMPricingManager'
 import FactoryTestsManager from '../logic/factory/FactoryTestsManager'
+import CredentialsManager from '../logic/git/CredentialsManager'
+import GitManager from '../logic/git/GitManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryLLMPricingManager: FactoryLLMPricingManager | undefined
@@ -31,6 +33,8 @@ export let documentIngestionManager: DocumentIngestionManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
 export let factoryCompletionManager: FactoryCompletionManager | undefined
 export let factoryTestsManager: FactoryTestsManager | undefined
+export let credentialsManager: CredentialsManager | undefined
+export let gitManager: GitManager | undefined
 
 let managers: BaseManager[] = []
 
@@ -71,6 +75,8 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryToolsManager,
   )
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
+  credentialsManager = new CredentialsManager(projectRoot, mainWindow)
+  gitManager = new GitManager(projectRoot, mainWindow, projectsManager, credentialsManager)
 
   managers = [
     databaseManager,
@@ -88,6 +94,8 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryToolsManager,
     factoryCompletionManager,
     factoryTestsManager,
+    credentialsManager,
+    gitManager,
   ]
 
   for (const manager of managers) {

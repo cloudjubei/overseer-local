@@ -14,6 +14,7 @@ import type { StoriesService } from 'src/renderer/src/services/storiesService'
 import type { FactoryTestsService } from 'src/renderer/src/services/factoryTestsService'
 import type { CompletionService } from '@renderer/services/completionService'
 import type { GitService } from 'src/renderer/src/services/gitService'
+import type { CredentialsService } from 'src/renderer/src/services/credentialsService'
 
 declare global {
   interface Window {
@@ -33,6 +34,7 @@ declare global {
     documentIngestionService: DocumentIngestionService
     factoryTestsService: FactoryTestsService
     gitService: GitService
+    credentialsService: CredentialsService
   }
 }
 export {}

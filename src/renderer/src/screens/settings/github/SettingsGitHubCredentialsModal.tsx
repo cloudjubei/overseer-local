@@ -42,17 +42,17 @@ export default function SettingsGitHubCredentialsModal({
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name || !form.username || !form.email || !form.token) {
       // light inline validation
       return
     }
     if (isEdit) {
-      updateCredentials(form.id, { ...form })
+      await updateCredentials(form.id, { ...form })
     } else {
       const { id: _omit, ...toAdd } = form
-      addCredentials(toAdd)
+      await addCredentials(toAdd)
     }
     onRequestClose()
   }
@@ -113,7 +113,7 @@ export default function SettingsGitHubCredentialsModal({
             type="password"
           />
           <p className="text-[12px] text-[var(--text-secondary)] mt-1">
-            Token is stored locally in app settings.
+            Token is stored securely in the main process.
           </p>
         </div>
         <div className="flex justify-end gap-2 pt-2">
