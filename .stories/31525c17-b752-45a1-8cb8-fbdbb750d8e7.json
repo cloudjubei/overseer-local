@@ -106,12 +106,13 @@
     },
     {
       "id": "4bba9a50-5e90-45a4-b69e-55cec5d9c236",
-      "status": "-",
+      "status": "+",
       "title": "Implement GitContext for UI State Management",
       "description": "Refactor the frontend state management for Git. First, delete the redundant hook file at `src/renderer/src/hooks/useGit.tsx`. Second, enhance `src/renderer/src/contexts/GitContext.tsx` to manage all Git state and actions. The context should not only provide data (e.g., `allProjects`) but also expose action functions (e.g., `applyMerge`, `getDiff`) that call the corresponding methods from `gitService`. Move any derived state logic (like `pendingAll` and `pendingCurrent`) into the context provider. Finally, ensure the `useGit` hook is exported from the context file itself for convenient access.",
       "context": [],
       "createdAt": "2025-10-24T15:36:03.841Z",
-      "updatedAt": "2025-10-24T15:38:13.161Z"
+      "updatedAt": "2025-10-24T15:48:47.261Z",
+      "completedAt": "2025-10-24T15:48:47.261Z"
     }
   ],
   "featureIdToDisplayIndex": {
