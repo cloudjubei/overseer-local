@@ -46,12 +46,13 @@
     },
     {
       "id": "2f65bc15-c493-44bb-82be-83c661e00b9b",
-      "status": "-",
+      "status": "+",
       "title": "Implement Git Panel UI with Project Views",
       "description": "Build the main UI components for the Git feature. Add a 'Git' section to the navigation with two subviews: 'Current project' and 'All projects'. These views will display pending feature branches for the active project and all projects, respectively, using data from the `useGit` hook.",
       "context": [],
       "createdAt": "2025-10-24T14:06:40.313Z",
-      "updatedAt": "2025-10-24T14:06:40.313Z"
+      "updatedAt": "2025-10-24T14:58:56.020Z",
+      "completedAt": "2025-10-24T14:58:56.020Z"
     },
     {
       "id": "e37e222e-2727-4240-baf7-c336b087c4bf",

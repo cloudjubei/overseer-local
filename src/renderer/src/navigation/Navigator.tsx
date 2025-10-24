@@ -63,6 +63,8 @@ function viewPrefixToView(prefix: string): NavigationView {
       return 'Tools'
     case 'tests':
       return 'Tests'
+    case 'git':
+      return 'Git'
     case 'home':
     default:
       return 'Home'
@@ -149,6 +151,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break
       case 'Tools':
         window.location.hash = '#tools'
+        break
+      case 'Git':
+        window.location.hash = '#git'
         break
     }
   }, [])

@@ -9,6 +9,7 @@ import LiveDataView from '../screens/LiveDataView'
 import ProjectTimelineView from '../screens/ProjectTimelineView'
 import ToolsScreen from '../screens/ToolsView'
 import TestsView from '../screens/TestsView'
+import GitView from '../screens/GitView'
 import { useNavigator } from './Navigator'
 import Tooltip from '../components/ui/Tooltip'
 import { useNotifications } from '../hooks/useNotifications'
@@ -31,6 +32,7 @@ import {
   IconTimeline,
   IconToolbox,
   IconTests,
+  IconBranch,
 } from '../components/ui/icons/Icons'
 import { notificationsService } from '../services/notificationsService'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
@@ -68,6 +70,13 @@ const NAV_ITEMS: NavDef[] = [
     view: 'Agents',
     icon: <IconRobot />,
     accent: 'teal',
+  },
+  {
+    id: 'git',
+    label: 'Git',
+    view: 'Git',
+    icon: <IconBranch />,
+    accent: 'purple',
   },
   {
     id: 'tests',
@@ -311,6 +320,12 @@ export default function SidebarView({}: SidebarProps) {
       return (
         <div key="Agents" className="flex flex-col flex-1 min-h-0 view-transition">
           <AgentsView />
+        </div>
+      )
+    if (currentView === 'Git')
+      return (
+        <div key="Git" className="flex flex-col flex-1 min-h-0 view-transition">
+          <GitView />
         </div>
       )
     if (currentView === 'Tests')

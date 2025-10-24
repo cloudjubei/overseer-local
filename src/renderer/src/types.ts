@@ -9,3 +9,4 @@ export type NavigationView =
   | 'ProjectTimeline'
   | 'Tools'
   | 'Tests'
+  | 'Git'

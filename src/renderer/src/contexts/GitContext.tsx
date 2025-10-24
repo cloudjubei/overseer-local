@@ -1,8 +1,7 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
-import { useActiveProject } from './ProjectContext'
+import { useProjectContext } from './ProjectContext'
 
-// Types mirrored from main GitManager to keep renderer generic
 export type PendingBranchSummary = {
   projectId: string
   repoPath: string
@@ -14,6 +13,7 @@ export type PendingBranchSummary = {
   featureId?: string
   totals?: { insertions: number; deletions: number; filesChanged: number }
 }
+
 export type ProjectGitSummary = {
   projectId: string
   repoPath?: string
@@ -23,97 +23,57 @@ export type ProjectGitSummary = {
 }
 
 export type GitContextValue = {
-  // Aggregated across all known projects
-  allProjects: ProjectGitSummary[]
-  // Convenience: current active project summary (if available)
-  currentProject?: ProjectGitSummary
-  // Loading and error state for latest fetches
   loading: boolean
   error?: string
-
-  // Actions
-  refreshAll: () => Promise<void>
-  refreshCurrent: () => Promise<void>
+  currentProject?: ProjectGitSummary
+  allProjects: ProjectGitSummary[]
+  refresh: () => Promise<void>
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
 
 export function GitProvider({ children }: { children: React.ReactNode }) {
-  const { projectId } = useActiveProject()
-  const [allProjects, setAllProjects] = useState<ProjectGitSummary[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
+  const { activeProjectId } = useProjectContext()
+  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | undefined>(undefined)
-  const mountedRef = useRef(true)
+  const [currentProject, setCurrent] = useState<ProjectGitSummary | undefined>(undefined)
+  const [allProjects, setAll] = useState<ProjectGitSummary[]>([])
 
-  useEffect(() => {
-    mountedRef.current = true
-    return () => {
-      mountedRef.current = false
-    }
-  }, [])
-
-  const refreshAll = useCallback(async () => {
+  const refresh = useCallback(async () => {
     setLoading(true)
     setError(undefined)
     try {
-      const res = await gitService.todo()
-      if (!mountedRef.current) return
-      setAllProjects(res?.projects ?? [])
-    } catch (e: any) {
-      if (!mountedRef.current) return
-      setError(e?.message ?? String(e))
+      // Fetch current project only
+      if (activeProjectId) {
+        const { projects } = await gitService.todo(activeProjectId)
+        setCurrent(projects[0])
+      } else {
+        setCurrent(undefined)
+      }
+      // Fetch all projects aggregate
+      const { projects: all } = await gitService.todo()
+      setAll(all || [])
+    } catch (err: any) {
+      setError(err?.message ?? String(err))
     } finally {
-      if (mountedRef.current) setLoading(false)
+      setLoading(false)
     }
-  }, [])
-
-  const refreshCurrent = useCallback(async () => {
-    if (!projectId) return
-    setLoading(true)
-    setError(undefined)
-    try {
-      const res = await gitService.todo(projectId)
-      if (!mountedRef.current) return
-      const proj = res?.projects ?? []
-      // Merge/replace current project entry in allProjects
-      setAllProjects((prev) => {
-        const map = new Map(prev.map((p) => [p.projectId, p]))
-        for (const p of proj) map.set(p.projectId, p)
-        return Array.from(map.values())
-      })
-    } catch (e: any) {
-      if (!mountedRef.current) return
-      setError(e?.message ?? String(e))
-    } finally {
-      if (mountedRef.current) setLoading(false)
-    }
-  }, [projectId])
+  }, [activeProjectId])
 
   useEffect(() => {
-    // Initial load for all projects; UI can call refreshCurrent for focused updates
-    refreshAll()
-  }, [refreshAll])
+    refresh()
+  }, [refresh])
 
-  useEffect(() => {
-    // When active project changes, refresh its summary quickly
-    if (projectId) refreshCurrent()
-  }, [projectId, refreshCurrent])
-
-  const currentProject = useMemo(() => {
-    if (!projectId) return undefined
-    return allProjects.find((p) => p.projectId === projectId)
-  }, [allProjects, projectId])
-
-  const value: GitContextValue = useMemo(
-    () => ({ allProjects, currentProject, loading, error, refreshAll, refreshCurrent }),
-    [allProjects, currentProject, loading, error, refreshAll, refreshCurrent],
+  const value = useMemo<GitContextValue>(
+    () => ({ loading, error, currentProject, allProjects, refresh }),
+    [loading, error, currentProject, allProjects, refresh],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>
 }
 
-export function useGitContext(): GitContextValue {
+export function useGit(): GitContextValue {
   const ctx = useContext(GitContext)
-  if (!ctx) throw new Error('useGitContext must be used within GitProvider')
+  if (!ctx) throw new Error('useGit must be used within GitProvider')
   return ctx
 }
