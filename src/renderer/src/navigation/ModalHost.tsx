@@ -8,6 +8,7 @@ import FeatureEditView from '../screens/stories/FeatureEditView'
 import SettingsLLMConfigModal from '@renderer/screens/settings/llms/SettingsLLMConfigModal'
 import SettingsGitHubCredentialsModal from '@renderer/screens/settings/github/SettingsGitHubCredentialsModal'
 import ProjectManagerModal from '@renderer/screens/projects/ProjectManagerModal'
+import GitMergeModal from '@renderer/screens/git/GitMergeModal'
 
 export default function ModalHost() {
   const { modal, closeModal } = useNavigator()
@@ -60,6 +61,19 @@ export default function ModalHost() {
           onRequestClose={closeModal}
           initialMode={modal.mode}
           initialProjectId={modal.projectId}
+        />
+      )
+      break
+    case 'git-merge':
+      content = (
+        <GitMergeModal
+          projectId={modal.projectId}
+          repoPath={modal.repoPath}
+          baseRef={modal.baseRef}
+          branch={modal.branch}
+          storyId={modal.storyId}
+          featureId={modal.featureId}
+          onRequestClose={closeModal}
         />
       )
       break

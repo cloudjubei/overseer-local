@@ -31,6 +31,7 @@ Top-Level Layout
     - settings/: AppSettings React context provider used app-wide (singleton).
     - components/ui/icons: Central SVG icons. All icon components are exported from `Icons.tsx` and are accessible by name via the registry in `screens/projects/projectIcons.tsx`.
       - Directive: When adding an icon, export it from `Icons.tsx` and register it in `PROJECT_ICON_REGISTRY` using kebab-case of the component name without the 'Icon' prefix (e.g., `IconCheckCircle` -> `check-circle`). Render with `renderProjectIcon('check-circle', className)`.
+    - screens/git/: Git workflows UI (Git view tabs, merge modal, and future conflict resolution).
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).
   - tests/: Main process tests manager bridging thefactory-tools test runner via IPC (exposed to renderer as testsService).

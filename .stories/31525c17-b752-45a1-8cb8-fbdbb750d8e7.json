@@ -56,12 +56,13 @@
     },
     {
       "id": "e37e222e-2727-4240-baf7-c336b087c4bf",
-      "status": "-",
+      "status": "+",
       "title": "Design and Implement Git Merge Popup",
       "description": "Create a modal component for the Git merge workflow. This popup will show contextual information (Project, Story, Branch), a per-file diff viewer, and placeholders for future analysis features like 'Compilation Impact', 'Tests Impact', and 'Diff Coverage'.",
       "context": [],
       "createdAt": "2025-10-24T14:06:40.314Z",
-      "updatedAt": "2025-10-24T14:06:40.314Z"
+      "updatedAt": "2025-10-24T15:04:52.932Z",
+      "completedAt": "2025-10-24T15:04:52.932Z"
     },
     {
       "id": "d08e8344-e4bd-4552-8a87-d41e7a4ce814",

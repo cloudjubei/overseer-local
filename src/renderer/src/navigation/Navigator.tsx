@@ -21,6 +21,15 @@ export type ModalRoute =
   | { type: 'github-credentials-add' }
   | { type: 'github-credentials-edit'; id: string }
   | { type: 'projects-manage'; mode?: 'list' | 'create' | 'edit'; projectId?: string }
+  | {
+      type: 'git-merge'
+      projectId: string
+      repoPath: string
+      baseRef: string
+      branch: string
+      storyId?: string
+      featureId?: string
+    }
 
 export type NavigatorState = {
   currentView: NavigationView

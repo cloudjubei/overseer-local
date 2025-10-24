@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { GitProvider, useGit } from '../contexts/GitContext'
 import { useProjectContext } from '../contexts/ProjectContext'
+import { useNavigator } from '../navigation/Navigator'
 
 function PendingItem({
   item,
@@ -12,10 +13,25 @@ function PendingItem({
   item: import('../contexts/GitContext').PendingBranchSummary
   projectTitle?: string
 }) {
+  const { openModal } = useNavigator()
   const story = item.storyId ? ` • story ${item.storyId}` : ''
   const aheadBehind = `${item.ahead}↑ / ${item.behind}↓`
   return (
-    <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm">
+    <div
+      className="flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer"
+      role="button"
+      onClick={() =>
+        openModal({
+          type: 'git-merge',
+          projectId: item.projectId,
+          repoPath: item.repoPath,
+          baseRef: item.baseRef,
+          branch: item.branch,
+          storyId: item.storyId,
+          featureId: item.featureId,
+        })
+      }
+    >
       <div className="min-w-0">
         <div className="font-medium truncate">{item.branch}</div>
         <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
